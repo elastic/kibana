@@ -1,5 +1,5 @@
 {
-  "sha1": "6cdb56d1738befa52197f4336f87130fd28995d5",
+  "sha1": "950606d7274b6393eca250e97732783b0a4b4955",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -69,6 +69,45 @@
       }
     },
     {
+      "id": "7f75bff6a1b2961-72ec5b0a18137c1",
+      "title": "Observability Alerting - privilege-based page access user with logs read privilege sees the full inbox page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
+        "line": 231,
+        "column": 25
+      }
+    },
+    {
+      "id": "7f75bff6a1b2961-18df943f4f428d2",
+      "title": "Observability Alerting - privilege-based page access user with alerting_v2_alerts read privilege sees the full inbox page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
+        "line": 217,
+        "column": 24
+      }
+    },
+    {
+      "id": "7f75bff6a1b2961-ab1df2d53b456f0",
+      "title": "Observability Alerting - privilege-based page access user with no alerting privileges is blocked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
+        "line": 224,
+        "column": 24
+      }
+    },
+    {
       "id": "648c81c97fb0579-c98c179092568db",
       "title": "Observability Alerting URLs returns app not found for Inbox (/inbox) when alerting v2 is disabled",
       "expectedStatus": "passed",
@@ -80,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 43,
-        "column": 28
+        "line": 104,
+        "column": 25
       }
     },
     {
@@ -96,8 +135,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 53,
-        "column": 15
+        "line": 115,
+        "column": 12
       }
     },
     {
@@ -112,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 43,
-        "column": 28
+        "line": 104,
+        "column": 25
       }
     },
     {
@@ -128,8 +167,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 53,
-        "column": 15
+        "line": 115,
+        "column": 12
       }
     },
     {
@@ -144,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 43,
-        "column": 28
+        "line": 104,
+        "column": 25
       }
     },
     {
@@ -160,8 +199,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 53,
-        "column": 15
+        "line": 115,
+        "column": 12
       }
     },
     {
@@ -176,8 +215,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 43,
-        "column": 28
+        "line": 104,
+        "column": 25
       }
     },
     {
@@ -192,8 +231,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 53,
-        "column": 15
+        "line": 115,
+        "column": 12
       }
     },
     {
@@ -208,8 +247,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 43,
-        "column": 28
+        "line": 104,
+        "column": 25
       }
     },
     {
@@ -224,8 +263,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 53,
-        "column": 15
+        "line": 115,
+        "column": 12
       }
     },
     {
@@ -240,8 +279,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 43,
-        "column": 28
+        "line": 104,
+        "column": 25
       }
     },
     {
@@ -256,8 +295,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 53,
-        "column": 15
+        "line": 115,
+        "column": 12
       }
     },
     {
@@ -272,8 +311,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 128,
+        "column": 15
       }
     },
     {
@@ -288,8 +327,168 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 100,
+        "line": 158,
         "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-8a152a7310e5aa2",
+      "title": "Observability Alerting URLs clicking a rule name stays on Observability Alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 183,
+        "column": 11
+      }
+    },
+    {
+      "id": "648c81c97fb0579-8b4152623253bff",
+      "title": "Observability Alerting URLs back button from details returns to the observability rules list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 203,
+        "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-324df5b08306600",
+      "title": "Observability Alerting URLs create rule type selection stays on Observability Alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 222,
+        "column": 13
+      }
+    },
+    {
+      "id": "648c81c97fb0579-8cd1d121198b323",
+      "title": "Observability Alerting URLs edit from the list stays on Observability Alerting and cancel returns to the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 241,
+        "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-8302e938714f611",
+      "title": "Observability Alerting URLs logs menu navigation stays on Observability Alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 261,
+        "column": 21
+      }
+    },
+    {
+      "id": "648c81c97fb0579-3200306d454ad51",
+      "title": "Observability Alerting URLs settings flyout does not leave Observability Alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 291,
+        "column": 65
+      }
+    },
+    {
+      "id": "648c81c97fb0579-64d7af3267e0a0b",
+      "title": "Observability Alerting URLs list page omits the Alerts back link on the Observability mount",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 304,
+        "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-323c9475331343b",
+      "title": "Observability Alerting URLs click-through list, details, tabs, edit, and back stays on Observability Alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 311,
+        "column": 71
+      }
+    },
+    {
+      "id": "648c81c97fb0579-c8f03d58511bccc",
+      "title": "Observability Alerting URLs settings from logs does not leave Observability Alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 361,
+        "column": 13
+      }
+    },
+    {
+      "id": "648c81c97fb0579-9d0f52150fc4d49",
+      "title": "Observability Alerting URLs stays on Observability Alerting when selecting a template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 384,
+        "column": 68
       }
     },
     {

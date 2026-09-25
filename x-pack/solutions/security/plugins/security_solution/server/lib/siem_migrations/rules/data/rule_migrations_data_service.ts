@@ -27,6 +27,7 @@ import {
   ruleMigrationsFieldMap,
 } from './field_maps';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
+import { resolveElserInferenceId } from './utils/resolve_elser_inference_id';
 import { SiemMigrationsBaseDataService } from '../../common/siem_migrations_base_service';
 
 interface CreateClientParams {
@@ -47,11 +48,26 @@ export interface SetupParams extends Omit<InstallParams, 'logger'> {
 export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
   protected readonly baseIndexName = '.kibana-siem-rule-migrations';
 
-  private readonly adapters: RuleMigrationAdapters;
+  /** Adapters are created during `setup`, once the ELSER inference endpoint has been resolved. */
+  private adapters?: RuleMigrationAdapters;
 
-  constructor(private logger: Logger, protected kibanaVersion: string, elserInferenceId?: string) {
+  constructor(
+    private logger: Logger,
+    protected kibanaVersion: string,
+    private readonly elserInferenceId?: string
+  ) {
     super(kibanaVersion);
-    this.adapters = {
+  }
+
+  private ensureAdapters(): RuleMigrationAdapters {
+    if (!this.adapters) {
+      throw new Error('Service not initialized, please call setup first');
+    }
+    return this.adapters;
+  }
+
+  private createAdapters(elserInferenceId: string): RuleMigrationAdapters {
+    return {
       migrations: this.createRuleIndexPatternAdapter({
         adapterId: 'migrations',
         fieldMap: migrationsFieldMaps,
@@ -86,32 +102,38 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
   }
 
   private async runIndexMigrations(esClient: SetupParams['esClient']) {
-    const indexMigrator = new RuleMigrationIndexMigrator(this.adapters, esClient, this.logger);
+    const adapters = this.ensureAdapters();
+    const indexMigrator = new RuleMigrationIndexMigrator(adapters, esClient, this.logger);
     await indexMigrator.run();
   }
 
   private async install(params: SetupParams): Promise<void> {
+    const adapters = this.ensureAdapters();
+    const installParams = { ...params, logger: this.logger };
     await Promise.all([
-      this.adapters.rules.install({ ...params, logger: this.logger }),
-      this.adapters.resources.install({ ...params, logger: this.logger }),
-      this.adapters.integrations.install({ ...params, logger: this.logger }),
-      this.adapters.prebuiltrules.install({ ...params, logger: this.logger }),
-      this.adapters.migrations.install({ ...params, logger: this.logger }),
+      adapters.rules.install(installParams),
+      adapters.resources.install(installParams),
+      adapters.integrations.install(installParams),
+      adapters.prebuiltrules.install(installParams),
+      adapters.migrations.install(installParams),
     ]);
   }
 
   public async setup(params: SetupParams): Promise<void> {
+    const elserInferenceId = await resolveElserInferenceId(params.esClient, this.elserInferenceId);
+    this.adapters = this.createAdapters(elserInferenceId);
     await this.install(params);
     await this.runIndexMigrations(params.esClient);
   }
 
   public createClient({ spaceId, currentUser, esScopedClient, dependencies }: CreateClientParams) {
+    const adapters = this.ensureAdapters();
     const indexNameProviders: RuleMigrationIndexNameProviders = {
-      rules: this.createIndexNameProvider(this.adapters.rules, spaceId),
-      resources: this.createIndexNameProvider(this.adapters.resources, spaceId),
+      rules: this.createIndexNameProvider(adapters.rules, spaceId),
+      resources: this.createIndexNameProvider(adapters.resources, spaceId),
       integrations: async () => this.getAdapterIndexName('integrations'),
       prebuiltrules: async () => this.getAdapterIndexName('prebuiltrules'),
-      migrations: this.createIndexNameProvider(this.adapters.migrations, spaceId),
+      migrations: this.createIndexNameProvider(adapters.migrations, spaceId),
     };
 
     return new RuleMigrationsDataClient(

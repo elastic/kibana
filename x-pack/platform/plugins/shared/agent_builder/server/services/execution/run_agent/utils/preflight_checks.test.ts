@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import type { ConverseInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { ConverseInput, UserMessageEvent } from '@kbn/agent-builder-common';
+import {
+  ConversationOriginType,
+  ConversationRoundStatus,
+  EventActorType,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
+import {
+  abortedExec0Timeline,
+  eventsNativeConversation,
+  pausedRoundTimeline,
+  pausedThenInterruptedResumeTimeline,
+} from '../../../../test_utils/timeline';
 import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
+import { eventsForContext } from './context_timeline';
 import { ensureValidInput } from './preflight_checks';
 
 describe('preflight_checks', () => {
@@ -63,17 +75,6 @@ describe('preflight_checks', () => {
 
         expect(() =>
           ensureValidInput({ input, timeline: roundsToEvents(conversation) })
-        ).not.toThrow();
-      });
-
-      it('should not throw when action=regenerate (input comes from last round)', () => {
-        const conversation = createEmptyConversation({
-          rounds: [createRound({ status: ConversationRoundStatus.completed })],
-        });
-        const input: ConverseInput = {};
-
-        expect(() =>
-          ensureValidInput({ input, timeline: roundsToEvents(conversation), action: 'regenerate' })
         ).not.toThrow();
       });
     });
@@ -158,6 +159,28 @@ describe('preflight_checks', () => {
         );
       });
 
+      it('should not treat later user messages as prompt responses', () => {
+        const conversation = createConversationAwaitingPrompt('prompt-123');
+        const userMessageEvent: UserMessageEvent = {
+          id: 'user-message',
+          type: TimelineEventType.userMessage,
+          created_at: '2026-01-01T00:00:00.000Z',
+          actor: {
+            type: EventActorType.external,
+            id: 'alice',
+            full_name: 'Alice',
+            origin: { type: ConversationOriginType.Slack },
+          },
+          data: { message: 'Approved in Slack' },
+        };
+        const timeline = [...roundsToEvents(conversation), userMessageEvent];
+        const input: ConverseInput = { message: 'continue' };
+
+        expect(() => ensureValidInput({ input, timeline })).toThrow(
+          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        );
+      });
+
       it('should not throw when prompt response is denied (allow: false)', () => {
         const conversation = createConversationAwaitingPrompt('prompt-123');
         const input: ConverseInput = {
@@ -169,6 +192,33 @@ describe('preflight_checks', () => {
         expect(() =>
           ensureValidInput({ input, timeline: roundsToEvents(conversation) })
         ).not.toThrow();
+      });
+    });
+
+    describe('after an interrupted execution', () => {
+      it('after an interrupted resume: plain input accepted, prompt-only input rejected', () => {
+        const timeline = eventsForContext(
+          eventsNativeConversation(pausedThenInterruptedResumeTimeline('r1', ['tc1']))
+        );
+
+        expect(() => ensureValidInput({ input: { message: 'again' }, timeline })).not.toThrow();
+        expect(() =>
+          ensureValidInput({
+            input: { prompts: { 'tools.my_tool.confirmation.tc1': { allow: true } } },
+            timeline,
+          })
+        ).toThrow(/No standard input was provided/);
+      });
+
+      it('does not mistake an earlier round pause behind an interrupted round for pending', () => {
+        const timeline = eventsForContext(
+          eventsNativeConversation([
+            ...pausedRoundTimeline('r1', ['tc1']),
+            ...abortedExec0Timeline('r2', '2026-01-01T00:02:00.000Z'),
+          ])
+        );
+
+        expect(() => ensureValidInput({ input: { message: 'hi' }, timeline })).not.toThrow();
       });
     });
   });

@@ -8,8 +8,9 @@
  */
 
 import type { ReactNode } from 'react';
+import type { DataAttributeProps } from '@elastic/eui';
 
-export interface MetaBlock {
+export interface MetaBlock extends DataAttributeProps {
   /** Stable identity used as the React key. Falls back to array position when omitted. */
   id?: string;
   title: ReactNode;

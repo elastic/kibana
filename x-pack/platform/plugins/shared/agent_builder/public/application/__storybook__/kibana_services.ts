@@ -88,5 +88,13 @@ export const createStorybookKibanaServices = (): StartServices =>
       navigateToUrl: () => Promise.resolve(),
     },
     appParams: { history: {} },
-    plugins: {},
+    plugins: {
+      // Minimal stub so components like ConnectorTypeIcon can read the action type registry.
+      triggersActionsUi: {
+        actionTypeRegistry: {
+          has: () => false,
+          get: () => ({ iconClass: 'plugs' }),
+        },
+      },
+    },
   } as unknown as StartServices);

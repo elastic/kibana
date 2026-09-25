@@ -30,7 +30,7 @@ describe('loadInboundConnector', () => {
           id: 'mem-1',
           actionTypeId: '.myConnector',
           name: 'Memory',
-          config: { ingestTokenHash: 'hash' },
+          config: { other: 'kept' },
           secrets: {},
           isMissingSecrets: false,
           isPreconfigured: true,
@@ -46,7 +46,7 @@ describe('loadInboundConnector', () => {
       connectorId: 'mem-1',
       connectorTypeId: '.myConnector',
       spaceId: 'default',
-      config: { ingestTokenHash: 'hash' },
+      config: { other: 'kept' },
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -85,7 +85,7 @@ describe('loadInboundConnector', () => {
         actionTypeId: '.myConnector',
         name: 'SO',
         isMissingSecrets: false,
-        config: { ingestTokenHash: 'abc' },
+        config: { other: 'kept' },
         secrets: {},
       },
     });
@@ -104,8 +104,39 @@ describe('loadInboundConnector', () => {
       connectorId: 'so-1',
       connectorTypeId: '.myConnector',
       spaceId: 'space-a',
-      config: { ingestTokenHash: 'abc' },
+      config: { other: 'kept' },
     });
+  });
+
+  it('keeps hasInboundEventIdentity when the saved object has it', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      id: 'so-1',
+      type: ACTION_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        actionTypeId: '.myConnector',
+        name: 'SO',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+        hasInboundEventIdentity: true,
+      },
+    });
+
+    const result = await loadInboundConnector({
+      connectorId: 'so-1',
+      connectorTypeId: '.myConnector',
+      spaceId: 'default',
+      unsecuredSavedObjectsClient,
+      inMemoryConnectors: [],
+      logger,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        hasInboundEventIdentity: true,
+      })
+    );
   });
 
   it('returns undefined when the saved object cannot be loaded', async () => {
@@ -131,7 +162,7 @@ describe('loadInboundConnector', () => {
         actionTypeId: '.otherConnector',
         name: 'SO',
         isMissingSecrets: false,
-        config: { ingestTokenHash: 'abc' },
+        config: {},
         secrets: {},
       },
     });

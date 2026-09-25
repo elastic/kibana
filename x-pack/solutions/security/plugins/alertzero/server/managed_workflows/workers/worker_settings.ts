@@ -6,125 +6,114 @@
  */
 
 import {
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  WatchAutonomyLevel,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  applyMissingWorkerSettingDefaults,
+  applyWorkerSettingsWrite,
+  createDefaultWorkerSettings,
+  formatWorkerSettingsIssues,
+  getCompleteWorkerSettingsSchema,
+  getWorkerSettingsDeclaration,
+  projectStoredAutonomyLevel,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
-import type { ManagedWorkflowTemplateValuesForId } from '@kbn/workflows/managed';
+import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 import type { WorkerSettingsRegistration } from './types';
 
 type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
   | typeof SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID
-  | typeof SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID
+  | typeof SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID
+  | typeof SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
-type WorkerTemplateValues = ManagedWorkflowTemplateValuesForId<RegisteredWorkerId>;
 
 const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 1,
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: 1,
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: 1,
+  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: 1,
 };
 
 /**
- * Default interval per schedule-driven Worker. Presence in this map is what opts a Worker into the
- * schedule setting — the other Workers are alert- or event-triggered and own no schedule, so the
- * setting is absent from their template values and from their projected settings entirely.
+ * Template values mirror the settings API: shared fields flat (with the legacy `autonomyLevel`
+ * key the YAML templates read), Worker-specific fields nested under `extras`.
  */
-const WORKER_SCHEDULE_DEFAULTS: Partial<Record<RegisteredWorkerId, string>> = {
-  // Matches the Attack Discovery schedule form default.
-  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: '24h',
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: '2h',
-};
+const toTemplateValues = (
+  workerId: RegisteredWorkerId,
+  settings: WorkerSettings
+): ManagedWorkflowTemplateValues => ({
+  settingsVersion: WORKER_SETTINGS_VERSIONS[workerId],
+  autonomyLevel: settings.autonomy,
+  ...(settings.scheduleInterval === undefined
+    ? {}
+    : { scheduleInterval: settings.scheduleInterval }),
+  ...(settings.extras === undefined ? {} : { extras: settings.extras }),
+});
 
 /**
- * Reads the interval back off parsed template values. Needed because the values type is a union
- * over every Worker, so only the schedule-driven members type the field as a string.
+ * Reads persisted template values. Missing schedule and extras keys are filled from the current
+ * defaults first; a present value is left as stored, so an out-of-range value still fails here
+ * and the Worker projects as unavailable. Autonomy is projected when the Worker no longer offers
+ * the stored level.
  */
-const readScheduleInterval = (values: WorkerTemplateValues): string | undefined =>
-  typeof values.scheduleInterval === 'string' ? values.scheduleInterval : undefined;
-
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
-  raw: Record<string, unknown>
-): WorkerTemplateValues => {
+  stored: Record<string, unknown>
+): WorkerSettings => {
+  const raw = applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), stored);
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval } = raw;
+  const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
     );
   }
-  const parsedAutonomyLevel = WatchAutonomyLevel.safeParse(autonomyLevel);
-  if (!parsedAutonomyLevel.success) {
-    throw new Error(`AlertZero worker "${workerId}" settings contain an invalid autonomy level`);
+  const unsupportedKeys = Object.keys(unsupported);
+  if (unsupportedKeys.length > 0) {
+    throw new Error(
+      `AlertZero worker "${workerId}" settings contain unsupported fields: ${unsupportedKeys.join(
+        ', '
+      )}`
+    );
   }
 
-  const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
-  if (scheduleDefault === undefined) {
-    return {
-      settingsVersion: currentVersion,
-      autonomyLevel: parsedAutonomyLevel.data,
-    };
-  }
-
-  // Absent means the install predates the setting, so it takes the default.
-  return {
-    settingsVersion: currentVersion,
-    autonomyLevel: parsedAutonomyLevel.data,
-    scheduleInterval: scheduleInterval ?? scheduleDefault,
+  const candidate = {
+    workerId,
+    autonomy: projectStoredAutonomyLevel(getWorkerSettingsDeclaration(workerId), autonomyLevel),
+    ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
+    ...(extras === undefined ? {} : { extras }),
   };
+  const parsed = getCompleteWorkerSettingsSchema(workerId).safeParse(candidate);
+  if (!parsed.success) {
+    throw new Error(
+      `AlertZero worker "${workerId}" settings are invalid: ${formatWorkerSettingsIssues(
+        parsed.error
+      )}`
+    );
+  }
+  return parsed.data;
 };
 
 export const createWorkerSettingsRegistration = (
   workerId: RegisteredWorkerId
 ): WorkerSettingsRegistration => ({
-  createDefaultValues: (): WorkerTemplateValues => {
-    const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
-    return {
-      settingsVersion: WORKER_SETTINGS_VERSIONS[workerId],
-      autonomyLevel: 'manual',
-      ...(scheduleDefault === undefined ? {} : { scheduleInterval: scheduleDefault }),
-    };
-  },
-  migrate: (raw: Record<string, unknown>) => {
-    const values = parseWorkerValues(workerId, raw);
-    return {
-      values,
-      migrated:
-        raw.settingsVersion !== WORKER_SETTINGS_VERSIONS[workerId] ||
-        Object.keys(raw).some((key) => !Object.hasOwn(values, key)),
-    };
-  },
+  createDefaultValues: () => toTemplateValues(workerId, createDefaultWorkerSettings(workerId)),
+  withMissingDefaults: (raw) =>
+    applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), raw),
   applyPatch: (raw, patch) => {
-    const values = parseWorkerValues(workerId, raw);
-    if (patch.scheduleInterval != null && WORKER_SCHEDULE_DEFAULTS[workerId] === undefined) {
-      return { rejected: 'a schedule interval' };
+    const next = applyWorkerSettingsWrite(parseWorkerValues(workerId, raw), patch);
+    const result = getCompleteWorkerSettingsSchema(workerId).safeParse(next);
+    if (!result.success) {
+      return { invalid: formatWorkerSettingsIssues(result.error) };
     }
-    return {
-      values: {
-        ...values,
-        autonomyLevel: patch.autonomyLevel ?? values.autonomyLevel,
-        ...(patch.scheduleInterval == null ? {} : { scheduleInterval: patch.scheduleInterval }),
-      },
-    };
+    return { values: toTemplateValues(workerId, result.data) };
   },
-  toSettings: (raw): WorkerSettings => {
-    const values = parseWorkerValues(workerId, raw);
-    const scheduleInterval = readScheduleInterval(values);
-    return {
-      workerId,
-      autonomy: values.autonomyLevel,
-      // Spread rather than assign undefined: the registry test asserts the projection's keys
-      // survive WorkerSettings.parse unchanged.
-      ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
-    };
-  },
+  toSettings: (raw) => parseWorkerValues(workerId, raw),
 });

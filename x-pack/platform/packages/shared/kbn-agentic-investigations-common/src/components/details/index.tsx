@@ -5,4 +5,29 @@
  * 2.0.
  */
 
-export { ConversationDetailsFlyout, type ConversationDetailsFlyoutProps } from './details_flyout';
+export {
+  ConversationDetailsFlyoutHeader,
+  type ConversationDetailsFlyoutHeaderProps,
+} from './flyout_header';
+export {
+  ConversationDetailsFlyoutFooter,
+  type ConversationDetailsFlyoutFooterProps,
+} from './flyout_footer';
+export {
+  ConversationHeaderBlocks,
+  type ConversationHeaderBlocksProps,
+  InvestigationHeaderBlocks,
+  type InvestigationHeaderBlocksProps,
+} from './header_blocks';
+export {
+  EscalationFlyoutHeader,
+  type EscalationFlyoutHeaderProps,
+} from './escalation_flyout_header';
+export { OverviewTab, type OverviewTabProps } from './details_flyout_tab_contents';
+export { StatusToggle, type StatusToggleProps } from './status_toggle';
+export { ProposedActionButton, type ProposedActionButtonProps } from './proposed_action_button';
+export {
+  LinkedInvestigationsList,
+  type LinkedInvestigationItem,
+  type LinkedInvestigationsListProps,
+} from './linked_investigations_list';

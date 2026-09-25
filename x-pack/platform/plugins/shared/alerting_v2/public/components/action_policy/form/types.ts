@@ -11,12 +11,27 @@ import type {
   PolicyMatcher,
   ThrottleStrategy,
 } from '@kbn/alerting-v2-schemas';
-import type { InlineWorkflowActionDraft } from '@kbn/alerting-v2-rule-form';
+import type {
+  ConnectorCreationConfig,
+  InlineWorkflowActionDraft,
+} from '@kbn/alerting-v2-rule-form';
+
+export type CollapsibleSection = 'notificationControls' | 'destination';
+export type FormLayout = 'page' | 'flyout';
+
+export interface CollapsibleSectionConfig {
+  readonly initialIsOpen?: boolean;
+}
+
+export interface ActionPolicyFormConfig {
+  readonly connectorCreation: ConnectorCreationConfig;
+  readonly layout?: FormLayout;
+  readonly collapsibleSections?: Partial<Record<CollapsibleSection, CollapsibleSectionConfig>>;
+}
 
 export interface ActionPolicyFormState {
   name: string;
   description: string;
-  tags: string[];
   matcher: PolicyMatcher | null;
   groupingMode: GroupingMode;
   groupBy: string[];

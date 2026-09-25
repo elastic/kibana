@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
@@ -18,12 +19,12 @@ describe('createNavigationTree', () => {
       ...mockServices,
       featureFlags: {
         ...mockServices.featureFlags,
-        getBooleanValue: jest.fn((flag: string, defaultValue?: boolean) => {
+        getBooleanValue$: jest.fn((flag: string, defaultValue?: boolean) => {
           if (flag === AGENT_BUILDER_NAV_AT_TOP_FLAG) {
-            return options?.agentBuilderNavAtTop ?? defaultValue ?? false;
+            return of(options?.agentBuilderNavAtTop ?? defaultValue ?? false);
           }
 
-          return defaultValue ?? false;
+          return of(defaultValue ?? false);
         }),
       },
       uiSettings: {
@@ -44,7 +45,10 @@ describe('createNavigationTree', () => {
     const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
     const agentBuilderNode = body.find((item) => item.link === 'agent_builder');
 
-    expect(body[contextEngineIndex]).toMatchObject({ icon: 'sparkles', link: 'context_engine' });
+    expect(body[contextEngineIndex]).toMatchObject({
+      icon: 'tableSparkles',
+      link: 'context_engine',
+    });
     expect(contextEngineIndex).toBe(0);
     expect(agentBuilderNode).toBeUndefined();
   });

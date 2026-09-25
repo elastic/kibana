@@ -13,14 +13,21 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { QueryClient } from '@kbn/react-query';
-import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { BulkAssignEpisodeActionItem } from '@kbn/alerting-v2-schemas';
-import type { EpisodeAction, EpisodeActionContext, EpisodeActionMenuItemContext } from './types';
+import type { AlertEpisode } from '../queries/episodes_query';
+import { episodeSupportsActions } from '../queries/episodes_query';
+import type {
+  EpisodeAction,
+  EpisodeActionContext,
+  EpisodeActionInlineControlContext,
+  EpisodeActionMenuItemContext,
+} from './types';
 import { bulkAssignEpisodeActions } from './bulk_create_alert_actions';
 import { successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 import { openAssigneeModal } from '../components/assignee_modal';
 import { EditEpisodeAssigneePopoverItem } from '../components/actions/edit_episode_assignee_popover_item';
+import { EpisodeAssigneeInlineControl } from '../components/actions/episode_assignee_inline_control';
 
 export const EDIT_EPISODE_ASSIGNEE_ACTION_ID = 'ALERTING_V2_EDIT_EPISODE_ASSIGNEE';
 
@@ -47,7 +54,8 @@ const applyAssignee = async (
   { episodes, onSuccess }: EpisodeActionContext,
   assigneeUid: string | null
 ) => {
-  const items: BulkAssignEpisodeActionItem[] = episodes.map((episode) => ({
+  const actionable = episodes.filter(episodeSupportsActions);
+  const items: BulkAssignEpisodeActionItem[] = actionable.map((episode) => ({
     episode_id: episode['episode.id'],
     assignee_uid: assigneeUid,
   }));
@@ -67,7 +75,8 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
   order: 50,
   displayName: i18n.EDIT_ASSIGNEE,
   iconType: 'user',
-  isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length > 0,
+  isCompatible: ({ episodes }: EpisodeActionContext) =>
+    episodes.filter(episodeSupportsActions).length > 0,
   renderMenuItem: ({ episodes, onSuccess, closeMenu }: EpisodeActionMenuItemContext) => (
     <EditEpisodeAssigneePopoverItem
       assigneeUid={getCurrentAssigneeUid(episodes)}
@@ -75,6 +84,15 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
       label={i18n.EDIT_ASSIGNEE}
       iconType="user"
       closeMenu={closeMenu}
+      onApply={(uid) => applyAssignee(deps, { episodes, onSuccess }, uid)}
+    />
+  ),
+  renderInlineControl: ({ episodes, onSuccess, isDisabled }: EpisodeActionInlineControlContext) => (
+    <EpisodeAssigneeInlineControl
+      assigneeUid={getCurrentAssigneeUid(episodes)}
+      userProfile={deps.userProfile}
+      episodeCount={episodes.length}
+      isDisabled={isDisabled || episodes.length === 0}
       onApply={(uid) => applyAssignee(deps, { episodes, onSuccess }, uid)}
     />
   ),

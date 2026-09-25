@@ -323,7 +323,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         ['policy-1'],
         undefined,
-        { agentVersions: ['8.18'] }
+        expect.objectContaining({ agentVersions: ['8.18'], spaceId: '*' })
       );
     });
 
@@ -362,7 +362,10 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         ['policy-1'],
         undefined,
-        { agentVersions: expect.arrayContaining(['8.18', '9.3']) }
+        expect.objectContaining({
+          agentVersions: expect.arrayContaining(['8.18', '9.3']),
+          spaceId: '*',
+        })
       );
     });
 
@@ -523,7 +526,12 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         mockPackagePolicy,
         ['8.18']
       );
-      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalled();
+      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        undefined,
+        expect.objectContaining({ spaceId: '*' })
+      );
     });
 
     it('Should not compile version-specific inputs for package policies without agent version conditions', async () => {
@@ -567,8 +575,13 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       // Should NOT compile version-specific inputs
       expect(mockPackagePolicyService.compilePackagePolicyForVersions).not.toHaveBeenCalled();
-      // But should still deploy
-      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalled();
+      // But should still deploy with spaceId: '*'
+      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        undefined,
+        expect.objectContaining({ spaceId: '*' })
+      );
     });
   });
 
@@ -630,7 +643,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         ['policy-1'],
         undefined,
-        { agentVersions: ['8.18'] }
+        expect.objectContaining({ agentVersions: ['8.18'], spaceId: '*' })
       );
     });
   });
@@ -687,7 +700,12 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       expect(mockedReassignAgents).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        { agentIds: ['agent-1', 'agent-2'], showInactive: true },
+        {
+          agentIds: ['agent-1', 'agent-2'],
+          showInactive: true,
+          spaceId: '*',
+          _internalCrossSpace: true,
+        },
         'policy-1'
       );
       expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
@@ -899,7 +917,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         ['policy-1'],
         undefined,
-        { agentVersions: ['9.2'] }
+        expect.objectContaining({ agentVersions: ['9.2'], spaceId: '*' })
       );
     });
   });

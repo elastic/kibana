@@ -254,7 +254,7 @@ const createObservabilityServices = (
 
 const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
   const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
+  coreStart.featureFlags.useBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
   createCallApi(coreStart);
@@ -272,7 +272,7 @@ const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
 
 const renderLandingWithRouter = (enabled: boolean) => {
   const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
+  coreStart.featureFlags.useBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
   createCallApi(coreStart);
@@ -291,7 +291,7 @@ const renderLandingWithRouter = (enabled: boolean) => {
 
 const renderLandingAtPath = (initialPath: string) => {
   const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
+  coreStart.featureFlags.useBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? true : fallback
   );
   createCallApi(coreStart);
@@ -311,7 +311,7 @@ const renderLandingAtPath = (initialPath: string) => {
 
 const renderFlowAtPath = (enabled: boolean, path: string) => {
   const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
+  coreStart.featureFlags.useBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
   createCallApi(coreStart);

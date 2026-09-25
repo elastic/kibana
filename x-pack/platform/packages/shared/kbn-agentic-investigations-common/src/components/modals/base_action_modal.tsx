@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,15 +21,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface ActionModalPrimaryAction {
+interface ActionModalPrimaryAction {
   label: string;
   icon?: string;
-  /** Called with the rationale text when the primary button is clicked */
-  onClick: (rationale: string) => void;
+  /**
+   * Called with the rationale text when the primary button is clicked. A returned promise is
+   * awaited so the button can show its own loading state; the caller decides what happens on
+   * rejection (typically a toast) — this modal only resets the button so the analyst can retry.
+   */
+  onClick: (rationale: string) => void | Promise<void>;
   color?: 'primary' | 'danger' | 'warning' | 'success' | 'text' | 'accent';
 }
 
-export interface BaseActionModalProps {
+interface BaseActionModalProps {
   type: 'assign' | 'dismiss';
   title: string;
   /** Case/record ID shown in the decision-history body sentence */
@@ -54,6 +58,18 @@ export const BaseActionModal = memo<BaseActionModalProps>(
     onClose,
   }) => {
     const [rationale, setRationale] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Resets on rejection so the analyst can retry; a resolved click is expected to close the
+    // modal from the caller's `onSuccess`, so there is no unmounted-component update to guard.
+    const handlePrimaryClick = useCallback(async () => {
+      setIsSubmitting(true);
+      try {
+        await primaryAction.onClick(rationale);
+      } catch {
+        setIsSubmitting(false);
+      }
+    }, [primaryAction, rationale]);
 
     return (
       <EuiModal
@@ -111,7 +127,7 @@ export const BaseActionModal = memo<BaseActionModalProps>(
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose}>
+          <EuiButtonEmpty onClick={onClose} isDisabled={isSubmitting}>
             {i18n.translate('xpack.alertzero.actionModal.cancel', {
               defaultMessage: 'Cancel',
             })}
@@ -120,8 +136,11 @@ export const BaseActionModal = memo<BaseActionModalProps>(
             fill
             color={primaryAction.color ?? 'primary'}
             iconType={primaryAction.icon}
-            onClick={() => primaryAction.onClick(rationale)}
-            isDisabled={(type === 'assign' && hasAssigneeError) || rationale.trim() === ''}
+            onClick={handlePrimaryClick}
+            isLoading={isSubmitting}
+            isDisabled={
+              isSubmitting || (type === 'assign' && hasAssigneeError) || rationale.trim() === ''
+            }
           >
             {primaryAction.label}
           </EuiButton>

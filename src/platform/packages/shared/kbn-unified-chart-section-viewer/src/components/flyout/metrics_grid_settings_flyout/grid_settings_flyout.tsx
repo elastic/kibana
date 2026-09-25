@@ -26,7 +26,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MetricsGridSettings } from '@kbn/discover-utils';
+import { type MetricsGridSettings } from '@kbn/discover-utils';
 import { useTelemetry } from '../../../context/ebt_telemetry_context';
 import { COUNTER_OPTIONS, GAUGE_OPTIONS, HISTOGRAM_OPTIONS } from './options';
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';

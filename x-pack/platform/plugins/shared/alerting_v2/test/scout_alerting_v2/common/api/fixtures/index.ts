@@ -47,6 +47,7 @@ export {
 export {
   buildAlertEvent,
   buildExternalAlertEvent,
+  buildGroupHash,
   buildCreateRuleData,
   buildCreateActionPolicyData,
   buildRuleTemplateData,
@@ -97,8 +98,7 @@ export {
 export {
   ACTION_POLICY_PER_PAGE_MAX,
   ACTION_POLICY_SEARCH_MAX_LENGTH,
-  ACTION_POLICY_TAG_MAX_LENGTH,
-  ACTION_POLICY_TAGS_MAX_COUNT,
+  MAX_PER_PAGE,
   RULE_TEMPLATE_PER_PAGE_MAX,
   RULE_TEMPLATE_TAGS_MAX_COUNT,
 } from '../../constants';

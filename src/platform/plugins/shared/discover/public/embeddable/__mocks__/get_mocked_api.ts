@@ -33,7 +33,7 @@ export const getMockedSearchApi = ({
   savedSearch: SavedSearch;
 }) => {
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
-  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+  const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
   return {
     api: {
       uuid: 'testEmbeddable',
@@ -48,8 +48,9 @@ export const getMockedSearchApi = ({
       timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
       setTimeRange: jest.fn(),
       dataLoading$,
-      blockingError$,
+      searchError$,
       fetchWarnings$: new BehaviorSubject<SearchResponseIncompleteWarning[]>([]),
+      abortSignal$: new BehaviorSubject<AbortSignal | undefined>(undefined),
       savedSearch$: new BehaviorSubject<SavedSearch>(savedSearch),
     },
     stateManager: {
@@ -75,7 +76,7 @@ export const getMockedSearchApi = ({
     },
     setters: {
       setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
-      setBlockingError: (error: Error | undefined) => blockingError$.next(error),
+      setSearchError: (error: Error | undefined) => searchError$.next(error),
     },
   };
 };

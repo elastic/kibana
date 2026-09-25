@@ -58,13 +58,17 @@ const truncateList = (fields: string[], max: number): string[] => {
 const createIndexSummaries = async ({
   indices,
   esClient,
+  includeFrozen,
 }: {
   indices: IndexSearchSource[];
   esClient: ElasticsearchClient;
+  includeFrozen: boolean;
 }): Promise<ResourceDescriptor[]> => {
   const indexFields = await getIndexFields({
     indices: indices.map((i) => i.name),
     esClient,
+    includeFrozen,
+    skipUnauthorized: true,
   });
 
   return indices.map(({ name }) => {
@@ -96,9 +100,11 @@ const createAliasSummaries = async ({
 const createDatastreamSummaries = async ({
   datastreams,
   esClient,
+  includeFrozen,
 }: {
   datastreams: DataStreamSearchSource[];
   esClient: ElasticsearchClient;
+  includeFrozen: boolean;
 }): Promise<ResourceDescriptor[]> => {
   const { local, remote } = partitionByCcs(datastreams);
   const descriptors: ResourceDescriptor[] = [];
@@ -128,6 +134,7 @@ const createDatastreamSummaries = async ({
     const fieldsByDs = await getBatchedFieldsFromFieldCaps({
       resources: remote.map((r) => r.name),
       esClient,
+      includeFrozen,
     });
 
     for (const { name } of remote) {
@@ -175,21 +182,29 @@ const buildResourceDescriptors = async ({
   includeAliases,
   includeDatastream,
   includeDatasets,
+  includeFrozen,
   esClient,
 }: {
   sources: Awaited<ReturnType<typeof listSearchSources>>;
   includeAliases: boolean;
   includeDatastream: boolean;
   includeDatasets: boolean;
+  includeFrozen: boolean;
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
   const resources: ResourceDescriptor[] = [];
   if (sources.indices.length > 0) {
-    resources.push(...(await createIndexSummaries({ indices: sources.indices, esClient })));
+    resources.push(
+      ...(await createIndexSummaries({ indices: sources.indices, esClient, includeFrozen }))
+    );
   }
   if (sources.data_streams.length > 0 && includeDatastream) {
     resources.push(
-      ...(await createDatastreamSummaries({ datastreams: sources.data_streams, esClient }))
+      ...(await createDatastreamSummaries({
+        datastreams: sources.data_streams,
+        esClient,
+        includeFrozen,
+      }))
     );
   }
   if (sources.aliases.length > 0 && includeAliases) {
@@ -210,12 +225,14 @@ export const gatherResourceDescriptors = async ({
   includeAliases = true,
   includeDatastream = true,
   includeDatasets = false,
+  includeFrozen = false,
   esClient,
 }: {
   indexPattern?: string;
   includeAliases?: boolean;
   includeDatastream?: boolean;
   includeDatasets?: boolean;
+  includeFrozen?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
   const sources = await listSearchSources({
@@ -231,6 +248,7 @@ export const gatherResourceDescriptors = async ({
     includeAliases,
     includeDatastream,
     includeDatasets,
+    includeFrozen,
     esClient,
   });
 };
@@ -241,6 +259,7 @@ export const indexExplorer = async ({
   includeAliases = true,
   includeDatastream = true,
   includeDatasets = false,
+  includeFrozen = false,
   limit = 1,
   esClient,
   model,
@@ -251,6 +270,7 @@ export const indexExplorer = async ({
   includeAliases?: boolean;
   includeDatastream?: boolean;
   includeDatasets?: boolean;
+  includeFrozen?: boolean;
   limit?: number;
   esClient: ElasticsearchClient;
   model: ScopedModel;
@@ -299,6 +319,7 @@ export const indexExplorer = async ({
     includeAliases,
     includeDatastream,
     includeDatasets,
+    includeFrozen,
     esClient,
   });
 

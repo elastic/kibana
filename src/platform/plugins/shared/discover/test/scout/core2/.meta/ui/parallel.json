@@ -1,5 +1,5 @@
 {
-  "sha1": "c6bb41480a8a9f0b6f23f8dc567b142f433189aa",
+  "sha1": "d34aeaa5c610c94bc66a0ffa543a4989e2dc81f1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 21,
+        "line": 23,
         "column": 23
       }
     },
@@ -111,7 +111,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 43,
+        "line": 45,
         "column": 32
       }
     },
@@ -131,13 +131,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 88,
+        "line": 90,
         "column": 30
       }
     },
     {
-      "id": "2f48d220f697ecb-f777cab5329cbe5",
-      "title": "Discover — adhoc data views saving preserves the data view ID but saving as copy generates a new data view ID",
+      "id": "2f48d220f697ecb-3d33fa3bb06795d",
+      "title": "Discover — adhoc data views saving and reloading preserve the stored data view ID but saving as copy generates a new ID",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 130,
+        "line": 132,
         "column": 27
       }
     },
@@ -171,8 +171,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 168,
-        "column": 13
+        "line": 196,
+        "column": 16
       }
     },
     {
@@ -191,8 +191,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 249,
-        "column": 36
+        "line": 275,
+        "column": 32
       }
     },
     {
@@ -469,8 +469,8 @@
       }
     },
     {
-      "id": "bd77256838a819d-bdff53e906569b9",
-      "title": "Discover session panels on Dashboard renders linked and by-value panels after saving and reload",
+      "id": "bd77256838a819d-9aa607b80d4bd6c",
+      "title": "Discover session panels on Dashboard shares one inline data view across API-created tabs after saving in Discover and reloading the dashboard",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -488,6 +488,28 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/discover_session_dashboard_reload.spec.ts",
         "line": 29,
         "column": 31
+      }
+    },
+    {
+      "id": "bd77256838a819d-bdff53e906569b9",
+      "title": "Discover session panels on Dashboard renders linked and by-value panels after saving and reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/discover_session_dashboard_reload.spec.ts",
+        "line": 141,
+        "column": 27
       }
     },
     {
@@ -565,8 +587,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/embedded_search_cancellation.spec.ts",
-        "line": 27,
-        "column": 35
+        "line": 79,
+        "column": 58
+      }
+    },
+    {
+      "id": "622bf1c9b192201-7fee3ed80f874de",
+      "title": "Discover session embedded in dashboard - request cancellation cancels async search when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/embedded_search_cancellation.spec.ts",
+        "line": 94,
+        "column": 17
       }
     },
     {
@@ -1059,7 +1094,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/panels_toggle_data_view.spec.ts",
-        "line": 35,
+        "line": 40,
         "column": 25
       }
     },
@@ -1150,8 +1185,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_cancellation.spec.ts",
-        "line": 31,
-        "column": 23
+        "line": 48,
+        "column": 13
+      }
+    },
+    {
+      "id": "f21ee4af972064b-9f0fc828458be5d",
+      "title": "Discover request cancellation recovers when a newer time range aborts an active request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_cancellation.spec.ts",
+        "line": 60,
+        "column": 11
       }
     },
     {

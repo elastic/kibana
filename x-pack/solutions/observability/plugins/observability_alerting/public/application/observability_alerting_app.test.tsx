@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import type { ScopedHistory } from '@kbn/core/public';
+import type { Capabilities, ScopedHistory } from '@kbn/core/public';
+import type { AlertingV2PageProps } from '@kbn/alerting-v2-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import type { AlertingV2PageProps } from '@kbn/alerting-v2-plugin/public';
 import type { ClassicRulesPageProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
@@ -25,7 +27,15 @@ import {
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 
-const Placeholder = ({ name }: { name: string }) => <div data-test-subj={name}>{name}</div>;
+const Placeholder = ({
+  name,
+  privilegeCheck,
+  ...rest
+}: { name: string; privilegeCheck?: unknown } & Record<string, unknown>) => (
+  <div data-test-subj={name} data-has-privilege-check={privilegeCheck != null} {...rest}>
+    {name}
+  </div>
+);
 
 const HostTabs = ({ tabs }: { tabs?: AlertingV2PageProps['tabs'] }) => (
   <>
@@ -45,23 +55,39 @@ const HostTabs = ({ tabs }: { tabs?: AlertingV2PageProps['tabs'] }) => (
 );
 
 const mockAlertingVTwo = {
-  RulesPage: ({ hostApp, tabs }: AlertingV2PageProps) => (
+  RulesPage: ({ hostApp, tabs, privilegeCheck }: AlertingV2PageProps) => (
     <>
-      <Placeholder name={`rulesPage:${hostApp?.rules?.app ?? 'none'}`} />
+      <Placeholder
+        name={`rulesPage:${hostApp?.rules?.app ?? 'none'}`}
+        privilegeCheck={privilegeCheck}
+      />
       <HostTabs tabs={tabs} />
     </>
   ),
-  RuleLibraryPage: ({ hostApp }: AlertingV2PageProps) => (
-    <Placeholder name={`ruleLibraryPage:${hostApp?.ruleLibrary?.app ?? 'none'}`} />
+  RuleLibraryPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`ruleLibraryPage:${hostApp?.ruleLibrary?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
   ),
-  EpisodesPage: ({ hostApp }: AlertingV2PageProps) => (
-    <Placeholder name={`episodesPage:${hostApp?.episodes?.app ?? 'none'}`} />
+  EpisodesPage: ({ hostApp, privilegeCheck, manageRulesHref }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`episodesPage:${hostApp?.episodes?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+      {...(manageRulesHref ? { 'data-manage-rules-href': manageRulesHref } : {})}
+    />
   ),
-  ActionPoliciesPage: ({ hostApp }: AlertingV2PageProps) => (
-    <Placeholder name={`actionPoliciesPage:${hostApp?.actionPolicies?.app ?? 'none'}`} />
+  ActionPoliciesPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`actionPoliciesPage:${hostApp?.actionPolicies?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
   ),
-  ExecutionHistoryPage: ({ hostApp }: AlertingV2PageProps) => (
-    <Placeholder name={`executionHistoryPage:${hostApp?.executionHistory?.app ?? 'none'}`} />
+  ExecutionHistoryPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`executionHistoryPage:${hostApp?.executionHistory?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
   ),
   CreateRuleOptionsFlyout: () => null,
   createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
@@ -89,8 +115,24 @@ const mockTriggersActionsUi = {
   )),
 };
 
-const renderAt = (pathname: string) => {
+const v1RulesCapabilities = {
+  navLinks: { uptime: true },
+} as unknown as Capabilities;
+
+const v2RulesCapabilities = {
+  alerting_v2_rules: { read: true },
+} as unknown as Capabilities;
+
+const mixedRulesCapabilities = {
+  navLinks: { uptime: true },
+  alerting_v2_rules: { read: true },
+} as unknown as Capabilities;
+
+const renderAt = (pathname: string, capabilities?: Capabilities) => {
   const coreStart = coreMock.createStart();
+  if (capabilities) {
+    Object.assign(coreStart.application.capabilities, capabilities);
+  }
   const history = createTestHistory(pathname);
 
   const result = render(
@@ -146,8 +188,11 @@ describe('ObservabilityAlertingApp', () => {
     );
   });
 
-  it('passes observability v1/v2 tab hrefs to the classic rules page', async () => {
-    const { getByTestId, coreStart } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH);
+  it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {
+    const { getByTestId, coreStart } = renderAt(
+      OBSERVABILITY_ALERTING_RULES_V1_PATH,
+      mixedRulesCapabilities
+    );
     const prepend = coreStart.http.basePath.prepend;
 
     await waitFor(() => {
@@ -165,6 +210,18 @@ describe('ObservabilityAlertingApp', () => {
     expect(getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
   });
 
+  it('hides the rules tab bar for a v1-only user', async () => {
+    const { getByTestId, queryAllByRole } = renderAt(
+      OBSERVABILITY_ALERTING_RULES_V1_PATH,
+      v1RulesCapabilities
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
+    });
+    expect(queryAllByRole('tab')).toHaveLength(0);
+  });
+
   it('renders RulesPage at /rules/v2 with observability host', async () => {
     const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_RULES_V2_PATH);
 
@@ -173,8 +230,11 @@ describe('ObservabilityAlertingApp', () => {
     });
   });
 
-  it('passes observability v1/v2 tab hrefs to the v2 rules page', async () => {
-    const { getByTestId, coreStart } = renderAt(OBSERVABILITY_ALERTING_RULES_V2_PATH);
+  it('shows both rules tabs for a mixed v1 and v2 user on the v2 rules page', async () => {
+    const { getByTestId, coreStart } = renderAt(
+      OBSERVABILITY_ALERTING_RULES_V2_PATH,
+      mixedRulesCapabilities
+    );
     const prepend = coreStart.http.basePath.prepend;
 
     await waitFor(() => {
@@ -190,6 +250,18 @@ describe('ObservabilityAlertingApp', () => {
     );
     expect(getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'true');
     expect(getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'false');
+  });
+
+  it('hides the rules tab bar for a v2-only user', async () => {
+    const { getByTestId, queryAllByRole } = renderAt(
+      OBSERVABILITY_ALERTING_RULES_V2_PATH,
+      v2RulesCapabilities
+    );
+
+    await waitFor(() => {
+      expect(getByTestId(`rulesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(queryAllByRole('tab')).toHaveLength(0);
   });
 
   it('renders RuleLibraryPage at /rule-library with observability host', async () => {
@@ -224,5 +296,91 @@ describe('ObservabilityAlertingApp', () => {
     const { history } = renderAt('/unknown');
 
     expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_INBOX_PATH);
+  });
+
+  it.each([
+    {
+      path: OBSERVABILITY_ALERTING_INBOX_PATH,
+      testId: `episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+      hasPrivilegeCheck: 'true',
+    },
+    {
+      path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+      testId: `ruleLibraryPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+      hasPrivilegeCheck: 'true',
+    },
+    {
+      path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
+      testId: `rulesPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+      hasPrivilegeCheck: 'false',
+    },
+    {
+      path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
+      testId: `actionPoliciesPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+      hasPrivilegeCheck: 'false',
+    },
+    {
+      path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+      testId: `executionHistoryPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+      hasPrivilegeCheck: 'false',
+    },
+  ])(
+    'sets privilegeCheck=$hasPrivilegeCheck on $testId at $path',
+    async ({ path, testId, hasPrivilegeCheck }) => {
+      const { getByTestId } = renderAt(path);
+
+      await waitFor(() => {
+        expect(getByTestId(testId)).toBeInTheDocument();
+      });
+      expect(getByTestId(testId)).toHaveAttribute('data-has-privilege-check', hasPrivilegeCheck);
+    }
+  );
+
+  it('passes manageRulesHref pointing to /rules/v2 for a v2-only user', async () => {
+    const { getByTestId, coreStart } = renderAt(
+      OBSERVABILITY_ALERTING_INBOX_PATH,
+      v2RulesCapabilities
+    );
+    const prepend = coreStart.http.basePath.prepend;
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
+      'data-manage-rules-href',
+      prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`)
+    );
+  });
+
+  it('passes manageRulesHref pointing to /rules/v2 for a mixed v1+v2 user', async () => {
+    const { getByTestId, coreStart } = renderAt(
+      OBSERVABILITY_ALERTING_INBOX_PATH,
+      mixedRulesCapabilities
+    );
+    const prepend = coreStart.http.basePath.prepend;
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
+      'data-manage-rules-href',
+      prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`)
+    );
+  });
+
+  it('passes manageRulesHref pointing to /rules/v1 for a v1-only user', async () => {
+    const { getByTestId, coreStart } = renderAt(
+      OBSERVABILITY_ALERTING_INBOX_PATH,
+      v1RulesCapabilities
+    );
+    const prepend = coreStart.http.basePath.prepend;
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
+      'data-manage-rules-href',
+      prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`)
+    );
   });
 });
