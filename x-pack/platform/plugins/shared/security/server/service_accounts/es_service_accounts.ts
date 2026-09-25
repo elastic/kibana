@@ -162,10 +162,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
+      privilege: 'manage_security',
       action: 'use a service account',
     });
   }
@@ -472,8 +473,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     return false;
   }
 
-  async createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
-    return await this.fakeRequests.create(params);
+  async createFakeRequest(_params?: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
+    throw Boom.notImplemented(
+      'Creating requests for Elasticsearch service accounts is not yet implemented'
+    );
   }
 
   async reauthenticateFakeRequest(
