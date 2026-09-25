@@ -94,12 +94,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     });
 
     const result = await definition.handler(
-      createContext(
-        'default__conv-1',
-        'default',
-        'checkout lag',
-        'nightshift.investigation'
-      )
+      createContext('default__conv-1', 'default', 'checkout lag', 'nightshift.investigation')
     );
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
@@ -154,12 +149,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     });
 
     const operation = definition.handler(
-      createContext(
-        'default__conv-1',
-        'default',
-        'checkout lag',
-        'nightshift.investigation'
-      )
+      createContext('default__conv-1', 'default', 'checkout lag', 'nightshift.investigation')
     );
     await Promise.resolve();
 
@@ -181,12 +171,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     });
 
     const result = await definition.handler(
-      createContext(
-        'marketing__conv-1',
-        'marketing',
-        undefined,
-        'nightshift.investigation'
-      )
+      createContext('marketing__conv-1', 'marketing', undefined, 'nightshift.investigation')
     );
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
@@ -215,12 +200,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
 
     await expect(
       definition.handler(
-        createContext(
-          'default__conv-1',
-          'default',
-          undefined,
-          'nightshift.investigation'
-        )
+        createContext('default__conv-1', 'default', undefined, 'nightshift.investigation')
       )
     ).rejects.toThrow(/sandbox is not configured/);
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
@@ -237,12 +217,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
 
     await expect(
       definition.handler(
-        createContext(
-          'default__conv-1',
-          'default',
-          'task',
-          'nightshift.investigation'
-        )
+        createContext('default__conv-1', 'default', 'task', 'nightshift.investigation')
       )
     ).rejects.toThrow('write failed');
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledTimes(1);
@@ -334,12 +309,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
 
     await expect(
       definition.handler(
-        createContext(
-          'default__conv-1',
-          'default',
-          'task',
-          'nightshift.investigation'
-        )
+        createContext('default__conv-1', 'default', 'task', 'nightshift.investigation')
       )
     ).rejects.toThrow('Semantic Memory internal Elasticsearch client is unavailable');
     expect(getScopedEsClient).not.toHaveBeenCalled();
