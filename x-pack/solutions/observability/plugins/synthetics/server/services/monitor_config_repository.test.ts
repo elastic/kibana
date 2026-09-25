@@ -771,12 +771,12 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         ...options,
-        perPage: 10000,
+        perPage: 10,
       });
 
       expect(soClient.find).toHaveBeenLastCalledWith({
         type: legacySyntheticsMonitorTypeSingle,
-        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true', perPage: 10000 },
+        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true', perPage: 10 },
       });
 
       expect(result).toStrictEqual(mockFindResult);
@@ -801,9 +801,37 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         search: 'test',
-        perPage: 10000,
+        perPage: 5000,
         page: 1,
       });
+    });
+
+    it('should fetch enough monitors from each type to construct a later page', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 30,
+        page: 1,
+      });
+
+      await repository.find({ page: 3, perPage: 10 });
+
+      expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ page: 1, perPage: 30 }));
+    });
+
+    it('should cap the per-type fetch size at the saved objects limit', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      });
+
+      await repository.find({ page: 3, perPage: 5000 });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ page: 1, perPage: 10000 })
+      );
     });
   });
 
