@@ -37,6 +37,7 @@ export {
 export {
   ConversationDetailsFlyoutFooter,
   type ConversationDetailsFlyoutFooterProps,
+  type CloseInvestigationModalRenderProps,
 } from './src/components/details/flyout_footer';
 export {
   ConversationHeaderBlocks,
@@ -52,6 +53,7 @@ export {
   EscalationFlyoutHeader,
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
+export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
 export { DetailsBlock } from './src/components/details/detail_block';
 export {
   ProposedActionButton,
@@ -80,6 +82,8 @@ export {
 export {
   type RenderAssignees,
   type AssigneesSlotRenderProps,
+  type RenderStatus,
+  type StatusSlotRenderProps,
   type RenderLinkedInvestigations,
   type LinkedInvestigationsSlotRenderProps,
 } from './src/template_ui/types';
