@@ -53,6 +53,8 @@ export const AppMenuPopover = ({
   onClose,
   onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
+  // Rebuilt on open so function-valued item fields (`disableButton`, `tooltipContent`, `tooltipTitle`)
+  // are re-evaluated, while `panels` stays referentially stable for as long as the menu is open.
   const panels = useMemo(
     () =>
       getPopoverPanels({
@@ -66,6 +68,7 @@ export const AppMenuPopover = ({
         onCloseOverflowButton,
         anchorDomElement,
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       items,
       staticItems,
@@ -76,6 +79,7 @@ export const AppMenuPopover = ({
       onClose,
       onCloseOverflowButton,
       anchorDomElement,
+      isOpen,
     ]
   );
 
