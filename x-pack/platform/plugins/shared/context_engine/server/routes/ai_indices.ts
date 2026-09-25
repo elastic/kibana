@@ -49,13 +49,13 @@ import {
   MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
   MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
-  aiIndexByIdPath,
-  aiIndexDescribePath,
-  aiIndexFeedbackAnalysisPath,
-  aiIndexKiByIdPath,
-  aiIndexKiListPath,
-  aiIndexPath,
-  aiIndexQueryPath,
+  AI_INDEX_BY_ID_PATH,
+  AI_INDEX_DESCRIBE_PATH,
+  AI_INDEX_FEEDBACK_ANALYSIS_PATH,
+  AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_LIST_PATH,
+  AI_INDEX_PATH,
+  AI_INDEX_QUERY_PATH,
   DEFAULT_KI_PAGE_SIZE,
   MAX_KI_PAGE_SIZE,
   MAX_KI_TYPE_FILTER_LENGTH,
@@ -531,7 +531,7 @@ export const registerAiIndexRoutes = ({
   // Create an AI Index
   router.versioned
     .post({
-      path: aiIndexPath,
+      path: AI_INDEX_PATH,
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create an AI Index',
@@ -584,7 +584,7 @@ export const registerAiIndexRoutes = ({
   // Create or update an AI Index
   router.versioned
     .put({
-      path: aiIndexByIdPath,
+      path: AI_INDEX_BY_ID_PATH,
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create or update an AI Index',
@@ -641,7 +641,7 @@ export const registerAiIndexRoutes = ({
   // Get an AI Index by id
   router.versioned
     .get({
-      path: aiIndexByIdPath,
+      path: AI_INDEX_BY_ID_PATH,
       security: READ_SECURITY,
       access: 'public',
       summary: 'Get an AI Index',
@@ -680,7 +680,7 @@ export const registerAiIndexRoutes = ({
   // List AI Indices
   router.versioned
     .get({
-      path: aiIndexPath,
+      path: AI_INDEX_PATH,
       security: READ_SECURITY,
       access: 'public',
       summary: 'List AI Indices',
@@ -711,7 +711,7 @@ export const registerAiIndexRoutes = ({
   // Query AI Indices with ES|QL
   router.versioned
     .post({
-      path: aiIndexQueryPath,
+      path: AI_INDEX_QUERY_PATH,
       security: READ_SECURITY,
       access: 'public',
       summary: 'Query AI Indices',
@@ -747,7 +747,7 @@ export const registerAiIndexRoutes = ({
   // Describe an AI Index
   router.versioned
     .get({
-      path: aiIndexDescribePath,
+      path: AI_INDEX_DESCRIBE_PATH,
       security: READ_SECURITY,
       access: 'public',
       summary: 'Describe an AI Index',
@@ -781,7 +781,7 @@ export const registerAiIndexRoutes = ({
   // List Knowledge Indicators for an AI Index
   router.versioned
     .get({
-      path: aiIndexKiListPath,
+      path: AI_INDEX_KI_LIST_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'List Knowledge Indicators',
@@ -824,7 +824,7 @@ export const registerAiIndexRoutes = ({
 
   router.versioned
     .get({
-      path: aiIndexKiByIdPath,
+      path: AI_INDEX_KI_BY_ID_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'Get a Knowledge Indicator',
@@ -869,7 +869,7 @@ export const registerAiIndexRoutes = ({
   // Update the feedback analysis configuration of an AI Index
   router.versioned
     .put({
-      path: aiIndexFeedbackAnalysisPath,
+      path: AI_INDEX_FEEDBACK_ANALYSIS_PATH,
       security: WRITE_SECURITY,
       access: 'internal',
       summary: 'Update AI Index feedback analysis configuration',
@@ -912,7 +912,7 @@ export const registerAiIndexRoutes = ({
   // Delete an AI Index
   router.versioned
     .delete({
-      path: aiIndexByIdPath,
+      path: AI_INDEX_BY_ID_PATH,
       security: DELETE_SECURITY,
       access: 'public',
       summary: 'Delete an AI Index',
