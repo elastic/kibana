@@ -13,6 +13,10 @@ import { TestProviders } from '../../mock';
 
 jest.mock('../../lib/kibana');
 
+// The single test mounts the heavy `TestProviders` tree and opens an EuiPopover. It runs in ~80ms
+// in isolation but has hit the default 5s budget under CI shard load (see #278243).
+jest.setTimeout(30_000);
+
 describe('MlPopover', () => {
   test('shows upgrade popover on mouse click', async () => {
     const { getByTestId } = render(<MlPopover />, {
