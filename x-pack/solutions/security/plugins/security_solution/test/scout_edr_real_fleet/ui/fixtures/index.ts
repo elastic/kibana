@@ -16,7 +16,6 @@ import type {
   SecurityWorkerFixtures,
 } from '@kbn/scout-security';
 import { setupFleetForEndpoint } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import {
   createAndEnrollEndpointHost,
   deleteMultipassVm,
@@ -26,6 +25,7 @@ import {
 import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
 import { startFleetServerIfNecessary } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { deleteEndpointDataAndTestSuperuser, stopAndDeleteFleetServer } from './cleanup';
 import {
   createEndpointPolicy,
   deleteEndpointPolicy,
@@ -107,9 +107,11 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
           await destroyEndpointHost(kbnClient, hostToDestroy).catch((destroyError) => {
             log.warning(`[edr_real_fleet] destroyEndpointHost failed: ${destroyError}`);
           });
-          await deleteAllEndpointData(esClient, log, [hostToDestroy.agentId]).catch(
+          await deleteEndpointDataAndTestSuperuser(esClient, log, [hostToDestroy.agentId]).catch(
             (deleteError) => {
-              log.warning(`[edr_real_fleet] deleteAllEndpointData failed: ${deleteError}`);
+              log.warning(
+                `[edr_real_fleet] deleteEndpointDataAndTestSuperuser failed: ${deleteError}`
+              );
             }
           );
         };
@@ -180,9 +182,11 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
           await destroyEndpointHost(kbnClient, created.host).catch((error) => {
             log.warning(`[edr_real_fleet] destroyEndpointHost failed: ${error}`);
           });
-          await deleteAllEndpointData(esClient, log, [created.host.agentId]).catch((error) => {
-            log.warning(`[edr_real_fleet] deleteAllEndpointData failed: ${error}`);
-          });
+          await deleteEndpointDataAndTestSuperuser(esClient, log, [created.host.agentId]).catch(
+            (error) => {
+              log.warning(`[edr_real_fleet] deleteEndpointDataAndTestSuperuser failed: ${error}`);
+            }
+          );
         }
 
         if (created.indexedPolicy) {
@@ -192,9 +196,11 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
         }
 
         if (created.fleetServer) {
-          await created.fleetServer.stop().catch((error) => {
-            log.warning(`[edr_real_fleet] fleet server stop failed: ${error}`);
-          });
+          await stopAndDeleteFleetServer(kbnClient, esClient, log, created.fleetServer).catch(
+            (error) => {
+              log.warning(`[edr_real_fleet] stopAndDeleteFleetServer failed: ${error}`);
+            }
+          );
         }
       }
     },

@@ -62,7 +62,8 @@ fi
 
 if [[ $EXIT_CODE -eq 2 ]]; then
   echo "No tests found for EDR Real Fleet"
-  exit 0
+  echo "^^^ +++"
+  exit 10
 fi
 
 upload_events_if_available
