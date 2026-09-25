@@ -454,6 +454,33 @@ steps:
             - exit_status: '-1'
               limit: 3
 
+      - label: 'Evals: Attack Discovery FP/TP Analysis'
+        key: kbn-evals-weekly-attack-discovery-fp-tp
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          # Extended tier: verdict correctness must hold across smaller/cheaper
+          # models too, not just the core frontier set.
+          # Keep in sync with `weeklyEisModelGroups` for
+          # security-attack-discovery-fp-tp in evals.suites.json.
+          EVAL_MODEL_GROUPS: *weekly_eis_extended_models
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          diskSizeGb: 130
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
       - label: 'Evals: Security ES|QL Generation Regression'
         key: kbn-evals-weekly-security-esql-generation-regression
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
