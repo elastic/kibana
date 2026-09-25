@@ -326,6 +326,22 @@ describe('reconcile_tracked_alerts', () => {
       });
     });
 
+    it('does not restore a document the recovered state already holds under the same uuid', () => {
+      // The recovery write for this document was lost; state is right, the document is stale.
+      const trackedAlerts = buildTrackedAlerts([
+        makeDoc({ uuid: 'uuid-1', instanceId: 'host-1', status: ALERT_STATUS_ACTIVE }),
+      ]);
+      const activeAlertsFromState = {};
+      const recoveredAlertsFromState = { 'host-1': { meta: { uuid: 'uuid-1' } } };
+
+      const result = restore(trackedAlerts, activeAlertsFromState, 1000, recoveredAlertsFromState);
+
+      expect(result.restoredInstanceIds).toEqual([]);
+      expect(result.activeAlertsFromState).toBe(activeAlertsFromState);
+      expect(result.recoveredAlertsFromState).toBe(recoveredAlertsFromState);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
     it('returns the recovered state untouched when nothing is restored', () => {
       const trackedAlerts = buildTrackedAlerts([
         makeDoc({ uuid: 'old-uuid', instanceId: 'host-1', status: ALERT_STATUS_RECOVERED }),

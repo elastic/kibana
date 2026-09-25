@@ -188,6 +188,11 @@ export function restoreStateFromTrackedAlerts<AlertData extends RuleAlertData>({
     if (reconciledActive[instanceId]) {
       return;
     }
+    // State already recovered this very document; only its recovery write was lost.
+    // buildUpdatedRecoveredAlert repairs the document, restoring it would recover it twice.
+    if (reconciledRecovered[instanceId]?.meta?.uuid === uuid) {
+      return;
+    }
     reconciledCount ??= Object.keys(activeAlertsFromState).length;
     if (reconciledCount >= maxAlerts) {
       skippedInstanceIds.push(instanceId);
@@ -200,8 +205,8 @@ export function restoreStateFromTrackedAlerts<AlertData extends RuleAlertData>({
     reconciledCount++;
     restoredInstanceIds.push(instanceId);
 
-    // The restored document started a new lifecycle for this instance. An older recovered
-    // entry left in state would win in setFlappingHistoryAndTrackedAlerts once the alert
+    // The restored document is a newer lifecycle than the recovered entry. Left in state,
+    // the older entry would win in setFlappingHistoryAndTrackedAlerts once the alert
     // recovers again and send the recovery write to the old document.
     if (reconciledRecovered[instanceId]) {
       if (reconciledRecovered === recoveredAlertsFromState) {

@@ -1776,6 +1776,80 @@ describe('Alerts Client', () => {
           expect(rawActiveAlerts).toEqual({});
         });
 
+        test('should not restore a doc whose recovery write was lost and let the recovered state repair it', async () => {
+          // Instance 1 recovered as u1 in the previous run and the state says so, but the
+          // bulk item that wrote the recovered doc failed: u1 is still active in the index.
+          const staleActiveDoc = { ...fetchedAlert1, [ALERT_UUID]: 'u1', [ALERT_TRACKED]: true };
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'u1',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: staleActiveDoc,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, enabled: true },
+            recoveredAlertsFromState: {
+              '1': { meta: { uuid: 'u1', flappingHistory: [true, true] } },
+            },
+          });
+
+          // Instance 1 does not fire this run either
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // Not restored, so it does not recover a second time
+          expect(logger.warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('Restored'),
+            expect.anything()
+          );
+          expect(alertsClient.getProcessedAlerts('recovered')).toEqual({});
+          const { rawActiveAlerts, rawRecoveredAlerts } =
+            alertsClient.getRawAlertInstancesForState();
+          expect(rawActiveAlerts).toEqual({});
+          expect(rawRecoveredAlerts['1'].meta?.uuid).toBe('u1');
+
+          // The stale document is repaired to recovered in place
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          expect(bulkBody).toContainEqual({
+            index: {
+              _id: 'u1',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              if_seq_no: 41,
+              if_primary_term: 665,
+              require_alias: false,
+            },
+          });
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'u1')).toEqual(
+            expect.objectContaining({
+              [ALERT_STATUS]: 'recovered',
+              [EVENT_ACTION]: 'close',
+            })
+          );
+        });
+
         test('should recover the restored alert doc, not the older recovered one, when the alert stops firing', async () => {
           // Instance 1 recovered as u1, fired again as u2 in a run that died before its
           // state was saved. Task state still holds the recovered u1 entry only.
