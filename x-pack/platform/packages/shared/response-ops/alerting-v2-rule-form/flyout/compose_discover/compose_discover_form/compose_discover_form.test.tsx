@@ -31,6 +31,10 @@ jest.mock('./alert_condition_step', () => ({
   AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
 }));
 
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: () => ({ mgetWorkflows: jest.fn().mockResolvedValue([]) }),
+}));
+
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
   ...overrides,
@@ -215,7 +219,7 @@ describe('step validation', () => {
           {
             id: 'dashboard-id',
             type: DASHBOARD_ARTIFACT_TYPE,
-            data: { dashboardId: DASHBOARD_ID },
+            data: { dashboard_id: DASHBOARD_ID },
           },
         ],
       });
@@ -273,30 +277,21 @@ describe('step validation', () => {
   describe('notifications step validation', () => {
     const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
 
-    it('declares notifications fields and no custom validate', () => {
-      expect(notificationsStep.fields).toEqual(['notifications']);
+    it('has no declared fields and no custom validate', () => {
+      expect(notificationsStep.fields).toBeUndefined();
       expect(notificationsStep.validate).toBeUndefined();
     });
 
-    it('delegates to methods.trigger with notifications', async () => {
-      const state = createState({ mode: 'create' });
+    it('returns true without calling trigger when no fields are declared', async () => {
+      const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(true),
       } as unknown as UseFormReturn<FormValues>;
 
       const result = await validateStep(notificationsStep, methods, state);
 
-      expect(methods.trigger).toHaveBeenCalledWith(['notifications']);
+      expect(methods.trigger).not.toHaveBeenCalled();
       expect(result).toBe(true);
-    });
-
-    it('returns false when trigger rejects notifications validation', async () => {
-      const state = createState({ mode: 'create' });
-      const methods = {
-        trigger: jest.fn().mockResolvedValue(false),
-      } as unknown as UseFormReturn<FormValues>;
-
-      expect(await validateStep(notificationsStep, methods, state)).toBe(false);
     });
   });
 
@@ -310,22 +305,21 @@ describe('step validation', () => {
           onRecoveryTypeChange={jest.fn()}
           onKindChange={jest.fn()}
           isEditing={ruleId !== undefined}
-          ruleId={ruleId}
         />,
         { wrapper: createComposeFormWrapper() }
       );
 
-    it('renders the simple action policy section in create mode', async () => {
+    it('renders the action policies section in create mode', async () => {
       renderNotificationsStep();
       await waitFor(() => {
-        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+        expect(screen.getByText('Action policies')).toBeInTheDocument();
       });
     });
 
-    it('renders the simple action policy section in edit mode', async () => {
+    it('renders the action policies section in edit mode', async () => {
       renderNotificationsStep('rule-1');
       await waitFor(() => {
-        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+        expect(screen.getByText('Action policies')).toBeInTheDocument();
       });
     });
   });
@@ -439,12 +433,26 @@ describe('shell shared fields', () => {
     ).toBeDisabled();
   });
 
+  it('shows the read-only outcome info tooltip in edit mode', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false }, { kind: 'alert' }, true);
+
+    expect(screen.getByTestId('composeDiscoverKindSelect-readOnlyTooltip')).toBeInTheDocument();
+  });
+
   it('enables KindSelect in create mode on Outcome when sandbox is closed', () => {
     renderShell({ step: 1, queryCommitted: true, childOpen: false });
 
     expect(
       screen.getByTestId('composeDiscoverKindSelect-alert').querySelector('input')
     ).not.toBeDisabled();
+  });
+
+  it('does not show the read-only outcome info tooltip in create mode', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false });
+
+    expect(
+      screen.queryByTestId('composeDiscoverKindSelect-readOnlyTooltip')
+    ).not.toBeInTheDocument();
   });
 
   it('disables KindSelect when sandbox is open on Outcome', () => {

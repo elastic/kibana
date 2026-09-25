@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
-import { tEnum } from '../../utils/t_enum';
+import { z } from '@kbn/zod';
+import type { SchemaOutput } from '../schema_output';
 import { ConfigKey } from '../../constants/monitor_management';
-export { ConfigKey } from '../../constants/monitor_management';
 
-export const ConfigKeyCodec = tEnum<ConfigKey>('ConfigKey', ConfigKey);
-export type ConfigKeyType = t.TypeOf<typeof ConfigKeyCodec>;
+export { ConfigKey };
+
+export const ConfigKeyCodec = z.enum(ConfigKey);
+export type ConfigKeyType = SchemaOutput<typeof ConfigKeyCodec>;

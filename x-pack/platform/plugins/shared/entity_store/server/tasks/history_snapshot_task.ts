@@ -14,7 +14,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import { parseDurationToMs } from '../infra/time';
-import { TasksConfig } from './config';
+import { getHistorySnapshotTaskId, TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
 import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
@@ -24,13 +24,9 @@ import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_ta
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
-export const getHistorySnapshotTaskId = (namespace: string): string =>
-  `${config.type}:${namespace}`;
-
 interface RunHistorySnapshotTaskParams {
   taskInstance: { state: Record<string, unknown>; id: string };
   signal: AbortSignal;
-  fakeRequest: KibanaRequest | null | undefined;
   core: EntityStoreCoreSetup;
   logger: Logger;
 }
@@ -38,7 +34,6 @@ interface RunHistorySnapshotTaskParams {
 async function runHistorySnapshotTask({
   taskInstance,
   signal,
-  fakeRequest,
   core,
   logger,
 }: RunHistorySnapshotTaskParams): Promise<{
@@ -51,7 +46,7 @@ async function runHistorySnapshotTask({
     return { state: taskInstance.state };
   }
 
-  const [start] = await core.getStartServices();
+  const [start, plugins] = await core.getStartServices();
   if (
     await shouldDeleteOrphanedEntityStoreTask({
       coreStart: start,
@@ -62,21 +57,18 @@ async function runHistorySnapshotTask({
     return { state: taskInstance.state, shouldDeleteTask: true };
   }
 
-  if (!fakeRequest) {
-    logger.error('No fake request found, skipping history snapshot task');
-    return { state: taskInstance.state };
-  }
-
-  const soClient = start.savedObjects.getScopedClient(fakeRequest);
-  const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+  const soClient = start.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace);
+  const esClient = start.elasticsearch.client.asInternalUser;
   const taskLogger = logger.get(taskInstance.id);
 
   const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, taskLogger);
   const historySnapshotClient = new HistorySnapshotClient({
     logger: taskLogger,
     esClient,
+    internalEsClient: esClient,
     namespace,
     globalStateClient,
+    taskManager: plugins.taskManager,
   });
 
   await historySnapshotClient.runHistorySnapshot({
@@ -111,24 +103,33 @@ export function registerHistorySnapshotTask({
           }),
         },
       },
-      createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
-        run: () =>
-          wrapTaskRun({
-            spanName: 'entityStore.task.history_snapshot.run',
-            namespace: taskInstance.state.namespace,
-            attributes: {
-              'entity_store.task.id': taskInstance.id,
-              'entity_store.task.type': taskType,
+      createTaskRunner: ({ taskInstance, signal }) => ({
+        run: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.executionContext.withContext(
+            {
+              type: 'security_solution',
+              name: 'entity_analytics-entity_store_history_snapshot_task',
+              id: taskInstance.id,
             },
-            run: () =>
-              runHistorySnapshotTask({
-                taskInstance,
-                signal,
-                fakeRequest,
-                core,
-                logger,
-              }),
-          }),
+            () =>
+              wrapTaskRun({
+                spanName: 'entityStore.task.history_snapshot.run',
+                namespace: taskInstance.state.namespace,
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': taskType,
+                },
+                run: () =>
+                  runHistorySnapshotTask({
+                    taskInstance,
+                    signal,
+                    core,
+                    logger,
+                  }),
+              })
+          );
+        },
       }),
     },
   });

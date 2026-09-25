@@ -171,13 +171,10 @@ describe('DocumentFlyoutWrapper', () => {
     expect(getByTestId('document-overview-fetch-error')).toBeInTheDocument();
   });
 
-  it('renders data view error when the data view has no matched indices', () => {
+  it('renders data view error when the data view failed to load', () => {
     (useDataView as jest.Mock).mockReturnValue({
-      status: 'ready',
-      dataView: {
-        ...mockDataView,
-        hasMatchedIndices: () => false,
-      },
+      status: 'error',
+      dataView: mockDataView,
     });
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
 
@@ -189,6 +186,29 @@ describe('DocumentFlyoutWrapper', () => {
         skip: true,
       })
     );
+  });
+
+  it('still fetches the document when the data view has no matched indices', () => {
+    const hit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
+    const degradedDataView = {
+      ...mockDataView,
+      hasMatchedIndices: () => false,
+    };
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'ready',
+      dataView: degradedDataView,
+    });
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
+
+    const { getByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(useEsDocSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: false,
+      })
+    );
+    expect(getByTestId('document-overview-wrapper-data-view-degraded')).toBeInTheDocument();
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
   });
 
   it('renders nothing when the document request returns found without a hit', () => {

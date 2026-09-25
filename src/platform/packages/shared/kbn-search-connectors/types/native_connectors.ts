@@ -1454,6 +1454,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      include_full_raw_message: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.gmail.include_full_raw_message.label', {
+          defaultMessage: 'Index full raw email (including headers)',
+        }),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.gmail.include_full_raw_message.tooltip',
+          {
+            defaultMessage:
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
@@ -1465,7 +1488,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -2240,15 +2263,51 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      secret_value: {
+      auth_method: {
         default_value: null,
         depends_on: [],
+        display: DROPDOWN,
+        label: translate('searchConnectors.nativeConnectors.microsoftTeams.authMethodLabel', {
+          defaultMessage: 'Authentication Method',
+        }),
+        options: [
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.microsoftTeams.authMethod.clientSecretLabel',
+              {
+                defaultMessage: 'Client Secret',
+              }
+            ),
+            value: 'secret',
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.microsoftTeams.authMethod.certificateLabel',
+              {
+                defaultMessage: 'Certificate',
+              }
+            ),
+            value: 'certificate',
+          },
+        ],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'secret',
+      },
+      secret_value: {
+        default_value: null,
+        depends_on: [{ field: 'auth_method', value: 'secret' }],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.microsoftTeams.secretValueLabel', {
           defaultMessage: 'Secret value',
         }),
         options: [],
-        order: 3,
+        order: 4,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -2257,26 +2316,13 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      username: {
+      certificate: {
         default_value: null,
-        depends_on: [],
-        display: TEXTBOX,
-        label: USERNAME_LABEL,
-        options: [],
-        order: 4,
-        required: true,
-        sensitive: false,
-        tooltip: null,
-        type: STRING,
-        ui_restrictions: [],
-        validations: [],
-        value: '',
-      },
-      password: {
-        default_value: null,
-        depends_on: [],
-        display: TEXTBOX,
-        label: PASSWORD_LABEL,
+        depends_on: [{ field: 'auth_method', value: 'certificate' }],
+        display: TEXTAREA,
+        label: translate('searchConnectors.nativeConnectors.microsoftTeams.certificateLabel', {
+          defaultMessage: 'Content of certificate file',
+        }),
         options: [],
         order: 5,
         required: true,
@@ -2287,8 +2333,89 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      private_key: {
+        default_value: null,
+        depends_on: [{ field: 'auth_method', value: 'certificate' }],
+        display: TEXTAREA,
+        label: translate('searchConnectors.nativeConnectors.microsoftTeams.privateKeyLabel', {
+          defaultMessage: 'Content of private key file',
+        }),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      fetch_attachment_content: {
+        default_value: true,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.microsoftTeams.fetchAttachmentContentLabel',
+          {
+            defaultMessage: 'Fetch attachment content',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.microsoftTeams.fetchAttachmentContentTooltip',
+          {
+            defaultMessage:
+              "Index channel Files-folder items and message file attachments (as File documents), and extract their content. Requires the 'Files.Read.All' application permission.",
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+      use_document_level_security: {
+        default_value: false,
+        depends_on: [],
+        display: TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          translate('searchConnectors.nativeConnectors.microsoftTeams.tooltipName', {
+            defaultMessage: 'Microsoft Teams',
+          })
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
-    features: {},
+    features: {
+      [DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+    },
     name: translate('searchConnectors.nativeConnectors.microsoftTeams.name', {
       defaultMessage: 'Microsoft Teams',
     }),
@@ -3774,6 +3901,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      sync_all_mail_folders: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.outlook.sync_all_mail_folders.label', {
+          defaultMessage: 'Sync all mail folders',
+        }),
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.outlook.sync_all_mail_folders.tooltip',
+          {
+            defaultMessage:
+              'When enabled, indexes the user mail folders in each mailbox, not only Inbox, Sent, Junk, and Archive. System folders such as Deleted Items, Drafts, Outbox, and search folders are never indexed. Expect longer syncs, more Exchange load, and a larger index.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: null,
         depends_on: [],
@@ -3785,7 +3935,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 12,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -3800,13 +3950,39 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      include_full_raw_message: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.outlook.include_full_raw_message.label',
+          {
+            defaultMessage: 'Index full raw email (including headers)',
+          }
+        ),
+        options: [],
+        order: 13,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.outlook.include_full_raw_message.tooltip',
+          {
+            defaultMessage:
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
         display: TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 13,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
@@ -4437,6 +4613,37 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      expand_role_members: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.servicenow.configuration.expandRoleMembersLabel',
+          {
+            defaultMessage: 'Expand role members',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.servicenow.configuration.expandRoleMembersTooltip',
+          {
+            defaultMessage:
+              "When enabled, ServiceNow role members are written individually onto each document's access control list. Disable this for large tenants to store compact role tokens on documents instead, and resolve membership during access control syncs. Changing this setting requires a full content sync and access control sync.",
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
     },
     features: {
       [SYNC_RULES]: {
@@ -4858,6 +5065,37 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           {
             defaultMessage:
               'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      expand_site_group_members: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.expandSiteGroupMembersLabel',
+          {
+            defaultMessage: 'Expand site group members',
+          }
+        ),
+        options: [],
+        order: 17,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.expandSiteGroupMembersTooltip',
+          {
+            defaultMessage:
+              "When enabled, SharePoint site group members are written individually onto each document's access control list. Disable this for large site groups to store a compact site group token on documents instead, and resolve membership during access control syncs. Changing this setting requires a full content sync and access control sync.",
           }
         ),
         type: BOOLEAN,

@@ -11,9 +11,17 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { getDeleteKiStepDefinition } from './delete_ki';
-import { createMockStepContext, mockAiIndexService } from './test_utils';
+import {
+  createMockStepContext,
+  mockAiIndexService,
+  mockKiStepTelemetry,
+  mockKiWriter,
+} from './test_utils';
 
-const searchHit = (index: string) => ({ hits: { hits: [{ _id: 'ki-1', _index: index }] } });
+const storedKi = { type: 'index_metadata', title: 'logs-* index profile', id: 'ki-1' };
+const searchHit = (index: string) => ({
+  hits: { hits: [{ _id: 'ki-1', _index: index, _source: storedKi }] },
+});
 
 const createNotFoundResponseError = () =>
   new errors.ResponseError({
@@ -41,17 +49,20 @@ describe('getDeleteKiStepDefinition', () => {
       esClient,
     });
     const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const telemetry = mockKiStepTelemetry();
 
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: async () => false,
       checkWritePrivilege: allowed,
+      ...telemetry,
     });
     const thrown = await handler(context).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);
     expect(thrown.type).toBe('FeatureDisabledError');
     expect(esClient.delete).not.toHaveBeenCalled();
+    expect(telemetry.analyticsService.reportKiWrite).not.toHaveBeenCalled();
   });
 
   it('throws PermissionError when the workflow user lacks the write privilege', async () => {
@@ -66,6 +77,7 @@ describe('getDeleteKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: async () => false,
+      ...mockKiStepTelemetry(),
     });
     const thrown = await handler(context).catch((e) => e);
 
@@ -76,8 +88,39 @@ describe('getDeleteKiStepDefinition', () => {
 
   it('deletes the KI from its backing index and returns the document id', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001')),
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
       delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    const result = await handler(context);
+
+    expect(result).toEqual({ output: { id: 'ki-1' } });
+    expect(esClient.delete).toHaveBeenCalledWith(
+      {
+        index: 'ai-index-idx-my-ai-index',
+        id: 'ki-1',
+        refresh: 'wait_for',
+      },
+      { signal: context.abortSignal }
+    );
+  });
+
+  it('appends a revision with lifecycle status deleted on a data stream', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001')),
+      index: jest.fn().mockResolvedValue({ _id: 'new' }),
+      delete: jest.fn(),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
@@ -89,18 +132,87 @@ describe('getDeleteKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
     });
     const result = await handler(context);
 
     expect(result).toEqual({ output: { id: 'ki-1' } });
-    expect(esClient.delete).toHaveBeenCalledWith(
+    expect(esClient.delete).not.toHaveBeenCalled();
+    expect(esClient.index).toHaveBeenCalledWith(
       {
-        index: '.ds-ai-index-ds-my-ai-index-000001',
-        id: 'ki-1',
+        index: 'ai-index-ds-my-ai-index',
+        document: {
+          ...storedKi,
+          '@timestamp': expect.any(String),
+          updated_at: expect.any(String),
+          governance: {
+            provenance: { updated_by: mockKiWriter },
+            lifecycle: { status: 'deleted' },
+          },
+        },
+        op_type: 'create',
         refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );
+  });
+
+  it('resolves the AI index with the workflow space id', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+      spaceId: 'marketing',
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(service.get).toHaveBeenCalledWith('my-ai-index', 'marketing');
+  });
+
+  it('throws NotFoundError when the data stream KI is already deleted', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'ki-1',
+              _index: '.ds-ai-index-ds-my-ai-index-000001',
+              _source: { ...storedKi, governance: { lifecycle: { status: 'deleted' } } },
+            },
+          ],
+        },
+      }),
+      index: jest.fn(),
+      delete: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'data_stream', value: 'ai-index-ds-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('NotFoundError');
+    expect(esClient.index).not.toHaveBeenCalled();
   });
 
   it('throws ValidationError when the KI id matches documents in multiple backing indices', async () => {
@@ -128,6 +240,7 @@ describe('getDeleteKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
     });
     const thrown = await handler(context).catch((e) => e);
 
@@ -151,6 +264,7 @@ describe('getDeleteKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
     });
     const thrown = await handler(context).catch((e) => e);
 
@@ -174,11 +288,114 @@ describe('getDeleteKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
     });
     const thrown = await handler(context).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);
     expect(thrown.type).toBe('NotFoundError');
+  });
+
+  it('reports a success event and logs after the delete', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const telemetry = mockKiStepTelemetry();
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...telemetry,
+    });
+    await handler(context);
+
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledWith({
+      action: 'delete',
+      aiIndexId: 'my-ai-index',
+      managed: false,
+      outcome: 'success',
+    });
+    expect(telemetry.logger.debug).toHaveBeenCalledWith(
+      "KI 'ki-1' deleted from AI index 'my-ai-index'"
+    );
+  });
+
+  it('reports a failure event when the KI is missing', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      delete: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'missing-ki' },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const telemetry = mockKiStepTelemetry();
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...telemetry,
+    });
+    await handler(context).catch(() => {});
+
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledWith({
+      action: 'delete',
+      aiIndexId: 'my-ai-index',
+      managed: false,
+      outcome: 'failure',
+      errorType: 'NotFoundError',
+    });
+    expect(telemetry.logger.debug).toHaveBeenCalledWith(
+      "KI delete failed in AI index 'my-ai-index': NotFoundError"
+    );
+  });
+
+  it('reports an aborted event when the run was cancelled', async () => {
+    const abortController = new AbortController();
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: jest.fn().mockImplementation(() => {
+        abortController.abort();
+        return Promise.reject(new errors.RequestAbortedError('Request aborted'));
+      }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+      abortController,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const telemetry = mockKiStepTelemetry();
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...telemetry,
+    });
+    await expect(handler(context)).rejects.toThrow('Request aborted');
+
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
+    expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledWith({
+      action: 'delete',
+      aiIndexId: 'my-ai-index',
+      managed: false,
+      outcome: 'aborted',
+    });
+    expect(telemetry.logger.debug).toHaveBeenCalledWith(
+      "KI delete aborted in AI index 'my-ai-index'"
+    );
   });
 
   it('throws NotFoundError when the AI index does not exist', async () => {
@@ -195,6 +412,7 @@ describe('getDeleteKiStepDefinition', () => {
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
     });
     const thrown = await handler(context).catch((e) => e);
 

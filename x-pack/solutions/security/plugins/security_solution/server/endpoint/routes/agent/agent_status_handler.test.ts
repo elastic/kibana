@@ -62,6 +62,16 @@ describe('Agent Status API route handler', () => {
     registerAgentStatusRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
 
+  it('opts the route into info-level HTTP response logs', () => {
+    expect(
+      apiTestSetup.getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1').routeConfig.options
+    ).toEqual(
+      expect.objectContaining({
+        httpResponseLogLevel: 'info',
+      })
+    );
+  });
+
   it.each(RESPONSE_ACTION_AGENT_TYPE)('should accept agent type of %s', async (agentType) => {
     httpRequestMock.query.agentType = agentType;
     await apiTestSetup

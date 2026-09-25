@@ -114,7 +114,7 @@ on_exit() {
 
 trap on_exit EXIT
 
-# Generate LiteLLM connectors (or skip when only EIS models are requested).
+# Generate OpenRouter connectors (or skip when only EIS models are requested).
 # This must run after bootstrap so Node is available for the generator script.
 source .buildkite/scripts/steps/evals/setup_connectors.sh
 
@@ -135,7 +135,7 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
   if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
-  # If the judge connector is EIS-backed, we still need EIS connectors even when running a LiteLLM project.
+  # If the judge connector is EIS-backed, we still need EIS connectors even when running an OpenRouter project.
   if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
@@ -156,8 +156,8 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
 
     export EIS_CONNECTORS_B64
 
-    echo "--- Merging LiteLLM + EIS connectors"
-    export KIBANA_TESTING_AI_CONNECTORS="$(
+    echo "--- Merging OpenRouter + EIS connectors"
+    export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(
       node x-pack/platform/packages/shared/kbn-evals/scripts/ci/merge_ai_connectors.js
     )"
   fi
@@ -170,7 +170,7 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
     CONNECTOR_IDS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_connector_ids.js)"
 
     if [[ -z "${CONNECTOR_IDS:-}" ]]; then
-      echo "No connectors found in KIBANA_TESTING_AI_CONNECTORS; falling back to evaluation connector only"
+      echo "No connectors found in KIBANA_TESTING_INFERENCE_ENDPOINTS; falling back to evaluation connector only"
       if [[ -n "${EVAL_CONNECTOR_ID:-}" ]]; then
         export EVAL_PROJECT="${EVAL_CONNECTOR_ID}"
       fi
@@ -352,7 +352,6 @@ EOF
           EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
           EVAL_PR_NUMBER: "${resolved_pr_number}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
-          EVAL_TRIAGE_MODEL_ID: "${EVAL_TRIAGE_MODEL_ID:-}"
         depends_on:
 EOF
         for key in "${fanout_step_keys[@]}"; do
@@ -485,6 +484,24 @@ fi
 echo "--- Disk usage before starting Scout"
 df -h .
 du -sh .es node_modules "${KIBANA_BUILD_LOCATION:-}" 2>/dev/null || true
+
+# A suite's `scoutHook` reads the evals config on stdin and prints `{ env }`, exported for Scout and
+# Playwright so the suite's server config set can read it.
+EVAL_SUITE_SCOUT_HOOK="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutHook // empty' 2>/dev/null || true)"
+if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
+  if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
+    _scout_hook_config="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d)"
+  else
+    _scout_hook_config='{}'
+  fi
+  _scout_hook_output="$(printf '%s' "$_scout_hook_config" | bash "$EVAL_SUITE_SCOUT_HOOK")"
+  # Piped, not `<<<`: older bash backs here-strings with a temp file, and this holds the private key.
+  while IFS= read -r _scout_hook_name; do
+    [[ -z "$_scout_hook_name" ]] && continue
+    export "$_scout_hook_name=$(printf '%s' "$_scout_hook_output" | jq -r --arg name "$_scout_hook_name" '.env[$name]')"
+  done < <(printf '%s' "$_scout_hook_output" | jq -r '(.env // {}) | keys[]')
+  unset _scout_hook_config _scout_hook_output _scout_hook_name
+fi
 
 # Start Scout server in background (run Kibana from the distributable)
 SCOUT_SERVER_ARGS=(start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")

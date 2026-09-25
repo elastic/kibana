@@ -1,8 +1,7 @@
 {
-  "sha1": "887c7d13dbe84bb22b48aec7bcf745cec645dca0",
+  "sha1": "5c758cbfcae2fa44db7146e340de3acca1ce4678",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -342,6 +341,70 @@
       }
     },
     {
+      "id": "8cf5758b6dd5b7d-3aed35557d6d9de",
+      "title": "Entity Store history snapshot enable/disable returns 403 for callers without the securitySolution privilege on enable and disable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/history_snapshot_enable_disable.spec.ts",
+        "line": 92,
+        "column": 21
+      }
+    },
+    {
+      "id": "8cf5758b6dd5b7d-4250d104b41698e",
+      "title": "Entity Store history snapshot enable/disable disables and enables the history snapshot task via Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/history_snapshot_enable_disable.spec.ts",
+        "line": 106,
+        "column": 75
+      }
+    },
+    {
+      "id": "8cf5758b6dd5b7d-e21e304e7199cb0",
+      "title": "Entity Store history snapshot enable/disable returns 404 on enable and disable when the entity store is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/history_snapshot_enable_disable.spec.ts",
+        "line": 138,
+        "column": 55
+      }
+    },
+    {
+      "id": "8cf5758b6dd5b7d-b1ef008b100347f",
+      "title": "Entity Store history snapshot enable/disable disables with index cleanup then re-enables and runs an immediate snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/history_snapshot_enable_disable.spec.ts",
+        "line": 161,
+        "column": 13
+      }
+    },
+    {
       "id": "d1ac35cbfabb8dd-c18f4e661235e05",
       "title": "Entity Store install / update API tests Should install the entity store happy path with feature flag enabled",
       "expectedStatus": "passed",
@@ -353,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 37,
-        "column": 11
+        "line": 43,
+        "column": 8
       }
     },
     {
@@ -369,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 61,
-        "column": 15
+        "line": 70,
+        "column": 8
       }
     },
     {
@@ -385,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 74,
-        "column": 11
+        "line": 81,
+        "column": 14
       }
     },
     {
@@ -401,8 +464,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 83,
-        "column": 5
+        "line": 92,
+        "column": 14
       }
     },
     {
@@ -417,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 100,
-        "column": 69
+        "line": 109,
+        "column": 7
       }
     },
     {
@@ -433,8 +496,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 115,
-        "column": 11
+        "line": 123,
+        "column": 7
       }
     },
     {
@@ -449,8 +512,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 145,
-        "column": 21
+        "line": 153,
+        "column": 7
       }
     },
     {
@@ -465,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 152,
-        "column": 21
+        "line": 160,
+        "column": 12
       }
     },
     {
@@ -481,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 163,
-        "column": 7
+        "line": 172,
+        "column": 16
       }
     },
     {
@@ -497,8 +560,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 170,
-        "column": 37
+        "line": 181,
+        "column": 21
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-b5ad2fd90b66e1d",
+      "title": "Entity Store per entity-type log extraction config reports identical config for every engine when nothing is overridden",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 54,
+        "column": 60
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-cc2c00064485f34",
+      "title": "Entity Store per entity-type log extraction config setting a store-wide field to null falls back to the built-in default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 69,
+        "column": 32
       }
     },
     {
@@ -801,7 +896,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 70,
+        "line": 69,
         "column": 23
       }
     },
@@ -817,7 +912,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 75,
+        "line": 74,
         "column": 72
       }
     },
@@ -833,7 +928,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 88,
+        "line": 87,
         "column": 74
       }
     },
@@ -849,7 +944,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 108,
+        "line": 107,
         "column": 67
       }
     },
@@ -865,7 +960,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 122,
+        "line": 121,
         "column": 23
       }
     },
@@ -881,7 +976,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 166,
+        "line": 158,
         "column": 24
       }
     }

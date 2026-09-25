@@ -10,7 +10,11 @@ import { defer, map } from 'rxjs';
 import type { Message, ToolOptions, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
-import { handleConnectorDataResponse, handleConnectorStreamResponse } from '../../utils';
+import {
+  handleConnectorDataResponse,
+  handleConnectorStreamResponse,
+  pickConnectorTelemetryForConnector,
+} from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream, processVertexResponse } from './process_vertex_stream';
 import type {
@@ -55,7 +59,9 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
           ...(metadata?.connectorTelemetry
-            ? { telemetryMetadata: metadata.connectorTelemetry }
+            ? {
+                telemetryMetadata: pickConnectorTelemetryForConnector(metadata.connectorTelemetry),
+              }
             : {}),
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
           ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)
@@ -158,13 +164,28 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
               )
             : {},
         };
-      case 'string':
+      case 'string': {
+        const enumValues = def.enum
+          ? (def.enum as string[])
+          : def.const
+          ? [def.const as string]
+          : undefined;
+        // Vertex AI treats `format: 'enum'` as a promise that `enum` is
+        // non-empty and rejects the request otherwise, so only emit an enum
+        // schema when the schema actually constrains the value to an enum/const.
+        if (enumValues?.length) {
+          return {
+            type: Gemini.SchemaType.STRING,
+            format: 'enum',
+            description: def.description,
+            enum: enumValues,
+          };
+        }
         return {
           type: Gemini.SchemaType.STRING,
-          format: 'enum',
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : [],
         };
+      }
       case 'boolean':
         return {
           type: Gemini.SchemaType.BOOLEAN,

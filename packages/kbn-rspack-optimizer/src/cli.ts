@@ -14,7 +14,9 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
-import { runBuild } from './run_build';
+import { KIBANA_GROUPS, type KibanaGroup } from '@kbn/projects-solutions-groups';
+import { runBuild, type BuildOptions } from './run_build';
+import { reportOptimizerTimings } from './report_optimizer_timings';
 import {
   validateLimitsForAllBundles,
   updateBundleLimits,
@@ -55,8 +57,12 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --test-plugins to have no value');
       }
 
-      // cache and hmr are declared as positive booleans defaulting to true.
+      // dev-only, cache and hmr are declared as positive booleans defaulting to true.
       // getopts interprets --no-cache as cache=false and --no-hmr as hmr=false.
+      // dev-only defaults to true because a source server started in dev mode without the
+      // optimizer (scripts/functional_tests, --no-optimizer) discovers devOnly plugins, and the
+      // UI fails to load without their bundles.
+      const devOnly = flags['dev-only'] as boolean;
       const cache = flags.cache as boolean;
       const hmr = flags.hmr as boolean;
 
@@ -127,12 +133,23 @@ export function runRspackCli(options: CliOptions = {}): void {
           ? Path.resolve(flags.limits)
           : options.defaultLimitsPath ?? DEFAULT_LIMITS_PATH;
 
+      // Parsed (and validated) up front so an invalid group errors in every mode. The
+      // limits modes operate on the canonical full plugin set, so a filtered build there
+      // would validate against — or rewrite limits.yml from — an incomplete set of bundles.
+      const allowlistPluginGroups = parsePluginGroups(flags['plugin-groups']);
+      if (allowlistPluginGroups && (validateLimits || updateLimits || updateLimitsFromMetrics)) {
+        throw createFlagError(
+          '--plugin-groups cannot be combined with --validate-limits, --update-limits, or --update-limits-from-metrics (these operate on the full plugin set)'
+        );
+      }
+
       // --validate-limits: quick check, no build needed
       if (validateLimits) {
         const allPlugins = await discoverPlugins({
           repoRoot: REPO_ROOT,
           examples: false,
           testPlugins: false,
+          devOnly: false,
         });
         const pluginIds = ['core', ...allPlugins.filter((p) => !p.ignoreMetrics).map((p) => p.id)];
         validateLimitsForAllBundles(log, pluginIds, limitsPath);
@@ -186,7 +203,7 @@ export function runRspackCli(options: CliOptions = {}): void {
 
       log.info('Building with RSPack unified compilation...');
 
-      const result = await runBuild({
+      const buildOptions: BuildOptions = {
         repoRoot: REPO_ROOT,
         outputRoot,
         watch: updateLimits ? false : watch,
@@ -194,17 +211,33 @@ export function runRspackCli(options: CliOptions = {}): void {
         cache,
         examples: effectiveExamples,
         testPlugins: effectiveTestPlugins,
+        devOnly: devOnly && !updateLimits,
+        allowlistPluginGroups,
         themeTags: themes,
         log,
         profile: false,
         hmr: hmr ? undefined : false,
         limitsPath,
-      });
+      };
 
-      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      const result = await runBuild(buildOptions);
+
+      const { close } = result;
+      if (close) {
+        addCleanupTask(() => void close());
+      }
+
+      const elapsedMs = Date.now() - startTime;
+      const duration = (elapsedMs / 1000).toFixed(2);
+
+      await reportOptimizerTimings(log, buildOptions, result, elapsedMs);
 
       if (result.success) {
         log.success(`RSPack build completed in ${duration}s`);
+      } else if (result.done) {
+        // Watcher is still running: the initial compilation failed but rebuilds
+        // continue on file changes, so treat this as recoverable.
+        log.error(`RSPack build failed after ${duration}s — waiting for changes to fix errors...`);
       } else {
         throw new Error(`RSPack build failed after ${duration}s`);
       }
@@ -217,7 +250,7 @@ export function runRspackCli(options: CliOptions = {}): void {
       await result.done;
     },
     {
-      usage: 'node scripts/build_rspack_bundles.js [options]',
+      usage: 'node scripts/build_kibana_platform_plugins.js [options]',
       description: 'RSPack Optimizer - Build Kibana platform plugin bundles',
       flags: {
         boolean: [
@@ -225,6 +258,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           'dist',
           'examples',
           'test-plugins',
+          'dev-only',
           'cache',
           'hmr',
           'profile',
@@ -233,7 +267,14 @@ export function runRspackCli(options: CliOptions = {}): void {
           'validate-limits',
           'inspect-workers',
         ],
-        string: ['themes', 'output-root', 'limits', 'profile-focus', 'update-limits-from-metrics'],
+        string: [
+          'themes',
+          'output-root',
+          'limits',
+          'profile-focus',
+          'update-limits-from-metrics',
+          'plugin-groups',
+        ],
         alias: {
           w: 'watch',
         },
@@ -242,6 +283,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           dist: false,
           examples: false,
           'test-plugins': false,
+          'dev-only': true,
           cache: true,
           hmr: true,
           profile: false,
@@ -254,7 +296,11 @@ export function runRspackCli(options: CliOptions = {}): void {
             --dist                    Build for distribution (minified, no source maps)
             --examples                Include example plugins
             --test-plugins            Include test plugins
+            --no-dev-only             Exclude devOnly plugins (included by default, even with --dist;
+                                      node scripts/build always excludes them)
             --themes <tags>           Comma-separated theme tags to build (default: all)
+            --plugin-groups <groups>  Comma-separated plugin groups to build (default: all).
+                                      Mirrors the server's plugins.allowlistPluginGroups setting.
             --output-root <dir>       Output root directory (default: repo root)
             --no-cache                Disable filesystem caching
             --no-hmr                  Disable Hot Module Replacement in watch mode
@@ -279,38 +325,59 @@ export function runRspackCli(options: CliOptions = {}): void {
                                       Note: --watch is ignored in profile mode
 
           Environment Variables:
-            KBN_USE_RSPACK=false      Use legacy webpack optimizer instead of default RSPack
-            KBN_HMR=false             Disable HMR (RSPack only, alternative to --no-hmr)
-            KBN_HMR_PORT=5678         Override the HMR SSE server port (RSPack only, default: 5678)
+            KBN_HMR=false             Disable HMR (alternative to --no-hmr)
+            KBN_HMR_PORT=5678         Override the HMR SSE server port (default: 5678)
         `,
         examples: `
           # Full production build
-          node scripts/build_rspack_bundles.js --dist
+          node scripts/build_kibana_platform_plugins.js --dist
 
           # Development with watch mode
-          node scripts/build_rspack_bundles.js --watch
+          node scripts/build_kibana_platform_plugins.js --watch
 
           # Profile with full analysis (stats.json + RsDoctor)
-          node scripts/build_rspack_bundles.js --profile
+          node scripts/build_kibana_platform_plugins.js --profile
 
           # Quick profile (stats.json only, faster)
-          node scripts/build_rspack_bundles.js --profile-stats-only
+          node scripts/build_kibana_platform_plugins.js --profile-stats-only
 
           # Profile production build
-          node scripts/build_rspack_bundles.js --dist --profile
+          node scripts/build_kibana_platform_plugins.js --dist --profile
 
           # Validate limits.yml (CI check, no build)
-          node scripts/build_rspack_bundles.js --validate-limits
+          node scripts/build_kibana_platform_plugins.js --validate-limits
 
           # Update limits.yml (always runs a full dist build)
-          node scripts/build_rspack_bundles.js --update-limits
+          node scripts/build_kibana_platform_plugins.js --update-limits
 
           # Update limits.yml from an existing metrics file (no build; CI auto-fix path)
-          node scripts/build_rspack_bundles.js --update-limits-from-metrics target/optimizer_bundle_metrics.json
+          node scripts/build_kibana_platform_plugins.js --update-limits-from-metrics target/optimizer_bundle_metrics.json
         `,
       },
     }
   );
+}
+
+function parsePluginGroups(flag: unknown): KibanaGroup[] | undefined {
+  if (typeof flag !== 'string' || flag.length === 0) {
+    return undefined;
+  }
+
+  const groups = flag
+    .split(',')
+    .map((g) => g.trim())
+    .filter(Boolean);
+
+  const invalid = groups.filter((g) => !KIBANA_GROUPS.includes(g as KibanaGroup));
+  if (invalid.length) {
+    throw createFlagError(
+      `--plugin-groups received unknown group(s): ${invalid.join(
+        ', '
+      )}. Valid groups: ${KIBANA_GROUPS.join(', ')}`
+    );
+  }
+
+  return groups as KibanaGroup[];
 }
 
 /**

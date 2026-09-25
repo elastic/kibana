@@ -20,6 +20,16 @@ jest.mock('../../api/registry', () => ({
   getRegistries: jest.fn(),
 }));
 
+jest.mock('@elastic/schemas/es/json/_types.json', () => ({
+  $defs: {
+    Oversized: {
+      type: 'object',
+      description: 'x'.repeat(2_000),
+      properties: { bool: { type: 'object' }, term: { type: 'object' } },
+    },
+  },
+}));
+
 const mockGetRegistries = jest.mocked(getRegistries);
 
 const createLoadedApi = (definition: ApiRegistryDefinition): LoadedApi => ({
@@ -52,7 +62,7 @@ describe('createDescribeApiTool', () => {
   });
 
   it('has the correct id', () => {
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     expect(tool.id).toBe(internalTools.describeApi);
   });
 
@@ -74,7 +84,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -84,8 +94,36 @@ describe('createDescribeApiTool', () => {
     expect(data.method).toBe('PUT');
     expect(data.path).toBe('/{index}');
     expect(data.destructive).toBe(false);
-    expect(data.unsupported_reason).toBeUndefined();
     expect(data.params_schema_yaml).toContain('description: Name of the index.');
+    expect(data.expandable_types).toEqual([]);
+  });
+
+  it('lists the types the schema was too large to output', async () => {
+    loadApi.mockResolvedValue(
+      createLoadedApi({
+        name: 'search',
+        namespace: null,
+        description: 'Run a search',
+        method: 'POST',
+        path: '/_search',
+        input: {
+          type: 'object',
+          properties: { query: { $ref: './_types.json#/$defs/Oversized' } },
+        },
+        destructive: false,
+      })
+    );
+
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
+    const result = (await tool.handler(
+      { target: 'elasticsearch', api: 'search' },
+      agentBuilderMocks.tools.createHandlerContext()
+    )) as ToolHandlerStandardReturn;
+
+    const data = result.results[0].data as ApiDescribeResultData;
+    expect(data.expandable_types).toEqual(['Oversized']);
+    expect(data.params_schema_yaml).toContain('x-expandable: Oversized');
+    expect(data.params_schema_yaml).toContain('x-properties');
   });
 
   it('presents one flat parameter set rather than where each value is routed', async () => {
@@ -108,7 +146,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -121,7 +159,7 @@ describe('createDescribeApiTool', () => {
     expect(data.params_schema_yaml).toContain('mappings');
   });
 
-  it('explains why an NDJSON API cannot be executed', async () => {
+  it('presents the payload of an NDJSON API as a parameter', async () => {
     loadApi.mockResolvedValue(
       createLoadedApi({
         name: 'bulk',
@@ -130,18 +168,31 @@ describe('createDescribeApiTool', () => {
         method: 'POST',
         path: '/_bulk',
         bodyFormat: 'ndjson',
+        input: {
+          type: 'object',
+          properties: {
+            operations: {
+              type: 'array',
+              description: 'The operations to perform.',
+              'x-found-in': 'body',
+              'x-body-root': true,
+            },
+          },
+        },
         destructive: true,
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'bulk' },
       agentBuilderMocks.tools.createHandlerContext()
     )) as ToolHandlerStandardReturn;
 
     const data = result.results[0].data as ApiDescribeResultData;
-    expect(data.unsupported_reason).toContain('NDJSON');
+    expect(data.params_schema_yaml).toContain('operations');
+    expect(data.params_schema_yaml).toContain('description: The operations to perform.');
+    expect(data.params_schema_yaml).not.toContain('x-body-root');
   });
 
   it('falls back to the raw schema when references cannot be resolved', async () => {
@@ -161,7 +212,7 @@ describe('createDescribeApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       context
@@ -186,7 +237,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.delete' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -208,7 +259,7 @@ describe('createDescribeApiTool', () => {
       })
     );
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'info' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -221,7 +272,7 @@ describe('createDescribeApiTool', () => {
   it('returns a helpful error for an unknown API identifier', async () => {
     loadApi.mockRejectedValue(new UnknownApiError('does.not.exist'));
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'does.not.exist' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -230,12 +281,38 @@ describe('createDescribeApiTool', () => {
     expect(result.results[0].type).toBe(ToolResultType.error);
     const data = result.results[0].data as ErrorResultData;
     expect(data.message).toContain('Unknown API identifier');
+    expect(data.message).toContain(internalTools.discoverApis);
+  });
+
+  describe('when API discovery is disabled', () => {
+    it('never points the model at the discovery tool from its description', () => {
+      const tool = createDescribeApiTool({ discoveryEnabled: false });
+
+      expect(tool.description).not.toContain(internalTools.discoverApis);
+      expect(tool.description).toContain(internalTools.executeApi);
+    });
+
+    it('spells out the identifier format instead of the discovery tool on an unknown API', async () => {
+      loadApi.mockRejectedValue(new UnknownApiError('does.not.exist'));
+
+      const tool = createDescribeApiTool({ discoveryEnabled: false });
+      const result = (await tool.handler(
+        { target: 'elasticsearch', api: 'does.not.exist' },
+        agentBuilderMocks.tools.createHandlerContext()
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      const data = result.results[0].data as ErrorResultData;
+      expect(data.message).not.toContain(internalTools.discoverApis);
+      expect(data.message).toContain('no API named "does.not.exist"');
+      expect(data.message).toContain('namespace.name');
+    });
   });
 
   it('returns an error result when loading fails for another reason', async () => {
     loadApi.mockRejectedValue(new Error('network down'));
 
-    const tool = createDescribeApiTool();
+    const tool = createDescribeApiTool({ discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       agentBuilderMocks.tools.createHandlerContext()

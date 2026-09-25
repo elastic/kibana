@@ -10,7 +10,7 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
@@ -134,12 +134,17 @@ function normalizeEvaluationConnectorId(raw: string): string {
     return `eis-${normalizeBuildkiteKey(raw.slice('eis/'.length))}`;
   }
 
-  // `models:judge:<modelGroup>` (e.g. `llm-gateway/gpt-5.2`) — judge value is a model group.
-  if (raw.includes('/')) {
-    return `litellm-${normalizeBuildkiteKey(raw)}`;
+  // `models:judge:openrouter/<provider>-<model>` (e.g. `openrouter/openai-gpt-5.4`).
+  if (raw.startsWith('openrouter/')) {
+    return `openrouter-${normalizeBuildkiteKey(raw.slice('openrouter/'.length))}`;
   }
 
-  // Already a connector id (e.g. `litellm-*` / `eis-*`).
+  // Native OpenRouter id (`openai/gpt-5.4`)
+  if (raw.includes('/')) {
+    return `openrouter-${normalizeBuildkiteKey(raw)}`;
+  }
+
+  // Already a connector id (e.g. `openrouter-*` / `eis-*`).
   return raw;
 }
 

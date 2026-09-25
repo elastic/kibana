@@ -18,7 +18,12 @@ import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import type { SortOrder, DataGridDensity } from '@kbn/unified-data-table';
+import type {
+  SortOrder,
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 
 export const getMockedSearchApi = ({
   searchSource,
@@ -28,7 +33,7 @@ export const getMockedSearchApi = ({
   savedSearch: SavedSearch;
 }) => {
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
-  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+  const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
   return {
     api: {
       uuid: 'testEmbeddable',
@@ -43,8 +48,9 @@ export const getMockedSearchApi = ({
       timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
       setTimeRange: jest.fn(),
       dataLoading$,
-      blockingError$,
+      searchError$,
       fetchWarnings$: new BehaviorSubject<SearchResponseIncompleteWarning[]>([]),
+      abortSignal$: new BehaviorSubject<AbortSignal | undefined>(undefined),
       savedSearch$: new BehaviorSubject<SavedSearch>(savedSearch),
     },
     stateManager: {
@@ -56,6 +62,12 @@ export const getMockedSearchApi = ({
       rowsPerPage: new BehaviorSubject<number | undefined>(savedSearch.rowsPerPage),
       sampleSize: new BehaviorSubject<number | undefined>(savedSearch.sampleSize),
       density: new BehaviorSubject<DataGridDensity | undefined>(savedSearch.density),
+      documentsDisplayMode: new BehaviorSubject<DocumentsDisplayMode | undefined>(
+        savedSearch.documentsDisplayMode
+      ),
+      jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(
+        savedSearch.jsonModeSettings
+      ),
       grid: new BehaviorSubject<DiscoverGridSettings | undefined>(savedSearch.grid),
       rows: new BehaviorSubject<DataTableRecord[]>([]),
       totalHitCount: new BehaviorSubject<number | undefined>(0),
@@ -64,7 +76,7 @@ export const getMockedSearchApi = ({
     },
     setters: {
       setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
-      setBlockingError: (error: Error | undefined) => blockingError$.next(error),
+      setSearchError: (error: Error | undefined) => searchError$.next(error),
     },
   };
 };

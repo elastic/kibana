@@ -29,7 +29,7 @@ describe('AlertEpisodeStatusBadges', () => {
         status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          snoozeExpiry: null,
+          snoozedUntil: null,
         }}
       />
     );
@@ -42,21 +42,21 @@ describe('AlertEpisodeStatusBadges', () => {
         status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          snoozeExpiry: '2020-01-01T00:00:00.000Z',
+          snoozedUntil: '2020-01-01T00:00:00.000Z',
         }}
       />
     );
     expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
   });
 
-  it('shows snooze expiry in tooltip on hover when snoozeExpiry is set', async () => {
+  it('shows snoozed_until in tooltip on hover when snoozedUntil is set', async () => {
     const user = userEvent.setup();
     renderWithI18n(
       <AlertEpisodeStatusBadges
         status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          snoozeExpiry: '2035-06-15T14:30:00.000Z',
+          snoozedUntil: '2035-06-15T14:30:00.000Z',
         }}
       />
     );
@@ -66,14 +66,14 @@ describe('AlertEpisodeStatusBadges', () => {
     expect(tooltip).toHaveTextContent(/2035/);
   });
 
-  it('shows generic snooze tooltip when snoozeExpiry is missing', async () => {
+  it('shows generic snooze tooltip when snoozedUntil is missing', async () => {
     const user = userEvent.setup();
     renderWithI18n(
       <AlertEpisodeStatusBadges
         status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          snoozeExpiry: null,
+          snoozedUntil: null,
         }}
       />
     );
@@ -92,6 +92,8 @@ describe('AlertEpisodeStatusBadges', () => {
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
           lastAssigneeUid: null,
           lastAckActor: null,
+          lastDeactivateAction: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -110,6 +112,8 @@ describe('AlertEpisodeStatusBadges', () => {
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
           lastAssigneeUid: null,
           lastAckActor: null,
+          lastDeactivateAction: null,
+          lastDeactivateActor: null,
         }}
       />
     );
@@ -126,7 +130,7 @@ describe('AlertEpisodeStatusBadges', () => {
     renderWithI18n(
       <AlertEpisodeStatusBadges
         status={status}
-        groupAction={{ lastSnoozeAction: null, snoozeExpiry: null }}
+        groupAction={{ lastSnoozeAction: null, snoozedUntil: null }}
       />
     );
     expect(screen.getByText(expectedLabel)).toBeInTheDocument();

@@ -39,7 +39,12 @@ export const queryKeys = {
       ['evals', 'experiments', 'detail', experimentId, executionId] as const,
     scores: (experimentId: string, executionId?: string) =>
       ['evals', 'experiments', 'scores', experimentId, executionId] as const,
-    datasetExamples: (experimentId: string, datasetId: string, executionId?: string) =>
+    datasetExamples: (
+      experimentId: string,
+      datasetId: string,
+      executionId?: string,
+      includePreviews = false
+    ) =>
       [
         'evals',
         'experiments',
@@ -48,17 +53,44 @@ export const queryKeys = {
         experimentId,
         datasetId,
         executionId,
+        includePreviews,
+      ] as const,
+    exampleDetails: (
+      experimentId: string,
+      datasetId: string,
+      exampleId: string,
+      repetitionIndex: number,
+      executionId?: string
+    ) =>
+      [
+        'evals',
+        'experiments',
+        'examples',
+        'details',
+        experimentId,
+        executionId,
+        datasetId,
+        exampleId,
+        repetitionIndex,
       ] as const,
     compare: (type: string, baselineId: string, targetId: string) =>
       ['evals', 'experiments', 'compare', type, baselineId, targetId] as const,
   },
   examples: {
     all: ['evals', 'examples'] as const,
-    scores: (exampleId: string) => ['evals', 'examples', 'scores', exampleId] as const,
+    scores: (exampleId: string, datasetId?: string) =>
+      ['evals', 'examples', 'scores', exampleId, datasetId ?? null] as const,
   },
   traces: {
     all: ['evals', 'traces'] as const,
     detail: (traceId: string) => ['evals', 'traces', 'detail', traceId] as const,
+  },
+  onlineEvals: {
+    all: ['evals', 'online_evals'] as const,
+    list: () => ['evals', 'online_evals', 'list'] as const,
+    detail: (workflowId: string) => ['evals', 'online_evals', 'detail', workflowId] as const,
+    scores: (workflowId: string, page: number, perPage: number) =>
+      ['evals', 'online_evals', 'scores', workflowId, page, perPage] as const,
   },
   tracing: {
     all: ['evals', 'tracing'] as const,

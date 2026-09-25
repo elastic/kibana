@@ -7,11 +7,12 @@
 
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
-import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, UpdateRuleData, Query, RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   IMMUTABLE_RULE_FIELDS,
   isNoDataQueryConsistentWithStrategy,
   isNoDataQueryProvidedForStrategy,
+  isRecoveryTransitionConsistentWithStrategy,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isSignalQueryBreachOnly,
@@ -202,18 +203,74 @@ function nullToEmptyArray<T>(
 }
 
 /**
+ * A composed query may omit `breach` over the API to mean "every row returned
+ * by `base` breaches". Storage always writes the block with an empty segment
+ * instead: every shipped model version requires `query.breach`, so omitting it
+ * on disk would make the rule unreadable by an older Kibana during a rollback
+ * or a zero-downtime upgrade — and `find` fails as a whole rather than per
+ * document, so one such rule would break the entire rules list.
+ */
+const toStoredQuery = (query: Query): RuleSavedObjectAttributes['query'] =>
+  query.format === 'composed'
+    ? { ...query, breach: { segment: query.breach?.segment ?? '' } }
+    : query;
+
+/** Inverse of {@link toStoredQuery}: an empty stored segment reads back as an omitted block. */
+const toApiQuery = (query: RuleSavedObjectAttributes['query']): Query => {
+  if (query.format !== 'composed' || query.breach.segment.trim()) {
+    return query;
+  }
+  const { breach, ...withoutBreach } = query;
+  return withoutBreach;
+};
+
+type StoredStateTransition = RuleSavedObjectAttributes['state_transition'];
+type ApiStateTransition = RuleResponse['state_transition'];
+
+const toStoredOperator = (operator: 'and' | 'or' | undefined): 'AND' | 'OR' | undefined => {
+  if (operator === undefined) return undefined;
+  return operator === 'and' ? 'AND' : 'OR';
+};
+
+const toApiOperator = (operator: 'AND' | 'OR' | undefined): 'and' | 'or' | undefined => {
+  if (operator === undefined) return undefined;
+  return operator === 'AND' ? 'and' : 'or';
+};
+
+/**
+ * The API uses lowercase `and`/`or` for `state_transition.*_operator`; the SO
+ * schema keeps the legacy uppercase literals so this rename doesn't require a
+ * saved-object migration.
+ */
+const toStoredStateTransition = (stateTransition: ApiStateTransition): StoredStateTransition =>
+  stateTransition
+    ? {
+        ...stateTransition,
+        pending_operator: toStoredOperator(stateTransition.pending_operator),
+        recovering_operator: toStoredOperator(stateTransition.recovering_operator),
+      }
+    : stateTransition;
+
+/** Inverse of {@link toStoredStateTransition}. */
+const toApiStateTransition = (stateTransition: StoredStateTransition): ApiStateTransition =>
+  stateTransition
+    ? {
+        ...stateTransition,
+        pending_operator: toApiOperator(stateTransition.pending_operator),
+        recovering_operator: toApiOperator(stateTransition.recovering_operator),
+      }
+    : stateTransition;
+
+/**
  * Converts a create-rule API body into saved object attributes.
- *
- * Today this is a 1:1 mapping, but it gives us a seam to evolve storage
- * independently of the public API.
  */
 export function transformCreateRuleBodyToRuleSoAttributes(
   data: CreateRuleData,
   serverFields: {
     enabled: boolean;
-    createdBy: string | null;
+    createdBy: RuleSavedObjectAttributes['createdBy'];
     createdAt: string;
-    updatedBy: string | null;
+    updatedBy: RuleSavedObjectAttributes['updatedBy'];
     updatedAt: string;
     version: number;
   }
@@ -224,7 +281,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     metadata: {
       name: data.metadata.name,
       description: data.metadata.description,
-      owner: data.metadata.owner,
       tags: data.metadata.tags,
       builder_type: data.metadata.builder_type,
       version,
@@ -234,10 +290,10 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       every: data.schedule.every,
       lookback: data.schedule.lookback,
     },
-    query: data.query,
+    query: toStoredQuery(data.query),
     recovery_strategy: data.recovery_strategy,
     no_data_strategy: data.no_data_strategy,
-    state_transition: data.state_transition,
+    state_transition: toStoredStateTransition(data.state_transition),
     grouping: data.grouping,
     artifacts: data.artifacts,
     ...restServerFields,
@@ -245,8 +301,10 @@ export function transformCreateRuleBodyToRuleSoAttributes(
 }
 
 /**
- * Resolves `metadata.builder_type` for an update. Auto-clears when the query
- * changes without an explicit `builder_type` in the same request.
+ * Resolves `metadata.builder_type` for an update.
+ *
+ * Builder rules require an explicit `metadata.builder_type: null` in the request
+ * to clear the field when the query changes.
  */
 function resolveBuilderType(
   updateData: UpdateRuleData,
@@ -256,15 +314,21 @@ function resolveBuilderType(
     return updateData.metadata.builder_type ?? undefined;
   }
 
+  // Compare in stored shape so an unchanged conditionless query (`breach`
+  // omitted in the body, empty segment on disk) does not read as a change.
   const queryChanged =
-    updateData.query !== undefined && !isEqual(updateData.query, existingAttrs.query);
-  const strategyChanged =
-    (updateData.recovery_strategy !== undefined &&
-      updateData.recovery_strategy !== existingAttrs.recovery_strategy) ||
-    (updateData.no_data_strategy !== undefined &&
-      updateData.no_data_strategy !== existingAttrs.no_data_strategy);
+    updateData.query !== undefined &&
+    !isEqual(toStoredQuery(updateData.query), existingAttrs.query);
 
-  if (queryChanged || strategyChanged) {
+  if (queryChanged && existingAttrs.metadata.builder_type) {
+    throw Boom.badRequest(
+      'Cannot update the query on a builder rule without explicitly clearing ' +
+        'metadata.builder_type. Send metadata.builder_type: null to confirm the transition to ES|QL mode.',
+      { code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED }
+    );
+  }
+
+  if (queryChanged) {
     return undefined;
   }
 
@@ -285,7 +349,11 @@ function resolveBuilderType(
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
   updateData: UpdateRuleData,
-  serverFields: { updatedBy: string | null; updatedAt: string; version: number }
+  serverFields: {
+    updatedBy: RuleSavedObjectAttributes['updatedBy'];
+    updatedAt: string;
+    version: number;
+  }
 ): RuleSavedObjectAttributes {
   const { version, ...restServerFields } = serverFields;
   return {
@@ -294,13 +362,16 @@ export function buildUpdateRuleAttributes(
       ...existingAttrs.metadata,
       ...updateData.metadata,
       builder_type: resolveBuilderType(updateData, existingAttrs),
+      // `null` clears all tags. The SO schema is `maybe(...)` without
+      // `nullable()`, so the cleared value must be stored as `undefined`.
+      tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
       version,
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
     // `query` - callers must send a complete new shape (we can't merge across formats),
     // so omitted = preserved, present = full replacement.
-    query: updateData.query ?? existingAttrs.query,
+    query: updateData.query !== undefined ? toStoredQuery(updateData.query) : existingAttrs.query,
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     recovery_strategy: nullToUndefined(
       updateData.recovery_strategy,
@@ -309,7 +380,7 @@ export function buildUpdateRuleAttributes(
     no_data_strategy: nullToUndefined(updateData.no_data_strategy, existingAttrs.no_data_strategy),
     // `null` → clear (null). SO schema uses `maybe(nullable())`.
     state_transition: applyNullableUpdate(
-      updateData.state_transition,
+      toStoredStateTransition(updateData.state_transition),
       existingAttrs.state_transition
     ),
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
@@ -383,6 +454,13 @@ export function validateMergedRuleAttributes(
       code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
+    {
+      valid: isRecoveryTransitionConsistentWithStrategy(attrs),
+      message:
+        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+      code: ALERTING_ERROR_CODES.INVALID_STATE_TRANSITION_CONFIG,
+      details: { rule_id: ruleId },
+    },
   ];
 
   for (const invariant of invariants) {
@@ -410,7 +488,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     metadata: {
       name: attrs.metadata.name,
       description: attrs.metadata.description,
-      owner: attrs.metadata.owner,
       tags: attrs.metadata.tags,
       builder_type: attrs.metadata.builder_type,
       version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,
@@ -420,12 +497,19 @@ export function transformRuleSoAttributesToRuleApiResponse(
       every: attrs.schedule.every,
       lookback: attrs.schedule.lookback,
     },
-    query: attrs.query,
+    query: toApiQuery(attrs.query),
     recovery_strategy: attrs.recovery_strategy,
     no_data_strategy: attrs.no_data_strategy,
-    state_transition: attrs.state_transition,
+    state_transition: toApiStateTransition(attrs.state_transition),
     grouping: attrs.grouping,
-    artifacts: attrs.artifacts,
+    // Project to the public artifact contract. Migrated rules may still carry a
+    // legacy `value` on disk for model-version rollback; echoing it in the API
+    // response makes round-trip updates fail zod `.strict()` validation.
+    artifacts: attrs.artifacts?.map(({ id: artifactId, type, data }) => ({
+      id: artifactId,
+      type,
+      data,
+    })),
     enabled: attrs.enabled,
     created_by: attrs.createdBy,
     created_at: attrs.createdAt,

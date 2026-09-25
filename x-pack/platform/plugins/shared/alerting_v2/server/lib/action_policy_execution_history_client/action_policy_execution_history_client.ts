@@ -13,6 +13,7 @@ import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
+  type ListPolicyExecutionHistoryRequest,
   type PolicyExecutionHistoryItem,
   type RuleResponse,
   type PolicyExecutionOutcomeFilter,
@@ -35,9 +36,10 @@ import {
   buildExecutionHistoryItem,
   type NameMaps,
 } from './build_execution_history_item';
+import { toEventActions } from './outcome';
 
 // Default lower bound on the event timestamp when the caller does not pass an
-// explicit `start_date`.
+// explicit `from`.
 const DEFAULT_TIME_WINDOW_HOURS = 24;
 
 // Pagination defaults applied when the caller omits them
@@ -54,25 +56,37 @@ export interface ListExecutionHistoryArgs {
   perPage?: number;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
+  outcomes?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
   /**
    * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
    * replaces the default rolling {@link DEFAULT_TIME_WINDOW_HOURS}-hour window.
    */
-  startDate?: string;
+  from?: string;
+  /** Inclusive ISO timestamp upper bound for `@timestamp`. Unbounded when omitted. */
+  to?: string;
+  /**
+   * Sort field. `dispatched_at` is the only supported value and maps to
+   * `@timestamp`, which the event log query always sorts on; only `sortOrder`
+   * is forwarded.
+   */
+  sortField?: ListPolicyExecutionHistoryRequest['sort_field'];
+  /** Sort direction. Defaults to `desc` (newest first). */
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ListExecutionHistoryResult {
   items: PolicyExecutionHistoryItem[];
   page: number;
   perPage: number;
-  totalEvents: number;
+  total: number;
   searchMatches: SearchMatchCounts | null;
 }
 
 @injectable()
 export class ActionPolicyExecutionHistoryClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract,
     @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient,
@@ -81,8 +95,10 @@ export class ActionPolicyExecutionHistoryClient {
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: AlertingServerStartDependencies['spaces'],
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('executionHistory');
+  }
 
   public async listExecutionHistory({
     request,
@@ -90,12 +106,14 @@ export class ActionPolicyExecutionHistoryClient {
     perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE,
     search,
     ruleIds,
-    outcome,
+    outcomes,
     episodeIds,
-    startDate,
+    from,
+    to,
+    sortOrder,
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
-    const effectiveStartDate =
-      startDate ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    const effectiveFrom =
+      from ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
@@ -106,17 +124,19 @@ export class ActionPolicyExecutionHistoryClient {
         items: [],
         page,
         perPage,
-        totalEvents: 0,
+        total: 0,
         searchMatches: matchingSearchIds.matches,
       };
     }
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
       spaceId,
-      startDate: effectiveStartDate,
+      startDate: effectiveFrom,
+      endDate: to,
+      sortOrder,
       page,
       perPage,
-      outcomes: outcome,
+      actions: toEventActions(outcomes),
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
       mandatoryRuleIds: ruleIds,
@@ -139,7 +159,7 @@ export class ActionPolicyExecutionHistoryClient {
       items,
       page: result.page,
       perPage: result.perPage,
-      totalEvents: result.total,
+      total: result.total,
       searchMatches: matchingSearchIds.matches,
     };
   }
@@ -173,7 +193,11 @@ export class ActionPolicyExecutionHistoryClient {
       policyIds: [...policyIds],
       ruleIds: [...ruleIds],
       hasMatches: policyIds.size > 0 || ruleIds.size > 0,
-      matches: { policies: policies.total, rules: rules.total, cap: SEARCH_ID_CAP },
+      matches: {
+        policies: policies.total,
+        rules: rules.total,
+        is_truncated: policies.total > SEARCH_ID_CAP || rules.total > SEARCH_ID_CAP,
+      },
     };
   }
 
@@ -208,7 +232,7 @@ export class ActionPolicyExecutionHistoryClient {
 
   private unwrapArray<T>(result: PromiseSettledResult<T[]>, code: AlertingV2LogCode): T[] {
     if (result.status === 'fulfilled') return result.value;
-    this.logger.error({ error: result.reason, code });
+    this.logger.warn({ message: 'Execution history lookup failed', error: result.reason, code });
     return [];
   }
 
@@ -236,7 +260,7 @@ export class ActionPolicyExecutionHistoryClient {
     code: AlertingV2LogCode
   ): { items: T[]; total: number } {
     if (result.status === 'fulfilled') return result.value;
-    this.logger.error({ error: result.reason, code });
+    this.logger.warn({ message: 'Execution history lookup failed', error: result.reason, code });
     return { items: [], total: 0 };
   }
 }

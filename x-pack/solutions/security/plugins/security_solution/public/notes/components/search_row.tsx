@@ -14,11 +14,16 @@ import {
   EuiSelect,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { CreatedByFilterDropdown } from './created_by_filter_dropdown';
 import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID } from './test_ids';
-import { userFilterAssociatedNotes, userSearchedNotes } from '..';
+import {
+  userFilterAssociatedNotes,
+  userSearchedNotes,
+  selectNotesTableSearch,
+  selectNotesTableAssociatedFilter,
+} from '..';
 import { AssociatedFilter } from '../../../common/notes/constants';
 
 const ATTACH_FILTER = i18n.translate('xpack.securitySolution.notes.management.attachFilter', {
@@ -44,9 +49,12 @@ const associatedNoteSelectOptions: EuiSelectOption[] = [
 export const SearchRow = React.memo(() => {
   const dispatch = useDispatch();
   const associatedSelectId = useGeneratedHtmlId({ prefix: 'associatedSelectId' });
+  const notesSearch = useSelector(selectNotesTableSearch);
+  const notesAssociatedFilter = useSelector(selectNotesTableAssociatedFilter);
 
   const onQueryChange = useCallback(
-    ({ queryText }: { queryText: string }) => {
+    ({ queryText, error }: { queryText: string; error: Error | null }) => {
+      if (error) return;
       dispatch(userSearchedNotes(queryText.trim()));
     },
     [dispatch]
@@ -62,7 +70,7 @@ export const SearchRow = React.memo(() => {
   return (
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem>
-        <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
+        <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery={notesSearch} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <CreatedByFilterDropdown />
@@ -71,6 +79,7 @@ export const SearchRow = React.memo(() => {
         <EuiSelect
           id={associatedSelectId}
           options={associatedNoteSelectOptions}
+          value={notesAssociatedFilter}
           onChange={onAssociatedNoteSelectChange}
           prepend={ATTACH_FILTER}
           aria-label={ATTACH_FILTER}

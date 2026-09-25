@@ -41,7 +41,8 @@ import type { QueryTab } from './types';
 import { CpsPicker } from './cps_picker';
 import { useResolveTimeField } from './use_resolve_time_field';
 import { extractFromSourceQuery } from './extract_from_source_query';
-import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT } from './constants';
+import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT, ESQL_CODE_EDITOR_OPTIONS } from './constants';
+import { addPrettifyAction } from './esql_prettify_action';
 import { useQuerySandboxStyles } from './query_sandbox.styles';
 import { useEditorHeightResize } from './use_editor_height_resize';
 
@@ -62,7 +63,7 @@ import { useEditorHeightResize } from './use_editor_height_resize';
  *
  * ## Layout
  *
- * The in-editor toolbar (Search, time field, date range, `headerActions`) sits
+ * The in-editor toolbar (Search, time field, date range) sits
  * inside the bordered editor panel. The Monaco viewport is resizable via a drag
  * handle (capped at a max height) so the flyout keeps scrolling the results
  * table as one surface — the table is never trapped in a squeezed pane.
@@ -92,12 +93,6 @@ export interface QuerySandboxProps {
    */
   helpText?: React.ReactNode;
   /**
-   * Optional actions rendered at the end of the in-editor toolbar (after Search,
-   * time field, and date range). Use for header-level controls such as Split /
-   * Merge buttons. Absent or `undefined` → nothing is rendered.
-   */
-  headerActions?: React.ReactNode;
-  /**
    * When provided, the editor panel renders `ComposeDiscoverTabs` with a tab
    * bar instead of a single `CodeEditor`. Absent or `[]` → single editor.
    */
@@ -113,8 +108,11 @@ export interface QuerySandboxProps {
     onRecoveryBlockChange: (v: string) => void;
     onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
     onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+    onBaseEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
     readOnly?: boolean;
   };
+  /** Mount handler for the single (non-tabbed) editor — e.g. to attach validation. */
+  onSingleEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   /**
    * Static validation error messages for the active tab's query — e.g. from a
    * blocked Apply. Rendered next to the editor, independent of `hasRun`/`isError`
@@ -139,8 +137,8 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   isTimeFieldResolved: isTimeFieldResolvedProp,
   helpText,
   tabProps,
-  headerActions,
   validationError,
+  onSingleEditorMount,
 }) => {
   const euiThemeContext = useEuiTheme();
   const {
@@ -160,6 +158,12 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     onResizeKeyDown,
   } = useEditorHeightResize();
   const services = useRuleFormServices();
+  // Injected by the host plugin (see RuleFormServices); PascalCase for JSX use.
+  const {
+    esqlMenu: EsqlMenu,
+    esqlEditorActionsProvider: EsqlEditorActionsProvider,
+    esqlEditorActionsRegister: EsqlEditorActionsRegister,
+  } = services;
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
   const skipTimeFieldResolution = timeFieldOptionsProp !== undefined;
@@ -258,6 +262,32 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [run]);
 
+  // A recommended query is a whole `FROM …`, so it can only be applied where the active editor
+  // holds a complete query: the single/unified editor, or the base tab in split mode. On the
+  // split fragment tabs (alert/recovery) there's no valid target, so it stays unwired (and the
+  // menu hides the section). The base tab writes through `onBaseQueryChange`, not `onQueryChange`
+  // (which in split mode targets the breach segment).
+  const recommendedQuerySubmit = (() => {
+    if (isReadOnly) return undefined;
+    if (!hasTabs) return onQueryChange;
+    return tabProps?.activeTab === 'base' ? tabProps.onBaseQueryChange : undefined;
+  })();
+
+  // Applies a recommended query picked from the ES|QL menu, then runs it. The run is deferred so
+  // the editor content update flushes first and `run()` reads the new query (its params ref
+  // updates on re-render) — mirroring the full editor's submit flow.
+  const handleSubmitRecommendedQuery = useCallback(
+    (nextQuery: string) => {
+      recommendedQuerySubmit?.(nextQuery);
+      setTimeout(() => run(), 0);
+    },
+    [recommendedQuerySubmit, run]
+  );
+
+  // Kept in sync with the menu's `hideRecommendedQueries` so we never show picks we can't apply.
+  const canWireRecommendedQueries =
+    Boolean(EsqlEditorActionsRegister) && Boolean(recommendedQuerySubmit);
+
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
       columns.map((col) => ({
@@ -292,6 +322,16 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     [rows]
   );
 
+  const handleSingleEditorMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      if (!isReadOnly) {
+        addPrettifyAction(editor);
+      }
+      onSingleEditorMount?.(editor);
+    },
+    [isReadOnly, onSingleEditorMount]
+  );
+
   const editorContent =
     tabProps && hasTabs ? (
       <ComposeDiscoverTabs
@@ -306,6 +346,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         tabs={tabProps.tabs}
         onAlertEditorMount={tabProps.onAlertEditorMount}
         onRecoveryEditorMount={tabProps.onRecoveryEditorMount}
+        onBaseEditorMount={tabProps.onBaseEditorMount}
         readOnly={tabProps.readOnly}
         hideTabBar
       />
@@ -316,13 +357,11 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         onChange={(v) => onQueryChange?.(v)}
         height="100%"
         options={{
-          minimap: { enabled: false },
-          automaticLayout: true,
-          scrollBeyondLastLine: false,
-          fontSize: 13,
+          ...ESQL_CODE_EDITOR_OPTIONS,
           readOnly: isReadOnly,
           domReadOnly: isReadOnly,
         }}
+        editorDidMount={handleSingleEditorMount}
       />
     );
 
@@ -382,6 +421,16 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AlertingDateRangePicker
+              from={dateRange.dateStart}
+              to={dateRange.dateEnd}
+              onChange={handleDateRangeChange}
+              services={services}
+              width="auto"
+              data-test-subj="querySandboxDatePicker"
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false} css={timeFieldSelectCss}>
             <EuiSelect
               options={timeFieldOptions}
@@ -402,17 +451,27 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               data-test-subj="querySandboxTimeField"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AlertingDateRangePicker
-              from={dateRange.dateStart}
-              to={dateRange.dateEnd}
-              onChange={handleDateRangeChange}
-              services={services}
-              width="auto"
-              data-test-subj="querySandboxDatePicker"
-            />
-          </EuiFlexItem>
-          {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
+          {EsqlMenu && EsqlEditorActionsProvider && (
+            <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+              <EsqlEditorActionsProvider>
+                {canWireRecommendedQueries && EsqlEditorActionsRegister && (
+                  <EsqlEditorActionsRegister
+                    currentQuery={query}
+                    submitEsqlQuery={handleSubmitRecommendedQuery}
+                  />
+                )}
+                {/* Visor (KQL / NL search) is owned by the full editor, which the sandbox
+                    doesn't mount — hide the button so it isn't shown enabled but inert.
+                    Recommended queries are hidden unless wired, so picks are always applicable. */}
+                <EsqlMenu
+                  hideHistory
+                  hideVisor
+                  hideRecommendedQueries={!canWireRecommendedQueries}
+                  docsFlyoutSize="s"
+                />
+              </EsqlEditorActionsProvider>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div css={editorBodyCss} style={{ height: editorHeight }}>

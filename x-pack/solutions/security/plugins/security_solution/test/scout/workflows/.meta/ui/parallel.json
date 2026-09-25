@@ -1,8 +1,7 @@
 {
-  "sha1": "7fefd208fdd81b7e35d744dc0404e7b9c82bc285",
+  "sha1": "9c03b4c24a2b436bb507474f69c7896d1ecb0e1e",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -222,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/run_workflow_action.spec.ts",
-        "line": 31,
+        "line": 37,
         "column": 13
       }
     },
@@ -236,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/run_workflow_action.spec.ts",
-        "line": 99,
+        "line": 105,
         "column": 9
       }
     },
@@ -250,7 +249,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/run_workflow_action.spec.ts",
-        "line": 115,
+        "line": 121,
         "column": 5
       }
     }

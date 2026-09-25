@@ -6,6 +6,7 @@
  */
 
 import { makeUpSummary } from '@kbn/observability-synthetics-test-data';
+import { v4 as uuidv4 } from 'uuid';
 import type { ApiClientFixture, EsClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders, SYNTHETICS_API_URLS } from '../../../common/fixtures';
@@ -18,6 +19,7 @@ const HTTP_DATA_STREAM = 'synthetics-http-default';
 const BROWSER_NETWORK_DATA_STREAM = 'synthetics-browser.network-default';
 const TEST_TAG = 'scout-cert-tag';
 const BROWSER_TAG = 'scout-cert-browser-tag';
+const OTHER_SPACE_TAG = 'scout-cert-other-space-tag';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -28,7 +30,7 @@ interface CertResultBody {
     issuer?: string;
     sha256?: string;
     monitorType?: string;
-    monitors: Array<{ id?: string; type?: string }>;
+    monitors: Array<{ id?: string; type?: string; spaces?: string[] }>;
   }>;
 }
 
@@ -61,7 +63,10 @@ const certData = (res: { body: unknown }): CertResultBody =>
  * dots, and the `monitorTypes` / `tags` quick-filter query params.
  *
  * Tests share worker-scoped Kibana/ES state and run sequentially, so the empty
- * assertion runs first and later tests build on the seeded certificates.
+ * assertion runs first and later tests build on the seeded certificates. The
+ * empty facets check is CCS-aware: stateful always runs the ES query (see
+ * `isCCSEnabled`), so fixed-bucket facets may be all-zero skeletons rather than
+ * `[]`.
  */
 apiTest.describe(
   'getCertificates',
@@ -79,22 +84,26 @@ apiTest.describe(
         commonName,
         sha256,
         tlsNotAfter,
+        id = monitorId,
+        tags = [TEST_TAG],
       }: {
         commonName: string;
         sha256: string;
         tlsNotAfter: string;
+        id?: string;
+        tags?: string[];
       }
     ) => {
       // Start from a realistic "up" summary ping (carries final-attempt summary,
       // recent timespan and full `tls.server.*`), then override the fields the
       // certs query dedupes/buckets on.
       const document = makeUpSummary({
-        monitorId,
-        configId: monitorId,
+        monitorId: id,
+        configId: id,
         timestamp: new Date(now).toISOString(),
         tlsNotAfter,
       }) as Record<string, any>;
-      document.tags = [TEST_TAG];
+      document.tags = tags;
       document.tls.server.x509.subject.common_name = commonName;
       document.tls.server.x509.subject.distinguished_name = `CN=${commonName}`;
       document.tls.server.hash.sha256 = sha256;
@@ -164,8 +173,8 @@ apiTest.describe(
       return res;
     };
 
-    const getCertFacets = async (apiClient: ApiClientFixture) => {
-      const res = await apiClient.get(SYNTHETICS_API_URLS.CERTS_FACETS, {
+    const getCertFacets = async (apiClient: ApiClientFixture, query = '') => {
+      const res = await apiClient.get(`${SYNTHETICS_API_URLS.CERTS_FACETS}${query}`, {
         headers: editorHeaders,
         responseType: 'json',
       });
@@ -187,7 +196,7 @@ apiTest.describe(
       });
       await esClient.deleteByQuery({
         index: `${HTTP_DATA_STREAM}*,${BROWSER_NETWORK_DATA_STREAM}*`,
-        query: { terms: { tags: [TEST_TAG, BROWSER_TAG] } },
+        query: { terms: { tags: [TEST_TAG, BROWSER_TAG, OTHER_SPACE_TAG] } },
         conflicts: 'proceed',
         refresh: true,
         ignore_unavailable: true,
@@ -199,18 +208,19 @@ apiTest.describe(
       expect(res).toHaveStatusCode(200);
       expect(certData(res)).toMatchObject({ certs: [], total: 0 });
 
-      // The facets route short-circuits to empty arrays (skipping the ES query)
-      // when no monitor is enabled.
+      // No enabled monitors → no cert data. Dynamic facets (terms aggs) stay
+      // empty; fixed-bucket facets (resource type / origin / expiring-within)
+      // are either [] (serverless short-circuits the ES query) or all-zero
+      // skeletons (stateful treats CCS as enabled and still runs the query).
       const facetsRes = await getCertFacets(apiClient);
       expect(facetsRes).toHaveStatusCode(200);
-      expect((facetsRes.body as { data: CertFacetsBody }).data).toStrictEqual({
-        monitorTypes: [],
-        tags: [],
-        issuers: [],
-        resourceTypes: [],
-        certOrigin: [],
-        expiringWithin: [],
-      });
+      const facets = (facetsRes.body as { data: CertFacetsBody }).data;
+      expect(facets.monitorTypes).toStrictEqual([]);
+      expect(facets.tags).toStrictEqual([]);
+      expect(facets.issuers).toStrictEqual([]);
+      expect(facets.resourceTypes.every((entry) => entry.count === 0)).toBe(true);
+      expect(facets.certOrigin.every((entry) => entry.count === 0)).toBe(true);
+      expect(facets.expiringWithin.every((entry) => entry.count === 0)).toBe(true);
     });
 
     apiTest(
@@ -429,5 +439,71 @@ apiTest.describe(
       expect(findCount(facets.issuers, 'GTS CA 1C3')).toBe(3);
       expect(findCount(facets.issuers, 'Browser Test CA')).toBe(2);
     });
+
+    apiTest(
+      'includes certificates from other permitted spaces when showFromAllSpaces is true',
+      async ({ apiClient, apiServices, esClient, kbnClient }) => {
+        const spaceId = `cert-space-${uuidv4()}`;
+        await kbnClient.spaces.create({ id: spaceId, name: `Cert space ${spaceId}` });
+        try {
+          const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
+            spaceId
+          );
+          const created = await addMonitor(
+            apiClient,
+            editorHeaders,
+            {
+              name: 'Other space cert monitor',
+              type: 'http',
+              urls: 'https://other-space.scout.test',
+              tags: [OTHER_SPACE_TAG],
+              locations: [spaceLocation],
+              spaces: [],
+            },
+            { spaceId }
+          );
+          const otherMonitorId = (created.body as { id: string }).id;
+
+          await indexCertPing(esClient, {
+            commonName: 'other-space.scout.test',
+            sha256: 'd'.repeat(64),
+            tlsNotAfter: new Date(now + 60 * DAY_MS).toISOString(),
+            id: otherMonitorId,
+            tags: [OTHER_SPACE_TAG],
+          });
+
+          const withoutAll = await getCerts(apiClient);
+          expect(withoutAll).toHaveStatusCode(200);
+          expect(certData(withoutAll).certs.map((cert) => cert.common_name)).not.toContain(
+            'other-space.scout.test'
+          );
+
+          const withAll = await getCerts(apiClient, '?showFromAllSpaces=true');
+          expect(withAll).toHaveStatusCode(200);
+          const otherCert = certData(withAll).certs.find(
+            (cert) => cert.common_name === 'other-space.scout.test'
+          );
+          expect(otherCert).toBeDefined();
+          expect(otherCert?.monitors?.[0]).toMatchObject({
+            id: otherMonitorId,
+            spaces: [spaceId],
+          });
+
+          const defaultFacets = await getCertFacets(apiClient);
+          expect(defaultFacets).toHaveStatusCode(200);
+          expect(
+            findCount((defaultFacets.body as { data: CertFacetsBody }).data.tags, OTHER_SPACE_TAG)
+          ).toBeUndefined();
+
+          const allFacets = await getCertFacets(apiClient, '?showFromAllSpaces=true');
+          expect(allFacets).toHaveStatusCode(200);
+          expect(
+            findCount((allFacets.body as { data: CertFacetsBody }).data.tags, OTHER_SPACE_TAG)
+          ).toBe(1);
+        } finally {
+          await kbnClient.spaces.delete(spaceId).catch(() => {});
+        }
+      }
+    );
   }
 );

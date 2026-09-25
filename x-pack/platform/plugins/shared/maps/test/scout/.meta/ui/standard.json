@@ -1,8 +1,7 @@
 {
-  "sha1": "41ec40a4f41a33fe96c28536d03a656c12c9a8ca",
+  "sha1": "d49c96022f0379b29aa58bc563f88ff443561de9",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -14,8 +13,35 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embedded_map_search_cancellation.spec.ts",
-        "line": 46,
+        "line": 50,
         "column": 7
+      }
+    },
+    {
+      "id": "f6a280d8279d22c-4035f9937306db3",
+      "title": "Maps embedded in dashboard - request cancellation cancels search when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embedded_map_search_cancellation.spec.ts",
+        "line": 62,
+        "column": 13
+      }
+    },
+    {
+      "id": "43bc63ddaba86b0-d8548e6b6a91a8d",
+      "title": "Maps - filter by map extent filter by map extent lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/filter_by_map_extent.spec.ts",
+        "line": 39,
+        "column": 37
       }
     },
     {
@@ -34,8 +60,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
-        "line": 23,
+        "line": 18,
         "column": 43
+      }
+    },
+    {
+      "id": "33cd82ee8ea79c8-9c8dbc398b758dd",
+      "title": "Maps - tooltip filter actions apply filter action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
+        "line": 37,
+        "column": 37
+      }
+    },
+    {
+      "id": "33cd82ee8ea79c8-dc9613c55761c90",
+      "title": "Maps - tooltip filter actions dashboard drilldown action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
+        "line": 48,
+        "column": 13
+      }
+    },
+    {
+      "id": "33cd82ee8ea79c8-3a614e041e60734",
+      "title": "Maps - tooltip filter actions url drilldown action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
+        "line": 67,
+        "column": 7
       }
     }
   ]

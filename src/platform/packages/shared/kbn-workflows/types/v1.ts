@@ -22,6 +22,7 @@ import type {
   WorkflowYaml,
 } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
+import type { WorkflowValidationRuleId } from '../validation/rules';
 
 export type { WorkflowYaml } from '../spec/schema';
 
@@ -303,6 +304,8 @@ export interface WorkflowExecutionDto {
   /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
+  /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
+  stepExecutionIds?: string[];
   duration: number | null;
   executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
@@ -332,6 +335,11 @@ export interface WorkflowExecutionListDto {
   page: number;
   size: number;
   total: number;
+  /**
+   * Opaque `search_after` sort values for the next window.
+   * Absent when there are no further results.
+   */
+  searchAfter?: unknown[];
 }
 
 export interface WorkflowStepExecutionListDto {
@@ -478,6 +486,7 @@ export interface WorkflowDetailDto {
   definition: WorkflowYaml | null;
   yaml: string;
   valid: boolean;
+  tags?: string[];
   version?: number;
 }
 
@@ -886,11 +895,24 @@ export interface WorkflowDiagnostic {
   message: string;
   source: string;
   path?: (string | number)[];
+  /**
+   * Stable identity of the check that produced this diagnostic. Prefer this over
+   * matching on `message`, which is translated and reworded freely.
+   * See WORKFLOW_VALIDATION_RULES.
+   */
+  ruleId: WorkflowValidationRuleId;
 }
 export interface ValidateWorkflowResponseDto {
   valid: boolean;
   diagnostics: WorkflowDiagnostic[];
   parsedWorkflow?: WorkflowYaml;
+  /**
+   * What the checks did not cover, each with the reason: a check either never
+   * ran or stopped at a budget part-way through. Reported separately from
+   * `diagnostics` because the absence of a diagnostic here means "not checked",
+   * not "nothing wrong".
+   */
+  notChecked?: string[];
 }
 
 export interface GetAvailableConnectorsResponse {

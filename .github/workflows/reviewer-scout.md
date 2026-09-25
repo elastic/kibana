@@ -24,19 +24,20 @@ imports:
   - .github/workflows/shared/app-dex-agents-otel.md
 engine:
   id: claude
-  version: '2.1.111'
+  version: '2.1.206'
   model: opus
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.7[1m]
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
     ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
+    CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
-# - reviewer:skip-ai and reviewer:libra suppress PR event activations.
+# - reviewer:skip-ai suppresses PR event activations.
 # - Reviewer label events activate, including labels added while creating a PR.
 # - Synchronize/reopened PR events activate when the reviewer label is already present.
 # - Synchronize events for merge commits are ignored; only code pushes activate a new review.
@@ -48,7 +49,6 @@ if: >-
     (
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      !contains(github.event.pull_request.labels.*.name, 'reviewer:libra') &&
       github.event_name == 'pull_request_target' &&
       (
         (
@@ -87,6 +87,7 @@ env:
   REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
   REVIEWER_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
 tools:
+  bash: true
   github:
     toolsets: [default]
     min-integrity: none

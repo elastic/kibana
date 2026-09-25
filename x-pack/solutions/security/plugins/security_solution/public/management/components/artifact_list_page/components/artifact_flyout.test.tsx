@@ -10,9 +10,11 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { getFormComponentMock } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
-import { ExceptionsListItemGenerator } from '../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../common/endpoint/service/artifacts';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  DISABLED_ARTIFACT_TAG,
+} from '../../../../../common/endpoint/service/artifacts';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { trustedAppsAllHttpMocks } from '../../../mocks';
@@ -73,6 +75,12 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     await render();
 
     expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+  });
+
+  it('should not show create-without-enabling submit button by default', async () => {
+    await render();
+
+    expect(renderResult.queryByTestId('testPage-flyout-submitWithoutEnablingButton')).toBeNull();
   });
 
   it.each([
@@ -166,6 +174,59 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEnabled();
     });
 
+    describe('and create enabled/disabled submit buttons are shown', () => {
+      const renderWithEnabledColumn = async () =>
+        render({ showAsSimpleTable: true, showEnabledColumn: true });
+
+      it('should show two submit buttons in create mode', async () => {
+        await renderWithEnabledColumn();
+
+        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).toBeEnabled();
+        expect(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        ).toBeEnabled();
+        expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEnabled();
+        expect(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        ).toHaveTextContent('Create without enabling');
+        expect(renderResult.getByTestId('testPage-flyout-submitButton')).toHaveTextContent(
+          'Create and enable'
+        );
+      });
+
+      it('should create without a disabled tag when create and enable is clicked', async () => {
+        await renderWithEnabledColumn();
+
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled();
+        });
+
+        const createBody = JSON.parse(
+          mockedApi.responseProvider.trustedAppCreate.mock.calls[0][0].body as string
+        );
+        expect(createBody.tags).not.toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+
+      it('should add the disabled tag when create without enabling is clicked', async () => {
+        await renderWithEnabledColumn();
+
+        await userEvent.click(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        );
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled();
+        });
+
+        const createBody = JSON.parse(
+          mockedApi.responseProvider.trustedAppCreate.mock.calls[0][0].body as string
+        );
+        expect(createBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+    });
+
     describe('and user clicks submit', () => {
       let releaseApiUpdateResponse: () => void;
       let getByTestId: (typeof renderResult)['getByTestId'];
@@ -232,107 +293,50 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     });
 
     describe('and submit fails', () => {
-      beforeEach(() => {
-        const _renderAndWaitForFlyout = render;
-
-        render = async (...args) => {
-          mockedApi.responseProvider.trustedAppCreate.mockRejectedValue(
-            new Error('oh oh. no good!') as never
-          );
-
-          await act(async () => {
-            await _renderAndWaitForFlyout(...args);
-          });
-
-          await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-
-          await waitFor(() =>
-            expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled()
-          );
-
-          return renderResult;
-        };
-      });
-
-      // FIXME:PT investigate test failure
-      // (I don't understand why its failing... All assertions are successful -- HELP!)
-      it.skip('should re-enable `Cancel` and `Submit` buttons', async () => {
-        await render();
-
-        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
-
-        expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
-      });
-
-      // FIXME:PT investigate test failure
-      // (I don't understand why its failing... All assertions are successful -- HELP!)
-      it.skip('should pass error along to the Form component and reset disabled back to `false`', async () => {
-        await render();
-        const lastFormProps = getLastFormComponentProps();
-
-        expect(lastFormProps.error).toBeInstanceOf(Error);
-        expect(lastFormProps.disabled).toBe(false);
-      });
-    });
-
-    describe('and a custom Submit handler is used', () => {
-      let handleSubmitCallback: jest.Mock;
-      let releaseSuccessSubmit: () => void;
-      let releaseFailureSubmit: () => void;
+      let releaseFailedApiUpdateResponse: () => void;
 
       beforeEach(async () => {
-        const deferred = getDeferred();
-        releaseSuccessSubmit = () => act(() => deferred.resolve());
-        releaseFailureSubmit = () => act(() => deferred.reject(new Error('oh oh. No good')));
+        await render();
 
-        handleSubmitCallback = jest.fn(async (item) => {
-          await deferred.promise;
-
-          return new ExceptionsListItemGenerator().generateTrustedApp(item);
-        });
-
-        await render({ onFormSubmit: handleSubmitCallback });
+        const deferrable = getDeferred();
+        mockedApi.responseProvider.trustedAppCreate.mockDelay.mockReturnValue(deferrable.promise);
+        mockedApi.responseProvider.trustedAppCreate.mockRejectedValue(
+          new Error('oh oh. no good!') as never
+        );
+        releaseFailedApiUpdateResponse = deferrable.resolve;
 
         await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
       });
 
       afterEach(() => {
-        if (releaseSuccessSubmit) {
-          releaseSuccessSubmit();
+        if (releaseFailedApiUpdateResponse) {
+          releaseFailedApiUpdateResponse();
         }
       });
 
-      it('should use custom submit handler when submit button is used', async () => {
-        expect(handleSubmitCallback).toHaveBeenCalled();
-
-        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
-
-        expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
-      });
-
-      it('should catch and show error if one is encountered', async () => {
-        releaseFailureSubmit();
+      it('should re-enable `Cancel` and `Submit` buttons', async () => {
         await waitFor(() => {
-          expect(renderResult.getByTestId('formError')).toBeTruthy();
+          expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
+          expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+        });
+
+        releaseFailedApiUpdateResponse();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-flyout-cancelButton')).toBeEnabled();
+          expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEnabled();
         });
       });
 
-      it('should show a success toast', async () => {
-        releaseSuccessSubmit();
+      it('should pass error along to the Form component and reset disabled back to `false`', async () => {
+        releaseFailedApiUpdateResponse();
 
         await waitFor(() => {
-          expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
+          const lastFormProps = getLastFormComponentProps();
+
+          expect(lastFormProps.error).toBeInstanceOf(Error);
+          expect(lastFormProps.disabled).toBe(false);
         });
-
-        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-          '"some name" has been added.'
-        );
-      });
-
-      it('should clear the URL params', () => {
-        releaseSuccessSubmit();
-
-        expect(location.search).toBe('');
       });
     });
 
@@ -381,6 +385,77 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           'cancel'
         );
       });
+
+      it('should add the disabled tag when create without enabling is confirmed', async () => {
+        await render({ showAsSimpleTable: true, showEnabledColumn: true });
+
+        await userEvent.click(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        );
+        expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
+
+        await userEvent.click(renderResult.getByTestId('artifactConfirmModal-submitButton'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled();
+        });
+
+        const createBody = JSON.parse(
+          mockedApi.responseProvider.trustedAppCreate.mock.calls[0][0].body as string
+        );
+        expect(createBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+
+      it('should remove the disabled tag when create and enable is clicked after cancelling create without enabling', async () => {
+        await render({ showAsSimpleTable: true, showEnabledColumn: true });
+
+        await userEvent.click(
+          renderResult.getByTestId('testPage-flyout-submitWithoutEnablingButton')
+        );
+        expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
+
+        await userEvent.click(renderResult.getByTestId('artifactConfirmModal-cancelButton'));
+
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+        expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
+
+        await userEvent.click(renderResult.getByTestId('artifactConfirmModal-submitButton'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled();
+        });
+
+        const createBody = JSON.parse(
+          mockedApi.responseProvider.trustedAppCreate.mock.calls[0][0].body as string
+        );
+        expect(createBody.tags).not.toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+    });
+  });
+
+  describe('and in View mode', () => {
+    beforeEach(() => {
+      act(() => {
+        history.push('somepage?show=view&itemId=123');
+      });
+    });
+
+    it('should load the item and render the edit form until a dedicated view mode exists', async () => {
+      const { getByTestId } = await render();
+
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
+      });
+
+      expect(getLastFormComponentProps().mode).toBe('edit');
+      expect(mockedApi.responseProvider.trustedApp).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          path: expect.any(String),
+          query: expect.objectContaining({
+            item_id: '123',
+          }),
+        })
+      );
     });
   });
 
@@ -490,6 +565,20 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         expect(getByTestId('formMock')).toBeTruthy();
         expect(getByTestId('testPage-flyout-expiredLicenseCallout')).toBeTruthy();
       });
+    });
+
+    it('should keep a single submit button when canCreateArtifactAsDisabled is enabled', async () => {
+      const { getByTestId, queryByTestId } = await render({
+        showAsSimpleTable: true,
+        showEnabledColumn: true,
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
+      });
+
+      expect(getByTestId('testPage-flyout-submitButton')).toBeInTheDocument();
+      expect(queryByTestId('testPage-flyout-submitWithoutEnablingButton')).toBeNull();
     });
   });
 });

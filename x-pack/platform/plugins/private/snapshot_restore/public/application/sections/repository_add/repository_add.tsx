@@ -7,22 +7,28 @@
 
 import { parse } from 'query-string';
 import React, { useEffect, useState } from 'react';
+import { i18n as i18nLib } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { SectionError } from '@kbn/es-ui-shared-plugin/public';
 import type { Repository, EmptyRepository } from '../../../../common/types';
 
 import { ConfirmDefaultRepositoryModal, PageLoading, RepositoryForm } from '../../components';
 import type { Section } from '../../constants';
 import { BASE_PATH } from '../../constants';
-import { useServices, useToastNotifications } from '../../app_context';
-import { breadcrumbService, docTitleService } from '../../services/navigation';
+import { useCore, useServices, useToastNotifications } from '../../app_context';
+import { breadcrumbService, docTitleService, linkToRepositories } from '../../services/navigation';
 import { useCanSetDefaultRepository } from '../../services/authorization';
 import { addRepository, useLoadRepositories } from '../../services/http';
 import { useDefaultRepository } from '../../services/use_default_repository';
 import { isRepositoryReadOnly } from '../../../../common/lib';
+
+const pageTitle = i18nLib.translate('xpack.snapshotRestore.addRepositoryTitle', {
+  defaultMessage: 'Register repository',
+});
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -30,6 +36,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
 }) => {
   const section = 'repositories' as Section;
   const { i18n } = useServices();
+  const { docLinks } = useCore();
   const toastNotifications = useToastNotifications();
   const canSetDefaultRepository = useCanSetDefaultRepository();
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -78,14 +85,34 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     docTitleService.setTitle('repositoryAdd');
   }, []);
 
+  const header = (
+    <>
+      <AppHeader
+        title={pageTitle}
+        back={{
+          href: history.createHref({ pathname: linkToRepositories() }),
+          label: i18nLib.translate('xpack.snapshotRestore.home.repositoriesTabTitle', {
+            defaultMessage: 'Repositories',
+          }),
+        }}
+        docLink={docLinks.links.snapshotRestore.guide}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+    </>
+  );
+
   if (isLoadingRepositories || isLoadingDefaultRepository) {
     return (
-      <PageLoading>
-        <FormattedMessage
-          id="xpack.snapshotRestore.addRepository.loadingDescription"
-          defaultMessage="Loading…"
-        />
-      </PageLoading>
+      <>
+        {header}
+        <PageLoading>
+          <FormattedMessage
+            id="xpack.snapshotRestore.addRepository.loadingDescription"
+            defaultMessage="Loading…"
+          />
+        </PageLoading>
+      </>
     );
   }
 
@@ -177,43 +204,33 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   };
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      {canSetOrChangeDefaultRepository && pendingSave && normalizedDefaultRepository !== null && (
-        <ConfirmDefaultRepositoryModal
-          currentDefaultRepository={normalizedDefaultRepository}
-          newDefaultRepository={pendingSave.name}
-          onCancel={() => setPendingSave(null)}
-          onConfirm={() => {
-            void doSave(pendingSave);
-            setPendingSave(null);
-          }}
+    <>
+      {header}
+      <EuiPageSection restrictWidth style={{ width: '100%' }}>
+        {canSetOrChangeDefaultRepository && pendingSave && normalizedDefaultRepository !== null && (
+          <ConfirmDefaultRepositoryModal
+            currentDefaultRepository={normalizedDefaultRepository}
+            newDefaultRepository={pendingSave.name}
+            onCancel={() => setPendingSave(null)}
+            onConfirm={() => {
+              void doSave(pendingSave);
+              setPendingSave(null);
+            }}
+          />
+        )}
+        <RepositoryForm
+          repository={emptyRepository}
+          isSaving={isSaving}
+          saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
+          onSave={onSave}
+          onCancel={onCancel}
+          isFirstRepository={isFirstRepository}
+          isDefaultRepository={effectiveIsDefaultRepository}
+          isDefaultRepositoryFeatureAvailable={!defaultRepositoryLoadError}
+          onToggleDefault={canSetDefaultRepository ? onToggleDefault : undefined}
         />
-      )}
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.snapshotRestore.addRepositoryTitle"
-              defaultMessage="Register repository"
-            />
-          </span>
-        }
-      />
-
-      <EuiSpacer size="l" />
-
-      <RepositoryForm
-        repository={emptyRepository}
-        isSaving={isSaving}
-        saveError={renderSaveError()}
-        clearSaveError={clearSaveError}
-        onSave={onSave}
-        onCancel={onCancel}
-        isFirstRepository={isFirstRepository}
-        isDefaultRepository={effectiveIsDefaultRepository}
-        isDefaultRepositoryFeatureAvailable={!defaultRepositoryLoadError}
-        onToggleDefault={canSetDefaultRepository ? onToggleDefault : undefined}
-      />
-    </EuiPageSection>
+      </EuiPageSection>
+    </>
   );
 };

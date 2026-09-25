@@ -125,4 +125,56 @@ steps:
     expect(result[1].key).toBe('my-slack-api');
     expect(result[1].connectorType).toBe('slack_api');
   });
+
+  it('should resolve connector type for waitForInput notification channel connector-id', () => {
+    const yaml = `
+name: Test Workflow
+steps:
+  - name: ask-in-slack
+    type: waitForInput
+    with:
+      message: Choose how to proceed
+      schema:
+        type: object
+        properties:
+          reason:
+            type: string
+      channels:
+        slack:
+          connector-id: my-slack
+        slack_api:
+          connector-id: my-slack-api
+          channels: ["C0123"]
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter });
+    const result = collectAllConnectorIds(yamlDocument, lineCounter);
+
+    expect(result).toHaveLength(2);
+    expect(result[0].key).toBe('my-slack');
+    expect(result[0].connectorType).toBe('slack');
+    expect(result[1].key).toBe('my-slack-api');
+    expect(result[1].connectorType).toBe('slack_api');
+  });
+
+  it('maps trigger connector-id to the connector type id from the event spec', () => {
+    const yaml = `
+name: Test Workflow
+triggers:
+  - type: inboundWebhook.received
+    connector-id: testyng
+steps:
+  - name: hello
+    type: console
+    with:
+      message: hello
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter });
+    const result = collectAllConnectorIds(yamlDocument, lineCounter);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('testyng');
+    expect(result[0].connectorType).toBe('.inboundWebhook');
+  });
 });

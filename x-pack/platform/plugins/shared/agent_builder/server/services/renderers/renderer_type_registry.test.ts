@@ -34,7 +34,7 @@ describe('createRendererTypeRegistry', () => {
     const registry = createRendererTypeRegistry();
     registry.register(dashboardDefinition);
 
-    expect(() => registry.register(dashboardDefinition)).toThrowError(
+    expect(() => registry.register(dashboardDefinition)).toThrow(
       'Renderer type with type "dashboard" already registered'
     );
   });

@@ -1,8 +1,7 @@
 {
-  "sha1": "5aad092acde4cc8dd02ec238a2afbb0818fee545",
+  "sha1": "ea8226d179943d40ee9af4ca9acad1ff0c74f2a8",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -35,6 +34,24 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/internal_actions/national_parks.spec.ts",
         "line": 56,
         "column": 13
+      }
+    },
+    {
+      "id": "19444d1b23e18a3-5e19e05711f14c3",
+      "title": "Workflow editor actions menu on the executions tab shows the actions menu only while the workflow is editable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/actions_menu_executions.spec.ts",
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -342,7 +359,7 @@
     {
       "id": "84b864bf30250b9-1e36b15992c9e68",
       "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -353,14 +370,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 65,
-        "column": 22
+        "line": 74,
+        "column": 25
       }
     },
     {
-      "id": "84b864bf30250b9-bb6c00e207d6b96",
-      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "skipped",
+      "id": "84b864bf30250b9-426daf58e791802",
+      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] editor stays responsive during rapid edits",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -371,14 +388,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 205,
-        "column": 18
+        "line": 230,
+        "column": 33
       }
     },
     {
       "id": "84b864bf30250b9-b92795356361dc9",
       "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -389,14 +406,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 65,
-        "column": 22
+        "line": 74,
+        "column": 25
       }
     },
     {
-      "id": "84b864bf30250b9-c189381fa89f5ce",
-      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "skipped",
+      "id": "84b864bf30250b9-9672ab6054b564c",
+      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] editor stays responsive during rapid edits",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -407,8 +424,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 205,
-        "column": 18
+        "line": 230,
+        "column": 33
       }
     },
     {
@@ -587,7 +604,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 143,
+        "line": 141,
         "column": 51
       }
     },
@@ -605,8 +622,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 157,
-        "column": 31
+        "line": 154,
+        "column": 87
       }
     },
     {

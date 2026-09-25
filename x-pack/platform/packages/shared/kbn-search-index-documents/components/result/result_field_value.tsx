@@ -25,6 +25,7 @@ interface ResultFieldValueProps {
   fieldType: string;
   isExpanded?: boolean;
   embeddings: string | undefined;
+  dimensions?: number;
 }
 
 function truncateVectors(embeddings: string[] | string[][]): string {
@@ -36,23 +37,31 @@ function truncateVectors(embeddings: string[] | string[][]): string {
   return `[${embeds}]`;
 }
 
-function getEmbeddings(embeddings: string): { embeddings: string[] | string[][]; chunks: number } {
+function getEmbeddings(embeddings: string): {
+  embeddings: string[] | string[][];
+  chunks: number;
+  dims: number;
+} {
   try {
     const embeds = JSON.parse(embeddings);
-    if (Array.isArray(embeds)) {
+    if (Array.isArray(embeds) && embeds.length > 0) {
       if (Array.isArray(embeds[0])) {
-        return { embeddings: embeds, chunks: embeds.length };
+        return { embeddings: embeds, chunks: embeds.length, dims: embeds[0].length };
       }
-      return { embeddings: embeds, chunks: 1 };
+      return { embeddings: embeds, chunks: 1, dims: embeds.length };
     }
-    return { embeddings: [], chunks: 0 };
+    return { embeddings: [], chunks: 0, dims: 0 };
   } catch {
-    return { embeddings: [], chunks: 0 };
+    return { embeddings: [], chunks: 0, dims: 0 };
   }
 }
 
-export const VectorFieldValue: React.FC<{ embeddings: string }> = ({ embeddings }) => {
-  const { embeddings: jsonEmbeddings, chunks } = getEmbeddings(embeddings);
+export const VectorFieldValue: React.FC<{ embeddings: string; dimensions?: number }> = ({
+  embeddings,
+  dimensions,
+}) => {
+  const { embeddings: jsonEmbeddings, chunks, dims } = getEmbeddings(embeddings);
+  const dimCount = dimensions ?? dims;
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -60,7 +69,7 @@ export const VectorFieldValue: React.FC<{ embeddings: string }> = ({ embeddings 
           {i18n.translate('xpack.searchIndexDocuments.result.value.denseVector.dimLabel', {
             defaultMessage: '{value} dims',
             values: {
-              value: jsonEmbeddings.length,
+              value: dimCount,
             },
           })}
         </EuiBadge>
@@ -108,6 +117,7 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
   fieldType,
   isExpanded = false,
   embeddings,
+  dimensions,
 }) => {
   if (
     isExpanded &&
@@ -115,7 +125,7 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
     (['object', 'array', 'nested'].includes(fieldType) || Array.isArray(fieldValue))
   ) {
     return (
-      <EuiCodeBlock language="json" transparentBackground fontSize="s">
+      <EuiCodeBlock language="json" transparentBackground fontSize="s" paddingSize="none">
         {fieldValue}
       </EuiCodeBlock>
     );
@@ -123,9 +133,9 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
     return (
       <>
         {fieldType === 'dense_vector' ? (
-          <VectorFieldValue embeddings={fieldValue} />
+          <VectorFieldValue embeddings={fieldValue} dimensions={dimensions} />
         ) : (
-          <EuiText size="s" color="default">
+          <EuiText size="xs" color="default">
             {fieldValue}
           </EuiText>
         )}
@@ -140,19 +150,19 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
         css={{ flex: 1 }}
       >
         <EuiFlexItem>
-          <EuiText size="s" color="default">
+          <EuiText size="xs" color="default">
             {fieldValue}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <VectorFieldValue embeddings={embeddings} />
+          <VectorFieldValue embeddings={embeddings} dimensions={dimensions} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
   {
     return (
-      <EuiText size="s" color="default">
+      <EuiText size="xs" color="default">
         {fieldValue}
       </EuiText>
     );

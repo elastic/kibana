@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/i18n'
   - '@kbn/saved-objects-tagging-oss-plugin'
-  - '@kbn/core-chrome-browser'
   - '@kbn/config-schema'
   - '@kbn/shared-ux-utility'
   - '@kbn/react-kibana-mount'
@@ -37,7 +36,6 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'

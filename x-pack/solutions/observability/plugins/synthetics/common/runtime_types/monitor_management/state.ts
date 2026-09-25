@@ -5,66 +5,63 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import type { Mixed } from 'io-ts';
+import { z } from '@kbn/zod';
+import type { SchemaOutput } from '../schema_output';
 import { useLogicalAndFields } from '../../constants/filters_fields_with_logical_and';
 
-const useLogicalAndFileLiteral = useLogicalAndFields.map((f) => t.literal(f)) as unknown as [
-  Mixed,
-  Mixed,
-  ...Mixed[]
-];
-
-const FetchMonitorQueryArgsCommon = {
-  query: t.string,
-  searchFields: t.array(t.string),
-  tags: t.array(t.string),
-  locations: t.array(t.string),
-  monitorTypes: t.array(t.string),
-  projects: t.array(t.string),
-  schedules: t.array(t.string),
-  remoteNames: t.array(t.string),
-  monitorQueryIds: t.array(t.string),
-  configIds: t.array(t.string),
-  sortField: t.string,
-  sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
-  showFromAllSpaces: t.boolean,
-  useLogicalAndFor: t.array(t.union(useLogicalAndFileLiteral)),
+const fetchMonitorQueryArgs = {
+  query: z.string().optional(),
+  searchFields: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  locations: z.array(z.string()).optional(),
+  monitorTypes: z.array(z.string()).optional(),
+  projects: z.array(z.string()).optional(),
+  schedules: z.array(z.string()).optional(),
+  remoteNames: z.array(z.string()).optional(),
+  monitorQueryIds: z.array(z.string()).optional(),
+  configIds: z.array(z.string()).optional(),
+  sortField: z.string().optional(),
+  sortOrder: z.enum(['desc', 'asc']).optional(),
+  showFromAllSpaces: z.boolean().optional(),
+  useLogicalAndFor: z.array(z.enum(useLogicalAndFields)).optional(),
   // Date-range window for the overview list. When `[dateRangeStart, dateRangeEnd]`
   // are present, the server scopes each monitor's status to that window (and
   // surfaces monitors with no run in the window as `pending`). The range strings
   // accept datemath (e.g. `now-24h`) or ISO timestamps.
-  dateRangeStart: t.string,
-  dateRangeEnd: t.string,
+  dateRangeStart: z.string().optional(),
+  dateRangeEnd: z.string().optional(),
 };
 
-export const FetchMonitorManagementListQueryArgsCodec = t.partial({
-  ...FetchMonitorQueryArgsCommon,
-  page: t.number,
-  perPage: t.number,
-  internal: t.boolean,
+export const FetchMonitorManagementListQueryArgsCodec = z.looseObject({
+  ...fetchMonitorQueryArgs,
+  page: z.number().optional(),
+  perPage: z.number().optional(),
+  internal: z.boolean().optional(),
 });
 
-export type FetchMonitorManagementListQueryArgs = t.TypeOf<
+export type FetchMonitorManagementListQueryArgs = SchemaOutput<
   typeof FetchMonitorManagementListQueryArgsCodec
 >;
 
-export const FetchMonitorOverviewQueryArgsCodec = t.partial({
-  ...FetchMonitorQueryArgsCommon,
-  includeHeartbeatMonitors: t.boolean,
+export const FetchMonitorOverviewQueryArgsCodec = z.looseObject({
+  ...fetchMonitorQueryArgs,
+  includeHeartbeatMonitors: z.boolean().optional(),
+  page: z.number().optional(),
+  perPage: z.number().optional(),
+  statusFilter: z.enum(['up', 'down', 'pending', 'stale', 'disabled']).optional(),
 });
 
-export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;
+export type FetchMonitorOverviewQueryArgs = SchemaOutput<typeof FetchMonitorOverviewQueryArgsCodec>;
 
-export const MonitorManagementEnablementResultCodec = t.type({
-  isEnabled: t.boolean,
-  canEnable: t.boolean,
-  canManageApiKeys: t.boolean,
-  areApiKeysEnabled: t.boolean,
-  isValidApiKey: t.boolean,
-  isServiceAllowed: t.boolean,
+export const MonitorManagementEnablementResultCodec = z.looseObject({
+  isEnabled: z.boolean(),
+  canEnable: z.boolean(),
+  canManageApiKeys: z.boolean(),
+  areApiKeysEnabled: z.boolean(),
+  isValidApiKey: z.boolean(),
+  isServiceAllowed: z.boolean(),
 });
 
-export type MonitorManagementEnablementResult = t.TypeOf<
+export type MonitorManagementEnablementResult = SchemaOutput<
   typeof MonitorManagementEnablementResultCodec
 >;

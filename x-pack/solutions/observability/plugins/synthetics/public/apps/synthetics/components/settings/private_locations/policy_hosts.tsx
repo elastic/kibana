@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useSelector } from 'react-redux-v7';
 import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
@@ -43,11 +43,10 @@ export const PolicyHostsField = ({
     control,
     formState: { isSubmitted },
     trigger,
-    getValues,
   } = useFormContext<PrivateLocation>();
   const { isTouched, error } = control.getFieldState(AGENT_POLICY_FIELD_NAME);
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
-  const selectedPolicyId = getValues(AGENT_POLICY_FIELD_NAME);
+  const selectedPolicyId = useWatch({ control, name: AGENT_POLICY_FIELD_NAME });
 
   const selectedPolicy = data?.find((item) => item.id === selectedPolicyId);
 
@@ -163,7 +162,8 @@ const SELECT_POLICY_HOSTS = i18n.translate('xpack.synthetics.monitorManagement.s
 const SELECT_POLICY_HOSTS_HELP_TEXT = i18n.translate(
   'xpack.synthetics.monitorManagement.selectPolicyHost.helpText',
   {
-    defaultMessage: 'We recommend using a single Elastic agent per agent policy.',
+    defaultMessage:
+      'Classic locations use one Elastic Agent per policy. Scalable locations can enroll several agents on the same policy.',
   }
 );
 

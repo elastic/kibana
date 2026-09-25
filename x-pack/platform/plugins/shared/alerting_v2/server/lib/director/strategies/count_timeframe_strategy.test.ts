@@ -13,13 +13,15 @@ import type {
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { createRuleResponse } from '../../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { buildLatestAlertEvent, buildStrategyStateTransitionContext } from '../test_utils';
 
 describe('CountTimeframeStrategy', () => {
   let strategy: CountTimeframeStrategy;
 
   beforeEach(() => {
-    strategy = new CountTimeframeStrategy();
+    const { loggerService } = createLoggerService();
+    strategy = new CountTimeframeStrategy(loggerService);
   });
 
   const getNextState = (...args: Parameters<typeof buildStrategyStateTransitionContext>) =>
@@ -238,7 +240,7 @@ describe('CountTimeframeStrategy', () => {
         stateTransition: {
           pending_count: 5,
           pending_timeframe: '2m',
-          pending_operator: 'OR',
+          pending_operator: 'or',
         },
         statusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
@@ -254,7 +256,7 @@ describe('CountTimeframeStrategy', () => {
         stateTransition: {
           pending_count: 5,
           pending_timeframe: '2m',
-          pending_operator: 'AND',
+          pending_operator: 'and',
         },
         statusCount: 1,
         expectedStatusCount: 2,
@@ -356,7 +358,7 @@ describe('CountTimeframeStrategy', () => {
         stateTransition: {
           recovering_count: 5,
           recovering_timeframe: '2m',
-          recovering_operator: 'OR',
+          recovering_operator: 'or',
         },
         statusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
@@ -372,7 +374,7 @@ describe('CountTimeframeStrategy', () => {
         stateTransition: {
           recovering_count: 5,
           recovering_timeframe: '2m',
-          recovering_operator: 'AND',
+          recovering_operator: 'and',
         },
         statusCount: 1,
         expectedStatusCount: 2,

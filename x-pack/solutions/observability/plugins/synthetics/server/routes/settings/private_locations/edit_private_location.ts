@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
+import { asRouteSchema, minLengthMessage, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
@@ -23,35 +23,40 @@ import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 import { syntheticsMonitorSOTypes } from '../../../../common/types/saved_objects';
 
-const EditPrivateLocationSchema = schema.object({
-  label: schema.maybe(
-    schema.string({
-      minLength: 1,
-    })
-  ),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
-  isAgentSharding: schema.maybe(schema.boolean()),
+export const EditPrivateLocationSchema = z.strictObject({
+  label: z
+    .string()
+    .min(1, { error: minLengthMessage(1) })
+    .max(MAX_ROUTE_ID_LENGTH)
+    .optional(),
+  tags: z.array(z.string().max(256)).max(100).optional(),
+  /** @deprecated Accepted for backward compatibility and ignored; sharding follows the license. */
+  isAgentSharding: z.boolean().optional(),
 });
 
-const EditPrivateLocationQuery = schema.object({
-  locationId: schema.string(),
+const EditPrivateLocationQuery = z.strictObject({
+  locationId: routeId,
 });
 
-export type EditPrivateLocationAttributes = Pick<
-  PrivateLocationAttributes,
-  keyof TypeOf<typeof EditPrivateLocationSchema>
->;
+export type EditPrivateLocationAttributes = Pick<PrivateLocationAttributes, 'label' | 'tags'>;
 
 const isPrivateLocationLabelChanged = (oldLabel: string, newLabel?: string): newLabel is string => {
   return typeof newLabel === 'string' && oldLabel !== newLabel;
 };
+
+const withIntendedLabel = <T extends { id: string; label?: string }>(
+  locations: T[],
+  locationId: string,
+  label: string
+): T[] =>
+  locations.map((location) => (location.id === locationId ? { ...location, label } : location));
 
 const isPrivateLocationChanged = ({
   privateLocation,
   newParams,
 }: {
   privateLocation: SavedObject<PrivateLocationAttributes>;
-  newParams: TypeOf<typeof EditPrivateLocationSchema>;
+  newParams: z.infer<typeof EditPrivateLocationSchema>;
 }) => {
   const isLabelChanged = isPrivateLocationLabelChanged(
     privateLocation.attributes.label,
@@ -62,11 +67,8 @@ const isPrivateLocationChanged = ({
     (!privateLocation.attributes.tags ||
       (privateLocation.attributes.tags &&
         !isEqual(privateLocation.attributes.tags, newParams.tags)));
-  const isShardingChanged =
-    typeof newParams.isAgentSharding === 'boolean' &&
-    newParams.isAgentSharding !== Boolean(privateLocation.attributes.isAgentSharding);
 
-  return isLabelChanged || areTagsChanged || isShardingChanged;
+  return isLabelChanged || areTagsChanged;
 };
 
 const checkPrivileges = async ({
@@ -103,16 +105,16 @@ const checkPrivileges = async ({
 
 export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   PrivateLocation,
-  TypeOf<typeof EditPrivateLocationQuery>,
+  z.infer<typeof EditPrivateLocationQuery>,
   any,
-  TypeOf<typeof EditPrivateLocationSchema>
+  z.infer<typeof EditPrivateLocationSchema>
 > = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
   validate: {},
   validation: {
     request: {
-      body: EditPrivateLocationSchema,
+      body: asRouteSchema(EditPrivateLocationSchema),
       params: EditPrivateLocationQuery,
     },
   },
@@ -120,11 +122,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   handler: async (routeContext) => {
     const { response, request, savedObjectsClient } = routeContext;
     const { locationId } = request.params;
-    const {
-      label: newLocationLabel,
-      tags: newTags,
-      isAgentSharding: newIsAgentSharding,
-    } = request.body;
+    const { label: newLocationLabel, tags: newTags } = request.body;
 
     const repo = new PrivateLocationRepository(routeContext);
 
@@ -145,11 +143,15 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       if (
         isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body })
       ) {
-        // This privileges check is done only when changing the label, because changing the label will update also the monitors in that location
-        if (
-          isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
-          monitorsInLocation.length
-        ) {
+        const isLabelChanged = isPrivateLocationLabelChanged(
+          existingLocation.attributes.label,
+          newLocationLabel
+        );
+
+        // Rewrite monitors before persisting: generateNewPolicy reads the
+        // in-memory location list, so overlay the new label. A failed rewrite
+        // must not leave the SO renamed.
+        if (isLabelChanged && monitorsInLocation.length) {
           const privilegeResponse = await checkPrivileges({
             routeContext,
             monitorsSpaces: [
@@ -161,23 +163,21 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
           }
         }
 
-        newLocation = await repo.editPrivateLocation(locationId, {
-          label: newLocationLabel || existingLocation.attributes.label,
-          tags: newTags || existingLocation.attributes.tags,
-          ...(typeof newIsAgentSharding === 'boolean'
-            ? { isAgentSharding: newIsAgentSharding }
-            : {}),
-        });
-
-        if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {
+        if (isLabelChanged) {
+          const storedLocations = await getPrivateLocations(savedObjectsClient);
           await updatePrivateLocationMonitors({
             locationId,
             newLocationLabel,
-            allPrivateLocations: await getPrivateLocations(savedObjectsClient),
+            allPrivateLocations: withIntendedLabel(storedLocations, locationId, newLocationLabel),
             routeContext,
             monitorsInLocation,
           });
         }
+
+        newLocation = await repo.editPrivateLocation(locationId, {
+          label: newLocationLabel || existingLocation.attributes.label,
+          tags: newTags || existingLocation.attributes.tags,
+        });
       }
 
       return toClientContract({

@@ -150,8 +150,16 @@ export type AvailablePackagesHookType = typeof useAvailablePackages;
 
 export const useAvailablePackages = ({
   prereleaseIntegrationsEnabled,
+  enableCollectionGrouping = false,
 }: {
   prereleaseIntegrationsEnabled: boolean;
+  /**
+   * When true, packages sharing a `group` id are collapsed into a single collection
+   * tile (subject to the `enableIntegrationCollectionTiles` feature flag).
+   * Omit or pass false in contexts where collection tiles are not appropriate
+   * (e.g. the agent policy add-integration flyout, Security onboarding).
+   */
+  enableCollectionGrouping?: boolean;
 }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
@@ -225,7 +233,7 @@ export const useAvailablePackages = ({
     let itemsToMap: Array<PackageListItem | CustomIntegration>;
     let extraCards: IntegrationCardItem[] = [];
 
-    if (enableIntegrationCollectionTiles) {
+    if (enableIntegrationCollectionTiles && enableCollectionGrouping) {
       const { collectionCards, ungroupedItems } = applyGrouping({
         items: eprAndCustomPackages,
         getHref,
@@ -257,6 +265,7 @@ export const useAvailablePackages = ({
     addBasePath,
     appendCustomIntegrations,
     applyOnboardingOverride,
+    enableCollectionGrouping,
     enableIntegrationCollectionTiles,
     getAbsolutePath,
     getHref,
@@ -266,28 +275,73 @@ export const useAvailablePackages = ({
 
   // Cards with the agentless filter applied (used by the old home page and
   // its category sidebar counts). Derived from allCards so the sort/map work
-  // is not duplicated.
+  // is not duplicated. Re-sorted after filtering because singleton degradation
+  // can change a card's title, shifting its position relative to the allCards sort.
   const cards: IntegrationCardItem[] = useMemo(() => {
-    if (isAgentlessEnabled && onlyAgentlessFilter) {
-      return allCards.filter((item) => item.supportsAgentless === true);
+    if (!isAgentlessEnabled || !onlyAgentlessFilter) return allCards;
+    const agentlessMatch = (c: IntegrationCardItem) => c.supportsAgentless === true;
+    const result: IntegrationCardItem[] = [];
+    for (const card of allCards) {
+      if (!card.isCollectionCard) {
+        if (agentlessMatch(card)) result.push(card);
+        continue;
+      }
+      const filteredMembers = (card.groupMembers ?? []).filter(agentlessMatch);
+      if (filteredMembers.length === 0) continue;
+      if (filteredMembers.length === 1) {
+        result.push(filteredMembers[0]);
+        continue;
+      }
+      const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
+      const filteredSearchableContent = filteredMembers
+        .flatMap((m) => [m.name, m.title, m.description ?? ''])
+        .join(' ');
+      result.push({
+        ...card,
+        groupMembers: filteredMembers,
+        categories: filteredCategories,
+        searchableContent: filteredSearchableContent,
+      });
     }
-    return allCards;
+    return result.sort((a, b) => a.title.localeCompare(b.title));
   }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
 
   // Packages to show
-  // Filters out based on selected category and subcategory (if any)
-  const filteredCards = useMemo(
-    () =>
-      cards.filter((c) => {
-        if (selectedCategory === '') {
-          return true;
-        }
-        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
-
-        return c.categories.includes(selectedSubCategory);
-      }),
-    [cards, selectedCategory, selectedSubCategory]
-  );
+  // Filters out based on selected category and subcategory (if any).
+  // For collection cards, filters groupMembers too so badge counts and flyout
+  // variants reflect the active filter state. Re-sorted after filtering because
+  // singleton degradation can change a card's title, shifting its position.
+  const filteredCards = useMemo(() => {
+    if (selectedCategory === '') return cards;
+    const categoryMatch = (c: IntegrationCardItem) =>
+      selectedSubCategory
+        ? c.categories.includes(selectedSubCategory)
+        : c.categories.includes(selectedCategory);
+    const result: IntegrationCardItem[] = [];
+    for (const card of cards) {
+      if (!card.isCollectionCard) {
+        if (categoryMatch(card)) result.push(card);
+        continue;
+      }
+      const filteredMembers = (card.groupMembers ?? []).filter(categoryMatch);
+      if (filteredMembers.length === 0) continue;
+      if (filteredMembers.length === 1) {
+        result.push(filteredMembers[0]);
+        continue;
+      }
+      const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
+      const filteredSearchableContent = filteredMembers
+        .flatMap((m) => [m.name, m.title, m.description ?? ''])
+        .join(' ');
+      result.push({
+        ...card,
+        groupMembers: filteredMembers,
+        categories: filteredCategories,
+        searchableContent: filteredSearchableContent,
+      });
+    }
+    return result.sort((a, b) => a.title.localeCompare(b.title));
+  }, [cards, selectedCategory, selectedSubCategory]);
 
   const {
     data: eprCategoriesRes,

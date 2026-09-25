@@ -134,6 +134,30 @@ describe('geminiAdapter', () => {
       );
     });
 
+    it('forwards only connector-supported telemetry metadata', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          metadata: {
+            connectorTelemetry: {
+              pluginId: 'feature',
+              aggregateBy: 'parent',
+              productSolution: 'solution',
+              productFeature: 'product-feature',
+              interactionId: 'interaction-1',
+            },
+          },
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke.mock.calls[0]?.[0].subActionParams?.telemetryMetadata).toEqual({
+        pluginId: 'feature',
+        aggregateBy: 'parent',
+      });
+    });
+
     it('correctly format tools', () => {
       geminiAdapter
         .chatComplete({
@@ -157,6 +181,11 @@ describe('geminiAdapter', () => {
                   foo: {
                     type: 'string',
                     description: 'foo',
+                  },
+                  bar: {
+                    type: 'string',
+                    description: 'bar',
+                    enum: ['a', 'b'],
                   },
                 },
                 required: ['foo'],
@@ -187,7 +216,11 @@ describe('geminiAdapter', () => {
                 properties: {
                   foo: {
                     description: 'foo',
-                    enum: [],
+                    type: 'string',
+                  },
+                  bar: {
+                    description: 'bar',
+                    enum: ['a', 'b'],
                     format: 'enum',
                     type: 'string',
                   },

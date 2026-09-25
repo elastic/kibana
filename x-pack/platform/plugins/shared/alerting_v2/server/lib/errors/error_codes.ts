@@ -31,8 +31,11 @@ export const ALERTING_ERROR_CODES = {
   RULE_VERSION_CONFLICT: 'RULE_VERSION_CONFLICT',
   /** The submitted rule body failed schema validation. */
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
+  /** A registered artifact's `data` failed its type-specific schema validation. */
+  INVALID_ARTIFACT_DATA: 'INVALID_ARTIFACT_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
+  INVALID_STATE_TRANSITION_CONFIG: 'INVALID_STATE_TRANSITION_CONFIG',
   /** A signal rule's merged shape violates signal constraints. */
   INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
   /**
@@ -48,6 +51,11 @@ export const ALERTING_ERROR_CODES = {
    * operation into multiple requests.
    */
   BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
+  /**
+   * A builder rule's query was changed without explicitly clearing
+   * `metadata.builder_type`. The transition to ES|QL mode must be explicit.
+   */
+  BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
   /** Filter expression referenced an unknown field. */
@@ -106,6 +114,13 @@ export const ALERTING_ERROR_CODES = {
    * it; bulk delete reports it per item.
    */
   API_KEY_INVALIDATION_FAILED: 'API_KEY_INVALIDATION_FAILED',
+  /**
+   * The current license does not support action policies. Action policies
+   * dispatch to Workflows, which require an active Enterprise license, so
+   * create / update / upsert / enable are rejected. Reading, disabling,
+   * snoozing and deleting existing policies stay available.
+   */
+  ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `episode_id`). */
@@ -178,6 +193,12 @@ export const ALERTING_LOG_CODES = {
    */
   HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
     'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
+  /**
+   * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
+   * limit, so rows past it were dropped. Episodes whose ack, snooze or
+   * deactivate state was in the dropped rows may be dispatched.
+   */
+  FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED: 'FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED',
   // ──────────────── Action policy API key invalidation ───────────────
   /**
    * A delete refused to remove one or more action policies because their API
@@ -354,17 +375,19 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
   /**
-   * The escape hatch fired but the pipeline stopped before FetchEpisodesStep so
-   * no episodes are known for the window, and watermark lag is still within one
-   * max scan window. The watermark is held; the stuck counter is reset so
-   * transient infra pressure can recover without dropping the window.
+   * The escape hatch fired but no episodes were fetched for the window (the
+   * pipeline was aborted before or during FetchEpisodesStep, or the scan query
+   * was rejected, e.g. `inline_stats_too_large`), and watermark lag is still
+   * within one max scan window. The watermark is held; the stuck counter is
+   * reset so the scan can recover without dropping the window. The message
+   * carries the tick's `halt_reason`.
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK',
   /**
-   * The pre-fetch escape hatch fired and watermark lag already exceeds one max
-   * scan window. The window is force-advanced without knowing its episodes;
-   * unread events in that window are skipped so the dispatcher cannot stall
-   * indefinitely.
+   * The escape hatch fired with no fetched episodes and watermark lag already
+   * exceeds one max scan window. The window is force-advanced without knowing
+   * its episodes; unread events in that window are skipped so the dispatcher
+   * cannot stall indefinitely. The message carries the tick's `halt_reason`.
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE:
     'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
@@ -373,6 +396,16 @@ export const ALERTING_LOG_CODES = {
    * call failed. The watermark is held so episodes will be retried next tick.
    */
   DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
+  /**
+   * ES rejected the INLINE STATS pre-fetch query with HTTP 400
+   * `illegal_argument_exception: sub-plan execution results too large`. This is a
+   * deterministic, non-retryable failure at the current cardinality level. The
+   * tick returns a halt (watermark held) so the existing stuck-tick counter
+   * increments; the escape hatch force-advances the watermark on its first fire
+   * after lag exceeds PRE_FETCH_STUCK_ADVANCE_LAG_MS, skipping the window. See
+   * the dispatcher README for the recovery timeline.
+   */
+  DISPATCHER_INLINE_STATS_TOO_LARGE: 'DISPATCHER_INLINE_STATS_TOO_LARGE',
 
   // ────────────────────────────── Director ───────────────────────────
   /**
@@ -429,6 +462,17 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /** A run hit `maxGroupsPerExecution`; groups past the cap were dropped. */
+  RULE_EXECUTION_MAX_GROUPS_EXCEEDED: 'RULE_EXECUTION_MAX_GROUPS_EXCEEDED',
+  /**
+   * The active-group fetch hit its `alerts.max` bound, so the active set may be truncated.
+   */
+  RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED: 'RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED',
+  /**
+   * The breach, recovery or data-presence ES|QL response exceeded
+   * `rules.run.query.maxResponseSize`; the run failed as a user error.
+   */
+  RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED: 'RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED',
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**
@@ -458,6 +502,12 @@ export const ALERTING_LOG_CODES = {
   STORAGE_BULK_INDEX_FAILED: 'STORAGE_BULK_INDEX_FAILED',
   /** An ES|QL query issued by the plugin failed to execute. */
   QUERY_ESQL_EXECUTION_FAILED: 'QUERY_ESQL_EXECUTION_FAILED',
+  /**
+   * The `alertingV2.esqlResponseFormat` feature flag resolved to a format name
+   * that is not in the response format registry. Queries keep running on the
+   * default format; the flag's variations need correcting.
+   */
+  QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN: 'QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN',
 
   // ────────────────────────────── Resources ──────────────────────────
   /**
@@ -500,6 +550,10 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
   /** `get_rule` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
+  /** `get_rule_events` failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED',
+  /** `get_rule_events` existence lookup (`get`) failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_LOOKUP_FAILED: 'AGENT_BUILDER_EPISODE_LOOKUP_FAILED',
   /** Episode attachment resolve failed; returns undefined. */
   AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
   /** Episode attachment isStale check failed; returns false. */
@@ -531,6 +585,15 @@ export const ALERTING_LOG_CODES = {
    * until the next restart. The task type is carried in `labels.task_id`.
    */
   TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
+  /**
+   * The pending API-key invalidation background task run failed. Keys queued
+   * for invalidation remain until the next scheduled run.
+   */
+  TASKS_API_KEY_INVALIDATION_RUN_FAILED: 'TASKS_API_KEY_INVALIDATION_RUN_FAILED',
+
+  // ─────────────────────────────── Routes ──────────────────────────────
+  /** An alerting v2 HTTP route handler failed with an unexpected 5xx error. */
+  ROUTES_HANDLER_FAILED: 'ROUTES_HANDLER_FAILED',
 } as const;
 
 export type AlertingV2LogCode = (typeof ALERTING_LOG_CODES)[keyof typeof ALERTING_LOG_CODES];

@@ -10,6 +10,9 @@
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
 export const STACK_ALERTS_ONLY_FEATURE_ID = 'stackAlertsOnly';
 export const ES_QUERY_ID = '.es-query';
+export const INDEX_THRESHOLD_ID = '.index-threshold';
+export const GEO_CONTAINMENT_ID = '.geo-containment';
+export const TRANSFORM_HEALTH_ID = 'transform_health';
 export const ML_ANOMALY_DETECTION_RULE_TYPE_ID = 'xpack.ml.anomaly_detection_alert';
 
 export const DEGRADED_DOCS_RULE_TYPE_ID = 'datasetQuality.degradedDocs';
@@ -23,4 +26,12 @@ export const STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY = [
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   DEGRADED_DOCS_RULE_TYPE_ID,
+];
+
+export const STACK_RULE_TYPE_IDS = [
+  ES_QUERY_ID,
+  INDEX_THRESHOLD_ID,
+  GEO_CONTAINMENT_ID,
+  TRANSFORM_HEALTH_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];

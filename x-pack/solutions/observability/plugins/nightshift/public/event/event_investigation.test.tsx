@@ -55,13 +55,20 @@ const completeState: InvestigationState = {
       status: 'confirmed',
     },
   ],
-  conclusion: `# Conclusion
-Checkout deploy introduced a regression.
-
-## Next Steps
-- Roll back checkout deployment · Revert commit abc123 and monitor error rate.`,
+  conclusion: 'Checkout deploy introduced a regression.',
+  recommendations: [
+    {
+      title: 'Roll back checkout deployment',
+      confidence: 0.95,
+      description: 'Revert commit abc123 and monitor error rate.',
+    },
+  ],
   blind_spots: [
-    { title: 'Missing trace coverage', description: 'No spans for payment gateway calls.' },
+    {
+      title: 'Missing trace coverage',
+      confidence: 0.8,
+      description: 'No spans for payment gateway calls.',
+    },
   ],
 };
 
@@ -150,6 +157,9 @@ describe('EventInvestigation', () => {
       'aria-selected',
       'true'
     );
+    expect(screen.getByText('95%')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
+    expect(screen.getByText('92%')).toBeInTheDocument();
 
     const chatButton = screen.getByTestId('nightshiftInvestigationFlyoutChatButton');
     expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
@@ -309,7 +319,7 @@ describe('EventInvestigation', () => {
       conversationId: undefined,
     });
 
-    expect(screen.getByText('Investigating')).toBeInTheDocument();
+    expect(screen.getByText('In progress')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationGoalPreview')).toHaveTextContent(
       'Determine whether the deploy caused the spike.'
     );
@@ -360,7 +370,7 @@ describe('EventInvestigation', () => {
       },
       state: {
         ...completeState,
-        conclusion: `# Conclusion\n${longConclusionBody}`,
+        conclusion: longConclusionBody,
       },
     });
 
@@ -387,11 +397,13 @@ describe('EventInvestigation', () => {
       },
       state: {
         ...completeState,
-        conclusion: `# Conclusion
-Checkout deploy introduced a regression.
-
-## Next Steps
-- Roll back checkout deployment · ${longRecommendationDescription}`,
+        recommendations: [
+          {
+            title: 'Roll back checkout deployment',
+            confidence: 0.95,
+            description: longRecommendationDescription,
+          },
+        ],
       },
     });
 
@@ -414,5 +426,48 @@ Checkout deploy introduced a regression.
     });
 
     expect(screen.getByTestId('nightshiftInvestigationMissingWorkflowCallout')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it.each<InvestigationStatus>(['running', 'loading', 'failed', 'unavailable'])(
+    'does not offer the investigation flyout when the status is %s',
+    (status) => {
+      renderInvestigation(mockEvent(), {
+        investigation: {
+          workflow_execution_id: 'exec-latest',
+          started_at: '2026-07-10T12:00:00Z',
+          completed_at: '2026-07-10T12:05:00Z',
+        },
+        status,
+      });
+
+      expect(
+        screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationFlyout')).not.toBeInTheDocument();
+    }
+  );
+
+  it.each<[InvestigationStatus, string]>([
+    ['failed', 'Failed'],
+    ['unavailable', 'Unavailable'],
+  ])('marks a %s investigation with its terminal status and error detail', (status, label) => {
+    renderInvestigation(mockEvent(), {
+      investigation: {
+        workflow_execution_id: 'exec-latest',
+        started_at: '2026-07-10T12:00:00Z',
+        completed_at: '2026-07-10T12:05:00Z',
+      },
+      status,
+      error: 'The investigation did not complete.',
+    });
+
+    expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(label);
+    expect(screen.getByTestId('nightshiftInvestigationError')).toHaveTextContent(
+      'The investigation did not complete.'
+    );
+    expect(screen.queryByTestId('nightshiftInvestigationStatusIcon')).not.toBeInTheDocument();
   });
 });

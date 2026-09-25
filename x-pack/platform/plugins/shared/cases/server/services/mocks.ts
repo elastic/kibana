@@ -156,6 +156,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     executeAggregations: jest.fn(),
     bulkUpdateCases: jest.fn(),
     ensureAlertsAuthorized: jest.fn(),
+    ensureDocumentsExist: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
   });
@@ -254,6 +255,7 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
     setLegacyKey: jest.fn(),
     updateFieldDefinition: jest.fn(),
     deleteFieldDefinition: jest.fn(),
+    assertFieldDefinitionIsValid: jest.fn(),
   });
 
   return service as unknown as FieldDefinitionsServiceMock;

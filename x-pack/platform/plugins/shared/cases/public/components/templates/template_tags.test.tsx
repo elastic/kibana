@@ -91,7 +91,7 @@ describe('TemplateTags', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           templateTags: ['test', 'template'],
         },
@@ -117,7 +117,7 @@ describe('TemplateTags', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           templateTags: ['foo', 'bar', 'test'],
         },

@@ -6,28 +6,12 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
-import type { Lead, LeadGenerationDatasetExample, LeadGenerationTaskOutput } from '../types';
+import { leadSchema } from '../types';
+import type { LeadGenerationDatasetExample, LeadGenerationTaskOutput } from '../types';
 
 export const LEAD_GENERATION_BASIC_EVALUATOR_NAME = 'LeadGenerationBasic';
 
-const isValidLead = (lead: unknown): lead is Lead => {
-  if (typeof lead !== 'object' || lead === null) return false;
-  const l = lead as Record<string, unknown>;
-  return (
-    typeof l.id === 'string' &&
-    l.id.length > 0 &&
-    typeof l.title === 'string' &&
-    l.title.length > 0 &&
-    typeof l.byline === 'string' &&
-    typeof l.description === 'string' &&
-    Array.isArray(l.entities) &&
-    typeof l.priority === 'number' &&
-    l.priority >= 1 &&
-    l.priority <= 10 &&
-    Array.isArray(l.observations) &&
-    typeof l.executionUuid === 'string'
-  );
-};
+const isValidLead = (lead: unknown): boolean => leadSchema.safeParse(lead).success;
 
 /**
  * CODE evaluator: verifies that the pipeline ran without errors and every
@@ -40,6 +24,7 @@ export const createLeadGenerationBasicEvaluator = (): Evaluator<
 > => ({
   name: LEAD_GENERATION_BASIC_EVALUATOR_NAME,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const errors = output?.errors;
     if (errors && errors.length > 0) {

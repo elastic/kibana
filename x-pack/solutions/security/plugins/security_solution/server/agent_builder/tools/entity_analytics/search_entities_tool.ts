@@ -11,7 +11,7 @@ import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
-  getHistorySnapshotIndexPattern,
+  resolveHistorySnapshotIndexPatterns,
   getEntitiesAlias,
   ENTITY_LATEST,
 } from '@kbn/entity-store/server';
@@ -728,23 +728,22 @@ export const searchEntitiesTool = (
         const [, { entityStore }] = await core.getStartServices();
         const client = esClient.asCurrentUser;
         const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
-        const entitySnapshotIndex = getHistorySnapshotIndexPattern(spaceId);
+        const historyPatterns = await resolveHistorySnapshotIndexPatterns(client, spaceId);
 
-        const [snapshotIndexExists, grounding] = await Promise.all([
-          client.indices.exists({ index: entitySnapshotIndex }),
+        const [patternExistence, grounding] = await Promise.all([
+          Promise.all(historyPatterns.map((pattern) => client.indices.exists({ index: pattern }))),
           fetchRiskScoreGrounding({
             entityStore,
             namespace: spaceId,
             logger,
           }),
         ]);
+        const liveHistoryPatterns = historyPatterns.filter((_, i) => patternExistence[i]);
+        const entitySnapshotIndex =
+          liveHistoryPatterns.length > 0 ? liveHistoryPatterns.join(',') : undefined;
         const groundingResult = grounding ? [grounding] : [];
 
-        const query = buildQuery(
-          normalized,
-          entityIndex,
-          snapshotIndexExists ? entitySnapshotIndex : undefined
-        );
+        const query = buildQuery(normalized, entityIndex, entitySnapshotIndex);
 
         const { columns, values } = await executeEsql({ query, esClient: client });
 

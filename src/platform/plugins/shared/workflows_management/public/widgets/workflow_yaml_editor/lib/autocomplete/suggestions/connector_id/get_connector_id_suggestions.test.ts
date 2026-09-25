@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parseDocument } from 'yaml';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { parseLineForCompletion } from '@kbn/workflows-yaml';
 import { getConnectorIdSuggestions } from './get_connector_id_suggestions';
@@ -71,6 +72,7 @@ describe('getConnectorIdSuggestions', () => {
     expect(result[1].insertText).toBe('private-slack');
     expect(result[2].label).toBe('Create a new connector');
     expect(result[2].insertText).toBe('');
+    expect(result.map((item) => item.insertText)).not.toContain('"*"');
   });
 
   it('should suggest slack connectors for waitForApproval channel connector-id', () => {
@@ -89,5 +91,73 @@ describe('getConnectorIdSuggestions', () => {
 
     expect(result).toHaveLength(3);
     expect(result[0].insertText).toBe('public-slack');
+    expect(result.map((item) => item.insertText)).not.toContain('"*"');
+  });
+
+  it('should suggest slack connectors for waitForInput channel connector-id', () => {
+    const line = '        connector-id: ';
+    const result = getConnectorIdSuggestions({
+      line,
+      lineParseResult: parseLineForCompletion(line),
+      range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: line.length + 1 },
+      focusedStepInfo: { stepType: 'waitForInput' },
+      focusedYamlPair: {
+        path: ['with', 'channels', 'slack', 'connector-id'],
+      },
+      path: ['steps', 0, 'with', 'channels', 'slack', 'connector-id'],
+      dynamicConnectorTypes: fakeConnectorTypes,
+    } as unknown as AutocompleteContext);
+
+    expect(result.some((item) => item.insertText === 'public-slack')).toBe(true);
+    expect(result.some((item) => item.command?.arguments?.[0].connectorType === '.slack')).toBe(
+      true
+    );
+  });
+
+  it('should suggest inbound webhook instances for a trigger connector-id', () => {
+    const line = '    connector-id: ';
+    const yamlDocument = parseDocument(`triggers:
+  - type: inboundWebhook.received
+    connector-id: 
+`);
+    const result = getConnectorIdSuggestions({
+      line,
+      lineParseResult: parseLineForCompletion(line),
+      range: { startLineNumber: 3, endLineNumber: 3, startColumn: 19, endColumn: line.length + 1 },
+      focusedStepInfo: null,
+      focusedYamlPair: null,
+      path: ['triggers', 0, 'connector-id'],
+      yamlDocument,
+      dynamicConnectorTypes: {
+        ...fakeConnectorTypes,
+        '.inboundWebhook': {
+          actionTypeId: '.inboundWebhook',
+          displayName: 'Inbound Webhook',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'gold',
+          subActions: [],
+          instances: [
+            {
+              id: 'inbound-webhook-1',
+              name: 'Sales inbound webhook',
+              isPreconfigured: false,
+              isDeprecated: false,
+            },
+          ],
+        },
+      },
+    } as unknown as AutocompleteContext);
+
+    expect(result.map((item) => item.insertText)).toEqual(
+      expect.arrayContaining(['"*"', 'inbound-webhook-1'])
+    );
+    expect(result.find((item) => item.insertText === '"*"')).toEqual(
+      expect.objectContaining({
+        label: 'All connectors of this type',
+        documentation: 'Starts the workflow for events from every connector instance of this type.',
+      })
+    );
   });
 });

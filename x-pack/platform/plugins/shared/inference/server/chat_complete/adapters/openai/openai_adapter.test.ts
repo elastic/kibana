@@ -206,6 +206,29 @@ describe('openAIAdapter', () => {
       );
     });
 
+    it('forwards only connector-supported telemetry metadata', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          metadata: {
+            connectorTelemetry: {
+              pluginId: 'feature',
+              aggregateBy: 'parent',
+              productSolution: 'solution',
+              productFeature: 'product-feature',
+              interactionId: 'interaction-1',
+            },
+          },
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams().telemetryMetadata).toEqual({
+        pluginId: 'feature',
+        aggregateBy: 'parent',
+      });
+    });
+
     it('correctly formats messages with content parts', () => {
       openAIAdapter
         .chatComplete({
@@ -273,13 +296,13 @@ describe('openAIAdapter', () => {
             {
               type: 'image_url',
               image_url: {
-                url: 'aaaaaa',
+                url: 'data:image/png;base64,aaaaaa',
               },
             },
             {
               type: 'image_url',
               image_url: {
-                url: 'bbbbbb',
+                url: 'data:image/png;base64,bbbbbb',
               },
             },
           ],

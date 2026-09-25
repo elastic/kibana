@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { REPORT_TABLE_ID } from '@kbn/reporting-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common } = getPageObjects(['common']);
+  const { common, security: securityPage } = getPageObjects(['common', 'security']);
   const retry = getService('retry');
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
@@ -37,6 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await reporting.teardownLogs();
+      // log the browser out while reporting_user still exists, so the next suite starts session-less
+      await securityPage.forceLogout();
       await deleteReportingUser();
     });
 
@@ -63,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('Reporting app', async () => {
         await common.navigateToApp('reporting');
-        return testSubjects.exists('reportingPageHeader');
+        return testSubjects.exists(REPORT_TABLE_ID, { timeout: 10 * 1000 });
       });
     });
 

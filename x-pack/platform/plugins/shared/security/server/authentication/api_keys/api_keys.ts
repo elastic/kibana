@@ -19,6 +19,7 @@ import type {
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantAPIKeyOptions,
   GrantAPIKeyResult,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
@@ -52,7 +53,7 @@ export interface ConstructorOptions {
   uiam?: UiamServicePublic;
 }
 
-type GrantAPIKeyParams =
+type GrantAPIKeyParams = (
   | {
       api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'password';
@@ -63,7 +64,8 @@ type GrantAPIKeyParams =
       api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'access_token';
       access_token: string;
-    };
+    }
+) & { refresh?: boolean | 'wait_for' };
 
 /**
  * Class responsible for managing Elasticsearch API keys.
@@ -273,7 +275,8 @@ export class APIKeys implements NativeAPIKeysType {
    */
   async grantAsInternalUser(
     request: KibanaRequest,
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    options?: GrantAPIKeyOptions
   ) {
     if (!this.license.isEnabled()) {
       return null;
@@ -287,13 +290,12 @@ export class APIKeys implements NativeAPIKeysType {
       );
     }
 
-    // If API key is granted for UIAM credentials, we need to pass UIAM client authentication and ignore any other
-    // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
-    // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
+    // Preserve UIAM client authentication paired with the granting credential. Other credentials
+    // use `es-client-authentication` (currently only used by JWT).
     let clientAuthentication: ClientAuthentication | undefined;
 
     if (this.uiam && isUiamCredential(authorizationHeader)) {
-      clientAuthentication = this.uiam.getClientAuthentication();
+      clientAuthentication = this.uiam.getClientAuthentication(request);
     } else {
       const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
         request,
@@ -323,6 +325,9 @@ export class APIKeys implements NativeAPIKeysType {
       authorizationHeader,
       clientAuthentication
     );
+    if (options?.refresh !== undefined) {
+      params.refresh = options.refresh;
+    }
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {

@@ -6,8 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { INVESTIGATION_TRIGGER_TYPES } from '../../common';
 import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
@@ -15,6 +17,20 @@ const inputSchema = z.object({
     .enum(['significant_event', 'alert'])
     .describe('The type of entity being investigated'),
   subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
+  title: z
+    .string()
+    .min(1)
+    .max(MAX_TITLE_LENGTH)
+    .describe('Human-readable headline for the investigation, e.g. the event title or rule name'),
+  trigger_type: z
+    .enum(INVESTIGATION_TRIGGER_TYPES)
+    .optional()
+    .describe('What initiated this investigation. Defaults to "automatic".'),
+  summary: z
+    .string()
+    .max(MAX_TEXT_LENGTH)
+    .optional()
+    .describe('Short description of the subject, returned on reads as subject.summary'),
   concurrency_key: z
     .string()
     .optional()
@@ -24,7 +40,9 @@ const inputSchema = z.object({
   context: z
     .record(z.string(), z.unknown())
     .optional()
-    .describe('Additional context to pass to the investigation workflow'),
+    .describe(
+      'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
+    ),
 });
 
 export const triggerInvestigationStepDefinition = (
@@ -53,7 +71,10 @@ export const triggerInvestigationStepDefinition = (
         subject: {
           type: input.subject_type,
           id: input.subject_id,
+          summary: input.summary,
         },
+        title: input.title,
+        trigger_type: input.trigger_type ?? 'automatic',
         concurrency_key: input.concurrency_key,
         context: input.context,
       });

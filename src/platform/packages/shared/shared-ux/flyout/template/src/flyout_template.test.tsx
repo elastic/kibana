@@ -8,14 +8,40 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+
+const mockEuiFlyout = jest.fn();
+
+// EUI's test-env `EuiFlyout` renders a stub that keeps only `data-test-subj`, `role`, and
+// `onKeyDown`, so a prop the root forwards is not observable in the DOM. Record the props and
+// delegate to that stub: forwarding is the template's half of the contract, rendering is EUI's.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: (props: Record<string, unknown>) => {
+      mockEuiFlyout(props);
+      return react.createElement(actual.EuiFlyout, props);
+    },
+  };
+});
+
+// eslint-disable-next-line import/order
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
 
 const renderTemplate = (ui: React.ReactElement) => render(ui);
 
+/** Props the template handed to `EuiFlyout` on the most recent render. */
+const forwardedProps = () => mockEuiFlyout.mock.calls[mockEuiFlyout.mock.calls.length - 1][0];
+
 describe('FlyoutTemplate', () => {
+  beforeEach(() => {
+    mockEuiFlyout.mockClear();
+  });
+
   it('renders header, body, and footer zones', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
@@ -35,32 +61,34 @@ describe('FlyoutTemplate', () => {
     expect(screen.getByText('summary content')).toBeInTheDocument();
   });
 
-  it('renders the header title as an H3', () => {
+  it('accepts id/hasChildBackground/outsideClickCloses/focusTrapProps/closeButtonProps without altering zone rendering', () => {
+    const focusTrapProps = { shards: [] };
+    const closeButtonProps = { 'data-test-subj': 'myCloseBtn' } as const;
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert details" />
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        id="passthrough-flyout"
+        hasChildBackground
+        outsideClickCloses={false}
+        focusTrapProps={focusTrapProps}
+        closeButtonProps={closeButtonProps}
+        data-test-subj="myFlyout"
+      >
+        <FlyoutTemplate.Header title="Title" />
         <FlyoutTemplate.Body>
-          <span>content</span>
+          <span>body content</span>
         </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
 
-    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
-    expect(title).toBeInTheDocument();
-  });
-
-  it('assigns a generated id to the visible header title for flyout labeling', () => {
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" aria-label="Hidden override">
-        <FlyoutTemplate.Header title="Alert details" />
-        <FlyoutTemplate.Body>
-          <span>content</span>
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
-
-    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
-    expect(title.id).toMatch(/^flyoutTemplateTitle/);
+    expect(screen.getByTestId('myFlyoutHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('myFlyoutBody')).toBeInTheDocument();
+    expect(screen.getByText('body content')).toBeInTheDocument();
+    // The EUI Jest mock doesn't forward id or closeButtonProps onto the DOM;
+    // assert the root flyout rendered and the default close button is still present.
+    expect(screen.getByTestId('myFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
   });
 
   it('accepts resizable/minWidth/onResize/ownFocus/onActive without altering zone rendering', () => {
@@ -91,23 +119,6 @@ describe('FlyoutTemplate', () => {
     expect(onActive).not.toHaveBeenCalled();
   });
 
-  it('renders unstructured body content with no title, outline, or divider', () => {
-    const { container } = renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Body>
-          <div data-test-subj="filterBar">filter bar</div>
-          <div data-test-subj="dataGrid">data grid</div>
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
-
-    expect(screen.getByTestId('filterBar')).toBeInTheDocument();
-    expect(screen.getByText('data grid')).toBeInTheDocument();
-    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
-    expect(screen.getByText('filter bar').closest('.euiPanel')).toBeNull();
-    expect(container.querySelectorAll('hr.euiHorizontalRule')).toHaveLength(0);
-  });
-
   it('is valid without a header (body is the only required zone)', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
     renderTemplate(
@@ -121,52 +132,6 @@ describe('FlyoutTemplate', () => {
     expect(screen.getByText('content')).toBeInTheDocument();
     expect(warn).not.toHaveBeenCalledWith('[FlyoutTemplate] A <FlyoutTemplate.Body> is required.');
     warn.mockRestore();
-  });
-
-  it('warns in development when the body zone is missing', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="No body here" />
-      </FlyoutTemplate>
-    );
-
-    expect(warn).toHaveBeenCalledWith('[FlyoutTemplate] A <FlyoutTemplate.Body> is required.');
-    warn.mockRestore();
-  });
-
-  it('renders the primary action to the right of the secondary action', () => {
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
-        <FlyoutTemplate.Body>
-          <span>content</span>
-        </FlyoutTemplate.Body>
-        <FlyoutTemplate.Footer>
-          <FlyoutTemplate.Footer.SecondaryAction label="Discard" onClick={noop} />
-          <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={noop} />
-        </FlyoutTemplate.Footer>
-      </FlyoutTemplate>
-    );
-
-    const footer = screen.getByTestId('withFooterFooter');
-    const text = footer.textContent ?? '';
-    expect(text.indexOf('Discard')).toBeLessThan(text.indexOf('Save'));
-    expect(within(footer).getByText('Save')).toBeInTheDocument();
-    expect(within(footer).getByText('Discard')).toBeInTheDocument();
-  });
-
-  it('does not render a footer when it has no actions, and adds no default Cancel button', () => {
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" data-test-subj="noFooter">
-        <FlyoutTemplate.Body>
-          <span>content</span>
-        </FlyoutTemplate.Body>
-        <FlyoutTemplate.Footer />
-      </FlyoutTemplate>
-    );
-
-    expect(screen.queryByTestId('noFooterFooter')).not.toBeInTheDocument();
-    expect(screen.queryByText('Cancel')).not.toBeInTheDocument();
   });
 
   it('warns and renders only the first zone when a singleton zone is duplicated', () => {
@@ -198,99 +163,83 @@ describe('FlyoutTemplate', () => {
     );
     expect(container.firstChild).toBeEmptyDOMElement();
   });
-});
 
-describe('FlyoutTemplate header title icon and description', () => {
-  const body = (
-    <FlyoutTemplate.Body>
-      <span>content</span>
-    </FlyoutTemplate.Body>
-  );
-
-  it('renders a decorative title icon when no tooltip is given', () => {
-    const { container } = renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert details" titleIcon="warning" />
-        {body}
+  it('forwards a custom data attribute and className to EuiFlyout', () => {
+    renderTemplate(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        className="myFlyoutClass"
+        data-foo="flyoutRoot"
+        data-test-subj="myFlyout"
+      >
+        <FlyoutTemplate.Header title="Title" />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
 
-    expect(container.querySelector('[data-euiicon-type="warning"]')).toHaveAttribute(
-      'aria-hidden',
-      'true'
-    );
-    expect(container.querySelector('.euiToolTipAnchor')).toBeNull();
+    expect(forwardedProps()).toMatchObject({
+      'data-foo': 'flyoutRoot',
+      className: 'myFlyoutClass',
+      'data-test-subj': 'myFlyout',
+    });
   });
 
-  it('renders the title icon as a focusable tooltip anchor, defaulting to the info icon', () => {
-    const { container } = renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert details" titleTooltip="Extra context" />
-        {body}
+  it('forwards EuiFlyout props the root does not name itself', () => {
+    renderTemplate(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        maskProps={{ headerZindexLocation: 'above' }}
+        pushMinBreakpoint="l"
+        includeSelectorInFocusTrap=".myWidget"
+      >
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
 
-    const anchor = container.querySelector('.euiToolTipAnchor');
-    expect(anchor).not.toBeNull();
-    expect(anchor?.querySelector('[data-euiicon-type="info"]')).toHaveAttribute('tabindex', '0');
+    expect(forwardedProps()).toMatchObject({
+      maskProps: { headerZindexLocation: 'above' },
+      pushMinBreakpoint: 'l',
+      includeSelectorInFocusTrap: '.myWidget',
+    });
   });
 
-  it('keeps the generated title id on the heading when a title icon is present', () => {
+  it('keeps flyoutMenuDisplayMode template-owned', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert details" titleIcon="info" />
-        {body}
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
 
-    const heading = screen.getByRole('heading', { level: 3, name: 'Alert details' });
-    expect(heading.id).toMatch(/^flyoutTemplateTitle/);
+    expect(forwardedProps().flyoutMenuDisplayMode).toBe('auto');
   });
 
-  it('renders no title icon by default', () => {
-    const { container } = renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert details" />
-        {body}
-      </FlyoutTemplate>
-    );
-
-    expect(container.querySelector('[data-euiicon-type]')).toBeNull();
-  });
-
-  it('renders the description below the title', () => {
+  it('does not forward the template-owned tab props to EuiFlyout', () => {
     renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Alert details" description="Mar 30, 2022 @ 10:01:21.313" />
-        {body}
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        tabs={[{ id: 'overview', label: 'Overview' }]}
+        defaultSelectedTabId="overview"
+        onTabChange={noop}
+      >
+        <FlyoutTemplate.Header title="Title" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">content</FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
 
-    expect(screen.getByText('Mar 30, 2022 @ 10:01:21.313')).toBeInTheDocument();
-  });
-
-  it('does not wrap the description in a paragraph, so block content stays valid', () => {
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header
-          title="Alert details"
-          description={<div data-test-subj="blockDescription">block content</div>}
-        />
-        {body}
-      </FlyoutTemplate>
-    );
-
-    expect(screen.getByTestId('blockDescription').closest('p')).toBeNull();
-  });
-
-  it('omits the description when it resolves falsy', () => {
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
-        <FlyoutTemplate.Header title="Alert details" description={false && 'hidden'} />
-        {body}
-      </FlyoutTemplate>
-    );
-
-    expect(screen.getByTestId('myFlyoutHeader').textContent).toBe('Alert details');
+    const props = forwardedProps();
+    expect(props).not.toHaveProperty('tabs');
+    expect(props).not.toHaveProperty('defaultSelectedTabId');
+    expect(props).not.toHaveProperty('onTabChange');
   });
 });

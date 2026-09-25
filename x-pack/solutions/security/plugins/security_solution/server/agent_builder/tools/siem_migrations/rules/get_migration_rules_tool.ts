@@ -20,15 +20,28 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
-import { createToolErrorResult } from '../common/tool_results';
+import { hasRuleMigrationPrivileges } from '../common/privileges';
+import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID } from './tool_ids';
+
+// Valid sort fields from `server/lib/siem_migrations/rules/data/sort.ts` `sortingOptionsMap`.
+// An invalid field causes a silent fallback to DEFAULT_SORTING on the server — narrow to an enum
+// so the model always sends a valid value and gets the order it expects.
+const SORT_FIELDS = [
+  'elastic_rule.title',
+  'elastic_rule.severity',
+  'elastic_rule.risk_score',
+  'elastic_rule.prebuilt_rule_id',
+  'translation_result',
+  'updated_at',
+] as const;
 
 // Extend the OpenAPI-generated query schema, bounding the unbounded inputs (repo rule: prevent
 // unbounded-input DoS). `page` is ZERO-BASED — the route computes `from: page * size`
 // (api/rules/get.ts), so `page=0` is the first page. `ids` is redefined as a plain array
 // (the route validates arrays; the API model's `ArrayFromString` string-split preprocess is
-// dropped — a deliberate divergence called out in the plan). Booleans and sort fields come
-// from the gen type unchanged.
+// dropped — a deliberate divergence called out in the plan). Sort fields are narrowed to the
+// server's allow-list so an invalid value cannot cause a silent fallback.
 const schema = GetRuleMigrationRulesRequestQuery.extend({
   migration_id: NonEmptyString.describe('The id of the rule migration whose rules to retrieve.'),
   page: z.coerce
@@ -45,7 +58,14 @@ const schema = GetRuleMigrationRulesRequestQuery.extend({
     .default(50)
     .describe('Number of rules per page (1-200).'),
   search_term: z.string().max(500).optional(),
-  ids: z.array(NonEmptyString).max(200).optional(),
+  ids: z.array(NonEmptyString).min(1).max(200).optional(),
+  sort_field: z
+    .enum(SORT_FIELDS)
+    .optional()
+    .describe(
+      `Field to sort by. One of: ${SORT_FIELDS.join(', ')}. ` +
+        'Defaults to translation_result (desc) when not supplied — matching the Kibana UI.'
+    ),
 });
 
 const buildPath = (migrationId: string): string =>
@@ -62,6 +82,7 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   },
   elastic_rule: rule.elastic_rule
     ? {
+        id: rule.elastic_rule.id,
         title: rule.elastic_rule.title,
         prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
         integration_ids: rule.elastic_rule.integration_ids,
@@ -94,24 +115,25 @@ export const getMigrationRulesTool = (
 Supports filtering by translation result, installed/prebuilt, search term, or explicit ids.
 Pagination is zero-based.
 
-Returns projected fields only (id, original title, vendor, translated title, prebuilt rule id, integration ids, translation result, status) — not full rule bodies.
+Returns projected fields only (migration item id, original title, vendor, installed Elastic rule id, translated title, prebuilt rule id, integration ids, translation result, status) — not full rule bodies.
 
 Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {
       const { migration_id: migrationId, ...query } = input;
-      // Default sort: translated title asc (deterministic pagination of translated rules).
+      const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
+      if (!hasPrivilege) {
+        return createMissingPrivilegeError('view migration rules');
+      }
+
+      // No sort override — let the API default apply (translation_result desc, matching the UI).
       const response = await callSelfClient<GetRuleMigrationRulesResponse>(
         request,
         buildPath(migrationId),
         {
           method: 'GET',
-          query: {
-            ...query,
-            sort_field: query.sort_field ?? 'elastic_rule.title',
-            sort_direction: query.sort_direction ?? 'asc',
-          },
+          query,
         }
       );
 
