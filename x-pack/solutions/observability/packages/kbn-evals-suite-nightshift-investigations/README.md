@@ -500,9 +500,8 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 
 ## CI
 
-Registered twice in
-[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json), on the same
-Playwright config:
+Registered in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json)
+as `nightshift-investigations`.
 
 - **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
   hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
@@ -515,47 +514,6 @@ Playwright config:
   runs it against the weekly core models (`weekly_eis_core_models`).
 - **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
-
-A second entry, **`nightshift-investigations-customer0`** (label
-`evals:nightshift-investigations-customer0`), runs only the trace-only eval on the stored
-`nightshift/customer0-manual` dataset against the shared sandbox cluster, with Sonnet 4.6 by default
-(`defaultModelGroups`, so no `models:` label is needed) and a 180-minute step budget. Its `ci`
-block declares the selection (`NIGHTSHIFT_DATASETS=trace-only`, `NIGHTSHIFT_DATASET_NAME`,
-`EVAL_FANOUT_CONCURRENCY=1` so two builds never share the cluster, and `SCOUT_TEST_RETRIES=0`
-because a Playwright retry would re-run every investigation inside the same step budget) and, under `ci.requiredConfig`, the evals Vault config paths it
-cannot run without (the `sandbox` host, API key, client certificate, key and CA, and the
-`nightshift.telemetry` URL and API key). `run_suite.sh` applies each `ci.env` value when the
-variable is unset and forwards it to the fanout steps, so a plain build-level override still wins,
-and it fails the step before any stack boots when a required path is missing or still a
-placeholder, naming the path. The entry opts out of `evals:all` (`ci.excludeFromAll`): a three-hour
-run against a shared cluster is only ever started by its own label. Per-example failures appear as
-`completed_with_trace` labels in the experiment rather than as a red step. There is no weekly step
-for it.
-
-### Secrets for the customer0 run
-
-The customer0 entry reads everything from the evals Vault config the pre-command hook already
-loads (`$VAULT_PATH_PREFIX/kbn-evals`, the same config `--profile dev-vault` reads locally): the
-`sandbox` block above and a `nightshift.telemetry` block for the remote cluster the investigations
-query through the sandbox (see [Remote telemetry investigations](#remote-telemetry-investigations)):
-
-```json
-{
-  "nightshift": {
-    "telemetry": {
-      "url": "https://<telemetry cluster>",
-      "apiKey": "<restricted read-only key>",
-      "readableIndices": "<optional manifest guidance, up to 10,000 characters>"
-    }
-  }
-}
-```
-
-The suite's scout hook turns both blocks into environment variables for Scout and Playwright, in CI
-and locally, and `run_suite.sh` logs the exported variable names (never values) right before
-starting Scout, so a build log shows whether the sandbox key and the telemetry connector reached the
-step. The CI client certificate is its own identity (account `ns-ci`), distinct from every developer
-leaf.
 
 ## Validation
 

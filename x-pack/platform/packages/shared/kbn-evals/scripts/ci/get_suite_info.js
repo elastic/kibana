@@ -36,7 +36,5 @@ process.stdout.write(
     shards: Array.isArray(suite.shards) ? suite.shards : [],
     stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
     scoutHook: suite.scoutHook,
-    // CI-only declarations: `run_suite.sh` applies `ci.env` defaults before fanout.
-    ci: suite.ci,
   })
 );

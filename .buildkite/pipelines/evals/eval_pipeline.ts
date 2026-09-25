@@ -22,31 +22,12 @@ export interface EvalsSuiteShard {
   specFiles: string[];
 }
 
-/**
- * CI-only declarations for a suite; the top-level fields stay the local defaults. Consumed by
- * `run_suite.sh` rather than here.
- */
-export interface EvalsSuiteCiDeclaration {
-  /** Applied by `run_suite.sh` when the variable is unset or empty, and forwarded to fanout steps. */
-  env?: Record<string, string>;
-  /**
-   * Dotted paths into the evals Vault config (e.g. `sandbox.apiKey`) the suite cannot run without;
-   * `run_suite.sh` fails the step before any stack boots when one is missing or a placeholder.
-   */
-  requiredConfig?: string[];
-  /** Selected only by its own label, never by `evals:all` (e.g. a long run against a shared cluster). */
-  excludeFromAll?: boolean;
-}
-
 export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
   ciLabels?: string[];
   configPath?: string;
   serverConfigSet?: string;
-  /** Repo-relative bash script `run_suite.sh` feeds the evals config to; it prints env for Scout. */
-  scoutHook?: string;
-  ci?: EvalsSuiteCiDeclaration;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
   shards?: EvalsSuiteShard[];
@@ -305,7 +286,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const runAllEvals = parsedLabels.includes('evals:all');
   const selectedEvalSuites = (
     runAllEvals
-      ? evalSuites.filter((suite) => !suite.ci?.excludeFromAll)
+      ? evalSuites
       : evalSuites.filter((suite) => {
           const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
           return labels.some((label) => parsedLabels.includes(label));
