@@ -76,7 +76,7 @@
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inferenceWorkflows": "platform/plugins/shared/inference_workflows",
-    "xpack.investigationOutput": "platform/packages/shared/kbn-investigation-output",
+    "xpack.investigationOutput": "solutions/observability/packages/kbn-investigation-output",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": [

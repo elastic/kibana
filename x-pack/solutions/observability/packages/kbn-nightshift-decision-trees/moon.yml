@@ -15,15 +15,15 @@ project:
   description: Moon project for @kbn/nightshift-decision-trees
   channel: ''
   owner: '@elastic/nightshift-investigations-team'
-  sourceRoot: x-pack/platform/packages/shared/kbn-nightshift-decision-trees
+  sourceRoot: x-pack/solutions/observability/packages/kbn-nightshift-decision-trees
 dependsOn:
   - '@kbn/zod'
 tags:
   - shared-common
   - package
   - prod
-  - group-platform
-  - shared
+  - group-observability
+  - private
   - jest-unit-tests
 fileGroups:
   src:
