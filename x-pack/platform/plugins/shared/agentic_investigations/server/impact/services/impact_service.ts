@@ -88,6 +88,53 @@ export class ImpactService {
   }
 
   /**
+   * Undoes an attach whose conversation attachment did not land. Deletes a
+   * document this call created, or restores the previous entity set, only while
+   * the stored body is still the one `attach` wrote.
+   */
+  async revertAttach({ written, previous }: { written: Impact; previous?: Impact }): Promise<void> {
+    const current = await this.findById(written.id);
+    if (!current || !sameImpactBody(current, written)) {
+      return;
+    }
+
+    if (!previous) {
+      try {
+        await this.deps.storage.delete({
+          id: written.id,
+          if_seq_no: current.seqNo,
+          if_primary_term: current.primaryTerm,
+        });
+      } catch (error) {
+        if (!isVersionConflict(error)) {
+          throw error;
+        }
+      }
+      return;
+    }
+
+    const document: ImpactDocument = {
+      spaceId: previous.spaceId,
+      conversationId: previous.conversationId,
+      entities: previous.entities,
+      createdAt: previous.createdAt,
+      createdBy: previous.createdBy,
+    };
+    try {
+      await this.deps.storage.index({
+        id: written.id,
+        document,
+        if_seq_no: current.seqNo,
+        if_primary_term: current.primaryTerm,
+      });
+    } catch (error) {
+      if (!isVersionConflict(error)) {
+        throw error;
+      }
+    }
+  }
+
+  /**
    * Bulk hydrate for a landing-page list. Missing conversations are omitted,
    * not 404, so a caller can attach the field only where it exists. No HTTP
    * route: a capped in-process read is not a contract worth exposing.
@@ -295,6 +342,13 @@ const unionEntities = (entities: ImpactEntity[]): ImpactEntity[] => {
 };
 
 const toImpact = (id: string, document: ImpactDocument): Impact => ({ id, ...document });
+
+const sameImpactBody = (left: Impact, right: Impact): boolean =>
+  left.spaceId === right.spaceId &&
+  left.conversationId === right.conversationId &&
+  left.createdAt === right.createdAt &&
+  JSON.stringify(left.createdBy ?? null) === JSON.stringify(right.createdBy ?? null) &&
+  JSON.stringify(left.entities) === JSON.stringify(right.entities);
 
 const withoutVersion = ({
   seqNo: _seqNo,

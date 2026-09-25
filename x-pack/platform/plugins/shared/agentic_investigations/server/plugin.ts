@@ -13,7 +13,7 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
-import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
@@ -79,6 +79,7 @@ export class AgenticInvestigationsPlugin
         logger: this.logger,
       }),
       getAttachmentClient: (request) => this.getAttachmentClient(request),
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     const router = coreSetup.http.createRouter();
@@ -90,6 +91,7 @@ export class AgenticInvestigationsPlugin
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
       getAttachmentClient: (request) => this.getAttachmentClient(request),
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     registerEscalationRoutes({
@@ -189,13 +191,26 @@ export class AgenticInvestigationsPlugin
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
   }
 
-  private async getAttachmentClient(request: KibanaRequest): Promise<AttachmentPublicClient> {
+  /**
+   * Agent Builder stays required because escalations and assignments are
+   * conversations. Callers resolve these clients before the impact index write,
+   * so a missing client fails the attach.
+   */
+  private requireAgentBuilder(): NonNullable<AgenticInvestigationsPlugin['agentBuilder']> {
     if (!this.agentBuilder) {
       throw new Error(
         'Agent Builder is not available until the agenticInvestigations plugin has started'
       );
     }
-    return this.agentBuilder.attachments.getScopedClient({ request });
+    return this.agentBuilder;
+  }
+
+  private async getAttachmentClient(request: KibanaRequest): Promise<AttachmentPublicClient> {
+    return this.requireAgentBuilder().attachments.getScopedClient({ request });
+  }
+
+  private async getConversationClient(request: KibanaRequest): Promise<ConversationPublicClient> {
+    return this.requireAgentBuilder().conversations.getScopedClient({ request });
   }
 
   /**

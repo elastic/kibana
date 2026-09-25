@@ -199,7 +199,7 @@ const renderPage = (
 
   // The sections discard their accumulated pages through the query client on
   // collapse, so the page needs a real one even with the hooks stubbed.
-  render(
+  const page = (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={{ ...core, agentBuilder }}>
@@ -212,8 +212,9 @@ const renderPage = (
       </EuiProvider>
     </I18nProvider>
   );
+  const rendered = render(page);
 
-  return { core, agentBuilder, closeFlyout, history };
+  return { core, agentBuilder, closeFlyout, history, rerender: () => rendered.rerender(page) };
 };
 
 const approveMutate = jest.fn();
@@ -751,6 +752,20 @@ describe('ConversationsPage impact pills', () => {
 
     expect(screen.queryByRole('heading', { name: 'Impact' })).not.toBeInTheDocument();
     expect(screen.getByText('No impact')).toBeInTheDocument();
+  });
+
+  it('clears the filter when the selected entity disappears from the loaded proposals', () => {
+    const { rerender } = renderPage('/');
+
+    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+
+    mockProposals({ investigate: [userProposal] });
+    rerender();
+
+    expect(screen.queryByRole('button', { name: 'host-1' })).not.toBeInTheDocument();
+    expect(screen.getByText('User investigation')).toBeInTheDocument();
+    expect(screen.queryByText('No events match the current filter.')).not.toBeInTheDocument();
   });
 
   it('shows the filtered empty state in a section whose rows do not carry the selected entity', () => {

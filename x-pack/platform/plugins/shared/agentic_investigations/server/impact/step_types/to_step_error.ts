@@ -6,6 +6,7 @@
  */
 
 import { ExecutionError } from '@kbn/workflows/server';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   ImpactConflictError,
   ImpactForbiddenError,
@@ -28,6 +29,9 @@ export const toStepError = (error: unknown, fallbackMessage: string): ExecutionE
   const match = ERROR_TYPES.find(([constructor]) => error instanceof constructor);
   if (match && error instanceof Error) {
     return new ExecutionError({ type: match[1], message: error.message });
+  }
+  if (isConversationNotFoundError(error)) {
+    return new ExecutionError({ type: 'NotFoundError', message: error.message });
   }
 
   return new ExecutionError({

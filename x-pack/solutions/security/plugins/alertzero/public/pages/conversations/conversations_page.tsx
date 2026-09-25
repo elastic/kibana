@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import {
@@ -16,6 +16,7 @@ import {
   InvestigationActionModals,
   type EscalationModalRenderProps,
   Impact,
+  impactPills,
 } from '@kbn/agentic-investigations-common';
 import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
@@ -66,6 +67,19 @@ export const ConversationsPage: React.FC = () => {
   const dismiss = useDismissProposal();
   const dropDecided = useDropDecidedProposal();
   const [entityFilter, setEntityFilter] = useState<string | null>(null);
+  const availableEntityIds = useMemo(
+    () => new Set(impactPills(conversations).map((pill) => pill.entityId)),
+    [conversations]
+  );
+  // A poll or a collapsed section can drop the selected entity from the loaded
+  // rows. Keep filtering only while that pill is still there to clear.
+  const effectiveEntityFilter =
+    entityFilter !== null && availableEntityIds.has(entityFilter) ? entityFilter : null;
+  useEffect(() => {
+    if (entityFilter !== effectiveEntityFilter) {
+      setEntityFilter(effectiveEntityFilter);
+    }
+  }, [entityFilter, effectiveEntityFilter]);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
@@ -289,7 +303,7 @@ export const ConversationsPage: React.FC = () => {
         <EuiFlexItem>
           <Impact
             investigations={conversations}
-            entityFilter={entityFilter}
+            entityFilter={effectiveEntityFilter}
             onEntityFilterChange={setEntityFilter}
           />
         </EuiFlexItem>
@@ -300,7 +314,7 @@ export const ConversationsPage: React.FC = () => {
           <EuiFlexItem key={section.id} grow={false}>
             <QueueSection
               section={section}
-              entityFilter={entityFilter}
+              entityFilter={effectiveEntityFilter}
               selectedConversationId={selectedConversationId}
               onClickRecommendedAction={onClickRecommendedAction}
               onClickAction={onClickAction}

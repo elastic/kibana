@@ -26,4 +26,4 @@ export const registerImpactAttachment = (
   );
 };
 
-export { stampImpactAttachment } from './stamp_impact_attachment';
+export { attachImpactToInvestigation } from './attach_impact_to_investigation';

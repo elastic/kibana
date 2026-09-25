@@ -58,12 +58,14 @@ const createStorage = (document?: ImpactDocument) => {
   return {
     index: jest.fn().mockResolvedValue({ _id: document ? documentId(document) : 'impact-new' }),
     get: jest.fn(),
+    delete: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
     search: jest
       .fn()
       .mockResolvedValue(versionedSearchResponse(document ? versionedHit(document) : undefined)),
   } as unknown as jest.Mocked<ImpactStorageClient> & {
     index: jest.Mock;
     get: jest.Mock;
+    delete: jest.Mock;
     search: jest.Mock;
   };
 };
@@ -424,6 +426,55 @@ describe('ImpactService', () => {
         service.listByConversationIds([CONVERSATION_ID], 's'.repeat(MAX_IMPACT_ID_LENGTH + 1))
       ).rejects.toBeInstanceOf(ImpactInvalidRequestError);
       expect(storage.search).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('revertAttach', () => {
+    const written = () => ({ id: documentId(baseDocument()), ...baseDocument() });
+
+    it('deletes an impact this attach created when the attachment write did not land', async () => {
+      const storage = createStorage(baseDocument());
+      const service = createService(storage);
+      const impact = written();
+
+      await service.revertAttach({ written: impact });
+
+      expect(storage.delete).toHaveBeenCalledWith({
+        id: impact.id,
+        if_seq_no: 3,
+        if_primary_term: 1,
+      });
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('restores the previous entity set when a merge was not attached to the conversation', async () => {
+      const previous = written();
+      const merged = baseDocument({ entities: [{ id: 'user-1' }, { id: 'host-1' }] });
+      const storage = createStorage(merged);
+      const service = createService(storage);
+
+      await service.revertAttach({
+        written: { id: documentId(merged), ...merged },
+        previous,
+      });
+
+      expect(storage.delete).not.toHaveBeenCalled();
+      expect(storage.index).toHaveBeenCalledWith({
+        id: documentId(merged),
+        document: baseDocument(),
+        if_seq_no: 3,
+        if_primary_term: 1,
+      });
+    });
+
+    it('leaves the document when a later write already changed it', async () => {
+      const storage = createStorage(baseDocument({ entities: [{ id: 'other' }] }));
+      const service = createService(storage);
+
+      await service.revertAttach({ written: written() });
+
+      expect(storage.delete).not.toHaveBeenCalled();
+      expect(storage.index).not.toHaveBeenCalled();
     });
   });
 });
