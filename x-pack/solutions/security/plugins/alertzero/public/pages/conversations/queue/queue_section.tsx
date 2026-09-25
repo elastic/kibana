@@ -27,6 +27,10 @@ export interface QueueSectionProps {
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   getChatHref: (id: Investigation['id']) => string | undefined;
   canManageEscalations?: boolean;
+  /** When true the "Close investigation" action is shown on each card. */
+  canCloseInvestigation?: boolean;
+  /** Optional: render the assignee picker widget for each non-closed card. */
+  renderAssignees: (investigation: Investigation) => React.ReactNode;
 }
 
 export const QueueSection = ({

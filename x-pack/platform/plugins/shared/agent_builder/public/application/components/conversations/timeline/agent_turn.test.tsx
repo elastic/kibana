@@ -148,6 +148,7 @@ describe('AgentTurn', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /tool/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
+    expect(screen.getByText('2 tools stopped')).toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderExecutionFailedToggle')).toHaveTextContent(
       'An error occurred'
     );
@@ -176,6 +177,7 @@ describe('AgentTurn', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /tool/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
+    expect(screen.getByText('2 tools stopped')).toBeInTheDocument();
     expect(screen.getByText('Response stopped by petr')).toBeInTheDocument();
   });
 

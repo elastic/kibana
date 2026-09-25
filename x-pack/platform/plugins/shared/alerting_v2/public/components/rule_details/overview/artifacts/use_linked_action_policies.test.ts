@@ -7,9 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
+import type { UseMatchedActionPoliciesResult } from '@kbn/alerting-v2-rule-form';
 import { useLinkedActionPolicies } from './use_linked_action_policies';
 
-const mockUseMatchedActionPolicies = jest.fn();
+const mockUseMatchedActionPolicies = jest.fn<UseMatchedActionPoliciesResult, [unknown]>();
 const mockHttp = { fake: 'http-start-contract' };
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
@@ -34,18 +35,16 @@ const buildItem = (
     enabled: true,
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
     matcher: null,
-    groupBy: null,
-    tags: null,
-    groupingMode: 'per_episode',
+    group_by: null,
+    grouping_mode: 'per_episode',
     throttle: null,
-    snoozedUntil: null,
-    auth: { owner: 'user', createdByUser: true },
-    createdBy: 'user',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'user',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    snoozed_until: null,
+    created_by: { profile_uid: 'u_user' },
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: { profile_uid: 'u_user' },
+    updated_at: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  } as MatchedActionPolicy['action_policy'],
+  },
   category,
 });
 
@@ -56,7 +55,6 @@ describe('useLinkedActionPolicies', () => {
       isLoading: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -77,7 +75,6 @@ describe('useLinkedActionPolicies', () => {
         buildItem('tags', { id: 'filtered-1' }),
         buildItem('tags', { id: 'filtered-2' }),
       ],
-      total: 3,
       evaluatedCount: 3,
       isTruncated: false,
     });
@@ -98,7 +95,6 @@ describe('useLinkedActionPolicies', () => {
       error: null,
       items: [buildItem('tags'), buildItem('tags')],
       evaluatedCount: 2,
-      total: 3,
       isTruncated: true,
     });
 
@@ -114,7 +110,6 @@ describe('useLinkedActionPolicies', () => {
       isLoading: true,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -129,7 +124,6 @@ describe('useLinkedActionPolicies', () => {
       isLoading: false,
       error: new Error('network error'),
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
