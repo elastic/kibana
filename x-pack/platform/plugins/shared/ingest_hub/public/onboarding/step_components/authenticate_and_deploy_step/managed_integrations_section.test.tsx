@@ -291,6 +291,31 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
     });
 
+    it('onReadyChange(false) is suppressed while connector is pre-loaded (avoids loading flash)', () => {
+      // With a pre-loaded connector, the identity federation form calls onReadyChange(false)
+      // on mount while it re-validates. The button must stay enabled during that window.
+      setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
+      renderSection({ showIdentityFederation: true });
+      act(() => {
+        fireEvent.click(screen.getByText('mark-not-ready'));
+      });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
+    });
+
+    it('onReadyChange(false) applies after user changes connector', () => {
+      // Once the user picks a different connector (connectorPreloaded cleared), a subsequent
+      // onReadyChange(false) from the form must be honoured so the button disables while loading.
+      setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
+      renderSection({ showIdentityFederation: true });
+      act(() => {
+        fireEvent.click(screen.getByText('mark-named')); // user selected a new connector
+      });
+      act(() => {
+        fireEvent.click(screen.getByText('mark-not-ready')); // form loading new connector
+      });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+
     it('Deploy button enables when fleet component calls onReadyChange(true)', () => {
       renderSection();
       act(() => {

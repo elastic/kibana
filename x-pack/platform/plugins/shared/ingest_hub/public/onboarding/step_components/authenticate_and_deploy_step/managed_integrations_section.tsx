@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -135,6 +135,24 @@ export function ManagedIntegrationsSection({
     const keys = authenticateAndDeployStep.staticKeys;
     return Boolean(keys?.access_key_id && keys?.secret_access_key);
   });
+  // Tracks whether a connector was pre-loaded from session. When true, transient
+  // onReadyChange(false) calls from the identity federation form (loading / re-validating) are
+  // suppressed so the Deploy button stays enabled across section open/close cycles caused by
+  // drift detection. Reset when the user actively switches to a different connector or method.
+  const connectorPreloaded = useRef(!!initialConnectorId && !isStaticKeysEditMode);
+
+  const handleIdentityFedReadyChange = useCallback((ready: boolean) => {
+    if (connectorPreloaded.current && !ready) return;
+    setIsDeployReady(ready);
+  }, []);
+
+  const handleIdentityFedConnectorChange = useCallback(
+    (id: string | undefined, name?: string) => {
+      connectorPreloaded.current = false;
+      setConnectorId(id, name);
+    },
+    [setConnectorId]
+  );
 
   const handleStaticKeysChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
@@ -282,6 +300,7 @@ export function ManagedIntegrationsSection({
                       setPreferredMethod(id as PreferredMethod);
                       setIsDeployReady(false);
                       if (id === 'access_keys') {
+                        connectorPreloaded.current = false;
                         setConnectorId(undefined);
                       }
                     }}
@@ -299,8 +318,8 @@ export function ManagedIntegrationsSection({
                   cloud={services.cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   integrations={iacIntegrations}
-                  onReadyChange={setIsDeployReady}
-                  onConnectorIdChange={setConnectorId}
+                  onReadyChange={handleIdentityFedReadyChange}
+                  onConnectorIdChange={handleIdentityFedConnectorChange}
                   onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
                 />

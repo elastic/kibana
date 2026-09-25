@@ -13,6 +13,7 @@ import {
   useOnboardingFeatureFlag,
   SERVICE_SETTINGS_SESSION_KEY,
   AUTHENTICATE_AND_DEPLOY_SESSION_KEY,
+  DETECT_AND_REVIEW_SESSION_KEY,
 } from '../helpers/onboarding';
 
 // ELB with identity federation enabled (no hide_in_var_group_options).
@@ -207,6 +208,236 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
     // Drift callout disappears once isDirty is cleared.
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+  });
+
+  test('no drift on clean return: no callout shown, Next enabled', async ({
+    browserAuth,
+    page,
+  }) => {
+    // SO and session match — user returned to Step 3 without changing any settings.
+    const DEP_ID = 'dep-no-drift-001';
+    await page.route(
+      (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ item: makeSoItem(DEP_ID) }),
+        })
+    );
+
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws', {
+      params: { deploymentId: DEP_ID },
+      hash: 'authenticate-and-deploy',
+    });
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+    // Hydration wrote session from SO. Inject serviceStatuses so isAlreadyDeployed becomes true
+    // (the SO does not store serviceStatuses — those come from the Detect & Review step).
+    await page.evaluate(
+      ({ key, depId }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            policyIdsByInstance: { elb: 'mock-mi-policy-id' },
+            serviceStatuses: { elb: 'receiving' },
+            onboardingDeploymentId: depId,
+          })
+        );
+      },
+      { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
+    );
+
+    // Await the drift effect's SO re-fetch so state settles before asserting.
+    const soResponsePromise = page.waitForResponse(
+      (resp) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(resp.url()).pathname
+        ) && resp.status() === 200
+    );
+    await page.reload();
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+    await soResponsePromise;
+
+    // No drift: session matches SO → callout must not appear.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+    // isAlreadyDeployed && !isDirty → isMiDone → Next enabled immediately.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
+  });
+
+  test('removing a deployed service does not trigger false drift', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Both ELB and EC2 appear in policyIdsByInstance (they were deployed), but the user
+    // deselected EC2 in Step 1 so session serviceVars has no EC2 entry.
+    // EC2 is a cleanup target — the drift loop must skip it, not flag it as changed.
+    const DEP_ID = 'dep-remove-svc-001';
+    await page.route(
+      (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            item: makeSoItem(DEP_ID, {
+              policyIdsByInstance: { elb: 'mock-mi-elb-policy', ec2: 'mock-ec2-policy' },
+            }),
+          }),
+        })
+    );
+
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws', {
+      params: { deploymentId: DEP_ID },
+      hash: 'authenticate-and-deploy',
+    });
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+    const soResponsePromise = page.waitForResponse(
+      (resp) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(resp.url()).pathname
+        ) && resp.status() === 200
+    );
+    await page.reload();
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+    await soResponsePromise;
+
+    // EC2 in deployedInstanceIds but absent from session serviceVars — drift loop skips it.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+  });
+
+  test('static-key replacement marks dirty immediately without SO re-fetch', async ({
+    browserAuth,
+    page,
+  }) => {
+    // SO uses static_keys auth — isStaticKeysEditMode renders the replace-keys form.
+    const DEP_ID = 'dep-static-dirty-001';
+    await page.route(
+      (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            item: makeSoItem(DEP_ID, { authMethod: 'static_keys', connectorId: null }),
+          }),
+        })
+    );
+
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws', {
+      params: { deploymentId: DEP_ID },
+      hash: 'authenticate-and-deploy',
+    });
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+    // Await the drift effect's SO fetch before filling the form to prevent the effect's
+    // updateDetectAndReviewStep({ isDirty: false }) from racing with the form's isDirty: true.
+    const soResponsePromise = page.waitForResponse(
+      (resp) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(resp.url()).pathname
+        ) && resp.status() === 200
+    );
+    await page.reload();
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+    await soResponsePromise;
+
+    // Reveal and fill both credential fields; once both are non-empty the replace view calls
+    // onReadyChange(true) which synchronously sets isDirty=true — no SO fetch needed.
+    await page.testSubj.locator('staticKeysReplace-accessKeyId-toggle').click();
+    await page.testSubj.locator('staticKeysReplace-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
+    await page.testSubj.locator('staticKeysReplace-secretAccessKey-toggle').click();
+    await page.testSubj
+      .locator('staticKeysReplace-secretAccessKey')
+      .fill('wJalrXUtnFEMI/K7MDENG');
+
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+  });
+
+  test('failed dirty redeploy keeps Retry visible and blocks Next', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Same service-var drift setup as the first test, but the Fleet PUT returns 500.
+    const DEP_ID = 'dep-fail-redeploy-001';
+    await page.route(
+      (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ item: makeSoItem(DEP_ID) }),
+        })
+    );
+
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws', {
+      params: { deploymentId: DEP_ID },
+      hash: 'authenticate-and-deploy',
+    });
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+    await page.evaluate(
+      ({ key }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            globalRegion: 'us-east-1',
+            serviceVars: {
+              elb: {
+                enabledDataStreams: ['elb_logs'],
+                varsByDataStream: {
+                  elb_logs: {
+                    enabledInputs: ['aws-s3'],
+                    varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::fail-test-bucket' } },
+                  },
+                },
+              },
+            },
+          })
+        );
+      },
+      { key: SERVICE_SETTINGS_SESSION_KEY }
+    );
+
+    await page.reload();
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+
+    // Policy GET succeeds, PUT returns 500 — simulates a transient Fleet error.
+    await page.route(
+      (url) => /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(url.pathname),
+      async (route) => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: MI_POLICY_ITEM }),
+          });
+        } else if (route.request().method() === 'PUT') {
+          await route.fulfill({
+            status: 500,
+            contentType: 'application/json',
+            body: JSON.stringify({ message: 'simulated policy update failure' }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
+
+    await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
+
+    // Failed PUT: hook surfaces hasFailed=true, isDeploying becomes false.
+    await expect(page.testSubj.locator('managedIntegrationsSection-retryButton')).toBeVisible();
+    // isDirty remains true — a failed deploy does not clear it.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+    // isMiDone is false — Next stays blocked until a successful redeploy.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
   });
 
   test('auth drift: connector change detected and callout shown', async ({ browserAuth, page }) => {
