@@ -58,6 +58,24 @@ describe('restoreMaskedMonitorParams', () => {
       })
     ).toBe('{"password":"********"}');
   });
+
+  it('restores masked array entries by index and retains changed entries', () => {
+    expect(
+      restoreMaskedMonitorParams({
+        previousParams: '["first","second"]',
+        submittedParams: '["updated","********"]',
+      })
+    ).toBe('["updated","second"]');
+  });
+
+  it('retains an intentionally empty array', () => {
+    expect(
+      restoreMaskedMonitorParams({
+        previousParams: '["first"]',
+        submittedParams: '[]',
+      })
+    ).toBe('[]');
+  });
 });
 
 describe('getUnrestorableMaskedParamKeys', () => {
@@ -76,6 +94,15 @@ describe('getUnrestorableMaskedParamKeys', () => {
         submittedParams: '{"token":"********"}',
       })
     ).toEqual(['token']);
+  });
+
+  it('returns masked array indexes that have no stored value', () => {
+    expect(
+      getUnrestorableMaskedParamKeys({
+        previousParams: '["first"]',
+        submittedParams: '["********","********"]',
+      })
+    ).toEqual(['1']);
   });
 
   it('ignores submissions that are not parameter objects', () => {

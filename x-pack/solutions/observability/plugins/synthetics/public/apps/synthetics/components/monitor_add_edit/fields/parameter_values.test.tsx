@@ -39,7 +39,9 @@ describe('ParameterValuesEditor', () => {
     const { getByTestId } = render(<ParameterValuesEditorForm />);
 
     expect(getByTestId('keyValuePairsKey0')).toHaveValue('password');
+    expect(getByTestId('keyValuePairsKey0')).toHaveAccessibleName('Parameter password');
     expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAccessibleName('Value for parameter password');
     expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
     expect(getByTestId('keyValuePairsValue0')).toHaveValue('********');
     expect(getByTestId('syntheticsParamValueVisibility0')).toBeInTheDocument();
@@ -129,7 +131,7 @@ describe('ParameterValuesEditor', () => {
     expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
   });
 
-  it('keeps a revealed value when edit is clicked', () => {
+  it('allows clearing a revealed value', () => {
     const { getByTestId } = render(
       <ParameterValuesEditorForm defaultParams={'{"password":"changeme"}'} />
     );
@@ -143,8 +145,22 @@ describe('ParameterValuesEditor', () => {
     fireEvent.change(getByTestId('keyValuePairsValue0'), { target: { value: '' } });
     fireEvent.blur(getByTestId('keyValuePairsValue0'));
 
-    expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
-    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"changeme"}');
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('');
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":""}');
+  });
+
+  it('hides the next value after deleting a visible row', () => {
+    const { getAllByTestId, getByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={'{"first":"one","second":"two"}'} />
+    );
+
+    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'text');
+
+    fireEvent.click(getAllByTestId('syntheticsKeyValuePairsFieldButton')[0]);
+
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('two');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
   });
 });
 
