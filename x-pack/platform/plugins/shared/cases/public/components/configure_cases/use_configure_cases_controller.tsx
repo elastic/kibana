@@ -44,7 +44,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
-  const { isObservablesFeatureEnabled } = useCasesFeatures();
+  const { isObservablesFeatureEnabled, isExtractObservablesEnabled } = useCasesFeatures();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] =
@@ -70,6 +70,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     customFields,
     templates,
     observableTypes,
+    extractObservables,
   } = currentConfiguration;
 
   const {
@@ -196,6 +197,29 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     [
       configurationId,
       configurationVersion,
+      connector,
+      customFields,
+      templates,
+      persistCaseConfigure,
+    ]
+  );
+
+  const onChangeExtractObservables = useCallback(
+    (value: boolean) => {
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        extractObservables: value,
+      });
+    },
+    [
+      configurationId,
+      configurationVersion,
+      closureType,
       connector,
       customFields,
       templates,
@@ -354,6 +378,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     hasMinimumLicensePermissions,
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
+    isExtractObservablesEnabled,
     configurationId,
     configurationVersion,
     closureType,
@@ -362,6 +387,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     customFields,
     templates,
     observableTypes,
+    extractObservables,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isLoadingConnectors,
@@ -377,6 +403,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     onAddNewConnector,
     onChangeConnector,
     onChangeClosureType,
+    onChangeExtractObservables,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,

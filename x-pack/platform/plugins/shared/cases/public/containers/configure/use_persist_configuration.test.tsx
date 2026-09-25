@@ -190,6 +190,46 @@ describe('usePersistConfiguration', () => {
     });
   });
 
+  it('includes extractObservables in postCaseConfigure payload', async () => {
+    const spyPost = jest.spyOn(api, 'postCaseConfigure');
+
+    const { result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({ ...request, extractObservables: false });
+    });
+
+    await waitFor(() => {
+      expect(spyPost).toHaveBeenCalledWith(expect.objectContaining({ extractObservables: false }));
+    });
+  });
+
+  it('includes extractObservables in patchCaseConfigure payload', async () => {
+    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+
+    const { result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        ...request,
+        id: 'test-id',
+        version: 'test-version',
+        extractObservables: false,
+      });
+    });
+
+    await waitFor(() => {
+      expect(spyPatch).toHaveBeenCalledWith(
+        'test-id',
+        expect.objectContaining({ extractObservables: false })
+      );
+    });
+  });
+
   it('calls patchCaseConfigure without observableTypes if it is not specified', async () => {
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
