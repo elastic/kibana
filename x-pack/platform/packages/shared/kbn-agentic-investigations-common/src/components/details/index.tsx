@@ -13,5 +13,19 @@ export {
   ConversationDetailsFlyoutFooter,
   type ConversationDetailsFlyoutFooterProps,
 } from './flyout_footer';
-export { InvestigationHeaderBlocks, type InvestigationHeaderBlocksProps } from './header_blocks';
+export {
+  ConversationHeaderBlocks,
+  type ConversationHeaderBlocksProps,
+  InvestigationHeaderBlocks,
+  type InvestigationHeaderBlocksProps,
+} from './header_blocks';
+export {
+  EscalationFlyoutHeader,
+  type EscalationFlyoutHeaderProps,
+} from './escalation_flyout_header';
 export { OverviewTab } from './details_flyout_tab_contents';
+export {
+  LinkedInvestigationsList,
+  type LinkedInvestigationItem,
+  type LinkedInvestigationsListProps,
+} from './linked_investigations_list';

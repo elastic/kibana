@@ -11,6 +11,7 @@ import {
   ConversationAccessControlRole,
   createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
+import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationPublicClient,
   ConversationTemplatesStart,
@@ -19,12 +20,16 @@ import type { ConversationSearchSort } from '@kbn/agent-builder-common';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
+  LinkedInvestigationSummary,
   ListEscalationsQuery,
   ListEscalationsResponse,
+  ListLinkedInvestigationsResponse,
   UpdateEscalationRequest,
 } from '../../../common/escalations/escalation';
 import {
+  ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
@@ -36,10 +41,23 @@ import {
 } from './errors';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
 
-// Scopes list results to escalations and hides closed ones. Uses `metadata.status` (the
-// template field), not the bare `status` field (which tracks round execution state).
-const NON_CLOSED_ESCALATIONS_FILTER =
-  `template_id: "${ESCALATION_TEMPLATE_ID}" and not (metadata.status: "closed")` as const;
+/**
+ * Builds the Elasticsearch filter clause for the list endpoint.
+ *
+ * "open" is expressed as *not closed* rather than `metadata.status: "open"` so
+ * escalations created before the template default was applied (and therefore
+ * missing a status value) still appear in the open bucket.
+ *
+ * Uses `metadata.status` (the template field), not the bare `status` field
+ * (which tracks round execution state).
+ */
+const buildEscalationsFilter = (status: ListEscalationsQuery['status']): string => {
+  const base = `template_id: "${ESCALATION_TEMPLATE_ID}"`;
+  if (status === 'all') return base;
+  if (status === 'closed') return `${base} and metadata.status: "closed"`;
+  // 'open' — fall through. "not closed" instead of "open" for the reason above.
+  return `${base} and not (metadata.status: "closed")`;
+};
 
 const ESCALATIONS_LIST_SORT: ConversationSearchSort = { field: 'updated_at', order: 'desc' };
 
@@ -95,6 +113,7 @@ export class EscalationsService {
     const metadata = {
       ...filteredMetadata,
       [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [body.linked_investigation_id],
+      ...(body.assignees?.length ? { [ESCALATION_ASSIGNEES_FIELD]: body.assignees } : {}),
     };
 
     const accessControl =
@@ -138,6 +157,11 @@ export class EscalationsService {
 
     let result: EscalationConversation = current;
 
+    // Accumulate all metadata fields so they land in a single OCC-protected write.
+    // Sending them as separate patchMetadata calls would allow partial application:
+    // if a later write failed, earlier fields would already be committed.
+    const metadataUpdates: Record<string, MetadataFieldValue> = {};
+
     if (body.linked_investigations?.length) {
       // Validate that every id being appended is an accessible investigation.
       // bulkGet omits inaccessible / non-existent ids silently, so we detect them
@@ -165,8 +189,16 @@ export class EscalationsService {
         );
       }
 
-      const { conversation } = await client.patchMetadata(escalationId, {
-        [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: union,
+      metadataUpdates[ESCALATION_LINKED_INVESTIGATIONS_FIELD] = union;
+    }
+
+    if (body.status !== undefined) {
+      metadataUpdates[ESCALATION_STATUS_FIELD] = body.status;
+    }
+
+    if (Object.keys(metadataUpdates).length > 0) {
+      const { conversation } = await client.patchMetadata(escalationId, metadataUpdates, {
+        access: 'converse',
       });
       result = conversation;
     }
@@ -185,7 +217,7 @@ export class EscalationsService {
     const client = await this.getConversationClient(request);
 
     const { results, total } = await client.search({
-      filter: NON_CLOSED_ESCALATIONS_FILTER,
+      filter: buildEscalationsFilter(query.status),
       sort: ESCALATIONS_LIST_SORT,
       page: query.page,
       perPage: query.per_page,
@@ -193,5 +225,47 @@ export class EscalationsService {
     });
 
     return { pagination: { total, page: query.page, per_page: query.per_page }, results };
+  }
+
+  /**
+   * Returns brief summaries (id, title, status, agent_id) for the investigations linked to
+   * an escalation. The order matches the stored `linked_investigations` array. Investigations
+   * that are inaccessible to the current user are silently dropped by `client.bulkGet`.
+   *
+   * Status follows the same "missing or non-closed ⇒ open" rule as the escalations list filter.
+   */
+  async listLinkedInvestigations(
+    request: KibanaRequest,
+    escalationId: string
+  ): Promise<ListLinkedInvestigationsResponse> {
+    const client = await this.getConversationClient(request);
+
+    const escalation = await client.get(escalationId);
+    if (escalation.template_id !== ESCALATION_TEMPLATE_ID) {
+      throw new NotAnEscalationError(escalationId);
+    }
+
+    const linkedIds = (
+      (escalation.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as unknown[]
+    ).filter((v): v is string => typeof v === 'string' && v.length > 0);
+
+    if (linkedIds.length === 0) {
+      return { results: [] };
+    }
+
+    const resolved = await client.bulkGet(linkedIds);
+
+    // Preserve stored order; silently omit ids that bulkGet couldn't resolve or that resolved to
+    // a non-investigation conversation (stale/corrupt linked_investigations entries).
+    const results: LinkedInvestigationSummary[] = linkedIds.flatMap((id) => {
+      const conv = resolved.get(id);
+      if (!conv || conv.template_id !== INVESTIGATION_TEMPLATE_ID) return [];
+      const rawStatus = conv.metadata?.status;
+      const status: 'open' | 'closed' =
+        typeof rawStatus === 'string' && rawStatus === 'closed' ? 'closed' : 'open';
+      return [{ id: conv.id, title: conv.title, status, agent_id: conv.agent_id }];
+    });
+
+    return { results };
   }
 }

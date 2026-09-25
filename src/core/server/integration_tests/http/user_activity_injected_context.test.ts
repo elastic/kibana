@@ -92,7 +92,7 @@ describe('user activity injected context', () => {
       async (context, request, response) => {
         userActivity.trackUserAction({
           message: 'ua-test',
-          event: { action: 'ua_test_action' as any, type: 'user' },
+          event: { action: 'ua_test_action' as any, type: ['user'] },
           object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
           metadata: { a: 1, b: '2', c: { d: true } },
         });
@@ -118,13 +118,19 @@ describe('user activity injected context', () => {
 
     expect(meta).toMatchObject({
       message: 'ua-test',
-      event: { action: 'ua_test_action', type: 'user' },
-      object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
+      event: { action: 'ua_test_action', type: ['user'], outcome: 'unknown' },
       metadata: { a: 1, b: '2', c: { d: true } },
-      kibana: { space: { id: 'myspace' } },
+      kibana: {
+        space: { id: 'myspace' },
+        session: { id: 'some-redacted-sid' },
+        object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
+      },
       http: { request: { referrer } },
-      session: { id: 'some-redacted-sid' },
       client: {
+        ip: expect.any(String),
+        address: expect.any(String),
+      },
+      source: {
         ip: expect.any(String),
         address: expect.any(String),
       },
@@ -135,5 +141,7 @@ describe('user activity injected context', () => {
         roles: ['superuser'],
       },
     });
+    expect(meta).not.toHaveProperty('session');
+    expect(meta).not.toHaveProperty('object');
   });
 });

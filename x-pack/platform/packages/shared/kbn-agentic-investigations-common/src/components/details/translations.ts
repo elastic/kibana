@@ -7,6 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const LINKED_INVESTIGATIONS_LABELS = Object.freeze({
+  sectionTitle: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.sectionTitle', {
+    defaultMessage: 'Linked investigations',
+  }),
+  typeBadge: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.typeBadge', {
+    defaultMessage: 'Investigation',
+  }),
+  statusOpen: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusOpen', {
+    defaultMessage: 'Open',
+  }),
+  statusClosed: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusClosed', {
+    defaultMessage: 'Closed',
+  }),
+  empty: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.empty', {
+    defaultMessage: 'No linked investigations',
+  }),
+  errorTitle: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.errorTitle', {
+    defaultMessage: 'Could not load linked investigations',
+  }),
+});
+
 export const DETAILS_FLYOUT_LABELS = Object.freeze({
   ariaLabel: i18n.translate('xpack.alertzero.detailsFlyout.ariaLabel', {
     defaultMessage: 'Conversation details',
@@ -19,9 +40,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
   sections: {
     overview: i18n.translate('xpack.alertzero.detailsFlyout.sections.situation', {
       defaultMessage: "What's happened",
-    }),
-    impact: i18n.translate('xpack.alertzero.detailsFlyout.sections.impact', {
-      defaultMessage: 'Impact',
     }),
     conclusion: i18n.translate('xpack.alertzero.detailsFlyout.sections.conclusion', {
       defaultMessage: 'Conclusion',
@@ -43,25 +61,10 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     triggerAlert: i18n.translate('xpack.alertzero.detailsFlyout.overview.triggerAlert', {
       defaultMessage: 'Trigger · Alert',
     }),
-    fieldColumn: i18n.translate('xpack.alertzero.detailsFlyout.overview.fieldColumn', {
-      defaultMessage: 'Field',
-    }),
-    tableCaption: i18n.translate('xpack.alertzero.detailsFlyout.tabs.tableCaption', {
-      defaultMessage: 'Conversation overview tabs',
-    }),
-    valueColumn: i18n.translate('xpack.alertzero.detailsFlyout.overview.valueColumn', {
-      defaultMessage: 'Value',
-    }),
-    compromised: i18n.translate('xpack.alertzero.detailsFlyout.overview.compromised', {
-      defaultMessage: 'Compromised',
-    }),
-    severity: i18n.translate('xpack.alertzero.detailsFlyout.overview.severity', {
-      defaultMessage: 'Severity',
-    }),
   },
   actions: {
     openChat: i18n.translate('xpack.alertzero.detailsFlyout.actions.openChat', {
-      defaultMessage: 'Open in chat',
+      defaultMessage: 'Open chat',
     }),
     openCase: i18n.translate('xpack.alertzero.detailsFlyout.actions.openCase', {
       defaultMessage: 'Open a case',

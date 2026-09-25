@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from '../../../common/feature_flags';
 
 export const isSignificantEventsSemanticCodeSearchGroundingEnabled = (
   featureFlags: FeatureFlagsStart
 ) =>
-  featureFlags.getBooleanValue(
-    SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
-    false
+  firstValueFrom(
+    featureFlags.getBooleanValue$(
+      SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
+      false
+    )
   );

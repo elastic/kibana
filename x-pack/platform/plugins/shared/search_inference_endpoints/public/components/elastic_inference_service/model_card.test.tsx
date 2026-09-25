@@ -152,4 +152,47 @@ describe('ModelCard', () => {
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
     });
   });
+
+  describe('Blocked badge', () => {
+    it('renders the blocked badge when an endpoint is denied by region policy', () => {
+      const model: GroupedModel = {
+        ...baseModel,
+        endpoints: [
+          {
+            inference_id: 'blocked',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'my-model' },
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
+      };
+      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      expect(getByTestId('modelBlockedBadge-my-model')).toHaveTextContent('Blocked');
+    });
+
+    it('renders the blocked badge together with an existing status badge', () => {
+      const model: GroupedModel = {
+        ...baseModel,
+        modelStatus: EisModelStatus.DeprecatedEOL,
+        endpoints: [
+          {
+            inference_id: 'blocked',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'my-model' },
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
+      };
+      const { getByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
+      expect(getByTestId('modelBlockedBadge-my-model')).toBeInTheDocument();
+      expect(getByTestId('modelEolBadge-my-model')).toBeInTheDocument();
+    });
+
+    it('does not render the blocked badge when no endpoint is denied by region policy', () => {
+      const { queryByTestId } = render(<ModelCard model={baseModel} onClick={jest.fn()} />);
+      expect(queryByTestId('modelBlockedBadge-my-model')).not.toBeInTheDocument();
+    });
+  });
 });

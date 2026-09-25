@@ -13,26 +13,20 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID } from '../common/constants';
 import { registerFeatures } from './features';
+import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import { createImpactPrivilegesChecker } from './impact/services/check_impact_privileges';
 import { createImpactClient } from './impact/services/impact_client';
 import { ImpactService } from './impact/services/impact_service';
+import { registerImpactStepDefinitions } from './impact/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
-import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
-import { registerRoutes } from './proposals/routes/register_routes';
-import { ProposalsService } from './proposals/services/proposals_service';
-import { createProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
-import type { ProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
-import { createProposalUserResolver } from './proposals/services/resolve_proposal_user';
-import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
-import { registerProposalAttachment } from './proposals/attachments';
-import { registerStepDefinitions } from './proposals/step_types';
-import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
+import { AssignmentsService } from './assignments/assignments_service';
+import { registerInvestigationRoutes } from './investigations/routes/register_routes';
+import { createUserResolver } from './services/resolve_user';
+import type { ResolveUser } from './services/resolve_user';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -50,15 +44,11 @@ export class AgenticInvestigationsPlugin
     >
 {
   private readonly logger: Logger;
-  private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
-  // `workflowsManagement` is a required plugin, so this is set in setup() and
-  // read only from start() onwards; the getter asserts that ordering.
-  private proposalsService?: ProposalsService;
   private impactService?: ImpactService;
-  private proposalPrivileges?: ProposalPrivilegesChecker;
   private escalationsService?: EscalationsService;
+  private assignmentsService?: AssignmentsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
-  private resolveUser?: ResolveProposalUser;
+  private resolveUser?: ResolveUser;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -66,46 +56,26 @@ export class AgenticInvestigationsPlugin
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    {
-      features,
-      workflowsExtensions,
-      workflowsManagement,
-      agentBuilder,
-    }: AgenticInvestigationsSetupDependencies
+    { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
-    // The workflows management API is only exposed on the setup contract.
-    this.workflowsManagementApi = workflowsManagement.management;
-
     registerFeatures({ features });
 
-    registerProposalAttachment(agentBuilder);
+    registerImpactAttachment(agentBuilder);
 
-    // Declares ownership of this plugin's managed workflows. Without it the
-    // startup orphan sweep treats every workflow we installed as owned by an
-    // unregistered plugin and force-deletes it.
-    workflowsExtensions.registerManagedWorkflowOwner(
-      AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID
-    );
-
-    registerStepDefinitions({
+    registerImpactStepDefinitions({
       workflowsExtensions,
-      getProposalsService: () => this.requireProposalsService(),
+      getImpactService: () => this.requireImpactService(),
       resolveUser: (request) => this.requireUserResolver()(request),
       // Steps register during setup but only run once Kibana has started, so
       // the authorization service is resolved per call rather than captured
       // here — `security.authz` does not exist yet.
-      privileges: this.getProposalPrivilegesChecker(coreSetup),
+      privileges: createImpactPrivilegesChecker({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        logger: this.logger,
+      }),
     });
 
     const router = coreSetup.http.createRouter();
-
-    registerRoutes({
-      router,
-      logger: this.logger,
-      getProposalsService: () => this.requireProposalsService(),
-      getSpaceId: (request) => this.getSpaceId(request),
-      resolveUser: (request) => this.requireUserResolver()(request),
-    });
 
     registerImpactRoutes({
       router,
@@ -119,8 +89,15 @@ export class AgenticInvestigationsPlugin
       router,
       logger: this.logger,
       getEscalationsService: () => this.requireEscalationsService(),
+      getAssignmentsService: () => this.requireAssignmentsService(),
       getSpaceId: (request) => this.getSpaceId(request),
       getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+    });
+
+    registerInvestigationRoutes({
+      router,
+      logger: this.logger,
+      getAssignmentsService: () => this.requireAssignmentsService(),
     });
 
     return {};
@@ -131,7 +108,7 @@ export class AgenticInvestigationsPlugin
     plugins: AgenticInvestigationsStartDependencies
   ): AgenticInvestigationsPluginStart {
     this.spaces = plugins.spaces;
-    this.resolveUser = createProposalUserResolver({
+    this.resolveUser = createUserResolver({
       userProfile: coreStart.userProfile,
       security: coreStart.security,
       logger: this.logger,
@@ -139,17 +116,6 @@ export class AgenticInvestigationsPlugin
 
     // Reads and writes go through the internal user; authorization is enforced
     // at the API layer.
-    const storage = createProposalsStorageClient({
-      esClient: coreStart.elasticsearch.client.asInternalUser,
-      logger: this.logger,
-    });
-
-    this.proposalsService = new ProposalsService({
-      storage,
-      logger: this.logger,
-      getWorkflowsApi: () => this.requireWorkflowsApi(),
-    });
-
     this.impactService = new ImpactService({
       storage: createImpactStorageClient({
         esClient: coreStart.elasticsearch.client.asInternalUser,
@@ -164,15 +130,9 @@ export class AgenticInvestigationsPlugin
       conversationTemplates: plugins.agentBuilder.conversationTemplates,
     });
 
-    void initializeManagedWorkflows({
-      workflowsExtensions: plugins.workflowsExtensions,
-      logger: this.logger,
-    }).catch((error) => {
-      this.logger.error(
-        `Agentic investigations managed workflow initialization failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+    this.assignmentsService = new AssignmentsService({
+      getConversationClient: (request) =>
+        plugins.agentBuilder.conversations.getScopedClient({ request }),
     });
 
     const getImpactClient = createImpactClient({
@@ -185,29 +145,9 @@ export class AgenticInvestigationsPlugin
     });
 
     return {
-      getProposalsService: () => this.requireProposalsService(),
       getImpactClient,
-      getProposalPrivileges: () => this.requireProposalPrivileges(),
       getEscalationsService: () => this.requireEscalationsService(),
     };
-  }
-
-  private requireWorkflowsApi(): WorkflowsServerPluginSetup['management'] {
-    if (!this.workflowsManagementApi) {
-      throw new Error(
-        'Workflows management API is not available until the agenticInvestigations plugin has been set up'
-      );
-    }
-    return this.workflowsManagementApi;
-  }
-
-  private requireProposalsService(): ProposalsService {
-    if (!this.proposalsService) {
-      throw new Error(
-        'Proposals service is not available until the agenticInvestigations plugin has started'
-      );
-    }
-    return this.proposalsService;
   }
 
   private requireImpactService(): ImpactService {
@@ -219,28 +159,6 @@ export class AgenticInvestigationsPlugin
     return this.impactService;
   }
 
-  // Resolves security lazily per call, so step registration can use it during setup.
-  private getProposalPrivilegesChecker(
-    coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>
-  ): ProposalPrivilegesChecker {
-    if (!this.proposalPrivileges) {
-      this.proposalPrivileges = createProposalPrivilegesChecker({
-        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
-        logger: this.logger,
-      });
-    }
-    return this.proposalPrivileges;
-  }
-
-  private requireProposalPrivileges(): ProposalPrivilegesChecker {
-    if (!this.proposalPrivileges) {
-      throw new Error(
-        'Proposal privileges checker is not available until the agenticInvestigations plugin has been set up'
-      );
-    }
-    return this.proposalPrivileges;
-  }
-
   private requireEscalationsService(): EscalationsService {
     if (!this.escalationsService) {
       throw new Error(
@@ -250,15 +168,24 @@ export class AgenticInvestigationsPlugin
     return this.escalationsService;
   }
 
+  private requireAssignmentsService(): AssignmentsService {
+    if (!this.assignmentsService) {
+      throw new Error(
+        'Assignments service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.assignmentsService;
+  }
+
   private getSpaceId(request: KibanaRequest): string {
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
   }
 
   /**
-   * Server-derived so a caller can never attribute a decision to someone else.
-   * Built in `start()`, and only ever called from a request handler or a step.
+   * Server-derived so a caller can never attribute a write to someone else.
+   * Built in `start()`, and only ever called from a request handler.
    */
-  private requireUserResolver(): ResolveProposalUser {
+  private requireUserResolver(): ResolveUser {
     if (!this.resolveUser) {
       throw new Error(
         'User resolution is not available until the agenticInvestigations plugin has started'
