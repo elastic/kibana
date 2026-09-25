@@ -204,6 +204,8 @@ export const ServicePanel = memo(function ServicePanel({
             entityRecord={entityFromStoreResult.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
+            enableWatchlistManagement
+            onWatchlistsChanged={entityFromStoreResult.refetch}
           />
         )}
         {tabsNode}

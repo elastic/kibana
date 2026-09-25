@@ -293,6 +293,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityRecord={entityFromStoreResult.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
+            enableWatchlistManagement
+            onWatchlistsChanged={entityFromStoreResult.refetch}
           />
         )}
         {tabsNode}
