@@ -104,15 +104,11 @@ written out here — this skill is the only place they exist.
       tags: ['logs'] # optional, <= 100 entries
       references: # optional, <= 100 entries
         - uri: 'index://logs-*'
-          relation: 'derived_from'
+          relation: 'derived_from' # derived_from | relates_to | supersedes
+          description: 'The indices this profile describes'
       expires_at: '2026-10-22T00:00:00Z' # optional; unset never expires
       attributes: # optional, <= 100 keys
         esql: 'FROM logs-* | LIMIT 10'
-      references: # optional, <= 100 entries
-        - uri: 'index://logs-*'
-          relation: 'derived_from' # derived_from | relates_to | supersedes
-          description: 'The indices this profile describes'
-      expires_at: '2026-10-17T00:00:00Z' # optional; unset never expires
 ```
 
 Passing the same `ki_id` again is the whole of what makes a re-run idempotent rather than
