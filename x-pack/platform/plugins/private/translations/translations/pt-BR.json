@@ -18645,8 +18645,6 @@
     "xpack.dataFederation.createFlyout.s3.fields.accessKeyRequired": "A chave de acesso é obrigatória.",
     "xpack.dataFederation.createFlyout.s3.fields.endpoint": "Endpoint",
     "xpack.dataFederation.createFlyout.s3.fields.jwtAudience": "Público do JWT",
-    "xpack.dataFederation.createFlyout.s3.fields.region": "Região",
-    "xpack.dataFederation.createFlyout.s3.fields.regionRequired": "É necessário informar a região.",
     "xpack.dataFederation.createFlyout.s3.fields.roleArn": "Função ARN",
     "xpack.dataFederation.createFlyout.s3.fields.roleArnRequired": "O ARN da função é obrigatório.",
     "xpack.dataFederation.createFlyout.s3.fields.roleSessionName": "Nome da sessão da função",
