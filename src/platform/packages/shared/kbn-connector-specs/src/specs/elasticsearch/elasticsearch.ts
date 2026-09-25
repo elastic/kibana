@@ -32,7 +32,7 @@ export const Elasticsearch: ConnectorSpec = {
     displayName: 'External Elasticsearch',
     description: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.metadata.description', {
       defaultMessage:
-        'Search and explore data on a remote Elasticsearch cluster, retrieve mappings and aliases, and run ES|QL queries',
+        'Search and explore data on a remote Elasticsearch cluster, retrieve mappings and aliases, and run ES|QL queries. Use this when cross-cluster search (CCS) or cross-project search (CPS) is not available',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
