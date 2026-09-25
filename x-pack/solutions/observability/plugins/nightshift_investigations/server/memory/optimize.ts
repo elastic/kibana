@@ -132,13 +132,9 @@ export type SynthesizeMemoryGroup = (input: {
   task?: string;
 }) => Promise<MemoryMergeSynthesis>;
 
-/** Drop a trailing `<system_update>` so extract `context` stays the original task. */
+/** Normalize the user-authored task without interpreting literal prompt content. */
 export const unwrapUserTask = (prompt: string | undefined): string => {
-  if (!prompt) {
-    return '';
-  }
-  const tag = prompt.search(/<system_update>/);
-  return (tag === -1 ? prompt : prompt.slice(0, tag)).trim();
+  return prompt?.trim() ?? '';
 };
 
 export const MERGED_CONTENT_MAX_CHARS = 3000;
@@ -162,26 +158,55 @@ export const capMergedContent = (content: string, maxChars = MERGED_CONTENT_MAX_
 };
 
 export const MAX_FORMATTED_RECALLED_CHARS = 32_000;
+export const MAX_RECALLED_TITLE_CHARS = 256;
+export const MAX_RECALLED_CONTEXT_CHARS = 1_024;
+const MIN_RECALLED_CONTENT_CHARS = 128;
 
 export const formatRecalled = (recalledMemories: readonly MemoryPage[]): string => {
   if (recalledMemories.length === 0) {
     return '(none)';
   }
+
+  const basePrefixes = recalledMemories.map(
+    (memory, index) =>
+      `${index === 0 ? '' : '\n'}- id=${memory.id}\n  title: \n  context: \n  content: `
+  );
+  const baseChars = basePrefixes.reduce((total, prefix) => total + prefix.length, 0);
+  const roomAfterIdsAndLabels = Math.max(0, MAX_FORMATTED_RECALLED_CHARS - baseChars);
+  const totalContentReserve = Math.min(
+    MIN_RECALLED_CONTENT_CHARS * recalledMemories.length,
+    roomAfterIdsAndLabels
+  );
+  const metadataPerEntry = Math.floor(
+    (roomAfterIdsAndLabels - totalContentReserve) / recalledMemories.length
+  );
+  const titleBudget = Math.min(MAX_RECALLED_TITLE_CHARS, Math.floor(metadataPerEntry / 3));
+  const contextBudget = Math.min(MAX_RECALLED_CONTEXT_CHARS, metadataPerEntry - titleBudget);
+  const entries = recalledMemories.map((memory, index) => ({
+    prefix:
+      `${index === 0 ? '' : '\n'}- id=${memory.id}\n` +
+      `  title: ${memory.title.slice(0, titleBudget)}\n` +
+      `  context: ${(memory.context ?? '').slice(0, contextBudget)}\n` +
+      `  content: `,
+    content: memory.content,
+  }));
+  const metadataChars = entries.reduce((total, entry) => total + entry.prefix.length, 0);
+  // Recalled sets are bounded upstream. Reserving content for every entry prevents an oversized
+  // early page from hiding the IDs and metadata of later selected pages.
+  const contentRoom = Math.max(0, MAX_FORMATTED_RECALLED_CHARS - metadataChars);
+  const reservedPerEntry = Math.min(
+    MIN_RECALLED_CONTENT_CHARS,
+    Math.floor(contentRoom / entries.length)
+  );
+  let remainingContentRoom = contentRoom;
   let output = '';
-  for (const memory of recalledMemories) {
-    const separator = output.length === 0 ? '' : '\n';
-    const prefix =
-      `${separator}- id=${memory.id}\n  title: ${memory.title}\n` +
-      `  context: ${memory.context ?? ''}\n  content: `;
-    const remaining = MAX_FORMATTED_RECALLED_CHARS - output.length;
-    if (prefix.length > remaining) {
-      break;
-    }
-    const contentBudget = remaining - prefix.length;
-    output += prefix + memory.content.slice(0, contentBudget);
-    if (memory.content.length > contentBudget) {
-      break;
-    }
+  for (let index = 0; index < entries.length; index++) {
+    const entry = entries[index];
+    const laterReserved = reservedPerEntry * (entries.length - index - 1);
+    const contentBudget = Math.max(0, remainingContentRoom - laterReserved);
+    const content = entry.content.slice(0, contentBudget);
+    output += entry.prefix + content;
+    remainingContentRoom -= content.length;
   }
   return output;
 };
@@ -718,7 +743,14 @@ export const applyMemoryEdits = async ({
       recalledIds,
       recalledMemories,
       catalogHits: exactPage ? [exactPage, ...catalogHits] : catalogHits,
-    }).filter((page) => !consumedIds.has(page.id));
+    });
+    if (overlaps.some((page) => consumedIds.has(page.id))) {
+      // A prior extraction already owns this source's merge group. Consuming later proposals
+      // avoids publishing another live page for the same fact.
+      logger.debug(`Skipped extraction "${extra.slug}" — overlap already belongs to a merge group`);
+      consumedExtracts.add(index);
+      continue;
+    }
     if (overlaps.some((page) => harmful.has(page.id))) {
       logger.debug(`Skipped extraction "${extra.slug}" — merge group includes a harmful memory`);
       consumedExtracts.add(index);
@@ -920,7 +952,7 @@ const mergeMemoryGroup = async ({
     } catch (err) {
       logger.warn('Memory merge synthesis failed');
       logger.debug(`Memory merge synthesis error: ${(err as Error).message}`);
-      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+      return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
     const content = capMergedContent(synthesis.content);

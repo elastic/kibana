@@ -81,20 +81,38 @@ describe('formatRecalled', () => {
     expect(formatted).toContain('FACT_AFTER_150');
   });
 
-  it('is deterministic, capped, and truncates only the final included page', () => {
-    const first = page('memory_first');
-    first.content = 'a'.repeat(20_000);
-    const second = page('memory_second');
-    second.content = 'b'.repeat(20_000);
-    const third = page('memory_third');
-    third.content = 'must-not-appear';
+  it('is deterministic, capped, and truncates only final-page content', () => {
+    const first = page('memory_first', 'First', 'FIRST_COMPLETE');
+    const second = page('memory_second', 'Second', 'SECOND_COMPLETE');
+    const third = page('memory_third', 'Third', 'z'.repeat(65_000));
 
     const formatted = formatRecalled([first, second, third]);
 
     expect(formatted).toBe(formatRecalled([first, second, third]));
     expect(formatted).toHaveLength(MAX_FORMATTED_RECALLED_CHARS);
+    expect(formatted).toContain('id=memory_first');
+    expect(formatted).toContain('FIRST_COMPLETE');
     expect(formatted).toContain('id=memory_second');
-    expect(formatted).not.toContain('id=memory_third');
+    expect(formatted).toContain('SECOND_COMPLETE');
+    expect(formatted).toContain('id=memory_third');
+    expect(formatted).not.toContain('z'.repeat(65_000));
+  });
+
+  it('bounds huge metadata while retaining every selected id and some content', () => {
+    const first = page('memory_huge-first', 't'.repeat(65_000), 'FIRST_CONTENT_VISIBLE');
+    first.context = 'c'.repeat(65_000);
+    const second = page('memory_huge-second', 'u'.repeat(65_000), 'SECOND_CONTENT_VISIBLE');
+    second.context = 'd'.repeat(65_000);
+
+    const formatted = formatRecalled([first, second]);
+
+    expect(formatted.length).toBeLessThanOrEqual(MAX_FORMATTED_RECALLED_CHARS);
+    expect(formatted).toContain('id=memory_huge-first');
+    expect(formatted).toContain('id=memory_huge-second');
+    expect(formatted).toContain('FIRST_CONTENT_VISIBLE');
+    expect(formatted).toContain('SECOND_CONTENT_VISIBLE');
+    expect(formatted).not.toContain('c'.repeat(1_025));
+    expect(formatted).not.toContain('d'.repeat(1_025));
   });
 });
 
@@ -332,6 +350,64 @@ describe('applyMemoryEdits', () => {
     );
   });
 
+  it('consumes later extraction proposals that overlap an existing merge group', async () => {
+    const source = page(
+      'memory_checkout-redis',
+      'Checkout Redis sessions',
+      'Checkout stores sessions in Redis.'
+    );
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === source.id ? source : undefined)),
+      retrieve: jest.fn().mockResolvedValue([source]),
+    });
+    const synthesizeMemoryGroup = jest.fn().mockResolvedValue({
+      title: 'Checkout Redis',
+      content: 'Checkout stores sessions in Redis.',
+      context: 'checkout redis sessions',
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-session-store',
+          title: 'Checkout Redis sessions',
+          content: 'Checkout stores sessions in Redis.',
+          tags: [],
+          categories: [],
+        },
+        {
+          slug: 'redis-session-backend',
+          title: 'Checkout Redis sessions',
+          content: 'Checkout stores sessions in Redis.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup,
+      logger: loggerMock.create(),
+    });
+
+    expect(synthesizeMemoryGroup).toHaveBeenCalledTimes(1);
+    expect(store.create).toHaveBeenCalledTimes(1);
+    expect(store.create).not.toHaveBeenCalledWith(
+      expect.objectContaining({ slug: 'redis-session-backend' })
+    );
+    expect(summary).toEqual(
+      expect.objectContaining({
+        extractionProposedCount: 2,
+        mergeAttemptCount: 1,
+        mergeSuccessCount: 1,
+        standaloneUpsertCount: 0,
+      })
+    );
+  });
+
   it('does not publish or archive when a source becomes harmful during synthesis', async () => {
     const source = page('memory_kafka-lag', 'Kafka consumer lag');
     let current = { page: source, seqNo: 1, primaryTerm: 1 };
@@ -534,6 +610,39 @@ describe('applyMemoryEdits', () => {
     expect(store.archive).not.toHaveBeenCalled();
     expect(summary).toEqual(
       expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0 })
+    );
+  });
+
+  it('counts a synthesis exception as a write failure', async () => {
+    const source = page('memory_kafka-lag', 'Kafka consumer lag');
+    const store = createStore({
+      get: jest.fn().mockResolvedValue(source),
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-kafka',
+          title: source.title,
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup: async () => {
+        throw new Error('inference unavailable');
+      },
+      logger: loggerMock.create(),
+    });
+
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.archive).not.toHaveBeenCalled();
+    expect(summary).toEqual(
+      expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0, writeFailureCount: 1 })
     );
   });
 
@@ -1035,7 +1144,7 @@ describe('optimizeMemory', () => {
     );
   });
 
-  it('stores extract context as the task with system_update removed', async () => {
+  it('preserves a literal system_update in the user-authored task', async () => {
     const store = createStore();
     const proposeLabels = jest.fn();
     const proposeExtractions = jest.fn().mockResolvedValue({
@@ -1064,7 +1173,10 @@ describe('optimizeMemory', () => {
 
     expect(unwrapUserTask).toBeDefined();
     expect(store.create).toHaveBeenCalledWith(
-      expect.objectContaining({ context: 'why is checkout slow?' })
+      expect.objectContaining({
+        context:
+          'why is checkout slow?\n\n<system_update>\nSemantic memories materialized this turn:\n- `/workspace/memories/memory_a.md` — Alpha\n</system_update>',
+      })
     );
   });
 

@@ -650,6 +650,58 @@ describe('createMemoryPageStore', () => {
     expect(esClient.search.mock.calls[1][0].sort).toBeUndefined();
   });
 
+  it('falls back to BM25 when a semantic retriever returns a generic 404', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockRejectedValueOnce({
+          statusCode: 404,
+          meta: { body: { error: { type: 'resource_not_found_exception' } } },
+        })
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _id: 'space-a:memory_kafka-lag', _source: source }] },
+        }),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+
+    await expect(store.retrieve({ query: 'checkout lag', size: 50 })).resolves.toEqual([
+      expect.objectContaining({ id: 'memory_kafka-lag' }),
+    ]);
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    expect(esClient.search.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({ must: [{ match: { context: 'checkout lag' } }] }),
+        }),
+      })
+    );
+  });
+
+  it('returns no hits for an index_not_found_exception without attempting BM25', async () => {
+    const esClient = {
+      search: jest.fn().mockRejectedValue({
+        statusCode: 404,
+        meta: { body: { error: { type: 'index_not_found_exception' } } },
+      }),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+
+    await expect(store.retrieve({ query: 'checkout lag', size: 50 })).resolves.toEqual([]);
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+  });
+
   it('retrieves catalog duplicates against title and content, not context', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({
