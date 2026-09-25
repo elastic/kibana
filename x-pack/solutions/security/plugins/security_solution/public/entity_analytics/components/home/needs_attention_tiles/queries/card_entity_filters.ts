@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { SignalCardId } from '../facelift/v5/data';
+import type { SignalCardId } from '../data';
 
 /**
  * Maps a signal card selection to an entity-latest DSL filter for the entities

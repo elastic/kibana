@@ -36,9 +36,9 @@ import {
   useNewEntityCount,
   useRiskMoversCount,
   useNewlyHighCriticalCount,
-} from '../components/home/hooks';
-import { SignalCards } from '../components/home/facelift/v5/signal_cards';
-import type { ActiveFilter, SignalCardData } from '../components/home/facelift/v5/data';
+} from '../components/home/needs_attention_tiles/hooks';
+import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
+import type { ActiveFilter, SignalCardData } from '../components/home/needs_attention_tiles/data';
 import {
   DataViewContext,
   useEntityURLState,
