@@ -207,7 +207,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // (which share the same data-test-subj but are always in the DOM with isVisible={true}).
         const showRelPanel1 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
         await (
-          await showRelPanel1.findByTestSubject(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID)
+          await showRelPanel1.findByTestSubject(
+            GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+          )
         ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
@@ -220,7 +222,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // Scope within the open popover panel to avoid cross-node toolbar mis-clicks.
         const hideRelPanel1 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
         await (
-          await hideRelPanel1.findByTestSubject(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID)
+          await hideRelPanel1.findByTestSubject(
+            GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+          )
         ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -319,7 +323,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // (which share the same data-test-subj but are always in the DOM with isVisible={true}).
         const showRelPanel2 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
         await (
-          await showRelPanel2.findByTestSubject(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID)
+          await showRelPanel2.findByTestSubject(
+            GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+          )
         ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
         await expandedFlyoutGraph.closePreviewSection();
@@ -369,7 +375,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // (which share the same data-test-subj but are always in the DOM with isVisible={true}).
         const hideRelPanel3 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
         await (
-          await hideRelPanel3.findByTestSubject(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID)
+          await hideRelPanel3.findByTestSubject(
+            GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+          )
         ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
         await expandedFlyoutGraph.closePreviewSection();
