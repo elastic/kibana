@@ -13,6 +13,7 @@ import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { focusFirstFocusable, getPanelContextMenuTriggerId } from './focus_helpers';
+import { LoadingFlyout } from './loading_flyout';
 import { tracksOverlays } from './tracks_overlays';
 
 export interface LoadContentArgs {
@@ -22,7 +23,6 @@ export interface LoadContentArgs {
 
 interface LazyFlyoutContentProps extends LoadContentArgs {
   core: CoreStart;
-  fallback: React.JSX.Element;
   flyoutClassName: string;
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
 }
@@ -44,7 +44,7 @@ const resolveAttachedElement = (element: HTMLElement | null): HTMLElement | null
 
 /**
  * Resolves the `type` and `ownFocus` flyout props from the overlay tracker (when the flyout is
- * opened from a dashboard panel) so that both `openLazyFlyout` and `openLazyFlyoutTemplate` produce
+ * opened from a dashboard panel) so that both `openLazyFlyout` and `openLazySystemFlyout` produce
  * consistent push-vs-overlay behaviour without duplicating the logic.
  */
 export const resolvePanelFlyoutDefaults = (
@@ -101,7 +101,6 @@ export const LazyFlyoutContent = ({
   ariaLabelledBy,
   closeFlyout,
   core,
-  fallback,
   flyoutClassName,
   loadContent,
 }: LazyFlyoutContentProps) => {
@@ -142,5 +141,5 @@ export const LazyFlyoutContent = ({
     }
   }, [flyoutClassName, loadedContent]);
 
-  return loadedContent ?? fallback;
+  return loadedContent ?? LoadingFlyout;
 };

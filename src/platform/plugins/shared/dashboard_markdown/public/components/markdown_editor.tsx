@@ -29,10 +29,12 @@ interface EuiMarkdownEditorRef {
 const componentStyles = {
   rootContainer: css({
     display: 'flex',
+    height: '100%',
     width: '100%',
     containerType: 'size',
   }),
   container: css({
+    height: '100%',
     width: '100%',
   }),
   componentInvisible: css({
@@ -59,6 +61,9 @@ const componentStyles = {
         },
       },
     }),
+  footerlessEditorStyles: css({
+    blockSize: '100%',
+  }),
 };
 
 const strings = {
@@ -141,8 +146,8 @@ export const MarkdownEditor = ({
           uiPlugins={uiPlugins}
           height="full"
           ref={editorRef}
-          css={styles.editorStyles}
-          aria-describedby={FOOTER_HELP_TEXT}
+          css={[styles.editorStyles, !showFooter && styles.footerlessEditorStyles]}
+          aria-describedby={showFooter ? FOOTER_HELP_TEXT : undefined}
           showFooter={false}
           toolbarProps={{
             right: (

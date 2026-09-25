@@ -59,7 +59,6 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/scout'
   - '@kbn/presentation-util'
-  - '@kbn/flyout-template'
   - '@kbn/zod'
   - '@kbn/presentation-publishing-schemas'
 tags:

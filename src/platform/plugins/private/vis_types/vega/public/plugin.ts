@@ -47,8 +47,6 @@ import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
-import { getAddVegaPanelAction } from './add_vega_panel_action';
-import { getAddVegaEmbeddableAction } from './embeddable/add_vega_embeddable_action';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -140,10 +138,16 @@ export class VegaPlugin implements Plugin<void, void> {
     setUsageCollectionStart(deps.usageCollection);
 
     deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
+      const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
       return getAddVegaPanelAction(deps);
     });
 
+    // The embeddable definition is always registered (see setup) so existing Vega panels keep
+    // rendering even after a flag rollback.
     deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
+      const { getAddVegaEmbeddableAction } = await import(
+        './embeddable/add_vega_embeddable_action'
+      );
       return getAddVegaEmbeddableAction(core);
     });
 

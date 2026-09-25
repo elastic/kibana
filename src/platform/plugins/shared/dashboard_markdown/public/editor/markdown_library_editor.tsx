@@ -9,14 +9,14 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { FlyoutTemplate } from '@kbn/flyout-template';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import {
   type HasSerializedChildState,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { EmbeddableEditorPreview } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableEditorPreview, ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
 import type { MarkdownEmbeddableState, MarkdownByValueState } from '../../server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '../../common';
 import type { MarkdownEditorApi } from '../types';
@@ -107,55 +107,48 @@ export const MarkdownLibraryEditor = ({
   };
 
   return (
-    <FlyoutTemplate onClose={closeFlyout} data-test-subj="markdownLibraryEditorFlyout">
-      <FlyoutTemplate.Header title={strings.editFlyoutTitle} />
-      <FlyoutTemplate.Body>
-        <div
-          css={css({
-            display: 'flex',
-            gap: 16,
-            minBlockSize: 0,
-          })}
-        >
-          <div css={css({ flex: 1, minInlineSize: 0, minBlockSize: 0 })}>
-            <MarkdownEditor
-              parsingPluginList={parsingPlugins}
-              processingPluginList={processingPlugins}
-              uiPlugins={uiPlugins}
-              content={content}
-              settings$={settings$}
-              isPreview$={isInlinePreview$}
-              onChange={setContent}
-              onCancel={closeFlyout}
-              onSave={async () => {}}
-              showFooter={false}
-            />
-          </div>
-          <EmbeddableEditorPreview<
-            MarkdownEmbeddableState,
-            MarkdownEditorApi,
-            HasSerializedChildState<MarkdownEmbeddableState>
-          >
-            type={MARKDOWN_EMBEDDABLE_TYPE}
-            serializedState={draftState}
-          />
-        </div>
-      </FlyoutTemplate.Body>
-      <FlyoutTemplate.Footer>
-        <FlyoutTemplate.Footer.SecondaryAction
-          label={strings.cancelButtonLabel}
-          onClick={closeFlyout}
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2>{strings.editFlyoutTitle}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody
+        css={css({
+          '.euiFlyoutBody__overflow': { overflow: 'hidden' },
+          '.euiFlyoutBody__overflowContent': { blockSize: '100%', position: 'relative' },
+        })}
+      >
+        <MarkdownEditor
+          parsingPluginList={parsingPlugins}
+          processingPluginList={processingPlugins}
+          uiPlugins={uiPlugins}
+          content={initialState.content}
+          settings$={settings$}
+          isPreview$={isInlinePreview$}
+          onChange={setContent}
+          onCancel={closeFlyout}
+          onSave={async () => {}}
+          showFooter={false}
         />
-        <FlyoutTemplate.Footer.PrimaryAction
-          label={strings.saveButtonLabel}
-          onClick={() => {
-            void save();
-          }}
-          isDisabled={!hasChanges}
-          isLoading={isSaving}
-          data-test-subj="markdownEditorApplyButton"
-        />
-      </FlyoutTemplate.Footer>
-    </FlyoutTemplate>
+      </EuiFlyoutBody>
+      <ManagedEditorFooter
+        onCancel={closeFlyout}
+        cancelButtonLabel={strings.cancelButtonLabel}
+        onSave={save}
+        saveButtonLabel={strings.saveButtonLabel}
+        isSaveDisabled={!hasChanges}
+        isSaving={isSaving}
+        saveButtonDataTestSubj="markdownEditorApplyButton"
+      />
+      <EmbeddableEditorPreview<
+        MarkdownEmbeddableState,
+        MarkdownEditorApi,
+        HasSerializedChildState<MarkdownEmbeddableState>
+      >
+        type={MARKDOWN_EMBEDDABLE_TYPE}
+        serializedState={draftState}
+      />
+    </>
   );
 };

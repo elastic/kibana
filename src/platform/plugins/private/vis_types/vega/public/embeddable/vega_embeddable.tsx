@@ -156,7 +156,8 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesDataViews &
   PublishesRendered & {
     /** Returns the editor panel content for an already-open flyout. */
-    getEditPanel?: (options?: {
+    getEditPanel?: (options: {
+      ariaLabelledBy: string;
       closeFlyout?: () => void;
       isNewPanel?: boolean;
     }) => Promise<JSX.Element | undefined>;
@@ -285,17 +286,20 @@ export const vegaEmbeddableFactory = (
     });
 
     const getEditPanel = async ({
+      ariaLabelledBy,
       closeFlyout = () => {},
       isNewPanel = false,
     }: {
+      ariaLabelledBy: string;
       closeFlyout?: () => void;
       isNewPanel?: boolean;
-    } = {}) => {
+    }) => {
       const initialSpec = spec$.getValue();
       const initialSearch = panelSearchStateManager.getLatestState();
       return (
         <VegaEditorFlyout
           api={api}
+          ariaLabelledBy={ariaLabelledBy}
           SearchBar={deps.SearchBar}
           closeFlyout={closeFlyout}
           initialSpec={initialSpec}

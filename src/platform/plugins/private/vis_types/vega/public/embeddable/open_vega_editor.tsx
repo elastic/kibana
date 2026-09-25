@@ -9,7 +9,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
-import { openLazyFlyoutTemplate } from '@kbn/presentation-util';
+import { openLazySystemFlyout } from '@kbn/presentation-util';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
 export const openVegaEditor = ({
@@ -29,7 +29,7 @@ export const openVegaEditor = ({
 }) => {
   let closed = false;
 
-  const flyoutRef = openLazyFlyoutTemplate({
+  const flyoutRef = openLazySystemFlyout({
     core,
     parentApi,
     returnFocus,
@@ -37,7 +37,7 @@ export const openVegaEditor = ({
       focusedPanelId,
       size: 'm',
     },
-    loadContent: async ({ closeFlyout }) => {
+    loadContent: async ({ ariaLabelledBy, closeFlyout }) => {
       const api = await loadApi();
       if (!api) return;
 
@@ -48,7 +48,7 @@ export const openVegaEditor = ({
         return;
       }
 
-      return api.getEditPanel?.({ closeFlyout, isNewPanel });
+      return api.getEditPanel?.({ ariaLabelledBy, closeFlyout, isNewPanel });
     },
   });
 

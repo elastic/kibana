@@ -9,8 +9,17 @@
 
 import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiSkeletonText } from '@elastic/eui';
-import { FlyoutTemplate } from '@kbn/flyout-template';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSkeletonText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { QueryState } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -67,6 +76,7 @@ const specFromEditor = (
 
 export const VegaEditorFlyout = ({
   api,
+  ariaLabelledBy,
   closeFlyout,
   initialSpec,
   SearchBar,
@@ -77,6 +87,7 @@ export const VegaEditorFlyout = ({
 }: {
   api: VegaEmbeddableApi;
   SearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
+  ariaLabelledBy: string;
   closeFlyout: () => void;
   initialSpec: VegaByValueState['spec'];
   isNewPanel?: boolean;
@@ -144,9 +155,13 @@ export const VegaEditorFlyout = ({
     closeFlyout();
   };
   return (
-    <FlyoutTemplate onClose={closeFlyout}>
-      <FlyoutTemplate.Header title="Vega" />
-      <FlyoutTemplate.Body data-test-subj="editorFlyoutBody">
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={ariaLabelledBy}>Vega</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody data-test-subj="editorFlyoutBody">
         <div css={bodyCss}>
           <div css={searchBarCss}>
             <SearchBar
@@ -193,33 +208,51 @@ export const VegaEditorFlyout = ({
             </Suspense>
           </div>
         </div>
-      </FlyoutTemplate.Body>
-      <FlyoutTemplate.Footer>
-        <FlyoutTemplate.Footer.SecondaryAction
-          label={i18n.translate('visTypeVega.dashboard.cancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
-          onClick={closeFlyout}
-          data-test-subj="vegaEditorFlyoutCancelButton"
-        />
-        <FlyoutTemplate.Footer.SecondaryAction
-          side="right"
-          label={i18n.translate('visTypeVega.dashboard.previewButtonLabel', {
-            defaultMessage: 'Run preview',
-          })}
-          disabled={!canPreview}
-          onClick={previewChanges}
-          data-test-subj="vegaEditorFlyoutPreviewButton"
-        />
-        <FlyoutTemplate.Footer.PrimaryAction
-          label={i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
-            defaultMessage: 'Apply and close',
-          })}
-          disabled={!canSave}
-          onClick={handleSave}
-          data-test-subj="vegaEditorFlyoutSaveButton"
-        />
-      </FlyoutTemplate.Footer>
-    </FlyoutTemplate>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              flush="left"
+              onClick={closeFlyout}
+              data-test-subj="vegaEditorFlyoutCancelButton"
+            >
+              {i18n.translate('visTypeVega.dashboard.cancelButtonLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="success"
+                  iconType="play"
+                  disabled={!canPreview}
+                  onClick={previewChanges}
+                  data-test-subj="vegaEditorFlyoutPreviewButton"
+                >
+                  {i18n.translate('visTypeVega.dashboard.previewButtonLabel', {
+                    defaultMessage: 'Run preview',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  disabled={!canSave}
+                  onClick={handleSave}
+                  data-test-subj="vegaEditorFlyoutSaveButton"
+                >
+                  {i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
+                    defaultMessage: 'Apply and close',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </>
   );
 };

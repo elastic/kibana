@@ -8,12 +8,17 @@
  */
 
 import React from 'react';
-import { openLazyFlyoutTemplate } from '@kbn/presentation-util';
+import { i18n } from '@kbn/i18n';
+import { openLazySystemFlyout } from '@kbn/presentation-util';
 import { markdownClient } from '../markdown_client/markdown_client';
 import { coreServices } from '../services/kibana_services';
 
+const editFlyoutTitle = i18n.translate('dashboardMarkdown.libraryEditor.editFlyoutTitle', {
+  defaultMessage: 'Edit markdown',
+});
+
 export const onVisualizationsEdit = (id: string) => {
-  openLazyFlyoutTemplate({
+  openLazySystemFlyout({
     core: coreServices,
     loadContent: async ({ closeFlyout }) => {
       const { data } = await markdownClient.get(id);
@@ -22,6 +27,7 @@ export const onVisualizationsEdit = (id: string) => {
     },
     flyoutProps: {
       'data-test-subj': 'markdownLibraryEditorFlyout',
+      title: editFlyoutTitle,
     },
   });
 };

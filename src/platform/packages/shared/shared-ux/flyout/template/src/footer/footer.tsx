@@ -44,10 +44,8 @@ export const FooterZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutF
   const { dataTestSubj: rootTestSubj } = useFlyoutTemplateConfig();
   const items = footerAssembly.parseChildren(children);
 
-  const secondaries = partsOf(items, SECONDARY_ACTION_PART_NAME);
+  const [secondary] = partsOf(items, SECONDARY_ACTION_PART_NAME);
   const [primary] = partsOf(items, PRIMARY_ACTION_PART_NAME);
-  const leftSecondaries = secondaries.filter((part) => part.attributes.side !== 'right');
-  const rightSecondaries = secondaries.filter((part) => part.attributes.side === 'right');
 
   // A menu with no panels has nothing to open, so it does not claim the primary slot;
   // skip past any such menu rather than letting it mask a later one that has content.
@@ -68,49 +66,17 @@ export const FooterZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutF
     : primary
     ? primaryActionPart.resolve(primary, undefined)
     : null;
-  const leftSecondaryActions = leftSecondaries
-    .map((part) => secondaryActionPart.resolve(part, undefined))
-    .filter(Boolean);
-  const rightSecondaryActions = rightSecondaries
-    .map((part) => secondaryActionPart.resolve(part, undefined))
-    .filter(Boolean);
-  const hasLeftActions = leftSecondaryActions.length > 0;
-  const hasRightActions = rightSecondaryActions.length > 0 || Boolean(primarySlot);
+  const secondaryAction = secondary ? secondaryActionPart.resolve(secondary, undefined) : null;
 
-  if (!hasLeftActions && !hasRightActions) {
+  if (!primarySlot && !secondaryAction) {
     return null;
   }
 
   return (
     <EuiFlyoutFooter data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Footer')}>
-      <EuiFlexGroup
-        justifyContent={hasLeftActions ? 'spaceBetween' : 'flexEnd'}
-        gutterSize="none"
-        responsive={false}
-      >
-        {hasLeftActions && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {leftSecondaryActions.map((action, index) => (
-                <EuiFlexItem grow={false} key={`left-secondary-${index}`}>
-                  {action}
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-        {hasRightActions && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {rightSecondaryActions.map((action, index) => (
-                <EuiFlexItem grow={false} key={`right-secondary-${index}`}>
-                  {action}
-                </EuiFlexItem>
-              ))}
-              {primarySlot && <EuiFlexItem grow={false}>{primarySlot}</EuiFlexItem>}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+        {secondaryAction && <EuiFlexItem grow={false}>{secondaryAction}</EuiFlexItem>}
+        {primarySlot && <EuiFlexItem grow={false}>{primarySlot}</EuiFlexItem>}
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );

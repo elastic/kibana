@@ -16,7 +16,6 @@ import {
   resolvePanelFlyoutDefaults,
   type LoadContentArgs,
 } from './lazy_flyout_common';
-import { LoadingFlyout } from './loading_flyout';
 
 const htmlId = htmlIdGenerator('modalTitleId');
 
@@ -68,7 +67,6 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
         loadContent={loadContent}
         core={core}
         ariaLabelledBy={ariaLabelledBy}
-        fallback={LoadingFlyout}
         flyoutClassName="kbnPresentationLazyFlyout"
       />,
       core

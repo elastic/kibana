@@ -6885,7 +6885,6 @@
     "links.panelEditor.layoutSettingsTitle": "Layout",
     "links.panelEditor.linksTitle": "Links",
     "links.panelEditor.saveButtonLabel": "Salvar",
-    "links.panelEditor.saveToLibrarySwitchLabel": "Salvar na biblioteca",
     "links.panelEditor.saveToLibrarySwitchTooltip": "Salve este painel de links na biblioteca para adicioná-lo facilmente a outros dashboards.",
     "links.panelEditor.titleInputLabel": "Título",
     "links.visTypeAlias.title": "Links",

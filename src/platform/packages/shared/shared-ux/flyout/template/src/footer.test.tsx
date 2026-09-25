@@ -115,29 +115,6 @@ describe('FlyoutTemplate footer', () => {
     expect(text.indexOf('Cancel')).toBeLessThan(text.indexOf('Take action'));
   });
 
-  it('renders right-aligned secondary actions before the primary action', () => {
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" data-test-subj="sidedFooter">
-        <FlyoutTemplate.Body>
-          <span>content</span>
-        </FlyoutTemplate.Body>
-        <FlyoutTemplate.Footer>
-          <FlyoutTemplate.Footer.SecondaryAction label="Cancel" onClick={noop} />
-          <FlyoutTemplate.Footer.SecondaryAction label="Preview" side="right" onClick={noop} />
-          <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={noop} />
-        </FlyoutTemplate.Footer>
-      </FlyoutTemplate>
-    );
-
-    const footer = screen.getByTestId('sidedFooterFooter');
-    const text = footer.textContent ?? '';
-    expect(text.indexOf('Cancel')).toBeLessThan(text.indexOf('Preview'));
-    expect(text.indexOf('Preview')).toBeLessThan(text.indexOf('Save'));
-    expect(within(footer).getByText('Cancel')).toBeInTheDocument();
-    expect(within(footer).getByText('Preview')).toBeInTheDocument();
-    expect(within(footer).getByText('Save')).toBeInTheDocument();
-  });
-
   it('omits the footer when a menu with empty panels is the only action', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="emptyMenu">

@@ -11,45 +11,45 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { openLazyFlyoutTemplate } from './open_lazy_flyout_template';
+import { openLazySystemFlyout } from './open_lazy_system_flyout';
 
 const overlayRef = { close: jest.fn() } as unknown as OverlayRef;
-type OpenFlyoutTemplate = CoreStart['overlays']['openFlyoutTemplate'];
-const openFlyoutTemplate = jest.fn<
-  ReturnType<OpenFlyoutTemplate>,
-  Parameters<OpenFlyoutTemplate>
->(() => overlayRef);
+type OpenSystemFlyout = CoreStart['overlays']['openSystemFlyout'];
+const openSystemFlyout = jest.fn<ReturnType<OpenSystemFlyout>, Parameters<OpenSystemFlyout>>(
+  () => overlayRef
+);
 const core = {
-  overlays: { openFlyoutTemplate },
+  overlays: { openSystemFlyout },
   application: { currentAppId$: { pipe: () => ({ subscribe: () => undefined }) } },
   notifications: { toasts: { addWarning: jest.fn() } },
 } as unknown as CoreStart;
 
-describe('openLazyFlyoutTemplate', () => {
+describe('openLazySystemFlyout', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('opens a managed flyout template with the presentation defaults', () => {
-    const ref = openLazyFlyoutTemplate({
+  it('opens a root managed flyout with the presentation defaults', () => {
+    const ref = openLazySystemFlyout({
       core,
       loadContent: async () => <div>Content</div>,
       flyoutProps: { 'data-test-subj': 'managedEditor' },
     });
 
     expect(ref).toBe(overlayRef);
-    expect(openFlyoutTemplate).toHaveBeenCalledWith(
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({
-        className: 'kbnPresentationLazyFlyoutTemplate',
+        className: 'kbnPresentationLazySystemFlyout',
         'data-test-subj': 'managedEditor',
-        resizable: true,
+        isResizable: true,
+        session: 'start',
         size: 500,
-      }),
-      expect.any(Function)
+      })
     );
   });
 
   it('tracks the managed flyout for compatible parents', () => {
     const parentApi = { openOverlay: jest.fn(), clearOverlays: jest.fn() };
-    openLazyFlyoutTemplate({
+    openLazySystemFlyout({
       core,
       parentApi,
       loadContent: async () => <div>Content</div>,
@@ -64,7 +64,7 @@ describe('openLazyFlyoutTemplate', () => {
   it('closes, clears tracking, notifies, and restores focus after loading fails', async () => {
     const parentApi = { openOverlay: jest.fn(), clearOverlays: jest.fn() };
     const returnFocus = jest.fn();
-    openLazyFlyoutTemplate({
+    openLazySystemFlyout({
       core,
       parentApi,
       returnFocus,
@@ -72,9 +72,7 @@ describe('openLazyFlyoutTemplate', () => {
         throw new Error('Failed');
       },
     });
-
-    const content = openFlyoutTemplate.mock.calls[0][1];
-    render(React.createElement(content));
+    render(openSystemFlyout.mock.calls[0][0]);
 
     await waitFor(() => expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1));
     expect(overlayRef.close).toHaveBeenCalledTimes(1);
@@ -89,21 +87,15 @@ describe('openLazyFlyoutTemplate', () => {
       resolveLoad = resolve;
       rejectLoad = reject;
     });
-
-    openLazyFlyoutTemplate({ core, loadContent: () => loading });
-    const content = openFlyoutTemplate.mock.calls[0][1];
-    const view = render(React.createElement(content));
-    openFlyoutTemplate.mock.calls[0][0].onClose?.();
+    openLazySystemFlyout({ core, loadContent: () => loading });
+    const view = render(openSystemFlyout.mock.calls[0][0]);
+    openSystemFlyout.mock.calls[0][1]?.onClose?.();
     view.unmount();
 
     await act(async () => {
-      if (outcome === 'resolve') {
-        resolveLoad(<div>Late content</div>);
-      } else {
-        rejectLoad(new Error('Late failure'));
-      }
+      if (outcome === 'resolve') resolveLoad(<div>Late content</div>);
+      else rejectLoad(new Error('Late failure'));
     });
-
     expect(screen.queryByText('Late content')).not.toBeInTheDocument();
     expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
     expect(overlayRef.close).toHaveBeenCalledTimes(1);

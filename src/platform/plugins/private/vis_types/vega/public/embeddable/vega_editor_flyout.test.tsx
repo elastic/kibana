@@ -94,6 +94,7 @@ const renderFlyout = ({
   const view = render(
     <VegaEditorFlyout
       api={api}
+      ariaLabelledBy="vegaEditorTitle"
       closeFlyout={closeFlyout}
       initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
       SearchBar={SearchBar}
@@ -108,6 +109,17 @@ const renderFlyout = ({
 };
 
 describe('VegaEditorFlyout', () => {
+  it('renders the title with the flyout label id and all footer actions', async () => {
+    renderFlyout();
+
+    await screen.findByText('changeSpec');
+
+    expect(screen.getByRole('heading', { name: 'Vega' })).toHaveAttribute('id', 'vegaEditorTitle');
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+  });
+
   it('runs preview for an updated spec', async () => {
     const { onPreview } = renderFlyout();
 

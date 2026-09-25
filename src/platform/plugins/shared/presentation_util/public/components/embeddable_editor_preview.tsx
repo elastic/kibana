@@ -9,12 +9,19 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiCallOut } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HasSerializedChildState, HasSerializableState } from '@kbn/presentation-publishing';
+import { useSearchApi } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { FlyoutTemplate } from '@kbn/flyout-template';
 
 export interface EmbeddableEditorPreviewProps<
   SerializedState extends object,
@@ -44,19 +51,25 @@ export const EmbeddableEditorPreview = <
   title = defaultPreviewTitle,
   verticalAlignment = 'stretch',
 }: EmbeddableEditorPreviewProps<SerializedState, Api, ParentApi>) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'embeddableEditorPreviewTitle' });
   const latestStateRef = useRef(serializedState);
   latestStateRef.current = serializedState;
   const [api, setApi] = useState<Api>();
   const [updateError, setUpdateError] = useState<Error>();
   const updateQueueRef = useRef(Promise.resolve());
 
+  // Stable search subjects for the child embeddable. `useSearchApi` creates them once;
+  // `EmbeddableRenderer` latches `getParentApi()` on mount so subjects must not be recreated.
+  const searchApi = useSearchApi({});
+
   const parentApi = useMemo(() => {
     const baseApi: HasSerializedChildState<SerializedState> & Record<string, unknown> = {
       ...(getParentApi?.() ?? {}),
+      ...searchApi,
       getSerializedStateForChild: () => latestStateRef.current,
     };
     return baseApi as ParentApi;
-  }, [getParentApi]);
+  }, [getParentApi, searchApi]);
 
   useEffect(() => {
     if (!api) return;
@@ -69,7 +82,8 @@ export const EmbeddableEditorPreview = <
   }, [api, serializedState]);
 
   return (
-    <FlyoutTemplate
+    <EuiFlyout
+      aria-labelledby={titleId}
       data-test-subj="embeddableEditorPreviewFlyout"
       hideCloseButton
       onClose={() => {}}
@@ -79,43 +93,42 @@ export const EmbeddableEditorPreview = <
       size="m"
       flyoutMenuProps={{ title }}
     >
-      <FlyoutTemplate.Header title={title} />
-      <FlyoutTemplate.Body>
-        <div
-          css={css({
-            display: 'flex',
-            flexDirection: 'column',
-            blockSize: '100%',
-            minBlockSize: 240,
-          })}
-        >
-          {updateError ? (
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              title={i18n.translate('presentationUtil.embeddableEditorPreview.updateErrorMessage', {
-                defaultMessage: 'Unable to update preview',
-              })}
-            >
-              <p>{updateError.message}</p>
-            </EuiCallOut>
-          ) : null}
-          <div
-            css={css(
-              verticalAlignment === 'top'
-                ? { blockSize: 'fit-content' }
-                : { blockSize: '100%', minBlockSize: 240 }
-            )}
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id={titleId}>{title}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody
+        css={css({
+          '.euiFlyoutBody__overflowContent': { blockSize: '100%' },
+        })}
+      >
+        {updateError ? (
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            title={i18n.translate('presentationUtil.embeddableEditorPreview.updateErrorMessage', {
+              defaultMessage: 'Unable to update preview',
+            })}
           >
-            <EmbeddableRenderer<SerializedState, Api, ParentApi>
-              type={type}
-              getParentApi={() => parentApi}
-              hidePanelChrome
-              onApiAvailable={setApi}
-            />
-          </div>
+            <p>{updateError.message}</p>
+          </EuiCallOut>
+        ) : null}
+        <div
+          css={css(
+            verticalAlignment === 'top'
+              ? { blockSize: 'fit-content' }
+              : { blockSize: '100%', minBlockSize: 240 }
+          )}
+        >
+          <EmbeddableRenderer<SerializedState, Api, ParentApi>
+            type={type}
+            getParentApi={() => parentApi}
+            hidePanelChrome
+            onApiAvailable={setApi}
+          />
         </div>
-      </FlyoutTemplate.Body>
-    </FlyoutTemplate>
+      </EuiFlyoutBody>
+    </EuiFlyout>
   );
 };

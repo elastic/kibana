@@ -429,7 +429,9 @@ describe('vegaEmbeddableFactory', () => {
     const { api } = await buildEmbeddable();
     api.setQuery({ language: 'kuery', query: 'bytes > 1000' });
     api.setFilters([{ meta: { alias: 'panel filter' }, query: { match: { status: 200 } } }]);
-    const content = (await api.getEditPanel?.()) as React.ReactElement<{
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
+    })) as React.ReactElement<{
       onRevert: () => void;
       onPreview: (spec: VegaByValueState['spec']) => void;
     }>;
@@ -450,7 +452,10 @@ describe('vegaEmbeddableFactory', () => {
 
   it('removes the panel when editing is cancelled on a brand-new one', async () => {
     const { api } = await buildEmbeddable();
-    const content = (await api.getEditPanel?.({ isNewPanel: true })) as React.ReactElement<{
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
+      isNewPanel: true,
+    })) as React.ReactElement<{
       onRevert: () => void;
     }>;
 
@@ -462,7 +467,9 @@ describe('vegaEmbeddableFactory', () => {
 
   it('keeps the edited spec when saving', async () => {
     const { api } = await buildEmbeddable();
-    const content = (await api.getEditPanel?.()) as React.ReactElement<{
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
+    })) as React.ReactElement<{
       onSave: (spec: VegaByValueState['spec']) => void;
     }>;
 

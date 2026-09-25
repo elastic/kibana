@@ -55,4 +55,7 @@ export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_pic
 export { EmbeddableEditorPreview } from './embeddable_editor_preview';
 export type { EmbeddableEditorPreviewProps } from './embeddable_editor_preview';
 
+export { ManagedEditorFooter } from './managed_editor_footer';
+export type { ManagedEditorFooterProps } from './managed_editor_footer';
+
 export type * from './types';

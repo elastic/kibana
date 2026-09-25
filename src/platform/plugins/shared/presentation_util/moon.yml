@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/field-utils'
   - '@kbn/embeddable-plugin'
-  - '@kbn/flyout-template'
   - '@kbn/presentation-publishing'
 tags:
   - plugin
