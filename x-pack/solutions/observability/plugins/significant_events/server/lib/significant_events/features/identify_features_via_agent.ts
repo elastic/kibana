@@ -21,6 +21,8 @@ import {
 import {
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
 } from '@kbn/significant-events-schema';
 import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
 import {
@@ -44,6 +46,7 @@ export interface ExecuteFeatureIdentificationAgentOptions {
   excludedFeatures?: ExcludedFeatureSummary[];
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
+  interactionId: string;
   signal?: AbortSignal;
   logger: Logger;
 }
@@ -57,6 +60,7 @@ export async function executeFeatureIdentificationAgent({
   excludedFeatures,
   previouslyIdentifiedFeatures = [],
   knownFeatureIds = '',
+  interactionId,
   signal,
   logger,
 }: ExecuteFeatureIdentificationAgentOptions): Promise<{
@@ -96,6 +100,9 @@ export async function executeFeatureIdentificationAgent({
       telemetryMetadata: {
         pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
         aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+        productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+        productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+        interactionId,
       },
     },
   });
