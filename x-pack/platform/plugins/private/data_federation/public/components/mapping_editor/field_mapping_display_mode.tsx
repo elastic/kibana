@@ -53,7 +53,7 @@ export const FieldMappingDisplayMode = ({
           <span aria-hidden="true">&nbsp;</span>
         )}
       </EuiFlexItem>
-    <MappingActions onEdit={onEdit} onRemove={onRemove} isDisabled={areActionsDisabled} />
+      <MappingActions onEdit={onEdit} onRemove={onRemove} isDisabled={areActionsDisabled} />
     </>
   );
 };

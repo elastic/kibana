@@ -79,4 +79,3 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
     </>
   );
 }
-

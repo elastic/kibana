@@ -787,9 +787,12 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsTrimSpacesHelp: i18n.translate('xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp', {
-    defaultMessage: 'Removes surrounding whitespace from field values.',
-  }),
+  settingsTrimSpacesHelp: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp',
+    {
+      defaultMessage: 'Removes surrounding whitespace from field values.',
+    }
+  ),
 
   settingsDatetimeFormatLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatLabel',

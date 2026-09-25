@@ -49,4 +49,3 @@ export function MappingHeader({ docLinks }: MappingHeaderProps) {
     </>
   );
 }
-

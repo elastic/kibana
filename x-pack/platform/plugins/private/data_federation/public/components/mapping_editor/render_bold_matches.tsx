@@ -36,4 +36,3 @@ export const renderBoldMatches = (text: string, query: string): React.ReactNode 
 
   return <>{parts}</>;
 };
-

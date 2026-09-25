@@ -34,4 +34,3 @@ describe('renderBoldMatches', () => {
     expect(container.querySelectorAll('strong')).toHaveLength(0);
   });
 });
-

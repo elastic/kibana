@@ -12,4 +12,3 @@ import type { Decorator } from '@storybook/react';
 const I18nDecorator: Decorator = (storyFn) => <I18nProvider>{storyFn()}</I18nProvider>;
 
 export const decorators = [I18nDecorator];
-

@@ -18,7 +18,10 @@ import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import type { CreateDatasetFormValues, DatasetBooleanFormValue } from '../create_dataset_form_state';
+import type {
+  CreateDatasetFormValues,
+  DatasetBooleanFormValue,
+} from '../create_dataset_form_state';
 
 const LATE_MATERIALIZATION_OPTIONS = [
   {
@@ -50,7 +53,11 @@ const LATE_MATERIALIZATION_OPTIONS = [
   },
 ] satisfies Array<EuiSuperSelectOption<DatasetBooleanFormValue>>;
 
-export function LateMaterializationSelect({ control }: { control: Control<CreateDatasetFormValues> }) {
+export function LateMaterializationSelect({
+  control,
+}: {
+  control: Control<CreateDatasetFormValues>;
+}) {
   const { field: lateMaterializationField } = useController({
     name: 'settings.late_materialization',
     control,
@@ -69,4 +76,3 @@ export function LateMaterializationSelect({ control }: { control: Control<Create
     />
   );
 }
-
