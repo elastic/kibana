@@ -39,4 +39,5 @@ export enum SOURCES_TYPES {
   CLASSIC_STREAM = 'Classic Stream',
   QUERY_STREAM = 'Query Stream',
   EXTERNAL = 'External data',
+  VIEW = 'View',
 }
