@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigationOutputProps } from './types';
 import { FinalResults } from './final_results';
 import { HypothesisRow } from './hypothesis_row';
-import { TriggerFeedback } from './trigger_feedback';
 import { buildHeader } from './utils';
 
 /**
@@ -143,10 +142,6 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
        * newlines in its tool-call JSON), so it's never rendered before `status` is `complete`.
        */}
       {status === 'complete' && state && <FinalResults state={state} />}
-
-      {status === 'complete' && state?.trigger_feedback?.length ? (
-        <TriggerFeedback updates={state.trigger_feedback} getQueryHref={getQueryHref} />
-      ) : null}
     </EuiPanel>
   );
 };
