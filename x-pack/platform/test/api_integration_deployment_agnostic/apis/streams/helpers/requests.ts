@@ -13,10 +13,8 @@ import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/ty
 import type { Streams } from '@kbn/streams-schema';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import type { ServerRouteRepository } from '@kbn/server-route-repository';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
-import type { RepositorySupertestClient } from '../../../../common/utils/server_route_repository/create_admin_service_from_repository';
 import type { StreamsSupertestRepositoryClient } from './repository_client';
 
 // ---------------------------------------------------------------------------
@@ -552,117 +550,4 @@ export async function previewContent(
     })
     .expect(expectStatusCode)
     .then((response) => response.body);
-}
-
-export type SignificantEventsApiClient = RepositorySupertestClient<ServerRouteRepository>;
-
-export interface BulkQueryIndexInput {
-  id: string;
-  title: string;
-  description?: string;
-  esql: { query: string };
-  severity_score?: number;
-  evidence?: string[];
-  expires_at?: string;
-}
-
-export type BulkQueryOperation = { index: BulkQueryIndexInput } | { delete: { id: string } };
-
-export interface ListedQuery {
-  id: string;
-  title: string;
-  description?: string;
-  esql: { query: string };
-  severity_score?: number;
-  evidence?: string[];
-  expires_at?: string;
-  [key: string]: unknown;
-}
-
-const LIST_QUERIES_RANGE = {
-  from: '2020-01-01T00:00:00.000Z',
-  to: '2020-01-01T01:00:00.000Z',
-  bucketSize: '1h',
-} as const;
-
-export async function getQueries(
-  apiClient: SignificantEventsApiClient,
-  name: string,
-  expectStatusCode: number = 200
-): Promise<{ queries: ListedQuery[] }> {
-  const body = (await apiClient
-    .fetch('GET /internal/streams/_queries', {
-      params: {
-        query: {
-          ...LIST_QUERIES_RANGE,
-          streamNames: [name],
-          status: ['active', 'draft'],
-          perPage: 1000,
-        },
-      },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body)) as { queries: ListedQuery[] };
-
-  return {
-    queries: body.queries,
-  };
-}
-
-async function upsertQuery(
-  apiClient: SignificantEventsApiClient,
-  streamName: string,
-  queryId: string,
-  body: Omit<BulkQueryIndexInput, 'id'>,
-  expectStatusCode: number = 200
-) {
-  return apiClient
-    .fetch('PUT /internal/significant_events/queries/{queryId}', {
-      params: {
-        path: { queryId },
-        body: {
-          ...body,
-          target_name: streamName,
-        },
-      },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
-}
-
-async function deleteQueries(
-  apiClient: SignificantEventsApiClient,
-  queryIds: string[],
-  expectStatusCode: number = 200
-) {
-  return apiClient
-    .fetch('POST /internal/streams/queries/_bulk_delete', {
-      params: { body: { queryIds } },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
-}
-
-export async function bulkQueries(
-  apiClient: SignificantEventsApiClient,
-  name: string,
-  operations: BulkQueryOperation[],
-  expectStatusCode: number = 200
-) {
-  const indexOps = operations.flatMap((operation) =>
-    'index' in operation ? [operation.index] : []
-  );
-  const deleteIds = operations.flatMap((operation) =>
-    'delete' in operation ? [operation.delete.id] : []
-  );
-
-  for (const query of indexOps) {
-    const { id, ...body } = query;
-    await upsertQuery(apiClient, name, id, body, expectStatusCode);
-  }
-  if (deleteIds.length > 0) {
-    await deleteQueries(apiClient, deleteIds, expectStatusCode);
-  }
-
-  return { acknowledged: true };
 }

@@ -2073,10 +2073,6 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 
 # Streams
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/nightshift-sre-agent-team  @elastic/streams-ui
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.feature_flag.index.ts @elastic/nightshift-sre-agent-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.feature_flag.serverless.config.ts @elastic/nightshift-sre-agent-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.index.ts @elastic/nightshift-sre-agent-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.stateful.config.ts @elastic/nightshift-sre-agent-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/nightshift-sre-agent-team @elastic/streams-ui
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/nightshift-sre-agent-team @elastic/streams-ui
 /x-pack/platform/test/api_integration/apis/streams @elastic/nightshift-sre-agent-team @elastic/streams-ui

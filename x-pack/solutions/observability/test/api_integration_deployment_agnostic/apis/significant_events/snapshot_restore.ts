@@ -8,19 +8,20 @@
 import expect from '@kbn/expect';
 import { emptyAssets, type Streams } from '@kbn/streams-schema';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
-import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
-  bulkQueries,
   disableStreams,
   enableStreams,
   forkStream,
-  getQueries,
   getStream,
   indexAndAssertTargetStream,
-} from './helpers/requests';
-import { STREAMS_SNAPSHOT_REPO_PATH } from '../../default_configs/common_paths';
+} from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/requests';
+import { STREAMS_SNAPSHOT_REPO_PATH } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/common_paths';
+import type { StreamsSupertestRepositoryClient } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
+import { createStreamsRepositoryAdminClient as createPlatformStreamsRepositoryAdminClient } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { bulkQueries, getQueries } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -28,6 +29,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const alertingApi = getService('alertingApiCommon');
   const samlAuth = getService('samlAuth');
   let apiClient: StreamsSupertestRepositoryClient;
+  let significantEventsApiClient: SignificantEventsSupertestRepositoryClient;
   let roleAuthc: Awaited<ReturnType<typeof samlAuth.createM2mApiKeyWithRoleScope>>;
 
   const REPO_NAME = 'streams_test_repo';
@@ -39,7 +41,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     this.tags(['skipCloud', 'skipMKI', 'skipServerless']);
 
     before(async () => {
-      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+      apiClient = await createPlatformStreamsRepositoryAdminClient(roleScopedSupertest);
+      significantEventsApiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
     });
 
@@ -174,7 +177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(configResponse.status).to.eql(200);
 
         // Add a significant event query that should survive snapshot/restore
-        await bulkQueries(apiClient, 'logs.otel.web-app', [
+        await bulkQueries(significantEventsApiClient, 'logs.otel.web-app', [
           {
             index: {
               id: 'slow-requests',
@@ -189,7 +192,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
 
         // Verify query was created
-        const streamWithQuery = await getQueries(apiClient, 'logs.otel.web-app');
+        const streamWithQuery = await getQueries(significantEventsApiClient, 'logs.otel.web-app');
         expect(streamWithQuery.queries).to.have.length(1);
         expect(streamWithQuery.queries[0].title).to.eql('Slow Requests');
 
@@ -349,7 +352,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // Verify significant event query survived the restore
-        const restoredQueries = await getQueries(apiClient, 'logs.otel.web-app');
+        const restoredQueries = await getQueries(significantEventsApiClient, 'logs.otel.web-app');
         expect(restoredQueries.queries).to.have.length(1);
         expect(restoredQueries.queries[0].title).to.eql('Slow Requests');
         expect(restoredQueries.queries[0].esql.query).to.eql(

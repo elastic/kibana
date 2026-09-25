@@ -10,5 +10,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Significant Events feature flag testing - Deployment-agnostic API integration tests', function () {
     loadTestFile(require.resolve('../../apis/significant_events'));
+    loadTestFile(require.resolve('../../apis/significant_events/snapshot_restore'));
   });
 }

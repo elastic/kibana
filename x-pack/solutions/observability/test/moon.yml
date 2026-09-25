@@ -89,6 +89,9 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/nightshift-shared'
+  - '@kbn/streams-plugin'
+  - '@kbn/content-packs-schema'
+  - '@kbn/streamlang'
 tags:
   - test-helper
   - package

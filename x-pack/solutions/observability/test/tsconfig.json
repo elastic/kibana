@@ -94,6 +94,9 @@
     "@kbn/app-header",
     "@kbn/significant-events-plugin",
     "@kbn/significant-events-schema",
-    "@kbn/nightshift-shared"
+    "@kbn/nightshift-shared",
+    "@kbn/streams-plugin",
+    "@kbn/content-packs-schema",
+    "@kbn/streamlang"
   ]
 }

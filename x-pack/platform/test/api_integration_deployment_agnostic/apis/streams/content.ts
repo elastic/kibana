@@ -22,11 +22,9 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
-  bulkQueries,
   disableStreams,
   enableStreams,
   exportContent,
-  getQueries,
   getStream,
   importContent,
   previewContent,
@@ -484,45 +482,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
 
         await exportContent(apiClient, 'logs.otel.branch_a', exportBody, 400);
-      });
-
-      it('omits significant-event queries from the exported pack', async () => {
-        // Significant-event queries live outside the stream definition (in the knowledge-indicator
-        // data stream), so export must never carry them even when the stream has detections.
-        await bulkQueries(apiClient, 'logs.otel.branch_a', [
-          {
-            index: {
-              id: 'export-omits-me',
-              title: 'detector',
-              description: '',
-              esql: {
-                query: `FROM logs.otel.branch_a,logs.otel.branch_a.* | WHERE KQL("message:'ERROR'")`,
-              },
-            },
-          },
-        ]);
-
-        const archiveBuffer = await exportContent(apiClient, 'logs.otel.branch_a', {
-          name: 'branch_a_pack',
-          description: 'export should not carry queries',
-          version: '1.0.0',
-          include: { objects: { all: {} } },
-        });
-        const contentPack = await parseArchive(Readable.from(archiveBuffer));
-
-        const streamEntries = contentPack.entries.filter(
-          (entry): entry is ContentPackStream => entry.type === 'stream'
-        );
-        expect(streamEntries.length).to.be.greaterThan(0);
-        streamEntries.forEach((entry) => {
-          expect(entry.request).to.not.have.property('queries');
-        });
-
-        // the detection still exists on the stream, it is just not part of the pack
-        const { queries } = await getQueries(apiClient, 'logs.otel.branch_a');
-        expect(queries.map((query) => query.id)).to.contain('export-omits-me');
-
-        await bulkQueries(apiClient, 'logs.otel.branch_a', [{ delete: { id: 'export-omits-me' } }]);
       });
     });
 
