@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { useHasRendered } from '../../hooks/use_has_rendered';
 import { createIndexEsqlQuery, hasSelectedEsqlQuery } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
@@ -36,6 +37,7 @@ interface SourcePickerProps {
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
   const [selectedTab, setSelectedTab] = useState<TabId>('esql');
+  const hasRendered = useHasRendered();
 
   const hasSelectedConnectorSources = useMemo(
     () => selectedSources.some((source) => source.type === 'connector'),
@@ -61,7 +63,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     if (hasSelectedEsqlQuery(selectedSources, query)) {
       return;
     }
-    onChange([...selectedSources, { type: 'esql', id: query, label: query, value: query }]);
+    onChange([{ type: 'esql', id: query, label: query, value: query }, ...selectedSources]);
   };
 
   const addIndexSource = (indexName: string) => {
@@ -80,7 +82,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     const others = selectedSources.filter(
       (current) => !(current.type === 'connector' && current.value === id)
     );
-    onChange(checked ? [...others, { type: 'connector', id, label: name, value: id }] : others);
+    onChange(checked ? [{ type: 'connector', id, label: name, value: id }, ...others] : others);
   };
 
   const removeSource = (source: SelectedSource) => {
@@ -175,9 +177,11 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
                   connectorActionTypeById,
                 }
               );
+
               return (
                 <EuiFlexItem key={`${source.type}-${source.id}`}>
                   <SourceRow
+                    animateOnMount={hasRendered}
                     label={label}
                     typeLabel={typeLabel}
                     icon={icon}
