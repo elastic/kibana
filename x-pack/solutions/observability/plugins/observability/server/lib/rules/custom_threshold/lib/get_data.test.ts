@@ -168,6 +168,55 @@ describe('getData', () => {
     expect(second[UNGROUPED_FACTORY_KEY].value).toBeNull();
   });
 
+  it('does not leak missingGroup entries from one grouped call into a subsequent call with different groupBy', async () => {
+    const searchWithMissingGroup = jest.fn().mockResolvedValue({
+      aggregations: {
+        groupings: {
+          buckets: [
+            {
+              key: { groupBy0: 'prod-host-1' },
+              doc_count: 0,
+              missingGroup: { value: 1 },
+              shouldWarn: { value: 0 },
+              shouldTrigger: { value: 0 },
+              currentPeriod: {
+                buckets: { all: { doc_count: 0, aggregatedValue: { value: null } } },
+              },
+            },
+          ],
+        },
+      },
+      _shards: { successful: 1 },
+    });
+
+    const firstResult = await callGetData(searchWithMissingGroup, 'host.name');
+    expect(firstResult).toHaveProperty('prod-host-1');
+    expect(firstResult['prod-host-1'].value).toBeNull();
+
+    const searchWithNormalBuckets = jest.fn().mockResolvedValue({
+      aggregations: {
+        groupings: {
+          buckets: [
+            {
+              key: { groupBy0: 'production' },
+              doc_count: 10,
+              shouldWarn: { value: 0 },
+              shouldTrigger: { value: 0 },
+              currentPeriod: {
+                buckets: { all: { doc_count: 10, aggregatedValue: { value: 10 } } },
+              },
+            },
+          ],
+        },
+      },
+      _shards: { successful: 1 },
+    });
+
+    const secondResult = await callGetData(searchWithNormalBuckets, 'environment');
+    expect(secondResult).toHaveProperty('production');
+    expect(secondResult).not.toHaveProperty('prod-host-1');
+  });
+
   it('throws other Elasticsearch errors', async () => {
     const error = new Error('Elasticsearch failed for another reason');
 
