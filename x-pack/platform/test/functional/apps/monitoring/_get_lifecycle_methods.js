@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import moment from 'moment';
+
+const DISPLAY_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+
 export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const client = getService('es');
-  const PageObjects = getPageObjects(['monitoring', 'timePicker', 'security', 'common']);
+  const PageObjects = getPageObjects(['monitoring', 'security', 'common']);
   let _archive;
 
   const deleteDataStream = async (index) => {
@@ -43,15 +47,17 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await browser.setWindowSize(1600, 1000);
 
       await esArchiver.load(archive, { useCreate });
-      await kibanaServer.uiSettings.replace({});
+      // seeded before the first render: with the default now-15m range the app finds no clusters and
+      // remounts through /no-data, and autorefresh would tick after the archive data is wiped out
+      await kibanaServer.uiSettings.replace({
+        'timepicker:timeDefaults': JSON.stringify({
+          from: moment.utc(from, DISPLAY_DATE_FORMAT).toISOString(),
+          to: moment.utc(to, DISPLAY_DATE_FORMAT).toISOString(),
+        }),
+        'timepicker:refreshIntervalDefaults': JSON.stringify({ pause: true, value: 10000 }),
+      });
 
       await PageObjects.common.navigateToApp('monitoring');
-
-      // pause autorefresh in the time filter because we don't wait any ticks,
-      // and we don't want ES to log a warning when data gets wiped out
-      await PageObjects.timePicker.pauseAutoRefresh();
-
-      await PageObjects.timePicker.setAbsoluteRange(from, to);
     },
 
     async tearDown() {
