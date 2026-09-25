@@ -6,7 +6,7 @@
  */
 
 import { RulesClient } from '../../../../rules_client/rules_client';
-import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
+import { ApiKeyType } from '../../../../task_runner/types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -265,7 +265,7 @@ describe('enable()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalledWith(
       API_KEY_PENDING_INVALIDATION_TYPE
     );
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name', undefined);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       {
@@ -497,6 +497,36 @@ describe('enable()', () => {
       `"Fail to update"`
     );
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+  });
+
+  test('clones the caller API key instead of persisting it when the borrowed-key flag is set', async () => {
+    // A rule created disabled stores no key, so on enable the caller's declaration that its
+    // API key is borrowed (cloneApiKeysOnCreate) must mint a framework-owned clone rather
+    // than persist the borrowed credential.
+    const clientWithBorrowedKey = new RulesClient({
+      ...rulesClientParams,
+      cloneApiKeysOnCreate: true,
+    });
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRuleWithoutApiKey);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValue(true);
+    rulesClientParams.cloneAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: 'cloned', name: 'Alerting: myType/name', api_key: 'cloned-secret' },
+    });
+
+    await clientWithBorrowedKey.enableRule({ id: '1' });
+
+    expect(rulesClientParams.cloneAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        enabled: true,
+        apiKey: Buffer.from('cloned:cloned-secret').toString('base64'),
+        apiKeyCreatedByUser: false,
+      }),
+      expect.anything()
+    );
   });
 
   test('enables task when scheduledTaskId is defined and task exists', async () => {
@@ -833,15 +863,13 @@ describe('enable()', () => {
   });
 
   describe('missing UIAM API key tagging', () => {
-    test('should add missing UIAM API key tag when enabling rule with missing UIAM key in serverless', async () => {
-      // Set up serverless environment with feature flag enabled
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
+    test('should defer missing UIAM API key tagging until rule execution', async () => {
+      // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
-        featureFlags,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
@@ -867,27 +895,25 @@ describe('enable()', () => {
 
       await serverlessRulesClient.enableRule({ id: '1' });
 
-      // Verify the missing UIAM key tag was added
+      // Rule execution owns the missing UIAM key tag.
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
+          tags: ['existing-tag'],
         }),
         expect.anything()
       );
     });
 
-    test('should add missing UIAM API key tag when enabling rule without existing API key', async () => {
-      // Set up serverless environment with feature flag enabled
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
+    test('should preserve tags when enabling a rule without an existing API key', async () => {
+      // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
         // To signal that user does not create the API key
         isAuthenticationTypeAPIKey: () => false,
-        featureFlags,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
@@ -919,25 +945,23 @@ describe('enable()', () => {
 
       await serverlessRulesClient.enableRule({ id: '1' });
 
-      // Verify the missing UIAM key tag was added
+      // Rule execution owns the missing UIAM key tag.
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
+          tags: ['existing-tag'],
         }),
         expect.anything()
       );
     });
 
     test('should not add missing UIAM API key tag when UIAM key is present', async () => {
-      // Set up serverless environment with feature flag enabled
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
+      // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
-        featureFlags,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
@@ -975,12 +999,8 @@ describe('enable()', () => {
 
     test('should not add missing UIAM API key tag in non-serverless environment', async () => {
       // Non-serverless environment (default rulesClientParams.isServerless = false)
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
       const nonServerlessRulesClient = new RulesClient({
         ...rulesClientParams,
-        featureFlags,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({

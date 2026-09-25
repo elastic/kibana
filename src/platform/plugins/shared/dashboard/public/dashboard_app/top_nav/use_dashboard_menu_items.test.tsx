@@ -39,7 +39,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({}),
@@ -65,7 +65,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -104,7 +104,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -124,6 +124,121 @@ describe('useDashboardMenuItems', () => {
       expect(editModeExportMenuItem).toBeDefined();
       expect((editModeExportMenuItem as unknown as { run?: unknown }).run).toBeDefined();
       expect((editModeExportMenuItem as unknown as AppMenuPopoverItem).items).toBeUndefined();
+    });
+
+    test('does not include Schedule export when only exportJson and scheduledReports are available', () => {
+      jest
+        .mocked(shareService!.availableIntegrations)
+        .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
+          if (groupId === 'export') {
+            return [];
+          }
+
+          if (groupId === 'exportDerivatives') {
+            return [
+              {
+                id: 'exportJson',
+                shareType: 'integration',
+                groupId: 'exportDerivatives',
+                config: async () => ({}),
+              } as ShareActionIntents,
+              {
+                id: 'scheduledReports',
+                shareType: 'integration',
+                groupId: 'exportDerivatives',
+                config: async () => ({}),
+              } as ShareActionIntents,
+            ];
+          }
+
+          return [];
+        });
+
+      const { result } = renderHook(
+        () =>
+          useDashboardMenuItems({
+            redirectTo: jest.fn(),
+          }),
+        {
+          wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
+        }
+      );
+
+      const viewModeExportMenuItem = result.current.viewModeTopNavConfig.items!.find(
+        ({ id }) => id === 'export'
+      );
+      expect(viewModeExportMenuItem).toBeDefined();
+      expect((viewModeExportMenuItem as { run?: unknown }).run).toBeDefined();
+      expect((viewModeExportMenuItem as AppMenuPopoverItem).items).toBeUndefined();
+
+      const editModeExportMenuItem = result.current.editModeTopNavConfig.items!.find(
+        ({ id }) => id === 'export'
+      );
+      expect(editModeExportMenuItem).toBeDefined();
+      expect((editModeExportMenuItem as { run?: unknown }).run).toBeDefined();
+      expect((editModeExportMenuItem as AppMenuPopoverItem).items).toBeUndefined();
+    });
+
+    test('includes Schedule export when a schedulable export integration is available', () => {
+      jest
+        .mocked(shareService!.availableIntegrations)
+        .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
+          if (groupId === 'export') {
+            return [
+              {
+                id: 'pdfReports',
+                shareType: 'integration',
+                groupId: 'export',
+                config: async () => ({}),
+              } as ShareActionIntents,
+            ];
+          }
+
+          if (groupId === 'exportDerivatives') {
+            return [
+              {
+                id: 'exportJson',
+                shareType: 'integration',
+                groupId: 'exportDerivatives',
+                config: async () => ({}),
+              } as ShareActionIntents,
+              {
+                id: 'scheduledReports',
+                shareType: 'integration',
+                groupId: 'exportDerivatives',
+                config: async () => ({}),
+              } as ShareActionIntents,
+            ];
+          }
+
+          return [];
+        });
+
+      const { result } = renderHook(
+        () =>
+          useDashboardMenuItems({
+            redirectTo: jest.fn(),
+          }),
+        {
+          wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
+        }
+      );
+
+      const viewModeExportMenuItem = result.current.viewModeTopNavConfig.items!.find(
+        ({ id }) => id === 'export'
+      ) as AppMenuPopoverItem;
+
+      expect(viewModeExportMenuItem.items!.map((item) => item.id)).toEqual(
+        expect.arrayContaining(['exportJson', 'pdfReports', 'scheduledReports'])
+      );
+
+      const editModeExportMenuItem = result.current.editModeTopNavConfig.items!.find(
+        ({ id }) => id === 'export'
+      ) as AppMenuPopoverItem;
+
+      expect(editModeExportMenuItem.items!.map((item) => item.id)).toEqual(
+        expect.arrayContaining(['exportJson', 'pdfReports', 'scheduledReports'])
+      );
     });
 
     test('includes Export top-nav item with JSON and Reporting items when export and exportDerivatives integrations are available', () => {
@@ -164,7 +279,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -207,7 +322,7 @@ describe('useDashboardMenuItems', () => {
     };
 
     const renderMenuItems = () =>
-      renderHook(() => useDashboardMenuItems({ maybeRedirect: jest.fn() }), {
+      renderHook(() => useDashboardMenuItems({ redirectTo: jest.fn() }), {
         wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
       });
 
@@ -289,7 +404,7 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              maybeRedirect: jest.fn(),
+              redirectTo: jest.fn(),
             }),
           {
             wrapper: dashboardContextWrapper({
@@ -328,7 +443,7 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              maybeRedirect: jest.fn(),
+              redirectTo: jest.fn(),
             }),
           {
             wrapper: dashboardContextWrapper({ savedObjectId: 'test-id', apiOverrides }),
@@ -354,7 +469,7 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              maybeRedirect: jest.fn(),
+              redirectTo: jest.fn(),
             }),
           {
             wrapper: dashboardContextWrapper({ savedObjectId: 'test-id', apiOverrides }),

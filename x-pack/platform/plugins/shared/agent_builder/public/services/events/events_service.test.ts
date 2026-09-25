@@ -45,6 +45,32 @@ describe('EventsService', () => {
     });
   });
 
+  describe('getStreamEnded$', () => {
+    it('only fires for the matching conversation id', () => {
+      const service = new EventsService();
+      let endedA = 0;
+      let endedB = 0;
+
+      service.getStreamEnded$('A').subscribe(() => endedA++);
+      service.getStreamEnded$('B').subscribe(() => endedB++);
+
+      service.notifyStreamEnded('A');
+
+      expect(endedA).toBe(1);
+      expect(endedB).toBe(0);
+    });
+
+    it('does not replay a run that ended before subscribing', () => {
+      const service = new EventsService();
+      service.notifyStreamEnded('A');
+
+      let ended = 0;
+      service.getStreamEnded$('A').subscribe(() => ended++);
+
+      expect(ended).toBe(0);
+    });
+  });
+
   describe('obs$ (deprecated)', () => {
     it('still emits every event regardless of conversation id', () => {
       const service = new EventsService();

@@ -275,21 +275,33 @@ export class WorkflowsApiService {
     });
   }
 
+  /**
+   * Polls an execution until it reports one of `status` and, when provided, `until` also holds.
+   *
+   * Step executions are written with `refresh: false` into a different index than the execution
+   * document, so `stepExecutions` can lag the reported status by a refresh cycle. Pass `until` to
+   * wait for the step data an assertion needs instead of treating the status as a proxy for it.
+   */
   async waitForStatus({
     workflowExecutionId,
     status,
     timeout = 20_000,
     includeOutput = false,
+    until,
   }: {
     workflowExecutionId: string;
     status: ExecutionStatus | readonly ExecutionStatus[];
     timeout?: number;
     includeOutput?: boolean;
+    until?: (execution: WorkflowExecutionDto) => boolean;
   }): Promise<WorkflowExecutionDto> {
     const expected = Array.isArray(status) ? status : [status];
     const execution = await waitForConditionOrThrow({
       action: () => this.getExecution(workflowExecutionId, { includeOutput }),
-      condition: (next) => next != null && expected.includes(next.status as ExecutionStatus),
+      condition: (next) =>
+        next != null &&
+        expected.includes(next.status as ExecutionStatus) &&
+        (until == null || until(next)),
       interval: 1000,
       timeout,
       errorMessage: (last) =>
@@ -306,12 +318,12 @@ export class WorkflowsApiService {
   async rawResume(
     workflowExecutionId: string,
     input: Record<string, unknown>,
-    options?: Partial<ReqOptions>
+    options?: Partial<ReqOptions> & { stepExecutionId?: string }
   ): Promise<{
     data: { success: boolean; executionId: string; message: string };
     status: number;
   }> {
-    const { headers, retries, ...rest } = options ?? {};
+    const { headers, retries, stepExecutionId, ...rest } = options ?? {};
     const response = await this.kbnClient.request<{
       success: boolean;
       executionId: string;
@@ -322,7 +334,10 @@ export class WorkflowsApiService {
       retries: retries ?? 0,
       method: 'POST',
       path: `/s/${this.spaceId}/api/workflows/executions/${workflowExecutionId}/resume`,
-      body: { input },
+      body: {
+        input,
+        ...(stepExecutionId ? { stepExecutionId } : {}),
+      },
       headers: { 'elastic-api-version': '2023-10-31', ...headers },
     });
     return response;

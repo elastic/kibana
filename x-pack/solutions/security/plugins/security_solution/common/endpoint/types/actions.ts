@@ -44,6 +44,12 @@ export interface ActionResponseOutput<
      * this value may not be available and thus will be empty string in those cases
      */
     canceled_id?: string;
+
+    /**
+     * The UUID of the duplicate action that was already queued or running on the endpoint when this most
+     * recent one arrived on the host
+     */
+    duplicate_of_id?: string;
   } & TOutputContent;
 }
 
@@ -73,13 +79,13 @@ export interface SuspendProcessActionOutputContent {
 
 /** A single killed process descendant. Only for Endpoint starting with v9.6 */
 export interface KilledProcessDescendant {
+  code?: string;
   pid?: number;
   parent_pid?: number;
   entity_id?: string;
   parent_entity_id?: string;
   process_name?: string;
   command?: string;
-  was_killed?: boolean;
   error?: string;
 }
 

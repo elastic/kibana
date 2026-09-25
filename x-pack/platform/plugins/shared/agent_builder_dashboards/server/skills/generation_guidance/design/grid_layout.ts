@@ -27,11 +27,17 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 - **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
 - **Markdown** → \`w: 24–48, h: 4–9\`. Size based on content length and layout needs — not always full-width.
 - **Datatable** → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
+- **Custom content** → \`w: 24–48\`, \`h\` from what the panel actually contains — the most common sizing mistake is making these too short, which leaves the panel scrolling inside its own frame:
+  - a single KPI or status card, or one short row of them: \`h: 6–8\`
+  - a list, table or status board of rows: \`h: 10–16\`, sized for the number of rows the ES|QL query returns
+  - a multi-section layout, or anything with a drawn chart or diagram: \`h: 16–20\`
+  Size for the rows the query actually returns (respect its \`LIMIT\`) rather than padding for rows that might appear later — an over-tall panel leaves a large empty gap under its content, which reads as broken just like a scrollbar does. When genuinely between two sizes, take the larger.
 
 Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 **Grid Packing Rules:**
 
+- **Automatic upward movement:** Kibana moves each panel upward at its current \`x\` until another panel or the top of its grid blocks it. A larger \`y\` does not preserve empty space above a panel or guarantee row alignment. Use sections, not blank rows, to separate semantic groups.
 - **Eliminate Dead Space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or
   placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
 - **Align Row Heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate),
@@ -49,10 +55,10 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space.
 6. **Markdown panels** use agent-specified \`grid\` like any other panel. Size based on content length (\`w: 24–48, h: 4–9\`). Account for their height when positioning subsequent panels.
 
-### Reflow after removals
+### Reflow after layout changes
 
-- If removing a panel leaves a gap in a row, shift the affected neighboring panels left by re-adding them with updated \`x\` values.
-- If removing a panel leaves later rows with unnecessary empty space above them, re-add the affected panels with updated \`y\` values.
+- After resizing, moving, or removing panels, choose final sizes first, then recalculate positions across the affected layout, including panels whose sizes did not change. Pack rows using the rules above, and do not keep old coordinates that leave gaps. Reflow each section separately.
+- Update existing panels in place. Before applying, check the planned coordinates for avoidable gaps, overlaps, and grid bounds.
 
 ### Section grid rules
 
@@ -62,7 +68,7 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 - A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. When placing widgets after a section, compute the next outer \`y\` as \`section.grid.y + 1\` (not by summing internal panel heights).
 - Internal section panel heights affect layout inside the section only; they do not increase the section's outer-grid height.
 - When mixing top-level panels and sections, compute outer \`y\` sequentially: top-level panels advance by \`y + h\`, sections advance by \`y + 1\`.
-- **Inserting above existing sections:** Top-level panels and sections share the same outer grid coordinates. If a section occupies \`y: 0\`, a new top-level panel at \`y: 0\` will collide and be pushed **below** the section. To place a panel above an existing section, first \`remove_section\` (with \`panelAction: "promote"\` or \`"delete"\`) and re-add it via \`add_section\` at a higher \`y\` to make room, then add the panel at the freed \`y\`.
+- **Inserting above existing sections:** Top-level panels and sections share the outer grid. To free space above a section, use \`remove_section\` with \`panelAction: "promote"\`, recreate the empty section at a higher \`y\`, then move its original panels back with \`update_panel_layouts\`. Preserve panel IDs and configurations throughout. Deleting or regenerating panels is not a layout operation.
 
 ### Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
 

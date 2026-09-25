@@ -73,7 +73,7 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { DiscoverDocumentFlyout } from '../document_flyout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { useIsChromeNextProjectHeader } from '../chrome_app_header';
+import { useIsProjectChromeStyle } from '../chrome_app_header';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -109,7 +109,7 @@ export function DiscoverLayout() {
   const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
   const dataStateContainer = useCurrentTabDataStateContainer();
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChromeStyle = useIsProjectChromeStyle();
 
   const { main$ } = dataStateContainer.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
@@ -302,6 +302,8 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
+  const isSidebarHidden = resultState === 'uninitialized';
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -371,12 +373,12 @@ export function DiscoverLayout() {
 
   const fullBodyHeightOffset = useMemo(() => {
     const isStandalone = customizationContext.displayMode === 'standalone';
-    if (isChromeNextProjectHeader && isStandalone) {
+    if (isProjectChromeStyle && isStandalone) {
       return mathWithUnits(euiTheme.size.xxl, (x) => x * 3);
     }
 
     return `${TABS_BAR_HEIGHT + 1}px`;
-  }, [customizationContext.displayMode, euiTheme.size.xxl, isChromeNextProjectHeader]);
+  }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
   return (
     <EuiPage
@@ -402,19 +404,20 @@ export function DiscoverLayout() {
         onCancelClick={onCancelClick}
       />
       <EuiPageBody css={styles.pageBody}>
+        <SavedSearchURLConflictCallout
+          discoverSession={discoverSession}
+          spaces={spaces}
+          history={history}
+        />
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
             </EuiDelayRender>
           )}
-          <SavedSearchURLConflictCallout
-            discoverSession={discoverSession}
-            spaces={spaces}
-            history={history}
-          />
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
+            isSidebarHidden={isSidebarHidden}
             sidebarPanel={
               <SidebarMemoized
                 columns={sidebarColumns}

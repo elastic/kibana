@@ -16,6 +16,7 @@
     "@kbn/custom-content-server",
     "@kbn/agent-builder-server",
     "@kbn/controls-constants",
+    "@kbn/as-code-dashboard-schema",
     "@kbn/dashboard-plugin",
     "@kbn/agent-builder-dashboards-common",
     "@kbn/zod",
@@ -25,6 +26,7 @@
     "@kbn/share-plugin",
     "@kbn/css-utils",
     "@kbn/logging",
+    "@kbn/ml-server-schemas",
     "@kbn/core-elasticsearch-server",
     "@kbn/lens-common",
     "@kbn/esql-utils",
@@ -41,8 +43,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/ftr-llm-proxy",
     "@kbn/ui-callout",
-    "@kbn/files-plugin",
-    "@kbn/react-kibana-mount",
   ],
   "exclude": ["target/**/*"]
 }

@@ -1,0 +1,1038 @@
+{
+  "sha1": "d187c614353fb6262d0b3300a26bd3ee3be0d58d",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "7673a6808af721d-50a1dabd617492b",
+      "title": "Setup Discover context awareness tests data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/global.setup.ts",
+        "line": 15,
+        "column": 1
+      }
+    },
+    {
+      "id": "11dbaf4bdd4ac36-b9a17cf40b05950",
+      "title": "Discover context awareness - extension getAdditionalCellActions ES|QL mode runs the additional cell actions for a logs data source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_additional_cell_actions.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "11dbaf4bdd4ac36-ac6c19e46cb8afb",
+      "title": "Discover context awareness - extension getAdditionalCellActions ES|QL mode runs the additional cell actions for a computed column",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_additional_cell_actions.spec.ts",
+        "line": 63,
+        "column": 51
+      }
+    },
+    {
+      "id": "11dbaf4bdd4ac36-08b9d6e2d157349",
+      "title": "Discover context awareness - extension getAdditionalCellActions data view mode runs the additional cell actions in Discover and on surrounding docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_additional_cell_actions.spec.ts",
+        "line": 78,
+        "column": 6
+      }
+    },
+    {
+      "id": "fdc4d06e5b53b74-19990f3acc55782",
+      "title": "Discover context awareness - extension getAppMenu under a solution view renders the main actions but not the action from the root profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_app_menu_solution_view.spec.ts",
+        "line": 36,
+        "column": 66
+      }
+    },
+    {
+      "id": "fdc4d06e5b53b74-2bcba392e4f0b24",
+      "title": "Discover context awareness - extension getAppMenu under a solution view renders the custom actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_app_menu_solution_view.spec.ts",
+        "line": 42,
+        "column": 13
+      }
+    },
+    {
+      "id": "1aa0004c57a2783-ea97fb01b69b420",
+      "title": "Discover context awareness - extension getAppMenu renders the main actions and the action from the root profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_app_menu.spec.ts",
+        "line": 41,
+        "column": 15
+      }
+    },
+    {
+      "id": "1aa0004c57a2783-c4a8b8d3df52aeb",
+      "title": "Discover context awareness - extension getAppMenu renders the custom actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_app_menu.spec.ts",
+        "line": 51,
+        "column": 22
+      }
+    },
+    {
+      "id": "342d139533f0700-0987e88339cc92e",
+      "title": "Discover context awareness - extension getCellRenderers under a solution view, data view mode root profile does not render a custom timestamp field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_data_view_solution_view.spec.ts",
+        "line": 35,
+        "column": 66
+      }
+    },
+    {
+      "id": "342d139533f0700-895e9f6dcac0949",
+      "title": "Discover context awareness - extension getCellRenderers under a solution view, data view mode renders neither a custom timestamp field nor a custom log.level",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_data_view_solution_view.spec.ts",
+        "line": 40,
+        "column": 50
+      }
+    },
+    {
+      "id": "342d139533f0700-842f47079b11b8a",
+      "title": "Discover context awareness - extension getCellRenderers under a solution view, data view mode data source profile renders a custom log.level but still no custom timestamp field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_data_view_solution_view.spec.ts",
+        "line": 51,
+        "column": 11
+      }
+    },
+    {
+      "id": "63c6846ff4f1ff4-cd193e9742923e7",
+      "title": "Discover context awareness - extension getCellRenderers, data view mode root profile renders a custom timestamp field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_data_view.spec.ts",
+        "line": 47,
+        "column": 66
+      }
+    },
+    {
+      "id": "63c6846ff4f1ff4-ac5ad2aba29b5d9",
+      "title": "Discover context awareness - extension getCellRenderers, data view mode data source profile renders a custom timestamp field but not a custom log.level",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_data_view.spec.ts",
+        "line": 52,
+        "column": 50
+      }
+    },
+    {
+      "id": "63c6846ff4f1ff4-1a1b023f6ddec63",
+      "title": "Discover context awareness - extension getCellRenderers, data view mode data source profile renders a custom timestamp field and a custom log.level",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_data_view.spec.ts",
+        "line": 61,
+        "column": 9
+      }
+    },
+    {
+      "id": "b37e33a09717d92-50ee72e9ab041ad",
+      "title": "Discover context awareness - extension getCellRenderers under a solution view, ES|QL mode root profile does not render a custom timestamp field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_esql_solution_view.spec.ts",
+        "line": 38,
+        "column": 66
+      }
+    },
+    {
+      "id": "b37e33a09717d92-7e23a3f38aef222",
+      "title": "Discover context awareness - extension getCellRenderers under a solution view, ES|QL mode renders neither a custom timestamp field nor a custom log.level",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_esql_solution_view.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "b37e33a09717d92-257e2fec319eddf",
+      "title": "Discover context awareness - extension getCellRenderers under a solution view, ES|QL mode data source profile renders a custom log.level but still no custom timestamp field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_esql_solution_view.spec.ts",
+        "line": 49,
+        "column": 40
+      }
+    },
+    {
+      "id": "000d5568cd6be7d-0a7b01c22a0e893",
+      "title": "Discover context awareness - extension getCellRenderers, ES|QL mode root profile renders a custom timestamp field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_esql.spec.ts",
+        "line": 47,
+        "column": 15
+      }
+    },
+    {
+      "id": "000d5568cd6be7d-ee67a3b56cd93b6",
+      "title": "Discover context awareness - extension getCellRenderers, ES|QL mode data source profile renders a custom timestamp field but not a custom log.level",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_esql.spec.ts",
+        "line": 52,
+        "column": 13
+      }
+    },
+    {
+      "id": "000d5568cd6be7d-e3836d0a9fac371",
+      "title": "Discover context awareness - extension getCellRenderers, ES|QL mode data source profile renders a custom timestamp field and a custom log.level",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_cell_renderers_esql.spec.ts",
+        "line": 59,
+        "column": 22
+      }
+    },
+    {
+      "id": "92a184529b69bd0-eab858b4728a2bc",
+      "title": "Discover context awareness - extension getDefaultAdHocDataViews, fallback falls back to the profile data view when the space has no other data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_ad_hoc_data_views_fallback.spec.ts",
+        "line": 36,
+        "column": 24
+      }
+    },
+    {
+      "id": "f72fc4a4029e58b-c593ce48f69b0e8",
+      "title": "Discover context awareness - extension getDefaultAdHocDataViews offers the profile data view in the picker as a managed one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_ad_hoc_data_views.spec.ts",
+        "line": 43,
+        "column": 48
+      }
+    },
+    {
+      "id": "f72fc4a4029e58b-82ca88b10fec4ee",
+      "title": "Discover context awareness - extension getDefaultAdHocDataViews reloads the profile data view on page refresh without an error toast",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_ad_hoc_data_views.spec.ts",
+        "line": 55,
+        "column": 15
+      }
+    },
+    {
+      "id": "f72fc4a4029e58b-ee108870e3a1986",
+      "title": "Discover context awareness - extension getDefaultAdHocDataViews forks the profile data view into an unmanaged copy when saving the session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_ad_hoc_data_views.spec.ts",
+        "line": 70,
+        "column": 29
+      }
+    },
+    {
+      "id": "6f45df2b5b75205-6d3d0aa9ab30728",
+      "title": "Discover context awareness - extension getDefaultAppState, data view mode renders the profile default state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_app_state_data_view.spec.ts",
+        "line": 43,
+        "column": 66
+      }
+    },
+    {
+      "id": "6f45df2b5b75205-45520f301b15b13",
+      "title": "Discover context awareness - extension getDefaultAppState, data view mode reapplies the default state when switching data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_app_state_data_view.spec.ts",
+        "line": 49,
+        "column": 13
+      }
+    },
+    {
+      "id": "6f45df2b5b75205-a104decc0cd087b",
+      "title": "Discover context awareness - extension getDefaultAppState, data view mode restores the default state when clicking New",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_app_state_data_view.spec.ts",
+        "line": 61,
+        "column": 20
+      }
+    },
+    {
+      "id": "64c85f2cf6ecbec-a42880f5800e6be",
+      "title": "Discover context awareness - extension getDefaultAppState, ES|QL mode renders the profile default state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_app_state_esql.spec.ts",
+        "line": 43,
+        "column": 66
+      }
+    },
+    {
+      "id": "64c85f2cf6ecbec-7cf2d7f108e6994",
+      "title": "Discover context awareness - extension getDefaultAppState, ES|QL mode reapplies the default state when the query changes data source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_app_state_esql.spec.ts",
+        "line": 48,
+        "column": 33
+      }
+    },
+    {
+      "id": "64c85f2cf6ecbec-c64e38a21f5ba30",
+      "title": "Discover context awareness - extension getDefaultAppState, ES|QL mode restores the default state when clicking New",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_app_state_esql.spec.ts",
+        "line": 53,
+        "column": 25
+      }
+    },
+    {
+      "id": "9e9fdf124595bf1-b29d2fcf890c47b",
+      "title": "Discover context awareness - extension getDefaultEsqlQuery applies the root profile default query when ES|QL mode is the default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_default_esql_query.spec.ts",
+        "line": 32,
+        "column": 15
+      }
+    },
+    {
+      "id": "706991796165c9e-61b2189173c98e7",
+      "title": "Discover context awareness - extension getDocViewer, interactions ES|QL mode rewrites the query from the custom doc viewer action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_doc_viewer_interactions.spec.ts",
+        "line": 38,
+        "column": 51
+      }
+    },
+    {
+      "id": "706991796165c9e-b9732bc6053f111",
+      "title": "Discover context awareness - extension getDocViewer, interactions ES|QL mode opens a named tab from the custom doc viewer action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_doc_viewer_interactions.spec.ts",
+        "line": 53,
+        "column": 36
+      }
+    },
+    {
+      "id": "59e40b12feb207f-e7d5448938ac560",
+      "title": "Discover context awareness - extension getDocViewer, tab presence and title ES|QL mode renders only the built-in tabs for a non-matching profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_doc_viewer_presence_and_title.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "59e40b12feb207f-cc5799a0a1f537d",
+      "title": "Discover context awareness - extension getDocViewer, tab presence and title ES|QL mode renders the custom tabs for a matching profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_doc_viewer_presence_and_title.spec.ts",
+        "line": 54,
+        "column": 15
+      }
+    },
+    {
+      "id": "59e40b12feb207f-b7d663a4ae1f943",
+      "title": "Discover context awareness - extension getDocViewer, tab presence and title data view mode renders only the built-in tabs for a non-matching profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_doc_viewer_presence_and_title.spec.ts",
+        "line": 66,
+        "column": 22
+      }
+    },
+    {
+      "id": "59e40b12feb207f-2a985039d3ee880",
+      "title": "Discover context awareness - extension getDocViewer, tab presence and title data view mode renders the custom tabs for a matching profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_doc_viewer_presence_and_title.spec.ts",
+        "line": 81,
+        "column": 22
+      }
+    },
+    {
+      "id": "e92a9e7b9fd5610-a471fb89670f7db",
+      "title": "Discover context awareness - extension getDocViewer, restorable state ES|QL mode keeps the restorable counter state per Discover tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_doc_viewer_restorable_state.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "e92a9e7b9fd5610-953f30bf8961fa3",
+      "title": "Discover context awareness - extension getDocViewer, restorable state data view mode keeps the restorable counter state per Discover tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_doc_viewer_restorable_state.spec.ts",
+        "line": 60,
+        "column": 58
+      }
+    },
+    {
+      "id": "badf6968da5be43-5ffdc4857b4e2bd",
+      "title": "Discover context awareness - extension getPaginationConfig ES|QL mode renders without pagination using a single page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_pagination_config.spec.ts",
+        "line": 38,
+        "column": 15
+      }
+    },
+    {
+      "id": "badf6968da5be43-2c494a3d3880174",
+      "title": "Discover context awareness - extension getPaginationConfig data view mode renders single page pagination without page numbers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_pagination_config.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "badf6968da5be43-fb9b8d166654c7e",
+      "title": "Discover context awareness - extension getPaginationConfig data view mode renders default pagination with page numbers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_pagination_config.spec.ts",
+        "line": 56,
+        "column": 22
+      }
+    },
+    {
+      "id": "78b66db639dbe81-7d82a7f45b55206",
+      "title": "Discover context awareness - extension getRecommendedFields ES|QL mode shows the recommended fields section for a matching profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_recommended_fields.spec.ts",
+        "line": 37,
+        "column": 15
+      }
+    },
+    {
+      "id": "78b66db639dbe81-75e0c8cbeac399d",
+      "title": "Discover context awareness - extension getRecommendedFields ES|QL mode does not show the recommended fields section for a non-matching profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_recommended_fields.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "78b66db639dbe81-64aca6275659c79",
+      "title": "Discover context awareness - extension getRecommendedFields data view mode shows the recommended fields section for a matching profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_recommended_fields.spec.ts",
+        "line": 50,
+        "column": 29
+      }
+    },
+    {
+      "id": "78b66db639dbe81-4093169a978b46a",
+      "title": "Discover context awareness - extension getRecommendedFields data view mode does not show the recommended fields section for a non-matching profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_recommended_fields.spec.ts",
+        "line": 63,
+        "column": 25
+      }
+    },
+    {
+      "id": "a477f5a71b7b25f-e2214b56a7815c1",
+      "title": "Discover context awareness - extension getRowAdditionalLeadingControls ES|QL mode renders the logs controls for a logs data source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_row_additional_leading_controls.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "a477f5a71b7b25f-3052a75f0d37cdc",
+      "title": "Discover context awareness - extension getRowAdditionalLeadingControls ES|QL mode does not render the logs controls for a non-logs data source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_row_additional_leading_controls.spec.ts",
+        "line": 42,
+        "column": 13
+      }
+    },
+    {
+      "id": "a477f5a71b7b25f-87544feb76336e0",
+      "title": "Discover context awareness - extension getRowAdditionalLeadingControls data view mode renders the logs controls for a logs data source, including surrounding docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_row_additional_leading_controls.spec.ts",
+        "line": 50,
+        "column": 29
+      }
+    },
+    {
+      "id": "a477f5a71b7b25f-8d3dad39ca619e1",
+      "title": "Discover context awareness - extension getRowAdditionalLeadingControls data view mode does not render the logs controls for a non-logs data source, including surrounding docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/get_row_additional_leading_controls.spec.ts",
+        "line": 65,
+        "column": 42
+      }
+    },
+    {
+      "id": "74caf989589fc37-2aeab29003ed0e9",
+      "title": "Discover context awareness - profile state, data view mode applies the default profile state on first resolve and keeps it isolated per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/profile_state_data_view.spec.ts",
+        "line": 49,
+        "column": 25
+      }
+    },
+    {
+      "id": "74caf989589fc37-f2ea034493c9a25",
+      "title": "Discover context awareness - profile state, data view mode restores isolated profile state and carries it into profiles without defaults",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/profile_state_data_view.spec.ts",
+        "line": 61,
+        "column": 20
+      }
+    },
+    {
+      "id": "74caf989589fc37-40cc2a4bf08e1ff",
+      "title": "Discover context awareness - profile state, data view mode applies UI, persistent, and URL profile state through refresh, restore, duplicate, and tab switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/profile_state_data_view.spec.ts",
+        "line": 82,
+        "column": 22
+      }
+    },
+    {
+      "id": "74caf989589fc37-fbd32c4f0d6f405",
+      "title": "Discover context awareness - profile state, data view mode restores persistent and URL profile state from a shared locator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/profile_state_data_view.spec.ts",
+        "line": 164,
+        "column": 27
+      }
+    },
+    {
+      "id": "a6bd6dc313a4039-f349b6d941763a6",
+      "title": "Discover context awareness - profile state, ES|QL mode applies the default profile state on first resolve and keeps it isolated per tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/profile_state_esql.spec.ts",
+        "line": 48,
+        "column": 66
+      }
+    },
+    {
+      "id": "a6bd6dc313a4039-a2279f00cf8a62f",
+      "title": "Discover context awareness - profile state, ES|QL mode restores isolated profile state and carries it into profiles without defaults",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/profile_state_esql.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "a6bd6dc313a4039-1877b0985a53cca",
+      "title": "Discover context awareness - profile state, ES|QL mode applies UI, persistent, and URL profile state through refresh, restore, duplicate, and tab switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/profile_state_esql.spec.ts",
+        "line": 74,
+        "column": 27
+      }
+    },
+    {
+      "id": "a6bd6dc313a4039-078d8f14d1d3539",
+      "title": "Discover context awareness - profile state, ES|QL mode restores persistent and URL profile state from a shared locator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout_discover_context_awareness/ui/parallel_tests/profile_state_esql.spec.ts",
+        "line": 159,
+        "column": 27
+      }
+    }
+  ]
+}

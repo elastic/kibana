@@ -21,6 +21,7 @@ import type { MockUiSettingsClient } from '../lib/services/settings_service/sett
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { createRouteDependencies } from './test_utils';
 import type { computeRouteValidate } from './compute_route_validate';
+import { ZodRequestValidationError } from './zod_request_validation';
 
 type ComputedValidate = Exclude<ReturnType<typeof computeRouteValidate>, false>;
 
@@ -291,7 +292,7 @@ describe('BaseAlertingRoute', () => {
     it('returns default options when no routeOptions are declared', () => {
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -304,7 +305,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           summary: 'Get a rule',
@@ -314,11 +315,11 @@ describe('BaseAlertingRoute', () => {
     });
 
     it('overrides defaults with child values', () => {
-      TestRoute.routeOptions = { access: 'internal' };
+      TestRoute.routeOptions = { access: 'public' };
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'internal',
+          access: 'public',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -331,7 +332,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2', 'extra-tag'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -344,7 +345,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '1.0' },
           oasOperationObject: expect.any(Function),
@@ -600,6 +601,39 @@ describe('BaseAlertingRoute', () => {
         },
         bypassErrorFormat: true,
       });
+    });
+
+    it('adds the per-field errors when the rejection carries the Zod issues', async () => {
+      const schema = z.object({ name: z.string(), age: z.number() });
+      TestRoute.schemas = { request: { body: schema } };
+      const validate = TestRoute.validate as ComputedValidate;
+
+      const parsed = schema.safeParse({ age: 'not-a-number' });
+      const rawError = new ZodRequestValidationError(
+        (parsed as { success: false; error: z.ZodError }).error
+      );
+
+      await validate.onRequestValidationError?.(
+        { message: rawError.message, source: 'body', rawError },
+        {} as unknown as KibanaRequest,
+        response
+      );
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            details: {
+              source: 'body',
+              errors: expect.objectContaining({
+                properties: {
+                  name: { errors: [expect.any(String)] },
+                  age: { errors: [expect.any(String)] },
+                },
+              }),
+            },
+          }),
+        })
+      );
     });
   });
 });

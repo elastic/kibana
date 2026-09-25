@@ -225,7 +225,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/packages/shared/esql/kbn-esql-language/scripts/**/*',
   'src/platform/kbn-ui/_tooling/**/*',
 ];
 
@@ -1284,7 +1284,7 @@ module.exports = {
         'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/platform/plugins/shared/significant_events_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/significant_events_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/packages/shared/kbn-unified-chart-section-viewer/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
@@ -1489,7 +1489,6 @@ module.exports = {
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1538,7 +1537,6 @@ module.exports = {
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
-        'no-extend-native': 'error',
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
@@ -1590,7 +1588,6 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
@@ -1697,7 +1694,6 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
@@ -1847,7 +1843,6 @@ module.exports = {
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
-        'no-extend-native': 'error',
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
@@ -1888,11 +1883,9 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        '@typescript-eslint/explicit-member-accessibility': 'error',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
         '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-unused-vars': 'error',
@@ -2283,11 +2276,8 @@ module.exports = {
         // react
         'react/no-did-mount-set-state': 'error',
         'react/no-did-update-set-state': 'error',
-        'react/no-multi-comp': ['error', { ignoreStateless: true }],
-        'react/self-closing-comp': 'error',
         'react/sort-comp': 'error',
         'react/jsx-boolean-value': 'error',
-        'react/no-unescaped-entities': ['error', { forbid: ['>', '}'] }],
         'react/forbid-elements': [
           'error',
           {
@@ -2387,6 +2377,19 @@ module.exports = {
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
+        // The `recommended` presets above re-enable these rules; they run in oxlint instead.
+        'no-cond-assign': 'off',
+        'no-debugger': 'off',
+        'no-empty': 'off',
+        'no-unused-labels': 'off',
+        'use-isnan': 'off',
+        'react/jsx-no-undef': 'off',
+        'react/no-is-mounted': 'off',
+        'react/no-unescaped-entities': 'off',
+        'react/no-unknown-property': 'off',
+        '@typescript-eslint/no-extra-non-null-assertion': 'off',
+        '@typescript-eslint/no-misused-new': 'off',
+        '@typescript-eslint/no-namespace': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/no-empty-object-type': 'off',
         '@typescript-eslint/no-unsafe-function-type': 'off',
@@ -2416,8 +2419,6 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
-        'src/platform/test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
-        'src/platform/test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
@@ -2479,8 +2480,6 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{ts,tsx}',
-        'src/platform/test/interactive_setup_api_integration/**/*.{ts,tsx}',
-        'src/platform/test/interactive_setup_functional/**/*.{ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{ts,tsx}',
         'src/platform/packages/private/kbn-mock-idp-utils/**/*.{ts,tsx}',
@@ -2579,7 +2578,6 @@ module.exports = {
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
-        'no-extend-native': 'error',
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
@@ -2631,7 +2629,6 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
@@ -2649,7 +2646,6 @@ module.exports = {
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -2778,18 +2774,22 @@ module.exports = {
       },
     },
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
      */
     {
-      files: '.buildkite/**/*.{js,ts}',
+      files: '.buildkite/**/*.{cjs,js,mjs,ts}',
+      parserOptions: {
+        ecmaVersion: 2022,
+      },
       rules: {
         'no-console': 'off',
         '@kbn/imports/no_unresolvable_imports': 'off',
+        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
       },
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
      */
     {
       files: [
@@ -2806,6 +2806,15 @@ module.exports = {
       files: [
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'scripts/capture_sigevents_env_snapshot.js',
+        'scripts/capture_sigevents_otel_demo_snapshots.js',
+        'scripts/probe_sigevents_eval_snapshot.js',
+        'scripts/replay_sigevents_eval_snapshot.js',
+        'scripts/restore_sigevents_env_snapshot.js',
+        'scripts/seed_sigevents_env.js',
+        'x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events/**',
+        'x-pack/platform/test/api_integration_deployment_agnostic/configs/**/oblt.significant_events.feature_flag.*',
+        'x-pack/platform/test/api_integration_deployment_agnostic/configs/**/platform.significant_events.feature_flag.*',
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)*',
 
@@ -2841,7 +2850,7 @@ module.exports = {
       // loads them natively via createRequire (see rspack_runtime.ts).
       files: [
         'packages/kbn-rspack-optimizer/**/*.{ts,tsx}',
-        'packages/kbn-plugin-helpers/src/tasks/optimize_rspack.ts',
+        'packages/kbn-plugin-helpers/src/tasks/optimize.ts',
       ],
       rules: {
         '@typescript-eslint/no-restricted-imports': [
@@ -3076,6 +3085,30 @@ module.exports = {
       },
     },
     {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          {
+            alternativeFixtures: [
+              'esClient',
+              'detectionsApi',
+              'discoveriesApi',
+              'endpointExceptionsApi',
+              'endpointManagementApi',
+              'entityAnalyticsApi',
+              'exceptionsApi',
+              'listsApi',
+              'osqueryApi',
+              'timelinesApi',
+            ],
+          },
+        ],
+      },
+    },
+    {
       // Deployment-agnostic test files must use proper context and services
       files: [
         'x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
@@ -3161,6 +3194,7 @@ module.exports = {
               '!@kbn/ui-chrome-layout',
               '!@kbn/ui-app-menu',
               '!@kbn/ui-favorite-button',
+              '!@kbn/ui-ai-components',
             ],
           },
         ],

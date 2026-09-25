@@ -167,6 +167,7 @@ describe('WorkflowDetailEditor', () => {
     store.dispatch(setYamlString(mockYaml));
     store.dispatch(
       _setComputedDataInternal({
+        yamlString: mockYaml,
         workflowDefinition: {
           version: '1',
           name: 'Test Workflow',
@@ -275,6 +276,20 @@ describe('WorkflowDetailEditor', () => {
 
       const { getByTestId } = renderEditor();
       expect(getByTestId('workflowEditorReadOnlyBadge')).toHaveTextContent('Read only');
+    });
+
+    it('hides the bottom-bar actions menu on the executions tab', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      mockUseWorkflowUrlState.mockReturnValue({
+        ...mockUseWorkflowUrlState(),
+        activeTab: 'executions',
+        selectedExecutionId: 'execution-1',
+      });
+
+      const { queryByTestId, getByTestId } = renderEditor();
+
+      expect(queryByTestId('workflowBottomBarActionsMenu')).not.toBeInTheDocument();
+      expect(getByTestId('workflowBottomBarDocumentation')).toBeInTheDocument();
     });
 
     it('shows the read-only badge for managed workflows', () => {

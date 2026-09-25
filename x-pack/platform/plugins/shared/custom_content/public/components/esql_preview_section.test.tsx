@@ -23,7 +23,7 @@ jest.mock('../services', () => ({
 
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { EsqlPreviewSection } from './esql_preview_section';
-import type { EsqlDataResult } from '../utils/fetch_esql_data';
+import type { EsqlDataResult } from '@kbn/custom-content-renderer';
 
 const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getESQLTimeField>;
 

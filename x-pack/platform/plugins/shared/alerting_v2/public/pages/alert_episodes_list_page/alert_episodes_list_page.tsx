@@ -39,14 +39,20 @@ import deepEqual from 'fast-deep-equal';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useService } from '@kbn/core-di-browser';
+import {
+  EpisodeDataSourceProvider,
+  useAdditionalEpisodesDataSource,
+} from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
+import { episodeSupportsTimeline } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
+  EpisodeDurationCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
@@ -57,9 +63,9 @@ import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/component
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
-import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
+import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
@@ -68,15 +74,18 @@ import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
+import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
+import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
+import { CLASSIC_EPISODES_DATA_SOURCE } from '../../episode_sources';
+import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
   EPISODE_ACTIONS_PRIVILEGE,
 } from '../../utils/filter_episode_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
-import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
-import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
+import { useManageRulesHref } from '../../application/manage_rules_href_context';
 
 const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {
@@ -157,8 +166,22 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
 `;
 
 export const AlertEpisodesListPage = () => {
+  const queryV2Source = useService(UserCapabilities).canRead('alerts');
+  return (
+    <EpisodeDataSourceProvider
+      dataSource={CLASSIC_EPISODES_DATA_SOURCE}
+      queryV2Source={queryV2Source}
+    >
+      <AlertEpisodesListPageContent />
+    </EpisodeDataSourceProvider>
+  );
+};
+
+const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
+  const { rulesLocators, episodesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
+  const additionalDataSource = useAdditionalEpisodesDataSource();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
     : EPISODE_ACTIONS_PRIVILEGE.read;
@@ -199,6 +222,9 @@ export const AlertEpisodesListPage = () => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
   const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
+  const [sourceRuleInfoToView, setSourceRuleInfoToView] = useState<
+    { category?: string } | undefined
+  >();
   const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
   const {
     flyout: composeFlyout,
@@ -209,9 +235,10 @@ export const AlertEpisodesListPage = () => {
 
   // The rule and the episode flyout occupy the same edge of the screen, so only one of them
   // can be open at a time.
-  const openRuleFlyout = useCallback((ruleId: string) => {
+  const openRuleFlyout = useCallback((ruleId: string, sourceRuleInfo?: { category?: string }) => {
     setExpandedDoc(undefined);
     setRuleIdToView(ruleId);
+    setSourceRuleInfoToView(sourceRuleInfo);
   }, []);
 
   const expandDoc = useCallback((doc?: DataTableRecord) => {
@@ -264,7 +291,7 @@ export const AlertEpisodesListPage = () => {
   );
 
   const ruleIds = useMemo(
-    () => [...new Set(episodesData?.map((row) => row['rule.id']) ?? [])],
+    () => [...new Set((episodesData ?? []).map((row) => row['rule.id']))],
     [episodesData]
   );
 
@@ -279,14 +306,20 @@ export const AlertEpisodesListPage = () => {
     http: services.http,
   });
 
-  const ruleOptions = useMemo(
-    () =>
-      Object.entries(rulesCache).map(([id, rule]) => ({
-        label: rule.metadata?.name ?? id,
-        value: id,
-      })),
-    [rulesCache]
-  );
+  const ruleOptions = useMemo(() => {
+    const options = Object.entries(rulesCache).map(([id, rule]) => ({
+      label: rule.metadata?.name ?? id,
+      value: id,
+    }));
+    const cachedIds = new Set(Object.keys(rulesCache));
+    for (const ep of episodesData ?? []) {
+      if (!cachedIds.has(ep['rule.id']) && ep['rule.name']) {
+        cachedIds.add(ep['rule.id']);
+        options.push({ label: ep['rule.name'], value: ep['rule.id'] });
+      }
+    }
+    return options;
+  }, [rulesCache, episodesData]);
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
@@ -362,6 +395,7 @@ export const AlertEpisodesListPage = () => {
           expressions: services.expressions,
           spaces: services.spaces,
           queryClient,
+          additionalDataSource,
           getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
             getDiscoverHrefForRuleAndEpisodeTimestamp({
               share: services.share,
@@ -375,47 +409,90 @@ export const AlertEpisodesListPage = () => {
         }),
         alertsCapability
       ),
-    [services, queryClient, rulesCache, alertsCapability]
+    [services, queryClient, additionalDataSource, rulesCache, alertsCapability]
+  );
+
+  const getRuleDetailsHref = useCallback(
+    (ruleId: string, isSourceRule?: boolean): string | undefined => {
+      if (isSourceRule) {
+        const sourceHref = additionalDataSource?.getRuleDetailsHref?.(ruleId);
+        return sourceHref ? services.http.basePath.prepend(sourceHref) : undefined;
+      }
+      return rulesLocators.getRedirectUrl({ ruleId });
+    },
+    [rulesLocators, additionalDataSource, services.http.basePath]
+  );
+  const getEpisodeDetailsHref = useCallback(
+    (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
+    [episodesLocators]
   );
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
-    (hit) => (
-      <AlertEpisodeDetailsFlyout
-        episodeId={hit.flattened['episode.id'] as string}
-        groupHash={hit.flattened.group_hash as string | undefined}
-        onClose={closeFlyout}
-        actions={episodeActions}
-        services={{
-          data: services.data,
-          http: services.http,
-          expressions: services.expressions,
-          userProfile: services.userProfile,
-          spaces: services.spaces,
-          uiSettings: services.uiSettings,
-          unifiedDocViewer: services.unifiedDocViewer,
-          dataViews: services.dataViews,
-        }}
-      />
-    ),
-    [closeFlyout, episodeActions, services]
+    (hit) => {
+      if (!episodeSupportsTimeline(dataTableRecordToEpisode(hit))) {
+        return (
+          <ClassicAlertDetailsFlyout
+            alertId={hit.flattened['episode.id'] as string}
+            onClose={closeFlyout}
+            services={{ http: services.http }}
+          />
+        );
+      }
+      return (
+        <AlertEpisodeDetailsFlyout
+          episodeId={hit.flattened['episode.id'] as string}
+          groupHash={hit.flattened.group_hash as string | undefined}
+          onClose={closeFlyout}
+          actions={episodeActions}
+          getRuleDetailsHref={(ruleId) => getRuleDetailsHref(ruleId) ?? ''}
+          getEpisodeDetailsHref={getEpisodeDetailsHref}
+          services={{
+            data: services.data,
+            http: services.http,
+            expressions: services.expressions,
+            userProfile: services.userProfile,
+            spaces: services.spaces,
+            uiSettings: services.uiSettings,
+            unifiedDocViewer: services.unifiedDocViewer,
+            dataViews: services.dataViews,
+          }}
+        />
+      );
+    },
+    [closeFlyout, episodeActions, getEpisodeDetailsHref, getRuleDetailsHref, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
     () =>
       episodeActions.map((action) => ({
         id: action.id,
-        isAvailable: ({ record }: RowControlRowProps) =>
-          action.isCompatible({ episodes: [dataTableRecordToEpisode(record)] }),
+        isAvailable: ({ record }: RowControlRowProps) => {
+          const episodes = [dataTableRecordToEpisode(record)];
+          return action.showWhenDisabled?.({ episodes }) || action.isCompatible({ episodes });
+        },
         render: (Control, { record }) => {
           const episodes = [dataTableRecordToEpisode(record)];
-          return (
+          const compatible = action.isCompatible({ episodes });
+          const disabled = !compatible;
+          const control = (
             <Control
               iconType={action.iconType}
               label={action.displayName}
+              disabled={disabled}
               onClick={() => action.execute({ episodes, onSuccess: invalidateEpisodeQueries })}
-              tooltipContent={action.displayName}
+              tooltipContent={disabled ? undefined : action.displayName}
             />
           );
+          if (disabled && action.disabledTooltip) {
+            return (
+              <EuiToolTip content={action.disabledTooltip}>
+                <span tabIndex={0} css={{ display: 'contents' }}>
+                  {control}
+                </span>
+              </EuiToolTip>
+            );
+          }
+          return control;
         },
       })),
     [episodeActions, invalidateEpisodeQueries]
@@ -445,14 +522,14 @@ export const AlertEpisodesListPage = () => {
     [setVisibleColumns]
   );
 
-  const getRuleDetailsHref = useCallback(
-    (ruleId: string) => services.http.basePath.prepend(paths.ruleDetails(ruleId)),
-    [services.http.basePath]
-  );
+  const locatorHref = rulesLocators.useUrl({});
+  const manageRulesHrefOverride = useManageRulesHref();
+  const manageRulesHref = manageRulesHrefOverride ?? locatorHref;
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
       rule_tags: (props) => (
@@ -487,13 +564,7 @@ export const AlertEpisodesListPage = () => {
     ]
   );
 
-  const episodesMenu = useMemo(
-    () =>
-      getEpisodesListMenu({
-        manageRulesHref: services.http.basePath.prepend(paths.ruleList),
-      }),
-    [services.http.basePath]
-  );
+  const episodesMenu = useMemo(() => getEpisodesListMenu({ manageRulesHref }), [manageRulesHref]);
 
   return (
     <div
@@ -572,7 +643,7 @@ export const AlertEpisodesListPage = () => {
                   </span>
                 </EuiScreenReaderOnly>
                 {!dataView ? (
-                  <EuiLoadingSpinner />
+                  <EuiLoadingSpinner data-test-subj="alertingV2EpisodesListTable-loading" />
                 ) : (
                   <UnifiedDataTable
                     ariaLabelledBy="alertingEpisodesTableAriaLabel"
@@ -624,7 +695,8 @@ export const AlertEpisodesListPage = () => {
       {ruleIdToView ? (
         <RuleSummaryFlyoutContainer
           ruleId={ruleIdToView}
-          type="overlay"
+          sourceRuleInfo={sourceRuleInfoToView}
+          cachedRule={rulesCache[ruleIdToView]}
           onClose={closeRuleFlyout}
           onEdit={(rule) => {
             setRuleIdToView(null);

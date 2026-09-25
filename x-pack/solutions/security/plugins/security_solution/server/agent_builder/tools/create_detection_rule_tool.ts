@@ -34,8 +34,21 @@ import type { RuleAttachmentData } from '../attachments/rule';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
-const RULE_CREATION_GENERIC_ERROR_MESSAGE =
-  'Failed to create detection rule. Please try again or refine your request.';
+const RULE_CREATION_ERROR_PREFIX = 'Failed to create detection rule';
+const RULE_CREATION_GENERIC_ERROR_MESSAGE = `${RULE_CREATION_ERROR_PREFIX}. Please try again or refine your request.`;
+
+/**
+ * Builds the error message returned to the agent. The underlying reasons are included so the agent
+ * can tell the user what actually went wrong (e.g. a missing index privilege) instead of guessing.
+ */
+const buildRuleCreationErrorMessage = (reasons: unknown[]): string => {
+  const detail = reasons
+    .filter((reason): reason is string => typeof reason === 'string')
+    .map((reason) => reason.trim())
+    .filter(Boolean)
+    .join('; ');
+  return detail ? `${RULE_CREATION_ERROR_PREFIX}: ${detail}` : RULE_CREATION_GENERIC_ERROR_MESSAGE;
+};
 
 const isRuleAttachment = (
   attachment: VersionedAttachment
@@ -281,6 +294,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           savedObjectsClient,
           rulesClient,
           events,
+          mitreDataClient: startPlugins.mitreAttack?.getMitreDataClient?.(),
         });
 
         // Seed the graph with the existing rule when rewriting a query; otherwise create fresh.
@@ -330,7 +344,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               {
                 type: ToolResultType.error,
                 data: {
-                  message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
+                  message: buildRuleCreationErrorMessage(result.errors),
                 },
               },
             ],
@@ -403,14 +417,16 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           ],
         };
       } catch (error) {
-        logger.error(`Create detection rule tool failed: ${error.message}`, error);
+        // A rejection is not guaranteed to be an Error instance; normalize before reporting.
+        const reason = error instanceof Error ? error.message : String(error);
+        logger.error(`Create detection rule tool failed: ${reason}`, error);
 
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
+                message: buildRuleCreationErrorMessage([reason]),
               },
             },
           ],

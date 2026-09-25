@@ -41,11 +41,13 @@ module.exports = (_, argv) => {
         'qs',
 
         /**
-         * babel runtime helpers referenced from entry chunks
-         * determined by running:
+         * babel runtime helpers referenced from entry chunks, derived from
+         * bundle stats:
          *
-         *  node scripts/build_kibana_platform_plugins --dist --profile
-         *  node scripts/find_babel_runtime_helpers_in_use.js
+         *  node scripts/build_kibana_platform_plugins --dist --profile-stats-only
+         *
+         * then inspect target/public/bundles/stats.json for
+         * @babel/runtime/helpers modules.
          */
         '@babel/runtime/helpers/assertThisInitialized',
         '@babel/runtime/helpers/classPrivateFieldGet',
@@ -184,30 +186,6 @@ module.exports = (_, argv) => {
     cache: false,
 
     plugins: [
-      // Ensure @elastic/charts resolves its own nested copies of redux-related deps
-      // (RTK v1 / immer v9) instead of the root versions (RTK v2 / immer v10).
-      // RTK v1 calls immer's enableES5() which was removed in immer v10.
-      new webpack.NormalModuleReplacementPlugin(
-        /^(immer|@reduxjs\/toolkit|redux|react-redux|reselect)$/,
-        (resource) => {
-          if (resource.context && /node_modules[\\/]@elastic[\\/]charts/.test(resource.context)) {
-            const nested = Path.resolve(
-              REPO_ROOT,
-              'node_modules',
-              '@elastic',
-              'charts',
-              'node_modules',
-              resource.request
-            );
-            try {
-              require.resolve(nested);
-              resource.request = nested;
-            } catch (e) {
-              // nested copy doesn't exist, fall through to default resolution
-            }
-          }
-        }
-      ),
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin(),
       new webpack.DllPlugin({

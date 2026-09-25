@@ -100,6 +100,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         ...defaultAdditionalFields,
       },
       configurationUtilities,
+      undefined,
       undefined
     );
     expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith({
@@ -147,6 +148,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         ...defaultAdditionalFields,
       },
       configurationUtilities,
+      undefined,
       undefined
     );
     expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith({
@@ -202,6 +204,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         ...specificAdditionalFields,
       }),
       expect.any(Object), // configurationUtilities
+      undefined,
       undefined
     );
   });
@@ -281,6 +284,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       },
       configurationUtilities,
+      undefined,
       undefined
     );
   });
@@ -388,6 +392,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         ...defaultAdditionalFields,
       },
       configurationUtilities,
+      undefined,
       undefined
     );
   });
@@ -431,6 +436,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         ...defaultAdditionalFields,
       },
       configurationUtilities,
+      undefined,
       undefined
     );
   });

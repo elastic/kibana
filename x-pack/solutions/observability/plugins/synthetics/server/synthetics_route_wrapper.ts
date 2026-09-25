@@ -15,6 +15,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { resolveHeartbeatIndices } from './services/resolve_heartbeat_indices';
+import { wrapZodRequestValidation } from './routes/zod_query';
 import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
@@ -23,6 +24,8 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   syntheticsMonitorClient
 ) => ({
   ...syntheticsRoute,
+  validate: wrapZodRequestValidation(syntheticsRoute.validate),
+  validation: wrapZodRequestValidation(syntheticsRoute.validation),
   options: {
     ...(syntheticsRoute.options ?? {}),
   },
@@ -32,6 +35,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         'uptime-read',
         ...(syntheticsRoute.requiredPrivileges ?? []),
         ...(syntheticsRoute?.writeAccess ? ['uptime-write'] : []),
+        // OR-set: at least one of these privileges must be satisfied. Used to allow a
+        // route for either a full-write user or a more granular privilege holder.
+        ...(syntheticsRoute.anyRequiredPrivileges?.length
+          ? [{ anyRequired: syntheticsRoute.anyRequiredPrivileges }]
+          : []),
       ],
     },
   },
