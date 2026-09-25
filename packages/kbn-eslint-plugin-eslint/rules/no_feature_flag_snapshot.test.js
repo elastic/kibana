@@ -70,6 +70,22 @@ ruleTester.run('@kbn/eslint/no_feature_flag_snapshot', rule, {
         const enabled = await firstValueFrom(featureFlags.getBooleanValue$('flag', false));
       `,
     },
+    {
+      filename: '/repo/plugin.ts',
+      code: dedent`
+        const subscription = featureFlags.getBooleanValue$('flag', false).subscribe(update);
+        return () => subscription.unsubscribe();
+      `,
+    },
+    {
+      filename: '/repo/plugin.ts',
+      code: dedent`
+        useEffect(() => {
+          const subscription = featureFlags.getBooleanValue$('flag', false).subscribe(update);
+          return () => subscription.unsubscribe();
+        });
+      `,
+    },
   ],
   invalid: [
     {
@@ -129,6 +145,16 @@ ruleTester.run('@kbn/eslint/no_feature_flag_snapshot', rule, {
           cached = enabled;
         });
         subscription.unsubscribe();
+      `,
+      errors: [ERR_UNSUB],
+    },
+    {
+      filename: '/repo/plugin.ts',
+      code: dedent`
+        const subscription = featureFlags.getBooleanValue$('flag', false).subscribe((enabled) => {
+          cached = enabled;
+          subscription.unsubscribe();
+        });
       `,
       errors: [ERR_UNSUB],
     },

@@ -100,7 +100,7 @@ function isFlagMethodCall(node) {
  * @param {Node} node
  * @returns {Node | null}
  */
-function resolveIdentifierInit(context, node) {
+function resolveVariableDeclarator(context, node) {
   if (node.type !== 'Identifier') {
     return null;
   }
@@ -110,11 +110,72 @@ function resolveIdentifierInit(context, node) {
     const variable = scope.set.get(node.name);
     if (variable) {
       const def = variable.defs.find((entry) => entry.type === 'Variable' && entry.node.init);
-      return def ? def.node.init : null;
+      return def ? def.node : null;
     }
     scope = scope.upper;
   }
   return null;
+}
+
+/**
+ * @param {import("eslint").Rule.RuleContext} context
+ * @param {Node} node
+ * @returns {Node | null}
+ */
+function resolveIdentifierInit(context, node) {
+  const declarator = resolveVariableDeclarator(context, node);
+  return declarator ? declarator.init : null;
+}
+
+/**
+ * @param {Node} node
+ * @returns {Node | null}
+ */
+function enclosingFunction(node) {
+  let current = node.parent;
+  while (current) {
+    if (
+      current.type === 'FunctionDeclaration' ||
+      current.type === 'FunctionExpression' ||
+      current.type === 'ArrowFunctionExpression'
+    ) {
+      return current;
+    }
+    current = current.parent;
+  }
+  return null;
+}
+
+/**
+ * @param {Node} node
+ * @param {Node} ancestor
+ * @returns {boolean}
+ */
+function isNodeInside(node, ancestor) {
+  let current = node.parent;
+  while (current) {
+    if (current === ancestor) {
+      return true;
+    }
+    current = current.parent;
+  }
+  return false;
+}
+
+/**
+ * @param {Node} node
+ * @param {Node} subscribeCall
+ * @returns {boolean}
+ */
+function isInsideSubscribeHandler(node, subscribeCall) {
+  return subscribeCall.arguments.some((arg) => {
+    const handler = unwrap(arg);
+    return (
+      handler &&
+      (handler.type === 'ArrowFunctionExpression' || handler.type === 'FunctionExpression') &&
+      isNodeInside(node, handler)
+    );
+  });
 }
 
 /**
@@ -213,10 +274,31 @@ function isImmediateUnsubscribeOfFlag(context, node) {
     return false;
   }
   if (receiver.type === 'Identifier') {
-    const init = resolveIdentifierInit(context, receiver);
-    return Boolean(init && isSubscribeOfFlag(context, init));
+    return isSynchronousUnsubscribeOfFlag(context, node, receiver);
   }
   return isSubscribeOfFlag(context, receiver);
+}
+
+/**
+ * `subscription.unsubscribe()` in the same function that subscribed reads one
+ * emission and drops the rest. A later cleanup (`return () => subscription.unsubscribe()`)
+ * keeps the subscription until that function runs.
+ *
+ * @param {import("eslint").Rule.RuleContext} context
+ * @param {Node} unsubscribeNode
+ * @param {Node} identifier
+ * @returns {boolean}
+ */
+function isSynchronousUnsubscribeOfFlag(context, unsubscribeNode, identifier) {
+  const declarator = resolveVariableDeclarator(context, identifier);
+  if (!declarator || !isSubscribeOfFlag(context, declarator.init)) {
+    return false;
+  }
+  const subscribeCall = unwrap(declarator.init);
+  if (subscribeCall && isInsideSubscribeHandler(unsubscribeNode, subscribeCall)) {
+    return true;
+  }
+  return enclosingFunction(unsubscribeNode) === enclosingFunction(declarator);
 }
 
 /**
