@@ -25,6 +25,7 @@ import type {
   AwsTemporaryKeyCredentials,
   NewAgentPolicy,
 } from '@kbn/fleet-plugin/public';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { AgentCredentialVars } from '../package_inputs';
 
 import { useOnboardingFlow } from '../../../onboarding_flow_context';
@@ -256,7 +257,13 @@ export function AgentBasedSection({
     isLoading: isPoliciesLoading,
     isError: isPoliciesError,
   } = useGetAgentPoliciesQuery(
-    { full: false, perPage: 1000, sortField: 'name', sortOrder: 'asc' },
+    {
+      full: false,
+      perPage: 1000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      kuery: `NOT ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
+    },
     { enabled: agentHostsMode === 'existing' }
   );
 
@@ -264,8 +271,8 @@ export function AgentBasedSection({
     return (policiesData?.items ?? [])
       .filter(
         (p: AgentPolicy) =>
-          // Exclude Fleet-Server policies — adding an AWS integration there is a footgun.
-          !p.is_managed && !p.has_fleet_server
+          // Exclude Fleet-Server and agentless policies — adding an AWS integration there is a footgun.
+          !p.is_managed && !p.has_fleet_server && !p.supports_agentless
       )
       .map((p: AgentPolicy) => ({ label: p.name, value: p.id }));
   }, [policiesData]);
