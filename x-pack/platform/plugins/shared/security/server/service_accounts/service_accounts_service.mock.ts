@@ -15,6 +15,7 @@ export const serviceAccountsServiceMock = {
       create: jest.fn().mockResolvedValue({
         id: 'mock-service-account-id',
         name: 'mock-service-account-name',
+        roles: ['viewer'],
       }),
       list: jest.fn().mockResolvedValue({ serviceAccounts: [] }),
       get: jest.fn().mockResolvedValue({

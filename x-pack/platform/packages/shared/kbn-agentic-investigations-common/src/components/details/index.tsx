@@ -13,5 +13,16 @@ export {
   ConversationDetailsFlyoutFooter,
   type ConversationDetailsFlyoutFooterProps,
 } from './flyout_footer';
-export { InvestigationHeaderBlocks, type InvestigationHeaderBlocksProps } from './header_blocks';
-export { OverviewTab } from './details_flyout_tab_contents';
+export { ConversationHeaderBlocks, type ConversationHeaderBlocksProps } from './header_blocks';
+export {
+  EscalationFlyoutHeader,
+  type EscalationFlyoutHeaderProps,
+} from './escalation_flyout_header';
+export { OverviewTab, type OverviewTabProps } from './details_flyout_tab_contents';
+export { StatusToggle, type StatusToggleProps } from './status_toggle';
+export { ProposedActionButton, type ProposedActionButtonProps } from './proposed_action_button';
+export {
+  LinkedInvestigationsList,
+  type LinkedInvestigationItem,
+  type LinkedInvestigationsListProps,
+} from './linked_investigations_list';

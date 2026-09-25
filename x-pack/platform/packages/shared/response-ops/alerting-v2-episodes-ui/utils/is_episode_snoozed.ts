@@ -11,20 +11,20 @@ import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
  * Whether notifications are currently snoozed for an episode/group.
  *
  * True when the latest snooze/unsnooze action is `snooze` and either there is
- * no expiry (indefinite) or the expiry is still in the future. Mirrors the KPI
- * ES|QL rule (`snooze_expiry IS NULL OR TO_DATETIME(snooze_expiry) > NOW()`).
+ * no `snoozed_until` (indefinite) or it is still in the future. Mirrors the KPI
+ * ES|QL rule (`snoozed_until IS NULL OR TO_DATETIME(snoozed_until) > NOW()`).
  */
 export const isEpisodeSnoozed = (
   lastSnoozeAction: string | null | undefined,
-  snoozeExpiry: string | null | undefined
+  snoozedUntil: string | null | undefined
 ): boolean => {
   if (lastSnoozeAction !== ALERT_EPISODE_ACTION_TYPE.SNOOZE) {
     return false;
   }
 
-  if (snoozeExpiry == null) {
+  if (snoozedUntil == null) {
     return true;
   }
 
-  return new Date(snoozeExpiry).getTime() > Date.now();
+  return new Date(snoozedUntil).getTime() > Date.now();
 };

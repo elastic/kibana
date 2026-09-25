@@ -19,7 +19,15 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
-export type AlertZeroPluginSetup = Record<string, never>;
+export interface AlertZeroPluginSetup {
+  /**
+   * `false` when the `xpack.alertzero.enabled` kill switch is off, in which case AlertZero
+   * registered nothing — including its `securitySolution:enableAlertZero` advanced setting.
+   * Serverless checks this before allowlisting that setting: allowlisting an unregistered key
+   * fails startup in dev (`UiSettingsService#validateAllowlist`).
+   */
+  isEnabled: boolean;
+}
 export type AlertZeroPluginStart = Record<string, never>;
 
 export interface AlertZeroSetupDependencies {

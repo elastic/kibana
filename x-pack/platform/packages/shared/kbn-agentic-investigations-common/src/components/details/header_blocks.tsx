@@ -6,46 +6,82 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiAvatar, EuiBadge, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InfoBlocks, type InfoBlockItem } from '@kbn/flyout-info-blocks';
-import type { Investigation } from '../../types';
 import { getEmptyValue } from '../helpers';
 import { TEMPLATE_UI_LABELS } from '../../template_ui/translations';
 
-export interface InvestigationHeaderBlocksProps {
-  investigation: Investigation;
+export interface ConversationHeaderBlocksProps {
+  status?: string;
+  /**
+   * Pre-rendered interactive status widget from the consuming plugin (e.g. a toggle).
+   * Falls back to a read-only badge when absent.
+   */
+  statusNode?: React.ReactNode;
+  /** Pre-rendered assignee content. Falls back to a read-only avatar stack when absent. */
+  assigneesNode?: React.ReactNode;
+  /** Fallback assignee uid list used to render read-only avatars when `assigneesNode` is absent. */
+  assigneeUids?: readonly string[];
+  'data-test-subj'?: string;
 }
 
 /**
  * Status and assignee tiles shown above the flyout tabs.
  *
- * Read-only: the only way to write conversation template metadata today is Agent Builder's
- * internal HTTP route, which is on neither its public start contract nor a package constant.
+ * Accepts either a fully pre-rendered `assigneesNode` (interactive picker from the
+ * consuming plugin) or a list of uid strings to render as a read-only avatar stack.
  */
-export const InvestigationHeaderBlocks = ({ investigation }: InvestigationHeaderBlocksProps) => {
-  const { status, assignee } = investigation;
+export const ConversationHeaderBlocks = ({
+  status,
+  statusNode,
+  assigneesNode,
+  assigneeUids = [],
+  'data-test-subj': dataTestSubj = 'investigationHeaderBlocks',
+}: ConversationHeaderBlocksProps) => {
+  const assigneesValue = useMemo<React.ReactNode>(() => {
+    if (assigneesNode !== undefined) {
+      return assigneesNode;
+    }
+    if (assigneeUids.length === 0) {
+      return null;
+    }
+    return (
+      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+        {assigneeUids.map((uid) => (
+          <EuiFlexItem key={uid} grow={false}>
+            <EuiAvatar size="s" name={uid} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }, [assigneesNode, assigneeUids]);
+
+  const statusValue = useMemo<React.ReactNode>(() => {
+    if (statusNode !== undefined) {
+      return statusNode;
+    }
+    return (
+      <EuiBadge color={status === 'open' ? 'primary' : 'hollow'}>
+        {status ?? getEmptyValue()}
+      </EuiBadge>
+    );
+  }, [status, statusNode]);
 
   const items = useMemo<InfoBlockItem[]>(
     () => [
       {
         id: 'status',
         title: TEMPLATE_UI_LABELS.status,
-        value: <EuiBadge color="hollow">{status ?? getEmptyValue()}</EuiBadge>,
+        value: statusValue,
       },
       {
         id: 'assignees',
         title: TEMPLATE_UI_LABELS.assignees,
-        value: assignee ? (
-          <EuiAvatar size="s" name={assignee} />
-        ) : (
-          <EuiText size="s" color="subdued">
-            {TEMPLATE_UI_LABELS.unassigned}
-          </EuiText>
-        ),
+        value: assigneesValue,
       },
     ],
-    [status, assignee]
+    [statusValue, assigneesValue]
   );
 
-  return <InfoBlocks items={items} maxColumns={2} data-test-subj="investigationHeaderBlocks" />;
+  return <InfoBlocks items={items} maxColumns={2} data-test-subj={dataTestSubj} />;
 };
