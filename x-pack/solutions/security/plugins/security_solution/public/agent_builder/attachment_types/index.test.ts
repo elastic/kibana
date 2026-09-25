@@ -60,14 +60,14 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(entityCall).toBeUndefined();
   });
 
-  it('registers security.alerts with a conversation-details renderer', () => {
+  it('registers security.alerts without a conversation-details renderer', () => {
     registerAttachmentUiDefinitions(mockAttachments);
 
     const alertsCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alerts
     );
     expect(alertsCall).toBeDefined();
-    expect(typeof alertsCall![1].renderConversationDetailsContent).toBe('function');
+    expect(alertsCall![1].renderConversationDetailsContent).toBeUndefined();
   });
 });
 
