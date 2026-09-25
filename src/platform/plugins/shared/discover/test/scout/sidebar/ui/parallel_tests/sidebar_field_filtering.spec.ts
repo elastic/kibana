@@ -25,7 +25,7 @@ spaceTest.describe('Discover sidebar field filtering', { tag: tags.deploymentAgn
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('filters the field list by field type', async ({ pageObjects }) => {
+  spaceTest('filters the field list by field type', async ({ page, pageObjects }) => {
     const { unifiedFieldList } = pageObjects;
 
     await unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -34,6 +34,23 @@ spaceTest.describe('Discover sidebar field filtering', { tag: tags.deploymentAgn
     );
 
     await unifiedFieldList.openFieldTypeFilter();
+
+    // `EuiPopover` portals the panel out of the sidebar, so it is scanned as a
+    // second root alongside the sidebar itself. axe only errors when *every*
+    // root is missing, so assert the panel first — otherwise an absent panel
+    // would quietly narrow this back to a sidebar-only scan.
+    await expect(
+      page.locator('[data-test-subj="fieldListFiltersFieldTypeFilterPanel"]')
+    ).toBeVisible();
+
+    const { violations } = await page.checkA11y({
+      include: [
+        '[data-test-subj="discover-sidebar"]',
+        '[data-test-subj="fieldListFiltersFieldTypeFilterPanel"]',
+      ],
+    });
+    expect(violations).toStrictEqual([]);
+
     await unifiedFieldList.selectFieldTypeFilter('keyword');
     await unifiedFieldList.closeFieldTypeFilter();
 

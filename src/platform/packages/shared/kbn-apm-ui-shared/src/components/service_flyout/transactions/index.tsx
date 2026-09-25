@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DocLinksStart, NotificationsStart } from '@kbn/core/public';
@@ -28,6 +28,26 @@ import type { TransactionGroup } from '../../transactions_table/types';
 import { TransactionsTable } from '../../transactions_table';
 import { SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS } from './ebt_constants';
 import { useServiceFlyoutTransactionData } from './hooks/use_service_flyout_transaction_data';
+
+/** Parent filters a transactions-list notification was requested with. */
+export interface TransactionsListFilters {
+  environment: string;
+  start: string;
+  end: string;
+  transactionType: string;
+}
+
+export interface TransactionsListChangeMeta {
+  isLoading: boolean;
+  /** Set when this filter generation failed to load. Previous items may still be present. */
+  error?: unknown;
+  filters: TransactionsListFilters;
+  /**
+   * True when `items` are narrowed by a server-side table search and cannot prove
+   * that a transaction is absent under the parent filters.
+   */
+  isSearchFiltered: boolean;
+}
 
 const getMaxGroupsTooltip = (docsHref: string) => (
   <EuiText size="s" style={{ maxWidth: 448 }}>
@@ -62,6 +82,11 @@ interface ServiceFlyoutTransactionsSectionProps {
   onTransactionClick?: (item: TransactionGroup) => void;
   /** When set with onTransactionClick, drives the expand/collapse icon state. */
   isTransactionExpanded?: (item: TransactionGroup) => boolean;
+  /**
+   * Notifies the host when the transactions list settles so it can decide whether a
+   * nested selection still exists under the current filters.
+   */
+  onTransactionsChange?: (items: TransactionGroup[], meta: TransactionsListChangeMeta) => void;
   projectRouting?: string;
 }
 
@@ -79,24 +104,64 @@ export function ServiceFlyoutTransactionsSection({
   refreshToken,
   onTransactionClick,
   isTransactionExpanded,
+  onTransactionsChange,
   projectRouting,
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { items, isLoading, isSparklineLoading, maxCountExceeded, hasActiveAlerts, error } =
-    useServiceFlyoutTransactionData({
-      http,
-      notifications,
-      serviceName,
+  const {
+    items,
+    presenceItems,
+    isServerSearch = false,
+    isLoading,
+    isSparklineLoading,
+    maxCountExceeded,
+    hasActiveAlerts,
+    error,
+    mainError,
+  } = useServiceFlyoutTransactionData({
+    http,
+    notifications,
+    serviceName,
+    environment,
+    start,
+    end,
+    transactionType,
+    latencyAggregationType,
+    searchQuery,
+    refreshToken,
+    projectRouting,
+  });
+
+  const listFilters = useMemo<TransactionsListFilters>(
+    () => ({
       environment,
       start,
       end,
-      transactionType,
-      latencyAggregationType,
-      searchQuery,
-      refreshToken,
-      projectRouting,
+      transactionType: transactionType ?? '',
+    }),
+    [environment, start, end, transactionType]
+  );
+
+  const listError = mainError ?? error;
+
+  const reconciliationItems = isServerSearch || !presenceItems ? items : presenceItems;
+
+  useEffect(() => {
+    onTransactionsChange?.(reconciliationItems, {
+      isLoading,
+      error: listError,
+      filters: listFilters,
+      isSearchFiltered: isServerSearch,
     });
+  }, [
+    reconciliationItems,
+    isServerSearch,
+    isLoading,
+    listError,
+    listFilters,
+    onTransactionsChange,
+  ]);
 
   const openInTransactionsLocator = locators?.get<ServiceTransactionsLocatorParams>(
     SERVICE_TRANSACTIONS_LOCATOR_ID
