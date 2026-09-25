@@ -870,7 +870,11 @@ export function buildAwsServiceMatrix(
           signalTypesSet.add(ptType as SignalType);
         }
 
-        const ptDataStreamIds: string[] = (pt as any).data_streams ?? [];
+        // When the PT doesn't list data_streams explicitly, fall back to all package data streams.
+        const allPackageDsIds = (packageInfo.data_streams ?? []).map(
+          (ds: any) => ds.path as string
+        );
+        const ptDataStreamIds: string[] = (pt as any).data_streams ?? allPackageDsIds;
         const includedDsIds = ptDataStreamIds.filter(
           (dsId) => !(excludedDataStreams ?? []).includes(dsId)
         );
@@ -966,6 +970,17 @@ export function buildAwsServiceMatrix(
                   'identity_federation'
                 )
             );
+          }
+        }
+      }
+
+      // Fallback: packages with no matching policy template (e.g. awsfirehose) still expose
+      // their data streams — derive signal types directly from the package manifest.
+      if (!pt) {
+        for (const ds of packageInfo.data_streams ?? []) {
+          const dsType = (ds as any)?.type as string | undefined;
+          if (dsType === 'logs' || dsType === 'metrics') {
+            signalTypesSet.add(dsType as SignalType);
           }
         }
       }
