@@ -43,6 +43,12 @@ describe('#resolve()', () => {
     `);
   });
 
+  it('caches repeated resolutions from the same directory', () => {
+    const first = resolver.resolve('foo', FIXTURES_DIR);
+
+    expect(resolver.resolve('foo', FIXTURES_DIR)).toBe(first);
+  });
+
   it('resolves nested node_module imports', () => {
     expect(resolver.resolve('bar', Path.join(FIXTURES_DIR, 'packages', 'box')))
       .toMatchInlineSnapshot(`
