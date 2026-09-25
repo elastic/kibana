@@ -7,10 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { InfoBlocks } from './src/info_blocks.component';
-export type {
-  InfoBlockItem,
-  InfoBlocksProps,
-  InfoBlockSize,
-  InfoBlocksMaxColumns,
-} from './src/types';
+export { FlyoutSystemApp } from './flyout_system_app';
+export type { ChildLabel, FlyoutForm } from './flyout_system_app';
