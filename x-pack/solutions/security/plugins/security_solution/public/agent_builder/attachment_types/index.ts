@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   AttachmentServiceStartContract,
@@ -25,10 +24,6 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import {
-  AlertsConversationDetailsContent,
-  type AlertsAttachmentData,
-} from './alerts_conversation_details';
 import { createImpactAttachmentDefinition } from './impact';
 
 /**
@@ -81,7 +76,7 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
     createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
   );
 
-  attachments.addAttachmentType<Attachment<string, AlertsAttachmentData>>(
+  attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
     SecurityAgentBuilderAttachments.alerts,
     {
       getLabel: (attachment) => {
@@ -94,8 +89,6 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
-      renderConversationDetailsContent: (props) =>
-        React.createElement(AlertsConversationDetailsContent, props),
     }
   );
 };
