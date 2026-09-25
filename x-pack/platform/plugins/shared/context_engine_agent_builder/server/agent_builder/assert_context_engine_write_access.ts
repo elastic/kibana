@@ -10,17 +10,20 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
 import { isContextEngineEnabledInSpace } from '@kbn/context-engine-plugin/server/utils/is_context_engine_enabled_in_space';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const assertContextEngineWriteAccess = async ({
   request,
   spaceId,
   getCoreStart,
   getSecurityStart,
+  requireMemoryEnabled = false,
 }: {
   request: KibanaRequest;
   spaceId: string;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  requireMemoryEnabled?: boolean;
 }): Promise<void> => {
   const coreStart = await getCoreStart();
   const security = await getSecurityStart();
@@ -37,6 +40,17 @@ export const assertContextEngineWriteAccess = async ({
 
   if (!isEnabled) {
     throw new Error('Context Engine is not enabled in this space.');
+  }
+
+  if (requireMemoryEnabled) {
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
+    const memoryEnabled = await globalUiSettings.get<boolean>(
+      CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID
+    );
+    if (!memoryEnabled) {
+      throw new Error('Context Engine memory is not enabled.');
+    }
   }
 
   const checkPrivileges = security.authz.checkPrivilegesWithRequest(request);

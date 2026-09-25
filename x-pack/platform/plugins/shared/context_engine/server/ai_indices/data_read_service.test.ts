@@ -25,6 +25,7 @@ const aiIndex: AiIndexHttpItem = {
   id: 'support',
   dest: { type: 'index', value: 'ai-index-idx-support' },
   managed: false,
+  memory_enabled: true,
   automations: [],
   sources: [],
   traces: [],
@@ -40,12 +41,14 @@ describe('AiIndexDataReadService', () => {
   const auditLogger = { log: jest.fn() } as unknown as jest.Mocked<AuditLogger>;
   const aiIndexService = { get: jest.fn(), list: jest.fn() };
   const logger = loggingSystemMock.createLogger();
+  const isMemoryEnabled = jest.fn().mockResolvedValue(true);
   const service = new AiIndexDataReadService({
     esClient,
     spaceId: 'marketing',
     auditLogger,
     aiIndexService,
     logger,
+    isMemoryEnabled,
   });
 
   beforeEach(() => {
@@ -53,6 +56,7 @@ describe('AiIndexDataReadService', () => {
     auditLogger.log.mockReset();
     aiIndexService.get.mockReset();
     aiIndexService.list.mockReset();
+    isMemoryEnabled.mockClear();
     describeAiIndexMock.mockReset();
     filterReadableAiIndicesMock.mockReset();
   });
@@ -103,7 +107,12 @@ describe('AiIndexDataReadService', () => {
 
       expect(result).toEqual({ response: contextBlock });
       expect(aiIndexService.get).toHaveBeenCalledWith('support', 'marketing');
-      expect(describeAiIndexMock).toHaveBeenCalledWith({ esClient, aiIndex, spaceId: 'marketing' });
+      expect(describeAiIndexMock).toHaveBeenCalledWith({
+        esClient,
+        aiIndex,
+        spaceId: 'marketing',
+        includeMemory: true,
+      });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'User has described AI index [id=support]',

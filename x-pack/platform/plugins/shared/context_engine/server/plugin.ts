@@ -17,6 +17,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
@@ -146,6 +147,19 @@ export class ContextEnginePlugin
         requiresPageReload: false,
         readonly: false,
       },
+      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: {
+        name: i18n.translate('xpack.contextEngine.uiSettings.memory.name', {
+          defaultMessage: 'Context Engine memory',
+        }),
+        description: i18n.translate('xpack.contextEngine.uiSettings.memory.description', {
+          defaultMessage: 'Enables memory capabilities for Context Engine AI indices.',
+        }),
+        schema: schema.boolean(),
+        value: false,
+        experimental: true,
+        requiresPageReload: false,
+        readonly: false,
+      },
     });
 
     registerSignalGeneratorTaskDefinition({
@@ -189,6 +203,15 @@ export class ContextEnginePlugin
       return this.scheduleService;
     };
 
+    const isMemoryEnabled = async (request: KibanaRequest) => {
+      const [coreStart] = await coreSetup.getStartServices();
+      const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+      const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
+      return (
+        (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false
+      );
+    };
+
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
@@ -196,6 +219,7 @@ export class ContextEnginePlugin
       getAiIndexService,
       getImprovementsService,
       getScheduleService,
+      isMemoryEnabled,
       getAiIndexDataReadService: (params) => {
         if (!this.createAiIndexDataReadService) {
           throw new Error('AI index read service not available — plugin has not started');
@@ -357,6 +381,13 @@ export class ContextEnginePlugin
         auditLogger: coreStart.security.audit.asScoped(request),
         aiIndexService,
         logger: this.logger,
+        isMemoryEnabled: async () => {
+          const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+          const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
+          return (
+            (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false
+          );
+        },
       });
     const createAiIndexDataReadService = this.createAiIndexDataReadService;
 

@@ -27,16 +27,18 @@ import {
   AiIndexCreatedCallout,
   AutomationsPanel,
   DescriptionPanel,
-  TracesPanel,
   LockedSectionPanel,
+  MemoryPanel,
   SignalsPanel,
   SourcesPanel,
+  TracesPanel,
 } from '../components/ai_index_detail';
 import { KiListPanel } from '../components/ki';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useKiList } from '../hooks/use_ki_list';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
 import {
@@ -75,6 +77,7 @@ export const AiIndexDetailPage = () => {
   const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
+  const isMemoryEnabled = useMemoryEnabled();
   const [isEditingSources, setIsEditingSources] = useState(false);
   const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
   const [showCreatedCallout, setShowCreatedCallout] = useState(
@@ -188,6 +191,12 @@ export const AiIndexDetailPage = () => {
             onSaved={refetch}
             isManaged={!!aiIndex?.managed}
           />
+          {isMemoryEnabled && (
+            <>
+              <EuiSpacer size="m" />
+              <MemoryPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
+            </>
+          )}
           <EuiSpacer size="m" />
           <TracesPanel
             isLoading={isLoading}
