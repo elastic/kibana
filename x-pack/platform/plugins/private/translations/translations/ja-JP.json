@@ -18641,6 +18641,8 @@
     "xpack.dataFederation.createFlyout.s3.fields.accessKey": "アクセスキー",
     "xpack.dataFederation.createFlyout.s3.fields.accessKeyRequired": "アクセスキーは必須です。",
     "xpack.dataFederation.createFlyout.s3.fields.endpoint": "エンドポイント",
+    "xpack.dataFederation.createFlyout.s3.fields.region": "リージョン",
+    "xpack.dataFederation.createFlyout.s3.fields.regionRequired": "リージョンは必須です。",
     "xpack.dataFederation.createFlyout.s3.fields.roleArn": "ロールARN",
     "xpack.dataFederation.createFlyout.s3.fields.roleArnRequired": "ロール ARN は必須です。",
     "xpack.dataFederation.createFlyout.s3.fields.secretKey": "シークレットキー",
