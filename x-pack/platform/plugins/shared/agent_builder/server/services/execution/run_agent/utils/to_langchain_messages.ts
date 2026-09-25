@@ -36,11 +36,10 @@ import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
   /**
-   * Optional function to transform all results from a tool call.
-   * When provided, results will be passed through this function.
+   * Optional transformer of the tool call results of a given round.
    * Defaults to identity (no transformation).
    */
-  resultTransformer?: ToolCallResultTransformer;
+  roundResultTransformer?: (roundId: string) => ToolCallResultTransformer;
   /**
    * When true, tool call steps will be ignored.
    */
@@ -64,11 +63,11 @@ export interface ConversationToLangchainOptions {
 
 /**
  * Builds the LangChain message history from the processed timeline, one round group at a time.
- * When `resultTransformer` is provided, previous rounds' tool results are passed through it.
+ * When `roundResultTransformer` is provided, previous rounds' tool results are passed through it.
  */
 export const prepareMessages = async ({
   conversation,
-  resultTransformer,
+  roundResultTransformer,
   ignoreSteps = false,
   compactionSummary,
   visibility = FULLY_VISIBLE,
@@ -91,7 +90,7 @@ export const prepareMessages = async ({
     if (isTimelineRound(entry)) {
       messages.push(
         ...(await roundToLangchain(entry, {
-          resultTransformer,
+          resultTransformer: roundResultTransformer?.(entry.id),
           ignoreSteps,
           attachmentTypes: conversation.attachmentTypes,
           attachmentTypeInstructionsProvided,

@@ -239,6 +239,7 @@ export {
   isZeroModelUsage,
   type CompactionSummary,
   type CompactionCursor,
+  type ToolCallRef,
   type CompactionStructuredData,
   type CompactionToolCallSummary,
   type CompactionEntity,

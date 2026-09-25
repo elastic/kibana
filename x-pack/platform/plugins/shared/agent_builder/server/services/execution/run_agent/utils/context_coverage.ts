@@ -121,25 +121,25 @@ const coveredThroughRoundStep = (
 };
 
 /**
- * Resolves a cursor against the history, then the current run. The history is searched first so
- * that a tool call id reused by a later call (some providers generate short ids) never covers
- * more than the summary did. An anchor that cannot be found covers nothing.
+ * Resolves a cursor against the history and the current run (`roundId`, `steps`). An anchor that
+ * cannot be found covers nothing.
  */
 export const resolveVisibility = ({
   entries,
+  roundId,
   steps,
   cursor,
 }: {
   entries: Array<TimelineEntry<ProcessedTimelineEvent>>;
+  roundId: string;
   steps: ConversationRoundStep[];
   cursor?: CompactionCursor;
 }): ContextVisibility => {
   if (!cursor) {
     return FULLY_VISIBLE;
   }
-  for (let index = 0; index < entries.length; index++) {
-    const entry = entries[index];
-    if ('event_id' in cursor) {
+  if ('event_id' in cursor) {
+    for (const [index, entry] of entries.entries()) {
       if (entry.userMessage.id === cursor.event_id) {
         return isTimelineRound(entry)
           ? coveredThroughRoundStep(entry, index, 0)
@@ -148,18 +148,21 @@ export const resolveVisibility = ({
       if (isTimelineRound(entry) && entry.terminal.id === cursor.event_id) {
         return { hiddenEntryCount: index + 1, entryFromStep: 0, currentFromStep: 0 };
       }
-    } else if (isTimelineRound(entry)) {
-      const stepIndex = findToolCall(entry.steps, cursor.tool_call_id);
-      if (stepIndex >= 0) {
-        return coveredThroughRoundStep(entry, index, stepIndex);
-      }
     }
+    return FULLY_VISIBLE;
   }
-  if ('tool_call_id' in cursor) {
+  if (cursor.round_id === roundId) {
     const stepIndex = findToolCall(steps, cursor.tool_call_id);
-    if (stepIndex >= 0) {
-      const { cycle } = cycleEndingAfter(steps, stepIndex);
-      return { hiddenEntryCount: entries.length, entryFromStep: 0, currentFromStep: cycle.end + 1 };
+    if (stepIndex < 0) {
+      return FULLY_VISIBLE;
+    }
+    const { cycle } = cycleEndingAfter(steps, stepIndex);
+    return { hiddenEntryCount: entries.length, entryFromStep: 0, currentFromStep: cycle.end + 1 };
+  }
+  for (const [index, entry] of entries.entries()) {
+    if (isTimelineRound(entry) && entry.id === cursor.round_id) {
+      const stepIndex = findToolCall(entry.steps, cursor.tool_call_id);
+      return stepIndex >= 0 ? coveredThroughRoundStep(entry, index, stepIndex) : FULLY_VISIBLE;
     }
   }
   return FULLY_VISIBLE;
@@ -242,7 +245,11 @@ export const unitSteps = (
  */
 export const unitAnchor = (
   unit: ContextUnit,
-  { steps, renderState }: { steps: ConversationRoundStep[]; renderState: ToolRenderStateMap }
+  {
+    roundId,
+    steps,
+    renderState,
+  }: { roundId: string; steps: ConversationRoundStep[]; renderState: ToolRenderStateMap }
 ): CompactionCursor | undefined => {
   if (unit.kind === 'message') {
     return { event_id: unit.entry.userMessage.id };
@@ -253,11 +260,11 @@ export const unitAnchor = (
       ({ tool_call_id: id }) => (renderState[id]?.kind ?? 'server') === 'server'
     );
     const last = persisted.at(-1);
-    return last ? { tool_call_id: last.tool_call_id } : undefined;
+    return last ? { round_id: roundId, tool_call_id: last.tool_call_id } : undefined;
   }
   const last = calls.at(-1);
   if (last) {
-    return { tool_call_id: last.tool_call_id };
+    return { round_id: unit.round.id, tool_call_id: last.tool_call_id };
   }
   return unit.last ? { event_id: unit.round.terminal.id } : { event_id: unit.round.userMessage.id };
 };

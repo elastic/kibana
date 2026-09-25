@@ -47,8 +47,8 @@ describe('EventSteps — single vs grouped tool calls', () => {
         steps={[
           createSubstitutionStep({
             trigger: 'round_start',
-            reason: 'cache_cold',
-            substituted_tool_call_ids: ['tc-1'],
+            threshold_tokens: 1_000,
+            substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'tc-1' }],
           }),
         ]}
       />

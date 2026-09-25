@@ -89,6 +89,8 @@ export interface RetryNotice {
  * down to the step renderer.
  */
 export interface CurrentRun {
+  /** The round the steps belong to, which scopes their tool call ids. */
+  roundId: string;
   steps: ConversationRoundStep[];
   cycleLimit: number;
   renderState: ToolRenderStateMap;

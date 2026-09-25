@@ -81,6 +81,7 @@ const run = (
   steps: ConversationRoundStep[],
   { cursor, renderState = {} }: { cursor?: CompactionCursor; renderState?: ToolRenderStateMap } = {}
 ): CurrentRun => ({
+  roundId: 'current',
   steps,
   cycleLimit: 30,
   renderState,
@@ -133,9 +134,9 @@ describe('renderVisibleContext', () => {
         input: { message: 'q2', attachments: [] },
         steps: [
           createSubstitutionStep({
-            substituted_tool_call_ids: ['c1'],
+            substituted_tool_calls: [{ round_id: 'a', tool_call_id: 'c1' }],
             trigger: 'round_start',
-            reason: 'cache_cold',
+            threshold_tokens: 1_000,
           }),
         ],
       },
@@ -155,9 +156,9 @@ describe('renderVisibleContext', () => {
       call('c1'),
       call('c2'),
       createSubstitutionStep({
-        substituted_tool_call_ids: ['c2'],
+        substituted_tool_calls: [{ round_id: 'current', tool_call_id: 'c2' }],
         trigger: 'intra_round',
-        reason: 'input_tokens_threshold',
+        threshold_tokens: 1_000,
       }),
     ];
     const messages = await renderVisibleContext(
@@ -178,7 +179,7 @@ describe('renderVisibleContext', () => {
     const messages = await renderVisibleContext(
       {
         conversation: conversation(twoRoundTimeline()),
-        run: run([], { cursor: { tool_call_id: 'a1' } }),
+        run: run([], { cursor: { round_id: 'a', tool_call_id: 'a1' } }),
         phase: 'research',
       },
       deps()
@@ -199,7 +200,7 @@ describe('renderVisibleContext', () => {
       {
         conversation: conversation(twoRoundTimeline()),
         run: run(steps, {
-          cursor: { tool_call_id: 'x1' },
+          cursor: { round_id: 'current', tool_call_id: 'x1' },
           renderState: renderStateOf(['x1', 'x2']),
         }),
         phase: 'research',

@@ -26,6 +26,7 @@ import {
   renderHistorySteps,
   type CurrentRunRenderOptions,
 } from './render_steps_to_messages';
+import { toolCallKey } from './filestore_substitution';
 import type { ToolCallResultTransformer } from './tool_summarization';
 
 const other = (id: string, data: object = { id }): ToolResult => ({
@@ -80,7 +81,7 @@ const current = (
   }: CurrentOverrides = {}
 ) =>
   renderCurrentRun({
-    run: { steps, renderState, cycleLimit, pendingToolCallIds, retryNotices },
+    run: { roundId: 'r', steps, renderState, cycleLimit, pendingToolCallIds, retryNotices },
     phase,
     ...options,
   });
@@ -435,7 +436,12 @@ describe('renderCurrentRun', () => {
       const messages = await current(
         [call('a', { tool_call_group_id: 'g' }), call('b', { tool_call_group_id: 'g' })],
         { ...rendered('a'), ...rendered('b') },
-        { substitution: { marks: new Set(['a']), substitute } }
+        {
+          substitution: {
+            marks: new Set([toolCallKey({ round_id: 'r', tool_call_id: 'a' })]),
+            substitute,
+          },
+        }
       );
       const [, toolA, toolB] = messages as [AIMessage, ToolMessage, ToolMessage];
       expect(toolA.content).toBe(
@@ -458,7 +464,10 @@ describe('renderCurrentRun', () => {
       ];
       const messages = await current([call('c1', { results })], rendered('c1'), {
         imageResolver,
-        substitution: { marks: new Set(['c1']), substitute },
+        substitution: {
+          marks: new Set([toolCallKey({ round_id: 'r', tool_call_id: 'c1' })]),
+          substitute,
+        },
       });
       expect(types(messages)).toEqual(['ai', 'tool']);
       expect(imageResolver).not.toHaveBeenCalled();
@@ -487,7 +496,13 @@ describe('renderCurrentRun', () => {
       const messages = await current(
         [call('c1', { results: [other('c1'), image] })],
         rendered('c1'),
-        { imageResolver, substitution: { marks: new Set(['c1']), substitute: keepImages } }
+        {
+          imageResolver,
+          substitution: {
+            marks: new Set([toolCallKey({ round_id: 'r', tool_call_id: 'c1' })]),
+            substitute: keepImages,
+          },
+        }
       );
       expect(types(messages)).toEqual(['ai', 'tool', 'human']);
       expect(imageResolver).toHaveBeenCalledWith({ attachmentId: 'ok' });

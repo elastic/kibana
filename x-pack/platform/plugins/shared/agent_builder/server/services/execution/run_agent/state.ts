@@ -29,6 +29,8 @@ const lastValue =
 export const StateAnnotation = Annotation.Root({
   // inputs
   cycleLimit: Annotation<number>({ reducer: lastValue<number>(), default: () => 10 }),
+  /** The round the run's steps are persisted under (the paused one on a resume). */
+  roundId: Annotation<string>({ reducer: lastValue<string>(), default: () => '' }),
   // internal state
   currentCycle: Annotation<number>({ reducer: lastValue<number>(), default: () => 0 }),
   // counter to keep track of the number of successive errors
@@ -103,6 +105,7 @@ export type StateUpdate = typeof StateAnnotation.Update;
 
 /** The view of the graph state the prompt layer renders the current run from. */
 export const toCurrentRun = (state: StateType): CurrentRun => ({
+  roundId: state.roundId,
   steps: state.steps,
   cycleLimit: state.cycleLimit,
   renderState: state.toolRenderState,

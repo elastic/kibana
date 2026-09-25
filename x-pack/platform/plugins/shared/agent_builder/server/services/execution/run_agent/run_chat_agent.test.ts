@@ -664,7 +664,7 @@ describe('runDefaultAgentMode', () => {
     });
 
     const storedSummary: CompactionSummary = {
-      summarized_up_to: { tool_call_id: 'call-0' },
+      summarized_up_to: { round_id: 'round-0', tool_call_id: 'call-0' },
       summarized_round_count: 0,
       covered_round_ids: [],
       created_at: '2026-01-01T00:00:00.000Z',

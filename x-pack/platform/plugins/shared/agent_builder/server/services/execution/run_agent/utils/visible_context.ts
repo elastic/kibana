@@ -44,10 +44,10 @@ export interface VisibleContextDeps {
 export interface ContextView {
   history: HistoryView;
   visibility: ContextVisibility;
-  /** Tool calls rendered as file references. */
+  /** `toolCallKey`s of the tool calls rendered as file references. */
   marks: Set<string>;
-  /** Transformer for history tool results: the base one, then the marks. */
-  historyTransformer: ToolCallResultTransformer;
+  /** Transformer for a history round's tool results: the base one, then the marks. */
+  historyTransformer: (roundId: string) => ToolCallResultTransformer;
   substitution: CurrentRunSubstitution;
 }
 
@@ -65,6 +65,7 @@ export const buildContextView = (
     history,
     visibility: resolveVisibility({
       entries: history.entries,
+      roundId: run.roundId,
       steps: run.steps,
       cursor: run.compactionSummary?.summarized_up_to,
     }),
@@ -104,7 +105,7 @@ export const renderVisibleContext = async (
   const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
   const history = await prepareMessages({
     conversation,
-    resultTransformer: view.historyTransformer,
+    roundResultTransformer: view.historyTransformer,
     compactionSummary: run.compactionSummary,
     visibility: view.visibility,
     conversationTimestamp,
@@ -148,19 +149,22 @@ export const renderUnit = async (
   }
   const { round } = unit;
   return [
-    ...(unit.first
-      ? [
-          formatUserInput({
-            input: round.userMessage.data,
-            timestamp: round.userMessage.created_at,
-            attachmentTypes: conversation.attachmentTypes,
-          }),
-        ]
-      : []),
+    ...(unit.first ? [roundUserMessage(unit, conversation)] : []),
     ...(await renderHistorySteps({
       steps: unitSteps(unit, run.steps),
-      resultTransformer: view.historyTransformer,
+      resultTransformer: view.historyTransformer(round.id),
     })),
     ...(unit.last ? [roundOutcomeMessage(round)] : []),
   ];
 };
+
+/** The user message of the round a history unit belongs to. */
+export const roundUserMessage = (
+  { round }: Extract<ContextUnit, { kind: 'round_cycle' }>,
+  conversation: ProcessedConversation
+): BaseMessage =>
+  formatUserInput({
+    input: round.userMessage.data,
+    timestamp: round.userMessage.created_at,
+    attachmentTypes: conversation.attachmentTypes,
+  });

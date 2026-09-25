@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type {
   ConversationRoundStep,
+  ToolCallRef,
   ToolCallWithResult,
   ToolResult,
 } from '@kbn/agent-builder-common';
@@ -33,10 +34,14 @@ export const isSubstitutionCandidate = ({
   result: ToolResult;
 }): boolean => result.type !== ToolResultType.fileReference && !isExcludedFromFilestore(toolId);
 
+/** Key of a tool call in a set of substitution marks. */
+export const toolCallKey = ({ round_id: roundId, tool_call_id: toolCallId }: ToolCallRef): string =>
+  `${roundId}/${toolCallId}`;
+
 /**
- * Every tool call marked as substituted, by the `SubstitutionStep`s of previous rounds and of the
- * current run. Collected before rendering because a round-start step marks tool calls of earlier
- * rounds.
+ * Every tool call marked as substituted (as `toolCallKey`s), by the `SubstitutionStep`s of previous
+ * rounds and of the current run. Collected before rendering because a round-start step marks tool
+ * calls of earlier rounds.
  */
 export const collectSubstitutionMarks = ({
   timeline,
@@ -51,7 +56,7 @@ export const collectSubstitutionMarks = ({
   return new Set(
     [...timelineSteps, ...steps]
       .filter(isSubstitutionStep)
-      .flatMap((step) => step.substituted_tool_call_ids)
+      .flatMap((step) => step.substituted_tool_calls.map(toolCallKey))
   );
 };
 
@@ -100,25 +105,31 @@ export const substituteToolCallResults = async ({
   );
 };
 
+/** The transformer for the tool calls of a history round: the base one, then the round's marks. */
 export const createMarkedResultTransformer = ({
   marks,
   resultStore,
   base,
   logger,
 }: {
-  marks: Set<string>;
+  marks: ReadonlySet<string>;
   resultStore: ToolResultStore;
   base: ToolCallResultTransformer;
   logger: Logger;
-}): ToolCallResultTransformer => {
-  return async (toolCall) => {
+}): ((roundId: string) => ToolCallResultTransformer) => {
+  return (roundId) => async (toolCall) => {
     const results = await base(toolCall);
-    if (!marks.has(toolCall.tool_call_id)) {
+    if (!marks.has(toolCallKey({ round_id: roundId, tool_call_id: toolCall.tool_call_id }))) {
       return results;
     }
     return substituteToolCallResults({ toolCall: { ...toolCall, results }, resultStore, logger });
   };
 };
+
+export interface RoundToolCall {
+  roundId: string;
+  toolCall: ToolCallWithResult;
+}
 
 /** Tool calls with at least one eligible result whose filestore entry exceeds the threshold. */
 export const selectSubstitutionCandidates = async ({
@@ -127,14 +138,15 @@ export const selectSubstitutionCandidates = async ({
   thresholdTokens,
   alreadyMarked,
 }: {
-  toolCalls: ToolCallWithResult[];
+  toolCalls: RoundToolCall[];
   resultStore: ToolResultStore;
   thresholdTokens: number;
-  alreadyMarked: Set<string>;
-}): Promise<string[]> => {
-  const selected: string[] = [];
-  for (const toolCall of toolCalls) {
-    if (alreadyMarked.has(toolCall.tool_call_id)) {
+  alreadyMarked: ReadonlySet<string>;
+}): Promise<ToolCallRef[]> => {
+  const selected: ToolCallRef[] = [];
+  for (const { roundId, toolCall } of toolCalls) {
+    const ref: ToolCallRef = { round_id: roundId, tool_call_id: toolCall.tool_call_id };
+    if (alreadyMarked.has(toolCallKey(ref))) {
       continue;
     }
     for (const result of toolCall.results) {
@@ -145,7 +157,7 @@ export const selectSubstitutionCandidates = async ({
         .getEntryByResultId(result.tool_result_id)
         .catch(() => undefined);
       if (entry && entry.metadata.token_count > thresholdTokens) {
-        selected.push(toolCall.tool_call_id);
+        selected.push(ref);
         break;
       }
     }

@@ -394,6 +394,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
       pendingTurn,
+      roundId,
       cycleLimit: CYCLE_LIMIT,
       toolManager,
       promptManager,
@@ -597,6 +598,7 @@ const buildPreExecutionSteps = ({
 
 const createInitializerCommand = ({
   pendingTurn,
+  roundId,
   cycleLimit,
   toolManager,
   promptManager,
@@ -608,6 +610,7 @@ const createInitializerCommand = ({
   initialTodos,
 }: {
   pendingTurn?: PendingTurn;
+  roundId: string;
   cycleLimit: number;
   toolManager: ToolManager;
   promptManager: PromptManager;
@@ -623,6 +626,7 @@ const createInitializerCommand = ({
     tracker.seed({ steps: preExecutionSteps, compactionSummary });
     const update: StateUpdate = {
       cycleLimit,
+      roundId,
       steps: new Overwrite(preExecutionSteps),
       compactionSummary,
     };
@@ -650,6 +654,8 @@ const createInitializerCommand = ({
   const lastCallInputTokens = previousRound?.lastCallInputTokens;
   const update: StateUpdate = {
     cycleLimit,
+    // a resume execution mints its own round id, but its steps are persisted to the paused round
+    roundId: pendingTurn.id,
     steps: new Overwrite(init.steps),
     pendingToolCallIds: init.pendingToolCallIds,
     researchOutcome: init.researchOutcome,

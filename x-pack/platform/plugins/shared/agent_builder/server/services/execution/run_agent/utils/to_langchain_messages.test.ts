@@ -889,7 +889,7 @@ describe('prepareMessages', () => {
 
       const result = await prepareMessages({
         conversation,
-        resultTransformer: customTransformer,
+        roundResultTransformer: () => customTransformer,
       });
 
       const toolResultMessage = result[2] as ToolMessage;
@@ -956,7 +956,7 @@ describe('prepareMessages', () => {
 
       const result = await prepareMessages({
         conversation,
-        resultTransformer: customTransformer,
+        roundResultTransformer: () => customTransformer,
       });
 
       const toolResultMessage = result[2] as ToolMessage;

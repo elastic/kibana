@@ -245,9 +245,9 @@ describe('sseToEvents', () => {
 
   it('appends a substitution step on substitution_applied', () => {
     const data = {
-      substituted_tool_call_ids: ['t1'],
+      substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 't1' }],
       trigger: 'intra_round',
-      reason: 'input_tokens_threshold',
+      threshold_tokens: 1_000,
     };
     const state = fold(executionStarted(), {
       type: ChatEventType.substitutionApplied,

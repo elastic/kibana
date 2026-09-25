@@ -48,6 +48,7 @@ const call = (id: string): ToolCallStep => ({
 const baseState = (over: Partial<StateType> = {}): StateType =>
   ({
     cycleLimit: 30,
+    roundId: 'current',
     currentCycle: 0,
     errorCount: 0,
     steps: [],
@@ -92,7 +93,7 @@ const appendedSteps = (update: StateUpdate): ConversationRoundStep[] =>
 
 const compactionResult = () => ({
   summary: {
-    summarized_up_to: { tool_call_id: 'x1' },
+    summarized_up_to: { round_id: 'current', tool_call_id: 'x1' },
     summarized_round_count: 0,
     created_at: 't',
     token_count: 1,
@@ -124,7 +125,7 @@ describe('contextManagement', () => {
     });
 
     it('substitutes the visible current-run calls between 50% and 80%', async () => {
-      selectCandidatesMock.mockResolvedValue(['x1']);
+      selectCandidatesMock.mockResolvedValue([{ round_id: 'current', tool_call_id: 'x1' }]);
       const { contextManagement } = createContextManagementNodes(deps({}, historyWithCall()));
 
       const update = await contextManagement(
@@ -139,15 +140,17 @@ describe('contextManagement', () => {
       expect(selectCandidatesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           thresholdTokens: 1_000,
-          toolCalls: [expect.objectContaining({ tool_call_id: 'x1' })],
+          toolCalls: [
+            { roundId: 'current', toolCall: expect.objectContaining({ tool_call_id: 'x1' }) },
+          ],
         })
       );
       expect(appendedSteps(update)).toEqual([
         {
           type: ConversationRoundStepType.substitution,
-          substituted_tool_call_ids: ['x1'],
+          substituted_tool_calls: [{ round_id: 'current', tool_call_id: 'x1' }],
           trigger: 'intra_round',
-          reason: 'input_tokens_threshold',
+          threshold_tokens: 1_000,
         },
       ]);
       expect(update.lastContextActionCycle).toBe(7);
@@ -182,7 +185,7 @@ describe('contextManagement', () => {
     });
 
     it('caps the substitution threshold at 100k on very large windows', async () => {
-      selectCandidatesMock.mockResolvedValue(['x1']);
+      selectCandidatesMock.mockResolvedValue([{ round_id: 'current', tool_call_id: 'x1' }]);
       const { contextManagement } = createContextManagementNodes(
         deps({
           connector: {
@@ -197,7 +200,9 @@ describe('contextManagement', () => {
       );
 
       expect(appendedSteps(update)).toEqual([
-        expect.objectContaining({ substituted_tool_call_ids: ['x1'] }),
+        expect.objectContaining({
+          substituted_tool_calls: [{ round_id: 'current', tool_call_id: 'x1' }],
+        }),
       ]);
     });
   });
@@ -236,7 +241,7 @@ describe('contextManagement', () => {
     });
 
     it('substitutes visible history calls with the cold threshold when the cache is stale', async () => {
-      selectCandidatesMock.mockResolvedValue(['old']);
+      selectCandidatesMock.mockResolvedValue([{ round_id: 'a', tool_call_id: 'old' }]);
       const { contextManagement } = createContextManagementNodes(
         deps(
           { previousRound: { terminatedAt: '2000-01-01T00:00:00.000Z', connectorId: 'c' } },
@@ -249,16 +254,16 @@ describe('contextManagement', () => {
       expect(selectCandidatesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           thresholdTokens: 1_000,
-          toolCalls: [expect.objectContaining({ tool_call_id: 'old' })],
+          toolCalls: [{ roundId: 'a', toolCall: expect.objectContaining({ tool_call_id: 'old' }) }],
         })
       );
       expect(appendedSteps(update)).toEqual([
-        expect.objectContaining({ trigger: 'round_start', reason: 'cache_cold' }),
+        expect.objectContaining({ trigger: 'round_start', threshold_tokens: 1_000 }),
       ]);
     });
 
     it('uses the hot threshold when the previous round ended within the ttl', async () => {
-      selectCandidatesMock.mockResolvedValue(['old']);
+      selectCandidatesMock.mockResolvedValue([{ round_id: 'a', tool_call_id: 'old' }]);
       const { contextManagement } = createContextManagementNodes(
         deps(
           { previousRound: { terminatedAt: new Date().toISOString(), connectorId: 'c' } },
@@ -272,7 +277,7 @@ describe('contextManagement', () => {
         expect.objectContaining({ thresholdTokens: 10_000 })
       );
       expect(appendedSteps(update)).toEqual([
-        expect.objectContaining({ trigger: 'round_start', reason: 'cache_hot' }),
+        expect.objectContaining({ trigger: 'round_start', threshold_tokens: 10_000 }),
       ]);
     });
 
@@ -282,7 +287,7 @@ describe('contextManagement', () => {
       await contextManagement(
         baseState({
           compactionSummary: {
-            summarized_up_to: { tool_call_id: 'old' },
+            summarized_up_to: { round_id: 'a', tool_call_id: 'old' },
             summarized_round_count: 1,
             created_at: 't',
             token_count: 1,
@@ -338,12 +343,22 @@ describe('compactContext node', () => {
     });
   });
 
-  it('emits compaction_started only when the compactor starts summarizing', async () => {
+  it('allows the summarizer fallback for forced compactions only', async () => {
+    compactContextMock.mockResolvedValue(compactionResult());
+    const { compactContext: node } = createContextManagementNodes(deps());
+
+    await node(baseState({ compactionRequest: request() }));
+    await node(baseState({ compactionRequest: request({ trigger: 'forced' }) }));
+
+    expect(compactContextMock.mock.calls.map(([input]) => input.fallbackOnFailure)).toEqual([
+      false,
+      true,
+    ]);
+  });
+
+  it('emits compaction_started only for a compaction that completed', async () => {
     const events = { emit: jest.fn() };
-    compactContextMock.mockImplementationOnce(async ({ onStart }) => {
-      onStart();
-      return compactionResult();
-    });
+    compactContextMock.mockResolvedValueOnce(compactionResult());
     const { compactContext: node } = createContextManagementNodes(deps({ events }));
 
     await node(baseState({ currentCycle: 7, compactionRequest: request() }));

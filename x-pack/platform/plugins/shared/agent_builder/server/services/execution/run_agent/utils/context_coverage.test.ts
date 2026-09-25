@@ -142,24 +142,31 @@ describe('historyView', () => {
 });
 
 describe('resolveVisibility', () => {
+  const resolve = (
+    entries: ReturnType<typeof fixture>['entries'],
+    cursor: Parameters<typeof resolveVisibility>[0]['cursor'],
+    steps: ConversationRoundStep[] = []
+  ) => resolveVisibility({ entries, roundId: 'current', steps, cursor });
+
   it('leaves everything visible without a cursor or when the anchor is not found', () => {
     const { entries } = fixture();
-    expect(resolveVisibility({ entries, steps: [], cursor: undefined })).toEqual(FULLY_VISIBLE);
-    expect(resolveVisibility({ entries, steps: [], cursor: { tool_call_id: 'unknown' } })).toEqual(
-      FULLY_VISIBLE
-    );
+    expect(resolve(entries, undefined)).toEqual(FULLY_VISIBLE);
+    expect(resolve(entries, { round_id: 'a', tool_call_id: 'unknown' })).toEqual(FULLY_VISIBLE);
+    expect(resolve(entries, { round_id: 'unknown', tool_call_id: 'a1' })).toEqual(FULLY_VISIBLE);
   });
 
   it('hides the rounds up to a terminal anchor', () => {
     const { entries, rounds } = fixture();
-    expect(
-      resolveVisibility({ entries, steps: [], cursor: { event_id: rounds[0].terminal.id } })
-    ).toEqual({ hiddenEntryCount: 1, entryFromStep: 0, currentFromStep: 0 });
+    expect(resolve(entries, { event_id: rounds[0].terminal.id })).toEqual({
+      hiddenEntryCount: 1,
+      entryFromStep: 0,
+      currentFromStep: 0,
+    });
   });
 
   it('keeps the rest of a round anchored on one of its middle cycles', () => {
     const { entries } = fixture();
-    expect(resolveVisibility({ entries, steps: [], cursor: { tool_call_id: 'a1' } })).toEqual({
+    expect(resolve(entries, { round_id: 'a', tool_call_id: 'a1' })).toEqual({
       hiddenEntryCount: 0,
       entryFromStep: 1,
       currentFromStep: 0,
@@ -168,7 +175,7 @@ describe('resolveVisibility', () => {
 
   it('hides a round anchored on its last cycle', () => {
     const { entries } = fixture();
-    expect(resolveVisibility({ entries, steps: [], cursor: { tool_call_id: 'a2' } })).toEqual({
+    expect(resolve(entries, { round_id: 'a', tool_call_id: 'a2' })).toEqual({
       hiddenEntryCount: 1,
       entryFromStep: 0,
       currentFromStep: 0,
@@ -177,7 +184,7 @@ describe('resolveVisibility', () => {
 
   it('hides up to a standalone message anchor', () => {
     const { entries } = fixture();
-    expect(resolveVisibility({ entries, steps: [], cursor: { event_id: 'sm' } })).toEqual({
+    expect(resolve(entries, { event_id: 'sm' })).toEqual({
       hiddenEntryCount: 3,
       entryFromStep: 0,
       currentFromStep: 0,
@@ -187,17 +194,22 @@ describe('resolveVisibility', () => {
   it('hides the history and the current cycles up to a current-run anchor', () => {
     const { entries } = fixture();
     const steps = [call('x1'), call('x2')];
-    expect(resolveVisibility({ entries, steps, cursor: { tool_call_id: 'x1' } })).toEqual({
+    expect(resolve(entries, { round_id: 'current', tool_call_id: 'x1' }, steps)).toEqual({
       hiddenEntryCount: entries.length,
       entryFromStep: 0,
       currentFromStep: 1,
     });
   });
 
-  it('resolves a tool call id reused by the current run against the history first', () => {
+  it('resolves a tool call id reused across rounds in the round of the anchor', () => {
     const { entries } = fixture();
     const steps = [call('a1'), call('x2')];
-    expect(resolveVisibility({ entries, steps, cursor: { tool_call_id: 'a1' } })).toEqual({
+    expect(resolve(entries, { round_id: 'current', tool_call_id: 'a1' }, steps)).toEqual({
+      hiddenEntryCount: entries.length,
+      entryFromStep: 0,
+      currentFromStep: 1,
+    });
+    expect(resolve(entries, { round_id: 'a', tool_call_id: 'a1' }, steps)).toEqual({
       hiddenEntryCount: 0,
       entryFromStep: 1,
       currentFromStep: 0,
@@ -254,11 +266,13 @@ describe('unitAnchor', () => {
   it('anchors history units on their last call, else on the round terminal or message id', () => {
     const { entries, rounds } = fixture();
     const units = listVisibleUnits({ entries, steps: [], visibility: FULLY_VISIBLE });
-    const anchors = units.map((unit) => unitAnchor(unit, { steps: [], renderState: {} }));
+    const anchors = units.map((unit) =>
+      unitAnchor(unit, { roundId: 'current', steps: [], renderState: {} })
+    );
     expect(anchors).toEqual([
-      { tool_call_id: 'a1' },
-      { tool_call_id: 'a2' },
-      { tool_call_id: 'b1' },
+      { round_id: 'a', tool_call_id: 'a1' },
+      { round_id: 'a', tool_call_id: 'a2' },
+      { round_id: 'b', tool_call_id: 'b1' },
       { event_id: 'sm' },
       { event_id: rounds[2].terminal.id },
     ]);
@@ -272,10 +286,9 @@ describe('unitAnchor', () => {
       b2: { toolName: 'b', kind: 'browser' as const },
     };
     const units = listVisibleUnits({ entries: [], steps, visibility: FULLY_VISIBLE });
-    expect(units.map((unit) => unitAnchor(unit, { steps, renderState }))).toEqual([
-      { tool_call_id: 's1' },
-      undefined,
-    ]);
+    expect(
+      units.map((unit) => unitAnchor(unit, { roundId: 'current', steps, renderState }))
+    ).toEqual([{ round_id: 'current', tool_call_id: 's1' }, undefined]);
   });
 });
 
@@ -319,7 +332,7 @@ describe('translateLegacySummary', () => {
   };
 
   it('keeps a summary that already has a cursor', () => {
-    const withCursor = summary({ summarized_up_to: { tool_call_id: 'x' } });
+    const withCursor = summary({ summarized_up_to: { round_id: 'a', tool_call_id: 'x' } });
     expect(
       translateLegacySummary({
         summary: withCursor,

@@ -42,12 +42,14 @@ import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import type { CurrentRun } from '../transient_state';
 import { countNonTodosSteps } from '../step_state';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
+import { toolCallKey } from './filestore_substitution';
 import type { ToolCallResultTransformer } from './tool_summarization';
 
 export type CurrentRunPhase = 'research' | 'answer';
 
 /** Tool calls whose results render as file references, and how to produce them. */
 export interface CurrentRunSubstitution {
+  /** `toolCallKey`s of the marked tool calls. */
   marks: ReadonlySet<string>;
   substitute: ToolCallResultTransformer;
 }
@@ -129,7 +131,11 @@ const rawToolContent = (call: ToolCallStep, { run }: CurrentRenderContext): stri
   run.renderState[call.tool_call_id]?.content ?? JSON.stringify({ results: call.results });
 
 const isSubstituted = (call: ToolCallStep, context: RenderContext): boolean =>
-  context.type === 'current' && (context.substitution?.marks.has(call.tool_call_id) ?? false);
+  context.type === 'current' &&
+  (context.substitution?.marks.has(
+    toolCallKey({ round_id: context.run.roundId, tool_call_id: call.tool_call_id })
+  ) ??
+    false);
 
 const renderToolResult = async (
   call: ToolCallStep,

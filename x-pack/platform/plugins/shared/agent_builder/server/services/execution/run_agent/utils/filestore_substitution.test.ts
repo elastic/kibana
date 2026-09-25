@@ -21,6 +21,7 @@ import {
   selectSubstitutionCandidates,
   substituteToolCallResults,
   SUBSTITUTION_MIN_RESULT_TOKENS,
+  toolCallKey,
 } from './filestore_substitution';
 
 const logger = { warn: jest.fn(), debug: jest.fn() } as unknown as Logger;
@@ -68,21 +69,28 @@ describe('collectSubstitutionMarks', () => {
         steps: [
           {
             type: ConversationRoundStepType.substitution,
-            substituted_tool_call_ids: ['c1', 'c2'],
+            substituted_tool_calls: [
+              { round_id: 'a', tool_call_id: 'c1' },
+              { round_id: 'a', tool_call_id: 'c2' },
+            ],
             trigger: 'round_start',
-            reason: 'cache_cold',
+            threshold_tokens: 1_000,
           },
         ],
       },
     ]);
     const steps = [
       createSubstitutionStep({
-        substituted_tool_call_ids: ['c3'],
+        substituted_tool_calls: [{ round_id: 'b', tool_call_id: 'c1' }],
         trigger: 'intra_round',
-        reason: 'input_tokens_threshold',
+        threshold_tokens: 2_000,
       }),
     ];
-    expect([...collectSubstitutionMarks({ timeline, steps })].sort()).toEqual(['c1', 'c2', 'c3']);
+    expect([...collectSubstitutionMarks({ timeline, steps })].sort()).toEqual([
+      toolCallKey({ round_id: 'a', tool_call_id: 'c1' }),
+      toolCallKey({ round_id: 'a', tool_call_id: 'c2' }),
+      toolCallKey({ round_id: 'b', tool_call_id: 'c1' }),
+    ]);
   });
 });
 
@@ -139,10 +147,10 @@ describe('substituteToolCallResults', () => {
 });
 
 describe('createMarkedResultTransformer', () => {
-  it('applies the base transformer, then substitutes only marked tool calls', async () => {
+  it('applies the base transformer, then substitutes only tool calls marked in their round', async () => {
     const base = jest.fn(async (tc) => tc.results);
     const transform = createMarkedResultTransformer({
-      marks: new Set(['marked']),
+      marks: new Set([toolCallKey({ round_id: 'a', tool_call_id: 'marked' })]),
       resultStore: store({ r: 5_000 }),
       base,
       logger,
@@ -150,9 +158,10 @@ describe('createMarkedResultTransformer', () => {
     const marked = { tool_call_id: 'marked', tool_id: 't', params: {}, results: [other('r')] };
     const unmarked = { tool_call_id: 'other', tool_id: 't', params: {}, results: [other('r')] };
 
-    expect((await transform(marked))[0].type).toBe(ToolResultType.fileReference);
-    expect((await transform(unmarked))[0].type).toBe(ToolResultType.other);
-    expect(base).toHaveBeenCalledTimes(2);
+    expect((await transform('a')(marked))[0].type).toBe(ToolResultType.fileReference);
+    expect((await transform('a')(unmarked))[0].type).toBe(ToolResultType.other);
+    expect((await transform('b')(marked))[0].type).toBe(ToolResultType.other);
+    expect(base).toHaveBeenCalledTimes(3);
   });
 
   it('returns the base output by reference when the tool call is not marked', async () => {
@@ -165,24 +174,32 @@ describe('createMarkedResultTransformer', () => {
       logger,
     });
     expect(
-      await transform({ tool_call_id: 'x', tool_id: 't', params: {}, results: [other('z')] })
+      await transform('a')({ tool_call_id: 'x', tool_id: 't', params: {}, results: [other('z')] })
     ).toBe(results);
   });
 });
 
 describe('selectSubstitutionCandidates', () => {
   it('returns tool calls with any eligible result above the threshold, skipping marked ones', async () => {
-    const ids = await selectSubstitutionCandidates({
-      toolCalls: [
-        { tool_call_id: 'big', tool_id: 't', params: {}, results: [other('r1')] },
-        { tool_call_id: 'small', tool_id: 't', params: {}, results: [other('r2')] },
-        { tool_call_id: 'marked', tool_id: 't', params: {}, results: [other('r3')] },
-        { tool_call_id: 'excluded', tool_id: 'read_file', params: {}, results: [other('r4')] },
-      ],
-      resultStore: store({ r1: 5000, r2: 10, r3: 5000, r4: 5000 }),
-      thresholdTokens: 1000,
-      alreadyMarked: new Set(['marked']),
+    const toolCall = (id: string, resultId: string, toolId = 't') => ({
+      roundId: 'a',
+      toolCall: { tool_call_id: id, tool_id: toolId, params: {}, results: [other(resultId)] },
     });
-    expect(ids).toEqual(['big']);
+    const selected = await selectSubstitutionCandidates({
+      toolCalls: [
+        toolCall('big', 'r1'),
+        toolCall('small', 'r2'),
+        toolCall('marked', 'r3'),
+        toolCall('excluded', 'r4', 'read_file'),
+        { ...toolCall('marked', 'r5'), roundId: 'b' },
+      ],
+      resultStore: store({ r1: 5000, r2: 10, r3: 5000, r4: 5000, r5: 5000 }),
+      thresholdTokens: 1000,
+      alreadyMarked: new Set([toolCallKey({ round_id: 'a', tool_call_id: 'marked' })]),
+    });
+    expect(selected).toEqual([
+      { round_id: 'a', tool_call_id: 'big' },
+      { round_id: 'b', tool_call_id: 'marked' },
+    ]);
   });
 });

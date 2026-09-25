@@ -203,7 +203,7 @@ describe('buildRoundInterruptedEvent', () => {
 
   it('carries the compaction summary of the latest state, for persistence', () => {
     const compactionSummary = {
-      summarized_up_to: { tool_call_id: 'c0' },
+      summarized_up_to: { round_id: 'round-0', tool_call_id: 'c0' },
       summarized_round_count: 0,
       created_at: '2026-01-01T00:00:00.000Z',
       token_count: 1,

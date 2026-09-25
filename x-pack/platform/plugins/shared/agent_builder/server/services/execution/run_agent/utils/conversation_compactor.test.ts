@@ -23,6 +23,7 @@ import {
   compactContext,
   extractProgrammaticSummary,
   type CompactContextDeps,
+  type CompactContextInput,
 } from './conversation_compactor';
 import { serializeCompactionSummary } from './compaction_serialize';
 import type { LlmCompactionOutput } from './compaction_schema';
@@ -92,6 +93,7 @@ const run = (
     kinds,
   }: { compactionSummary?: CompactionSummary; kinds?: Record<string, 'server' | 'browser'> } = {}
 ): CurrentRun => ({
+  roundId: 'current',
   steps,
   cycleLimit: 30,
   renderState: renderStateOf(steps, kinds),
@@ -195,9 +197,14 @@ describe('serializeCompactionSummary', () => {
 });
 
 describe('compactContext', () => {
+  const compact = (
+    input: Omit<CompactContextInput, 'fallbackOnFailure'> & { fallbackOnFailure?: boolean },
+    deps: CompactContextDeps
+  ) => compactContext({ fallbackOnFailure: false, ...input }, deps);
+
   it('does nothing when only the current cycle is visible', async () => {
     const { invoke, deps } = setup();
-    const result = await compactContext(
+    const result = await compact(
       { conversation: conversationOf([]), run: run([call('x1', BIG * 4)]), tailCapTokens: 1 },
       deps
     );
@@ -205,25 +212,9 @@ describe('compactContext', () => {
     expect(invoke).not.toHaveBeenCalled();
   });
 
-  it('calls onStart once it covers something, never on a no-op', async () => {
-    const { deps } = setup();
-    const onStart = jest.fn();
-    await compactContext(
-      { conversation: conversationOf([]), run: run([call('x1')]), tailCapTokens: 1, onStart },
-      deps
-    );
-    expect(onStart).not.toHaveBeenCalled();
-
-    await compactContext(
-      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000, onStart },
-      deps
-    );
-    expect(onStart).toHaveBeenCalledTimes(1);
-  });
-
   it('does nothing below the token floor', async () => {
     const { invoke, deps } = setup();
-    const result = await compactContext(
+    const result = await compact(
       {
         conversation: conversationOf(
           timelineFromRounds([{ id: 'A', input: { message: 'hi', attachments: [] } }])
@@ -239,13 +230,13 @@ describe('compactContext', () => {
 
   it('covers the history cycles beyond the tail cap and keeps the current cycle', async () => {
     const { invoke, deps } = setup();
-    const result = await compactContext(
+    const result = await compact(
       { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
       deps
     );
 
     expect(result?.summary).toMatchObject({
-      summarized_up_to: { tool_call_id: 'b' },
+      summarized_up_to: { round_id: 'B', tool_call_id: 'b' },
       covered_round_ids: ['A', 'B'],
       summarized_round_count: 2,
       structured_data: expect.objectContaining({
@@ -270,12 +261,12 @@ describe('compactContext', () => {
   it('covers cycles of the current run, anchored on their last call', async () => {
     const { deps } = setup();
     const steps = ['x1', 'x2', 'x3', 'x4'].map((id) => call(id, BIG));
-    const result = await compactContext(
+    const result = await compact(
       { conversation: conversationOf([]), run: run(steps), tailCapTokens: 20_000 },
       deps
     );
 
-    expect(result?.summary.summarized_up_to).toEqual({ tool_call_id: 'x2' });
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x2' });
     expect(result?.summary.covered_round_ids).toEqual([]);
     expect(result?.summarizedCycleCount).toBe(2);
   });
@@ -283,7 +274,7 @@ describe('compactContext', () => {
   it('stops the covered range at the last cycle with a persisted anchor', async () => {
     const { invoke, deps } = setup();
     const steps = ['x1', 'x2', 'x3', 'x4'].map((id) => call(id, BIG));
-    const result = await compactContext(
+    const result = await compact(
       {
         conversation: conversationOf([]),
         run: run(steps, { kinds: { x2: 'browser' } }),
@@ -292,7 +283,7 @@ describe('compactContext', () => {
       deps
     );
 
-    expect(result?.summary.summarized_up_to).toEqual({ tool_call_id: 'x1' });
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x1' });
     expect(result?.summarizedCycleCount).toBe(1);
     expect(requestText(invoke, 0)).not.toContain('"x2"');
   });
@@ -300,7 +291,7 @@ describe('compactContext', () => {
   it('builds on the existing summary: only the visible cycles are sent and tool calls accumulate', async () => {
     const { invoke, deps } = setup();
     const existing: CompactionSummary = {
-      summarized_up_to: { tool_call_id: 'a' },
+      summarized_up_to: { round_id: 'A', tool_call_id: 'a' },
       summarized_round_count: 1,
       covered_round_ids: ['A'],
       created_at: '2026-01-01T00:00:00.000Z',
@@ -310,7 +301,7 @@ describe('compactContext', () => {
         agent_actions: ['Called my.tool(q=a)'],
       }),
     };
-    const result = await compactContext(
+    const result = await compact(
       {
         conversation: bigHistory(),
         run: run([call('x1')], { compactionSummary: existing }),
@@ -324,7 +315,7 @@ describe('compactContext', () => {
     expect(request).not.toContain('hello A');
     expect(request).toContain('hello B');
     expect(result?.summary).toMatchObject({
-      summarized_up_to: { tool_call_id: 'b' },
+      summarized_up_to: { round_id: 'B', tool_call_id: 'b' },
       covered_round_ids: ['A', 'B'],
     });
     expect(result?.summary.structured_data.tool_calls_summary).toEqual([
@@ -340,7 +331,7 @@ describe('compactContext', () => {
   it('chunks the covered cycles on the history budget, each request building on the previous output', async () => {
     const { invoke, deps } = setup({ historyBudget: 20_000 });
     invoke.mockResolvedValueOnce(llmOutput('FIRST_CHUNK')).mockResolvedValueOnce(llmOutput());
-    const result = await compactContext(
+    const result = await compact(
       { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
       deps
     );
@@ -359,9 +350,39 @@ describe('compactContext', () => {
     expect(result?.summary.structured_data.discussion_summary).toBe('LLM_SUMMARY');
   });
 
+  it("gives a chunk starting mid-round its round's user message", async () => {
+    const { invoke, deps } = setup({ historyBudget: 20_000 });
+    const conversation = conversationOf(
+      timelineFromRounds([
+        {
+          id: 'A',
+          input: { message: 'hello A', attachments: [] },
+          steps: [call('a1', BIG), call('a2', BIG)],
+          response: { message: 'answer A' },
+        },
+        {
+          id: 'B',
+          input: { message: 'hello B', attachments: [] },
+          steps: [call('b', BIG)],
+          response: { message: 'answer B' },
+        },
+      ])
+    );
+    const result = await compact(
+      { conversation, run: run([call('x1')]), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'A', tool_call_id: 'a2' });
+    expect(invoke).toHaveBeenCalledTimes(2);
+    const second = requestText(invoke, 1);
+    expect(second).not.toContain('"q":"a1"');
+    expect(second).toContain('hello A');
+  });
+
   it('still sends a cycle that does not fit the budget alone, with a warning', async () => {
     const { invoke, deps } = setup({ historyBudget: 5_000 });
-    const result = await compactContext(
+    const result = await compact(
       { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
       deps
     );
@@ -383,13 +404,10 @@ describe('compactContext', () => {
         },
       ])
     );
-    const result = await compactContext(
-      { conversation, run: run([]), tailCapTokens: 20_000 },
-      deps
-    );
+    const result = await compact({ conversation, run: run([]), tailCapTokens: 20_000 }, deps);
 
     expect(result?.summary).toMatchObject({
-      summarized_up_to: { tool_call_id: 'a' },
+      summarized_up_to: { round_id: 'A', tool_call_id: 'a' },
       covered_round_ids: ['A'],
     });
     expect(result?.summarizedCycleCount).toBe(1);
@@ -398,7 +416,7 @@ describe('compactContext', () => {
   it('retries a failed summarizer request once', async () => {
     const { invoke, deps } = setup();
     invoke.mockRejectedValueOnce(new Error('bad json')).mockResolvedValueOnce(llmOutput('RETRIED'));
-    const result = await compactContext(
+    const result = await compact(
       { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
       deps
     );
@@ -408,18 +426,36 @@ describe('compactContext', () => {
     expect(result?.summary.structured_data.discussion_summary).toBe('RETRIED');
   });
 
+  it('skips the compaction when the summarizer keeps failing without fallback', async () => {
+    const { invoke, deps } = setup();
+    invoke.mockRejectedValue(new Error('llm down'));
+    const result = await compact(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('skipping the compaction'));
+    expect(result).toBeUndefined();
+  });
+
   it('falls back to the programmatic summary when the summarizer keeps failing', async () => {
     const { invoke, deps } = setup();
     invoke.mockRejectedValue(new Error('llm down'));
-    const result = await compactContext(
-      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+    const result = await compact(
+      {
+        conversation: bigHistory(),
+        run: run([call('x1')]),
+        tailCapTokens: 20_000,
+        fallbackOnFailure: true,
+      },
       deps
     );
 
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('llm down'));
     expect(result?.summary).toMatchObject({
-      summarized_up_to: { tool_call_id: 'b' },
+      summarized_up_to: { round_id: 'B', tool_call_id: 'b' },
       covered_round_ids: ['A', 'B'],
       structured_data: expect.objectContaining({
         user_intent: 'CURRENT_REQUEST',
@@ -436,7 +472,7 @@ describe('compactContext', () => {
     const { invoke, deps } = setup();
     invoke.mockRejectedValue(new Error('llm down'));
     const existing: CompactionSummary = {
-      summarized_up_to: { tool_call_id: 'a' },
+      summarized_up_to: { round_id: 'A', tool_call_id: 'a' },
       summarized_round_count: 1,
       covered_round_ids: ['A'],
       created_at: '2026-01-01T00:00:00.000Z',
@@ -445,11 +481,12 @@ describe('compactContext', () => {
         tool_calls_summary: [{ tool_id: 'my.tool', params_summary: 'q=a' }],
       }),
     };
-    const result = await compactContext(
+    const result = await compact(
       {
         conversation: bigHistory(),
         run: run([call('x1')], { compactionSummary: existing }),
         tailCapTokens: 20_000,
+        fallbackOnFailure: true,
       },
       deps
     );
@@ -471,7 +508,7 @@ describe('compactContext', () => {
       controller.abort();
       throw new Error('aborted');
     });
-    const result = await compactContext(
+    const result = await compact(
       { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
       { ...deps, abortSignal: controller.signal }
     );

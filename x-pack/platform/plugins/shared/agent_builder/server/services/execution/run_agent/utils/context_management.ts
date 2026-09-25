@@ -35,7 +35,7 @@ import { computeCacheState } from './cache_state';
 import { computeContextBudget } from './context_budget';
 import { listVisibleUnits, unitToolCalls } from './context_coverage';
 import { compactContext } from './conversation_compactor';
-import { selectSubstitutionCandidates } from './filestore_substitution';
+import { selectSubstitutionCandidates, type RoundToolCall } from './filestore_substitution';
 import { buildContextView, type VisibleContextDeps } from './visible_context';
 
 export interface PreviousRoundInfo {
@@ -73,53 +73,62 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
 
   const substitute = async (
     state: StateType,
-    toolCalls: ToolCallStep[],
-    thresholdTokens: number,
-    data: Omit<SubstitutionStepData, 'substituted_tool_call_ids'>
+    toolCalls: RoundToolCall[],
+    data: Omit<SubstitutionStepData, 'substituted_tool_calls'>
   ): Promise<StateUpdate> => {
     const { marks } = buildContextView(
       { conversation: deps.conversation, run: toCurrentRun(state) },
       deps
     );
-    const ids = await selectSubstitutionCandidates({
+    const selected = await selectSubstitutionCandidates({
       toolCalls,
       resultStore: deps.resultStore,
-      thresholdTokens,
+      thresholdTokens: data.threshold_tokens,
       alreadyMarked: marks,
     });
-    if (ids.length === 0) {
+    if (selected.length === 0) {
       deps.logger.debug(
         `[contextManagement] substitution skipped cycle=${state.currentCycle} trigger=${data.trigger} candidates=${toolCalls.length} already_marked=${marks.size}`
       );
       return {};
     }
     deps.logger.info(
-      `[contextManagement] substitution applied cycle=${state.currentCycle} trigger=${data.trigger} reason=${data.reason} threshold=${thresholdTokens} substituted=${ids.length}`
+      `[contextManagement] substitution applied cycle=${state.currentCycle} trigger=${data.trigger} threshold=${data.threshold_tokens} substituted=${selected.length}`
     );
     return {
       steps: [
-        stepUpdates.append(createSubstitutionStep({ ...data, substituted_tool_call_ids: ids })),
+        stepUpdates.append(createSubstitutionStep({ ...data, substituted_tool_calls: selected })),
       ],
       lastContextActionCycle: state.currentCycle,
     };
   };
 
   /** Tool calls the model currently sees in full: history ones for round start, else the run's. */
-  const visibleToolCalls = (state: StateType, scope: 'history' | 'current'): ToolCallStep[] => {
+  const visibleToolCalls = (state: StateType, scope: 'history' | 'current'): RoundToolCall[] => {
     const run = toCurrentRun(state);
     const view = buildContextView({ conversation: deps.conversation, run }, deps);
     const pending = new Set(state.pendingToolCallIds);
+    const isDurable = ({ tool_call_id: id }: ToolCallStep) =>
+      !pending.has(id) && (state.toolRenderState[id]?.kind ?? 'server') === 'server';
     return listVisibleUnits({
       entries: view.history.entries,
       steps: run.steps,
       visibility: view.visibility,
-    })
-      .filter((unit) => (unit.kind === 'current_cycle') === (scope === 'current'))
-      .flatMap((unit) => unitToolCalls(unit, run.steps))
-      .filter(
-        ({ tool_call_id: id }) =>
-          !pending.has(id) && (state.toolRenderState[id]?.kind ?? 'server') === 'server'
-      );
+    }).flatMap((unit) => {
+      if (unit.kind === 'message') {
+        return [];
+      }
+      if (unit.kind === 'current_cycle') {
+        return scope === 'current'
+          ? unitToolCalls(unit, run.steps)
+              .filter(isDurable)
+              .map((toolCall) => ({ roundId: run.roundId, toolCall }))
+          : [];
+      }
+      return scope === 'history'
+        ? unitToolCalls(unit, run.steps).map((toolCall) => ({ roundId: unit.round.id, toolCall }))
+        : [];
+    });
   };
 
   const contextManagement = async (state: StateType): Promise<StateUpdate> => {
@@ -161,12 +170,13 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
           hint ?? 'unknown'
         } decision=maybe_substitute`
       );
-      return substitute(
-        state,
-        visibleToolCalls(state, 'history'),
-        cacheState === 'cold' ? SUBST_ROUND_START_THRESHOLD_COLD : SUBST_ROUND_START_THRESHOLD_HOT,
-        { trigger: 'round_start', reason: cacheState === 'cold' ? 'cache_cold' : 'cache_hot' }
-      );
+      return substitute(state, visibleToolCalls(state, 'history'), {
+        trigger: 'round_start',
+        threshold_tokens:
+          cacheState === 'cold'
+            ? SUBST_ROUND_START_THRESHOLD_COLD
+            : SUBST_ROUND_START_THRESHOLD_HOT,
+      });
     }
 
     if (state.currentCycle - state.lastContextActionCycle < CONTEXT_MANAGEMENT_COOLDOWN_CYCLES) {
@@ -191,9 +201,9 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
       deps.logger.debug(
         `[contextManagement] cycle=${state.currentCycle} mode=proactive inputTokens=${lastCallTokens} decision=substitute threshold=${substitutionThreshold}`
       );
-      return substitute(state, visibleToolCalls(state, 'current'), SUBST_INTRA_ROUND_THRESHOLD, {
+      return substitute(state, visibleToolCalls(state, 'current'), {
         trigger: 'intra_round',
-        reason: 'input_tokens_threshold',
+        threshold_tokens: SUBST_INTRA_ROUND_THRESHOLD,
       });
     }
     return {};
@@ -216,11 +226,8 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
         conversation: deps.conversation,
         run: toCurrentRun(state),
         tailCapTokens: request.tailCapTokens,
-        onStart: () =>
-          deps.events.emit({
-            type: ChatEventType.compactionStarted,
-            data: { token_count_before: request.tokensBefore },
-          }),
+        // a forced compaction is the round's last resort, a proactive one can be retried later
+        fallbackOnFailure: request.trigger === 'forced',
       },
       { ...deps, budget }
     );
@@ -237,6 +244,10 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
       );
       return { compactionRequest: undefined, lastContextActionCycle: state.currentCycle };
     }
+    deps.events.emit({
+      type: ChatEventType.compactionStarted,
+      data: { token_count_before: request.tokensBefore },
+    });
     deps.logger.info(
       `[contextManagement] compaction completed cycle=${state.currentCycle} covered=${result.summarizedCycleCount} tokensBefore=${result.tokensBefore} tokensAfter=${result.tokensAfter}`
     );

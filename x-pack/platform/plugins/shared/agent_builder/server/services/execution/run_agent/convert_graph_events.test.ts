@@ -217,9 +217,9 @@ describe('convertGraphEvents', () => {
 
   it('emits substitution_applied for substitution appends, and nothing for a compaction request', async () => {
     const substitution = {
-      substituted_tool_call_ids: ['c1'],
+      substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'c1' }],
       trigger: 'intra_round' as const,
-      reason: 'input_tokens_threshold' as const,
+      threshold_tokens: 1_000,
     };
     const events = await collect([
       chainEnd(steps.contextManagement, {

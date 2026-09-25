@@ -276,8 +276,8 @@ describe('groupSteps', () => {
   it('hides a SubstitutionStep without splitting the surrounding tool group', () => {
     const substitution = createSubstitutionStep({
       trigger: 'intra_round',
-      reason: 'input_tokens_threshold',
-      substituted_tool_call_ids: ['a'],
+      threshold_tokens: 1_000,
+      substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'a' }],
     });
     const a = toolStep('a');
     const b = toolStep('b');

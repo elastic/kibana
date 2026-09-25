@@ -526,7 +526,7 @@ describe('createAgentGraph', () => {
     const contextLengthError = () =>
       new InferenceTaskError(ChatCompletionErrorCode.ContextLengthExceededError, 'too long', {});
     const compactionSummary = {
-      summarized_up_to: { tool_call_id: 'x1' },
+      summarized_up_to: { round_id: 'round-0', tool_call_id: 'x1' },
       summarized_round_count: 0,
       created_at: 't',
       token_count: 1,

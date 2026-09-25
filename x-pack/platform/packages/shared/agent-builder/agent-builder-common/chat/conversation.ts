@@ -224,11 +224,21 @@ export const isCompactionStep = (step: ConversationRoundStep): step is Compactio
 
 // substitution step
 
+/**
+ * A tool call of a given round. Tool call ids are provider-generated and may repeat across rounds,
+ * so a durable reference to one carries its round.
+ */
+export interface ToolCallRef {
+  round_id: string;
+  tool_call_id: string;
+}
+
 export interface SubstitutionStepData {
   /** Tool calls whose results are rendered as file references from now on. */
-  substituted_tool_call_ids: string[];
+  substituted_tool_calls: ToolCallRef[];
   trigger: 'round_start' | 'intra_round';
-  reason: 'cache_cold' | 'cache_hot' | 'input_tokens_threshold';
+  /** Stored result size above which a tool call was substituted. */
+  threshold_tokens: number;
 }
 
 export type SubstitutionStep = ConversationRoundStepMixin<
@@ -841,10 +851,10 @@ export interface CompactionStructuredData {
 /**
  * Anchor of a compaction cursor: the summary covers the context timeline up to the end of the
  * cycle this anchor belongs to. Only ids that are stable across timeline re-serialization are
- * used: a tool call id for a cycle with tool calls, the id of a non-step event (`user_message`,
+ * used: a tool call for a cycle with tool calls, the id of a non-step event (`user_message`,
  * execution terminal) otherwise.
  */
-export type CompactionCursor = { tool_call_id: string } | { event_id: string };
+export type CompactionCursor = ToolCallRef | { event_id: string };
 
 /**
  * Summary of the compacted part of the conversation.

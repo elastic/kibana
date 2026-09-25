@@ -30,7 +30,12 @@ import {
 } from './context_coverage';
 import { estimateMessagesTokens } from './estimate_conversation_tokens';
 import { compactionSummaryMessages } from './to_langchain_messages';
-import { buildContextView, renderUnit, type VisibleContextDeps } from './visible_context';
+import {
+  buildContextView,
+  renderUnit,
+  roundUserMessage,
+  type VisibleContextDeps,
+} from './visible_context';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { llmCompactionSchema, COMPACTION_SYSTEM_PROMPT } from './compaction_schema';
 import type { LlmCompactionOutput } from './compaction_schema';
@@ -44,8 +49,11 @@ export interface CompactContextInput {
   run: CurrentRun;
   /** Max tokens of completed cycles kept verbatim before the current one. */
   tailCapTokens: number;
-  /** Called once the covered range is known, before summarizing: the compaction will complete. */
-  onStart?: () => void;
+  /**
+   * Whether to still compact when the summarizer fails, with only the programmatic fields added:
+   * the covered cycles are then lost to the model for good.
+   */
+  fallbackOnFailure: boolean;
 }
 
 export interface CompactContextDeps extends VisibleContextDeps {
@@ -125,13 +133,14 @@ interface RenderedUnit {
  *    a stable anchor for the cursor.
  * 3. Summarize the covered cycles on top of the existing summary, in requests budgeted on their
  *    rendered size; the programmatic tool-call fields accumulate across compactions. When the
- *    summarizer fails, the covered cycles are still dropped, with only the programmatic fields
- *    added to the existing summary.
+ *    summarizer fails and `fallbackOnFailure` is set, the covered cycles are still dropped, with
+ *    only the programmatic fields added to the existing summary.
  *
- * Returns `undefined` when there is nothing to compact or the run was aborted.
+ * Returns `undefined` when there is nothing to compact, the summarizer failed without fallback or
+ * the run was aborted.
  */
 export const compactContext = async (
-  { conversation, run, tailCapTokens, onStart }: CompactContextInput,
+  { conversation, run, tailCapTokens, fallbackOnFailure }: CompactContextInput,
   deps: CompactContextDeps
 ): Promise<CompactContextResult | undefined> => {
   const existingSummary = run.compactionSummary;
@@ -190,7 +199,6 @@ export const compactContext = async (
       existingSummary?.token_count ?? 0
     }`
   );
-  onStart?.();
 
   const added = extractProgrammaticSummary(
     covered.flatMap(({ unit }) => unitToolCalls(unit, run.steps))
@@ -210,6 +218,7 @@ export const compactContext = async (
   try {
     llmOutput = await generateLlmSummary({
       covered,
+      conversation,
       userMessage: view.history.input.message,
       programmatic,
       existingSummary,
@@ -217,6 +226,10 @@ export const compactContext = async (
     });
   } catch (error) {
     if (deps.abortSignal?.aborted) {
+      return undefined;
+    }
+    if (!fallbackOnFailure) {
+      deps.logger.error(`Compaction summarization failed, skipping the compaction: ${error}`);
       return undefined;
     }
     deps.logger.error(
@@ -228,7 +241,12 @@ export const compactContext = async (
   const structuredData: CompactionStructuredData = { ...llmOutput, ...programmatic };
   const coveredRoundIds = fullyCoveredRoundIds(
     view.history.entries,
-    resolveVisibility({ entries: view.history.entries, steps: run.steps, cursor })
+    resolveVisibility({
+      entries: view.history.entries,
+      roundId: run.roundId,
+      steps: run.steps,
+      cursor,
+    })
   );
   const summary: CompactionSummary = {
     summarized_up_to: cursor,
@@ -300,8 +318,9 @@ const takeWithinBudget = (units: RenderedUnit[], budget: number): RenderedUnit[]
 
 /**
  * The LLM half of the summary. Each request is: system prompt, the running summary as prior
- * context, a chunk of covered cycles rendered as they are sent, the user's current request (it
- * anchors chunks that start mid-round) and the instruction with the programmatic tool list.
+ * context, a chunk of covered cycles rendered as they are sent (preceded by its round's user
+ * message when it starts mid-round), the user's current request and the instruction with the
+ * programmatic tool list.
  * Requests are budgeted on their rendered size: the fixed part is measured per request, the chunk
  * is sized against what is left of `budget.historyBudget`, and the request is re-measured,
  * shedding trailing cycles while it still exceeds the budget. A cycle that does not fit alone is
@@ -309,12 +328,14 @@ const takeWithinBudget = (units: RenderedUnit[], budget: number): RenderedUnit[]
  */
 const generateLlmSummary = async ({
   covered,
+  conversation,
   userMessage,
   programmatic,
   existingSummary,
   deps: { chatModel, budget, logger, abortSignal },
 }: {
   covered: RenderedUnit[];
+  conversation: ProcessedConversation;
   userMessage: string;
   programmatic: ProgrammaticSummary;
   existingSummary?: CompactionSummary;
@@ -333,9 +354,15 @@ const generateLlmSummary = async ({
       : '';
   const instruction = `Please generate a structured summary of this conversation history.${toolContext}`;
 
+  const chunkLead = ([first]: RenderedUnit[]): BaseMessage[] =>
+    first?.unit.kind === 'round_cycle' && !first.unit.first
+      ? [roundUserMessage(first.unit, conversation)]
+      : [];
+
   const renderRequest = (chunk: RenderedUnit[], prior?: CompactionSummary): BaseMessage[] => [
     new SystemMessage(COMPACTION_SYSTEM_PROMPT),
     ...(prior ? compactionSummaryMessages(prior) : []),
+    ...chunkLead(chunk),
     ...chunk.flatMap(({ messages }) => messages),
     createUserMessage(userMessage),
     new HumanMessage(instruction),
