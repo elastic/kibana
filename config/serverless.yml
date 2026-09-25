@@ -316,5 +316,3 @@ xpack.security.audit.appender:
   type: console
   layout:
     type: json
-xpack.security.audit.savedObjectDiff.enabled: true
-xpack.security.audit.savedObjectDiff.typesToInclude: ["index-pattern"]
