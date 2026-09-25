@@ -50,6 +50,12 @@ describe('Worker settings declarations', () => {
     );
   });
 
+  it('gives every Worker a settings migration step per version after 1', () => {
+    for (const declaration of WORKER_SETTINGS_DECLARATIONS) {
+      expect(declaration.migrations?.length ?? 0).toBe(declaration.settingsVersion - 1);
+    }
+  });
+
   it.each([...SYSTEM_SECURITY_WORKER_IDS])(
     '%s defaults pass both the generic and the complete schema',
     (workerId) => {
@@ -171,10 +177,12 @@ describe('Worker settings declarations', () => {
 describe('allowed autonomy levels', () => {
   const twoLevels: WorkerSettingsDeclaration = {
     workerId: 'test-worker',
+    settingsVersion: 1,
     allowedAutonomyLevels: ['manual', 'assisted'],
   };
   const noManual: WorkerSettingsDeclaration = {
     workerId: 'test-worker',
+    settingsVersion: 1,
     allowedAutonomyLevels: ['supervised'],
   };
 
@@ -234,10 +242,12 @@ describe('allowed autonomy levels', () => {
 describe('projectStoredAutonomyLevel', () => {
   const ruleTuning: WorkerSettingsDeclaration = {
     workerId: 'test-worker',
+    settingsVersion: 1,
     allowedAutonomyLevels: ['manual', 'assisted'],
   };
   const attackDiscovery: WorkerSettingsDeclaration = {
     workerId: 'test-worker',
+    settingsVersion: 1,
     allowedAutonomyLevels: ['manual', 'supervised'],
   };
 
@@ -255,6 +265,7 @@ describe('projectStoredAutonomyLevel', () => {
   it('keeps a disallowed stored level when nothing sits at or below, so validation fails closed', () => {
     const supervisedOnly: WorkerSettingsDeclaration = {
       workerId: 'test-worker',
+      settingsVersion: 1,
       allowedAutonomyLevels: ['supervised'],
     };
     // Projecting up to 'supervised' would hand a stored 'assisted' Worker unattended authority.
@@ -265,10 +276,12 @@ describe('projectStoredAutonomyLevel', () => {
   it('picks the closest offered level regardless of declaration order', () => {
     const unordered: WorkerSettingsDeclaration = {
       workerId: 'test-worker',
+      settingsVersion: 1,
       allowedAutonomyLevels: ['manual', 'assisted'],
     };
     const reversed: WorkerSettingsDeclaration = {
       workerId: 'test-worker',
+      settingsVersion: 1,
       allowedAutonomyLevels: ['assisted', 'manual'],
     };
     // Both declarations offer the same set, so both must project 'supervised' to 'assisted'.

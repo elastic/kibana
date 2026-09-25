@@ -13,5 +13,6 @@ import type { WorkerSettingsDeclaration } from './types';
 
 export const CONTINUOUS_THREAT_HUNT_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+  settingsVersion: 1,
   allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
 };

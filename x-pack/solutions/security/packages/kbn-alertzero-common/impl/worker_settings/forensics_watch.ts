@@ -13,5 +13,6 @@ import type { WorkerSettingsDeclaration } from './types';
 
 export const ENDPOINT_ANALYSIS_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  settingsVersion: 1,
   allowedAutonomyLevels: WATCH_AUTONOMY_MANUAL,
 };

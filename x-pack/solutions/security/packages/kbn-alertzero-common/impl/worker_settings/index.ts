@@ -61,7 +61,6 @@ export const createDefaultWorkerSettings = (workerId: string): WorkerSettings =>
 export const getAllowedAutonomyLevels = (workerId: string): readonly WatchAutonomyLevel[] =>
   getContract(workerId).declaration.allowedAutonomyLevels;
 
-export { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
 export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
@@ -81,4 +80,6 @@ export {
   FP_RATE_THRESHOLD_PCT_MIN,
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
-export type { WorkerSettingsDeclaration } from './types';
+export { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
+export { migrateStoredTemplateValues, renameStoredField } from './migrate';
+export type { WorkerSettingsDeclaration, WorkerSettingsMigration } from './types';
