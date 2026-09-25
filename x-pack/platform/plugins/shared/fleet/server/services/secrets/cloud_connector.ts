@@ -94,7 +94,7 @@ async function extractAwsCloudConnectorSecrets(
   const externalIdVar = findFirstVarEntry(vars, externalIdKeys);
 
   if (roleArn) {
-    if (!externalIdVar) {
+    if (!externalIdVar || !externalIdVar.value) {
       logger.debug('Extracted AWS cloud connector vars: role_arn only (no external_id)');
       return {
         role_arn: { type: 'text' as const, value: roleArn },

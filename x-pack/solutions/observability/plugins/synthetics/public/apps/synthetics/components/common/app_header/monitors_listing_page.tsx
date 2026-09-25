@@ -52,7 +52,7 @@ export function MonitorsListingPage({
       tabs={tabs}
       back={back}
       toolbar={toolbar}
-      menu={{ showSettings: false, showCreateMonitor: Boolean(selectedTab) }}
+      menu={{ showCreateMonitor: Boolean(selectedTab) }}
       paddingSize={paddingSize}
     >
       {children}

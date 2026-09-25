@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getIndexMappings } from './get_index_mappings';
@@ -109,5 +110,88 @@ describe('getIndexMappings', () => {
         properties: { [`field_${idx}`]: { type: 'keyword' } },
       });
     }
+  });
+
+  describe('skipUnauthorized', () => {
+    const make403 = () =>
+      new esErrors.ResponseError({
+        statusCode: 403,
+        body: { error: { type: 'security_exception' } },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      } as any);
+
+    it('re-throws 403 by default (skipUnauthorized=false)', async () => {
+      esClient.indices.getMapping.mockRejectedValue(make403());
+
+      await expect(
+        getIndexMappings({ indices: ['index-a'], esClient, cleanup: false })
+      ).rejects.toThrow();
+    });
+
+    it('drops a single unauthorized index and returns an empty result', async () => {
+      esClient.indices.getMapping.mockRejectedValue(make403());
+
+      const result = await getIndexMappings({
+        indices: ['metrics-endpoint.metadata_current_default'],
+        esClient,
+        cleanup: false,
+        skipUnauthorized: true,
+      });
+
+      expect(result).toEqual({});
+      // initial batch + one per-index retry, both rejected
+      expect(esClient.indices.getMapping).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries per-index on a batch 403 and returns only authorized indices', async () => {
+      const authorizedMappings: MappingTypeMapping = { properties: { host: { type: 'keyword' } } };
+
+      esClient.indices.getMapping.mockImplementation((params: any) => {
+        const names: string[] = params.index;
+        // batch call fails; single-index calls succeed only for authorized-index
+        if (names.length > 1) {
+          return Promise.reject(make403());
+        }
+        if (names[0] === 'authorized-index') {
+          return Promise.resolve({ 'authorized-index': { mappings: authorizedMappings } }) as any;
+        }
+        return Promise.reject(make403());
+      });
+
+      const result = await getIndexMappings({
+        indices: ['authorized-index', 'denied-index'],
+        esClient,
+        cleanup: false,
+        skipUnauthorized: true,
+      });
+
+      expect(result).toEqual({ 'authorized-index': { mappings: authorizedMappings } });
+      // initial batch + 2 per-index retries
+      expect(esClient.indices.getMapping).toHaveBeenCalledTimes(3);
+    });
+
+    it('re-throws non-403 errors even when skipUnauthorized=true', async () => {
+      esClient.indices.getMapping.mockRejectedValue(new Error('network error'));
+
+      await expect(
+        getIndexMappings({ indices: ['index-a'], esClient, skipUnauthorized: true })
+      ).rejects.toThrow('network error');
+    });
+
+    it('rethrows non-403 errors from per-index retries after a batch 403', async () => {
+      esClient.indices.getMapping.mockImplementation((params: any) => {
+        const names: string[] = params.index;
+        if (names.length > 1) {
+          return Promise.reject(make403());
+        }
+        return Promise.reject(new Error('service unavailable'));
+      });
+
+      await expect(
+        getIndexMappings({ indices: ['index-a', 'index-b'], esClient, skipUnauthorized: true })
+      ).rejects.toThrow('service unavailable');
+    });
   });
 });

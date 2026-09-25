@@ -17,6 +17,7 @@ import { useServiceFlyoutContext } from '../service_flyout_context';
 export function ServiceFlyoutFooter() {
   const { capabilities } = useServiceFlyoutContext();
   const {
+    apm: { overviewTab: serviceOverviewHref },
     alerts: alertsHref,
     slos: slosHref,
     discover: {
@@ -25,11 +26,34 @@ export function ServiceFlyoutFooter() {
     },
   } = useServiceFlyoutLinks();
 
+  const showServiceOverview = Boolean(
+    serviceOverviewHref && (capabilities.header?.serviceNameLink ?? false)
+  );
   const showAlerts = Boolean(alertsHref && capabilities.footer?.alerts);
   const showSlos = Boolean(slosHref && capabilities.footer?.slos);
 
   const actionGroups = useMemo(() => {
     const groups: ActionGroups = [];
+
+    if (showServiceOverview) {
+      groups.push({
+        id: 'apm',
+        actions: [
+          {
+            id: 'openServiceOverview',
+            name: i18n.translate('xpack.apm.serviceFlyout.openServiceOverviewAction', {
+              defaultMessage: 'Open service overview',
+            }),
+            href: serviceOverviewHref,
+            ebt: {
+              action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+              element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+              detail: 'overview',
+            },
+          },
+        ],
+      });
+    }
 
     if (tracesDiscoverHref || logsDiscoverHref) {
       groups.push({
@@ -125,8 +149,10 @@ export function ServiceFlyoutFooter() {
   }, [
     logsDiscoverHref,
     logsOpenInDiscoverTab,
+    serviceOverviewHref,
     showAlerts,
     alertsHref,
+    showServiceOverview,
     showSlos,
     slosHref,
     tracesDiscoverHref,

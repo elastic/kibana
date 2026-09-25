@@ -34,9 +34,12 @@ export const toListExecutionHistoryArgs = ({
   per_page: perPage,
   search,
   rule_ids: ruleIds,
-  outcome,
+  outcomes,
   episode_ids: episodeIds,
-  start_date: startDate,
+  from,
+  to,
+  sort_field: sortField,
+  sort_order: sortOrder,
   ...rest
 }: ListPolicyExecutionHistoryRequest): Complete<Omit<ListExecutionHistoryArgs, 'request'>> => {
   assertAllFieldsMapped(rest);
@@ -45,9 +48,12 @@ export const toListExecutionHistoryArgs = ({
     perPage,
     search,
     ruleIds,
-    outcome,
+    outcomes,
     episodeIds,
-    startDate,
+    from,
+    to,
+    sortField,
+    sortOrder,
   };
 };
 
@@ -55,7 +61,7 @@ export const toListExecutionHistoryResponse = ({
   items,
   page,
   perPage,
-  totalEvents,
+  total,
   searchMatches,
   ...rest
 }: ListExecutionHistoryResult): Complete<ListPolicyExecutionHistoryResponse> => {
@@ -64,7 +70,7 @@ export const toListExecutionHistoryResponse = ({
     items,
     page,
     per_page: perPage,
-    total_events: totalEvents,
+    total,
     search_matches: searchMatches,
   };
 };
@@ -120,7 +126,7 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
   protected async execute() {
     const result = await this.executionHistoryClient.listExecutionHistory({
       request: this.request,
-      ...toListExecutionHistoryArgs(this.request.query ?? {}),
+      ...toListExecutionHistoryArgs(this.request.query),
     });
 
     return this.ctx.response.ok({ body: toListExecutionHistoryResponse(result) });

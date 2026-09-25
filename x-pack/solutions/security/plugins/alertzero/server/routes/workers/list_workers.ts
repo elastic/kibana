@@ -13,6 +13,7 @@ import {
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 export const registerListWorkersRoute = ({
   router,
@@ -38,7 +39,7 @@ export const registerListWorkersRoute = ({
           request: {},
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
           const body: ListWorkersResponse = await getWorkersService().list(
             request,
@@ -52,6 +53,6 @@ export const registerListWorkersRoute = ({
             body: { message: 'Failed to list workers' },
           });
         }
-      }
+      })
     );
 };

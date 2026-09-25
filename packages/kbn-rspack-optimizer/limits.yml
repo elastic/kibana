@@ -3,18 +3,18 @@ pageLoadAssetSize:
   advancedSettings: 1981
   agentBuilder: 644
   agentBuilderDashboards: 3743
-  agentBuilderPlatform: 21685
+  agentBuilderPlatform: 23882
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
-  agenticInvestigations: 4869
+  agenticInvestigations: 15406
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 17737
+  alertzero: 21199
   apm: 35746
-  apmShared: 1896
+  apmShared: 2226
   apmSourcesAccess: 1174
   automaticImport: 13257
   banners: 1425
@@ -53,7 +53,6 @@ pageLoadAssetSize:
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7461
-  developerToolbar: 1951
   devTools: 4281
   discover: 19917
   discoverEnhanced: 1359
@@ -89,7 +88,7 @@ pageLoadAssetSize:
   files: 3954
   filesManagement: 940
   fileUpload: 480
-  fleet: 7307
+  fleet: 8071
   genAiSettings: 1795
   globalSearch: 5447
   globalSearchBar: 21704
@@ -107,7 +106,6 @@ pageLoadAssetSize:
   ingestHub: 8059
   ingestPipelines: 534
   inputControlVis: 3213
-  inspectComponent: 1141
   inspector: 586
   interactiveSetup: 32694
   intercepts: 14374
@@ -125,14 +123,13 @@ pageLoadAssetSize:
   logsDataAccess: 576
   logsShared: 2042
   logstash: 11772
-  maintenanceWindows: 3754
+  maintenanceWindows: 4338
   management: 10296
   maps: 1201
   mapsEms: 3256
-  metricsDataAccess: 1947
+  metricsDataAccess: 2418
   mitreAttack: 2022
   ml: 950
-  mockIdpPlugin: 3990
   monitoring: 22416
   navigation: 332
   newsfeed: 10708
@@ -195,7 +192,7 @@ pageLoadAssetSize:
   share: 379
   shared-core: 311749
   shared-misc: 155260
-  shared-packages: 5010040
+  shared-packages: 5513030
   shared-plugins: 13536562
   shared-solution-packages: 347767
   significantEvents: 3679
