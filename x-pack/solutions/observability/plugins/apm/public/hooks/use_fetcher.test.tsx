@@ -8,7 +8,7 @@
 import React from 'react';
 import { waitFor, act, renderHook, type RenderHookResult } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
 import { useFetcher, isPending, FETCH_STATUS } from './use_fetcher';
@@ -161,7 +161,7 @@ describe('useFetcher', () => {
     it('uses toasts.add for expected transport failures so RUM is not captured via addDanger', async () => {
       async function failingFn(): Promise<string> {
         await delay(500);
-        throw new Error('Failed to fetch');
+        throw createHttpFetchError('Failed to fetch', 'TypeError');
       }
 
       const hook = renderHook(() => useFetcher(failingFn, []), { wrapper });
@@ -185,16 +185,17 @@ describe('useFetcher', () => {
     it('uses toasts.addDanger for HTTP 500 application errors', async () => {
       async function failingFn(): Promise<string> {
         await delay(500);
-        const error = new Error('Internal Server Error') as IHttpFetchError;
-        Object.assign(error, {
-          response: {
+        throw createHttpFetchError(
+          'Internal Server Error',
+          'Error',
+          {} as Request,
+          {
             status: 500,
             statusText: 'Internal Server Error',
             url: '/internal/apm/services',
-          },
-          body: { message: 'Internal Server Error' },
-        });
-        throw error;
+          } as Response,
+          { message: 'Internal Server Error' }
+        );
       }
 
       const hook = renderHook(() => useFetcher(failingFn, []), { wrapper });

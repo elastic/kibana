@@ -6,7 +6,7 @@
  */
 
 import { apm } from '@elastic/apm-rum';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { isAbortError, isExpectedTransportFailure, reportFetchError } from './report_fetch_error';
 import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
 
@@ -37,43 +37,50 @@ describe('report_fetch_error', () => {
       expect(isExpectedTransportFailure(error)).toBe(true);
     });
 
-    it('returns true for Failed to fetch', () => {
-      expect(isExpectedTransportFailure(new Error('Failed to fetch'))).toBe(true);
-    });
-
-    it('returns true for NetworkError name', () => {
-      const error = new Error('The network request failed.');
-      error.name = 'NetworkError';
-      expect(isExpectedTransportFailure(error)).toBe(true);
-    });
-
-    it('returns true for TLS handshake timeout messages', () => {
-      expect(isExpectedTransportFailure(new Error('TLS handshake timeout'))).toBe(true);
-    });
-
-    it('returns true for backend closed connection messages', () => {
-      expect(isExpectedTransportFailure(new Error('backend closed connection'))).toBe(true);
+    it('returns true for HttpFetchError without a response (network failure)', () => {
+      expect(isExpectedTransportFailure(createHttpFetchError('Failed to fetch', 'TypeError'))).toBe(
+        true
+      );
     });
 
     it.each([408, 502, 503, 504])('returns true for HTTP %s', (status) => {
-      const error = new Error(`Error (${status})`) as IHttpFetchError;
-      Object.assign(error, { response: { status } });
+      const error = createHttpFetchError(
+        `Error (${status})`,
+        'Error',
+        {} as Request,
+        {
+          status,
+        } as Response
+      );
       expect(isExpectedTransportFailure(error)).toBe(true);
     });
 
-    it('returns false for a regular application error', () => {
+    it('returns false for a plain Error that is not an HttpFetchError', () => {
+      expect(isExpectedTransportFailure(new Error('Failed to fetch'))).toBe(false);
       expect(isExpectedTransportFailure(new Error('Something went wrong'))).toBe(false);
     });
 
     it('returns false for HTTP 500', () => {
-      const error = new Error('Internal Server Error') as IHttpFetchError;
-      Object.assign(error, { response: { status: 500 } });
+      const error = createHttpFetchError(
+        'Internal Server Error',
+        'Error',
+        {} as Request,
+        {
+          status: 500,
+        } as Response
+      );
       expect(isExpectedTransportFailure(error)).toBe(false);
     });
 
-    it('returns false for HTTP 500 even when the message matches a transport pattern', () => {
-      const error = new Error('Failed to fetch upstream') as IHttpFetchError;
-      Object.assign(error, { response: { status: 500 } });
+    it('returns false for HTTP 500 even when the message looks like a network failure', () => {
+      const error = createHttpFetchError(
+        'Failed to fetch upstream',
+        'Error',
+        {} as Request,
+        {
+          status: 500,
+        } as Response
+      );
       expect(isExpectedTransportFailure(error)).toBe(false);
     });
 
@@ -115,9 +122,9 @@ describe('report_fetch_error', () => {
       expect(captureErrorSpy).not.toHaveBeenCalled();
     });
 
-    it('skips Failed to fetch', () => {
+    it('skips HttpFetchError without a response', () => {
       reportFetchError({
-        error: new Error('Failed to fetch'),
+        error: createHttpFetchError('Failed to fetch', 'TypeError'),
         operationId: FETCHER_OPERATION_IDS.FETCH_SPAN_LINKS,
       });
 
@@ -125,8 +132,14 @@ describe('report_fetch_error', () => {
     });
 
     it('skips HTTP 502', () => {
-      const error = new Error('Bad Gateway') as IHttpFetchError;
-      Object.assign(error, { response: { status: 502 } });
+      const error = createHttpFetchError(
+        'Bad Gateway',
+        'Error',
+        {} as Request,
+        {
+          status: 502,
+        } as Response
+      );
 
       reportFetchError({ error, operationId: FETCHER_OPERATION_IDS.FETCH_SPAN_LINKS });
 

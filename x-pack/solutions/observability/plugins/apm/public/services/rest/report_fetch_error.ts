@@ -6,7 +6,7 @@
  */
 
 import { apm } from '@elastic/apm-rum';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { FetcherOperationId } from '../../hooks/fetcher_operation_ids';
 
 export const isAbortError = (error: unknown): boolean =>
@@ -15,42 +15,28 @@ export const isAbortError = (error: unknown): boolean =>
 /** Gateway / proxy / timeout statuses that are infrastructure noise, not APM UI bugs. */
 const EXPECTED_TRANSPORT_STATUS_CODES = new Set([408, 502, 503, 504]);
 
-const EXPECTED_TRANSPORT_MESSAGE_PATTERNS = [
-  /failed to fetch/i,
-  /networkerror/i,
-  /network error/i,
-  /networkrequestfailed/i,
-  /tls handshake/i,
-  /backend closed connection/i,
-  /load failed/i,
-  /request aborted/i,
-];
-
 /**
  * Returns true for transport / infra failures that should not be reported to APM RUM
  * (they still may surface as user-facing toasts).
+ *
+ * Relies on Kibana's HTTP client shapes: network failures are `HttpFetchError`s without a
+ * response status; application errors carry an HTTP status on `response`.
  */
 export const isExpectedTransportFailure = (error: unknown): boolean => {
   if (isAbortError(error)) {
     return true;
   }
 
-  if (!(error instanceof Error)) {
+  if (!isHttpFetchError(error)) {
     return false;
   }
 
-  const status = (error as IHttpFetchError).response?.status;
-  // When an HTTP status is present, classify by status only — do not let browser
-  // network-message patterns override a real application response (e.g. 500).
-  if (status != null) {
-    return EXPECTED_TRANSPORT_STATUS_CODES.has(status);
-  }
-
-  if (error.name === 'NetworkError') {
+  const status = error.response?.status;
+  if (status == null) {
     return true;
   }
 
-  return EXPECTED_TRANSPORT_MESSAGE_PATTERNS.some((pattern) => pattern.test(error.message));
+  return EXPECTED_TRANSPORT_STATUS_CODES.has(status);
 };
 
 interface ReportFetchErrorParams {
