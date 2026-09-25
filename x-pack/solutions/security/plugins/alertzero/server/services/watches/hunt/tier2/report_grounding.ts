@@ -325,9 +325,13 @@ const requiredRegexpCore = (alternative: string): string[] => {
  *
  * - a regular expression's alternation, so `|` splits the pattern into alternatives that must
  *   each be grounded;
- * - a full-text match's terms, which are ORed by default, so each term has to be grounded.
- *   Terms below `MIN_GROUNDING_LENGTH` are dropped rather than required, because that is the
- *   length at which this gate stops being able to judge a value in either direction.
+ * - a full-text match's terms, which are ORed by default, so each term has to be grounded. A term
+ *   too short for this gate to judge is not excused from that: it is still a term Elasticsearch
+ *   matches on, so `MATCH(message, "AssumeRole up")` returns documents holding only `up`, and
+ *   judging the predicate on the one term that can be read counted those as the report's evidence.
+ *   Every term is required and `MIN_GROUNDING_LENGTH` decides whether it can be met, which costs
+ *   a match on short tokens alone — `MATCH(process.command_line, "net use")` keeps the
+ *   placeholder — and costs nothing that can be verified.
  *
  * `LIKE` needs neither the alternation rule nor `RLIKE`'s whitelist: its only wildcards are `*`
  * for any sequence and `?` for exactly one character, so every fragment between them is text the
@@ -341,8 +345,10 @@ const groundingRequirements = (operator: string, literal: string): string[][] =>
     return literal.split('|').map(requiredRegexpCore);
   }
   if (FULL_TEXT_FUNCTIONS.has(operator)) {
-    const terms = literal.split(/\s+/).filter((term) => term.length >= MIN_GROUNDING_LENGTH);
-    return terms.length > 0 ? terms.map((term) => [term]) : [[literal]];
+    const terms = literal.split(/\s+/).filter((term) => term.length > 0);
+    // A literal with no term asks for nothing, and an empty requirement list is satisfied by
+    // everything, so it has to fail here rather than pass vacuously.
+    return terms.length > 0 ? terms.map((term) => [term]) : [[]];
   }
   return [[literal]];
 };

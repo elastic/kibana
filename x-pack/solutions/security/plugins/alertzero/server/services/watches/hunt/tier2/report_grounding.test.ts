@@ -456,7 +456,7 @@ describe('assertEsqlGroundedInReport', () => {
       expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
     });
 
-    it('requires every judgeable term of a full-text match to be grounded', () => {
+    it('requires every term of a full-text match to be grounded', () => {
       // A match query ORs its terms by default, so an ungrounded term widens the result exactly
       // as an ungrounded OR branch does.
       const grounded = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role")';
@@ -470,15 +470,42 @@ describe('assertEsqlGroundedInReport', () => {
       );
     });
 
-    it('ignores a term too short for the gate to judge either way', () => {
-      // `in` and `the` are below MIN_GROUNDING_LENGTH, so they are dropped rather than required.
-      const query = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role in the")';
+    it('refuses a match whose term is too short for the gate to judge', () => {
+      // A short term is not a term Elasticsearch ignores: `MATCH(message, "escalated-role up")`
+      // returns documents holding only `up`, so excusing it from the requirement — which an
+      // earlier version of this test asserted as intent — counted those rows as the report's.
+      const query = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role up")';
       expect(
         assertEsqlGroundedInReport(query, {
           reportText: 'the actor reached escalated-role',
           iocValues: [],
         }).ok
-      ).toBe(true);
+      ).toBe(false);
+    });
+
+    it('refuses a match made only of terms too short to verify', () => {
+      // The cost of the rule above, stated: a command built from short tokens keeps the
+      // placeholder even where the report contains it verbatim, because nothing here can tell
+      // `net use` in the report from `net` or `use` in an unrelated document.
+      const query = 'FROM logs-aws.* | WHERE MATCH(process.command_line, "net use")';
+      expect(
+        assertEsqlGroundedInReport(query, {
+          reportText: 'the actor ran net use against the share',
+          iocValues: [],
+        }).ok
+      ).toBe(false);
+    });
+
+    it('refuses a match on an empty literal instead of passing it vacuously', () => {
+      // No term means no requirement, and a requirement list with nothing in it is met by every
+      // row, so this has to fail rather than come out grounded by default.
+      const query = 'FROM logs-aws.* | WHERE MATCH(message, "")';
+      expect(
+        assertEsqlGroundedInReport(query, {
+          reportText: 'the actor reached escalated-role',
+          iocValues: [],
+        }).ok
+      ).toBe(false);
     });
   });
 
