@@ -56,11 +56,11 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "9.5.5"
+    "version": "9.5.7"
   },
   {
     "name": "security_ai_prompts",
-    "version": "1.0.13",
+    "version": "1.0.14",
     "allowSyncToPrerelease": true
   }
 ]

@@ -48,6 +48,7 @@ examples/user_activity_example @elastic/kibana-core
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
 examples/workflows_extensions_example @elastic/workflows-eng
+oas_docs @elastic/kibana-core
 packages/kbn-api-contracts @elastic/kibana-core
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
@@ -1400,9 +1401,9 @@ x-pack/solutions/security/packages/navigation @elastic/security-investigations
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
 x-pack/solutions/security/packages/side-nav @elastic/security-investigations
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
-x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
+x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
-x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting
+x-pack/solutions/security/packages/upselling @elastic/security-investigations
 x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/discoveries @elastic/security-threat-hunting
