@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import {
   mockData,
   nullMockData,
@@ -116,6 +117,22 @@ describe('ProcessTree component', () => {
     it('When Verbose mode is ON, it should show all childrens', () => {
       renderResult = mockedContext.render(<ProcessTree {...props} verboseMode={true} />);
       expect(renderResult.queryByRole('document', { name: '/home/vagrant cat' })).toBeTruthy();
+    });
+
+    it('toggles the tree and its button label between collapse all and expand all', async () => {
+      const user = userEvent.setup();
+      const trackEvent = jest.fn();
+      renderResult = mockedContext.render(<ProcessTree {...props} trackEvent={trackEvent} />);
+
+      await user.click(renderResult.getByRole('button', { name: 'Collapse all' }));
+
+      expect(trackEvent).toHaveBeenCalledWith('collapse_tree');
+      expect(renderResult.queryByRole('button', { name: 'Collapse all' })).toBeFalsy();
+
+      await user.click(renderResult.getByRole('button', { name: 'Expand all' }));
+
+      expect(trackEvent).toHaveBeenCalledWith('expand_tree');
+      expect(renderResult.queryByRole('button', { name: 'Collapse all' })).toBeTruthy();
     });
   });
 });
