@@ -17,7 +17,9 @@ import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
  * unregistered anyway, `get` resolves to `undefined`, which keeps the route gated off.
  */
 export const withAlertZeroEnabled =
-  <Params, Query, Body>(handler: RequestHandler<Params, Query, Body>): RequestHandler<Params, Query, Body> =>
+  <Params, Query, Body>(
+    handler: RequestHandler<Params, Query, Body>
+  ): RequestHandler<Params, Query, Body> =>
   async (context, request, response) => {
     const { uiSettings } = await context.core;
     const isEnabled = await uiSettings.client.get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
