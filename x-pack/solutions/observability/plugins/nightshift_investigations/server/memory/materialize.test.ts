@@ -238,7 +238,7 @@ describe('materializeMemory', () => {
     session.statFiles.mockImplementation(async (paths: string[]) =>
       paths.map((path) => ({
         path,
-        exists: path.endsWith('memory_a.md'),
+        exists: path === '/workspace/memories/.index.json' || path.endsWith('memory_a.md'),
         is_dir: false,
         size: 1,
         modified_time_sec: 0,
@@ -277,13 +277,43 @@ describe('materializeMemory', () => {
     });
   });
 
+  it('does not overwrite an existing catalog when its read fails', async () => {
+    const store = createStore(candidates.slice(0, 1));
+    const session = createSession();
+    session.statFiles.mockImplementation(async (paths: string[]) =>
+      paths.map((path) => ({
+        path,
+        exists: path === '/workspace/memories/.index.json',
+        is_dir: false,
+        size: 1,
+        modified_time_sec: 0,
+      }))
+    );
+    session.readFiles.mockResolvedValue([
+      {
+        path: '/workspace/memories/.index.json',
+        success: false,
+        content: Buffer.from(''),
+      },
+    ]);
+
+    await expect(
+      materializeMemory({
+        session: session as never,
+        store,
+        logger: loggerMock.create(),
+      })
+    ).rejects.toThrow('Memory catalog exists but could not be read');
+    expect(session.writeFiles).not.toHaveBeenCalled();
+  });
+
   it('emits an empty notification when every keep-set path already exists', async () => {
     const store = createStore(candidates.slice(0, 1));
     const session = createSession();
     session.statFiles.mockImplementation(async (paths: string[]) =>
       paths.map((path) => ({
         path,
-        exists: true,
+        exists: path !== '/workspace/memories/.index.json',
         is_dir: false,
         size: 1,
         modified_time_sec: 0,

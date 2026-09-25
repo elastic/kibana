@@ -88,13 +88,42 @@ export const parseMemoryCatalog = (raw: string): MemoryCatalogEntry[] => {
 };
 
 const readMemoryCatalog = async (session: SandboxSession): Promise<MemoryCatalogEntry[]> => {
+  const [metadata] = await session.statFiles([MEMORY_INDEX_PATH]);
+  if (!metadata?.exists) {
+    return [];
+  }
+  if (metadata.is_dir) {
+    throw new Error('Memory catalog path is a directory');
+  }
+
   const [result] = await session.readFiles([
     { path: MEMORY_INDEX_PATH, maxReadBytes: MEMORY_INDEX_MAX_BYTES },
   ]);
   if (!result?.success) {
-    return [];
+    throw new Error('Memory catalog exists but could not be read');
   }
-  return parseMemoryCatalog(result.content.toString('utf8'));
+
+  const raw = result.content.toString('utf8');
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error('Memory catalog is malformed or exceeds its read limit');
+  }
+  if (
+    typeof parsed !== 'object' ||
+    parsed === null ||
+    !('entries' in parsed) ||
+    !Array.isArray(parsed.entries)
+  ) {
+    throw new Error('Memory catalog has an invalid shape');
+  }
+
+  const catalog = parseMemoryCatalog(raw);
+  if (catalog.length !== parsed.entries.length) {
+    throw new Error('Memory catalog contains an invalid entry');
+  }
+  return catalog;
 };
 
 const existingFilePaths = async (
