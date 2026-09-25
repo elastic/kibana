@@ -93,7 +93,9 @@ spaceTest.describe(
         await spaceTest.step('filter to actions triggered manually', async () => {
           await responseActionsHistory.toggleTypeFilter(TRIGGERED_MANUALLY);
           await expect(rows.filter({ hasText: TRIGGERED_BY_RULE })).toHaveCount(0);
-          await expect(rows.filter({ hasText: history.manualHostname })).not.toHaveCount(0);
+          // The manual host asks for 2 actions and can get up to 6. The
+          // automated host stays at 1, so this filter is every row except that one.
+          await expect(rows).toHaveCount(totalRows - 1);
         });
 
         await spaceTest.step('open the rule that triggered the action', async () => {
