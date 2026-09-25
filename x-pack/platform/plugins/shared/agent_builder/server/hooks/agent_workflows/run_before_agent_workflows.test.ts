@@ -227,9 +227,7 @@ describe('runBeforeAgentWorkflows', () => {
         logger,
       })
     ).resolves.toEqual({
-      nextInput: {
-        message: 'hello',
-        attachments: [],
+      preExecutionWorkflow: {
         model_context: 'first context\n\nsecond context',
       },
     });
@@ -300,7 +298,8 @@ describe('runBeforeAgentWorkflows', () => {
       logger,
     });
 
-    const recalledIds = result?.nextInput?.workflow_context?.semantic_memory?.recalled_ids;
+    const recalledIds =
+      result?.preExecutionWorkflow?.workflow_context?.semantic_memory?.recalled_ids;
     expect(recalledIds).toHaveLength(WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT - 1);
     expect(recalledIds?.[0]).toBe('memory-1');
     expect(recalledIds?.[1]).toHaveLength(WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH);

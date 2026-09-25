@@ -59,6 +59,13 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
   it('preserves a maximal completed round (steps, structured output, attachments, trace_id, state, overrides)', () => {
     const steps: ConversationRoundStep[] = [
       {
+        type: ConversationRoundStepType.preExecutionWorkflow,
+        model_context: '  <system_update>\nexact model context\n</system_update>  ',
+        workflow_context: {
+          semantic_memory: { recalled_ids: ['memory-1', ' memory-2 '] },
+        },
+      },
+      {
         type: ConversationRoundStepType.toolCall,
         tool_call_id: 'tc-1',
         tool_id: 'platform.core.execute_esql',
@@ -80,10 +87,6 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
           { attachment_id: 'a1', version: 1, actor: 'user', operation: 'created' },
         ] as unknown as ConversationRound['input']['attachment_refs'],
         attachment_context: 'pre-rendered context',
-        model_context: '  <system_update>\nexact model context\n</system_update>  ',
-        workflow_context: {
-          semantic_memory: { recalled_ids: ['memory-1', ' memory-2 '] },
-        },
       },
       steps,
       response: { message: 'hi there', structured_output: { foo: 'bar' } },

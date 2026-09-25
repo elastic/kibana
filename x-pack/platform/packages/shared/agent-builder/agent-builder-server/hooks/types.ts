@@ -7,7 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
-import type { AgentConfiguration, ConversationRound } from '@kbn/agent-builder-common';
+import type {
+  AgentConfiguration,
+  ConversationRound,
+  PreExecutionWorkflowStepData,
+} from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
@@ -23,6 +27,8 @@ interface AgentHookContextBase {
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
   nextInput: ProcessedRoundInput;
+  /** Accumulated output of the pre-execution workflows that already ran for this round. */
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
   /**
    * Id of the conversation this round belongs to. Absent for standalone (sub-agent) runs.
    * Present but ephemeral for `ai.agent` workflow steps that set neither `create-conversation`
@@ -68,6 +74,7 @@ export type HookContext<E extends HookLifecycle = HookLifecycle> = HookContextBy
 export interface HookHandlerResultByLifecycle {
   [HookLifecycle.beforeAgent]: {
     nextInput?: ProcessedRoundInput;
+    preExecutionWorkflow?: PreExecutionWorkflowStepData;
   };
   [HookLifecycle.beforeToolCall]: {
     toolParams?: Record<string, unknown>;

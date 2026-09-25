@@ -105,10 +105,10 @@ const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined =
 
 /**
  * Runs the agent's configured before-agent workflows in sequence, updating the
- * round input when a workflow returns `new_prompt` or model-only context. Throws
+ * round input when a workflow returns `new_prompt` and accumulating workflow context. Throws
  * on workflow failure or when a workflow aborts the agent.
  *
- * @returns Updated nextInput when any workflow changed it, otherwise undefined
+ * @returns Updated input and/or accumulated workflow context, otherwise undefined
  */
 export async function runBeforeAgentWorkflows({
   context,
@@ -132,6 +132,8 @@ export async function runBeforeAgentWorkflows({
 
   const spaceId = getCurrentSpaceId({ request: context.request, spaces });
   let currentNextInput = context.nextInput;
+  let preExecutionWorkflow = context.preExecutionWorkflow;
+  let nextInputChanged = false;
 
   for (const workflowId of workflowIds) {
     const result = await executeWorkflow({
@@ -172,24 +174,25 @@ export async function runBeforeAgentWorkflows({
 
     if (output.new_prompt) {
       currentNextInput = { ...currentNextInput, message: output.new_prompt };
+      nextInputChanged = true;
     }
 
     const modelContext = normalizeModelContext(output.model_context);
     if (modelContext) {
-      const combinedModelContext = [currentNextInput.model_context, modelContext]
+      const combinedModelContext = [preExecutionWorkflow?.model_context, modelContext]
         .filter((fragment): fragment is string => Boolean(fragment))
         .join('\n\n')
         .slice(0, MODEL_CONTEXT_MAX_LENGTH);
-      currentNextInput = {
-        ...currentNextInput,
+      preExecutionWorkflow = {
+        ...preExecutionWorkflow,
         model_context: combinedModelContext,
       };
     }
 
     const workflowContext = normalizeWorkflowContext(output.workflow_context);
     if (workflowContext) {
-      currentNextInput = {
-        ...currentNextInput,
+      preExecutionWorkflow = {
+        ...preExecutionWorkflow,
         workflow_context: workflowContext,
       };
     }
@@ -203,8 +206,11 @@ export async function runBeforeAgentWorkflows({
     }
   }
 
-  if (currentNextInput !== context.nextInput) {
-    return { nextInput: currentNextInput };
+  if (nextInputChanged || preExecutionWorkflow !== context.preExecutionWorkflow) {
+    return {
+      ...(nextInputChanged ? { nextInput: currentNextInput } : {}),
+      ...(preExecutionWorkflow ? { preExecutionWorkflow } : {}),
+    };
   }
 }
 

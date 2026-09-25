@@ -9,7 +9,6 @@ import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
 import type {
   CompactionSummary,
-  ConversationRound,
   ConversationRoundStep,
   ReasoningStep,
   TimelineEvent,
@@ -45,7 +44,6 @@ import {
   type ProcessedConversationRound,
 } from '../../../../test_utils/timeline';
 import { eventsForContext, type ProcessedTimelineEvent } from './context_timeline';
-import { applyResumeResolution } from '../../../conversation/client/merge_rounds';
 
 describe('prepareMessages', () => {
   const now = new Date().toISOString();
@@ -54,10 +52,7 @@ describe('prepareMessages', () => {
     message: string,
     attachments: ProcessedAttachment[] = [],
     overrides: Partial<
-      Pick<
-        ProcessedRoundInput,
-        'attachment_refs' | 'attachment_context' | 'model_context' | 'workflow_context' | 'author'
-      >
+      Pick<ProcessedRoundInput, 'attachment_refs' | 'attachment_context' | 'author'>
     > = {}
   ): ProcessedRoundInput => ({
     message,
@@ -225,37 +220,37 @@ describe('prepareMessages', () => {
     expect(result[2].content).toBe('how are you?');
   });
 
-  it('replays the pending round input and its persisted model context on resume', async () => {
-    const pendingStartedAt = '2026-06-30T12:34:56.000Z';
+  it('orders user input, workflow model context, then relevant-skills notice', async () => {
     const previousRounds = [
       createRound({
-        id: 'round-1',
-        status: ConversationRoundStatus.awaitingPrompt,
-        input: makeRoundInput('original user request', [], {
-          author: { id: 'u1', username: 'alice' },
-          model_context: '<system_update>original round context</system_update>',
-        }),
-        started_at: pendingStartedAt,
+        input: makeRoundInput('user-authored task'),
+        steps: [
+          {
+            type: ConversationRoundStepType.preExecutionWorkflow,
+            model_context: '<system_update>workflow context</system_update>',
+            workflow_context: { semantic_memory: { recalled_ids: ['never-render-this'] } },
+          },
+          {
+            type: ConversationRoundStepType.relevantSkills,
+            skills: [{ id: 's1', name: 'skill', path: '/s1', description: 'd' }],
+            source: 'implicit',
+          },
+        ],
       }),
     ];
 
     const result = await prepareMessages({
       conversation: createConversation({
         previousRounds,
-        nextInput: makeRoundInput('prompt answer', [], {
-          author: { id: 'u2', username: 'bob' },
-          model_context: '<system_update>rerun hook context</system_update>',
-        }),
+        nextInput: makeRoundInput('next question'),
       }),
     });
 
-    expect(result).toHaveLength(1);
-    expect(result[0].content).toBe(
-      `[User: alice — Sent: ${formatDate(
-        pendingStartedAt
-      )}]\n\noriginal user request\n\n<system_update>original round context</system_update>\n`
-    );
-    expect(result[0].content).not.toContain('rerun hook context');
+    expect(result[0].content).toContain('user-authored task');
+    expect(result[1].name).toBe('pre_execution_workflow_context');
+    expect(result[1].content).toBe('<system_update>workflow context</system_update>');
+    expect(result[2].content).toContain('relevant_skills');
+    expect(JSON.stringify(result)).not.toContain('never-render-this');
   });
 
   it('places the next-input date prefix above attachment XML', async () => {
@@ -809,124 +804,6 @@ describe('prepareMessages', () => {
 
       expect(result[0].content as string).not.toContain('<attachments');
       expect(result[0].content as string).not.toContain('<attachments');
-    });
-  });
-
-  describe('with model_context', () => {
-    it('appends model-only context to the outgoing user message', async () => {
-      const nextInput = makeRoundInput('user-authored task', [], {
-        model_context: '<system_update>hydrated context</system_update>',
-      });
-
-      const result = await prepareMessages({
-        conversation: createConversation({ nextInput }),
-      });
-
-      expect(result).toHaveLength(1);
-      expect(result[0].content).toBe(
-        'user-authored task\n\n<system_update>hydrated context</system_update>\n'
-      );
-    });
-
-    it('replays historical HumanMessage content byte-for-byte on later turns', async () => {
-      const round1 = createRound({
-        id: 'round-1',
-        started_at: '2026-09-24T10:00:00.000Z',
-        input: makeRoundInput('round one', [], {
-          model_context: '  <system_update>\nround 1 exact\n</system_update>  ',
-        }),
-      });
-      const round2 = createRound({
-        id: 'round-2',
-        started_at: '2026-09-24T10:01:00.000Z',
-        input: makeRoundInput('round two', [], {
-          model_context: '<system_update>round 2 exact</system_update>',
-        }),
-      });
-
-      const turn2 = await prepareMessages({
-        conversation: createConversation({
-          previousRounds: [round1],
-          nextInput: makeRoundInput('round two', [], {
-            model_context: '<system_update>round 2 exact</system_update>',
-          }),
-        }),
-        conversationTimestamp: round2.started_at,
-      });
-      const turn3 = await prepareMessages({
-        conversation: createConversation({
-          previousRounds: [round1, round2],
-          nextInput: makeRoundInput('round three'),
-        }),
-      });
-
-      expect(turn3[0].content).toBe(turn2[0].content);
-      expect(turn3[2].content).toBe(turn2[2].content);
-      expect(turn3[0].content).toContain(
-        'round one\n\n  <system_update>\nround 1 exact\n</system_update>  \n'
-      );
-    });
-
-    it('keeps the historical HumanMessage byte-identical after an HITL resume', async () => {
-      const paused = createRound({
-        id: 'round-paused',
-        status: ConversationRoundStatus.awaitingPrompt,
-        started_at: '2026-09-24T10:00:00.000Z',
-        input: makeRoundInput('original request', [], {
-          model_context: '<system_update>original context</system_update>',
-        }),
-        response: { message: '' },
-      });
-      const followUp = createRound({
-        id: 'follow-up-execution',
-        input: makeRoundInput('', [], {
-          model_context: '<system_update>different follow-up context</system_update>',
-        }),
-        response: { message: 'completed response' },
-      });
-
-      const resumedCall = await prepareMessages({
-        conversation: createConversation({
-          previousRounds: [paused],
-          nextInput: followUp.input,
-        }),
-      });
-      const resolved = applyResumeResolution(
-        paused as unknown as ConversationRound,
-        followUp as unknown as ConversationRound,
-        new Map()
-      ) as unknown as ProcessedConversationRound;
-      const laterTurn = await prepareMessages({
-        conversation: createConversation({
-          previousRounds: [resolved],
-          nextInput: makeRoundInput('later turn'),
-        }),
-      });
-
-      expect(laterTurn[0].content).toBe(resumedCall[0].content);
-      expect(laterTurn[0].content).toContain(
-        'original request\n\n<system_update>original context</system_update>\n'
-      );
-      expect(laterTurn[0].content).not.toContain('different follow-up context');
-    });
-
-    it('never renders workflow_context into a HumanMessage', async () => {
-      const result = await prepareMessages({
-        conversation: createConversation({
-          previousRounds: [
-            createRound({
-              input: makeRoundInput('historical', [], {
-                workflow_context: { semantic_memory: { recalled_ids: ['secret-history-id'] } },
-              }),
-            }),
-          ],
-          nextInput: makeRoundInput('current', [], {
-            workflow_context: { semantic_memory: { recalled_ids: ['secret-current-id'] } },
-          }),
-        }),
-      });
-
-      expect(JSON.stringify(result.map(({ content }) => content))).not.toContain('secret-');
     });
   });
 

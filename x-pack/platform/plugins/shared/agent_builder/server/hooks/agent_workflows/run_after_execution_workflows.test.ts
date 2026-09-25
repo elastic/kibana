@@ -161,7 +161,13 @@ describe('runAfterExecutionWorkflows', () => {
         semantic_memory: { recalled_ids: ['memory-1', 'memory-2'] },
       };
       const round = makeRound({
-        input: { message: 'my question', workflow_context: workflowContext },
+        input: { message: 'my question' },
+        steps: [
+          {
+            type: ConversationRoundStepType.preExecutionWorkflow,
+            workflow_context: workflowContext,
+          },
+        ],
         response: { message: 'my answer' },
         model_usage: {
           connector_id: 'stale-folded-connector',

@@ -60,14 +60,6 @@ export interface RoundInput {
    * Pre-rendered, immutable prompt context for attachments created/updated in this round
    */
   attachment_context?: string;
-  /**
-   * Pre-rendered, immutable context added by before-agent workflows for model input only.
-   */
-  model_context?: string;
-  /**
-   * Bounded workflow state persisted with the round and never rendered to the model.
-   */
-  workflow_context?: WorkflowContext;
 }
 
 /**
@@ -113,6 +105,7 @@ export enum ConversationRoundStepType {
   updateTodos = 'update_todos',
   askUserQuestion = 'ask_user_question',
   relevantSkills = 'relevant_skills',
+  preExecutionWorkflow = 'pre_execution_workflow',
   subagentRosterUpdated = 'subagent_roster_updated',
 }
 
@@ -330,6 +323,31 @@ export const isRelevantSkillsStep = (step: ConversationRoundStep): step is Relev
   return step.type === ConversationRoundStepType.relevantSkills;
 };
 
+export interface PreExecutionWorkflowStepData {
+  /** Pre-rendered context from before-agent workflows, rendered to the model after the user message. */
+  model_context?: string;
+  /** State forwarded to after-execution workflows. Never rendered to the model. */
+  workflow_context?: WorkflowContext;
+}
+
+export type PreExecutionWorkflowStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.preExecutionWorkflow,
+  PreExecutionWorkflowStepData
+>;
+
+export const createPreExecutionWorkflowStep = (
+  data: PreExecutionWorkflowStepData
+): PreExecutionWorkflowStep => ({
+  type: ConversationRoundStepType.preExecutionWorkflow,
+  ...data,
+});
+
+export const isPreExecutionWorkflowStep = (
+  step: ConversationRoundStep
+): step is PreExecutionWorkflowStep => {
+  return step.type === ConversationRoundStepType.preExecutionWorkflow;
+};
+
 /**
  * Returns the (single) todos step from a list of steps, if present.
  * A round only ever has at most one todos step, which is updated in place.
@@ -359,6 +377,7 @@ export type ConversationRoundStep =
   | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
+  | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep;
 
 /**

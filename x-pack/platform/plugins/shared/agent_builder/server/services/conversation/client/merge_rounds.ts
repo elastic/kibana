@@ -57,17 +57,9 @@ export const mergeRounds = (
 
 const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => {
   const mergedRefs = mergeAttachmentRefs(previous.attachment_refs, next.attachment_refs);
-  // A resume is another execution of the same round. Its before-agent hooks may produce fresh
-  // context, but the historical HumanMessage must remain byte-identical to what the model saw
-  // before it paused. Never let follow-up execution context rewrite that round's prompt prefix.
-  const {
-    model_context: _nextModelContext,
-    workflow_context: _nextWorkflowContext,
-    ...nextInput
-  } = next;
   return {
     ...previous,
-    ...nextInput,
+    ...next,
     message: next.message || previous.message,
     ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
   };

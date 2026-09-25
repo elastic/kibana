@@ -14,6 +14,7 @@ import type {
   ChatAgentEvent,
   ConversationRoundStep,
   MetadataFieldValue,
+  PreExecutionWorkflowStepData,
   RoundInput,
   SubagentEntry,
   TodosStep,
@@ -227,6 +228,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversationId: conversation?.id,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+  const preExecutionWorkflow = beforeHookResult.preExecutionWorkflow;
 
   const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
     relevantSkillsEnabled && !pendingTurn
@@ -420,6 +422,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       eventEmitter,
       tracker,
       compactionResult,
+      preExecutionWorkflow,
       relevantSkillsSelection,
       initialTodos,
     }),
@@ -459,18 +462,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     finalize(() => manualEvents$.complete())
   );
 
-  // Persist workflow-provided context separately from the user-authored message so later model
-  // turns can replay model_context exactly while workflow_context remains model-invisible.
   const processedInput: RoundInput = {
     message: processedConversation.nextInput.message,
     attachments: [], // legacy attachments are always stripped in `prepare_conversation` and replaced with refs
     attachment_refs: processedConversation.nextInput.attachment_refs,
-    ...(processedConversation.nextInput.model_context !== undefined
-      ? { model_context: processedConversation.nextInput.model_context }
-      : {}),
-    ...(processedConversation.nextInput.workflow_context !== undefined
-      ? { workflow_context: processedConversation.nextInput.workflow_context }
-      : {}),
   };
 
   manualEvents$.next({
@@ -605,15 +600,17 @@ const getConversationState = ({
 };
 
 /**
- * The steps a fresh run starts with: compaction / relevant-skills bookkeeping, then the todos
- * carried over from the previous round (the trailing singleton the first `todo_write` replaces).
+ * The steps a fresh run starts with: compaction / workflow / relevant-skills bookkeeping, then
+ * the todos carried over from the previous round (the trailing singleton `todo_write` replaces).
  */
 const buildPreExecutionSteps = ({
   compactionResult,
+  preExecutionWorkflow,
   relevantSkillsSelection,
   initialTodos,
 }: {
   compactionResult?: CompactedConversation;
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
   relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): ConversationRoundStep[] => {
@@ -623,7 +620,11 @@ const buildPreExecutionSteps = ({
       ? [{ type: ConversationRoundStepType.updateTodos, todos: carried, carried_over: true }]
       : [];
   return [
-    ...createPreExecutionSteps({ compactionResult, relevantSkillsSelection }),
+    ...createPreExecutionSteps({
+      compactionResult,
+      preExecutionWorkflow,
+      relevantSkillsSelection,
+    }),
     ...carriedStep,
   ];
 };
@@ -636,6 +637,7 @@ const createInitializerCommand = ({
   eventEmitter,
   tracker,
   compactionResult,
+  preExecutionWorkflow,
   relevantSkillsSelection,
   initialTodos,
 }: {
@@ -646,12 +648,14 @@ const createInitializerCommand = ({
   eventEmitter: AgentEventEmitterFn;
   tracker: RunTracker;
   compactionResult?: CompactedConversation;
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
   relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): Command => {
   if (!pendingTurn) {
     const preExecutionSteps = buildPreExecutionSteps({
       compactionResult,
+      preExecutionWorkflow,
       relevantSkillsSelection,
       initialTodos,
     });

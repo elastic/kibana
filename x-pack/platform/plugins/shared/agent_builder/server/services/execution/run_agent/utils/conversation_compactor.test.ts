@@ -328,10 +328,11 @@ describe('compactConversation', () => {
       createMockRound('r5', 200),
     ];
     const conversation = createMockConversation(rounds);
-    rounds[0].input.model_context = '<system_update>historical workflow context</system_update>';
+    rounds[0].steps.push({
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: '<system_update>historical workflow context</system_update>',
+    });
     conversation.timeline = timelineFromRounds(rounds);
-    conversation.nextInput.model_context =
-      '<system_update>current workflow context</system_update>';
 
     const budget: ContextBudget = {
       totalBudget: 500,
@@ -356,9 +357,6 @@ describe('compactConversation', () => {
     const structuredModel = chatModel.withStructuredOutput.mock.results[0].value;
     expect(JSON.stringify(structuredModel.invoke.mock.calls[0][0])).not.toContain(
       'historical workflow context'
-    );
-    expect(JSON.stringify(structuredModel.invoke.mock.calls[0][0])).not.toContain(
-      'current workflow context'
     );
     expect(JSON.stringify(result.processedConversation.timeline)).not.toContain(
       'historical workflow context'
@@ -1045,7 +1043,10 @@ describe('compactConversation', () => {
     it('uses context-stripped counts to group summarizer chunks while full counts trigger compaction', async () => {
       const rounds = ['A', 'B', 'C', 'D', 'E'].map((id, index) => {
         const round = completed(id, index);
-        round.input.model_context = `MODEL-CONTEXT-${id}-${'z'.repeat(40_000)}`;
+        round.steps.push({
+          type: ConversationRoundStepType.preExecutionWorkflow,
+          model_context: `MODEL-CONTEXT-${id}-${'z'.repeat(40_000)}`,
+        });
         return round;
       });
 

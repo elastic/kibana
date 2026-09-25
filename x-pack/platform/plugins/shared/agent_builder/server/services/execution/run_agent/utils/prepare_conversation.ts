@@ -223,12 +223,6 @@ const prepareRoundInput = ({
     // for legacy compatibility
     attachments: [],
     ...(author !== undefined ? { author } : {}),
-    ...('model_context' in input && input.model_context !== undefined
-      ? { model_context: input.model_context }
-      : {}),
-    ...('workflow_context' in input && input.workflow_context !== undefined
-      ? { workflow_context: input.workflow_context }
-      : {}),
     ...inputAttachments,
   };
 };

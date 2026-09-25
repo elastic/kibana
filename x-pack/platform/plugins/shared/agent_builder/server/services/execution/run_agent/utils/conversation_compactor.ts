@@ -13,7 +13,12 @@ import type {
   CompactionStructuredData,
   CompactionToolCallSummary,
 } from '@kbn/agent-builder-common';
-import { ChatEventType, TimelineEventType, isToolCallStep } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  TimelineEventType,
+  isPreExecutionWorkflowStep,
+  isToolCallStep,
+} from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
@@ -83,13 +88,13 @@ export interface CompactedConversation {
 
 type Round = TimelineRound<ProcessedTimelineEvent>;
 
-const withoutModelContext = (event: ProcessedTimelineEvent): ProcessedTimelineEvent => {
-  if (event.type !== TimelineEventType.userMessage) {
-    return event;
-  }
-  const { model_context: _modelContext, ...data } = event.data;
-  return { ...event, data };
-};
+const withoutPreExecutionWorkflowSteps = (
+  events: ProcessedTimelineEvent[]
+): ProcessedTimelineEvent[] =>
+  events.filter(
+    (event) =>
+      event.type !== TimelineEventType.executionStep || !isPreExecutionWorkflowStep(event.data.step)
+  );
 
 // ---------------------------------------------------------------------------
 // Programmatic extraction helpers
@@ -370,7 +375,7 @@ const summarizeOlderRounds = async ({
 
   try {
     const summarizerTokenCounts = await estimatePerRoundTokens(
-      rawRounds.flatMap((round) => round.events).map(withoutModelContext),
+      withoutPreExecutionWorkflowSteps(rawRounds.flatMap((round) => round.events)),
       resultTransformer
     );
     const summarizerTokensByRoundId = new Map(
@@ -449,8 +454,6 @@ const generateLlmSummary = async ({
   const structuredModel = chatModel.withStructuredOutput(llmCompactionSchema, {
     name: 'compact_conversation',
   });
-  const { model_context: _modelContext, ...nextInputWithoutModelContext } = conversation.nextInput;
-
   const toolLines = programmatic.tool_calls_summary
     .map((tc) => `- ${tc.tool_id}(${tc.params_summary})`)
     .join('\n');
@@ -468,10 +471,9 @@ const generateLlmSummary = async ({
     const history = await prepareMessages({
       conversation: {
         ...conversation,
-        timeline: chunk.flatMap((round) => round.events).map(withoutModelContext),
-        // Workflow model context is replayed verbatim with un-compacted rounds, but must not be
+        // Workflow model context is replayed verbatim with uncompacted rounds, but must not be
         // folded into the persisted summary after those original messages are removed.
-        nextInput: nextInputWithoutModelContext,
+        timeline: withoutPreExecutionWorkflowSteps(chunk.flatMap((round) => round.events)),
       },
       compactionSummary: prior,
       resultTransformer,

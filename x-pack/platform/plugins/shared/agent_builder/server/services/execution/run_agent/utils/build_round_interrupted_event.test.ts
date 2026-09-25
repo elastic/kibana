@@ -11,6 +11,7 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   EventActorType,
+  type PreExecutionWorkflowStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
@@ -94,6 +95,20 @@ describe('buildRoundInterruptedEvent', () => {
     });
     expect(event.data).not.toHaveProperty('resumed');
     expect(event.data).not.toHaveProperty('attachment_events');
+  });
+
+  it('persists a seeded pre-execution workflow step when the graph fails before streaming', () => {
+    const tracker = new RunTracker({ graphName: 'g' });
+    const workflowStep: PreExecutionWorkflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: '<system_update>workflow context</system_update>',
+      workflow_context: { semantic_memory: { recalled_ids: ['memory-1'] } },
+    };
+    tracker.seed({ steps: [workflowStep] });
+
+    const event = base({ tracker });
+
+    expect(event.data.steps).toEqual([workflowStep]);
   });
 
   it('merges refs accessed during the run into the input and renders the attachment context', () => {

@@ -8,6 +8,7 @@
 import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
 import {
   ConversationRoundStatus,
+  isPreExecutionWorkflowStep,
   isToolCallStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
@@ -62,6 +63,7 @@ export const runAfterExecutionWorkflows = async ({
   }));
 
   const connectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
+  const workflowContext = round.steps.find(isPreExecutionWorkflowStep)?.workflow_context;
 
   const workflowParams: AfterExecutionWorkflowParams = {
     prompt: round.input.message ?? '',
@@ -70,9 +72,7 @@ export const runAfterExecutionWorkflows = async ({
     ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
     ...(context.agentId ? { agent_id: context.agentId } : {}),
     ...(connectorId ? { connector_id: connectorId } : {}),
-    ...(round.input.workflow_context !== undefined
-      ? { workflow_context: round.input.workflow_context }
-      : {}),
+    ...(workflowContext !== undefined ? { workflow_context: workflowContext } : {}),
     tool_calls: toolCalls,
   };
 

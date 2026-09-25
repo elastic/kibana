@@ -598,32 +598,6 @@ describe('prepareConversation', () => {
       );
     });
 
-    it("preserves a previous round's model_context and workflow_context verbatim", async () => {
-      const modelContext = '  <system_update>\nexact bytes\n</system_update>  ';
-      const workflowContext = {
-        semantic_memory: { recalled_ids: ['memory-1', ' memory-2 '] },
-      };
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: {
-            message: 'Previous message',
-            model_context: modelContext,
-            workflow_context: workflowContext,
-          },
-        }),
-      ];
-
-      const result = await prepareConversation({
-        previousRounds,
-        nextInput: { message: 'New message' },
-        context: mockContext,
-      });
-
-      expect(result.previousRounds[0].input.model_context).toBe(modelContext);
-      expect(result.previousRounds[0].input.workflow_context).toEqual(workflowContext);
-    });
-
     it('should process multiple previous rounds', async () => {
       mockAttachmentsService.getTypeDefinition.mockReturnValue(
         attachmentDefinition({ id: 'text', repr: textRepresentation('unused') })
