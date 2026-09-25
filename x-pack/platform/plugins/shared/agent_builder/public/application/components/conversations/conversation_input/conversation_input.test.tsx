@@ -306,6 +306,28 @@ describe('ConversationInput', () => {
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
 
+    it('does not carry the choice over to another shared conversation', () => {
+      const { rerender } = renderInput(<ConversationInput />);
+
+      selectTalkToUsers();
+      mockedUseConversationId.mockReturnValue('conv-2');
+      rerender(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('always');
+    });
+
+    it('does not restore the choice once the conversation is shared again', () => {
+      const { rerender } = renderInput(<ConversationInput />);
+
+      selectTalkToUsers();
+      mockedUseIsSharedConversation.mockReturnValue(false);
+      rerender(<ConversationInput />);
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      rerender(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('always');
+    });
+
     it('sends without running the agent when talking to users and clears the editor on success', async () => {
       const onSubmit = jest.fn();
 

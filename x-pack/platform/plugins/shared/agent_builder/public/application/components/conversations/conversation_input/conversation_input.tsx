@@ -10,7 +10,7 @@ import { EuiFlexItem, EuiIcon, EuiText, euiCanAnimate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CONVERSATION_INPUT_SHELL_RADIUS,
   ConversationInputShell,
@@ -119,6 +119,39 @@ const InputContainer: React.FC<
   );
 };
 
+/**
+ * The input stays mounted across conversations, so a trigger mode choice only applies to the
+ * conversation it was made in and is dropped once the selector stops being offered.
+ */
+const useTriggerMode = () => {
+  const conversationId = useConversationId();
+  const isSharedConversation = useIsSharedConversation();
+  const isExperimentalEnabled = useExperimentalFeatures();
+
+  const [choice, setChoice] = useState<{
+    conversationId?: string;
+    triggerMode: ChatTriggerMode;
+  }>();
+
+  const isSelectable = isSharedConversation && isExperimentalEnabled;
+
+  if (!isSelectable && choice) {
+    setChoice(undefined);
+  }
+
+  const setTriggerMode = useCallback(
+    (triggerMode: ChatTriggerMode) => setChoice({ conversationId, triggerMode }),
+    [conversationId]
+  );
+
+  const triggerMode =
+    isSelectable && choice && choice.conversationId === conversationId
+      ? choice.triggerMode
+      : ChatTriggerMode.Always;
+
+  return { triggerMode, setTriggerMode, isSelectable };
+};
+
 interface ConversationInputProps {
   onSubmit?: () => void;
   onEditorFocus?: () => void;
@@ -186,9 +219,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
-  const isSharedConversation = useIsSharedConversation();
-  const isExperimentalEnabled = useExperimentalFeatures();
+  const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
@@ -234,9 +265,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const isNewConversation = !conversationId;
   const { title: conversationTitle } = useConversationTitle();
-
-  const isTriggerModeSelectable = isSharedConversation && isExperimentalEnabled;
-  const effectiveTriggerMode = isTriggerModeSelectable ? triggerMode : ChatTriggerMode.Always;
 
   const messageEditorAriaLabel = getMessageEditorAriaLabel({
     isNewConversation,
@@ -292,7 +320,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
-    if (effectiveTriggerMode === ChatTriggerMode.Never) {
+    if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
           messageEditorController.clear();
@@ -320,7 +348,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     <InputContainer
       isDisabled={isInputDisabled}
       isCollapsed={shouldCollapseInput}
-      triggerMode={effectiveTriggerMode}
+      triggerMode={triggerMode}
     >
       {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
@@ -353,7 +381,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           isSubmitDisabled={isSubmitDisabled}
           isSubmitting={isCreatingConversation || isSendingUserMessage}
           showTriggerModeSelector={isTriggerModeSelectable}
-          triggerMode={effectiveTriggerMode}
+          triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
         />
       )}
