@@ -25,11 +25,6 @@ export const llmCompactionSchema = z.object({
     .describe(
       "A clear statement of what the user is trying to achieve. Start with a verb, e.g., 'Investigate slow query performance on the orders index'."
     ),
-  key_topics: z
-    .array(z.string())
-    .describe(
-      "Primary subjects discussed, e.g., 'Elasticsearch indexing', 'API authentication', 'dashboard configuration'."
-    ),
   entities: z
     .array(
       z.object({
@@ -43,6 +38,11 @@ export const llmCompactionSchema = z.object({
     )
     .describe(
       "Structured entities referenced in the conversation. Extract only supported entity types. Currently the only supported type is 'index' (Elasticsearch index names, data views, and index patterns). Deduplicate entries."
+    ),
+  key_topics: z
+    .array(z.string())
+    .describe(
+      "Primary subjects discussed, e.g., 'Elasticsearch indexing', 'API authentication', 'dashboard configuration'."
     ),
   outcomes_and_decisions: z
     .array(z.string())
