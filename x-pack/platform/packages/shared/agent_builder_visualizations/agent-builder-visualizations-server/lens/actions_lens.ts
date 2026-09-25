@@ -5,14 +5,8 @@
  * 2.0.
  */
 
+import type { ResolveEsqlAction } from '../shared/run_resolve_esql_node';
 import type { VisualizationConfig } from './types';
-
-export interface GenerateEsqlAction {
-  type: 'generate_esql';
-  success: boolean;
-  query?: string;
-  error?: string;
-}
 
 export interface GenerateConfigAction {
   type: 'generate_config';
@@ -32,10 +26,10 @@ export interface ValidateConfigAction {
   error?: string;
 }
 
-export type Action = GenerateEsqlAction | GenerateConfigAction | ValidateConfigAction;
+export type Action = ResolveEsqlAction | GenerateConfigAction | ValidateConfigAction;
 
-export function isGenerateEsqlAction(action: Action): action is GenerateEsqlAction {
-  return action.type === 'generate_esql';
+export function isResolveEsqlAction(action: Action): action is ResolveEsqlAction {
+  return action.type === 'resolve_esql';
 }
 
 export function isGenerateConfigAction(action: Action): action is GenerateConfigAction {
@@ -47,7 +41,7 @@ export function isValidateConfigAction(action: Action): action is ValidateConfig
 }
 
 // Node name constants
-export const GENERATE_ESQL_NODE = 'generate_esql_query';
+export const RESOLVE_ESQL_NODE = 'resolve_esql';
 export const GENERATE_CONFIG_NODE = 'generate_config';
 export const VALIDATE_CONFIG_NODE = 'validate_config';
 

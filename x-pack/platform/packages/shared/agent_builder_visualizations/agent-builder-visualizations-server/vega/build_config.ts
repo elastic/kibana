@@ -9,8 +9,6 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
-import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVegaGraph } from './graph';
 import { extractEsqlFromSpec } from './recover_esql';
 
@@ -22,7 +20,8 @@ interface BuildVegaConfigParams {
   existingSpec?: string;
   /**
    * Keep the ES|QL query recovered from `existingSpec` instead of regenerating
-   * one. The edit then only re-authors the spec around it.
+   * one. The edit then only re-authors the spec around it. Ignored when `esql`
+   * is provided, since a provided query always takes precedence.
    */
   preserveESQL?: boolean;
   /** Optional chart-type hint for the intended visual form (Vega authors free-form). */
@@ -63,38 +62,29 @@ export const buildVegaConfig = async ({
   events,
   esClient,
 }: BuildVegaConfigParams): Promise<BuildVegaConfigResult> => {
-  // If the caller provides ES|QL, keep it only when validation says it is safe.
-  // If validation cannot run, keep it and let the graph handle it.
-  let providedEsql = esql;
-  if (providedEsql) {
-    let validationError: string | undefined;
-    try {
-      validationError = await validateEsqlQuery(
-        providedEsql,
-        buildServerESQLCallbacks({ client: esClient.asCurrentUser })
-      );
-    } catch {
-      // Couldn't validate, keep it.
-    }
-    if (validationError) {
-      logger.warn(
-        `Provided ES|QL failed validation; regenerating from the natural-language query. Error: ${validationError}`
-      );
-      providedEsql = undefined;
-    }
+  // A caller-provided ES|QL query is handed to the graph as-is: its resolve
+  // node executes the query (which subsumes syntax validation) and regenerates
+  // a corrected one when execution fails. It therefore supersedes preserving
+  // the existing query, which is only ever kept verbatim when it is the one
+  // recovered from the spec being edited.
+  if (preserveESQL && esql) {
+    logger.warn(
+      'Both an ES|QL query and preserveESQL were given; the provided query takes precedence and the existing one is not preserved.'
+    );
   }
+  const keepsExistingEsql = preserveESQL && !esql;
 
   // On edit, recover the ES|QL embedded in the existing spec and pass it to the
   // graph as context (not as the query to reuse). The graph modifies it when the
   // instruction needs different data (e.g. a new breakdown) and keeps it for
-  // visual-only edits, so query-changing edits are not blocked. A trusted
-  // caller-provided query (above) still takes precedence. Recovery also survives
+  // visual-only edits, so query-changing edits are not blocked. A
+  // caller-provided query still takes precedence. Recovery also survives
   // save/import round-trips, where the stored spec is the source of truth.
   const existingEsql = existingSpec ? extractEsqlFromSpec(existingSpec) : undefined;
   if (existingEsql) {
     logger.debug('Recovered ES|QL from the existing Vega spec to seed this edit');
   }
-  if (preserveESQL && !existingEsql) {
+  if (keepsExistingEsql && !existingEsql) {
     throw new Error(
       'Preserving the ES|QL query requires an existing Vega spec with a recoverable ES|QL query.'
     );
@@ -108,9 +98,10 @@ export const buildVegaConfig = async ({
     existingSpec,
     existingEsql,
     chartType,
-    // Preserving ES|QL reuses the recovered query as the trusted query,
-    // so the graph skips regeneration and only re-authors the spec around it.
-    esqlQuery: providedEsql || (preserveESQL ? existingEsql : '') || '',
+    preserveESQL: keepsExistingEsql,
+    // Preserving ES|QL reuses the recovered query as the trusted query: the
+    // graph only probes it for columns and re-authors the spec around it.
+    esqlQuery: esql || (keepsExistingEsql ? existingEsql : '') || '',
     currentAttempt: 0,
     actions: [],
     spec: null,

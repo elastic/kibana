@@ -14,7 +14,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
-import type { EsqlResponse } from '../utils/esql';
+import { DEFAULT_ESQL_TIME_RANGE, type EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph, requestDocumentationSchema } from './graph';
 import type { RequestDocumentationAction } from './actions';
 import { indexExplorer } from '../index_explorer';
@@ -113,7 +113,7 @@ export interface GenerateEsqlOptions {
   /**
    * Time range used to supply named parameters (?_tstart, ?_tend)
    * when executing the generated query for validation.
-   * Defaults to last 24 hours if not provided.
+   * Defaults to {@link DEFAULT_ESQL_TIME_RANGE} when omitted.
    */
   timeRange?: TimeRange;
   /**
@@ -158,7 +158,7 @@ export const generateEsql = async ({
   const model = modelProvider
     ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
     : inputModel!;
-  const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
+  const timeRange = inputTimeRange ?? DEFAULT_ESQL_TIME_RANGE;
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });

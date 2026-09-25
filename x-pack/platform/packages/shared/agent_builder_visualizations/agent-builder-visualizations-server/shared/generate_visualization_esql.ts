@@ -44,7 +44,8 @@ interface GenerateVisualizationEsqlParams {
   /**
    * Time range bound to `?_tstart`/`?_tend` when the query is executed for
    * validation. The live range is applied by Kibana at render time, so this
-   * only affects the validation run. Defaults to the last 24 hours.
+   * only affects the validation run. When omitted, generateEsql uses
+   * `DEFAULT_ESQL_TIME_RANGE`.
    */
   timeRange?: TimeRange;
   /**
@@ -52,6 +53,11 @@ interface GenerateVisualizationEsqlParams {
    * Vega's stricter time-range-filtering requirements.
    */
   extraInstructions?: string;
+  /**
+   * Extra generation context, e.g. a provided query that failed the schema
+   * probe. Forwarded to generateEsql so the model can correct it.
+   */
+  additionalContext?: string;
 }
 
 /**
@@ -99,8 +105,9 @@ const findTargetError = (query: string | undefined, index: string | undefined) =
  * Resolve a visualization-ready ES|QL query, shared by the Lens and Vega
  * engines so both generate queries the same way.
  *
- * `generateEsql` validates and executes candidate queries in a bounded retry
- * loop, so a returned `query` is one that actually runs. A query is treated as
+ * `generateEsql` validates with `execute: 'schema'` (probe LIMIT 1, keep
+ * all-null columns) in a bounded retry loop, so a returned `query` is one that
+ * actually runs and `columns` come from that probe. A query is treated as
  * failed when none was produced or the loop still reported an execution error,
  * ensuring an unrunnable query never reaches config/spec authoring. On edits,
  * `existingQueries` seed the request so a query-changing edit is not blocked.
@@ -120,6 +127,7 @@ export const generateVisualizationEsql = async ({
   esClient,
   timeRange,
   extraInstructions,
+  additionalContext,
 }: GenerateVisualizationEsqlParams): Promise<GeneratedVisualizationEsql> => {
   const instructions = buildEsqlAdditionalInstructions(index);
   const requestParams = {
@@ -133,6 +141,7 @@ export const generateVisualizationEsql = async ({
       : instructions,
     execute: 'schema' as const,
     ...(timeRange ? { timeRange } : {}),
+    ...(additionalContext ? { additionalContext } : {}),
   };
 
   const response = await generateEsql({ ...requestParams, modelProvider, maxRetries: 2 });
@@ -153,7 +162,9 @@ export const generateVisualizationEsql = async ({
     ...requestParams,
     model: defaultModel,
     maxRetries: 1,
-    additionalContext: buildFallbackContext(response.query, error),
+    additionalContext: [additionalContext, buildFallbackContext(response.query, error)]
+      .filter(Boolean)
+      .join('\n'),
   });
   const fallbackError = fallbackResponse.error ?? findTargetError(fallbackResponse.query, index);
 

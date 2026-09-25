@@ -9,8 +9,6 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
-import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVisualizationGraph, getExistingEsqlQueries } from './graph_lens';
 import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
@@ -39,7 +37,8 @@ interface BuildLensConfigParams {
   parsedExistingConfig?: VisualizationConfig | null;
   /**
    * Keep the existing ES|QL query and column bindings of
-   * `parsedExistingConfig` instead of regenerating the query.
+   * `parsedExistingConfig` instead of regenerating the query. Ignored when
+   * `esql` is provided, since a provided query always takes precedence.
    */
   preserveESQL?: boolean;
   /**
@@ -84,32 +83,22 @@ export const buildLensConfig = async ({
   const schema = getSchemaForChartType(selectedChartType);
   const graph = await createVisualizationGraph(modelProvider, logger, events, esClient);
 
-  // If the user provides ES|QL, use it only when validation says it is safe.
-  // If validation cannot run, keep the query and let the next step handle it.
-  let providedEsql = esql;
-  if (providedEsql) {
-    let validationError: string | undefined;
-    try {
-      validationError = await validateEsqlQuery(
-        providedEsql,
-        buildServerESQLCallbacks({ client: esClient.asCurrentUser })
-      );
-    } catch {
-      // Couldn't validate, keep it.
-    }
-    if (validationError) {
-      logger.warn(
-        `Provided ES|QL failed validation; regenerating from the natural-language query. Error: ${validationError}`
-      );
-      providedEsql = undefined;
-    }
+  // A provided ES|QL query is handed to the graph as-is: its resolve node
+  // executes the query (which subsumes syntax validation) and regenerates a
+  // corrected one when execution fails. It therefore supersedes preserving
+  // the existing query, which is only ever kept verbatim when it is the one
+  // recovered from the configuration being edited.
+  if (preserveESQL && esql) {
+    logger.warn(
+      'Both an ES|QL query and preserveESQL were given; the provided query takes precedence and the existing one is not preserved.'
+    );
   }
+  const keepsExistingEsql = preserveESQL && !esql;
 
-  // Preserving ES|QL reuses the existing query, which also routes the
-  // graph straight to config generation. The graph re-pins every layer's own
-  // data_source, so the first query only seeds the prompt.
-  const [existingEsql] = preserveESQL ? getExistingEsqlQueries(parsedExistingConfig) : [];
-  if (preserveESQL && !existingEsql) {
+  // Preserving ES|QL reuses the existing query. The graph re-pins every
+  // layer's own data_source, so the first query only seeds the prompt.
+  const [existingEsql] = keepsExistingEsql ? getExistingEsqlQueries(parsedExistingConfig) : [];
+  if (keepsExistingEsql && !existingEsql) {
     throw new Error(
       'Preserving the ES|QL query requires an existing ES|QL-backed Lens configuration.'
     );
@@ -122,9 +111,9 @@ export const buildLensConfig = async ({
     schema,
     existingConfig,
     parsedExistingConfig,
-    preserveESQL,
+    preserveESQL: keepsExistingEsql,
     applyChartRules,
-    esqlQuery: providedEsql || existingEsql || '',
+    esqlQuery: esql || existingEsql || '',
     currentAttempt: 0,
     actions: [],
     validatedConfig: null,

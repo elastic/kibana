@@ -12,6 +12,7 @@ import type { ModelProvider, ToolEventEmitter, ToolHandlerResult } from '@kbn/ag
 import type { TimeRange } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import type { TopSnippetsConfig } from '../steps/extract_snippets';
+import { DEFAULT_ESQL_TIME_RANGE } from '../utils/esql';
 import { createSearchToolGraph } from './graph';
 
 export const runSearchTool = async ({
@@ -62,7 +63,7 @@ export const runSearchTool = async ({
       },
     },
     async () => {
-      const resolvedTimeRange = timeRange ?? { from: 'now-24h', to: 'now' };
+      const resolvedTimeRange = timeRange ?? DEFAULT_ESQL_TIME_RANGE;
       const outState = await toolGraph.invoke(
         {
           nlQuery,

@@ -6,7 +6,9 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { formatColumnsBlock } from '../shared/format_columns';
 import { getChartTypeConfigPromptContent } from './chart_type_guidance';
 import { getColorConfigPromptContent } from './color_palettes';
 import type { VisualizationConfig } from './types';
@@ -28,6 +30,7 @@ const getEditRulesPromptContent = (applyChartRules: boolean): string =>
 export const createGenerateConfigPrompt = ({
   nlQuery,
   esqlQuery,
+  columns,
   chartType,
   schema,
   existingConfig,
@@ -38,6 +41,7 @@ export const createGenerateConfigPrompt = ({
 }: {
   nlQuery: string;
   esqlQuery: string;
+  columns?: EsqlEsqlColumnInfo[];
   chartType: SupportedChartType;
   schema: object;
   existingConfig?: string;
@@ -61,7 +65,7 @@ ${JSON.stringify(schema)}
 2. ${
       keepsExistingQueries
         ? 'This is an appearance-only edit. Each layer keeps its existing data_source, column bindings, order, and displayed measures from the existing configuration.'
-        : 'Bind only result columns from the resolved ES|QL query supplied with the request.'
+        : formatColumnsBlock(columns, esqlQuery)
     }
 3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and bind only columns produced by the layer's query.
 4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.`,

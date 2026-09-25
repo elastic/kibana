@@ -11,6 +11,8 @@ export {
   executeEsql,
   interpolateEsqlQuery,
   validateEsqlQuery,
+  buildTimeRangeParams,
+  DEFAULT_ESQL_TIME_RANGE,
 } from './esql';
 export { listDatasets, getDatasetFields, type DatasetInfo } from './datasets';
 export { FROZEN_TIER, excludeFrozenTierQuery, applyFrozenTierExclusion } from './data_tiers';
