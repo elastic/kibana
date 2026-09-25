@@ -1665,7 +1665,7 @@ describe('Attack Discovery worker chain', () => {
 
   describe('the Investigation journal helper', () => {
     const append = stepIn(journalNoteSteps, 'append_note');
-    const request = append?.with?.request as
+    const request = append?.with as
       | { body?: { trigger_mode?: string }; path?: string }
       | undefined;
 

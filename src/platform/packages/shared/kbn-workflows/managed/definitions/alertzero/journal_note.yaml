@@ -27,19 +27,30 @@ triggers:
       additionalProperties: false
 steps:
   # kibana.request is sent verbatim, so the path is prefixed with the executing space.
+  # Flat with: (method/path/headers/body), matching every other kibana.request step
+  # in this package (hunt.yaml, hunt_continuous_threat_hunt.yaml): the nested
+  # `with: { request: {...} } }` shape this step previously used returns
+  # `valid: false` from both POST /api/workflows/test and POST /api/workflows/workflow
+  # (confirmed live, 2026-09-25) -- both resolve the strict per-connector step
+  # schema (getWorkflowZodSchemaFromConnectors). Confirmed harmless in production:
+  # managed-workflow installation builds its schema with `lightweight: true`
+  # (generateLightweightYamlSchema), which types every step as z.unknown() and never
+  # validates step shape at all, so this file's nested shape has always executed
+  # fine there; the runtime request builder (kibana_request_builder.ts) also accepts
+  # it directly. Flattened anyway so it validates against the strict schema too
+  # (testable via the ad-hoc endpoints) and matches this package's convention.
   - name: append_note
     type: kibana.request
     with:
-      request:
-        method: POST
-        path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-        headers:
-          kbn-xsrf: "true"
-          elastic-api-version: "2023-10-31"
-          Content-Type: application/json
-        body:
-          conversation_id: "{{ inputs.conversation_id }}"
-          input: "{{ inputs.message }}"
-          trigger_mode: never
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ inputs.conversation_id }}"
+        input: "{{ inputs.message }}"
+        trigger_mode: never
     on-failure:
       continue: true
