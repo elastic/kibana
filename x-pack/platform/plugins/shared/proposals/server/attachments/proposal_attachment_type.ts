@@ -27,6 +27,14 @@ export interface ProposalAttachmentTypeDeps {
  * live rather than snapshotted when the attachment was written.
  */
 const describeOutcome = (proposal: ProposalWithMetadata, isExpired: boolean): string => {
+  if (proposal.supersededBy !== undefined || proposal.status === 'superseded') {
+    return (
+      'REPLACED: this proposal is historical and cannot be acted on.' +
+      (proposal.supersededBy !== undefined
+        ? ` Replacement proposal ID: ${proposal.supersededBy}. Consult that proposal's attachment for its current state; it may also have been replaced or settled.`
+        : '')
+    );
+  }
   if (isExpired) {
     return '';
   }
@@ -140,5 +148,6 @@ export const createProposalAttachmentType = ({
     '- Whenever you mention or summarise a proposal in your response, render it inline with ' +
     '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id) so ' +
     'the analyst can act on it directly in the chat.\n' +
+    '- Replaced proposals are historical and non-actionable. Consult the replacement attachment for its current state before describing any next steps.\n' +
     '- If the proposal is expired or already decided, say so in your response but still render the card.',
 });

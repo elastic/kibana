@@ -686,7 +686,8 @@ describe('proposals.cloneProposal step', () => {
 
     expect(clone).toHaveBeenCalledWith(
       { id: 'proposal-1', executionError: 'action exploded' },
-      SPACE_ID
+      SPACE_ID,
+      FAKE_REQUEST
     );
     expect(result.output).toEqual({ proposalId: 'proposal-2' });
   });
