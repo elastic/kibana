@@ -18,6 +18,7 @@ import {
   assertSemanticSearchAvailable,
   auditCorpus,
   logRunManifest,
+  refreshCorpus,
   seedCorpusIfNeeded,
 } from '../../src/corpus_audit';
 import { logArmComparison } from '../../src/arm_comparison';
@@ -57,7 +58,9 @@ evaluate.describe(
 
     evaluate.beforeAll(async ({ esClient, fetch, log, connector }) => {
       // Seeding writes up to the moment it finishes, so the window is resolved after it.
-      seedCorpusIfNeeded(await auditCorpus({ esClient, corpus, log }), corpus, log);
+      if (seedCorpusIfNeeded(await auditCorpus({ esClient, corpus, log }), corpus, log)) {
+        await refreshCorpus({ esClient, corpus });
+      }
 
       activeCorpus = resolveCorpusWindow(corpus);
 

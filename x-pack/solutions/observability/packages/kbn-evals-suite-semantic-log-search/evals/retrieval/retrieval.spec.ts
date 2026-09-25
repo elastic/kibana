@@ -13,6 +13,7 @@ import {
   auditCorpus,
   logRunManifest,
   readRerankAllocations,
+  refreshCorpus,
   seedCorpusIfNeeded,
 } from '../../src/corpus_audit';
 import { logArmComparison } from '../../src/arm_comparison';
@@ -81,6 +82,7 @@ evaluate.describe(
       // window has to be resolved after it rather than before.
       if (seedCorpusIfNeeded(await auditCorpus({ esClient, corpus, log }), corpus, log)) {
         log.debug('Corpus was re-seeded; resolving the window against the new data');
+        await refreshCorpus({ esClient, corpus });
       }
 
       activeCorpus = resolveCorpusWindow(corpus);

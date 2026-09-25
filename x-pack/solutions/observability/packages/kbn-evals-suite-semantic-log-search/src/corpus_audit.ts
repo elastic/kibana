@@ -183,6 +183,24 @@ export const seedCorpusIfNeeded = (
 };
 
 /**
+ * Makes freshly seeded documents visible to search before the corpus is audited again.
+ *
+ * Synthtrace returns once Elasticsearch has accepted its writes, not once they are searchable, so an
+ * audit running straight after a seed can count zero documents in an index that was just written and
+ * fail the run with "No documents found". Whether it does is a timing race, which is worse than a
+ * consistent failure.
+ */
+export const refreshCorpus = async ({
+  esClient,
+  corpus,
+}: {
+  esClient: Client;
+  corpus: CorpusProfile;
+}): Promise<void> => {
+  await esClient.indices.refresh({ index: corpus.target, ignore_unavailable: true });
+};
+
+/**
  * Asserts that semantic log search can serve requests on this cluster, by asking it to.
  *
  * Probing the tool rather than checking for a specific inference endpoint keeps this valid for
