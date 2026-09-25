@@ -42,12 +42,18 @@ export interface FakeAlertZeroBackend {
    * one per call in order. Throws if the queue runs dry, so a suite that forgot
    * to queue a verdict fails loudly rather than silently degrading to
    * `inconclusive` and passing for the wrong reason.
+   *
+   * Shape matches the merged `attack_discovery_fp_tp_analysis.yaml` `analyze`
+   * step's `structured_output` schema: `verdict`, `summary_markdown`, `checks`,
+   * and `claims` are required; `rationale_markdown` is the only optional field.
+   * The schema has no `confidence` or `reasoning_summary` fields.
    */
   queueAgentVerdict: (verdict: {
     verdict: 'false_positive' | 'true_positive' | 'inconclusive';
     summary_markdown: string;
     rationale_markdown?: string;
-    confidence?: number;
+    checks: unknown[];
+    claims: Record<string, unknown>;
   }) => void;
   agentCallCount: () => number;
 }
@@ -78,7 +84,8 @@ export const createFakeAlertZeroBackend = (): {
     verdict: 'false_positive' | 'true_positive' | 'inconclusive';
     summary_markdown: string;
     rationale_markdown?: string;
-    confidence?: number;
+    checks: unknown[];
+    claims: Record<string, unknown>;
   }> = [];
   let agentCalls = 0;
 
