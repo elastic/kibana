@@ -52,7 +52,7 @@ describe('createUnsnoozeAction', () => {
         episodes: [
           makeEpisode({
             last_snooze_action: 'snooze',
-            snooze_expiry: '2020-01-01T00:00:00.000Z',
+            snoozed_until: '2020-01-01T00:00:00.000Z',
           }),
         ],
       })

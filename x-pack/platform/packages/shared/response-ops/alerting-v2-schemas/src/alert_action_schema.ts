@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { tagsSchema } from './common';
+import { groupHashSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
 export const ALERT_EPISODE_STATUS = {
@@ -35,7 +35,10 @@ export type AlertEpisodeActionType =
 const snoozeActionSchema = z
   .object({
     action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
-    expiry: z.iso.datetime().optional().describe('ISO datetime when snooze should expire.'),
+    snoozed_until: z.iso
+      .datetime()
+      .optional()
+      .describe('ISO datetime until which the alert should be snoozed.'),
   })
   .strict()
   .meta({ id: 'alerting_snooze_alert_action' });
@@ -93,8 +96,8 @@ const tagEpisodeActionSchema = z
   .object({
     action_type: z
       .literal(ALERT_EPISODE_ACTION_TYPE.TAG)
-      .describe('Adds tags to an alerting episode.'),
-    tags: tagsSchema.describe('List of tags to add to the episode.'),
+      .describe("Replaces an alerting episode's tags."),
+    tags: tagsSchema.describe("Replaces the episode's tags. Send `[]` to clear."),
   })
   .strict()
   .meta({ id: 'alerting_tag_episode_action' });
@@ -156,11 +159,9 @@ export type CreateEpisodeAlertActionBody = z.infer<typeof createEpisodeAlertActi
 
 export const seriesAlertActionParamsSchema = z
   .object({
-    group_hash: z
-      .string()
-      .min(1)
-      .max(256)
-      .describe('Hash identifying the alert episode series to apply the action to.'),
+    group_hash: groupHashSchema.describe(
+      'Hash identifying the alert episode series to apply the action to.'
+    ),
   })
   .strict()
   .describe('Path parameters for series-level alert action endpoints.');
@@ -235,11 +236,9 @@ export type CreateDeactivateEpisodeActionBody = z.infer<
 // body is an `{ items: [...] }` envelope of one item shape: the single-route
 // body fields plus the series/episode identifier. The envelope leaves room
 // for future request-level fields (e.g. dry_run) without a breaking change.
-const bulkGroupHashSchema = z
-  .string()
-  .min(1)
-  .max(256)
-  .describe('Hash identifying the alert episode series to apply the action to.');
+const bulkGroupHashSchema = groupHashSchema.describe(
+  'Hash identifying the alert episode series to apply the action to.'
+);
 
 const bulkEpisodeIdSchema = z
   .string()

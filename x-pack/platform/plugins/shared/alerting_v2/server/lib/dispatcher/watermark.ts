@@ -14,7 +14,7 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  * - Aborted before StoreActionsStep (recordedEpisodes undefined), or
  *   inline_stats_too_large (scan query rejected): no advance.
  * - No actions: window fully consumed. Advance to windowEnd.
- * - Truncated (row count === EPISODE_QUERY_LIMIT): advance to the last fetched
+ * - Truncated (row count === ESQL_QUERY_ROW_LIMIT): advance to the last fetched
  *   episode's timestamp (the truncation edge); the deferred tail is re-read next tick.
  * - All other outcomes (no_episodes, normal completion): advance to windowEnd.
  *
@@ -49,7 +49,7 @@ export const computeNextWatermark = ({
     // episodes were filtered still advanced through the full window logically.
     nextWatermark = windowEnd;
   } else if (finalState.scan?.truncated) {
-    // EPISODE_QUERY_LIMIT hit: advance to the truncation edge; the tail will be
+    // ESQL_QUERY_ROW_LIMIT hit: advance to the truncation edge; the tail will be
     // re-read from eventWatermark - OVERLAP on the next tick.
     nextWatermark = finalState.scan.truncationEdge() ?? eventWatermark;
   } else {

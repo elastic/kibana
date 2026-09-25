@@ -64,7 +64,7 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 
 | Tick outcome                                    | `nextWatermark`                                     |
 | ----------------------------------------------- | --------------------------------------------------- |
-| Truncated (`EPISODE_QUERY_LIMIT` rows returned) | `last_event_timestamp` of the last returned episode |
+| Truncated (`ESQL_QUERY_ROW_LIMIT` rows returned) | `last_event_timestamp` of the last returned episode |
 | `no_episodes` or `no_actions` halt              | `windowEnd`                                         |
 | Aborted before `StoreActionsStep`               | `eventWatermark` (no advance)                       |
 | `inline_stats_too_large` halt                   | `eventWatermark` (no advance)                       |
@@ -168,7 +168,7 @@ An empty matcher is a catch-all.
 | Task schedule               | `5s`                           | [`schedule_task.ts`](schedule_task.ts)                                                                                                                                                                                                  |
 | Task timeout                | `1m`                           | `DISPATCHER_TASK_TIMEOUT` in [`constants.ts`](constants.ts)                                                                                                                                                                             |
 | Soft deadline               | `42 000 ms` (~70 % of timeout) | `TICK_DEADLINE_MS` — pipeline is aborted at this point so the returned `RunResult` is always within the TM window                                                                                                                       |
-| Episode query cap           | `10 000` rows                  | `EPISODE_QUERY_LIMIT` in [`queries.ts`](queries.ts) — a truncated tick advances the watermark to the last returned row, not to `now`                                                                                                    |
+| Query row cap               | `10 000` rows                  | `ESQL_QUERY_ROW_LIMIT` in [`queries.ts`](queries.ts) — `LIMIT` on every dispatcher query; a truncated episode scan advances the watermark to the last returned row, not to `now`                                                        |
 | Overlap re-read             | `10` minutes                   | `OVERLAP_WINDOW_MINUTES` — each scan re-reads this far behind the watermark; content-addressed dedup makes re-reads free                                                                                                                |
 | Max scan window             | `15` minutes                   | `MAX_WINDOW_MINUTES` — caps forward progress per tick; must be `> OVERLAP_WINDOW_MINUTES`                                                                                                                                               |
 | Settle buffer               | `5` seconds                    | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write                                                                                                                                                    |
@@ -265,7 +265,7 @@ Episodes in the skipped window are **not dispatched** (accepted data loss). Once
 - Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
-- The episode query is capped at `EPISODE_QUERY_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
+- The episode query is capped at `ESQL_QUERY_ROW_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
 - Sustained backlog is drained over multiple ticks at up to `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` minutes per tick.
 - Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `episode_count`, `stuck_ticks`.
 

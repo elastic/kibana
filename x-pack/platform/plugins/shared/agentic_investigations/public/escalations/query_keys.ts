@@ -21,4 +21,13 @@ export const escalationQueryKeys = {
       perPage ?? null,
       search ?? '',
     ] as const,
+  /**
+   * Key for the linked-investigations list of a single escalation.
+   *
+   * `linkedIds` is the comma-joined list of linked investigation ids read from the escalation
+   * conversation's metadata. Including it means the flyout's 5 s conversation poll triggers a
+   * re-fetch here whenever a new investigation is linked.
+   */
+  linkedInvestigations: (escalationId: string, linkedIds?: string) =>
+    [...escalationQueryKeys.all, 'linkedInvestigations', escalationId, linkedIds ?? ''] as const,
 };

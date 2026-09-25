@@ -54,3 +54,10 @@ export const PROPOSALS_UI_CAPABILITY_DECIDE = 'decideProposals' as const;
 
 /** Channel recorded on the workflow resume, for audit. */
 export const PROPOSALS_RESUME_CHANNEL = 'proposals_api' as const;
+
+/**
+ * How aggressively a query should re-check a proposal `isProposalSettling` still reads true for
+ * — an approved proposal whose action has not finished running yet. Shared so every list/detail
+ * query settles on the same cadence, rather than each hook inventing its own.
+ */
+export const PROPOSAL_SETTLING_POLL_INTERVAL_MS = 3_000;
