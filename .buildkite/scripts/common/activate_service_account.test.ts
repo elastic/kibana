@@ -13,12 +13,13 @@ import Path from 'path';
 import { spawnSync } from 'child_process';
 
 const SCRIPT_PATH = Path.resolve(__dirname, './activate_service_account.sh');
+const TOKEN_SCRIPT_PATH = Path.resolve(__dirname, './gcp_oidc_token.sh');
 const PROVIDER =
   'projects/1003139005402/locations/global/workloadIdentityPools/buildkite/providers/buildkite';
-const AUDIENCE = `//iam.googleapis.com/${PROVIDER}`;
 const PROXY_EMAIL = 'kibana-ci-sa-proxy@elastic-kibana-ci.iam.gserviceaccount.com';
 const TARGET_EMAIL = 'kibana-ci-access-artifacts@elastic-kibana-ci.iam.gserviceaccount.com';
 const BUCKET = 'ci-artifacts.kibana.dev';
+const TOKEN_RESPONSE = 'mock-token-response';
 
 const writeExecutable = (targetPath: string, contents: string) => {
   Fs.writeFileSync(targetPath, contents, { mode: 0o755 });
@@ -37,8 +38,14 @@ const setupSandbox = () => {
   writeExecutable(
     Path.join(bin, 'buildkite-agent'),
     `#!/usr/bin/env bash
-echo "Token requests should be delegated to gcloud." >&2
-exit 1
+set -euo pipefail
+printf '%s\\0' "$@" >> "$CALLS_FILE"
+printf '\\n' >> "$CALLS_FILE"
+if [[ "\${MOCK_FAIL_COMMAND:-}" == "oidc request-token" ]]; then
+  echo "Mock token request failure" >&2
+  exit 23
+fi
+printf '%s\\n' '${TOKEN_RESPONSE}'
 `
   );
   writeExecutable(
@@ -59,8 +66,8 @@ esac
 `
   );
 
-  const run = (argument = BUCKET, env: Record<string, string> = {}) => {
-    const result = spawnSync('bash', [SCRIPT_PATH, argument], {
+  const runScript = (scriptPath: string, args: string[], env: Record<string, string> = {}) => {
+    const result = spawnSync(scriptPath, args, {
       cwd: root,
       encoding: 'utf-8',
       env: {
@@ -81,8 +88,11 @@ esac
     return { ...result, calls };
   };
 
+  const run = (argument = BUCKET, env: Record<string, string> = {}) =>
+    runScript(SCRIPT_PATH, [argument], env);
+  const requestToken = (env: Record<string, string> = {}) => runScript(TOKEN_SCRIPT_PATH, [], env);
   const cleanup = () => Fs.rmSync(root, { recursive: true, force: true });
-  return { root, bin, credentialsDir, run, cleanup };
+  return { root, credentialsDir, run, requestToken, cleanup };
 };
 
 describe('GCS service account activation', () => {
@@ -97,7 +107,7 @@ describe('GCS service account activation', () => {
   });
 
   it('configures executable credentials and logs in noninteractively', () => {
-    const { bin, credentialsDir, run } = sandbox;
+    const { credentialsDir, run } = sandbox;
     const credentialsFile = Path.join(credentialsDir, 'credentials.json');
     const result = run();
 
@@ -109,13 +119,45 @@ describe('GCS service account activation', () => {
         'create-cred-config',
         PROVIDER,
         `--service-account=${PROXY_EMAIL}`,
-        `--executable-command="${Path.join(bin, 'buildkite-agent')}" oidc request-token --audience="${AUDIENCE}" --format=gcp --log-level=error --debug=false`,
+        `--executable-command="${TOKEN_SCRIPT_PATH}"`,
         `--output-file=${credentialsFile}`,
       ],
       ['auth', 'login', `--cred-file=${credentialsFile}`, '--quiet', '--no-user-output-enabled'],
       ['config', 'set', 'auth/impersonate_service_account', TARGET_EMAIL],
     ]);
     expect(Fs.existsSync(Path.join(credentialsDir, 'token.jwt'))).toBe(false);
+  });
+
+  it('returns only the token response using the audience supplied by gcloud', () => {
+    const result = sandbox.requestToken({
+      GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE: 'mock-audience',
+      BUILDKITE_AGENT_DEBUG: 'true',
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toBe(`${TOKEN_RESPONSE}\n`);
+    expect(result.stderr).toBe('');
+    expect(result.calls).toEqual([
+      [
+        'oidc',
+        'request-token',
+        '--audience=mock-audience',
+        '--format=gcp',
+        '--log-level=error',
+        '--debug=false',
+      ],
+    ]);
+  });
+
+  it('propagates token request failures without writing to stdout', () => {
+    const result = sandbox.requestToken({
+      GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE: 'mock-audience',
+      MOCK_FAIL_COMMAND: 'oidc request-token',
+    });
+
+    expect(result.status).toBe(23);
+    expect(result.stdout).toBe('');
+    expect(result.stderr).toContain('Mock token request failure');
   });
 
   it('rebinds an active proxy account to credentials for the next job', () => {

@@ -32,18 +32,19 @@ if [[ ! -x "$(command -v gcloud)" ]]; then
   echo "gcloud is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
   exit 1
 fi
-if ! BUILDKITE_AGENT_BIN="$(command -v buildkite-agent)"; then
+if [[ ! -x "$(command -v buildkite-agent)" ]]; then
   echo "buildkite-agent is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
   exit 1
 fi
 
+GCP_OIDC_TOKEN_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/gcp_oidc_token.sh"
 mkdir -p "$KIBANA_WIF_CREDENTIALS_DIR"
 
 # Request a fresh Buildkite token whenever gcloud refreshes its credentials.
 gcloud iam workload-identity-pools create-cred-config \
   "${GCLOUD_WIF_AUDIENCE#//iam.googleapis.com/}" \
   --service-account="$GCLOUD_SA_PROXY_EMAIL" \
-  --executable-command="\"$BUILDKITE_AGENT_BIN\" oidc request-token --audience=\"$GCLOUD_WIF_AUDIENCE\" --format=gcp --log-level=error --debug=false" \
+  --executable-command="\"$GCP_OIDC_TOKEN_SCRIPT\"" \
   --output-file="$WIF_CREDENTIALS_FILE"
 
 if ! gcloud auth login --cred-file="$WIF_CREDENTIALS_FILE" --quiet --no-user-output-enabled; then
