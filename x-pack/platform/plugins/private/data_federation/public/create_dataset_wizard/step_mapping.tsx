@@ -130,7 +130,7 @@ export function StepMapping() {
     (next: SetStateAction<MappingEditorValue>) => {
       setMappings((prev) => {
         const otherFields = prev.fields.filter((f) => !isTimestampField(f));
-        const timestamp = prev.fields.find(isTimestampField);
+        let timestamp = prev.fields.find(isTimestampField);
 
         const resolved =
           typeof next === 'function'
@@ -139,6 +139,33 @@ export function StepMapping() {
                 fields: otherFields,
               })
             : next;
+
+        // If timeseries is currently disabled, allow users to add `@timestamp`
+        // via the mapping editor and automatically enable timeseries.
+        if (!timestamp) {
+          const timestampIndex = resolved.fields.findIndex(
+            (f) => f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME
+          );
+          if (timestampIndex >= 0) {
+            const candidate = resolved.fields[timestampIndex];
+            const candidatePath = candidate.path.trim();
+            const candidateFormat = candidate.format.trim();
+            const nextType =
+              candidate.type === 'date_nanos' ? ('date_nanos' as const) : ('date' as const);
+
+            timestamp = {
+              id: TIMESTAMP_FIELD_ID,
+              name: TIMESTAMP_LOGICAL_FIELD_NAME,
+              // In the mapping editor, `path` is "Original field name (optional)".
+              // In the timeseries section, `path` is the source column / JSON path.
+              path: candidatePath || candidate.name.trim(),
+              type: nextType,
+              format: candidateFormat,
+            };
+
+            resolved.fields = resolved.fields.filter((_, idx) => idx !== timestampIndex);
+          }
+        }
 
         return {
           ...prev,

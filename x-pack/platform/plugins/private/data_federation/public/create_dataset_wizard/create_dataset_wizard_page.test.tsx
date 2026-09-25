@@ -511,6 +511,68 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeInTheDocument();
   });
 
+  it('enables timeseries when @timestamp is added via field mappings', async () => {
+    const { getByTestId, findByTestId, getByText, queryByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+
+    // Disable timeseries and verify the timestamp editor is hidden.
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetWizardTimeseriesToggle'));
+    });
+    expect(queryByTestId('createDatasetWizardTimestampPath')).toBeNull();
+
+    // Add an @timestamp field via the mapping editor.
+    await act(async () => {
+      fireEvent.click(getByTestId('dataFederationMappingEditorAddField'));
+    });
+
+    await act(async () => {
+      fireEvent.change(getByTestId('dataFederationMappingEditorFieldType'), {
+        target: { value: 'date_nanos' },
+      });
+    });
+    fireEvent.change(getByTestId('dataFederationMappingEditorFieldName'), {
+      target: { value: '@timestamp' },
+    });
+    fireEvent.change(getByTestId('dataFederationMappingEditorFieldPath'), {
+      target: { value: 'event_time' },
+    });
+
+    const formatCombo = getByTestId('dataFederationMappingEditorFieldFormat');
+    await act(async () => {
+      fireEvent.click(formatCombo.querySelector('input') ?? formatCombo);
+    });
+    await act(async () => {
+      fireEvent.click(getByText('yyyy-MM-dd'));
+    });
+
+    await act(async () => {
+      fireEvent.click(getByTestId('dataFederationMappingEditorDraftAddField'));
+    });
+
+    // Timeseries should be enabled and migrated values should populate the timestamp editor.
+    expect(getByTestId('createDatasetWizardTimeseriesToggle')).toBeChecked();
+    expect(getByTestId('createDatasetWizardTimestampPath')).toHaveValue('event_time');
+    expect(getByTestId('createDatasetWizardTimestampType')).toHaveValue('date_nanos');
+    const timestampFormatCombo = getByTestId('createDatasetWizardTimestampFormat');
+    const timestampFormatInput = timestampFormatCombo.querySelector('input');
+    expect(timestampFormatInput).not.toBeNull();
+    expect(timestampFormatInput as HTMLInputElement).toHaveValue('yyyy-MM-dd');
+  });
+
   it('still allows Next after navigating back multiple steps', async () => {
     const { getByTestId, findByTestId } = renderWizard();
 
