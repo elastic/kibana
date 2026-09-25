@@ -10,9 +10,11 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { MobileProperty } from '../../../../../../common/mobile_types';
+import { MobileErrorTabIds } from '../../errors_and_crashes_overview/tabs/tab_ids';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
+import { useApmRoutePath } from '../../../../../hooks/use_apm_route_path';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { push } from '../../../../shared/links/url_helpers';
 
@@ -54,6 +56,7 @@ const MOBILE_FILTERS: Array<{ key: MobileFilter['key']; label: string }> = [
 export function MobileFilters() {
   const history = useHistory();
   const { serviceName } = useApmServiceContext();
+  const routePath = useApmRoutePath();
 
   const {
     query: {
@@ -66,6 +69,7 @@ export function MobileFilters() {
       osVersion,
       appVersion,
       transactionType,
+      mobileErrorTabId,
     },
   } = useAnyOfApmParams(
     '/mobile-services/{serviceName}/overview',
@@ -77,16 +81,28 @@ export function MobileFilters() {
   const filters = { netConnectionType, device, osVersion, appVersion };
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  // On the errors & crashes page, scope the dropdown options to the active tab's
+  // documents so the crashes tab only offers values present in crash documents.
+  // The tab defaults to "errors" when no tab id is present in the URL.
+  const isErrorsAndCrashesPage = routePath.startsWith(
+    '/mobile-services/{serviceName}/errors-and-crashes'
+  );
+  const errorType: 'error' | 'crash' | undefined = isErrorsAndCrashesPage
+    ? mobileErrorTabId === MobileErrorTabIds.CRASHES
+      ? 'crash'
+      : 'error'
+    : undefined;
+
   const { data = { mobileFilters: [] }, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/services/{serviceName}/mobile/filters', {
         params: {
           path: { serviceName },
-          query: { start, end, environment, kuery, transactionType },
+          query: { start, end, environment, kuery, transactionType, errorType },
         },
       });
     },
-    [start, end, environment, kuery, serviceName, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType, errorType]
   );
 
   function toSelectOptions(items?: string[]) {

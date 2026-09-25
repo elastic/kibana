@@ -29,6 +29,7 @@ export const mobileFiltersRoute = defineRoute<MobileFiltersRouteResponse>()({
       query: z
         .object({
           transactionType: z.string().optional(),
+          errorType: z.enum(['error', 'crash']).optional(),
         })
         .merge(kuerySchema)
         .merge(rangeSchema)
