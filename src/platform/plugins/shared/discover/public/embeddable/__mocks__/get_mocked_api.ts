@@ -50,6 +50,7 @@ export const getMockedSearchApi = ({
       dataLoading$,
       searchError$,
       fetchWarnings$: new BehaviorSubject<SearchResponseIncompleteWarning[]>([]),
+      abortSignal$: new BehaviorSubject<AbortSignal | undefined>(undefined),
       savedSearch$: new BehaviorSubject<SavedSearch>(savedSearch),
     },
     stateManager: {
