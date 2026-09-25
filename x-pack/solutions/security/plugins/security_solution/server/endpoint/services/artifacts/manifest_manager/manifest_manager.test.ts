@@ -1488,6 +1488,62 @@ describe('ManifestManager', () => {
       );
       expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
     });
+
+    test('does not republish cached YARA signatures after a libyara failure aborts the build', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValue(
+        new YaraEngineUnavailableError('libyara WASM allocation failed')
+      );
+
+      await expect(manifestManager.buildNewManifest()).rejects.toBeInstanceOf(
+        YaraEngineUnavailableError
+      );
+
+      // License downgrade while the failed build's snapshot is still the last thing fetched.
+      // The list client still returns the signature; a cache hit would ship it once the engine recovers.
+      context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      });
+
+      const manifest = await manifestManager.buildNewManifest();
+      const yaraWindowsArtifact = manifest
+        .getAllArtifacts()
+        .find((artifact) => artifact.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({ entries: [] });
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+    });
   });
 
   describe('buildNewManifest with Endpoint Exceptions', () => {

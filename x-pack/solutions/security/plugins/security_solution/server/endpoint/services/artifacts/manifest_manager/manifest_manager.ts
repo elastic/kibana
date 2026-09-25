@@ -770,22 +770,27 @@ export class ManifestManager {
     );
 
     const allPolicyIds = await this.listEndpointPolicyIds();
-    const results = await Promise.all([
-      this.buildExceptionListArtifacts(allPolicyIds, isEndpointExceptionsPerPolicyEnabled),
-      this.buildTrustedAppsArtifacts(allPolicyIds),
-      this.buildEventFiltersArtifacts(allPolicyIds),
-      this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
-      this.buildBlocklistArtifacts(allPolicyIds),
-      ...(this.experimentalFeatures.trustedDevices
-        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
-        : []),
-      ...(this.experimentalFeatures.customYaraSignaturesEnabled
-        ? [this.buildCustomYaraSignaturesArtifacts(allPolicyIds)]
-        : []),
-    ]);
-
-    // Clear cache as the ManifestManager instance is reused on every run.
-    this.cachedExceptionsListsByOs.clear();
+    let results: ArtifactsBuildResult[];
+    try {
+      results = await Promise.all([
+        this.buildExceptionListArtifacts(allPolicyIds, isEndpointExceptionsPerPolicyEnabled),
+        this.buildTrustedAppsArtifacts(allPolicyIds),
+        this.buildEventFiltersArtifacts(allPolicyIds),
+        this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
+        this.buildBlocklistArtifacts(allPolicyIds),
+        ...(this.experimentalFeatures.trustedDevices
+          ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
+          : []),
+        ...(this.experimentalFeatures.customYaraSignaturesEnabled
+          ? [this.buildCustomYaraSignaturesArtifacts(allPolicyIds)]
+          : []),
+      ]);
+    } finally {
+      // Clear on success and failure: the manager is reused on every packager run, and a
+      // rejected Promise.all (e.g. exhausted libyara retries) would otherwise leave the
+      // snapshot in place for the next build.
+      this.cachedExceptionsListsByOs.clear();
+    }
 
     const manifest = new Manifest({
       schemaVersion: this.schemaVersion,
