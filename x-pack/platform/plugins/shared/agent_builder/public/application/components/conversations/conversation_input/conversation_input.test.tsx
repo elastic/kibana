@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { ConversationInput } from './conversation_input';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -164,6 +165,8 @@ const editorController = {
   removePlaceholderByName: jest.fn(),
 };
 
+const renderInput = (ui: React.ReactElement) => render(ui, { wrapper: EuiProvider });
+
 describe('ConversationInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -219,7 +222,7 @@ describe('ConversationInput', () => {
   it('calls onSubmitOverride with editor content and skips submitMessage when override is provided', () => {
     const onSubmitOverride = jest.fn();
 
-    render(<ConversationInput onSubmitOverride={onSubmitOverride} />);
+    renderInput(<ConversationInput onSubmitOverride={onSubmitOverride} />);
 
     fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
@@ -230,7 +233,7 @@ describe('ConversationInput', () => {
   });
 
   it('routes to submitMessage when no override is provided', () => {
-    render(<ConversationInput />);
+    renderInput(<ConversationInput />);
 
     fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
@@ -253,7 +256,7 @@ describe('ConversationInput', () => {
     it('is not offered for a conversation that is not shared', () => {
       mockedUseIsSharedConversation.mockReturnValue(false);
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
     });
@@ -261,19 +264,19 @@ describe('ConversationInput', () => {
     it('is not offered when experimental features are off', () => {
       mockedUseExperimentalFeatures.mockReturnValue(false);
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
     });
 
     it('is offered for a shared conversation', () => {
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       expect(screen.getByTestId('mock-trigger-mode-selector')).toBeInTheDocument();
     });
 
     it('shows the post to team header only when talking to users', () => {
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       const header = screen.getByTestId('agentBuilderConversationInputPostToTeamHeader');
       expect(header).toHaveAttribute('aria-hidden', 'true');
@@ -285,7 +288,7 @@ describe('ConversationInput', () => {
     });
 
     it('falls back to running the agent once the conversation is no longer shared', () => {
-      const { rerender } = render(<ConversationInput />);
+      const { rerender } = renderInput(<ConversationInput />);
 
       selectTalkToUsers();
       mockedUseIsSharedConversation.mockReturnValue(false);
@@ -305,7 +308,7 @@ describe('ConversationInput', () => {
     it('sends without running the agent when talking to users and clears the editor on success', async () => {
       const onSubmit = jest.fn();
 
-      render(<ConversationInput onSubmit={onSubmit} />);
+      renderInput(<ConversationInput onSubmit={onSubmit} />);
 
       selectTalkToUsers();
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
@@ -319,7 +322,7 @@ describe('ConversationInput', () => {
     it('keeps the editor content and shows a toast when the send fails', async () => {
       sendUserMessage.mockRejectedValue(new Error('boom'));
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       selectTalkToUsers();
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
@@ -329,7 +332,7 @@ describe('ConversationInput', () => {
     });
 
     it('runs the agent when talking to agent and users', () => {
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
@@ -341,7 +344,7 @@ describe('ConversationInput', () => {
   it('hides the message input for read-only conversations', () => {
     mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: true, isLoading: false });
 
-    render(<ConversationInput />);
+    renderInput(<ConversationInput />);
 
     expect(screen.queryByTestId('mock-message-editor-submit')).not.toBeInTheDocument();
   });
@@ -349,7 +352,7 @@ describe('ConversationInput', () => {
   it('hides the message input while the conversation is loading', () => {
     mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: true });
 
-    render(<ConversationInput />);
+    renderInput(<ConversationInput />);
 
     expect(screen.queryByTestId('mock-message-editor-submit')).not.toBeInTheDocument();
   });
@@ -357,7 +360,7 @@ describe('ConversationInput', () => {
   describe('auto-focus', () => {
     it('focuses the editor shortly after mount', () => {
       jest.useFakeTimers();
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       jest.advanceTimersByTime(200);
       expect(editorController.focus).toHaveBeenCalled();
@@ -367,7 +370,7 @@ describe('ConversationInput', () => {
     it('does not steal focus from an open HITL prompt', () => {
       jest.useFakeTimers();
       mockedUseIsAwaitingPrompt.mockReturnValue(true);
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       jest.advanceTimersByTime(200);
       expect(editorController.focus).not.toHaveBeenCalled();
@@ -382,7 +385,7 @@ describe('ConversationInput', () => {
         isLoading: true,
       } as never);
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       // The shell paints the disabled background off this attribute; the editor is mocked here.
       expect(screen.getByTestId('agentBuilderConversationInputForm')).toHaveAttribute(
@@ -407,7 +410,7 @@ describe('ConversationInput', () => {
         conversationActions: {} as never,
       } as never);
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
       fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
 
       expect(removeAttachment).toHaveBeenCalledWith(0);
@@ -425,7 +428,7 @@ describe('ConversationInput', () => {
         conversationActions: {} as never,
       } as never);
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
       fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
 
       expect(removeAttachment).toHaveBeenCalledWith(0);

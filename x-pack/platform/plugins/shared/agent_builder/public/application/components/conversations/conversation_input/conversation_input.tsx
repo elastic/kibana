@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiIcon, EuiText, euiCanAnimate, useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiIcon, EuiText, euiCanAnimate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
@@ -46,46 +47,56 @@ const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.pos
 const INPUT_SHELL_RADIUS = 16;
 const POST_TO_TEAM_HEADER_HEIGHT = 24;
 
+const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
+  flex-grow: 0;
+  width: 100%;
+  border-radius: ${INPUT_SHELL_RADIUS}px;
+  ${euiCanAnimate} {
+    transition: background-color ${euiTheme.animation.fast} ease-out;
+  }
+`;
+
+const wrapperWithHeaderStyles = ({ euiTheme }: UseEuiTheme) => css`
+  background-color: ${euiTheme.colors.backgroundBaseDisabled};
+`;
+
+// The header stays mounted so it can slide back behind the input on the way out;
+// visibility is delayed on exit so it only leaves the accessibility tree once collapsed.
+const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  ${euiCanAnimate} {
+    transition: height ${euiTheme.animation.fast} ease-out,
+      visibility 0s linear ${euiTheme.animation.fast};
+  }
+`;
+
+const headerVisibleStyles = css`
+  height: ${POST_TO_TEAM_HEADER_HEIGHT}px;
+  visibility: visible;
+  ${euiCanAnimate} {
+    transition-delay: 0s;
+  }
+`;
+
+const headerContentStyles = ({ euiTheme }: UseEuiTheme) => css`
+  display: flex;
+  align-items: center;
+  gap: ${euiTheme.size.xs};
+  height: ${POST_TO_TEAM_HEADER_HEIGHT}px;
+  padding-inline: ${euiTheme.size.base};
+`;
+
 const InputContainer: React.FC<
   PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean; triggerMode: ChatTriggerMode }>
 > = ({ children, isDisabled, isCollapsed, triggerMode }) => {
-  const { euiTheme } = useEuiTheme();
   const showHeader = triggerMode === ChatTriggerMode.Never;
 
-  const transitionDuration = euiTheme.animation.fast;
-
-  const wrapperStyles = css`
-    flex-grow: 0;
-    width: 100%;
-    border-radius: ${INPUT_SHELL_RADIUS}px;
-    background-color: ${showHeader ? euiTheme.colors.backgroundBaseDisabled : 'transparent'};
-    ${euiCanAnimate} {
-      transition: background-color ${transitionDuration} ease-out;
-    }
-  `;
-  // The header stays mounted so it can slide back behind the input on the way out;
-  // visibility is delayed on exit so it only leaves the accessibility tree once collapsed.
-  const headerStyles = css`
-    height: ${showHeader ? POST_TO_TEAM_HEADER_HEIGHT : 0}px;
-    overflow: hidden;
-    visibility: ${showHeader ? 'visible' : 'hidden'};
-    ${euiCanAnimate} {
-      transition: height ${transitionDuration} ease-out,
-        visibility 0s linear ${showHeader ? '0s' : transitionDuration};
-    }
-  `;
-  const headerContentStyles = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.xs};
-    height: ${POST_TO_TEAM_HEADER_HEIGHT}px;
-    padding-inline: ${euiTheme.size.base};
-  `;
-
   return (
-    <div css={wrapperStyles}>
+    <div css={[wrapperStyles, showHeader && wrapperWithHeaderStyles]}>
       <div
-        css={headerStyles}
+        css={[headerStyles, showHeader && headerVisibleStyles]}
         aria-hidden={!showHeader}
         data-test-subj="agentBuilderConversationInputPostToTeamHeader"
       >
