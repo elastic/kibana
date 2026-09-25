@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { updateMaintenanceWindowRoute } from './update_maintenance_window_route';
-import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
+import { getMockMaintenanceWindowDomain } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/types';
 import type {
@@ -26,17 +26,17 @@ jest.mock('../../../../../lib/license_api_access', () => ({
 }));
 
 const mockMaintenanceWindow = {
-  ...getMockMaintenanceWindow(),
+  ...getMockMaintenanceWindowDomain(),
   eventStartTime: new Date().toISOString(),
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
   duration: 864000000,
   schedule: {
     custom: {
-      ...getMockMaintenanceWindow().schedule.custom,
+      ...getMockMaintenanceWindowDomain().schedule.custom,
       duration: '10d',
       recurring: {
-        ...getMockMaintenanceWindow().schedule.custom.recurring,
+        ...getMockMaintenanceWindowDomain().schedule.custom.recurring,
       },
     },
   },
@@ -142,6 +142,7 @@ describe('updateMaintenanceWindowRoute', () => {
         },
         scope: {
           alerting: {
+            enabled: true,
             kql: "_id: '1234'",
             filters: [],
           },
@@ -180,7 +181,7 @@ describe('updateMaintenanceWindowRoute', () => {
     updateMaintenanceWindowRoute(router, licenseState);
 
     maintenanceWindowClient.update.mockResolvedValueOnce({
-      ...getMockMaintenanceWindow(), // it has 60m duration
+      ...getMockMaintenanceWindowDomain(), // it has 60m duration
       eventStartTime: new Date().toISOString(),
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,

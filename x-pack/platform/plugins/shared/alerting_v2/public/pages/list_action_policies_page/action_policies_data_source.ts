@@ -58,8 +58,8 @@ export type ActionPolicyContentListItem = ContentListItem & {
 const toContentListItem = (policy: ActionPolicyResponse): ActionPolicyContentListItem => ({
   id: policy.id,
   title: policy.name,
-  createdBy: policy.created_by ?? undefined,
-  updatedBy: policy.updated_by ?? undefined,
+  createdBy: policy.created_by?.profile_uid ?? undefined,
+  updatedBy: policy.updated_by?.profile_uid ?? undefined,
   updatedAt: policy.updated_at ? new Date(policy.updated_at) : undefined,
   policy,
 });

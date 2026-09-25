@@ -97,23 +97,20 @@ In general, the recommendation is to check our telemetry to validate the usage o
 
 ## Evaluating feature flags
 
-There are 3 typed methods. Each returns an RxJS observable that emits the current value, and again when the flag or evaluation context changes.
+There are 3 typed methods. Each is available as an RxJS observable (`get*Value$`) and, in the browser, as a React hook (`use*Value`). Both follow the current value, and update when the flag or evaluation context changes.
 
-|  Type   | API                                                      |
-|:-------:|:---------------------------------------------------------|
-| Boolean | `core.featureFlags.getBooleanValue$(flagName, fallback)` |
-| String  | `core.featureFlags.getStringValue$(flagName, fallback)`  |
-| Number  | `core.featureFlags.getNumberValue$(flagName, fallback)`  |
+|  Type   | Observable                                               | React                                                |
+|:-------:|:---------------------------------------------------------|:-----------------------------------------------------|
+| Boolean | `core.featureFlags.getBooleanValue$(flagName, fallback)` | `core.featureFlags.useBooleanValue(flagName, fallback)` |
+| String  | `core.featureFlags.getStringValue$(flagName, fallback)`  | `core.featureFlags.useStringValue(flagName, fallback)`  |
+| Number  | `core.featureFlags.getNumberValue$(flagName, fallback)`  | `core.featureFlags.useNumberValue(flagName, fallback)`  |
 
-In React, subscribe with `useObservable`:
+In React, call the `use*Value` hook during render. The first render uses the synchronous evaluation, then the hook updates when the flag or the evaluation context changes:
 
 ```tsx
-import useObservable from 'react-use/lib/useObservable';
-
-const enabled = useObservable(
-  core.featureFlags.getBooleanValue$('myPlugin.exampleBoolean', false),
-  false // value until the first emission
-);
+const enabled = core.featureFlags.useBooleanValue('myPlugin.exampleBoolean', false);
+const variant = core.featureFlags.useStringValue('myPlugin.exampleString', 'default');
+const limit = core.featureFlags.useNumberValue('myPlugin.exampleNumber', 1);
 ```
 
 On the server (and in non-React browser code), subscribe directly:

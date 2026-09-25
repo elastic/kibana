@@ -74,7 +74,6 @@
     "cypress:run:qa:serverless:entity_analytics:host_details": "pnpm cypress:qa:serverless --spec './cypress/e2e/entity_analytics/host_details/**/*.cy.ts'",
     "cypress:run:qa:serverless:entity_analytics:entity_analytics_home": "pnpm cypress:qa:serverless --spec './cypress/e2e/entity_analytics/entity_analytics_home/**/*.cy.ts'",
     "cypress:run:qa:serverless:entity_analytics:hosts": "pnpm cypress:qa:serverless --spec './cypress/e2e/entity_analytics/hosts/**/*.cy.ts'",
-    "cypress:run:qa:serverless:entity_analytics:priv_mon": "pnpm cypress:qa:serverless --spec './cypress/e2e/entity_analytics/priv_mon/**/*.cy.ts'",
     "cypress:run:qa:serverless:entity_analytics:watchlists": "pnpm cypress:qa:serverless --spec './cypress/e2e/entity_analytics/watchlists/**/*.cy.ts'",
     "cypress:run:qa:serverless:entity_analytics:explore_hosts": "pnpm cypress:qa:serverless --spec './cypress/e2e/explore/hosts/**/*.cy.ts'",
     "cypress:run:qa:serverless:entity_analytics:machine_learning": "pnpm cypress:qa:serverless --spec './cypress/e2e/explore/ml/**/*.cy.ts'",

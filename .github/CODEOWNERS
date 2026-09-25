@@ -86,7 +86,6 @@ packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-moon @elastic/kibana-operations
-packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-perf-page-load @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
@@ -395,7 +394,8 @@ src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-controls-renderer @elastic/kibana-dashboards
 src/platform/packages/private/kbn-cps-common @elastic/appex-sharedux
 src/platform/packages/private/kbn-data-streams @elastic/kibana-core
-src/platform/packages/private/kbn-discover-session-constants @elastic/kibana-data-discovery
+src/platform/packages/private/kbn-dev-comments @elastic/appex-sharedux
+src/platform/packages/private/kbn-discover-session-constants @elastic/kibana-discover
 src/platform/packages/private/kbn-dot-text @elastic/kibana-operations
 src/platform/packages/private/kbn-dot-text-loader @elastic/kibana-operations
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-discover
@@ -524,6 +524,10 @@ src/platform/packages/shared/deeplinks/vectordb @elastic/search-ml-ux
 src/platform/packages/shared/deeplinks/workflows @elastic/workflows-eng
 src/platform/packages/shared/deeplinks/workplace_ai @elastic/search-ml-ux
 src/platform/packages/shared/esql/kbn-esql-browser @elastic/kibana-discover
+src/platform/packages/shared/esql/kbn-esql-language @elastic/kibana-discover
+src/platform/packages/shared/esql/kbn-esql-server-utils @elastic/kibana-discover
+src/platform/packages/shared/esql/kbn-esql-types @elastic/kibana-discover
+src/platform/packages/shared/esql/kbn-esql-utils @elastic/kibana-discover
 src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
@@ -547,7 +551,7 @@ src/platform/packages/shared/kbn-bench @elastic/kibana-core
 src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/nightshift-sre-agent-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-dashboards
-src/platform/packages/shared/kbn-cases-components @elastic/kibana-cases
+src/platform/packages/shared/kbn-cases-components @elastic/security-investigations
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting
 src/platform/packages/shared/kbn-change-point-chart-viewer @elastic/search-ml-ux
@@ -604,12 +608,8 @@ src/platform/packages/shared/kbn-es-query-constants @elastic/kibana-discover
 src/platform/packages/shared/kbn-es-query-server @elastic/kibana-discover
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core
 src/platform/packages/shared/kbn-esql-composer @elastic/obs-signals-metrics-team @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-esql-language @elastic/kibana-discover
 src/platform/packages/shared/kbn-esql-resource-browser @elastic/kibana-management
 src/platform/packages/shared/kbn-esql-resource-browser/.storybook @elastic/kibana-management
-src/platform/packages/shared/kbn-esql-server-utils @elastic/kibana-discover
-src/platform/packages/shared/kbn-esql-types @elastic/kibana-discover
-src/platform/packages/shared/kbn-esql-utils @elastic/kibana-discover
 src/platform/packages/shared/kbn-eval-kql @elastic/workflows-eng
 src/platform/packages/shared/kbn-evals-suite-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-dashboards
@@ -685,6 +685,7 @@ src/platform/packages/shared/kbn-rrule @elastic/response-ops
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detection-engineering @elastic/response-ops @elastic/nightshift-sre-agent-team
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 src/platform/packages/shared/kbn-saved-search-component @elastic/obs-signals-logs-team
+src/platform/packages/shared/kbn-schema-string-helpers @elastic/kibana-security @elastic/kibana-core
 src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/shared/kbn-scout-synthtrace @elastic/appex-qa
 src/platform/packages/shared/kbn-search-agent @elastic/search-ml-ux
@@ -843,6 +844,7 @@ src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-signals-metrics-team
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
+src/platform/plugins/private/dev_comments @elastic/appex-sharedux
 src/platform/plugins/private/event_annotation @elastic/kibana-dashboards
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-dashboards
 src/platform/plugins/private/files_management @elastic/appex-sharedux
@@ -1087,20 +1089,18 @@ x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-threat-h
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-es-snapshot-loader @elastic/nightshift-context-and-research-team
-x-pack/platform/packages/shared/kbn-evals @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
-x-pack/platform/packages/shared/kbn-evals-common @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
-x-pack/platform/packages/shared/kbn-evals-extensions @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
+x-pack/platform/packages/shared/kbn-evals @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-evals-common @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-evals-extensions @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-evals-runner @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2 @elastic/rna-project-team
-x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-investigations-team
-x-pack/platform/packages/shared/kbn-evals-suite-significant-events @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-grok-heuristics @elastic/streams-ui
-x-pack/platform/packages/shared/kbn-inbox-common @elastic/security-genai-research-and-development
+x-pack/platform/packages/shared/kbn-inbox-common @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/search-ml-ux @elastic/search-inference-team
 x-pack/platform/packages/shared/kbn-inference-connectors @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/search-ml-ux
@@ -1116,8 +1116,11 @@ x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-mcp-client @elastic/workchat-eng
 x-pack/platform/packages/shared/kbn-nightshift-ai @elastic/nightshift-sre-agent-team
+x-pack/platform/packages/shared/kbn-nightshift-decision-trees @elastic/nightshift-investigations-team
 x-pack/platform/packages/shared/kbn-nightshift-shared @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
+x-pack/platform/packages/shared/kbn-proposals-common @elastic/security-solution
+x-pack/platform/packages/shared/kbn-proposals-ui @elastic/security-solution
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
@@ -1191,6 +1194,7 @@ x-pack/platform/plugins/private/data_usage @elastic/kibana-management
 x-pack/platform/plugins/private/data_visualizer @elastic/search-ml-ux
 x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-discover
 x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/kibana-dashboards
+x-pack/platform/plugins/private/esql_views @elastic/kibana-management
 x-pack/platform/plugins/private/feedback @elastic/appex-sharedux
 x-pack/platform/plugins/private/file_upload @elastic/kibana-dashboards @elastic/search-ml-ux
 x-pack/platform/plugins/private/gen_ai_settings @elastic/search-ml-ux
@@ -1237,7 +1241,7 @@ x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
 x-pack/platform/plugins/shared/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-signals-traces-team
 x-pack/platform/plugins/shared/automatic_import @elastic/siem-conduit
-x-pack/platform/plugins/shared/cases @elastic/kibana-cases
+x-pack/platform/plugins/shared/cases @elastic/security-investigations
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/connector_events_bridge @elastic/workflows-eng
@@ -1247,11 +1251,11 @@ x-pack/platform/plugins/shared/context_engine_agent_builder @elastic/context-eng
 x-pack/platform/plugins/shared/custom_content @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/data_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/dataset_quality @elastic/kibana-management
-x-pack/platform/plugins/shared/elastic_console @elastic/obs-elastic-brain-team
+x-pack/platform/plugins/shared/elastic_console @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
-x-pack/platform/plugins/shared/evals @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
+x-pack/platform/plugins/shared/evals @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 x-pack/platform/plugins/shared/evals_skills @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/features @elastic/kibana-core
@@ -1259,7 +1263,7 @@ x-pack/platform/plugins/shared/fields_metadata @elastic/streams-ui
 x-pack/platform/plugins/shared/fleet @elastic/streams-ui
 x-pack/platform/plugins/shared/fleet/cypress @elastic/streams-ui
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
-x-pack/platform/plugins/shared/inbox @elastic/security-genai-research-and-development
+x-pack/platform/plugins/shared/inbox @elastic/security-generative-ai
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/search-ml-ux
 x-pack/platform/plugins/shared/inference_endpoint @elastic/search-ml-ux
@@ -1275,12 +1279,13 @@ x-pack/platform/plugins/shared/maintenance_windows @elastic/response-ops
 x-pack/platform/plugins/shared/maps @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/ml @elastic/search-ml-ux
 x-pack/platform/plugins/shared/ml/evals @elastic/search-ml-ux
-x-pack/platform/plugins/shared/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/platform/plugins/shared/nightshift_sources @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/notification_center @elastic/search-ml-ux
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/osquery/cypress @elastic/security-defend-workflows
+x-pack/platform/plugins/shared/proposals @elastic/security-solution
 x-pack/platform/plugins/shared/query_activity @elastic/kibana-management
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/sample_data_ingest @elastic/search-ml-ux
@@ -1291,8 +1296,6 @@ x-pack/platform/plugins/shared/search_inference_endpoints @elastic/search-ml-ux
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
 x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
-x-pack/platform/plugins/shared/significant_events @elastic/nightshift-sre-agent-team
-x-pack/platform/plugins/shared/significant_events_app @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/slo_shared @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
@@ -1310,16 +1313,16 @@ x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/res
 x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
-x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/kibana-cases
-x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/kibana-cases
-x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/kibana-cases
+x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/security-investigations
+x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/security-investigations
+x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/security-investigations
 x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
-x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/kibana-cases
+x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/security-investigations
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
@@ -1335,6 +1338,7 @@ x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-
 x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/service_accounts @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security
@@ -1347,7 +1351,9 @@ x-pack/solutions/observability/packages/alerting-test-data @elastic/nightshift-s
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-signals-traces-team
+x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-investigations-team
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/packages/kbn-evals-suite-significant-events @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
@@ -1365,6 +1371,7 @@ x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-signals-log
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/nightshift @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_agent_builder @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/nightshift-context-and-research-team
@@ -1375,6 +1382,8 @@ x-pack/solutions/observability/plugins/observability_shared @elastic/observabili
 x-pack/solutions/observability/plugins/profiling @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/observability-ui
+x-pack/solutions/observability/plugins/significant_events @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/significant_events_app @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/slo @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-signals-logs-team
@@ -1405,7 +1414,7 @@ x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting
 x-pack/solutions/security/packages/distribution-bar @elastic/contextual-security-apps
 x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting
-x-pack/solutions/security/packages/features @elastic/security-pds-deployment
+x-pack/solutions/security/packages/features @elastic/security-investigations
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-alertzero-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common @elastic/security-threat-hunting
@@ -1417,7 +1426,8 @@ x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-thr
 x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
-x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder @elastic/security-genai-research-and-development
+x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
@@ -1429,7 +1439,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
-x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
@@ -1447,15 +1457,15 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/secu
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
-x-pack/solutions/security/packages/navigation @elastic/security-pds-deployment
+x-pack/solutions/security/packages/navigation @elastic/security-investigations
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
 x-pack/solutions/security/packages/security-mitre-attack-common @elastic/security-detection-engineering
 x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering
-x-pack/solutions/security/packages/side-nav @elastic/security-pds-deployment
+x-pack/solutions/security/packages/side-nav @elastic/security-investigations
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
-x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
+x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
-x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting
+x-pack/solutions/security/packages/upselling @elastic/security-investigations
 x-pack/solutions/security/plugins/alertzero @elastic/security-solution
 x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
@@ -1491,7 +1501,6 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 # limits.yml files change frequently as bundle sizes shift; no owner means the
 # ops team isn't auto-requested as reviewer on every bump. A GitHub Actions
 # workflow (bundle-size-limits-comment.yml) flags increases ≥15% instead.
-packages/kbn-optimizer/limits.yml
 packages/kbn-rspack-optimizer/limits.yml
 
 # The #CC# prefix delineates Code Coverage,
@@ -1624,7 +1633,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/serverless/functional/test_suites/management/data_views @elastic/kibana-discover
 
 # Discover session metrics tab schema
-/src/platform/packages/shared/as-code/discover-schema/src/schemas/metrics_tab.ts @elastic/kibana-data-discovery @elastic/obs-signals-metrics-team
+/src/platform/packages/shared/as-code/discover-schema/src/schemas/metrics_tab.ts @elastic/kibana-discover @elastic/obs-signals-metrics-team
 
 # Discover Profile Providers
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
@@ -1941,14 +1950,14 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/global_retention.test.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/failure_store.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/lifecycle_retention.ts @elastic/kibana-management
-x-pack/platform/plugins/shared/significant_events/server/lib/slack_app @elastic/nightshift-context-and-research-team
-x-pack/platform/plugins/shared/significant_events/common/slack_app @elastic/nightshift-context-and-research-team
-x-pack/platform/plugins/shared/significant_events/server/routes/internal/apps/slack @elastic/nightshift-context-and-research-team
-x-pack/platform/plugins/shared/significant_events_app/public/pages/significant_events/components/settings/apps_section @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/significant_events/server/lib/slack_app @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/significant_events/common/slack_app @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/significant_events/server/routes/internal/apps/slack @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/significant_events_app/public/pages/significant_events/components/settings/apps_section @elastic/nightshift-context-and-research-team
 
 # Significant Events - Investigation features (owned by Nightshift context & research)
-x-pack/platform/plugins/shared/significant_events/server/agent_builder/skills/investigation_management @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
-x-pack/platform/plugins/shared/significant_events/server/agent_builder/tools/event_investigation_attach @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/significant_events/server/agent_builder/skills/investigation_management @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/significant_events/server/agent_builder/tools/event_investigation_attach @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management
@@ -1962,7 +1971,7 @@ x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts 
 x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/default_index_patterns.ts @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_index_patterns.ts @elastic/nightshift-sre-agent-team
 # server
-x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events @elastic/nightshift-sre-agent-team
 
 
 # Infra Monitoring tests
@@ -2003,7 +2012,9 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/test/fixtures/es_archives/fleet @elastic/streams-ui
 /x-pack/platform/test/api_integration/services/fleet_and_agents.ts @elastic/streams-ui
 /x-pack/solutions/security/test/fleet_api_integration @elastic/streams-ui
-/x-pack/platform/test/fleet_api_integration @elastic/streams-ui @elastic/siem-conduit
+/x-pack/platform/test/fleet_api_integration @elastic/streams-ui
+/x-pack/platform/test/fleet_api_integration/apis/cloud_connector @elastic/streams-ui @elastic/siem-conduit
+/x-pack/platform/test/fleet_api_integration/apis/cloud_onboarding_deployment @elastic/streams-ui @elastic/siem-conduit
 /x-pack/platform/test/fleet_packages @elastic/streams-ui
 /x-pack/platform/test/fleet_tasks @elastic/streams-ui
 /src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/streams-ui
@@ -2653,6 +2664,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/*
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_iam/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_secret_manager/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/gitlab/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitoring/** @elastic/nightshift-context-and-research-team
@@ -2690,6 +2702,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/wor
 src/platform/packages/shared/kbn-connector-specs/src/specs/snowflake/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/threatq/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/trello/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/unifi/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlscan_io/** @elastic/workflows-eng
@@ -3162,6 +3175,24 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/significant_event
 
 # Nightshift investigations managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+# Decision-tree workflows and plugin surfaces (investigations team only)
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/decision_tree_hydrate @elastic/nightshift-investigations-team
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/decision_tree_reinforce @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/common/decision_trees.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/decision_trees @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/tools/decision_tree @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/agents/decision_tree_reinforcement @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/step_definitions/decision_tree_hydrate.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/step_definitions/decision_tree_prepare.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/lib/install_decision_tree_reinforcement_agent.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/lib/managed_workflows/install_decision_tree_workflows.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/get_decision_tree.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/get_decision_tree_version.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/get_decision_trees_availability.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/list_decision_tree_versions.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/list_decision_trees.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/list_decision_trees.test.ts @elastic/nightshift-investigations-team
+x-pack/solutions/observability/plugins/significant_events_app/public/pages/significant_events/components/decision_trees @elastic/nightshift-investigations-team
 
 # AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/security-solution
@@ -3186,6 +3217,8 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @ela
 /x-pack/solutions/security/plugins/security_solution/server/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel @elastic/security-investigations
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/threat_intel @elastic/security-investigations
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_threat_intel @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
@@ -3415,6 +3448,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/ @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout_managed_mitre @elastic/security-detection-engineering
 
 /x-pack/solutions/security/plugins/security_solution/scripts/openapi @elastic/security-detection-engineering
 
@@ -3509,7 +3543,8 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_endpoint @elastic/security-defend-workflows
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_entity_analytics @elastic/security-entity-analytics
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_persona_matrix @elastic/security-generative-ai
-/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_attack_discovery_agent_builder @elastic/security-genai-research-and-development
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_attack_discovery_agent_builder @elastic/security-generative-ai
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-investigations-team
 # /security_solution/common/endpoint/ and /security_solution/server/endpoint/ children overrides
 /x-pack/solutions/security/plugins/security_solution/common/endpoint/schema/resolver.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts @elastic/security-investigations
@@ -3759,6 +3794,7 @@ x-pack/platform/plugins/shared/anonymization/server/saved_objects/register_anony
 x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/streams-ui @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/obs-signals-logs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/synthetics_monitor_config.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
@@ -3802,8 +3838,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
 /.agents/skills/flaky-test-investigator/** @elastic/appex-qa
 /.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
-/.agents/skills/evals-create-suite/** @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
-/.agents/skills/evals-write-spec/** @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
+/.agents/skills/evals-create-suite/** @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
+/.agents/skills/evals-write-spec/** @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 
 # Security team skills: API authorization, CodeQL, and privilege deprecation guidance.
 /.agents/skills/api-authz/** @elastic/kibana-security
@@ -3829,7 +3865,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/failed-test-investigator.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-test-fixer.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-verifier.* @elastic/kibana-operations @elastic/appex-qa
-/.github/workflows/shared/flaky-test-fix-guardrails.md @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/shared/flaky-fix-guidelines.md @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-review-reminder.yml @elastic/appex-qa
 /.github/scripts/flaky_fix_review_reminder* @elastic/appex-qa
 /.github/aw/ @elastic/kibana-operations
@@ -3879,11 +3915,11 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scripts/steps/check_flaky_test_issues.sh @elastic/appex-qa @elastic/kibana-operations
 
 # Evals (Buildkite + scripts)
-/.buildkite/pipelines/evals/ @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
-/.buildkite/scripts/steps/evals/ @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
+/.buildkite/pipelines/evals/ @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
+/.buildkite/scripts/steps/evals/ @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 
 # Inbox FTR test directory (no kibana.jsonc — manual entry)
-/x-pack/platform/test/inbox_api_integration/ @elastic/security-genai-research-and-development
+/x-pack/platform/test/inbox_api_integration/ @elastic/security-generative-ai
 
 # FTR config manifests have no single owner — touched by all solutions.
 # Leaving this unowned avoids routing every edit through Kibana Operations.

@@ -19,7 +19,6 @@ import {
   getNoDataEsqlQuery,
   getRootEsqlQuery,
   bulkGetRulesResponseSchema,
-  bulkGetRulesParamsSchema,
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
@@ -29,7 +28,6 @@ import {
 import { tagsResponseSchema } from './common';
 import {
   FIND_MAX_RESULT_WINDOW,
-  ID_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
   MAX_ARTIFACT_DATA_LENGTH,
   MAX_BULK_ITEMS,
@@ -61,7 +59,7 @@ describe('createRuleDataSchema', () => {
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
+        metadata: { name: 'test rule', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
         recovery_strategy: 'no_breach',
@@ -79,7 +77,7 @@ describe('createRuleDataSchema', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
+          metadata: { name: 'test rule', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
           recovery_strategy: 'no_breach',
@@ -1781,59 +1779,6 @@ describe('findRulesRequestSchema', () => {
   });
 });
 
-describe('bulkGetRulesParamsSchema', () => {
-  it('accepts a single id', () => {
-    const result = bulkGetRulesParamsSchema.parse({ ids: ['rule-1'] });
-    expect(result).toEqual({ ids: ['rule-1'] });
-  });
-
-  it('accepts up to MAX_BULK_ITEMS ids', () => {
-    const ids = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => `rule-${i}`);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids })).not.toThrow();
-  });
-
-  it('preserves caller-provided id order (no sorting)', () => {
-    const ids = ['rule-z', 'rule-a', 'rule-m'];
-    const result = bulkGetRulesParamsSchema.parse({ ids });
-    expect(result.ids).toEqual(ids);
-  });
-
-  it('trims whitespace around ids', () => {
-    const result = bulkGetRulesParamsSchema.parse({ ids: ['  rule-1  '] });
-    expect(result.ids).toEqual(['rule-1']);
-  });
-
-  it('rejects a missing ids field', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({})).toThrow();
-  });
-
-  it('rejects an empty ids array', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [] })).toThrow();
-  });
-
-  it('rejects more than MAX_BULK_ITEMS ids', () => {
-    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `rule-${i}`);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids })).toThrow();
-  });
-
-  it('rejects an id longer than ID_MAX_LENGTH', () => {
-    const tooLong = 'a'.repeat(ID_MAX_LENGTH + 1);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [tooLong] })).toThrow();
-  });
-
-  it('rejects an empty-string id', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [''] })).toThrow();
-  });
-
-  it('rejects a whitespace-only id (after trim it is empty)', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['   '] })).toThrow();
-  });
-
-  it('rejects unknown top-level fields (strict)', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['rule-1'], foo: 'bar' })).toThrow();
-  });
-});
-
 describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
@@ -1843,9 +1788,9 @@ describe('bulkGetRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    created_by: 'user-a',
+    created_by: { profile_uid: 'user-a' },
     created_at: '2026-01-01T00:00:00.000Z',
-    updated_by: 'user-a',
+    updated_by: { profile_uid: 'user-a' },
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
@@ -1945,9 +1890,9 @@ describe('bulkCreateRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    created_by: 'user-a',
+    created_by: { profile_uid: 'user-a' },
     created_at: '2026-01-01T00:00:00.000Z',
-    updated_by: 'user-a',
+    updated_by: { profile_uid: 'user-a' },
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 

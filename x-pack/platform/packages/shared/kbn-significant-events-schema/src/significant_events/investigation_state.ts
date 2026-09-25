@@ -155,7 +155,8 @@ const sortByConfidence = <T extends { confidence: number }>(items: T[]): T[] =>
  * render a "Try next" list without parsing prose for headings and bullets.
  */
 export const investigationRecommendationSchema = z.object({
-  /** The action itself, stated concretely (e.g. "Revert the pool-size config change"). */
+  /** The action itself, stated concretely as plain text with no Markdown or HTML. Put explanations
+   * and links in `description`, and commands or snippets in `code`. */
   title: z.string().max(MAX_MEDIUM_STRING_LENGTH),
   /** How strongly the findings support that this action will resolve or mitigate the confirmed problem. */
   confidence: investigationItemConfidenceSchema,
@@ -176,7 +177,8 @@ export const MAX_BLIND_SPOTS = 3;
  * "title · description" sentence themselves.
  */
 export const investigationBlindSpotSchema = z.object({
-  /** The missing data source or access, named concisely (e.g. "No traces for the cart service"). */
+  /** The missing data source or access, named concisely as plain text with no Markdown or HTML.
+   * Put explanations and links in `description`. */
   title: z.string().max(MAX_MEDIUM_STRING_LENGTH),
   /** How strongly the findings support that closing this gap would materially improve the investigation. */
   confidence: investigationItemConfidenceSchema,

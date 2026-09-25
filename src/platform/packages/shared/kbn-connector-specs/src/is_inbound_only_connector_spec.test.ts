@@ -9,7 +9,10 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from './connector_spec';
-import { isInboundOnlyConnectorSpec } from './is_inbound_only_connector_spec';
+import {
+  connectorTypeIsInboundOnly,
+  isInboundOnlyConnectorSpec,
+} from './is_inbound_only_connector_spec';
 import { InboundWebhook } from './specs/inbound_webhook/inbound_webhook';
 import { Unifi } from './specs/unifi/unifi';
 
@@ -58,5 +61,15 @@ describe('isInboundOnlyConnectorSpec', () => {
     });
 
     expect(isInboundOnlyConnectorSpec(spec)).toBe(false);
+  });
+});
+
+describe('connectorTypeIsInboundOnly', () => {
+  it('is true for .inboundWebhook', () => {
+    expect(connectorTypeIsInboundOnly('.inboundWebhook')).toBe(true);
+  });
+
+  it('is false for an unknown type', () => {
+    expect(connectorTypeIsInboundOnly('.not-a-spec')).toBe(false);
   });
 });

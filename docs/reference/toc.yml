@@ -100,6 +100,7 @@ toc:
           - file: connectors-kibana/gcp-iam-action-type.md
           - file: connectors-kibana/gcp-secret-manager-action-type.md
           - file: connectors-kibana/github-action-type.md
+          - file: connectors-kibana/gitlab-action-type.md
           - file: connectors-kibana/gmail-action-type.md
           - file: connectors-kibana/google-calendar-action-type.md
           - file: connectors-kibana/google-cloud-monitoring-action-type.md
@@ -141,6 +142,7 @@ toc:
           - file: connectors-kibana/snowflake-action-type.md
           - file: connectors-kibana/sublime-security-action-type.md
           - file: connectors-kibana/tavily-action-type.md
+          - file: connectors-kibana/threatq-action-type.md
           - file: connectors-kibana/trello-action-type.md
           - file: connectors-kibana/unifi-action-type.md
           - file: connectors-kibana/urlscan-io-action-type.md

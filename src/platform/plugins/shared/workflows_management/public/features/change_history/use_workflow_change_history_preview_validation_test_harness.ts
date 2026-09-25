@@ -9,9 +9,9 @@
 
 import type { MutableRefObject } from 'react';
 import type { monaco } from '@kbn/code-editor';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { UseWorkflowChangeHistoryPreviewValidationParams } from './use_workflow_change_history_preview_validation';
 import type { WorkflowChangeHistoryCompareMode } from './workflow_change_history_preview_settings_popover';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 export const PREVIEW_VALIDATION_TEST_MODEL_URI = 'inmemory://model/test.yaml';
 

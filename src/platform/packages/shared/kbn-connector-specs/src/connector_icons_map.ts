@@ -394,4 +394,12 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.gitlab',
+    lazy(() => import(/* webpackChunkName: "connectorIconGitlab" */ './specs/gitlab/icon')),
+  ],
+  [
+    '.threatq',
+    lazy(() => import(/* webpackChunkName: "connectorIconThreatQ" */ './specs/threatq/icon')),
+  ],
 ]);

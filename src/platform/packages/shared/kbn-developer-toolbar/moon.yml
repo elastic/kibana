@@ -23,7 +23,7 @@ dependsOn:
 tags:
   - shared-browser
   - package
-  - prod
+  - dev
   - group-platform
   - shared
   - jest-unit-tests
