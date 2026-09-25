@@ -8,12 +8,19 @@
 import type { HttpStart } from '@kbn/core/public';
 
 import type { DataSourceWithSecrets } from '../common';
-import { DATA_SOURCES_LIST_ROUTE_PATH, getDataSourceByIdApiPath, type DataSource } from '../common';
+import {
+  DATA_SOURCES_LIST_ROUTE_PATH,
+  DATA_SOURCE_TEST_ROUTE_PATH,
+  ES_REDACTED_SECRET_VALUE,
+  getDataSourceByIdApiPath,
+  type DataSource,
+} from '../common';
 import { DataSourcesClient } from './data_sources_client';
 
-const createHttpMock = (): Pick<HttpStart, 'get' | 'put' | 'delete'> => ({
+const createHttpMock = (): Pick<HttpStart, 'get' | 'put' | 'post' | 'delete'> => ({
   get: jest.fn(),
   put: jest.fn(),
+  post: jest.fn(),
   delete: jest.fn(),
 });
 
@@ -398,6 +405,36 @@ describe('DataSourcesClient', () => {
 
       expect(http.put).toHaveBeenCalledWith(getDataSourceByIdApiPath('ds1'), {
         body: JSON.stringify(expectedBody),
+      });
+    });
+  });
+
+  describe('testConnection', () => {
+    it('posts type and settings, dropping empty and redacted values', async () => {
+      const http = createHttpMock();
+      const client = new DataSourcesClient(http as unknown as HttpStart);
+
+      const result = { status: 'success' } as const;
+      (http.post as jest.Mock).mockResolvedValue(result);
+
+      const dataSource: DataSourceWithSecrets = {
+        type: 's3',
+        name: 'ds1',
+        description: 'a description',
+        settings: {
+          region: 'us-east-1',
+          endpoint: '',
+          access_key: 'key',
+          secret_key: ES_REDACTED_SECRET_VALUE,
+        },
+      };
+
+      await expect(client.testConnection(dataSource)).resolves.toEqual(result);
+      expect(http.post).toHaveBeenCalledWith(DATA_SOURCE_TEST_ROUTE_PATH, {
+        body: JSON.stringify({
+          type: 's3',
+          settings: { region: 'us-east-1', access_key: 'key' },
+        }),
       });
     });
   });

@@ -8,9 +8,14 @@
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { isNil, omit, omitBy } from 'lodash';
-import type { DataSourceType, DataSourceWithSecrets } from '../common';
+import type {
+  DataSourceConnectionTestResult,
+  DataSourceType,
+  DataSourceWithSecrets,
+} from '../common';
 import {
   DATA_SOURCES_LIST_ROUTE_PATH,
+  DATA_SOURCE_TEST_ROUTE_PATH,
   ES_REDACTED_SECRET_VALUE,
   SECRET_FIELDS_BY_TYPE,
   UI_MANAGED_SECRET_FIELDS_BY_TYPE,
@@ -153,6 +158,25 @@ export class DataSourcesClient {
     };
     await this.http.put(getDataSourceByIdApiPath(nameTrimmed), {
       body: JSON.stringify(body),
+    });
+  }
+
+  /**
+   * Asks Elasticsearch whether it can reach the given configuration, without saving it.
+   *
+   * Secrets of an existing data source are read back redacted, so they are dropped here: a test
+   * run from the edit flyout only covers the credentials the user re-entered.
+   */
+  public async testConnection(
+    dataSource: DataSourceWithSecrets
+  ): Promise<DataSourceConnectionTestResult> {
+    const settings = omitBy(
+      omitEmptySettingsFields(dataSource.settings),
+      (value) => value === ES_REDACTED_SECRET_VALUE
+    );
+
+    return this.http.post<DataSourceConnectionTestResult>(DATA_SOURCE_TEST_ROUTE_PATH, {
+      body: JSON.stringify({ type: dataSource.type, settings }),
     });
   }
 
