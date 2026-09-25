@@ -55,9 +55,6 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 const COMMON_STATE_IGNORE_PATHS = [
   'savedObjectId', // panel-level SO reference, not part of LensAttributes
   'state.visualization.title', // removed by-value nested title
-  // TODO: check missing properties striped out in transforms
-  'state.datasourceStates.formBased.layers.*.indexPatternId',
-  'state.datasourceStates.formBased.currentIndexPatternId',
   // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
   'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
   // TODO: check missing/different properties on colorMapping
@@ -1371,6 +1368,16 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             // apply defaults
             layer.sampling = layer.sampling ?? LENS_SAMPLING_DEFAULT_VALUE;
 
+            // `indexPatternId` is a runtime only field (`FormBasedPrivateState`) that leaked into some
+            // legacy dashboard SOs. On persist `extractReferences` strips it into the
+            // `indexpattern-datasource-layer-*` reference, and on load `injectReferences` reconstructs it
+            // from that reference. It is never part of `FormBasedPersistedState`. The transform mirrors
+            // this by resolving the data view from references (`resolveDataViewId`). Drop the leaked
+            // value since the reference is the source of truth.
+            if ('indexPatternId' in layer) {
+              delete layer.indexPatternId;
+            }
+
             // remove empty incompleteColumns
             if (Object.keys(layer.incompleteColumns ?? {}).length === 0) {
               delete layer.incompleteColumns;
@@ -1479,6 +1486,13 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
             }
           }
+          // `currentIndexPatternId` is a runtime only field (`FormBasedPrivateState`) that leaked into
+          // some legacy dashboard SOs. It is recomputed at load by `initializeState` and never part of
+          // `FormBasedPersistedState`, so the transform never emits it.
+          if ('currentIndexPatternId' in ds) {
+            delete ds.currentIndexPatternId;
+          }
+
           return ds;
         }
       ),
