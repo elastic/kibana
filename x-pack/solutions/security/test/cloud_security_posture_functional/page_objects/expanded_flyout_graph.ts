@@ -139,9 +139,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     itemTestSubject: string
   ): Promise<WebElementWrapper> {
     const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
-    const toolbar = await graph.findByCssSelector(
-      `.react-flow__node-toolbar[data-id="${nodeId}"]`
-    );
+    const toolbar = await graph.findByCssSelector(`.react-flow__node-toolbar[data-id="${nodeId}"]`);
     return toolbar.findByCssSelector(`[data-test-subj="${itemTestSubject}"]`);
   }
 
@@ -188,10 +186,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async showEntityRelationships(nodeId: string): Promise<void> {
-    await this.clickOnNodeToolbarItem(
-      nodeId,
-      GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
-    );
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
