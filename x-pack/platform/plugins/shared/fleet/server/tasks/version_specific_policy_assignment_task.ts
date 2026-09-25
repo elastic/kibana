@@ -464,7 +464,8 @@ export class VersionSpecificPolicyAssignmentTask {
       // Compile version-specific inputs for package policies with agent version conditions
       const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
         soClient,
-        parentPolicyId
+        parentPolicyId,
+        { spaceIds: ['*'] }
       );
 
       for (const packagePolicy of packagePolicies) {
@@ -502,6 +503,7 @@ export class VersionSpecificPolicyAssignmentTask {
       // This will create the version-specific policies in .fleet-policies index
       await agentPolicyService.deployPolicies(soClient, [parentPolicyId], undefined, {
         agentVersions: versionsToCreate,
+        spaceId: '*',
       });
       // Record every variant deployed this run so Phase 2 does not delete them: Phase 1 skips
       // agents already on the correct variant, so a wrongly-deleted variant is never recreated
@@ -556,6 +558,8 @@ export class VersionSpecificPolicyAssignmentTask {
         {
           agentIds,
           showInactive: false,
+          spaceId: '*',
+          _internalCrossSpace: true,
         },
         targetPolicyId
       );
@@ -784,6 +788,7 @@ export class VersionSpecificPolicyAssignmentTask {
         try {
           await agentPolicyService.deployPolicies(soClient, [parentId], undefined, {
             agentVersions: versions,
+            spaceId: '*',
           });
         } catch (err) {
           this.logger.error(
@@ -829,7 +834,12 @@ export class VersionSpecificPolicyAssignmentTask {
         );
         // Reassign by agent id (not kuery) so agents in every space are covered — the task runs
         // with a space-agnostic saved objects client.
-        await reassignAgents(soClient, esClient, { agentIds, showInactive: true }, parentPolicyId);
+        await reassignAgents(
+          soClient,
+          esClient,
+          { agentIds, showInactive: true, spaceId: '*', _internalCrossSpace: true },
+          parentPolicyId
+        );
 
         // bulkUpdateAgents collects per-agent ES errors without throwing, so reassignAgents
         // returns { actionId } even if some updates silently failed (e.g. retry_on_conflict
