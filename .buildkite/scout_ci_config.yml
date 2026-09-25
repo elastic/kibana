@@ -4,6 +4,7 @@ plugins:
     - advanced_settings
     - agent_builder
     - agent_builder_dashboards
+    - agentic_investigations
     - alerting
     - alerting_v2
     - apm
@@ -60,6 +61,7 @@ plugins:
     - license_management
     - links
     - logstash
+    - maintenance_windows
     - management
     - maps
     - ml
@@ -67,6 +69,7 @@ plugins:
     - navigation
     - nightshift
     - nightshift_investigations
+    - nightshift_sources
     - notification_center
     - observability
     - observability_alerting
@@ -114,7 +117,6 @@ plugins:
     - workflows_management
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
-    - discoveries # Not yet registered for CI; added to unblock flaky test runner pipelines
     - links # Not yet registered for CI; added to unblock flaky test runner pipelines
 
 packages:
@@ -139,3 +141,4 @@ excluded_configs:
   - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts
+  - x-pack/platform/plugins/shared/alerting/test/scout_cps_local/api/playwright.config.ts

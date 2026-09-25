@@ -13,12 +13,9 @@ export {
   ALERTZERO_FEATURE_ID,
   ALERTZERO_INTERNAL_URL,
   ALERTZERO_PLUGIN_NAME,
-  ALERTZERO_INVESTIGATIONS_URL,
-  ALERTZERO_INVESTIGATION_URL_TEMPLATE,
   ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_WATCHES_URL,
   ALERTZERO_WATCH_URL_TEMPLATE,
-  buildInvestigationUrl,
   buildWatchUrl,
   SYSTEM_SECURITY_WATCH_IDS,
 } from '@kbn/alertzero-common';
@@ -34,3 +31,11 @@ export const ALERTZERO_API_PRIVILEGE_WRITE = 'alertzero_write' as const;
 
 /** Owner id registered for all AlertZero managed workflow definitions. */
 export const ALERTZERO_MANAGED_WORKFLOW_OWNER_ID = 'alertzero' as const;
+
+/**
+ * Single source of truth for the Hunt Watch attachment type ids, used by the server
+ * attachment definitions, the client attachment UI definitions, and their tests.
+ */
+export const ALERTZERO_ATTACHMENT_TYPES = {
+  threat: 'security.threat',
+} as const;

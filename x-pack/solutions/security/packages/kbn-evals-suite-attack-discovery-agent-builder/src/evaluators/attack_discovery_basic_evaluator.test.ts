@@ -6,6 +6,7 @@
  */
 
 import { createAttackDiscoveryBasicEvaluator } from './attack_discovery_basic_evaluator';
+import { EMPTY_RETRIEVAL_EVIDENCE } from '../types';
 import type {
   AttackDiscovery,
   AttackDiscoveryAgentBuilderExample,
@@ -36,8 +37,10 @@ const baseOutput = (
   workflow: {
     stages: [],
     retrievedAlertCount: null,
+    retrievedAlertCountSource: 'none',
     passedAlertCount: null,
     validatedDiscoveryCount: null,
+    retrievalEvidence: EMPTY_RETRIEVAL_EVIDENCE,
   },
 });
 

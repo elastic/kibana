@@ -746,12 +746,60 @@ describe('Task Runner', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     const [enqueuedActions] = actionsClient.bulkEnqueueExecution.mock.calls[0];
     expect(enqueuedActions).toHaveLength(1);
+    // The enqueued action must also carry the UIAM key id so the API key invalidation task's
+    // in-use guard can see that this pending connector execution still needs the key.
     expect(enqueuedActions[0]).toEqual(
       expect.objectContaining({
         id: '1',
         apiKey: 'essu_uiam_api_key',
+        uiamApiKeyId: '456',
       })
     );
+  });
+
+  test('does not enqueue the UIAM API key id when the rule run falls back to the ES API key', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = createTaskRunner({
+      context: {
+        ...taskRunnerFactoryInitializerParams,
+        apiKeyType: ApiKeyType.UIAM,
+        shouldGrantUiam: true,
+      },
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    // UIAM is expected, but the rule has no UIAM key, so the run authenticates with the ES key.
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        uiamApiKey: null,
+      },
+    });
+
+    await taskRunner.run();
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    const [fallbackEnqueuedActions] = actionsClient.bulkEnqueueExecution.mock.calls[0];
+    // Recording the id here would claim a UIAM key the connector task never presents, keeping
+    // an unused key alive.
+    expect(fallbackEnqueuedActions[0]).not.toHaveProperty('uiamApiKeyId');
   });
 
   test('actionsPlugin.execute is skipped if muteAll is true', async () => {
