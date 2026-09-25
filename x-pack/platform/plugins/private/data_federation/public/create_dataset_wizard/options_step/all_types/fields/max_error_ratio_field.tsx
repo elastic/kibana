@@ -6,9 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiCode, EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiCode, EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import {
@@ -16,12 +17,6 @@ import {
   type CreateDatasetFormValues,
 } from '../../../create_dataset_form_state';
 import { FormRowLabelWithInfo } from '../../../components/form_row_label_with_info';
-
-const helpTextDefault = (valueLabel: string) => (
-  <EuiText size="xs" color="subdued">
-    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
-  </EuiText>
-);
 
 export function MaxErrorRatioField({ control }: { control: Control<CreateDatasetFormValues> }) {
   const { field: maxErrorRatioField, fieldState: maxErrorRatioState } = useController({
@@ -53,7 +48,15 @@ export function MaxErrorRatioField({ control }: { control: Control<CreateDataset
           infoText={createDatasetWizardStrings.settingsMaxErrorRatioDescription}
         />
       }
-      helpText={helpTextDefault('0.0')}
+      helpText={
+        <FormattedMessage
+          id="xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioHelpText"
+          defaultMessage="If left blank, defaults to {defaultValue}."
+          values={{
+            defaultValue: <EuiCode>0.0</EuiCode>,
+          }}
+        />
+      }
       fullWidth
       isInvalid={isMaxErrorRatioInvalid}
       error={maxErrorRatioErrorMessage}

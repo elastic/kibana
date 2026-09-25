@@ -9,11 +9,10 @@ import React from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
-  DEFAULT_DATETIME_FORMAT_LABEL,
-  DEFAULT_ENCODING,
   validateDelimiter,
   type CreateDatasetFormValues,
   type DatasetFormatFormValue,
@@ -25,12 +24,6 @@ import { HeaderRow } from './fields/header_row';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 import { QuoteMode } from './fields/quote_mode';
 import { SkipRowsField } from './fields/skip_rows_field';
-
-const helpTextDefault = (valueLabel: string) => (
-  <EuiText size="xs" color="subdued">
-    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
-  </EuiText>
-);
 
 export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
@@ -52,7 +45,11 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDelimiterDescription}
           />
         }
-        helpText={helpTextDefault(format === 'tsv' ? '\\t' : ',')}
+        helpText={
+          <EuiText size="xs" color="subdued">
+            <EuiCode>{format === 'tsv' ? '\\t' : ','}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
+          </EuiText>
+        }
         fullWidth
         isInvalid={Boolean(delimiterState.error)}
         error={delimiterState.error?.message}
@@ -65,17 +62,8 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsModeLabel}
-            infoText={createDatasetWizardStrings.settingsQuoteModeDescription}
-          />
-        }
-        helpText={helpTextDefault(
-          format === 'tsv'
-            ? createDatasetWizardStrings.settingsModePlain
-            : createDatasetWizardStrings.settingsModeQuoted
-        )}
+        label={createDatasetWizardStrings.settingsModeLabel}
+        helpText={createDatasetWizardStrings.settingsQuoteModeDescription}
         fullWidth
       >
         <QuoteMode
@@ -86,12 +74,8 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsHeaderRowLabel}
-            infoText={createDatasetWizardStrings.settingsHeaderRowDescription}
-          />
-        }
+        label={createDatasetWizardStrings.settingsHeaderRowLabel}
+        helpText={createDatasetWizardStrings.settingsHeaderRowHelp}
         fullWidth
       >
         <HeaderRow
@@ -108,7 +92,13 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDatetimeFormatDescription}
           />
         }
-        helpText={helpTextDefault(DEFAULT_DATETIME_FORMAT_LABEL)}
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsDatetimeFormatHelpText"
+            defaultMessage="If left blank, defaults to {defaultValue}."
+            values={{ defaultValue: <EuiCode>ISO-8601</EuiCode> }}
+          />
+        }
         fullWidth
       >
         <DatetimeFormatSelect control={control} />
@@ -117,10 +107,19 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         label={
           <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsNullValueLabel}
-            infoText={createDatasetWizardStrings.settingsNullValueDescription}
+            infoText={
+              <FormattedMessage
+                id="xpack.dataFederation.createDatasetWizard.additionalSettings.nullValue.descriptionText"
+                defaultMessage="Enter the value your files use for missing data. For example: {nullValue} or {naValue}. When set, empty fields are no longer treated as null."
+                values={{
+                  nullValue: <EuiCode>NULL</EuiCode>,
+                  naValue: <EuiCode>NA</EuiCode>,
+                }}
+              />
+            }
           />
         }
-        helpText={helpTextDefault(createDatasetWizardStrings.emptyString)}
+        helpText={createDatasetWizardStrings.settingsNullValueHelp}
         fullWidth
       >
         <EuiFieldText
@@ -133,13 +132,8 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsEncodingLabel}
-            infoText={createDatasetWizardStrings.settingsEncodingHelp}
-          />
-        }
-        helpText={helpTextDefault(DEFAULT_ENCODING)}
+        label={createDatasetWizardStrings.settingsEncodingLabel}
+        helpText={createDatasetWizardStrings.settingsEncodingHelp}
         fullWidth
       >
         <EncodingSelect control={control} />

@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
@@ -42,6 +43,7 @@ import { ParquetCommonSettings } from './parquet/parquet_common_settings';
 import { PartitionDetectionSelect } from '../components/fields/partition_detection_select';
 import { SharedAdvancedSettings } from './all_types/shared_advanced_settings';
 import { SharedCommonSettings } from './all_types/shared_common_settings';
+import { FormRowLabelWithInfo } from '../components/form_row_label_with_info';
 
 // ---------------------------------------------------------------------------
 // Module-level option arrays — shared across components so each select
@@ -286,7 +288,32 @@ function RemainingUniversalSettings({
   return (
     <>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsSchemaResolutionLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsSchemaResolutionLabel}
+            infoText={
+              <FormattedMessage
+                id="xpack.dataFederation.createDatasetForm.settingsSchemaResolutionDescription"
+                defaultMessage="{firstFileWins} uses the first matching file. {strict} requires identical schemas. {unionByName} merges fields by name."
+                values={{
+                  firstFileWins: (
+                    <strong>
+                      {createDatasetWizardStrings.settingsSchemaResolutionFirstFileWins}
+                    </strong>
+                  ),
+                  strict: (
+                    <strong>{createDatasetWizardStrings.settingsSchemaResolutionStrict}</strong>
+                  ),
+                  unionByName: (
+                    <strong>
+                      {createDatasetWizardStrings.settingsSchemaResolutionUnionByName}
+                    </strong>
+                  ),
+                }}
+              />
+            }
+          />
+        }
         helpText={createDatasetWizardStrings.settingsSchemaResolutionHelp}
         fullWidth
       >
@@ -316,6 +343,7 @@ function RemainingUniversalSettings({
             data-test-subj="createDatasetSettingsPartitionPath"
             fullWidth
             isInvalid={Boolean(partitionPathState.error)}
+            placeholder={createDatasetWizardStrings.settingsPartitionPathPlaceholder}
             value={partitionPathField.value}
             onChange={(e) => partitionPathField.onChange(e.target.value)}
             name={partitionPathField.name}

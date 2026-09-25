@@ -6,9 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiCode, EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import {
@@ -16,12 +17,6 @@ import {
   type CreateDatasetFormValues,
 } from '../../../create_dataset_form_state';
 import { FormRowLabelWithInfo } from '../../../components/form_row_label_with_info';
-
-const helpTextDefault = (valueLabel: string) => (
-  <EuiText size="xs" color="subdued">
-    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
-  </EuiText>
-);
 
 export function MaxErrorsField({ control }: { control: Control<CreateDatasetFormValues> }) {
   const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
@@ -46,7 +41,12 @@ export function MaxErrorsField({ control }: { control: Control<CreateDatasetForm
           infoText={createDatasetWizardStrings.settingsMaxErrorsDescription}
         />
       }
-      helpText={helpTextDefault(createDatasetWizardStrings.unbounded)}
+      helpText={
+        <FormattedMessage
+          id="xpack.dataFederation.createDatasetForm.settingsMaxErrorsHelpText"
+          defaultMessage="If left blank, there is no limit."
+        />
+      }
       fullWidth
       isInvalid={isMaxErrorsInvalid}
       error={maxErrorsErrorMessage}
@@ -56,7 +56,6 @@ export function MaxErrorsField({ control }: { control: Control<CreateDatasetForm
         fullWidth
         min={1}
         step={1}
-        placeholder={createDatasetWizardStrings.settingsMaxErrorsPlaceholder}
         isInvalid={isMaxErrorsInvalid}
         value={maxErrorsField.value}
         onChange={(e) => maxErrorsField.onChange(e.target.value)}

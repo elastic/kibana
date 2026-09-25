@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
@@ -54,10 +55,27 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         label={
           <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsQuoteLabel}
-            infoText={createDatasetWizardStrings.settingsQuoteCharacterDescription}
+            infoText={
+              <FormattedMessage
+                id="xpack.dataFederation.createDatasetWizard.additionalSettings.quoteCharacter.descriptionText"
+                defaultMessage="Character that surrounds field values. Overrides {quoteMode} in {commonSettings}."
+                values={{
+                  quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
+                  commonSettings: (
+                    <strong>{createDatasetWizardStrings.commonSettingsSectionTitle}</strong>
+                  ),
+                }}
+              />
+            }
           />
         }
-        helpText={helpTextDefault(quoteDefaultLabel)}
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsQuoteHelpText"
+            defaultMessage="Defaults to {quote} for CSV and no quote character for TSV."
+            values={{ quote: <EuiCode>&quot;</EuiCode> }}
+          />
+        }
         fullWidth
         isInvalid={Boolean(quoteState.error)}
         error={quoteState.error?.message}
@@ -78,10 +96,27 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         label={
           <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsEscapeLabel}
-            infoText={createDatasetWizardStrings.settingsEscapeHelp}
+            infoText={
+              <FormattedMessage
+                id="xpack.dataFederation.createDatasetWizard.additionalSettings.escapeCharacter.descriptionText"
+                defaultMessage="Character used to escape special characters. Overrides {quoteMode} in {commonSettings}."
+                values={{
+                  quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
+                  commonSettings: (
+                    <strong>{createDatasetWizardStrings.commonSettingsSectionTitle}</strong>
+                  ),
+                }}
+              />
+            }
           />
         }
-        helpText={helpTextDefault(escapeDefaultLabel)}
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsEscapeHelpText"
+            defaultMessage="Defaults to {escape} for CSV and no escape character for TSV."
+            values={{ escape: <EuiCode>\</EuiCode> }}
+          />
+        }
         fullWidth
         isInvalid={Boolean(escapeState.error)}
         error={escapeState.error?.message}
@@ -99,13 +134,17 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsColumnPrefixLabel}
-            infoText={createDatasetWizardStrings.settingsColumnPrefixHelp}
+        label={createDatasetWizardStrings.settingsColumnPrefixLabel}
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsColumnPrefixHelpText"
+            defaultMessage="Prefix for generated field names when {headerRow} is {falseValue}."
+            values={{
+              headerRow: <strong>{createDatasetWizardStrings.settingsHeaderRowLabel}</strong>,
+              falseValue: <strong>{createDatasetWizardStrings.falseLabel}</strong>,
+            }}
           />
         }
-        helpText={helpTextDefault(DEFAULT_COLUMN_PREFIX)}
         fullWidth
       >
         <EuiFieldText

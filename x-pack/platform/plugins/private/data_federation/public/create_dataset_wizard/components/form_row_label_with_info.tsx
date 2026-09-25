@@ -16,7 +16,7 @@ export function FormRowLabelWithInfo({
   infoText,
 }: {
   label: React.ReactNode;
-  infoText: string;
+  infoText: React.ReactNode;
 }) {
   return (
     <EuiFlexGroup

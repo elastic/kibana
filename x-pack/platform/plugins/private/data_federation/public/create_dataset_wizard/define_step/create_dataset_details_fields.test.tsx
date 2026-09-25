@@ -11,6 +11,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { DataSource, DataSourceWithSecrets } from '../../../common';
 import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
 import type { CreateDatasetFormValues } from '../create_dataset_form_state';
@@ -71,9 +72,11 @@ describe('CreateDatasetDetailsFields', () => {
   it('opens the create data source flyout and selects the new source after save', async () => {
     const add = jest.fn().mockResolvedValue(undefined);
     const { getByTestId, findByTestId, queryByTestId } = render(
-      <EuiProvider>
-        <Harness add={add} />
-      </EuiProvider>
+      <I18nProvider>
+        <EuiProvider>
+          <Harness add={add} />
+        </EuiProvider>
+      </I18nProvider>
     );
 
     fireEvent.click(getByTestId('createDatasetDataSource'));

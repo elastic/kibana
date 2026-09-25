@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -123,7 +124,15 @@ export function CreateDatasetDetailsFields({
       </EuiFormRow>
       <EuiFormRow
         label={createDatasetWizardStrings.resourceLabel}
-        helpText={createDatasetWizardStrings.resourceHelp}
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.resourceHelpText"
+            defaultMessage="URI or pattern that selects the files to read. For example: {example}."
+            values={{
+              example: <EuiCode>s3://logs-bucket/access/**/*.csv</EuiCode>,
+            }}
+          />
+        }
         fullWidth
         isInvalid={Boolean(resourceFieldState.error)}
         error={resourceFieldState.error?.message}
