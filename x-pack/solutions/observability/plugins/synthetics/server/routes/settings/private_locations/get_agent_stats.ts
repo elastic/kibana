@@ -242,7 +242,12 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
       ? await getVisibleMonitorConfigIds(
           monitorConfigRepository,
           locations.map(({ id }) => id)
-        ).catch(() => new Set<string>())
+        ).catch((error) => {
+          server.logger.warn('Unable to load visible monitors for private location agent stats', {
+            error,
+          });
+          return new Set<string>();
+        })
       : new Set<string>();
 
     const { elasticsearch } = await context.core;

@@ -100,7 +100,7 @@ const makeContext = ({
           }),
         },
       },
-      logger: { error: jest.fn() },
+      logger: { error: jest.fn(), warn: jest.fn() },
     },
     context: {
       core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: { search } } } }),
@@ -308,6 +308,24 @@ describe('getPrivateLocationAgentStats route', () => {
     const result = await run(routeContext);
 
     expect(result[0].agents[0].monitorsAssigned).toBe(1);
+  });
+
+  it('logs when visible monitors cannot be loaded', async () => {
+    mockListByAgentPolicy.mockResolvedValue([
+      { id: 'mon-a-loc-1', condition: agentIdCondition('agent-1') },
+    ]);
+    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const { routeContext } = makeContext({ listAgentsImpl: listAgents, hasEnterprise: true });
+    const error = new Error('failed to load monitors');
+    routeContext.monitorConfigRepository.getAll.mockRejectedValue(error);
+
+    const result = await run(routeContext);
+
+    expect(result[0].agents[0].monitorsAssigned).toBe(0);
+    expect(routeContext.server.logger.warn).toHaveBeenCalledWith(
+      'Unable to load visible monitors for private location agent stats',
+      { error }
+    );
   });
 
   it('reports no sharding when shard rebalancing is off, even with an Enterprise license', async () => {
