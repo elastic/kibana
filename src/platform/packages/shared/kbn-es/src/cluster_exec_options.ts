@@ -29,4 +29,11 @@ export interface EsClusterExecOptions {
   esStdoutLogLevel?: 'all' | 'info' | 'warn' | 'error' | 'silent';
   /** Disable creating a temp directory, allowing ES to write to OS's /tmp directory */
   disableEsTmpDir?: boolean;
+  /**
+   * Controls whether the optional `config/es.dev.yml` file, if present, is loaded and
+   * merged into the Elasticsearch settings. Defaults to `true`. Settings from this file
+   * override built-in defaults but are themselves overridden by explicit `-E`/`esArgs`
+   * settings.
+   */
+  devConfig?: boolean;
 }
