@@ -108,8 +108,7 @@ export const CLOSE_TARGETS_CHANGED = i18n.translate(
 export const PREVIEW_LOAD_ERROR = i18n.translate(
   'xpack.alertzero.closeConfirmation.previewLoadError',
   {
-    defaultMessage:
-      'Could not load the pending proposals. Check your connection and try again.',
+    defaultMessage: 'Could not load the pending proposals. Check your connection and try again.',
   }
 );
 
