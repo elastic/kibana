@@ -71,7 +71,8 @@ export const useFetchAlertingEpisodesQuery = ({
     filterState,
     sortState,
     timeRange ?? undefined,
-    additionalEpisodesDataSource?.id
+    additionalEpisodesDataSource?.id,
+    queryV2Source
   );
 
   const query = useQuery<CombinedEpisodesResult>({

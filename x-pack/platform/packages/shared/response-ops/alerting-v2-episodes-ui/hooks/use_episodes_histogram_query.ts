@@ -89,7 +89,8 @@ export const useEpisodesHistogramQuery = ({
       filterState,
       timeRange,
       breakdownField,
-      additionalEpisodesDataSource?.id
+      additionalEpisodesDataSource?.id,
+      queryV2Source
     ),
     queryFn: async ({ signal }) => {
       const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-const SWALLOWED_HTTP_STATUSES = new Set([401, 403, 503]);
+const PRIVILEGE_HTTP_STATUSES = new Set([401, 403]);
+const SERVICE_UNAVAILABLE_HTTP_STATUS = 503;
 const SECURITY_EXCEPTION_TYPE = 'security_exception';
 
 interface HttpStatusCarrier {
@@ -53,15 +54,21 @@ const isSecurityException = (error: unknown): boolean =>
 const isAbortError = (error: unknown): boolean =>
   error instanceof Error && error.name === 'AbortError';
 
-/**
- * True for abort, privilege (401/403 or ES `security_exception`), and 503
- * (index/service not ready) errors that should not surface as episodes fetch toasts.
- */
-export const shouldSwallowFetchError = (error: unknown): boolean => {
-  if (isAbortError(error) || isSecurityException(error)) {
+/** True for errors caused by missing privileges (401/403 or ES `security_exception`). */
+export const isPrivilegeFetchError = (error: unknown): boolean => {
+  if (isSecurityException(error)) {
     return true;
   }
 
   const status = getHttpStatus(error);
-  return status != null && SWALLOWED_HTTP_STATUSES.has(status);
+  return status != null && PRIVILEGE_HTTP_STATUSES.has(status);
 };
+
+/**
+ * True for abort, privilege (401/403 or ES `security_exception`), and 503
+ * (index/service not ready) errors that should not surface as episodes fetch toasts.
+ */
+export const shouldSwallowFetchError = (error: unknown): boolean =>
+  isAbortError(error) ||
+  isPrivilegeFetchError(error) ||
+  getHttpStatus(error) === SERVICE_UNAVAILABLE_HTTP_STATUS;

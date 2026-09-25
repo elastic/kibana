@@ -101,7 +101,8 @@ export const useEpisodesKpisQuery = ({
       filterState,
       timeRange,
       currentUserUid,
-      additionalEpisodesDataSource?.id
+      additionalEpisodesDataSource?.id,
+      queryV2Source
     ),
     queryFn: async ({ signal }) => {
       const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);

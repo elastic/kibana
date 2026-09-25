@@ -18,6 +18,8 @@ jest.mock('react-use/lib/useAsync', () => ({
   __esModule: true,
   default: jest.fn((fn: () => Promise<void>) => {
     const result = fn();
+    // The real hook captures rejections as `error`; swallow them so they don't go unhandled.
+    result.catch(() => {});
     return { loading: false, error: undefined, value: result };
   }),
 }));
@@ -198,5 +200,30 @@ describe('useAlertingRulesCache', () => {
     expect(dataSource.resolveRules).toHaveBeenCalledWith(
       expect.objectContaining({ ids: [ruleId] })
     );
+  });
+
+  it('does not cache rule ids as missing when the v2 rules lookup is unavailable', async () => {
+    const ruleId = 'v2-rule';
+    mockHttp.get.mockRejectedValue({
+      name: 'Error',
+      message: 'Service Unavailable',
+      response: { status: 503 },
+    });
+    const dataSource = createTestEpisodeSource({ resolveRules: jest.fn().mockResolvedValue([]) });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(EpisodeDataSourceProvider, { dataSource }, children);
+
+    const { rerender } = renderHook(
+      ({ ruleIds }: { ruleIds: string[] }) =>
+        useAlertingRulesCache({ ruleIds, services: { http: mockHttp } }),
+      { wrapper, initialProps: { ruleIds: [ruleId] } }
+    );
+
+    await waitFor(() => expect(mockHttp.get).toHaveBeenCalledTimes(1));
+    expect(dataSource.resolveRules).not.toHaveBeenCalled();
+
+    rerender({ ruleIds: [ruleId] });
+
+    await waitFor(() => expect(mockHttp.get).toHaveBeenCalledTimes(2));
   });
 });

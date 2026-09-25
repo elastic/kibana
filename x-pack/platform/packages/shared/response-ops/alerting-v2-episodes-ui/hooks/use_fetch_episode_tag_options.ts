@@ -36,7 +36,8 @@ export const useFetchEpisodeTagOptions = ({
     queryKey: queryKeys.tagOptions(
       spaceId,
       timeRange ?? undefined,
-      additionalEpisodesDataSource?.id
+      additionalEpisodesDataSource?.id,
+      queryV2Source
     ),
     queryFn: async ({ signal }) => {
       const { v2, additional } = await fetchFromV2AndSource({
