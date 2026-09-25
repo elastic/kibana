@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/significant-events-schema'
   - '@kbn/agent-builder-common'
   - '@kbn/dev-cli-runner'
+  - '@kbn/dev-utils'
   - '@kbn/tooling-log'
   - '@kbn/synthtrace'
   - '@kbn/streams-schema'
