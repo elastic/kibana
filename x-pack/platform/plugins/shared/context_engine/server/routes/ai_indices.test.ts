@@ -868,7 +868,7 @@ describe('ai indices routes', () => {
     it('returns 403 when the caller cannot read the backing indices', async () => {
       readService.describe.mockRejectedValue(new AiIndexNotReadableError('a'));
 
-      await callRoute('GET', aiIndexDescribePath, { params: { aiIndexId: 'a' } });
+      await callRoute('GET', AI_INDEX_DESCRIBE_PATH, { params: { aiIndexId: 'a' } });
 
       expect(response.forbidden).toHaveBeenCalledWith({
         body: { message: expect.stringContaining("AI index 'a' is not readable") },
@@ -881,7 +881,7 @@ describe('ai indices routes', () => {
         new Error("AI index 'a' is not available: index_closed_exception")
       );
 
-      await callRoute('GET', aiIndexDescribePath, { params: { aiIndexId: 'a' } });
+      await callRoute('GET', AI_INDEX_DESCRIBE_PATH, { params: { aiIndexId: 'a' } });
 
       expect(response.forbidden).not.toHaveBeenCalled();
       expect(response.customError).toHaveBeenCalledWith({

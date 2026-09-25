@@ -343,15 +343,19 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     }
   );
 
-  apiTest('returns 403 when the caller lacks read privilege', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-      headers: { ...metadataOnlyCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-    });
+  apiTest(
+    'returns Elasticsearch 403 when the caller lacks read privilege',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+        headers: { ...metadataOnlyCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(403);
-    expect(response.body.message).toContain(`AI index '${SINGLE_AI_INDEX_ID}' is not readable`);
-  });
+      expect(response).toHaveStatusCode(403);
+      // No `read` anywhere: Elasticsearch refuses the whole readability probe.
+      expect(response.body.message).toMatch(/security_exception|unauthorized/i);
+    }
+  );
 
   apiTest(
     'returns 403 when the caller holds no privilege on the backing index',
