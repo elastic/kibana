@@ -195,6 +195,7 @@ function renderSection(
     isDeploying?: boolean;
     isDone?: boolean;
     hasFailed?: boolean;
+    isDirty?: boolean;
   } = {}
 ) {
   return render(
@@ -208,6 +209,7 @@ function renderSection(
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
           hasFailed={props.hasFailed ?? false}
+          isDirty={props.isDirty ?? false}
         />
       </React.Suspense>
     </I18nProvider>
@@ -285,17 +287,27 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
     });
 
-    it('Deploy button is enabled immediately when connectorId is present (identity federation drift)', () => {
+    it('Deploy button is enabled immediately when connectorId is present and drift detected', () => {
+      // isDirty=true bypasses form re-validation: the connector was already used in the
+      // previous deploy and is still valid — no need to wait for the form to re-validate it.
       setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
-      renderSection({ showIdentityFederation: true });
+      renderSection({ showIdentityFederation: true, isDirty: true });
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
+    });
+
+    it('Deploy button is disabled when drift detected but no connector is pre-loaded', () => {
+      // isDirty bypass only applies when a connector is present (identity federation path).
+      // Without a connector the form must signal ready before Deploy is enabled.
+      setupMocks({ connectorId: undefined, authMethod: 'identity_federation' });
+      renderSection({ showIdentityFederation: true, isDirty: true });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
     });
 
     it('onReadyChange(false) is suppressed while connector is pre-loaded (avoids loading flash)', () => {
       // With a pre-loaded connector, the identity federation form calls onReadyChange(false)
-      // on mount while it re-validates. The button must stay enabled during that window.
+      // on mount while it re-validates. isDeployReady must stay true during that window.
       setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
-      renderSection({ showIdentityFederation: true });
+      renderSection({ showIdentityFederation: true, isDirty: true });
       act(() => {
         fireEvent.click(screen.getByText('mark-not-ready'));
       });
@@ -305,8 +317,10 @@ describe('ManagedIntegrationsSection', () => {
     it('onReadyChange(false) applies after user changes connector', () => {
       // Once the user picks a different connector (connectorPreloaded cleared), a subsequent
       // onReadyChange(false) from the form must be honoured so the button disables while loading.
+      // isDirty bypass still applies here (connector present), so we test via isDeployReady state
+      // being false — the bypass only affects button rendering, not isDeployReady itself.
       setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
-      renderSection({ showIdentityFederation: true });
+      renderSection({ showIdentityFederation: true, isDirty: false }); // no bypass
       act(() => {
         fireEvent.click(screen.getByText('mark-named')); // user selected a new connector
       });

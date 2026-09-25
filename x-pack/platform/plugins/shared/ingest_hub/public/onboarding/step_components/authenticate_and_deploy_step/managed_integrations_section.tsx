@@ -61,6 +61,13 @@ interface ManagedIntegrationsSectionProps {
   hasFailed: boolean;
   /** When true, Deploy only runs cleanup (Fleet API calls) — AWS credentials are not required. */
   isCleanupOnly?: boolean;
+  /**
+   * When true, settings have drifted from the last deploy. With an existing identity-federation
+   * connector the Deploy button is enabled immediately — credentials were already validated by the
+   * previous deploy and the connector is still the same. This bypasses the form's async
+   * re-validation window which would otherwise disable the button on section re-open.
+   */
+  isDirty?: boolean;
 }
 
 export function ManagedIntegrationsSection({
@@ -72,6 +79,7 @@ export function ManagedIntegrationsSection({
   isDone,
   hasFailed,
   isCleanupOnly = false,
+  isDirty = false,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
   const {
@@ -384,7 +392,11 @@ export function ManagedIntegrationsSection({
 
             {!hasFailed && !isDone && (
               <EuiButton
-                isDisabled={!isDeployReady && !isCleanupOnly}
+                isDisabled={
+                  !isDeployReady &&
+                  !isCleanupOnly &&
+                  !(isDirty && preferredMethod === 'identity_federation' && !!initialConnectorId)
+                }
                 isLoading={isDeploying}
                 onClick={onDeploy}
                 data-test-subj="managedIntegrationsSection-deployButton"
