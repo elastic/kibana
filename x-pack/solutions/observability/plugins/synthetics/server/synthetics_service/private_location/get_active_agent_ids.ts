@@ -9,6 +9,7 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { getAPIKeyForSyntheticsService } from '../get_api_key';
 import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
 import type { SyntheticsServerSetup } from '../../types';
+import { getPrivateLocationShardingApiKey } from './get_sharding_api_key';
 
 /**
  * Data-plane liveness signal: which of the given agents have written a
@@ -24,7 +25,8 @@ import type { SyntheticsServerSetup } from '../../types';
  * so absence of data is ambiguous and falls back to the check-in signal.
  *
  * The task runs as `kibana_system`, which cannot read `synthetics-*`; we query
- * as the synthetics service API key (the same credential Heartbeat uses).
+ * with the Synthetics service API key when available, otherwise with the
+ * dedicated private location sharding API key.
  * Correlation is on `agent.id` because synthetics documents carry `agent.id`,
  * not `host.name`. Best-effort: any failure returns an empty set so the caller
  * falls back to check-ins alone — this never triggers an eviction, only prevents
@@ -44,7 +46,10 @@ export const getRecentlyActiveAgentIds = async (
 
   try {
     signal.throwIfAborted();
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server });
+    const serviceApiKey = await getAPIKeyForSyntheticsService({ server });
+    const { apiKey, isValid } = serviceApiKey.isValid
+      ? serviceApiKey
+      : await getPrivateLocationShardingApiKey({ server });
     if (!apiKey || !isValid) {
       return active;
     }
