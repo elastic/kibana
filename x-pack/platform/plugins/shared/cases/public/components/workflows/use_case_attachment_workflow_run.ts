@@ -14,21 +14,28 @@ import {
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCaseAttachmentWorkflowContext } from './case_attachment_workflow_context';
 
-/** A row target (`attachmentId`) or a bulk target (`attachmentIds`, including a selection of one). */
+/**
+ * A row target (`attachmentId`) or a bulk target (`attachmentIds`, including a selection of one).
+ * `attachmentIds` must not be empty.
+ */
 export type CaseAttachmentWorkflowTarget =
   | { attachmentId: string }
   | { attachmentIds: readonly string[] };
 
 /**
  * Whether the surface renders inside a case, and if so whether the current user may run workflows
- * through Cases. Independent of the target, so it can gate a menu item before the panel renders.
+ * through Cases.
+ *
+ * - `outside`: not in a case. Runs use the Workflows API.
+ * - `available`: in a case and the user may run workflows through Cases.
+ * - `unavailable`: in a case but the user cannot run workflows through Cases.
  */
 export type CaseAttachmentWorkflowRouting = 'outside' | 'available' | 'unavailable';
 
 export interface UseCaseAttachmentWorkflowRunParams {
   attachmentType: string;
-  /** Omit when the surface has no case attachment target. */
-  target?: CaseAttachmentWorkflowTarget;
+  /** Memoize it: a new object builds a new executor. */
+  target: CaseAttachmentWorkflowTarget;
 }
 
 export interface CaseAttachmentWorkflowRunProps {
@@ -36,63 +43,48 @@ export interface CaseAttachmentWorkflowRunProps {
   runWorkflow: RunWorkflowExecutor | undefined;
   /** Pass to `RunWorkflowPanel`. */
   showSuccessToast: boolean;
-  caseRouting: CaseAttachmentWorkflowRouting;
 }
 
 /**
- * Returns `RunWorkflowPanel` props and the case routing state for a registered attachment surface.
- *
- * - `outside`: not in a case. `runWorkflow` is `undefined` and the panel uses the Workflows API.
- * - `available`: in a case and the user may run workflows through Cases. With a target,
- *   `runWorkflow` is a Cases-routed executor that owns the success toast.
- * - `unavailable`: in a case but the user cannot run workflows through Cases.
- *
- * Inside a case, callers must hide their run action when `caseRouting` is `unavailable`, or when it
- * is `available` and they have no target, so no run starts from a case without being recorded on it.
+ * Returns the case routing state for an attachment surface, so it can gate its run action before
+ * a target exists. Inside a case, hide the action unless this is `available` and the surface has
+ * a target, so no run starts from a case without being recorded on it.
+ */
+export const useCaseAttachmentWorkflowRouting = (): CaseAttachmentWorkflowRouting =>
+  useCaseAttachmentWorkflowContext().status;
+
+/**
+ * Returns `RunWorkflowPanel` props for a registered attachment surface. When routing is
+ * `available`, `runWorkflow` is a Cases-routed executor that owns the success toast. Otherwise it
+ * is `undefined` and the panel uses the Workflows API.
  */
 export const useCaseAttachmentWorkflowRun = ({
   attachmentType,
   target,
 }: UseCaseAttachmentWorkflowRunParams): CaseAttachmentWorkflowRunProps => {
   const context = useCaseAttachmentWorkflowContext();
-  const caseId = context?.caseId;
-  const attachmentId =
-    target !== undefined && 'attachmentId' in target ? target.attachmentId : undefined;
-  const attachmentIds =
-    target !== undefined && 'attachmentIds' in target ? target.attachmentIds : undefined;
-
-  const origin = useMemo((): CaseWorkflowRunOrigin | undefined => {
-    if (caseId === undefined) {
-      return undefined;
-    }
-
-    if (attachmentId !== undefined) {
-      return {
-        type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
-        caseId,
-        attachmentType,
-        attachmentId,
-      };
-    }
-
-    if (attachmentIds !== undefined && attachmentIds.length > 0) {
-      return {
-        type: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
-        caseId,
-        attachmentType,
-        attachmentIds: [...attachmentIds],
-      };
-    }
-
-    return undefined;
-  }, [attachmentId, attachmentIds, attachmentType, caseId]);
 
   return useMemo(() => {
-    const caseRouting = context?.status ?? 'outside';
-    const runWorkflow =
-      context?.status === 'available' && origin !== undefined
-        ? context.createExecutor(origin)
-        : undefined;
-    return { runWorkflow, showSuccessToast: runWorkflow === undefined, caseRouting };
-  }, [context, origin]);
+    if (context.status !== 'available') {
+      return { runWorkflow: undefined, showSuccessToast: true };
+    }
+
+    const { caseId, createExecutor } = context;
+    const origin: CaseWorkflowRunOrigin =
+      'attachmentId' in target
+        ? {
+            type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+            caseId,
+            attachmentType,
+            attachmentId: target.attachmentId,
+          }
+        : {
+            type: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+            caseId,
+            attachmentType,
+            attachmentIds: [...target.attachmentIds],
+          };
+
+    return { runWorkflow: createExecutor(origin), showSuccessToast: false };
+  }, [attachmentType, context, target]);
 };

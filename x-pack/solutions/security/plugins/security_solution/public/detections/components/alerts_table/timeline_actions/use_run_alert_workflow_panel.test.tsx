@@ -26,11 +26,12 @@ import * as i18n from '../translations';
 const GENERIC_RUN_PROPS = {
   runWorkflow: undefined,
   showSuccessToast: true,
-  caseRouting: 'outside',
 };
 const mockUseCaseAttachmentWorkflowRun = jest.fn();
+const mockUseCaseAttachmentWorkflowRouting = jest.fn();
 jest.mock('@kbn/cases-plugin/public', () => ({
   useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
 }));
 
 const mockMutate = jest.fn();
@@ -169,6 +170,7 @@ describe('useRunAlertWorkflowPanel', () => {
   beforeEach(() => {
     mockRunWorkflowPanelProps.length = 0;
     mockUseCaseAttachmentWorkflowRun.mockReturnValue(GENERIC_RUN_PROPS);
+    mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
     mockUseRunWorkflow.mockReturnValue({ mutate: mockMutate });
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
@@ -263,10 +265,7 @@ describe('useRunAlertWorkflowPanel', () => {
     });
 
     it('returns empty lists inside a case where Cases workflow runs are unavailable', () => {
-      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
-        ...GENERIC_RUN_PROPS,
-        caseRouting: 'unavailable',
-      });
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('unavailable');
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
@@ -277,11 +276,7 @@ describe('useRunAlertWorkflowPanel', () => {
     });
 
     it('returns the menu item inside a case where Cases workflow runs are available', () => {
-      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
-        runWorkflow: jest.fn(),
-        showSuccessToast: false,
-        caseRouting: 'available',
-      });
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
@@ -356,10 +351,10 @@ describe('useRunAlertWorkflowPanel', () => {
 
     it('passes the Cases executor as runWorkflow when inside a case', async () => {
       const mockExecutor = jest.fn();
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
       mockUseCaseAttachmentWorkflowRun.mockReturnValue({
         runWorkflow: mockExecutor,
         showSuccessToast: false,
-        caseRouting: 'available',
       });
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {

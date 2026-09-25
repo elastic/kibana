@@ -10,7 +10,10 @@ import { act, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { CaseAttachmentWorkflowProvider } from './case_attachment_workflow_provider';
-import { useCaseAttachmentWorkflowRun } from './use_case_attachment_workflow_run';
+import {
+  useCaseAttachmentWorkflowRouting,
+  useCaseAttachmentWorkflowRun,
+} from './use_case_attachment_workflow_run';
 import { useCanRunCaseWorkflow } from './use_run_case_workflow';
 import * as api from './api';
 
@@ -59,14 +62,10 @@ describe('useCaseAttachmentWorkflowRun', () => {
       })
     );
 
-    expect(result.current).toEqual({
-      runWorkflow: undefined,
-      showSuccessToast: true,
-      caseRouting: 'outside',
-    });
+    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
   });
 
-  it('reports unavailable routing when the user cannot run workflows through Cases', () => {
+  it('falls back to the panel executor and toast when the user cannot run workflows through Cases', () => {
     mockUseCanRunCaseWorkflow.mockReturnValue(false);
     const { result } = renderHook(
       () =>
@@ -77,24 +76,7 @@ describe('useCaseAttachmentWorkflowRun', () => {
       { wrapper }
     );
 
-    expect(result.current).toEqual({
-      runWorkflow: undefined,
-      showSuccessToast: true,
-      caseRouting: 'unavailable',
-    });
-  });
-
-  it('reports available routing without an executor when there is no row or bulk target', () => {
-    const { result } = renderHook(
-      () => useCaseAttachmentWorkflowRun({ attachmentType: 'security.alert' }),
-      { wrapper }
-    );
-
-    expect(result.current).toEqual({
-      runWorkflow: undefined,
-      showSuccessToast: true,
-      caseRouting: 'available',
-    });
+    expect(result.current).toEqual({ runWorkflow: undefined, showSuccessToast: true });
   });
 
   it('suppresses the panel success toast when it returns a Cases executor', () => {
@@ -107,11 +89,7 @@ describe('useCaseAttachmentWorkflowRun', () => {
       { wrapper }
     );
 
-    expect(result.current).toEqual({
-      runWorkflow: expect.any(Function),
-      showSuccessToast: false,
-      caseRouting: 'available',
-    });
+    expect(result.current).toEqual({ runWorkflow: expect.any(Function), showSuccessToast: false });
   });
 
   it('posts a singular attachment origin', async () => {
@@ -215,5 +193,32 @@ describe('useCaseAttachmentWorkflowRun', () => {
     expect(mockToasts.addWarning).toHaveBeenCalledTimes(1);
     expect(mockToasts.addSuccess).not.toHaveBeenCalled();
     expect(mockRefreshCaseViewPage).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useCaseAttachmentWorkflowRouting', () => {
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <CaseAttachmentWorkflowProvider caseId="case-1">{children}</CaseAttachmentWorkflowProvider>
+  );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseCanRunCaseWorkflow.mockReturnValue(true);
+  });
+
+  it('reports outside routing without the attachment provider', () => {
+    const { result } = renderHook(() => useCaseAttachmentWorkflowRouting());
+    expect(result.current).toBe('outside');
+  });
+
+  it('reports available routing when the user can run workflows through Cases', () => {
+    const { result } = renderHook(() => useCaseAttachmentWorkflowRouting(), { wrapper });
+    expect(result.current).toBe('available');
+  });
+
+  it('reports unavailable routing when the user cannot run workflows through Cases', () => {
+    mockUseCanRunCaseWorkflow.mockReturnValue(false);
+    const { result } = renderHook(() => useCaseAttachmentWorkflowRouting(), { wrapper });
+    expect(result.current).toBe('unavailable');
   });
 });

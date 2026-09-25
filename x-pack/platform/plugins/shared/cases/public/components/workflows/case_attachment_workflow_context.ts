@@ -11,6 +11,10 @@ import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
 
 export type CaseAttachmentWorkflowContextValue =
   | {
+      /** Not inside a case attachment surface (alerts page, flyout). */
+      status: 'outside';
+    }
+  | {
       status: 'available';
       caseId: string;
       /**
@@ -25,20 +29,17 @@ export type CaseAttachmentWorkflowContextValue =
       caseId: string;
     };
 
+const OUTSIDE_CASE: CaseAttachmentWorkflowContextValue = { status: 'outside' };
+
 /**
  * Kept apart from the provider so the public `useCaseAttachmentWorkflowRun` export does not pull
  * the executor and Workflows UI hooks into the Cases page-load bundle.
  */
-export const CaseAttachmentWorkflowContext = createContext<
-  CaseAttachmentWorkflowContextValue | undefined
->(undefined);
+export const CaseAttachmentWorkflowContext =
+  createContext<CaseAttachmentWorkflowContextValue>(OUTSIDE_CASE);
 
 CaseAttachmentWorkflowContext.displayName = 'CaseAttachmentWorkflowContext';
 
-/**
- * Reads the enclosing case context. Returns `undefined` only outside a case attachment surface.
- * Absence is a legitimate state (alerts page, flyout), not a programming error, so this does not throw.
- */
-export const useCaseAttachmentWorkflowContext = ():
-  | CaseAttachmentWorkflowContextValue
-  | undefined => useContext(CaseAttachmentWorkflowContext);
+/** Reads the enclosing case context, or `{ status: 'outside' }` without a provider. */
+export const useCaseAttachmentWorkflowContext = (): CaseAttachmentWorkflowContextValue =>
+  useContext(CaseAttachmentWorkflowContext);
