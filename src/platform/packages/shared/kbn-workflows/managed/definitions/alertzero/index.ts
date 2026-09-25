@@ -30,6 +30,7 @@ import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './fore
 import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_run_endpoint_analysis';
 import { ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
 import { ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID } from './find_or_create_investigation';
+import { ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID } from './hunt_package_report';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './hunt_continuous_threat_hunt';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID } from './journal_note';
 import {
@@ -99,6 +100,10 @@ export {
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW,
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
 } from './find_or_create_investigation';
+export {
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
+} from './hunt_package_report';
 export {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -173,17 +178,22 @@ export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
 /**
  * Hunt Watch's untagged children invoked via `workflow.execute` by the tagged
  * Worker (`hunt_continuous_threat_hunt.yaml`): the hunt child (former 3D, now
- * on PR 4, `system-security-hunt-execute`) and the find-or-create-Investigation
+ * on PR 4, `system-security-hunt-execute`), the find-or-create-Investigation
  * child (added Phase 0 task 7: the deterministic id it mints needs a uuidv5
  * hash Liquid cannot compute, so it cannot live inline in the Worker's
- * `parallel` branch). Own no trigger, so — like `journal_note` above — both
+ * `parallel` branch), and the packaging child (Phase 5: wraps `hunt.packageReport`,
+ * fans mint payloads out to the proposal-gate child, closes the Investigation
+ * on a clean run). Own no trigger, so — like `journal_note` above — all three
  * must be installed globally for the Worker's `workflow.execute` calls to
  * resolve them. Correlation (`system-security-hunt-correlation`) lands with 3B
- * under R.7.
+ * under R.7. The proposal-gate child (Phase 6, not yet written) is not in this
+ * list yet; the packaging child's `workflow.executeAsync` reference to it
+ * resolves at runtime, not at registration, so this doesn't block Phase 5.
  */
 export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [
   ALERTZERO_HUNT_WORKFLOW_ID,
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
 ] as const;
 
 /**
