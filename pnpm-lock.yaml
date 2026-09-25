@@ -2380,9 +2380,6 @@ importers:
       '@kbn/index-management-shared-types':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/index-management/index_management_shared_types
-      '@kbn/index-patterns-test-plugin':
-        specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/index_patterns
       '@kbn/indices-metadata-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/indices_metadata
@@ -8758,8 +8755,6 @@ importers:
   src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin: {}
 
   src/platform/test/plugin_functional/plugins/hardening: {}
-
-  src/platform/test/plugin_functional/plugins/index_patterns: {}
 
   src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
 

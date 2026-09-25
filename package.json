@@ -820,7 +820,6 @@
     "@kbn/index-lifecycle-management-plugin": "workspace:*",
     "@kbn/index-management-plugin": "workspace:*",
     "@kbn/index-management-shared-types": "workspace:*",
-    "@kbn/index-patterns-test-plugin": "workspace:*",
     "@kbn/indices-metadata-plugin": "workspace:*",
     "@kbn/inference-common": "workspace:*",
     "@kbn/inference-connectors": "workspace:*",
