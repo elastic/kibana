@@ -47,12 +47,16 @@ const page = (id: string, title = id, content = 'body'): MemoryPage => ({
   },
 });
 
-const createStore = (overrides: Partial<MemoryPageStore> = {}): MemoryPageStore =>
-  ({
+const createStore = (overrides: Partial<MemoryPageStore> = {}): MemoryPageStore => {
+  const get = overrides.get ?? jest.fn();
+  return {
     list: jest.fn(),
     retrieve: jest.fn().mockResolvedValue([]),
-    get: jest.fn(),
-    getVersioned: jest.fn(),
+    get,
+    getVersioned: jest.fn(async (id: string) => {
+      const current = await get(id);
+      return current ? { page: current, seqNo: 1, primaryTerm: 1 } : undefined;
+    }),
     getByName: jest.fn(),
     upsert: jest.fn().mockResolvedValue({}),
     create: jest.fn().mockResolvedValue({}),
@@ -62,7 +66,8 @@ const createStore = (overrides: Partial<MemoryPageStore> = {}): MemoryPageStore 
     delete: jest.fn(),
     pruneDuplicates: jest.fn(),
     ...overrides,
-  } as MemoryPageStore);
+  } as MemoryPageStore;
+};
 
 describe('formatRecalled', () => {
   it('includes context and facts beyond character 150', () => {
@@ -327,6 +332,174 @@ describe('applyMemoryEdits', () => {
     );
   });
 
+  it('does not publish or archive when a source becomes harmful during synthesis', async () => {
+    const source = page('memory_kafka-lag', 'Kafka consumer lag');
+    let current = { page: source, seqNo: 1, primaryTerm: 1 };
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === source.id ? source : undefined)),
+      getVersioned: jest.fn(async () => current),
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-kafka',
+          title: source.title,
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup: async () => {
+        current = {
+          page: { ...source, status: 'archived', archive_reason: 'harmful' },
+          seqNo: 2,
+          primaryTerm: 1,
+        };
+        return { title: 'Merged', content: 'Body', context: 'kafka lag' };
+      },
+      logger: loggerMock.create(),
+    });
+
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.update).not.toHaveBeenCalled();
+    expect(store.archive).not.toHaveBeenCalled();
+    expect(summary.mergeSuccessCount).toBe(0);
+  });
+
+  it('resynthesizes from refreshed content when a live source changes', async () => {
+    const source = page('memory_kafka-lag', 'Kafka consumer lag', 'Old fact.');
+    const refreshed = { ...source, content: 'Refreshed fact.' };
+    let current = { page: source, seqNo: 1, primaryTerm: 1 };
+    const synthesizedSourceContents: string[][] = [];
+    const synthesizeMemoryGroup = jest.fn(async ({ sources }: { sources: MemoryPage[] }) => {
+      synthesizedSourceContents.push(sources.map(({ content }) => content));
+      if (current.seqNo === 1) {
+        current = { page: refreshed, seqNo: 2, primaryTerm: 1 };
+      }
+      return { title: 'Merged Kafka', content: current.page.content, context: 'kafka lag' };
+    });
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === source.id ? source : undefined)),
+      getVersioned: jest.fn(async () => current),
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-kafka',
+          title: source.title,
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup,
+      logger: loggerMock.create(),
+    });
+
+    expect(synthesizeMemoryGroup).toHaveBeenCalledTimes(2);
+    expect(synthesizedSourceContents[1]).toEqual(['Refreshed fact.']);
+    expect(store.create).toHaveBeenCalledWith(
+      expect.objectContaining({ content: 'Refreshed fact.' })
+    );
+    expect(summary.mergeSuccessCount).toBe(1);
+  });
+
+  it('preserves sources when repeated live changes exhaust merge attempts', async () => {
+    const source = page('memory_kafka-lag', 'Kafka consumer lag');
+    let seqNo = 1;
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === source.id ? source : undefined)),
+      getVersioned: jest.fn(async () => ({
+        page: { ...source, content: `Fact ${seqNo}` },
+        seqNo,
+        primaryTerm: 1,
+      })),
+    });
+    const synthesizeMemoryGroup = jest.fn(async () => {
+      seqNo += 1;
+      return { title: 'Merged Kafka', content: `Fact ${seqNo}`, context: 'kafka lag' };
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-kafka',
+          title: source.title,
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup,
+      logger: loggerMock.create(),
+    });
+
+    expect(synthesizeMemoryGroup).toHaveBeenCalledTimes(3);
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.update).not.toHaveBeenCalled();
+    expect(store.archive).not.toHaveBeenCalled();
+    expect(summary).toEqual(
+      expect.objectContaining({ mergeSuccessCount: 0, writeFailureCount: 1 })
+    );
+  });
+
+  it('archives non-canonical sources only after the canonical commit', async () => {
+    const source = page('memory_kafka-lag', 'Kafka consumer lag');
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === source.id ? source : undefined)),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-kafka',
+          title: source.title,
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup: async () => ({
+        title: 'Merged Kafka',
+        content: 'Merged fact.',
+        context: 'kafka lag',
+      }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.create).toHaveBeenCalledTimes(1);
+    expect(store.archive).toHaveBeenCalledWith(source.id, 'merged');
+    expect((store.create as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (store.archive as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
   it('does not merge when synthesis returns an empty context', async () => {
     const source = page('memory_kafka-lag', 'Kafka consumer lag');
     source.context = 'why is checkout slow';
@@ -402,11 +575,12 @@ describe('applyMemoryEdits', () => {
     const source = page('memory_source', 'Source memory');
     source.context = 'source context';
     const store = createStore({
-      get: jest
-        .fn()
-        .mockImplementation(async (id: string) =>
-          id === source.id ? source : page(id, 'Occupied canonical page')
-        ),
+      get: jest.fn().mockImplementation(async (id: string) => {
+        if (id === source.id) {
+          return source;
+        }
+        return id === 'memory_duplicate-source' ? undefined : page(id, 'Occupied canonical page');
+      }),
     });
 
     const summary = await applyMemoryEdits({
