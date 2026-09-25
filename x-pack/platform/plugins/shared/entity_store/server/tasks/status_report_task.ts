@@ -36,6 +36,7 @@ import {
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
@@ -264,25 +265,34 @@ export function registerStatusReportTask({
           executionUuid,
           setCustomTaskRunEventFields,
         }) => ({
-          run: () =>
-            wrapTaskRun({
-              spanName: 'entityStore.task.status_report.run',
-              namespace: taskInstance.state.namespace,
-              attributes: {
-                'entity_store.task.id': taskInstance.id,
-              },
-              run: () =>
-                runTask({
-                  taskInstance,
-                  fakeRequest,
-                  signal,
-                  executionUuid,
-                  setCustomTaskRunEventFields,
-                  logger: logger.get(taskInstance.id),
-                  core,
-                  telemetryReporter,
-                }),
-            }),
+          run: async () => {
+            const [coreStart] = await core.getStartServices();
+            return coreStart.executionContext.withContext(
+              buildEaExecutionContext(
+                EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_STATUS_REPORT_TASK,
+                taskInstance.id
+              ),
+              () =>
+                wrapTaskRun({
+                  spanName: 'entityStore.task.status_report.run',
+                  namespace: taskInstance.state.namespace,
+                  attributes: {
+                    'entity_store.task.id': taskInstance.id,
+                  },
+                  run: () =>
+                    runTask({
+                      taskInstance,
+                      fakeRequest,
+                      signal,
+                      executionUuid,
+                      setCustomTaskRunEventFields,
+                      logger: logger.get(taskInstance.id),
+                      core,
+                      telemetryReporter,
+                    }),
+                })
+            );
+          },
         }),
       },
     });

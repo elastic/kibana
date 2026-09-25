@@ -24,14 +24,22 @@ export const ExportRulesRequestQuery = lazySchema(() =>
     /**
      * Determines whether a summary of the exported rules is returned.
      */
-    exclude_export_details: BooleanFromString.optional().default(false),
+    exclude_export_details: BooleanFromString.optional()
+      .default(false)
+      .describe('Determines whether a summary of the exported rules is returned.'),
     /**
       * File name for saving the exported rules.
 > info
 > When using cURL to export rules to a file, use the -O and -J options to save the rules to the file name specified in the URL.
 
       */
-    file_name: z.string().optional().default('export.ndjson'),
+    file_name: z
+      .string()
+      .optional()
+      .default('export.ndjson')
+      .describe(
+        'File name for saving the exported rules.\n> info\n> When using cURL to export rules to a file, use the -O and -J options to save the rules to the file name specified in the URL.\n'
+      ),
   })
 );
 export type ExportRulesRequestQuery = z.infer<typeof ExportRulesRequestQuery>;
@@ -43,11 +51,15 @@ export const ExportRulesRequestBody = lazySchema(() =>
       /**
        * Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
        */
-      objects: z.array(
-        z.object({
-          rule_id: RuleSignatureId,
-        })
-      ),
+      objects: z
+        .array(
+          z.object({
+            rule_id: RuleSignatureId,
+          })
+        )
+        .describe(
+          "Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified."
+        ),
     })
     .nullable()
 );

@@ -26,6 +26,8 @@ export class InventoryPage {
   public readonly metricsContextMenu: Locator;
 
   public readonly schemaSelect: Locator;
+  public readonly schemaHelpText: Locator;
+  public readonly schemaSelectorInvalidToken: Locator;
 
   public readonly k8sTourText: Locator;
   public readonly k8sTourDismissButton: Locator;
@@ -40,6 +42,14 @@ export class InventoryPage {
   public readonly nodesOverviewTable: Locator;
 
   public readonly noDataPrompt: Locator;
+  public readonly noDataSwitchSchemaLink: Locator;
+
+  public readonly contextMenuLogsLink: Locator;
+  public readonly contextMenuApmLink: Locator;
+  public readonly contextMenuMetricsLink: Locator;
+
+  public readonly waffleGroupByDropdown: Locator;
+  public readonly groupByContextMenu: Locator;
 
   public readonly noDataPage: Locator;
   public readonly noDataPageActionButton: Locator;
@@ -81,6 +91,8 @@ export class InventoryPage {
     this.metricsContextMenu = this.page.getByTestId('infraInventoryMetricsContextMenu');
 
     this.schemaSelect = this.page.getByTestId('infraSchemaSelect');
+    this.schemaHelpText = this.page.getByText(/available in another schema/);
+    this.schemaSelectorInvalidToken = this.page.getByTestId('infraSchemaSelectorInvalidToken');
 
     this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
     this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
@@ -95,6 +107,14 @@ export class InventoryPage {
     this.nodesOverviewTable = this.page.getByTestId('infraNodesOverviewTable');
 
     this.noDataPrompt = this.page.getByTestId('noMetricsDataPrompt');
+    this.noDataSwitchSchemaLink = this.page.getByTestId('infraInventoryViewNoDataInSelectedSchema');
+
+    this.contextMenuLogsLink = this.page.getByTestId('viewLogsContextMenuItem');
+    this.contextMenuApmLink = this.page.getByTestId('viewApmTracesContextMenuItem');
+    this.contextMenuMetricsLink = this.page.getByTestId('viewAssetDetailsContextMenuItem');
+
+    this.waffleGroupByDropdown = this.page.getByTestId('waffleGroupByDropdown');
+    this.groupByContextMenu = this.page.getByTestId('groupByContextMenu');
 
     this.noDataPage = this.page.getByTestId('kbnNoDataPage');
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
@@ -108,17 +128,15 @@ export class InventoryPage {
     this.alertsHeaderButton = this.page.getByTestId('infrastructure-alerts-and-rules');
     this.alertsMenu = this.page.getByTestId('metrics-alert-menu');
 
-    this.inventoryAlertsMenuOption = this.alertsMenu.getByTestId('inventory-alerts-menu-option');
-    this.createInventoryRuleButton = this.alertsMenu.getByTestId('inventory-alerts-create-rule');
+    this.inventoryAlertsMenuOption = this.page.getByTestId('inventory-alerts-menu-option');
+    this.createInventoryRuleButton = this.page.getByTestId('inventory-alerts-create-rule');
 
-    this.metricsAlertsMenuOption = this.alertsMenu.getByTestId(
-      'metrics-threshold-alerts-menu-option'
-    );
-    this.createMetricsThresholdRuleButton = this.alertsMenu.getByTestId(
+    this.metricsAlertsMenuOption = this.page.getByTestId('metrics-threshold-alerts-menu-option');
+    this.createMetricsThresholdRuleButton = this.page.getByTestId(
       'metrics-threshold-alerts-create-rule'
     );
 
-    this.customThresholdAlertMenuOption = this.alertsMenu.getByTestId(
+    this.customThresholdAlertMenuOption = this.page.getByTestId(
       'custom-threshold-alerts-menu-option'
     );
 
@@ -257,6 +275,29 @@ export class InventoryPage {
     };
   }
 
+  /** Exact tile name. `pod-0` must not match `semconv-pod-0`. */
+  public async podWaffleNodeByName(podName: string) {
+    const container = this.waffleMap.getByTestId('nodeContainer').filter({
+      has: this.page.getByTestId('nodeName').getByText(podName, { exact: true }),
+    });
+
+    return {
+      container,
+      name: container.getByTestId('nodeName'),
+      value: container.getByTestId('nodeValue'),
+    };
+  }
+
+  public async selectGroupBy(field: string) {
+    await this.waffleGroupByDropdown.click();
+    await this.groupByContextMenu.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    // EuiContextMenu assigns role="menuitem" to panel items (not button).
+    await this.groupByContextMenu
+      .getByRole('menuitem', { name: field, exact: true })
+      .click({ timeout: EXTENDED_TIMEOUT });
+    await this.waitForNodesToLoad();
+  }
+
   public async clickWaffleNode(nodeName: string) {
     const node = await this.getWaffleNode(nodeName);
     await node.container.click();
@@ -318,6 +359,10 @@ export class InventoryPage {
     await this.schemaSelect.click();
     await this.page.getByRole('option', { name: schema }).waitFor();
     await this.page.getByRole('option', { name: schema }).click();
+    // Wait for the control to reflect the selection before callers assert URL/tiles.
+    await this.schemaSelect
+      .filter({ hasText: schema })
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.waitForNodesToLoad();
   }
 

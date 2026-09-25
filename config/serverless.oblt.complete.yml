@@ -8,6 +8,7 @@ xpack.infra.enabled: true
 xpack.slo.enabled: true
 xpack.uptime.enabled: true
 xpack.significantEvents.enabled: true
+xpack.nightshiftSources.enabled: true
 
 xpack.features.overrides:
   infrastructure.name: 'Infrastructure'
@@ -30,6 +31,8 @@ xpack.features.overrides:
   agentBuilderSml.category: 'observability'
   ### Context Engine should match Agent Builder for role management (avoid orphan Kibana category).
   contextEngine.category: 'observability'
+  ### Agentic investigations should be moved from Analytics category to the Observability one.
+  # agenticInvestigations.category: 'observability' # TODO: uncomment when agentic investigations plugin is enabled
   
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

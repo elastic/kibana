@@ -92,7 +92,7 @@ If you have an OpenRouter API key (from vault config or `OPENROUTER_API_KEY`):
 bash x-pack/platform/packages/shared/kbn-evals/scripts/openrouter/dev_env.sh
 ```
 
-This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_AI_CONNECTORS`.
+This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_INFERENCE_ENDPOINTS`.
 
 </details>
 
@@ -266,6 +266,21 @@ Each eval suite lives in its own `kbn-evals-suite-<name>` package. The package c
 
 To scaffold a new suite, you can use the [`evals-create-suite`](../../../../../.agents/skills/evals-create-suite/SKILL.md) skill (available to AI coding agents) or follow its templates manually. Register suites in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) for CI labeling and `node scripts/evals list`.
 
+### Suite-owned secrets (`scoutHook`)
+
+A suite whose Scout server needs secrets from the evals config can map them into env with a hook in its own package, rather than teaching the shared evals tooling about them. Point `scoutHook` in its `evals.suites.json` entry at a repo-relative bash script:
+
+```json
+{
+  "id": "my-suite",
+  "configPath": "x-pack/.../kbn-evals-suite-my-suite/playwright.config.ts",
+  "serverConfigSet": "evals_my_suite",
+  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh"
+}
+```
+
+The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
+
 ### Playwright config
 
 ```ts
@@ -392,7 +407,7 @@ Built-in evaluator factories you can use directly or as inspiration for custom e
   - `Correctness` -- checks factual accuracy against expected output
   - `Groundedness` -- verifies claims are supported by provided context
 - **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks agent skill reads)
-- **RAG** -- `createRagEvaluators` (Precision@K, Recall@K, F1@K)
+- **IR (information retrieval)** -- `createIrEvaluators` (Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K)
 - **Code evaluators** -- any inline `{ name, kind: 'CODE', direction, evaluate }` object
 
 You can use these as-is or build your own directly in the suite.
@@ -471,6 +486,73 @@ node scripts/evals dataplex sync --dry-run   # Preview changes
 
 ## 4. Developer details
 
+### Connector definitions and inference endpoints
+
+Model definitions come from two sources:
+
+1. `KIBANA_TESTING_INFERENCE_ENDPOINTS` — **inference endpoint definitions** (base64-encoded or raw JSON, set by CI or exported by `node scripts/evals init`).
+2. `KIBANA_TESTING_AI_CONNECTORS` or, locally, `xpack.actions.preconfigured` in `config/kibana.dev.yml` — **stack connector definitions** (Actions saved objects, e.g. the workflow suites' mock Slack/email connectors).
+
+`KIBANA_TESTING_INFERENCE_ENDPOINTS` example (decoded):
+
+```json
+{
+  "eis-anthropic-claude-sonnet-4-6": {
+    "name": "EIS anthropic-claude-sonnet-4-6",
+    "inferenceId": ".anthropic-claude-sonnet-4-6-chat_completion",
+    "provider": "elastic",
+    "taskType": "chat_completion",
+    "providerConfig": { "model_id": "anthropic-claude-sonnet-4-6" }
+  },
+  "openrouter-openai-gpt-4o": {
+    "name": "OpenRouter openai/gpt-4o",
+    "inferenceId": "openrouter-openai-gpt-4o",
+    "provider": "openai",
+    "taskType": "chat_completion",
+    "providerConfig": {
+      "model_id": "openai/gpt-4o",
+      "url": "https://openrouter.ai/api/v1/chat/completions"
+    },
+    "secrets": { "providerSecrets": { "api_key": "<api key>" } }
+  }
+}
+```
+
+#### Migrating `.gen-ai` definitions
+
+**deprecated `.gen-ai` stack connector**, `.gen-ai` definitions are no longer recognized as LLM definitions.
+
+Preferred replacement: an inference endpoint definition in `KIBANA_TESTING_INFERENCE_ENDPOINTS` (see the `openrouter-openai-gpt-4o` entry above). If you would rather keep the model in `kibana.dev.yml`, use a preconfigured `.inference` stack connector, Kibana creates the underlying endpoint at startup and evals reuses the preconfigured connector:
+
+```yaml
+# Before
+xpack.actions.preconfigured:
+  my-gpt:
+    name: My GPT
+    actionTypeId: .gen-ai
+    config:
+      apiUrl: https://openrouter.ai/api/v1/chat/completions
+      defaultModel: openai/gpt-4o
+    secrets:
+      apiKey: '<api key>'
+
+# After
+xpack.actions.preconfigured:
+  openrouter-openai-gpt-4o:
+    name: OpenRouter openai/gpt-4o
+    actionTypeId: .inference
+    config:
+      provider: openai
+      taskType: chat_completion
+      inferenceId: openrouter-openai-gpt-4o
+      providerConfig:
+        model_id: openai/gpt-4o
+        url: https://openrouter.ai/api/v1/chat/completions
+    secrets:
+      providerSecrets:
+        api_key: '<api key>'
+```
+
 ### Automated label sync
 
 `models:*` and `models:judge:*` labels are synced automatically:
@@ -510,7 +592,10 @@ Grants:
 
 - Write/read `.evaluation-scores*` (results)
 - Write/read `traces-*` (OTLP traces)
+- Read evidence events from `logs-*`, restricted by document-level security
 - Write/read/delete `.evaluation-dataset*` (managed datasets)
 - Kibana `evals` feature privilege (`all`)
+
+The log-event allowlist is embedded in the API key. Regenerate existing keys when support for a new log-backed instrumentation profile or event name is added.
 
 With `--profile dev-vault`, these keys are read from Vault automatically.

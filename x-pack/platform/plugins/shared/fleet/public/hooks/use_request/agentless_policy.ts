@@ -25,28 +25,51 @@ import type {
   UpdateAgentlessPolicyResponse,
 } from '../../../common/types/rest_spec/agentless_policy';
 
+import {
+  type CloudConnectorIacPersistOptions,
+  persistPendingCloudConnectorIac,
+} from './pending_cloud_connector_iac';
 import { sendRequestForRq } from './use_request';
 import type { RequestError } from './use_request';
 
-export const sendCreateAgentlessPolicy = (body: CreateAgentlessPolicyRequest['body']) => {
-  return sendRequestForRq<CreateAgentlessPolicyResponse>({
+export const sendCreateAgentlessPolicy = async (
+  body: CreateAgentlessPolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
+) => {
+  const result = await sendRequestForRq<CreateAgentlessPolicyResponse>({
     path: agentlessPolicyRouteService.getCreatePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
+  await persistPendingCloudConnectorIac({
+    policyName: body.name,
+    cloudConnectorId: result.item.cloud_connector?.cloud_connector_id,
+    onError: onIacPersistError,
+  });
+  return result;
 };
 
-export const sendUpdateAgentlessPolicy = (
+export const sendUpdateAgentlessPolicy = async (
   policyId: string,
-  body: UpdateAgentlessPolicyRequest['body']
+  body: UpdateAgentlessPolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
 ) => {
-  return sendRequestForRq<UpdateAgentlessPolicyResponse>({
+  const result = await sendRequestForRq<UpdateAgentlessPolicyResponse>({
     path: agentlessPolicyRouteService.getUpdatePath(policyId),
     method: 'put',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
+  await persistPendingCloudConnectorIac({
+    policyName: body.name,
+    cloudConnectorId:
+      result.item.cloud_connector?.cloud_connector_id ?? body.cloud_connector?.cloud_connector_id,
+    onError: onIacPersistError,
+  });
+  return result;
 };
 
 export const sendDeleteAgentlessPolicy = (

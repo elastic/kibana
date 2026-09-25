@@ -27,7 +27,6 @@ import { AlertConditionStep } from './alert_condition_step';
 import { OutcomeStep } from './outcome_step';
 import { EsqlRecoveryContent } from './esql_recovery_content';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
-import { NotificationsStep } from './notifications_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { QueryFieldRules } from './query_field_rules';
 
@@ -38,7 +37,6 @@ interface Props {
   onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
-  ruleId?: string;
   builderType?: string;
 }
 
@@ -95,14 +93,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
       defaultMessage: 'Actions',
     }),
-    render: (props) => (
-      <>
-        <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        <EuiHorizontalRule margin="m" />
-        <NotificationsStep />
-      </>
-    ),
-    fields: ['notifications'],
+    render: (props) => <LinkedActionPoliciesStep http={props.services.http} />,
   },
 };
 
@@ -162,7 +153,6 @@ export const ComposeDiscoverForm = ({
   onRecoveryTypeChange,
   onKindChange,
   isEditing,
-  ruleId,
   builderType,
 }: Props) => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
@@ -180,7 +170,6 @@ export const ComposeDiscoverForm = ({
     onRecoveryTypeChange,
     onKindChange,
     isEditing,
-    ruleId,
     renderCustomRecovery,
   });
 

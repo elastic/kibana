@@ -11,12 +11,12 @@ import type { LineCounter } from 'yaml';
 import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowValidationRuleId } from '@kbn/workflows';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   getValueFromValueNode,
   type StepPropInfo,
   type WorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 const CONDITION_VALIDATION_OWNER = 'if-condition-validation' as const;
 

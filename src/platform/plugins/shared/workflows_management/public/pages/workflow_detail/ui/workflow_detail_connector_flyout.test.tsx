@@ -144,6 +144,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
         initialConnector: { actionTypeId: 'test-action-type' },
         onClose: expect.any(Function),
         onConnectorCreated: expect.any(Function),
+        onConnectorUpdated: expect.any(Function),
       });
     });
 
@@ -168,6 +169,52 @@ describe('WorkflowDetailConnectorFlyout', () => {
         onCloseCallback!();
       });
       expect(store.getState().detail.connectorFlyout.isOpen).toBe(false);
+    });
+
+    it('reloads connectors when a created connector is edited without inserting the id again', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      let onConnectorUpdatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        onConnectorUpdatedCallback = config.onConnectorUpdated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(
+          openCreateConnectorFlyout({
+            connectorType: '.dual',
+            insertPosition: mockInsertPosition,
+          })
+        );
+      });
+
+      act(() => {
+        onConnectorCreatedCallback!({
+          ...mockConnector,
+          actionTypeId: '.dual',
+          isInboundEventsEnabled: true,
+        });
+      });
+
+      const editorModel = mockEditorRef.current?.getModel();
+      expect(editorModel?.pushEditOperations).toHaveBeenCalledTimes(1);
+      (editorModel?.pushEditOperations as jest.Mock).mockClear();
+      mockLoadConnectors.mockClear();
+
+      act(() => {
+        onConnectorUpdatedCallback!({
+          ...mockConnector,
+          actionTypeId: '.dual',
+          isInboundEventsEnabled: false,
+          name: 'Renamed',
+        });
+      });
+
+      expect(mockLoadConnectors).toHaveBeenCalledTimes(1);
+      expect(editorModel?.pushEditOperations).not.toHaveBeenCalled();
+      expect(store.getState().detail.connectorFlyout.isOpen).toBe(true);
     });
 
     it('should insert connector ID and reload connectors when onConnectorCreated is triggered', () => {
@@ -276,6 +323,60 @@ describe('WorkflowDetailConnectorFlyout', () => {
         ],
         expect.any(Function)
       );
+    });
+
+    it('closes after creating a dual connector with inbound events off', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(
+          openCreateConnectorFlyout({
+            connectorType: '.dual',
+          })
+        );
+      });
+
+      act(() => {
+        onConnectorCreatedCallback!({
+          ...mockConnector,
+          actionTypeId: '.dual',
+          isInboundEventsEnabled: false,
+        });
+      });
+
+      expect(store.getState().detail.connectorFlyout.isOpen).toBe(false);
+    });
+
+    it('keeps the flyout open after creating a dual connector with inbound events on', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(
+          openCreateConnectorFlyout({
+            connectorType: '.dual',
+          })
+        );
+      });
+
+      act(() => {
+        onConnectorCreatedCallback!({
+          ...mockConnector,
+          actionTypeId: '.dual',
+          isInboundEventsEnabled: true,
+        });
+      });
+
+      expect(store.getState().detail.connectorFlyout.isOpen).toBe(true);
     });
   });
 

@@ -36,11 +36,12 @@ describe('initialize fetch', () => {
     setters,
   } = getMockedSearchApi({ searchSource, savedSearch });
   const refreshTrigger$ = new BehaviorSubject<void>(undefined);
+  let cleanupFetch: (() => void) | undefined;
 
   const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
   beforeAll(async () => {
-    initializeFetch({
+    const { cleanup } = initializeFetch({
       api: mockedApi,
       stateManager,
       discoverServices: discoverServiceMock,
@@ -50,7 +51,9 @@ describe('initialize fetch', () => {
       }),
       refreshTrigger$,
       ...setters,
+      setApproximationApplied: jest.fn(),
     });
+    cleanupFetch = cleanup;
     await waitOneTick();
   });
 
@@ -85,7 +88,7 @@ describe('initialize fetch', () => {
   });
 
   it('should catch and emit error', async () => {
-    expect(mockedApi.blockingError$.getValue()).toBeUndefined();
+    expect(mockedApi.searchError$.getValue()).toBeUndefined();
     searchSource.fetch$ = jest.fn().mockImplementation(
       () =>
         new Observable(() => {
@@ -94,8 +97,8 @@ describe('initialize fetch', () => {
     );
     mockedApi.savedSearch$.next(savedSearch);
     await waitOneTick();
-    expect(mockedApi.blockingError$.getValue()).toBeDefined();
-    expect(mockedApi.blockingError$.getValue()?.message).toBe('Search failed');
+    expect(mockedApi.searchError$.getValue()).toBeDefined();
+    expect(mockedApi.searchError$.getValue()?.message).toBe('Search failed');
   });
 
   it('should correctly handle aborted requests', async () => {
@@ -143,5 +146,13 @@ describe('initialize fetch', () => {
     await waitOneTick();
 
     expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBeforeRefresh);
+  });
+
+  it('aborts the current request on cleanup', () => {
+    const signal = mockedApi.abortSignal$.getValue();
+
+    expect(signal).toBeDefined();
+    cleanupFetch?.();
+    expect(signal?.aborted).toBe(true);
   });
 });

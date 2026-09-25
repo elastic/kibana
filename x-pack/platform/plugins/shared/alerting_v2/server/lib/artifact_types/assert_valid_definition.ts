@@ -10,11 +10,10 @@ import type { ArtifactTypeDefinition } from './types';
 /**
  * A reference field names the `data` key it mirrors, so it must be a colon-free
  * identifier (colons delimit the `artifact:<field>:<id>` reference name).
- * Casing is deliberately not restricted: the field has to match the artifact's
- * data key exactly, and shipped keys (e.g. the dashboard type's `dashboardId`)
- * are camelCase.
+ * snake_case is enforced to match the payload-key convention of the alerting
+ * v2 APIs.
  */
-const SAFE_FIELD_PATTERN = /^[A-Za-z][A-Za-z0-9_]*$/;
+const SAFE_FIELD_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 /**
  * Structural sanity checks for an artifact type definition. Throws so a
@@ -46,7 +45,7 @@ export function assertValidDefinition(def: ArtifactTypeDefinition): void {
     }
     if (!SAFE_FIELD_PATTERN.test(descriptor.field)) {
       throw new Error(
-        `Artifact type "${def.type}" reference field "${descriptor.field}" is invalid: it must start with a letter and may contain only letters, digits, and underscores`
+        `Artifact type "${def.type}" reference field "${descriptor.field}" is invalid: it must be snake_case — start with a lowercase letter and contain only lowercase letters, digits, and underscores`
       );
     }
     if (seenFields.has(descriptor.field)) {

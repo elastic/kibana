@@ -8,13 +8,13 @@
  */
 
 import { parse as yamlParse } from 'yaml';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 import {
   getEvalPipeline,
   getEvalTriggerStep,
   getForwardablePrLabels,
   shouldRunEvals,
-} from './eval_pipeline';
+} from './eval_pipeline.ts';
 
 // `jest.mock` calls are hoisted above the imports above, so `eval_pipeline` sees
 // the mocked `fs` / `child_process` when it is first evaluated.
@@ -206,11 +206,9 @@ describe('eval_pipeline', () => {
     });
 
     it('parses the JSON-array label form too (matches the child parser)', () => {
-      expect(
-        getForwardablePrLabels(
-          '["evals:smoke-tests","help wanted","ci:build-with-rspack-optimizer"]'
-        )
-      ).toBe('evals:smoke-tests,ci:build-with-rspack-optimizer');
+      expect(getForwardablePrLabels('["evals:smoke-tests","help wanted","ci:cloud-deploy"]')).toBe(
+        'evals:smoke-tests,ci:cloud-deploy'
+      );
     });
 
     it('returns an empty string when every label contains whitespace', () => {

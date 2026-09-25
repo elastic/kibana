@@ -27,9 +27,9 @@ describe('trackDiscoverSessionAction', () => {
   });
 
   it.each([
-    ['create', 'discover_session_create', 'creation', 'created'],
-    ['update', 'discover_session_update', 'change', 'updated'],
-    ['delete', 'discover_session_delete', 'deletion', 'deleted'],
+    ['create', 'discover_session_create', ['creation'], 'created'],
+    ['update', 'discover_session_update', ['change'], 'updated'],
+    ['delete', 'discover_session_delete', ['deletion'], 'deleted'],
   ] as const)('tracks a successful %s', (operation, action, eventType, verb) => {
     trackDiscoverSessionAction(userActivity, operation, result);
 

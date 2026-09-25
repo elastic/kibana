@@ -24,6 +24,23 @@ import type { ActionsClientContext } from '../../../../actions_client';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
+import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
+import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
+
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeHasInboundEvents(actionTypeId)
+    ),
+    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeIsDual(actionTypeId)
+    ),
+  };
+});
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const authorization = actionsAuthorizationMock.create();
@@ -902,14 +919,37 @@ describe('update()', () => {
   });
 
   describe('inbound ingress credentials', () => {
+    const securityService = securityServiceMock.createStart();
     const inboundContext: ActionsClientContext = {
       ...mockContext,
       spaceId: 'default',
+      securityService,
     };
 
-    const storedHash = 'b'.repeat(64);
+    const previousApiKey = encodeApiKey('old-id', 'old-secret');
+    const nextApiKey = encodeApiKey('es-id', 'es-secret');
 
     beforeEach(() => {
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity connector-id',
+        api_key: 'es-secret',
+      });
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+        invalidated_api_keys: ['old-id'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          apiKey: previousApiKey,
+        },
+      } as never);
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(
         getConnectorType({
           id: '.inboundWebhook',
@@ -929,53 +969,468 @@ describe('update()', () => {
       }));
     });
 
-    test('keeps the stored hash and does not return a new token', async () => {
+    test('remints the last-saver API key and invalidates the previous framework key', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         ...existingRawAction,
         attributes: {
           ...existingRawAction.attributes,
           actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
-        },
-      } as never);
-
-      const result = await update({
-        context: inboundContext,
-        id: 'connector-id',
-        action: { name: 'renamed', config: {}, secrets: {} },
-      });
-
-      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
-      };
-      expect(saved.config.ingestTokenHash).toBe(storedHash);
-      expect(result).not.toHaveProperty('secrets');
-    });
-
-    test('ignores a client-supplied ingestTokenHash', async () => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        ...existingRawAction,
-        attributes: {
-          ...existingRawAction.attributes,
-          actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: storedHash },
+          config: {},
         },
       } as never);
 
       await update({
         context: inboundContext,
         id: 'connector-id',
-        action: {
-          name: 'renamed',
-          config: { ingestTokenHash: 'c'.repeat(64) },
-          secrets: {},
-        },
+        action: { name: 'renamed', config: {}, secrets: {} },
       });
 
       const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash: string };
+        apiKey?: string;
+        secrets: Record<string, unknown>;
       };
-      expect(saved.config.ingestTokenHash).toBe(storedHash);
+      expect(saved.apiKey).toBe(nextApiKey);
+      expect(saved.secrets).toEqual({});
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['old-id'],
+      });
+    });
+
+    test('ignores a client-supplied apiKey on update', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          apiKey: 'from-client',
+        },
+      } as never);
+
+      await update({
+        context: inboundContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        apiKey?: string;
+      };
+      expect(saved.apiKey).toBe(nextApiKey);
+    });
+
+    test('returns 400 when encryption is unavailable', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: {},
+        },
+      } as never);
+
+      await expect(
+        update({
+          context: { ...inboundContext, isESOCanEncrypt: false },
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {} },
+        })
+      ).rejects.toThrow('encrypted saved objects are not available');
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('dual connector inbound events', () => {
+    const securityService = securityServiceMock.createStart();
+    const dualContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: 'default',
+      securityService,
+    };
+
+    const dualExisting = {
+      ...existingRawAction,
+      attributes: {
+        ...existingRawAction.attributes,
+        actionTypeId: '.dual',
+        config: {},
+      },
+    };
+
+    beforeEach(() => {
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual' || actionTypeId === '.inboundWebhook'
+      );
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity connector-id',
+        api_key: 'es-secret',
+      });
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+        invalidated_api_keys: ['old-id'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
+        dualExisting as never
+      );
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.dual',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.get.mockResolvedValue(dualExisting as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'connector-id',
+        type,
+        attributes,
+        references: options?.references ?? [],
+      }));
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [],
+      } as never);
+    });
+
+    test('omitted flag keeps inbound off and does not mint identity', async () => {
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      const actionCreates = unsecuredSavedObjectsClient.create.mock.calls.filter(
+        (call) => call[0] === 'action'
+      );
+      expect((actionCreates[0][1] as { apiKey?: string }).apiKey).toBeUndefined();
+      expect(
+        (actionCreates[0][1] as { hasInboundEventIdentity?: boolean }).hasInboundEventIdentity
+      ).toBe(false);
+      expect(result.isInboundEventsEnabled).toBe(false);
+    });
+
+    test('omitted flag keeps inbound on and remints identity', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {} },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+        (call) => call[0] === 'action'
+      )?.[1] as { apiKey?: string; hasInboundEventIdentity?: boolean };
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['old-id'],
+      });
+    });
+
+    test('enabling mints identity only', async () => {
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: true },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+      const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+        (call) => call[0] === 'action'
+      )?.[1] as { apiKey?: string; hasInboundEventIdentity?: boolean };
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
+      expect(
+        unsecuredSavedObjectsClient.create.mock.calls.every((call) => call[0] === 'action')
+      ).toBe(true);
+    });
+
+    test('disabling deletes credentials and does not remint identity', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: true }],
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalled();
+      const actionCreates = unsecuredSavedObjectsClient.create.mock.calls.filter(
+        (call) => call[0] === 'action'
+      );
+      expect((actionCreates[0][1] as { apiKey?: string }).apiKey).toBeUndefined();
+      expect(
+        (actionCreates[0][1] as { hasInboundEventIdentity?: boolean }).hasInboundEventIdentity
+      ).toBe(false);
+      const bulkDeleteOrder = unsecuredSavedObjectsClient.bulkDelete.mock.invocationCallOrder[0];
+      const actionCreateOrder = unsecuredSavedObjectsClient.create.mock.invocationCallOrder.find(
+        (_, index) => unsecuredSavedObjectsClient.create.mock.calls[index][0] === 'action'
+      );
+      expect(actionCreateOrder).toBeLessThan(bulkDeleteOrder ?? Number.POSITIVE_INFINITY);
+    });
+
+    test('disabling deletes credentials when the previous identity cannot be decrypted', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
+        new Error('unable to decrypt')
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: true }],
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE, id: 'cred-1' },
+      ]);
+      const actionCreateOrder = unsecuredSavedObjectsClient.create.mock.invocationCallOrder.find(
+        (_, index) => unsecuredSavedObjectsClient.create.mock.calls[index][0] === 'action'
+      );
+      expect(actionCreateOrder).toBeLessThan(
+        unsecuredSavedObjectsClient.bulkDelete.mock.invocationCallOrder[0]
+      );
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).not.toHaveBeenCalled();
+      const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+        (call) => call[0] === 'action'
+      )?.[1] as { hasInboundEventIdentity?: boolean };
+      expect(saved.hasInboundEventIdentity).toBe(false);
+    });
+
+    test('a failed disable leaves the existing ingress credential in place', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('version conflict'));
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+        })
+      ).rejects.toThrow('version conflict');
+      expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    test('a failed credential delete still invalidates the previous identity', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          hasInboundEventIdentity: true,
+          apiKey: encodeApiKey('old-id', 'old-secret'),
+        },
+      } as never);
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: false }],
+      } as never);
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+        })
+      ).rejects.toThrow('Failed to delete 1 ingest credential(s) for connector "connector-id"');
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['old-id'],
+      });
+    });
+
+    test('an explicit disable deletes credentials when inbound events are already off', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'cred-1',
+            type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+            attributes: { connectorId: 'connector-id' },
+            references: [],
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      } as never);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'cred-1', success: true }],
+      } as never);
+
+      const result = await update({
+        context: dualContext,
+        id: 'connector-id',
+        action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: false },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(false);
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE, id: 'cred-1' },
+      ]);
+    });
+
+    test('rejects the flag on a non-dual type', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValue({
+        ...dualExisting,
+        attributes: {
+          ...dualExisting.attributes,
+          actionTypeId: '.slack',
+        },
+      } as never);
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.slack',
+          preSaveHook,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        update({
+          context: dualContext,
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: true },
+        })
+      ).rejects.toThrow(
+        'Inbound events can only be turned on for connectors that both send and receive.'
+      );
+      expect(preSaveHook).not.toHaveBeenCalled();
     });
   });
 });
