@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/server';
 import type { DiscoveriesPluginStartDeps } from '../../types';
 import { withWorkflowsEnabledGuard } from '.';
 
 const buildGetStartServices = (enabled: boolean) => async () => ({
   coreStart: {
-    featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(enabled) },
+    featureFlags: { getBooleanValue$: jest.fn().mockReturnValue(of(enabled)) },
   } as unknown as CoreStart,
   pluginsStart: {} as unknown as DiscoveriesPluginStartDeps,
 });

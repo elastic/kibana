@@ -125,7 +125,7 @@ These are easy to miss during implementation or review — they are not always s
 | `selection.getDetails` | Avoid network calls when `option` is present — use `option.label` / `option.value` / `context.values`. Only fetch when `option === null`. The combined `resolve` + `getDetails` outcome is cached for ~30s per logical field |
 | Dynamic output schema | Express via `editorHandlers.dynamicSchema.getOutputSchema({ input, config })` for autocomplete; **server still validates against the static `outputSchema`** in the common definition, so keep that schema as the union of all possible shapes |
 | Public async loader | Prefer async import to keep zod + step module out of the plugin's main bundle. Loaders that reject (or throw inside the registry) are caught and logged; one broken loader does NOT prevent other steps from registering — verify the log when a step is silently missing |
-| Conditional registration | Loaders returning `undefined` are skipped silently (unlike triggers, which do not support this). Use for feature flags |
+| Conditional registration | Loaders run once. Return `undefined` only for a decision that cannot change after startup. Feature flags must be subscribed to in `start()` and checked in the handler — do not snapshot them with `firstValueFrom` |
 | Registration timing | All `registerStepDefinition` calls happen in `setup()`, never `start()`. Engine and UI both `await workflowsExtensions.isReady()` before reading the registry |
 
 For the YAML naming conventions (the single most common mistake — only the step type action is camelCase, config/input keys we own never are), follow [STEPS.md → Workflow YAML Naming Conventions](../../dev_docs/STEPS.md#workflow-yaml-naming-conventions).
@@ -192,7 +192,7 @@ When adding a new step:
 
 5. **Registration** (`{server,public}/step_types/index.ts`) — see [STEPS.md Step 4](../../dev_docs/STEPS.md#step-4-register-in-plugin-setup)
    - [ ] Public side uses async loader (`() => import('./...').then(...)`) to keep zod + step module out of the main bundle
-   - [ ] Conditional/feature-flagged steps return `undefined` from the loader; they do not throw
+   - [ ] Feature flags are subscribed to in `start()` and checked in the handler. Loaders do not snapshot them with `firstValueFrom`. `undefined` from a loader is only for a decision that cannot change after startup
    - [ ] All `registerStepDefinition` calls happen in `setup()`, never `start()`
 
 6. **Approval gate** — see [STEPS.md Step Definition Approval Process](../../dev_docs/STEPS.md#step-definition-approval-process)

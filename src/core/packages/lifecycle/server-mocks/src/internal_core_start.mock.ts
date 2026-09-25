@@ -35,7 +35,7 @@ export function createInternalCoreStartMock() {
     capabilities: capabilitiesServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createInternalStart(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
+    featureFlags: coreFeatureFlagsMock.createInternalStart(),
     http: httpServiceMock.createInternalStartContract(),
     metrics: metricsServiceMock.createInternalStartContract(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),

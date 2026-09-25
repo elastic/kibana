@@ -233,17 +233,15 @@ export class SignificantEventsPlugin
 
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-      const useRuleEventsRead = await coreStart.featureFlags.getBooleanValue(
-        SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-        false
-      );
-
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
         space,
-        useRuleEventsRead,
+        useRuleEventsRead$: coreStart.featureFlags.getBooleanValue$(
+          SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
+          false
+        ),
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,

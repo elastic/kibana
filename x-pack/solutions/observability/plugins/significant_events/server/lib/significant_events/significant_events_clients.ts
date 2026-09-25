@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import { firstValueFrom, type Observable } from 'rxjs';
 import {
   DetectionService,
   detectionsDataStream,
@@ -28,9 +29,9 @@ export interface SignificantEventsClients {
   getEventClient: () => Promise<EventClient>;
   /**
    * Flag-aware accessor for `eventsSearchRoute` (the list/count/pagination endpoint) — the only
-   * caller migrated onto `RuleEventsClient` so far (nightshift-program#1516). Honors
-   * `useRuleEventsRead`; every other caller must keep using `getEventClient()`, which always
-   * returns `EventClient` regardless of the flag.
+   * caller migrated onto `RuleEventsClient` so far (nightshift-program#1516). Reads the current
+   * `useRuleEventsRead$` value on each call; every other caller must keep using `getEventClient()`,
+   * which always returns `EventClient` regardless of the flag.
    */
   getEventSearchClient: () => Promise<EventClient | RuleEventsClient>;
 }
@@ -48,15 +49,18 @@ export function createSignificantEventsClients({
   esClient,
   space,
   triggerEmitter,
-  useRuleEventsRead,
+  useRuleEventsRead$,
 }: {
   services: SignificantEventsServices;
   dataStreams: DataStreamsStart;
   esClient: ElasticsearchClient;
   space: string;
   triggerEmitter?: TriggerEmitter;
-  /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
-  useRuleEventsRead?: boolean;
+  /**
+   * Current `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` value. Read when a search client is created,
+   * so a later flag change applies to the next search.
+   */
+  useRuleEventsRead$?: Observable<boolean>;
 }): SignificantEventsClients {
   const buildEventClientOptions = async () => ({
     dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
@@ -83,11 +87,17 @@ export function createSignificantEventsClients({
       // tools, workflow triggers) uses the full `EventClient` surface (`bulkCreate`,
       // `findByEventUuid`, `findLatestActive`, `emitTrigger`, …), which `RuleEventsClient`
       // intentionally does not implement (#1517). This accessor always returns `EventClient`,
-      // independent of `useRuleEventsRead` — the flag only affects `getEventSearchClient()`.
+      // independent of `useRuleEventsRead$` — the flag only affects `getEventSearchClient()`.
       return services.event.getClient(eventClientOptions) as EventClient;
     },
     getEventSearchClient: async () => {
-      const eventClientOptions = await buildEventClientOptions();
+      // Safe to read the flag when the client is created: `eventsSearchRoute` is the only caller,
+      // and it uses the instance for one `findLatestByCurrentStatePaginated` then drops it.
+      // The next request evaluates the stream again.
+      const [eventClientOptions, useRuleEventsRead] = await Promise.all([
+        buildEventClientOptions(),
+        useRuleEventsRead$ ? firstValueFrom(useRuleEventsRead$) : false,
+      ]);
       return services.event.getClient({ ...eventClientOptions, useRuleEventsRead });
     },
   };

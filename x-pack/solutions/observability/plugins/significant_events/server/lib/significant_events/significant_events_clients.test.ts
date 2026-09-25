@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BehaviorSubject, of } from 'rxjs';
 import { detectionsDataStream } from './detections';
 import { eventsDataStream } from './events';
 import {
@@ -40,7 +41,7 @@ describe('createSignificantEventsClients', () => {
     expect(initializeClient).toHaveBeenNthCalledWith(2, eventsDataStream.name);
   });
 
-  it('getEventClient() always returns EventClient, regardless of useRuleEventsRead', async () => {
+  it('getEventClient() always returns EventClient, regardless of useRuleEventsRead$', async () => {
     const eventClient = {};
     const services: SignificantEventsServices = {
       detection: { getClient: jest.fn() } as never,
@@ -51,7 +52,7 @@ describe('createSignificantEventsClients', () => {
       dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
       esClient: {} as never,
       space: 'default',
-      useRuleEventsRead: true,
+      useRuleEventsRead$: of(true),
     });
 
     await expect(clients.getEventClient()).resolves.toBe(eventClient);
@@ -60,7 +61,7 @@ describe('createSignificantEventsClients', () => {
     );
   });
 
-  it('getEventSearchClient() returns RuleEventsClient when useRuleEventsRead is true and EventClient when false/omitted', async () => {
+  it('getEventSearchClient() returns RuleEventsClient when useRuleEventsRead$ emits true and EventClient when false/omitted', async () => {
     const ruleEventsClient = {};
     const eventClient = {};
     const getClient = jest.fn(({ useRuleEventsRead }: { useRuleEventsRead?: boolean }) =>
@@ -76,7 +77,7 @@ describe('createSignificantEventsClients', () => {
       dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
       esClient: {} as never,
       space: 'default',
-      useRuleEventsRead: true,
+      useRuleEventsRead$: of(true),
     });
     await expect(clientsWithFlagOn.getEventSearchClient()).resolves.toBe(ruleEventsClient);
 
@@ -87,5 +88,30 @@ describe('createSignificantEventsClients', () => {
       space: 'default',
     });
     await expect(clientsWithFlagOff.getEventSearchClient()).resolves.toBe(eventClient);
+  });
+
+  it('getEventSearchClient() follows a later useRuleEventsRead$ emission', async () => {
+    const ruleEventsClient = {};
+    const eventClient = {};
+    const getClient = jest.fn(({ useRuleEventsRead }: { useRuleEventsRead?: boolean }) =>
+      useRuleEventsRead ? ruleEventsClient : eventClient
+    );
+    const useRuleEventsRead$ = new BehaviorSubject(false);
+    const clients = createSignificantEventsClients({
+      services: {
+        detection: { getClient: jest.fn() } as never,
+        event: { getClient } as never,
+      },
+      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
+      esClient: {} as never,
+      space: 'default',
+      useRuleEventsRead$,
+    });
+
+    await expect(clients.getEventSearchClient()).resolves.toBe(eventClient);
+
+    useRuleEventsRead$.next(true);
+
+    await expect(clients.getEventSearchClient()).resolves.toBe(ruleEventsClient);
   });
 });

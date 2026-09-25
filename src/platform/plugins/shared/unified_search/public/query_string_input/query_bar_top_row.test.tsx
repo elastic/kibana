@@ -88,16 +88,6 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
   }
 });
 
-startMock.featureFlags.getBooleanValue.mockImplementation((key: string, fallback: boolean) => {
-  if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
-    return useNewDateRangePickerFlag;
-  }
-  if (key === 'unifiedSearch.dateRangePickerPresetsPersistenceEnabled') {
-    return usePresetPersistenceFlag;
-  }
-  return fallback;
-});
-
 startMock.featureFlags.getBooleanValue$.mockImplementation((key: string, fallback: boolean) => {
   if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
     return of(useNewDateRangePickerFlag);
