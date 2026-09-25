@@ -317,7 +317,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         executionId,
         repetitions,
         concurrency,
-        concurrencySetByRun: getConcurrencyFromEnv() !== undefined,
+        requestedConcurrency: getConcurrencyFromEnv(),
         upsertDataset: async (dataset: EvaluationDataset) =>
           evalsClient.upsertDataset({
             name: dataset.name,

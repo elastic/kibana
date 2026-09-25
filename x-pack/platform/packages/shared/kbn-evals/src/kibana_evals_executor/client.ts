@@ -53,8 +53,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       repetitions?: number;
       /** Examples each experiment runs at once when the spec doesn't pass its own. */
       concurrency?: number;
-      /** Whether `concurrency` came from `--concurrency` / `EVAL_CONCURRENCY` rather than a default. */
-      concurrencySetByRun?: boolean;
+      /** What `--concurrency` / `EVAL_CONCURRENCY` asked for, so overriding it can be reported. */
+      requestedConcurrency?: number;
       /**
        * Persists the dataset and resolves to the id the server stored it under,
        * which scores are stamped with. An id it didn't return would detach them.
@@ -146,14 +146,18 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
   }
 
   private resolveConcurrency(experimentName: string, specConcurrency?: number): number {
-    const { concurrency = DEFAULT_EXPERIMENT_CONCURRENCY, concurrencySetByRun, log } = this.options;
+    const {
+      concurrency = DEFAULT_EXPERIMENT_CONCURRENCY,
+      requestedConcurrency,
+      log,
+    } = this.options;
     if (specConcurrency === undefined) {
       return concurrency;
     }
 
-    if (concurrencySetByRun && specConcurrency !== concurrency) {
+    if (requestedConcurrency !== undefined && specConcurrency !== requestedConcurrency) {
       log.warning(
-        `Experiment "${experimentName}" sets its own concurrency (${specConcurrency}), so the requested --concurrency / EVAL_CONCURRENCY (${concurrency}) does not apply to it.`
+        `Experiment "${experimentName}" sets its own concurrency (${specConcurrency}), so the requested --concurrency / EVAL_CONCURRENCY (${requestedConcurrency}) does not apply to it.`
       );
     }
     return specConcurrency;

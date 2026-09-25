@@ -490,32 +490,38 @@ describe('KibanaEvalsClient', () => {
     });
 
     it('uses the run concurrency when the spec does not set one', async () => {
-      const client = createClient({ concurrency: 3, concurrencySetByRun: true });
+      const client = createClient({ concurrency: 3, requestedConcurrency: 3 });
       expect(await measureMaxInFlight(client)).toBe(3);
       expect(mockLog.warning).not.toHaveBeenCalled();
     });
 
     it('lets the spec concurrency win and warns that the run value does not apply', async () => {
-      const client = createClient({ concurrency: 8, concurrencySetByRun: true });
+      const client = createClient({ concurrency: 8, requestedConcurrency: 8 });
       expect(await measureMaxInFlight(client, 2)).toBe(2);
       expect(mockLog.warning).toHaveBeenCalledTimes(1);
       expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('(8) does not apply'));
     });
 
-    it('does not warn when the concurrency was not set by the run', async () => {
-      const client = createClient({ concurrency: 5, concurrencySetByRun: false });
+    it('does not warn when the run did not request a concurrency', async () => {
+      const client = createClient({ concurrency: 5 });
       expect(await measureMaxInFlight(client, 1)).toBe(1);
       expect(mockLog.warning).not.toHaveBeenCalled();
     });
 
     it('does not warn when the spec concurrency matches the run value', async () => {
-      const client = createClient({ concurrency: 4, concurrencySetByRun: true });
+      const client = createClient({ concurrency: 4, requestedConcurrency: 4 });
       expect(await measureMaxInFlight(client, 4)).toBe(4);
       expect(mockLog.warning).not.toHaveBeenCalled();
     });
 
+    it('quotes the requested value even when the fixture was overridden', async () => {
+      const client = createClient({ concurrency: 2, requestedConcurrency: 8 });
+      expect(await measureMaxInFlight(client, 1)).toBe(1);
+      expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('(8) does not apply'));
+    });
+
     it('logs the resolved concurrency in the experiment start line', async () => {
-      await measureMaxInFlight(createClient({ concurrency: 7, concurrencySetByRun: true }));
+      await measureMaxInFlight(createClient({ concurrency: 7, requestedConcurrency: 7 }));
       expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining('7 concurrent runs'));
     });
   });

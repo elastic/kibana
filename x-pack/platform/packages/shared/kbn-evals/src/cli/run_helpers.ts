@@ -33,7 +33,7 @@ import {
 import { runScoutHook } from './scout_hook';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
-import { parseConcurrency } from '../utils/concurrency';
+import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
 import {
   runConfigInit,
   runConnectorSetup,
@@ -202,11 +202,16 @@ export const readSpaceIdsFlag = (flagsReader: FlagsReader): string[] | undefined
   }
 };
 
-/** `--concurrency`, validated so a bad value stops before a stack boots for it. */
+/** Reads `--concurrency`, failing on a bad flag or `EVAL_CONCURRENCY` before a stack boots. */
 export const readConcurrencyFlag = (flagsReader: FlagsReader): string | undefined => {
   try {
-    const concurrency = parseConcurrency(flagsReader.string('concurrency'));
-    return concurrency === undefined ? undefined : String(concurrency);
+    const concurrency = parseConcurrency(flagsReader.string('concurrency'), '--concurrency');
+    if (concurrency !== undefined) {
+      return String(concurrency);
+    }
+    // Without the flag, EVAL_CONCURRENCY passes through untouched to the Playwright config.
+    getConcurrencyFromEnv();
+    return undefined;
   } catch (error) {
     throw createFlagError(error instanceof Error ? error.message : String(error));
   }

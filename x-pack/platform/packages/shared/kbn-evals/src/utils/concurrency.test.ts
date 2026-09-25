@@ -16,13 +16,13 @@ describe('parseConcurrency', () => {
     ['8', 8],
     [' 16 ', 16],
   ])('reads %p as %p', (value, expected) => {
-    expect(parseConcurrency(value)).toBe(expected);
+    expect(parseConcurrency(value, '--concurrency')).toBe(expected);
   });
 
   it.each(['0', '-1', 'abc', '1.5', '8x', '1e2', '9'.repeat(400), '9007199254740993'])(
     'rejects %p',
     (value) => {
-      expect(() => parseConcurrency(value)).toThrow(
+      expect(() => parseConcurrency(value, '--concurrency')).toThrow(
         `--concurrency must be a positive integer, got "${value}".`
       );
     }
@@ -43,6 +43,13 @@ describe('getConcurrencyFromEnv', () => {
   it('reads EVAL_CONCURRENCY', () => {
     process.env.EVAL_CONCURRENCY = '12';
     expect(getConcurrencyFromEnv()).toBe(12);
+  });
+
+  it('names EVAL_CONCURRENCY when it is invalid', () => {
+    process.env.EVAL_CONCURRENCY = 'abc';
+    expect(() => getConcurrencyFromEnv()).toThrow(
+      'EVAL_CONCURRENCY must be a positive integer, got "abc".'
+    );
   });
 
   it('is undefined when EVAL_CONCURRENCY is unset', () => {

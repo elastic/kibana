@@ -35,6 +35,38 @@ describe('readConcurrencyFlag', () => {
   });
 });
 
+describe('readConcurrencyFlag with EVAL_CONCURRENCY', () => {
+  const previous = process.env.EVAL_CONCURRENCY;
+
+  afterEach(() => {
+    if (previous === undefined) {
+      delete process.env.EVAL_CONCURRENCY;
+    } else {
+      process.env.EVAL_CONCURRENCY = previous;
+    }
+  });
+
+  it('rejects an invalid EVAL_CONCURRENCY with a flag error when the flag is not passed', () => {
+    process.env.EVAL_CONCURRENCY = '0';
+    expect(() => readConcurrencyFlag(readFlags([]))).toThrow(
+      expect.objectContaining({
+        message: 'EVAL_CONCURRENCY must be a positive integer, got "0".',
+        showHelp: true,
+      })
+    );
+  });
+
+  it('leaves a valid EVAL_CONCURRENCY for the Playwright config to read', () => {
+    process.env.EVAL_CONCURRENCY = '8';
+    expect(readConcurrencyFlag(readFlags([]))).toBeUndefined();
+  });
+
+  it('lets the flag win over an invalid EVAL_CONCURRENCY', () => {
+    process.env.EVAL_CONCURRENCY = 'abc';
+    expect(readConcurrencyFlag(readFlags(['--concurrency', '4']))).toBe('4');
+  });
+});
+
 describe('--concurrency forwarding', () => {
   const log = new ToolingLog();
 
