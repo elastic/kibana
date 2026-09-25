@@ -24,7 +24,7 @@ import type {
 } from '../../../common/search_strategy/osquery';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
-import type { OsqueryFactory, OsqueryFactoryRequest } from './factory/types';
+import type { OsqueryFactory } from './factory/types';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 
 /**
