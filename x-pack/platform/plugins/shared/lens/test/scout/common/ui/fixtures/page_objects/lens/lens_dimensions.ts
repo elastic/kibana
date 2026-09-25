@@ -14,10 +14,12 @@ const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
 /** Stable test-subj for the dimension time-shift combo (also passed into `waitForFunction`). */
 const TIME_SHIFT_TEST_SUBJ = 'indexPattern-dimension-time-shift';
 
-/** `LensApp` close-editor helpers needed by dimension open/close actions. */
+/** Lens editor helpers needed by dimension actions. */
 interface LensDimensionsDeps {
   closeDimensionEditorButton: Locator;
   closeDimensionEditor: () => Promise<void>;
+  getVisualizationRenderCount: (chartTestSubj: string) => Promise<number | null>;
+  waitForVisualization: (chartTestSubj: string, options?: { afterCount?: number }) => Promise<void>;
 }
 
 /**
@@ -357,7 +359,22 @@ export class LensDimensions {
 
   /** Changes the axis side of the currently open dimension editor. */
   async changeAxisSide(newSide: 'left' | 'right' | 'auto') {
-    await this.page.testSubj.click(`lnsXY_axisSide_groups_${newSide}`);
+    const chartTestSubj = 'xyVisChart';
+    await this.deps.waitForVisualization(chartTestSubj);
+    const renderCountBeforeChange = await this.deps.getVisualizationRenderCount(chartTestSubj);
+    const axisSideButtonTestSubj = `lnsXY_axisSide_groups_${newSide}`;
+
+    await this.page.testSubj.click(axisSideButtonTestSubj);
+    await this.page.waitForFunction(
+      (testSubj) =>
+        document.querySelector(`[data-test-subj="${testSubj}"]`)?.getAttribute('aria-pressed') ===
+        'true',
+      axisSideButtonTestSubj,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+    await this.deps.waitForVisualization(chartTestSubj, {
+      afterCount: renderCountBeforeChange ?? undefined,
+    });
   }
 
   /** Returns the selected axis side label from an open dimension editor. */
