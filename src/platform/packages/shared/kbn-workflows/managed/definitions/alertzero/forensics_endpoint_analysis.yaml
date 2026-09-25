@@ -146,8 +146,6 @@ steps:
       # `manual`, so containment waits for approval.
       - name: set_ki_autonomy
         type: context-engine.updateKi
-        on-failure:
-          continue: true
         with:
           ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
           ki_id: "{{ foreach.item._source.id | default: foreach.item._id }}"
@@ -156,7 +154,6 @@ steps:
               autonomy: "{%- if execution.triggeredBy == 'scheduled' -%}{{ consts.worker_settings.autonomy }}{%- else -%}manual{%- endif -%}"
       - name: start_run
         type: workflow.executeAsync
-        if: "${{ steps.set_ki_autonomy.error == null }}"
         with:
           workflow-id: system-security-forensics-run-endpoint-analysis
           inputs:

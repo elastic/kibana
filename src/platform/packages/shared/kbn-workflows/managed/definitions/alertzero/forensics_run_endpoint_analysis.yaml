@@ -782,9 +782,9 @@ steps:
       inputs:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
-          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` queued
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is submitting
           {{ steps.forensic_analysis.output.structured_output.recommendedActions.size }} containment proposal(s)
-          {%- if steps.resolve_autonomy.output.level == 'supervised' %} and approved them{% else %} for approval{% endif %}.
+          {%- if steps.resolve_autonomy.output.level == 'supervised' %} for auto-approval{% else %} for analyst approval{% endif %}.
 
   # Containment is proposed on the investigation, not returned as run output.
   # `executeAsync` so this run does not sit in the 72h approval gate; each

@@ -131,7 +131,9 @@ describe('Endpoint analysis worker', () => {
       ki_id: '{{ foreach.item._source.id | default: foreach.item._id }}',
       ai_index_id: '{{ inputs.ai_index_id | default: consts.ai_index_id }}',
     });
-    expect(start?.if).toContain('steps.set_ki_autonomy.error == null');
+    // No `if` guard: set_ki_autonomy failing the iteration stops execution
+    // before start_run is reached, so the guard is redundant.
+    expect(start?.if).toBeUndefined();
 
     expect(allSteps.filter(({ type }) => type === 'context-engine.updateKi')).toEqual([
       expect.objectContaining({ name: 'set_ki_autonomy' }),
@@ -220,6 +222,9 @@ describe('Endpoint analysis worker', () => {
     expect(fanOut?.type).toBe('parallel');
     expect(fanOut?.mode).toBe('settled');
     expect(stepByName('start_run')?.['on-failure']).toBeUndefined();
+    // A failed autonomy write must fail the iteration, not silently continue;
+    // otherwise start_runs.output.failed stays 0 even when no child was started.
+    expect(stepByName('set_ki_autonomy')?.['on-failure']).toBeUndefined();
   });
 
   // A `foreach` publishes no aggregate and keeps only its last iteration, so the
