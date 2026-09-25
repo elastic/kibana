@@ -1,5 +1,5 @@
 {
-  "sha1": "2d4aeeb833e88dc34d1a4abac0c123fe69ab4f38",
+  "sha1": "a75bf718828a688f07c2fee33cb66319dd6dc114",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -229,8 +229,8 @@
       }
     },
     {
-      "id": "e747878cbda0163-2460e798459b606",
-      "title": "Director transitions recovering -> inactive via recovering_timeframe when recovering_operator is OR",
+      "id": "e747878cbda0163-1b4b75e2976ee45",
+      "title": "Director transitions recovering -> inactive via recovering_timeframe when recovering_operator is or",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -243,8 +243,8 @@
       }
     },
     {
-      "id": "e747878cbda0163-7182c84cbe7c68a",
-      "title": "Director keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator AND",
+      "id": "e747878cbda0163-66bb5f442e1bbba",
+      "title": "Director keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator and",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -257,8 +257,8 @@
       }
     },
     {
-      "id": "e747878cbda0163-5c5ce4414752b37",
-      "title": "Director keeps the latest episode in pending when only pending_timeframe is met under pending_operator AND",
+      "id": "e747878cbda0163-114285b6713dfc3",
+      "title": "Director keeps the latest episode in pending when only pending_timeframe is met under pending_operator and",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -271,8 +271,8 @@
       }
     },
     {
-      "id": "e747878cbda0163-7faf6350097a4dc",
-      "title": "Director transitions pending -> active under pending_operator AND when both count and timeframe are met",
+      "id": "e747878cbda0163-6c96b8fd020b243",
+      "title": "Director transitions pending -> active under pending_operator and when both count and timeframe are met",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

@@ -276,6 +276,14 @@ type Integrations =
     }
   | BeatsIntegrations;
 
+export interface InventoryModelFields {
+  id: string;
+  name: string;
+  os?: string;
+  ip?: string;
+  cloudProvider?: string;
+}
+
 export interface InventoryModel<
   TEntityType extends InventoryItemType,
   TAggregations extends AggregationConfigMap,
@@ -286,13 +294,9 @@ export interface InventoryModel<
   displayName: string;
   singularDisplayName: string;
   requiredIntegration: Integrations;
-  fields: {
-    id: string;
-    name: string;
-    os?: string;
-    ip?: string;
-    cloudProvider?: string;
-  };
+  fields: InventoryModelFields;
+  /** Identity for one schema. `findInventoryFields` returns a present entry as-is. A missing key falls back to `fields`. */
+  schemaFields?: Partial<Record<DataSchemaFormat, InventoryModelFields>>;
   crosslinkSupport: {
     details: boolean;
     logs: boolean;

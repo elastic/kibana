@@ -14,7 +14,7 @@ import {
 } from '../alert_oas_shared_examples';
 
 export const CREATE_SNOOZE_SERIES_ACTION_REQUEST: CreateSnoozeSeriesActionBody = {
-  expiry: '2026-01-16T12:00:00.000Z',
+  snoozed_until: '2026-01-16T12:00:00.000Z',
 };
 
 export const createSnoozeSeriesActionOasExamples = (): AlertingOasOperationObject =>

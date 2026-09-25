@@ -63,7 +63,7 @@ const pasteImage = async (
 };
 
 const meta: Meta<typeof ConversationInput> = {
-  title: 'Conversation Input/Image Upload',
+  title: 'Conversations/Input/Image Upload',
   component: ConversationInput,
   args: {
     onSubmitOverride: fn(),

@@ -13,6 +13,10 @@ import {
   TooManyLinkedInvestigationsError,
 } from '../services/errors';
 import { WrongTemplateError } from '../../assignments/assignments_service';
+import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
+import { ProposalDismissFailedError } from '../../investigations/services/proposal_dismiss_failed_error';
+import { EscalationCloseIncompleteError } from '../services/escalation_close_incomplete_error';
+import { LinkedInvestigationUnavailableError } from '../services/linked_investigation_unavailable_error';
 
 /**
  * Maps service errors to HTTP responses for escalation routes.
@@ -44,6 +48,54 @@ export const handleEscalationRouteError = (
 
   if (error instanceof NotAnEscalationError || error instanceof WrongTemplateError) {
     return response.notFound({ body: { message: error.message } });
+  }
+
+  if (error instanceof CloseTargetsChangedError) {
+    return response.conflict({
+      body: { message: error.message, attributes: { code: error.code } },
+    });
+  }
+
+  if (error instanceof LinkedInvestigationUnavailableError) {
+    return response.conflict({
+      body: {
+        message: error.message,
+        attributes: {
+          code: error.code,
+          unavailable_investigation_ids: error.unavailableInvestigationIds,
+        },
+      },
+    });
+  }
+
+  if (error instanceof ProposalDismissFailedError) {
+    return response.customError({
+      statusCode: 500,
+      body: {
+        message: error.message,
+        attributes: { code: error.code, failed_proposal_ids: error.failedProposalIds },
+      },
+    });
+  }
+
+  if (error instanceof EscalationCloseIncompleteError) {
+    return response.customError({
+      statusCode: 500,
+      body: {
+        message: error.message,
+        attributes: {
+          code: error.code,
+          closed_investigation_ids: error.closedInvestigationIds,
+          skipped_investigation_ids: error.skippedInvestigationIds,
+        },
+      },
+    });
+  }
+
+  // ProposalForbiddenError is thrown by the proposals plugin's privilege helpers.
+  // We match by name to avoid importing across plugin boundaries.
+  if (error instanceof Error && error.name === 'ProposalForbiddenError') {
+    return response.forbidden({ body: { message: error.message } });
   }
 
   if (isAgentBuilderError(error)) {
