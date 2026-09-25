@@ -179,6 +179,19 @@ export interface PageOverlayProps {
    */
   zIndex?: CSSProperties['zIndex'];
 
+  /**
+   * The `id` of the element holding the overlay's visible title. The overlay is exposed to assistive
+   * technologies as a modal dialog, so one of `aria-labelledby` or `aria-label` must be provided in
+   * order for it to be announced with a meaningful name when it opens.
+   */
+  'aria-labelledby'?: string;
+
+  /**
+   * Accessible name for the overlay, for use when there is no visible title to reference via
+   * `aria-labelledby`.
+   */
+  'aria-label'?: string;
+
   'data-test-subj'?: string;
 }
 
@@ -198,6 +211,8 @@ export const PageOverlay = memo<PageOverlayProps>(
     appendAsBodyLastNode = true,
     paddingSize,
     zIndex,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-label': ariaLabel,
     'data-test-subj': dataTestSubj,
   }) => {
     const { pathname } = useLocation();
@@ -354,6 +369,10 @@ export const PageOverlay = memo<PageOverlayProps>(
     return (
       <EuiPortal portalRef={setPortalEleRef}>
         <OverlayRootContainer
+          role="dialog"
+          aria-modal={true}
+          aria-labelledby={ariaLabelledBy}
+          aria-label={ariaLabel}
           data-test-subj={dataTestSubj}
           className={containerClassName}
           style={containerCssOverrides}

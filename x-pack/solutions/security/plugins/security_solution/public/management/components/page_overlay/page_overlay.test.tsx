@@ -59,6 +59,31 @@ describe('When using PageOverlay component', () => {
     expect(overlay.classList.contains('hidden')).toBe(false);
   });
 
+  it('should expose the overlay as a modal dialog', () => {
+    render();
+
+    const overlay = renderResult.getByTestId('test');
+
+    expect(overlay.getAttribute('role')).toEqual('dialog');
+    expect(overlay.getAttribute('aria-modal')).toEqual('true');
+  });
+
+  it('should name the dialog via `aria-labelledby`', () => {
+    renderProps['aria-labelledby'] = 'some-title-id';
+    render();
+
+    expect(renderResult.getByTestId('test').getAttribute('aria-labelledby')).toEqual(
+      'some-title-id'
+    );
+  });
+
+  it('should name the dialog via `aria-label`', () => {
+    renderProps['aria-label'] = 'Response console';
+    render();
+
+    expect(renderResult.getByTestId('test').getAttribute('aria-label')).toEqual('Response console');
+  });
+
   it('should set classname on `<body>` when visible', () => {
     render();
 
