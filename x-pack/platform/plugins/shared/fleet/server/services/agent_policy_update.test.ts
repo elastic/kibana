@@ -42,11 +42,10 @@ describe('agentPolicyUpdateEventHandler', () => {
       withoutSpaceExtClient = savedObjectsClientMock.create();
 
       appContextService.start(
-        createAppContextStartContractMock(
-          {},
-          false,
-          { internal: withSpaceExtClient, withoutSpaceExtensions: withoutSpaceExtClient }
-        )
+        createAppContextStartContractMock({}, false, {
+          internal: withSpaceExtClient,
+          withoutSpaceExtensions: withoutSpaceExtClient,
+        })
       );
 
       jest.mocked(apiKeys.generateEnrollmentAPIKey).mockResolvedValue({} as any);
