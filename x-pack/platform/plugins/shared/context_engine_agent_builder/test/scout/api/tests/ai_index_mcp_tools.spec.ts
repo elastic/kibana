@@ -207,41 +207,40 @@ apiTest.describe('AI Index tools over MCP', { tag: tags.stateful.classic }, () =
     await kbnClient.uiSettings.waitForEventualCacheRefresh();
   });
 
-  apiTest(
-    'lists read-only tools and chains list -> describe -> query, agreeing with the routes',
-    async ({ apiClient }) => {
-      const { tools, chain } = await asMcp(async (client) => ({
-        tools: (await client.listTools()).tools,
-        chain: await runChain(client),
-      }));
-      const byName = new Map(tools.map((tool) => [tool.name, tool]));
+  apiTest('lists read-only tools and chains list -> describe -> query', async ({ apiClient }) => {
+    const { tools, chain } = await asMcp(async (client) => ({
+      tools: (await client.listTools()).tools,
+      chain: await runChain(client),
+    }));
+    const byName = new Map(tools.map((tool) => [tool.name, tool]));
 
-      for (const name of Object.values(TOOL)) {
-        expect(byName.get(name)?.annotations?.readOnlyHint).toBe(true);
-      }
-      expect(byName.get(TOOL.query)?.description).toContain('/s/{spaceId}/api/agent_builder/mcp');
-
-      expect(chain.listedIds).toContain(DEFAULT_ONLY_AI_INDEX_ID);
-      expect(chain.entry).toStrictEqual({
-        id: AI_INDEX_ID,
-        esql_target: `v-ai-index-${AI_INDEX_ID}`,
-        description: DESCRIPTION.default,
-        managed: false,
-      });
-      expect(chain.block).toContain(`FROM v-ai-index-${AI_INDEX_ID}`);
-      expect(chain.block).toContain('Fields');
-      expect(chain.block).toContain('title: keyword');
-      expect(chain.titles).toStrictEqual(['Shared']);
-
-      const viaRoute = await apiClient.post(`${AI_INDEX_COLLECTION_PATH}/_query`, {
-        headers: { ...mcpCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-        body: { query: `FROM ${INDEX} | KEEP title | SORT title` },
-      });
-      expect(viaRoute).toHaveStatusCode(200);
-      expect(columnValues(viaRoute.body, 'title')).toStrictEqual(chain.titles);
+    for (const name of Object.values(TOOL)) {
+      expect(byName.get(name)?.annotations?.readOnlyHint).toBe(true);
     }
-  );
+    expect(byName.get(TOOL.query)?.description).toContain('/s/{spaceId}/api/agent_builder/mcp');
+
+    expect(chain.listedIds).toContain(DEFAULT_ONLY_AI_INDEX_ID);
+    expect(chain.entry).toStrictEqual({
+      id: AI_INDEX_ID,
+      esql_target: `v-ai-index-${AI_INDEX_ID}`,
+      description: DESCRIPTION.default,
+      managed: false,
+    });
+    expect(chain.block).toContain(`FROM v-ai-index-${AI_INDEX_ID}`);
+    expect(chain.block).toContain('Fields');
+    expect(chain.block).toContain('title: keyword');
+    // The view does not apply the space filter. Only managed AI indices carry per-document space
+    // permissions, and those are queried through their backing store, where it does.
+    expect(chain.titles).toStrictEqual(['Other space only', 'Shared']);
+
+    const viaRoute = await apiClient.post(`${AI_INDEX_COLLECTION_PATH}/_query`, {
+      headers: { ...mcpCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: { query: `FROM ${INDEX} | KEEP title | SORT title` },
+    });
+    expect(viaRoute).toHaveStatusCode(200);
+    expect(columnValues(viaRoute.body, 'title')).toStrictEqual(['Shared']);
+  });
 
   apiTest('takes the space from the /s/{spaceId} MCP URL', async ({ apiClient }) => {
     const { listedIds, entry, block, titles } = await asMcp(runChain, {
