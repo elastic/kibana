@@ -14,7 +14,13 @@ import {
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { discoverSessionApiTabSchema } from '@kbn/as-code-discover-schema';
+import type { z } from '@kbn/zod';
+import { expectType } from 'tsd';
 import { getDiscoverSessionEmbeddableSchema } from './schema';
+import type {
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableByValueState,
+} from '../../common/embeddable/types';
 
 const classicTabInput = {
   data_source: {
@@ -118,4 +124,22 @@ describe('tab type parity', () => {
       expect(apiTab).toMatchObject({ type: tabType });
     }
   );
+});
+
+describe('common embeddable state types', () => {
+  type SchemaState = z.output<ReturnType<typeof getDiscoverSessionEmbeddableSchema>>;
+  type SchemaByValueState = Exclude<SchemaState, { ref_id: string }>;
+  type SchemaByReferenceState = Extract<SchemaState, { ref_id: string }>;
+  type IsEquivalent<Left, Right> = [Left, keyof Left] extends [Right, keyof Right]
+    ? [Right, keyof Right] extends [Left, keyof Left]
+      ? true
+      : false
+    : false;
+
+  it('are equivalent to the schema output', () => {
+    expectType<IsEquivalent<DiscoverSessionEmbeddableByValueState, SchemaByValueState>>(true);
+    expectType<IsEquivalent<DiscoverSessionEmbeddableByReferenceState, SchemaByReferenceState>>(
+      true
+    );
+  });
 });
