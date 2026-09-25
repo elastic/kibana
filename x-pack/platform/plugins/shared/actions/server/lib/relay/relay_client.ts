@@ -306,7 +306,9 @@ export class RelayClient implements RelayClientContract {
 }
 
 const installCredential = (body: RelayInstallRequest): string =>
-  'uiam_service_account_id' in body ? body.uiam_service_account_id : body.kibana_api_key;
+  'uiam_service_account_id' in body
+    ? (body as RelayServiceAccountInstallRequest).uiam_service_account_id
+    : (body as RelayApiKeyInstallRequest).kibana_api_key;
 
 /**
  * Copies the install body down to exactly one credential. A caller that sets
