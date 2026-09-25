@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ESQLAstNode, ESQLAstQueryExpression } from '@elastic/esql';
 import { Parser, Walker } from '@elastic/esql';
 
 /**
@@ -32,9 +33,9 @@ const stripFraming = (value: string): string =>
     .trim();
 
 /**
- * True when `quote` appears in `text`. An internal ellipsis is treated as a gap:
- * each side must appear, so a genuinely truncated verbatim quote still verifies
- * while a fabrication stitched from unrelated fragments does not.
+ * True when `quote` appears in `text`. An internal ellipsis is treated as a gap in a
+ * sequence: every segment must appear, in order, so a genuinely truncated verbatim
+ * quote still verifies while a fabrication stitched from unrelated fragments does not.
  */
 export const isEvidenceQuoteGrounded = (quote: string, text: string): boolean => {
   const haystack = normalize(text);
@@ -45,7 +46,22 @@ export const isEvidenceQuoteGrounded = (quote: string, text: string): boolean =>
   if (segments.length === 0) {
     return false;
   }
-  return segments.every((segment) => haystack.includes(segment));
+  // Each segment is searched from the end of the previous match, so the order of the
+  // segments is part of the claim being verified. Testing them independently accepts a
+  // quote that rearranges the report: for `AssumeRole was followed by data access`,
+  // `data access ... AssumeRole` reverses the chronology the report states, and Tier 2
+  // would publish a behavior and an indexed finding asserting it. Advancing past each
+  // match also stops one occurrence satisfying two segments, so `foo ... foo` no longer
+  // verifies against a text containing a single `foo`.
+  let searchFrom = 0;
+  for (const segment of segments) {
+    const at = haystack.indexOf(segment, searchFrom);
+    if (at === -1) {
+      return false;
+    }
+    searchFrom = at + segment.length;
+  }
+  return true;
 };
 
 export type EsqlGroundedResult = { ok: true } | { ok: false; reason: string };
@@ -58,19 +74,81 @@ export type EsqlGroundedResult = { ok: true } | { ok: false; reason: string };
 const MIN_GROUNDING_LENGTH = 4;
 
 /**
+ * Fields that describe where a document sits rather than what it records. A filter on one
+ * of them narrows the scope, which the hunt has already fixed, so it is not report evidence.
+ */
+const METADATA_COLUMNS: ReadonlySet<string> = new Set([
+  '_index',
+  '_id',
+  '_version',
+  '_score',
+  '_source',
+  '_ignored',
+]);
+
+/**
+ * Collects the literals a query uses to restrict which rows it reads. Two positions
+ * qualify: the `WHERE` command, and the aggregation filter in `STATS ... WHERE ...`,
+ * which the parser represents as a `where` function inside the `STATS` command rather
+ * than as a command of its own. `FORK` branches are reached because their `WHERE`s are
+ * ordinary nested commands.
+ *
+ * Literals anywhere else describe the shape of the output rather than narrowing the
+ * input: an `EVAL` assignment, a `SORT` key, a `LIMIT`, a `GROK` pattern, an index name.
+ */
+const collectFilterLiterals = (root: ESQLAstQueryExpression): string[] => {
+  const literals: string[] = [];
+  const collect = (node: ESQLAstNode | ESQLAstNode[]) =>
+    Walker.walk(node, {
+      visitFunction: (fn, _parent, walker) => {
+        // A comparison against a metadata field restates the scope rather than describing
+        // the report: `WHERE _index == "logs-aws.cloudtrail-default"` filters on the index
+        // the hunt was already pointed at and returns arbitrary rows from it. Skipping the
+        // subtree drops the literal on the other side of the comparison with it.
+        const comparesMetadata = fn.args.some(
+          (arg) =>
+            !Array.isArray(arg) &&
+            'type' in arg &&
+            arg.type === 'column' &&
+            METADATA_COLUMNS.has(arg.name.toLowerCase())
+        );
+        if (comparesMetadata) walker.skipChildren();
+      },
+      visitLiteral: ({ value }) => literals.push(stripFraming(String(value))),
+    });
+
+  Walker.walk(root, {
+    visitCommand: (command) => {
+      if (command.name === 'where') collect(command);
+    },
+    visitFunction: (fn) => {
+      // `STATS c = COUNT(*) WHERE user.name == "x"` parses as a `where` function whose
+      // first argument is the aggregation and second is the predicate. Only the second
+      // filters rows — the aggregation may hold literals of its own.
+      if (fn.name === 'where' && fn.args.length > 1) collect(fn.args[1]);
+    },
+  });
+
+  return literals;
+};
+
+/**
  * A generated query must filter on at least one value drawn from the report, so a
  * hit means the environment matched *the report* rather than merely that a
  * required index has rows.
  *
- * `FROM`/`LOOKUP JOIN`/`ENRICH` targets are `source` nodes, not literals, so index
- * names are excluded by construction; only the values the query compares against
- * are considered. A literal grounds the query when it equals an extracted IOC or
- * appears verbatim in the report text.
+ * Only literals in a row-filtering predicate count. Considering literals anywhere in
+ * the pipeline let `FROM logs-aws.* | EVAL label = "AssumeRole" | LIMIT 1` pass while
+ * filtering on nothing at all: the report's value appears in the query text, and the
+ * query still returns the first arbitrary row of a required index, which Tier 2 then
+ * counts as corroboration. A value the query merely mentions is not a value it searched
+ * for. A qualifying literal grounds the query when it equals an extracted IOC or appears
+ * verbatim in the report text.
  *
- * This is the string-literal form of the check: it catches the unfiltered-query
- * case without modelling which literals sit in a filtering command specifically.
- * Narrowing it to the `WHERE`/filter AST is the natural next step if this proves
- * too loose.
+ * The gate is deliberately a value test rather than a semantic one, so it does not
+ * attempt to prove the predicate is *restrictive* — a tautology disjoined onto a
+ * grounded comparison would still pass. It establishes that the report reached the
+ * predicate, which is what the unfiltered and mention-only cases lack.
  */
 export const assertEsqlGroundedInReport = (
   query: string,
@@ -81,16 +159,20 @@ export const assertEsqlGroundedInReport = (
     return { ok: false, reason: 'query failed to parse' };
   }
 
-  // Index patterns (`FROM`/`LOOKUP JOIN`/`ENRICH` targets) surface as both source and
-  // literal nodes, so collect the source names and exclude them: reading an index is not
-  // filtering on report data, even if the report happens to name that index.
+  const literals = collectFilterLiterals(root);
+  if (literals.length === 0) {
+    return {
+      ok: false,
+      reason: 'query has no filtering predicate, so any row in scope would answer it',
+    };
+  }
+
+  // Index patterns surface as `source` nodes, so a literal equal to one of them is the
+  // query naming its own scope. `collectFilterLiterals` already drops comparisons against
+  // `_index`; this covers the rest, at the cost of rejecting a report value that happens
+  // to be spelled exactly like an index pattern.
   const sources = new Set<string>();
   Walker.walk(root, { visitSource: ({ name }) => sources.add(normalize(name)) });
-
-  const literals: string[] = [];
-  Walker.walk(root, {
-    visitLiteral: ({ value }) => literals.push(stripFraming(String(value))),
-  });
 
   const haystack = normalize(reportText);
   const groundingIocs = new Set(iocValues.map(normalize).filter((value) => value.length > 0));
@@ -106,7 +188,8 @@ export const assertEsqlGroundedInReport = (
   if (!grounded) {
     return {
       ok: false,
-      reason: 'query filters on no value drawn from the report (no matching IOC or report literal)',
+      reason:
+        'query filters on no value drawn from the report (no matching IOC or report literal in a filtering predicate)',
     };
   }
   return { ok: true };
