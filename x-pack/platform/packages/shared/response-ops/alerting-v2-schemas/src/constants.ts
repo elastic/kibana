@@ -76,7 +76,7 @@ export const MAX_EPISODE_LABEL_LENGTH = MAX_NAME_LENGTH * 2 + 32;
 /** Maximum length for human-readable description fields (rule description, action policy description). */
 export const MAX_DESCRIPTION_LENGTH = 1024;
 
-/** Maximum length for an external alert `fingerprint` / series key. */
+/** Maximum length for an external alert `fingerprint`, the caller's own series key. */
 export const MAX_FINGERPRINT_LENGTH = 1024;
 
 /** Maximum number of fields named in `fingerprint_fields` on external alert ingest. */
@@ -111,8 +111,11 @@ export const ACTION_POLICY_MAX_DESTINATIONS = 10;
  */
 export const VERSION_MAX_LENGTH = 256;
 
+/** Maximum number of items any list endpoint returns per page. */
+export const MAX_PER_PAGE = 100;
+
 /** Maximum number of execution-history events returned per page (rule + action policy streams). */
-export const EXECUTION_HISTORY_MAX_PER_PAGE = 100;
+export const EXECUTION_HISTORY_MAX_PER_PAGE = MAX_PER_PAGE;
 
 /** Default number of execution-history events returned per page when `per_page` is omitted. */
 export const EXECUTION_HISTORY_DEFAULT_PER_PAGE = 20;
@@ -129,7 +132,7 @@ export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
 export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
 
 /** Maximum number of rule templates returned per page. */
-export const RULE_TEMPLATE_MAX_PER_PAGE = 100;
+export const RULE_TEMPLATE_MAX_PER_PAGE = MAX_PER_PAGE;
 
 /** Default number of items returned per page by the rule, action policy and rule template list APIs. */
 export const FIND_DEFAULT_PER_PAGE = 20;
@@ -148,7 +151,7 @@ export const FIND_MAX_RESULT_WINDOW = 10_000;
 export const MAX_EPISODE_DATA_LENGTH = 32_000;
 
 /** Maximum number of rule change-history events returned per page. */
-export const RULE_CHANGE_HISTORY_MAX_PER_PAGE = 100;
+export const RULE_CHANGE_HISTORY_MAX_PER_PAGE = MAX_PER_PAGE;
 
 /** Default number of rule change-history events returned per page when `per_page` is omitted. */
 export const RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE = 20;
@@ -157,3 +160,8 @@ export const RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE = 20;
  * Maximum number of rule change-history events that can be paged through.
  */
 export const RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW = 10_000;
+
+/**
+ * Canonical alert event severity levels, ordered from least to most severe.
+ */
+export const SEVERITY_LEVELS = ['info', 'low', 'medium', 'high', 'critical'] as const;

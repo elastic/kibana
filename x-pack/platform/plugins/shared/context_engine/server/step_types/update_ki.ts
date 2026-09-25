@@ -8,12 +8,18 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { isResponseError } from '@kbn/es-errors';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
+import { omitNullKiAttributes } from '../../common/step_types/ki';
 import type { KiStepDependencies } from './helpers';
 import {
+  appendKiRevision,
   assertContextEngineEnabled,
   assertKiWritePrivilege,
-  findKiBackingIndex,
+  findKiRevision,
+  isKiDeleted,
+  kiConflictError,
+  kiDeletedError,
   kiNotFoundError,
+  kiWriterFromContext,
   resolveAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
@@ -32,7 +38,9 @@ export const getUpdateKiStepDefinition = ({
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, lifecycle, force = false } = context.input;
+      // A null attribute is left out of the patch, so the stored value is untouched.
+      const ki = omitNullKiAttributes(context.input.ki);
       return withKiWriteTelemetry({
         action: 'update',
         aiIndexId,
@@ -45,28 +53,62 @@ export const getUpdateKiStepDefinition = ({
           setManaged(managed);
           const esClient = context.contextManager.getScopedEsClient();
 
-          const backingIndex = await findKiBackingIndex({
+          const revision = await findKiRevision({
             esClient,
             aiIndexId,
-            destValue: dest.value,
+            dest,
             kiId,
             abortSignal: context.abortSignal,
           });
+          if (!revision) {
+            throw kiNotFoundError(aiIndexId, kiId);
+          }
+          if (isKiDeleted(revision.source) && !force) {
+            throw kiDeletedError(aiIndexId, kiId);
+          }
+          if (Object.keys(ki).length === 0 && lifecycle === undefined) {
+            return { output: { id: kiId, result: 'noop' as const } };
+          }
+
+          const now = new Date().toISOString();
+          const writer = kiWriterFromContext(context.contextManager.getContext());
+          const changes = {
+            ...ki,
+            updated_at: now,
+            governance: { provenance: { updated_by: writer }, ...(lifecycle && { lifecycle }) },
+          };
+
+          if (dest.type === 'data_stream') {
+            await appendKiRevision({
+              esClient,
+              destValue: dest.value,
+              kiId,
+              source: revision.source,
+              changes,
+              abortSignal: context.abortSignal,
+            });
+            return { output: { id: kiId, result: 'updated' as const } };
+          }
 
           const response = await esClient
             .update(
               {
-                index: backingIndex,
-                id: kiId,
-                doc: ki,
+                index: revision.index,
+                id: revision.documentId,
+                doc: changes,
+                if_seq_no: revision.seqNo,
+                if_primary_term: revision.primaryTerm,
                 refresh: 'wait_for',
               },
               { signal: context.abortSignal }
             )
             .catch((error) => {
-              // The KI may have been removed concurrently.
+              // The KI may have been removed or rewritten concurrently.
               if (isResponseError(error) && error.statusCode === 404) {
                 throw kiNotFoundError(aiIndexId, kiId);
+              }
+              if (isResponseError(error) && error.statusCode === 409) {
+                throw kiConflictError(aiIndexId, kiId);
               }
               throw error;
             });

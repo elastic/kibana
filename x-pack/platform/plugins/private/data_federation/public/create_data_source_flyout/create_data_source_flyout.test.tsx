@@ -112,47 +112,43 @@ describe('CreateDataSourceFlyout', () => {
     });
   });
 
-  it('shows the S3 region field without expanding connection settings, and requires it on create', async () => {
-    const toasts = createToastsMock();
-    const client = createClientMock();
+  it('shows an error', async () => {
     const services: DataFederationKibanaServices = {
-      dataSourcesClient: client,
+      dataSourcesClient: createClientMock(),
       datasetsClient: createDatasetsClientMock(),
-      toasts,
+      toasts: createToastsMock(),
       docLinks: createDocLinksMock(),
       featureFlags: {},
     };
-    const onSave = jest.fn().mockResolvedValue(null);
+    const onSave = jest.fn().mockResolvedValue('validation_exception: something went wrong');
 
-    const { getByTestId, queryByText } = render(
+    const initialDataSource: DataSource = {
+      type: 's3',
+      name: 'ds',
+      description: '',
+      settings: {
+        region: 'us-east-1',
+      } as any,
+    } as any;
+
+    const { findByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={services}>
           <CreateDataSourceFlyout
             onClose={jest.fn()}
             onSave={onSave}
             existingDataSourceNames={[]}
+            initialDataSource={initialDataSource}
           />
         </KibanaContextProvider>
       </EuiProvider>
     );
 
-    // Region is visible up front, without expanding "Show connection settings".
-    expect(getByTestId('createDataSourceFlyoutS3Region')).toBeInTheDocument();
+    fireEvent.click(await findByTestId('createDataSourceFlyoutSubmit'));
 
-    fireEvent.change(getByTestId('createDataSourceFlyoutName'), { target: { value: 'my-ds' } });
-    fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
-
-    await waitFor(() => {
-      expect(queryByText('Region is required.')).toBeInTheDocument();
-    });
-    expect(onSave).not.toHaveBeenCalled();
-
-    fireEvent.change(getByTestId('createDataSourceFlyoutS3Region'), {
-      target: { value: 'us-east-1' },
-    });
-
-    await waitFor(() => {
-      expect(queryByText('Region is required.')).not.toBeInTheDocument();
-    });
+    const banner = await findByTestId('createDataSourceFlyoutSaveError');
+    expect(banner).toHaveTextContent('Could not save the data source');
+    expect(banner).toHaveTextContent('validation_exception: something went wrong');
+    expect(await findByTestId('createDataSourceFlyoutFooter')).toContainElement(banner);
   });
 });

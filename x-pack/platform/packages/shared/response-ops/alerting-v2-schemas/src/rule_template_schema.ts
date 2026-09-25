@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
-import { arrayOrSingleSchema, queryIntSchema } from './common';
+import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import { createRuleDataSchema } from './rule_data_schema';
 import {
   FIND_DEFAULT_PER_PAGE,
@@ -74,6 +74,7 @@ export const findRuleTemplatesRequestSchema = z
         'Only return templates carrying at least one of these tags. Accepts a single tag or a repeated parameter.'
       ),
   })
+  .strict()
   .refine(
     ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
     { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
@@ -84,7 +85,9 @@ export type FindRuleTemplatesRequest = z.infer<typeof findRuleTemplatesRequestSc
 export const findRuleTemplatesResponseSchema = z
   .object({
     items: z.array(ruleTemplateResponseSchema).describe('The list of rule templates.'),
-    total: z.number().describe('The total number of rule templates matching the query.'),
+    total: z
+      .number()
+      .describe(`The number of rule templates matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().describe('The current page number.'),
     per_page: z.number().describe('The number of rule templates per page.'),
   })
@@ -92,8 +95,10 @@ export const findRuleTemplatesResponseSchema = z
 
 export type FindRuleTemplatesResponse = z.infer<typeof findRuleTemplatesResponseSchema>;
 
-export const ruleTemplateIdParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule template.'),
-});
+export const ruleTemplateIdParamsSchema = z
+  .object({
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule template.'),
+  })
+  .strict();
 
 export type RuleTemplateIdParams = z.infer<typeof ruleTemplateIdParamsSchema>;

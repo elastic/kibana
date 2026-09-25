@@ -10,11 +10,14 @@ tags:
   - security
   - detection-rule-tuning
 settings:
-  # The proposal gate runs for up to 80h (72h decision window plus its own margin)
-  # while this run parks in WAITING_FOR_CHILD. The engine's default 6h workflow
-  # timeout would cancel the review under the analyst, so this must stay above the
-  # gate's own timeout.
-  timeout: "84h"
+  # This run parks in WAITING_FOR_CHILD for as long as the proposal gate holds
+  # the decision, and the engine's default 6h workflow timeout would cancel the
+  # review out from under the analyst. So this has to stay above the gate's own
+  # ceiling, which is `168h`: a 72h decision window, plus a second full 72h for
+  # a proposal re-parked just before its deadline, plus margin. A test pins the
+  # relationship, so raising the gate's ceiling fails here rather than silently
+  # cancelling reviews.
+  timeout: "176h"
   # Keyed per rule so a later sweep cannot open a second gate for a rule whose
   # review is still pending: alerts are only tagged after the gate resolves,
   # so the harvest keeps returning such a rule until then.
@@ -104,7 +107,7 @@ outputs:
 consts:
   # Fallbacks for the optional operational inputs; keep in sync with the sweep's
   # consts in rule_tuning_worker.yaml.
-  analysis_window_days: 14
+  analysis_window_days: 7
   preview_invocation_count: 2
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
@@ -187,7 +190,7 @@ steps:
       ${{ inputs.autonomy_level == 'manual'
         and steps.create_investigation.output.conversation_id != null }}
     with:
-      workflow-id: system-create-investigation-proposal
+      workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ steps.create_investigation.output.conversation_id }}"
         comment: |-
@@ -205,11 +208,14 @@ steps:
           **On approval**
           The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
         impact: low
+        # No action, so no inherited category, and the queue drops an
+        # uncategorised proposal. Grouped with the tuning proposal that follows.
+        category: configure
 
   - name: record_entry
     type: data.set
     with:
-      declined: "${{ steps.propose_entry.output.status == 'dismissed' }}"
+      declined: "${{ steps.propose_entry.output.decision == 'dismissed' }}"
 
   # A declined review still retires its alerts, or the next sweep would open the
   # same entry gate for the same alerts again.
@@ -247,6 +253,11 @@ steps:
 
   - name: diagnose_rule
     type: ai.agent
+    # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_agentic
+    # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
+    plugin-id: alertzero_rule_tuning_review
+    aggregate-by: alertzero_parent
     if: >-
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
@@ -301,11 +312,29 @@ steps:
           low-priority noise. Populate proposed_risk_score (0–100) and
           proposed_severity (low / medium / high / critical).
 
+        threshold  — The rule fires too broadly because the threshold count is
+          too low, capturing events that a higher minimum count would filter out.
+          Only valid for rule type "threshold". Always populate all three fields:
+          proposed_threshold_value (integer, minimum 1),
+          proposed_threshold_field (array of field names — use the rule's current
+          threshold.field if not changing it), and proposed_threshold_cardinality
+          (array of {field, value} objects — use the rule's current
+          threshold.cardinality, or [] if it has none). Do not use this for query
+          changes; if the threshold logic is structurally wrong, use manual instead.
+
+        schedule  — The rule sweeps too wide a lookback window or runs too
+          frequently, generating FPs that tighter timing would prevent.
+          Always populate both proposed_interval (e.g. "10m") and proposed_from
+          (e.g. "now-11m") using the same date-math format the rule currently
+          uses, even if only one setting needs to change. The patch replaces
+          both atomically, so both must be explicitly proposed. Ensure
+          proposed_from overlaps with proposed_interval to avoid gaps.
+
         manual  — None of the above is safe to apply automatically. Use summary
           to describe: (a) the false-positive pattern you found, (b) which automated
-          paths you considered (exception / query / risk_score) and why each is unsafe
-          or inapplicable for this rule, and (c) a concrete recommendation for what the
-          analyst should do manually in the Detection Rules UI.
+          paths you considered (exception / query / risk_score / threshold / schedule)
+          and why each is unsafe or inapplicable for this rule, and (c) a concrete
+          recommendation for what the analyst should do manually in the Detection Rules UI.
 
         The analyst sees your output as a proposal card, so fill every field for a
         reader who has not seen the alerts: title is one short line naming the
@@ -332,26 +361,36 @@ steps:
               confidence:
                 type: string
                 enum: [low, medium, high]
+              # Bounds mirror the platform exception schema, which the action and
+              # the step validate against. An unbounded recommendation here is
+              # rejected when the proposal is created, so the review fails and the
+              # alerts wait for the next sweep instead of reaching an analyst.
               exception_entries:
                 type: array
                 minItems: 1
+                maxItems: 100
                 items:
                   oneOf:
                     - type: object
                       properties:
                         field:
                           type: string
+                          minLength: 1
+                          maxLength: 1024
                         operator:
                           type: string
                           enum: [is, is_not, matches, does_not_match]
                         value:
                           type: string
                           minLength: 1
+                          maxLength: 1024
                       required: [field, operator, value]
                     - type: object
                       properties:
                         field:
                           type: string
+                          minLength: 1
+                          maxLength: 1024
                         operator:
                           type: string
                           enum: [is_one_of, is_not_one_of]
@@ -359,12 +398,17 @@ steps:
                           type: array
                           items:
                             type: string
+                            minLength: 1
+                            maxLength: 1024
                           minItems: 1
+                          maxItems: 1000
                       required: [field, operator, values]
                     - type: object
                       properties:
                         field:
                           type: string
+                          minLength: 1
+                          maxLength: 1024
                         operator:
                           type: string
                           enum: [exists, does_not_exist]
@@ -383,7 +427,8 @@ steps:
               reasoning:
                 type: string
               confidence:
-                type: string  
+                type: string
+                enum: [low, medium, high]
               proposed_query:
                 type: string
                 minLength: 1
@@ -401,7 +446,8 @@ steps:
               reasoning:
                 type: string
               confidence:
-                type: string  
+                type: string
+                enum: [low, medium, high]
               proposed_risk_score:
                 type: integer
                 minimum: 0
@@ -410,6 +456,65 @@ steps:
                 type: string
                 enum: [low, medium, high, critical]
             required: [change_type, summary, proposed_risk_score, proposed_severity, title, fp_pattern, reasoning, confidence]
+          - type: object
+            properties:
+              change_type:
+                const: threshold
+              summary:
+                type: string
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_threshold_value:
+                type: integer
+                minimum: 1
+              proposed_threshold_field:
+                type: array
+                items:
+                  type: string
+                  maxLength: 512
+                maxItems: 5
+              proposed_threshold_cardinality:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      maxLength: 512
+                    value:
+                      type: integer
+                      minimum: 0
+                  required: [field, value]
+            required: [change_type, summary, proposed_threshold_value, proposed_threshold_field, proposed_threshold_cardinality, title, fp_pattern, reasoning, confidence]
+          - type: object
+            properties:
+              change_type:
+                const: schedule
+              summary:
+                type: string
+              title:
+                type: string
+              fp_pattern:
+                type: string
+              reasoning:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_interval:
+                type: string
+                maxLength: 32
+              proposed_from:
+                type: string
+                maxLength: 64
+            required: [change_type, summary, title, fp_pattern, reasoning, confidence, proposed_interval, proposed_from]
           - type: object
             properties:
               change_type:
@@ -423,7 +528,8 @@ steps:
               reasoning:
                 type: string
               confidence:
-                type: string     
+                type: string
+                enum: [low, medium, high]
             required: [change_type, summary, title, fp_pattern, reasoning, confidence]
 
   # Rules using a data view, timestamp override, or alert suppression need fields
@@ -530,7 +636,7 @@ steps:
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
         {{ steps.compose_evidence.output.rule_line }}
-        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "suppression" %}Edit rule settings (alert suppression){% when "threshold" %}Edit rule settings (threshold){% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
+        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule settings (risk score and severity){% when "threshold" %}Edit rule settings (threshold){% when "schedule" %}Edit rule settings (schedule){% else %}Manual change, no automated action{% endcase %}
         {{ steps.compose_evidence.output.investigation_line }}
 
         **Why this rule needs tuning**
@@ -552,7 +658,8 @@ steps:
         {{ steps.compose_evidence.output.sample_alerts }}
 
         **Proposed change**
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        {% case steps.diagnose_rule.output.structured_output.change_type %}
+        {% when "query" %}
         Current query:
         ```
         {{ steps.fetch_rule.output.query }}
@@ -562,29 +669,39 @@ steps:
         ```
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
         ```
-        {% endif %}
-
-        {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
+        {% when "exception" %}
         Proposed exception:
         {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
         Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
-        {% endif %}
-
-        {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
+        {% when "risk_score" %}
         Current risk score: {{ steps.fetch_rule.output.risk_score }}
         Current severity: {{ steps.fetch_rule.output.severity }}
         Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
         Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
+        {% when "threshold" %}
+        Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
+        Proposed threshold value: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}
+        {% if steps.diagnose_rule.output.structured_output.proposed_threshold_field != nil %}
+        Current threshold field: {{ steps.fetch_rule.output.threshold.field | json }}
+        Proposed threshold field: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_field | json }}
         {% endif %}
-        
-        {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
+        Current threshold cardinality: {% if steps.fetch_rule.output.threshold.cardinality %}{% for entry in steps.fetch_rule.output.threshold.cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
+        Proposed threshold cardinality: {% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}{% for entry in steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
+        Approving patches the rule's threshold settings. The change can be reverted in the Detection Rules UI.
+        {% when "schedule" %}
+        Current interval: {{ steps.fetch_rule.output.interval }}
+        Proposed interval: {{ steps.diagnose_rule.output.structured_output.proposed_interval }}
+        Current lookback (from): {{ steps.fetch_rule.output.from }}
+        Proposed lookback (from): {{ steps.diagnose_rule.output.structured_output.proposed_from }}
+        Approving patches the rule's schedule settings. The change can be reverted in the Detection Rules UI.
+        {% else %}
         No automated change can be applied safely for this rule.
         Approving records the handoff — no rule changes are made automatically.
         Apply the recommended change in the Detection Rules UI.
-        {% endif %}
+        {% endcase %}
 
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
         {% if steps.can_preview_query_change.output.supported %}
@@ -602,109 +719,190 @@ steps:
         Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        This rule is not a query rule, or uses a data view, timestamp override, or
-        alert suppression, so the proposed query is not previewed or applied automatically.
-        Approving marks these alerts acknowledged; apply the change manually in the Detection Rules UI.
+        No backtest: this rule is not a query rule, or uses a data view, timestamp
+        override, or alert suppression, which the preview API cannot reproduce.
+        Approving still applies the proposed query, so judge it on the query itself
+        and the false positives above rather than on a simulated alert count.
         {% endif %}
         {% endif %}
 
-  # The proposal gate records the recommendation on the investigation, parks on
-  # the analyst's decision for up to 72h, and on approval runs the edit-rule action
-  # as the approver. A gate timeout fails the gate, which fails this run before the
-  # tag steps: the alerts stay unreviewed and the next sweep proposes the rule again
-  # with a fresh diagnosis, while the investigation stays open because nobody decided.
-  - name: propose_action
-    type: workflow.execute
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.diagnose_rule.output.structured_output.change_type == 'query' }}
-    with:
-      workflow-id: system-create-investigation-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        comment: "{{ steps.compose_proposal.output.comment }}"
-        actionWorkflowId: system-alertzero-action-edit-rule
-        actionInput:
-          id: "{{ inputs.rule_uuid }}"
-          query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
-        impact: medium
-        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
-        # Query edits always wait for an analyst; matches the action's approvalPolicy.
-        autoApprove: false
+  # One switch, four exclusive arms, one gate call each. Separate arms because a
+  # YAML object cannot be assembled conditionally. The manual arm is the default.
+  #
+  # The gate parks on the analyst's decision for up to 72h and on approval runs
+  # the named action as the approver. A gate timeout fails this run before the
+  # tag steps, so the alerts stay unreviewed and the next sweep retries the rule.
+  - name: propose_tuning
+    type: switch
+    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    expression: "{{ steps.diagnose_rule.output.structured_output.change_type }}"
+    cases:
+      - match: query
+        steps:
+          - name: propose_query
+            type: workflow.execute
+            with:
+              workflow-id: system-create-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                # Query edits always wait for an analyst; matches the action's approvalPolicy.
+                autoApprove: false
 
-  # Same gate without an action: the analyst carries the change out themselves, so
-  # approval is the whole lifecycle. Needs a diagnosis, since the investigation now
-  # exists before one.
-  - name: propose_manual
-    type: workflow.execute
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.diagnose_rule.output.structured_output.change_type == 'manual' }}
-    with:
-      workflow-id: system-create-investigation-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        comment: "{{ steps.compose_proposal.output.comment }}"
-        impact: low
-        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+      # Same action as the query arm; it patches only the fields it is given.
+      - match: risk_score
+        steps:
+          - name: propose_risk_score
+            type: workflow.execute
+            with:
+              workflow-id: system-create-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  # `${{ }}` keeps the score a number; the gate validates the input at creation.
+                  risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
+                  severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
+                impact: low
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
 
-  # The gate reports `succeeded` once the action ran, `approved` for a manual
-  # proposal, `dismissed` otherwise. Spelled out per outcome rather than derived
-  # from a single flag so a run that never proposed (no diagnosis) matches none of
-  # them and leaves the alerts untagged.
+      # Not a rule edit: an exception item has its own action.
+      - match: exception
+        steps:
+          - name: propose_exception
+            type: workflow.execute
+            with:
+              workflow-id: system-create-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-add-rule-exception
+                actionInput:
+                  rule_id: "{{ inputs.rule_uuid }}"
+                  name: "Tuning: {{ steps.fetch_rule.output.name }}"
+                  description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
+                  # `${{ }}` keeps the entries as objects.
+                  entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                # Same as a query edit: an exception changes how many alerts the
+                # rule produces, so it can lose a detection. Re-ranking cannot,
+                # which is why the risk score arm is lower.
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
+      - match: threshold
+        steps:
+          - name: incomplete_threshold_output
+            type: workflow.fail
+            if: >-
+              ${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value == nil
+                or steps.diagnose_rule.output.structured_output.proposed_threshold_field == nil
+                or steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality == nil }}
+            with:
+              message: "diagnose_rule chose change_type=threshold but did not populate all required threshold fields"
+          - name: propose_threshold
+            type: workflow.execute
+            with:
+              workflow-id: system-create-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  threshold:
+                    value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
+                    field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field }}"
+                    cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
+      - match: schedule
+        steps:
+          - name: propose_schedule
+            type: workflow.execute
+            with:
+              workflow-id: system-create-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  interval: "{{ steps.diagnose_rule.output.structured_output.proposed_interval }}"
+                  from: "{{ steps.diagnose_rule.output.structured_output.proposed_from }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
+    # Same gate without an action: the analyst carries the change out
+    # themselves, so approval is the whole lifecycle. The default arm, so a
+    # change type the arms above do not recognise still reaches the analyst.
+    default:
+      - name: propose_manual
+        type: workflow.execute
+        with:
+          workflow-id: system-create-proposal
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            comment: "{{ steps.compose_proposal.output.comment }}"
+            impact: low
+            # No action, so no inherited category; see the entry gate.
+            category: configure
+            confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+
+  # The gate reports its outcome on two independent axes: `decision` is what the
+  # analyst concluded (`approved` / `dismissed`, absent until someone decides),
+  # and `status` is how far it got (`succeeded` once the action ran, `no_action`
+  # when there was nothing to run, `expired` when nobody answered). Spelled out
+  # per outcome rather than derived from a single flag so a run that never
+  # proposed (no diagnosis) matches none of them and leaves the alerts untagged.
+  # One axis per question: what the analyst concluded is read off `decision`,
+  # whether the change landed is read off `status`. Reading a decision off
+  # `status` cannot work, because a dismissal and an approved action-less
+  # proposal both report `no_action`.
+  #
+  # NOTE: the gate reports `decision: approved` only once it has settled that
+  # way, which is either an approval with no action or an action that succeeded.
+  # An approval whose action failed through every retry settles as expired and
+  # reports no decision, so it counts as neither approved nor dismissed and the
+  # alerts stay untagged for the next sweep.
   - name: record_proposal_action_decision
     type: data.set
     with:
-      applied: "${{ steps.propose_action.output.status == 'succeeded' }}"
+      applied: >-
+        ${{ steps.propose_query.output.status == 'succeeded'
+          or steps.propose_risk_score.output.status == 'succeeded'
+          or steps.propose_exception.output.status == 'succeeded'
+          or steps.propose_threshold.output.status == 'succeeded'
+          or steps.propose_schedule.output.status == 'succeeded' }}
       approved: >-
-        ${{ steps.propose_action.output.status == 'succeeded'
-          or steps.propose_manual.output.status == 'approved' }}
+        ${{ steps.propose_query.output.decision == 'approved'
+          or steps.propose_risk_score.output.decision == 'approved'
+          or steps.propose_exception.output.decision == 'approved'
+          or steps.propose_threshold.output.decision == 'approved'
+          or steps.propose_schedule.output.decision == 'approved'
+          or steps.propose_manual.output.decision == 'approved' }}
       dismissed: >-
-        ${{ steps.propose_action.output.status == 'dismissed'
-          or steps.propose_manual.output.status == 'dismissed' }}
-
-  ### this is temporray, unitl excepion/rule score proposals is implemented
-  - name: review_tuning
-    type: waitForApproval
-    if: >-
-      ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' or steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
-    timeout: "72h"
-    with:
-      approveLabel: Approve change
-      rejectLabel: Dismiss
-      message: |-
-        {{ steps.compose_proposal.output.comment }}
-
-  ### this is temporray, unitl excepion/rule score proposals is implemented
-  - name: apply_exception_tuning
-    type: security.createRuleException
-    if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
-    on-failure:
-      continue: true
-    with:
-      rule_id: "{{ inputs.rule_uuid }}"
-      name: "Tuning: {{ steps.fetch_rule.output.name }}"
-      description: "Added by the rule tuning workflow."
-      entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
-
-  ### this is temporray, unitl excepion/rule score proposals is implemented
-  - name: apply_risk_score_tuning
-    type: security.patchRule
-    if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
-    on-failure:
-      continue: true
-    with:
-      patch:
-        id: "{{ inputs.rule_uuid }}"
-        risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
-        severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
+        ${{ steps.propose_query.output.decision == 'dismissed'
+          or steps.propose_risk_score.output.decision == 'dismissed'
+          or steps.propose_exception.output.decision == 'dismissed'
+          or steps.propose_threshold.output.decision == 'dismissed'
+          or steps.propose_schedule.output.decision == 'dismissed'
+          or steps.propose_manual.output.decision == 'dismissed' }}
 
   # The action ran inside the gate, so its result is not visible here; re-read the
-  # rule to refresh the attachment with the query that actually landed.
+  # rule to refresh the attachment with the change that actually landed.
   - name: refetch_rule
     type: kibana.request
     if: "${{ steps.record_proposal_action_decision.output.applied == true }}"
@@ -737,40 +935,9 @@ steps:
     on-failure:
       continue: true
 
-  # A skipped step leaves no execution record. Query success requires a returned
-  # rule id; the other error checks are paired with their apply gates. Failed
-  # changes stay untagged so a later sweep can retry.
-  - name: record_apply_results
-    type: data.set
-    with:
-      query_applied: >-
-        ${{ steps.record_proposal_action_decision.output.applied == true and steps.diagnose_rule.output.structured_output.change_type == 'query' }}
-      exception_applied: >-
-        ${{ steps.review_tuning.output.response.approved == true
-          and steps.diagnose_rule.output.structured_output.change_type == 'exception'
-          and steps.apply_exception_tuning.error == null }}
-      risk_score_applied: >-
-        ${{ steps.review_tuning.output.response.approved == true
-          and steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
-          and steps.apply_risk_score_tuning.error == null }}
-
-  # Liquid cannot parenthesise conditions, so the OR-of-ANDs for rule_patched is
-  # split into a second step that reads the already-resolved individual flags.
-  - name: record_outcome
-    type: data.set
-    with:
-      rule_patched: >-
-        ${{ steps.record_apply_results.output.query_applied == true
-          or steps.record_apply_results.output.exception_applied == true
-          or steps.record_apply_results.output.risk_score_applied == true }}
-
-  # Dismissals arrive from either gate: the proposal gate for query and manual,
-  # the interim in-run gate for exception and risk score.
   - name: mark_alerts_dismissed
     type: security.setAlertTags
-    if: >-
-      ${{ steps.record_proposal_action_decision.output.dismissed == true
-        or steps.review_tuning.output.response.approved == false }}
+    if: "${{ steps.record_proposal_action_decision.output.dismissed == true }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       # Listed item by item because security.setAlertTags takes an array here and its
@@ -781,7 +948,7 @@ steps:
 
   - name: mark_alerts_applied
     type: security.setAlertTags
-    if: "${{ steps.record_outcome.output.rule_patched == true }}"
+    if: "${{ steps.record_proposal_action_decision.output.applied == true }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
@@ -790,14 +957,18 @@ steps:
 
   # An approved change the pipeline does not apply itself is the analyst's to act
   # on. Tagging retires these alerts so later sweeps do not re-open the same gate;
-  # the rule returns once new false positives accumulate past the watermark. The
-  # auto-apply path stays untagged when its apply fell through, so a later sweep can retry with current data.
-  # Liquid evaluates right-to-left: approved gates both the manual path and the
-  # unsupported-query path without needing parentheses.
+  # the rule returns once new false positives accumulate past the watermark. An
+  # action path whose apply fell through stays untagged instead, so a later sweep
+  # can retry it with current data. A query change with no backtest is not this
+  # case: it carries the edit-rule action like any other and is tagged applied.
+  # Keyed on the proposal rather than on the change type: `propose_manual` is the
+  # switch's default arm, so it is the one that ran for `manual` and for any value
+  # the three action arms did not match. Testing the change type here would leave
+  # those alerts untagged after an approval, and the next sweep would re-propose
+  # the rule the analyst just decided.
   - name: mark_alerts_acknowledged
     type: security.setAlertTags
-    if: >-
-      ${{ steps.diagnose_rule.output.structured_output.change_type == 'manual' and steps.propose_manual.output.status == 'approved' }}
+    if: "${{ steps.propose_manual.output.decision == 'approved' }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
@@ -817,18 +988,17 @@ steps:
       updates:
         status: closed
         close_reason: resolved
-        verdict: "Analyst approved the {{ steps.diagnose_rule.output.structured_output.change_type }} tuning proposal."
+        # No raw change type: the default arm accepts values the arms do not
+        # name, and an unrecognised one would leave a gap in the sentence.
+        verdict: "Analyst approved the tuning proposal."
     on-failure:
       continue: true
 
-  # Liquid evaluates right-to-left, so the conversation check gates both
-  # dismissal sources without parentheses.
   - name: close_investigation_dismissed
     type: ai.conversation.metadata.patch
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_proposal_action_decision.output.dismissed == true
-        or steps.review_tuning.output.response.approved == false }}
+        and steps.record_proposal_action_decision.output.dismissed == true }}
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       updates:
@@ -843,10 +1013,5 @@ steps:
     status: completed
     with:
       rule_uuid: "{{ inputs.rule_uuid }}"
-      # Two approval sources: the proposal gate (query, manual) and the interim
-      # in-run gate (exception, risk_score). A plain or-chain, since Liquid has no
-      # parentheses.
-      approved: >-
-        ${{ steps.record_proposal_action_decision.output.approved == true
-          or steps.review_tuning.output.response.approved == true }}
-      applied: "${{ steps.record_outcome.output.rule_patched == true }}"
+      approved: "${{ steps.record_proposal_action_decision.output.approved == true }}"
+      applied: "${{ steps.record_proposal_action_decision.output.applied == true }}"

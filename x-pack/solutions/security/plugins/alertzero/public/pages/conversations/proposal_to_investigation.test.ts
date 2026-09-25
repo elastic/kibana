@@ -7,7 +7,7 @@
 
 import { proposalToInvestigation } from './proposal_to_investigation';
 import type { ProposalItem } from '../../../common/proposals/list';
-import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
 const baseProposal: ProposalItem = {
   id: 'prop-001',
@@ -20,6 +20,7 @@ const baseProposal: ProposalItem = {
   origin: 'worker',
   createdAt: '2026-09-10T10:00:00.000Z',
   expired: false,
+  conversationAssignees: [],
 };
 
 describe('proposalToInvestigation', () => {
@@ -58,7 +59,6 @@ describe('proposalToInvestigation', () => {
       ['respond', 'respond'],
       ['investigate', 'investigate'],
       ['configure', 'configure'],
-      ['tune', 'configure'], // legacy mapping
     ] as const)('category %s → bucket %s', (category, expected) => {
       const result = proposalToInvestigation({ ...baseProposal, category });
       expect(result.recommendedAction).toBe(expected);
@@ -81,7 +81,8 @@ describe('proposalToInvestigation', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         category: 'respond',
-        status: 'dismissed',
+        decision: 'dismissed',
+        status: 'no_action',
         decidedAt: '2026-09-10T11:00:00.000Z',
       });
       expect(result.recommendedAction).toBe('closed');
@@ -139,6 +140,25 @@ describe('proposalToInvestigation', () => {
     });
   });
 
+  describe('assignee', () => {
+    // `Investigation.assignee` is singular because the flyout header renders one avatar.
+    it('takes the first assignee', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        conversationAssignees: ['first.analyst', 'second.analyst'],
+      });
+      expect(result.assignee).toBe('first.analyst');
+    });
+
+    it('is null when nobody is assigned', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        conversationAssignees: [],
+      });
+      expect(result.assignee).toBeNull();
+    });
+  });
+
   describe('fixed fields', () => {
     it('id equals proposal id', () => {
       const result = proposalToInvestigation(baseProposal);
@@ -150,9 +170,19 @@ describe('proposalToInvestigation', () => {
       expect(result.events).toEqual([]);
     });
 
-    it('affectedSurface is undefined', () => {
+    it('affectedSurface is undefined when Impact was not hydrated', () => {
       const result = proposalToInvestigation(baseProposal);
       expect(result.affectedSurface).toBeUndefined();
+      expect(result.entityIds).toBeUndefined();
+    });
+
+    it('copies hydrated entity ids onto the card and uses the first as affectedSurface', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        entityIds: ['cfo@corp', 'host-1'],
+      });
+      expect(result.entityIds).toEqual(['cfo@corp', 'host-1']);
+      expect(result.affectedSurface).toBe('cfo@corp');
     });
 
     it('pendingProposalCount is 1 for undecided proposals', () => {
@@ -164,7 +194,8 @@ describe('proposalToInvestigation', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         decidedAt: '2026-09-10T11:00:00.000Z',
-        status: 'approved',
+        decision: 'approved',
+        status: 'succeeded',
       });
       expect(result.pendingProposalCount).toBe(0);
     });

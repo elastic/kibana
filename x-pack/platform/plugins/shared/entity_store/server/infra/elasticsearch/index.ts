@@ -15,6 +15,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 export { assertReindexSucceeded, reindex } from './reindex';
+export { chunkByUrlLength } from './chunk_by_url_length';
 export type { ReindexOptions, ReindexResult } from './reindex';
 export { updateByQueryWithScript } from './ingest';
 export type { UpdateByQueryWithScriptOptions } from './ingest';

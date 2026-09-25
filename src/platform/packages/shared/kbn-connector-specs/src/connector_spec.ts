@@ -108,6 +108,18 @@ export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
   clientId: string;
 }
 
+export interface OAuthPasswordGetTokenOpts {
+  authType: 'oauth_password';
+  tokenUrl: string;
+  username: string;
+  password: string;
+  clientId?: string;
+  scope?: string;
+  usernameField?: 'username' | 'email';
+  requestBodyFormat?: 'form' | 'json';
+  tokenType?: string;
+}
+
 export interface EarsGetTokenOpts {
   authType: 'ears';
   provider: string;
@@ -116,6 +128,7 @@ export interface EarsGetTokenOpts {
 
 export type GetTokenOpts =
   | OAuthGetTokenOpts
+  | OAuthPasswordGetTokenOpts
   | OAuthClientCredsPrivateKeyJWTGetTokenOpts
   | EarsGetTokenOpts;
 
@@ -261,10 +274,11 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 export interface RelayActionClient {
   trigger(input: {
     tenantKey: string;
+    /** Slack conversation id or a connected channel name (`#general`). */
     channel: string;
     message: string;
     threadTs?: string;
-  }): Promise<{ ref: string; tenantKey: string }>;
+  }): Promise<{ ref: string; tenantKey: string; channel: string }>;
   /** One page of the channels this deployment has connected; follow `nextCursor` for the rest. */
   listBindings(
     tenantKey: string,
@@ -363,7 +377,7 @@ export interface AuthTypeDef {
     /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
     label?: string;
     meta?: Record<string, Record<string, unknown>>;
-    // can override other Zod fields here in the future if needed
+    fields?: Record<string, z.ZodType>;
   };
 }
 export interface ConnectorSpec {

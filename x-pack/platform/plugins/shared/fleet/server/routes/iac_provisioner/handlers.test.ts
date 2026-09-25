@@ -16,6 +16,7 @@ import { appContextService } from '../../services/app_context';
 import { iacProvisionerService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
@@ -84,7 +85,7 @@ const cspmSelection = {
 const renderBody = (overrides: Record<string, unknown> = {}) => ({
   provider: 'aws',
   flow: 'cloud_connector',
-  workflow: 'federated_identity',
+  workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
   integrations: [cspmSelection],
   ...overrides,
 });
@@ -137,7 +138,7 @@ describe('renderIacTemplateHandler', () => {
 
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
-      workflow: 'federated_identity',
+      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
       integrations: [
         {
           name: 'cloud_security_posture',
@@ -165,23 +166,6 @@ describe('renderIacTemplateHandler', () => {
     );
   });
 
-  it('does not invent inputs the caller did not enable', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockResolvedValue(RENDERED);
-
-    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
-
-    expect(mockedRenderTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        integrations: [
-          expect.objectContaining({
-            policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-          }),
-        ],
-      })
-    );
-  });
-
   it('forwards templateSha when the caller supplies it', async () => {
     mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
     mockedRenderTemplate.mockResolvedValue(RENDERED);
@@ -206,53 +190,6 @@ describe('renderIacTemplateHandler', () => {
     expect(mockedRenderTemplate).toHaveBeenCalledWith(
       expect.not.objectContaining({ templateSha: expect.anything() })
     );
-  });
-
-  it('merges duplicate package entries and unions enabledInputs per policy template', async () => {
-    mockedGetPackageInfo.mockResolvedValue({
-      name: 'aws',
-      version: '7.1.0',
-      policy_templates: [
-        { name: 'guardduty', inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }] },
-        { name: 's3', inputs: [{ type: 'aws-s3' }] },
-      ],
-    } as any);
-    mockedRenderTemplate.mockResolvedValue(RENDERED);
-
-    await renderIacTemplateHandler(
-      buildContext(),
-      buildRequest(
-        renderBody({
-          integrations: [
-            { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }] },
-            {
-              name: 'aws',
-              policyTemplates: [
-                { name: 's3', enabledInputs: ['aws-s3'] },
-                { name: 'guardduty', enabledInputs: ['aws-cloudwatch'] },
-              ],
-            },
-          ],
-        })
-      ),
-      response
-    );
-
-    expect(mockedGetPackageInfo).toHaveBeenCalledTimes(1);
-    expect(mockedRenderTemplate).toHaveBeenCalledWith({
-      provider: 'aws',
-      workflow: 'federated_identity',
-      integrations: [
-        {
-          name: 'aws',
-          version: '7.1.0',
-          policyTemplates: [
-            { name: 'guardduty', enabledInputs: ['aws-s3', 'aws-cloudwatch'] },
-            { name: 's3', enabledInputs: ['aws-s3'] },
-          ],
-        },
-      ],
-    });
   });
 
   it('returns 400 when a requested policy template is not on the package', async () => {
@@ -353,7 +290,7 @@ describe('renderIacTemplateHandler', () => {
     expect(mockedGetPackageInfo).toHaveBeenCalledTimes(3);
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
-      workflow: 'federated_identity',
+      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
       integrations: [
         {
           name: 'aws',

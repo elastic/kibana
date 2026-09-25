@@ -1,29 +1,55 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Seeds Agent Builder conversations with proposal attachments for local development.
-# Creates 3 conversations each containing a proposal attachment in a different state:
-#   1. Pending, low impact — the normal happy-path state.
-#   2. Pending, critical impact with an expiry in the past — shows the expired callout.
-#   3. Already dismissed — shows the decided callout.
+# Seeds AlertZero/Agent Builder with proposal data for local development.
+# Creates 3 conversations, each with a real proposal in the investigations index
+# and a matching Agent Builder attachment that renders the inline proposal card:
+#
+#   1. Pending, low impact — with a create-rule action (Configure bucket).
+#   2. Pending, medium impact — with a create-rule action, expires in 30 min.
+#   3. Already dismissed — appears in the queue's "Closed" section.
+#
+# Proposals are written directly to Elasticsearch (the Kibana proposals API is
+# internal-only and cannot be called from outside the server process).
+# Agent Builder conversations use the public Kibana API.
+#
+# Display-only: a seeded proposal has no backing gate-workflow execution, so
+# it renders in the queue and as an inline card, but clicking Approve/Decline
+# 409s ("has no gate execution, so its decision cannot be recorded") — that
+# check is intentional, since a real proposal is always created as a step of
+# the running `system-create-proposal` workflow it gets decided through. To
+# exercise the decision flow, create a proposal via that real path instead
+# (e.g. have the AlertZero worker propose an action) rather than seeding one.
 #
 # Prerequisites:
 #   - Kibana running at $KIBANA_URL (default: http://localhost:5601)
-#   - An agent named "AlertZero" already created (run the alertzero plugin's ensure-agent logic first)
-#   - The proposal attachment type registered (alertzero plugin enabled)
+#   - Elasticsearch running at $ES_URL (default: http://localhost:9200)
+#   - alertzero plugin enabled (registers the proposal attachment type)
 #
 # Usage:
 #   KIBANA_URL=http://localhost:5601 \
+#   ES_URL=http://localhost:9200 \
 #   KIBANA_USER=elastic \
 #   KIBANA_PASSWORD=changeme \
+#   KIBANA_SPACE=default \
+#   AGENT_ID=elastic-ai-agent \
 #   bash x-pack/solutions/security/plugins/alertzero/scripts/seed_proposal_attachments.sh
 
 KIBANA_URL="${KIBANA_URL:-http://localhost:5601}"
+ES_URL="${ES_URL:-http://localhost:9200}"
 KIBANA_USER="${KIBANA_USER:-elastic}"
 KIBANA_PASSWORD="${KIBANA_PASSWORD:-changeme}"
-CONVERSATIONS_VERSION="2023-10-31"
-ATTACHMENTS_VERSION="2023-10-31"
-PROPOSAL_TYPE="investigation_proposal"
+KIBANA_SPACE="${KIBANA_SPACE:-default}"
+AGENT_BUILDER_API_VERSION="2023-10-31"
+PROPOSAL_ATTACHMENT_TYPE="platform.proposal"
+PROPOSALS_INDEX=".kibana-proposals"
+
+# Build the URL base that includes the space path prefix when not "default".
+if [ "$KIBANA_SPACE" = "default" ]; then
+  KIBANA_API_BASE="${KIBANA_URL}"
+else
+  KIBANA_API_BASE="${KIBANA_URL}/s/${KIBANA_SPACE}"
+fi
 
 # ---- helpers ---------------------------------------------------------------
 
@@ -34,138 +60,314 @@ kibana_curl() {
     "$@"
 }
 
+es_curl() {
+  curl --silent --fail-with-body \
+    -u "${KIBANA_USER}:${KIBANA_PASSWORD}" \
+    "$@"
+}
+
+gen_uuid() {
+  uuidgen 2>/dev/null | tr '[:upper:]' '[:lower:]' \
+    || cat /proc/sys/kernel/random/uuid
+}
+
+# The real ProposalsService writes through an *alias* named `.kibana-proposals`
+# — the storage adapter's index template (index_patterns: ".kibana-proposals-*")
+# points that alias at a concrete backing index like ".kibana-proposals-000001"
+# and maps rootProposalId/category/etc. as `keyword` there. This script writes
+# directly to Elasticsearch instead of through the adapter, so on a brand-new
+# cluster neither the template nor the alias exist yet: a plain
+# `PUT .kibana-proposals` would create a same-named *index*, which then
+# permanently blocks the real adapter from ever creating its alias of the same
+# name (`invalid_alias_name_exception: an index ... exists with the same name
+# as the alias`) — breaking every proposal the real gate workflow tries to
+# create afterwards. Register the same template the adapter would, and create
+# a concrete backing index that matches its pattern, so the alias and mapping
+# come from the template exactly as they would for the real service.
+ensure_index() {
+  # `GET /<name>` succeeds for either an index or an alias, so it cannot tell apart the alias
+  # this script requires from a legacy concrete index left behind by an older version of it (one
+  # that wrote straight to `${PROPOSALS_INDEX}/_doc/...` before this template existed). Checking
+  # `_alias` specifically is what catches that case — rerunning against a concrete index would
+  # otherwise silently write more documents to it and leave the real gate workflow blocked by the
+  # alias-name conflict this template was added to prevent.
+  if es_curl --fail "${ES_URL}/_alias/${PROPOSALS_INDEX}" > /dev/null 2>&1; then
+    return 0
+  fi
+  if es_curl --fail "${ES_URL}/${PROPOSALS_INDEX}" > /dev/null 2>&1; then
+    echo "ERROR: ${PROPOSALS_INDEX} already exists as a concrete index, not an alias." >&2
+    echo "This is left over from an older version of this script. Delete it and re-run:" >&2
+    echo "  curl -X DELETE -u \"\$KIBANA_USER:\$KIBANA_PASSWORD\" \"${ES_URL}/${PROPOSALS_INDEX}\"" >&2
+    echo "(Back up its documents first with a reindex if you want to keep them.)" >&2
+    exit 1
+  fi
+  es_curl \
+    -X PUT \
+    -H "Content-Type: application/json" \
+    "${ES_URL}/_index_template/${PROPOSALS_INDEX}" \
+    -d '{
+      "index_patterns": ["'"${PROPOSALS_INDEX}"'-*"],
+      "template": {
+        "aliases": { "'"${PROPOSALS_INDEX}"'": { "is_write_index": true } },
+        "mappings": {
+          "properties": {
+            "spaceId": { "type": "keyword", "ignore_above": 1024 },
+            "conversationId": { "type": "keyword", "ignore_above": 1024 },
+            "comment": { "type": "text" },
+            "actionWorkflowId": { "type": "keyword", "ignore_above": 1024 },
+            "actionInput": { "type": "flattened" },
+            "status": { "type": "keyword", "ignore_above": 1024 },
+            "decision": { "type": "keyword", "ignore_above": 1024 },
+            "supersededBy": { "type": "keyword", "ignore_above": 1024 },
+            "rootProposalId": { "type": "keyword", "ignore_above": 1024 },
+            "supersedes": { "type": "keyword", "ignore_above": 1024 },
+            "revision": { "type": "long" },
+            "impact": { "type": "keyword", "ignore_above": 1024 },
+            "confidence": { "type": "keyword", "ignore_above": 1024 },
+            "category": { "type": "keyword", "ignore_above": 1024 },
+            "origin": { "type": "keyword", "ignore_above": 1024 },
+            "expiresAt": { "type": "date", "format": "strict_date_optional_time" },
+            "impactRank": { "type": "byte" },
+            "confidenceRank": { "type": "byte" },
+            "decidedBy": {
+              "type": "object",
+              "properties": {
+                "username": { "type": "keyword", "ignore_above": 1024 },
+                "fullName": { "type": "keyword", "ignore_above": 1024 },
+                "email": { "type": "keyword", "ignore_above": 1024 },
+                "profileUid": { "type": "keyword", "ignore_above": 1024 }
+              }
+            },
+            "decidedAt": { "type": "date", "format": "strict_date_optional_time" },
+            "dismissReason": { "type": "keyword", "ignore_above": 1024 },
+            "rationale": { "type": "text" },
+            "executionError": { "type": "text" },
+            "workflowExecutionId": { "type": "keyword", "ignore_above": 1024 },
+            "createdAt": { "type": "date", "format": "strict_date_optional_time" },
+            "createdBy": {
+              "type": "object",
+              "properties": {
+                "username": { "type": "keyword", "ignore_above": 1024 },
+                "fullName": { "type": "keyword", "ignore_above": 1024 },
+                "email": { "type": "keyword", "ignore_above": 1024 },
+                "profileUid": { "type": "keyword", "ignore_above": 1024 }
+              }
+            }
+          }
+        }
+      }
+    }' > /dev/null
+
+  # The template only applies when a matching index is actually created —
+  # `PUT` here, not a document write, so the alias exists even before the
+  # first proposal is indexed.
+  es_curl -X PUT "${ES_URL}/${PROPOSALS_INDEX}-000001" > /dev/null
+}
+
+ensure_index
+
+AGENT_ID="${AGENT_ID:-elastic-ai-agent}"
+
 create_conversation() {
   local title="$1"
   kibana_curl \
     -X POST \
     -H "Content-Type: application/json" \
-    -H "elastic-api-version: ${CONVERSATIONS_VERSION}" \
-    "${KIBANA_URL}/api/agent_builder/conversations" \
-    -d "$(jq -n --arg t "$title" '{ title: $t }')" \
+    -H "elastic-api-version: ${AGENT_BUILDER_API_VERSION}" \
+    "${KIBANA_API_BASE}/api/agent_builder/conversations" \
+    -d "$(jq -n --arg t "$title" --arg a "$AGENT_ID" '{ title: $t, agent_id: $a, template_id: "investigation", access_control: { access_mode: "public" } }')" \
     | jq -r '.id'
 }
 
+# Writes a proposal document directly to Elasticsearch.
+# Returns the proposal id that was written.
+index_proposal() {
+  local proposal_id="$1"
+  local payload="$2"
+  es_curl \
+    -X PUT \
+    -H "Content-Type: application/json" \
+    "${ES_URL}/${PROPOSALS_INDEX}/_doc/${proposal_id}" \
+    -d "$payload" \
+    > /dev/null
+  echo "$proposal_id"
+}
+
+# Creates an Agent Builder attachment that links to an existing proposal via
+# its `origin` field. Everything rendered is read live from the proposal, so the
+# attachment carries the id and nothing else. Only needed here because this
+# script writes proposals straight to Elasticsearch — a proposal created through
+# the service attaches itself.
 add_attachment() {
   local conversation_id="$1"
   local payload="$2"
   kibana_curl \
     -X POST \
     -H "Content-Type: application/json" \
-    -H "elastic-api-version: ${ATTACHMENTS_VERSION}" \
-    "${KIBANA_URL}/api/agent_builder/conversations/${conversation_id}/attachments" \
+    -H "elastic-api-version: ${AGENT_BUILDER_API_VERSION}" \
+    "${KIBANA_API_BASE}/api/agent_builder/conversations/${conversation_id}/attachments" \
     -d "$payload" \
     | jq -r '.attachment.id'
 }
 
-# ---- now + 30 min in ISO 8601 for "soon to expire" -------------------------
+# ---- timestamps -------------------------------------------------------------
+NOW=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
 FUTURE_EXPIRY=$(date -u -v+30M '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null \
   || date -u -d '30 minutes' '+%Y-%m-%dT%H:%M:%SZ')
 
-# ---- 1. Pending, low impact ------------------------------------------------
-echo "Creating conversation 1: pending low-impact proposal…"
-CONV1=$(create_conversation "AlertZero — Pending proposal (low impact)")
+# ---- 1. Pending, low impact -------------------------------------------------
+echo "Creating conversation 1: pending proposal (low impact)…"
+CONV1=$(create_conversation "AlertZero — Pending proposal (low impact) [$NOW]")
+P1_ID=$(gen_uuid)
+
+index_proposal "$P1_ID" "$(jq -n \
+  --arg cid "$CONV1" \
+  --arg now "$NOW" \
+  --arg id "$P1_ID" \
+  --arg space "$KIBANA_SPACE" \
+  '{
+    id: $id,
+    spaceId: $space,
+    conversationId: $cid,
+    comment: "Block outbound traffic from the compromised host to prevent data exfiltration. This change applies only to the host running qualys-scan on the DMZ scan pool.",
+    actionWorkflowId: "system-alertzero-action-create-rule",
+    actionInput: {
+      name: "Block outbound — seed",
+      description: "Seed rule: block egress from compromised host.",
+      query: "host.name:web-dmz-04 and network.direction:egress"
+    },
+    status: "pending",
+    impact: "low",
+    confidence: "high",
+    category: "configure",
+    origin: "worker",
+    impactRank: 3,
+    confidenceRank: 0,
+    createdAt: $now,
+    rootProposalId: $id,
+    revision: 1
+  }')" > /dev/null
 
 ATTACH1=$(add_attachment "$CONV1" "$(jq -n \
-  --arg type "$PROPOSAL_TYPE" \
-  --arg now "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+  --arg type "$PROPOSAL_ATTACHMENT_TYPE" \
+  --arg origin "$P1_ID" \
   '{
     type: $type,
+    origin: $origin,
+    render_inline: true,
     data: {
-      id: "seed-proposal-low-001",
-      spaceId: "default",
-      conversationId: "seed-conversation-1",
-      comment: "Block outbound traffic from the compromised host to prevent data exfiltration. This change applies only to the host running qualys-scan on the DMZ scan pool.",
-      status: "pending",
-      impact: "low",
-      confidence: "high",
-      origin: "worker",
-      targetEntities: ["host.name:web-dmz-04", "host.ip:10.20.30.44"],
-      category: "network",
-      createdAt: $now,
-      expired: false
+      proposalId: $origin,
+      title: "Block outbound \u2014 seed"
     }
-  }')"
-)
+  }')")
 
-echo "  conversation: $CONV1, attachment: $ATTACH1"
+echo "  conversation: $CONV1, proposal: $P1_ID, attachment: $ATTACH1"
 
-# ---- 2. Pending, critical impact, expires soon -----------------------------
-echo "Creating conversation 2: pending critical-impact proposal with expiry…"
-CONV2=$(create_conversation "AlertZero — Pending proposal (critical, expires soon)")
+# ---- 2. Pending, medium impact, expires soon --------------------------------
+echo "Creating conversation 2: pending proposal (create rule, expires in 30 min)…"
+CONV2=$(create_conversation "AlertZero — Pending proposal (create rule, expires soon) [$NOW]")
+P2_ID=$(gen_uuid)
+
+index_proposal "$P2_ID" "$(jq -n \
+  --arg cid "$CONV2" \
+  --arg now "$NOW" \
+  --arg expiry "$FUTURE_EXPIRY" \
+  --arg id "$P2_ID" \
+  --arg space "$KIBANA_SPACE" \
+  '{
+    id: $id,
+    spaceId: $space,
+    conversationId: $cid,
+    comment: "Create a detection rule for repeated SSH login failures from external IP ranges. The pattern observed correlates with credential-stuffing campaigns in our threat intel feed.",
+    actionWorkflowId: "system-alertzero-action-create-rule",
+    actionInput: {
+      name: "Detect repeated SSH login failures",
+      description: "Alerts when more than 5 SSH authentication failures occur within 5 minutes from a single source IP.",
+      query: "event.category:authentication and event.outcome:failure and source.ip:185.220.101.0/24"
+    },
+    status: "pending",
+    impact: "medium",
+    confidence: "high",
+    category: "configure",
+    origin: "worker",
+    expiresAt: $expiry,
+    impactRank: 2,
+    confidenceRank: 0,
+    createdAt: $now,
+    rootProposalId: $id,
+    revision: 1
+  }')" > /dev/null
 
 ATTACH2=$(add_attachment "$CONV2" "$(jq -n \
-  --arg type "$PROPOSAL_TYPE" \
-  --arg now "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
-  --arg expiry "$FUTURE_EXPIRY" \
+  --arg type "$PROPOSAL_ATTACHMENT_TYPE" \
+  --arg origin "$P2_ID" \
   '{
     type: $type,
+    origin: $origin,
+    render_inline: true,
     data: {
-      id: "seed-proposal-critical-002",
-      spaceId: "default",
-      conversationId: "seed-conversation-2",
-      comment: "Terminate the suspicious SSH session from 185.220.101.0 and revoke its API keys immediately. Confidence is high based on threat intelligence correlation.",
-      status: "pending",
-      impact: "critical",
-      confidence: "high",
-      origin: "worker",
-      targetEntities: ["host.name:bastion-01", "source.ip:185.220.101.0"],
-      category: "identity",
-      actionWorkflowId: "system-alertzero-action-terminate-session",
-      action: {
-        name: "Terminate SSH session and revoke keys",
-        impact: "critical",
-        category: "identity",
-        reversible: false
-      },
-      expiresAt: $expiry,
-      createdAt: $now,
-      expired: false
+      proposalId: $origin,
+      title: "Detect repeated SSH login failures"
     }
-  }')"
-)
+  }')")
 
-echo "  conversation: $CONV2, attachment: $ATTACH2"
+echo "  conversation: $CONV2, proposal: $P2_ID, attachment: $ATTACH2"
 
-# ---- 3. Already dismissed --------------------------------------------------
+# ---- 3. Already dismissed ---------------------------------------------------
 echo "Creating conversation 3: dismissed proposal…"
-CONV3=$(create_conversation "AlertZero — Already-dismissed proposal")
+CONV3=$(create_conversation "AlertZero — Already-dismissed proposal [$NOW]")
+P3_ID=$(gen_uuid)
+
+index_proposal "$P3_ID" "$(jq -n \
+  --arg cid "$CONV3" \
+  --arg now "$NOW" \
+  --arg id "$P3_ID" \
+  --arg space "$KIBANA_SPACE" \
+  '{
+    id: $id,
+    spaceId: $space,
+    conversationId: $cid,
+    comment: "Create a detection rule for repeated failed logins from this IP range.",
+    status: "no_action",
+    decision: "dismissed",
+    impact: "medium",
+    confidence: "medium",
+    origin: "worker",
+    decidedAt: $now,
+    decidedBy: { username: "elastic", fullName: null, email: null },
+    dismissReason: "already_handled",
+    rationale: "We already have a rule covering this pattern from last sprint.",
+    impactRank: 2,
+    confidenceRank: 1,
+    createdAt: $now,
+    rootProposalId: $id,
+    revision: 1
+  }')" > /dev/null
 
 ATTACH3=$(add_attachment "$CONV3" "$(jq -n \
-  --arg type "$PROPOSAL_TYPE" \
-  --arg now "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+  --arg type "$PROPOSAL_ATTACHMENT_TYPE" \
+  --arg origin "$P3_ID" \
   '{
     type: $type,
-    data: {
-      id: "seed-proposal-dismissed-003",
-      spaceId: "default",
-      conversationId: "seed-conversation-3",
-      comment: "Create a detection rule for repeated failed logins from this IP range.",
-      status: "dismissed",
-      impact: "medium",
-      confidence: "medium",
-      origin: "worker",
-      targetEntities: ["source.ip:10.0.0.0/8"],
-      category: "detection",
-      dismissReason: "already_handled",
-      rationale: "We already have a rule covering this pattern from last sprint.",
-      decidedAt: $now,
-      createdAt: $now,
-      expired: false
-    }
-  }')"
-)
+    origin: $origin,
+    render_inline: true,
+    data: { proposalId: $origin }
+  }')")
 
-echo "  conversation: $CONV3, attachment: $ATTACH3"
+echo "  conversation: $CONV3, proposal: $P3_ID, attachment: $ATTACH3"
 
 # ---- summary ---------------------------------------------------------------
 echo ""
-echo "Done. To test:"
-echo "  1. Open Kibana and navigate to Agent Builder."
-echo "  2. Open one of the seeded conversations above."
-echo "  3. Ask the agent: 'Show me the proposal in this conversation.'"
-echo "  4. The agent should emit <render_attachment id=\"...\"/> and the card renders."
+echo "Done. Three proposals are now in the AlertZero queue."
 echo ""
-echo "Conversation IDs:"
-echo "  Pending (low):      $CONV1"
-echo "  Pending (critical): $CONV2"
-echo "  Dismissed:          $CONV3"
+echo "To verify:"
+echo "  1. Open Kibana and navigate to AlertZero (Security → AlertZero)."
+echo "  2. Conversations 1 and 2 appear as pending proposals (Configure bucket)."
+echo "  3. Conversation 3 appears in the 'Closed' section (dismissed)."
+echo "  4. Open Agent Builder and open one of the three conversations —"
+echo "     the proposal card renders inline in the conversation."
+echo ""
+echo "Conversation IDs (open in Agent Builder to see the inline card):"
+echo "  Pending (low impact):   $CONV1  →  proposal $P1_ID"
+echo "  Pending (medium/expiry): $CONV2  →  proposal $P2_ID"
+echo "  Dismissed:              $CONV3  →  proposal $P3_ID"

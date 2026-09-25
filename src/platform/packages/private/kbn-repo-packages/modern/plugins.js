@@ -120,6 +120,7 @@ function getPluginPackagesFilter(selector = {}) {
    */
   return (pkg) =>
     pkg.isPlugin() &&
+    !(pkg.isDevOnly() && !selector.devOnly) &&
     matchBrowserServer(selector, pkg) &&
     matchParentDirsLimit(selector, pkg.directory) &&
     (matchCategory(selector, pkg.getPluginCategories()) ||

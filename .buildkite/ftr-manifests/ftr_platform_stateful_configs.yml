@@ -79,7 +79,6 @@ enabled:
   - src/platform/test/functional/apps/dashboard/group6/config.ts
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
-  - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
@@ -175,6 +174,7 @@ enabled:
   - x-pack/platform/test/fleet_api_integration/config.preconfiguration_updates.ts
   - x-pack/platform/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/platform/test/fleet_api_integration/config.cloud_connector.ts
+  - x-pack/platform/test/fleet_api_integration/config.iac_provisioner.ts
   - x-pack/platform/test/fleet_functional/config.ts
   - x-pack/platform/test/fleet_tasks/config.ts
   - x-pack/platform/test/ftr_apis/security_and_spaces/config.ts
@@ -201,8 +201,6 @@ enabled:
   - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
-  - x-pack/platform/test/functional/apps/discover/group3/config.ts
-  - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group8/config.ts
   - x-pack/platform/test/functional/apps/lens/group12/config.ts
@@ -218,7 +216,6 @@ enabled:
   - x-pack/platform/test/functional/apps/maps/group5/config.ts
   - x-pack/platform/test/functional/apps/maps/group6/config.ts
   - x-pack/platform/test/functional/apps/maps/group7/config.ts
-  - x-pack/platform/test/functional/apps/maps/group8/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group3/config.ts
@@ -327,7 +324,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/cases/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/config.ts
   - x-pack/platform/test/api_integration/apis/cloud/saml.config.ts
-  - x-pack/platform/test/api_integration/apis/console/config.ts
   - x-pack/platform/test/api_integration/apis/anonymization/config.ts
   - x-pack/platform/test/api_integration/apis/features/config.ts
   - x-pack/platform/test/api_integration/apis/es/config.ts

@@ -2,7 +2,7 @@ version: '1'
 name: Investigation
 description: >
   Root cause analysis for an observability issue. One agent investigates using
-  available signals — logs, traces, metrics, topology, and memory — then
+  available signals — logs, traces, metrics, and topology — then
   produces a structured root cause conclusion.
 enabled: true
 settings:
@@ -103,6 +103,8 @@ steps:
     connector-id-by-feature: 'significant_events_investigation'
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
     create-conversation: true
     public-conversation: true
     timeout: 1800s
@@ -305,7 +307,10 @@ steps:
                 title:
                   type: string
                   maxLength: 512
-                  description: The action itself, stated concretely (e.g. "Revert the pool-size config change").
+                  description: >
+                    The action itself, stated concretely as concise plain text. Do not use Markdown
+                    or HTML, including links, emphasis, backticks, headings, lists, or code fences.
+                    Put explanations and links in description, and commands or snippets in code.
                 confidence:
                   type: number
                   minimum: 0
@@ -345,7 +350,10 @@ steps:
                 title:
                   type: string
                   maxLength: 512
-                  description: The missing data source or access, named concisely (e.g. "No traces for the cart service").
+                  description: >
+                    The missing data source or access, named concisely as plain text. Do not use
+                    Markdown or HTML, including links, emphasis, backticks, headings, lists, or code
+                    fences. Put explanations and links in description.
                 confidence:
                   type: number
                   minimum: 0
@@ -798,31 +806,6 @@ steps:
         max-attempts: 3
         delay: 5s
         strategy: exponential
-
-  # Reconcile the gaps this investigation surfaced into the _gaps/overview memory
-  # page. Deliberately minimal: a cheap model, memory read/write only, no auditing.
-  # connector-id-by-feature: shared memory connector (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
-  # plugin-id: step-specific cost attribution; aggregate-by: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID.
-  - name: merge_investigation_gaps
-    type: ai.agent
-    connector-id-by-feature: 'significant_events_memory'
-    plugin-id: 'significant_events_memory_investigation_gaps'
-    aggregate-by: 'significant_events'
-    create-conversation: false
-    timeout: 120s
-    with:
-      message: |
-        Call load_skill with path skills/platform/streams/significant-events-memory to get the memory tools.
-
-        The following knowledge gaps were identified during an investigation, as JSON objects each carrying a `title` (the missing data source, named concisely), `confidence` (its relevance to the investigation), and a `description` (why that gap mattered):
-
-        {{ steps.investigate.output.structured_output.blind_spots | json }}
-
-        Keep only gaps whose `title` is an actionable structural deficiency — a data source or access that is missing and could reasonably be provided (e.g. "No traces for the cart service", "No infrastructure metrics for host X", "No code repository access for service Y"). Discard incident-specific observations that just describe what happened during the outage (e.g. "the pod crashed", "no logs during the failure window").
-
-        Read the current _gaps/overview page with platform_sig_events_memory_read. Compare the filtered gaps against it. If every gap is already reflected there, stop and write nothing. If there are genuinely new gaps, weave them into the existing sections (do not add a separate section) and save the page with platform_sig_events_memory_write using categories ["_system/gaps"].
-    on-failure:
-      continue: true
 
   - name: emit_investigation_completed
     type: kibana.request

@@ -63,7 +63,7 @@ import { useEditorHeightResize } from './use_editor_height_resize';
  *
  * ## Layout
  *
- * The in-editor toolbar (Search, time field, date range, `headerActions`) sits
+ * The in-editor toolbar (Search, time field, date range) sits
  * inside the bordered editor panel. The Monaco viewport is resizable via a drag
  * handle (capped at a max height) so the flyout keeps scrolling the results
  * table as one surface — the table is never trapped in a squeezed pane.
@@ -92,12 +92,6 @@ export interface QuerySandboxProps {
    * nothing is rendered.
    */
   helpText?: React.ReactNode;
-  /**
-   * Optional actions rendered at the end of the in-editor toolbar (after Search,
-   * time field, and date range). Use for header-level controls such as Split /
-   * Merge buttons. Absent or `undefined` → nothing is rendered.
-   */
-  headerActions?: React.ReactNode;
   /**
    * When provided, the editor panel renders `ComposeDiscoverTabs` with a tab
    * bar instead of a single `CodeEditor`. Absent or `[]` → single editor.
@@ -143,7 +137,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   isTimeFieldResolved: isTimeFieldResolvedProp,
   helpText,
   tabProps,
-  headerActions,
   validationError,
   onSingleEditorMount,
 }) => {
@@ -165,6 +158,12 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     onResizeKeyDown,
   } = useEditorHeightResize();
   const services = useRuleFormServices();
+  // Injected by the host plugin (see RuleFormServices); PascalCase for JSX use.
+  const {
+    esqlMenu: EsqlMenu,
+    esqlEditorActionsProvider: EsqlEditorActionsProvider,
+    esqlEditorActionsRegister: EsqlEditorActionsRegister,
+  } = services;
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
   const skipTimeFieldResolution = timeFieldOptionsProp !== undefined;
@@ -262,6 +261,32 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [run]);
+
+  // A recommended query is a whole `FROM …`, so it can only be applied where the active editor
+  // holds a complete query: the single/unified editor, or the base tab in split mode. On the
+  // split fragment tabs (alert/recovery) there's no valid target, so it stays unwired (and the
+  // menu hides the section). The base tab writes through `onBaseQueryChange`, not `onQueryChange`
+  // (which in split mode targets the breach segment).
+  const recommendedQuerySubmit = (() => {
+    if (isReadOnly) return undefined;
+    if (!hasTabs) return onQueryChange;
+    return tabProps?.activeTab === 'base' ? tabProps.onBaseQueryChange : undefined;
+  })();
+
+  // Applies a recommended query picked from the ES|QL menu, then runs it. The run is deferred so
+  // the editor content update flushes first and `run()` reads the new query (its params ref
+  // updates on re-render) — mirroring the full editor's submit flow.
+  const handleSubmitRecommendedQuery = useCallback(
+    (nextQuery: string) => {
+      recommendedQuerySubmit?.(nextQuery);
+      setTimeout(() => run(), 0);
+    },
+    [recommendedQuerySubmit, run]
+  );
+
+  // Kept in sync with the menu's `hideRecommendedQueries` so we never show picks we can't apply.
+  const canWireRecommendedQueries =
+    Boolean(EsqlEditorActionsRegister) && Boolean(recommendedQuerySubmit);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -426,9 +451,25 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               data-test-subj="querySandboxTimeField"
             />
           </EuiFlexItem>
-          {headerActions && (
+          {EsqlMenu && EsqlEditorActionsProvider && (
             <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
-              {headerActions}
+              <EsqlEditorActionsProvider>
+                {canWireRecommendedQueries && EsqlEditorActionsRegister && (
+                  <EsqlEditorActionsRegister
+                    currentQuery={query}
+                    submitEsqlQuery={handleSubmitRecommendedQuery}
+                  />
+                )}
+                {/* Visor (KQL / NL search) is owned by the full editor, which the sandbox
+                    doesn't mount — hide the button so it isn't shown enabled but inert.
+                    Recommended queries are hidden unless wired, so picks are always applicable. */}
+                <EsqlMenu
+                  hideHistory
+                  hideVisor
+                  hideRecommendedQueries={!canWireRecommendedQueries}
+                  docsFlyoutSize="s"
+                />
+              </EsqlEditorActionsProvider>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

@@ -9,24 +9,17 @@ import React, { Suspense, lazy } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
-import type { Investigation } from '../types';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
-import type { InvestigationLoader } from './investigation_slot';
+import type { RenderAssignees, RenderLinkedInvestigations } from './types';
 
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
  * `start`, so anything this module imports statically lands in that plugin's page load bundle.
- * All five share one chunk, which the first opened flyout pulls in.
+ * All share one chunk, which the first opened flyout pulls in.
  */
 const LazyOverviewSlot = lazy(() =>
   import('./slots').then(({ OverviewSlot }) => ({ default: OverviewSlot }))
-);
-const LazyAttachmentsSlot = lazy(() =>
-  import('./slots').then(({ AttachmentsSlot }) => ({ default: AttachmentsSlot }))
-);
-const LazyTimelineSlot = lazy(() =>
-  import('./slots').then(({ TimelineSlot }) => ({ default: TimelineSlot }))
 );
 const LazyHeaderSlot = lazy(() =>
   import('./slots').then(({ HeaderSlot }) => ({ default: HeaderSlot }))
@@ -34,16 +27,19 @@ const LazyHeaderSlot = lazy(() =>
 const LazyFooterSlot = lazy(() =>
   import('./slots').then(({ FooterSlot }) => ({ default: FooterSlot }))
 );
+const LazyEscalationHeaderSlot = lazy(() =>
+  import('./slots').then(({ EscalationHeaderSlot }) => ({ default: EscalationHeaderSlot }))
+);
+const LazyEscalationOverviewSlot = lazy(() =>
+  import('./slots').then(({ EscalationOverviewSlot }) => ({ default: EscalationOverviewSlot }))
+);
 
 /**
  * Tab ids are prefixed with the solution's template id because Agent Builder's tab ids are a
- * global keyspace and duplicate registration throws. `timeline` is deliberately not reused: Agent
- * Builder's built-in tab of that name renders chat execution events, not investigation events.
+ * global keyspace and duplicate registration throws.
  */
 export const getInvestigationTabIds = (templateId: string): readonly string[] => [
   `${templateId}.overview`,
-  `${templateId}.attachments`,
-  `${templateId}.timeline`,
 ];
 
 export interface RegisterAgenticInvestigationTemplateUIOptions {
@@ -53,107 +49,185 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   /** Localized template display name, shown in Agent Builder's title badge. */
   name: string;
   icon?: IconType;
-  loadInvestigation: InvestigationLoader;
+  /**
+   * When provided, the flyout footer renders a dedicated "Open escalation" primary button and
+   * delegates modal rendering to this function. Supplied by the caller so the modal can use
+   * Kibana HTTP hooks unavailable in this package.
+   */
+  renderEscalationModal?: import('./slots').FooterSlotProps['onOpenEscalation'];
+  /**
+   * When provided, the overview tab renders a "Proposed actions" section with this as its
+   * content. Supplied by the caller because listing and deciding a conversation's proposals
+   * needs Kibana HTTP hooks unavailable in this package.
+   */
+  renderProposedActions?: import('./slots').OverviewSlotProps['renderProposedActions'];
+  /**
+   * When provided, the header renders an interactive assignee picker instead of the read-only
+   * avatar stack. Supplied by the caller so the picker can use HTTP hooks and Kibana context
+   * unavailable in this package.
+   */
+  renderAssignees?: RenderAssignees;
 }
 
 /**
- * Every slot of an open flyout resolves the same investigation, so concurrent loads for one
- * conversation share a request instead of issuing one per slot. Slots mount as the lazy chunk
- * below resolves, so they join whichever request the first of them put in flight.
- */
-const shareConcurrentLoads = (load: InvestigationLoader): InvestigationLoader => {
-  const inFlight = new Map<string, Promise<Investigation>>();
-
-  return (conversationId) => {
-    const pending = inFlight.get(conversationId);
-    if (pending) {
-      return pending;
-    }
-
-    const request = load(conversationId).finally(() => inFlight.delete(conversationId));
-    inFlight.set(conversationId, request);
-    return request;
-  };
-};
-
-/**
- * Registers one solution's agentic investigation flyout UI: the tabs Agent Builder renders, plus
- * the header and footer of its conversation details flyout.
+ * Registers one solution's agentic investigation flyout UI: the overview tab Agent Builder
+ * renders, plus the header and footer of its conversation details flyout.
  *
  * Call once per solution from the plugin's `start`. Tabs are registered per template rather than
- * shared, so each solution's tab components close over its own investigation loader.
+ * shared, so each solution's tab components stay independent.
  */
 export const registerAgenticInvestigationTemplateUI = ({
   conversationTemplates,
   templateId,
   name,
   icon,
-  loadInvestigation,
+  renderEscalationModal,
+  renderProposedActions,
+  renderAssignees,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
-  const load = shareConcurrentLoads(loadInvestigation);
-  const [overviewTabId, attachmentsTabId, timelineTabId] = getInvestigationTabIds(templateId);
+  const [overviewTabId] = getInvestigationTabIds(templateId);
 
-  conversationTemplates.registerTab(overviewTabId, () => ({
+  conversationTemplates.registerTab(overviewTabId, ({ attachmentsService }) => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
     content: function OverviewTabContent({ conversation }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyOverviewSlot conversation={conversation} loadInvestigation={load} />
-        </Suspense>
-      );
-    },
-  }));
-
-  conversationTemplates.registerTab(attachmentsTabId, ({ attachmentsService }) => ({
-    label: DETAILS_FLYOUT_LABELS.tabs.attachments,
-    content: function AttachmentsTabContent({ conversation }) {
-      return (
-        <Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyAttachmentsSlot
+          <LazyOverviewSlot
             conversation={conversation}
             attachmentsService={attachmentsService}
+            renderProposedActions={renderProposedActions}
           />
         </Suspense>
       );
     },
   }));
 
-  conversationTemplates.registerTab(timelineTabId, () => ({
-    label: DETAILS_FLYOUT_LABELS.tabs.timeline,
-    content: function TimelineTabContent({ conversation }) {
+  conversationTemplates.registerTemplateUIDefinition(
+    templateId,
+    ({ openFullscreenConversation }) => ({
+      name,
+      icon,
+      tabs: [overviewTabId],
+      detailsFlyout: {
+        header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
+          return (
+            // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
+            // collapse to nothing while the slot's chunk loads.
+            <Suspense fallback={<ConversationTitle title={conversation.title} />}>
+              <LazyHeaderSlot
+                conversation={conversation}
+                renderAssignees={renderAssignees}
+                refetchConversation={refetchConversation}
+              />
+            </Suspense>
+          );
+        },
+        footer: function InvestigationFlyoutFooter({ conversation }) {
+          return (
+            <Suspense fallback={null}>
+              <LazyFooterSlot
+                conversation={conversation}
+                // Full screen rather than the sidebar: the chat is the investigation's own record,
+                // so it gets the whole page instead of a panel beside the flyout that opened it.
+                onOpenChat={() =>
+                  openFullscreenConversation({
+                    conversationId: conversation.id,
+                    agentId: conversation.agent_id,
+                    openDetails: true,
+                  })
+                }
+                onOpenEscalation={renderEscalationModal}
+              />
+            </Suspense>
+          );
+        },
+      },
+    })
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Escalation flyout registration
+// ---------------------------------------------------------------------------
+
+export interface RegisterEscalationTemplateUIOptions {
+  conversationTemplates: ConversationTemplateServiceStartContract;
+  /** Escalation template id (typically `'escalation'`). Agent Builder throws on duplicate. */
+  templateId: string;
+  /** Localized template display name. */
+  name: string;
+  icon?: IconType;
+  /**
+   * When provided, the header renders an interactive assignee picker.
+   * See `RegisterAgenticInvestigationTemplateUIOptions.renderAssignees`.
+   */
+  renderAssignees?: RenderAssignees;
+  /**
+   * When provided, the overview tab body renders the connected linked-investigations list.
+   * Supplied by the caller so the list can use Kibana HTTP hooks unavailable in this package.
+   */
+  renderLinkedInvestigations?: RenderLinkedInvestigations;
+}
+
+/** Returns the tab ids registered by the escalation template. */
+export const getEscalationTabIds = (templateId: string): readonly string[] => [
+  `${templateId}.overview`,
+];
+
+/**
+ * Registers the escalation conversation details flyout UI.
+ *
+ * The flyout shows a header (title, status, assignees) and — when `renderLinkedInvestigations`
+ * is supplied — an overview tab listing the linked investigations. With a single tab Agent Builder
+ * hides the tab bar, so the list reads as the flyout body.
+ *
+ * Call once from the plugin's `start`, **after** `registerAgenticInvestigationTemplateUI`.
+ * Agent Builder throws if the template id is already registered.
+ */
+export const registerEscalationTemplateUI = ({
+  conversationTemplates,
+  templateId,
+  name,
+  icon,
+  renderAssignees,
+  renderLinkedInvestigations,
+}: RegisterEscalationTemplateUIOptions): void => {
+  const [overviewTabId] = getEscalationTabIds(templateId);
+
+  conversationTemplates.registerTab(overviewTabId, ({ openFullscreenConversation }) => ({
+    label: DETAILS_FLYOUT_LABELS.tabs.overview,
+    content: function EscalationOverviewTabContent({ conversation }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyTimelineSlot conversation={conversation} loadInvestigation={load} />
+          <LazyEscalationOverviewSlot
+            conversation={conversation}
+            renderLinkedInvestigations={renderLinkedInvestigations}
+            onOpenInvestigation={({ conversationId, agentId }) =>
+              openFullscreenConversation({ conversationId, agentId, openDetails: true })
+            }
+          />
         </Suspense>
       );
     },
   }));
 
-  conversationTemplates.registerTemplateUIDefinition(templateId, ({ openSidebarConversation }) => ({
+  conversationTemplates.registerTemplateUIDefinition(templateId, () => ({
     name,
     icon,
-    tabs: [overviewTabId, attachmentsTabId, timelineTabId],
+    tabs: [overviewTabId],
     detailsFlyout: {
-      header: function InvestigationFlyoutHeader({ conversation }) {
+      header: function EscalationFlyoutHeaderWrapper({ conversation, refetchConversation }) {
         return (
-          // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
-          // collapse to nothing while the slot's chunk loads.
           <Suspense fallback={<ConversationTitle title={conversation.title} />}>
-            <LazyHeaderSlot conversation={conversation} loadInvestigation={load} />
-          </Suspense>
-        );
-      },
-      footer: function InvestigationFlyoutFooter({ conversation }) {
-        return (
-          <Suspense fallback={null}>
-            <LazyFooterSlot
+            <LazyEscalationHeaderSlot
               conversation={conversation}
-              loadInvestigation={load}
-              onOpenChat={() => openSidebarConversation(conversation.id)}
+              renderAssignees={renderAssignees}
+              refetchConversation={refetchConversation}
             />
           </Suspense>
         );
       },
+      // No footer for escalations yet.
     },
   }));
 };
