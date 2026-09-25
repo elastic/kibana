@@ -11,7 +11,10 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import type { ServiceAccountCredentialAttributes } from './credential_saved_object';
+import type {
+  ServiceAccountCredentialAttributes,
+  ServiceAccountCredentialCreator,
+} from './credential_saved_object';
 import { getCredentialId, SERVICE_ACCOUNT_CREDENTIAL_TYPE } from './credential_saved_object';
 import { getDetailedErrorMessage } from '../../errors';
 
@@ -80,33 +83,34 @@ export class ServiceAccountCredentialStore {
   }
 
   /**
-   * Which of the given accounts Kibana holds a credential for. Accounts with none are simply
-   * absent from the result.
+   * Which of the given accounts Kibana holds a credential for, keyed by account and mapped to the
+   * principal that created the credential. Accounts with none are simply absent from the result.
    *
-   * Existence is the whole answer: nothing outside this store reads a credential's attributes,
-   * and what the caller does with the answer is its own business. The documents are read without
-   * decrypting, so this says a credential is on file, not that it still works.
+   * The documents are read without decrypting, so this says a credential is on file, not that it
+   * still works, and the creator it reports has not been authenticated against the document's
+   * AAD. It is fit for attribution on display and nothing that grants access.
    *
    * An account whose credential cannot be read throws rather than resolving absent. Absent means
    * "Kibana holds nothing for this account", which a caller is entitled to act on, and a document
    * Kibana failed to read is not that.
    */
-  async findExisting(serviceAccountIds: string[]): Promise<Set<string>> {
-    const existing = new Set<string>();
+  async findExisting(
+    serviceAccountIds: string[]
+  ): Promise<Map<string, ServiceAccountCredentialCreator>> {
+    const existing = new Map<string, ServiceAccountCredentialCreator>();
     if (serviceAccountIds.length === 0) {
       return existing;
     }
 
     const { saved_objects: savedObjects } = await this.client.bulkGet<
-      Pick<ServiceAccountCredentialAttributes, 'serviceAccountId'>
+      Pick<ServiceAccountCredentialAttributes, 'serviceAccountId' | 'createdBy'>
     >(
       serviceAccountIds.map((serviceAccountId) => ({
         type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
         id: getCredentialId(serviceAccountId),
-        // Nothing here reads an attribute, but the list cannot be empty: the saved objects client
-        // reads that as "no filtering" and hands back the whole document, ciphertext included.
-        // One cheap field keeps the token out of the response.
-        fields: ['serviceAccountId'],
+        // An empty list reads as "no filtering" and hands back the whole document, ciphertext
+        // included, so the fields are always named to keep the token out of the response.
+        fields: ['serviceAccountId', 'createdBy'],
       }))
     );
 
@@ -122,7 +126,7 @@ export class ServiceAccountCredentialStore {
         );
       }
 
-      existing.add(serviceAccountId);
+      existing.set(serviceAccountId, result.attributes.createdBy);
     });
 
     return existing;

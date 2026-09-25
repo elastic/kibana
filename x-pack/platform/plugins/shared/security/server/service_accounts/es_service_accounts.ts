@@ -22,7 +22,7 @@ import { z } from '@kbn/zod';
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
-import type { ServiceAccountCredentialStore } from './credentials';
+import type { ServiceAccountCredentialCreator, ServiceAccountCredentialStore } from './credentials';
 import type { EsServiceAccountPrincipal } from './es_service_account_id';
 import { parseEsServiceAccountId } from './es_service_account_id';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
@@ -86,16 +86,23 @@ interface ElasticsearchServiceAccount {
   enabled: boolean;
 }
 
-/** Narrows an account to the directory entry. */
+/**
+ * Narrows an account to the directory entry. `createdBy` is the principal that created the
+ * account through Kibana, as its stored credential records it; Kibana refuses to create over an
+ * existing name, so that principal is the account's creator for as long as the credential still
+ * describes it.
+ */
 const toDirectoryEntry = (
   { id, name, roles, enabled }: ElasticsearchServiceAccount,
-  assumable: boolean
+  assumable: boolean,
+  createdBy?: ServiceAccountCredentialCreator
 ): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles,
   enabled,
   assumable,
+  ...(createdBy ? { createdBy } : {}),
 });
 
 export interface EsServiceAccountsOptions {
@@ -305,7 +312,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * Unlike {@link get}, a stored credential is taken at face value here. Confirming each one the
    * way {@link isAssumable} does would cost an Elasticsearch round trip per account, up to a
    * hundred of them on one page, so a listed account that was deleted and recreated outside
-   * Kibana keeps a stale `assumable` until it is opened.
+   * Kibana keeps a stale `assumable` and `createdBy` until it is opened.
    */
   async list(
     request: KibanaRequest,
@@ -358,7 +365,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     const credentialled = await this.credentialStore.findExisting(accounts.map(({ id }) => id));
 
     const serviceAccounts = accounts.map((account) =>
-      toDirectoryEntry(account, credentialled.has(account.id))
+      toDirectoryEntry(account, credentialled.has(account.id), credentialled.get(account.id))
     );
 
     if (rawAccounts.length <= limit) {
@@ -401,8 +408,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
-    const stored = (await this.credentialStore.findExisting([id])).has(id);
-    return toDirectoryEntry(account, await this.isAssumable(esClient, principal, stored));
+    const storedCreator = (await this.credentialStore.findExisting([id])).get(id);
+    const assumable = await this.isAssumable(esClient, principal, storedCreator !== undefined);
+    // The token check is also what says the credential still describes this account, rather than
+    // one of the same name that it outlived, so the creator is only reported alongside it.
+    return toDirectoryEntry(account, assumable, assumable ? storedCreator : undefined);
   }
 
   /**

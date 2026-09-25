@@ -59,6 +59,13 @@ const staleCredential = () => ({
   token: 'AAEAAWtpYmFuYS9...',
 });
 
+/** Whoever asked Kibana to create the account, as its credential records them. */
+const CREATOR = { type: 'user' as const, username: 'elastic', userProfileId: 'profile-uid' };
+
+/** What the credential store reports for accounts it holds a credential for. */
+const stored = (...serviceAccountIds: string[]) =>
+  new Map(serviceAccountIds.map((serviceAccountId) => [serviceAccountId, CREATOR]));
+
 /** The shape Elasticsearch returns for a scoped GET of a user-managed account. */
 const accountEntry = (overrides = {}) => ({
   'kibana/nightshift-relay': {
@@ -105,7 +112,7 @@ describe('EsServiceAccounts', () => {
       set: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(true),
       getDecrypted: jest.fn().mockResolvedValue(null),
-      findExisting: jest.fn().mockResolvedValue(new Set()),
+      findExisting: jest.fn().mockResolvedValue(new Map()),
     } as unknown as jest.Mocked<ServiceAccountCredentialStore>;
 
     mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
@@ -662,7 +669,7 @@ describe('EsServiceAccounts', () => {
           queried('kibana/nightshift-relay'),
         ],
       });
-      credentialStore.findExisting.mockResolvedValue(new Set(['kibana/nightshift-relay']));
+      credentialStore.findExisting.mockResolvedValue(stored('kibana/nightshift-relay'));
 
       const result = await serviceAccounts.list(request);
 
@@ -694,25 +701,26 @@ describe('EsServiceAccounts', () => {
             roles: ['viewer'],
             enabled: true,
             assumable: true,
+            createdBy: CREATOR,
           },
         ],
       });
       expect(result).not.toHaveProperty('nextPage');
     });
 
-    it('reports no creator, which Elasticsearch does not record yet', async () => {
+    it('reports the creator only for accounts Kibana created', async () => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        service_accounts: [queried('kibana/nightshift-relay')],
+        service_accounts: [queried('acme/billing'), queried('kibana/nightshift-relay')],
       });
-      // The credential names whoever asked Kibana to create the account. That is not the
-      // account's creator, so it stays out of the entry until Elasticsearch reports one.
-      credentialStore.findExisting.mockResolvedValue(new Set(['kibana/nightshift-relay']));
+      // Kibana refuses to create over a taken name, so whoever asked it to create the account
+      // is the account's creator. An account created outside Kibana has no credential to ask.
+      credentialStore.findExisting.mockResolvedValue(stored('kibana/nightshift-relay'));
 
-      const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
+      const [outside, managed] = (await serviceAccounts.list(request)).serviceAccounts;
 
-      expect(entry).not.toHaveProperty('createdBy');
-      expect(entry).not.toHaveProperty('createdAt');
-      expect(entry.assumable).toBe(true);
+      expect(outside).not.toHaveProperty('createdBy');
+      expect(managed.createdBy).toEqual(CREATOR);
+      expect(managed).not.toHaveProperty('createdAt');
     });
 
     it('asks for one more than the page and reports the last principal as the cursor when it arrives', async () => {
@@ -828,16 +836,15 @@ describe('EsServiceAccounts', () => {
         .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
         // The account still holds Kibana's token, so the stored credential describes it.
         .mockResolvedValueOnce(accountCredentials(['kibana-managed']));
-      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+      credentialStore.findExisting.mockResolvedValue(stored(ACCOUNT_ID));
 
-      // The credential records who asked Kibana to create the account, and none of it is
-      // reported: Elasticsearch does not store a creator yet, and Kibana will not invent one.
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
         id: ACCOUNT_ID,
         name: 'nightshift-relay',
         roles: ['viewer'],
         enabled: true,
         assumable: true,
+        createdBy: CREATOR,
       });
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
@@ -870,8 +877,9 @@ describe('EsServiceAccounts', () => {
         // Deleted and recreated through Elasticsearch: the account is back, Kibana's token is
         // not, and the credential document outlived both.
         .mockResolvedValueOnce(accountCredentials([]));
-      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+      credentialStore.findExisting.mockResolvedValue(stored(ACCOUNT_ID));
 
+      // Nor does it report the credential's creator, who created an account that is gone.
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
         id: ACCOUNT_ID,
         name: 'nightshift-relay',
@@ -885,7 +893,7 @@ describe('EsServiceAccounts', () => {
       esClient.asCurrentUser.transport.request
         .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
         .mockResolvedValueOnce(accountCredentials(['operator-minted']));
-      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+      credentialStore.findExisting.mockResolvedValue(stored(ACCOUNT_ID));
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
         assumable: false,
@@ -897,10 +905,11 @@ describe('EsServiceAccounts', () => {
         .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
         // A reader must not be told an account is unmanaged because one call did not land.
         .mockRejectedValueOnce(Boom.forbidden('insufficient privileges'));
-      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+      credentialStore.findExisting.mockResolvedValue(stored(ACCOUNT_ID));
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
         assumable: true,
+        createdBy: CREATOR,
       });
     });
 

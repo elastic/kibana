@@ -45,12 +45,14 @@ export interface ServiceAccountDirectoryEntry {
   assumable: boolean;
   /**
    * The principal that created the account. Reported on UIAM, which records a creator of its
-   * own, and absent on Elasticsearch until Elasticsearch stores one too.
+   * own. On Elasticsearch it is the principal that created the account through Kibana, taken from
+   * the credential Kibana stored, and absent for an account created outside Kibana. Like
+   * `assumable`, a listed account keeps a stale creator until it is opened.
    */
   createdBy?: ServiceAccountDirectoryCreator;
   // No creation time. UIAM reports no timestamp of any kind, and the only one Elasticsearch could
   // offer is on the credential Kibana stored, which dates Kibana's record rather than the
-  // account. It arrives with the same followup that brings the Elasticsearch creator.
+  // account.
 }
 
 /**
