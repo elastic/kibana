@@ -30,6 +30,8 @@ import type {
   SetEscalationStatusResponse,
 } from '../../../common/investigations/status';
 import type { InvestigationStatusService } from '../../investigations/services/investigation_status_service';
+import { assertNoUnexpectedProposals } from '../../investigations/services/investigation_status_service';
+import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
 import {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
@@ -250,6 +252,7 @@ export class EscalationsService {
           id: conv.id,
           title: conv.title,
           pending_proposal_count: preview.pending_proposal_count,
+          pending_proposals: preview.pending_proposals,
         };
       })
     );
@@ -283,13 +286,41 @@ export class EscalationsService {
           return conv !== undefined && conv.metadata?.status !== 'closed';
         });
 
+        // -----------------------------------------------------------------------
+        // Pre-flight: check for unexpected investigations or proposals before
+        // touching anything, so a mismatch leaves nothing half-closed.
+        // -----------------------------------------------------------------------
+        if (body.expected_investigation_ids !== undefined) {
+          const expectedInvSet = new Set(body.expected_investigation_ids);
+          const unexpectedInvs = openIds.filter((id) => !expectedInvSet.has(id));
+          if (unexpectedInvs.length > 0) {
+            throw new CloseTargetsChangedError(
+              `${unexpectedInvs.length} linked investigation(s) opened after the dialog appeared`
+            );
+          }
+        }
+
         const statusSvc = this.getInvestigationStatusService();
+
+        if (body.expected_proposal_ids !== undefined) {
+          const allPendingPerInv = await Promise.all(
+            openIds.map((id) => statusSvc.listPendingProposalsForRequest(id, request))
+          );
+          const allPending = allPendingPerInv.flat();
+          // Reuse the same check as investigations — throws CloseTargetsChangedError.
+          assertNoUnexpectedProposals(allPending, body.expected_proposal_ids);
+        }
         const results = await Promise.allSettled(
           openIds.map((id) =>
             statusSvc.setStatus(request, id, {
               status: 'closed',
               dismiss_reason: body.dismiss_reason,
               rationale: body.rationale,
+              // Pass each investigation's subset of the expected ids. Because we already
+              // ran the pre-flight check above, the per-investigation check inside
+              // setStatus will always pass — but we still send it so the service stays
+              // correct if called in isolation.
+              expected_proposal_ids: body.expected_proposal_ids,
             })
           )
         );

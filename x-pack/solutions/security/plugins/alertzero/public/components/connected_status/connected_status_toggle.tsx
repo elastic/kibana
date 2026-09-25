@@ -9,6 +9,7 @@ import React, { useState, useCallback } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { StatusToggle } from '@kbn/agentic-investigations-common';
 import {
   useSetInvestigationStatus,
@@ -20,6 +21,10 @@ import {
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import type { DismissReason } from '@kbn/proposals-common';
 import type { StatusSlotRenderProps } from '@kbn/agentic-investigations-common';
+import type {
+  InvestigationClosePreviewResponse,
+  EscalationClosePreviewResponse,
+} from '@kbn/agentic-investigations-plugin/common';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 import { statusSignal } from './status_signal';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';
@@ -27,6 +32,136 @@ import { CloseEscalationModal } from '../close_confirmation/close_escalation_mod
 import * as i18n from '../close_confirmation/translations';
 
 export type ConnectedStatusToggleProps = StatusSlotRenderProps;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns true when an HTTP error response has our `close_targets_changed` code.
+ * We avoid importing the error class across plugin boundaries.
+ */
+const isCloseTargetsChangedError = (error: unknown): boolean => {
+  if (!isHttpFetchError(error)) return false;
+  const body = error.body as { attributes?: { code?: string } } | undefined;
+  return body?.attributes?.code === 'close_targets_changed';
+};
+
+// ---------------------------------------------------------------------------
+// Investigation close modal container
+// ---------------------------------------------------------------------------
+
+interface InvestigationCloseContainerProps {
+  conversationId: string;
+  isMutating: boolean;
+  onClose: () => void;
+  onConfirm: (params: {
+    dismissReason?: DismissReason;
+    rationale?: string;
+    preview: InvestigationClosePreviewResponse;
+  }) => Promise<void> | void;
+}
+
+/**
+ * Mounts the close preview hook and renders the investigation modal.
+ * Rendered only when the modal is open, so every open starts a fresh fetch.
+ */
+const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = ({
+  conversationId,
+  isMutating,
+  onClose,
+  onConfirm,
+}) => {
+  const [targetsChanged, setTargetsChanged] = useState(false);
+
+  const preview = useInvestigationClosePreview(conversationId, { enabled: true });
+
+  const handleConfirm = useCallback(
+    async (params: { dismissReason?: DismissReason; rationale?: string }) => {
+      if (!preview.data) return;
+      try {
+        await onConfirm({ ...params, preview: preview.data });
+      } catch (err) {
+        if (isCloseTargetsChangedError(err)) {
+          setTargetsChanged(true);
+          void preview.refetch();
+        }
+      }
+    },
+    [onConfirm, preview]
+  );
+
+  return (
+    <CloseInvestigationModal
+      preview={preview.data}
+      isRefreshing={preview.isFetching}
+      targetsChanged={targetsChanged}
+      onClose={onClose}
+      onConfirm={handleConfirm}
+      isLoading={isMutating}
+    />
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Escalation close modal container
+// ---------------------------------------------------------------------------
+
+interface EscalationCloseContainerProps {
+  conversationId: string;
+  isMutating: boolean;
+  onClose: () => void;
+  onConfirm: (params: {
+    dismissReason?: DismissReason;
+    rationale?: string;
+    preview: EscalationClosePreviewResponse;
+  }) => Promise<void> | void;
+}
+
+/**
+ * Mounts the close preview hook and renders the escalation modal.
+ * Rendered only when the modal is open, so every open starts a fresh fetch.
+ */
+const EscalationCloseContainer: React.FC<EscalationCloseContainerProps> = ({
+  conversationId,
+  isMutating,
+  onClose,
+  onConfirm,
+}) => {
+  const [targetsChanged, setTargetsChanged] = useState(false);
+
+  const preview = useEscalationClosePreview(conversationId, { enabled: true });
+
+  const handleConfirm = useCallback(
+    async (params: { dismissReason?: DismissReason; rationale?: string }) => {
+      if (!preview.data) return;
+      try {
+        await onConfirm({ ...params, preview: preview.data });
+      } catch (err) {
+        if (isCloseTargetsChangedError(err)) {
+          setTargetsChanged(true);
+          void preview.refetch();
+        }
+      }
+    },
+    [onConfirm, preview]
+  );
+
+  return (
+    <CloseEscalationModal
+      preview={preview.data}
+      isRefreshing={preview.isFetching}
+      targetsChanged={targetsChanged}
+      onClose={onClose}
+      onConfirm={handleConfirm}
+      isLoading={isMutating}
+    />
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 
 /**
  * Wraps `StatusToggle` with the real HTTP mutations and confirmation modals.
@@ -48,20 +183,10 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
 
   const [showCloseModal, setShowCloseModal] = useState(false);
 
-  // Pre-fetch the close preview when the user starts hovering / the toggle is visible.
-  // `enabled: showCloseModal` — only fetch when the modal is about to open.
-  const investigationPreview = useInvestigationClosePreview(conversationId, {
-    enabled: showCloseModal && templateId === 'investigation',
-  });
-  const escalationPreview = useEscalationClosePreview(conversationId, {
-    enabled: showCloseModal && templateId === 'escalation',
-  });
-
   const setInvestigationStatus = useSetInvestigationStatus();
   const setEscalationStatus = useSetEscalationStatus();
 
   const isMutating = setInvestigationStatus.isLoading || setEscalationStatus.isLoading;
-  const isLoading = isMutating || investigationPreview.isLoading || escalationPreview.isLoading;
 
   const invalidateAll = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
@@ -97,52 +222,98 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
     services.notifications?.toasts.addDanger(i18n.STATUS_CHANGE_ERROR);
   }, [services]);
 
-  const executeClose = useCallback(
-    ({ dismissReason, rationale }: { dismissReason?: DismissReason; rationale?: string }) => {
-      if (templateId === 'investigation') {
+  const executeCloseInvestigation = useCallback(
+    ({
+      dismissReason,
+      rationale,
+      preview,
+    }: {
+      dismissReason?: DismissReason;
+      rationale?: string;
+      preview: InvestigationClosePreviewResponse;
+    }): Promise<void> => {
+      return new Promise((resolve, reject) => {
         setInvestigationStatus.mutate(
           {
             investigationId: conversationId,
-            body: { status: 'closed', dismiss_reason: dismissReason, rationale },
+            body: {
+              status: 'closed',
+              dismiss_reason: dismissReason,
+              rationale,
+              expected_proposal_ids: preview.pending_proposals.map((p) => p.id),
+            },
           },
           {
             onSuccess: (result) => {
               setShowCloseModal(false);
               handleSuccess(result.failed_proposal_ids);
+              resolve();
             },
-            onError: () => {
-              setShowCloseModal(false);
-              handleError();
+            onError: (err) => {
+              if (isCloseTargetsChangedError(err)) {
+                // Let the container handle 409 — keep modal open.
+                reject(err);
+              } else {
+                setShowCloseModal(false);
+                handleError();
+                resolve();
+              }
             },
           }
         );
-      } else {
+      });
+    },
+    [conversationId, handleError, handleSuccess, setInvestigationStatus]
+  );
+
+  const executeCloseEscalation = useCallback(
+    ({
+      dismissReason,
+      rationale,
+      preview,
+    }: {
+      dismissReason?: DismissReason;
+      rationale?: string;
+      preview: EscalationClosePreviewResponse;
+    }): Promise<void> => {
+      const allProposalIds = preview.open_investigations.flatMap((inv) =>
+        inv.pending_proposals.map((p) => p.id)
+      );
+      const openInvestigationIds = preview.open_investigations.map((inv) => inv.id);
+
+      return new Promise((resolve, reject) => {
         setEscalationStatus.mutate(
           {
             escalationId: conversationId,
-            body: { status: 'closed', dismiss_reason: dismissReason, rationale },
+            body: {
+              status: 'closed',
+              dismiss_reason: dismissReason,
+              rationale,
+              expected_proposal_ids: allProposalIds,
+              expected_investigation_ids: openInvestigationIds,
+            },
           },
           {
             onSuccess: (result) => {
               setShowCloseModal(false);
               handleSuccess(result.failed_proposal_ids);
+              resolve();
             },
-            onError: () => {
-              setShowCloseModal(false);
-              handleError();
+            onError: (err) => {
+              if (isCloseTargetsChangedError(err)) {
+                // Let the container handle 409 — keep modal open.
+                reject(err);
+              } else {
+                setShowCloseModal(false);
+                handleError();
+                resolve();
+              }
             },
           }
         );
-      }
+      });
     },
-    [
-      conversationId,
-      handleError,
-      handleSuccess,
-      setEscalationStatus,
-      setInvestigationStatus,
-      templateId,
-    ]
+    [conversationId, handleError, handleSuccess, setEscalationStatus]
   );
 
   const handleToggle = useCallback(
@@ -185,28 +356,29 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
       <StatusToggle
         status={status}
         onChange={handleToggle}
-        isLoading={isLoading}
+        isLoading={isMutating}
         isDisabled={!canToggle}
         data-test-subj="connectedStatusToggle"
       />
 
-      {showCloseModal && templateId === 'investigation' && investigationPreview.data ? (
-        <CloseInvestigationModal
-          pendingProposalCount={investigationPreview.data.pending_proposal_count}
+      {/* Modal containers are mounted only when open so every open starts a fresh fetch. */}
+      {showCloseModal && templateId === 'investigation' && (
+        <InvestigationCloseContainer
+          conversationId={conversationId}
+          isMutating={isMutating}
           onClose={() => setShowCloseModal(false)}
-          onConfirm={executeClose}
-          isLoading={isMutating}
+          onConfirm={executeCloseInvestigation}
         />
-      ) : null}
+      )}
 
-      {showCloseModal && templateId === 'escalation' && escalationPreview.data ? (
-        <CloseEscalationModal
-          preview={escalationPreview.data}
+      {showCloseModal && templateId === 'escalation' && (
+        <EscalationCloseContainer
+          conversationId={conversationId}
+          isMutating={isMutating}
           onClose={() => setShowCloseModal(false)}
-          onConfirm={executeClose}
-          isLoading={isMutating}
+          onConfirm={executeCloseEscalation}
         />
-      ) : null}
+      )}
     </>
   );
 };

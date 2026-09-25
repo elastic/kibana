@@ -77,6 +77,7 @@ export type {
   SetInvestigationStatusRequest,
   SetInvestigationStatusResponse,
   InvestigationClosePreviewResponse,
+  ClosePreviewProposal,
   SetEscalationStatusRequest,
   SetEscalationStatusResponse,
   EscalationClosePreviewResponse,

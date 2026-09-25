@@ -80,6 +80,31 @@ export const CANCEL_BUTTON = i18n.translate('xpack.alertzero.closeConfirmation.c
   defaultMessage: 'Cancel',
 });
 
+export const NO_AUTOMATED_ACTION_LABEL = i18n.translate(
+  'xpack.alertzero.closeConfirmation.proposals.noAutomatedAction',
+  { defaultMessage: 'No automated action' }
+);
+
+export const MORE_PROPOSALS = (count: number) =>
+  i18n.translate('xpack.alertzero.closeConfirmation.proposals.moreProposals', {
+    defaultMessage: 'and {count} more',
+    values: { count },
+  });
+
+export const INVESTIGATION_PROPOSAL_COUNT = (count: number) =>
+  i18n.translate('xpack.alertzero.closeConfirmation.escalation.investigationProposalCount', {
+    defaultMessage: '{count, plural, one {# pending proposal} other {# pending proposals}}',
+    values: { count },
+  });
+
+export const CLOSE_TARGETS_CHANGED = i18n.translate(
+  'xpack.alertzero.closeConfirmation.targetsChanged',
+  {
+    defaultMessage:
+      'The pending proposals changed since this dialog was opened. Review the updated list and confirm again.',
+  }
+);
+
 // ---------------------------------------------------------------------------
 // Status toggle / reopening
 // ---------------------------------------------------------------------------

@@ -67,7 +67,13 @@ export const useSetInvestigationStatus = () => {
   });
 };
 
-/** Fetches a preview of what closing an investigation would affect (pending proposal count). */
+/**
+ * Fetches a preview of what closing an investigation would affect.
+ *
+ * The query is always fresh: `staleTime` and `cacheTime` are both 0 so every
+ * mount starts a network request, and `refetchInterval` keeps the list current
+ * while the close dialog is open. Pass `enabled: false` to pause polling.
+ */
 export const useInvestigationClosePreview = (
   investigationId: string | undefined,
   { enabled }: { enabled: boolean }
@@ -82,5 +88,10 @@ export const useInvestigationClosePreview = (
         { version: AGENTIC_INVESTIGATIONS_API_VERSION }
       ),
     enabled: enabled && Boolean(investigationId),
+    // Never serve stale data: every mount triggers a fresh fetch.
+    staleTime: 0,
+    cacheTime: 0,
+    // Keep the list current while the dialog is open.
+    refetchInterval: 10_000,
   });
 };

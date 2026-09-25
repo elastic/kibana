@@ -13,6 +13,7 @@ import {
   TooManyLinkedInvestigationsError,
 } from '../services/errors';
 import { WrongTemplateError } from '../../assignments/assignments_service';
+import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
 
 /**
  * Maps service errors to HTTP responses for escalation routes.
@@ -44,6 +45,12 @@ export const handleEscalationRouteError = (
 
   if (error instanceof NotAnEscalationError || error instanceof WrongTemplateError) {
     return response.notFound({ body: { message: error.message } });
+  }
+
+  if (error instanceof CloseTargetsChangedError) {
+    return response.conflict({
+      body: { message: error.message, attributes: { code: error.code } },
+    });
   }
 
   if (isAgentBuilderError(error)) {

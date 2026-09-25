@@ -268,8 +268,10 @@ beforeEach(() => {
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSetInvestigationStatus.mockReturnValue({ mutate: setStatusMutate, isLoading: false });
   mockUseInvestigationClosePreview.mockReturnValue({
-    data: { pending_proposal_count: 0 },
+    data: { pending_proposal_count: 0, pending_proposals: [] },
     isLoading: false,
+    isFetching: false,
+    refetch: jest.fn(),
   });
   mockOpenCount(0);
 });

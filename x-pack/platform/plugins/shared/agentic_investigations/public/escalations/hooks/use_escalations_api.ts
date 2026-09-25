@@ -146,7 +146,13 @@ export const useSetEscalationStatus = () => {
   });
 };
 
-/** Fetches a preview of what closing an escalation would affect (open linked investigations and their pending proposal counts). */
+/**
+ * Fetches a preview of what closing an escalation would affect.
+ *
+ * The query is always fresh: `staleTime` and `cacheTime` are both 0 so every
+ * mount starts a network request, and `refetchInterval` keeps the list current
+ * while the close dialog is open. Pass `enabled: false` to pause polling.
+ */
 export const useEscalationClosePreview = (
   escalationId: string | undefined,
   { enabled }: { enabled: boolean }
@@ -161,5 +167,10 @@ export const useEscalationClosePreview = (
         { version: AGENTIC_INVESTIGATIONS_API_VERSION }
       ),
     enabled: enabled && Boolean(escalationId),
+    // Never serve stale data: every mount triggers a fresh fetch.
+    staleTime: 0,
+    cacheTime: 0,
+    // Keep the list current while the dialog is open.
+    refetchInterval: 10_000,
   });
 };
