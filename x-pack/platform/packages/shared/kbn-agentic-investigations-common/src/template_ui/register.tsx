@@ -200,26 +200,23 @@ export const registerEscalationTemplateUI = ({
     },
   }));
 
-  conversationTemplates.registerTemplateUIDefinition(
-    templateId,
-    () => ({
-      name,
-      icon,
-      tabs: [overviewTabId],
-      detailsFlyout: {
-        header: function EscalationFlyoutHeaderWrapper({ conversation, refetchConversation }) {
-          return (
-            <Suspense fallback={<ConversationTitle title={conversation.title} />}>
-              <LazyEscalationHeaderSlot
-                conversation={conversation}
-                renderAssignees={renderAssignees}
-                refetchConversation={refetchConversation}
-              />
-            </Suspense>
-          );
-        },
-        // No footer for escalations yet.
+  conversationTemplates.registerTemplateUIDefinition(templateId, () => ({
+    name,
+    icon,
+    tabs: [overviewTabId],
+    detailsFlyout: {
+      header: function EscalationFlyoutHeaderWrapper({ conversation, refetchConversation }) {
+        return (
+          <Suspense fallback={<ConversationTitle title={conversation.title} />}>
+            <LazyEscalationHeaderSlot
+              conversation={conversation}
+              renderAssignees={renderAssignees}
+              refetchConversation={refetchConversation}
+            />
+          </Suspense>
+        );
       },
-    })
-  );
+      // No footer for escalations yet.
+    },
+  }));
 };

@@ -739,11 +739,11 @@ describe('EscalationsService.listLinkedInvestigations', () => {
 
   it('silently drops linked ids that resolved to a non-investigation template', async () => {
     const escalationEntry = {
+      ...INV_A,
       id: 'another-escalation',
       title: 'Nested Escalation',
       template_id: ESCALATION_TEMPLATE_ID,
       agent_id: 'agent-3',
-      metadata: { status: 'open' },
     };
     const { service } = makeService({
       get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'another-escalation'])),
