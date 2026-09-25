@@ -25,6 +25,7 @@ export {
 export {
   browserAuthFixture,
   apiServicesFixture,
+  apiClientFixture,
   coreWorkerFixtures,
   esArchiverFixture,
   createPlaywrightConfig,
@@ -55,6 +56,8 @@ export type {
 // Fixture types
 export type {
   ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
   ApiServicesFixture,
   BrowserAuthFixture,
   RequestAuthFixture,
