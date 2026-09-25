@@ -19,7 +19,7 @@ const UNAVAILABLE: AvailabilityResult = {
 } as const;
 
 /**
- * Agent Builder availability for the investigation agents and their tools. Without it these
+ * Agent Builder availability for the investigation agent and its tools. Without it these
  * surfaces stay listed after `nightshift.enabled` is turned off: agent documents are persisted,
  * and a registered tool is only filtered out of the catalog when it declares availability.
  *

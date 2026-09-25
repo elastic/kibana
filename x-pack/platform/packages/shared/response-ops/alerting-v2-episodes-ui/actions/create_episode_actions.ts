@@ -68,7 +68,7 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
     createSnoozeAction(
       deps,
       ext('ALERTING_V2_SNOOZE_EPISODE') as
-        | EpisodeActionExtension<{ expiry: string | null }>
+        | EpisodeActionExtension<{ snoozedUntil: string | null }>
         | undefined
     ),
     createUnsnoozeAction(actionDeps, ext('ALERTING_V2_UNSNOOZE_EPISODE')),

@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+export { buildChainWorld, getChainIds } from './chain';
+export type {
+  FpTpChainDefinition,
+  FpTpChainDestination,
+  FpTpChainEvent,
+  FpTpChainIds,
+  FpTpChainParentProcess,
+  FpTpChainProcess,
+  FpTpChainStage,
+} from './chain';
+export type { FpTpEntityRoleKey } from './chain_entities';
 export {
   FP_TP_ATTACK_ADHOC_INDEX,
   FP_TP_BASE_TIME,
@@ -21,7 +32,18 @@ export {
   withoutEntities,
   withoutEvents,
 } from './evidence_states';
+export { asRecord, withFieldMessage } from './event_message';
 export { joinKibanaUrl } from './join_kibana_url';
+export {
+  withCommandLine,
+  withFilePath,
+  withNetworkDestination,
+  withoutEventCategory,
+  withoutEventIds,
+  withoutProcessParent,
+  withProcessExecutable,
+  withProcessParent,
+} from './mutations';
 export {
   buildLiveSeedPlan,
   cleanupManualSeedLive,
@@ -41,3 +63,5 @@ export type { FpTpSeededEvidence } from './seeded_evidence';
 export { shiftTwinToNow } from './shift_timestamps';
 export type { FpTpGold, FpTpIndexedEntity, FpTpMustRetrieve, FpTpTwin, FpTpWorld } from './types';
 export { toRunMarker, uniquify } from './uniquify';
+export { deriveFpTpOutcome, FP_TP_VERDICT_RULES } from './verdict_rules';
+export type { FpTpCheckResult, FpTpWorldChecks } from './verdict_rules';

@@ -14,7 +14,7 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { GenAISemConvAttributes } from '@kbn/inference-tracing';
 import type { ConversationRound } from '@kbn/agent-builder-common';
-import { DEDUCTIVE_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
 import { ungradedPlaceholder } from './placeholder';
@@ -38,7 +38,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         readFileSync(
           join(
             REPO_ROOT,
-            'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/deductive_investigation/instructions/deductive_investigator.md.text'
+            'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/investigator.md.text'
           ),
           'utf8'
         )
@@ -63,12 +63,12 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           { timeout: 60_000 }
         )
         .toBe(true);
-      // Availability checks the significant-events workflow, but manual investigations run the
-      // deductive one, which Kibana may still be installing right after a cold start.
+      // Availability can turn true while Kibana is still installing the managed workflow after a
+      // cold start.
       await expect
         .poll(
           async () =>
-            fetch(`/api/workflows/workflow/${DEDUCTIVE_INVESTIGATION_WORKFLOW_ID}`, {
+            fetch(`/api/workflows/workflow/${NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID}`, {
               headers: { 'elastic-api-version': '2023-10-31' },
             }).then(
               () => true,
@@ -139,7 +139,14 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           const [score] = exampleScores;
           expect(score.example.metadata?.case_id).toBe(output.case_id);
           expect(score.task.trace_id).toBe(output.traceId);
-          expect(score.task.output).toEqual(JSON.parse(JSON.stringify(output)));
+          // The examples listing returns previews only; the full output comes from the details route.
+          const details = await evalsClient.getExperimentExampleDetails(
+            experiment.id,
+            experiment.datasetId,
+            score.example.id,
+            run.repetition
+          );
+          expect(details.task.output).toEqual(JSON.parse(JSON.stringify(output)));
           expect(score.evaluator).toMatchObject({
             name: 'ungraded_placeholder',
             kind: 'code',
