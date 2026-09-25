@@ -9,7 +9,12 @@
 
 import type YAML from 'yaml';
 import type { LineCounter } from 'yaml';
-import type { WorkflowDetailDto, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type {
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+  WorkflowYaml,
+} from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { LoadingStates } from './utils/loading_states';
@@ -37,6 +42,15 @@ export interface WorkflowDetailState {
   computed?: ComputedData;
   /** The currently selected execution (when viewing executions tab) */
   execution?: WorkflowExecutionDto;
+  executionRequest?: { id: string; requestId: string; loadMore: boolean };
+  executionError?: { id: string; message: string };
+  /** `total` from the paginated execution-steps list; used for the truncation callout. */
+  stepExecutionsTotal: number;
+  /**
+   * Step executions loaded so far, one entry per fetched page of
+   * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE. `execution.stepExecutions` is the flattened view.
+   */
+  stepExecutionPages: WorkflowStepExecutionDto[][];
   /** The computed data derived from the selected execution, it is updated by the loadExecutionThunk */
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */
@@ -88,6 +102,8 @@ export interface WorkflowDetailState {
 export type ActiveTab = 'workflow' | 'executions';
 
 export interface ComputedData {
+  /** YAML source used to derive the rest of this snapshot. */
+  yamlString: string | undefined;
   yamlDocument?: YAML.Document; // This will be handled specially for serialization
   yamlLineCounter?: LineCounter;
   workflowLookup?: WorkflowLookup;

@@ -1,5 +1,5 @@
 {
-  "sha1": "0e20897affa4f9c475a52469be8b4f04f0fc65b6",
+  "sha1": "8277678f4c680be5a41a09817962567cb07ec91c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -288,8 +288,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_wait_for_input.spec.ts",
-        "line": 110,
-        "column": 9
+        "line": 119,
+        "column": 26
       }
     },
     {
@@ -430,6 +430,26 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/scheduled_workflow.spec.ts",
         "line": 114,
         "column": 21
+      }
+    },
+    {
+      "id": "d6bd3441ef31ba7-5234e877cb74062",
+      "title": "Sync sub-workflow identity after child HITL approval child continues as the approver while the parent keeps the original runner identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/sync_child_hitl_identity.spec.ts",
+        "line": 113,
+        "column": 26
       }
     },
     {

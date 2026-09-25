@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ScoutPage } from '@kbn/scout';
 
@@ -22,7 +23,7 @@ export class SpacesPage {
   constructor(private readonly page: ScoutPage) {}
 
   async isProjectHeaderVisible() {
-    return await this.page.testSubj.locator('chromeNextGlobalHeader').isVisible();
+    return await this.page.testSubj.locator(CHROME_HEADER_TEST_SUBJECTS.root).isVisible();
   }
 
   async navigateToHome() {
@@ -314,6 +315,15 @@ export class SpacesPage {
    */
   cpsProjectPickerButtonLocator() {
     return this.page.testSubj.locator('cps-project-picker-button');
+  }
+
+  /**
+   * "Hide all" shortcut in the feature-visibility section of the create/edit
+   * space form. Absent when `xpack.spaces.allowFeatureVisibility` is off, which
+   * is the case for every serverless project type.
+   */
+  hideAllFeaturesLinkLocator() {
+    return this.page.testSubj.locator('hideAllFeaturesLink');
   }
 
   async setSpaceName(name: string) {

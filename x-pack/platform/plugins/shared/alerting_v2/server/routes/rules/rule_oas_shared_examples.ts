@@ -8,6 +8,8 @@
 import type {
   BulkByIdsParams,
   BulkByQueryParams,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleDataInput,
   DryRunResponse,
@@ -56,9 +58,9 @@ export const RULE_RESPONSE: RuleResponse = {
     ...SAMPLE_RULE_DATA.metadata,
     version: 1,
   },
-  created_by: 'elastic',
+  created_by: { profile_uid: 'u_elastic_0' },
   created_at: '2026-01-15T12:00:00.000Z',
-  updated_by: 'elastic',
+  updated_by: { profile_uid: 'u_elastic_0' },
   updated_at: '2026-01-15T12:00:00.000Z',
 };
 
@@ -75,6 +77,37 @@ export const BULK_OPERATION_RESPONSE: BulkResponse = {
   errors: [],
 };
 
+export const BULK_CREATE_RULES_REQUEST: BulkCreateRulesParams = {
+  rules: [
+    SAMPLE_RULE_DATA,
+    {
+      ...SAMPLE_RULE_DATA,
+      id: 'rule-disabled',
+      enabled: false,
+      metadata: {
+        ...SAMPLE_RULE_DATA.metadata,
+        name: 'Host CPU high (disabled)',
+      },
+    },
+  ],
+};
+
+export const BULK_CREATE_RULES_RESPONSE: BulkCreateRulesResponse = {
+  items: [
+    RULE_RESPONSE,
+    {
+      ...RULE_RESPONSE,
+      id: 'rule-disabled',
+      enabled: false,
+      metadata: {
+        ...RULE_RESPONSE.metadata,
+        name: 'Host CPU high (disabled)',
+      },
+    },
+  ],
+  errors: [],
+};
+
 export const DRY_RUN_RESPONSE: DryRunResponse = {
   match_count: 2,
   sample: ['rule-1', 'rule-2'],
@@ -85,6 +118,13 @@ export const INVALID_BULK_OPERATION_RESPONSE = invalidResponseExample({
   summary: 'Request body is missing required rule ids',
   message: 'ids: Required',
   details: { errors: { ids: ['Required'] } },
+});
+
+/** Shared 400 body for bulk create. */
+export const INVALID_BULK_CREATE_RULES_RESPONSE = invalidResponseExample({
+  summary: 'Request body is missing required rules',
+  message: 'rules: Required',
+  details: { errors: { rules: ['Required'] } },
 });
 
 /** Shared 400 body for by-query bulk routes. */

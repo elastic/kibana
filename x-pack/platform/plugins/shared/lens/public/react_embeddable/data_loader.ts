@@ -127,6 +127,32 @@ export function loadEmbeddableData(
   const getConsumerMessages = () =>
     apiHasUserMessages(parentApi) ? parentApi.userMessages ?? [] : [];
 
+  const getExecutionContext = () => {
+    const parentContext = getParentContext(parentApi);
+    const lastState = getState();
+    if (lastState.attributes) {
+      const child: KibanaExecutionContext = {
+        type: 'lens',
+        name: lastState.attributes.visualizationType ?? '',
+        id: uuid || 'new',
+        // Prefer the panel-level title when it is set, falling back to the
+        // chart's own title. With the `lens.apiFormat` path the chart title is
+        // stripped from the wire format, so the panel title is the source of truth.
+        description: lastState.title ?? lastState.attributes.title ?? '',
+        url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
+          lastState.ref_id
+        )}`,
+      };
+
+      return parentContext
+        ? {
+            ...parentContext,
+            child,
+          }
+        : child;
+    }
+  };
+
   // Some convenience api for the user messaging
   const {
     getUserMessages,
@@ -134,7 +160,7 @@ export function loadEmbeddableData(
     updateBlockingErrors,
     updateValidationErrors,
     updateWarnings,
-    resetMessages,
+    discardRuntimeMessages,
     updateMessages,
   } = buildUserMessagesHelpers(
     api,
@@ -165,6 +191,13 @@ export function loadEmbeddableData(
     }
   };
 
+  // Declared outside of `reload` to keep a stable identity: this ends up in the expression
+  // renderer params, where a new reference makes the renderer rebuild its loader on each reload.
+  const onRuntimeError = (error: Error) => {
+    updateBlockingErrors(error);
+    getLogError(getExecutionContext)('runtime');
+  };
+
   async function reload(
     // make reload easier to debug
     sourceId: ReloadReason,
@@ -172,10 +205,21 @@ export function loadEmbeddableData(
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
 
-    resetMessages();
+    const currentAbortController = internalApi.expressionAbortController$.getValue();
+
+    // If the current controller is already aborted, create a fresh one for this reload
+    // This happens when cancelRequests() was called before this reload started
+    let activeController = currentAbortController;
+    if (currentAbortController.signal.aborted) {
+      activeController = new AbortController();
+      internalApi.updateAbortController(activeController);
+    }
 
     // reset the render on reload
     internalApi.dispatchRenderStart();
+
+    // Hide badges while reloading. `onRenderComplete` republishes them.
+    updateMessages([]);
 
     // notify about data loading
     internalApi.updateDataLoading(true);
@@ -184,32 +228,6 @@ export function loadEmbeddableData(
     onLoad?.(true);
 
     const currentState = getState();
-
-    const getExecutionContext = () => {
-      const parentContext = getParentContext(parentApi);
-      const lastState = getState();
-      if (lastState.attributes) {
-        const child: KibanaExecutionContext = {
-          type: 'lens',
-          name: lastState.attributes.visualizationType ?? '',
-          id: uuid || 'new',
-          // Prefer the panel-level title when it is set, falling back to the
-          // chart's own title. With the `lens.apiFormat` path the chart title is
-          // stripped from the wire format, so the panel title is the source of truth.
-          description: lastState.title ?? lastState.attributes.title ?? '',
-          url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
-            lastState.ref_id
-          )}`,
-        };
-
-        return parentContext
-          ? {
-              ...parentContext,
-              child,
-            }
-          : child;
-      }
-    };
 
     // _data (expression result) is unused — Lens only needs the inspector adapters.
     // The signature OnDataCallback is used for consistency with the expressions plugin.
@@ -260,7 +278,6 @@ export function loadEmbeddableData(
       services
     );
 
-    // Go concurrently: build the expression and fetch the dataViews
     const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
         searchContext,
@@ -273,15 +290,14 @@ export function loadEmbeddableData(
         renderMode: getRenderMode(parentApi),
         services,
         searchSessionId: api.searchSessionId$.getValue(),
-        abortController: internalApi.expressionAbortController$.getValue(),
+        abortController: activeController,
         getExecutionContext,
-        logError: getLogError(getExecutionContext),
+        onRuntimeError,
         addUserMessages,
         onRender,
         onData,
         handleEvent,
         disableTriggers,
-        updateBlockingErrors,
         forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
         getDisplayOptions: internalApi.getDisplayOptions,
       }),
@@ -291,6 +307,10 @@ export function loadEmbeddableData(
         services.dataViews
       ),
     ]);
+
+    // Drop runtime errors from the old expression that can arrive during `await`.
+    // (`dispatchBlockingErrorIfAny` reads these, so stale errors would skip rendering)
+    discardRuntimeMessages();
 
     // update the visualization context before anything else
     // as it will be used to compute blocking errors also in case of issues
@@ -309,8 +329,6 @@ export function loadEmbeddableData(
     if (params?.expression != null && !hasBlockingErrors) {
       internalApi.updateExpressionParams(params);
     }
-
-    internalApi.updateAbortController(abortController ?? new AbortController());
   }
 
   // Build a custom operator to be resused for various observables

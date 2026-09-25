@@ -212,6 +212,74 @@ describe('Internal dashboard top nav', () => {
     );
   });
 
+  it('should disable the date picker when the only data view is an ES|QL view without a time field', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
+    const dashboardApi: DashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+        { type: 'esql', timeFieldName: undefined, isTimeBased: () => false } as DataView,
+      ]),
+    };
+
+    renderWithChrome(
+      <DashboardContext.Provider value={dashboardApi}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showDatePicker: { disabled: true },
+      }),
+      {}
+    );
+  });
+
+  it('should keep the date picker enabled when an ES|QL view has a time field', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
+    const dashboardApi: DashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+        { type: 'esql', timeFieldName: '@timestamp', isTimeBased: () => false } as DataView,
+      ]),
+    };
+
+    renderWithChrome(
+      <DashboardContext.Provider value={dashboardApi}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showDatePicker: { disabled: false },
+      }),
+      {}
+    );
+  });
+
   it('should keep the date picker enabled when at least one data view is time-based', async () => {
     const { api, internalApi } = buildMockDashboardApi();
     const dashboardApi: DashboardApi = {
@@ -339,11 +407,11 @@ describe('Internal dashboard top nav', () => {
       });
     });
 
-    it('should be enabled when a panel publishes usesEsql$ as true (e.g. a Vega panel using ES|QL)', async () => {
+    it('should be enabled when a panel publishes esql$ with queries (e.g. a Vega panel using ES|QL)', async () => {
       const { api, internalApi } = buildMockDashboardApi();
       api.registerChildApi({
         uuid: 'vega-panel',
-        usesEsql$: new BehaviorSubject(true),
+        esql$: new BehaviorSubject([{ esql: 'FROM logs | LIMIT 10' }]),
         approximationApplied$: new BehaviorSubject<boolean | undefined>(undefined),
       } as unknown as Parameters<typeof api.registerChildApi>[0]);
 

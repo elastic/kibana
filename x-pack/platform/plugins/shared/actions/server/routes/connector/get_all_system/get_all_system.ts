@@ -13,10 +13,12 @@ import type { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { transformGetAllConnectorsResponseV1 } from '../get_all/transforms';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
+import type { ActionsConfigurationUtilities } from '../../../actions_config';
 
 export const getAllConnectorsIncludingSystemRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  actionsConfigUtils: ActionsConfigurationUtilities
 ) => {
   router.get(
     {
@@ -34,8 +36,10 @@ export const getAllConnectorsIncludingSystemRoute = (
           includeSystemActions: true,
         });
 
-        const responseBody: GetAllConnectorsResponseV1 =
-          transformGetAllConnectorsResponseV1(result);
+        const responseBody: GetAllConnectorsResponseV1 = transformGetAllConnectorsResponseV1(
+          result,
+          { includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled() }
+        );
         return res.ok({ body: responseBody });
       })
     )

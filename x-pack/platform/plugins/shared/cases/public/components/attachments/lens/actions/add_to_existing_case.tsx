@@ -27,7 +27,7 @@ export const createAddToExistingCaseLensAction = (
     type: 'actionButton',
     order: 10,
     grouping: [{ id: 'cases', order: 6 }],
-    getIconType: () => 'casesApp',
+    getIconType: () => 'briefcase',
     getDisplayName: () => ADD_TO_EXISTING_CASE_DISPLAYNAME,
     isCompatible: async ({ embeddable }) => {
       const { isCompatible } = await import('./is_compatible');

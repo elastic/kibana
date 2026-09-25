@@ -20,6 +20,15 @@ export {
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
   NIGHTSHIFT_APP_ID,
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_APP_ROUTE,
+  OBSERVABILITY_ALERTING_BASE_PATH,
 } from './constants';
-export type { AppId, DeepLinkId, SignificantEventsLinkId, StreamsLinkId } from './deep_links';
+export type {
+  AppId,
+  DeepLinkId,
+  ObservabilityAlertingLinkId,
+  SignificantEventsLinkId,
+  StreamsLinkId,
+} from './deep_links';
 export * from './locators';

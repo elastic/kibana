@@ -84,7 +84,10 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'public-conversation': publicConversation,
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
+          'product-solution': productSolution,
+          'product-feature': productFeature,
           'max-step-size': maxStepSize,
+          'reasoning-level': reasoningLevel,
         } = context.config;
         const maxContentLength =
           typeof maxStepSize === 'string' ? parseMaxStepSize(maxStepSize) : undefined;
@@ -156,7 +159,18 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               attachments,
             },
             ...(maxContentLength !== undefined ? { maxContentLength } : {}),
-            ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
+            ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
+            ...(pluginId
+              ? {
+                  telemetryMetadata: {
+                    pluginId,
+                    aggregateBy,
+                    productSolution,
+                    productFeature,
+                    interactionId: context.contextManager.getContext().execution.id,
+                  },
+                }
+              : {}),
           },
           // workflows already run as scheduled tasks
           useTaskManager: false,

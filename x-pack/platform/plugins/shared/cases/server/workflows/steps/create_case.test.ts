@@ -159,4 +159,23 @@ describe('createCaseStepDefinition', () => {
       pushType: 'automatic',
     });
   });
+
+  it('omits extractObservables from the create payload when the caller did not supply it', async () => {
+    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest
+      .fn()
+      .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
+    const definition = createCaseStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        ...createCaseRequestFixture,
+        settings: { syncAlerts: true }, // extractObservables intentionally absent
+      })
+    );
+
+    // extractObservables must be absent so the server-side create path applies the space
+    // configuration default instead of a value hard-coded from owner info.
+    expect(create.mock.calls[0][0].settings).not.toHaveProperty('extractObservables');
+  });
 });

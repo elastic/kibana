@@ -5,44 +5,106 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { AiButtonEmpty } from '@kbn/ui-ai-components';
 import type { Investigation } from '../../types';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
-import { BaseActions, type BaseActionsProps } from '../actions';
-import type { ConversationsActionsGroupProps } from '../conversation_card';
+import { type CardActionType } from '../actions';
+import {
+  InvestigationActionModals,
+  type CloseInvestigationModalRenderProps,
+  type EscalationModalRenderProps,
+} from '../modals/investigation_action_modals';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
+
+export type { CloseInvestigationModalRenderProps };
 
 export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
-  onClickAction: BaseActionsProps['onClickAction'];
-  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
+  onOpenChat: () => void;
+  /**
+   * When provided, the "Open an escalation" item in the actions menu opens the escalation modal.
+   * Supplied by the caller who has access to Kibana HTTP hooks unavailable in this package.
+   */
+  onOpenEscalation?: (props: EscalationModalRenderProps) => React.ReactNode;
+  /**
+   * When provided, the "Close investigation" action renders a confirmation modal.
+   * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   */
+  onCloseInvestigation?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
 }
 
-export const ConversationDetailsFlyoutFooter = memo<ConversationDetailsFlyoutFooterProps>(
-  ({ investigation, onClickAction, onClickRecommendedAction }) => {
-    const onOpenChat = useOpenInChat(investigation.id);
+interface ModalState {
+  type: CardActionType | null;
+  recordId: Investigation['recordId'] | null;
+}
 
-    return (
-      <EuiFlyoutFooter>
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
+const CLOSED_MODAL: ModalState = { type: null, recordId: null };
+
+/**
+ * Footer slot content. It owns its action modals rather than delegating them upwards: the flyout
+ * can be mounted through `core.overlays.openFlyout`, where there is no page-level React tree.
+ */
+export const ConversationDetailsFlyoutFooter = ({
+  investigation,
+  onOpenChat,
+  onOpenEscalation,
+  onCloseInvestigation,
+}: ConversationDetailsFlyoutFooterProps) => {
+  const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
+  const closeModal = useCallback(() => setModalState(CLOSED_MODAL), []);
+  const canRenderEscalationButton = Boolean(onOpenEscalation);
+
+  const onClickAction = useCallback(
+    (action: CardActionType, recordId: Investigation['recordId']) => {
+      setModalState({ type: action, recordId });
+    },
+    []
+  );
+
+  const renderCloseModal = onCloseInvestigation
+    ? (props: CloseInvestigationModalRenderProps) => onCloseInvestigation(props)
+    : undefined;
+
+  return (
+    <>
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <AiButtonEmpty
+            size="s"
+            iconType="productAgent"
+            onClick={onOpenChat}
+            data-test-subj="investigationFlyoutOpenChat"
+          >
+            {DETAILS_FLYOUT_LABELS.actions.openChat}
+          </AiButtonEmpty>
+        </EuiFlexItem>
+        {canRenderEscalationButton && (
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="productAgent" onClick={onOpenChat} size="s">
-              {DETAILS_FLYOUT_LABELS.actions.openChat}
+            <EuiButton
+              color="primary"
+              iconType="document"
+              onClick={() => onClickAction('createEscalation', investigation.recordId)}
+              size="s"
+            >
+              {ACTIONS_TRANSLATIONS.buttons.openEscalation}
             </EuiButton>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <BaseActions
-              investigation={investigation}
-              isFlyout={true}
-              onClickAction={onClickAction}
-              onClickRecommendedAction={onClickRecommendedAction}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    );
-  }
-);
+        )}
+      </EuiFlexGroup>
 
-ConversationDetailsFlyoutFooter.displayName = 'ConversationDetailsFlyoutFooter';
+      <InvestigationActionModals
+        action={modalState.type}
+        recordId={modalState.recordId}
+        initialAssignee={investigation.assignee}
+        investigation={investigation}
+        onCloseAction={closeModal}
+        onCloseApproval={closeModal}
+        renderCloseModal={renderCloseModal}
+        renderEscalationModal={onOpenEscalation}
+      />
+    </>
+  );
+};

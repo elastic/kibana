@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
@@ -25,7 +25,7 @@ import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 import {
   ensureWorkflowIdleTimeoutResumeAfterLoop,
-  getWorkflowIdleTimeoutResumeAtAfterLoop,
+  getIdleTimeoutResumeDeadlineMs,
 } from '../workflow_execution_loop/handle_execution_delay';
 
 export async function resumeWorkflow({
@@ -54,7 +54,7 @@ export async function resumeWorkflow({
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
-}): Promise<{ idleTimeoutResumeAt?: Date }> {
+}): Promise<{ retryAt?: Date }> {
   let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
   try {
     setupResult = await setupDependencies(
@@ -102,6 +102,34 @@ export async function resumeWorkflow({
     return {};
   }
 
+  const waitingForInput = loadedExecution.status === ExecutionStatus.WAITING_FOR_INPUT;
+  const hasResumeInput = loadedExecution.context?.resumeInput != null;
+  const node = loadedExecution.currentNodeId ? workflowRuntime.getCurrentNode() : undefined;
+  if (
+    !loadedExecution.cancelRequested &&
+    (loadedExecution.status === ExecutionStatus.WAITING || (waitingForInput && !hasResumeInput)) &&
+    node?.type !== 'enter-parallel' &&
+    node?.stepId
+  ) {
+    // Read persisted metadata before deciding whether this notification may advance the workflow.
+    await stepIoService.load();
+    const stepExecution = workflowExecutionState.getLatestStepExecution(node.stepId);
+    const deadline = getIdleTimeoutResumeDeadlineMs(
+      { workflowExecutionGraph, workflowExecutionState },
+      loadedExecution,
+      workflowExecutionCursor.currentStackFrames,
+      { node, startedAt: stepExecution?.startedAt, state: stepExecution?.state }
+    );
+    const resumeAt = stepExecution?.state?.resumeAt;
+    const waitDeadline = typeof resumeAt === 'string' ? new Date(resumeAt).getTime() : Infinity;
+    const nextRunAt = Math.min(waitingForInput ? Infinity : waitDeadline, deadline ?? Infinity);
+    if ((waitingForInput || typeof resumeAt === 'string') && nextRunAt > Date.now()) {
+      // A notification is not approval. Keep HITL parked until input, cancellation, or a deadline.
+      if (!Number.isFinite(nextRunAt)) return {};
+      return { retryAt: new Date(nextRunAt) };
+    }
+  }
+
   await workflowRuntime.resume();
 
   const workflowExecutionLoopParams = {
@@ -121,11 +149,8 @@ export async function resumeWorkflow({
     workflowTaskManager,
   };
 
-  let idleTimeoutResumeAt: Date | undefined;
-
   try {
     await workflowExecutionLoop(workflowExecutionLoopParams);
-    idleTimeoutResumeAt = getWorkflowIdleTimeoutResumeAtAfterLoop(workflowExecutionLoopParams);
     await ensureWorkflowIdleTimeoutResumeAfterLoop(workflowExecutionLoopParams);
   } finally {
     await emitWorkflowExecutionFailedEventIfFailed({
@@ -142,13 +167,13 @@ export async function resumeWorkflow({
     workflowRunId,
     spaceId,
     logger,
-    fakeRequest,
     workflowExecutionRepository,
+    stepExecutionRepository,
     internalResumeWorkflowExecution,
     workflowTaskManager,
     meteringService,
     cloudSetup: dependencies.cloudSetup,
   });
 
-  return { idleTimeoutResumeAt };
+  return {};
 }
