@@ -16,3 +16,5 @@ export { recordLog, snapshotLogsForRunnable, getSnapshotOfRunnableLogs } from '.
 // @ts-ignore not typed yet
 // @internal
 export { escapeCdata } from './xml';
+// @internal
+export { isMochaTimeoutError } from './mocha_timeout';
