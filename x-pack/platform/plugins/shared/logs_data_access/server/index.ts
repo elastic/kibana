@@ -25,6 +25,7 @@ export type {
   LogPattern,
   SemanticLogSearchService,
   SemanticLogSearchParams,
+  SearchDiagnostics,
   SemanticLogSearchResult,
   TimeRange,
 } from '../common/services/semantic_log_search/types';

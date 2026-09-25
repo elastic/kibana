@@ -14,7 +14,17 @@ export const SEARCH_STATUS = {
 
 /** The search cannot run against this target or cluster at all; retrying will not help. */
 export const UNAVAILABLE_REASON = {
+  /**
+   * The target resolves to at least one index, but they do not expose `message` and `@timestamp`.
+   * A mapping problem: the data is there and cannot be categorized.
+   */
   MISSING_FIELDS: 'missing_fields',
+  /**
+   * The target resolves to no index at all, so there is nothing to search.
+   * Distinct from `MISSING_FIELDS` because the fix is different: correct the target, do not go
+   * looking at mappings. Reported for both an empty wildcard match and an absent concrete index.
+   */
+  NO_MATCHING_INDICES: 'no_matching_indices',
   INFERENCE_UNAVAILABLE: 'inference_unavailable',
 } as const;
 
@@ -39,6 +49,21 @@ export const ERROR_REASON = {
   INFERENCE_NOT_READY: 'inference_not_ready',
 } as const;
 
+/**
+ * Stage of the search a failure happened in, reported to the caller alongside the reason.
+ *
+ * Lives here rather than with the search implementation because it is part of the result contract:
+ * a reason says what went wrong, a phase says where, and "where" is what makes an `execution`
+ * failure diagnosable without server log access.
+ */
+export const SEARCH_PHASE = {
+  CAPABILITIES: 'capabilities',
+  PROBE: 'probe',
+  SEARCH: 'search',
+  RERANK: 'rerank',
+} as const;
+
 export type SearchStatus = (typeof SEARCH_STATUS)[keyof typeof SEARCH_STATUS];
 export type UnavailableReason = (typeof UNAVAILABLE_REASON)[keyof typeof UNAVAILABLE_REASON];
 export type ErrorReason = (typeof ERROR_REASON)[keyof typeof ERROR_REASON];
+export type SearchPhase = (typeof SEARCH_PHASE)[keyof typeof SEARCH_PHASE];

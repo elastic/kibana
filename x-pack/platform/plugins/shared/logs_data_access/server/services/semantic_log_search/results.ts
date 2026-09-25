@@ -10,16 +10,27 @@ import { isRequestAbortedError } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
 import {
   ERROR_REASON,
+  SEARCH_PHASE,
   SEARCH_STATUS,
   type ErrorReason,
+  type SearchPhase,
   type UnavailableReason,
 } from '../../../common/services/semantic_log_search/constants';
-import type { SemanticLogSearchResult } from '../../../common/services/semantic_log_search/types';
+import type {
+  SearchDiagnostics,
+  SemanticLogSearchResult,
+} from '../../../common/services/semantic_log_search/types';
+
+export { SEARCH_PHASE };
 
 /** Builds an `error` result without repeating the status literal at every call site. */
-export const errorResult = (reason: ErrorReason): SemanticLogSearchResult => ({
+export const errorResult = (
+  reason: ErrorReason,
+  diagnostics?: SearchDiagnostics
+): SemanticLogSearchResult => ({
   status: SEARCH_STATUS.ERROR,
   reason,
+  ...(diagnostics ? { diagnostics } : {}),
 });
 
 /** Builds an `unavailable` result without repeating the status literal at every call site. */
@@ -27,16 +38,6 @@ export const unavailableResult = (reason: UnavailableReason): SemanticLogSearchR
   status: SEARCH_STATUS.UNAVAILABLE,
   reason,
 });
-
-/** Which stage of the search pipeline failed. `PROBE` and `RERANK` treat a timeout as actionable. */
-export const SEARCH_PHASE = {
-  CAPABILITIES: 'capabilities',
-  PROBE: 'probe',
-  SEARCH: 'search',
-  RERANK: 'rerank',
-} as const;
-
-type SearchPhase = (typeof SEARCH_PHASE)[keyof typeof SEARCH_PHASE];
 
 // Tests the error type, not the signal: any non-abort error surfacing after an abort
 // (mapping error, 403) must still be classified as `execution`, not `cancelled`.
@@ -77,6 +78,18 @@ function isModelDeploymentTimeoutError(error: unknown): boolean {
   return error instanceof Error && error.message.includes(MODEL_DEPLOYMENT_TIMEOUT_TYPE);
 }
 
+/**
+ * Elasticsearch's classifier for a failure, e.g. `verification_exception`, or the error's name when
+ * it did not come from Elasticsearch. Never the message: that is free text and is logged instead.
+ */
+function elasticsearchErrorType(error: unknown): string | undefined {
+  if (error instanceof errors.ResponseError) {
+    const type = (error.body as { error?: { type?: string } } | undefined)?.error?.type;
+    if (type) return type;
+  }
+  return error instanceof Error ? error.name : undefined;
+}
+
 // A probe timeout is actionable: the scope is too broad to categorize within the budget, and a
 // narrower one may succeed. A rerank timeout is actionable in a different way, because the model is
 // likely still loading, so retrying shortly may succeed while narrowing the scope will not. A
@@ -114,15 +127,23 @@ export function toFailureResult(
 ): SemanticLogSearchResult {
   const { timeoutReason, timeoutText, failedText } = PHASE_FAILURE[phase];
 
+  const esErrorType = elasticsearchErrorType(error);
+  const diagnostics: SearchDiagnostics = {
+    phase,
+    ...(esErrorType ? { elasticsearchErrorType: esErrorType } : {}),
+  };
+
   if (isCancellationError(error)) {
     logger.debug(`Semantic log search cancelled for target "${target}" during ${phase}`);
-    return errorResult(ERROR_REASON.CANCELLED);
+    return errorResult(ERROR_REASON.CANCELLED, diagnostics);
   }
   if (isTimeoutError(error) || isModelDeploymentTimeoutError(error)) {
     logger.warn(`Semantic log search ${timeoutText} for target "${target}"`);
-    return errorResult(timeoutReason);
+    return errorResult(timeoutReason, diagnostics);
   }
+  // The message goes to the log only. `diagnostics` carries the phase and Elasticsearch's own error
+  // type, which is what a caller without log access needs to tell a query problem from a timeout.
   const message = error instanceof Error ? error.message : String(error);
   logger.warn(`Semantic log search ${failedText} for target "${target}": ${message}`);
-  return errorResult(ERROR_REASON.EXECUTION);
+  return errorResult(ERROR_REASON.EXECUTION, diagnostics);
 }

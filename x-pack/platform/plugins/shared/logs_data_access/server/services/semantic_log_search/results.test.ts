@@ -42,7 +42,7 @@ describe('toFailureResult — cancellation', () => {
     const logger = loggerMock.create();
     const abort = new errors.RequestAbortedError('aborted');
     const result = toFailureResult(abort, { logger, target: 'logs-*', phase: SEARCH_PHASE.PROBE });
-    expect(result).toEqual({ status: 'error', reason: 'cancelled' });
+    expect(result).toMatchObject({ status: 'error', reason: 'cancelled' });
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('cancelled'));
     expect(logger.warn).not.toHaveBeenCalled();
   });
@@ -55,7 +55,7 @@ describe('toFailureResult — cancellation', () => {
       target: 'logs-*',
       phase: SEARCH_PHASE.SEARCH,
     });
-    expect(result).toEqual({ status: 'error', reason: 'cancelled' });
+    expect(result).toMatchObject({ status: 'error', reason: 'cancelled' });
     expect(logger.debug).toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
@@ -74,7 +74,7 @@ describe('toFailureResult — timeout', () => {
       target: 'logs-*',
       phase: SEARCH_PHASE.PROBE,
     });
-    expect(result).toEqual({ status: 'error', reason: 'scope_too_large' });
+    expect(result).toMatchObject({ status: 'error', reason: 'scope_too_large' });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('scope too large'));
   });
 
@@ -86,7 +86,7 @@ describe('toFailureResult — timeout', () => {
       target: 'logs-*',
       phase: SEARCH_PHASE.SEARCH,
     });
-    expect(result).toEqual({ status: 'error', reason: 'timeout' });
+    expect(result).toMatchObject({ status: 'error', reason: 'timeout' });
   });
 
   it('classifies a real TimeoutError as inference_not_ready in the rerank phase', () => {
@@ -99,7 +99,7 @@ describe('toFailureResult — timeout', () => {
       target: 'logs-*',
       phase: SEARCH_PHASE.RERANK,
     });
-    expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
+    expect(result).toMatchObject({ status: 'error', reason: 'inference_not_ready' });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('still be loading its model'));
   });
 
@@ -110,7 +110,7 @@ describe('toFailureResult — timeout', () => {
       target: 'logs-*',
       phase: SEARCH_PHASE.RERANK,
     });
-    expect(result).toEqual({ status: 'error', reason: 'execution' });
+    expect(result).toMatchObject({ status: 'error', reason: 'execution' });
   });
 
   it('classifies a real TimeoutError as timeout in the capabilities phase', () => {
@@ -121,7 +121,7 @@ describe('toFailureResult — timeout', () => {
       target: 'logs-*',
       phase: SEARCH_PHASE.CAPABILITIES,
     });
-    expect(result).toEqual({ status: 'error', reason: 'timeout' });
+    expect(result).toMatchObject({ status: 'error', reason: 'timeout' });
   });
 
   it('classifies a plain Error with name TimeoutError as scope_too_large in the probe phase', () => {
@@ -133,7 +133,7 @@ describe('toFailureResult — timeout', () => {
       target: 'logs-*',
       phase: SEARCH_PHASE.PROBE,
     });
-    expect(result).toEqual({ status: 'error', reason: 'scope_too_large' });
+    expect(result).toMatchObject({ status: 'error', reason: 'scope_too_large' });
   });
 });
 
@@ -150,7 +150,7 @@ describe('toFailureResult — execution', () => {
       target: 'logs-*',
       phase: SEARCH_PHASE.SEARCH,
     });
-    expect(result).toEqual({ status: 'error', reason: 'execution' });
+    expect(result).toMatchObject({ status: 'error', reason: 'execution' });
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('verification_exception: shard failure')
     );
@@ -163,7 +163,7 @@ describe('toFailureResult — execution', () => {
       target: 'logs-*',
       phase: SEARCH_PHASE.CAPABILITIES,
     });
-    expect(result).toEqual({ status: 'error', reason: 'execution' });
+    expect(result).toMatchObject({ status: 'error', reason: 'execution' });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('something went wrong'));
   });
 
@@ -187,7 +187,7 @@ describe('toFailureResult — execution', () => {
       phase: SEARCH_PHASE.RERANK,
     });
 
-    expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
+    expect(result).toMatchObject({ status: 'error', reason: 'inference_not_ready' });
   });
 
   it('classifies a model deployment timeout surfaced only in the message', () => {
@@ -198,7 +198,7 @@ describe('toFailureResult — execution', () => {
       phase: SEARCH_PHASE.RERANK,
     });
 
-    expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
+    expect(result).toMatchObject({ status: 'error', reason: 'inference_not_ready' });
   });
 
   it('leaves an unrelated ResponseError in the rerank phase classified as execution', () => {
@@ -217,7 +217,7 @@ describe('toFailureResult — execution', () => {
       phase: SEARCH_PHASE.RERANK,
     });
 
-    expect(result).toEqual({ status: 'error', reason: 'execution' });
+    expect(result).toMatchObject({ status: 'error', reason: 'execution' });
   });
 
   it('uses the phase-specific failed text in the log message', () => {
@@ -236,5 +236,88 @@ describe('toFailureResult — execution', () => {
       phase: SEARCH_PHASE.PROBE,
     });
     expect(probeLogger.warn).toHaveBeenCalledWith(expect.stringContaining('count probe failed'));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// toFailureResult — diagnostics
+// ---------------------------------------------------------------------------
+
+describe('toFailureResult — diagnostics', () => {
+  const logger = () => loggerMock.create();
+
+  it.each([
+    SEARCH_PHASE.CAPABILITIES,
+    SEARCH_PHASE.PROBE,
+    SEARCH_PHASE.SEARCH,
+    SEARCH_PHASE.RERANK,
+  ])('reports the %s phase, so a failure says where it happened', (phase) => {
+    const result = toFailureResult(new Error('boom'), {
+      logger: logger(),
+      target: 'logs-*',
+      phase,
+    });
+
+    expect(result).toMatchObject({ diagnostics: { phase } });
+  });
+
+  it("reports Elasticsearch's own error type, which is what distinguishes the cause", () => {
+    const responseError = new errors.ResponseError({
+      body: { error: { type: 'verification_exception' } },
+      statusCode: 400,
+      headers: {},
+      meta: {} as any,
+      warnings: [],
+    });
+
+    const result = toFailureResult(responseError, {
+      logger: logger(),
+      target: 'logs-*',
+      phase: SEARCH_PHASE.PROBE,
+    });
+
+    expect(result).toEqual({
+      status: 'error',
+      reason: 'execution',
+      diagnostics: { phase: 'probe', elasticsearchErrorType: 'verification_exception' },
+    });
+  });
+
+  it("falls back to the error's name when it did not come from Elasticsearch", () => {
+    const result = toFailureResult(new TypeError('bad'), {
+      logger: logger(),
+      target: 'logs-*',
+      phase: SEARCH_PHASE.SEARCH,
+    });
+
+    expect(result).toMatchObject({ diagnostics: { elasticsearchErrorType: 'TypeError' } });
+  });
+
+  it('omits the error type for a non-Error throw rather than inventing one', () => {
+    const result = toFailureResult('a bare string', {
+      logger: logger(),
+      target: 'logs-*',
+      phase: SEARCH_PHASE.SEARCH,
+    });
+
+    expect(result).toEqual({
+      status: 'error',
+      reason: 'execution',
+      diagnostics: { phase: 'search' },
+    });
+  });
+
+  it('never carries the underlying message, which is logged instead', () => {
+    const log = logger();
+    const secret = 'index logs-customer-42 field user.email';
+
+    const result = toFailureResult(new Error(secret), {
+      logger: log,
+      target: 'logs-*',
+      phase: SEARCH_PHASE.SEARCH,
+    });
+
+    expect(JSON.stringify(result)).not.toContain(secret);
+    expect(log.warn).toHaveBeenCalledWith(expect.stringContaining(secret));
   });
 });

@@ -247,6 +247,7 @@ describe('getLogsSemanticHandler', () => {
 
   it.each([
     ['missing_fields', 'target does not expose the required message and @timestamp fields'],
+    ['no_matching_indices', 'No indices matched this index pattern'],
     ['inference_unavailable', 'cluster has no RERANK inference endpoint'],
   ] as const)('returns an actionable unavailable warning for %s', async (reason, warning) => {
     const search = jest.fn().mockResolvedValue({ status: 'unavailable', reason });
@@ -317,6 +318,72 @@ describe('getLogsSemanticHandler', () => {
 
     expect(result.patterns).toEqual([]);
     expect(result.warnings[0]).toContain(warning);
+  });
+
+  it('separates an absent target from a mapping problem, since the fixes differ', async () => {
+    // Reporting "nothing matched" as "missing fields" sends the reader to look at mappings when
+    // the data is simply not there.
+    const search = jest
+      .fn()
+      .mockResolvedValue({ status: 'unavailable', reason: 'no_matching_indices' });
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch: { search } as SemanticLogSearchService,
+    });
+
+    expect(result.warnings[0]).toContain('the target, not the query');
+    expect(result.warnings[0]).not.toContain('@timestamp');
+  });
+
+  it('names the phase and the Elasticsearch error type on a failure', async () => {
+    // Without this the only record of what broke is a Kibana server log line, which a user on a
+    // managed deployment cannot read.
+    const search = jest.fn().mockResolvedValue({
+      status: 'error',
+      reason: 'execution',
+      diagnostics: { phase: 'probe', elasticsearchErrorType: 'verification_exception' },
+    });
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch: { search } as SemanticLogSearchService,
+    });
+
+    expect(result.warnings[0]).toContain('phase: probe');
+    expect(result.warnings[0]).toContain('elasticsearch: verification_exception');
+    expect(result.warnings[0]).toContain('Do not retry automatically');
+  });
+
+  it('omits the Elasticsearch type when the failure did not carry one', async () => {
+    const search = jest.fn().mockResolvedValue({
+      status: 'error',
+      reason: 'execution',
+      diagnostics: { phase: 'search' },
+    });
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch: { search } as SemanticLogSearchService,
+    });
+
+    expect(result.warnings[0]).toContain('(phase: search)');
+    expect(result.warnings[0]).not.toContain('elasticsearch:');
+  });
+
+  it('leaves the warning unchanged when a failure carries no diagnostics at all', async () => {
+    const search = jest.fn().mockResolvedValue({ status: 'error', reason: 'execution' });
+
+    const result = await getLogsSemanticHandler({
+      esClient: mockEsClient,
+      params: baseParams,
+      semanticLogSearch: { search } as SemanticLogSearchService,
+    });
+
+    expect(result.warnings[0]).not.toContain('phase:');
   });
 
   it('regression: does not advise narrowing scope when the reranker is not ready', async () => {

@@ -33,9 +33,11 @@ const result = await logsDataAccess.services.semanticLogSearch.search({
 if (result.status === 'success') {
   // result.patterns: LogPattern[]
 } else if (result.status === 'unavailable') {
-  // result.reason: 'missing_fields' | 'inference_unavailable'
+  // result.reason: 'missing_fields' | 'no_matching_indices' | 'inference_unavailable'
 } else {
   // result.reason: 'timeout' | 'cancelled' | 'execution' | 'invalid_params'
+  //              | 'scope_too_large' | 'inference_not_ready'
+  // result.diagnostics?: { phase, elasticsearchErrorType? }
 }
 ```
 
@@ -44,8 +46,24 @@ if (result.status === 'success') {
 | `status` | When | Extra fields |
 |---|---|---|
 | `'success'` | Patterns found (may be empty array) | `patterns: LogPattern[]` |
-| `'unavailable'` | Cluster lacks required capability | `reason: 'missing_fields' \| 'inference_unavailable'` |
-| `'error'` | Request failed or was rejected | `reason: 'timeout' \| 'cancelled' \| 'execution' \| 'invalid_params'` |
+| `'unavailable'` | The target or cluster cannot support the search at all | `reason: 'missing_fields' \| 'no_matching_indices' \| 'inference_unavailable'` |
+| `'error'` | Request failed or was rejected | `reason: 'timeout' \| 'cancelled' \| 'execution' \| 'invalid_params' \| 'scope_too_large' \| 'inference_not_ready'`, plus `diagnostics?` |
+
+`no_matching_indices` is distinct from `missing_fields` because the fixes differ: the first means the
+target resolves to no index, so correct the target; the second means the indices exist but do not
+expose `message` and `@timestamp`, so look at the mappings.
+
+### Diagnosing a failure
+
+An `error` result carries an optional `diagnostics: { phase, elasticsearchErrorType? }`. `phase` is
+one of `capabilities | probe | search | rerank`, and `elasticsearchErrorType` is Elasticsearch's own
+classifier, e.g. `verification_exception`. Both are closed vocabularies, and the underlying error
+message is deliberately excluded: it is arbitrary text that can embed index names, field values and
+query fragments, and this result reaches an LLM prompt. The full message is logged at `warn`
+instead, so the server log remains the richest record.
+
+This matters on a managed deployment, where a user cannot read Kibana logs and would otherwise have
+nothing beyond "failed during execution".
 
 ### Capability checks
 

@@ -222,9 +222,20 @@ export const assertSemanticSearchAvailable = async ({
   }
 
   if (result.warnings.length > 0 && result.patterns.length === 0) {
+    const warnings = result.warnings.map((w) => `  - ${w}`).join('\n');
+
+    // A target that matches no indices is a missing corpus, not a broken service, and this check
+    // runs before seeding. Reporting it as "unavailable on this cluster" sends the reader to look at
+    // cluster capabilities when the fix is to seed the data.
+    if (result.warnings.some((w) => w.includes('No indices matched'))) {
+      throw new Error(
+        `Semantic arm pre-flight found no data to search. Service warnings:\n${warnings}\n\n` +
+          `Seed the corpus first:\n\n${corpus.setupCommand}\n`
+      );
+    }
+
     throw new Error(
-      `Semantic log search is unavailable on this cluster. Service warnings:\n` +
-        result.warnings.map((w) => `  - ${w}`).join('\n') +
+      `Semantic log search is unavailable on this cluster. Service warnings:\n${warnings}` +
         `\n\nEnsure the cluster has the required capabilities for semantic log search.`
     );
   }

@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   ErrorReason,
   LogPattern,
+  SearchDiagnostics,
   SemanticLogSearchService,
   UnavailableReason,
 } from '@kbn/logs-data-access-plugin/server';
@@ -29,6 +30,8 @@ const MAX_PATTERN_LENGTH = 1024;
 const WARNINGS = {
   missingFields:
     'Semantic log search is unavailable because the target does not expose the required message and @timestamp fields. Do not retry with the same target.',
+  noMatchingIndices:
+    'No indices matched this index pattern, so there is nothing to search. The problem is the target, not the query: check the pattern or pick a different one. Do not retry with the same target.',
   inferenceUnavailable:
     'Semantic log search is unavailable because the cluster has no RERANK inference endpoint. Do not retry.',
   timeout:
@@ -53,6 +56,7 @@ const WARNINGS = {
 // here, the Record type annotation causes a compile-time error on the missing key.
 const UNAVAILABLE_REASON_WARNINGS: Record<UnavailableReason, string> = {
   missing_fields: WARNINGS.missingFields,
+  no_matching_indices: WARNINGS.noMatchingIndices,
   inference_unavailable: WARNINGS.inferenceUnavailable,
 };
 
@@ -88,6 +92,25 @@ export interface GetLogsSemanticResult {
   semanticQuery: string;
   warnings: string[];
 }
+
+/**
+ * Appends the failing phase and Elasticsearch's error type to a warning.
+ *
+ * Without this, every unexpected failure reads the same and the only record of what actually broke
+ * is a Kibana server log line, which a user on a managed deployment cannot read. Both values are
+ * closed vocabularies; the underlying message is deliberately not included.
+ */
+const withDiagnostics = (warning: string, diagnostics?: SearchDiagnostics): string => {
+  if (!diagnostics) return warning;
+
+  const parts = [
+    `phase: ${diagnostics.phase}`,
+    ...(diagnostics.elasticsearchErrorType
+      ? [`elasticsearch: ${diagnostics.elasticsearchErrorType}`]
+      : []),
+  ];
+  return `${warning} (${parts.join(', ')})`;
+};
 
 const emptyResult = (semanticQuery: string, warning: string): GetLogsSemanticResult => ({
   patterns: [],
@@ -138,7 +161,10 @@ export async function getLogsSemanticHandler({
   }
 
   if (result.status === 'error') {
-    return emptyResult(semanticFilter, ERROR_REASON_WARNINGS[result.reason]);
+    return emptyResult(
+      semanticFilter,
+      withDiagnostics(ERROR_REASON_WARNINGS[result.reason], result.diagnostics)
+    );
   }
 
   const patterns = result.patterns.map(toPattern);

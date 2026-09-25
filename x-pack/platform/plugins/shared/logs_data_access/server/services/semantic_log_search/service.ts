@@ -44,7 +44,12 @@ export async function search(
   const input: SemanticLogSearchParams = { ...validation.data, esClient, abortSignal };
 
   try {
-    if (!(await hasRequiredFields(esClient, input.target))) {
+    const fieldCheck = await hasRequiredFields(esClient, input.target);
+    if (fieldCheck === 'no_matching_indices') {
+      logger.debug(`Semantic log search found no indices matching target "${input.target}"`);
+      return unavailableResult(UNAVAILABLE_REASON.NO_MATCHING_INDICES);
+    }
+    if (fieldCheck === 'missing_fields') {
       return unavailableResult(UNAVAILABLE_REASON.MISSING_FIELDS);
     }
     if (!(await detectRerankCapability(esClient, rerankInferenceId))) {

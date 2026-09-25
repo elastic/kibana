@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { UnavailableReason, ErrorReason } from './constants';
+import type { UnavailableReason, ErrorReason, SearchPhase } from './constants';
 
 /** A log pattern: a group of log messages sharing a common template. */
 export interface LogPattern {
@@ -59,10 +59,25 @@ export interface SemanticLogSearchParams {
   abortSignal?: AbortSignal;
 }
 
+/**
+ * Where a failure happened and how Elasticsearch classified it.
+ *
+ * Both fields are closed vocabularies on purpose. The underlying error message is logged but never
+ * returned: it is arbitrary text that can embed index names, field values and query fragments, and
+ * this result reaches an LLM prompt and can reach a user-visible conversation. A phase and an
+ * Elasticsearch error type carry no data and are enough to tell a query problem from a timeout,
+ * a mapping problem or a model that is still loading.
+ */
+export interface SearchDiagnostics {
+  phase: SearchPhase;
+  /** Elasticsearch's own classifier, e.g. `verification_exception`. Absent for non-ES errors. */
+  elasticsearchErrorType?: string;
+}
+
 export type SemanticLogSearchResult =
   | { status: 'success'; patterns: LogPattern[] }
   | { status: 'unavailable'; reason: UnavailableReason }
-  | { status: 'error'; reason: ErrorReason };
+  | { status: 'error'; reason: ErrorReason; diagnostics?: SearchDiagnostics };
 
 /** Service for semantic log search using CATEGORIZE + inference RERANK. */
 export interface SemanticLogSearchService {

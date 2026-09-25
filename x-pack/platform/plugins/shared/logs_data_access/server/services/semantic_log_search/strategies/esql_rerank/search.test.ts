@@ -136,7 +136,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps(logger));
 
-      expect(result).toEqual({ status: 'error', reason: 'scope_too_large' });
+      expect(result).toMatchObject({ status: 'error', reason: 'scope_too_large' });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('scope too large'));
     });
 
@@ -150,7 +150,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
-      expect(result).toEqual({ status: 'error', reason: 'scope_too_large' });
+      expect(result).toMatchObject({ status: 'error', reason: 'scope_too_large' });
     });
 
     it('returns cancelled when the probe is aborted', async () => {
@@ -164,7 +164,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
-      expect(result).toEqual({ status: 'error', reason: 'cancelled' });
+      expect(result).toMatchObject({ status: 'error', reason: 'cancelled' });
     });
 
     it('returns execution error when the probe fails with an unrelated error', async () => {
@@ -175,7 +175,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
-      expect(result).toEqual({ status: 'error', reason: 'execution' });
+      expect(result).toMatchObject({ status: 'error', reason: 'execution' });
     });
 
     it('includes the kqlFilter in the count probe query', async () => {
@@ -461,7 +461,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
-      expect(result).toEqual({ status: 'error', reason: 'execution' });
+      expect(result).toMatchObject({ status: 'error', reason: 'execution' });
     });
 
     it('returns timeout when a categorize pass times out', async () => {
@@ -480,7 +480,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
-      expect(result).toEqual({ status: 'error', reason: 'timeout' });
+      expect(result).toMatchObject({ status: 'error', reason: 'timeout' });
     });
 
     it('returns inference_not_ready when the inference rerank call times out', async () => {
@@ -500,7 +500,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
-      expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
+      expect(result).toMatchObject({ status: 'error', reason: 'inference_not_ready' });
     });
 
     it('returns cancelled for a RequestAbortedError in the categorize phase', async () => {
@@ -518,7 +518,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
-      expect(result).toEqual({ status: 'error', reason: 'cancelled' });
+      expect(result).toMatchObject({ status: 'error', reason: 'cancelled' });
     });
 
     it('returns execution error for an unrelated failure in the categorize phase', async () => {
@@ -536,7 +536,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps(logger));
 
-      expect(result).toEqual({ status: 'error', reason: 'execution' });
+      expect(result).toMatchObject({ status: 'error', reason: 'execution' });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('verification_exception'));
     });
 
@@ -561,7 +561,7 @@ describe('searchWithEsqlRerank', () => {
         searchDeps()
       );
 
-      expect(result).toEqual({ status: 'error', reason: 'execution' });
+      expect(result).toMatchObject({ status: 'error', reason: 'execution' });
     });
 
     it('passes the abortSignal to query calls', async () => {
@@ -692,7 +692,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
-      expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
+      expect(result).toMatchObject({ status: 'error', reason: 'inference_not_ready' });
     });
 
     it('still reports a categorize timeout as timeout, not inference_not_ready', async () => {
@@ -710,7 +710,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
-      expect(result).toEqual({ status: 'error', reason: 'timeout' });
+      expect(result).toMatchObject({ status: 'error', reason: 'timeout' });
     });
   });
 

@@ -29,7 +29,10 @@ const createEsClient = ({
   fields?: Record<string, unknown>;
   rerankAvailable?: boolean;
 } = {}) => {
-  const fieldCaps = jest.fn().mockResolvedValue({ fields });
+  const fieldCaps = jest.fn().mockResolvedValue({
+    indices: ['.ds-logs-synth-default-000001'],
+    fields,
+  });
   const notFoundError = new errors.ResponseError({
     body: { error: { type: 'resource_not_found_exception' } },
     statusCode: 404,
@@ -133,15 +136,30 @@ describe('semantic log search service', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('returns execution error when the field capability check fails', async () => {
+  it('returns execution error when the field capability check fails, naming the phase', async () => {
+    // A 403 must stay an execution failure: only a 404 means the target is absent.
     const logger = loggerMock.create();
     const { esClient, fieldCaps } = createEsClient();
     fieldCaps.mockRejectedValue(new Error('forbidden'));
 
     const result = await search(createParams(esClient), searchDeps(logger));
 
-    expect(result).toEqual({ status: 'error', reason: 'execution' });
+    expect(result).toEqual({
+      status: 'error',
+      reason: 'execution',
+      diagnostics: { phase: 'capabilities', elasticsearchErrorType: 'Error' },
+    });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('capability check'));
+  });
+
+  it('reports no_matching_indices when the target resolves to nothing', async () => {
+    const { esClient, fieldCaps, esqlQuery } = createEsClient();
+    fieldCaps.mockResolvedValue({ indices: [], fields: {} });
+
+    const result = await search(createParams(esClient), searchDeps());
+
+    expect(result).toEqual({ status: 'unavailable', reason: 'no_matching_indices' });
+    expect(esqlQuery).not.toHaveBeenCalled();
   });
 
   it('returns cancelled when the capability check is aborted by the caller', async () => {
@@ -154,7 +172,11 @@ describe('semantic log search service', () => {
 
     const result = await search(createParams(esClient), searchDeps(logger));
 
-    expect(result).toEqual({ status: 'error', reason: 'cancelled' });
+    expect(result).toEqual({
+      status: 'error',
+      reason: 'cancelled',
+      diagnostics: { phase: 'capabilities', elasticsearchErrorType: 'AbortError' },
+    });
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('cancelled'));
     expect(logger.warn).not.toHaveBeenCalled();
   });
