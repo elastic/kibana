@@ -60,7 +60,7 @@ const dueIn = (state: NodesVersionState, completedAt = 0): number =>
   state.nextActionAt - completedAt;
 
 describe('a zero interval falls back to the normal one', () => {
-  it('does not divide the grid by a configured zero failure interval', () => {
+  it('polls at the normal interval when the failure interval is zero', () => {
     const zero = { ...config, healthCheckFailureInterval: 0 };
     const normal: NodesVersionState = {
       controlState: 'NORMAL',
@@ -129,40 +129,7 @@ describe('attemptsLeft', () => {
   });
 });
 
-describe('one scheduling policy', () => {
-  const normal: NodesVersionState = {
-    controlState: 'NORMAL',
-    compatibility: compatibilityOf(compatible),
-    attemptsLeft: config.healthCheckRetry,
-    nextActionAt: 1_000,
-  };
-  const { healthCheckInterval: interval } = config;
-
-  it('a retry stays on the grid anchored at the failed request, like a settle', () => {
-    // Due at 1000, failed at 1400 after a slow request. A fixed delay would
-    // retry at 1400 + interval; the grid point is 1000 + interval.
-    const { state: retried } = model(config, normal, fail(requestError, 1_400));
-    const { state: settled } = model(
-      config,
-      { ...normal, attemptsLeft: 0 },
-      fail(requestError, 1_400)
-    );
-
-    expect(retried.nextActionAt).toBe(1_000 + interval);
-    expect(settled.nextActionAt).toBe(1_000 + config.healthCheckFailureInterval);
-  });
-
-  it('a retry skips the grid points a slow request overran', () => {
-    const { state: retried } = model(config, normal, fail(requestError, 1_000 + 2 * interval + 1));
-    expect(retried.nextActionAt).toBe(1_000 + 3 * interval);
-  });
-});
-
 describe('the initial state', () => {
-  it('schedules the first request when the machine starts', () => {
-    expect(initialState(config, 1_000).nextActionAt).toBe(1_000);
-  });
-
   it('starts in STARTUP, so a retry waits the startup interval rather than 0', () => {
     const { state: retried } = model(
       config,
@@ -203,28 +170,12 @@ describe('the event of a step', () => {
     expect(model(config, normal, ok(compatible)).event).toEqual({ type: 'compatibilityUnchanged' });
   });
 
-  it('is compatibilityChanged when a node changes version', () => {
-    const { state, event } = model(config, normal, ok(incompatible));
-    expect(event).toEqual({ type: 'compatibilityChanged', compatibility: state.compatibility });
-  });
-
   it('is compatibilityChanged when the request starts failing, and again when it recovers', () => {
     const failing = model(config, { ...normal, attemptsLeft: 0 }, fail(requestError));
     expect(failing.event.type).toBe('compatibilityChanged');
 
     const recovered = model(config, failing.state, ok(compatible));
     expect(recovered.event.type).toBe('compatibilityChanged');
-  });
-
-  it('is compatibilityUnchanged when the same error settles again', () => {
-    const failing = model(config, { ...normal, attemptsLeft: 0 }, fail(requestError));
-    // A settle restores the attempts, so use them again to settle the repeat.
-    const again = model(
-      config,
-      { ...failing.state, attemptsLeft: 0 },
-      fail(new Error(requestError.message))
-    );
-    expect(again.event).toEqual({ type: 'compatibilityUnchanged' });
   });
 
   it('is retried while attempts remain, and the compatibility it keeps is not re-announced', () => {

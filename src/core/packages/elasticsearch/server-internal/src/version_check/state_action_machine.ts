@@ -8,66 +8,42 @@
  */
 
 /**
- * A state-action machine driver, shared by the polling checks (node versions,
- * clock skew). A machine is its state, its actions, and its model, supplied
- * as three functions:
- *
- *   initialState  the state to start from, given the current time
- *   next          the action to run in a state, or null once the machine is done
- *   model         the transition: given a state and what its action returned,
- *                 the next state and an event saying what the step meant
- *
- * `run` drives it: wait until the state's `nextActionAt`, run the action, turn
- * any failure into an `ok: false` result, apply the model, yield. Each yielded value pairs
- * a state with the event that led to it, and the initial state carries the
- * event `{ type: 'initial' }`. This is the augmented state of Lamport,
- * "Computer Science and State Machines" (2008), p. 3: a device whose
- * transitions carry events is a state machine whose states include the last
- * event. The result of an action never leaves the model; consumers see what
- * the domain concluded, not how it asked.
- *
- * Time reaches a model only as `completedAt` on the result; a model never
- * reads a clock. That time is monotonic and only for scheduling. A domain that
- * needs wall-clock time (clock skew) reads it inside its own action.
+ * A state-action machine driver. A machine is an `initialState`, a `next` that
+ * picks the action for a state, and a pure `model` that turns a state and its
+ * action's result into the next state plus an event describing the step
+ * (Lamport's augmented state, "Computer Science and State Machines", 2008).
+ * Models never read a clock; time arrives as the result's `completedAt`.
  */
 
 import { setTimeout as delay } from 'node:timers/promises';
 
 export type Sleep = (duration: number, signal?: AbortSignal) => Promise<void>;
 
-/** The clock a machine runs on. Injectable so tests can run it on virtual time. */
+/** Injectable so tests can run a machine on virtual time. */
 export interface Clock {
   readonly now: () => number;
   readonly sleep: Sleep;
 }
 
-/**
- * An action: one asynchronous thing the machine can do. It receives the
- * machine's signal so an in-flight request can be cancelled on shutdown.
- */
 export type Action<R> = (signal?: AbortSignal) => Promise<R>;
 
-/** What an action returned, and when it completed. */
 export type ActionResult<R> =
   | { readonly ok: true; readonly value: R; readonly completedAt: number }
   | { readonly ok: false; readonly error: Error; readonly completedAt: number };
 
-/** What the driver needs from a state: when its action is due. */
 export interface Scheduled {
   readonly nextActionAt: number;
 }
 
-/** A domain event is a tagged union; the tag is what consumers switch on. */
 export interface DomainEvent {
   readonly type: string;
 }
 
-/** The event of the initial state, which no transition led to. */
 export interface InitialEvent {
   readonly type: 'initial';
 }
 
-/** A state together with the event of the transition that led to it. */
+/** A state and the event of the step that led to it. */
 export interface AugmentedState<S, E> {
   readonly state: S;
   readonly event: E;
@@ -80,29 +56,22 @@ export interface StateActionMachine<S extends Scheduled, R, E extends DomainEven
   readonly model: (state: S, result: ActionResult<R>) => AugmentedState<S, E>;
 }
 
-/**
- * Monotonic, so a wall-clock adjustment cannot move a scheduled action. The
- * unref'd timer never keeps the process alive on its own.
- */
+/** Monotonic, so wall-clock adjustments don't move schedules; unref'd, so it never holds the process open. */
 export const realClock: Clock = {
   now: () => performance.now(),
   sleep: (duration, signal) => delay(duration, undefined, { ref: false, signal }),
 };
 
 /**
- * The first multiple of `interval` after `completedAt`, counted from `anchor`,
- * the time the action that just ran was due. Slow actions skip the points they
- * overran instead of accumulating drift.
+ * The first point on the `interval` grid from `anchor` (when the last action was due)
+ * that is after both `anchor` and `completedAt`; with a zero interval, `completedAt`.
  */
 export const nextOnGrid = (anchor: number, completedAt: number, interval: number): number =>
-  anchor + (Math.floor((completedAt - anchor) / interval) + 1) * interval;
+  interval > 0
+    ? anchor + Math.max(1, Math.floor((completedAt - anchor) / interval) + 1) * interval
+    : completedAt;
 
-/**
- * Wait until the state's action is due, then run it once. Every failure of the
- * action, including a synchronous throw, becomes an `ok: false` result. An
- * abort during the wait throws instead, even when the injected sleep ignores
- * the signal, so `run` can stop.
- */
+/** Waits until the action is due and runs it; action failures become results, an abort throws. */
 const perform = async <R>(
   action: Action<R>,
   state: Scheduled,
@@ -128,14 +97,7 @@ const perform = async <R>(
   }
 };
 
-/**
- * Runs a machine. Yields the initial state, then one augmented state per step,
- * and returns the last state once `next` yields null or `signal` aborts. A
- * result that arrives after the abort is dropped, not modelled.
- * `next` and `model` see the same state within a step, so an action may close
- * over the state it was built for. What to do with the states is the
- * consumer's concern.
- */
+/** Yields the initial state and then each step, until `next` returns null or `signal` aborts. */
 export async function* run<S extends Scheduled, R, E extends DomainEvent>(
   { initialState, next, model }: StateActionMachine<S, R, E>,
   clock: Clock = realClock,
@@ -153,14 +115,13 @@ export async function* run<S extends Scheduled, R, E extends DomainEvent>(
     try {
       result = await perform(action, state, clock, signal);
     } catch (error) {
-      // Only the wait can throw here; `perform` turns action failures into results.
       if (signal?.aborted) {
         return state;
       }
       throw error;
     }
     if (signal?.aborted) {
-      // The result arrived after the abort: drop it rather than model and yield it.
+      // Drop a result that arrived after the abort.
       return state;
     }
     const reached = model(state, result);

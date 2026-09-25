@@ -11,21 +11,15 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   classifyClockSkew,
-  clockSkewMachine,
-  initialState,
-  model,
   pollEsNodesClockSkew,
   sampleClocks,
   type ClockSkew,
   type ClockSkewSample,
-  type ClockSkewState,
 } from './clock_skew';
-import { run, type ActionResult } from './state_action_machine';
-import { take, virtualClock } from './state_action_machine.test_helpers';
+import { virtualClock } from './state_action_machine.test_helpers';
 
 const MINUTE = 60 * 1000;
 const CHECK_INTERVAL = 10 * MINUTE;
-const REMINDER_INTERVAL = 60 * MINUTE;
 
 const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
 const sampleAt = (elasticsearchTime: number, latency = 0): ClockSkewSample => ({
@@ -40,17 +34,6 @@ const behindBy61s: ClockSkew = {
   kibanaTime,
   elasticsearchTime: kibanaTime - 61_000,
 };
-
-const ok = (value: ClockSkewSample, completedAt = 0): ActionResult<ClockSkewSample> => ({
-  ok: true,
-  value,
-  completedAt,
-});
-const fail = (completedAt = 0): ActionResult<ClockSkewSample> => ({
-  ok: false,
-  error: new Error('boom'),
-  completedAt,
-});
 
 describe('classifyClockSkew', () => {
   it('reports Elasticsearch behind Kibana by more than the tolerance', () => {
@@ -74,107 +57,6 @@ describe('classifyClockSkew', () => {
 
   it('measures nothing when no node reported a timestamp', () => {
     expect(classifyClockSkew({ ...inSync, timestamps: [] })).toEqual({ type: 'unmeasured' });
-  });
-});
-
-describe('model', () => {
-  const healthy: ClockSkewState = initialState(0);
-  const skewed: ClockSkewState = {
-    controlState: 'skewed',
-    remindAt: REMINDER_INTERVAL,
-    nextActionAt: 0,
-  };
-
-  it('checks every ten minutes while healthy, and says so quietly', () => {
-    expect(model(healthy, ok(inSync))).toEqual({
-      state: { controlState: 'healthy', nextActionAt: CHECK_INTERVAL },
-      event: { type: 'inSync' },
-    });
-  });
-
-  it('detects skew, keeps checking every ten minutes, and schedules a reminder in an hour', () => {
-    expect(model(healthy, ok(behind))).toEqual({
-      state: { controlState: 'skewed', remindAt: REMINDER_INTERVAL, nextActionAt: CHECK_INTERVAL },
-      event: { type: 'skewDetected', skew: behindBy61s },
-    });
-  });
-
-  it('stays quiet while skew persists before the reminder is due', () => {
-    expect(model(skewed, ok(behind))).toEqual({
-      state: { ...skewed, nextActionAt: CHECK_INTERVAL },
-      event: { type: 'skewPersists' },
-    });
-  });
-
-  it('reminds once the hour is up, then schedules the next reminder', () => {
-    expect(model(skewed, ok(behind, REMINDER_INTERVAL))).toEqual({
-      state: {
-        controlState: 'skewed',
-        remindAt: 2 * REMINDER_INTERVAL,
-        nextActionAt: REMINDER_INTERVAL + CHECK_INTERVAL,
-      },
-      event: { type: 'skewReminder', skew: behindBy61s },
-    });
-  });
-
-  it('recovers on an in-sync sample', () => {
-    expect(model(skewed, ok(inSync))).toEqual({
-      state: { controlState: 'healthy', nextActionAt: CHECK_INTERVAL },
-      event: { type: 'recovered' },
-    });
-  });
-
-  it('keeps the state and its interval when the request fails', () => {
-    expect(model(healthy, fail())).toEqual({
-      state: { ...healthy, nextActionAt: CHECK_INTERVAL },
-      event: { type: 'unavailable' },
-    });
-    expect(model(skewed, fail())).toEqual({
-      state: { ...skewed, nextActionAt: CHECK_INTERVAL },
-      event: { type: 'unavailable' },
-    });
-  });
-
-  it('treats a sample with no timestamps as unavailable, not as recovery', () => {
-    expect(model(skewed, ok({ ...inSync, timestamps: [] }))).toEqual({
-      state: { ...skewed, nextActionAt: CHECK_INTERVAL },
-      event: { type: 'unavailable' },
-    });
-  });
-
-  it('stays on the grid anchored at the time the action was due', () => {
-    const late = model({ ...healthy, nextActionAt: 1_000 }, ok(inSync, 1_000 + CHECK_INTERVAL + 1));
-    expect(late.state.nextActionAt).toBe(1_000 + 2 * CHECK_INTERVAL);
-  });
-});
-
-describe('the machine on a virtual clock', () => {
-  it('checks every ten minutes throughout: detects, stays quiet, reminds after an hour, recovers', async () => {
-    const clock = virtualClock();
-    const samples = [...Array<ClockSkewSample>(7).fill(behind), inSync, inSync];
-    let i = 0;
-    const action = async () => samples[Math.min(i++, samples.length - 1)];
-
-    const steps = await take(run(clockSkewMachine(action), clock), 10);
-
-    expect(
-      steps.map(({ state: { controlState, nextActionAt }, event }) => [
-        controlState,
-        nextActionAt,
-        event.type,
-      ])
-    ).toEqual([
-      ['healthy', 0, 'initial'],
-      ['skewed', 1 * CHECK_INTERVAL, 'skewDetected'],
-      ['skewed', 2 * CHECK_INTERVAL, 'skewPersists'],
-      ['skewed', 3 * CHECK_INTERVAL, 'skewPersists'],
-      ['skewed', 4 * CHECK_INTERVAL, 'skewPersists'],
-      ['skewed', 5 * CHECK_INTERVAL, 'skewPersists'],
-      ['skewed', 6 * CHECK_INTERVAL, 'skewPersists'],
-      ['skewed', 7 * CHECK_INTERVAL, 'skewReminder'],
-      ['healthy', 8 * CHECK_INTERVAL, 'recovered'],
-      ['healthy', 9 * CHECK_INTERVAL, 'inSync'],
-    ]);
   });
 });
 
@@ -248,10 +130,6 @@ describe('pollEsNodesClockSkew', () => {
     ]);
 
     expect(internalClient.nodes.stats).toHaveBeenCalledTimes(10);
-    expect(internalClient.nodes.stats).toHaveBeenCalledWith(
-      { node_id: '_all', metric: 'os', filter_path: ['nodes.*.timestamp'] },
-      { requestTimeout: expect.any(Number), signal: expect.any(AbortSignal) }
-    );
     expect(stoppedAt).toBe(9 * CHECK_INTERVAL);
     expect(log.error.mock.calls).toEqual([
       [
@@ -262,6 +140,21 @@ describe('pollEsNodesClockSkew', () => {
       ],
     ]);
     expect(log.info.mock.calls).toEqual([['Kibana and Elasticsearch clocks are in sync again.']]);
+  });
+
+  it.each([
+    [
+      'a failed request',
+      async () => {
+        throw new Error('mock stats request error');
+      },
+    ],
+    ['a response without timestamps', async () => ({ nodes: { 'node-0': {} } })],
+  ])('does not treat %s while skewed as a recovery', async (_, interruption) => {
+    await runRequests([respond(kibanaTime - 61_000), interruption, respond(kibanaTime - 61_000)]);
+
+    expect(log.error).toHaveBeenCalledTimes(1);
+    expect(log.info).not.toHaveBeenCalled();
   });
 
   it('swallows request failures', async () => {

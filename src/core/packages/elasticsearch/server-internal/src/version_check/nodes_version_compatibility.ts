@@ -42,9 +42,9 @@ export interface NodesVersionCompatibility {
   nodesInfoRequestError?: Error;
 }
 
-/** A node's identity for ordering and equality: its version, then its IP. */
+/** A node's identity for ordering and equality: its version, then its IP. Tolerates a response missing either. */
 const compareNodes = (a: NodeInfo, b: NodeInfo): number =>
-  a.version.localeCompare(b.version) || a.ip.localeCompare(b.ip);
+  (a.version ?? '').localeCompare(b.version ?? '') || (a.ip ?? '').localeCompare(b.ip ?? '');
 
 const sameNodes = (a: NodeInfo[], b: NodeInfo[]): boolean =>
   a.length === b.length && a.every((node, i) => compareNodes(node, b[i]) === 0);

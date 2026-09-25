@@ -8,9 +8,8 @@
  */
 
 /**
- * Marble-equivalent tests: the machine runs on the virtual clock and the
- * assertions read the timeline of states it produced, which is what a marble
- * diagram encodes, as plain data.
+ * The version machine on a virtual clock: each test asserts the timeline of
+ * when requests completed and what state and event they led to.
  */
 
 import {
@@ -85,9 +84,8 @@ const runTimeline = async (
   return timeline;
 };
 
-describe('the machine on a virtual clock (marble-equivalent)', () => {
+describe('the version machine on a virtual clock', () => {
   it('yields the initial state, starts immediately, then requests on a fixed interval', async () => {
-    // pollEsNodesVersion marble: 'a 99ms (b|)', a at 0, b at 100.
     const timeline = await runTimeline([compatible, incompatible], baseConfig, 3);
 
     expect(timeline).toEqual([
@@ -130,8 +128,7 @@ describe('the machine on a virtual clock (marble-equivalent)', () => {
   });
 
   it('uses the startup interval until the first compatible response, then normal', async () => {
-    // marble: 'a 49ms b 99ms (c|)' with startup 50: a@0, b@50 (startup), c@150
-    // (50 + 100 normal, after the compatible response settles NORMAL).
+    // Startup interval 50 until the response at 50 is compatible, then normal 100.
     const timeline = await runTimeline(
       [incompatible, compatible, compatible],
       { ...baseConfig, healthCheckStartupInterval: 50 },
@@ -147,9 +144,8 @@ describe('the machine on a virtual clock (marble-equivalent)', () => {
   });
 
   it('keeps the fixed grid when a slow request changes the polling interval', async () => {
-    // The RxJS original restarted its `interval()` when the regime changed, so
-    // it would request at 230 here. The machine stays on the grid anchored at the time
-    // the request that changed the regime was due: 0 + 2 * 100.
+    // The request due at 0 takes 130ms and switches to the normal interval. The
+    // next request stays on the grid from 0 (at 200), not 100ms after completion.
     const timeline = await runTimeline(
       [compatible, compatible],
       { ...baseConfig, healthCheckStartupInterval: 50 },
@@ -165,8 +161,7 @@ describe('the machine on a virtual clock (marble-equivalent)', () => {
   });
 
   it('holds the interval through a retry, then switches to the failure interval on recovery', async () => {
-    // marble 'a 199ms b 29ms c 99ms (d|)': 100 poll + 100 retry, then 30
-    // failure, then 100 normal. With retry:1 the second error settles FAILING.
+    // With retry: 1, the first error retries on the normal grid and the second settles FAILING.
     const timeline = await runTimeline(
       [compatible, requestError, requestError, compatible],
       { ...baseConfig, healthCheckFailureInterval: 30 },
@@ -176,20 +171,15 @@ describe('the machine on a virtual clock (marble-equivalent)', () => {
     expect(timeline).toEqual([
       initialTick,
       { at: 0, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
-      // request error, 1 attempt left: use it, settle nothing, request again on
-      // the current (normal) grid.
       { at: 100, controlState: 'NORMAL', isCompatible: true, event: 'retried' },
-      // second request error, attempts used: settle FAILING at failure interval.
       { at: 200, controlState: 'FAILING', isCompatible: false, event: 'compatibilityChanged' },
-      // recovery: NORMAL, requested at 200 + 30 (failure interval).
       { at: 230, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
     ]);
   });
 
   it('keeps a slow failing request on the grid instead of delaying the retry by its duration', async () => {
-    // The request due at 100 takes 50ms to fail. A fixed delay would retry at
-    // 250; the grid point is 200. The retry keeps the last
-    // compatibility, so the compatible request that follows changes nothing.
+    // The request due at 100 takes 50ms to fail; the retry is due at 200, not 250.
+    // The retry keeps the last compatibility, so the next success changes nothing.
     const timeline = await runTimeline(
       [compatible, requestError, compatible],
       baseConfig,

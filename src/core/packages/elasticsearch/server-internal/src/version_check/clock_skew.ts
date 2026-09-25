@@ -8,17 +8,8 @@
  */
 
 /**
- * The Kibana/Elasticsearch clock skew check as a state-action machine.
- *
- *   state   `ClockSkewState`: healthy or skewed, checked every ten minutes
- *           either way; while skewed, a reminder is due once an hour
- *   action  `sampleClocks`: one node stats request, bracketed by Kibana's wall
- *           clock
- *   model   `model`: classifies the sample and says what the step meant as a
- *           `ClockSkewEvent`
- *
- * The driver schedules on a monotonic clock; the skew is measured on the wall
- * clock, read inside the action. The model never reads either.
+ * The Kibana/Elasticsearch clock skew check as a state-action machine: checked
+ * every ten minutes, logged on detection, hourly while skewed, and on recovery.
  */
 
 import type { Logger } from '@kbn/logging';
@@ -41,17 +32,13 @@ const MAX_CLOCK_SKEW_MS = 60_000;
 const CLOCK_SKEW_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const CLOCK_SKEW_REMINDER_INTERVAL_MS = 60 * 60 * 1000;
 
-/** What one node stats request returned, bracketed by Kibana's wall clock. */
+/** Each node's `timestamp`, bracketed by Kibana's wall clock around the request. */
 export interface ClockSkewSample {
-  /** Kibana wall-clock time just before the request was sent. */
   readonly requestedAt: number;
-  /** Kibana wall-clock time just after the response arrived. */
   readonly respondedAt: number;
-  /** The `timestamp` each Elasticsearch node reported. */
   readonly timestamps: number[];
 }
 
-/** A skew that the round trip cannot explain, with its size in milliseconds. */
 export interface ClockSkew {
   readonly ms: number;
   readonly kibanaTime: number;
@@ -59,7 +46,6 @@ export interface ClockSkew {
 }
 
 export type ClockSkewClassification =
-  /** No node reported a timestamp, so nothing was measured. */
   | { readonly type: 'unmeasured' }
   | { readonly type: 'inSync' }
   | { readonly type: 'skewed'; readonly skew: ClockSkew };
@@ -70,31 +56,21 @@ export type ClockSkewState = Scheduled &
     | { readonly controlState: 'skewed'; readonly remindAt: number }
   );
 
-/** What a step meant, judged against the state it left. */
 export type ClockSkewEvent =
-  /** The request failed or measured nothing; nothing is known about this step. */
+  /** The request failed or measured nothing. */
   | { readonly type: 'unavailable' }
-  /** In sync, and was before. */
   | { readonly type: 'inSync' }
-  /** In sync after having been skewed. */
   | { readonly type: 'recovered' }
-  /** Skewed, and was not before. */
   | { readonly type: 'skewDetected'; readonly skew: ClockSkew }
   /** Still skewed; the hourly reminder is not yet due. */
   | { readonly type: 'skewPersists' }
-  /** Still skewed, and an hour has passed since the last report. */
   | { readonly type: 'skewReminder'; readonly skew: ClockSkew };
-
-// State
 
 export const initialState = (nextActionAt: number): ClockSkewState => ({
   controlState: 'healthy',
   nextActionAt,
 });
 
-// Action
-
-/** Sample every node's clock, bracketed by Kibana's own. */
 export const sampleClocks =
   (internalClient: ElasticsearchClient): Action<ClockSkewSample> =>
   async (signal) => {
@@ -110,13 +86,9 @@ export const sampleClocks =
     return { requestedAt, respondedAt, timestamps };
   };
 
-// Model
-
 /**
- * A node is skewed when its clock cannot be explained by the round trip: it
- * reads more than the tolerance before the request left or after the response
- * arrived. Kibana's time is the instant of the round trip closest to the
- * node's, so the reported skew is a lower bound.
+ * A node is skewed when its clock is more than the tolerance outside the round
+ * trip, so latency can't cause it; the reported skew is a lower bound.
  */
 export const classifyClockSkew = ({
   requestedAt,
@@ -149,7 +121,6 @@ export const model = (
     result.completedAt,
     CLOCK_SKEW_CHECK_INTERVAL_MS
   );
-  // Nothing new to say: keep the state, check again in ten minutes.
   const unavailable: AugmentedState<ClockSkewState, ClockSkewEvent> = {
     state: { ...state, nextActionAt },
     event: { type: 'unavailable' },
@@ -186,9 +157,6 @@ export const model = (
   };
 };
 
-// Machine
-
-/** `next` is constant: there is only one action. */
 export const clockSkewMachine = (
   action: Action<ClockSkewSample>
 ): StateActionMachine<ClockSkewState, ClockSkewSample, ClockSkewEvent> => ({
@@ -197,14 +165,11 @@ export const clockSkewMachine = (
   model,
 });
 
-// Presentation
-
 const describeSkew = (still: '' | 'still ', { ms, kibanaTime, elasticsearchTime }: ClockSkew) =>
   `Kibana and Elasticsearch clocks are ${still}out of sync by at least ${ms}ms. Kibana time: ${new Date(
     kibanaTime
   ).toISOString()}; Elasticsearch time: ${new Date(elasticsearchTime).toISOString()}.`;
 
-/** Memoryless: the event already says what changed. */
 export const logClockSkewEvent = (log: Logger, event: ClockSkewEvent | InitialEvent): void => {
   switch (event.type) {
     case 'initial':
@@ -227,11 +192,10 @@ export const logClockSkewEvent = (log: Logger, event: ClockSkewEvent | InitialEv
 export interface PollEsNodesClockSkewOptions {
   internalClient: ElasticsearchClient;
   log: Logger;
-  /** Ends the check. The returned promise resolves once the machine has stopped. */
   signal: AbortSignal;
 }
 
-/** Runs the clock skew check against the cluster, logging its events, until `signal` aborts. */
+/** Runs the clock skew check, logging its events, until `signal` aborts. */
 export const pollEsNodesClockSkew = async (
   { internalClient, log, signal }: PollEsNodesClockSkewOptions,
   clock: Clock = realClock

@@ -37,6 +37,19 @@ describe('mapNodesVersionCompatibility', () => {
     expect(result.isCompatible).toBe(false);
   });
 
+  it('reports a node that returned no version as incompatible, rather than throwing', () => {
+    const { nodes } = createNodes('5.1.0');
+    const withoutVersion = { ip: 'ip', name: 'node-1' } as NodesInfo['nodes'][string];
+    const result = mapNodesVersionCompatibility(
+      { nodes: { ...nodes, 'node-1': withoutVersion } },
+      KIBANA_VERSION,
+      false
+    );
+
+    expect(result.isCompatible).toBe(false);
+    expect(result.incompatibleNodes).toHaveLength(1);
+  });
+
   it('accepts matching and compatible node versions', () => {
     const result = mapNodesVersionCompatibility(
       createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'),

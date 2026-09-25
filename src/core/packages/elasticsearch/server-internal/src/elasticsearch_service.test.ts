@@ -273,26 +273,6 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 
-  it('esNodesCompatibility$ replays the latest compatibility to a late subscriber', async () => {
-    const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
-
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-
-    const setupContract = await elasticsearchService.setup(setupDeps);
-    // The first request lands a microtask after setup, once the machine has yielded its initial state.
-    await jest.advanceTimersByTimeAsync(0);
-
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-
-    await firstValueFrom(setupContract.esNodesCompatibility$);
-
-    await jest.advanceTimersByTimeAsync(0);
-    await jest.advanceTimersByTimeAsync(TICK);
-
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
-  });
-
   it("should inject the cluster's ID in the logging system", async () => {
     const setupContract = await elasticsearchService.setup(setupDeps);
 

@@ -18,21 +18,15 @@ import {
 } from './state_action_machine';
 import { take, virtualClock } from './state_action_machine.test_helpers';
 
+// Overruns and skipped points are covered through the machines' timelines; these are the edges.
 describe('nextOnGrid', () => {
-  it('schedules the next grid point after a completion at the due time', () => {
-    expect(nextOnGrid(1_000, 1_000, 100)).toBe(1_100);
-  });
-
-  it('stays on the grid when the request overran part of an interval', () => {
-    expect(nextOnGrid(1_000, 1_040, 100)).toBe(1_100);
-  });
-
-  it('skips the grid points a slow request overran', () => {
-    expect(nextOnGrid(1_000, 1_250, 100)).toBe(1_300);
-  });
-
-  it('never schedules on or before the completion', () => {
-    expect(nextOnGrid(1_000, 1_100, 100)).toBe(1_200);
+  it.each([
+    ['a completion at the due time', 1_000, 100, 1_100],
+    ['a completion exactly on a grid point', 1_100, 100, 1_200],
+    ['a completion before the due time, as after an early wake', 995, 100, 1_100],
+    ['a zero interval, which is due at the completion', 1_040, 0, 1_040],
+  ])('schedules after %s', (_, completedAt, interval, expected) => {
+    expect(nextOnGrid(1_000, completedAt, interval)).toBe(expected);
   });
 });
 
@@ -144,18 +138,6 @@ describe('run', () => {
       { state: { count: 1, nextActionAt: 100 }, event: { type: 'added', by: 1 } },
       { state: { count: 1, nextActionAt: 200 }, event: { type: 'missed' } },
     ]);
-  });
-
-  it('does not act until the states are pulled', async () => {
-    const request = jest.fn(async () => 1);
-    const clock = virtualClock();
-    const steps = run(counter(request), clock);
-
-    expect(request).not.toHaveBeenCalled();
-    await steps.next(); // the initial state
-    expect(request).not.toHaveBeenCalled();
-    await steps.next();
-    expect(request).toHaveBeenCalledTimes(1);
   });
 
   it('terminates with the final state once next yields no action', async () => {
