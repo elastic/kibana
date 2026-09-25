@@ -7,11 +7,17 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { TIME_RANGE_OPTIONS } from './use_time_range_param';
 import type { TimeRange } from './use_time_range_param';
+
+const TIME_RANGE_LEGEND = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.timeRange.legend',
+  { defaultMessage: 'Time range' }
+);
 
 interface Props {
   dataView: DataView;
@@ -26,7 +32,7 @@ export const EntitySearchBar: React.FC<Props> = ({ dataView, timeRange, onTimeRa
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiButtonGroup
-        legend="Time range"
+        legend={TIME_RANGE_LEGEND}
         options={TIME_RANGE_OPTIONS.map((v) => ({ id: v, label: v }))}
         idSelected={timeRange}
         onChange={(id) => onTimeRangeChange(id as TimeRange)}

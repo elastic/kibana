@@ -21,7 +21,6 @@ export interface EntityFilters {
   dataSources: string[];
 }
 
-// Key-only list used by useEntityFiltersParam for URL read/write.
 const FILTER_FIELDS = [
   'entityTypes',
   'riskLevels',
@@ -30,15 +29,6 @@ const FILTER_FIELDS = [
   'dataSources',
 ] as const satisfies ReadonlyArray<keyof EntityFilters>;
 
-// Key + entity-latest field name — used by ES DSL and ES|QL filter builders.
-const FILTER_FIELD_MAPPINGS = [
-  ['entityTypes', 'entity.EngineMetadata.Type'],
-  ['riskLevels', 'entity.risk.calculated_level'],
-  ['assetCriticality', 'asset.criticality'],
-  ['watchlists', 'entity.attributes.watchlists'],
-  ['dataSources', 'entity.source'],
-] as const satisfies ReadonlyArray<[key: keyof EntityFilters, esField: string]>;
-
 const VALID_ENTITY_TYPES = new Set<string>(getEntityAnalyticsEntityTypes());
 const VALID_RISK_LEVELS = new Set<string>(SEVERITY_UI_SORT_ORDER);
 const VALID_CRITICALITY = new Set<string>(ValidCriticalityLevels);
@@ -46,29 +36,6 @@ const VALID_CRITICALITY = new Set<string>(ValidCriticalityLevels);
 const parseArray = (params: URLSearchParams, key: keyof EntityFilters): string[] => {
   const val = params.get(key);
   return val ? val.split(',').filter(Boolean) : [];
-};
-
-export interface EntityFilterTerm {
-  terms: Record<string, string[]>;
-}
-
-export const getEntityFilterTerms = (filters: EntityFilters): EntityFilterTerm[] =>
-  FILTER_FIELD_MAPPINGS.filter(([key]) => filters[key].length).map(([key, field]) => ({
-    terms: { [field]: filters[key] as string[] },
-  }));
-
-export const getEntityFilterESQL = (filters: EntityFilters): string[] =>
-  FILTER_FIELD_MAPPINGS.filter(([key]) => filters[key].length).map(([key, field]) => {
-    const quoted = (filters[key] as string[]).map((v) => `"${v}"`).join(', ');
-    return `| WHERE ${field} IN (${quoted})`;
-  });
-
-export const EMPTY_ENTITY_FILTERS: EntityFilters = {
-  entityTypes: [],
-  riskLevels: [],
-  assetCriticality: [],
-  watchlists: [],
-  dataSources: [],
 };
 
 interface EntityFiltersResult {

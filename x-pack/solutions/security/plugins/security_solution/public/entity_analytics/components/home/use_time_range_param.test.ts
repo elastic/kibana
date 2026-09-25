@@ -8,6 +8,8 @@
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { useTimeRangeParam } from './use_time_range_param';
 
 const makeWrapper = (initialSearch = '') => {
@@ -67,5 +69,21 @@ describe('useTimeRangeParam', () => {
     });
 
     expect(result.current[0]).toBe('7d');
+  });
+
+  it('rewrites the URL when the param becomes invalid after a same-route navigation', () => {
+    const history = createMemoryHistory({ initialEntries: ['/?eaTimeRange=7d'] });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(Router, { history }, children);
+
+    const { result } = renderHook(() => useTimeRangeParam(), { wrapper });
+    expect(result.current[0]).toBe('7d');
+
+    act(() => {
+      history.replace('/?other=keep');
+    });
+
+    expect(result.current[0]).toBe('30d');
+    expect(history.location.search).toContain('eaTimeRange=30d');
   });
 });
