@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
+import { APP_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
 
 const ALERTS_APP_PATH = 'security/alerts';
 
@@ -39,10 +40,12 @@ export class AlertFlyoutResponsePage {
         query: `(language:kuery,query:'_id: ${alertId}')`,
       },
     });
-    await this.alertsTable.waitFor({ state: 'visible' });
-    await this.expandEvent.waitFor({ state: 'visible' });
+    // First visit creates the ad-hoc alerts data view. The table stays on its
+    // skeleton until that finishes, which is past the default 10s action timeout.
+    await this.alertsTable.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
+    await this.expandEvent.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
     await this.expandEvent.click();
-    await this.flyoutTitle.waitFor({ state: 'visible' });
+    await this.flyoutTitle.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   async openResponseDetails(): Promise<void> {

@@ -67,6 +67,8 @@ spaceTest.describe(
     });
 
     spaceTest('shows the isolate action on the alert response details', async ({ pageObjects }) => {
+      // The alerts page load wait is 60s, and the suite timeout is also 60s.
+      spaceTest.setTimeout(120_000);
       const { alertId } = requireSeededAlert(seeded);
       const { alertFlyoutResponse } = pageObjects;
 
