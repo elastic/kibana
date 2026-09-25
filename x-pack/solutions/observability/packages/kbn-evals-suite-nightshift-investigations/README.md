@@ -2,7 +2,7 @@
 
 Evaluation suite for [Nightshift investigations](../../plugins/nightshift_investigations).
 
-By default every eval runs, locally and in CI, as long as sandbox credentials are available. Set `NIGHTSHIFT_DATASETS` to run just one. The smoke eval checks seed data loading and score ingestion. The trace-only eval runs the real manual investigation workflow on file-based or stored questions and persists its report, conversation and full agent trace. Its single placeholder score is **ungraded**. It does not measure investigation quality or establish execution success.
+By default every eval runs, locally and in CI, as long as sandbox credentials are available. Set `NIGHTSHIFT_DATASETS` to run just one. The smoke eval checks seed data loading and score ingestion. The trace-only eval runs the real manual investigation workflow on file-based or stored questions and persists its report, conversation and full agent trace. Its single score, `completed_with_trace`, records whether each investigation **completed with a linked agent trace**; it does not measure investigation quality.
 
 ## Running the suite
 
@@ -102,11 +102,28 @@ finish and verify concurrent commands can allocate before launching a larger dat
 
 The native framework still requires an evaluation endpoint in its configuration; the command
 reuses the target endpoint for that metadata. This suite never invokes an LLM evaluator or judge.
-The CODE evaluator `ungraded_placeholder` always returns one, uses neutral direction, and states
-that no quality evaluation was performed. Execution errors, missing reports, incomplete traces, missing
-examples or missing persisted scores fail independent acceptance checks even if that score is one.
-Recovered tool errors remain visible in the evidence. Trace acceptance checks their complete
-payloads, including model calls rejected by schema validation before tool execution.
+The CODE evaluator `completed_with_trace` (direction `maximize`) scores 1 when the investigation
+completed without an execution error, its report has a conclusion or summary, it has a
+conversation and a well-formed trace id, and the exported agent trace is linked to the saved
+conversation: the question, conversation id, system instructions and final response appear in
+spans, and every tool call has a span with the same call id, equal arguments and a non-empty
+result. It polls up to 60 seconds for spans, queries only Elasticsearch, and never judges the
+answer. Its label names the first failing reason from a closed set:
+
+| Label              | Meaning                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------- |
+| `completed`        | Score 1; everything above held.                                                                          |
+| `timeout`          | The workflow was still running at the runner's 20-minute deadline.                                       |
+| `workflow_failed`  | The workflow failed, was cancelled, or the investigation could not be started.                           |
+| `schema_rejected`  | The workflow failed because the persisted report was rejected by a route schema (HTTP 400).              |
+| `no_report`        | Completed without a conclusion or summary.                                                               |
+| `no_trace`         | No conversation id, no well-formed trace id, or no spans arrived within the poll budget.                 |
+| `trace_incomplete` | Spans exist but are not linked to the saved conversation (a failing check is quoted in the explanation). |
+
+Recovered tool errors remain visible in the evidence, and model calls rejected by schema
+validation before tool execution are checked in the LLM messages. Stored tool results are not
+compared for equality with the execution span: Agent Builder replaces non-MCP results above its
+2 MiB storage limit with a preview by design, while the span keeps the full payload.
 The bundled synthetic cases also require a successful sandbox command (exit code zero), so an
 unavailable sandbox cannot pass acceptance. The calculation output and investigation answer stay
 ungraded; this fixture-specific execution check does not apply to custom files or stored datasets.
@@ -169,14 +186,16 @@ synthetic fixture. No golden-source derivation or LangSmith identifier is needed
 Tags must satisfy the shared dataset API schema, including its 64-character limit and 20-tag
 total after adding the required `nightshift` and `ungraded` tags.
 
-Acceptance verifies expected example/repetition coverage, one persisted placeholder per run,
-completed investigations, saved report/conversation identifiers, complete linked agent traces,
-and no LLM calls in the evaluator traces. The terminal prints experiment, dataset, case,
-investigation, conversation and trace IDs for sharing. Inspect them in the evaluations UI under
-`/app/management/ai/evals/experiments/<experiment-id>`; per-example links add
+The Playwright test keeps only harness assertions: run count equals examples times
+repetitions, case ids match the dataset, one persisted `completed_with_trace` score per run with a
+label from the set above, and no LLM calls in the evaluator traces. Per-example failures show up
+as labels in the experiment rather than as a red step; the only floor is that at least one
+investigation must score 1. The terminal prints experiment, dataset, case, investigation,
+conversation and trace IDs plus the label per run, then a label histogram. Inspect them in the
+evaluations UI under `/app/management/ai/evals/experiments/<experiment-id>`; per-example links add
 `?dataset_id=<dataset-id>&example_id=<example-index>&trace_id=<agent-trace-id>`.
-Historical full-grader runs are not acceptance evidence for this runner. Graders, native trace
-metrics, automatic provisioning and generalized CI defaults are deferred.
+Historical full-grader runs are not acceptance evidence for this runner. Quality graders, native
+trace metrics and automatic provisioning are deferred.
 
 `evals start` restarts Scout automatically when connectors, the server config set,
 `TRACING_EXPORTERS`, `GCS_CREDENTIALS` or any variable the hook exports changes. Switching
@@ -210,8 +229,10 @@ The investigation spec sets the existing `runExperiment` concurrency option to *
 Scout config reserves **21 normal-task slots** (42 raw cost units): sixteen for investigation
 workflows and five for background work. The workflow executes its agent inline, without a second
 Task Manager task. The spec uses the same concurrency constant for trace checks and for calculating
-the timeout from example/repetition batches and the 20-minute investigation deadline, with two
-additional minutes per batch for trace ingestion.
+the timeout from example/repetition batches and the 20-minute investigation deadline, with three
+additional minutes per batch for the grader's trace poll and evaluator trace ingestion.
+To run fewer investigations at once, for example against a small local sandbox, lower the
+constant in the spec together with the capacity in the Scout config set.
 
 To change parallelism, edit the spec's concurrency constant and ensure the Scout config and
 sandbox pool have sufficient capacity. Restart Scout after changing its capacity. Dataset
@@ -221,7 +242,7 @@ restarting a shared local stack.
 
 ## Remote telemetry investigations
 
-Use the same `trace-only` selection, dataset loader, investigation task, placeholder evaluator and
+Use the same `trace-only` selection, dataset loader, investigation task, completion grader and
 trace acceptance checks to investigate an operator-configured Elasticsearch cluster. The telemetry
 source is independent of the evaluations profile: the sandbox queries the remote cluster, while
 the profile still selects where experiment results and agent traces are persisted.
@@ -278,8 +299,8 @@ restricted key first. For connectivity acceptance, inspect the persisted agent t
 actual Elasticsearch response: confirm it queried the configured endpoint through the telemetry
 connector and returned data from the intended remote/index and time range without query or remote
 failures. Record the tested commit, experiment and trace links, plus sanitized query evidence. A
-`connector_id`, exit code zero, completed investigation or placeholder score alone does not prove
-connectivity. This workflow remains ungraded and requires no reference answer or quality threshold.
+`connector_id`, exit code zero, completed investigation or `completed` label alone does not prove
+connectivity. This workflow requires no reference answer or quality threshold.
 
 Leave the remote settings unset for the bundled synthetic examples;
 synthetic execution continues to need no telemetry connector. The former `remote` selection and
@@ -300,6 +321,25 @@ Serializing manifest writes alone does not close the gap before a subsequent too
 Until then, use a conversation only within one trusted authorization context. The outstanding
 [review finding](https://github.com/elastic/kibana/pull/291603#discussion_r4097938707) records this
 explicitly deferred scope.
+
+## Client identities on a shared sandbox cluster
+
+A persistent, shared sandbox-service deployment needs no code change: its `sandbox` block names
+the public gRPC endpoint (no port-forward), the deployment's static API key and **your own** client
+leaf, minted from the deployment's CA, because sandbox-api requires mutual TLS and takes each
+caller's identity from the certificate's common name. The common name must use the ESS format
+`i.node.<32 hex>.cluster.<account>.account` (a common name is limited to 64 bytes). Sessions and
+snapshots are namespaced by account and cluster id, so two Kibanas with distinct identities cannot
+open each other's sandboxes even though they share the API key. Use a fixed account per role and
+carry the individual identity in the cluster id: CI runs as account `ns-ci`, and a developer leaf
+uses account `ns-dev` with the first 32 hex characters of the SHA-256 of your GitHub handle. The
+cert-manager steps for minting a leaf from the deployment's issuer and extracting it are in
+sandbox-service's `docs/gke-deploy.md` ("Onboarding another Kibana"). Keep extracted PEM files
+owner-only; cert-manager renews the Secret in the cluster, not your local copies. Cluster-specific
+addresses and commands stay out of this README.
+
+Session capacity is the deployment's `SANDBOX_MAX_CONCURRENT_SESSIONS`; keep the concurrency at or
+below it, since every concurrent investigation holds one session.
 
 ## Two kinds of dataset
 
@@ -460,8 +500,9 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 
 ## CI
 
-Registered in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json)
-as `nightshift-investigations`.
+Registered twice in
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json), on the same
+Playwright config:
 
 - **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
   hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
@@ -474,6 +515,47 @@ as `nightshift-investigations`.
   runs it against the weekly core models (`weekly_eis_core_models`).
 - **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
+
+A second entry, **`nightshift-investigations-customer0`** (label
+`evals:nightshift-investigations-customer0`), runs only the trace-only eval on the stored
+`nightshift/customer0-manual` dataset against the shared sandbox cluster, with Sonnet 4.6 by default
+(`defaultModelGroups`, so no `models:` label is needed) and a 180-minute step budget. Its `ci`
+block declares the selection (`NIGHTSHIFT_DATASETS=trace-only`, `NIGHTSHIFT_DATASET_NAME`,
+`EVAL_FANOUT_CONCURRENCY=1` so two builds never share the cluster, and `SCOUT_TEST_RETRIES=0`
+because a Playwright retry would re-run every investigation inside the same step budget) and, under `ci.requiredConfig`, the evals Vault config paths it
+cannot run without (the `sandbox` host, API key, client certificate, key and CA, and the
+`nightshift.telemetry` URL and API key). `run_suite.sh` applies each `ci.env` value when the
+variable is unset and forwards it to the fanout steps, so a plain build-level override still wins,
+and it fails the step before any stack boots when a required path is missing or still a
+placeholder, naming the path. The entry opts out of `evals:all` (`ci.excludeFromAll`): a three-hour
+run against a shared cluster is only ever started by its own label. Per-example failures appear as
+`completed_with_trace` labels in the experiment rather than as a red step. There is no weekly step
+for it.
+
+### Secrets for the customer0 run
+
+The customer0 entry reads everything from the evals Vault config the pre-command hook already
+loads (`$VAULT_PATH_PREFIX/kbn-evals`, the same config `--profile dev-vault` reads locally): the
+`sandbox` block above and a `nightshift.telemetry` block for the remote cluster the investigations
+query through the sandbox (see [Remote telemetry investigations](#remote-telemetry-investigations)):
+
+```json
+{
+  "nightshift": {
+    "telemetry": {
+      "url": "https://<telemetry cluster>",
+      "apiKey": "<restricted read-only key>",
+      "readableIndices": "<optional manifest guidance, up to 10,000 characters>"
+    }
+  }
+}
+```
+
+The suite's scout hook turns both blocks into environment variables for Scout and Playwright, in CI
+and locally, and `run_suite.sh` logs the exported variable names (never values) right before
+starting Scout, so a build log shows whether the sandbox key and the telemetry connector reached the
+step. The CI client certificate is its own identity (account `ns-ci`), distinct from every developer
+leaf.
 
 ## Validation
 

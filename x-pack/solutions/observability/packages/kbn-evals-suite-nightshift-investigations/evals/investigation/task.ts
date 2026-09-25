@@ -17,7 +17,27 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
 
 export const INVESTIGATION_TIMEOUT_MS = 20 * 60_000;
+/** Execution error recorded when the workflow is still running at the deadline. */
+export const INVESTIGATION_TIMEOUT_ERROR = `Investigation did not reach a terminal status within ${
+  INVESTIGATION_TIMEOUT_MS / 60_000
+} minutes`;
 const MAX_PERSISTED_REPORT_BYTES = 512 * 1024;
+
+/** Reads the saved Agent Builder conversation an investigation ran in. */
+export const fetchConversation = (
+  fetch: HttpHandler,
+  conversationId: string
+): Promise<{ rounds: ConversationRound[] }> =>
+  fetch<{ rounds: ConversationRound[] }>(
+    `/api/agent_builder/conversations/${encodeURIComponent(conversationId)}`,
+    { headers: { 'elastic-api-version': '2023-10-31' } }
+  );
+
+/** Lists the agent trace ids of the conversation's rounds, in order. */
+export const roundTraceIds = (rounds: Array<Pick<ConversationRound, 'trace_id'>>): string[] =>
+  rounds
+    .flatMap(({ trace_id: traceId }) => (typeof traceId === 'string' ? [traceId] : traceId ?? []))
+    .filter(Boolean);
 
 const boundOutput = (output: InvestigationTaskOutput): InvestigationTaskOutput => {
   const { structured_report: report, execution_error: executionError } = output;
@@ -64,7 +84,7 @@ export const runInvestigation = async (
       output.workflow_status = investigation.status;
       output.conversation_id = investigation.conversation_id;
       if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
-        throw new Error('Investigation did not reach a terminal status within 20 minutes');
+        throw new Error(INVESTIGATION_TIMEOUT_ERROR);
       }
       await setTimeout(1000);
       investigation = await fetch<GetInvestigationResponse>(investigationPath);
@@ -113,17 +133,9 @@ export const runInvestigation = async (
       impact,
     };
     if (output.conversation_id) {
-      const conversation = await fetch<{ rounds: ConversationRound[] }>(
-        `/api/agent_builder/conversations/${encodeURIComponent(output.conversation_id)}`,
-        { headers: { 'elastic-api-version': '2023-10-31' } }
-      );
+      const conversation = await fetchConversation(fetch, output.conversation_id);
       output.conversation_round_count = conversation.rounds.length;
-      output.traceId = conversation.rounds
-        .flatMap(({ trace_id: traceId }) =>
-          typeof traceId === 'string' ? [traceId] : traceId ?? []
-        )
-        .filter(Boolean)
-        .at(-1);
+      output.traceId = roundTraceIds(conversation.rounds).at(-1);
     } else {
       output.execution_error ??= 'Completed investigation has no conversation id';
     }

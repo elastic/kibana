@@ -12,27 +12,25 @@ import pMap from 'p-map';
 import { tags } from '@kbn/evals';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { GenAISemConvAttributes } from '@kbn/inference-tracing';
-import type { ConversationRound } from '@kbn/agent-builder-common';
 import { DEDUCTIVE_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
-import { ungradedPlaceholder } from './placeholder';
-import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
-import { assertAgentTrace, assertSuccessfulSandboxCommand } from './trace_evidence';
+import { COMPLETION_LABELS, createCompletedWithTraceEvaluator } from './completed_with_trace';
+import { INVESTIGATION_TIMEOUT_MS, fetchConversation, runInvestigation } from './task';
+import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
 evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
   evaluate(
-    'persists ungraded investigations and complete agent traces',
+    'persists a completion score and complete agent traces per investigation',
     async ({ executorClient, connector, fetch, evalsClient, traceEsClient, repetitions, log }) => {
       const dataset = await loadInvestigationDataset(evalsClient);
+      // Matches the task slots the Scout config set reserves; edit both to change parallelism.
       const concurrency = 16;
-      evaluate.setTimeout(
-        Math.ceil((dataset.examples.length * repetitions) / concurrency) *
-          (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
-          5 * 60_000
-      );
+      // Per batch: the investigation deadline, the grader's trace poll and the evaluator-trace
+      // poll below; plus a fixed allowance for setup and score ingestion.
+      const batches = Math.ceil((dataset.examples.length * repetitions) / concurrency);
+      evaluate.setTimeout(batches * (INVESTIGATION_TIMEOUT_MS + 3 * 60_000) + 5 * 60_000);
       // The typed agent API omits inherited instructions; the source prompt is the acceptance oracle.
       const systemInstructions = cleanPrompt(
         readFileSync(
@@ -79,14 +77,14 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         .toBe(true);
       const [experiment] = await executorClient.runExperiment(
         {
-          name: 'Nightshift ungraded investigation traces',
+          name: 'Nightshift investigation completion',
           datasets: [dataset],
           trustUpstreamDataset: Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
           concurrency,
           metadata: { concurrency },
           task: (example) => runInvestigation(fetch, example),
         },
-        [ungradedPlaceholder]
+        [createCompletedWithTraceEvaluator({ fetch, traceEsClient, systemInstructions })]
       );
 
       const runs = Object.values(experiment.runs);
@@ -105,31 +103,14 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
       );
       const scores = examples.flatMap((example) => example.scores);
       expect(scores).toHaveLength(runs.length);
+      const bundledFixtures =
+        !process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME;
 
+      const histogram = new Map<string, number>();
       await pMap(
         runs,
         async (run) => {
           const output = run.output as InvestigationTaskOutput;
-          // The placeholder stays at one even on failure; these checks alone establish execution acceptance.
-          expect(output.execution_error).toBeUndefined();
-          expect(output.workflow_status).toBe('completed');
-          expect(output.investigation_id).toEqual(expect.any(String));
-          expect(output.conversation_id).toEqual(expect.any(String));
-          expect(
-            output.structured_report?.conclusion || output.structured_report?.summary
-          ).toBeTruthy();
-          const conversation = await fetch<{ rounds: ConversationRound[] }>(
-            `/api/agent_builder/conversations/${encodeURIComponent(output.conversation_id ?? '')}`,
-            { headers: { 'elastic-api-version': '2023-10-31' } }
-          );
-          expect(conversation.rounds.length).toBeGreaterThan(0);
-          expect(conversation.rounds).toHaveLength(output.conversation_round_count ?? 0);
-          if (!process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME) {
-            assertSuccessfulSandboxCommand(conversation.rounds);
-          }
-          expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);
-          expect(run.traceId).toBe(output.traceId);
-
           const exampleScores = scores.filter(
             (score) =>
               score.example.index === run.exampleIndex &&
@@ -148,35 +129,24 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           );
           expect(details.task.output).toEqual(JSON.parse(JSON.stringify(output)));
           expect(score.evaluator).toMatchObject({
-            name: 'ungraded_placeholder',
+            name: 'completed_with_trace',
             kind: 'code',
-            direction: 'neutral',
-            score: 1,
-            label: 'ungraded',
-            explanation: expect.stringContaining('no quality evaluation was performed'),
+            direction: 'maximize',
+            explanation: expect.any(String),
           });
-          expect(score.evaluator.trace_id).not.toBe(output.traceId);
-
-          const agentTraceIds = conversation.rounds.flatMap(({ trace_id: traceId }) =>
-            typeof traceId === 'string' ? [traceId] : traceId ?? []
-          );
-          await expect(async () => {
-            const spans = await traceEsClient.search<{ attributes: GenAISemConvAttributes }>({
-              index: 'traces-*',
-              size: 1_000,
-              query: { terms: { 'trace.id': agentTraceIds } },
-              _source: ['attributes'],
-            });
-            assertAgentTrace(
-              spans.hits.hits.flatMap(({ _source: source }) => (source ? [source.attributes] : [])),
-              {
-                question: output.query,
-                conversationId: output.conversation_id,
-                systemInstructions,
-                rounds: conversation.rounds,
-              }
-            );
-          }).toPass({ timeout: 60_000 });
+          const label = score.evaluator.label ?? '';
+          expect(COMPLETION_LABELS).toContain(label);
+          expect(score.evaluator.score).toBe(label === 'completed' ? 1 : 0);
+          if (output.traceId) expect(score.evaluator.trace_id).not.toBe(output.traceId);
+          histogram.set(label, (histogram.get(label) ?? 0) + 1);
+          if (bundledFixtures) {
+            // The synthetic questions request a calculation, so an unavailable sandbox cannot pass.
+            expect(output.conversation_id).toEqual(expect.any(String));
+            const conversation = await fetchConversation(fetch, output.conversation_id ?? '');
+            assertSuccessfulSandboxCommand(conversation.rounds);
+          }
+          // Identifiers and the label only: explanations can quote workflow errors, and the
+          // persisted score already carries them where the dataset's contents are allowed.
           log.info(
             JSON.stringify({
               experiment_id: experiment.id,
@@ -186,12 +156,19 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
               investigation_id: output.investigation_id,
               conversation_id: output.conversation_id,
               trace_id: output.traceId,
-              evaluation: 'ungraded',
+              label,
             })
           );
         },
         { concurrency }
       );
+      log.info(
+        `completed_with_trace labels: ${JSON.stringify(Object.fromEntries(histogram))} (${
+          histogram.get('completed') ?? 0
+        }/${runs.length} completed)`
+      );
+      // Per-example failures stay visible as labels; only a run with nothing concluded fails here.
+      expect(histogram.get('completed') ?? 0).toBeGreaterThan(0);
 
       const evaluatorTraces = experiment.evaluationRuns
         .map(({ traceId }) => traceId)

@@ -6,8 +6,9 @@
  */
 
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import type { EsClient } from '@kbn/scout';
 import { runInvestigation } from './task';
-import { ungradedPlaceholder } from './placeholder';
+import { createCompletedWithTraceEvaluator } from './completed_with_trace';
 
 const example = {
   input: { question: 'Investigate synthetic timeouts.' },
@@ -172,13 +173,15 @@ it.each([
       conversation_round_count: 1,
       traceId: 'partial-trace',
     });
-    const placeholder = await ungradedPlaceholder.evaluate({
-      input: example.input,
-      metadata: example.metadata,
-      output,
-      expected: undefined,
-    });
-    expect(placeholder).toMatchObject({ score: 1, label: 'ungraded' });
+    // The grader reads the failure from the persisted output alone; no trace lookup is needed.
+    const search = jest.fn();
+    const score = await createCompletedWithTraceEvaluator({
+      fetch: jest.fn(),
+      traceEsClient: { search } as unknown as EsClient,
+      systemInstructions: 'Investigate the evidence.',
+    }).evaluate({ input: example.input, metadata: example.metadata, output, expected: undefined });
+    expect(score).toMatchObject({ score: 0, label: 'workflow_failed', explanation: expectedError });
+    expect(search).not.toHaveBeenCalled();
   }
 );
 

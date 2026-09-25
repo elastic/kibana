@@ -218,6 +218,9 @@ Run a suite on any branch without a PR:
 | `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
 | `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
 | `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
+| `<suite ci.env>`                  | no                 | Suites may declare CI defaults under `ci.env` in `evals.suites.json`; an explicit build-level value wins     |
+| `<suite ci.requiredConfig>`       | no                 | Dotted evals-config paths a suite cannot run without; `run_suite.sh` fails the step before any stack boots  |
+| `<suite ci.excludeFromAll>`       | no                 | Suites that only their own label may start; `evals:all` skips them                                          |
 | `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
