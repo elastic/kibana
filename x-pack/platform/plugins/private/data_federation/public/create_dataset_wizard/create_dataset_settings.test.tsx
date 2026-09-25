@@ -102,9 +102,9 @@ describe('CreateDatasetSettings', () => {
   it('updates partition_detection in form state', () => {
     const { getByTestId } = renderSettings();
 
-    fireEvent.change(getByTestId('createDatasetSettingsPartitionDetection'), {
-      target: { value: 'hive' },
-    });
+    const partitionDetectionCombo = getByTestId('createDatasetSettingsPartitionDetection');
+    fireEvent.click(partitionDetectionCombo.querySelector('input') ?? partitionDetectionCombo);
+    fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-hive'));
 
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
   });

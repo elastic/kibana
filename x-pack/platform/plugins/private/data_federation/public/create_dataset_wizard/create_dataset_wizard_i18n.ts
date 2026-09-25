@@ -824,6 +824,13 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsTrimSpacesPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsTrimSpacesPlaceholder',
+    {
+      defaultMessage: 'Default',
+    }
+  ),
+
   settingsTrimSpacesHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp',
     {

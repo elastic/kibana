@@ -32,6 +32,8 @@ import { CsvTsvAdvancedSettings } from './components/csv_tsv_advanced_settings';
 import { CsvTsvCommonSettings } from './components/csv_tsv_common_settings';
 import { FormatSelect } from './components/format_select';
 import { DelimiterSelect } from './components/delimiter_select';
+import { HeaderRow } from './components/header_row';
+import { QuoteMode } from './components/quote_mode';
 import { NdjsonCommonSettings } from './components/ndjson_common_settings';
 import { ParquetAdvancedSettings } from './components/parquet_advanced_settings';
 import { ParquetCommonSettings } from './components/parquet_common_settings';
@@ -57,24 +59,11 @@ const SCHEMA_RESOLUTION_OPTIONS = [
   },
 ];
 
-const MODE_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsModePlaceholder },
-  { value: 'quoted', text: createDatasetWizardStrings.settingsModeQuoted },
-  { value: 'escaped', text: createDatasetWizardStrings.settingsModeEscaped },
-  { value: 'plain', text: createDatasetWizardStrings.settingsModePlain },
-];
-
 const helpTextDefault = (valueLabel: string) => (
   <EuiText size="xs" color="subdued">
     <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
   </EuiText>
 );
-
-const HEADER_ROW_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsHeaderRowPlaceholder },
-  { value: 'true', text: createDatasetWizardStrings.settingsHeaderRowTrue },
-  { value: 'false', text: createDatasetWizardStrings.settingsHeaderRowFalse },
-];
 
 const HIVE_PARTITIONING_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsHivePartitioningPlaceholder },
@@ -375,27 +364,17 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsModeLabel} fullWidth>
-        <EuiSelect
-          options={MODE_OPTIONS}
-          data-test-subj="createDatasetSettingsMode"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsModeLabel}
+        <QuoteMode
           value={modeField.value}
-          onChange={(e) => modeField.onChange(e.target.value)}
-          name={modeField.name}
-          inputRef={modeField.ref}
+          onChange={(next) => modeField.onChange(next)}
+          onBlur={modeField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsHeaderRowLabel} fullWidth>
-        <EuiSelect
-          options={HEADER_ROW_OPTIONS}
-          data-test-subj="createDatasetSettingsHeaderRow"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
+        <HeaderRow
           value={headerRowField.value}
-          onChange={(e) => headerRowField.onChange(e.target.value as DatasetBooleanFormValue)}
-          name={headerRowField.name}
-          inputRef={headerRowField.ref}
+          onChange={(next) => headerRowField.onChange(next)}
+          onBlur={headerRowField.onBlur}
         />
       </EuiFormRow>
     </>

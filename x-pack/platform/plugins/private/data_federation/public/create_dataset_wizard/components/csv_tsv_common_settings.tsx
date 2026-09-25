@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiCode,
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCode, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
@@ -24,27 +17,14 @@ import {
   validateDelimiter,
   validateSkipRows,
   type CreateDatasetFormValues,
-  type DatasetBooleanFormValue,
   type DatasetFormatFormValue,
-  type DatasetModeFormValue,
 } from '../create_dataset_form_state';
 import { DatetimeFormatSelect } from './datetime_format_select';
 import { DelimiterSelect } from './delimiter_select';
 import { EncodingSelect } from './encoding_select';
+import { HeaderRow } from './header_row';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
-
-const MODE_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsModePlaceholder },
-  { value: 'quoted', text: createDatasetWizardStrings.settingsModeQuoted },
-  { value: 'escaped', text: createDatasetWizardStrings.settingsModeEscaped },
-  { value: 'plain', text: createDatasetWizardStrings.settingsModePlain },
-];
-
-const HEADER_ROW_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsHeaderRowPlaceholder },
-  { value: 'true', text: createDatasetWizardStrings.trueLabel },
-  { value: 'false', text: createDatasetWizardStrings.falseLabel },
-];
+import { QuoteMode } from './quote_mode';
 
 const helpTextDefault = (valueLabel: string) => (
   <EuiText size="xs" color="subdued">
@@ -97,15 +77,10 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         }
         fullWidth
       >
-        <EuiSelect
-          options={MODE_OPTIONS}
-          data-test-subj="createDatasetSettingsMode"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsModeLabel}
+        <QuoteMode
           value={modeField.value}
-          onChange={(e) => modeField.onChange(e.target.value as DatasetModeFormValue)}
-          name={modeField.name}
-          inputRef={modeField.ref}
+          onChange={(next) => modeField.onChange(next)}
+          onBlur={modeField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -117,15 +92,10 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         }
         fullWidth
       >
-        <EuiSelect
-          options={HEADER_ROW_OPTIONS}
-          data-test-subj="createDatasetSettingsHeaderRow"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
+        <HeaderRow
           value={headerRowField.value}
-          onChange={(e) => headerRowField.onChange(e.target.value as DatasetBooleanFormValue)}
-          name={headerRowField.name}
-          inputRef={headerRowField.ref}
+          onChange={(next) => headerRowField.onChange(next)}
+          onBlur={headerRowField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow

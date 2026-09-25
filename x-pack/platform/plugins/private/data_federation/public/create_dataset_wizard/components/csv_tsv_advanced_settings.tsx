@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
@@ -21,11 +21,7 @@ import {
   type DatasetFormatFormValue,
 } from '../create_dataset_form_state';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
-
-const TRIM_SPACES_OPTIONS = [
-  { value: 'false', text: createDatasetWizardStrings.falseLabel },
-  { value: 'true', text: createDatasetWizardStrings.trueLabel },
-];
+import { TrimSpaces } from './trim_spaces';
 
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
@@ -133,15 +129,10 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         helpText={createDatasetWizardStrings.settingsTrimSpacesHelp}
         fullWidth
       >
-        <EuiSelect
-          options={TRIM_SPACES_OPTIONS}
-          data-test-subj="createDatasetSettingsTrimSpaces"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsTrimSpacesLabel}
-          value={trimSpacesField.value ? 'true' : 'false'}
-          onChange={(e) => trimSpacesField.onChange(e.target.value === 'true')}
-          name={trimSpacesField.name}
-          inputRef={trimSpacesField.ref}
+        <TrimSpaces
+          value={trimSpacesField.value}
+          onChange={(next) => trimSpacesField.onChange(next)}
+          onBlur={trimSpacesField.onBlur}
         />
       </EuiFormRow>
     </div>

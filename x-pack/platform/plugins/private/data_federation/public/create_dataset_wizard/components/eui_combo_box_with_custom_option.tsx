@@ -12,6 +12,7 @@ export interface ComboBoxPresetOption {
   value: string;
   label: string;
   'data-test-subj'?: string;
+  append?: React.ReactNode;
 }
 
 type ComboBoxOption = EuiComboBoxOptionOption<string> & {
@@ -72,6 +73,7 @@ export function EuiComboBoxWithCustomOption({
       {
         value: selectedValue,
         label: preset?.label ?? getCustomLabel(selectedValue),
+        append: preset?.append,
       },
     ];
   }, [getCustomLabel, presetOptions, selectedValue]);

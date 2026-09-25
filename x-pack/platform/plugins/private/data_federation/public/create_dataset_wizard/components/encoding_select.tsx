@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiBadge } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -14,7 +15,11 @@ import { type CreateDatasetFormValues } from '../create_dataset_form_state';
 import { EuiComboBoxWithCustomOption } from './eui_combo_box_with_custom_option';
 
 const presetOptions = [
-  { value: 'UTF-8', label: createDatasetWizardStrings.settingsEncodingUtf8 },
+  {
+    value: 'UTF-8',
+    label: createDatasetWizardStrings.settingsEncodingUtf8,
+    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
+  },
   { value: 'UTF-16', label: createDatasetWizardStrings.settingsEncodingUtf16 },
   { value: 'ISO-8859-1', label: createDatasetWizardStrings.settingsEncodingIso88591 },
   { value: 'US-ASCII', label: createDatasetWizardStrings.settingsEncodingUsAscii },

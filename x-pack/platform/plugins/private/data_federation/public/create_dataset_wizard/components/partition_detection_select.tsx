@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSelect } from '@elastic/eui';
+import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -16,11 +16,25 @@ import type {
   DatasetPartitionDetectionFormValue,
 } from '../create_dataset_form_state';
 
-const PARTITION_DETECTION_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsPartitionDetectionPlaceholder },
-  { value: 'auto', text: createDatasetWizardStrings.settingsPartitionDetectionAuto },
-  { value: 'hive', text: createDatasetWizardStrings.settingsPartitionDetectionHive },
-  { value: 'none', text: createDatasetWizardStrings.settingsPartitionDetectionNone },
+type Option = EuiComboBoxOptionOption<string> & { value: DatasetPartitionDetectionFormValue };
+
+const PARTITION_DETECTION_OPTIONS: Option[] = [
+  {
+    value: 'auto',
+    label: createDatasetWizardStrings.settingsPartitionDetectionAuto,
+    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
+    'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-auto',
+  },
+  {
+    value: 'hive',
+    label: createDatasetWizardStrings.settingsPartitionDetectionHive,
+    'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-hive',
+  },
+  {
+    value: 'none',
+    label: createDatasetWizardStrings.settingsPartitionDetectionNone,
+    'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-none',
+  },
 ];
 
 export function PartitionDetectionSelect({
@@ -33,18 +47,25 @@ export function PartitionDetectionSelect({
     control,
   });
 
+  const selectedOption = PARTITION_DETECTION_OPTIONS.find(
+    (o) => o.value === partitionDetectionField.value
+  );
+
   return (
-    <EuiSelect
+    <EuiComboBox
+      placeholder={createDatasetWizardStrings.settingsPartitionDetectionPlaceholder}
       options={PARTITION_DETECTION_OPTIONS}
       data-test-subj="createDatasetSettingsPartitionDetection"
-      fullWidth
       aria-label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
-      value={partitionDetectionField.value}
-      onChange={(e) =>
-        partitionDetectionField.onChange(e.target.value as DatasetPartitionDetectionFormValue)
-      }
-      name={partitionDetectionField.name}
-      inputRef={partitionDetectionField.ref}
+      singleSelection={{ asPlainText: true }}
+      isClearable
+      selectedOptions={selectedOption ? [selectedOption] : []}
+      onChange={(nextSelectedOptions) => {
+        const next = nextSelectedOptions?.[0] as Option | undefined;
+        partitionDetectionField.onChange(next?.value ?? '');
+      }}
+      onBlur={partitionDetectionField.onBlur}
+      fullWidth
     />
   );
 }
