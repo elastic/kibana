@@ -2888,6 +2888,77 @@ describe('Agent policy', () => {
     });
   });
 
+  describe('deployPolicies', () => {
+    beforeEach(() => {
+      jest.restoreAllMocks();
+      mockedGetFullAgentPolicy.mockReset();
+    });
+
+    it('should pass spaceId to getByIds and getFullAgentPolicy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue(null);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: { name: 'Policy 1', revision: 1 },
+            references: [],
+          },
+        ],
+      });
+
+      const getByIdsSpy = jest.spyOn(agentPolicyService, 'getByIds');
+      const getFullAgentPolicySpy = jest.spyOn(agentPolicyService, 'getFullAgentPolicy');
+
+      await agentPolicyService.deployPolicies(soClient, ['policy-1'], undefined, {
+        spaceId: 'my-space',
+      });
+
+      expect(getByIdsSpy).toHaveBeenCalledWith(
+        soClient,
+        ['policy-1'],
+        expect.objectContaining({ spaceId: 'my-space' })
+      );
+      expect(getFullAgentPolicySpy).toHaveBeenCalledWith(
+        soClient,
+        'policy-1',
+        expect.objectContaining({ spaceId: 'my-space' })
+      );
+    });
+
+    it('should pass undefined spaceId to getByIds and getFullAgentPolicy when not provided', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue(null);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: { name: 'Policy 1', revision: 1 },
+            references: [],
+          },
+        ],
+      });
+
+      const getByIdsSpy = jest.spyOn(agentPolicyService, 'getByIds');
+      const getFullAgentPolicySpy = jest.spyOn(agentPolicyService, 'getFullAgentPolicy');
+
+      await agentPolicyService.deployPolicies(soClient, ['policy-1']);
+
+      expect(getByIdsSpy.mock.calls[0][2]?.spaceId).toBeUndefined();
+      expect(getFullAgentPolicySpy.mock.calls[0][2]?.spaceId).toBeUndefined();
+    });
+  });
+
   describe('ensurePreconfiguredAgentPolicy', () => {
     it('should use preconfigured id if provided for policy', async () => {
       const soClient = createSavedObjectClientMock();
