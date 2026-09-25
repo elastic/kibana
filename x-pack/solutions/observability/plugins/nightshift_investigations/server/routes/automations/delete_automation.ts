@@ -36,8 +36,9 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
       params.path.id
     );
 
-    await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
-
+    // Delete the backing workflow first so it cannot fire after the SO is gone.
+    // Best-effort: if workflow deletion fails the SO is still removed; any orphaned
+    // workflow will be inert because the automation SO is the source of truth for routing.
     if (workflowsManagement && existing.attributes.workflowId) {
       try {
         await workflowsManagement.management.deleteWorkflows(
@@ -46,9 +47,11 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
           request
         );
       } catch {
-        // Best-effort: log but do not fail the delete if workflow cleanup fails.
+        // Intentionally swallowed — the SO delete below is the authoritative cleanup.
       }
     }
+
+    await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
 
     return {};
   },
