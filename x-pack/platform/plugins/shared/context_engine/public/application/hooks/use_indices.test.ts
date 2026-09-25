@@ -162,17 +162,17 @@ describe('useIndices', () => {
     expect(result.current.indexNames).toEqual(['logs-ds']);
   });
 
-  it('ignores stale responses when a slower earlier search finishes after a newer one', async () => {
-    let resolveSlow!: (value: MatchedItem[]) => void;
-    const slowPromise = new Promise<MatchedItem[]>((resolve) => {
-      resolveSlow = resolve;
+  it('does not lose results when returning to a search that is still in flight', async () => {
+    let resolveA!: (value: MatchedItem[]) => void;
+    const pendingA = new Promise<MatchedItem[]>((resolve) => {
+      resolveA = resolve;
     });
 
     const getIndices = jest.fn(({ pattern }: { pattern: string }) => {
-      if (pattern === '*slow*') {
-        return slowPromise;
+      if (pattern === '*a*') {
+        return pendingA;
       }
-      return Promise.resolve([buildMatchedItem('fast-match')]);
+      return Promise.resolve([buildMatchedItem('b-match')]);
     });
 
     const core = coreMock.createStart();
@@ -187,26 +187,22 @@ describe('useIndices', () => {
         React.createElement(QueryClientProvider, { client: queryClient }, children)
       );
 
-    const searchRef = { current: 'slow' };
+    const searchRef = { current: 'a' };
     const { result, rerender } = renderHook(() => useIndices({ search: searchRef.current }), {
       wrapper,
     });
+    await waitFor(() => expect(getIndices).toHaveBeenCalledTimes(1));
 
-    await waitFor(() =>
-      expect(getIndices).toHaveBeenCalledWith({
-        pattern: '*slow*',
-        isRollupIndex: expect.any(Function),
-      })
-    );
+    // Switch away, then back to "a" while its request is still pending.
+    searchRef.current = 'b';
+    rerender();
+    await waitFor(() => expect(result.current.indexNames).toEqual(['b-match']));
 
-    searchRef.current = 'fast';
+    searchRef.current = 'a';
     rerender();
 
-    await waitFor(() => expect(result.current.indexNames).toEqual(['fast-match']));
-
-    resolveSlow([buildMatchedItem('stale-match')]);
-    await waitFor(() => expect(getIndices).toHaveBeenCalledTimes(2));
-
-    expect(result.current.indexNames).toEqual(['fast-match']);
+    // The original in-flight "a" fetch finally resolves; it must still populate "a"'s result.
+    resolveA([buildMatchedItem('a-match')]);
+    await waitFor(() => expect(result.current.indexNames).toEqual(['a-match']));
   });
 });
