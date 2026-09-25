@@ -21,6 +21,7 @@ import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metad
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
 import { getLatestEntitiesIndexName } from '../../common/domain/entity_index';
 import type { EntityStoreCoreSetup } from '../types';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 jest.mock('./factories');
 jest.mock('./should_delete_orphaned_task', () => ({
@@ -422,11 +423,10 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     await runStatusReportTask();
 
     expect(withContextSpy).toHaveBeenCalledWith(
-      {
-        type: 'security_solution',
-        name: 'entity_analytics-entity_store_status_report_task',
-        id: `status:${NAMESPACE}`,
-      },
+      buildEaExecutionContext(
+        EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_STATUS_REPORT_TASK,
+        `status:${NAMESPACE}`
+      ),
       expect.any(Function)
     );
   });
