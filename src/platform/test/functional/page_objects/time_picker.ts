@@ -356,14 +356,15 @@ export class TimePickerPageObject extends FtrService {
       'superDatePickerApplyTimeButton',
       { timeout: 100 }
     );
+    // The picker re-renders as its date popover closes, so a bare resolve-and-click can be swallowed
     if (superDatePickerApplyButtonExists) {
       // Timepicker is in top nav
       // Click super date picker apply button to apply time range
-      await this.testSubjects.click('superDatePickerApplyTimeButton');
+      await this.testSubjects.clickWhenNotDisabled('superDatePickerApplyTimeButton');
     } else {
       // Timepicker is embedded in query bar
       // click query bar submit button to apply time range
-      await this.testSubjects.click('querySubmitButton');
+      await this.testSubjects.clickWhenNotDisabled('querySubmitButton');
     }
   }
 
