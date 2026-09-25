@@ -237,6 +237,7 @@ export function useMiDeploy({
       // state in the final shared update so succeeded entries are cleared after the deploy SO write.
       // undefined means cleanup didn't run this invocation; the retry path writes mid-flight instead.
       let remainingPending: Record<string, string> | undefined;
+      let dirtyUpdateApplied = false;
 
       if (isInitialDeploy) {
         const plan = planMiInitialRun(
@@ -264,7 +265,6 @@ export function useMiDeploy({
         // Dirty update: update all already-deployed MI policies with the current session config.
         // Runs when isDirty regardless of whether there are new targets, so existing policies
         // are always brought up to date in the same run even when the user adds a service.
-        let dirtyUpdateApplied = false;
         if (isDirty) {
           const byPolicy = new Map<string, string[]>();
           for (const [instanceId, policyId] of Object.entries(policyIdsByInstance)) {
