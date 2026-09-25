@@ -30,13 +30,7 @@ jest.mock('../../links/discover_links/use_discover_href', () => ({
 // render the button slot so the "Actions" button lands in the DOM.
 const mockActionsContextMenu = jest.fn();
 jest.mock('../../actions_context_menu', () => ({
-  ActionsContextMenu: ({
-    actions,
-    button,
-  }: {
-    actions: ActionGroups;
-    button: React.ReactNode;
-  }) => {
+  ActionsContextMenu: ({ actions, button }: { actions: ActionGroups; button: React.ReactNode }) => {
     mockActionsContextMenu({ actions });
     return (
       <div data-test-subj="actionsContextMenuMock">

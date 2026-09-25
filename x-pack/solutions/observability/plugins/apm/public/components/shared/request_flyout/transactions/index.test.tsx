@@ -199,9 +199,7 @@ describe('RequestFlyoutTransactions', () => {
     );
 
     fireEvent.click(screen.getByTestId('transactionRow-POST /api/orders'));
-    expect(screen.getByTestId('transactionDetailFlyoutName')).toHaveTextContent(
-      'POST /api/orders'
-    );
+    expect(screen.getByTestId('transactionDetailFlyoutName')).toHaveTextContent('POST /api/orders');
   });
 
   it('closes the flyout when the flyout close button is clicked', () => {

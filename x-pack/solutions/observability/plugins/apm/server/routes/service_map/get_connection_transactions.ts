@@ -138,8 +138,7 @@ export function getConnectionTransactions({
 
       const sourceBuckets = sourceTxResponse.aggregations?.transaction_ids.buckets ?? [];
       transactionIds = sourceBuckets.map((b) => String(b.key));
-      isMaxTransactionsReached =
-        parentIds.length >= MAX_IDS || transactionIds.length >= MAX_IDS;
+      isMaxTransactionsReached = parentIds.length >= MAX_IDS || transactionIds.length >= MAX_IDS;
     } else {
       //
       // Service→dependency Phase 1: resource-based join.
@@ -259,9 +258,7 @@ export function getConnectionTransactions({
         value: totalCount,
       });
 
-      const transactionType = String(
-        (bucket as any).transaction_type?.buckets?.[0]?.key ?? ''
-      );
+      const transactionType = String((bucket as any).transaction_type?.buckets?.[0]?.key ?? '');
 
       return {
         name: String(bucket.key),

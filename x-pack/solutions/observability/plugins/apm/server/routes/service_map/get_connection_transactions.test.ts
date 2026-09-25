@@ -57,6 +57,11 @@ function idsAggResponse(ids: string[], aggName: string) {
  * Build a Phase 2 ES aggregation response with one bucket per transaction name.
  * The bucket shape is the minimum needed so that `calculateFailedTransactionRate`,
  * `getLatencyValue`, and `calculateThroughputWithRange` do not throw.
+ *
+ * `calculateFailedTransactionRate` is called with the raw bucket, so the bucket
+ * must contain the filter sub-aggregation keys produced by `getOutcomeAggregation`
+ * for `ApmDocumentType.TransactionEvent`: `successful` and `successful_or_failed`,
+ * each with a `doc_count` (filter aggregation response shape).
  */
 function txGroupsAggResponse(txNames: string[]) {
   return {
@@ -67,15 +72,10 @@ function txGroupsAggResponse(txNames: string[]) {
           doc_count: 10,
           // avg latency aggregation (used with LatencyAggregationType.avg)
           latency: { value: 150_000 }, // 150 ms in µs
-          // outcome filter aggregation expected by calculateFailedTransactionRate
-          // The exact field names mirror what getOutcomeAggregation produces for
-          // ApmDocumentType.TransactionEvent.
-          outcome: {
-            buckets: [
-              { key: 'success', doc_count: 9 },
-              { key: 'failure', doc_count: 1 },
-            ],
-          },
+          // outcome filter aggregations expected by calculateFailedTransactionRate
+          // for ApmDocumentType.TransactionEvent (filter aggs return doc_count).
+          successful: { doc_count: 9 },
+          successful_or_failed: { doc_count: 10 },
           transaction_type: {
             buckets: [{ key: 'request', doc_count: 10 }],
           },
@@ -200,18 +200,14 @@ describe('getConnectionTransactions', () => {
     });
 
     it('sets the correct operation names for Phase 1a and 1b', async () => {
-      const search: SearchMock = jest
-        .fn()
-        .mockResolvedValueOnce(idsAggResponse([], 'parent_ids'));
+      const search: SearchMock = jest.fn().mockResolvedValueOnce(idsAggResponse([], 'parent_ids'));
 
       const apmEventClient = { search } as unknown as APMEventClient;
       await getConnectionTransactions(
         makeOptions({ apmEventClient, targetServiceName: 'serviceB' })
       );
 
-      expect(search.mock.calls[0][0]).toBe(
-        'get_connection_transactions_target_parent_ids'
-      );
+      expect(search.mock.calls[0][0]).toBe('get_connection_transactions_target_parent_ids');
     });
   });
 
