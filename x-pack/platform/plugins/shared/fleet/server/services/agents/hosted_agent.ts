@@ -25,7 +25,10 @@ export async function getHostedPolicies(
   const agentPolicies = await agentPolicyService.getByIds(soClient, Array.from(policyIdsToGet), {
     fields: ['is_managed'],
     ignoreMissing: true,
-    spaceId: options?.spaceId,
+    // Only pass spaceId when the client is unscoped (spaceId '*'). For a space-scoped client the
+    // client already enforces the namespace; passing an explicit namespaces param would trigger a
+    // _has_privileges check with no user credentials.
+    ...(options?.spaceId === '*' ? { spaceId: options.spaceId } : {}),
   });
   const hostedPolicies = agentPolicies.reduce<Record<string, boolean>>((acc, policy) => {
     acc[policy.id] = policy.is_managed;

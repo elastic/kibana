@@ -42,9 +42,12 @@ async function verifyNewAgentPolicy(
 ) {
   let newAgentPolicy;
   try {
-    newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId, false, {
-      spaceId: options?.spaceId,
-    });
+    newAgentPolicy = await agentPolicyService.get(
+      soClient,
+      newAgentPolicyId,
+      false,
+      options?.spaceId === '*' ? { spaceId: options.spaceId } : {}
+    );
   } catch (err) {
     if (err instanceof SavedObjectNotFound) {
       throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
