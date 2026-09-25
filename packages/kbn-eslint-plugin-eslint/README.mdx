@@ -71,6 +71,26 @@ Disallows the usage of an async function as a constructor for a Promise function
 
 Disallows the usage of constructor arguments into class property initializers.
 
+## no_feature_flag_snapshot
+
+Disallows freezing `getBooleanValue$` / `getStringValue$` / `getNumberValue$` on the first emission via `firstValueFrom`, or via `subscribe()` immediately followed by `unsubscribe()`.
+
+In an HTTP handler, use the request context. It evaluates the flag for that request, so do not read the plugin start contract with `firstValueFrom`:
+
+```typescript
+const { featureFlags } = await context.core;
+const enabled = await featureFlags.getBooleanValue('myPlugin.exampleBoolean', false);
+```
+
+Elsewhere, subscribe for as long as the decision should follow the flag. When the function already runs on every action, disable the line and say why:
+
+```javascript
+// eslint-disable-next-line @kbn/eslint/no_feature_flag_snapshot -- read again on every request
+const enabled = await firstValueFrom(featureFlags.getBooleanValue$('flag', false));
+```
+
+`allow` is a temporary list of existing files so the rule can land before those calls are updated. Delete a path in the PR that subscribes or adds the line disable. Test files are ignored. Tracked in https://github.com/elastic/kibana/issues/293566.
+
 ## no_export_all
 
 Disables the usage of `export *`.

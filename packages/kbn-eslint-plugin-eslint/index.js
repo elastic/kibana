@@ -42,6 +42,7 @@ module.exports = {
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
     no_wrapped_error_in_logger: require('./rules/no_wrapped_error_in_logger'),
     no_sync_import_from_plugin: require('./rules/no_sync_import_from_plugin'),
+    no_feature_flag_snapshot: require('./rules/no_feature_flag_snapshot'),
     no_npx_playwright: require('./rules/no_npx_playwright'),
     no_viz_naming: require('./rules/no_viz_naming'),
   },
