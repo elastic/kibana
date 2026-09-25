@@ -7,7 +7,6 @@
 
 import { assertValidConversationEventType } from '@kbn/agent-builder-common';
 import type { ConversationEventUIDefinition } from '@kbn/agent-builder-browser';
-import type { ZodType } from '@kbn/zod/v4';
 
 /**
  * Internal service maintaining a registry of conversation event UI definitions, keyed by event
@@ -28,8 +27,8 @@ export class ConversationEventsService {
    * @throws Error if the type is already registered, contains the id delimiter, is reserved, or
    *   shadows a built-in timeline event type.
    */
-  register<TType extends string, TSchema extends ZodType>(
-    definition: ConversationEventUIDefinition<TType, TSchema>
+  register<TType extends string, TData>(
+    definition: ConversationEventUIDefinition<TType, TData>
   ): void {
     if (this.registry.has(definition.type)) {
       throw new Error(`Conversation event type "${definition.type}" is already registered.`);

@@ -12,6 +12,7 @@ import type {
   ToolCallStep,
 } from '@kbn/agent-builder-common';
 import {
+  AgentExecutionMode,
   ChatEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
@@ -555,6 +556,10 @@ describe('runDefaultAgentMode', () => {
 
     const initialCommand = (streamEvents: jest.Mock): Command<unknown, Partial<StateType>> =>
       streamEvents.mock.calls[0][0];
+    const streamOptions = (
+      streamEvents: jest.Mock
+    ): { streamMode?: string; configurable?: Record<string, unknown> } =>
+      (streamEvents.mock.calls[0] as unknown[])[1] as ReturnType<typeof streamOptions>;
 
     it('hands the tracker and the todo state manager to the graph', async () => {
       const { context, streamEvents } = setup();
@@ -567,13 +572,30 @@ describe('runDefaultAgentMode', () => {
       const graphParams = createAgentGraphMock.mock.calls[0][0];
       expect(graphParams.toolExecutionBuffer).toBeInstanceOf(RunTracker);
       // the root `on_chain_stream` chunks must carry the full state (see `RunTracker`)
-      expect((streamEvents.mock.calls[0] as unknown[])[1]).toMatchObject({ streamMode: 'values' });
+      expect(streamOptions(streamEvents).streamMode).toBe('values');
+      // a sub-agent run must not inherit the checkpoint namespace of the parent node it runs in
+      expect(streamOptions(streamEvents).configurable).toStrictEqual({ checkpoint_ns: '' });
       expect(graphParams.todoStateManager).toBe(context.todoStateManager);
       // fresh run: starts at init with no pending calls
       const command = initialCommand(streamEvents);
       expect(command.goto).toEqual([nodeNames.init]);
       expect(command.update).not.toHaveProperty('pendingToolCallIds');
       expect(command.update).toMatchObject({ cycleLimit: 30, steps: new Overwrite([]) });
+    });
+
+    it('also cuts the inherited abort signals for a standalone run', async () => {
+      const { context, streamEvents } = setup();
+      context.executionMode = AgentExecutionMode.standalone;
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      expect(streamOptions(streamEvents).configurable).toStrictEqual({
+        checkpoint_ns: '',
+        __pregel_abort_signals: undefined,
+      });
     });
 
     const pausedCall: ToolCallStep = {

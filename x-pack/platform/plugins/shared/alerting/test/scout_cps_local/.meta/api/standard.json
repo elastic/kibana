@@ -1,0 +1,22 @@
+{
+  "sha1": "a42854b7ec9d9cf8d592f3483f9abf6076aa0e0e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "92a51da7743546e-f7dc5c79f56a245",
+      "title": "[NON-MKI] Missing UIAM API key tag reconciliation rule execution reconciles missing UIAM API key tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_cps_local/api/tests/missing_uiam_api_key_tag.spec.ts",
+        "line": 21,
+        "column": 20
+      }
+    }
+  ]
+}

@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/css-utils'
   - '@kbn/logging'
+  - '@kbn/ml-server-schemas'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/lens-common'
   - '@kbn/esql-utils'

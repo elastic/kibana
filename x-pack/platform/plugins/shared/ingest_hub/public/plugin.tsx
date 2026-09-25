@@ -19,6 +19,7 @@ import { INGEST_HUB_APP_ID } from '@kbn/deeplinks-observability';
 import type { Observable } from 'rxjs';
 import { catchError, firstValueFrom, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type {
   IngestHubSetup,
   IngestHubStart,
@@ -61,13 +62,17 @@ const createNavigationAvailable$ = (
 };
 
 export class IngestHubPlugin
-  implements Plugin<IngestHubSetup, IngestHubStart, object, IngestHubStartDependencies>
+  implements
+    Plugin<IngestHubSetup, IngestHubStart, { cloud?: CloudSetup }, IngestHubStartDependencies>
 {
   private readonly ingestFlows: IngestFlow[] = [];
 
   constructor(private readonly context: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup<IngestHubStartDependencies>): IngestHubSetup {
+  setup(
+    coreSetup: CoreSetup<IngestHubStartDependencies>,
+    deps: { cloud?: CloudSetup } = {}
+  ): IngestHubSetup {
     const startServicesPromise = coreSetup.getStartServices();
 
     coreSetup.application.register({
@@ -111,7 +116,12 @@ export class IngestHubPlugin
       },
     });
 
-    registerOnboardingApp(coreSetup, startServicesPromise, this.context.env.packageInfo.version);
+    registerOnboardingApp(
+      coreSetup,
+      startServicesPromise,
+      this.context.env.packageInfo.version,
+      deps.cloud
+    );
 
     return {};
   }

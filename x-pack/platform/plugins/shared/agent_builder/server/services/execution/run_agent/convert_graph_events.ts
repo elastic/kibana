@@ -121,13 +121,17 @@ const NODE_NAMES: ReadonlySet<string> = new Set(Object.values(steps));
 
 /**
  * True for the `on_chain_end` of one of *our* nodes running in the *root* graph of this run.
- * Node names are reused by nested graphs (a sub-agent runs this same graph; tool-internal graphs
- * have their own names) and inherited metadata is not enough to tell them apart, so this checks:
+ * Node names are reused by nested graphs (tool-internal graphs have their own names) and inherited
+ * metadata is not enough to tell them apart, so this checks:
  * - `metadata.graphName`,
  * - `event.name === metadata.langgraph_node` (the node's own run, not a runnable inside it — the
  *   same test LangGraph uses in its stream handlers),
- * - a single-segment `langgraph_checkpoint_ns` (LangGraph joins nested namespaces with `|`; any
- *   graph invoked under one of our nodes with an inherited config gets a `parent|child` namespace).
+ * - a single-segment `langgraph_checkpoint_ns`: LangGraph joins nested namespaces with `|`, so a
+ *   graph invoked under one of our nodes whose events reach this stream through inherited callbacks
+ *   shows up as `parent|child`. Our own nodes are always single-segment, including inside a
+ *   sub-agent run (`run_chat_agent` resets the inherited namespace when it streams the graph), so
+ *   this check cannot tell a sub-agent's nodes from the parent's: a sub-agent's events are kept off
+ *   the parent's stream by `callbacks: []`, not by this check.
  */
 const isRootGraphNodeEnd = (event: LangchainStreamEvent, graphName: string): boolean => {
   if (event.event !== 'on_chain_end' || !NODE_NAMES.has(event.name)) return false;
