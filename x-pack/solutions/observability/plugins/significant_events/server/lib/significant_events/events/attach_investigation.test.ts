@@ -435,4 +435,28 @@ describe('attachInvestigationToEvent', () => {
       expect.anything()
     );
   });
+
+  it('uses a canonical EventClient version for lineage when eventSearchClient has a synthetic UUID', async () => {
+    const existing = createEvent({ event_uuid: 'event-1' });
+    const readEvent = createEvent({ event_uuid: 'group-hash' });
+    const { client, dataStreamClient } = createEventClient([existing]);
+    const readFindByEventId = jest.fn().mockResolvedValue({ hits: [readEvent] });
+    const eventSearchClient = { findByEventId: readFindByEventId } as unknown as Parameters<
+      typeof attachInvestigationToEvent
+    >[0]['eventSearchClient'];
+    const eventClientFindByEventId = jest.spyOn(client, 'findByEventId');
+
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventSearchClient,
+      eventId: 'agent-event-1',
+      investigation: createInvestigation(),
+    });
+
+    expect(result.updated).toBe(1);
+    expect(readFindByEventId).toHaveBeenCalledWith('agent-event-1');
+    expect(eventClientFindByEventId).toHaveBeenCalledWith('agent-event-1');
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    expect(callArg.documents[0].previous_event_uuid).toBe('event-1');
+  });
 });

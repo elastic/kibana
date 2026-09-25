@@ -13,7 +13,7 @@ import {
 import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
-  type EventClient,
+  type SignificantEventsReadClient,
 } from '../../../lib/significant_events/events';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
@@ -270,7 +270,7 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
   eventClient,
   params,
 }: {
-  eventClient: EventClient;
+  eventClient: SignificantEventsReadClient;
   params: EventSearchInput & { view?: V };
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';

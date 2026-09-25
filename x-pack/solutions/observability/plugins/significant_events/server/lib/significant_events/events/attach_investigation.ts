@@ -16,6 +16,7 @@ import type {
 } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { EventClient } from './event_client';
+import type { SignificantEventsReadClient } from './read_client';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import { toRuleEvent } from './to_rule_event';
 
@@ -94,27 +95,47 @@ const fieldsFromTriggerFeedback = (
 
 export const attachInvestigationToEvent = async ({
   eventClient,
+  eventSearchClient,
   eventId,
   investigation,
   triggerFeedback,
   alertEventsClient,
   logger,
 }: {
+  /** Full-surface EventClient — all writes and canonical lineage reads go here. */
   eventClient: EventClient;
+  /**
+   * Flag-aware read surface (`getEventSearchClient()`). When provided, `resolvedSearchClient`
+   * uses this for the initial read; canonical lineage (previous_event_uuid, investigations) is
+   * always sourced from `eventClient`. Defaults to `eventClient` for legacy tests. Production
+   * callers must always supply this.
+   */
+  eventSearchClient?: SignificantEventsReadClient;
   eventId: string;
   investigation: SignificantEventInvestigation;
   triggerFeedback?: SignificantEventTriggerFeedback;
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
 }): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
-  const { hits } = await eventClient.findByEventId(eventId);
+  const resolvedSearchClient = eventSearchClient ?? eventClient;
+  const { hits } = await resolvedSearchClient.findByEventId(eventId);
   const latest = hits[hits.length - 1];
 
   if (!latest) {
     return { event_uuid: eventId, updated: 0, ignored: 1 };
   }
 
-  const existing = latest.investigations ?? [];
+  // RuleEventsClient uses `group_hash` as a synthetic event_uuid, so a legacy write must retain
+  // the actual EventClient version as its predecessor.
+  const latestLegacy =
+    resolvedSearchClient === eventClient
+      ? latest
+      : (await eventClient.findByEventId(eventId)).hits.at(-1);
+  if (!latestLegacy) {
+    return { event_uuid: eventId, updated: 0, ignored: 1 };
+  }
+
+  const existing = latestLegacy.investigations ?? [];
 
   // Replace-by-workflow_execution_id: completion events are safe to redeliver.
   const existingIdx = existing.findIndex(
@@ -132,22 +153,22 @@ export const attachInvestigationToEvent = async ({
   }
 
   const changedFields = pickChangedFields(
-    latest,
-    fieldsFromTriggerFeedback(latest, triggerFeedback, eventId, logger)
+    latestLegacy,
+    fieldsFromTriggerFeedback(latestLegacy, triggerFeedback, eventId, logger)
   );
 
   // No-op only when neither the investigation list nor any reassessed field actually changed.
   if (isEqual(investigations, existing) && Object.keys(changedFields).length === 0) {
-    return { event_uuid: latest.event_uuid, updated: 0, ignored: 1 };
+    return { event_uuid: latestLegacy.event_uuid, updated: 0, ignored: 1 };
   }
 
   const now = new Date().toISOString();
   const nextEventUuid = uuidv4();
   const updatedEvent = {
-    ...latest,
+    ...latestLegacy,
     '@timestamp': now,
     event_uuid: nextEventUuid,
-    previous_event_uuid: latest.event_uuid,
+    previous_event_uuid: latestLegacy.event_uuid,
     investigations,
     workflow_execution_id: investigation.workflow_execution_id,
     ...changedFields,
@@ -168,7 +189,7 @@ export const attachInvestigationToEvent = async ({
   emitSignificantEventWriteTriggers({
     eventClient,
     significantEvent: updatedEvent,
-    priorSignificantEvent: latest,
+    priorSignificantEvent: latestLegacy,
   });
 
   return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };

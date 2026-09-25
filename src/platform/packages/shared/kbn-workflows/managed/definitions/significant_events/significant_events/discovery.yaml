@@ -54,7 +54,6 @@ outputs:
     type: number
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
-  EVENTS_INDEX: '.significant_events-events'
   INVESTIGATABLE_SEVERITIES: ['80-critical', '60-high']
 
 steps:
@@ -242,7 +241,7 @@ steps:
                   description: 'Echo the event_id verbatim from the discovery. Also returned by events_write. Required for trigger_investigation context.'
                 event_uuid:
                   type: string
-                  description: 'UUID assigned by events_write. Present only when written is true and required for trigger_investigation context.'
+                  description: 'UUID returned by events_write when written is true. Omit entirely for failed or skipped writes — used in trigger_investigation context when present.'
                 severity:
                   type: string
                   enum: ['80-critical', '60-high', '40-medium', '20-low']
@@ -380,46 +379,16 @@ steps:
                 type: if
                 condition: '${{ foreach.item.event_uuid != null and consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
                 steps:
+                  # Flag-aware read (`getEventSearchClient()`): serves from `.rule-events` when
+                  # SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ is on, `.significant_events-events`
+                  # otherwise. Returns only the latest current-state version per event_id.
                   - name: resolve_open_event
-                    type: elasticsearch.request
+                    type: kibana.request
                     with:
-                      method: POST
-                      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
-                      body:
-                        size: 1
-                        sort:
-                          - '@timestamp':
-                              order: desc
-                        query:
-                          bool:
-                            filter:
-                              - term:
-                                  kibana.space_ids: '{{ variables.spaceId }}'
-                              - term:
-                                  event_id: '{{ foreach.item.event_id }}'
-                    on-failure:
-                      continue: true
-
-                  # Skip events that already have an investigation attached. events_write carries
-                  # the investigations lineage forward on re-open, so any version of the event_id
-                  # that carries an investigations entry means this episode was already investigated.
-                  # The field is a mapped object, so an `exists` filter matches only versions that
-                  # actually carry an entry (an empty investigations array does not count).
-                  - name: check_prior_investigation
-                    type: elasticsearch.request
-                    with:
-                      method: POST
-                      path: '/{{ consts.EVENTS_INDEX }}/_count?ignore_unavailable=true'
-                      body:
-                        query:
-                          bool:
-                            filter:
-                              - term:
-                                  kibana.space_ids: '{{ variables.spaceId }}'
-                              - term:
-                                  event_id: '{{ foreach.item.event_id }}'
-                              - exists:
-                                  field: investigations
+                      method: GET
+                      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events?event_id={{ foreach.item.event_id }}&perPage=1'
+                      headers:
+                        x-elastic-internal-origin: 'kibana'
                     on-failure:
                       continue: true
 
@@ -434,15 +403,18 @@ steps:
                     type: if
                     condition: >-
                       ${{ steps.resolve_open_event.error == null
-                        and steps.resolve_open_event.output.hits.hits[0] != null }}
+                        and steps.resolve_open_event.output.hits[0] != null }}
                     steps:
                       # Keep the dedupe condition as a wrapping step so the
                       # quota gate can run only after event deduplication.
+                      # Skip events that already have an investigation attached. events_write
+                      # carries the investigations lineage forward on re-open, so a non-empty
+                      # `investigations` array on the latest version means this episode was
+                      # already investigated.
                       - name: guard_missing_investigation
                         type: if
                         condition: >-
-                          ${{ steps.check_prior_investigation.error != null
-                            or steps.check_prior_investigation.output.count == 0 }}
+                          ${{ (steps.resolve_open_event.output.hits[0].investigations | size | default: 0) == 0 }}
                         steps:
                           - name: consume_investigation_quota
                             type: kibana.request
@@ -468,13 +440,13 @@ steps:
                                   workflow-id: 'system-significant-events-investigation'
                                   inputs:
                                     message: |
-                                      {{ steps.resolve_open_event.output.hits.hits[0]._source.title }}
+                                      {{ steps.resolve_open_event.output.hits[0].title }}
 
-                                      {{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}
+                                      {{ steps.resolve_open_event.output.hits[0].summary }}
 
-                                      Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis }}
-                                    title: '{{ steps.resolve_open_event.output.hits.hits[0]._source.title }}'
-                                    stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'
+                                      Probable cause: {{ steps.resolve_open_event.output.hits[0].symptom_hypothesis }}
+                                    title: '{{ steps.resolve_open_event.output.hits[0].title }}'
+                                    stream_names: '${{ steps.resolve_open_event.output.hits[0].stream_names | default: [] }}'
                                     concurrency_key: '{{ foreach.item.event_id }}'
                                     context:
                                       source: 'significant_event'
@@ -482,8 +454,8 @@ steps:
                                       event_uuid: '{{ foreach.item.event_uuid }}'
                                       event_id: '{{ foreach.item.event_id }}'
                                       status: '{{ foreach.item.status }}'
-                                      causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
-                                      blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
+                                      causal_features: '${{ steps.resolve_open_event.output.hits[0].causal_features | default: [] }}'
+                                      blast_radius: '${{ steps.resolve_open_event.output.hits[0].blast_radius | default: [] }}'
 
   - name: output_result
     type: workflow.output

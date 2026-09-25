@@ -193,6 +193,35 @@ describe('RuleEventsClient', () => {
       expect(q).toContain('FIELD_EXTRACT(data, "event_id") IN ("agent-event-1", "agent-event-2")');
     });
 
+    it('filters ruleUuids via MV_INTERSECTS against FIELD_EXTRACT(data, "signals.metadata.rule_uuid")', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      await client.findLatestByCurrentStatePaginated({ ruleUuids: ['rule-A', 'rule-B'] });
+
+      const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A", "rule-B"])'
+      );
+    });
+
+    it('filters topologyFeatureIds via MV_INTERSECTS against causal_features.feature_id OR blast_radius.feature_id', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      await client.findLatestByCurrentStatePaginated({ topologyFeatureIds: ['feat-1'] });
+
+      const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "causal_features.feature_id"), ["feat-1"])'
+      );
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "blast_radius.feature_id"), ["feat-1"])'
+      );
+    });
+
     it('orders stages: created_at -> time range -> free-text -> latest-per-group -> status', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
@@ -246,6 +275,68 @@ describe('RuleEventsClient', () => {
         perPage: 25,
         total: 1,
       });
+    });
+  });
+
+  describe('findLatestPaginated', () => {
+    it('delegates to findLatestByCurrentStatePaginated with no filters', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      const result = await client.findLatestPaginated();
+
+      expect(result).toEqual({ hits: [], page: 1, perPage: 25, total: 0 });
+      expect(query).toHaveBeenCalled();
+    });
+  });
+
+  describe('findLatestActive', () => {
+    it('filters episode.status to the active mapping, not the top-level status', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findLatestActive({});
+
+      const q = lastQuery(query);
+      expect(q).toContain('`episode.status` IN ("active")');
+      expect(q).not.toContain('status IN ("open")');
+    });
+
+    it('narrows by streamNames via FIELD_EXTRACT(data, "stream_names")', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findLatestActive({ streamNames: ['logs.checkout'] });
+
+      const q = lastQuery(query);
+      expect(q).toContain('MV_INTERSECTS(FIELD_EXTRACT(data, "stream_names"), ["logs.checkout"])');
+    });
+
+    it('narrows by ruleUuids via FIELD_EXTRACT(data, "signals.metadata.rule_uuid")', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findLatestActive({ ruleUuids: ['rule-A'] });
+
+      const q = lastQuery(query);
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
+      );
+    });
+
+    it('decodes hits the same way as findLatest', async () => {
+      const row: MockRow = { source: ruleEventSource(), dataJson: JSON.stringify(dataDoc) };
+      const { client } = createClient(async () => sourceResponse([row]));
+
+      const { hits } = await client.findLatestActive({});
+
+      expect(hits).toEqual([
+        {
+          ...dataDoc,
+          '@timestamp': '2026-01-02T00:00:00.000Z',
+          event_uuid: 'group-hash-1',
+          status: 'open',
+          severity: '40-medium',
+        },
+      ]);
     });
   });
 

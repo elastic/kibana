@@ -36,12 +36,12 @@ const event: SignificantEvent = {
 const createGetScopedClients = (
   events: SignificantEvent[]
 ): jest.MockedFunction<GetScopedClients> => {
-  const getEventClient = jest.fn(() => ({
+  const getEventSearchClient = jest.fn(() => ({
     findByEventId: jest.fn().mockResolvedValue({ hits: events }),
   }));
 
   return jest.fn().mockResolvedValue({
-    getEventClient,
+    getEventSearchClient,
   } as unknown as RouteHandlerScopedClients) as jest.MockedFunction<GetScopedClients>;
 };
 

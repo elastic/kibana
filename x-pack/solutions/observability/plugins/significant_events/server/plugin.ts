@@ -354,6 +354,13 @@ export class SignificantEventsPlugin
               })
             : false;
         },
+        getUseRuleEventsRead: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.featureFlags.getBooleanValue(
+            SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
+            false
+          );
+        },
       });
     }
 

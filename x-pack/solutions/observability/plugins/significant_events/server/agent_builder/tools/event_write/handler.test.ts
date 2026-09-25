@@ -21,7 +21,10 @@ import {
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { eventsWriteItemSchema } from './tool';
-import type { EventClient } from '../../../lib/significant_events/events';
+import type {
+  EventClient,
+  SignificantEventsReadClient,
+} from '../../../lib/significant_events/events';
 import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
 
 const TS_EARLIER = '2024-01-01T00:00:00.000Z';
@@ -1185,6 +1188,112 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     expect(writtenDoc.symptom_hypothesis).toBe(
       'Both auth route and SageMaker provider return >=400.'
     );
+  });
+});
+
+describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', () => {
+  it('uses eventSearchClient for dedup and current-state reads while eventClient supplies legacy lineage', async () => {
+    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
+      findLatestPaginated: jest.fn(),
+      findLatestByCurrentStatePaginated: jest.fn(),
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+    };
+    const eventClient = makeEventClient();
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      inputs: [{ ...baseInput }, { ...baseInput, event_id: 'existing-event-id' }],
+    });
+
+    expect(eventSearchClient.findLatestActive).toHaveBeenCalled();
+    expect(eventSearchClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
+    expect(eventClient.findLatestActive).not.toHaveBeenCalled();
+    expect(eventClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
+  });
+
+  it('uses the canonical event UUID for continuation lineage when eventSearchClient has a synthetic UUID', async () => {
+    const eventId = 'existing-event-id';
+    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
+      findLatestPaginated: jest.fn(),
+      findLatestByCurrentStatePaginated: jest.fn(),
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId: jest.fn().mockResolvedValue({
+        hits: [makeStoredEvent(eventId, { event_uuid: 'group-hash' })],
+      }),
+    };
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({
+        hits: [makeStoredEvent(eventId, { event_uuid: 'legacy-event-uuid' })],
+      }),
+    });
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      inputs: [{ ...baseInput, event_id: eventId, severity: '80-critical' }],
+    });
+
+    const written = eventClient.bulkCreate.mock.calls[0][0][0] as SignificantEvent;
+    expect(written.previous_event_uuid).toBe('legacy-event-uuid');
+  });
+
+  it('uses eventClient investigations when eventSearchClient has stale investigations (dual-write lag)', async () => {
+    const eventId = 'event-with-investigations';
+    const staleInvestigation = { workflow_execution_id: 'wf-old', started_at: TS_EARLIER };
+    const freshInvestigation = { workflow_execution_id: 'wf-new', started_at: TS_EARLIER };
+    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
+      findLatestPaginated: jest.fn(),
+      findLatestByCurrentStatePaginated: jest.fn(),
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId: jest.fn().mockResolvedValue({
+        // eventSearchClient (RuleEventsClient) missed the dual-write for wf-new
+        hits: [
+          makeStoredEvent(eventId, {
+            event_uuid: 'group-hash',
+            investigations: [staleInvestigation],
+          }),
+        ],
+      }),
+    };
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({
+        hits: [
+          makeStoredEvent(eventId, {
+            event_uuid: 'real-uuid',
+            investigations: [staleInvestigation, freshInvestigation],
+          }),
+        ],
+      }),
+    });
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      inputs: [{ ...baseInput, event_id: eventId, severity: '80-critical' }],
+    });
+
+    const written = eventClient.bulkCreate.mock.calls[0][0][0] as SignificantEvent;
+    expect(written.investigations).toHaveLength(2);
+    expect(written.investigations).toEqual(
+      expect.arrayContaining([expect.objectContaining({ workflow_execution_id: 'wf-new' })])
+    );
+  });
+
+  it('falls back to eventClient for reads when eventSearchClient is omitted', async () => {
+    const eventClient = makeEventClient({
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+    });
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [{ ...baseInput }, { ...baseInput, event_id: 'existing-event-id' }],
+    });
+
+    expect(eventClient.findLatestActive).toHaveBeenCalled();
+    expect(eventClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
   });
 });
 

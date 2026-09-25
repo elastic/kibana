@@ -17,7 +17,7 @@ import {
   EventService,
   eventsDataStream,
   type eventsMappings,
-  type EventClient,
+  type SignificantEventsReadClient,
   type StoredEvent,
 } from '../../lib/significant_events/events';
 import type { GetScopedClients } from '../../routes/types';
@@ -26,6 +26,8 @@ interface CreateSignificantEventSmlTypeOptions {
   getScopedClients: GetScopedClients;
   getDataStreams: () => Promise<DataStreamsStart>;
   isAvailable: () => Promise<boolean>;
+  /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
+  getUseRuleEventsRead: () => Promise<boolean>;
 }
 
 const PAGE_SIZE = 100;
@@ -48,9 +50,12 @@ export const createSignificantEventSmlType = ({
   getScopedClients,
   getDataStreams,
   isAvailable,
+  getUseRuleEventsRead,
 }: CreateSignificantEventSmlTypeOptions): SmlTypeDefinition => {
   const eventService = new EventService();
-  const getSmlEventClient = async (esClient: ElasticsearchClient) => {
+  const getSmlEventClient = async (
+    esClient: ElasticsearchClient
+  ): Promise<SignificantEventsReadClient | undefined> => {
     if (!(await isAvailable())) {
       return;
     }
@@ -59,16 +64,14 @@ export const createSignificantEventSmlType = ({
     const dataStreamClient = await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
       eventsDataStream.name
     );
+    const useRuleEventsRead = await getUseRuleEventsRead();
 
-    // `EventService.getClient()` returns `EventClient | RuleEventsClient` now that
-    // `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` exists, but this SML type doesn't pass
-    // `useRuleEventsRead` (always false here), so the result is always an `EventClient` at
-    // runtime. See the equivalent note in `significant_events_clients.ts`.
     return eventService.getClient({
       dataStreamClient,
       esClient,
       space: DEFAULT_SPACE_ID,
-    }) as EventClient;
+      useRuleEventsRead,
+    });
   };
 
   return {
@@ -146,8 +149,8 @@ export const createSignificantEventSmlType = ({
       if (!originId) {
         return undefined;
       }
-      const { getEventClient } = await getScopedClients({ request: context.request });
-      const eventClient = await getEventClient();
+      const { getEventSearchClient } = await getScopedClients({ request: context.request });
+      const eventClient = await getEventSearchClient();
       const { hits } = await eventClient.findByEventId(originId);
       const event = hits.at(-1);
 

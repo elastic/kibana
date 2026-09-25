@@ -40,6 +40,7 @@ describe('event_investigation_attach tool', () => {
     const tool = createEventInvestigationAttachTool({
       getScopedClients: jest.fn().mockResolvedValue({
         getEventClient: jest.fn().mockResolvedValue({}),
+        getEventSearchClient: jest.fn().mockResolvedValue({}),
         getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
         licensing: {},
       }) as unknown as GetScopedClients,
@@ -51,7 +52,7 @@ describe('event_investigation_attach tool', () => {
     await invokeHandler(
       tool as never,
       {
-        event_uuid: 'event-uuid',
+        event_id: 'agent-event-1',
         workflow_execution_id: 'workflow-id',
         started_at: '2026-01-01T00:00:00.000Z',
       },
