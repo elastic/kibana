@@ -12,14 +12,21 @@ import type { FpTpWorld } from './types';
 
 const processName = (event: Ad2IndexedRawEvent): unknown => asRecord(event.source.process).name;
 
+/** Throws when nothing matches, so a rewrite whose target moved fails instead of changing nothing. */
 const mapEvents = (
   world: FpTpWorld,
+  target: string,
   matches: (event: Ad2IndexedRawEvent) => boolean,
   update: (event: Ad2IndexedRawEvent) => Ad2IndexedRawEvent
-): FpTpWorld => ({
-  ...world,
-  events: world.events.map((event) => (matches(event) ? withFieldMessage(update(event)) : event)),
-});
+): FpTpWorld => {
+  if (!world.events.some(matches)) {
+    throw new Error(`No raw event matches ${target}`);
+  }
+  return {
+    ...world,
+    events: world.events.map((event) => (matches(event) ? withFieldMessage(update(event)) : event)),
+  };
+};
 
 /** Rewrites the parent of every raw event whose process is `childName`. */
 export const withProcessParent = (
@@ -29,6 +36,7 @@ export const withProcessParent = (
 ): FpTpWorld =>
   mapEvents(
     world,
+    `process ${childName}`,
     (event) => processName(event) === childName,
     (event) => ({
       ...event,
@@ -40,6 +48,7 @@ export const withProcessParent = (
 export const withoutProcessParent = (world: FpTpWorld, childName: string): FpTpWorld =>
   mapEvents(
     world,
+    `process ${childName}`,
     (event) => processName(event) === childName,
     (event) => {
       const { parent, ...process } = asRecord(event.source.process);
@@ -56,6 +65,7 @@ export const withCommandLine = (
   const args = commandLine.split(/\s+/).filter(Boolean);
   return mapEvents(
     world,
+    `id ${eventId}`,
     ({ id }) => id === eventId,
     (event) => ({
       ...event,
@@ -76,6 +86,7 @@ export const withCommandLine = (
 export const withFilePath = (world: FpTpWorld, eventId: string, path: string): FpTpWorld =>
   mapEvents(
     world,
+    `id ${eventId}`,
     ({ id }) => id === eventId,
     (event) => ({
       ...event,
@@ -91,6 +102,7 @@ export const withProcessExecutable = (
 ): FpTpWorld =>
   mapEvents(
     world,
+    `process ${name}`,
     (event) => processName(event) === name,
     (event) => ({
       ...event,
@@ -109,6 +121,7 @@ export const withNetworkDestination = (
 ): FpTpWorld =>
   mapEvents(
     world,
+    `destination ${fromDomain}`,
     (event) => asRecord(event.source.destination).domain === fromDomain,
     (event) => ({ ...event, source: { ...event.source, destination } })
   );

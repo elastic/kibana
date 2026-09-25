@@ -19,12 +19,7 @@ interface EventSource {
 const CHAIN_PROCESSES = new Set(['powershell.exe', 'zbuild.exe']);
 const USER_PARENTS = new Set(['explorer.exe']);
 const MANAGEMENT_PARENTS = new Set(['ccmexec.exe', 'agentexecutor.exe']);
-const VENDOR_DESTINATIONS = new Set([
-  'manage.microsoft.com',
-  'sccm-dp-02.corp.local',
-  'dl.dropboxusercontent.com',
-  'api.dropbox.com',
-]);
+const VENDOR_DESTINATIONS = new Set(['manage.microsoft.com', 'sccm-dp-02.corp.local']);
 
 const eventSources = (world: FpTpWorld): EventSource[] =>
   world.events.map(({ source }) => source as EventSource);

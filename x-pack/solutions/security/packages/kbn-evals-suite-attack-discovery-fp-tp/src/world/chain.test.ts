@@ -191,6 +191,20 @@ describe('chain mutations', () => {
     ).toEqual(['C:\\other.exe', 'C:\\other.exe']);
   });
 
+  it.each([
+    ['withProcessParent', () => withProcessParent(world, 'nope.exe', { name: 'a.exe', pid: 1 })],
+    ['withoutProcessParent', () => withoutProcessParent(world, 'nope.exe')],
+    ['withCommandLine', () => withCommandLine(world, 'nope', 'a.exe')],
+    ['withFilePath', () => withFilePath(world, 'nope', 'C:\\a.exe')],
+    ['withProcessExecutable', () => withProcessExecutable(world, 'nope.exe', 'C:\\a.exe')],
+    [
+      'withNetworkDestination',
+      () => withNetworkDestination(world, 'nope.example', { domain: 'a', ip: '1.1.1.1', port: 1 }),
+    ],
+  ])('throws from %s when no raw event matches', (_name, rewrite) => {
+    expect(rewrite).toThrow('No raw event matches');
+  });
+
   it('returns the remaining events after withoutEventIds', () => {
     expect(withoutEventIds(world, [ids.eventId('start')]).events.map(({ id }) => id)).toEqual([
       ids.eventId('beacon'),

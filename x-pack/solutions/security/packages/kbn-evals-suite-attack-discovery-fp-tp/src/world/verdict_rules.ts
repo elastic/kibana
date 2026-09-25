@@ -21,8 +21,28 @@ export interface FpTpWorldChecks {
 }
 
 /**
- * Applies the workflow's verdict rules (`fp_tp_analysis.yaml`, first match wins) to
- * authored check results, so every example's gold follows from its world.
+ * The verdict rules `deriveFpTpOutcome` implements, as `fp_tp_analysis.yaml` states them.
+ * A test compares this text with the YAML, so changing the rules there fails until
+ * the function and this text are updated together.
+ */
+export const FP_TP_VERDICT_RULES = `
+1. inconclusive — world checks both support and contradict; or you cannot cite
+   an id from the hits below.
+2. false_positive — at least one world check contradicts, none supports, and
+   both the entity store and the raw events have hits. Missing evidence cannot
+   clear an alert: if either source is empty or its query failed, the verdict
+   is inconclusive.
+3. true_positive — process_parent or network_destination supports and no world
+   check contradicts. An empty or failed entity store does not block this.
+   entity_role and alert_linkage corroborate but are never enough on their own.
+4. inconclusive — anything else: every world check is skipped or neutral, or
+   only entity_role or alert_linkage supports.
+`;
+
+/**
+ * Applies `FP_TP_VERDICT_RULES` (first match wins) to authored check results, so every
+ * example's gold follows from its world. It reads the three world checks only: rule 1's
+ * citeability clause never applies because every example seeds citeable hits.
  */
 export const deriveFpTpOutcome = ({
   entityRole,

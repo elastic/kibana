@@ -20,11 +20,22 @@ export type FpTpEvidenceState =
   | 'attack_discovery_missing'
   | 'cited_alert_missing';
 
-/**
- * Where the world came from: written by hand, replayed from a published attack chain,
- * or a replayed chain with one fact changed.
- */
-export type FpTpLabelProvenance = 'authored' | 'replay' | 'adversarial-mutation';
+/** Where the world came from: written by hand, or replayed from a published attack chain. */
+export type FpTpProvenance = 'authored' | 'replay';
+
+/** How an example's world differs from the world of another example in its scenario. */
+export interface FpTpVariant {
+  /**
+   * A `mutation` must change at least one check result of the base, or it tests nothing
+   * the base does not. A `perturbation` changes evidence the checks do not read, so it
+   * must change none, and the gold does not move either.
+   */
+  readonly kind: 'mutation' | 'perturbation';
+  /** Id of the base example whose world this one changes. */
+  readonly of: string;
+  /** What changed. */
+  readonly description: string;
+}
 
 export interface FpTpExample {
   /** Unique across all scenarios; prefixed with the scenario key. */
@@ -32,22 +43,13 @@ export interface FpTpExample {
   readonly situation: FpTpSituation;
   readonly evidenceState: FpTpEvidenceState;
   readonly expectedOutcome: FpTpOutcome;
-  readonly labelProvenance: FpTpLabelProvenance;
+  readonly provenance: FpTpProvenance;
+  /** Unset for a base world. */
+  readonly variant?: FpTpVariant;
   /** The gold is not agreed yet; report the example's score separately. */
   readonly provisional?: boolean;
   /** Check results the world is authored to produce. The gold must follow from them. */
   readonly checks?: FpTpWorldChecks;
-  /**
-   * Set when the world changes one fact of the scenario's `.tp` world. A mutation must
-   * change at least one check result, or it tests nothing the base world does not.
-   */
-  readonly mutation?: string;
-  /**
-   * Set when the world drops or changes evidence the world checks do not read. A
-   * perturbation must leave every check result of the scenario's `.tp` world unchanged,
-   * so the gold does not move either.
-   */
-  readonly perturbation?: string;
   /**
    * Builds the world one run seeds. Every id in it must be a digest of `runMarker`
    * or contain one of the scenario's `sharedNames`, so runs never share a document.

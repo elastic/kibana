@@ -63,5 +63,5 @@ export type { FpTpSeededEvidence } from './seeded_evidence';
 export { shiftTwinToNow } from './shift_timestamps';
 export type { FpTpGold, FpTpIndexedEntity, FpTpMustRetrieve, FpTpTwin, FpTpWorld } from './types';
 export { toRunMarker, uniquify } from './uniquify';
-export { deriveFpTpOutcome } from './verdict_rules';
+export { deriveFpTpOutcome, FP_TP_VERDICT_RULES } from './verdict_rules';
 export type { FpTpCheckResult, FpTpWorldChecks } from './verdict_rules';

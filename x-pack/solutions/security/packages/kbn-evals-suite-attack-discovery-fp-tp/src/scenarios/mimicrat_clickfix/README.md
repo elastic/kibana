@@ -20,7 +20,7 @@ Each example declares the result each world check should reach (`checks`). Its g
 | `fp-network-only` | U4 | Benign activity with no entity role, no parents, management destinations | neutral / neutral / contradicts | `false_positive` |
 | `fp-entities-missing` | U1 | Benign mimic without entity records | skipped / contradicts / contradicts | `inconclusive` |
 | `fp-events-missing` | U1 | Benign mimic without raw events | contradicts / skipped / skipped | `inconclusive` |
-| `domain-swap` | U4 | The cradle, the stage-2 download and the C2 go to Dropbox | supports / supports / contradicts | `inconclusive` |
+| `domain-swap` | U4 | The cradle, the stage-2 download and the C2 go to Microsoft management services | supports / supports / contradicts | `inconclusive` |
 | `role-swap-sccm` | U2 | The host is an SCCM distribution point | contradicts / supports / supports | `inconclusive` |
 | `role-swap-mdm` | U2 | The host is an Intune provisioning host | contradicts / supports / supports | `inconclusive` |
 | `parent-spoof` | U1 | The Intune management extension starts PowerShell | supports / contradicts / supports | `inconclusive` |
@@ -36,18 +36,18 @@ The benign mimic keeps the alerts and the discovery, which still make the attack
 
 The labels in #293023 predate the verdict rules in [security-team#19280](https://github.com/elastic/security-team/issues/19280). Re-derived under them:
 
-- `domain-swap`: `false_positive` there, with only the C2 hop moved. That leaves `xMRi.network` supporting and Dropbox contradicting within one check, which the workflow cannot report: it returns one result per check. Here both hops go to Dropbox, and the one-liner is rewritten to fetch from Dropbox too, so the destination contradicts while the parent and role support, and the gold is `inconclusive`.
+- `domain-swap`: `false_positive` there, with only the C2 hop moved. That leaves `xMRi.network` supporting and Dropbox contradicting within one check, which the workflow cannot report: it returns one result per check. Here both hops, and the one-liner, go to the management destinations `fp-network-only` uses (`manage.microsoft.com`, `sccm-dp-02.corp.local`), so the destination contradicts while the parent and role support, and the gold is `inconclusive`. Dropbox is not used: a consumer file-sharing service is a gray area between vendor and staging infrastructure, so the gold would depend on how a model classifies it.
 - `role-swap-sccm` and `role-swap-mdm`: `false_positive` there. A management role alone contradicts while the destinations support, so `inconclusive`. Here they change only the role; the parent stays `explorer.exe`.
 - `parent-spoof`: `false_positive` there, with `msiexec.exe` running a vendor `install-deps.ps1`. An installer is not clearly a management agent, so this port uses the Intune management extension, which is. The destinations still support, so `inconclusive`.
 - `drop-one-sole-evidence`: `inconclusive` there. The other stages still support, so the rules give `true_positive`. It is `provisional` until that is agreed.
 
 ## Discarded mutations
 
-A mutation that changes no check result is discarded, not relabelled: it tests nothing the base world does not. `registry.test.ts` enforces this for every example with a `mutation`. The two drop-one examples are `perturbation`s instead: they remove evidence the checks do not read, and the test requires their checks, and so their gold, to equal `tp`'s.
+A mutation that changes no check result is discarded, not relabelled: it tests nothing the base world does not. `registry.test.ts` enforces this for every `mutation` variant against its base. The two drop-one examples are `perturbation`s of `tp` instead: they remove evidence the checks do not read, and the test requires their checks, and so their gold, to equal `tp`'s.
 
 - `chain-reorder`: the checks ignore event order.
 - `benign-payload-rename`: renaming `zbuild.exe` changes no parent, destination, or role.
 
 ## Placeholder values
 
-The write-up does not document these, so they are made up: process ids, the stage-2 and C2 IPs (`45.13.212.250` is from the write-up, `18.245.139.12` is not), the host OS version, the user domain `CORP`, entity roles and risk scores, the benign mimic's script, package, and destinations (`manage.microsoft.com`, `sccm-dp-02.corp.local`), and the Dropbox IPs.
+The write-up does not document these, so they are made up: process ids, the stage-2 and C2 IPs (`45.13.212.250` is from the write-up, `18.245.139.12` is not), the host OS version, the user domain `CORP`, entity roles and risk scores, the benign mimic's script, package, and destinations (`manage.microsoft.com`, `sccm-dp-02.corp.local`), and the stage-2 path on `manage.microsoft.com`.

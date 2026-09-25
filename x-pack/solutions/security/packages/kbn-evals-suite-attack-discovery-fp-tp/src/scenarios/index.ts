@@ -46,8 +46,9 @@ export const buildFpTpExampleWorld = (exampleId: string, suffix: string): FpTpWo
 export type {
   FpTpEvidenceState,
   FpTpExample,
-  FpTpLabelProvenance,
+  FpTpProvenance,
   FpTpRegisteredExample,
   FpTpScenario,
   FpTpSituation,
+  FpTpVariant,
 } from './types';

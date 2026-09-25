@@ -6,7 +6,14 @@
  */
 
 import { deriveFpTpOutcome, FP_TP_RAW_EVENT_WINDOW_MS } from '../world';
-import { buildFpTpExampleWorld, FP_TP_EXAMPLES, FP_TP_SCENARIOS, getFpTpScenario } from '.';
+import {
+  buildFpTpExampleWorld,
+  FP_TP_EXAMPLES,
+  FP_TP_SCENARIOS,
+  getFpTpScenario,
+  type FpTpRegisteredExample,
+  type FpTpVariant,
+} from '.';
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -36,39 +43,48 @@ describe('FP/TP scenario registry', () => {
     }
   );
 
-  it.each(
-    FP_TP_EXAMPLES.filter(({ mutation }) => mutation).map((example) => [example.id, example])
-  )('returns %s checks that differ from its scenario tp checks', (_id, { checks, scenarioKey }) => {
-    const base = FP_TP_EXAMPLES.find(({ id }) => id === `${scenarioKey}.tp`);
-    expect(checks).not.toEqual(base?.checks);
-  });
+  const baseOf = ({ variant }: FpTpRegisteredExample): FpTpRegisteredExample | undefined =>
+    FP_TP_EXAMPLES.find(({ id }) => id === variant?.of);
 
-  it.each(
-    FP_TP_EXAMPLES.filter(({ perturbation }) => perturbation).map((example) => [
+  const variantsOfKind = (
+    kind: FpTpVariant['kind']
+  ): ReadonlyArray<[string, FpTpRegisteredExample]> =>
+    FP_TP_EXAMPLES.filter(({ variant }) => variant?.kind === kind).map((example) => [
       example.id,
       example,
-    ])
-  )('returns %s checks equal to its scenario tp checks', (_id, { checks, scenarioKey }) => {
-    const base = FP_TP_EXAMPLES.find(({ id }) => id === `${scenarioKey}.tp`);
-    expect(checks).toEqual(base?.checks);
-  });
+    ]);
 
-  it('returns checks for every mutation and perturbation', () => {
+  it.each(FP_TP_EXAMPLES.filter(({ variant }) => variant).map((example) => [example.id, example]))(
+    'returns a %s base from its own scenario',
+    (id, example) => {
+      const base = baseOf(example);
+      expect(base !== undefined && base.id !== id && base.scenarioKey === example.scenarioKey).toBe(
+        true
+      );
+    }
+  );
+
+  it('returns checks for every variant and its base', () => {
     expect(
       FP_TP_EXAMPLES.filter(
-        ({ mutation, perturbation, checks }) => (mutation || perturbation) && !checks
+        (example) => example.variant && !(example.checks && baseOf(example)?.checks)
       ).map(({ id }) => id)
     ).toEqual([]);
   });
 
-  it('returns exactly one of mutation or perturbation for every adversarial mutation', () => {
-    expect(
-      FP_TP_EXAMPLES.filter(
-        ({ labelProvenance, mutation, perturbation }) =>
-          labelProvenance === 'adversarial-mutation' && !mutation === !perturbation
-      ).map(({ id }) => id)
-    ).toEqual([]);
-  });
+  it.each(variantsOfKind('mutation'))(
+    'returns %s checks that differ from its base checks',
+    (_id, example) => {
+      expect(example.checks).not.toEqual(baseOf(example)?.checks);
+    }
+  );
+
+  it.each(variantsOfKind('perturbation'))(
+    'returns %s checks equal to its base checks',
+    (_id, example) => {
+      expect(example.checks).toEqual(baseOf(example)?.checks);
+    }
+  );
 
   it('throws for an unknown scenario key', () => {
     expect(() => getFpTpScenario('nope')).toThrow('Unknown FP/TP scenario "nope"');
