@@ -10,9 +10,10 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, ViewMode } from '@kbn/presentation-publishing';
 import {
   fetch$,
+  getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
@@ -138,10 +139,15 @@ export function getAlertsEmbeddableFactory({
           reload$.next(next);
         });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
-          const [slos] = useBatchedPublishingSubjects(sloAlertsStateManager.api.slos$);
+          const [slos, viewMode] = useBatchedPublishingSubjects(
+            sloAlertsStateManager.api.slos$,
+            viewMode$
+          );
           const fetchContext = useFetchContext(api);
           const I18nContext = deps.i18n.Context;
 
@@ -177,6 +183,7 @@ export function getAlertsEmbeddableFactory({
                       slos={slos}
                       timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
                       reloadSubject={reload$}
+                      previewMode={viewMode === 'preview'}
                     />
                   </QueryClientProvider>
                 </PluginContext.Provider>

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   BehaviorSubject,
   Subject,
@@ -37,6 +37,7 @@ import {
   type PublishingSubject,
   getViewModeSubject,
   type ViewMode,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
@@ -368,6 +369,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       return {
         api,
         Component: () => {
+          const viewMode = useStateFromPublishingSubject(componentApi.viewMode$);
+
           useEffect(() => {
             return () => {
               // on unmount, clean up all subscriptions
@@ -385,13 +388,13 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
             };
           }, []);
 
+          const displaySettings = useMemo(
+            () => ({ ...(state.display_settings ?? {}), previewMode: viewMode === 'preview' }),
+            [viewMode]
+          );
+
           return (
-            <OptionsListControlContext.Provider
-              value={{
-                componentApi,
-                displaySettings: state.display_settings ?? {},
-              }}
-            >
+            <OptionsListControlContext.Provider value={{ componentApi, displaySettings }}>
               <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );

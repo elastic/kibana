@@ -25,6 +25,7 @@ export function SloErrorBudget({
   sloInstanceId,
   onRenderComplete,
   reloadSubject,
+  previewMode = false,
 }: EmbeddableSloProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
@@ -119,6 +120,7 @@ export function SloErrorBudget({
             onClick={() => {
               setSelectedSlo(slo);
             }}
+            disabled={previewMode}
           >
             <h4>{slo.name}</h4>
           </EuiLink>

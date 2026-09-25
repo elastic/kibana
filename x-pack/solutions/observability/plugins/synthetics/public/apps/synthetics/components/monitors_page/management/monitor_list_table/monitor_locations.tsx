@@ -21,9 +21,16 @@ interface Props {
   locations?: ServiceLocations;
   configId: string;
   spaces?: string[];
+  previewMode?: boolean;
 }
 
-export const MonitorLocations = ({ locationsWithStatus, locations, configId, spaces }: Props) => {
+export const MonitorLocations = ({
+  locationsWithStatus,
+  locations,
+  configId,
+  spaces,
+  previewMode = false,
+}: Props) => {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
   const getColor = useMonitorHealthColor();
@@ -46,6 +53,7 @@ export const MonitorLocations = ({ locationsWithStatus, locations, configId, spa
         locations={locationsToDisplay}
         loading={false}
         spaces={spaces}
+        previewMode={previewMode}
       />
     );
   } else {
@@ -68,6 +76,7 @@ export const MonitorLocations = ({ locationsWithStatus, locations, configId, spa
         locations={locationsToDisplay}
         loading={true}
         spaces={spaces}
+        previewMode={previewMode}
       />
     );
   }

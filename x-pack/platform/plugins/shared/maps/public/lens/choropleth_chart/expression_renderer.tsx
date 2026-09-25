@@ -64,7 +64,6 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         await coreSetup.getStartServices();
       const { ChoroplethChart } = await import('./choropleth_chart');
       const { getEmsFileLayers } = await import('../../util');
-
       let emsFileLayers: FileLayer[] = [];
       try {
         emsFileLayers = await getEmsFileLayers();
@@ -106,6 +105,7 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
             uiSettings={coreStart.uiSettings}
             emsFileLayers={emsFileLayers}
             onRenderComplete={renderComplete}
+            interactive={handlers.isInteractive()}
           />
         </KibanaRenderContextProvider>,
         domNode

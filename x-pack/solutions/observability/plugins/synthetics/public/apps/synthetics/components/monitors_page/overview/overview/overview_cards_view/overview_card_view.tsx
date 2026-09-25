@@ -83,10 +83,12 @@ const UnGroupedCardView = ({
   monitorsSortedByStatus,
   setFlyoutConfigCallback,
   loaded,
+  previewMode = false,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   loaded: boolean;
+  previewMode?: boolean;
 }) => {
   const dispatch = useDispatch();
   const trendData = useSelector(selectOverviewTrends);
@@ -257,7 +259,11 @@ const UnGroupedCardView = ({
                                 data-test-subj="syntheticsOverviewGridItem"
                                 key={listIndex * rowCount + idx}
                               >
-                                <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+                                <MetricItem
+                                  monitor={monitor}
+                                  onClick={setFlyoutConfigCallback}
+                                  previewMode={previewMode}
+                                />
                               </EuiFlexItem>
                             ))}
                             {row.length % rowCount !== 0 &&
@@ -287,10 +293,12 @@ export const OverviewCardView = ({
   monitorsSortedByStatus,
   setFlyoutConfigCallback,
   loaded,
+  previewMode = false,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   loaded: boolean;
+  previewMode?: boolean;
 }) => {
   const { field: groupField } = useSelector(selectOverviewGroupBy);
   const view = useSelector(selectOverviewView);
@@ -302,6 +310,7 @@ export const OverviewCardView = ({
         monitorsSortedByStatus={monitorsSortedByStatus}
         setFlyoutConfigCallback={setFlyoutConfigCallback}
         loaded={loaded}
+        previewMode={previewMode}
       />
     );
   }

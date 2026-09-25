@@ -17,6 +17,9 @@ import {
   titleComparators,
   apiPublishesSettings,
   initializeStateApi,
+  getViewModeSubject,
+  useStateFromPublishingSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
 import {
@@ -77,6 +80,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
+    const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);
     const defaultDescription$ = new BehaviorSubject<string | undefined>(
@@ -143,6 +147,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
           attributes: savedMap.getSavedObjectId() !== undefined ? 'skip' : 'deepEquality',
           mapSettings: 'deepEquality',
           savedObjectId: 'skip',
+          ...(viewMode$.getValue() === 'preview' && { mapCenter: 'skip' }),
         };
       },
       applySerializedState: async (nextState) => {
@@ -202,6 +207,8 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     return {
       api,
       Component: () => {
+        const viewMode = useStateFromPublishingSubject(viewMode$);
+
         useEffect(() => {
           return () => {
             crossPanelActions.cleanup();
@@ -247,6 +254,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
                   : undefined
               }
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
+              previewMode={viewMode === 'preview'}
             />
           </Provider>
         );

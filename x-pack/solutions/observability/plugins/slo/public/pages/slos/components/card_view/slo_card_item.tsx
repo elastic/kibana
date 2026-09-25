@@ -35,6 +35,7 @@ export interface Props {
   loading: boolean;
   error: boolean;
   refetchRules: () => void;
+  previewMode?: boolean;
 }
 
 export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
@@ -59,7 +60,14 @@ const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
   return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? firstGroupBy : '';
 };
 
-export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refetchRules }: Props) {
+export function SloCardItem({
+  slo,
+  rules,
+  activeAlerts,
+  historicalSummary,
+  refetchRules,
+  previewMode = false,
+}: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -121,20 +129,25 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
               rules={rules}
               activeAlerts={activeAlerts}
               handleCreateRule={handleCreateRule}
+              previewMode={previewMode}
             />
           }
+          previewMode={previewMode}
         />
-        <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
-          <SloCardItemActions
-            slo={slo}
-            rules={rules}
-            isActionsPopoverOpen={isActionsPopoverOpen}
-            setIsActionsPopoverOpen={setIsActionsPopoverOpen}
-            setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
-            setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
-            setDashboardAttachmentReady={setDashboardAttachmentReady}
-          />
-        </div>
+        {!previewMode && (
+          <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
+            <SloCardItemActions
+              slo={slo}
+              rules={rules}
+              isActionsPopoverOpen={isActionsPopoverOpen}
+              setIsActionsPopoverOpen={setIsActionsPopoverOpen}
+              setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
+              setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
+              setDashboardAttachmentReady={setDashboardAttachmentReady}
+            />
+          </div>
+        )}
+        .
       </EuiPanel>
 
       <BurnRateRuleFlyout
@@ -176,11 +189,13 @@ export function SloCardChart({
   badges,
   onClick,
   historicalSliData,
+  previewMode = false,
 }: {
   badges: React.ReactNode;
   slo: SLOWithSummaryResponse;
   historicalSliData?: Array<{ key?: number; value?: number }>;
   onClick?: () => void;
+  previewMode?: boolean;
 }) {
   const {
     application: { navigateToUrl },
@@ -201,15 +216,17 @@ export function SloCardChart({
             iconAlign: 'right',
           },
         }}
-        onElementClick={([d]) => {
-          if (onClick) {
-            onClick();
-          } else {
-            if (isMetricElementEvent(d)) {
-              navigateToUrl(sloDetailsUrl);
+        {...(!previewMode && {
+          onElementClick: ([d]) => {
+            if (onClick) {
+              onClick();
+            } else {
+              if (isMetricElementEvent(d)) {
+                navigateToUrl(sloDetailsUrl);
+              }
             }
-          }
-        }}
+          },
+        })}
         locale={i18n.getLocale()}
       />
       <Metric

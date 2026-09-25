@@ -234,6 +234,7 @@ export const getLinksEmbeddableFactory = () => {
                       key={currentLink.id}
                       link={currentLink}
                       layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                      parentApi={parentApi as LinksParentApi}
                     />
                   ),
               },

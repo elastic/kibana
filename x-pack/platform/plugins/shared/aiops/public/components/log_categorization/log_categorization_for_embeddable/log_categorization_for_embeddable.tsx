@@ -57,6 +57,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   onRenderComplete,
   timeRange,
   lastReloadRequestTime,
+  parentApi,
 }) => {
   const {
     notifications: { toasts },
@@ -388,6 +389,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           selectable={false}
           actions={actions}
           onRenderComplete={onRenderComplete}
+          parentApi={parentApi}
         />
       ) : null}
     </>

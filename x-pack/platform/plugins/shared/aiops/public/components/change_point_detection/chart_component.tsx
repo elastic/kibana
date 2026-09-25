@@ -20,6 +20,8 @@ export interface ChartComponentProps {
 
   onLoading?: (isLoading: boolean) => void;
   onRenderComplete?: () => void;
+
+  parentApi: unknown;
 }
 
 export interface ChartComponentPropsAll {
@@ -33,11 +35,10 @@ export interface ChartComponentPropsAll {
 }
 
 export const ChartComponent: FC<ChartComponentProps> = React.memo(
-  ({ annotation, fieldConfig, interval, onLoading, onRenderComplete }) => {
+  ({ annotation, fieldConfig, interval, onLoading, onRenderComplete, parentApi }) => {
     const {
       lens: { EmbeddableComponent },
     } = useAiopsAppContext();
-
     const chartWrapperRef = useRef<HTMLDivElement>(null);
 
     const renderCompleteListener = useCallback(
@@ -82,7 +83,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(
             type: 'aiops_change_point_detection_chart',
             name: 'Change point detection',
           }}
-          disableTriggers
+          parentApi={parentApi}
           onLoad={onLoading}
         />
       </div>

@@ -49,6 +49,7 @@ export interface Props {
   layerList: ILayer[];
   waitUntilTimeLayersLoad$: Observable<void>;
   euiTheme?: any;
+  previewMode?: boolean;
 }
 
 interface State {
@@ -239,6 +240,7 @@ export class MapContainer extends Component<Props, State> {
       exitFullScreen,
       mapInitError,
       renderTooltipContent,
+      previewMode,
     } = this.props;
 
     if (mapInitError) {
@@ -264,15 +266,16 @@ export class MapContainer extends Component<Props, State> {
           css={mapWrapperStyles}
           style={{ backgroundColor: this.props.settings.backgroundColor }}
         >
-          <MapControlsThemeStyles />
+          {!previewMode && <MapControlsThemeStyles />}
           <MBMap
             addFilters={addFilters}
             getFilterActions={getFilterActions}
             getActionContext={getActionContext}
             onSingleValueTrigger={onSingleValueTrigger}
             renderTooltipContent={renderTooltipContent}
+            previewMode={previewMode}
           />
-          {!this.props.settings.hideToolbarOverlay && !isScreenshotMode() && (
+          {!previewMode && !this.props.settings.hideToolbarOverlay && !isScreenshotMode() && (
             <ToolbarOverlay
               addFilters={addFilters}
               getFilterActions={getFilterActions}
@@ -281,7 +284,7 @@ export class MapContainer extends Component<Props, State> {
               showTimesliderButton={this.state.showTimesliderButton}
             />
           )}
-          <RightSideControls />
+          {!previewMode && <RightSideControls />}
           {this.props.isTimesliderOpen && (
             <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
           )}

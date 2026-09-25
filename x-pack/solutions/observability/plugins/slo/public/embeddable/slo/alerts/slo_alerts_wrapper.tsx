@@ -26,6 +26,7 @@ interface Props {
   onRenderComplete?: () => void;
   reloadSubject: Subject<FetchContext>;
   onEdit: () => void;
+  previewMode?: boolean;
 }
 
 export function SloAlertsWrapper({
@@ -35,6 +36,7 @@ export function SloAlertsWrapper({
   onRenderComplete,
   reloadSubject,
   onEdit,
+  previewMode = false,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -113,6 +115,7 @@ export function SloAlertsWrapper({
               onEdit();
             }}
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
+            disabled={previewMode}
           >
             {showInstanceCountBreakdown ? (
               <SloIncludedCount slos={slos} />
@@ -127,17 +130,19 @@ export function SloAlertsWrapper({
             )}
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
-            onClick={handleGoToAlertsClick}
-          >
-            <FormattedMessage
-              id="xpack.slo.sloAlertsWrapper.goToAlertsFlexItemLabel"
-              defaultMessage="Go to alerts"
-            />
-          </EuiLink>
-        </EuiFlexItem>
+        {!previewMode && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
+              onClick={handleGoToAlertsClick}
+            >
+              <FormattedMessage
+                id="xpack.slo.sloAlertsWrapper.goToAlertsFlexItemLabel"
+                defaultMessage="Go to alerts"
+              />
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="column" style={{ margin: '10px' }} responsive={true}>
@@ -156,6 +161,7 @@ export function SloAlertsWrapper({
             timeRange={timeRange}
             onLoaded={() => setIsTableLoaded(true)}
             lastReloadRequestTime={lastRefreshTime}
+            previewMode={previewMode}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

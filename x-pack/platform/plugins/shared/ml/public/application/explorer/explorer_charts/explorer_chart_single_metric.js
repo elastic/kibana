@@ -76,6 +76,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     id: PropTypes.string.isRequired,
     euiTheme: PropTypes.object.isRequired,
     isEmbeddable: PropTypes.bool,
+    previewMode: PropTypes.bool,
   };
 
   constructor(props) {
@@ -122,9 +123,9 @@ export class ExplorerChartSingleMetric extends React.Component {
       timeBuckets,
       showSelectedInterval,
       onPointerUpdate,
+      previewMode,
       id: chartId,
     } = this.props;
-
     const element = this.rootNode;
     const config = this.props.seriesConfig;
     const severity = this.props.severity;
@@ -403,16 +404,16 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Remove dots that are no longer needed i.e. if number of chart points has decreased.
       dots.exit().remove();
       // Create any new dots that are needed i.e. if number of chart points has increased.
-      dots
-        .enter()
-        .append('circle')
-        .attr('r', LINE_CHART_ANOMALY_RADIUS)
-        .on('click', function (d) {
+      const dot = dots.enter().append('circle').attr('r', LINE_CHART_ANOMALY_RADIUS);
+      if (!previewMode) {
+        dot.on('click', function (d) {
           d3.event.preventDefault();
           if (d.anomalyScore === undefined) return;
           showAnomalyPopover(d, this);
-        })
-        // Don't use an arrow function since we need access to `this`.
+        });
+      }
+      // Don't use an arrow function since we need access to `this`.
+      dot
         .on('mouseover', function (d) {
           // Show the tooltip only if the actions menu isn't active
           if (that.state.popoverData === null) {

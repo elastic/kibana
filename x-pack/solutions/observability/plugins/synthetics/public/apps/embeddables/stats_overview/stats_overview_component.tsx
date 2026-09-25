@@ -9,6 +9,7 @@ import React, { useEffect, useRef } from 'react';
 import type { Subject } from 'rxjs';
 import { useDispatch } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN } from '../../../../common/constants/plugin';
 import { areFiltersEmpty } from '../common/utils';
@@ -23,9 +24,11 @@ import type { MonitorFilters } from '../../../../common/types';
 export const StatsOverviewComponent = ({
   reload$,
   filters,
+  viewMode,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
+  viewMode: ViewMode;
 }) => {
   const statsOverviewStore = useRef(getStatsOverviewStore());
 
@@ -38,14 +41,20 @@ export const StatsOverviewComponent = ({
         }}
       >
         <EuiFlexItem>
-          <WithFiltersComponent filters={filters ?? {}} />
+          <WithFiltersComponent filters={filters ?? {}} viewMode={viewMode} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </SyntheticsEmbeddableContext>
   );
 };
 
-const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
+const WithFiltersComponent = ({
+  filters,
+  viewMode,
+}: {
+  filters: MonitorFilters;
+  viewMode: ViewMode;
+}) => {
   const dispatch = useDispatch();
   const { application } = useKibana().services;
 
@@ -69,7 +78,7 @@ const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
     <OverviewStatus
       titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
       hideTitle={true}
-      areStatsClickable
+      areStatsClickable={viewMode !== 'preview'}
       onStatusFilterClick={(statusFilter) => {
         application?.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
           path: `?statusFilter=${statusFilter}`,

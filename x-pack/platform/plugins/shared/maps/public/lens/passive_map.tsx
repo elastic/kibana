@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { Subscription } from 'rxjs';
+import { BehaviorSubject, type Subscription } from 'rxjs';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import type { MapEmbeddableState } from '../../common';
@@ -18,6 +18,7 @@ import type { MapApi } from '../react_embeddable/types';
 export interface Props {
   passiveLayer: LayerDescriptor;
   onRenderComplete?: () => void;
+  interactive?: boolean;
 }
 
 /*
@@ -54,6 +55,7 @@ export function PassiveMap(props: Props) {
       <EmbeddableRenderer<MapEmbeddableState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
+          viewMode$: new BehaviorSubject(!props.interactive ? 'preview' : 'view'),
           hideFilterActions: true,
           getSerializedStateForChild: () => {
             const basemapLayerDescriptor = createBasemapLayerDescriptor();

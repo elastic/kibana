@@ -18,12 +18,14 @@ import type {
   PublishesTitle,
   HasEditCapabilities,
   HasSupportedTriggers,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   useBatchedPublishingSubjects,
   fetch$,
   titleComparators,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
@@ -147,6 +149,8 @@ export const getStatsOverviewEmbeddableFactory = (
         },
       });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       const fetchSubscription = fetch$(api)
         .pipe()
         .subscribe((next) => {
@@ -156,7 +160,7 @@ export const getStatsOverviewEmbeddableFactory = (
       return {
         api,
         Component: () => {
-          const [filters] = useBatchedPublishingSubjects(filters$);
+          const [filters, viewMode] = useBatchedPublishingSubjects(filters$, viewMode$);
 
           useEffect(() => {
             return () => {
@@ -170,7 +174,11 @@ export const getStatsOverviewEmbeddableFactory = (
                 width: '100%',
               }}
             >
-              <StatsOverviewComponent reload$={reload$} filters={filters || DEFAULT_FILTERS} />
+              <StatsOverviewComponent
+                reload$={reload$}
+                viewMode={viewMode}
+                filters={filters || DEFAULT_FILTERS}
+              />
             </div>
           );
         },

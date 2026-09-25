@@ -37,6 +37,7 @@ export const tileMapRenderer = {
       query,
       timeRange,
       visConfig,
+      interactive: handlers.isInteractive(),
     };
 
     render(

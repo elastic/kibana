@@ -16,12 +16,14 @@ import type {
   PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   useBatchedPublishingSubjects,
   fetch$,
   titleComparators,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
@@ -152,10 +154,16 @@ export const getMonitorsEmbeddableFactory = (
           reload$.next(next.isReload);
         });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
-          const [filters, view] = useBatchedPublishingSubjects(filters$, view$);
+          const [filters, view, viewMode] = useBatchedPublishingSubjects(
+            filters$,
+            view$,
+            viewMode$
+          );
 
           useEffect(() => {
             return () => {
@@ -174,6 +182,7 @@ export const getMonitorsEmbeddableFactory = (
                 reload$={reload$}
                 filters={filters || DEFAULT_FILTERS}
                 view={view}
+                previewMode={viewMode === 'preview'}
               />
             </div>
           );

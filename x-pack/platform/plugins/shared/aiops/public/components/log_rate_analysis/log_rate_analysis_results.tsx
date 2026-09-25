@@ -91,6 +91,7 @@ interface LogRateAnalysisResultsProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  parentApi?: unknown;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -98,6 +99,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
+  parentApi,
 }) => {
   const { analytics, http, embeddingOrigin, cps } = useAiopsAppContext();
   const { dataView } = useDataSource();
@@ -474,6 +476,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            parentApi={parentApi}
           />
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
@@ -482,6 +485,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            parentApi={parentApi}
           />
         ) : null}
       </div>

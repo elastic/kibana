@@ -31,6 +31,7 @@ import type { EventRate } from '../use_categorize_request';
 
 import { ExpandedRow } from './expanded_row';
 import { FormattedPatternExamples, FormattedTokens } from '../format_category';
+import { useIsInteractive } from '../../../hooks/use_is_interactive';
 
 interface Props {
   categories: Category[];
@@ -48,6 +49,7 @@ interface Props {
   displayExamples?: boolean;
   selectable?: boolean;
   onRenderComplete?: () => void;
+  parentApi: unknown;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -61,10 +63,13 @@ export const CategoryTable: FC<Props> = ({
   displayExamples = true,
   selectable = true,
   onRenderComplete,
+  parentApi,
 }) => {
   const { euiTheme } = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { onTableChange, pagination, sorting } = tableState;
+
+  const isInteractive = useIsInteractive(parentApi);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
@@ -140,14 +145,18 @@ export const CategoryTable: FC<Props> = ({
       sortable: true,
       render: (item: Category) => <FormattedPatternExamples category={item} count={1} />,
     },
-    {
-      name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
-        defaultMessage: 'Actions',
-      }),
-      sortable: false,
-      width: '65px',
-      actions,
-    },
+    ...(isInteractive
+      ? [
+          {
+            name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
+              defaultMessage: 'Actions',
+            }),
+            sortable: false,
+            width: '65px',
+            actions,
+          },
+        ]
+      : []),
   ] as Array<EuiBasicTableColumn<Category>>;
 
   if (displayExamples === false) {
@@ -293,7 +302,7 @@ export const CategoryTable: FC<Props> = ({
         itemId="key"
         onTableChange={onTableChange}
         pagination={pagination}
-        sorting={sorting}
+        sorting={isInteractive ? sorting : undefined}
         data-test-subj="aiopsLogPatternsTable"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         css={tableStyle}

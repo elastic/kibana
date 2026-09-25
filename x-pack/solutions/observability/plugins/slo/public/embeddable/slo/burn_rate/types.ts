@@ -22,6 +22,7 @@ export interface EmbeddableProps {
   sloInstanceId: string;
   duration: string;
   reloadSubject?: Subject<boolean>;
+  previewMode?: boolean;
 }
 
 export type BurnRateApi = DefaultEmbeddableApi<BurnRateEmbeddableState> &

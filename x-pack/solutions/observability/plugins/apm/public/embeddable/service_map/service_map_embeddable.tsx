@@ -14,6 +14,7 @@ import { SERVICE_NAME } from '@kbn/apm-types';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
 import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
@@ -54,6 +55,7 @@ export interface ServiceMapEmbeddableProps {
   environment?: Environment;
   kuery?: string;
   serviceName?: string;
+  viewMode: ViewMode;
   /**
    * Multi-service context highlight from panel state (`highlighted_service_names`).
    * When unset, falls back to highlighting `serviceName` alone.
@@ -153,6 +155,7 @@ function EmbeddableContainer({
 }
 
 export function ServiceMapEmbeddable({
+  viewMode,
   rangeFrom,
   rangeTo,
   environment = ENVIRONMENT_ALL.value,
@@ -539,6 +542,7 @@ export function ServiceMapEmbeddable({
             isFullscreen={false}
             fullMapHref={fullMapHref}
             isEmbedded
+            isInteractive={viewMode !== 'preview'}
             showEmbeddedControls={showEmbeddedControls}
             showFocusMap={showFocusMapInPopover}
             alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}

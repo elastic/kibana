@@ -70,6 +70,7 @@ export function LensRenderer({
   hidePanelTitles,
   lastReloadRequestTime,
   titleHighlight,
+  parentApi,
   onApiAvailable,
   ...props
 }: LensRendererProps) {
@@ -170,13 +171,13 @@ export function LensRenderer({
       },
     };
   }, [withDefaultActions, extraActions, lensApi, titleHighlight]);
-
   return (
     <EmbeddableRenderer<LensWireAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       getParentApi={() =>
         ({
+          ...parentApi,
           // forward the Lens components to the embeddable
           ...props,
           // forward the unified search context

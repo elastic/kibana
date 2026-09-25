@@ -123,6 +123,8 @@ interface GraphProps {
   fullMapHref?: string;
   /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
+  /** When false, disables all click + drag operations except for zoom + pan */
+  isInteractive?: boolean;
   /**
    * When true, shows the quick-filters toggle/menu and minimap even in embedded mode.
    * Used by the dashboard embeddable when the panel is maximized in view mode.
@@ -173,6 +175,7 @@ function GraphInner({
   isFullscreen = false,
   onToggleFullscreen,
   fullMapHref,
+  isInteractive = true,
   isEmbedded = false,
   showEmbeddedControls = false,
   showFocusMap,
@@ -737,19 +740,21 @@ function GraphInner({
             edges={edges}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onNodeClick={handleNodeClick}
-            onEdgeClick={handleEdgeClick}
-            onPaneClick={handlePaneClick}
-            onMoveStart={handleDragStart}
-            onNodeDragStart={handleDragStart}
+            {...(isInteractive && {
+              onNodesChange,
+              onEdgesChange,
+              onNodeClick: handleNodeClick,
+              onEdgeClick: handleEdgeClick,
+              onPaneClick: handlePaneClick,
+              onMoveStart: handleDragStart,
+              onNodeDragStart: handleDragStart,
+            })}
             minZoom={MIN_ZOOM}
             maxZoom={MAX_ZOOM}
             proOptions={{ hideAttribution: true }}
-            nodesDraggable
+            nodesDraggable={isInteractive}
             nodesConnectable={false}
-            nodesFocusable
+            nodesFocusable={isInteractive}
             edgesFocusable={false}
           >
             <Background gap={24} size={1} color={euiTheme.colors.lightShade} />

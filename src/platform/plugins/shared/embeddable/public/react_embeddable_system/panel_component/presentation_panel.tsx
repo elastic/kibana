@@ -17,11 +17,7 @@ import type {
   PublishesHideBorder,
   PublishesTitle,
 } from '@kbn/presentation-publishing';
-import {
-  apiHasParentApi,
-  apiPublishesViewMode,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { getViewModeSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
@@ -58,11 +54,10 @@ const PresentationPanelChrome = <
 >) => {
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
-  const viewModeSubject = useMemo(() => {
-    if (apiPublishesViewMode(componentApi)) return componentApi.viewMode$;
-    if (apiHasParentApi(componentApi) && apiPublishesViewMode(componentApi.parentApi))
-      return componentApi.parentApi.viewMode$;
-  }, [componentApi]);
+  const viewModeSubject = useMemo(
+    () => getViewModeSubject(componentApi) ?? new BehaviorSubject(undefined),
+    [componentApi]
+  );
 
   const [
     dataLoading,
@@ -84,7 +79,7 @@ const PresentationPanelChrome = <
     componentApi.description$ ?? new BehaviorSubject(undefined),
     componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
     componentApi.defaultDescription$ ?? new BehaviorSubject(undefined),
-    viewModeSubject ?? new BehaviorSubject(undefined),
+    viewModeSubject,
     (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
     componentApi.rendered$ ?? new BehaviorSubject(true),
     componentApi.renderCount$ ?? new BehaviorSubject(undefined)

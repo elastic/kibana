@@ -16,7 +16,7 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, ViewMode } from '@kbn/presentation-publishing';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -24,6 +24,8 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  apiHasDisableTriggers,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -76,6 +78,11 @@ export const getSearchEmbeddableFactory = ({
       parentApi,
       uuid,
     }) => {
+      const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
+      const disableTriggers$ = apiHasDisableTriggers(parentApi)
+        ? parentApi.disableTriggers$
+        : new BehaviorSubject<boolean>(false);
+
       const runtimeState = await deserializeState({
         serializedState: initialState,
         discoverServices,
@@ -298,9 +305,12 @@ export const getSearchEmbeddableFactory = ({
         });
       };
 
-      const enableFilters = runtimeState.nonPersistedDisplayOptions?.enableFilters !== false;
+      const enableFilters =
+        runtimeState.nonPersistedDisplayOptions?.enableFilters !== false &&
+        !disableTriggers$.getValue();
       const enableDocumentViewer =
-        runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !== false;
+        runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !== false &&
+        !disableTriggers$.getValue();
 
       const expandedDoc$ = new BehaviorSubject<DataTableRecord | undefined>(undefined);
       const initialDocViewerTabId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -493,7 +503,7 @@ export const getSearchEmbeddableFactory = ({
                       }
                     >
                       <SearchEmbeddableGridComponent
-                        api={{ ...api, fetchWarnings$, fetchContext$, abortSignal$ }}
+                        api={{ ...api, fetchWarnings$, fetchContext$, abortSignal$, viewMode$ }}
                         dataView={dataView!}
                         onAddFilter={enableFilters ? addFilter : undefined}
                         enableDocumentViewer={enableDocumentViewer}

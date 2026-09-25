@@ -8,7 +8,11 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import {
+  getViewModeSubject,
+  initializeStateApi,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -105,12 +109,15 @@ export const getErrorBudgetEmbeddableFactory = ({
           reload$.next(next.isReload);
         });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
-          const [sloId, sloInstanceId] = useBatchedPublishingSubjects(
+          const [sloId, sloInstanceId, viewMode] = useBatchedPublishingSubjects(
             sloErrorBudgetManager.api.sloId$,
-            sloErrorBudgetManager.api.sloInstanceId$
+            sloErrorBudgetManager.api.sloInstanceId$,
+            viewMode$
           );
 
           useEffect(() => {
@@ -138,6 +145,7 @@ export const getErrorBudgetEmbeddableFactory = ({
                     sloId={sloId}
                     sloInstanceId={sloInstanceId}
                     reloadSubject={reload$}
+                    previewMode={viewMode === 'preview'}
                   />
                 </QueryClientProvider>
               </PluginContext.Provider>

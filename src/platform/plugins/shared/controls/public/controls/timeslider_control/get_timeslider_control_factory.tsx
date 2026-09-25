@@ -337,8 +337,15 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
       return {
         api,
         Component: (controlPanelClassNames) => {
-          const [isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
-            useBatchedPublishingSubjects(isAnchored$, isPopoverOpen$, timeRangeMeta$, timeslice$);
+          const [viewMode, isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
+            useBatchedPublishingSubjects(
+              viewModeSubject,
+              isAnchored$,
+              isPopoverOpen$,
+              timeRangeMeta$,
+              timeslice$
+            );
+
           useEffect(() => {
             return () => {
               cleanupTimeRangeSubscription();
@@ -376,6 +383,7 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
                   formatDate={formatDate}
                   from={from}
                   to={to}
+                  previewMode={viewMode === 'preview'}
                 />
               }
               isOpen={isPopoverOpen}

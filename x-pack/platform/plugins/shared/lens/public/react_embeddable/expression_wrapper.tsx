@@ -83,6 +83,7 @@ export function ExpressionWrapper({
   );
 
   if (!expression) return null;
+
   return (
     <>
       <Global styles={lnsGlobalChartStyles} />

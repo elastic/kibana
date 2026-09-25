@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText } from '@elastic/eui';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { TimeRange } from '@kbn/es-query';
 import { alertsFiltersToEsQuery } from '@kbn/response-ops-alerts-filters-form/utils/filters';
@@ -16,12 +16,14 @@ import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks
 import { getTime } from '@kbn/data-plugin/common';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
-import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { JsonObject } from '@kbn/utility-types';
 import { AlertDetailFlyout } from '@kbn/response-ops-alerts-table/components/alert_detail_flyout';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import { DefaultCellValue } from '@kbn/response-ops-alerts-table/components/default_cell_value';
 import {
   CONFIG_EDITOR_KQL_ERROR_TOAST_TITLE,
   getSolutionRuleTypesAuthPromptBody,
@@ -40,6 +42,7 @@ export interface EmbeddableAlertsTableProps {
   solution?: RuleTypeSolution;
   query?: EmbeddableAlertsTableQuery;
   services: AlertsTableProps['services'];
+  viewMode?: ViewMode;
 }
 
 const columns = defaultAlertsTableColumns.map<EuiDataGridColumn>((column) => ({
@@ -61,6 +64,7 @@ export const EmbeddableAlertsTable = ({
   solution,
   query,
   services,
+  viewMode = 'view',
 }: EmbeddableAlertsTableProps) => {
   const onUpdate = useCallback<NonNullable<AlertsTableProps['onUpdate']>>(
     (context) => {
@@ -163,7 +167,7 @@ export const EmbeddableAlertsTable = ({
         lastReloadRequestTime={lastReloadRequestTime}
         onUpdate={onUpdate}
         showAlertStatusWithFlapping
-        renderActionsCell={AlertActionsCell}
+        renderActionsCell={viewMode === 'preview' ? undefined : AlertActionsCell}
         toolbarVisibility={{
           showFullScreenSelector: false,
           showColumnSelector: false,
@@ -182,6 +186,21 @@ export const EmbeddableAlertsTable = ({
         configurationStorage={null}
         browserFields={{}}
         services={services}
+        renderCellValue={
+          viewMode === 'preview'
+            ? (props) => {
+                if (props.columnId === ALERT_RULE_NAME && props.alert) {
+                  const ruleName = props.alert[ALERT_RULE_NAME]?.[0] as string | undefined;
+                  return (
+                    <EuiText size="s" data-test-subj="alertRuleName">
+                      {ruleName}
+                    </EuiText>
+                  );
+                }
+                return <DefaultCellValue {...props} />;
+              }
+            : undefined
+        }
       />
     </div>
   );

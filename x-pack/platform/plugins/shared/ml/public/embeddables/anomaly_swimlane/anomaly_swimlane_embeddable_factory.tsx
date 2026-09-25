@@ -16,10 +16,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type { PublishesUnifiedSearch, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
   fetch$,
+  getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -227,6 +228,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           })
       );
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
@@ -252,14 +255,15 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             subscriptions.unsubscribe();
           });
 
-          const [fromPage, perPage, swimlaneType, swimlaneData, error, isLoading] =
+          const [fromPage, perPage, swimlaneType, swimlaneData, error, isLoading, viewMode] =
             useBatchedPublishingSubjects(
               api.fromPage,
               api.perPage,
               api.swimlaneType,
               swimLaneData$,
               blockingError$,
-              dataLoading$
+              dataLoading$,
+              viewMode$
             );
           const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
@@ -315,15 +319,19 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                       }
                       onResize={(size) => chartWidth$.next(size)}
                       selection={selectedCells}
-                      onCellsSelection={onCellsSelection}
-                      onPaginationChange={(update) => {
-                        if (update.fromPage) {
-                          api.updatePagination({ fromPage: update.fromPage });
-                        }
-                        if (update.perPage) {
-                          api.updatePagination({ perPage: update.perPage, fromPage: 1 });
-                        }
-                      }}
+                      onCellsSelection={viewMode === 'preview' ? undefined : onCellsSelection}
+                      onPaginationChange={
+                        viewMode === 'preview'
+                          ? undefined
+                          : (update) => {
+                              if (update.fromPage) {
+                                api.updatePagination({ fromPage: update.fromPage });
+                              }
+                              if (update.perPage) {
+                                api.updatePagination({ perPage: update.perPage, fromPage: 1 });
+                              }
+                            }
+                      }
                       isLoading={isLoading!}
                       yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
                       noDataWarning={

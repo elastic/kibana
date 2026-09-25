@@ -33,10 +33,12 @@ export const StatusGridComponent = ({
   reload$,
   filters,
   view,
+  previewMode = false,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
   view: OverviewView;
+  previewMode?: boolean;
 }) => {
   const overviewStore = useRef(getOverviewStore());
 
@@ -46,7 +48,12 @@ export const StatusGridComponent = ({
 
   const monitorOverviewListComponent = (
     <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
-      <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} view={view} />
+      <MonitorsOverviewList
+        filters={filters}
+        singleMonitor={singleMonitor}
+        view={view}
+        previewMode={previewMode}
+      />
     </SyntheticsEmbeddableContext>
   );
 
@@ -122,10 +129,12 @@ const MonitorsOverviewList = ({
   filters,
   singleMonitor,
   view,
+  previewMode,
 }: {
   filters: MonitorFilters;
   singleMonitor?: boolean;
   view: OverviewView;
+  previewMode: boolean;
 }) => {
   const dispatch = useDispatch();
 
@@ -148,5 +157,5 @@ const MonitorsOverviewList = ({
     return <SingleMonitorView />;
   }
 
-  return <OverviewGrid view={view} isEmbeddable />;
+  return <OverviewGrid view={view} isEmbeddable previewMode={previewMode} />;
 };

@@ -53,10 +53,12 @@ export const useMonitorsTableColumns = ({
   setFlyoutConfigCallback,
   items,
   isFlyoutOpen,
+  previewMode = false,
 }: {
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   isFlyoutOpen?: boolean;
+  previewMode?: boolean;
 }) => {
   const history = useHistory();
   // Skip the histogram fetch while the flyout is open — the column it feeds
@@ -137,9 +139,9 @@ export const useMonitorsTableColumns = ({
         field: 'overallStatus',
         name: STATUS,
         width: '160px',
-        sortable: true,
+        sortable: !previewMode,
         render: (_overallStatus: string, monitor: OverviewStatusMetaData) => (
-          <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
+          <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} previewMode={previewMode} />
         ),
       },
       {
@@ -150,7 +152,7 @@ export const useMonitorsTableColumns = ({
         // ellipsis. The URL column it replaced was 15% wide on its own.
         // Reclaimed budget comes from the Tags column (15% → 12%).
         width: '25%',
-        sortable: true,
+        sortable: !previewMode,
         render: (name: OverviewStatusMetaData['name'], monitor) => (
           <EuiFlexGroup
             direction="column"
@@ -166,7 +168,11 @@ export const useMonitorsTableColumns = ({
                 <EuiFlexItem grow={false}>
                   <MonitorTypeBadge
                     monitorType={monitor.type}
-                    onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
+                    onClick={
+                      previewMode
+                        ? undefined
+                        : () => onClickMonitorFilter('monitorTypes', monitor.type)
+                    }
                   />
                 </EuiFlexItem>
                 {monitor.remote && (
@@ -208,25 +214,29 @@ export const useMonitorsTableColumns = ({
                     className="eui-textTruncate"
                     css={{ display: 'block', width: '100%' }}
                   >
-                    <EuiLink
-                      data-test-subj="syntheticsCompactViewUrl"
-                      href={monitor.urls}
-                      target="_blank"
-                      color="subdued"
-                      external={false}
-                      // `display: block` + `width: 100%` ensure the anchor
-                      // (inline by default) inherits the truncation box from
-                      // its EuiText parent rather than overflowing it.
-                      css={{
-                        display: 'block',
-                        width: '100%',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {monitor.urls}
-                    </EuiLink>
+                    {previewMode ? (
+                      monitor.urls
+                    ) : (
+                      <EuiLink
+                        data-test-subj="syntheticsCompactViewUrl"
+                        href={monitor.urls}
+                        target="_blank"
+                        color="subdued"
+                        external={false}
+                        // `display: block` + `width: 100%` ensure the anchor
+                        // (inline by default) inherits the truncation box from
+                        // its EuiText parent rather than overflowing it.
+                        css={{
+                          display: 'block',
+                          width: '100%',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {monitor.urls}
+                      </EuiLink>
+                    )}
                   </EuiText>
                 </EuiToolTip>
               </EuiFlexItem>
@@ -240,7 +250,11 @@ export const useMonitorsTableColumns = ({
         width: '120px',
         render: (monitor: OverviewStatusMetaData) => {
           return (
-            <MonitorLocations configId={monitor.configId} locationsWithStatus={monitor.locations} />
+            <MonitorLocations
+              configId={monitor.configId}
+              locationsWithStatus={monitor.locations}
+              previewMode={previewMode}
+            />
           );
         },
       },
@@ -305,7 +319,7 @@ export const useMonitorsTableColumns = ({
               render: (monitor: OverviewStatusMetaData) => (
                 <TagsList
                   tags={monitor.tags}
-                  onClick={(tag) => onClickMonitorFilter('tags', tag)}
+                  onClick={previewMode ? undefined : (tag) => onClickMonitorFilter('tags', tag)}
                 />
               ),
             },
@@ -375,12 +389,16 @@ export const useMonitorsTableColumns = ({
           <MonitorTimestamp timestamp={updatedAt} absolute={absoluteTimestamps} />
         ),
       },
-      {
-        name: ACTIONS,
-        render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
-        align: 'right',
-        width: '40px',
-      },
+      ...(previewMode
+        ? []
+        : [
+            {
+              name: ACTIONS,
+              render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
+              align: 'right',
+              width: '40px',
+            } as EuiBasicTableColumn<OverviewStatusMetaData>,
+          ]),
     ];
 
     return allColumns
@@ -397,6 +415,7 @@ export const useMonitorsTableColumns = ({
     minInterval,
     onClickMonitorFilter,
     openFlyout,
+    previewMode,
     showFromAllSpaces,
     // Depending on the resolved space id (a string) instead of the whole
     // `space` object keeps the columns array referentially stable: the hook

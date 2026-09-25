@@ -70,6 +70,8 @@ export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
 
 export interface SingleMetricViewerProps {
   shouldShowForecastButton?: boolean;
+  previewMode?: boolean;
+
   bounds?: TimeRangeBounds;
   forecastId?: string;
   selectedEntities?: MlEntity;
@@ -114,6 +116,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   selectedEntities,
   selectedJobId,
   shouldShowForecastButton,
+  previewMode,
   uuid,
   isRenderComplete,
   wrapperRef,
@@ -314,6 +317,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                       onRenderComplete={onRenderComplete}
                       onForecastComplete={onForecastComplete}
                       shouldShowForecastButton={shouldShowForecastButton}
+                      previewMode={previewMode}
                     />
                   )}
               </DatePickerContextProvider>

@@ -11,8 +11,15 @@ import React from 'react';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import { Subscription, map, merge } from 'rxjs';
-import { fetch$, timeRangeComparators, titleComparators } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subscription, map, merge } from 'rxjs';
+import {
+  fetch$,
+  getViewModeSubject,
+  timeRangeComparators,
+  titleComparators,
+  useStateFromPublishingSubject,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -163,6 +170,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         ...pluginsStartServices,
       };
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
@@ -182,6 +191,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             subscriptions.unsubscribe();
           });
           const { euiTheme } = useEuiTheme();
+
+          const viewMode = useStateFromPublishingSubject(viewMode$);
 
           return (
             <KibanaRenderContextProvider {...coreStartServices}>
@@ -203,6 +214,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     onRenderComplete={onRenderComplete}
                     onError={onError}
                     timeRange$={appliedTimeRange$}
+                    previewMode={viewMode === 'preview'}
                   />
                 </div>
               </KibanaContextProvider>
