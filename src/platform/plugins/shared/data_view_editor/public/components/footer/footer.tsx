@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiToolTip,
 } from '@elastic/eui';
 
 export enum SubmittingType {
@@ -133,17 +132,16 @@ export const Footer = ({
 
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={hasCustomId ? exploreButtonCustomIdTitle : exploreButtonTitle}>
-                  <EuiButton
-                    color="primary"
-                    onClick={submitAdHoc}
-                    data-test-subj="exploreIndexPatternButton"
-                    disabled={submitDisabled || hasCustomId}
-                    isLoading={submittingType === SubmittingType.savingAsAdHoc}
-                  >
-                    {exploreButtonLabel}
-                  </EuiButton>
-                </EuiToolTip>
+                <EuiButton
+                  color="primary"
+                  onClick={submitAdHoc}
+                  data-test-subj="exploreIndexPatternButton"
+                  disabled={submitDisabled || hasCustomId}
+                  isLoading={submittingType === SubmittingType.savingAsAdHoc}
+                  title={hasCustomId ? exploreButtonCustomIdTitle : exploreButtonTitle}
+                >
+                  {exploreButtonLabel}
+                </EuiButton>
               </EuiFlexItem>
             )}
 
