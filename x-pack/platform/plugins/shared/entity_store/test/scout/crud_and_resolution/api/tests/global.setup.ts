@@ -6,11 +6,13 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import { installEntityStoreSuite } from '../../../common/fixtures/helpers';
 
 globalSetupHook(
   'Install Entity Store once for CRUD and resolution API suite',
-  async ({ apiClient, samlAuth }) => {
+  async ({ apiClient, samlAuth, kbnClient }) => {
+    await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
     await installEntityStoreSuite({ apiClient, samlAuth });
   }
 );
