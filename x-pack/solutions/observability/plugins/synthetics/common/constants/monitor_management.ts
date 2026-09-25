@@ -26,6 +26,10 @@ export enum ConfigKey {
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
   JOURNEY_FILTERS_TAGS = 'filter_journeys.tags',
   JOURNEY_ID = 'journey_id',
+  // Nested Heartbeat auth blocks. Package vars are the same names (type: text);
+  // private formatters pack each object into a base64 string for Fleet.
+  KERBEROS = 'kerberos',
+  NTLM = 'ntlm',
   MAX_REDIRECTS = 'max_redirects',
   METADATA = '__ui',
   LABELS = 'labels',
@@ -87,6 +91,9 @@ export const secretKeys = [
   ConfigKey.PROXY_HEADERS,
   ConfigKey.PARAMS,
   ConfigKey.PASSWORD,
+  // Whole auth blocks are encrypted (credentials live inside the object).
+  ConfigKey.KERBEROS,
+  ConfigKey.NTLM,
   ConfigKey.REQUEST_BODY_CHECK,
   ConfigKey.REQUEST_HEADERS_CHECK,
   ConfigKey.REQUEST_SEND_CHECK,

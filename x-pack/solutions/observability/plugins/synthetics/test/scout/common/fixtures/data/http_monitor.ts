@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { DEFAULT_HTTP_ADVANCED_FIELDS } from '../../../../../common/constants/monitor_defaults';
+import { ConfigKey } from '../../../../../common/runtime_types';
+
 /**
  * HTTP monitor fixture used by the create-monitor spec. Ported from the FTR
  * fixture `apis/synthetics/fixtures/http_monitor.json` (read there via
@@ -14,6 +17,9 @@
  * Callers must supply their own `locations` (e.g. a private location resolved
  * at runtime); the fixture intentionally omits a default to avoid leaking a
  * hardcoded location into tests that forget to override it.
+ *
+ * `kerberos` / `ntlm` mirror `DEFAULT_HTTP_ADVANCED_FIELDS` so create/edit
+ * assertions match the defaults the API hydrates onto saved monitors.
  */
 export const httpMonitorFixture: Record<string, unknown> = {
   type: 'http',
@@ -58,6 +64,8 @@ export const httpMonitorFixture: Record<string, unknown> = {
   'check.response.headers': {},
   'check.request.method': '',
   username: 'test-username',
+  [ConfigKey.KERBEROS]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS],
+  [ConfigKey.NTLM]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM],
   'ssl.certificate_authorities': 't.string',
   'ssl.certificate': 't.string',
   'ssl.key': 't.string',

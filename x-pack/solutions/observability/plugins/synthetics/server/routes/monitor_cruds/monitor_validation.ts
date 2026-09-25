@@ -167,6 +167,41 @@ export function validateMonitor(
     };
   }
 
+  if (monitorType === MonitorTypeEnum.HTTP) {
+    const hasBasicAuth = Boolean(
+      monitorFields[ConfigKey.USERNAME] || monitorFields[ConfigKey.PASSWORD]
+    );
+    const kerberos = monitorFields[ConfigKey.KERBEROS];
+    const enabledAuthSchemes = [
+      hasBasicAuth,
+      Boolean(kerberos?.enabled),
+      Boolean(monitorFields[ConfigKey.NTLM]?.enabled),
+    ].filter(Boolean);
+
+    if (enabledAuthSchemes.length > 1) {
+      return {
+        valid: false,
+        reason: INVALID_AUTH_CONFIGURATION_ERROR,
+        details: INVALID_AUTH_CONFIGURATION_DETAILS,
+        payload: monitorFields,
+      };
+    }
+
+    // Heartbeat: exactly one of config_path / krb5_conf when Kerberos is enabled.
+    if (kerberos?.enabled) {
+      const hasPath = Boolean(kerberos.config_path?.trim());
+      const hasInline = Boolean(kerberos.krb5_conf?.trim());
+      if (hasPath === hasInline) {
+        return {
+          valid: false,
+          reason: INVALID_AUTH_CONFIGURATION_ERROR,
+          details: INVALID_KERBEROS_CONFIG_DETAILS,
+          payload: monitorFields,
+        };
+      }
+    }
+  }
+
   if (monitorType === MonitorTypeEnum.BROWSER || monitorType === MonitorTypeEnum.API) {
     const inlineScript = monitorFields[ConfigKey.SOURCE_INLINE];
     const projectContent = monitorFields[ConfigKey.SOURCE_PROJECT_CONTENT];
@@ -574,6 +609,29 @@ const INVALID_PAYLOAD_ERROR = i18n.translate(
 const INVALID_TYPE_ERROR = i18n.translate('xpack.synthetics.server.monitors.invalidTypeError', {
   defaultMessage: 'Monitor type is invalid',
 });
+
+const INVALID_AUTH_CONFIGURATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidAuthConfigurationError',
+  {
+    defaultMessage: 'Monitor authentication configuration is invalid',
+  }
+);
+
+const INVALID_AUTH_CONFIGURATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidAuthConfigurationDetails',
+  {
+    defaultMessage:
+      'Only one authentication method can be enabled per HTTP monitor. Choose one of basic authentication (username/password), Kerberos, or NTLM.',
+  }
+);
+
+const INVALID_KERBEROS_CONFIG_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosConfigDetails',
+  {
+    defaultMessage:
+      'Kerberos requires exactly one of config_path (file on the agent) or krb5_conf (inline krb5.conf body).',
+  }
+);
 
 const INVALID_SCHEDULE_ERROR = i18n.translate(
   'xpack.synthetics.server.monitors.invalidScheduleError',

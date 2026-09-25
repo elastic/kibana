@@ -95,6 +95,23 @@ export enum Mode {
   ALL = 'all',
 }
 
+// UI-only selector value used by the HTTP monitor form to switch between the
+// mutually exclusive authentication schemes. Not persisted directly; the
+// underlying `kerberos.enabled` / `ntlm.enabled` flags (and basic auth
+// username/password) are the source of truth.
+export enum HttpAuthMethod {
+  NONE = 'none',
+  BASIC = 'basic',
+  KERBEROS = 'kerberos',
+  NTLM = 'ntlm',
+}
+
+// Mirrors the libbeat Kerberos client `auth_type` option used by Heartbeat.
+export enum KerberosAuthType {
+  PASSWORD = 'password',
+  KEYTAB = 'keytab',
+}
+
 export const MonitorTypeCodec = z.enum(MonitorTypeEnum);
 export const ResponseBodyIndexPolicyCodec = z.enum(ResponseBodyIndexPolicy);
 export const CodeEditorModeCodec = z.enum(CodeEditorMode);
@@ -105,6 +122,29 @@ export const ScreenshotOptionCodec = z.enum(ScreenshotOption);
 export const SourceTypeCodec = z.enum(SourceType);
 export const FormMonitorTypeCodec = z.enum(FormMonitorType);
 export const ModeCodec = z.enum(Mode);
+export const KerberosAuthTypeCodec = z.enum(KerberosAuthType);
+
+export const KerberosConfigCodec = z.looseObject({
+  enabled: z.boolean(),
+  auth_type: KerberosAuthTypeCodec,
+  username: z.string(),
+  password: z.string(),
+  keytab: z.string(),
+  // Exactly one of config_path / krb5_conf is required when enabled (Heartbeat).
+  config_path: z.string(),
+  krb5_conf: z.string(),
+  realm: z.string(),
+  service_name: z.string(),
+  enable_krb5_fast: z.boolean(),
+});
+
+export const NtlmConfigCodec = z.looseObject({
+  enabled: z.boolean(),
+  username: z.string(),
+  password: z.string(),
+  domain: z.string(),
+  workstation: z.string(),
+});
 
 export const ResponseCheckJSONCodec = z.looseObject({
   description: z.string(),
@@ -116,5 +156,7 @@ export const RequestBodyCheckCodec = z.looseObject({
   type: CodeEditorModeCodec,
 });
 
+export type KerberosConfig = SchemaOutput<typeof KerberosConfigCodec>;
+export type NtlmConfig = SchemaOutput<typeof NtlmConfigCodec>;
 export type ResponseCheckJSON = SchemaOutput<typeof ResponseCheckJSONCodec>;
 export type RequestBodyCheck = SchemaOutput<typeof RequestBodyCheckCodec>;

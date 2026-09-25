@@ -59,4 +59,16 @@ export const httpFormatters: HTTPFormatMap = {
   // `false` from an omitted value, so they are intentionally still emitted.
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
+  // Package vars are single `kerberos` / `ntlm` text fields (synthetics 1.12.0+).
+  // Pack the nested SO object into a base64 JSON string when enabled.
+  [ConfigKey.KERBEROS]: (fields) => {
+    const value = fields[ConfigKey.KERBEROS];
+    if (!value?.enabled) return null;
+    return Buffer.from(JSON.stringify(value)).toString('base64');
+  },
+  [ConfigKey.NTLM]: (fields) => {
+    const value = fields[ConfigKey.NTLM];
+    if (!value?.enabled) return null;
+    return Buffer.from(JSON.stringify(value)).toString('base64');
+  },
 };
