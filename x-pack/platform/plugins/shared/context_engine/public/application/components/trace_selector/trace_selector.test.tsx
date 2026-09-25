@@ -59,7 +59,7 @@ describe('TraceSelector', () => {
     });
     mockUseIndices.mockReturnValue({
       indexNames: ['logs-genai-default'],
-      isLoading: false,
+      isFetching: false,
     });
   });
 

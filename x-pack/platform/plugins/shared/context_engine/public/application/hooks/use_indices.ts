@@ -31,7 +31,7 @@ export interface UseIndicesOptions {
 
 export interface UseIndicesResult {
   indexNames: string[];
-  isLoading: boolean;
+  isFetching: boolean;
 }
 
 const matchesTypes = (match: MatchedItem, types: IndexResourceType[] | undefined): boolean =>
@@ -52,11 +52,12 @@ export const useIndices = ({
   const trimmedSearch = search.trim();
   const pattern = trimmedSearch ? `*${trimmedSearch}*` : DEFAULT_PATTERN;
 
-  const { data: matches, isLoading } = useQuery<MatchedItem[], Error>({
+  const { data: matches, isFetching } = useQuery<MatchedItem[], Error>({
     queryKey: contextEngineQueryKeys.indices.list(trimmedSearch),
     queryFn: () => data.dataViews.getIndices({ pattern, isRollupIndex: NOT_ROLLUP_INDEX }),
     refetchOnWindowFocus: false,
     enabled,
+    keepPreviousData: true,
   });
 
   const indexNames = useMemo(
@@ -70,6 +71,6 @@ export const useIndices = ({
 
   return {
     indexNames,
-    isLoading: enabled && isLoading,
+    isFetching: enabled && isFetching,
   };
 };

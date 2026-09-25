@@ -81,7 +81,7 @@ const VALID_ID = 'support-ticket-triage';
 
 describe('CreateAiIndexPage', () => {
   beforeEach(() => {
-    mockUseIndices.mockReturnValue({ indexNames: [], isLoading: false });
+    mockUseIndices.mockReturnValue({ indexNames: [], isFetching: false });
   });
 
   afterEach(() => {
@@ -223,7 +223,7 @@ describe('CreateAiIndexPage', () => {
     services.http.post.mockResolvedValue({});
     mockUseIndices.mockReturnValue({
       indexNames: ['logs-genai-default'],
-      isLoading: false,
+      isFetching: false,
     });
 
     renderWithProviders(services);

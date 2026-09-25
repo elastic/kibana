@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiProgress,
   EuiSpacer,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -50,7 +51,7 @@ export const ElasticsearchSourcesTab = ({
   const [esqlQuery, setEsqlQuery] = useState('');
   const trimmedEsqlQuery = esqlQuery.trim();
 
-  const { indexNames, isLoading } = useIndices({
+  const { indexNames, isFetching } = useIndices({
     search: debouncedSearch.trim(),
     enabled: hasFocused,
   });
@@ -93,6 +94,12 @@ export const ElasticsearchSourcesTab = ({
 
   return (
     <div data-test-subj="contextElasticsearchSourcesTab">
+      <EuiProgress
+        size="xs"
+        color="accent"
+        css={{ visibility: isFetching ? 'visible' : 'hidden' }}
+        data-test-subj="contextIndexComboBoxLoadingBar"
+      />
       <EuiFormRow
         fullWidth
         label={
@@ -119,13 +126,12 @@ export const ElasticsearchSourcesTab = ({
             defaultMessage: 'Select an index, data stream or alias',
           })}
           placeholder={i18n.translate('xpack.contextEngine.sourcePicker.index.comboPlaceholder', {
-            defaultMessage: 'e.g. logs-nginx or logs-*',
+            defaultMessage: 'e.g. logs-nginx',
           })}
           options={indexOptions}
           onChange={handleIndexChange}
           onSearchChange={setSearchValue}
           onFocus={handleFocus}
-          isLoading={isLoading}
           data-test-subj="contextIndexComboBox"
         />
       </EuiFormRow>

@@ -99,7 +99,7 @@ describe('useIndices', () => {
       .mockResolvedValue([buildMatchedItem('logs-*'), buildMatchedItem('.ds-metrics-default')]);
     const { result } = renderUseIndices({ search: '' }, getIndices);
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
 
     expect(result.current.indexNames).toEqual(['logs-*', '.ds-metrics-default']);
   });
@@ -109,7 +109,7 @@ describe('useIndices', () => {
     const { result } = renderUseIndices({ search: '', enabled: false }, getIndices);
 
     expect(getIndices).not.toHaveBeenCalled();
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isFetching).toBe(false);
     expect(result.current.indexNames).toEqual([]);
   });
 
@@ -123,7 +123,7 @@ describe('useIndices', () => {
       ]);
     const { result } = renderUseIndices({ search: '' }, getIndices);
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
 
     expect(result.current.indexNames).toEqual(['logs-index', 'logs-alias', 'logs-ds']);
   });
@@ -138,7 +138,7 @@ describe('useIndices', () => {
       );
     const { result } = renderUseIndices({ search: '' }, getIndices);
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
 
     expect(result.current.indexNames).toHaveLength(MAX_INDEX_SEARCH_RESULTS);
     expect(result.current.indexNames[0]).toBe('logs-0');
@@ -157,7 +157,7 @@ describe('useIndices', () => {
       ]);
     const { result } = renderUseIndices({ search: '', types: ['data_stream'] }, getIndices);
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
 
     expect(result.current.indexNames).toEqual(['logs-ds']);
   });

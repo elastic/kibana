@@ -27,7 +27,7 @@ jest.mock('../../hooks/use_indices', () => ({
 
 const defaultHookResult = {
   indexNames: ['logs-genai-default'],
-  isLoading: false,
+  isFetching: false,
 };
 
 const renderField = (props: React.ComponentProps<typeof DataStreamField>) => {
