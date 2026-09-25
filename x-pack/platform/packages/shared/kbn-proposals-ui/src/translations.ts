@@ -47,6 +47,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   irreversible: i18n.translate('xpack.proposals.approvalModal.caption.irreversible', {
     defaultMessage: 'Irreversible',
   }),
+  expiredCaption: i18n.translate('xpack.proposals.approvalModal.caption.expired', {
+    defaultMessage: 'Expired',
+  }),
   appliedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.appliedTitle', {
     defaultMessage: 'Applied successfully',
   }),

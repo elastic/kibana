@@ -49,7 +49,7 @@ describe('ApprovalModal', () => {
     expect(screen.getByText('Needs review')).toBeInTheDocument();
   });
 
-  it('builds the header caption from the category and reversibility, matching the flyout row', () => {
+  it('builds the header caption from category, reversibility and impact, unlike the flyout row which omits impact', () => {
     renderModal({
       proposal: {
         ...mockProposal,
@@ -57,12 +57,42 @@ describe('ApprovalModal', () => {
         action: { name: 'Apply monitored exception', reversible: true },
       },
     });
-    expect(screen.getByText('Configure • Reversible')).toBeInTheDocument();
+    expect(screen.getByText('Configure • Reversible • Low impact')).toBeInTheDocument();
   });
 
-  it('omits the header caption when the proposal has neither a category nor reversibility', () => {
+  it('adds impact and the decision deadline the flyout row omits, since the modal has the room for them', () => {
+    const expiresAt = '2024-01-05T17:00:00.000Z';
+    renderModal({
+      proposal: {
+        ...mockProposal,
+        impact: 'critical',
+        category: 'configure',
+        action: { name: 'Apply monitored exception', reversible: true },
+        expiresAt,
+      },
+    });
+    // Computed the same way the implementation does, rather than a hardcoded guess: the exact
+    // rendering of `toLocaleString` depends on the environment's locale/ICU data.
+    const formattedDeadline = new Date(expiresAt).toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+    expect(
+      screen.getByText(`Configure • Reversible • Critical impact • Expires ${formattedDeadline}`)
+    ).toBeInTheDocument();
+  });
+
+  it('shows Expired instead of a deadline once the decision window has passed', () => {
+    renderModal({
+      proposal: { ...mockProposal, expired: true, expiresAt: '2024-01-05T17:00:00.000Z' },
+    });
+    expect(screen.getByText('Low impact • Expired')).toBeInTheDocument();
+  });
+
+  it('drops category and reversibility from the caption when the proposal has neither, keeping impact', () => {
     renderModal({ proposal: { ...mockProposal, category: undefined, action: undefined } });
     expect(screen.queryByText(/reversible/i)).not.toBeInTheDocument();
+    expect(screen.getByText('Low impact')).toBeInTheDocument();
   });
 
   it('falls back to the workflow id when the action metadata carries no name', () => {

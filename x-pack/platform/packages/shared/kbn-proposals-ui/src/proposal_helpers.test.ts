@@ -82,6 +82,57 @@ describe('getProposalCaption', () => {
   it('is undefined when there is neither a category nor a reversibility flag', () => {
     expect(getProposalCaption(proposal())).toBeUndefined();
   });
+
+  it('omits impact and the deadline by default, even when the proposal carries both', () => {
+    expect(
+      getProposalCaption(
+        proposal({ category: 'configure', impact: 'high', expiresAt: '2999-01-05T17:00:00.000Z' })
+      )
+    ).toBe('Configure');
+  });
+
+  it('appends impact when includeRiskDetails is set', () => {
+    expect(
+      getProposalCaption(proposal({ category: 'configure', impact: 'high' }), {
+        includeRiskDetails: true,
+      })
+    ).toBe('Configure • High impact');
+  });
+
+  it('appends the decision deadline, formatted the same way the host renders any other date', () => {
+    const expiresAt = '2999-01-05T17:00:00.000Z';
+    const formattedDeadline = new Date(expiresAt).toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+    expect(
+      getProposalCaption(proposal({ category: 'configure', impact: 'high', expiresAt }), {
+        includeRiskDetails: true,
+      })
+    ).toBe(`Configure • High impact • Expires ${formattedDeadline}`);
+  });
+
+  it('shows Expired rather than a formatted deadline once the decision window has passed', () => {
+    expect(
+      getProposalCaption(
+        proposal({
+          category: 'configure',
+          impact: 'high',
+          expired: true,
+          expiresAt: '2024-01-05T17:00:00.000Z',
+        }),
+        { includeRiskDetails: true }
+      )
+    ).toBe('Configure • High impact • Expired');
+  });
+
+  it('omits the deadline segment entirely when the proposal carries no expiresAt', () => {
+    expect(
+      getProposalCaption(proposal({ category: 'configure', impact: 'high' }), {
+        includeRiskDetails: true,
+      })
+    ).toBe('Configure • High impact');
+  });
 });
 
 describe('getProposalDecision', () => {

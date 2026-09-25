@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ApprovalProposal } from './types';
 import type { ApprovalDecision } from './approval_content';
 import type { ApprovalPhase } from './approval_outcome';
@@ -21,13 +22,50 @@ export const getProposalTitle = (proposal: ApprovalProposal): string =>
 const toSentenceCase = (value: string): string =>
   value.length > 0 ? `${value[0].toUpperCase()}${value.slice(1)}` : value;
 
+const impactCaptionPart = (proposal: ApprovalProposal): string | undefined => {
+  const impact = proposal.impact ?? proposal.action?.impact;
+  return impact === undefined
+    ? undefined
+    : i18n.translate('xpack.proposals.approvalModal.caption.impact', {
+        defaultMessage: '{impact} impact',
+        values: { impact: toSentenceCase(impact) },
+      });
+};
+
+/** `undefined` proposals carry no deadline at all — as opposed to one already past. */
+const deadlineCaptionPart = (proposal: ApprovalProposal): string | undefined => {
+  if (!proposal.expiresAt) {
+    return undefined;
+  }
+  if (isProposalExpired(proposal)) {
+    return APPROVAL_MODAL_TRANSLATIONS.expiredCaption;
+  }
+  const deadline = new Date(proposal.expiresAt).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+  return i18n.translate('xpack.proposals.approvalModal.caption.expires', {
+    defaultMessage: 'Expires {deadline}',
+    values: { deadline },
+  });
+};
+
 /**
  * The category/reversibility line shown under a proposal's title — in the modal header and the
  * flyout's `ProposedActionButton` row alike, so the two describe the same proposal identically.
  * `undefined` when the proposal carries neither, so a caller can skip the line rather than render
  * an empty one.
+ *
+ * `includeRiskDetails` adds impact and the decision deadline — the same risk context the modal
+ * used to show as its own list section before this became one caption line. Opt-in rather than
+ * always on: a whole list of flyout rows repeating both on every line would be noisier than
+ * useful, where the one proposal a modal (or the chat card) is actually asking about has the room
+ * for it and the analyst needs it to actually decide.
  */
-export const getProposalCaption = (proposal: ApprovalProposal): string | undefined => {
+export const getProposalCaption = (
+  proposal: ApprovalProposal,
+  { includeRiskDetails = false }: { includeRiskDetails?: boolean } = {}
+): string | undefined => {
   const category = proposal.action?.category ?? proposal.category;
   const reversible = proposal.action?.reversible;
   const parts = [
@@ -37,6 +75,7 @@ export const getProposalCaption = (proposal: ApprovalProposal): string | undefin
       : reversible
       ? APPROVAL_MODAL_TRANSLATIONS.reversible
       : APPROVAL_MODAL_TRANSLATIONS.irreversible,
+    ...(includeRiskDetails ? [impactCaptionPart(proposal), deadlineCaptionPart(proposal)] : []),
   ].filter((part): part is string => Boolean(part));
 
   return parts.length > 0 ? parts.join(' • ') : undefined;
