@@ -46,6 +46,38 @@ export type WorkflowUrlSelectionSetter = (
 ) => void;
 
 /**
+ * History-entry state for the run flyout: how many entries were pushed since the last entry with
+ * no `executionId` (1 on the entry that opened the run), and whether that earlier entry exists in
+ * this history. It does not for a deep link that opened the page with a run already selected.
+ */
+interface RunEntryState {
+  depth: number;
+  openedInApp: boolean;
+}
+
+const RUN_ENTRY_STATE_KEY = 'workflowsRunEntry';
+
+const getRunEntryState = (state: unknown): RunEntryState | undefined => {
+  const value = (state as Record<string, unknown> | null | undefined)?.[RUN_ENTRY_STATE_KEY] as
+    | Partial<RunEntryState>
+    | undefined;
+  return typeof value?.depth === 'number' && value.depth > 0
+    ? { depth: value.depth, openedInApp: value.openedInApp === true }
+    : undefined;
+};
+
+/** Returns the entry state with the run entry set, keeping any other state it carries. */
+const withRunEntryState = (
+  state: unknown,
+  runEntry: RunEntryState | undefined
+): Record<string, unknown> => {
+  const rest =
+    state != null && typeof state === 'object' ? { ...(state as Record<string, unknown>) } : {};
+  delete rest[RUN_ENTRY_STATE_KEY];
+  return runEntry ? { ...rest, [RUN_ENTRY_STATE_KEY]: runEntry } : rest;
+};
+
+/**
  * Normalise a `query-string` value (which may be `string | string[] | null`)
  * to `string | undefined`, taking the first element of any array.
  */
@@ -114,15 +146,65 @@ export function useWorkflowUrlState() {
         return;
       }
 
+      const currentExecutionId = firstString(currentParams.executionId);
+      const nextExecutionId = firstString(cleanParams.executionId as string | undefined);
+      // A deep-linked run has no state yet: its entry counts as depth 1 with nothing before it.
+      const currentRunEntry =
+        getRunEntryState(history.location.state) ??
+        (currentExecutionId ? { depth: 1, openedInApp: false } : undefined);
+
+      if (!replace) {
+        let nextRunEntry: RunEntryState | undefined;
+        if (nextExecutionId) {
+          nextRunEntry = currentRunEntry
+            ? { depth: currentRunEntry.depth + 1, openedInApp: currentRunEntry.openedInApp }
+            : { depth: 1, openedInApp: true };
+        }
+        history.push({
+          ...history.location,
+          search: nextSearch,
+          state: withRunEntryState(history.location.state, nextRunEntry),
+        });
+        return;
+      }
+
+      let replacedRunEntry: RunEntryState | undefined;
+      if (nextExecutionId) {
+        replacedRunEntry = currentRunEntry ?? { depth: 1, openedInApp: false };
+      }
       const nextLocation = {
         ...history.location,
         search: nextSearch,
+        state: withRunEntryState(history.location.state, replacedRunEntry),
       };
-      if (replace) {
-        history.replace(nextLocation);
-      } else {
-        history.push(nextLocation);
+
+      // Closing a run without a navigation (a filter change, a cleanup) must leave none of its
+      // entries reachable, or Back or Forward reopens the run against state that no longer
+      // matches it. Replacing only the current entry is not enough once steps inside the run
+      // pushed more.
+      if (currentExecutionId && !nextExecutionId && currentRunEntry) {
+        const { depth, openedInApp } = currentRunEntry;
+        if (openedInApp) {
+          // Go to the entry before the run and push from it: the push discards every run entry.
+          const unlisten = history.listen(() => {
+            unlisten();
+            history.push(nextLocation);
+          });
+          history.go(-depth);
+          return;
+        }
+        if (depth > 1) {
+          // Nothing before a deep-linked run: replace its first entry instead.
+          const unlisten = history.listen(() => {
+            unlisten();
+            history.replace(nextLocation);
+          });
+          history.go(-(depth - 1));
+          return;
+        }
       }
+
+      history.replace(nextLocation);
     },
     [history]
   );

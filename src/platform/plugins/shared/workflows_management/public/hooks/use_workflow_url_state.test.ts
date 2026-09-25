@@ -13,7 +13,9 @@ import { MemoryRouter, useHistory } from 'react-router-dom';
 import { useWorkflowUrlState } from './use_workflow_url_state';
 import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_editor_preferences';
 
-const createWrapper = (initialEntries: string[] = ['/']) => {
+type InitialEntries = React.ComponentProps<typeof MemoryRouter>['initialEntries'];
+
+const createWrapper = (initialEntries: InitialEntries = ['/']) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(MemoryRouter, { initialEntries }, children);
   return Wrapper;
@@ -381,7 +383,7 @@ describe('useWorkflowUrlState', () => {
     });
   });
   describe('browser history', () => {
-    const renderWithHistory = (initialEntries: string[]) =>
+    const renderWithHistory = (initialEntries: InitialEntries) =>
       renderHook(() => ({ urlState: useWorkflowUrlState(), history: useHistory() }), {
         wrapper: createWrapper(initialEntries),
       });
@@ -452,6 +454,70 @@ describe('useWorkflowUrlState', () => {
 
       expect(result.current.urlState.selectedStepId).toBe('step-b');
       expect(result.current.history.length).toBe(1);
+    });
+
+    it('drops every entry a run added when a filter change closes it after step selections', () => {
+      const { result } = renderWithHistory(['/?tab=executions']);
+
+      act(() => {
+        result.current.urlState.setSelectedExecution('exec-1');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-b');
+      });
+      act(() => {
+        result.current.urlState.setSelectedExecution(null, { replace: true });
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+      // The entry before the run, then the closed state: no run entry left, none ahead.
+      expect(result.current.history.length).toBe(2);
+
+      act(() => {
+        result.current.history.goForward();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+      expect(result.current.urlState.selectedStepExecutionId).toBeUndefined();
+    });
+
+    it('drops the step entries of a deep-linked run when it is closed with replace', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedExecution(null, { replace: true });
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+    });
+
+    it('keeps other history state on entries it pushes', () => {
+      const { result } = renderWithHistory([
+        { pathname: '/', search: '?tab=executions', state: { fromList: true } },
+      ]);
+
+      act(() => {
+        result.current.urlState.setSelectedExecution('exec-1');
+      });
+
+      expect(result.current.history.location.state).toEqual(
+        expect.objectContaining({ fromList: true })
+      );
     });
 
     it('replaces the entry when a selection is normalised with replace', () => {
