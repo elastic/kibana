@@ -131,10 +131,19 @@ describe('buildChainWorld', () => {
   it('throws for a stage that cites no event', () => {
     expect(() =>
       buildChainWorld(
-        { ...DEFINITION, stages: [{ ...DEFINITION.stages[0], eventKeys: ['missing'] }] },
+        { ...DEFINITION, stages: [{ ...DEFINITION.stages[0], eventKeys: [] }] },
         RUN_MARKER
       )
     ).toThrow('Chain "test-chain" stage "exec" cites no event');
+  });
+
+  it('throws for a stage that cites an unknown event next to a known one', () => {
+    expect(() =>
+      buildChainWorld(
+        { ...DEFINITION, stages: [{ ...DEFINITION.stages[0], eventKeys: ['start', 'missing'] }] },
+        RUN_MARKER
+      )
+    ).toThrow('Chain "test-chain" stage "exec" cites unknown event missing');
   });
 });
 

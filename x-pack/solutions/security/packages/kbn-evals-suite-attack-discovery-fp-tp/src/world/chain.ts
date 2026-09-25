@@ -183,6 +183,14 @@ const buildAlert = (
   ids: FpTpChainIds,
   runMarker: string
 ): Ad2IndexedAlert => {
+  const unknownKeys = stage.eventKeys.filter(
+    (eventKey) => !definition.events.some(({ key }) => key === eventKey)
+  );
+  if (unknownKeys.length > 0) {
+    throw new Error(
+      `Chain "${definition.key}" stage "${stage.key}" cites unknown event ${unknownKeys.join(', ')}`
+    );
+  }
   const stageEvents = definition.events.filter(({ key }) => stage.eventKeys.includes(key));
   const [firstEvent] = stageEvents;
   if (!firstEvent) {
