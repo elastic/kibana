@@ -73,10 +73,39 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
 
   spaceTest(
     'supports ad-hoc data views with runtime field relabel and remove',
-    async ({ apiServices, discoverScoutSpace, esClient, log, page, pageObjects }, testInfo) => {
+    async ({ apiServices, discoverScoutSpace, log, page, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const fieldName = '_bytes-runtimefield';
       const labeledName = '_bytes-runtimefield2';
+
+      // TODO(flaky-diagnostics): remove once the extra available field is identified.
+      // Log every field existence response (include_empty_fields=false) Discover receives.
+      const existenceLogs: Array<Promise<void>> = [];
+      page.on('response', (response) => {
+        const url = response.url();
+        if (
+          !url.includes('/internal/data_views/_fields_for_wildcard') ||
+          !url.includes('include_empty_fields=false')
+        ) {
+          return;
+        }
+        existenceLogs.push(
+          response
+            .text()
+            .then((body) =>
+              log.info(
+                `field-existence-diagnostics: ${JSON.stringify({
+                  url,
+                  status: response.status(),
+                  requestBody: response.request().postData(),
+                })} response: ${body}`
+              )
+            )
+            .catch((error) =>
+              log.info(`field-existence-diagnostics: failed to read ${url}: ${error}`)
+            )
+        );
+      });
 
       await openAdHocSessionWithRuntimeFields({
         apiServices,
@@ -90,77 +119,12 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
         },
       });
 
-      // TODO(flaky-diagnostics): remove once the extra available field is identified.
       try {
         await unifiedFieldList.expectAvailableFieldCount(
           testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1
         );
-      } catch (error) {
-        // The field list renders lazily (50 at a time); scroll until every item is in the DOM.
-        const scrollContainer = page.testSubj.locator('fieldListGroupedFieldGroups');
-        let previousCount = -1;
-        for (let attempt = 0; attempt < 20; attempt++) {
-          const renderedCount = await scrollContainer.locator('li[data-attr-field]').count();
-          if (renderedCount === previousCount) break;
-          previousCount = renderedCount;
-          await scrollContainer.evaluate((el) => el.scrollTo(0, el.scrollHeight));
-          await page.waitForTimeout(300);
-        }
-
-        const sections = ['selected', 'popular', 'available', 'empty', 'meta'] as const;
-        const sidebarFields: Record<string, { count: string | null; names: string[] }> = {};
-        for (const section of sections) {
-          const sectionLocator = page.testSubj.locator(
-            unifiedFieldList.getSidebarSectionSelector(section)
-          );
-          sidebarFields[section] = {
-            count: (await sectionLocator.count())
-              ? await page.testSubj
-                  .locator(`${unifiedFieldList.getSidebarSectionSelector(section)}-count`)
-                  .textContent()
-              : null,
-            names: await unifiedFieldList.getSidebarSectionFieldNames(section),
-          };
-        }
-
-        // Same query Discover's field existence check sends (include_empty_fields=false + time filter).
-        const fieldCaps = await esClient.fieldCaps({
-          index: testData.DEFAULT_DATA_VIEW,
-          fields: '*',
-          include_empty_fields: false,
-          index_filter: {
-            range: {
-              '@timestamp': {
-                format: 'strict_date_optional_time',
-                gte: testData.DEFAULT_TIME_RANGE.from,
-                lte: testData.DEFAULT_TIME_RANGE.to,
-              },
-            },
-          },
-        });
-        const indices = await esClient.cat.indices({
-          index: `${testData.DEFAULT_DATA_VIEW},${testData.DEFAULT_DATA_VIEW.replace('*', '')}*`,
-          format: 'json',
-          h: 'index,docs.count,status',
-        });
-
-        const diagnostics = JSON.stringify(
-          {
-            url: page.url(),
-            sidebarFields,
-            esNonEmptyFields: Object.keys(fieldCaps.fields).sort(),
-            esFieldCapsIndices: fieldCaps.indices,
-            logstashIndices: indices,
-          },
-          null,
-          2
-        );
-        log.info(`available-field-diagnostics: ${diagnostics}`);
-        await testInfo.attach('available-field-diagnostics.json', {
-          contentType: 'application/json',
-          body: diagnostics,
-        });
-        throw error;
+      } finally {
+        await Promise.all(existenceLogs);
       }
       await unifiedFieldList.searchField(fieldName);
       await expect(unifiedFieldList.getAvailableField(fieldName)).toBeVisible();
