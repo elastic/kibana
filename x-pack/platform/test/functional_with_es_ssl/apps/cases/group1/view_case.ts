@@ -871,8 +871,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await createAndNavigateToCase(getPageObject, getService);
 
         await cases.singleCase.openAssigneesPopover();
-        await cases.common.setSearchTextInAssigneesPopover('case');
-        await cases.common.selectFirstRowInAssigneesPopover();
+        await cases.common.setSearchTextInAssigneesPopover('cases_all_user');
+        await cases.common.selectUserInAssigneesPopover('cases_all_user');
         await cases.singleCase.closeAssigneesPopover();
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
