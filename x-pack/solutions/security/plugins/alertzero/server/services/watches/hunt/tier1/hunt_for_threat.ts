@@ -276,10 +276,18 @@ export const huntForThreat = async (
   // does not fire, and the run reports `no_environment_hits`: searched and clean, for a
   // hunt that searched for nothing. Dropping them here also keeps `resolved_iocs` and
   // `resolved_techniques` honest about what was actually looked for.
+  // Both are normalised before the emptiness test rather than tested on a trimmed copy and
+  // then searched raw: a padded `" example.com "` would otherwise pass the filter and be
+  // searched verbatim, and a keyword `term` on a padded value matches no document holding
+  // `example.com`. That is the same clean-report-for-an-impossible-match this filter exists
+  // to prevent, so the value that survives here is the value that gets searched, attributed
+  // against, and echoed back in `resolved_iocs`.
   const techniques = rawTechniques
     .map((technique) => technique.trim().toUpperCase())
     .filter((technique) => technique.length > 0);
-  const iocs = rawIocs.filter(({ value }) => value.trim().length > 0);
+  const iocs = rawIocs
+    .map((ioc) => ({ ...ioc, value: ioc.value.trim() }))
+    .filter(({ value }) => value.length > 0);
 
   const from = time_range?.from ?? scope.window.from;
   const to = time_range?.to ?? scope.window.to;

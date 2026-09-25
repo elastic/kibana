@@ -95,6 +95,62 @@ describe('huntForThreat', () => {
       expect(serialized).not.toContain('""');
     });
 
+    it('searches a padded value trimmed, not verbatim', async () => {
+      // Testing the trimmed length and then searching the raw value is the whole bug: a
+      // keyword `term` on `" example.com "` matches no document holding `example.com`, so
+      // the run reports clean for a search that could not have matched.
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, { scope, iocs: [{ type: 'domain', value: ' example.com ' }] });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      expect(searchBody.query.bool.should).toEqual(
+        expect.arrayContaining([
+          { term: { 'dns.question.name': { value: 'example.com', case_insensitive: true } } },
+        ])
+      );
+      expect(JSON.stringify(searchBody.query)).not.toContain(' example.com ');
+    });
+
+    it('attributes a hit to the padded IOC once the value is trimmed', async () => {
+      const esClient = buildEsClient(
+        {
+          hits: {
+            total: { value: 1 },
+            hits: [
+              {
+                _index: 'logs-aws.cloudtrail-default',
+                _id: 'abc',
+                _source: {
+                  '@timestamp': '2026-09-01T00:00:00.000Z',
+                  dns: { question: { name: 'example.com' } },
+                },
+              },
+            ],
+          },
+          aggregations: {
+            per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
+            affected_hosts: { buckets: [] },
+            affected_users: { buckets: [] },
+          },
+        },
+        1
+      );
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'domain', value: ' example.com ' }],
+      });
+
+      // Attribution compares against the same value the query used, so trimming at the
+      // source keeps a found hit explainable.
+      expect(result.hits[0].matched).toEqual({
+        ioc: { type: 'domain', value: 'example.com' },
+        field: 'dns.question.name',
+      });
+      expect(result.has_confirmed_hit).toBe(true);
+    });
+
     it('echoes only what it actually searched for', async () => {
       const esClient = buildEsClient(emptySearchResponse);
 
