@@ -125,7 +125,12 @@ describe('huntCoordinator', () => {
     );
     expect(result.status).toBe('tier1_only');
     expect(result.tier2_skipped_reason).toBe('no_inference');
-    expect(result.completed_successfully).toBe(true);
+    // Tier 1 searched, so a caller could be forgiven for reading this as a complete
+    // run — and that is the trap. Tier 2 was requested and never ran, so the report's
+    // behavioral techniques were not hunted at all. Configuring a connector is all it
+    // takes for the next run to cover them, so the report has to stay eligible.
+    expect(result.completeness).toBe('incomplete_retryable');
+    expect(result.completed_successfully).toBe(false);
   });
 
   it('returns tier1_only when text is absent', async () => {
@@ -968,6 +973,160 @@ describe('huntCoordinator', () => {
       mockT2.mockResolvedValueOnce(tier2Result());
 
       const result = await run('run-t1-hits');
+
+      expect(result.completeness).toBe('complete');
+    });
+
+    it('reports a requested Tier 2 that could not run, even though Tier 1 searched', async () => {
+      // The hole Libra found in the first version of this: keying the gap on Tier 1
+      // having mapped nothing meant a report whose IOCs *were* searched, on a run with
+      // no connector, reported `complete` and was retired before its behavioral
+      // techniques were ever looked at.
+      mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_environment_hits' }));
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        undefined,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-requested-unavailable',
+          text: 'report text',
+        }
+      );
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
+    });
+
+    it.each([
+      ['never', 'configured_never'],
+      ['on_hits', 'no_environment_hits'],
+    ] as const)(
+      'treats Tier 2 not being asked for (%s) as a complete run, not lost coverage',
+      async (tier2When, expectedReason) => {
+        // The other half of the same decision: reporting the caller's own gating as a
+        // gap would make every deliberate Tier-1-only run look incomplete.
+        mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_environment_hits' }));
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          mockModel,
+          logger,
+          {
+            spaceId: 'default',
+            trigger: 'scheduled',
+            run_id: `run-not-asked-${tier2When}`,
+            text: 'report text',
+            tier2_when: tier2When,
+          }
+        );
+
+        expect(result.tier2_skipped_reason).toBe(expectedReason);
+        expect(result.completeness).toBe('complete');
+        expect(result.completed_successfully).toBe(true);
+      }
+    );
+
+    it('reports nothing_searched when Tier 2 ran but extracted nothing and Tier 1 mapped nothing', async () => {
+      // Tier 2 running is not Tier 2 searching. Extraction returning no candidate means
+      // no query reached Elasticsearch, and zero hits from zero queries is not clean.
+      mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
+      mockT2.mockResolvedValueOnce(tier2Result({ status: 'no_behaviors_found', behaviors: [] }));
+
+      const result = await run('run-t2-extracted-nothing');
+
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.completed_successfully).toBe(true);
+    });
+
+    it('reports nothing_searched when behaviors were proposed but none executed', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          behaviors: [
+            { technique_id: 'T1078.004', execution: { executed: false, row_count: 0, hit: false } },
+          ],
+        })
+      );
+
+      const result = await run('run-t2-proposed-not-executed');
+
+      expect(result.completeness).toBe('incomplete_final');
+    });
+
+    it('stays complete when Tier 2 executed something, even though Tier 1 mapped nothing', async () => {
+      // Tier 1 mapping no IOC is not itself a gap — decision #4 maps it to clean — so
+      // long as something did query the environment.
+      mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          behaviors: [
+            { technique_id: 'T1078.004', execution: { executed: true, row_count: 3, hit: true } },
+          ],
+        })
+      );
+
+      const result = await run('run-t2-did-search');
+
+      expect(result.completeness).toBe('complete');
+    });
+
+    it('reports a report that was hunted only as a prefix, and says what it missed', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        truncated: { iocs: { kept: 100, dropped: 50 } },
+      });
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(tier2Result());
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-truncated',
+          report_id: 'rpt-1',
+        }
+      );
+
+      // Deterministic: the same report truncates the same way every sweep, so re-hunting
+      // the same prefix gains nothing. It retires, but not as clean.
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.next_step).toContain('50 IOC(s)');
+    });
+
+    it('ignores what the report lost when the caller supplied its own IOCs', async () => {
+      // The caller's array replaces the report's, so what the loader dropped from the
+      // report is not coverage this run lost.
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        truncated: { iocs: { kept: 100, dropped: 50 } },
+      });
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(tier2Result());
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-truncated-overridden',
+          report_id: 'rpt-1',
+          iocs: [{ type: 'ip', value: '203.0.113.7' }],
+        }
+      );
 
       expect(result.completeness).toBe('complete');
     });

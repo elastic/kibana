@@ -33,7 +33,7 @@ export type IndexScopeStatusEnum = typeof IndexScopeStatus.enum;
 export const IndexScopeStatusEnum = IndexScopeStatus.enum;
 
 /**
- * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. The first four are transient: the same run repeated could succeed, so the report must stay eligible. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends the run.
+ * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. The first four are transient: the same run repeated could succeed, so the report must stay eligible. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends the run. `input_truncated` means the report carried more IOCs, techniques or text than a hunt accepts, so only a prefix of it was hunted.
  */
 export const HuntIncompleteReason = lazySchema(() =>
   z.enum([
@@ -49,6 +49,7 @@ export const HuntIncompleteReason = lazySchema(() =>
     'rows_unclassifiable',
     'refs_unavailable',
     'nothing_searched',
+    'input_truncated',
   ])
 );
 export type HuntIncompleteReason = z.infer<typeof HuntIncompleteReason>;

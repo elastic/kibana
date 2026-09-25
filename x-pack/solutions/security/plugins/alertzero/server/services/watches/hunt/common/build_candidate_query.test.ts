@@ -63,6 +63,70 @@ describe('buildCandidateQuery', () => {
     ).rejects.toThrow('index_not_found_exception');
   });
 
+  describe('a partial answer is not an empty pool', () => {
+    it('refuses to select from a timed-out search', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        ...searchResponseOf(['rpt-1']),
+        timed_out: true,
+      });
+
+      await expect(
+        buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'default' })
+      ).rejects.toThrow('timed out');
+    });
+
+    it('refuses to select when shards failed, rather than reading a shrunken pool', async () => {
+      // The hit page *is* the eligible pool here, so a lost shard removes reports with
+      // no sign that it did: the paging loop reads the short page as a spent pool.
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        ...searchResponseOf(['rpt-1']),
+        _shards: { total: 5, successful: 4, skipped: 0, failed: 1 },
+      });
+
+      await expect(
+        buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'default' })
+      ).rejects.toThrow('1 of 5 shards failed');
+    });
+
+    it('refuses a named-id lookup on a partial answer instead of reporting not_found', async () => {
+      // `not_found` is a statement about the report; a failed shard is a statement about
+      // the cluster, and the caller cannot tell them apart from the result alone.
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        ...searchResponseOf([]),
+        _shards: { total: 3, successful: 2, skipped: 0, failed: 1 },
+      });
+
+      await expect(
+        buildCandidateQuery(esClient, logger, {
+          trigger: 'manual',
+          spaceId: 'default',
+          report_ids: ['rpt-1'],
+        })
+      ).rejects.toThrow('shards failed');
+    });
+
+    it('checks every page, not only the first', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const pool = Array.from({ length: 200 }, (_, i) => `rpt-${i}`);
+      const serve = servePool(pool);
+      esClient.search
+        .mockImplementationOnce(serve)
+        .mockResolvedValue({ ...searchResponseOf([]), timed_out: true });
+
+      await expect(
+        buildCandidateQuery(
+          esClient,
+          logger,
+          { trigger: 'scheduled', spaceId: 'default', limit: 100 },
+          async () => new Set(pool.map(buildHuntInvestigationConversationId))
+        )
+      ).rejects.toThrow('timed out');
+    });
+  });
+
   it('does not ignore a missing reports index, so an outage cannot read as an empty pool', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue(searchResponseOf([]));

@@ -35,12 +35,14 @@ components:
         - rows_unclassifiable
         - refs_unavailable
         - nothing_searched
+        - input_truncated
       description: >-
         Why a hunt could not corroborate part of what it was asked to look at, or
         could not show what it found. The first four are transient: the same run
         repeated could succeed, so the report must stay eligible. The rest are
         deterministic: repeating the run produces the same gap, so retrying only
-        re-spends the run.
+        re-spends the run. `input_truncated` means the report carried more IOCs,
+        techniques or text than a hunt accepts, so only a prefix of it was hunted.
 
     HuntIncompleteness:
       type: object

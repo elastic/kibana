@@ -16,6 +16,17 @@ export interface ReportHuntContext {
   iocs: HuntIoc[];
   techniques: string[];
   text?: string;
+  /**
+   * What the bounds below dropped, so the run can report the part of the report it
+   * never looked at. Silently hunting a prefix is the failure mode: an IOC past the
+   * limit reads exactly like an IOC that was searched and found nothing, and the
+   * caller retires the report as hunted on that basis.
+   */
+  truncated?: {
+    iocs?: { kept: number; dropped: number };
+    techniques?: { kept: number; dropped: number };
+    text?: { kept: number; dropped: number };
+  };
 }
 
 interface StoredReportSource {
@@ -81,18 +92,41 @@ export const loadReportHuntContext = async ({
   if (!source) return null;
 
   const rawText = source.content?.body_text;
-  const text =
-    typeof rawText === 'string' && rawText.length > 0
-      ? rawText.slice(0, MAX_HUNT_REPORT_TEXT_CHARS)
-      : undefined;
+  const hasText = typeof rawText === 'string' && rawText.length > 0;
+  const text = hasText ? rawText.slice(0, MAX_HUNT_REPORT_TEXT_CHARS) : undefined;
+
+  // Counted before the bound is applied, and only over values that survived
+  // validation: an IOC kind Tier 1 cannot map is dropped by design and is not lost
+  // coverage, whereas one pushed past the limit is.
+  const mappableIocs = (source.extracted?.iocs ?? []).filter(isHuntIoc);
+  const validTechniques = (source.extracted?.ttps?.techniques ?? []).filter(isHuntTechnique);
+
+  const truncated = {
+    ...(mappableIocs.length > MAX_HUNT_REPORT_IOCS && {
+      iocs: {
+        kept: MAX_HUNT_REPORT_IOCS,
+        dropped: mappableIocs.length - MAX_HUNT_REPORT_IOCS,
+      },
+    }),
+    ...(validTechniques.length > MAX_HUNT_REPORT_TECHNIQUES && {
+      techniques: {
+        kept: MAX_HUNT_REPORT_TECHNIQUES,
+        dropped: validTechniques.length - MAX_HUNT_REPORT_TECHNIQUES,
+      },
+    }),
+    ...(hasText &&
+      rawText.length > MAX_HUNT_REPORT_TEXT_CHARS && {
+        text: {
+          kept: MAX_HUNT_REPORT_TEXT_CHARS,
+          dropped: rawText.length - MAX_HUNT_REPORT_TEXT_CHARS,
+        },
+      }),
+  };
+
   return {
-    iocs: (source.extracted?.iocs ?? [])
-      .filter(isHuntIoc)
-      .slice(0, MAX_HUNT_REPORT_IOCS)
-      .map(({ type, value }) => ({ type, value })),
-    techniques: (source.extracted?.ttps?.techniques ?? [])
-      .filter(isHuntTechnique)
-      .slice(0, MAX_HUNT_REPORT_TECHNIQUES),
+    iocs: mappableIocs.slice(0, MAX_HUNT_REPORT_IOCS).map(({ type, value }) => ({ type, value })),
+    techniques: validTechniques.slice(0, MAX_HUNT_REPORT_TECHNIQUES),
     ...(text !== undefined ? { text } : {}),
+    ...(Object.keys(truncated).length > 0 ? { truncated } : {}),
   };
 };

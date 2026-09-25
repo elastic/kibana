@@ -252,29 +252,70 @@ const decideTier2Skip = (
 };
 
 /**
- * The gap the coordinator sees that neither tier can: both of them sitting out. Tier
- * 1 mapped none of the report's IOCs to a searchable field, and Tier 2 never ran, so
- * nothing queried the environment at all. Tier 1 still returns zero hits, which a
- * caller writing hunt evidence would otherwise record as a clean environment for a
- * search that never happened.
+ * Skip reasons that mean Tier 2 was asked for and could not run, as opposed to not
+ * being asked for at all. `configured_never`, `no_searchable_input` and
+ * `no_environment_hits` are the caller's own gating being honoured — reporting those
+ * as lost coverage would make every deliberate Tier-1-only run look incomplete.
  *
- * A missing connector is transient, since one can be configured and the next run then
- * covers the report; every other skip reason recurs identically.
+ * All three here are transient. A connector can be configured and a failing one can
+ * recover; report text can arrive from a later ingest, and the alternative —
+ * retiring a report whose text simply had not been written yet — is the silent
+ * permanent miss settled decision #7 rules out for a missing required index. So the
+ * report stays in the candidate pool and a later sweep covers it.
  */
-const bothTiersSatOut = (
-  tier1Status: HuntForThreatResult['status'],
-  skipReason: HuntCoordinatorTier2SkipReason
-): HuntIncompleteness[] => {
-  if (tier1Status !== 'no_searchable_terms') return [];
-  return [
-    {
-      reason: skipReason === 'no_inference' ? 'generation_failed' : 'nothing_searched',
+const TIER2_REQUESTED_BUT_UNAVAILABLE: ReadonlySet<HuntCoordinatorTier2SkipReason> = new Set([
+  'no_inference',
+  'no_report_text',
+  'tier2_failed',
+]);
+
+/**
+ * Coverage the coordinator can see and neither tier can, keyed on what actually
+ * matters: whether any query reached the environment, and whether the run covered
+ * both halves of what it was asked to.
+ *
+ * Keying this on *which tier sat out* is the mistake worth not repeating. Tier 1
+ * reports zero hits whether it searched and found nothing or mapped nothing to search
+ * for, and Tier 2 reports no behaviors whether it proposed none or executed none — so
+ * a run where nothing queried Elasticsearch is indistinguishable from a clean
+ * environment unless the coordinator says otherwise, and a caller writing hunt
+ * evidence retires the report either way.
+ */
+const coordinatorGaps = ({
+  tier1Status,
+  tier2Executed,
+  skipReason,
+  skipDetail,
+}: {
+  tier1Status: HuntForThreatResult['status'];
+  tier2Executed: boolean;
+  skipReason?: HuntCoordinatorTier2SkipReason;
+  skipDetail?: string;
+}): HuntIncompleteness[] => {
+  const gaps: HuntIncompleteness[] = [];
+
+  if (skipReason && TIER2_REQUESTED_BUT_UNAVAILABLE.has(skipReason)) {
+    gaps.push({
+      reason: 'generation_failed',
       detail:
-        `Tier 1 mapped no searchable term from this report and Tier 2 did not run ` +
-        `(${skipReason}), so no query reached the environment. The absence of hits says ` +
-        `nothing about whether the environment is clean.`,
-    },
-  ];
+        `Tier 2 was requested but could not run (${skipReason}${
+          skipDetail ? `: ${skipDetail}` : ''
+        }), so this report's behavioral techniques were never hunted. Tier 1's result covers its ` +
+        `IOCs only.`,
+    });
+  }
+
+  if (tier1Status === 'no_searchable_terms' && !tier2Executed) {
+    gaps.push({
+      reason: 'nothing_searched',
+      detail:
+        `Tier 1 mapped no searchable term from this report and Tier 2 executed no query, so ` +
+        `nothing reached the environment. The absence of hits says nothing about whether the ` +
+        `environment is clean.`,
+    });
+  }
+
+  return gaps;
 };
 
 export const huntCoordinator = async (
@@ -347,6 +388,39 @@ export const huntCoordinator = async (
   // Clamp after merge: request schema bounds caller `text`, but report-loaded
   // `content.body_text` has no such bound and must not exceed the Tier 2 contract.
   const text = clampHuntReportText(callerText ?? reportContext?.text);
+
+  // What the loader had to drop from the report, counted only where this run actually
+  // used the report's value: a caller-supplied array replaces the report's, so what was
+  // dropped from the report is not coverage this run lost. Deterministic — the same
+  // report truncates the same way every sweep — so it retires the report rather than
+  // re-hunting the same prefix forever, but it retires saying what it never looked at.
+  const truncated = reportContext?.truncated;
+  const lostToTruncation = [
+    ...(truncated?.iocs && callerIocs === undefined
+      ? [`${truncated.iocs.dropped} IOC(s) beyond the first ${truncated.iocs.kept}`]
+      : []),
+    ...(truncated?.techniques && callerTechniques === undefined
+      ? [
+          `${truncated.techniques.dropped} technique(s) beyond the first ${truncated.techniques.kept}`,
+        ]
+      : []),
+    ...(truncated?.text && callerText === undefined
+      ? [
+          `${truncated.text.dropped} character(s) of report text beyond the first ${truncated.text.kept}`,
+        ]
+      : []),
+  ];
+  const inputGaps: HuntIncompleteness[] =
+    lostToTruncation.length > 0
+      ? [
+          {
+            reason: 'input_truncated',
+            detail:
+              `This report carries more than a hunt accepts, so only a prefix of it was hunted: ` +
+              `${lostToTruncation.join(', ')} were never searched.`,
+          },
+        ]
+      : [];
 
   // Resolve the index scope from the environment: the named technology, or every
   // technology whose required indices exist in this space.
@@ -434,7 +508,9 @@ export const huntCoordinator = async (
   const { sample_event_summaries: _summaries, ...tier1Wire } = tier1Raw;
   const tier1: HuntCoordinatorTier1 = { ...tier1Wire, tier: 1 };
 
-  const tier1Gaps = tier1Raw.incomplete ?? [];
+  // Everything known before a tier reported: what the report lost to the input bounds
+  // applies to every return below, whether or not Tier 2 ran.
+  const runGaps = [...inputGaps, ...(tier1Raw.incomplete ?? [])];
 
   /**
    * Every return that stops before Tier 2 produces a result. Completeness is computed
@@ -447,17 +523,23 @@ export const huntCoordinator = async (
     reason,
     message,
     nextStep,
-    extraGaps = [],
+    skipDetail,
   }: {
     reason: HuntCoordinatorTier2SkipReason;
     message: string;
     nextStep: string;
-    extraGaps?: HuntIncompleteness[];
+    skipDetail?: string;
   }): HuntCoordinatorResult => {
     const completeness = huntCompletenessOf([
-      ...tier1Gaps,
-      ...bothTiersSatOut(tier1Raw.status, reason),
-      ...extraGaps,
+      ...runGaps,
+      // Tier 2 never ran on any of these paths, so nothing it could have executed
+      // counts towards coverage.
+      ...coordinatorGaps({
+        tier1Status: tier1Raw.status,
+        tier2Executed: false,
+        skipReason: reason,
+        skipDetail,
+      }),
     ]);
     return {
       status: 'tier1_only',
@@ -497,8 +579,12 @@ export const huntCoordinator = async (
 
   if (!text) {
     const completeness = huntCompletenessOf([
-      ...tier1Gaps,
-      ...bothTiersSatOut(tier1Raw.status, 'no_report_text'),
+      ...runGaps,
+      ...coordinatorGaps({
+        tier1Status: tier1Raw.status,
+        tier2Executed: false,
+        skipReason: 'no_report_text',
+      }),
     ]);
     return {
       status: 'tier2_only_skipped',
@@ -554,21 +640,25 @@ export const huntCoordinator = async (
       reason: 'tier2_failed',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 failed: ${(err as Error).message}`,
       nextStep: 'Tier 2 LLM call failed. Check connector configuration and retry.',
-      extraGaps: [
-        {
-          reason: 'generation_failed',
-          detail:
-            `Tier 2 threw before producing any behavior (${(err as Error).message}), so none of ` +
-            `the report's techniques were searched. A later run may succeed.`,
-        },
-      ],
+      skipDetail: (err as Error).message,
     });
   }
 
   const tier2: HuntCoordinatorTier2 = { ...tier2Raw, tier: 2 };
   const hasConfirmedHit = tier1Raw.has_confirmed_hit || tier2Raw.has_hit;
   const tier2Gaps = tier2Raw.incomplete ?? [];
-  const gaps = [...tier1Gaps, ...tier2Gaps];
+  // Tier 2 ran, which is not the same as Tier 2 having searched: extraction can return
+  // no candidate at all, and a proposed behavior whose query never executed queried
+  // nothing either. Both leave `behaviors` empty of executions, so this is what decides
+  // whether anything reached the environment on a run where Tier 1 mapped nothing.
+  // An absent `execution` is a behavior that never reached execute, which queried
+  // exactly as much as one that executed and returned nothing: nothing.
+  const tier2Executed = tier2Raw.behaviors.some(({ execution }) => execution?.executed === true);
+  const gaps = [
+    ...runGaps,
+    ...tier2Gaps,
+    ...coordinatorGaps({ tier1Status: tier1Raw.status, tier2Executed }),
+  ];
   // Both tiers ran, so `completed_successfully` is no longer a hardcoded `true`: it
   // follows the gaps each tier reported. A deterministic gap still retires the report,
   // because re-running reproduces it exactly and would re-spend the generation budget

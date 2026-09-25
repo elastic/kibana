@@ -132,7 +132,7 @@ export const buildCandidateQuery = async (
   // headroom, and only it pages.
   const pageSize = namedIds ? namedIds.length : limit * OVERFETCH_MULTIPLIER;
 
-  const searchPage = async (excludedIds: string[]) => {
+  const runSearch = async (excludedIds: string[]) => {
     try {
       return await esClient.search({
         index: HUNT_REPORTS_INDEX,
@@ -156,6 +156,31 @@ export const buildCandidateQuery = async (
     } catch (err) {
       throw failClosed(logger, 'ES search failed', err);
     }
+  };
+
+  /**
+   * A 200 can still be a partial answer, and this selector reads the hit page *as* the
+   * eligible pool — so a lost shard shrinks the pool with no sign that it did. The
+   * paging loop below reads a short page as a spent pool and stops early, and a named
+   * report whose shard failed is reported `not_found` although it exists. Fail closed
+   * for the same reason the reports index is not `ignore_unavailable`: an outage must
+   * never be indistinguishable from a sweep that found nothing to hunt.
+   */
+  const searchPage = async (excludedIds: string[]) => {
+    const response = await runSearch(excludedIds);
+    const failedShards = response._shards?.failed ?? 0;
+    if (response.timed_out === true || failedShards > 0) {
+      throw failClosed(
+        logger,
+        'the candidate search answered only partially',
+        new Error(
+          response.timed_out === true
+            ? 'the candidate search timed out'
+            : `${failedShards} of ${response._shards?.total} shards failed on the candidate search`
+        )
+      );
+    }
+    return response;
   };
 
   // A report whose Hunt Proposal is still awaiting a decision is excluded from selection,
