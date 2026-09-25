@@ -69,7 +69,7 @@ spaceTest.describe('Discover search session lifecycle', { tag: '@local-stateful-
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('Starts on index pattern select', async ({ pageObjects, sessionObserver }) => {
+  spaceTest('Starts on data view select', async ({ pageObjects, sessionObserver }) => {
     await pageObjects.discover.selectDataView(sourceDataViewName, { createAdHocIfMissing: false });
     await pageObjects.discover.waitUntilTabIsLoaded();
     const initialSessionId = await clearAfterCurrentSession(sessionObserver);
