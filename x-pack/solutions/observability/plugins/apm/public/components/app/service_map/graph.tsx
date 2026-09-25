@@ -725,7 +725,7 @@ function GraphInner({
       'This is an interactive service map showing application services and their dependencies. ' +
       'Use Tab to navigate between service nodes. Use Arrow keys to move between adjacent nodes. ' +
       'Press Enter or Space to select a node and view its details including connections. ' +
-      'Press Escape to close the details popover. ' +
+      'Press Escape to close the details panel. ' +
       'When focus is in the map region or on the page background (no text field focused), press Command K or Control K to open find in page and focus the search field. ' +
       'The options panel and zoom controls in the top left allow you to filter, change layout, zoom in, zoom out, and fit the view.',
   });
@@ -963,7 +963,6 @@ function GraphInner({
           </ReactFlow>
           <MapPopover
             selectedNode={selectedNodeForPopover}
-            selectedEdge={null}
             focusedServiceName={serviceName}
             environment={environment}
             kuery={kuery}
