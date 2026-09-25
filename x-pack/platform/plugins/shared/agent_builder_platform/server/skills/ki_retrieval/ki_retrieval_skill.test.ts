@@ -29,11 +29,10 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('queries the AI index views in content', () => {
-    expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-*');
-    expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-<id>');
+  it('queries the AI index targets in content', () => {
+    expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-* METADATA _id, _index, _score');
+    expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-<id> METADATA _id, _index, _score');
     expect(kiRetrievalSkill.content).not.toContain('FROM ai-index-*');
-    expect(kiRetrievalSkill.content).not.toContain('METADATA _id, _index, _score');
   });
 
   it('routes every AI-index query through the space-scoped query tool', () => {

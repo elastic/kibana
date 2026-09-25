@@ -104,6 +104,13 @@ describe('describeAiIndex', () => {
     );
   });
 
+  it('targets the backing store of a managed AI index', async () => {
+    const response = await describeAiIndex({ ...params, aiIndex: { ...aiIndex, managed: true } });
+
+    expect(response).toContain('Query with ES|QL against: ai-index-idx-support*');
+    expect(response).toContain(buildExampleQueries('ai-index-idx-support*')[0].esql);
+  });
+
   it('omits the description line when the AI index has none', async () => {
     const { description, ...withoutDescription } = aiIndex;
 

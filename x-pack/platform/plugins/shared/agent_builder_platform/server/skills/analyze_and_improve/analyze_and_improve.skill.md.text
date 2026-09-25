@@ -102,8 +102,9 @@ A **KI** is a structured fact stored in a searchable AI index or datastream (bac
 `context-engine` steps using the AI index id — never by indexing into the backing store directly.
 
 Agents retrieve through the AI index's ES|QL view, `v-ai-index-<id>`, which returns only current,
-active, unexpired KIs and drops the `governance` fields. Diagnosis reads the backing store, where
-deleted and expired KIs, every revision, and the governance fields remain.
+active, unexpired KIs and drops the `governance` fields. Elastic-managed AI indices have no view
+and are queried through their backing store. Diagnosis reads the backing store, where deleted and
+expired KIs, every revision, and the governance fields remain.
 
 Each KI does two things:
 

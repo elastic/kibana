@@ -182,6 +182,9 @@ export class AiIndexService {
    * clobber a user-owned (unmanaged) entry that squats the same id, throwing
    * {@link AiIndexIdConflictError} so the collision surfaces instead of
    * silently destroying user data.
+   *
+   * Managed entries get no view: their KIs carry nested per-document space permissions, which
+   * the ES|QL request filter cannot see on a view's output.
    */
   async putManaged(
     aiIndexId: string,
@@ -193,7 +196,7 @@ export class AiIndexService {
     if (existing && !existing.document.managed) {
       throw new AiIndexIdConflictError(aiIndexId);
     }
-    return this.writeDocumentWithView(
+    return this.writeDocument(
       aiIndexId,
       spaceId,
       { ...properties, id: aiIndexId, space: spaceId, managed: true },

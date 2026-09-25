@@ -18,8 +18,7 @@ describe('buildExampleQueries', () => {
       'Count by type',
     ]);
     for (const { esql } of queries) {
-      expect(esql.startsWith('FROM v-ai-index-support')).toBe(true);
-      expect(esql).not.toContain('METADATA');
+      expect(esql.startsWith('FROM v-ai-index-support METADATA _id, _index, _score')).toBe(true);
     }
   });
 

@@ -124,6 +124,18 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     expect(getAiIndexDataReadService).toHaveBeenCalledWith({ esClient: asCurrentUser, request });
   });
 
+  it('maps a managed AI index to its backing store', async () => {
+    const { resolver } = setup({
+      aiIndices: [
+        { id: 'elastic', managed: true, dest: { type: 'index', value: '.ai-index-idx-elastic' } },
+      ],
+    });
+
+    expect(await resolver({ ids: ['elastic'], request })).toEqual([
+      { id: 'elastic', esqlTarget: '.ai-index-idx-elastic' },
+    ]);
+  });
+
   it('registers a resolver mapping registry items to id, esqlTarget (view name) and description', async () => {
     const { resolver } = setup({
       aiIndices: [

@@ -40,7 +40,7 @@ describe('listAiIndicesHandler', () => {
       ai_indices: [
         {
           id: 'elastic',
-          esql_target: 'v-ai-index-elastic',
+          esql_target: 'ai-index-elastic',
           description: 'elastic description',
           managed: true,
         },

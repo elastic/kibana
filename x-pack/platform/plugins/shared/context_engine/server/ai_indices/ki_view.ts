@@ -6,11 +6,9 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { KI_VIEW_NAME_PREFIX } from '../../common/constants';
+import { kiViewName } from '../../common/constants';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { formatErrorMessage } from '../utils/format_es_error';
-
-const kiViewName = (aiIndexId: string): string => `${KI_VIEW_NAME_PREFIX}${aiIndexId}`;
 
 const LIFECYCLE_FILTERS = [
   'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
