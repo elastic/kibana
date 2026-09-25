@@ -7,9 +7,15 @@
 
 /* eslint-disable playwright/no-nth-methods */
 
+import { euiSelectors } from '@kbn/scout';
 import moment from 'moment';
-import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper, type EuiDataGridObject } from '@kbn/scout';
+import {
+  AppMenu,
+  KibanaCodeEditorWrapper,
+  type EuiDataGridObject,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../../public/components/stream_management/data_management/schema_editor/constants';
 
@@ -51,6 +57,7 @@ export class StreamsApp {
   public readonly fetchMoreMatchingSamplesButton;
   // Canvas
   public readonly canvasTab;
+  public readonly canvasViewport;
   public readonly canvasZoomControls;
   public readonly canvasZoomIn;
   public readonly canvasZoomOut;
@@ -65,14 +72,16 @@ export class StreamsApp {
   public readonly canvasAddDestination;
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
+  public readonly canvasEmptyState;
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
-  public readonly streamsLayoutPipelinesPlaceholder;
   public readonly streamsDestinationsTable;
   public readonly streamsDestinationsSearch;
+  private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
     this.processorFieldComboBox = this.page.components.comboBox(
       'streamsAppProcessorFieldSelectorComboFieldText'
     );
@@ -116,6 +125,7 @@ export class StreamsApp {
     );
     // Canvas locators
     this.canvasTab = this.page.testSubj.locator('streamsCanvasTab');
+    this.canvasViewport = this.canvasTab.locator('.react-flow__viewport');
     this.canvasZoomControls = this.page.testSubj.locator('streamsCanvasZoomControls');
     this.canvasZoomIn = this.page.testSubj.locator('streamsCanvasZoomIn');
     this.canvasZoomOut = this.page.testSubj.locator('streamsCanvasZoomOut');
@@ -130,12 +140,10 @@ export class StreamsApp {
     this.canvasAddDestination = this.page.testSubj.locator('streamsCanvasAddDestination');
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
+    this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
-    this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutPipelinesPlaceholder'
-    );
     this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
     this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
   }
@@ -213,6 +221,28 @@ export class StreamsApp {
 
   getCanvasNodeByAriaLabel(ariaLabel: string) {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
+  }
+
+  /**
+   * React Flow's viewport transform, which encodes both pan and zoom.
+   */
+  async getCanvasViewportTransform(): Promise<string> {
+    return this.canvasViewport.evaluate((element) => window.getComputedStyle(element).transform);
+  }
+
+  /** Current canvas zoom, read the way React Flow itself reads it (`@xyflow/system`). */
+  async getCanvasZoom(): Promise<number> {
+    return this.canvasViewport.evaluate((element) => {
+      const { transform } = window.getComputedStyle(element);
+      return transform === 'none' ? 1 : new DOMMatrixReadOnly(transform).m22;
+    });
+  }
+
+  /** Zooms in once, resolving when the viewport reflects the higher zoom. */
+  async zoomInCanvas() {
+    const previousZoom = await this.getCanvasZoom();
+    await this.canvasZoomIn.click();
+    await expect.poll(() => this.getCanvasZoom()).toBeGreaterThan(previousZoom);
   }
 
   /**
@@ -1398,14 +1428,14 @@ export class StreamsApp {
 
   async expectAttachmentDetailsFlyoutDescription(description: string) {
     // The description is shown in the first InfoPanel - scope to the flyout
-    const flyout = this.page.locator('.euiFlyout');
+    const flyout = this.page.locator(euiSelectors.flyout.ROOT_SELECTOR);
     const descriptionText = flyout.getByText(description);
     await expect(descriptionText).toBeVisible();
   }
 
   async expectAttachmentDetailsFlyoutType(typeLabel: string) {
     // The type badge is inside the flyout - scope to the flyout to avoid matching table badges
-    const flyout = this.page.locator('.euiFlyout');
+    const flyout = this.page.locator(euiSelectors.flyout.ROOT_SELECTOR);
     const typeBadge = flyout.getByText(typeLabel, { exact: true });
     await expect(typeBadge).toBeVisible();
   }
@@ -1448,8 +1478,7 @@ export class StreamsApp {
   }
 
   async openStreamsSettings() {
-    await this.page.getByTestId('app-menu-overflow-button').click();
-    await this.page.getByTestId('streamsAppSettingsButton').click();
+    await this.appMenu.clickItem('streamsAppSettingsButton');
   }
 
   async clickCreateQueryStreamButton() {
@@ -1486,8 +1515,7 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.click('streamsDeleteStreamButton');
+    await this.appMenu.clickItem('streamsDeleteStreamButton');
   }
 
   async fillDeleteQueryStreamModalInput(value: string) {

@@ -8,6 +8,7 @@
 import type { UpdateActionPolicyBody } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
+  ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
   actionPolicyResponseExample,
@@ -17,7 +18,7 @@ import { buildOasOperation } from '../oas_utils';
 
 export const UPDATE_ACTION_POLICY_REQUEST: UpdateActionPolicyBody = {
   version: 'WzAsMV0=',
-  name: 'Notify on host alerts (updated)',
+  name: 'Notify on production alerts (updated)',
   description: 'Updated description.',
 };
 
@@ -34,6 +35,7 @@ export const updateActionPolicyOasExamples = (): AlertingOasOperationObject =>
         description: UPDATE_ACTION_POLICY_REQUEST.description,
       }),
       400: invalidActionPolicyDataResponse('update'),
+      403: ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
       404: ACTION_POLICY_NOT_FOUND_RESPONSE,
       409: ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
     },

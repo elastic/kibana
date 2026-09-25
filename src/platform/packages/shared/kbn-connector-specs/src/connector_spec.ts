@@ -109,6 +109,18 @@ export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
   clientId: string;
 }
 
+export interface OAuthPasswordGetTokenOpts {
+  authType: 'oauth_password';
+  tokenUrl: string;
+  username: string;
+  password: string;
+  clientId?: string;
+  scope?: string;
+  usernameField?: 'username' | 'email';
+  requestBodyFormat?: 'form' | 'json';
+  tokenType?: string;
+}
+
 export interface EarsGetTokenOpts {
   authType: 'ears';
   provider: string;
@@ -117,6 +129,7 @@ export interface EarsGetTokenOpts {
 
 export type GetTokenOpts =
   | OAuthGetTokenOpts
+  | OAuthPasswordGetTokenOpts
   | OAuthClientCredsPrivateKeyJWTGetTokenOpts
   | EarsGetTokenOpts;
 
@@ -140,6 +153,13 @@ export interface AuthTypeDefinition {
 export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
   getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
+  /**
+   * Specs using this auth type reach the third party through the Elastic-hosted Relay rather than
+   * authenticating the axios client. Defaults to false.
+   */
+  usesRelayTransport?: boolean;
+  /** Kibana manages these credentials: the UI hides the auth type and create/update rejects it, but connectors Kibana already provisioned keep executing. */
+  isKibanaManaged?: boolean;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -248,6 +268,32 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   scope: ActionScope;
 }
 
+/**
+ * The slice of the Actions plugin's Relay client that action handlers use. Declared structurally so
+ * this package does not depend on x-pack; the concrete `RelayClient` satisfies it by shape.
+ */
+export interface RelayActionClient {
+  trigger(input: {
+    tenantKey: string;
+    /** Slack conversation id or a connected channel name (`#general`). */
+    channel: string;
+    message: string;
+    threadTs?: string;
+  }): Promise<{ ref: string; tenantKey: string; channel: string }>;
+  /** One page of the channels this deployment has connected; follow `nextCursor` for the rest. */
+  listBindings(
+    tenantKey: string,
+    options?: { cursor?: string; limit?: number }
+  ): Promise<{
+    bindings: Array<{
+      scope_id?: string;
+      display_name?: string;
+      visibility?: 'public' | 'private';
+    }>;
+    nextCursor?: string;
+  }>;
+}
+
 export interface ActionContext {
   client: AxiosInstance;
   /**
@@ -257,14 +303,20 @@ export interface ActionContext {
    * and only the client types a handler actually asks for are ever built.
    *
    * Lifetime is governed by the actions plugin's client lease pool, not by the action
-   * stack frame. No client types are registered yet, so `ClientTypeId` currently
-   * resolves to `never`.
+   * stack frame. `ClientTypeId` resolves to a union of every id registered in
+   * `ClientRegistry` (see lib/clients/index.ts) — `never` only if none are registered.
    */
   getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /**
+   * Reaches the third party through the Elastic-hosted Relay, for specs whose auth type routes that
+   * way. Undefined when the auth type does not use Relay transport or the deployment has no Relay
+   * configured.
+   */
+  relay?: RelayActionClient;
 }
 
 // ============================================================================
@@ -306,7 +358,7 @@ export interface ConnectorTest {
    */
   handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
-  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler */
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler. Events-only specs must keep this false; Test is outbound HTTP. */
   enabled: boolean;
 }
 
@@ -326,7 +378,7 @@ export interface AuthTypeDef {
     /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
     label?: string;
     meta?: Record<string, Record<string, unknown>>;
-    // can override other Zod fields here in the future if needed
+    fields?: Record<string, z.ZodType>;
   };
 }
 export interface ConnectorSpec {

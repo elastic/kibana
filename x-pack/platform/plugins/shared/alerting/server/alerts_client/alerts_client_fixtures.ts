@@ -94,6 +94,7 @@ export const getParamsByMaintenanceWindowScopedQuery: GetMaintenanceWindowScoped
         categoryIds: ['management'],
         scope: {
           alerting: {
+            enabled: true,
             kql: "kibana.alert.rule.name: 'test123'",
             filters: [],
             dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test123"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
@@ -105,6 +106,7 @@ export const getParamsByMaintenanceWindowScopedQuery: GetMaintenanceWindowScoped
         categoryIds: ['management'],
         scope: {
           alerting: {
+            enabled: true,
             kql: "kibana.alert.rule.name: 'test456'",
             filters: [],
             dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test456"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',

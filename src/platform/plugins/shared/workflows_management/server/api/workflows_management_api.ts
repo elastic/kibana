@@ -14,7 +14,8 @@ import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
 } from '@kbn/agent-builder-sml-plugin/server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
@@ -65,9 +66,11 @@ import {
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
+import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   SearchExecutionsViewParams,
@@ -160,6 +163,12 @@ export interface GetStepExecutionParams {
   id: string;
 }
 
+export interface GetExecutionStepExecutionsParams {
+  executionId: string;
+  page: number;
+  size: number;
+}
+
 export interface SearchStepExecutionsParams {
   workflowId: string;
   stepId?: string;
@@ -208,6 +217,31 @@ export interface BulkScheduleWorkflowItem {
   inputs: Record<string, unknown>;
   triggeredBy: string;
   metadata?: WorkflowExecutionEventDispatchMetadata;
+}
+
+export type AlertPreprocessingContext = Pick<
+  CustomRequestHandlerContext<{ alerting: AlertingApiRequestHandlerContext }>,
+  'core' | 'alerting'
+>;
+
+export interface RunWorkflowWithAlertPreprocessingParams {
+  workflow: WorkflowExecutionEngineModel;
+  spaceId: string;
+  inputs: Record<string, unknown>;
+  request: KibanaRequest;
+  preprocessingContext: AlertPreprocessingContext;
+  metadata?: Record<string, unknown>;
+  /**
+   * Fields to merge into `event` *after* alert preprocessing. Use this to inject
+   * server-owned values (e.g. `caseIds`) that alert preprocessing would otherwise
+   * overwrite, because `preprocessAlertInputs` replaces the whole `event` object with
+   * the expanded alert-event shape.
+   */
+  eventOverrides?: Record<string, unknown>;
+}
+
+export interface RunWorkflowWithAlertPreprocessingResult {
+  workflowExecutionId: string;
 }
 
 const DEFAULT_EXECUTE_WORKFLOW_COMPLETION_TIMEOUT_SEC = 120;
@@ -271,7 +305,8 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    public readonly isWorkflowsAvailable: boolean
+    public readonly isWorkflowsAvailable: boolean,
+    private readonly logger: Logger
   ) {}
 
   public setAuditLog(audit: WorkflowManagementAuditLog): void {
@@ -512,6 +547,56 @@ export class WorkflowsManagementApi {
     return executeResponse.workflowExecutionId;
   }
 
+  /**
+   * Preprocesses alert inputs and starts a workflow without waiting for its execution document.
+   *
+   * When `eventOverrides` is supplied, its keys are merged into `event` *after* preprocessing.
+   * This is needed because `preprocessAlertInputs` replaces the whole `event` object with the
+   * expanded alert-event shape, so any caller-owned event fields must be re-applied afterwards.
+   */
+  public async runWorkflowWithAlertPreprocessing({
+    workflow,
+    spaceId,
+    inputs,
+    request,
+    preprocessingContext,
+    metadata,
+    eventOverrides,
+  }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
+    const processedInputs = await preprocessAlertInputs(
+      inputs,
+      preprocessingContext,
+      spaceId,
+      this.logger
+    );
+
+    const finalInputs =
+      eventOverrides != null
+        ? {
+            ...processedInputs,
+            event: {
+              ...(typeof processedInputs.event === 'object' &&
+              processedInputs.event !== null &&
+              !Array.isArray(processedInputs.event)
+                ? (processedInputs.event as Record<string, unknown>)
+                : {}),
+              ...eventOverrides,
+            },
+          }
+        : processedInputs;
+
+    const workflowExecutionId = await this.runWorkflow(
+      workflow,
+      spaceId,
+      finalInputs,
+      request,
+      undefined,
+      metadata
+    );
+
+    return { workflowExecutionId };
+  }
+
   public async executeWorkflow(params: ExecuteWorkflowParams): Promise<ExecuteWorkflowResult> {
     const {
       spaceId,
@@ -556,7 +641,9 @@ export class WorkflowsManagementApi {
     const validation = await this.workflowsService.validateWorkflow(
       params.yaml,
       params.spaceId,
-      params.request
+      params.request,
+      // This throws on an invalid result, so it must not apply the variable rules.
+      { includeVariableRules: false }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, params.yaml);
@@ -717,7 +804,14 @@ export class WorkflowsManagementApi {
       throw new Error('Either workflowId or workflowYaml must be provided');
     }
 
-    const validation = await this.workflowsService.validateWorkflow(resolvedYaml, spaceId, request);
+    const validation = await this.workflowsService.validateWorkflow(
+      resolvedYaml,
+      spaceId,
+      request,
+      {
+        includeVariableRules: false,
+      }
+    );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, resolvedYaml);
     }
@@ -761,7 +855,14 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
-    const validation = await this.workflowsService.validateWorkflow(workflowYaml, spaceId, request);
+    const validation = await this.workflowsService.validateWorkflow(
+      workflowYaml,
+      spaceId,
+      request,
+      {
+        includeVariableRules: false,
+      }
+    );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, workflowYaml);
     }
@@ -804,7 +905,7 @@ export class WorkflowsManagementApi {
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId, options);
   }
@@ -814,6 +915,13 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
     return this.workflowsService.getChildWorkflowExecutions(parentExecutionId, spaceId);
+  }
+
+  public async getExecutionStepExecutions(
+    params: GetExecutionStepExecutionsParams,
+    spaceId: string
+  ): Promise<GetExecutionStepExecutionsResult> {
+    return this.workflowsService.getExecutionStepExecutions(params, spaceId);
   }
 
   public async getWorkflowExecutionLogs(params: {
@@ -950,20 +1058,26 @@ export class WorkflowsManagementApi {
         options?.stepExecutionId ??
         (await this.workflowsService.getWaitingStepExecutionId(executionId, spaceId));
 
-      if (stepExecutionId) {
-        const claimed = await this.workflowsService.markStepAsResponded(
-          stepExecutionId,
-          request,
-          channel,
-          spaceId
+      if (!stepExecutionId) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          'waiting step not found',
+          'waiting_for_input'
         );
-        if (!claimed) {
-          throw new WorkflowExecutionInvalidStatusError(
-            executionId,
-            'already responded to or no longer waiting for input',
-            'waiting_for_input'
-          );
-        }
+      }
+
+      const claimed = await this.workflowsService.markStepAsResponded(
+        stepExecutionId,
+        request,
+        channel,
+        spaceId
+      );
+      if (!claimed) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          'already responded to or no longer waiting for input',
+          'waiting_for_input'
+        );
       }
 
       const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
@@ -1118,12 +1232,15 @@ export class WorkflowsManagementApi {
     return getWorkflowJsonSchema(zodSchema);
   }
 
+  /** Backs `POST /api/workflows/validate`, which reports and does not gate. */
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
     request: KibanaRequest
   ): Promise<ValidateWorkflowResponseDto> {
-    return this.workflowsService.validateWorkflow(yaml, spaceId, request);
+    return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
+      includeVariableRules: true,
+    });
   }
 
   private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {

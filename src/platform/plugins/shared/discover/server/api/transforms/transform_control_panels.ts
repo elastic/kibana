@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isObject } from 'lodash';
+import { ZodError } from '@kbn/zod';
 import { transformType } from '@kbn/embeddable-plugin/server';
-import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import type { DiscoverSessionControlPanels, DiscoverSessionWarning } from '../schema';
-import { discoverSessionControlPanelSchema, discoverSessionControlPanelsSchema } from '../schema';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import {
+  discoverSessionApiControlPanelSchema,
+  discoverSessionApiControlPanelsSchema,
+} from '@kbn/as-code-discover-schema';
+import {
+  getControlOrder,
+  isRecord,
+  convertControlGroupEntryToApi,
+} from '../../../common/session/control_panels';
+import type { DiscoverSessionApiControlPanels, DiscoverSessionWarning } from '../schema';
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  isObject(value) && !Array.isArray(value);
-
-const getPanelOrder = (panel: unknown): number =>
-  isRecord(panel) && typeof panel.order === 'number' ? panel.order : 0;
+export { serializeEsqlControls as transformControlPanelsIn } from '../../../common/session/control_panels';
 
 const createDroppedControlPanelsWarning = (
   tabId: string,
@@ -33,14 +37,20 @@ const createDroppedPanelWarning = (
   tabId: string,
   panelId: string,
   error: unknown
-): DiscoverSessionWarning => ({
-  type: 'dropped_panel',
-  tab_id: tabId,
-  panel_id: panelId,
-  message: `Unable to transform control panel [${panelId}]. Error: ${
-    error instanceof Error ? error.message : 'Unknown error'
-  }`,
-});
+): DiscoverSessionWarning => {
+  let message = error instanceof Error ? error.message : 'Unknown error';
+
+  if (error instanceof ZodError) {
+    message = stringifyZodError(error);
+  }
+
+  return {
+    type: 'dropped_panel',
+    tab_id: tabId,
+    panel_id: panelId,
+    message: `Unable to transform control panel [${panelId}]. Error: ${message}`,
+  };
+};
 
 /*
  * Converts one stored panel to the API shape and validates it.
@@ -49,25 +59,12 @@ const createDroppedPanelWarning = (
 const parseControlPanelEntry = (
   id: string,
   panel: unknown
-): DiscoverSessionControlPanels[number] => {
-  if (!isRecord(panel)) {
-    throw new Error('controlGroupJson panels must be JSON objects');
-  }
+): DiscoverSessionApiControlPanels[number] => {
+  const control = convertControlGroupEntryToApi(id, panel);
 
-  if (typeof panel.type !== 'string') {
-    throw new Error('controlGroupJson panels must have a type');
-  }
-
-  const { order, width, grow, type, ...config } = panel;
-  // `convertCamelCasedKeysToSnakeCase` is idempotent, so it is safe to run on non-legacy config too.
-  const snakeCasedConfig = convertCamelCasedKeysToSnakeCase(config);
-
-  return discoverSessionControlPanelSchema.parse({
-    id,
-    type: transformType(type),
-    ...(width !== undefined && { width }),
-    ...(grow !== undefined && { grow }),
-    config: snakeCasedConfig,
+  return discoverSessionApiControlPanelSchema.parse({
+    ...control,
+    type: transformType(control.type),
   });
 };
 
@@ -78,7 +75,7 @@ const parseControlPanelEntry = (
 export const transformControlPanelsOut = (
   controlGroupJson: string | undefined,
   tabId: string
-): { panels: DiscoverSessionControlPanels | undefined; warnings: DiscoverSessionWarning[] } => {
+): { panels: DiscoverSessionApiControlPanels | undefined; warnings: DiscoverSessionWarning[] } => {
   if (!controlGroupJson) {
     return { panels: undefined, warnings: [] };
   }
@@ -103,10 +100,10 @@ export const transformControlPanelsOut = (
   }
 
   const entries = Object.entries(parsed).sort(
-    ([, panelA], [, panelB]) => getPanelOrder(panelA) - getPanelOrder(panelB)
+    ([, panelA], [, panelB]) => getControlOrder(panelA) - getControlOrder(panelB)
   );
 
-  const panels: DiscoverSessionControlPanels = [];
+  const panels: DiscoverSessionApiControlPanels = [];
   const warnings: DiscoverSessionWarning[] = [];
 
   for (const [id, panel] of entries) {
@@ -118,38 +115,7 @@ export const transformControlPanelsOut = (
   }
 
   return {
-    panels: panels.length ? discoverSessionControlPanelsSchema.parse(panels) : undefined,
+    panels: panels.length ? discoverSessionApiControlPanelsSchema.parse(panels) : undefined,
     warnings,
   };
-};
-
-/*
- * Converts API control panels back to Discover's stored JSON shape.
- * Omits the property when there are no panels to store.
- */
-export const transformControlPanelsIn = (
-  controlPanels: DiscoverSessionControlPanels | undefined
-): string | undefined => {
-  if (!controlPanels?.length) {
-    return undefined;
-  }
-
-  const panels = Object.fromEntries(
-    controlPanels.map((panel, order) => {
-      const { id, type, width, grow, config } = panel;
-
-      return [
-        id,
-        {
-          order,
-          type,
-          ...(width !== undefined && { width }),
-          ...(grow !== undefined && { grow }),
-          ...config,
-        },
-      ];
-    })
-  );
-
-  return JSON.stringify(panels);
 };

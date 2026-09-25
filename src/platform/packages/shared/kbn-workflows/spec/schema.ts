@@ -27,8 +27,12 @@ import {
   MAX_HITL_MESSAGE_LENGTH,
   MAX_HITL_SLACK_CHANNEL_LENGTH,
 } from '../common/hitl';
+import { DURATION_REGEX, MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 
-export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
+export const DurationSchema = z
+  .string()
+  .max(MAX_DURATION_LENGTH)
+  .regex(DURATION_REGEX, 'Invalid duration format');
 
 export const ByteSizeSchema = z
   .string()
@@ -46,10 +50,7 @@ export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
   condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
-  delay: z
-    .string()
-    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
-    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+  delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
   /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
   strategy: RetryDelayStrategySchema.optional(),
   /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
@@ -197,6 +198,43 @@ export const TimeoutPropSchema = z.object({
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
+/** Upper bound on a Liquid duration template. Matches other dynamic expressions in this schema. */
+export const DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH = 2000;
+
+const liquidDurationTemplateSchema = (message: string) =>
+  z
+    .string()
+    .max(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH)
+    .regex(/\{\{[\s\S]*\}\}/, message);
+
+/** A duration, or Liquid that renders to one at step entry. */
+export const DynamicTimeoutSchema = z
+  .union([
+    DurationSchema,
+    liquidDurationTemplateSchema(
+      'Invalid timeout. Use a duration (e.g. "72h") or a template that renders to one.'
+    ),
+  ])
+  .describe(
+    "Duration (`72h`) or Liquid that renders to one (`{{ inputs.expiresIn | default: '72h' }}`)."
+  );
+
+/** A wait duration, or Liquid that renders to one at step entry. */
+export const DynamicDurationSchema = z
+  .union([
+    DurationSchema,
+    liquidDurationTemplateSchema(
+      'Invalid duration. Use a duration (e.g. "5s") or a template that renders to one.'
+    ),
+  ])
+  .describe(
+    "Duration (`5s`) or Liquid that renders to one (`{{ inputs.waitFor | default: '5s' }}`)."
+  );
+
+export const DynamicTimeoutPropSchema = z.object({
+  timeout: DynamicTimeoutSchema.optional(),
+});
+
 export const MaxStepSizePropSchema = z.object({
   'max-step-size': ByteSizeSchema.optional(),
 });
@@ -243,7 +281,7 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   with: z.record(z.string(), z.any()).optional(),
 })
   .merge(StepWithForEachSchema)
-  .merge(TimeoutPropSchema)
+  .merge(DynamicTimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
@@ -263,8 +301,9 @@ export const BuiltInStepProperties = [
 export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
 export const WaitStepInputSchema = z.object({
-  duration: DurationSchema.describe(
-    'Duration to wait, e.g. "5s", "1m", "2h". Format: number + unit (ms/s/m/h/d/w)'
+  duration: DynamicDurationSchema.describe(
+    'Duration to wait, e.g. "5s", "1h30m". Units in descending order (w/d/h/m/s/ms). ' +
+      "Accepts Liquid that renders to one (`{{ inputs.waitFor | default: '5s' }}`)."
   ),
 });
 export const WaitStepSchema = BaseStepSchema.extend({
@@ -345,7 +384,7 @@ export const WaitForInputStepInputSchema = z
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-}).merge(TimeoutPropSchema);
+}).merge(DynamicTimeoutPropSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
@@ -374,7 +413,7 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
-}).merge(TimeoutPropSchema);
+}).merge(DynamicTimeoutPropSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z

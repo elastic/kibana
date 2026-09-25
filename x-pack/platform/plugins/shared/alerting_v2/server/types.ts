@@ -29,6 +29,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
@@ -43,9 +44,9 @@ export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
 
 export interface AlertingServerSetup {
   /**
-   * Registers an artifact type owned by the calling plugin. Its `dataSchema` is
-   * enforced for this type on rule create and update. Unregistered types pass
-   * through unchanged.
+   * Registers an artifact type owned by the calling plugin. Validation and
+   * declarative SO references are applied for this type on rule create/update/read.
+   * Unregistered types pass through unchanged.
    */
   registerArtifactType(definition: ArtifactTypeDefinition): void;
 }
@@ -95,4 +96,5 @@ export interface AlertingServerStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   eventLog: IEventLogClientService;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  licensing: LicensingPluginStart;
 }

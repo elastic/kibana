@@ -28,6 +28,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     // Trial
     loadTestFile(require.resolve('./cases/import_export_templates'));
     loadTestFile(require.resolve('./cases/public_template_crud'));
+    loadTestFile(require.resolve('./cases/public_field_definitions_crud'));
     loadTestFile(require.resolve('./cases/user_actions/find_user_actions'));
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/find_cases'));
@@ -61,6 +62,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/find_user_actions_extended_fields'));
     loadTestFile(require.resolve('./internal/required_on_close'));
     loadTestFile(require.resolve('./internal/search_cases_extended_fields'));
+    // workflow execution API — trial-only because workflowsManagement sub-feature privileges
+    // (workflow_execute) require at least a trial license
+    loadTestFile(require.resolve('./internal/run_workflow'));
 
     /**
      * Telemetry

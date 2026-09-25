@@ -13,6 +13,7 @@
     "../../../../../typings/**/*",
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/licensing-plugin",
     "@kbn/features-plugin",

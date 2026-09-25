@@ -7,19 +7,29 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { EuiContextMenuItem } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AnomalyRowActionsMenu } from './anomaly_row_actions_menu';
 import type { AnomalyTableRowAction } from '../../../api/hooks/use_anomaly_table_row_actions';
 import { useAnomalyTableRowActions } from '../../../api/hooks/use_anomaly_table_row_actions';
 import type { TableRow } from './types';
+import { useEntityCaseTakeActionItems } from '../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
+import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/entity/test_ids';
 
 jest.mock('../../../api/hooks/use_anomaly_table_row_actions');
+jest.mock('../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items', () => ({
+  useEntityCaseTakeActionItems: jest.fn(),
+}));
 
 const useAnomalyTableRowActionsMock = useAnomalyTableRowActions as jest.MockedFunction<
   typeof useAnomalyTableRowActions
 >;
+const useEntityCaseTakeActionItemsMock = useEntityCaseTakeActionItems as jest.MockedFunction<
+  typeof useEntityCaseTakeActionItems
+>;
 
 const ACTIONS_BUTTON = 'entity-anomalies-table-row-actions-button';
+const ADD_TO_CASE = ADD_TO_CASE_TEST_ID;
 const ADD_TO_TIMELINE = 'entity-anomalies-table-row-action-add-to-timeline';
 const VIEW_IN_DISCOVER = 'entity-anomalies-table-row-action-view-in-discover';
 const VIEW_IN_SMV = 'entity-anomalies-table-row-action-view-in-single-metric-viewer';
@@ -41,6 +51,7 @@ const row: TableRow = {
 };
 
 const timeRange = { from: 'now-30d', to: 'now' };
+const entityToAttach = { id: 'entity-1', name: 'host-1', type: 'host' as const };
 
 const addToTimeline = jest.fn();
 const viewInDiscover = jest.fn();
@@ -65,7 +76,7 @@ const allActions: AnomalyTableRowAction[] = [
 const renderMenu = () =>
   render(
     <IntlProvider locale="en">
-      <AnomalyRowActionsMenu row={row} timeRange={timeRange} />
+      <AnomalyRowActionsMenu entityToAttach={entityToAttach} row={row} timeRange={timeRange} />
     </IntlProvider>
   );
 
@@ -80,12 +91,18 @@ describe('AnomalyRowActionsMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useAnomalyTableRowActionsMock.mockReturnValue({ actions: allActions });
+    useEntityCaseTakeActionItemsMock.mockReturnValue(() => [
+      <EuiContextMenuItem key="addToCase" data-test-subj={ADD_TO_CASE}>
+        {'Add to case'}
+      </EuiContextMenuItem>,
+    ]);
   });
 
   it('keeps the menu closed until the actions button is clicked', () => {
     renderMenu();
 
     expect(screen.getByTestId(ACTIONS_BUTTON)).toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_CASE)).toBeNull();
     expect(screen.queryByTestId(ADD_TO_TIMELINE)).toBeNull();
     expect(screen.queryByTestId(VIEW_IN_DISCOVER)).toBeNull();
     expect(screen.queryByTestId(VIEW_IN_SMV)).toBeNull();
@@ -96,9 +113,16 @@ describe('AnomalyRowActionsMenu', () => {
 
     await openMenu();
 
+    expect(screen.getByTestId(ADD_TO_CASE)).toBeInTheDocument();
     expect(screen.getByTestId(ADD_TO_TIMELINE)).toBeInTheDocument();
     expect(screen.getByTestId(VIEW_IN_DISCOVER)).toBeInTheDocument();
     expect(screen.getByTestId(VIEW_IN_SMV)).toBeInTheDocument();
+    expect(screen.getAllByRole('menuitem').map(({ textContent }) => textContent)).toEqual([
+      'Add to case',
+      'Add to timeline',
+      'View in Discover',
+      'View in Single metric viewer',
+    ]);
   });
 
   it('labels each investigation action', async () => {
@@ -141,5 +165,11 @@ describe('AnomalyRowActionsMenu', () => {
       timeRange,
       closePopover: expect.any(Function),
     });
+  });
+
+  it('builds the case action from the entity represented by the anomalies table', () => {
+    renderMenu();
+
+    expect(useEntityCaseTakeActionItemsMock).toHaveBeenCalledWith(entityToAttach);
   });
 });

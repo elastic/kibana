@@ -75,6 +75,12 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
+  const { data: securityHubData, refetch: securityHubRefetch } = useGetPackageInfoByKeyQuery(
+    'aws_securityhub',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
   const { data: billingData, refetch: billingRefetch } = useGetPackageInfoByKeyQuery(
     'aws_billing',
     undefined,
@@ -114,6 +120,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
       ...(cloudwatchOtelData?.item && {
         aws_cloudwatch_input_otel: cloudwatchOtelData.item,
       }),
+      ...(securityHubData?.item && { aws_securityhub: securityHubData.item }),
       ...(billingData?.item && { aws_billing: billingData.item }),
       ...(firehoseData?.item && { awsfirehose: firehoseData.item }),
       ...(securityLakeData?.item && { amazon_security_lake: securityLakeData.item }),
@@ -128,6 +135,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     mqData,
     logsData,
     cloudwatchOtelData,
+    securityHubData,
     billingData,
     firehoseData,
     securityLakeData,
@@ -142,6 +150,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     mqRefetch();
     logsRefetch();
     cloudwatchOtelRefetch();
+    securityHubRefetch();
     billingRefetch();
     firehoseRefetch();
     securityLakeRefetch();
@@ -154,6 +163,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     mqRefetch,
     logsRefetch,
     cloudwatchOtelRefetch,
+    securityHubRefetch,
     billingRefetch,
     firehoseRefetch,
     securityLakeRefetch,

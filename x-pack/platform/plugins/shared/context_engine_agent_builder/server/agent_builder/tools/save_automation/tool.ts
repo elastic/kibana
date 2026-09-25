@@ -7,7 +7,10 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import {
+  hasWorkflowExecutePrivilege,
+  hasWorkflowReadPrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -21,33 +24,63 @@ import { validateAiIndexId } from '@kbn/context-engine-plugin/common/validation'
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
+import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
+import type { SaveAutomationParams, SavedWorkflowSummary } from './handler';
 import {
   getSaveAutomationErrorMessage,
+  parseWorkflowEnabledFromYaml,
+  parseWorkflowNameFromYaml,
   saveAutomationHandler,
   tryResolveAiIndexDisplayLabelFromAttachments,
-  tryResolveWorkflowDisplayNameById,
+  tryResolveSavedWorkflowById,
   tryResolveWorkflowDisplayNameFromAttachments,
+  tryResolveWorkflowEnabledFromAttachments,
+  tryResolveWorkflowOriginFromAttachments,
 } from './handler';
 
 const MAX_ATTACHMENT_ID_LENGTH = 256;
+const MAX_WORKFLOW_YAML_LENGTH = 128_000;
+
+/**
+ * Some models fill every optional parameter and send whitespace for the ones they mean to omit.
+ * A blank string carries no information, so it is read as the parameter not being supplied.
+ */
+const blankToUndefined = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim().length > 0 ? value : undefined;
+
+/** The tool's parameters with blank optional strings dropped, so the rest of the tool sees one shape. */
+export const normalizeSaveAutomationParams = (
+  params: Record<string, unknown>
+): SaveAutomationParams => ({
+  workflowAttachmentId: blankToUndefined(params.workflowAttachmentId),
+  workflowYaml: blankToUndefined(params.workflowYaml),
+  workflowId: blankToUndefined(params.workflowId),
+  aiIndexId: blankToUndefined(params.aiIndexId),
+  run: params.run === true,
+});
 
 const saveAutomationSchema = z
   .object({
     workflowAttachmentId: z
       .string()
-      .min(1)
       .max(MAX_ATTACHMENT_ID_LENGTH)
       .optional()
       .describe(
         'Conversation attachment id of the generated workflow (from generate_workflow attachment_id). Saves the YAML and attaches it to the AI index.'
       ),
+    workflowYaml: z
+      .string()
+      .max(MAX_WORKFLOW_YAML_LENGTH)
+      .optional()
+      .describe(
+        'Complete workflow YAML to save. Use when the definition did not come from generate_workflow — for example when a subagent authored and tested it and returned the YAML.'
+      ),
     workflowId: z
       .string()
-      .min(1)
       .max(MAX_AI_INDEX_AUTOMATION_LENGTH)
       .optional()
       .describe(
-        'Saved workflow id to register as an automation on the AI index. Use when the workflow was already saved manually.'
+        "Existing saved workflow id. On its own, registers that already-saved workflow as an automation on the AI index. Together with workflowYaml or workflowAttachmentId, overwrites that workflow's definition with the one supplied — the confirmation says so, and the replaced definition cannot be recovered. Omit it to save a new workflow."
       ),
     aiIndexId: z
       .string()
@@ -56,15 +89,35 @@ const saveAutomationSchema = z
       .describe(
         'Context Engine AI index id. Defaults to the id from the ai_index attachment in this conversation.'
       ),
+    run: z
+      .boolean()
+      .optional()
+      .describe(
+        'Run the automation over the full corpus once this call has saved or attached it — it applies to every way of calling this tool, including attaching a workflow that was already saved. Set only when the user asked for it: the confirmation dialog says so, and the run costs a model call per document. A disabled workflow is enabled in order to run, and stays enabled afterwards. Returns an execution id to poll rather than waiting for completion.'
+      ),
   })
-  .superRefine((value, ctx) => {
-    const hasWorkflowAttachmentId = value.workflowAttachmentId !== undefined;
-    const hasWorkflowId = value.workflowId !== undefined;
+  .superRefine((raw, ctx) => {
+    const value = normalizeSaveAutomationParams(raw);
 
-    if (hasWorkflowAttachmentId === hasWorkflowId) {
+    // At most one definition, since two would be ambiguous about which gets saved. `workflowId` is
+    // not a third alternative: it either stands alone as an attach, or names the target of the
+    // definition supplied alongside it.
+    if (value.workflowAttachmentId !== undefined && value.workflowYaml !== undefined) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Provide exactly one of workflowAttachmentId or workflowId.',
+        message: 'Provide either workflowAttachmentId or workflowYaml, not both.',
+        path: ['workflowAttachmentId'],
+      });
+    }
+
+    if (
+      value.workflowAttachmentId === undefined &&
+      value.workflowYaml === undefined &&
+      value.workflowId === undefined
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Provide workflowAttachmentId, workflowYaml or workflowId.',
         path: ['workflowAttachmentId'],
       });
     }
@@ -108,52 +161,129 @@ export const createSaveAutomationTool = ({
     openWorldHint: false,
   },
   description: dedent`
-    Save a generated workflow and/or attach it to a Context Engine AI index as an automation.
+    Save a workflow and/or attach it to a Context Engine AI index as an automation.
     - To persist a draft from generate_workflow, pass workflowAttachmentId.
-    - If the user already saved the workflow manually, pass workflowId instead.
+    - To persist YAML that did not come from generate_workflow, pass workflowYaml.
+    - To replace an existing automation, pass its workflowId alongside the new definition. The
+      confirmation names the workflow being overwritten.
+    - If the user already saved the workflow manually, pass workflowId on its own.
+    - To run it over the full corpus straight after saving, pass run: true.
     Requires an ai_index attachment in the conversation unless aiIndexId is provided explicitly.
   `,
   schema: saveAutomationSchema,
+  availability: aiIndexToolsAvailability,
   confirmation: {
     askUser: 'always',
     getConfirmation: async ({ toolParams, context }) => {
       const { attachments, request, spaceId } = context;
-      const aiIndexLabel = tryResolveAiIndexDisplayLabelFromAttachments(
-        attachments,
-        typeof toolParams.aiIndexId === 'string' ? toolParams.aiIndexId : undefined
-      );
-      const workflowAttachmentId =
-        typeof toolParams.workflowAttachmentId === 'string'
-          ? toolParams.workflowAttachmentId
-          : undefined;
-      const workflowId =
-        typeof toolParams.workflowId === 'string' ? toolParams.workflowId : undefined;
+      const { workflowAttachmentId, workflowId, workflowYaml, aiIndexId, run } =
+        normalizeSaveAutomationParams(toolParams);
+      const aiIndexLabel = tryResolveAiIndexDisplayLabelFromAttachments(attachments, aiIndexId);
 
+      // The workflow whose stored definition this call would replace: named outright, or carried
+      // by the attachment from the last time it was saved. Only meaningful alongside a definition
+      // — `workflowId` on its own attaches an existing workflow and writes nothing.
+      const targetWorkflowId =
+        workflowAttachmentId || workflowYaml
+          ? workflowId ??
+            (workflowAttachmentId
+              ? tryResolveWorkflowOriginFromAttachments(attachments, workflowAttachmentId)
+              : undefined)
+          : undefined;
+
+      let draftName: string | undefined;
       let workflowLabel = 'workflow';
       if (workflowAttachmentId) {
-        const workflowName = tryResolveWorkflowDisplayNameFromAttachments(
-          attachments,
-          workflowAttachmentId
-        );
-        workflowLabel = workflowName
-          ? `workflow "${workflowName}"`
+        draftName = tryResolveWorkflowDisplayNameFromAttachments(attachments, workflowAttachmentId);
+        workflowLabel = draftName
+          ? `workflow "${draftName}"`
           : `draft workflow attachment "${workflowAttachmentId}"`;
-      } else if (workflowId) {
-        let workflowName: string | undefined;
-        const security = await getSecurityStart();
+      } else if (workflowYaml) {
+        draftName = parseWorkflowNameFromYaml(workflowYaml);
+        workflowLabel = draftName ? `workflow "${draftName}"` : 'the drafted workflow';
+      }
+
+      const resolveSaved = async (id: string): Promise<SavedWorkflowSummary | undefined> => {
         const canRead = await hasWorkflowReadPrivilege({
-          security,
+          security: await getSecurityStart(),
           request,
           spaceId,
         });
-        if (canRead) {
-          workflowName = await tryResolveWorkflowDisplayNameById({
-            workflowsManagement: getWorkflowsManagement(),
-            workflowId,
-            spaceId,
-          });
-        }
-        workflowLabel = workflowName ? `workflow "${workflowName}"` : `workflow "${workflowId}"`;
+
+        return canRead
+          ? tryResolveSavedWorkflowById({
+              workflowsManagement: getWorkflowsManagement(),
+              workflowId: id,
+              spaceId,
+            })
+          : undefined;
+      };
+
+      let attachTargetEnabled: boolean | undefined;
+      if (!workflowAttachmentId && !workflowYaml && workflowId) {
+        const saved = await resolveSaved(workflowId);
+        workflowLabel = saved?.name ? `workflow "${saved.name}"` : `workflow "${workflowId}"`;
+        attachTargetEnabled = saved?.enabled;
+      }
+
+      // The dialog is binary, so a run the caller cannot perform is never offered as one: without
+      // the execute privilege this degrades to a plain save, which is what the handler will do.
+      const willRun =
+        run &&
+        (await hasWorkflowExecutePrivilege({
+          security: await getSecurityStart(),
+          request,
+          spaceId,
+        }));
+
+      // What the workflow's `enabled` flag will be once this call has written: whatever the
+      // definition being saved declares, or the stored flag when nothing is being written.
+      const enabledAfterSave = workflowYaml
+        ? parseWorkflowEnabledFromYaml(workflowYaml)
+        : workflowAttachmentId
+        ? tryResolveWorkflowEnabledFromAttachments(attachments, workflowAttachmentId)
+        : attachTargetEnabled;
+
+      // Enabling to run outlasts the run, including a run that fails, so it is a second change to
+      // the workflow and not a detail of the first. This dialog is the only place it is visible.
+      const enableNotice =
+        willRun && enabledAfterSave !== true
+          ? ' The workflow is disabled, so it will be enabled in order to run, and stays enabled afterwards even if the run fails.'
+          : '';
+
+      if (targetWorkflowId) {
+        const existingName = (await resolveSaved(targetWorkflowId))?.name;
+        const existingLabel = existingName ? `"${existingName}"` : `with id "${targetWorkflowId}"`;
+        // A replacement that also renames is the case most easily mistaken for a new automation,
+        // so the rename is called out rather than left to be discovered afterwards.
+        const rename =
+          draftName && existingName && draftName !== existingName
+            ? ` It will be renamed to "${draftName}".`
+            : '';
+        const overwrite = `This replaces the saved definition of the existing workflow ${existingLabel} attached to AI index "${aiIndexLabel}".${rename} The definition it replaces cannot be recovered.`;
+
+        return willRun
+          ? {
+              title: 'Replace and run workflow automation',
+              message: `${overwrite}${enableNotice} Replace it and run the new definition now over the full corpus?`,
+              confirm_text: 'Replace and run',
+              cancel_text: 'Cancel',
+            }
+          : {
+              title: 'Replace workflow automation',
+              message: `${overwrite} Replace it?`,
+              confirm_text: 'Replace',
+              cancel_text: 'Cancel',
+            };
+      }
+
+      if (willRun) {
+        return {
+          title: 'Save and run workflow automation',
+          message: `Save ${workflowLabel} to Kibana, attach it to AI index "${aiIndexLabel}", and run it now over the full corpus?${enableNotice}`,
+          confirm_text: 'Save and run',
+          cancel_text: 'Cancel',
+        };
       }
 
       return {
@@ -167,7 +297,7 @@ export const createSaveAutomationTool = ({
   handler: async (params, { request, spaceId, attachments, logger }) => {
     try {
       const result = await saveAutomationHandler({
-        params,
+        params: normalizeSaveAutomationParams(params),
         request,
         spaceId,
         attachments,

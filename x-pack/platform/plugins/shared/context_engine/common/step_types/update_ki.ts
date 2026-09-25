@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
-import { aiIndexIdSchema, kiIdSchema, kiPartialFieldsSchema } from './ki';
+import { aiIndexIdSchema, kiIdSchema, kiLifecycleStatusSchema, kiPartialFieldsSchema } from './ki';
 
 export const UPDATE_KI_STEP_ID = 'context-engine.updateKi' as const;
 
@@ -17,6 +17,15 @@ export const updateKiInputSchema = z.object({
   ai_index_id: aiIndexIdSchema,
   ki_id: kiIdSchema,
   ki: kiPartialFieldsSchema.describe('The knowledge indicator fields to update'),
+  lifecycle: z
+    .object({ status: kiLifecycleStatusSchema })
+    .optional()
+    .describe('The lifecycle status to set'),
+  force: z.boolean().optional().describe('Update the knowledge indicator even if it is deleted'),
+  refresh: z
+    .boolean()
+    .optional()
+    .describe('Wait for the write to become searchable before the step completes (default false)'),
 });
 
 export const updateKiOutputSchema = z.object({
@@ -45,8 +54,8 @@ export const updateKiStepCommonDefinition: CommonStepDefinition<
     details: i18n.translate('xpack.contextEngine.workflows.steps.updateKi.documentation.details', {
       defaultMessage:
         'Applies a partial update to a knowledge indicator document in the backing store of the ' +
-        'specified AI index. Only the provided fields are changed. The step fails when the KI does ' +
-        'not exist in the AI index.',
+        'specified AI index. Only the provided fields are changed; arrays are replaced. The step ' +
+        'fails when the KI does not exist in the AI index, or is deleted and force is not set.',
     }),
     examples: [
       `## Update a knowledge indicator

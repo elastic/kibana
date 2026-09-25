@@ -10,9 +10,11 @@ import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
 import { sendCreateAgentlessPolicy } from '../../../../../../hooks/use_request/agentless_policy';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
 
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
+import { ExperimentalFeaturesService } from '../../../../../../services';
 import {
   INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
@@ -113,6 +115,7 @@ jest.mock('../../../../hooks', () => {
         toasts: {
           addError: jest.fn(),
           addSuccess: jest.fn(),
+          addWarning: jest.fn(),
         },
       },
       docLinks: {
@@ -483,14 +486,54 @@ describe('When on the package policy create page', () => {
         fireEvent.click(saveBtn);
       });
 
-      expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
-        ...newPackagePolicy,
-        policy_ids: ['agent-policy-1'],
-        force: false,
-        create_dataset_templates: true,
-      });
+      expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+        {
+          ...newPackagePolicy,
+          policy_ids: ['agent-policy-1'],
+          force: false,
+          create_dataset_templates: true,
+        },
+        expect.objectContaining({ onIacPersistError: expect.any(Function) })
+      );
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
 
+      await waitFor(() => {
+        expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+      });
+    });
+
+    test('warns when the policy saved but its cloud connector could not record the template details', async () => {
+      // The request helper reports the failed template-details write through the options it is handed;
+      // the save itself succeeded, so the page must add a warning next to the success toast.
+      (sendCreatePackagePolicyForRq as jest.MockedFunction<any>).mockImplementationOnce(
+        async (_body: unknown, options?: { onIacPersistError?: (error: Error) => void }) => {
+          options?.onIacPersistError?.(new Error('boom'));
+          return {
+            item: {
+              id: 'policy-1',
+              inputs: [],
+              policy_ids: ['agent-policy-1'],
+              package: { name: 'nginx', version: '1.3.0', title: 'Nginx' },
+            },
+          };
+        }
+      );
+      await act(async () => {
+        render('agent-policy-1');
+      });
+
+      let saveBtn: HTMLElement;
+      await waitFor(() => {
+        saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).not.toBeDisabled();
+      });
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      expect(useStartServices().notifications.toasts.addWarning).toHaveBeenCalledWith(
+        IAC_TEMPLATE_WRITE_FAILED_TOAST
+      );
       await waitFor(() => {
         expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
       });
@@ -642,12 +685,15 @@ describe('When on the package policy create page', () => {
           },
           { withSysMonitoring: true }
         );
-        expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
-          ...newPackagePolicy,
-          policy_ids: ['agent-policy-2'],
-          force: false,
-          create_dataset_templates: true,
-        });
+        expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+          {
+            ...newPackagePolicy,
+            policy_ids: ['agent-policy-2'],
+            force: false,
+            create_dataset_templates: true,
+          },
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
+        );
 
         await waitFor(() => {
           expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
@@ -706,12 +752,15 @@ describe('When on the package policy create page', () => {
           });
 
           expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
-          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
-            ...newPackagePolicy,
-            policy_ids: ['agent-policy-1'],
-            force: false,
-            create_dataset_templates: true,
-          });
+          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+            {
+              ...newPackagePolicy,
+              policy_ids: ['agent-policy-1'],
+              force: false,
+              create_dataset_templates: true,
+            },
+            expect.objectContaining({ onIacPersistError: expect.any(Function) })
+          );
 
           await waitFor(() => {
             expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
@@ -762,30 +811,33 @@ describe('When on the package policy create page', () => {
           await act(async () => {
             fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
           });
-          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
-            ...newPackagePolicy,
-            inputs: [
-              {
-                ...newPackagePolicy.inputs[0],
-                streams: [
-                  {
-                    ...newPackagePolicy.inputs[0].streams[0],
-                    vars: {
-                      paths: {
-                        type: 'text',
-                        value: ['/path/to/log'],
+          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+            {
+              ...newPackagePolicy,
+              inputs: [
+                {
+                  ...newPackagePolicy.inputs[0],
+                  streams: [
+                    {
+                      ...newPackagePolicy.inputs[0].streams[0],
+                      vars: {
+                        paths: {
+                          type: 'text',
+                          value: ['/path/to/log'],
+                        },
                       },
                     },
-                  },
-                  {
-                    ...newPackagePolicy.inputs[0].streams[1],
-                  },
-                ],
-              },
-            ],
-            force: false,
-            create_dataset_templates: true,
-          });
+                    {
+                      ...newPackagePolicy.inputs[0].streams[1],
+                    },
+                  ],
+                },
+              ],
+              force: false,
+              create_dataset_templates: true,
+            },
+            expect.objectContaining({ onIacPersistError: expect.any(Function) })
+          );
         });
       });
     });
@@ -801,7 +853,26 @@ describe('When on the package policy create page', () => {
         });
       });
 
-      test('should render documentation callout when packageInfo has a readme', async () => {
+      test('should not render documentation callout when enableIntegrationTileClickToAdd is disabled', async () => {
+        ExperimentalFeaturesService.init({ enableIntegrationTileClickToAdd: false } as any);
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+          ...getMockPackageInfo(),
+          data: {
+            item: { ...getMockPackageInfo().data!.item, readme: '/package/nginx-1.3.0/README.md' },
+          },
+        });
+
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('packageDocumentationCallout')).not.toBeInTheDocument();
+        });
+      });
+
+      test('should render documentation callout when packageInfo has a readme and enableIntegrationTileClickToAdd is enabled', async () => {
+        ExperimentalFeaturesService.init({ enableIntegrationTileClickToAdd: true } as any);
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
           ...getMockPackageInfo(),
           data: {
@@ -819,6 +890,7 @@ describe('When on the package policy create page', () => {
       });
 
       test('should open documentation modal when View documentation button is clicked', async () => {
+        ExperimentalFeaturesService.init({ enableIntegrationTileClickToAdd: true } as any);
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
           ...getMockPackageInfo(),
           data: {
@@ -901,7 +973,8 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          })
+          }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
@@ -927,7 +1000,8 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          })
+          }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 

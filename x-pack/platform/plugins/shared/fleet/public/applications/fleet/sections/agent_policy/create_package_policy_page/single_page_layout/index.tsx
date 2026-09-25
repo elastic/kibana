@@ -272,9 +272,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // Derive var_group_selections from policy for StepConfigurePackagePolicy
   // Note: StepDefinePackagePolicy handles its own initialization and state management
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
   // Options unsupported by the policy template the page is scoped to (e.g. opened
   // from the integrations browse page) are hidden from selectors and defaults
   const hiddenVarGroupOptions = useMemo(
@@ -562,6 +560,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
   const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
+  const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
 
   const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
     return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
@@ -783,7 +782,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const children = (
     <>
-      {packageInfo?.readme && (
+      {enableIntegrationTileClickToAdd && packageInfo?.readme && (
         <>
           <EuiPanel hasBorder paddingSize="m" data-test-subj="packageDocumentationCallout">
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -919,7 +918,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   return !addIntegrationFlyoutProps ? (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="createPackagePolicy"
+    >
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
           <EuiErrorBoundary>

@@ -210,11 +210,54 @@ set_git_merge_base() {
   export GITHUB_PR_MERGE_BASE
 }
 
+# Sets the GitHub stack root merge base, falling back to the current PR merge base.
+set_git_stack_merge_base() {
+  GITHUB_PR_STACK_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
+  GITHUB_PR_STACK_MERGE_BASE="$GITHUB_PR_MERGE_BASE"
+  export GITHUB_PR_STACK_TARGET_BRANCH
+  export GITHUB_PR_STACK_MERGE_BASE
+
+  local github_token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
+  local stack_target_branch
+  local stack_merge_base
+
+  if [[ -z "$github_token" || -z "${GITHUB_PR_BASE_OWNER:-}" || -z "${GITHUB_PR_BASE_REPO:-}" ]] || ! command -v gh >/dev/null 2>&1; then
+    return
+  fi
+
+  if ! stack_target_branch="$(
+    GH_TOKEN="$github_token" gh api graphql \
+      -f owner="$GITHUB_PR_BASE_OWNER" \
+      -f repo="$GITHUB_PR_BASE_REPO" \
+      -F number="$GITHUB_PR_NUMBER" \
+      -f query='query($owner: String!, $repo: String!, $number: Int!) { repository(owner: $owner, name: $repo) { pullRequest(number: $number) { stack { baseRefName } } } }' \
+      --jq '.data.repository.pullRequest.stack.baseRefName // empty' 2>/dev/null
+  )" || [[ -z "$stack_target_branch" ]]; then
+    return
+  fi
+
+  if git fetch origin "$stack_target_branch" 2>/dev/null; then
+    stack_merge_base="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+  fi
+
+  if [[ -z "$stack_merge_base" ]]; then
+    echo "Failed to resolve stack merge base; falling back to PR merge base" >&2
+    return
+  fi
+
+  GITHUB_PR_STACK_TARGET_BRANCH="$stack_target_branch"
+  GITHUB_PR_STACK_MERGE_BASE="$stack_merge_base"
+  export GITHUB_PR_STACK_TARGET_BRANCH
+  export GITHUB_PR_STACK_MERGE_BASE
+}
+
 # For merge-queue builds (gh-readonly-queue/* branches), resolves the merge base
 # against the target branch and the list of first-parent commits this merge group
 # will add to the target branch when it lands. These are reported to ci-stats so
 # a single queue build can act as the metrics baseline for every commit it covers.
 set_merge_queue_git_info() {
+  local merge_queue_target_head
+
   MERGE_QUEUE_MERGE_BASE="$(buildkite-agent meta-data get merge-queue-merge-base --default '')"
   MERGE_QUEUE_COVERED_COMMITS="$(buildkite-agent meta-data get merge-queue-covered-commits --default '')"
 
@@ -224,7 +267,19 @@ set_merge_queue_git_info() {
       return 1
     fi
 
-    MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+    merge_queue_target_head="$(git rev-parse FETCH_HEAD)"
+    MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD "$merge_queue_target_head" 2>/dev/null || true)"
+
+    if [[ ! "$MERGE_QUEUE_MERGE_BASE" && "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+      echo "Deepening shallow checkout to resolve merge queue git info"
+      if ! git fetch --unshallow origin "$MERGE_QUEUE_TARGET_BRANCH" "$BUILDKITE_COMMIT" 2>/dev/null; then
+        echo "Failed to deepen checkout to resolve merge queue git info" >&2
+        return 1
+      fi
+
+      MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD "$merge_queue_target_head" 2>/dev/null || true)"
+    fi
+
     if [[ ! "$MERGE_QUEUE_MERGE_BASE" ]]; then
       echo "Failed to resolve merge queue merge base" >&2
       return 1
@@ -245,7 +300,7 @@ set_merge_queue_git_info() {
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
-  retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+  retry 3 1 timeout 10m buildkite-agent artifact download "$@"
 }
 
 GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
@@ -261,13 +316,23 @@ download_tmp_artifact() {
   done
 
   if [[ "$use_gcs" == "true" ]]; then
-    if "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" \
+    local expected_sha256
+    expected_sha256="$(tmp_artifact_expected_sha256 "$artifact_name" "$build_id")"
+
+    if [[ -z "$expected_sha256" ]]; then
+      echo "No recorded checksum for ${artifact_name} (build ${build_id}), skipping GCS download."
+    elif "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" \
       && gcloud storage cp \
         "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
         "${dest_dir}/${artifact_name}"; then
-      return 0
+      if [[ "$(sha256_of "${dest_dir}/${artifact_name}")" == "$expected_sha256" ]]; then
+        return 0
+      fi
+      echo "Checksum mismatch for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id}), discarding it." >&2
+      rm -f "${dest_dir}/${artifact_name}"
+    else
+      echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
     fi
-    echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
   fi
 
   if [[ "$fallback" != "true" ]]; then
@@ -280,7 +345,13 @@ download_tmp_artifact() {
 
 upload_tmp_artifact() {
   local local_path="$1" artifact_name="$2" build_id="$3"
-  local region pids=() failures=0
+  local region pids=() failures=0 sha256
+
+  # Downloads only trust GCS objects matching the checksum recorded in the producing build's meta-data
+  if ! sha256="$(sha256_of "$local_path")" || ! buildkite-agent meta-data set "tmp-artifact-sha256:${artifact_name}" "$sha256"; then
+    echo "Failed to record checksum for ${artifact_name}; skipping GCS upload. Same-region downloads will fall back to the buildkite artifact." >&2
+    return 0
+  fi
 
   if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"; then
     echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
@@ -317,6 +388,86 @@ upload_tmp_artifact_to_region() (
     "$local_path" \
     "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
 )
+
+# Artifacts of other builds are checked against the checksum Buildkite recorded for their buildkite artifact
+tmp_artifact_expected_sha256() {
+  local artifact_name="$1" build_id="$2"
+
+  if [[ "$build_id" == "${BUILDKITE_BUILD_ID:-}" ]]; then
+    buildkite-agent meta-data get "tmp-artifact-sha256:${artifact_name}" --default '' 2>/dev/null || true
+  else
+    buildkite-agent artifact shasum --sha256 --build "$build_id" "$artifact_name" 2>/dev/null || true
+  fi
+}
+
+sha256_of() {
+  local file_sha256
+  file_sha256="$(sha256sum "$1")" || return 1
+  echo "${file_sha256%% *}"
+}
+
+# Restores a moon cache archive into ./.moon/cache, only if it passes validate_moon_cache_archive.
+extract_moon_cache() {
+  local archive="$1" staging_dir
+
+  if ! validate_moon_cache_archive "$archive"; then
+    echo "Skipping moon cache restore." >&2
+    return 1
+  fi
+
+  mkdir -p ./.moon
+  staging_dir="$(mktemp -d ./.moon/cache-restore.XXXXXX)"
+  if ! tar -xf "$archive" --zstd --no-same-owner --no-same-permissions -C "$staging_dir"; then
+    rm -rf "$staging_dir"
+    echo "Failed to extract ${archive}, skipping moon cache restore." >&2
+    return 1
+  fi
+
+  rm -rf ./.moon/cache
+  mv "$staging_dir/.moon/cache" ./.moon/cache
+  rm -rf "$staging_dir"
+}
+
+# Checks that a moon cache archive only contains regular files and directories under .moon/cache.
+validate_moon_cache_archive() {
+  local archive="$1" entries names
+
+  # `tar -tv` prints one line per entry, starting with its type and permissions (e.g. "-rw-r--r--")
+  if ! entries="$(tar -tvf "$archive" --zstd)"; then
+    echo "Unable to list ${archive}." >&2
+    return 1
+  fi
+
+  # `tar -t` prints only the entry paths
+  if ! names="$(tar -tf "$archive" --zstd)"; then
+    echo "Unable to list ${archive}." >&2
+    return 1
+  fi
+
+  # Only regular files ("-") and directories ("d") are allowed: no symlinks, devices or fifos
+  if grep -qv '^[-d]' <<< "$entries"; then
+    echo "${archive} contains entries that are not regular files or directories." >&2
+    return 1
+  fi
+
+  # Some tar implementations list hard links with a regular file type and a " link to <target>" suffix
+  if grep -q ' link to ' <<< "$entries"; then
+    echo "${archive} contains hard links." >&2
+    return 1
+  fi
+
+  # Every entry must be .moon/cache itself or live inside it (relative path, no leading "/" or "./")
+  if grep -qvE '^\.moon/cache(/|$)' <<< "$names"; then
+    echo "${archive} contains entries outside .moon/cache." >&2
+    return 1
+  fi
+
+  # No entry may contain a ".." path segment
+  if grep -qE '(^|/)\.\.(/|$)' <<< "$names"; then
+    echo "${archive} contains parent-directory path segments." >&2
+    return 1
+  fi
+}
 
 print_if_dry_run() {
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then

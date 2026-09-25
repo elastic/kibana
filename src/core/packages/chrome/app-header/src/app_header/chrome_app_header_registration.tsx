@@ -28,7 +28,7 @@ export const useChromeAppHeaderRegistration = (config: ChromeAppHeaderConfig) =>
       return;
     }
 
-    const unregister = chrome.next.appHeader.set(config);
+    const unregister = chrome.appHeader.set(config);
     unregisterRef.current = unregister;
 
     return () => {
@@ -47,8 +47,19 @@ export const useChromeAppHeaderRegistration = (config: ChromeAppHeaderConfig) =>
  * `@elastic/appex-sharedux`.
  */
 export const ChromeAppHeaderRegistration = React.memo<ChromeAppHeaderConfig>((props) => {
-  const { title, back, tabs, badges, menu, favorite, share, description, metadata, spacing } =
-    props;
+  const {
+    title,
+    back,
+    tabs,
+    badges,
+    menu,
+    favorite,
+    share,
+    experimentalDashboardAiAction,
+    description,
+    metadata,
+    spacing,
+  } = props;
 
   const config = useMemo<ChromeAppHeaderConfig>(
     () => ({
@@ -59,10 +70,23 @@ export const ChromeAppHeaderRegistration = React.memo<ChromeAppHeaderConfig>((pr
       menu,
       favorite,
       share,
+      experimentalDashboardAiAction,
       ...(description ? { description } : { metadata }),
       spacing,
     }),
-    [title, back, tabs, badges, menu, favorite, share, description, metadata, spacing]
+    [
+      title,
+      back,
+      tabs,
+      badges,
+      menu,
+      favorite,
+      share,
+      experimentalDashboardAiAction,
+      description,
+      metadata,
+      spacing,
+    ]
   );
 
   useChromeAppHeaderRegistration(config);

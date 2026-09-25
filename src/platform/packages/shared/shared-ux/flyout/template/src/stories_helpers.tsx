@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  EuiHealth,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useState } from 'react';
-import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import type { FlyoutTemplateProps } from './types';
 import { FlyoutTemplate } from './flyout_template';
+import type { FlyoutFooterMenuPanel, FlyoutTemplateProps } from './types';
 
 /** Args shared across all `@kbn/flyout-template` story files. Extend per story as needed. */
 export interface SharedStoryArgs {
@@ -21,8 +29,12 @@ export interface SharedStoryArgs {
   numUnstructuredBlocks: number;
   titleIcon: boolean;
   description: boolean;
+  numMetaBlocks: number;
+  numBadges: number;
+  numInfoBlocks: number;
   footer: boolean;
   secondaryActionIcon: boolean;
+  primaryActionKind: 'button' | 'menu';
   resizable: boolean;
   type: NonNullable<FlyoutTemplateProps['type']>;
   ownFocus: boolean;
@@ -32,6 +44,29 @@ export const LEADING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']
   { iconType: 'documents', onClick: () => {}, 'aria-label': 'View surrounding documents', toolTipContent: 'View surrounding documents' },
   { iconType: 'document', onClick: () => {}, 'aria-label': 'View document', toolTipContent: 'View document' },
 ]; // prettier-ignore
+
+const noop = () => {};
+
+export const MENU_PANELS: FlyoutFooterMenuPanel[] = [
+  {
+    id: 0,
+    items: [
+      { name: 'Edit', icon: 'pencil', onClick: noop },
+      { name: 'Duplicate', icon: 'copy', onClick: noop },
+      { name: 'More options', icon: 'boxesVertical', panel: 1 },
+      { isSeparator: true },
+      { name: 'Export as PDF', icon: 'export', onClick: noop },
+    ],
+  },
+  {
+    id: 1,
+    title: 'More options',
+    items: [
+      { name: 'Archive', icon: 'folderCheck', onClick: noop },
+      { name: 'Delete', icon: 'trash', color: 'danger', onClick: noop },
+    ],
+  },
+];
 
 export const TRAILING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps']>['trailingActions'] = [
   { iconType: 'share', onClick: () => {}, 'aria-label': 'Share', toolTipContent: 'Share' },
@@ -133,16 +168,128 @@ export const bodyText = (content: string) => (
   </EuiText>
 );
 
+const METABLOCK_POOL = [
+  <FlyoutTemplate.Header.MetaBlock key="updated" title="Last updated">
+    Dec 3, 2025
+  </FlyoutTemplate.Header.MetaBlock>,
+  <FlyoutTemplate.Header.MetaBlock key="oncall" title="On call">
+    <EuiToolTip content="Platform team, paged until Friday 18:00 UTC">
+      <EuiLink href="#" onClick={(event) => event.preventDefault()}>
+        platform-oncall@elastic.co
+      </EuiLink>
+    </EuiToolTip>
+  </FlyoutTemplate.Header.MetaBlock>,
+  <FlyoutTemplate.Header.MetaBlock key="owner" title="Owner">
+    Platform
+  </FlyoutTemplate.Header.MetaBlock>,
+  <FlyoutTemplate.Header.MetaBlock key="creator" title="Created by">
+    automation
+  </FlyoutTemplate.Header.MetaBlock>,
+];
+
+export const metaBlockItems = (count: number) => METABLOCK_POOL.slice(0, count);
+
+/** Long labels are deliberate: they exercise the badge width cap and its ellipsis. */
+const BADGE_POOL = [
+  <FlyoutTemplate.Header.Badge key="type" iconType="warning" color="default">
+    Type
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="urgency" color="warning">
+    Urgency
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta1" color="hollow">
+    Metadata 1 very very very very very very long label
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta2" color="hollow">
+    Metadata 2
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta3" color="hollow">
+    Metadata 3 very very very very long label
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta4" color="hollow">
+    Metadata 4
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta5" color="hollow">
+    Metadata 5
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta6" color="hollow">
+    Metadata 6
+  </FlyoutTemplate.Header.Badge>,
+];
+
+export const badgeItems = (count: number) => BADGE_POOL.slice(0, count);
+
+const NotifyOnChangeSwitch = (): React.JSX.Element => {
+  const [checked, setChecked] = useState(false);
+  return (
+    <EuiSwitch
+      compressed
+      label="Notify on change"
+      checked={checked}
+      onChange={(event) => setChecked(event.target.checked)}
+    />
+  );
+};
+
+const INFO_BLOCK_POOL = [
+  <FlyoutTemplate.Header.InfoBlock key="owner" title="Owner">
+    Platform
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="latency" title="Latency">
+    <EuiHealth color="success">Healthy</EuiHealth>
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="throughput" title="Throughput">
+    1.2k tpm
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="risk" title="Risk score" size="xl" color="danger">
+    90
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="notifications" title="Notifications">
+    <NotifyOnChangeSwitch />
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="env" title="Environment">
+    global.prod.long-environment-name-with-ellipsis.elastic.co
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="version" title="Version">
+    2.4.1
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="region" title="Region">
+    us-east-1
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="uptime" title="Uptime">
+    99.9%
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="lastSeen" title="Last seen">
+    2m ago
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="errors" title="Errors" color="warning">
+    12
+  </FlyoutTemplate.Header.InfoBlock>,
+];
+
+export const infoBlockItems = (count: number) => INFO_BLOCK_POOL.slice(0, count);
+
 /**
  * Each zone helper below is called inline (not rendered as a component) so the root still
  * sees `FlyoutTemplate.Header`/`Body`/`Footer` as its own direct children.
  */
-export const headerZone = (args: SharedStoryArgs, title: string) => (
+export const headerZone = (
+  args: SharedStoryArgs,
+  title: string,
+  children?: React.ReactNode,
+  headerProps?: Partial<React.ComponentProps<typeof FlyoutTemplate.Header>>
+) => (
   <FlyoutTemplate.Header
     title={title}
     {...buildTitleIconProps(args)}
     description={args.description ? HEADER_DESCRIPTION : undefined}
-  />
+    {...headerProps}
+  >
+    {metaBlockItems(args.numMetaBlocks)}
+    {badgeItems(args.numBadges)}
+    {infoBlockItems(args.numInfoBlocks)}
+    {children}
+  </FlyoutTemplate.Header>
 );
 
 export const bodyZone = (content: React.ReactNode) => (
@@ -157,6 +304,10 @@ export const footerZone = (args: SharedStoryArgs) =>
         onClick={() => {}}
         {...(args.secondaryActionIcon ? { iconType: 'trash' } : {})}
       />
-      <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={() => {}} />
+      {args.primaryActionKind === 'menu' ? (
+        <FlyoutTemplate.Footer.PrimaryActionMenu label="Take action" panels={MENU_PANELS} />
+      ) : (
+        <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={() => {}} />
+      )}
     </FlyoutTemplate.Footer>
   ) : null;

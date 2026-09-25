@@ -177,6 +177,7 @@ describe('WorkflowsService (facade)', () => {
     executionQuerySpies = spyPrototype(WorkflowExecutionQueryService, [
       'getWorkflowExecution',
       'getChildWorkflowExecutions',
+      'getExecutionStepExecutions',
       'getWorkflowExecutions',
       'getWorkflowExecutionHistory',
       'getStepExecutions',
@@ -268,7 +269,7 @@ describe('WorkflowsService (facade)', () => {
     it('returns managed template values to their owning plugin', async () => {
       const source = {
         managed: true,
-        managedBy: 'pnd',
+        managedBy: 'alertzero',
         managedTemplateValues: { autonomyLevel: 'assisted' },
         originManagedWorkflowId: 'system-security-watch-floor',
         spaceId: 'space-a',
@@ -281,7 +282,7 @@ describe('WorkflowsService (facade)', () => {
         service.getInstalledManagedWorkflowState(
           'system-security-watch-floor-space-a',
           'space-a',
-          'pnd'
+          'alertzero'
         )
       ).resolves.toEqual({
         workflowId: 'system-security-watch-floor-space-a',
@@ -392,6 +393,10 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getWorkflowExecution('exec-1', 'default', { includeInput: true });
       await service.getChildWorkflowExecutions('parent-1', 'default');
+      await service.getExecutionStepExecutions(
+        { executionId: 'exec-1', page: 1, size: 100 },
+        'default'
+      );
       await service.getWorkflowExecutions({ workflowId: 'wf-1' } as any, 'default');
       await service.getWorkflowExecutionHistory('exec-1', 'default');
       await service.getStepExecutions({ executionId: 'exec-1' } as any, 'default');
@@ -405,6 +410,10 @@ describe('WorkflowsService (facade)', () => {
       });
       expect(executionQuerySpies.getChildWorkflowExecutions).toHaveBeenCalledWith(
         'parent-1',
+        'default'
+      );
+      expect(executionQuerySpies.getExecutionStepExecutions).toHaveBeenCalledWith(
+        { executionId: 'exec-1', page: 1, size: 100 },
         'default'
       );
       expect(executionQuerySpies.getWorkflowExecutions).toHaveBeenCalled();
@@ -421,11 +430,18 @@ describe('WorkflowsService (facade)', () => {
       const request = {} as any;
 
       await service.getAvailableConnectors('default', request);
-      await service.validateWorkflow('name: wf', 'default', request);
+      await service.validateWorkflow('name: wf', 'default', request, {
+        includeVariableRules: false,
+      });
       await service.getWorkflowZodSchema({ loose: false }, 'default', request);
 
       expect(validationSpies.getAvailableConnectors).toHaveBeenCalledWith('default', request);
-      expect(validationSpies.validateWorkflow).toHaveBeenCalledWith('name: wf', 'default', request);
+      expect(validationSpies.validateWorkflow).toHaveBeenCalledWith(
+        'name: wf',
+        'default',
+        request,
+        { includeVariableRules: false }
+      );
       expect(validationSpies.getWorkflowZodSchema).toHaveBeenCalledWith(
         { loose: false },
         'default',

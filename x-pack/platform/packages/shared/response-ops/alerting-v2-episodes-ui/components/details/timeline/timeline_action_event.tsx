@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
 import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
-import { AlertEpisodeTags } from '../../actions/tags';
+import { TagBadges } from '../../actions/tags';
 import * as i18n from './translations';
 
 export interface AlertEpisodeTimelineActionEventProps {
@@ -75,7 +75,7 @@ const ActionSentence = ({ entry, assigneeProfile, inlineDetailStyles }: ActionSe
       <FormattedMessage
         id="xpack.alertingV2EpisodesUi.details.timeline.setEpisodeTagsTo"
         defaultMessage="set the tags to {tags}"
-        values={{ tags: <AlertEpisodeTags tags={tags} inline /> }}
+        values={{ tags: <TagBadges tags={tags} showAll /> }}
       />
     );
   }

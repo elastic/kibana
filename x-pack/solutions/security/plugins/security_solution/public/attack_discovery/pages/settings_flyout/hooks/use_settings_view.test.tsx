@@ -271,7 +271,7 @@ describe('useSettingsView', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(false),
+          useBooleanValue: jest.fn().mockReturnValue(false),
         },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
@@ -693,7 +693,7 @@ describe('useSettingsView', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           lens: {
             EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
@@ -966,7 +966,8 @@ describe('useSettingsView', () => {
           },
         });
 
-        // Feature flag is false by default in beforeEach
+        mockUseKibana().services.featureFlags.useBooleanValue = jest.fn().mockReturnValue(false);
+
         const { result } = renderHook(() => useSettingsView(defaultProps), {
           wrapper: TestProviders,
         });
@@ -1050,7 +1051,8 @@ describe('useSettingsView', () => {
           },
         });
 
-        // Feature flag is false by default in beforeEach
+        mockUseKibana().services.featureFlags.useBooleanValue = jest.fn().mockReturnValue(false);
+
         const { result } = renderHook(() => useSettingsView(defaultProps), {
           wrapper: TestProviders,
         });
@@ -1607,7 +1609,7 @@ describe('useSettingsView', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           lens: {
             EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
@@ -1668,7 +1670,7 @@ describe('useSettingsView', () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
-      expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalledWith(
+      expect(mockUseKibana().services.featureFlags.useBooleanValue).toHaveBeenCalledWith(
         'securitySolution.attackDiscoveryWorkflowsEnabled',
         true
       );
@@ -1685,7 +1687,7 @@ describe('useSettingsView', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(false),
+            useBooleanValue: jest.fn().mockReturnValue(false),
           },
           lens: {
             EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,

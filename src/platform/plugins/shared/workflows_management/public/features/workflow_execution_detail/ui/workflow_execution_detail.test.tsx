@@ -119,6 +119,12 @@ jest.mock('../../../entities/workflows/model/use_workflow_execution_polling', ()
   useWorkflowExecutionPolling: () => mockUseWorkflowExecutionPolling(),
 }));
 
+// The component reads the polled execution from the store; mirror the mocked poll result there.
+jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
+  ...jest.requireActual('../../../entities/workflows/store/workflow_detail/selectors'),
+  selectExecution: () => mockUseWorkflowExecutionPolling().workflowExecution,
+}));
+
 const createMockExecution = (
   overrides: Partial<WorkflowExecutionDto> = {}
 ): WorkflowExecutionDto => ({
@@ -203,8 +209,8 @@ describe('WorkflowExecutionDetail', () => {
     });
   });
 
-  describe('auto-select overview on failed before steps', () => {
-    it('should auto-select overview when execution is terminal with no step executions', () => {
+  describe('auto-select trigger on failed before steps', () => {
+    it('should auto-select trigger when execution is terminal with no step executions', () => {
       mockPollingResult.workflowExecution = createMockExecution({
         id: 'exec-fail',
         status: ExecutionStatus.FAILED,
@@ -220,7 +226,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
     });
   });
 
@@ -433,8 +439,8 @@ describe('WorkflowExecutionDetail', () => {
     });
   });
 
-  describe('auto-select overview pseudo step', () => {
-    it('should auto-select __overview when no step is selected and execution has step executions', () => {
+  describe('auto-select trigger pseudo step', () => {
+    it('should auto-select trigger when no step is selected and execution has step executions', () => {
       mockUrlState.selectedStepExecutionId = undefined;
       mockPollingResult.workflowExecution = createMockExecution({
         id: 'exec-1',
@@ -454,10 +460,10 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
     });
 
-    it('should auto-select __overview when no step is selected and execution is terminal with no steps', () => {
+    it('should auto-select trigger when no step is selected and execution is terminal with no steps', () => {
       mockUrlState.selectedStepExecutionId = undefined;
       mockPollingResult.workflowExecution = createMockExecution({
         id: 'exec-1',
@@ -471,7 +477,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
     });
   });
 });
@@ -785,7 +791,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
   });
 });
 
-describe('WorkflowExecutionDetail - auto-select overview on failed before steps', () => {
+describe('WorkflowExecutionDetail - auto-select trigger on failed before steps', () => {
   let mockRemoveQueries: jest.Mock;
 
   beforeEach(() => {
@@ -796,7 +802,7 @@ describe('WorkflowExecutionDetail - auto-select overview on failed before steps'
     } as any);
   });
 
-  it('should auto-select overview when execution is terminal with no step executions', () => {
+  it('should auto-select trigger when execution is terminal with no step executions', () => {
     const failedExecution = {
       ...createMockExecution({ id: 'exec-fail' }),
       status: ExecutionStatus.FAILED,
@@ -823,6 +829,6 @@ describe('WorkflowExecutionDetail - auto-select overview on failed before steps'
       </TestWrapper>
     );
 
-    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
   });
 });

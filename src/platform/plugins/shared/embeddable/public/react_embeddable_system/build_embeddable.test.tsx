@@ -25,6 +25,7 @@ const testEmbeddableFactory: EmbeddablePublicDefinition<{ name: string; bork: st
       }),
       anyStateChange$: of(),
       applySerializedState: jest.fn(),
+      latestState$: of(initialState),
     });
     return {
       Component: () => (
@@ -70,6 +71,9 @@ it('should return Component and componentApi', async () => {
       "isDuplicable": true,
       "isExpandable": true,
       "isPinnable": false,
+      "latestState$": Observable {
+        "_subscribe": [Function],
+      },
       "lockHoverActions": [Function],
       "parentApi": Object {
         "getSerializedStateForChild": [Function],

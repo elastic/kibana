@@ -9,11 +9,14 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo } from 'react';
-import { ConversationInputShell } from '@kbn/agent-builder-browser';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ConversationInputShell, formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
+import { useSendUserMessage } from '../../../hooks/use_send_user_message';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
@@ -21,13 +24,14 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
-  useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
+import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
+import { useImageUpload } from './use_image_upload';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -95,7 +99,9 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   onEditorFocus,
   onSubmitOverride,
 }) => {
-  const { pendingMessage, error, isResuming, isResponseLoading } = useConversationStream();
+  const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
+
+  const { isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -108,17 +114,38 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAwaitingPrompt = useIsAwaitingPrompt();
   const { isReadOnly: isConversationReadOnly, isLoading: isConversationReadOnlyLoading } =
     useConversationReadOnly();
-  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
-    useConversationContext();
-  const submitMessage = useSubmitMessage();
+  const {
+    attachments,
+    upsertAttachments,
+    initialMessage,
+    autoSendInitialMessage,
+    resetInitialMessage,
+  } = useConversationContext();
+  const { submitMessage, isCreatingConversation } = useSubmitMessage();
+  const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
+  const isExperimentalEnabled = useExperimentalFeatures();
+  const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
+
+  const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
+    useImageUpload({
+      addErrorToast,
+      messageEditorController,
+    });
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
-  const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
+  const isInputDisabled =
+    isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
   const isSubmitDisabled =
-    messageEditorController.isEmpty || isResponseLoading || !isAgentIdValid || isAwaitingPrompt;
+    messageEditorController.isEmpty ||
+    isResponseLoading ||
+    isSendingUserMessage ||
+    isCreatingConversation ||
+    !isAgentIdValid ||
+    isAwaitingPrompt ||
+    uploadingNames.size > 0;
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -127,8 +154,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     flex-direction: column;
     height: 100%;
   `;
-  // Hide attachments if there's an error from current round or if message has been just sent
-  const shouldHideAttachments = Boolean(error) || isResponseLoading;
+  // Hide attachments while the message that carries them is being sent
+  const shouldHideAttachments = isResponseLoading;
 
   const shouldCollapseInput = isResponseLoading || hasActiveConversation;
 
@@ -197,6 +224,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
+    if (triggerMode === ChatTriggerMode.Never) {
+      sendUserMessage(content)
+        .then(() => {
+          messageEditorController.clear();
+          onSubmit?.();
+        })
+        .catch((sendError: unknown) => {
+          addErrorToast({ title: formatAgentBuilderErrorMessage(sendError) });
+        });
+      return;
+    }
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
@@ -212,9 +250,15 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   return (
     <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
-      {visibleAttachments.length > 0 && (
+      {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} removable />
+          <AttachmentPillsRow
+            attachments={visibleAttachments}
+            uploadingNames={uploadingNames}
+            removable
+            onRemoveAttachment={handleRemoveAttachment}
+            hoveredImageName={hoveredImageName}
+          />
         </EuiFlexItem>
       )}
       <EuiFlexItem css={editorContainerStyles}>
@@ -225,18 +269,20 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           placeholder={placeholder}
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
+          onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+          onAfterInput={handleAfterInput}
+          onHoveredPlaceholderChange={setHoveredImageName}
+          uploadingNames={uploadingNames}
         />
       </EuiFlexItem>
       {!isAgentDeleted && (
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          resetToPendingMessage={() => {
-            if (pendingMessage) {
-              messageEditorController.setContent(pendingMessage);
-            }
-          }}
-          agentId={agentId}
+          isSubmitting={isCreatingConversation || isSendingUserMessage}
+          showTriggerModeToggle={!isNewConversation && isExperimentalEnabled}
+          triggerMode={triggerMode}
+          onTriggerModeChange={setTriggerMode}
         />
       )}
     </InputContainer>

@@ -11,6 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import { DiscoverFlyouts, openAfterDismissingOtherFlyouts } from '@kbn/discover-utils';
 import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
@@ -21,10 +22,11 @@ import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import { GridSettingsFlyout } from '../../flyout';
-import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
+import type { UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
+  useExitFullscreenOnEmptyResults,
   useMetricFieldsFilter,
   useMetricsSort,
   useResetPageOnDimensionsChange,
@@ -44,12 +46,12 @@ export const MetricsExperienceGrid = ({
   isComponentVisible,
   isTabSelected,
   breakdownField,
-  onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
     isFullscreen,
     onToggleFullscreen,
+    onExitFullscreen,
     selectedDimensions,
     onDimensionsChange,
     onPageChange,
@@ -57,9 +59,21 @@ export const MetricsExperienceGrid = ({
     profileId,
     gridSettings,
     onGridSettingsChange,
+    onFlyoutStateChange,
     recentlyExploredMetrics,
   } = useMetricsExperienceState();
   const [isGridSettingsFlyoutOpen, toggleGridSettingsFlyout] = useToggle(false);
+
+  const onOpenGridSettings = useCallback(() => {
+    onFlyoutStateChange(undefined);
+    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricGridSettings, () =>
+      toggleGridSettingsFlyout(true)
+    );
+  }, [onFlyoutStateChange, toggleGridSettingsFlyout]);
+
+  const onCloseGridSettings = useCallback(() => {
+    toggleGridSettingsFlyout(false);
+  }, [toggleGridSettingsFlyout]);
   const {
     metricItems,
     allDimensions,
@@ -96,22 +110,20 @@ export const MetricsExperienceGrid = ({
 
   useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
 
-  const onToolbarDimensionsChange = useCallback(
-    (nextSelectedDimensions: Dimension[]) => {
-      onDimensionsChange(nextSelectedDimensions);
-      onBreakdownFieldChange?.(nextSelectedDimensions[0]?.name);
-    },
-    [onDimensionsChange, onBreakdownFieldChange]
-  );
-
   useDimensionsWipe({
     selectedDimensions,
     allDimensions,
     isLoading: isDiscoverLoading,
     hasError: metricsInfoError != null,
-    breakdownField,
     onSelectedDimensionsChange: onDimensionsChange,
-    onBreakdownFieldChange,
+  });
+
+  useExitFullscreenOnEmptyResults({
+    isFullscreen,
+    isLoading: isDiscoverLoading,
+    isComponentVisible,
+    hasMetrics: metricItems.length > 0,
+    onExitFullscreen,
   });
 
   const { onPageReady } = usePerformanceContext();
@@ -140,9 +152,9 @@ export const MetricsExperienceGrid = ({
     allDimensions,
     metricItems,
     renderToggleActions,
-    onDimensionsChange: onToolbarDimensionsChange,
+    onDimensionsChange,
     isLoading: isDiscoverLoading,
-    onOpenGridSettings: toggleGridSettingsFlyout,
+    onOpenGridSettings,
   });
 
   const onKeyDown = useCallback(
@@ -207,7 +219,7 @@ export const MetricsExperienceGrid = ({
         <GridSettingsFlyout
           gridSettings={gridSettings}
           onGridSettingsChange={onGridSettingsChange}
-          onClose={toggleGridSettingsFlyout}
+          onClose={onCloseGridSettings}
         />
       )}
     </>

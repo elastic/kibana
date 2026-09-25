@@ -1,9 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/esql-server-utils",
-  "owner": [
-    "@elastic/kibana-esql"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

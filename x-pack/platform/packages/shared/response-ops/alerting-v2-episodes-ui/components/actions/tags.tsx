@@ -7,20 +7,18 @@
 
 import React, { Fragment, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiPopover, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EMPTY_VALUE } from '../../constants';
 import * as i18n from './translations';
 
-export interface AlertEpisodeTagsProps {
+export interface TagBadgesProps {
   tags?: string[];
-  /** How many tags to show before collapsing the rest into a `+N` popover. Ignored when `inline`. */
+  /** How many tags to show before collapsing the rest into a `+N` popover. Ignored when `showAll`. */
   size?: number;
-  /**
-   * When `true`, render the badges as inline siblings instead of a flex row, so they share the
-   * line flow of the surrounding text and break one by one instead of as a block. Every tag is
-   * rendered in this mode: the wrapping text handles the overflow, so there is no `+N` popover.
-   */
-  inline?: boolean;
+  /** Render every tag instead of collapsing the overflow into a `+N` popover. */
+  showAll?: boolean;
+  'data-test-subj'?: string;
 }
 
 /**
@@ -38,65 +36,65 @@ const inlineTagsCss = css`
   }
 `;
 
-export function AlertEpisodeTags({ tags = [], size = 3, inline = false }: AlertEpisodeTagsProps) {
+export function TagBadges({
+  tags = [],
+  size = 3,
+  showAll = false,
+  'data-test-subj': dataTestSubj,
+}: TagBadgesProps) {
   const [isMoreTagsOpen, setIsMoreTagsOpen] = useState(false);
   const onMoreTagsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setIsMoreTagsOpen((isPopoverOpen) => !isPopoverOpen);
   };
   const closePopover = () => setIsMoreTagsOpen(false);
-  const moreTags = tags.length > size && (
-    <EuiBadge
-      key="more"
-      iconType="tag"
-      onClick={onMoreTagsClick}
-      onClickAriaLabel={i18n.TAGS_MORE_BADGE_ARIA_LABEL}
-      color="hollow"
-    >
-      <FormattedMessage
-        id="xpack.observability.component.tags.moreTags"
-        defaultMessage="+{number}"
-        values={{ number: tags.length - size }}
-      />
-    </EuiBadge>
-  );
 
-  if (inline) {
-    return (
-      <span css={inlineTagsCss}>
-        {tags.map((tag, index) => (
-          <Fragment key={tag}>
-            {/* A real space keeps the badges apart and lets the line break between them. */}
-            {index > 0 ? ' ' : null}
-            <EuiBadge color="hollow">{tag}</EuiBadge>
-          </Fragment>
-        ))}
-      </span>
-    );
+  if (tags.length === 0) {
+    return <span data-test-subj={dataTestSubj}>{EMPTY_VALUE}</span>;
   }
 
+  const visibleTags = showAll ? tags : tags.slice(0, size);
+  const hiddenTags = showAll ? [] : tags.slice(size);
+
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center" direction="row">
-      {tags.slice(0, size).map((tag) => (
-        <EuiBadge key={tag} color="hollow">
-          {tag}
-        </EuiBadge>
+    <span css={inlineTagsCss} data-test-subj={dataTestSubj}>
+      {visibleTags.map((tag, index) => (
+        <Fragment key={tag}>
+          {/* A real space keeps the badges apart and lets the line break between them. */}
+          {index > 0 ? ' ' : null}
+          <EuiBadge color="hollow">{tag}</EuiBadge>
+        </Fragment>
       ))}
-      <br />
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          aria-label={i18n.TAGS_MORE_POPOVER_ARIA_LABEL}
-          button={moreTags}
-          isOpen={isMoreTagsOpen}
-          closePopover={closePopover}
-        >
-          {tags.slice(size).map((tag) => (
-            <EuiBadge key={tag} color="hollow">
-              {tag}
-            </EuiBadge>
-          ))}
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      {hiddenTags.length > 0 ? (
+        <>
+          {visibleTags.length > 0 ? ' ' : null}
+          <EuiPopover
+            aria-label={i18n.TAGS_MORE_POPOVER_ARIA_LABEL}
+            button={
+              <EuiBadge
+                iconType="tag"
+                onClick={onMoreTagsClick}
+                onClickAriaLabel={i18n.TAGS_MORE_BADGE_ARIA_LABEL}
+                color="hollow"
+              >
+                <FormattedMessage
+                  id="xpack.observability.component.tags.moreTags"
+                  defaultMessage="+{number}"
+                  values={{ number: hiddenTags.length }}
+                />
+              </EuiBadge>
+            }
+            isOpen={isMoreTagsOpen}
+            closePopover={closePopover}
+          >
+            {hiddenTags.map((tag) => (
+              <EuiBadge key={tag} color="hollow">
+                {tag}
+              </EuiBadge>
+            ))}
+          </EuiPopover>
+        </>
+      ) : null}
+    </span>
   );
 }

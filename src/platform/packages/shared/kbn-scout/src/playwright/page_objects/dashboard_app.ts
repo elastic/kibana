@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Download } from 'playwright-core';
+import { euiSelectors } from '../eui_components';
 import type { ScoutPage } from '..';
 import { expect } from '..';
-import { RenderablePage } from './renderable_page';
+import { AppMenu } from './app_menu';
+import { RenderablePage } from './utils/renderable_page';
 import { Toasts } from './toasts';
 
 type CommonlyUsedTimeRange =
@@ -31,6 +34,7 @@ const DEFAULT_LIBRARY_TIMEOUT = 30_000;
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
+  private readonly appMenu: AppMenu;
   // Dashboard shell and mode controls
   private readonly settingsFlyout;
   private readonly settingsButton;
@@ -39,9 +43,6 @@ export class DashboardApp {
   private readonly dashboardViewport;
   private readonly editInDiscoverLink;
   private readonly embeddablePanel;
-  private readonly controlsGroup;
-  private readonly controlFrame;
-  private readonly optionsListControlSearchInput;
   private readonly tryEsqlLink;
 
   // Add panel flow
@@ -85,6 +86,7 @@ export class DashboardApp {
   constructor(private readonly page: ScoutPage) {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
+    this.appMenu = new AppMenu(page);
 
     // Dashboard shell and mode controls
     this.settingsFlyout = this.page.testSubj.locator('dashboardSettingsFlyout');
@@ -96,11 +98,6 @@ export class DashboardApp {
       'discoverEmbeddableInlineEditEditInDiscoverLink'
     );
     this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
-    this.controlsGroup = this.page.testSubj.locator('controls-group-wrapper');
-    this.controlFrame = this.page.testSubj.locator('control-frame');
-    this.optionsListControlSearchInput = this.page.testSubj.locator(
-      'optionsList-control-search-input'
-    );
     this.tryEsqlLink = this.page.testSubj.locator('tryESQLLink');
 
     // Add panel flow
@@ -281,7 +278,7 @@ export class DashboardApp {
   }
 
   async saveDashboard(name: string, options?: TimeoutOptions) {
-    await this.clickAppMenuItem('dashboardInteractiveSaveMenuItem');
+    await this.appMenu.clickItem('dashboardInteractiveSaveMenuItem');
     await this.savedObjectTitleInput.fill(name);
     await this.confirmSaveModal(options);
   }
@@ -291,14 +288,6 @@ export class DashboardApp {
     await expect(this.saveModal).toBeHidden({
       timeout: options?.timeout ?? DEFAULT_SAVE_MODAL_TIMEOUT,
     });
-  }
-
-  private async clickAppMenuItem(testSubj: string) {
-    const item = this.page.testSubj.locator(testSubj);
-    if (!(await item.isVisible())) {
-      await this.page.testSubj.click('app-menu-overflow-button');
-    }
-    await item.click();
   }
 
   async saveChangesToExistingDashboard() {
@@ -321,9 +310,11 @@ export class DashboardApp {
       await expect(titleButton).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
       await titleButton.click();
 
-      await expect(
-        this.page.testSubj.locator(`embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`)
-      ).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
+      // Strip whitespace only: the panel header builds this subject with
+      // `replace(/\s/g, '')`, so titles keep their hyphens.
+      await this.page.testSubj
+        .locator(`embeddablePanelHeading-${names[i].replace(/\s/g, '')}`)
+        .waitFor({ state: 'visible', timeout: DEFAULT_LIBRARY_TIMEOUT });
     }
     await this.closeLibraryFlyout();
   }
@@ -364,8 +355,8 @@ export class DashboardApp {
   async closeLibraryFlyout() {
     await expect(this.savedObjectsFinderTable).toBeVisible();
     await this.page
-      .locator('.euiFlyout', { has: this.savedObjectsFinderTable })
-      .locator('[data-test-subj="euiFlyoutCloseButton"]')
+      .locator(euiSelectors.flyout.ROOT_SELECTOR, { has: this.savedObjectsFinderTable })
+      .locator(`[data-test-subj="${euiSelectors.flyout.CLOSE_BUTTON_TEST_SUBJ}"]`)
       .click();
     await expect(this.savedObjectsFinderTable).toBeHidden();
   }
@@ -542,46 +533,8 @@ export class DashboardApp {
     return visibilities.filter(Boolean).length;
   }
 
-  getControlsGroupLocator() {
-    return this.controlsGroup;
-  }
-
-  getControlFramesLocator() {
-    return this.controlFrame;
-  }
-
   getDashboardControlsLocator() {
     return this.dashboardViewport.locator('[data-control-id]');
-  }
-
-  getControlFrameLocator(controlId: string) {
-    return this.getControlFramesLocator()
-      .locator(`[data-control-id='${controlId}']`)
-      .locator('xpath=ancestor::*[@data-test-subj="control-frame"][1]');
-  }
-
-  async getControlIds() {
-    await this.getControlFramesLocator().evaluateAll((frames) => {
-      if (!frames.length) {
-        throw new Error('No control frames found');
-      }
-    });
-
-    return this.getControlFramesLocator()
-      .locator('[data-control-id]')
-      .evaluateAll((controls) => {
-        return controls.map((control) => control.getAttribute('data-control-id') ?? '');
-      });
-  }
-
-  async getOnlyControlId() {
-    const controlIds = await this.getControlIds();
-
-    if (controlIds.length !== 1 || !controlIds[0]) {
-      throw new Error(`Expected exactly one control id, got: ${controlIds.join(', ')}`);
-    }
-
-    return controlIds[0];
   }
 
   /**
@@ -596,61 +549,6 @@ export class DashboardApp {
     }
 
     return controlId;
-  }
-
-  /**
-   * Gets the count of dashboard controls
-   */
-  async getControlCount(): Promise<number> {
-    return this.getControlFramesLocator().count();
-  }
-
-  async removeControl(controlId: string) {
-    const controlFrame = this.getControlFrameLocator(controlId);
-    await controlFrame.locator(`[data-control-id='${controlId}']`).hover();
-
-    const hoverActions = controlFrame.getByTestId(`hover-actions-${controlId}`);
-    await hoverActions.waitFor({ state: 'visible' });
-
-    const deleteAction = hoverActions.getByTestId('embeddablePanelAction-deletePanel');
-    await deleteAction.waitFor({ state: 'visible' });
-    await deleteAction.click();
-  }
-
-  async optionsListOpenPopover(controlId: string) {
-    await this.page.testSubj.locator(`optionsList-control-${controlId}`).click();
-    await this.optionsListControlSearchInput.waitFor({ state: 'visible' });
-  }
-
-  async optionsListPopoverSelectOption(availableOption: string) {
-    await this.optionsListControlSearchInput.fill(availableOption);
-
-    const option = this.page.testSubj.locator(`optionsList-control-selection-${availableOption}`);
-    await option.click();
-  }
-
-  /**
-   * Closes the options-list popover if it is open, and waits for it to disappear.
-   *
-   * Dismisses with Escape rather than by toggling the control button: selecting an option
-   * re-renders the control, so a click aimed at the button can land on a detached node and
-   * leave the popover open.
-   */
-  async optionsListEnsurePopoverIsClosed() {
-    if (await this.optionsListControlSearchInput.isVisible()) {
-      await this.page.keyboard.press('Escape');
-      await this.optionsListControlSearchInput.waitFor({ state: 'hidden' });
-    }
-  }
-
-  /**
-   * Locator for the selected-options label of an options-list control, e.g. `AE`
-   * for a single selection or `AE, CN` for multiple.
-   */
-  getOptionsListSelectionsLocator(controlId: string) {
-    return this.page.testSubj
-      .locator(`optionsList-control-${controlId}`)
-      .getByTestId('optionsListSelections');
   }
 
   async getSavedSearchRowCount(): Promise<number> {
@@ -999,6 +897,20 @@ export class DashboardApp {
     await this.editInDiscoverLink.click();
   }
 
+  /** Generates and downloads a CSV report for a Discover session panel. */
+  async exportPanelAsCsv(title?: string): Promise<Download> {
+    await this.toasts.dismissAll();
+    await this.clickPanelAction('embeddablePanelAction-generateCsvReport', title);
+
+    const downloadButton = this.page.testSubj.locator('downloadCompletedReportButton');
+    // Report generation runs asynchronously and can be slow on shared CI workers.
+    await downloadButton.waitFor({ state: 'visible', timeout: 120_000 });
+
+    const downloadPromise = this.page.waitForEvent('download');
+    await downloadButton.click();
+    return downloadPromise;
+  }
+
   /**
    * Clones a panel on the dashboard.
    * The cloned panel becomes a "by value" panel (not linked to library).
@@ -1256,7 +1168,7 @@ export class DashboardApp {
   // ============================================================
 
   async enterFullscreen() {
-    await this.clickAppMenuItem('dashboardFullScreenMode');
+    await this.appMenu.clickItem('dashboardFullScreenMode');
     await expect(this.page.testSubj.locator('exitFullScreenModeButton')).toBeVisible();
   }
 
@@ -1308,7 +1220,8 @@ export class DashboardApp {
   async createUrlDrilldown(
     name: string,
     url: string,
-    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value'
+    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value',
+    openInNewTab = false
   ) {
     await this.page.testSubj.click('drilldownFactoryItem-url_drilldown');
     await this.page.testSubj.locator('drilldownNameInput').fill(name);
@@ -1321,7 +1234,26 @@ export class DashboardApp {
     await this.page.keyboard.press(selectAll);
     await this.page.keyboard.type(url);
 
+    await this.page.testSubj.click('urlDrilldownAdditionalOptions');
+    const openInNewTabSwitch = this.page.testSubj.locator('urlDrilldownOpenInNewTab');
+    const isOpenInNewTab = (await openInNewTabSwitch.getAttribute('aria-checked')) === 'true';
+    if (isOpenInNewTab !== openInNewTab) {
+      await openInNewTabSwitch.click();
+    }
+
     await this.selectDrilldownTriggerAndSubmit(trigger);
+  }
+
+  /** Selects a tab while inline-editing a Discover embeddable. */
+  async selectDiscoverEmbeddableTab(tabLabel: string) {
+    await this.page.testSubj.click('discoverEmbeddableInlineEditSelectTabAction');
+    const tabPicker = this.page.testSubj.locator('discoverEmbeddableInlineEditSelectTabPopover');
+    await tabPicker.getByText(tabLabel, { exact: true }).click();
+  }
+
+  /** Applies pending inline edits to a Discover embeddable. */
+  async applyDiscoverEmbeddableInlineEdits() {
+    await this.page.testSubj.click('discoverEmbeddableInlineEditApplyButton');
   }
 
   // ============================================================

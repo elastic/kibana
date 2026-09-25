@@ -289,6 +289,20 @@ export const ConfigSchema = z
       .describe(
         "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
       ),
+    'product-solution': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        'The product solution to attribute this step to. Ignored when `plugin-id` is not set.'
+      ),
+    'product-feature': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        'The product feature to attribute this step to. Ignored when `plugin-id` is not set.'
+      ),
     /**
      * Parent feature id used to roll up this step's LLM token usage under a parent feature
      * (sets `metadata.connectorTelemetry.aggregateBy`). Only used when `plugin-id` is set.
@@ -310,6 +324,15 @@ export const ConfigSchema = z
       .max(32)
       .optional()
       .describe('Maximum response size for this workflow step.'),
+    /**
+     * Reasoning level the model should use.
+     */
+    'reasoning-level': z
+      .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+      .optional()
+      .describe(
+        "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider."
+      ),
   })
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
@@ -397,7 +420,7 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
 \`\`\`yaml
 - name: investigate
   type: ${RunAgentStepTypeId}
-  agent-id: "significant-events.investigation"
+  agent-id: "nightshift.investigation"
   connector-id-by-feature: "significant_events_investigation"
   with:
     message: "Investigate the significant events in this stream."

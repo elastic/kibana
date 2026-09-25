@@ -13,6 +13,7 @@ import { v4 } from 'uuid';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import {
   AttachmentBridge,
@@ -26,7 +27,6 @@ import {
   WORKFLOW_EDITOR_ATTACHMENT_ID,
 } from '../../../../features/ai_integration';
 import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';
-import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTelemetry } from '../../../../hooks/use_telemetry';
 
@@ -38,9 +38,14 @@ interface UseAgentBuilderIntegrationParams {
   validationErrors?: YamlValidationResult[] | null;
 }
 
-interface OpenAgentChatOptions {
+export interface OpenAgentChatOptions {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
+  /**
+   * Required for `initialMessage` to take effect: Agent Builder ignores
+   * initial messages when restoring a persisted conversation.
+   */
+  newConversation?: boolean;
   // Internal: auto-open path from the mount effect. Tags the chat-opened /
   // session-completed events with `autoOpened: true` so analysts can filter
   // out non-deliberate opens when measuring engagement.
@@ -403,16 +408,19 @@ export const useAgentBuilderIntegration = ({
       }
 
       const currentYaml = editorRef.current?.getModel()?.getValue() ?? '';
+      // A new conversation has no restored attachment to wait for, so attach the YAML now.
+      // Otherwise the active-conversation subscription adds it once it knows which
+      // conversation this session shares.
+      const shouldAttachNow =
+        attachmentTargetResolvedRef.current || options?.newConversation === true;
 
       const { chatRef } = agentBuilder.openChat({
         sessionTag: `workflow-editor:${sessionId}`,
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
-        // Left empty while a restored conversation is still loading; the
-        // active-conversation subscription adds the attachment once it knows
-        // which one this session shares.
-        attachments: attachmentTargetResolvedRef.current
+        newConversation: options?.newConversation,
+        attachments: shouldAttachNow
           ? [
               buildWorkflowAttachment({
                 yaml: currentYaml,

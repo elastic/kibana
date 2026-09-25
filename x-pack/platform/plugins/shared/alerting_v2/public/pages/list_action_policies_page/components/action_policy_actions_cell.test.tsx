@@ -11,6 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyActionsCell } from './action_policy_actions_cell';
 
+let mockIsLicenseValid = true;
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
+
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
   version: 'v1',
@@ -20,14 +25,12 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   group_by: null,
-  tags: null,
   grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
   snoozed_until: null,
-  auth: { owner: 'elastic', created_by_user: false },
-  created_by: 'elastic_uid',
+  created_by: { profile_uid: 'elastic_uid' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'elastic_uid',
+  updated_by: { profile_uid: 'elastic_uid' },
   updated_at: '2026-01-02T00:00:00.000Z',
   ...overrides,
 });
@@ -48,12 +51,23 @@ const renderCell = (canWrite: boolean) =>
   );
 
 describe('ActionPolicyActionsCell', () => {
+  beforeEach(() => {
+    mockIsLicenseValid = true;
+  });
+
   describe('when the user has write privilege', () => {
     it('renders the edit and more actions affordances', () => {
       renderCell(true);
 
-      expect(screen.getByLabelText('Edit this action policy')).toBeInTheDocument();
+      expect(screen.getByLabelText('Edit this action policy')).toBeEnabled();
       expect(screen.getByLabelText('More actions')).toBeInTheDocument();
+    });
+
+    it('disables the edit button when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      renderCell(true);
+
+      expect(screen.getByTestId('editActionPolicyButton-policy-1')).toBeDisabled();
     });
 
     it('does not render a standalone view details button (the name link covers it)', () => {

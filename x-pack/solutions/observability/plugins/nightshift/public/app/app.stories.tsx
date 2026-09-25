@@ -43,6 +43,8 @@ const NightshiftLandingStory = ({
     <MockAppHeaderProvider>
       <EuiPageTemplate restrictWidth={false}>
         <NightshiftAppHeader
+          onManagementClick={noop}
+          managementHref="/app/significant_events/streams"
           onSettingsClick={noop}
           settingsHref="/app/significant_events/settings"
         />

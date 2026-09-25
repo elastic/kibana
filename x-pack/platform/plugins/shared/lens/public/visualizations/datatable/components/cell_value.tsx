@@ -16,6 +16,7 @@ import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { DataGridDensity } from '@kbn/lens-common';
+import { isMissingValue } from '@kbn/field-formats-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
@@ -256,23 +257,31 @@ export const createGridCell = (
         );
 
       case 'link': {
+        // `LinkCell` wraps `linkContent` inside an `<EuiLink>` (an anchor), so present values
+        // stay as plain text to avoid nested anchors — e.g. the URL formatter's own `<a>`
+        // rendered via React would produce invalid, unusable markup. Missing values are the
+        // exception: the dash + tooltip is a React-only rendering with no
+        // interactive elements, so it is safe inside the outer anchor.
+        const linkContent =
+          formatter && isMissingValue(rawValue)
+            ? formatter.convertToReact(rawValue)
+            : formatter?.convertToText(rawValue) ?? fallbackText;
         const backgroundColor =
           colorMode === 'cell' && !isEmptyValue(rawValue)
             ? getCellColor(columnId, palette, colorMapping)(rawValue)
             : null;
-        const baseColor = euiTheme.colors.link;
-        // Only adjust link contrast when the cell background is colored (colorMode: cell).
+        // Only override EuiLink color when the cell background is colored (colorMode: cell).
         const linkColor =
           colorMode === 'cell' && backgroundColor
             ? makeHighContrastColor(
-                isDarkMode ? euiTheme.colors.highlight : baseColor, // preferred foreground
+                isDarkMode ? euiTheme.colors.highlight : euiTheme.colors.textPrimary,
                 4.5 // WCAG AA contrast ratio (default in EUI)
               )(backgroundColor)
-            : baseColor;
+            : undefined;
 
         return (
           <LinkCell
-            content={formatter?.convertToText(rawValue) ?? fallbackText}
+            content={linkContent}
             linkColor={linkColor}
             onClick={onFilter}
             alignment={alignment}
