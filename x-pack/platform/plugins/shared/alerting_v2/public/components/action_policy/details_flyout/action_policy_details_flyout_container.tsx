@@ -90,12 +90,15 @@ export const ActionPolicyDetailsFlyoutContainer = ({
   };
 
   if (isLoading) {
-    return <LoadingFlyout onClose={onClose} />;
+    return <LoadingFlyout type="overlay" session={session} ownFocus={false} onClose={onClose} />;
   }
 
   if (isError || !policy) {
     return (
       <EntityNotFoundFlyout
+        type="overlay"
+        session={session}
+        ownFocus={false}
         title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.notFoundTitle', {
           defaultMessage: 'Action policy not found',
         })}

@@ -82,6 +82,50 @@ jest.mock('../../../hooks/use_update_action_policy_api_key', () => ({
   useUpdateActionPolicyApiKey: () => ({ mutate: mockUpdateApiKey, isLoading: false }),
 }));
 
+jest.mock('../../loading_flyout', () => ({
+  LoadingFlyout: ({
+    type,
+    session,
+    ownFocus,
+  }: {
+    type?: string;
+    session?: string;
+    ownFocus?: boolean;
+  }) => (
+    <div
+      data-test-subj="loadingFlyout"
+      data-flyout-type={type}
+      data-session={session}
+      data-own-focus={String(ownFocus)}
+    />
+  ),
+}));
+
+jest.mock('../../entity_not_found_flyout', () => ({
+  EntityNotFoundFlyout: ({
+    type,
+    session,
+    ownFocus,
+    onClose,
+  }: {
+    type?: string;
+    session?: string;
+    ownFocus?: boolean;
+    onClose: () => void;
+  }) => (
+    <div
+      data-test-subj="entityNotFoundFlyout"
+      data-flyout-type={type}
+      data-session={session}
+      data-own-focus={String(ownFocus)}
+    >
+      <button type="button" data-test-subj="entityNotFoundFlyoutCloseButton" onClick={onClose}>
+        close
+      </button>
+    </div>
+  ),
+}));
+
 interface FlyoutMockProps {
   policy: ActionPolicyResponse;
   session?: string;
@@ -227,16 +271,48 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
   it('renders the loading flyout while the policy is loading', () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: true });
     renderContainer();
-    expect(screen.getByTestId('loadingFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-flyout-type', 'overlay');
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-session', 'start');
     expect(screen.queryByTestId('mockFlyout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityNotFoundFlyout')).not.toBeInTheDocument();
+  });
+
+  it('keeps the summary flyout session while the policy is loading or missing', () => {
+    mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: true });
+    const { rerender } = renderContainer('inherit');
+
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-flyout-type', 'overlay');
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-session', 'inherit');
+    expect(screen.getByTestId('loadingFlyout')).toHaveAttribute('data-own-focus', 'false');
+
+    mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+    rerender(
+      <I18nProvider>
+        <ActionPolicyDetailsFlyoutContainer
+          policyId="policy-1"
+          onClose={mockOnClose}
+          session="inherit"
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute(
+      'data-flyout-type',
+      'overlay'
+    );
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute('data-session', 'inherit');
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute('data-own-focus', 'false');
   });
 
   it('renders the not-found flyout when the fetch errors out', async () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: undefined, isLoading: false, isError: true });
     renderContainer();
 
-    expect(screen.getByTestId('entityNotFoundFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute(
+      'data-flyout-type',
+      'overlay'
+    );
+    expect(screen.getByTestId('entityNotFoundFlyout')).toHaveAttribute('data-session', 'start');
 
     await userEvent.click(screen.getByTestId('entityNotFoundFlyoutCloseButton'));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
