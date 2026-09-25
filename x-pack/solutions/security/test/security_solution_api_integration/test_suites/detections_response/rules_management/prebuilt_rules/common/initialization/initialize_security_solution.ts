@@ -78,8 +78,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe(INITIALIZATION_FLOW_INIT_PREBUILT_RULES, () => {
       const initializePrebuiltRulesWithRetry = async () => {
-        return retryService.tryWithRetries(
-          'initializePrebuiltRules',
+        return retryService.tryForTime(
+          PREBUILT_RULES_TIMEOUT,
           async () => {
             const { body } = await initializeFlows([INITIALIZATION_FLOW_INIT_PREBUILT_RULES])
               .timeout(INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS)
@@ -91,9 +91,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
             return body;
           },
-          {
-            timeout: PREBUILT_RULES_TIMEOUT,
-          }
+          { description: 'initializePrebuiltRules' }
         );
       };
       it('installs the prebuilt rules package', async () => {
@@ -183,8 +181,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('multiple flows in a single request', () => {
       it('runs all flows and returns results for each', async () => {
-        const { body } = await retryService.tryWithRetries(
-          'initializeAllFlows',
+        const { body } = await retryService.tryForTime(
+          PREBUILT_RULES_TIMEOUT,
           async () => {
             const response = await initializeFlows([
               INITIALIZATION_FLOW_CREATE_LIST_INDICES,
@@ -203,9 +201,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
             return response;
           },
-          {
-            timeout: PREBUILT_RULES_TIMEOUT,
-          }
+          { description: 'initializeAllFlows' }
         );
 
         expect(body.flows[INITIALIZATION_FLOW_CREATE_LIST_INDICES]).toMatchObject({

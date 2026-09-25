@@ -48,8 +48,8 @@ export const installFleetPackage = async ({
 
   log.debug(`Installing ${packageName} package`);
 
-  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installFleetPackage.name,
+  const fleetResponse = await retryService.tryForTime<InstallPackageResponse>(
+    FLEET_RATE_LIMIT_TIMEOUT * 3,
     async () => {
       const response = await supertest
         .post(epmRouteService.getInstallPath(packageName, packageVersion))
@@ -68,9 +68,7 @@ export const installFleetPackage = async ({
 
       return response.body;
     },
-    {
-      timeout: FLEET_RATE_LIMIT_TIMEOUT * 3,
-    }
+    { description: installFleetPackage.name }
   );
 
   return fleetResponse;
@@ -95,8 +93,8 @@ export const installFleetPackageByUpload = async ({
 
   log.debug('Uploading a package to Fleet...');
 
-  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installFleetPackageByUpload.name,
+  const fleetResponse = await retryService.tryForTime<InstallPackageResponse>(
+    FLEET_RATE_LIMIT_TIMEOUT * 2,
     async () => {
       const response = await supertest
         .post(EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN)
@@ -115,10 +113,7 @@ export const installFleetPackageByUpload = async ({
 
       return response.body;
     },
-    {
-      retryDelay: FLEET_RATE_LIMIT_TIMEOUT,
-      timeout: FLEET_RATE_LIMIT_TIMEOUT * 2,
-    }
+    { description: installFleetPackageByUpload.name, retryDelay: FLEET_RATE_LIMIT_TIMEOUT }
   );
 
   return fleetResponse;
@@ -176,8 +171,8 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
   supertest: SuperTest.Agent,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installPrebuiltRulesPackageViaFleetAPI.name,
+  const fleetResponse = await retryService.tryForTime<InstallPackageResponse>(
+    TOTAL_TIMEOUT,
     async () => {
       const testResponse = await supertest
         .post(`/api/fleet/epm/packages/security_detection_engine`)
@@ -191,9 +186,7 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
 
       return testResponse.body;
     },
-    {
-      timeout: TOTAL_TIMEOUT,
-    }
+    { description: installPrebuiltRulesPackageViaFleetAPI.name }
   );
 
   await refreshSavedObjectIndices(es);
@@ -217,8 +210,8 @@ export const installPrebuiltRulesPackageByVersion = async (
   version: string,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installPrebuiltRulesPackageByVersion.name,
+  const fleetResponse = await retryService.tryForTime<InstallPackageResponse>(
+    TOTAL_TIMEOUT,
     async () => {
       const testResponse = await supertest
         .post(epmRouteService.getInstallPath('security_detection_engine', version))
@@ -232,9 +225,7 @@ export const installPrebuiltRulesPackageByVersion = async (
 
       return testResponse.body;
     },
-    {
-      timeout: TOTAL_TIMEOUT,
-    }
+    { description: installPrebuiltRulesPackageByVersion.name }
   );
 
   await refreshSavedObjectIndices(es);

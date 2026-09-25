@@ -52,8 +52,8 @@ async function deleteFleetPackage(params: DeleteFleetPackageArgs): Promise<void>
   const { packageName, dependencies } = params;
   const { supertest, retryService, log, es } = dependencies;
 
-  await retryService.tryWithRetries(
-    'deleteFleetPackage',
+  await retryService.tryForTime(
+    3 * 60000,
     async () => {
       log.debug(`Deleting ${packageName} package`);
 
@@ -77,9 +77,7 @@ async function deleteFleetPackage(params: DeleteFleetPackageArgs): Promise<void>
         throw response.error;
       }
     },
-    {
-      timeout: 3 * 60000, // total timeout applied to all attempts altogether
-    }
+    { description: 'deleteFleetPackage' }
   );
 
   await refreshSavedObjectIndices(es);

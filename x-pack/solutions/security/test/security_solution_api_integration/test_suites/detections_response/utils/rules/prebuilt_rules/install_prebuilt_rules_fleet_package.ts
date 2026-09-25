@@ -39,8 +39,8 @@ export const installPrebuiltRulesFleetPackage = async ({
 }): Promise<InstallPackageResponse | BulkInstallPackagesResponse> => {
   if (version) {
     // Install a specific version
-    const response = await retryService.tryWithRetries<InstallPackageResponse>(
-      installPrebuiltRulesFleetPackage.name,
+    const response = await retryService.tryForTime<InstallPackageResponse>(
+      TOTAL_TIMEOUT,
       async () => {
         const testResponse = await supertest
           .post(epmRouteService.getInstallPath('security_detection_engine', version))
@@ -54,9 +54,7 @@ export const installPrebuiltRulesFleetPackage = async ({
 
         return testResponse.body;
       },
-      {
-        timeout: TOTAL_TIMEOUT,
-      }
+      { description: installPrebuiltRulesFleetPackage.name }
     );
 
     await refreshSavedObjectIndices(es);
@@ -64,8 +62,8 @@ export const installPrebuiltRulesFleetPackage = async ({
     return response;
   } else {
     // Install the latest version
-    const response = await retryService.tryWithRetries<BulkInstallPackagesResponse>(
-      installPrebuiltRulesFleetPackage.name,
+    const response = await retryService.tryForTime<BulkInstallPackagesResponse>(
+      TOTAL_TIMEOUT,
       async () => {
         const testResponse = await supertest
           .post(epmRouteService.getBulkInstallPath())
@@ -87,9 +85,7 @@ export const installPrebuiltRulesFleetPackage = async ({
 
         return body;
       },
-      {
-        timeout: TOTAL_TIMEOUT,
-      }
+      { description: installPrebuiltRulesFleetPackage.name }
     );
 
     await refreshSavedObjectIndices(es);

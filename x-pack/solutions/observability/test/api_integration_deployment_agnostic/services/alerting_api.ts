@@ -14,7 +14,7 @@ import type { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/me
 import type { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { errors, type Client } from '@elastic/elasticsearch';
-import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
+import type { RetryOptions } from '@kbn/ftr-common-functional-services';
 import type { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
@@ -94,10 +94,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       indexName: string;
       ruleId: string;
       num: number;
-      retryOptions?: TryWithRetriesOptions;
+      retryOptions?: RetryOptions;
     }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-      return await retry.tryWithRetries(
-        `Alerting API - waitForAlertInIndex, retryOptions: ${JSON.stringify(retryOptions)}`,
+      return await retry.try(
         async () => {
           const response = await esClient.search<T>({
             index: indexName,
@@ -125,7 +124,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
 
           return response;
         },
-        retryOptions
+        {
+          ...retryOptions,
+          description: `Alerting API - waitForAlertInIndex, retryOptions: ${JSON.stringify(
+            retryOptions
+          )}`,
+        }
       );
     },
 
@@ -180,10 +184,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       ruleId: string;
       num?: number;
       sort?: 'asc' | 'desc';
-      retryOptions?: TryWithRetriesOptions;
+      retryOptions?: RetryOptions;
     }): Promise<SearchResponse> {
-      return await retry.tryWithRetries(
-        `Alerting API - waitForDocumentInIndex, retryOptions: ${JSON.stringify(retryOptions)}`,
+      return await retry.try(
         async () => {
           const response = await esClient.search({
             index: indexName,
@@ -205,7 +208,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           }
           return response;
         },
-        retryOptions
+        {
+          ...retryOptions,
+          description: `Alerting API - waitForDocumentInIndex, retryOptions: ${JSON.stringify(
+            retryOptions
+          )}`,
+        }
       );
     },
 
@@ -528,11 +536,10 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       ruleId: string;
       esClient: Client;
       testStart: Date;
-      retryOptions?: TryWithRetriesOptions;
+      retryOptions?: RetryOptions;
     }) {
       for (let i = 0; i < numOfRuns; i++) {
-        await retry.tryWithRetries(
-          `Alerting API - waitForNumRuleRuns, retryOptions: ${JSON.stringify(retryOptions)}`,
+        await retry.try(
           async () => {
             await this.runRule({ roleAuthc, ruleId });
             await this.waiting.waitForExecutionEventLog({
@@ -543,7 +550,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
             });
             await this.waiting.waitForAllTasksIdle({ esClient, filter: testStart });
           },
-          retryOptions
+          {
+            ...retryOptions,
+            description: `Alerting API - waitForNumRuleRuns, retryOptions: ${JSON.stringify(
+              retryOptions
+            )}`,
+          }
         );
       }
     },
@@ -625,12 +637,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         ruleId: string;
         num?: number;
         sort?: 'asc' | 'desc';
-        retryOptions?: TryWithRetriesOptions;
+        retryOptions?: RetryOptions;
       }): Promise<SearchResponse> {
-        return await retry.tryWithRetries(
-          `Alerting API - waiting.waitForDocumentInIndex, retryOptions: ${JSON.stringify(
-            retryOptions
-          )}`,
+        return await retry.try(
           async () => {
             const response = await esClient.search({
               index: indexName,
@@ -652,7 +661,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
             }
             return response;
           },
-          retryOptions
+          {
+            ...retryOptions,
+            description: `Alerting API - waiting.waitForDocumentInIndex, retryOptions: ${JSON.stringify(
+              retryOptions
+            )}`,
+          }
         );
       },
 
@@ -688,12 +702,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       }: {
         esClient: Client;
         filter: Date;
-        retryOptions?: TryWithRetriesOptions;
+        retryOptions?: RetryOptions;
       }): Promise<SearchResponse> {
-        return await retry.tryWithRetries(
-          `Alerting API - waiting.waitForAllTasksIdle, retryOptions: ${JSON.stringify(
-            retryOptions
-          )}`,
+        return await retry.try(
           async () => {
             const response = await esClient.search({
               index: '.kibana_task_manager',
@@ -728,7 +739,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
             }
             return response;
           },
-          retryOptions
+          {
+            ...retryOptions,
+            description: `Alerting API - waiting.waitForAllTasksIdle, retryOptions: ${JSON.stringify(
+              retryOptions
+            )}`,
+          }
         );
       },
 
@@ -743,12 +759,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         filter: Date;
         ruleId: string;
         num?: number;
-        retryOptions?: TryWithRetriesOptions;
+        retryOptions?: RetryOptions;
       }): Promise<SearchResponse> {
-        return await retry.tryWithRetries(
-          `Alerting API - waiting.waitForExecutionEventLog, retryOptions: ${JSON.stringify(
-            retryOptions
-          )}`,
+        return await retry.try(
           async () => {
             const response = await esClient.search({
               index: '.kibana-event-log*',
@@ -790,7 +803,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
             }
             return response;
           },
-          retryOptions
+          {
+            ...retryOptions,
+            description: `Alerting API - waiting.waitForExecutionEventLog, retryOptions: ${JSON.stringify(
+              retryOptions
+            )}`,
+          }
         );
       },
 
@@ -814,10 +832,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         filter: Date;
         taskType: string;
         attempts: number;
-        retryOptions?: TryWithRetriesOptions;
+        retryOptions?: RetryOptions;
       }): Promise<SearchResponse> {
-        return await retry.tryWithRetries(
-          `Alerting API - waiting.waitForAllTasks, retryOptions: ${JSON.stringify(retryOptions)}`,
+        return await retry.try(
           async () => {
             const response = await esClient.search({
               index: '.kibana_task_manager',
@@ -860,7 +877,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
             }
             return response;
           },
-          retryOptions
+          {
+            ...retryOptions,
+            description: `Alerting API - waiting.waitForAllTasks, retryOptions: ${JSON.stringify(
+              retryOptions
+            )}`,
+          }
         );
       },
 
@@ -873,10 +895,9 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         esClient: Client;
         ruleId: string;
         filter: Date;
-        retryOptions?: TryWithRetriesOptions;
+        retryOptions?: RetryOptions;
       }): Promise<SearchResponse> {
-        return await retry.tryWithRetries(
-          `Alerting API - waiting.waitForDisabled, retryOptions: ${JSON.stringify(retryOptions)}`,
+        return await retry.try(
           async () => {
             const response = await esClient.search({
               index: '.kibana_task_manager',
@@ -914,7 +935,12 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
             }
             return response;
           },
-          retryOptions
+          {
+            ...retryOptions,
+            description: `Alerting API - waiting.waitForDisabled, retryOptions: ${JSON.stringify(
+              retryOptions
+            )}`,
+          }
         );
       },
     },

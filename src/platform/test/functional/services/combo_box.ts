@@ -45,13 +45,13 @@ export class ComboBoxService extends FtrService {
       const comboBox = await this.testSubjects.find(comboBoxSelector);
       await this.setElement(comboBox, value);
     } else {
-      await this.retry.tryWithRetries(
-        `comboBox.set, comboBoxSelector: ${comboBoxSelector}`,
+      await this.retry.tryForTime(
+        timeout,
         async () => {
           const comboBox = await this.testSubjects.find(comboBoxSelector);
           await this.setElement(comboBox, value);
         },
-        { timeout, retryDelay: 1000 }
+        { description: `comboBox.set, comboBoxSelector: ${comboBoxSelector}`, retryDelay: 1000 }
       );
     }
   }
@@ -348,8 +348,8 @@ export class ComboBoxService extends FtrService {
     this.log.debug('comboBox.closeOptionsList');
 
     // wait for potential other animations to finish (e.g. due to closing on selection)
-    const isOptionListClosed = await this.retry.tryWithRetries(
-      'wait for possible ongoing closing of the combobox listbox',
+    const isOptionListClosed = await this.retry.tryForTime(
+      5000,
       async () => {
         const isOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
           timeout: 50,
@@ -358,7 +358,7 @@ export class ComboBoxService extends FtrService {
         return !isOpen;
       },
       {
-        timeout: 5000,
+        description: 'wait for possible ongoing closing of the combobox listbox',
         initialDelay: 500,
       }
     );

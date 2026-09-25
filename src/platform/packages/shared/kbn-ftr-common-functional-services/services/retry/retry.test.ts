@@ -20,7 +20,7 @@ const createRetryService = (log = new ToolingLog()) => {
   return new RetryService(context as FtrProviderContext);
 };
 
-describe('tryWithRetries', () => {
+describe('RetryService', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -29,62 +29,56 @@ describe('tryWithRetries', () => {
     jest.useRealTimers();
   });
 
-  it(`logs failures and recovery callbacks`, async () => {
-    const successfulAttempt = 3;
+  it('logs failures and runs recovery callbacks passed through options', async () => {
     const log = new ToolingLog();
     const writer = new ToolingLogCollectingWriter();
     log.setWriters([writer]);
-
-    let count = 0;
+    let attempts = 0;
     const block = async () => {
-      count++;
-      if (count !== successfulAttempt) throw Error('whoops, could not find anything');
+      if (++attempts < 3) throw Error('whoops, could not find anything');
     };
 
-    const retry = createRetryService(log);
-    const result = retry.tryWithRetries('test action', block, { timeout: 4500 }, async () =>
-      log.debug('handled failure')
-    );
-    await jest.advanceTimersByTimeAsync(400);
+    const result = createRetryService(log).tryForTime(4500, block, {
+      description: 'test action',
+      onFailureBlock: async () => log.debug('handled failure'),
+    });
+    await jest.advanceTimersByTimeAsync(200);
     await result;
 
     expect(writer.messages).toMatchInlineSnapshot(`
       Array [
-        " [2mdebg[22m --- retry.tryWithRetries error: whoops, could not find anything",
+        " [2mdebg[22m --- retry.tryForTime error: whoops, could not find anything",
         " [2mdebg[22m handled failure",
-        " [2mdebg[22m --- retry.tryWithRetries failed again with the same message...",
+        " [2mdebg[22m --- retry.tryForTime failed again with the same message...",
         " [2mdebg[22m handled failure",
       ]
     `);
   });
 
-  it('stops at the timeout and retains the 200 ms default delay', async () => {
+  it('honors a timeout override with the 100 ms default delay', async () => {
     const block = jest.fn().mockRejectedValue(new Error('not ready'));
     const onFailureBlock = jest.fn().mockResolvedValue(undefined);
     const result = expect(
-      createRetryService().tryWithRetries('test action', block, { timeout: 450 }, onFailureBlock)
-    ).rejects.toThrow("reached timeout 450 ms waiting for 'test action'");
+      createRetryService().try(block, { timeout: 250, description: 'test action', onFailureBlock })
+    ).rejects.toThrow("reached timeout 250 ms waiting for 'test action'");
 
-    await jest.advanceTimersByTimeAsync(199);
+    await jest.advanceTimersByTimeAsync(99);
     expect(block).toHaveBeenCalledTimes(1);
     await jest.advanceTimersByTimeAsync(1);
     expect(block).toHaveBeenCalledTimes(2);
-    await jest.advanceTimersByTimeAsync(400);
+    await jest.advanceTimersByTimeAsync(200);
     await result;
     expect(block).toHaveBeenCalledTimes(3);
     expect(onFailureBlock).toHaveBeenCalledTimes(2);
   });
 
-  it('honors the timeout with an explicit retry delay', async () => {
+  it('honors an explicit timeout and retry delay', async () => {
     const block = jest.fn().mockRejectedValue(new Error('not ready'));
     const result = expect(
-      createRetryService().tryWithRetries('test action', block, {
-        retryDelay: 100,
-        timeout: 250,
-      })
-    ).rejects.toThrow('reached timeout 250 ms');
+      createRetryService().tryForTime(600, block, { retryDelay: 250 })
+    ).rejects.toThrow('reached timeout 600 ms');
 
-    await jest.advanceTimersByTimeAsync(300);
+    await jest.advanceTimersByTimeAsync(750);
     await result;
     expect(block).toHaveBeenCalledTimes(3);
   });
@@ -95,17 +89,28 @@ describe('tryWithRetries', () => {
       if (++attempts <= 10) throw new Error('not ready');
       return 42;
     });
-    const result = createRetryService().tryWithRetries('test action', block);
+    const result = createRetryService().try(block);
 
-    await jest.advanceTimersByTimeAsync(2000);
+    await jest.advanceTimersByTimeAsync(1000);
     await expect(result).resolves.toBe(42);
     expect(block).toHaveBeenCalledTimes(11);
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('waits for the initial delay and returns a successful attempt without another delay', async () => {
+  it('uses the configured timeout when no override is supplied', async () => {
+    const result = expect(
+      createRetryService().try(async () => {
+        throw new Error('not ready');
+      })
+    ).rejects.toThrow('reached timeout 20000 ms');
+
+    await jest.advanceTimersByTimeAsync(20100);
+    await result;
+  });
+
+  it('applies the initial delay before starting the timeout', async () => {
     const block = jest.fn().mockRejectedValueOnce(new Error('not ready')).mockResolvedValue(42);
-    const result = createRetryService().tryWithRetries('test action', block, {
+    const result = createRetryService().tryForTime(60, block, {
       retryDelay: 50,
       initialDelay: 1000,
     });
@@ -119,4 +124,24 @@ describe('tryWithRetries', () => {
     expect(block).toHaveBeenCalledTimes(2);
     expect(jest.getTimerCount()).toBe(0);
   });
+
+  it.each(['try', 'tryForTime'])(
+    'preserves the callback and delay arguments for %s',
+    async (method) => {
+      const block = jest.fn().mockRejectedValueOnce(new Error('not ready')).mockResolvedValue(42);
+      const onFailureBlock = jest.fn().mockResolvedValue(undefined);
+      const retry = createRetryService();
+      const result =
+        method === 'try'
+          ? retry.try(block, onFailureBlock, 250)
+          : retry.tryForTime(1000, block, onFailureBlock, 250);
+
+      await jest.advanceTimersByTimeAsync(249);
+      expect(block).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(1);
+      await expect(result).resolves.toBe(42);
+      expect(onFailureBlock).toHaveBeenCalledTimes(1);
+      expect(block).toHaveBeenCalledTimes(2);
+    }
+  );
 });

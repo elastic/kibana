@@ -93,8 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await sendReport(report);
       // Wait for the report to be query-able in ES since sending report uses (refresh = false)
-      await retry.tryWithRetries(
-        'reported events to be stored into ES',
+      await retry.try(
         async () => {
           const savedObjects = await fetchUsageCountersObjects();
 
@@ -104,7 +103,11 @@ export default function ({ getService }: FtrProviderContext) {
           expect(countTypeEvents[0].attributes.count).to.eql(1);
           return true;
         },
-        { retryDelay: 1500, initialDelay: 3000 }
+        {
+          description: 'reported events to be stored into ES',
+          retryDelay: 1500,
+          initialDelay: 3000,
+        }
       );
     });
 
@@ -122,8 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await sendReport(report);
       // Wait for the report to be query-able in ES since sending report uses (refresh = false)
-      await retry.tryWithRetries(
-        'reported events to be stored into ES',
+      await retry.try(
         async () => {
           const savedObjects = await fetchUsageCountersObjects();
           const firstEventWithCountTypeEvents = getCounter(
@@ -151,7 +153,11 @@ export default function ({ getService }: FtrProviderContext) {
           expect(secondEventWithCountTypeEvents[0].attributes.count).to.eql(1);
           return true;
         },
-        { retryDelay: 1500, initialDelay: 3000 }
+        {
+          description: 'reported events to be stored into ES',
+          retryDelay: 1500,
+          initialDelay: 3000,
+        }
       );
     });
   });

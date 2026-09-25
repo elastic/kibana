@@ -35,8 +35,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('CNVM AWS', () => {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
-        await retry.tryWithRetries(
-          'waiting for loading indicator to be hidden',
+        await retry.try(
           async () => {
             await cisIntegration.navigateToAddIntegrationCnvmPage();
             await cisIntegration.inputUniqueIntegrationName();
@@ -49,11 +48,14 @@ export default function (providerContext: FtrProviderContext) {
             );
             return true;
           },
-          retryOptions,
-          async () => {
-            // Log the error or handle it in some way
-            logger.debug('Failed while waiting for loading indicator');
-            return true;
+          {
+            ...retryOptions,
+            description: 'waiting for loading indicator to be hidden',
+            onFailureBlock: async () => {
+              // Log the error or handle it in some way
+              logger.debug('Failed while waiting for loading indicator');
+              return true;
+            },
           }
         );
       });

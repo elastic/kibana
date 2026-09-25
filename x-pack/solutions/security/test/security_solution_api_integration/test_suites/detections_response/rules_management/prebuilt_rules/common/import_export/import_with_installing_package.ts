@@ -138,8 +138,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('imports prebuilt rules on top of existing rules', async () => {
       // Package installation is rate limited. A single package installation is allowed per 10 seconds.
-      await retryService.tryWithRetries(
-        'installSecurityDetectionEnginePackage',
+      await retryService.tryForTime(
+        15000,
         async () => {
           const securityDetectionEnginePackageBuffer = await generatePrebuiltRulesPackageBuffer({
             packageName: PREBUILT_RULES_PACKAGE_NAME,
@@ -154,10 +154,7 @@ export default ({ getService }: FtrProviderContext): void => {
             packageBuffer: securityDetectionEnginePackageBuffer,
           });
         },
-        {
-          retryDelay: 5000,
-          timeout: 15000, // total timeout applied to all attempts altogether
-        }
+        { description: 'installSecurityDetectionEnginePackage', retryDelay: 5000 }
       );
       await installPrebuiltRules(es, supertest);
       await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });

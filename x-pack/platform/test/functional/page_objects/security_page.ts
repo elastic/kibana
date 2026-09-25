@@ -389,7 +389,7 @@ export class SecurityPageObject extends FtrService {
       }
     };
 
-    await this.retry.tryWithRetries('force logout with retries', performForceLogout);
+    await this.retry.try(performForceLogout, { description: 'force logout with retries' });
   }
 
   async clickRolesSection() {
