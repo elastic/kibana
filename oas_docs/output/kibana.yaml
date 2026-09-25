@@ -13351,7 +13351,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         query:
                           breach:
                             query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -13367,7 +13366,6 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
                     page: 1
                     per_page: 20
                     total: 1
@@ -13525,7 +13523,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     query:
                       breach:
                         query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -13541,7 +13538,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the newly created rule.
@@ -13721,7 +13717,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         query:
                           breach:
                             query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -13737,7 +13732,6 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
                       - created_at: '2026-01-15T12:00:00.000Z'
                         created_by:
                           profile_uid: u_elastic_0
@@ -13753,7 +13747,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         query:
                           breach:
                             query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -13769,7 +13762,6 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rules_response'
           description: Created rules are returned in `rules`. Failures are returned in `errors`.
@@ -14264,7 +14256,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          version: 1
                         query:
                           breach:
                             query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -14280,7 +14271,6 @@ paths:
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
                           profile_uid: u_elastic_0
-                        version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_response'
           description: Returns the requested rules.
@@ -15147,7 +15137,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     query:
                       breach:
                         query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -15163,7 +15152,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the requested rule.
@@ -15297,7 +15285,6 @@ paths:
                   metadata:
                     description: Updated description.
                     name: Host CPU high (updated)
-                  version: WzAsMV0=
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_rule'
       responses:
@@ -15323,7 +15310,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     query:
                       breach:
                         query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -15339,7 +15325,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the updated rule.
@@ -15529,7 +15514,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     query:
                       breach:
                         query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -15545,7 +15529,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the replaced rule.
@@ -15571,7 +15554,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     query:
                       breach:
                         query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -15587,7 +15569,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the newly created rule.
@@ -15732,7 +15713,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     query:
                       breach:
                         query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -15748,7 +15728,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the disabled rule.
@@ -15911,7 +15890,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      version: 1
                     query:
                       breach:
                         query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
@@ -15927,7 +15905,6 @@ paths:
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
                       profile_uid: u_elastic_0
-                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           description: Returns the enabled rule.
@@ -150037,7 +150014,7 @@ components:
               type: string
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data_strategy:
           anyOf:
             - description: Keeps the alert's last status when the rule finds no data.
@@ -150126,9 +150103,6 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_actor'
           description: Actor who last updated the rule.
           nullable: true
-        version:
-          description: The saved object version token of the rule, used for optimistic concurrency control.
-          type: string
       required:
         - kind
         - metadata
@@ -150140,40 +150114,6 @@ components:
         - created_at
         - updated_by
         - updated_at
-    Kibana_HTTP_APIs_alerting_rule_response_metadata:
-      additionalProperties: false
-      type: object
-      properties:
-        builder_type:
-          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
-          maxLength: 64
-          type: string
-        description:
-          description: Human-readable description of the rule.
-          maxLength: 1024
-          type: string
-        name:
-          description: Rule name (must be unique within the space).
-          maxLength: 256
-          minLength: 1
-          type: string
-        tags:
-          description: Tags for categorization, e.g. ["production", "infra"].
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          minItems: 1
-          type: array
-        version:
-          description: Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.
-          maximum: 9007199254740991
-          minimum: 1
-          type: integer
-      required:
-        - name
-        - version
     Kibana_HTTP_APIs_alerting_rule_schedule:
       additionalProperties: false
       description: Execution schedule configuration.
@@ -150447,11 +150387,6 @@ components:
         time_field:
           description: Document field used as the event time when applying the lookback window. If omitted, the existing value is kept.
           maxLength: 128
-          minLength: 1
-          type: string
-        version:
-          description: The current version of the rule, used for optimistic concurrency control.
-          maxLength: 256
           minLength: 1
           type: string
     Kibana_HTTP_APIs_alerting_workflow_action_policy_destination:
