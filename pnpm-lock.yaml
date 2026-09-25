@@ -2802,7 +2802,7 @@ importers:
         version: link:x-pack/solutions/observability/plugins/nightshift
       '@kbn/nightshift-shared':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-nightshift-shared
+        version: link:x-pack/solutions/observability/packages/kbn-nightshift-shared
       '@kbn/nightshift-sources-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift_sources
@@ -9077,8 +9077,6 @@ importers:
 
   x-pack/platform/packages/shared/kbn-nightshift-decision-trees: {}
 
-  x-pack/platform/packages/shared/kbn-nightshift-shared: {}
-
   x-pack/platform/packages/shared/kbn-profiler-cli: {}
 
   x-pack/platform/packages/shared/kbn-proposals-common: {}
@@ -9550,6 +9548,8 @@ importers:
   x-pack/solutions/observability/packages/kbn-evals-suite-significant-events: {}
 
   x-pack/solutions/observability/packages/kbn-genai-cli: {}
+
+  x-pack/solutions/observability/packages/kbn-nightshift-shared: {}
 
   x-pack/solutions/observability/packages/kbn-observability-schema: {}
 

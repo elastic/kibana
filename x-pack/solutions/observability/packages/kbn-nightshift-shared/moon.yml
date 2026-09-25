@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/nightshift-shared
   channel: ''
   owner: '@elastic/nightshift-context-and-research-team'
-  sourceRoot: x-pack/platform/packages/shared/kbn-nightshift-shared
+  sourceRoot: x-pack/solutions/observability/packages/kbn-nightshift-shared
 dependsOn:
   - '@kbn/std'
   - '@kbn/zod'
@@ -23,8 +23,8 @@ tags:
   - shared-common
   - package
   - prod
-  - group-platform
-  - shared
+  - group-observability
+  - private
   - jest-unit-tests
 fileGroups:
   src:

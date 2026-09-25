@@ -2,6 +2,6 @@
   "type": "shared-common",
   "id": "@kbn/nightshift-shared",
   "owner": ["@elastic/nightshift-context-and-research-team", "@elastic/nightshift-sre-agent-team"],
-  "group": "platform",
-  "visibility": "shared"
+  "group": "observability",
+  "visibility": "private"
 }

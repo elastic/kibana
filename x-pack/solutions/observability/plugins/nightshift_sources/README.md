@@ -155,7 +155,7 @@ in `config/serverless.oblt.yml` and back on for Observability Complete in
 
 ```bash
 node scripts/jest x-pack/solutions/observability/plugins/nightshift_sources
-node scripts/jest x-pack/platform/packages/shared/kbn-nightshift-shared
+node scripts/jest x-pack/solutions/observability/packages/kbn-nightshift-shared
 node scripts/type_check --project x-pack/solutions/observability/plugins/nightshift_sources/tsconfig.json
 node scripts/scout run-tests --arch stateful --domain classic \
   --config x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/playwright.config.ts
