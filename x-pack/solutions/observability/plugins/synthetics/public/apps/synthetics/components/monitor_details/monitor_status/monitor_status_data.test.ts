@@ -103,4 +103,44 @@ describe('createStatusTimeBins', () => {
       { start: 2000, end: 3000, ups: 1, downs: 0, value: getStatusEffectiveValue(1, 0) },
     ]);
   });
+
+  it('copies the latest failed-test state id from matching heatmap buckets', () => {
+    const timeBuckets = [{ start: 1000, end: 3000 }];
+
+    const heatmapData = [
+      {
+        key: 1500,
+        key_as_string: '1500',
+        doc_count: 1,
+        up: { value: 0 },
+        down: { value: 1 },
+        last_down: {
+          latest: { hits: { hits: [{ _source: { state: { id: 'older-state' } } }] } },
+        },
+      },
+      {
+        key: 2500,
+        key_as_string: '2500',
+        doc_count: 1,
+        up: { value: 0 },
+        down: { value: 1 },
+        last_down: {
+          latest: { hits: { hits: [{ _source: { state: { id: 'newer-state' } } }] } },
+        },
+      },
+    ];
+
+    const result = createStatusTimeBins(timeBuckets, heatmapData);
+
+    expect(result).toEqual([
+      {
+        start: 1000,
+        end: 3000,
+        ups: 0,
+        downs: 2,
+        value: getStatusEffectiveValue(0, 2),
+        stateId: 'newer-state',
+      },
+    ]);
+  });
 });

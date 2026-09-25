@@ -12,6 +12,24 @@ import { tint, transparentize, COLOR_MODES_STANDARD } from '@elastic/eui';
 import type { BrushEvent } from '@elastic/charts';
 import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 
+interface HeatmapLastDownSource {
+  last_down?: {
+    latest?: {
+      hits?: {
+        hits?: Array<{
+          _source?: {
+            state?: {
+              id?: string;
+            };
+          };
+        }>;
+      };
+    };
+  };
+}
+
+type HeatmapBucketWithLastDown = MonitorStatusHeatmapBucket & HeatmapLastDownSource;
+
 export const CHART_CELL_WIDTH = 17;
 
 export interface MonitorStatusTimeBucket {
@@ -29,6 +47,11 @@ export interface MonitorStatusTimeBin {
    * To color code the time bin on chart
    */
   value: number;
+
+  /**
+   * Latest failed-test error state in this bin, when any downs occurred
+   */
+  stateId?: string;
 }
 
 export interface MonitorStatusPanelProps {
@@ -47,7 +70,9 @@ export interface MonitorStatusPanelProps {
   showViewHistoryButton?: boolean;
   onBrushed?: (timeBounds: { from: number; to: number; fromUtc: string; toUtc: string }) => void;
   monitorId?: string;
+  configId?: string;
   locationLabel?: string;
+  locationId?: string;
   remoteName?: string;
 }
 
@@ -110,6 +135,14 @@ export function createTimeBuckets(intervalMinutes: number, from: number, to: num
   return buckets;
 }
 
+export function getErrorStateIdFromHeatmapBucket(
+  bucket: MonitorStatusHeatmapBucket
+): string | undefined {
+  const stateId = (bucket as HeatmapBucketWithLastDown).last_down?.latest?.hits?.hits?.[0]?._source
+    ?.state?.id;
+  return stateId ? stateId : undefined;
+}
+
 export function createStatusTimeBins(
   timeBuckets: MonitorStatusTimeBucket[],
   heatmapData?: MonitorStatusHeatmapBucket[]
@@ -124,15 +157,20 @@ export function createStatusTimeBins(
         value: 0,
       };
     }
-    const { ups, downs } = heatmapData
-      .filter(({ key }) => key >= start && key < end)
-      .reduce(
-        (acc, cur) => ({
-          ups: acc.ups + cur.up.value,
-          downs: acc.downs + cur.down.value,
-        }),
-        { ups: 0, downs: 0 }
-      );
+    const matching = heatmapData.filter(({ key }) => key >= start && key < end);
+    const { ups, downs, stateId } = matching.reduce(
+      (acc, cur) => {
+        const nextStateId = getErrorStateIdFromHeatmapBucket(cur);
+        const useNewerStateId = nextStateId !== undefined && cur.key >= acc.stateIdKey;
+        return {
+          ups: acc.ups + (cur.up?.value ?? 0),
+          downs: acc.downs + (cur.down?.value ?? 0),
+          stateId: useNewerStateId ? nextStateId : acc.stateId,
+          stateIdKey: useNewerStateId ? cur.key : acc.stateIdKey,
+        };
+      },
+      { ups: 0, downs: 0, stateId: undefined as string | undefined, stateIdKey: -Infinity }
+    );
 
     return {
       start,
@@ -140,6 +178,7 @@ export function createStatusTimeBins(
       ups,
       downs,
       value: ups + downs === 0 ? 0 : getStatusEffectiveValue(ups, downs),
+      ...(stateId ? { stateId } : {}),
     };
   });
 }
