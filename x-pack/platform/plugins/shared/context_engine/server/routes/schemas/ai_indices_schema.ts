@@ -41,6 +41,7 @@ import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_action
 import { MAX_KI_ID_LENGTH } from '../../../common/step_types/ki';
 import {
   validateAbsoluteSignalWindow,
+  validateAiIndexDestValue,
   validateAiIndexId,
   validateAiIndexQueryLimit,
   validateFeedbackAnalysisInterval,
@@ -211,9 +212,10 @@ const aiIndexDestSchema = schema.object(
     value: schema.string({
       minLength: 1,
       maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
+      validate: validateAiIndexDestValue,
       meta: {
         description:
-          'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index id. System indices are not allowed.',
+          'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index ID. System indices are not allowed.',
       },
     }),
   },

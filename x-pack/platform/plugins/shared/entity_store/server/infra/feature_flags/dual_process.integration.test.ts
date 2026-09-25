@@ -16,7 +16,7 @@
  * Tracked in: https://github.com/elastic/kibana/issues/288610
  */
 
-import { Subject } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import type { CoreStart } from '@kbn/core/server';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -62,15 +62,18 @@ function buildCoreStart(
   });
   mockRepo.update.mockResolvedValue({} as never);
 
-  const getBooleanValue =
+  const startupFlag$ =
     flagOnStartup !== undefined
-      ? jest.fn().mockResolvedValue(flagOnStartup)
-      : jest.fn().mockRejectedValue(new Error('getBooleanValue not mocked for this test'));
+      ? of(flagOnStartup)
+      : throwError(() => new Error('startup flag read not mocked for this test'));
 
   const coreStart = {
     featureFlags: {
-      getBooleanValue$: jest.fn().mockReturnValue(flagSubject.asObservable()),
-      getBooleanValue,
+      // First subscription is the startup snapshot; later ones drive in-session transitions.
+      getBooleanValue$: jest
+        .fn()
+        .mockImplementationOnce(() => startupFlag$)
+        .mockReturnValue(flagSubject.asObservable()),
     },
     savedObjects: {
       createInternalRepository: jest.fn().mockReturnValue(mockRepo),
@@ -283,9 +286,10 @@ describe('dual-process FF reactive path — integration', () => {
     it('logs an error and does not throw when the startup reconciliation fails', async () => {
       const flagSubject = new Subject<boolean>();
       const { coreStart } = buildCoreStart(flagSubject, { saved_objects: [] });
-      (coreStart.featureFlags.getBooleanValue as jest.Mock).mockRejectedValue(
-        new Error('LD unreachable')
-      );
+      (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReset();
+      (coreStart.featureFlags.getBooleanValue$ as jest.Mock)
+        .mockImplementationOnce(() => throwError(() => new Error('LD unreachable')))
+        .mockReturnValue(flagSubject.asObservable());
 
       expect(() => subscribeToDualProcessFlag({ coreStart, logger, stop$ })).not.toThrow();
 
@@ -333,8 +337,12 @@ describe('dual-process FF reactive path — integration', () => {
 
       const coreStart = {
         featureFlags: {
-          getBooleanValue$: jest.fn().mockReturnValue(flagSubject.asObservable()),
-          getBooleanValue: jest.fn().mockRejectedValue(new Error('not mocked')),
+          getBooleanValue$: jest
+            .fn()
+            .mockImplementationOnce(() =>
+              throwError(() => new Error('startup flag read not mocked for this test'))
+            )
+            .mockReturnValue(flagSubject.asObservable()),
         },
         savedObjects: {
           createInternalRepository: jest.fn().mockReturnValue(mockRepo),
