@@ -127,7 +127,7 @@ pageLoadAssetSize:
   management: 10296
   maps: 1201
   mapsEms: 3256
-  metricsDataAccess: 1947
+  metricsDataAccess: 2418
   mitreAttack: 2022
   ml: 950
   monitoring: 22416
@@ -192,7 +192,7 @@ pageLoadAssetSize:
   share: 379
   shared-core: 311749
   shared-misc: 155260
-  shared-packages: 5010040
+  shared-packages: 5513030
   shared-plugins: 13536562
   shared-solution-packages: 347767
   significantEvents: 3679

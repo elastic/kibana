@@ -57,7 +57,7 @@ import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
 } from './saved_objects';
-import { SavedObjectInvestigationRepository } from './storage';
+import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
   scheduleInvestigationReconciliationTask,
@@ -175,6 +175,7 @@ export class NightshiftInvestigationsPlugin
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
           getDeps: () => ({ actions: this.actionsStart }),
           telemetryConnectorId,
+          telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
@@ -387,8 +388,14 @@ export class NightshiftInvestigationsPlugin
       });
     }
 
+    const investigationSweepRepository = createInvestigationSweepRepository(
+      coreStart.savedObjects,
+      this.logger
+    );
+
     return {
       getInvestigationsClient: this.getInvestigationsClient,
+      deleteAllInvestigations: () => investigationSweepRepository.deleteAllAcrossSpaces(),
       isInvestigationAvailable: (request) =>
         isInvestigationAvailable({
           request,
