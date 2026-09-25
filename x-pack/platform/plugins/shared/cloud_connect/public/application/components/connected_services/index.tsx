@@ -34,6 +34,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
     notifications,
     hasConfigurePermission,
     docLinks,
+    telemetryService,
     apiService,
     licensing,
   } = useCloudConnectedAppContext();
@@ -47,6 +48,10 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   const showDisconnectModal = useCallback(() => {
     setIsDisconnectModalVisible(true);
   }, []);
+
+  const trackDocsLinkClicked = useCallback(() => {
+    telemetryService.trackLinkClicked({ destination_type: 'cloud_connect_docs' });
+  }, [telemetryService]);
 
   const closeDisconnectModal = () => {
     setIsDisconnectModalVisible(false);
@@ -163,6 +168,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
         })}
         menu={menu}
         docLink={docLinks.links.cloud.cloudConnect}
+        onDocLinkClick={trackDocsLinkClicked}
         spacing="bleed"
       />
       <EuiPage direction="column" grow={false} paddingSize="none" restrictWidth={true}>

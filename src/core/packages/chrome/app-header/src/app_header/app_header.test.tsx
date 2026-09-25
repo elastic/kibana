@@ -134,6 +134,23 @@ describe('AppHeader adapter', () => {
     );
   });
 
+  it('calls onDocLinkClick without dropping the documentation href', async () => {
+    const onDocLinkClick = jest.fn();
+    renderAppHeader(
+      <AppHeaderView
+        title="Workflows"
+        docLink="https://example.com/docs"
+        onDocLinkClick={onDocLinkClick}
+      />
+    );
+
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    const documentationLink = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation);
+    expect(documentationLink).toHaveAttribute('href', 'https://example.com/docs');
+    fireEvent.click(documentationLink);
+    expect(onDocLinkClick).toHaveBeenCalledTimes(1);
+  });
+
   it('falls back to help-extension documentation when docLink is omitted', async () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getHelpExtension$.mockReturnValue(

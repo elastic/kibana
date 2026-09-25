@@ -271,8 +271,10 @@ export const mapAppMenuItemToPanelItem = (
   };
 
   const hasClickHandler = childPanelId === undefined;
+  // New-tab links keep native navigation. getLinkProps would cancel it, which
+  // drops external docs links that also record a click.
   const linkProps =
-    item?.href && item?.run && hasClickHandler
+    item?.href && item?.run && hasClickHandler && item.target !== '_blank'
       ? getLinkProps({ href: item.href, onClick: handleClick })
       : { onClick: hasClickHandler ? handleClick : undefined };
 

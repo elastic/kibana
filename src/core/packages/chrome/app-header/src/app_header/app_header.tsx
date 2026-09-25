@@ -29,6 +29,8 @@ export type AppHeaderViewProps = DistributiveOmit<
   'staticItems' | 'fallbackMenu' | 'titleAppend' | 'borderless'
 > & {
   docLink?: string;
+  /** Called when the Documentation menu item is clicked. The link still opens in a new tab. */
+  onDocLinkClick?: () => void;
   showAddIntegrations?: boolean;
 };
 
@@ -46,6 +48,7 @@ const getPublicAppHeaderViewProps = ({
   sticky,
   spacing,
   docLink,
+  onDocLinkClick,
   showAddIntegrations,
 }: AppHeaderViewProps): AppHeaderViewProps => {
   const secondaryContent = description ? { description } : metadata ? { metadata } : {};
@@ -63,6 +66,7 @@ const getPublicAppHeaderViewProps = ({
     sticky,
     spacing,
     docLink,
+    onDocLinkClick,
     showAddIntegrations,
   };
 };
@@ -76,10 +80,11 @@ const usePresentationProps = (
   const resolvedBadges = useResolvedBadges(publicProps.badges);
   const staticItems = useAppHeaderStaticItems({
     docLink: publicProps.docLink,
+    onDocLinkClick: publicProps.onDocLinkClick,
     showAddIntegrations: publicProps.showAddIntegrations,
   });
   const legacyActionMenu = useLegacyActionMenu();
-  const { docLink, showAddIntegrations, ...rest } = publicProps;
+  const { docLink, showAddIntegrations, onDocLinkClick, ...rest } = publicProps;
 
   return {
     ...rest,
