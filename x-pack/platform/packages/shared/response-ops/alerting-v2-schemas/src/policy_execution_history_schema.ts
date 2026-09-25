@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema, queryIntSchema } from './common';
+import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
   MAX_SEARCH_LENGTH,
@@ -24,7 +24,7 @@ const idFilterArraySchema = arrayOrSingleSchema(
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER
 );
 
-export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled', 'dispatch_failed']);
+export const policyExecutionOutcomeSchema = z.enum(['success', 'throttled', 'failure']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
 
 export const dispatchFailureReasonSchema = z.enum([
@@ -56,10 +56,10 @@ const sharedFilterFields = {
     .describe(
       'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided.'
     ),
-  outcome: policyExecutionOutcomeFilterSchema
+  outcomes: policyExecutionOutcomeFilterSchema
     .optional()
     .describe(
-      'Outcome filter. When omitted matches all outcomes. Pass one or more of "dispatched", "throttled", "dispatch_failed" to narrow.'
+      'Outcome filter. When omitted matches all outcomes. Pass one or more of "success", "throttled", "failure" to narrow.'
     ),
 };
 
@@ -88,7 +88,7 @@ export const listPolicyExecutionHistoryRequestSchema = z
       .describe(
         'Episode filter. Narrows events to those referencing at least one of the provided episode ids.'
       ),
-    sort: z
+    sort_field: z
       .enum(['dispatched_at'])
       .default('dispatched_at')
       .describe('Sort field. Defaults to "dispatched_at".'),
@@ -131,7 +131,7 @@ const episodeRefSchema = z.object({ id: z.string() });
 
 export const policyExecutionHistoryItemSchema = z
   .object({
-    dispatched_at: z.string(),
+    dispatched_at: z.iso.datetime(),
     policy: namedRefSchema,
     outcome: policyExecutionOutcomeSchema,
     episode_count: z.number(),
@@ -168,8 +168,8 @@ export const policyExecutionHistoryItemSchema = z
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
 
 export const searchMatchCountsSchema = z.object({
-  policies: z.number().describe('Total policies matching the search.'),
-  rules: z.number().describe('Total rules matching the search.'),
+  policies: z.number().describe(`Policies matching the search. ${ESTIMATED_COUNT_NOTE}`),
+  rules: z.number().describe(`Rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
   is_truncated: z
     .boolean()
     .describe('True when the server filter cap was reached and results may be truncated.'),
@@ -181,7 +181,11 @@ export const listPolicyExecutionHistoryResponseSchema = z
     items: z.array(policyExecutionHistoryItemSchema),
     page: z.number().int().min(1),
     per_page: z.number().int().min(0),
-    total: z.number().int().nonnegative(),
+    total: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(`The number of action policy events matching the query. ${ESTIMATED_COUNT_NOTE}`),
     search_matches: searchMatchCountsSchema
       .nullable()
       .describe(

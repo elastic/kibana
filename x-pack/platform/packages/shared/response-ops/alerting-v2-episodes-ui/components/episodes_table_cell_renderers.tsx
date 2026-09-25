@@ -78,7 +78,7 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
 
   const groupAction: EpisodeStatusGroupAction = {
     lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
-    snoozeExpiry: (row.flattened.snooze_expiry as string | undefined) ?? null,
+    snoozedUntil: (row.flattened.snoozed_until as string | undefined) ?? null,
   };
 
   return (
