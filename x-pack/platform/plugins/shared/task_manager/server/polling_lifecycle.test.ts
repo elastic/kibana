@@ -806,7 +806,7 @@ describe('TaskPollingLifecycle', () => {
     });
   });
 
-  describe('claim nudge error backoff', () => {
+  describe('claim nudge', () => {
     const claimResult = {
       docs: [],
       stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
@@ -883,6 +883,43 @@ describe('TaskPollingLifecycle', () => {
       claimNudgeSubject.next();
       await flushPromises();
       expect(claimCalls()).toBe(baseline + 1);
+    });
+
+    test('throttles a burst of claim nudges down to one immediate claim cycle', async () => {
+      const { claimNudgeSubject } = await startLifecycleWithNudge();
+      const baseline = claimCalls();
+
+      claimNudgeSubject.next();
+      await flushPromises();
+      claimNudgeSubject.next();
+      claimNudgeSubject.next();
+      await flushPromises();
+
+      expect(claimCalls()).toBe(baseline + 1);
+
+      // Inside the window, where neither a held nudge nor a regular cycle is due.
+      clock.tick(taskManagerOpts.config.poll_interval / 2);
+      await flushPromises();
+
+      expect(claimCalls()).toBe(baseline + 1);
+    });
+
+    test('runs a throttled claim nudge at the end of the window instead of dropping it', async () => {
+      const { claimNudgeSubject } = await startLifecycleWithNudge();
+      const baseline = claimCalls();
+
+      claimNudgeSubject.next();
+      await flushPromises();
+      claimNudgeSubject.next();
+      await flushPromises();
+      expect(claimCalls()).toBe(baseline + 1);
+
+      // The window closes just as the regular cycle after the leading nudge falls due; the held
+      // nudge fires first and cancels it, so the two amount to one cycle.
+      clock.tick(taskManagerOpts.config.poll_interval);
+      await flushPromises();
+
+      expect(claimCalls()).toBe(baseline + 2);
     });
   });
 

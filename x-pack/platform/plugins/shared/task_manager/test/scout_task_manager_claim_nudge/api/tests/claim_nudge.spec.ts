@@ -94,7 +94,10 @@ apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] 
     const response = await getTask(apiClient, cookieHeader, taskId);
 
     if (response.statusCode === 404) {
-      return true;
+      // Only the route's own "not found" means the task ran and was removed. A 404 from an
+      // unregistered route (`ftr_apis` disabled, path renamed) would otherwise pass instantly.
+      const { message } = (response.body ?? {}) as { message?: string };
+      return message === `Task ${taskId} not found`;
     }
     if (response.statusCode !== 200) {
       // An error body has no `status`, which would read as "not idle" and pass. Keep polling so

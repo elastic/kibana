@@ -6,8 +6,17 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { Subject, withLatestFrom, BehaviorSubject, combineLatest } from 'rxjs';
-import { distinctUntilChanged, filter, startWith, pairwise, map as rxMap, share, scan } from 'rxjs';
+import { Subject, withLatestFrom, BehaviorSubject, combineLatest, timer } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  startWith,
+  pairwise,
+  map as rxMap,
+  share,
+  scan,
+  throttle,
+} from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
@@ -91,7 +100,8 @@ export interface TaskPollingLifecycleOpts {
   enrichFakeRequest?: FakeRequestEnricher;
   /**
    * Triggers an immediate claim cycle when another node requests one, instead of waiting for
-   * `poll_interval`. Ignored while this node is backing off from Elasticsearch errors.
+   * `poll_interval`. Throttled to one cycle per poll interval, and ignored entirely while this
+   * node is backing off from Elasticsearch errors.
    */
   claimNudgeService?: TaskManagerClaimNudgeService;
 }
@@ -219,7 +229,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
           return false;
         }
         return true;
-      })
+      }),
+      // Caps nudge-triggered cycles at one per poll interval. `trailing` runs a throttled nudge at
+      // the end of its window rather than dropping it, so a nudge never costs more than the wait it
+      // was avoiding. Re-read per window so it widens with the managed poll interval.
+      throttle(() => timer(this.currentPollInterval), { leading: true, trailing: true })
     );
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
