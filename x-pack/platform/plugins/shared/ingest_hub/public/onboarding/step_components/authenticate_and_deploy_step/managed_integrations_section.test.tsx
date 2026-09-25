@@ -72,6 +72,7 @@ function setupMocks({
   setPendingIacTemplate = jest.fn(),
   connectorId = undefined,
   authMethod = undefined,
+  staticKeys = undefined,
   searchParams = '',
 }: {
   cloud?: object;
@@ -80,6 +81,7 @@ function setupMocks({
   setPendingIacTemplate?: jest.Mock;
   connectorId?: string;
   authMethod?: 'identity_federation' | 'static_keys';
+  staticKeys?: { access_key_id?: string; secret_access_key?: string };
   searchParams?: string;
 } = {}) {
   mockUseKibana.mockReturnValue({ services: { cloud } });
@@ -90,7 +92,7 @@ function setupMocks({
     setConnectorId,
     setStaticKeys,
     setPendingIacTemplate,
-    authenticateAndDeployStep: { connectorId, authMethod },
+    authenticateAndDeployStep: { connectorId, authMethod, staticKeys },
     awsServicesMap: new Map([
       [
         'guardduty',
@@ -329,6 +331,30 @@ describe('ManagedIntegrationsSection', () => {
         fireEvent.click(screen.getByText('mark-not-ready')); // form loading new connector
       });
       // Bypass cleared — button disabled while new connector validates
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+
+    it('Deploy button enabled in static-keys edit mode with service-var drift and existing credentials', () => {
+      // Scenario: user deployed with static keys, changed a service var, returns to Step 3.
+      // isDirty=true from service-var drift. Replace form not touched. Existing keys in session.
+      // Deploy should be enabled using the stored credentials — replace form is optional.
+      setupMocks({
+        authMethod: 'static_keys',
+        staticKeys: { access_key_id: 'AKIA123', secret_access_key: 'secret456' },
+        searchParams: 'deploymentId=dep-abc',
+      });
+      renderSection({ showIdentityFederation: false, isDirty: true });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
+    });
+
+    it('Deploy button disabled in static-keys edit mode with service-var drift but no stored credentials', () => {
+      // Edge case: isDirty but session has no static keys — replace form must be filled first.
+      setupMocks({
+        authMethod: 'static_keys',
+        staticKeys: undefined,
+        searchParams: 'deploymentId=dep-abc',
+      });
+      renderSection({ showIdentityFederation: false, isDirty: true });
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
     });
 

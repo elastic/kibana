@@ -416,7 +416,13 @@ export function ManagedIntegrationsSection({
                 isDisabled={
                   !isDeployReady &&
                   !isCleanupOnly &&
-                  !(isDirty && preferredMethod === 'identity_federation' && isConnectorPreloaded)
+                  !(isDirty && preferredMethod === 'identity_federation' && isConnectorPreloaded) &&
+                  !(
+                    isDirty &&
+                    isStaticKeysEditMode &&
+                    !!(authenticateAndDeployStep.staticKeys?.access_key_id) &&
+                    !!(authenticateAndDeployStep.staticKeys?.secret_access_key)
+                  )
                 }
                 isLoading={isDeploying}
                 onClick={onDeploy}
