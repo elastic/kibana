@@ -3,6 +3,7 @@ id: agent-builder-tools
 description: Reviews Agent Builder tool registrations for availability scoping, MCP hygiene, description quality, return value design, and checklist compliance
 apply_to:
   - "x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts"
+  - "x-pack/**/tools/**"
 can_block: false
 ---
 

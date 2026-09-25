@@ -45,7 +45,7 @@ If the registering plugin's feature is gated — by project type, uiSetting, lic
 
 **How to verify:**
 1. Find the registering plugin's `kibana.jsonc` and feature registration (look for `features.registerKibanaFeature` or `features.registerElasticsearchFeature` calls in the plugin's setup)
-2. Check if the plugin or feature has project-type restrictions (`supportedProjectTypes`), license requirements (`minimumLicense`), or uiSetting gates
+2. Check if the plugin or feature has project-type restrictions (`supportedProjectTypes`), license requirements (`minimumLicense`), plugin enable flags (`xpack.*.enabled` / `enabledOnlyIn`), or uiSetting gates
 3. If gated: verify the tool has an `availability` handler matching those conditions
 4. If not gated: confirm the tool genuinely works across all project types and deployment modes
 
@@ -82,7 +82,7 @@ Check the tool's description string, `ToolResultType` usage in the handler, and 
 
 Tools that create, update, or delete resources must:
 1. Set `annotations.destructiveHint: true` (for delete/irreversible overwrite) or ensure `annotations.readOnlyHint` is not `true` (for create/update)
-2. If `annotations.destructiveHint: true`: set `confirmation.askUser` to `'once'` or `'always'`
+2. If `annotations.destructiveHint: true`: set `confirmation.askUser` to `'always'`. Using `'once'` is permitted but should be flagged as a **warning** (non-blocking) — `once` reuses the first confirmation for all subsequent calls to the same tool in a conversation, which can silently authorize deletes of different resources
 3. Never set both `readOnlyHint: true` and `destructiveHint: true`
 
 MCP clients bypass Agent Builder's UI confirmation dialog, so the annotation is the only signal an MCP host has to gate destructive calls.
