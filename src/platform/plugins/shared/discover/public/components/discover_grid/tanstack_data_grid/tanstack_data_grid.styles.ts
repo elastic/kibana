@@ -341,14 +341,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     cursor: 'pointer',
   }),
 
-  // -- Cell actions (hover overlay; secondary actions clip, expand always stays) --
+  // -- Cell actions (mounted on hover/focus; secondary actions clip, expand always stays) --
   cellWithActions: css({
     position: 'relative',
     overflow: 'hidden',
-    '&:hover .tsg-cellActions, &:focus-within .tsg-cellActions': {
-      opacity: 1,
-      pointerEvents: 'auto',
-    },
   }),
 
   cellActions: css({
@@ -361,9 +357,6 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     gap: euiTheme.size.xxs,
     maxWidth: '100%',
     overflow: 'hidden',
-    opacity: 0,
-    pointerEvents: 'none',
-    transition: 'opacity 100ms ease',
     color: euiTheme.colors.emptyShade,
     backgroundColor: euiTheme.colors.primary,
     border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.primary}`,

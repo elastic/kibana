@@ -393,15 +393,14 @@ export const TanStackColumnHeaderActions = React.memo(
     const [isOpen, setIsOpen] = useState(false);
     const closePopover = useCallback(() => setIsOpen(false), []);
 
-    const listItems = buildTanStackColumnHeaderActions({
-      ...buildParams,
-      columnId,
-      onActionComplete: closePopover,
-    });
-
-    if (listItems.length === 0) {
-      return null;
-    }
+    // Built only while open: the list always contains "Copy column values", so it is never empty.
+    const listItems = isOpen
+      ? buildTanStackColumnHeaderActions({
+          ...buildParams,
+          columnId,
+          onActionComplete: closePopover,
+        })
+      : [];
 
     const actionsButtonLabel = i18n.translate(
       'discover.grid.tanStack.columnActionsButtonAriaLabel',

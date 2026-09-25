@@ -22,7 +22,7 @@ import {
   type Cell,
   type Column,
 } from '@tanstack/react-table';
-import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
+import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -231,7 +231,7 @@ const DENSITY_BUTTONS = [
   },
 ];
 
-const OVERSCAN = 20;
+const OVERSCAN = 5;
 const MAX_SUMMARY_FIELDS = 80;
 const MAX_SELECTED_DOCS_FOR_COMPARE = 100;
 
@@ -628,7 +628,7 @@ const CellActions = React.memo(
     value: unknown;
     formattedValue: string;
     onFilter?: UnifiedDataTableProps['onFilter'];
-    onExpand: () => void;
+    onExpand: (cellElement: HTMLElement) => void;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
   }) => {
     const handleFilterIn = useCallback(
@@ -653,9 +653,10 @@ const CellActions = React.memo(
       [formattedValue]
     );
     const handleExpand = useCallback(
-      (e: React.MouseEvent) => {
+      (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
-        onExpand();
+        const cellElement = e.currentTarget.closest<HTMLElement>('[role="gridcell"]');
+        if (cellElement) onExpand(cellElement);
       },
       [onExpand]
     );
@@ -988,7 +989,7 @@ const VirtualRow = React.memo(
     HTMLDivElement,
     {
       row: Row<DataTableRecord>;
-      virtualRow: VirtualItem;
+      rowIndex: number;
       isExpanded: boolean;
       isSelected: boolean;
       indicatorColor: string | undefined;
@@ -996,17 +997,17 @@ const VirtualRow = React.memo(
       isAutoHeight: boolean;
       styles: ReturnType<typeof getTanStackDataGridStyles>;
       focusedColIndex: number | null;
-      rowIndex: number;
       onFilter?: UnifiedDataTableProps['onFilter'];
       setPopoverState?: (state: CellPopoverState | null) => void;
       findTerm?: string;
-      findActiveMatch?: FindMatch | null;
+      /** Column id of the active find match when it is in this row. */
+      findActiveColumnId?: string;
       getColumnStyle: TanStackColumnLayout['getColumnStyle'];
     }
   >(function VirtualRow(
     {
       row,
-      virtualRow,
+      rowIndex,
       isExpanded,
       isSelected,
       indicatorColor,
@@ -1014,11 +1015,10 @@ const VirtualRow = React.memo(
       isAutoHeight,
       styles,
       focusedColIndex,
-      rowIndex,
       onFilter,
       setPopoverState,
       findTerm,
-      findActiveMatch,
+      findActiveColumnId,
       getColumnStyle,
     },
     ref
@@ -1027,25 +1027,25 @@ const VirtualRow = React.memo(
     return (
       <div
         ref={ref}
-        data-index={virtualRow.index}
-        style={{ height: isAutoHeight ? undefined : rowHeight, width: '100%' }}
+        data-index={rowIndex}
+        css={[
+          styles.row,
+          isAutoHeight && styles.rowAutoHeight,
+          isExpanded && styles.rowExpanded,
+          isSelected && styles.selectedRow,
+        ]}
+        style={{
+          height: isAutoHeight ? undefined : rowHeight,
+          borderLeft: indicatorColor ? `3px solid ${indicatorColor}` : undefined,
+        }}
         role="row"
         aria-rowindex={rowIndex + 2}
         aria-selected={isSelected}
         tabIndex={-1}
       >
-        <div
-          css={[
-            styles.row,
-            isAutoHeight && styles.rowAutoHeight,
-            isExpanded && styles.rowExpanded,
-            isSelected && styles.selectedRow,
-          ]}
-          style={{
-            borderLeft: indicatorColor ? `3px solid ${indicatorColor}` : undefined,
-          }}
-        >
-          {cells.map((cell, colIdx) => (
+        {cells.map((cell, colIdx) => {
+          const meta = cell.column.columnDef.meta;
+          return (
             <VirtualCell
               key={cell.id}
               cell={cell}
@@ -1055,13 +1055,13 @@ const VirtualRow = React.memo(
               onFilter={onFilter}
               setPopoverState={setPopoverState}
               findTerm={findTerm}
-              findActiveMatch={findActiveMatch}
-              rowIndex={virtualRow.index}
+              isActiveMatch={findActiveColumnId === cell.column.id}
               getColumnStyle={getColumnStyle}
-              isRowSelected={isSelected}
+              isRowSelected={Boolean(meta?.isSelect) && isSelected}
+              isRowExpanded={Boolean(meta?.isControl) && isExpanded}
             />
-          ))}
-        </div>
+          );
+        })}
       </div>
     );
   })
@@ -1078,8 +1078,7 @@ const VirtualCell = React.memo(
     onFilter,
     setPopoverState,
     findTerm,
-    findActiveMatch,
-    rowIndex,
+    isActiveMatch,
     getColumnStyle,
     isRowSelected,
   }: {
@@ -1090,26 +1089,23 @@ const VirtualCell = React.memo(
     onFilter?: UnifiedDataTableProps['onFilter'];
     setPopoverState?: (state: CellPopoverState | null) => void;
     findTerm?: string;
-    findActiveMatch?: FindMatch | null;
-    rowIndex?: number;
+    isActiveMatch: boolean;
     getColumnStyle: TanStackColumnLayout['getColumnStyle'];
     isRowSelected: boolean;
+    /** Only used to re-render the control cell, whose content reads the expanded doc from a ref. */
+    isRowExpanded: boolean;
   }) => {
-    const isControl = cell.column.columnDef.meta?.isControl;
-    const isSelect = cell.column.columnDef.meta?.isSelect;
-    const isSummary = cell.column.columnDef.meta?.isSummary;
-    const isPinned = Boolean(cell.column.getIsPinned());
-    const isLastLeftPinned =
-      cell.column.getIsPinned() === 'left' && cell.column.getIsLastColumn('left');
+    // Cell actions are only mounted while the cell is hovered or focused to keep the DOM small.
+    const [isHovered, setIsHovered] = useState(false);
+    const [hasFocusWithin, setHasFocusWithin] = useState(false);
+    const { meta } = cell.column.columnDef;
+    const isControl = meta?.isControl;
+    const isSelect = meta?.isSelect;
+    const isSummary = meta?.isSummary;
+    const pinned = cell.column.getIsPinned();
+    const isPinned = Boolean(pinned);
+    const isLastLeftPinned = pinned === 'left' && cell.column.getIsLastColumn('left');
     const pinStyle = getColumnPinningStyle(cell.column);
-    const columnStyle = {
-      ...getColumnStyle({
-        id: cell.column.id,
-        isSummary,
-        isTimestamp: cell.column.columnDef.meta?.isTimestamp,
-      }),
-      ...pinStyle,
-    };
 
     if (isControl || isSelect) {
       return (
@@ -1133,6 +1129,15 @@ const VirtualCell = React.memo(
         </div>
       );
     }
+
+    const columnStyle = {
+      ...getColumnStyle({
+        id: cell.column.id,
+        isSummary,
+        isTimestamp: meta?.isTimestamp,
+      }),
+      ...pinStyle,
+    };
 
     if (isSummary) {
       const openSummaryPopover = (cellEl: HTMLElement) => {
@@ -1178,23 +1183,19 @@ const VirtualCell = React.memo(
       );
     }
 
-    const fieldName = cell.column.columnDef.meta?.fieldName;
+    const fieldName = meta?.fieldName;
     const value = cell.getValue();
-    const colId = cell.column.id;
-    const rowId = cell.row.original.id;
-    const formatted = cell.column.columnDef.meta?.formatValue?.(value) ?? formatCellValue(value);
-    const isActiveHighlight =
-      findTerm &&
-      findActiveMatch &&
-      findActiveMatch.rowIndex === rowIndex &&
-      findActiveMatch.fieldName === colId;
+    const showActions = Boolean(fieldName) && (isHovered || hasFocusWithin);
+    const getFormattedValue = () => meta?.formatValue?.(value) ?? formatCellValue(value);
+    // Text formatting is only needed for highlighting and actions; skip it for idle cells.
+    const formatted = findTerm || showActions ? getFormattedValue() : undefined;
 
     const openCellPopover = (cellEl: HTMLElement) => {
       if (fieldName && setPopoverState) {
         setPopoverState({
           fieldName,
           value,
-          formattedValue: formatted,
+          formattedValue: formatted ?? getFormattedValue(),
           cellElement: cellEl,
           cellWidth: cellEl.offsetWidth,
         });
@@ -1214,9 +1215,15 @@ const VirtualCell = React.memo(
         ]}
         style={columnStyle}
         role="gridcell"
-        data-row-id={rowId}
-        data-col-id={colId}
         tabIndex={0}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setHasFocusWithin(true)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+            setHasFocusWithin(false);
+          }
+        }}
         onClick={(e) => openCellPopover(e.currentTarget)}
         onKeyDown={(e) => {
           if (e.key === keys.ENTER || e.key === keys.SPACE) {
@@ -1225,28 +1232,30 @@ const VirtualCell = React.memo(
           }
         }}
       >
-        <div css={isAutoHeight ? styles.cellContentAuto : styles.cellContent}>
-          {findTerm ? (
+        <div
+          css={[
+            isAutoHeight ? styles.cellContentAuto : styles.cellContent,
+            meta?.isTimestamp && styles.timestampCell,
+          ]}
+        >
+          {findTerm && formatted !== undefined ? (
             <HighlightedText
               text={formatted}
               term={findTerm}
-              isActive={Boolean(isActiveHighlight)}
+              isActive={isActiveMatch}
               styles={styles}
             />
           ) : (
             flexRender(cell.column.columnDef.cell, cell.getContext())
           )}
         </div>
-        {fieldName && (
+        {showActions && fieldName && formatted !== undefined && (
           <CellActions
             fieldName={fieldName}
             value={value}
             formattedValue={formatted}
             onFilter={onFilter}
-            onExpand={() => {
-              const el = document.querySelector(`[data-row-id="${rowId}"][data-col-id="${colId}"]`);
-              if (el) openCellPopover(el as HTMLElement);
-            }}
+            onExpand={openCellPopover}
             styles={styles}
           />
         )}
@@ -1254,6 +1263,219 @@ const VirtualCell = React.memo(
     );
   }
 );
+
+// ── Leading control cell: expand toggle + profile-provided row controls ──
+const RowControlsCell = React.memo(function RowControlsCell({
+  record,
+  rowIndex,
+  isExpanded,
+  rowAdditionalLeadingControls,
+  onToggleExpand,
+}: {
+  record: DataTableRecord;
+  rowIndex: number;
+  isExpanded: boolean;
+  rowAdditionalLeadingControls: UnifiedDataTableProps['rowAdditionalLeadingControls'];
+  onToggleExpand: (record: DataTableRecord) => void;
+}) {
+  const rowProps = useMemo(() => ({ record, rowIndex }), [record, rowIndex]);
+
+  // Stable per row so controls are not remounted on every render.
+  const Control = useMemo<React.FC<RowControlProps>>(
+    () =>
+      function RowControl({
+        color,
+        'data-test-subj': dataTestSubj,
+        disabled,
+        iconType,
+        label,
+        onClick,
+        tooltipContent,
+        ...controlProps
+      }) {
+        const button = (
+          <EuiButtonIcon
+            {...controlProps}
+            aria-label={label}
+            color={color ?? 'text'}
+            data-test-subj={dataTestSubj}
+            disabled={disabled}
+            iconSize="s"
+            iconType={iconType}
+            size="xs"
+            onClick={() => onClick?.(rowProps)}
+          />
+        );
+
+        return tooltipContent ? <EuiToolTip content={tooltipContent}>{button}</EuiToolTip> : button;
+      },
+    [rowProps]
+  );
+
+  const availableControls =
+    rowAdditionalLeadingControls?.filter((control) => control.isAvailable?.(rowProps) ?? true) ??
+    [];
+
+  return (
+    <>
+      <EuiToolTip content="Toggle document details" disableScreenReaderOutput>
+        <EuiButtonIcon
+          size="xs"
+          iconSize="s"
+          aria-label="Toggle document details"
+          data-test-subj="docTableExpandToggleColumn"
+          onClick={() => onToggleExpand(record)}
+          color={isExpanded ? 'primary' : 'text'}
+          iconType={isExpanded ? 'minimize' : 'maximize'}
+          isSelected={isExpanded}
+        />
+      </EuiToolTip>
+      {availableControls.map((control) => (
+        <React.Fragment key={control.id}>{control.render(Control, rowProps)}</React.Fragment>
+      ))}
+    </>
+  );
+});
+
+type RowVirtualizer = Virtualizer<HTMLDivElement, Element>;
+
+interface TanStackGridBodyProps {
+  scrollRef: React.MutableRefObject<HTMLDivElement | null>;
+  virtualizerRef: React.MutableRefObject<RowVirtualizer | null>;
+  header: React.ReactNode;
+  overlay: React.ReactNode;
+  tableRows: Array<Row<DataTableRecord>>;
+  rowHeight: number;
+  isAutoRowHeight: boolean;
+  scrollKey: string;
+  totalWidth: number | '100%';
+  styles: ReturnType<typeof getTanStackDataGridStyles>;
+  selectedRows: Set<string>;
+  expandedDocId: string | undefined;
+  getRowIndicator?: UnifiedDataTableProps['getRowIndicator'];
+  focusedCell: { row: number; col: number } | null;
+  onFilter?: UnifiedDataTableProps['onFilter'];
+  setPopoverState: SetCellPopoverState;
+  findTerm: string;
+  findActiveMatch: FindMatch | null;
+  getColumnStyle: TanStackColumnLayout['getColumnStyle'];
+  colCount: number;
+  onKeyDown: (event: React.KeyboardEvent) => void;
+}
+
+/**
+ * Owns the row virtualizer so scroll-driven re-renders stay inside the grid body
+ * instead of re-rendering the toolbar, header chrome, pagination, and footer.
+ */
+const TanStackGridBody = React.memo(function TanStackGridBody({
+  scrollRef,
+  virtualizerRef,
+  header,
+  overlay,
+  tableRows,
+  rowHeight,
+  isAutoRowHeight,
+  scrollKey,
+  totalWidth,
+  styles,
+  selectedRows,
+  expandedDocId,
+  getRowIndicator,
+  focusedCell,
+  onFilter,
+  setPopoverState,
+  findTerm,
+  findActiveMatch,
+  getColumnStyle,
+  colCount,
+  onKeyDown,
+}: TanStackGridBodyProps) {
+  const { euiTheme } = useEuiTheme();
+  const estimateSize = useCallback(() => rowHeight, [rowHeight]);
+  // Must be stable: a new function invalidates the virtualizer's measurement cache every render.
+  const getItemKey = useCallback(
+    (index: number) => tableRows[index]?.original.id ?? index,
+    [tableRows]
+  );
+
+  const rowVirtualizer = useVirtualizer({
+    count: tableRows.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize,
+    overscan: OVERSCAN,
+    initialOffset: scrollPositionCache.get(scrollKey) ?? 0,
+    getItemKey,
+  });
+  virtualizerRef.current = rowVirtualizer;
+
+  useEffect(() => {
+    rowVirtualizer.measure();
+  }, [rowHeight, isAutoRowHeight, rowVirtualizer]);
+
+  useEffect(() => {
+    if (findActiveMatch) {
+      rowVirtualizer.scrollToIndex(findActiveMatch.rowIndex, { align: 'center' });
+    }
+  }, [findActiveMatch, rowVirtualizer]);
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
+  return (
+    <div
+      ref={scrollRef}
+      css={styles.scrollContainer}
+      role="grid"
+      aria-rowcount={tableRows.length + 1}
+      aria-colcount={colCount}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+    >
+      {header}
+
+      {/* Virtual body */}
+      <div css={styles.virtualOuter} style={{ height: rowVirtualizer.getTotalSize() }}>
+        <div
+          css={styles.virtualInner}
+          style={{
+            transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
+            width: totalWidth,
+          }}
+        >
+          {virtualItems.map(({ index }) => {
+            const row = tableRows[index];
+            const record = row.original;
+
+            return (
+              <VirtualRow
+                key={row.id}
+                // Fixed-height rows never change size, so skip per-row ResizeObserver measuring.
+                ref={isAutoRowHeight ? rowVirtualizer.measureElement : undefined}
+                row={row}
+                rowIndex={index}
+                isExpanded={expandedDocId === record.id}
+                isSelected={selectedRows.has(record.id)}
+                indicatorColor={getRowIndicator?.(record, euiTheme)?.color}
+                rowHeight={rowHeight}
+                isAutoHeight={isAutoRowHeight}
+                styles={styles}
+                focusedColIndex={focusedCell?.row === index ? focusedCell.col : null}
+                onFilter={onFilter}
+                setPopoverState={setPopoverState}
+                findTerm={findTerm}
+                findActiveColumnId={
+                  findActiveMatch?.rowIndex === index ? findActiveMatch.fieldName : undefined
+                }
+                getColumnStyle={getColumnStyle}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      {overlay}
+    </div>
+  );
+});
 
 const SummaryCellContent = React.memo(
   ({
@@ -1812,6 +2034,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     );
     const toggleExpandDocRef = useRef(toggleExpandDoc);
     toggleExpandDocRef.current = toggleExpandDoc;
+    const onToggleExpandDoc = useCallback(
+      (doc: DataTableRecord) => toggleExpandDocRef.current(doc),
+      []
+    );
 
     // When the document view is rendered externally, we need to provide some metadata
     // to the consumer to allow them to properly render the doc viewer component
@@ -1974,71 +2200,14 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         meta: { isControl: true },
         cell: function ExpandCell({ row }) {
           const record = row.original;
-          const isExp = expandedDocRef.current?.id === record.id;
-          const rowProps = { record, rowIndex: row.index };
-          const availableControls =
-            rowAdditionalLeadingControls?.filter(
-              (control) => control.isAvailable?.(rowProps) ?? true
-            ) ?? [];
-          const Control: React.FC<RowControlProps> = ({
-            color,
-            'data-test-subj': dataTestSubj,
-            disabled,
-            iconType,
-            label,
-            onClick,
-            tooltipContent,
-            ...controlProps
-          }) => {
-            const button = (
-              <EuiButtonIcon
-                {...controlProps}
-                aria-label={label}
-                color={color ?? 'text'}
-                data-test-subj={dataTestSubj}
-                disabled={disabled}
-                iconSize="s"
-                iconType={iconType}
-                size="xs"
-                onClick={() => onClick?.(rowProps)}
-              />
-            );
-
-            return tooltipContent ? (
-              <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>
-            ) : (
-              button
-            );
-          };
-
           return (
-            <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center" wrap={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content="Toggle document details" disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    size="xs"
-                    iconSize="s"
-                    aria-label="Toggle document details"
-                    data-test-subj="docTableExpandToggleColumn"
-                    onClick={() => toggleExpandDocRef.current(record)}
-                    onKeyDown={(event: React.KeyboardEvent) => {
-                      if (event.key === keys.ENTER || event.key === keys.SPACE) {
-                        event.preventDefault();
-                        toggleExpandDocRef.current(record);
-                      }
-                    }}
-                    color={isExp ? 'primary' : 'text'}
-                    iconType={isExp ? 'minimize' : 'maximize'}
-                    isSelected={isExp}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              {availableControls.map((control) => (
-                <EuiFlexItem key={control.id} grow={false}>
-                  {control.render(Control, rowProps)}
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <RowControlsCell
+              record={record}
+              rowIndex={row.index}
+              isExpanded={expandedDocRef.current?.id === record.id}
+              rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+              onToggleExpand={onToggleExpandDoc}
+            />
           );
         },
       });
@@ -2080,22 +2249,18 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             id: timeFieldName,
             accessorFn: (r) => r.flattened[timeFieldName],
             header: timeFieldName,
-            size: getTimeColumnWidth(timeFieldName, columnSizing, settings),
+            size: getTimeColumnWidth(timeFieldName, {}, settings),
             minSize: MIN_COL_WIDTH,
             enableSorting: false,
             meta: { isTimestamp: true, fieldName: timeFieldName, formatValue: formatTimeValue },
             cell: function TimeCell({ getValue, row }) {
-              return (
-                <span css={styles.timestampCell}>
-                  {formatFieldValueReact({
-                    value: getValue(),
-                    hit: row.original.raw,
-                    fieldFormats,
-                    dataView,
-                    field: timeField,
-                  })}
-                </span>
-              );
+              return formatFieldValueReact({
+                value: getValue(),
+                hit: row.original.raw,
+                fieldFormats,
+                dataView,
+                field: timeField,
+              });
             },
           });
         }
@@ -2135,23 +2300,19 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             accessorFn: (r) => r.flattened[colId],
             header: settings?.columns?.[colId]?.display ?? colId,
             size: isTimeField
-              ? getTimeColumnWidth(timeFieldName, columnSizing, settings)
+              ? getTimeColumnWidth(timeFieldName, {}, settings)
               : settings?.columns?.[colId]?.width ?? DEFAULT_COL_WIDTH,
             minSize: MIN_COL_WIDTH,
             enableSorting: columnIsSortable,
             meta: { isTimestamp: isTimeField, fieldName: colId, formatValue },
             cell: function DataCell({ getValue, row }) {
-              return (
-                <div css={isTimeField ? styles.timestampCell : undefined}>
-                  {formatFieldValueReact({
-                    value: getValue(),
-                    hit: row.original.raw,
-                    fieldFormats,
-                    dataView,
-                    field: dataViewField,
-                  })}
-                </div>
-              );
+              return formatFieldValueReact({
+                value: getValue(),
+                hit: row.original.raw,
+                fieldFormats,
+                dataView,
+                field: dataViewField,
+              });
             },
           });
         }
@@ -2168,13 +2329,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       settings,
       shouldShowFieldHandler,
       showTimeCol,
-      styles,
       isPlainRecord,
-      columnSizing,
       timeFieldName,
       rowAdditionalLeadingControls,
       headerRowHeightLines,
       actionsColumnWidth,
+      onToggleExpandDoc,
     ]);
 
     const dataColumns = useMemo<TanStackDataColumnDescriptor[]>(() => {
@@ -2329,23 +2489,8 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     }, [rowHeightLines, densityCfg, isAutoRowHeight, isSummaryMode]);
     const totalColCount = table.getVisibleLeafColumns().length;
 
-    const getRowHeight = useCallback((): number => {
-      return baseRowHeight;
-    }, [baseRowHeight]);
-
-    // ── Virtualizer ──
-    const rowVirtualizer = useVirtualizer({
-      count: tableRows.length,
-      getScrollElement: () => parentRef.current,
-      estimateSize: getRowHeight,
-      overscan: OVERSCAN,
-      initialOffset: scrollPositionCache.get(scrollKey) ?? 0,
-      getItemKey: (index) => pageRows[index]?.id ?? index,
-    });
-
-    useEffect(() => {
-      rowVirtualizer.measure();
-    }, [dataGridDensity, rowHeightLines, rowVirtualizer]);
+    // Filled by TanStackGridBody, which owns the virtualizer.
+    const virtualizerRef = useRef<RowVirtualizer | null>(null);
 
     useEffect(() => {
       const scrollEl = parentRef.current;
@@ -2379,13 +2524,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       wrapper.addEventListener('keydown', handler);
       return () => wrapper.removeEventListener('keydown', handler);
     }, []);
-
-    // Scroll to active find match
-    useEffect(() => {
-      if (findActiveMatch) {
-        rowVirtualizer.scrollToIndex(findActiveMatch.rowIndex, { align: 'center' });
-      }
-    }, [findActiveMatch, rowVirtualizer]);
 
     // ── Keyboard navigation ──
     const handleGridKeyDown = useCallback(
@@ -2445,12 +2583,11 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         }
 
         setFocusedCell({ row: r, col: c });
-        rowVirtualizer.scrollToIndex(r, { align: 'auto' });
+        virtualizerRef.current?.scrollToIndex(r, { align: 'auto' });
       },
-      [tableRows.length, totalColCount, rowVirtualizer]
+      [tableRows.length, totalColCount]
     );
 
-    const virtualItems = rowVirtualizer.getVirtualItems();
     const canRenderDocumentView = Boolean(setExpandedDoc && renderDocumentView);
     const isLoading = loadingState === DataLoadingState.loading;
     const isEmpty = !isLoading && displayedRows.length === 0;
@@ -3105,17 +3242,27 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               data-test-subj="discoverNoResults"
             />
           ) : (
-            <div
-              ref={parentRef}
-              css={styles.scrollContainer}
-              role="grid"
-              aria-rowcount={tableRows.length + 1}
-              aria-colcount={totalColCount}
-              tabIndex={0}
+            <TanStackGridBody
+              scrollRef={parentRef}
+              virtualizerRef={virtualizerRef}
+              tableRows={tableRows}
+              rowHeight={baseRowHeight}
+              isAutoRowHeight={isAutoRowHeight}
+              scrollKey={scrollKey}
+              totalWidth={totalWidth}
+              styles={styles}
+              selectedRows={selectedRows}
+              expandedDocId={currentExpandedDoc?.id}
+              getRowIndicator={getRowIndicator}
+              focusedCell={focusedCell}
+              onFilter={onFilterRef.current}
+              setPopoverState={setPopoverState}
+              findTerm={findTerm}
+              findActiveMatch={findActiveMatch}
+              getColumnStyle={getColumnStyle}
+              colCount={totalColCount}
               onKeyDown={handleGridKeyDown}
-            >
-              {/* Header */}
-              {headerGroupsRaw.map((headerGroup) => (
+              header={headerGroupsRaw.map((headerGroup) => (
                 <div
                   key={headerGroup.id}
                   css={styles.headerRow}
@@ -3337,65 +3484,24 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                   })}
                 </div>
               ))}
-
-              {/* Virtual body */}
-              <div css={styles.virtualOuter} style={{ height: rowVirtualizer.getTotalSize() }}>
-                <div
-                  css={styles.virtualInner}
-                  style={{
-                    transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
-                    width: totalWidth,
-                  }}
-                >
-                  {virtualItems.map((virtualRow) => {
-                    const row = tableRows[virtualRow.index];
-                    const record = row.original;
-
-                    const isExpanded = currentExpandedDoc?.id === record.id;
-                    const isSelected = selectedRows.has(record.id);
-                    const indicator = getRowIndicator?.(record, euiTheme);
-
-                    return (
-                      <VirtualRow
-                        key={row.id}
-                        ref={rowVirtualizer.measureElement}
-                        row={row}
-                        virtualRow={virtualRow}
-                        isExpanded={isExpanded}
-                        isSelected={isSelected}
-                        indicatorColor={indicator?.color}
-                        rowHeight={baseRowHeight}
-                        isAutoHeight={isAutoRowHeight}
-                        styles={styles}
-                        focusedColIndex={
-                          focusedCell?.row === virtualRow.index ? focusedCell.col : null
-                        }
-                        rowIndex={virtualRow.index}
-                        onFilter={onFilterRef.current}
-                        setPopoverState={setPopoverState}
-                        findTerm={findTerm}
-                        findActiveMatch={findActiveMatch}
-                        getColumnStyle={getColumnStyle}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-
-              {isLoading && (
-                <div css={styles.loadingOverlay}>
-                  <EuiLoadingSpinner size="xl" />
-                </div>
-              )}
-              {isLoadingMore && (
-                <EuiProgress
-                  size="xs"
-                  color="accent"
-                  position="absolute"
-                  css={{ bottom: 0, left: 0, right: 0, top: 'auto' }}
-                />
-              )}
-            </div>
+              overlay={
+                <>
+                  {isLoading && (
+                    <div css={styles.loadingOverlay}>
+                      <EuiLoadingSpinner size="xl" />
+                    </div>
+                  )}
+                  {isLoadingMore && (
+                    <EuiProgress
+                      size="xs"
+                      color="accent"
+                      position="absolute"
+                      css={{ bottom: 0, left: 0, right: 0, top: 'auto' }}
+                    />
+                  )}
+                </>
+              }
+            />
           )}
 
           {canRenderDocumentView &&
