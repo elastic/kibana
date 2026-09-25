@@ -230,7 +230,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     }
     isConvSwitchRef.current = true;
     draftHydratedRef.current = false;
-  }, [agentId, conversationId]);
+  }, [agentId, conversationId, spaceId, sessionTag]);
 
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
@@ -259,7 +259,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       return;
     }
     draftHydratedRef.current = true;
-    if (draft) {
+    if (draft && !lastEditorContentRef.current) {
       messageEditorController.setContent(draft);
     }
   }, [
@@ -307,20 +307,22 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       clearTimeout(saveDraftDebounceRef.current);
       saveDraftDebounceRef.current = null;
     }
-    lastEditorContentRef.current = '';
 
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
+          lastEditorContentRef.current = '';
           clearDraft();
           messageEditorController.clear();
           onSubmit?.();
         })
         .catch((sendError: unknown) => {
+          lastEditorContentRef.current = content;
           addErrorToast({ title: formatAgentBuilderErrorMessage(sendError) });
         });
       return;
     }
+    lastEditorContentRef.current = '';
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
