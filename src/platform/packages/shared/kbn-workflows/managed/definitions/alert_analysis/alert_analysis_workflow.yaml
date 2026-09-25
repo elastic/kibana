@@ -1638,7 +1638,7 @@ steps:
                     conversation_id: "{{ variables.investigation_conversation_id }}"
                     trigger_mode: "never"
                     input: |-
-                      🤖 **Alert Analysis** — Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts. These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.
+                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts. These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.
 
                       [View execution]({{ execution.url }})
 
@@ -1775,7 +1775,7 @@ steps:
                     conversation_id: "{{ variables.investigation_conversation_id }}"
                     trigger_mode: "never"
                     input: >-
-                      🤖 **Alert Analysis** — Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete
+                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete
                       ({{ foreach.item | size }} alert(s)):
                       {{ variables.batch_tp_count }} true positive,
                       {{ variables.batch_fp_count }} false positive,
