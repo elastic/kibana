@@ -1214,7 +1214,10 @@ describe('ClusterClient', () => {
       // Client authentication that rode in with the token speaks for it, so a valid attestation
       // changes nothing.
       expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
-        expect.objectContaining({ credentialSource: 'inbound', relayedClientAuthentication: inbound })
+        expect.objectContaining({
+          credentialSource: 'inbound',
+          relayedClientAuthentication: inbound,
+        })
       );
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
