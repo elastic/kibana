@@ -102,7 +102,6 @@ export const EscalationHeaderSlot = ({
   refetchConversation,
 }: EscalationHeaderSlotProps) => {
   const { status, assigneeUids } = conversationToEscalationHeader(conversation);
-  // linkedInvestigationIds is used by EscalationOverviewSlot, not here.
 
   const assigneesNode = renderAssignees
     ? renderAssignees({

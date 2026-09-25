@@ -255,10 +255,11 @@ export class EscalationsService {
 
     const resolved = await client.bulkGet(linkedIds);
 
-    // Preserve stored order; silently omit ids that bulkGet couldn't resolve.
+    // Preserve stored order; silently omit ids that bulkGet couldn't resolve or that resolved to
+    // a non-investigation conversation (stale/corrupt linked_investigations entries).
     const results: LinkedInvestigationSummary[] = linkedIds.flatMap((id) => {
       const conv = resolved.get(id);
-      if (!conv) return [];
+      if (!conv || conv.template_id !== INVESTIGATION_TEMPLATE_ID) return [];
       const rawStatus = conv.metadata?.status;
       const status: 'open' | 'closed' =
         typeof rawStatus === 'string' && rawStatus === 'closed' ? 'closed' : 'open';

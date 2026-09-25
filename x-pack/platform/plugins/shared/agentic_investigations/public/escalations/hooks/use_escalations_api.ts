@@ -150,6 +150,9 @@ export const useLinkedInvestigations = ({
     // status and title changes on existing linked investigations are reflected without
     // waiting for the linked-IDs list itself to change.
     refetchInterval: 5000,
+    // Keep the previous list visible during the brief re-fetch triggered by a linked-id change
+    // (e.g. a new investigation was just added), avoiding a skeleton flash.
+    keepPreviousData: true,
     retry: retryOnTransientError,
   });
 

@@ -202,9 +202,8 @@ export class AlertZeroPublicPlugin
       >;
     });
 
-    const { manageEscalations: canManageEscalations } = getAgenticInvestigationsCapabilities(
-      core.application.capabilities
-    );
+    const { manageEscalations: canManageEscalations, showEscalations: canShowEscalations } =
+      getAgenticInvestigationsCapabilities(core.application.capabilities);
 
     // ---------------------------------------------------------------------------
     // renderAssignees render prop — shared by both templates
@@ -248,7 +247,7 @@ export class AlertZeroPublicPlugin
       name: ESCALATION_TEMPLATE_NAME,
       icon: 'warning',
       renderAssignees,
-      renderLinkedInvestigations,
+      renderLinkedInvestigations: canShowEscalations ? renderLinkedInvestigations : undefined,
     });
 
     return {};

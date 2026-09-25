@@ -202,7 +202,7 @@ export const registerEscalationTemplateUI = ({
 
   conversationTemplates.registerTemplateUIDefinition(
     templateId,
-    ({ openFullscreenConversation }) => ({
+    () => ({
       name,
       icon,
       tabs: [overviewTabId],

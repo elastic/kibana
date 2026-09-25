@@ -736,4 +736,27 @@ describe('EscalationsService.listLinkedInvestigations', () => {
 
     expect(result.results[0].agent_id).toBe('agent-1');
   });
+
+  it('silently drops linked ids that resolved to a non-investigation template', async () => {
+    const escalationEntry = {
+      id: 'another-escalation',
+      title: 'Nested Escalation',
+      template_id: ESCALATION_TEMPLATE_ID,
+      agent_id: 'agent-3',
+      metadata: { status: 'open' },
+    };
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'another-escalation'])),
+      bulkGet: jest.fn().mockResolvedValue(
+        new Map([
+          ['inv-a', INV_A],
+          ['another-escalation', escalationEntry],
+        ])
+      ),
+    });
+
+    const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+    expect(result.results.map((r) => r.id)).toEqual(['inv-a']);
+  });
 });
