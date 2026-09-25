@@ -16,9 +16,6 @@ import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewSource } from '@kbn/data-source';
-import * as processFetchParamsModule from '../utils/process_fetch_params';
-
-const actualProcessFetchParams = processFetchParamsModule.processFetchParams;
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
@@ -136,21 +133,19 @@ describe('useServicesBootstrap', () => {
       resolveStaleFetch = resolve;
     });
 
-    const processFetchParamsSpy = jest
-      .spyOn(processFetchParamsModule, 'processFetchParams')
-      .mockImplementation(async (args: Parameters<typeof actualProcessFetchParams>[0]) => {
-        const result = await actualProcessFetchParams(args);
-        if (args.params.searchSessionId === 'stale-area') {
-          await staleFetchGate;
-        }
-        return result;
-      });
+    processFetchParamsMock.mockImplementation(async (args) => {
+      const result = await actualProcessFetchParams(args);
+      if (args.params.searchSessionId === 'stale-area') {
+        await staleFetchGate;
+      }
+      return result;
+    });
 
     let staleFetchDone = false;
     const staleFetch = hook.result.current.api.fetch({
       ...baseFetchParams,
       searchSessionId: 'stale-area',
-    }) as unknown as Promise<void>;
+    });
     void staleFetch.then(() => {
       staleFetchDone = true;
     });
@@ -173,8 +168,5 @@ describe('useServicesBootstrap', () => {
     expect(staleFetchDone).toBe(true);
     expect(hook.result.current.fetchParams?.searchSessionId).toBe('line');
     expect(hook.result.current.lensVisService).toBe(lensVisService);
-    expect(processFetchParamsSpy).toHaveBeenCalled();
-
-    processFetchParamsSpy.mockRestore();
   });
 });

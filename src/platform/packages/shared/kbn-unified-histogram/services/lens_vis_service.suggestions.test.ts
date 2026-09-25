@@ -794,7 +794,7 @@ describe('LensVisService suggestions', () => {
           ...histogramESQLSuggestionMock,
           title: 'Line',
           visualizationState: {
-            ...(histogramESQLSuggestionMock.visualizationState as object),
+            ...histogramESQLSuggestionMock.visualizationState,
             preferredSeriesType: 'line',
           },
         },
