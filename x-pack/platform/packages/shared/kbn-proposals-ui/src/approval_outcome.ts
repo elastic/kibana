@@ -18,11 +18,20 @@ export type ApprovalOutcomeStatus = 'applied' | 'declined';
  *
  * `'applying'` covers both the approve call itself being in flight and, once that call has
  * returned, the action it started still executing — approving only resumes the gate workflow,
- * whose post-gate steps run the action and write the real outcome afterward. `'failed'` is that
- * outcome read back from the proposal's own `status`, never asserted optimistically: nothing
- * client-side knows an action failed until the server says so.
+ * whose post-gate steps run the action and write the real outcome afterward. `'failed'` and
+ * `'no_action'` are both read back from the proposal's own `status`, never asserted
+ * optimistically: nothing client-side knows an action failed, or that a proposal carried none to
+ * run, until the server says so. `'no_action'` is distinct from `'applied'` for exactly that
+ * reason — an approved proposal with nothing to run never executes anything, so folding it into
+ * `'applied'` would claim an automated action succeeded when none was ever going to happen.
  */
-export type ApprovalPhase = 'pending' | 'applying' | 'declining' | ApprovalOutcomeStatus | 'failed';
+export type ApprovalPhase =
+  | 'pending'
+  | 'applying'
+  | 'declining'
+  | ApprovalOutcomeStatus
+  | 'failed'
+  | 'no_action';
 
 export interface ApprovalOutcomeBadge {
   color: EuiBadgeProps['color'];
@@ -79,6 +88,13 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         label: APPROVAL_MODAL_TRANSLATIONS.failedBadge,
         isLoading: false,
       };
+    case 'no_action':
+      return {
+        color: 'default',
+        iconType: 'check',
+        label: APPROVAL_MODAL_TRANSLATIONS.noActionBadge,
+        isLoading: false,
+      };
     default:
       return undefined;
   }
@@ -118,6 +134,12 @@ export const getApprovalOutcomeBanner = (
       return {
         color: 'danger',
         title: APPROVAL_MODAL_TRANSLATIONS.failedBannerTitle,
+        isLoading: false,
+      };
+    case 'no_action':
+      return {
+        color: 'primary',
+        title: APPROVAL_MODAL_TRANSLATIONS.noActionBannerTitle,
         isLoading: false,
       };
     default:

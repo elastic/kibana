@@ -35,6 +35,14 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   failedBadge: i18n.translate('xpack.proposals.approvalModal.failedBadge', {
     defaultMessage: 'Failed',
   }),
+  /**
+   * Distinct from `appliedBadge`: an approved proposal that carries no action never runs
+   * anything, so labeling it "Applied" would claim an automated action succeeded when none
+   * was ever going to happen.
+   */
+  noActionBadge: i18n.translate('xpack.proposals.approvalModal.noActionBadge', {
+    defaultMessage: 'Approved',
+  }),
   applyingBadge: i18n.translate('xpack.proposals.approvalModal.applyingBadge', {
     defaultMessage: 'Applying',
   }),
@@ -64,6 +72,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   failedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.failedTitle', {
     defaultMessage: 'Action failed',
+  }),
+  noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
+    defaultMessage: 'Approved — no action to run',
   }),
   inProgressHint: i18n.translate('xpack.proposals.approvalModal.outcome.inProgressHint', {
     defaultMessage: 'Typically takes 3-5 minutes.',

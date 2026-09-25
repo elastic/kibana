@@ -180,6 +180,7 @@ describe('getProposalDecision', () => {
     ['executing', 'applying'],
     ['succeeded', 'applied'],
     ['failed', 'failed'],
+    ['no_action', 'no_action'],
   ] as const)('maps an approved decision with status %s to %s', (status, expected) => {
     expect(
       getProposalDecision(

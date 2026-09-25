@@ -110,7 +110,11 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
 /**
  * Approving only resumes the gate workflow — the action it starts still runs afterward, so a
  * `decision: 'approved'` proposal can read back `executing` or `failed` as well as `succeeded`.
- * Declining has no action to run, so it settles as soon as it is decided.
+ * Declining has no action to run, so it settles as soon as it is decided — `no_action` covers
+ * that case too, but `'declined'` (the branch above) already accounts for every non-approved
+ * decision regardless of status, so this only ever sees `no_action` for an *approved* proposal
+ * that simply carried no action to run — a distinct outcome from `'applied'`, which claims one
+ * ran and succeeded.
  */
 const approvedStatusFor = (proposal: ApprovalProposal): Exclude<ApprovalPhase, 'pending'> => {
   if (proposal.decision !== 'approved') {
@@ -121,6 +125,9 @@ const approvedStatusFor = (proposal: ApprovalProposal): Exclude<ApprovalPhase, '
   }
   if (proposal.status === 'pending' || proposal.status === 'executing') {
     return 'applying';
+  }
+  if (proposal.status === 'no_action') {
+    return 'no_action';
   }
   return 'applied';
 };

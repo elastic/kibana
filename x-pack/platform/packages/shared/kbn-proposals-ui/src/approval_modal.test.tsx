@@ -229,6 +229,24 @@ describe('ApprovalModal', () => {
     expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
   });
 
+  it('shows Approved rather than Applied for an approved proposal that carried no action to run', () => {
+    // `no_action` covers a proposal with nothing to run at all — distinct from `applied`, which
+    // claims an automated action actually ran and succeeded.
+    renderModal({
+      proposal: {
+        ...mockProposal,
+        decision: 'approved',
+        decidedBy: { fullName: 'Ava', username: 'ava', email: null },
+        decidedAt: '2024-01-01T17:20:00.000Z',
+        status: 'no_action',
+      },
+    });
+
+    expect(screen.getByText('Approved')).toBeInTheDocument();
+    expect(screen.getByText('Approved — no action to run')).toBeInTheDocument();
+    expect(screen.queryByText('Applied')).not.toBeInTheDocument();
+  });
+
   it('reverts to pending and shows an error when onConfirm rejects', async () => {
     const onConfirm = jest.fn().mockRejectedValue(new Error('The action rejected its inputs.'));
     renderModal({ onConfirm });
