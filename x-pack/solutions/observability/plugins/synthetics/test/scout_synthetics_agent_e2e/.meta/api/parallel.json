@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/rebalance.spec.ts",
-        "line": 74,
-        "column": 60
+        "line": 93,
+        "column": 5
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/rebalance.spec.ts",
-        "line": 92,
-        "column": 35
+        "line": 145,
+        "column": 5
       }
     }
   ]

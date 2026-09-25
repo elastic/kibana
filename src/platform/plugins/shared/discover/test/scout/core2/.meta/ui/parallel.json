@@ -1,5 +1,5 @@
 {
-  "sha1": "d34aeaa5c610c94bc66a0ffa543a4989e2dc81f1",
+  "sha1": "cd8c4427ac2cd898369a3d3a33b55f280cbc1bae",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 23,
+        "line": 21,
         "column": 23
       }
     },
@@ -111,7 +111,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 45,
+        "line": 43,
         "column": 32
       }
     },
@@ -131,13 +131,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 90,
+        "line": 88,
         "column": 30
       }
     },
     {
-      "id": "2f48d220f697ecb-3d33fa3bb06795d",
-      "title": "Discover — adhoc data views saving and reloading preserve the stored data view ID but saving as copy generates a new ID",
+      "id": "2f48d220f697ecb-f777cab5329cbe5",
+      "title": "Discover — adhoc data views saving preserves the data view ID but saving as copy generates a new data view ID",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 132,
+        "line": 130,
         "column": 27
       }
     },
@@ -171,8 +171,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 196,
-        "column": 16
+        "line": 168,
+        "column": 13
       }
     },
     {
@@ -191,8 +191,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 275,
-        "column": 32
+        "line": 249,
+        "column": 36
       }
     },
     {
@@ -469,28 +469,6 @@
       }
     },
     {
-      "id": "bd77256838a819d-9aa607b80d4bd6c",
-      "title": "Discover session panels on Dashboard shares one inline data view across API-created tabs after saving in Discover and reloading the dashboard",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/discover_session_dashboard_reload.spec.ts",
-        "line": 29,
-        "column": 31
-      }
-    },
-    {
       "id": "bd77256838a819d-bdff53e906569b9",
       "title": "Discover session panels on Dashboard renders linked and by-value panels after saving and reload",
       "expectedStatus": "passed",
@@ -508,8 +486,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/discover_session_dashboard_reload.spec.ts",
-        "line": 141,
-        "column": 27
+        "line": 29,
+        "column": 31
       }
     },
     {

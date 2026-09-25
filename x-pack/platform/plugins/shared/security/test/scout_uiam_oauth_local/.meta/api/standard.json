@@ -1,5 +1,5 @@
 {
-  "sha1": "b6a830169c14ffd4edc3d0e856a07beb7767d7e7",
+  "sha1": "6e32d86f815b08d9fd97d3d5afe617b6f03d69e6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -86,45 +86,6 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
         "line": 97,
         "column": 66
-      }
-    },
-    {
-      "id": "d9840c0f73ffb7f-bedfa876da9d57a",
-      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation after OAuth swap and relay OAuth ephemeral self-call stamp survives the token swap so the acceptUiamOAuth receiver skips a second exchange",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_self_call_oauth_attestation.spec.ts",
-        "line": 21,
-        "column": 9
-      }
-    },
-    {
-      "id": "d9840c0f73ffb7f-ade864b28571adf",
-      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation after OAuth swap and relay Relayed token self-call withholds the stamp and forwards the upstream secret to ES",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_self_call_oauth_attestation.spec.ts",
-        "line": 42,
-        "column": 11
-      }
-    },
-    {
-      "id": "d9840c0f73ffb7f-5fa01c332227328",
-      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation after OAuth swap and relay Relayed token self-call to an acceptUiamOAuth route is treated like an external call",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_self_call_oauth_attestation.spec.ts",
-        "line": 61,
-        "column": 17
       }
     }
   ]

@@ -1,5 +1,5 @@
 {
-  "sha1": "0b13eaafbdd16637cedc5ec0a95841beba8dcd5e",
+  "sha1": "e4597345758719fbbb06c31a127cbb3b81511a92",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -106,97 +106,6 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
         "line": 226,
         "column": 18
-      }
-    },
-    {
-      "id": "0eb73a3c441f598-876734e2c1092d5",
-      "title": "Execute Elasticsearch service account workloads uses the account identity and permits only its own roles",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 95,
-        "column": 13
-      }
-    },
-    {
-      "id": "0eb73a3c441f598-9761d752788de80",
-      "title": "Execute Elasticsearch service account workloads renews an expired token transparently on an existing scoped ES client",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 118,
-        "column": 28
-      }
-    },
-    {
-      "id": "0eb73a3c441f598-42b563a62f0aa1d",
-      "title": "Execute Elasticsearch service account workloads isolates workload bindings by space",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 130,
-        "column": 25
-      }
-    },
-    {
-      "id": "0eb73a3c441f598-b9c26581cd5cfa5",
-      "title": "Execute Elasticsearch service account workloads unbind denies renewal while leaving the issued token valid until expiry",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 160,
-        "column": 14
-      }
-    },
-    {
-      "id": "0eb73a3c441f598-259bf3df208982d",
-      "title": "Execute Elasticsearch service account workloads disable denies renewal while leaving the issued token valid until expiry",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 160,
-        "column": 14
-      }
-    },
-    {
-      "id": "0eb73a3c441f598-44b2c3fe997636b",
-      "title": "Execute Elasticsearch service account workloads delete_token denies renewal while leaving the issued token valid until expiry",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 160,
-        "column": 14
-      }
-    },
-    {
-      "id": "0eb73a3c441f598-719b03d79f6445f",
-      "title": "Execute Elasticsearch service account workloads refuses an unauthorized caller before executing a workload",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 180,
-        "column": 20
       }
     },
     {

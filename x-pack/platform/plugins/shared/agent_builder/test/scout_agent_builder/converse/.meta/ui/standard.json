@@ -1,12 +1,12 @@
 {
-  "sha1": "7754a713ceefd6312493c4d7777b335d9c7240b1",
+  "sha1": "",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "8f086a092d7d6f8-d1d9c3bf3993f6e",
-      "title": "Agent Builder — conversation error handling shows a failed turn as a collapsible error, live and after reload",
+      "id": "8f086a092d7d6f8-10cc1e9ef7f5e5c",
+      "title": "Agent Builder — conversation error handling shows error message when there is an error and allows user to retry",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/conversation_error_handling.spec.ts",
-        "line": 22,
-        "column": 25
+        "line": 26,
+        "column": 28
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/conversation_error_handling.spec.ts",
-        "line": 56,
-        "column": 17
+        "line": 70,
+        "column": 28
       }
     },
     {
@@ -48,7 +48,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/conversation_error_handling.spec.ts",
-        "line": 78,
+        "line": 91,
         "column": 13
       }
     },
@@ -64,13 +64,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/conversation_error_handling.spec.ts",
-        "line": 118,
-        "column": 24
+        "line": 134,
+        "column": 9
       }
     },
     {
-      "id": "8f086a092d7d6f8-6defea9aee9ef29",
-      "title": "Agent Builder — conversation error handling keeps the failed turn and continues the conversation on the next message",
+      "id": "8f086a092d7d6f8-7f7342ab9798952",
+      "title": "Agent Builder — conversation error handling clears the error when the user sends a new message",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/conversation_error_handling.spec.ts",
-        "line": 165,
+        "line": 184,
         "column": 13
       }
     },
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/conversation_error_handling.spec.ts",
-        "line": 201,
-        "column": 22
+        "line": 226,
+        "column": 16
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/conversation_flow.spec.ts",
-        "line": 17,
-        "column": 25
+        "line": 21,
+        "column": 28
       }
     },
     {
@@ -128,14 +128,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/conversation_flow.spec.ts",
-        "line": 29,
-        "column": 16
+        "line": 32,
+        "column": 13
       }
     },
     {
       "id": "607099166745c31-13af72ec4c5ef00",
       "title": "Agent Builder — sidebar conversation flow embeddable sidebar conversation flow",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/sidebar_conversation_flow.spec.ts",
-        "line": 19,
-        "column": 25
+        "line": 22,
+        "column": 28
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/ui/tests/sidebar_error_handling.spec.ts",
-        "line": 21,
-        "column": 25
+        "line": 25,
+        "column": 28
       }
     }
   ]

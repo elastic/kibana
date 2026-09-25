@@ -1,5 +1,5 @@
 {
-  "sha1": "c06fef524e19b35a26d48203c7dce247d8114b64",
+  "sha1": "",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/availability_gating_api.spec.ts",
-        "line": 74,
-        "column": 16
+        "line": 75,
+        "column": 30
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/availability_gating_api.spec.ts",
-        "line": 84,
-        "column": 6
+        "line": 88,
+        "column": 7
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/availability_gating_api.spec.ts",
-        "line": 96,
-        "column": 6
+        "line": 100,
+        "column": 7
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/availability_gating_api.spec.ts",
-        "line": 106,
-        "column": 27
+        "line": 108,
+        "column": 16
       }
     },
     {
@@ -324,8 +324,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 166,
-        "column": 15
+        "line": 160,
+        "column": 8
       }
     },
     {
@@ -338,8 +338,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 180,
-        "column": 41
+        "line": 173,
+        "column": 17
       }
     },
     {
@@ -352,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 198,
-        "column": 23
+        "line": 190,
+        "column": 40
       }
     },
     {
@@ -366,8 +366,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 219,
-        "column": 9
+        "line": 214,
+        "column": 13
       }
     },
     {
@@ -380,8 +380,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 227,
-        "column": 28
+        "line": 219,
+        "column": 4
       }
     },
     {
@@ -394,8 +394,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 230,
-        "column": 12
+        "line": 223,
+        "column": 30
       }
     },
     {
@@ -408,8 +408,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 238,
-        "column": 29
+        "line": 234,
+        "column": 14
       }
     },
     {
@@ -422,7 +422,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 243,
+        "line": 238,
         "column": 4
       }
     },
@@ -436,8 +436,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 251,
-        "column": 4
+        "line": 246,
+        "column": 27
       }
     },
     {
@@ -450,13 +450,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 268,
+        "line": 263,
         "column": 14
       }
     },
     {
-      "id": "fa5572d77c20c08-03f710aca9c34c4",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach attaches entry and emits attachment_added",
+      "id": "fa5572d77c20c08-af2271c43253dbd",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach attaches entry and persists attachment refs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -464,7 +464,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 286,
+        "line": 278,
         "column": 14
       }
     },
@@ -478,8 +478,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 219,
-        "column": 6
+        "line": 159,
+        "column": 7
       }
     },
     {
@@ -492,8 +492,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 224,
-        "column": 29
+        "line": 162,
+        "column": 21
       }
     },
     {
@@ -506,8 +506,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 229,
-        "column": 82
+        "line": 168,
+        "column": 32
       }
     },
     {
@@ -520,22 +520,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 232,
-        "column": 7
-      }
-    },
-    {
-      "id": "7aad733afee3135-81736073f340074",
-      "title": "Agent Builder — SML type permission contract a count-0 element naming an action is hidden from every caller, though its count-1 form is visible to the holder",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 239,
-        "column": 21
+        "line": 174,
+        "column": 13
       }
     },
     {

@@ -1,5 +1,5 @@
 {
-  "sha1": "5285735d7dd46b71dcad8199be8d44f96a75a78c",
+  "sha1": "bea40de9cfa9723818922a0ccda7c37fe91ddabb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -478,46 +478,6 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
         "line": 91,
         "column": 21
-      }
-    },
-    {
-      "id": "c4c9212de6726a5-25bfdde0cc2a1f6",
-      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation Kibana-minted internal UIAM API key self-call stamps and the receiver attaches the ES secret",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@local-serverless-security_complete",
-        "@local-serverless-security_essentials",
-        "@local-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@local-serverless-vectordb"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
-        "line": 77,
-        "column": 44
-      }
-    },
-    {
-      "id": "c4c9212de6726a5-641c7b2f3eba339",
-      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation Cookie session on the UI Run path (not Task Manager worker) stamps and the acceptUiamOAuth receiver skips exchange",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@local-serverless-security_complete",
-        "@local-serverless-security_essentials",
-        "@local-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@local-serverless-vectordb"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
-        "line": 113,
-        "column": 16
       }
     },
     {

@@ -1,5 +1,5 @@
 {
-  "sha1": "a42854b7ec9d9cf8d592f3483f9abf6076aa0e0e",
+  "sha1": "e03d5f7b851b5dc27e466ec0bdab50679d8311ea",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout_cps_local/api/tests/missing_uiam_api_key_tag.spec.ts",
-        "line": 21,
-        "column": 20
+        "line": 29,
+        "column": 47
       }
     }
   ]

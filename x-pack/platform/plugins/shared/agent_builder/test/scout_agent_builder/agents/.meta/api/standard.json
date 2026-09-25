@@ -1,5 +1,5 @@
 {
-  "sha1": "86081901138401784c76cb2f2b4062c0031e563e",
+  "sha1": "",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 405,
-        "column": 42
+        "line": 336,
+        "column": 81
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 418,
-        "column": 22
+        "line": 345,
+        "column": 94
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 447,
-        "column": 24
+        "line": 375,
+        "column": 84
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 466,
-        "column": 30
+        "line": 396,
+        "column": 7
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 458,
-        "column": 27
+        "line": 416,
+        "column": 6
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 543,
-        "column": 7
+        "line": 472,
+        "column": 11
       }
     },
     {
@@ -98,22 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 565,
+        "line": 494,
         "column": 29
-      }
-    },
-    {
-      "id": "2b60f5344e96d53-4c6a2bf3cc3dd5a",
-      "title": "Agent Builder — agents access-control API name-only access_control.entries (pre-id migration) still grant read and list access",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 659,
-        "column": 11
       }
     },
     {
@@ -126,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 692,
-        "column": 6
+        "line": 589,
+        "column": 18
       }
     },
     {
@@ -140,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 744,
-        "column": 30
+        "line": 642,
+        "column": 17
       }
     },
     {
@@ -154,36 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 778,
-        "column": 23
-      }
-    },
-    {
-      "id": "2b60f5344e96d53-f33424a8a737c36",
-      "title": "Agent Builder — agents access-control API PUT /agents/{id}/access_control accepts legacy name-only entries and rejects entries with neither id nor name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 821,
-        "column": 32
-      }
-    },
-    {
-      "id": "2b60f5344e96d53-f07e8465b7ea88b",
-      "title": "Agent Builder — agents access-control API PUT /agents/{id}/access_control round-trips a legacy name-only entry alongside new id-backed entries",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 865,
-        "column": 15
+        "line": 676,
+        "column": 16
       }
     },
     {
@@ -196,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 910,
-        "column": 19
+        "line": 718,
+        "column": 6
       }
     },
     {
@@ -210,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 940,
-        "column": 5
+        "line": 746,
+        "column": 16
       }
     },
     {
@@ -224,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 949,
-        "column": 17
+        "line": 722,
+        "column": 27
       }
     },
     {
@@ -238,13 +196,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 962,
-        "column": 41
+        "line": 770,
+        "column": 19
       }
     },
     {
-      "id": "2b60f5344e96d53-6448818daa2a62f",
-      "title": "Agent Builder — agents access-control API /_suggest_user_profiles only requires agentBuilder read",
+      "id": "2b60f5344e96d53-645b019a74319ed",
+      "title": "Agent Builder — agents access-control API /_suggest_user_profiles requires manageAgents (reader gets 403)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -252,22 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 979,
-        "column": 5
-      }
-    },
-    {
-      "id": "2b60f5344e96d53-895a195894da255",
-      "title": "Agent Builder — agents access-control API /_suggest_user_profiles rejects callers without Agent Builder privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
-        "line": 994,
-        "column": 25
+        "line": 778,
+        "column": 28
       }
     },
     {

@@ -1,37 +1,9 @@
 {
-  "sha1": "611e3a5158a077d009d276b48943d750516019dd",
+  "sha1": "98a9c04998eeec00ce5382fa3f8cd7e03b17cf28",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "a002a5dadd7e00b-cbb70278009f3c9",
-      "title": "Onboarding Authenticate and Deploy step policy cleanup same-package: removing a service updates the shared policy (PUT, not DELETE) for the surviving service — cleanup-only when survivor already deployed",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 109,
-        "column": 11
-      }
-    },
-    {
-      "id": "a002a5dadd7e00b-38c32bacf1bd50b",
-      "title": "Onboarding Authenticate and Deploy step agent-based cleanup: removing a service updates the shared package policy for the surviving service (PUT, not DELETE)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 196,
-        "column": 24
-      }
-    },
     {
       "id": "a002a5dadd7e00b-8a982de270c8a77",
       "title": "Onboarding Authenticate and Deploy step deploy fires POST /api/fleet/managed_integrations and shows success state",
@@ -42,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 337,
-        "column": 11
+        "line": 108,
+        "column": 30
       }
     },
     {
