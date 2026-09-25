@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
+import { deleteCustomLinksByLabel } from '../../fixtures/custom_links_helpers';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe(
@@ -20,34 +21,7 @@ test.describe(
     const createdCustomLinkLabels: string[] = [];
 
     test.afterEach(async ({ kbnClient }) => {
-      if (createdCustomLinkLabels.length === 0) {
-        return;
-      }
-
-      // Custom links live in the `.apm-custom-link` index, exposed through the
-      // internal APM settings API rather than as saved objects.
-      const response = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/apm/settings/custom_links',
-      });
-      const { customLinks } = response.data as {
-        customLinks: Array<{ id?: string; label: string }>;
-      };
-
-      await Promise.all(
-        customLinks
-          .filter((link) => link.id && createdCustomLinkLabels.includes(link.label))
-          .map((link) =>
-            kbnClient
-              .request({
-                method: 'DELETE',
-                path: `/internal/apm/settings/custom_links/${link.id}`,
-                headers: { 'kbn-xsrf': 'scout' },
-              })
-              .catch(() => {})
-          )
-      );
-
+      await deleteCustomLinksByLabel(kbnClient, createdCustomLinkLabels);
       createdCustomLinkLabels.length = 0;
     });
 

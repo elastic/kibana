@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout-oblt';
+import type { KbnClient, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import type { CustomLinksPage } from './page_objects/custom_links';
 import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_SYNTH_NODE_1 } from './constants';
@@ -44,30 +44,32 @@ export const createTemplateLinkFromSettings = async (
   });
 };
 
-export const deleteCustomLink = async (
-  customLinksPage: CustomLinksPage,
-  page: ScoutPage,
-  label: string
-) => {
-  await customLinksPage.goto();
-  await customLinksPage.clickEditCustomLinkForRow(label);
-  await customLinksPage.clickDelete();
-
-  await expect(page).toHaveURL(/.*custom-links$/);
-  await expect(customLinksPage.getCustomLinkRow(label)).toBeHidden({
-    timeout: EXTENDED_TIMEOUT,
-  });
-  await expect(page.getByTestId('euiToastHeader__title')).toHaveText('Deleted custom link.');
-};
-
-export const deleteCustomLinkIfExists = async (
-  customLinksPage: CustomLinksPage,
-  page: ScoutPage,
-  label: string
-) => {
-  await customLinksPage.goto();
-  const row = customLinksPage.getCustomLinkRow(label);
-  if (await row.isVisible()) {
-    await deleteCustomLink(customLinksPage, page, label);
+export const deleteCustomLinksByLabel = async (kbnClient: KbnClient, labels: string[]) => {
+  if (labels.length === 0) {
+    return;
   }
+
+  // Custom links live in the `.apm-custom-link` index, exposed through the
+  // internal APM settings API rather than as saved objects.
+  const response = await kbnClient.request({
+    method: 'GET',
+    path: '/internal/apm/settings/custom_links',
+  });
+  const { customLinks } = response.data as {
+    customLinks: Array<{ id?: string; label: string }>;
+  };
+
+  await Promise.all(
+    customLinks
+      .filter((link) => link.id && labels.includes(link.label))
+      .map((link) =>
+        kbnClient
+          .request({
+            method: 'DELETE',
+            path: `/internal/apm/settings/custom_links/${link.id}`,
+            headers: { 'kbn-xsrf': 'scout' },
+          })
+          .catch(() => {})
+      )
+  );
 };
