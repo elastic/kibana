@@ -12,6 +12,12 @@ import { significantSecurityEventAttachmentDataSchema } from '../../../../../com
 import { huntCoordinator } from '../hunt_coordinator';
 import { buildSseData, buildSseAttachmentId } from './sse_mapper';
 
+const huntResultOf = (entry: ReturnType<typeof buildSseData>[number]) => {
+  const huntResult = entry.data.hunt_result;
+  if (!huntResult) throw new Error('expected hunt_result on the SSE entry');
+  return huntResult;
+};
+
 jest.mock('./resolve_index_scope', () => ({
   resolveHuntScope: jest.fn().mockResolvedValue({
     technologies: ['aws_iam'],
@@ -206,26 +212,24 @@ describe('buildSseData', () => {
     expect(entry.data.run_id).toBe('run-hunt-20260730T160000Z');
     expect(entry.data.source_watch).toBe('system-security-hunt-continuous-threat-hunt');
 
-    expect(entry.data.hunt_result.has_confirmed_hit).toBe(true);
-    expect(entry.data.hunt_result.hit_sources).toEqual(
-      expect.arrayContaining(['tier1', 'tier2'])
-    );
-    expect(entry.data.hunt_result.tier1.status).toBe('environment_hits_found');
-    expect(entry.data.hunt_result.tier1.counts.total_hits).toBe(4);
-    expect(entry.data.hunt_result.tier1.per_index).toEqual([
+    expect(huntResultOf(entry).has_confirmed_hit).toBe(true);
+    expect(huntResultOf(entry).hit_sources).toEqual(expect.arrayContaining(['tier1', 'tier2']));
+    expect(huntResultOf(entry).tier1.status).toBe('environment_hits_found');
+    expect(huntResultOf(entry).tier1.counts.total_hits).toBe(4);
+    expect(huntResultOf(entry).tier1.per_index).toEqual([
       { index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001', hit_count: 3, required: true },
       { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
     ]);
-    expect(entry.data.hunt_result.tier1.resolved_iocs).toEqual([
+    expect(huntResultOf(entry).tier1.resolved_iocs).toEqual([
       { type: 'hash', value: '9f2b1e7c4a6d8e0f1b3c5d7e9f0a1b2c' },
     ]);
-    expect(entry.data.hunt_result.tier2).toBeDefined();
-    expect(entry.data.hunt_result.tier2?.status).toBe('behaviors_proposed');
-    expect(entry.data.hunt_result.tier2?.behaviors[0].technique_id).toBe('T1078.004');
-    expect(entry.data.hunt_result.tier2?.behaviors[0].proposed_esql_rule).toContain(
+    expect(huntResultOf(entry).tier2).toBeDefined();
+    expect(huntResultOf(entry).tier2?.status).toBe('behaviors_proposed');
+    expect(huntResultOf(entry).tier2?.behaviors[0].technique_id).toBe('T1078.004');
+    expect(huntResultOf(entry).tier2?.behaviors[0].proposed_esql_rule).toContain(
       'FROM logs-aws.cloudtrail-default'
     );
-    expect(entry.data.hunt_result.tier2?.behaviors[0].execution).toEqual({
+    expect(huntResultOf(entry).tier2?.behaviors[0].execution).toEqual({
       executed: true,
       row_count: 2,
       hit: true,
@@ -299,7 +303,7 @@ describe('buildSseData', () => {
       (i) => i.type === 'technique'
     );
     expect(secondTechniqueIndicators.map((i) => i.technique_id)).toEqual(['T1552.001']);
-    expect(secondEntry.data.hunt_result.tier2?.behaviors.map((b) => b.technique_id)).toEqual([
+    expect(huntResultOf(secondEntry).tier2?.behaviors.map((b) => b.technique_id)).toEqual([
       'T1552.001',
     ]);
   });
@@ -331,9 +335,9 @@ describe('buildSseData', () => {
     expect(entries[0].attachment_id).toEqual(
       buildSseAttachmentId({ spaceId: 'default', reportId: 'tr-hit-no-behaviors' })
     );
-    expect(entries[0].data.hunt_result.has_confirmed_hit).toBe(true);
-    expect(entries[0].data.hunt_result.hit_sources).toEqual(['tier1']);
-    expect(entries[0].data.hunt_result.tier2?.status).toBe('no_behaviors_found');
+    expect(huntResultOf(entries[0]).has_confirmed_hit).toBe(true);
+    expect(huntResultOf(entries[0]).hit_sources).toEqual(['tier1']);
+    expect(huntResultOf(entries[0]).tier2?.status).toBe('no_behaviors_found');
   });
 
   it('emits a Tier 2-only hit with tier2 hit_sources and Tier 2 entities', async () => {
@@ -395,8 +399,8 @@ describe('buildSseData', () => {
     expect(coordinatorResult.has_confirmed_hit).toBe(true);
     const entries = buildSseData(coordinatorResult, 'tr-behavior-only', { spaceId: 'default' });
     expect(entries).toHaveLength(1);
-    expect(entries[0].data.hunt_result.has_confirmed_hit).toBe(true);
-    expect(entries[0].data.hunt_result.hit_sources).toEqual(['tier2']);
+    expect(huntResultOf(entries[0]).has_confirmed_hit).toBe(true);
+    expect(huntResultOf(entries[0]).hit_sources).toEqual(['tier2']);
     expect(entries[0].data.entities).toEqual([{ field: 'host.name', value: 'WIN-ANALYST01' }]);
     expect(entries[0].data.events).toEqual([
       expect.objectContaining({
@@ -446,9 +450,9 @@ describe('buildSseData', () => {
     const entries = buildSseData(coordinatorResult, 'tr-clean-2026-07-28', { spaceId: 'default' });
 
     expect(entries).toHaveLength(1);
-    expect(entries[0].data.hunt_result.has_confirmed_hit).toBe(false);
-    expect(entries[0].data.hunt_result.hit_sources).toEqual([]);
-    expect(entries[0].data.hunt_result.tier2).toBeUndefined();
+    expect(huntResultOf(entries[0]).has_confirmed_hit).toBe(false);
+    expect(huntResultOf(entries[0]).hit_sources).toEqual([]);
+    expect(huntResultOf(entries[0]).tier2).toBeUndefined();
     expect(entries[0].data.entities).toEqual([]);
     expect(entries[0].data.events).toEqual([]);
     expect(entries[0].data.alerts).toEqual([]);

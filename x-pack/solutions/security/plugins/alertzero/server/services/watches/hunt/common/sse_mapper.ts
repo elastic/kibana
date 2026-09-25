@@ -18,7 +18,10 @@
  */
 
 import { createHash } from 'crypto';
-import type { SignificantSecurityEventAttachmentData } from '../../../../../common/significant_security_event_schema';
+import {
+  huntIocSchema,
+  type SignificantSecurityEventAttachmentData,
+} from '../../../../../common/significant_security_event_schema';
 import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import type { HuntCoordinatorResult } from '../hunt_coordinator';
 
@@ -199,11 +202,12 @@ const toEventMatched = (
   if (!matched) return undefined;
   // Schema requires `field` whenever `matched` is present.
   if (!matched.field) return undefined;
+  // The coordinator types `ioc.type` as a free string; the SSE schema only
+  // accepts the IOC enum, so drop an ioc the schema would reject.
+  const ioc = matched.ioc ? huntIocSchema.safeParse(matched.ioc) : undefined;
   return {
     field: matched.field,
-    ...(matched.ioc?.type && matched.ioc?.value
-      ? { ioc: { type: matched.ioc.type, value: matched.ioc.value } }
-      : {}),
+    ...(ioc?.success ? { ioc: ioc.data } : {}),
     ...(matched.technique_id ? { technique_id: matched.technique_id } : {}),
   };
 };
@@ -460,28 +464,28 @@ const buildChrome = ({
     ? behavior.severity
     : severityFromConfidence(confidence);
 
-  const hypothesis_tested = (
+  const hypothesisTested = (
     behavior?.evidence_quote ||
     behavior?.rule_name ||
     `Hunt Watch evaluated report ${reportId} against the environment.`
   ).slice(0, 4000);
 
-  const evidence_for: string[] = [];
+  const evidenceFor: string[] = [];
   if (huntResult.hit_sources.includes('tier1')) {
-    evidence_for.push(
+    evidenceFor.push(
       `Tier 1 confirmed ${huntResult.tier1.counts.total_hits} hit(s) in the hunt window (see hunt_result.tier1.per_index).`
     );
   }
   if (huntResult.hit_sources.includes('tier2') && behavior?.execution?.hit) {
-    evidence_for.push(
+    evidenceFor.push(
       `Tier 2 executed ${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
     );
   }
   if (behavior?.proposed_esql_rule) {
-    evidence_for.push(`Proposed lasting rule: ${behavior.rule_name}.`);
+    evidenceFor.push(`Proposed lasting rule: ${behavior.rule_name}.`);
   }
-  if (evidence_for.length === 0 && huntResult.has_confirmed_hit) {
-    evidence_for.push('Environment hit confirmed; see hunt_result for structured detail.');
+  if (evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
+    evidenceFor.push('Environment hit confirmed; see hunt_result for structured detail.');
   }
 
   const timeline: SseAttachmentData['timeline'] = [];
@@ -510,8 +514,8 @@ const buildChrome = ({
     confidence,
     status: 'open',
     timeline,
-    hypothesis_tested,
-    evidence_for: evidence_for.slice(0, MAX_EVIDENCE),
+    hypothesis_tested: hypothesisTested,
+    evidence_for: evidenceFor.slice(0, MAX_EVIDENCE),
     evidence_against: [],
     evaluation_record_ref: evalRef,
   };
@@ -534,7 +538,7 @@ const buildEntry = ({
     onlyTechniqueId: techniqueId,
   });
   const { entities, truncated, originalCount } = buildEntities(result, techniqueId);
-  const hunt_result = buildHuntResult(result, {
+  const huntResult = buildHuntResult(result, {
     onlyTechniqueId: techniqueId,
     tier1RefCount,
   });
@@ -544,7 +548,7 @@ const buildEntry = ({
   const chrome = buildChrome({
     reportId,
     runId: result.run_id,
-    huntResult: hunt_result,
+    huntResult,
     behavior,
     events,
     alerts,
@@ -562,7 +566,7 @@ const buildEntry = ({
       entities,
       alerts,
       events,
-      hunt_result,
+      hunt_result: huntResult,
       ...(truncated ? { truncated: true, truncated_original_count: originalCount } : {}),
     },
   };
