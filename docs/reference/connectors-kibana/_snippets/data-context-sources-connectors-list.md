@@ -19,6 +19,7 @@
 - [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 - [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
 - [GitHub](/reference/connectors-kibana/github-action-type.md): Search code, issues, and pull requests, and access repository contents and metadata from GitHub.
+- [GitLab](/reference/connectors-kibana/gitlab-action-type.md): Search projects, manage issues and merge requests, browse repository files, and trigger CI/CD pipelines in GitLab.
 - [Gmail](/reference/connectors-kibana/gmail-action-type.md): Search, read, label, quarantine, and send emails in Gmail.
 - [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md): Search and access events and calendars in Google Calendar.
 - [Google Cloud Monitoring](/reference/connectors-kibana/google-cloud-monitoring-action-type.md): Find, silence, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data.
@@ -81,6 +82,7 @@
 - [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
 - [MISP](/reference/connectors-kibana/misp-action-type.md): Search attributes and events, check indicators and warninglists, and write sightings, events, attributes, and tags back to MISP.
 - [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.
+- [ThreatQ](/reference/connectors-kibana/threatq-action-type.md): Search and enrich intelligence, update indicators, link objects, and run operations.
 - [URLScan.io](/reference/connectors-kibana/urlscan-io-action-type.md): Search historical URL scans, detonate a URL in a sandboxed browser, and retrieve verdicts, screenshots, and page content.
 - [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
 - [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL and domain analysis, result retrieval, and threat intelligence lookups.

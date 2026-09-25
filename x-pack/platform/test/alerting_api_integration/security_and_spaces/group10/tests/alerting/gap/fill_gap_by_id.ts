@@ -11,6 +11,7 @@ import {
   ManualRunOnlyUserAtSpace1,
   AllWithoutBackfillPrivilegesUserAtSpace1,
   UserAtSpaceScenarios,
+  SuperuserAtSpace1,
 } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
@@ -213,68 +214,71 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
                 throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
             }
           });
-
-          it('should handle invalid parameters appropriately', async () => {
-            // Create a rule
-            const ruleResponse = await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
-              .set('kbn-xsrf', 'foo')
-              .send(getRule())
-              .expect(200);
-            const ruleId = ruleResponse.body.id;
-            objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
-
-            // Test with missing rule_id
-            const response1 = await supertestWithoutAuth
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_fill_by_id`)
-              .set('kbn-xsrf', 'foo')
-              .auth(apiOptions.username, apiOptions.password)
-              .send({});
-
-            // Test with missing gap_id
-            const response2 = await supertestWithoutAuth
-              .post(
-                `${getUrlPrefix(
-                  apiOptions.spaceId
-                )}/internal/alerting/rules/gaps/_fill_by_id?rule_id=${ruleId}`
-              )
-              .set('kbn-xsrf', 'foo')
-              .auth(apiOptions.username, apiOptions.password)
-              .send({});
-
-            switch (scenario.id) {
-              case 'no_kibana_privileges at space1':
-              case 'space_1_all at space2':
-              case 'global_read at space1':
-              case 'space_1_all_alerts_none_actions at space1':
-              case 'superuser at space1':
-              case 'manual_run_only at space1':
-              case 'all_without_backfill_privileges at space1':
-              case 'space_1_all at space1':
-              case 'space_1_all_with_restricted_fixture at space1':
-                expect(response1.statusCode).to.eql(400);
-                expect(response1.body).to.eql({
-                  statusCode: 400,
-                  error: 'Bad Request',
-                  message:
-                    '[request query.rule_id]: expected value of type [string] but got [undefined]',
-                });
-
-                expect(response2.statusCode).to.eql(400);
-                expect(response2.body).to.eql({
-                  statusCode: 400,
-                  error: 'Bad Request',
-                  message:
-                    '[request query.gap_id]: expected value of type [string] but got [undefined]',
-                });
-                break;
-
-              default:
-                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-            }
-          });
         });
       });
     }
+
+    // Request validation returns 400 for every scenario, so it runs once.
+    describe(`${SuperuserAtSpace1.id} (runs once)`, () => {
+      const { user, space } = SuperuserAtSpace1;
+      const apiOptions = {
+        spaceId: space.id,
+        username: user.username,
+        password: user.password,
+      };
+
+      describe('fill gap by id', () => {
+        beforeEach(async () => {
+          await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/delete_gaps`)
+            .set('kbn-xsrf', 'foo')
+            .send({})
+            .expect(200);
+        });
+
+        it('should handle invalid parameters appropriately', async () => {
+          // Create a rule
+          const ruleResponse = await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getRule())
+            .expect(200);
+          const ruleId = ruleResponse.body.id;
+          objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
+
+          // Test with missing rule_id
+          const response1 = await supertestWithoutAuth
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_fill_by_id`)
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password)
+            .send({});
+
+          // Test with missing gap_id
+          const response2 = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                apiOptions.spaceId
+              )}/internal/alerting/rules/gaps/_fill_by_id?rule_id=${ruleId}`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password)
+            .send({});
+
+          expect(response1.statusCode).to.eql(400);
+          expect(response1.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '[request query.rule_id]: expected value of type [string] but got [undefined]',
+          });
+
+          expect(response2.statusCode).to.eql(400);
+          expect(response2.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '[request query.gap_id]: expected value of type [string] but got [undefined]',
+          });
+        });
+      });
+    });
   });
 }

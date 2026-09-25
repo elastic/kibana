@@ -19,6 +19,7 @@ import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
+import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -39,6 +40,7 @@ export const ActionPolicyCanvasContent = ({
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
   const notifications = useService(CoreStart('notifications'));
+  const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
 
   const { data: rawData, origin } = attachment;
   const data = rawData as ActionPolicyCanvasData;
@@ -87,7 +89,7 @@ export const ActionPolicyCanvasContent = ({
   }, []);
 
   useEffect(() => {
-    if (!mounted) {
+    if (!mounted || !showExperimentalFeatures) {
       registerActionButtons([]);
       return;
     }
@@ -191,6 +193,7 @@ export const ActionPolicyCanvasContent = ({
     notifications,
     data,
     hasDraftDependencies,
+    showExperimentalFeatures,
   ]);
 
   return (

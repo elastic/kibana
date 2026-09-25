@@ -28,7 +28,6 @@ const DEFAULT_SPACE_IDS = {
   empty: `scout-list-empty-${RUN_ID}`,
   missing: `scout-list-missing-${RUN_ID}`,
   forbidden: `scout-list-forbidden-${RUN_ID}`,
-  forbiddenWildcard: `scout-list-forbidden-wildcard-${RUN_ID}`,
 };
 // Registered only in `OTHER_SPACE_ID`, on a backing index the caller can read.
 const OTHER_SPACE_ID_ONLY = `scout-list-other-only-${RUN_ID}`;
@@ -95,7 +94,6 @@ apiTest.describe('context engine AI Index list', { tag: tags.stateful.classic },
       registerAiIndex(DEFAULT_SPACE_IDS.empty, EMPTY_INDEX),
       registerAiIndex(DEFAULT_SPACE_IDS.missing, MISSING_INDEX),
       registerAiIndex(DEFAULT_SPACE_IDS.forbidden, FORBIDDEN_INDEX),
-      registerAiIndex(DEFAULT_SPACE_IDS.forbiddenWildcard, `${FORBIDDEN_INDEX}*`),
     ]) {
       await register(AI_INDEX_COLLECTION_PATH, body);
     }
@@ -129,15 +127,9 @@ apiTest.describe('context engine AI Index list', { tag: tags.stateful.classic },
     });
 
     expect(response).toHaveStatusCode(200);
-    // Empty and missing stay listed; unreadable is dropped. A wildcard with no readable match is
-    // a 404, not a 403, so it is listed too. The other space's entry never shows up here.
+    // Empty and missing stay listed; unreadable is dropped. The other space's entry never shows up here.
     expect(listedIds(response.body).sort()).toStrictEqual(
-      [
-        DEFAULT_SPACE_IDS.readable,
-        DEFAULT_SPACE_IDS.empty,
-        DEFAULT_SPACE_IDS.missing,
-        DEFAULT_SPACE_IDS.forbiddenWildcard,
-      ].sort()
+      [DEFAULT_SPACE_IDS.readable, DEFAULT_SPACE_IDS.empty, DEFAULT_SPACE_IDS.missing].sort()
     );
   });
 

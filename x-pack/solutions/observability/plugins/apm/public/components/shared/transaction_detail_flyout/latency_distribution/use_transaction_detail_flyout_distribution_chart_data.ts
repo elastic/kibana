@@ -12,7 +12,6 @@ import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations
 import { EVENT_OUTCOME } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../../common/latency_distribution_chart_types';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getTransactionDistributionChartData } from '../../../app/correlations/get_transaction_distribution_chart_data';
 import { isErrorMessage } from '../../../app/correlations/utils/is_error_message';
@@ -24,15 +23,15 @@ export function useTransactionDetailFlyoutDistributionChartData({
   transactionName,
   transactionType,
   environment,
-  rangeFrom,
-  rangeTo,
+  start,
+  end,
 }: TransactionDetailFlyoutFilters) {
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { euiTheme } = useEuiTheme();
   const {
     deps: {
       core: { notifications },
     },
+    refreshToken,
   } = useTransactionDetailFlyoutContext();
 
   const params = useMemo(
@@ -54,6 +53,7 @@ export function useTransactionDetailFlyoutDistributionChartData({
     error: overallLatencyError,
   } = useFetcher(
     (callApmApi) => {
+      void refreshToken;
       if (params.serviceName && params.environment && params.start && params.end) {
         return callApmApi('POST /internal/apm/latency/overall_distribution/transactions', {
           params: {
@@ -66,7 +66,7 @@ export function useTransactionDetailFlyoutDistributionChartData({
         });
       }
     },
-    [params]
+    [params, refreshToken]
   );
 
   useEffect(() => {
@@ -92,6 +92,7 @@ export function useTransactionDetailFlyoutDistributionChartData({
 
   const { data: errorHistogramData = {}, error: errorHistogramError } = useFetcher(
     (callApmApi) => {
+      void refreshToken;
       if (
         params.serviceName &&
         params.environment &&
@@ -119,7 +120,7 @@ export function useTransactionDetailFlyoutDistributionChartData({
         });
       }
     },
-    [params, overallLatencyData.durationMin, overallLatencyData.durationMax]
+    [params, overallLatencyData.durationMin, overallLatencyData.durationMax, refreshToken]
   );
 
   useEffect(() => {

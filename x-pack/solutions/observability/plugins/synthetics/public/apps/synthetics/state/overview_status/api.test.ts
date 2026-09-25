@@ -45,7 +45,6 @@ describe('fetchStaleStatus', () => {
     expect(mockPost).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE,
       { monitorQueryIds: ['mon-1', 'mon-2'] },
-      expect.anything(),
       expect.objectContaining({
         dateRangeStart: 'now-24h',
         dateRangeEnd: 'now',
