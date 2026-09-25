@@ -40,6 +40,15 @@ const MAX_LIMIT = 10;
 const OVERFETCH_MULTIPLIER = 3;
 
 /**
+ * Pages one scheduled sweep walks before it stops and says so. Without a bound a
+ * pool where every report carries an open Proposal would search until the pool ran
+ * out; without paging at all the sweep could only ever see the first page, so a
+ * top-ranked run of open Proposals would hide every eligible report behind it from
+ * this and every later sweep alike.
+ */
+const MAX_SELECTION_PAGES = 5;
+
+/**
  * Both callers below must fail closed: an empty result would read as "nothing
  * to hunt" and hide a broken index or store behind a clean 200.
  */
@@ -116,37 +125,38 @@ export const buildCandidateQuery = async (
     { '@timestamp': { order: 'desc' } },
   ];
 
-  let response;
-  try {
-    response = await esClient.search({
-      index: HUNT_REPORTS_INDEX,
-      // Manual selection has to see every named id, not just the first `limit` of
-      // them: an id the search never reached is indistinguishable from an absent
-      // one below, and would be reported as `not_found` although it exists. The
-      // request schema bounds `report_ids`, so this stays small. Only the
-      // scheduled sweep needs overfetch headroom.
-      size: namedIds ? namedIds.length : limit * OVERFETCH_MULTIPLIER,
-      // The reports index is required, not optional. Ignoring it when it is
-      // unavailable turns a missing index into a successful empty page, and an
-      // empty candidate pool reads exactly like "nothing is eligible to hunt".
-      // Let the search fail instead, so `failClosed` reports it as the outage it
-      // is.
-      ignore_unavailable: false,
-      track_total_hits: true,
-      _source: false,
-      sort,
-      query: { bool: { filter: filterClauses } },
-    });
-  } catch (err) {
-    throw failClosed(logger, 'ES search failed', err);
-  }
+  // Manual selection has to see every named id, not just the first `limit` of them:
+  // an id the search never reached is indistinguishable from an absent one below, and
+  // would be reported as `not_found` although it exists. The request schema bounds
+  // `report_ids`, so this stays small. Only the scheduled sweep needs overfetch
+  // headroom, and only it pages.
+  const pageSize = namedIds ? namedIds.length : limit * OVERFETCH_MULTIPLIER;
 
-  const hits = response.hits.hits ?? [];
-  const matchedIds = hits.map((h) => h._id).filter((id): id is string => typeof id === 'string');
-  const total =
-    typeof response.hits.total === 'number'
-      ? response.hits.total
-      : response.hits.total?.value ?? matchedIds.length;
+  const searchPage = async (excludedIds: string[]) => {
+    try {
+      return await esClient.search({
+        index: HUNT_REPORTS_INDEX,
+        size: pageSize,
+        // The reports index is required, not optional. Ignoring it when it is
+        // unavailable turns a missing index into a successful empty page, and an
+        // empty candidate pool reads exactly like "nothing is eligible to hunt".
+        // Let the search fail instead, so `failClosed` reports it as the outage it
+        // is.
+        ignore_unavailable: false,
+        track_total_hits: true,
+        _source: false,
+        sort,
+        query: {
+          bool: {
+            filter: filterClauses,
+            ...(excludedIds.length > 0 && { must_not: [{ ids: { values: excludedIds } }] }),
+          },
+        },
+      });
+    } catch (err) {
+      throw failClosed(logger, 'ES search failed', err);
+    }
+  };
 
   // A report whose Hunt Proposal is still awaiting a decision is excluded from selection,
   // so an unattended sweep cannot revisit reports while their approval gates are parked.
@@ -161,28 +171,73 @@ export const buildCandidateQuery = async (
   }
 
   const ids: string[] = [];
-  for (const id of matchedIds) {
-    if (
-      openProposalConversationIds &&
-      openProposalConversationIds.has(buildHuntInvestigationConversationId(id))
-    ) {
-      skipped.push({ id, reason: 'open_proposal' });
-      continue;
+  // Every id this sweep has looked at, excluded from the next page. `from` would be
+  // the obvious way to page and is the wrong one here: nothing writes
+  // `corroborated_rank_score` or `rank_score` yet, so reports tie at `missing: 0` and
+  // the sort is not stable between requests, which lets `from` return a report twice
+  // or step over one entirely. Excluding by id takes the examined prefix out of the
+  // result set instead, so neither can happen and the window never deepens.
+  const examined: string[] = [];
+  let total = 0;
+  let poolExhausted = false;
+
+  for (let page = 0; page < MAX_SELECTION_PAGES; page++) {
+    const response = await searchPage([...examined]);
+    const pageIds = (response.hits.hits ?? [])
+      .map((h) => h._id)
+      .filter((id): id is string => typeof id === 'string');
+
+    if (page === 0) {
+      // Read before any id exclusion narrows it, so `total` keeps meaning every report
+      // matching the selection filter, which is what `truncated` is measured against.
+      total =
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value ?? pageIds.length;
     }
-    if (ids.length < limit) {
-      ids.push(id);
+
+    for (const id of pageIds) {
+      examined.push(id);
+      if (
+        openProposalConversationIds &&
+        openProposalConversationIds.has(buildHuntInvestigationConversationId(id))
+      ) {
+        skipped.push({ id, reason: 'open_proposal' });
+        continue;
+      }
+      if (ids.length < limit) {
+        ids.push(id);
+      }
     }
+
+    if (namedIds) break;
+    // A short page has nothing after it, so the pool is genuinely spent rather than
+    // merely unexamined. The difference is what the warning below turns on.
+    if (pageIds.length < pageSize) {
+      poolExhausted = true;
+      break;
+    }
+    if (ids.length >= limit) break;
   }
 
   // Named ids that matched nothing are reported rather than silently dropped: from the
   // caller's side an unknown id and an id in another space are both "not selected".
   if (namedIds) {
-    const matched = new Set(matchedIds);
+    const matched = new Set(examined);
     for (const requested of namedIds) {
       if (!matched.has(requested)) {
         skipped.push({ id: requested, reason: 'not_found' });
       }
     }
+  }
+
+  if (!namedIds && !poolExhausted && ids.length < limit) {
+    logger.warn(
+      `build_candidate_query: stopped after ${MAX_SELECTION_PAGES} pages having examined ` +
+        `${examined.length} reports, with ${ids.length} of ${limit} candidates selected and ` +
+        `${skipped.length} skipped for open Proposals. Eligible reports may sit past the examined ` +
+        `prefix; they are reachable by the next sweep only once some of those Proposals are decided.`
+    );
   }
 
   const truncated = ids.length < total - skipped.length;
