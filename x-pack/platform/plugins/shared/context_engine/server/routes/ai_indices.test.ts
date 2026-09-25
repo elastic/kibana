@@ -402,7 +402,7 @@ describe('ai indices routes', () => {
     it('rejects explicitly enabling memory while the memory feature flag is disabled', async () => {
       memoryFlagEnabled = false;
 
-      await callRoute('POST', aiIndexPath, {
+      await callRoute('POST', AI_INDEX_PATH, {
         body: { ...postBody, memory_enabled: true },
       });
 
@@ -416,8 +416,8 @@ describe('ai indices routes', () => {
       memoryFlagEnabled = false;
       aiIndexService.create.mockResolvedValue(undefined);
 
-      await callRoute('POST', aiIndexPath, { body: postBody });
-      await callRoute('POST', aiIndexPath, {
+      await callRoute('POST', AI_INDEX_PATH, { body: postBody });
+      await callRoute('POST', AI_INDEX_PATH, {
         body: { ...postBody, memory_enabled: false },
       });
 
@@ -584,7 +584,7 @@ describe('ai indices routes', () => {
     it('rejects explicitly enabling memory while the memory feature flag is disabled', async () => {
       memoryFlagEnabled = false;
 
-      await callRoute('PUT', aiIndexByIdPath, {
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
         ...putRequest,
         body: { ...putRequest.body, memory_enabled: true },
       });
@@ -605,7 +605,7 @@ describe('ai indices routes', () => {
         memory_enabled: true,
       };
 
-      await callRoute('PUT', aiIndexByIdPath, { ...putRequest, body });
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, { ...putRequest, body });
 
       expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
       expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', defaultSpaceId, body);
