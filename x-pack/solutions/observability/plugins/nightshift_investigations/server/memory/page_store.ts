@@ -15,10 +15,11 @@ import {
   type MemoryStats,
 } from '../../common/memory';
 import { formatPageRefs, previewText } from './log_format';
-import { DECAY_LAMBDA, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
+import { applyUpdate, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
 
 const MAX_LIST_SIZE = 500;
 const MAX_ARCHIVE_ATTEMPTS = 3;
+const MAX_COUNTER_UPDATE_ATTEMPTS = 3;
 const MEMORY_TAG = 'memory';
 const SPACE_ID_FIELD = 'attributes.space_id';
 
@@ -574,6 +575,7 @@ export const createMemoryPageStore = ({
         return;
       }
 
+      // Aggregate first so each logical batch decays a page only once.
       const deltas = new Map<string, { addImp: number; addConv: number }>();
       for (const update of updates) {
         const previous = deltas.get(update.id) ?? { addImp: 0, addConv: 0 };
@@ -582,75 +584,74 @@ export const createMemoryPageStore = ({
           addConv: previous.addConv + update.addConv,
         });
       }
-      const nowSec = now();
-      const operations: object[] = [];
-      for (const [id, delta] of [...deltas].sort(([left], [right]) => left.localeCompare(right))) {
-        operations.push(
-          {
-            update: {
-              _index: MEMORY_INDEX,
-              _id: toStoredId(id),
-              retry_on_conflict: 3,
-            },
-          },
-          {
-            script: {
-              lang: 'painless',
-              source: `
-if (ctx.op == 'create' || ctx._source.attributes == null || ctx._source.attributes.status == 'archived') {
-  ctx.op = 'noop';
-} else {
-  def attributes = ctx._source.attributes;
-  double impressions = attributes.impressions == null ? 0.0 : ((Number) attributes.impressions).doubleValue();
-  double conversions = attributes.conversions == null ? 0.0 : ((Number) attributes.conversions).doubleValue();
-  double lastTime = params.now;
-  if (attributes.last_impression_time != null) {
-    lastTime = ZonedDateTime.parse(attributes.last_impression_time).toInstant().toEpochMilli() / 1000.0;
-  }
-  double elapsed = Math.max(0.0, params.now - lastTime);
-  double decay = Math.exp(-params.decayLambda * elapsed);
-  attributes.impressions = impressions * decay + params.addImp;
-  attributes.conversions = conversions * decay + params.addConv;
-  attributes.last_impression_time = Instant.ofEpochMilli((long) (params.now * 1000.0)).toString();
-}`.trim(),
-              params: {
-                now: nowSec,
-                decayLambda: DECAY_LAMBDA,
-                addImp: delta.addImp,
-                addConv: delta.addConv,
-              },
-            },
-            scripted_upsert: true,
-            upsert: {},
-          }
-        );
-      }
 
-      const bulk = await esClient.bulk(
-        {
-          refresh: 'wait_for',
-          operations,
-        },
-        { signal }
-      );
-      logger.debug(
-        `Memory counter bulk update attempted ${deltas.size} doc(s): ` +
-          [...deltas]
-            .map(([id, delta]) => `${id} +imp=${delta.addImp} +conv=${delta.addConv}`)
-            .join(', ')
-      );
-      if (bulk.errors) {
-        const reasons = (bulk.items ?? []).flatMap((item) =>
-          Object.values(item).flatMap((result) =>
-            result.error ? [`${result.error.type}: ${result.error.reason}`] : []
-          )
-        );
-        throw new Error(
-          `Memory counter bulk update failed for one or more items${
-            reasons.length > 0 ? `: ${reasons.join('; ')}` : ''
-          }`
-        );
+      let updated = 0;
+      let skipped = 0;
+      let conflicts = 0;
+      for (const [id, delta] of [...deltas].sort(([left], [right]) => left.localeCompare(right))) {
+        let applied = false;
+        for (let attempt = 0; attempt < MAX_COUNTER_UPDATE_ATTEMPTS; attempt++) {
+          const versioned = await this.getVersioned(id);
+          if (!versioned || versioned.page.status === 'archived') {
+            skipped++;
+            break;
+          }
+
+          const current = toCounterState(versioned.page.telemetry);
+          // A fresh time on every retry prevents a concurrent newer timestamp from regressing.
+          const effectiveNow = Math.max(now(), current.lastTime);
+          const next = applyUpdate(current, effectiveNow, delta.addImp, delta.addConv);
+
+          try {
+            // Elasticsearch 9.6 rejects scripts on any index containing semantic_text, even
+            // when a script only changes counters, so send only the non-semantic partial fields.
+            await esClient.update(
+              {
+                index: MEMORY_INDEX,
+                id: toStoredId(id),
+                if_seq_no: versioned.seqNo,
+                if_primary_term: versioned.primaryTerm,
+                refresh: 'wait_for',
+                doc: {
+                  attributes: {
+                    impressions: next.impressions,
+                    conversions: next.conversions,
+                    last_impression_time: epochSecondsToIso(next.lastTime),
+                  },
+                },
+              },
+              { signal }
+            );
+            // The successful conditional write is the atomic linearization point.
+            updated++;
+            applied = true;
+            break;
+          } catch (err) {
+            if ((err as { statusCode?: number }).statusCode !== 409) {
+              throw err;
+            }
+            conflicts++;
+            logger.debug(`Memory counter update conflict id=${id} attempt=${attempt + 1}`);
+            // Rereading and recomputing on conflict preserves increments committed by another writer.
+            if (attempt === MAX_COUNTER_UPDATE_ATTEMPTS - 1) {
+              // Bounded exhaustion fails visibly instead of silently dropping feedback.
+              throw new Error(
+                `Memory counter update exhausted ${MAX_COUNTER_UPDATE_ATTEMPTS} version conflicts`,
+                { cause: err }
+              );
+            }
+          }
+        }
+        if (applied) {
+          logger.debug(
+            `Memory counter update applied id=${id} +imp=${delta.addImp} +conv=${delta.addConv}`
+          );
+        }
       }
+      logger.debug(
+        `Memory counter updates completed total=${deltas.size} updated=${updated} ` +
+          `skipped=${skipped} conflicts=${conflicts}`
+      );
     },
 
     async archive(id, reason) {
