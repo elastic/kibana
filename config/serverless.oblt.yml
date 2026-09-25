@@ -45,21 +45,6 @@ xpack.apm.serverlessOnboarding: true
 xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
 xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
-# TEMPORARY, E2E TESTING ONLY: everything from here to "END E2E TESTING" enables the sandbox and
-# nightshift investigations on a PR project deployment. It will not be merged; remove it before
-# the PR leaves draft. The mTLS certs come from the /mnt/elastic-internal/http-certs mount.
-xpack.sandbox.enabled: true
-xpack.sandbox.host: elastic-sandbox-api.elastic-observability-ocp.elastic.dev
-xpack.sandbox.port: 9090
-xpack.sandbox.api_key: xxx
-xpack.nightshift_investigations.enabled: true
-xpack.nightshift_investigations.sandbox.telemetry_connector_id: nightshift-telemetry
-feature_flags.overrides.nightshift.enabled: true
-uiSettings.overrides.workflows:ui:enabled: true
-uiSettings.overrides.workflows:aiAgent:enabled: true
-uiSettings.overrides.agentBuilder:experimentalFeatures: true
-# END E2E TESTING
-
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
 xpack.fleet.internal.registry.excludePackages: [
