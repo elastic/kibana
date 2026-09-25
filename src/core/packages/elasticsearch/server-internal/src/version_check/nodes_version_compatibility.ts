@@ -42,6 +42,23 @@ export interface NodesVersionCompatibility {
   nodesInfoRequestError?: Error;
 }
 
+/** A node's identity for ordering and equality: its version, then its IP. */
+const compareNodes = (a: NodeInfo, b: NodeInfo): number =>
+  a.version.localeCompare(b.version) || a.ip.localeCompare(b.ip);
+
+const sameNodes = (a: NodeInfo[], b: NodeInfo[]): boolean =>
+  a.length === b.length && a.every((node, i) => compareNodes(node, b[i]) === 0);
+
+/** Are two compatibilities observably equal? Relies on the node lists being sorted by `compareNodes`. */
+export const sameCompatibility = (
+  prev: NodesVersionCompatibility,
+  curr: NodesVersionCompatibility
+): boolean =>
+  prev.isCompatible === curr.isCompatible &&
+  sameNodes(prev.incompatibleNodes, curr.incompatibleNodes) &&
+  sameNodes(prev.warningNodes, curr.warningNodes) &&
+  prev.nodesInfoRequestError?.message === curr.nodesInfoRequestError?.message;
+
 function getHumanizedNodeName(node: NodeInfo) {
   const publishAddress = node?.http?.publish_address + ' ' || '';
   return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
@@ -68,16 +85,10 @@ export function mapNodesVersionCompatibility(
     };
   }
 
-  // Sort by version first, then by IP for stable ordering
-  const sortNodes = (a: NodeInfo, b: NodeInfo) => {
-    const versionCompare = a.version.localeCompare(b.version);
-    return versionCompare !== 0 ? versionCompare : a.ip.localeCompare(b.ip);
-  };
-
   const nodes = Object.keys(nodesInfoResponse.nodes)
     .map((key) => nodesInfoResponse.nodes[key])
     .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }))
-    .sort(sortNodes); // Sorting ensures stable ordering for comparison
+    .sort(compareNodes); // stable order, so `sameCompatibility` can compare positionally
 
   // Aggregate incompatible ES nodes.
   const incompatibleNodes = nodes.filter(

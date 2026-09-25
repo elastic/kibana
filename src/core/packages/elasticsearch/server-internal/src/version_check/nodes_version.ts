@@ -31,7 +31,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 import {
   mapNodesVersionCompatibility,
-  type NodeInfo,
+  sameCompatibility,
   type NodesInfo,
   type NodesVersionCompatibility,
 } from './nodes_version_compatibility';
@@ -132,20 +132,6 @@ const nextControlState = (
   // incompatible version is not: the health check is working, so poll normally.
   return result.ok ? 'NORMAL' : 'FAILING';
 };
-
-const sameNode = (a: NodeInfo, b: NodeInfo): boolean => a.ip === b.ip && a.version === b.version;
-
-/** Are two compatibilities observably equal? Ports the original `compareNodes`. */
-export const sameCompatibility = (
-  prev: NodesVersionCompatibility,
-  curr: NodesVersionCompatibility
-): boolean =>
-  prev.isCompatible === curr.isCompatible &&
-  prev.incompatibleNodes.length === curr.incompatibleNodes.length &&
-  prev.warningNodes.length === curr.warningNodes.length &&
-  prev.incompatibleNodes.every((node, i) => sameNode(node, curr.incompatibleNodes[i])) &&
-  prev.warningNodes.every((node, i) => sameNode(node, curr.warningNodes[i])) &&
-  prev.nodesInfoRequestError?.message === curr.nodesInfoRequestError?.message;
 
 export const model = (
   config: NodesVersionConfig,

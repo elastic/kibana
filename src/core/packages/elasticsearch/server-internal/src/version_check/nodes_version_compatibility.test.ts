@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NodesInfo } from './nodes_version_compatibility';
-import { mapNodesVersionCompatibility } from './nodes_version_compatibility';
+import type { NodesInfo, NodesVersionCompatibility } from './nodes_version_compatibility';
+import { mapNodesVersionCompatibility, sameCompatibility } from './nodes_version_compatibility';
 
 const KIBANA_VERSION = '5.1.0';
 
@@ -122,5 +122,35 @@ describe('mapNodesVersionCompatibility', () => {
         nodesInfoRequestError,
       })
     );
+  });
+});
+
+describe('sameCompatibility', () => {
+  const compatibilityOf = (nodes: NodesInfo & { nodesInfoRequestError?: Error }) =>
+    mapNodesVersionCompatibility(nodes, KIBANA_VERSION, false);
+  const withError = (message: string): NodesVersionCompatibility =>
+    compatibilityOf({ nodes: {}, nodesInfoRequestError: new Error(message) });
+
+  it('treats two compatibilities of the same cluster as equal', () => {
+    expect(
+      sameCompatibility(
+        compatibilityOf(createNodes('5.1.0')),
+        compatibilityOf(createNodes('5.1.0'))
+      )
+    ).toBe(true);
+  });
+
+  it('distinguishes a changed node version', () => {
+    expect(
+      sameCompatibility(
+        compatibilityOf(createNodes('5.1.0')),
+        compatibilityOf(createNodes('4.0.0'))
+      )
+    ).toBe(false);
+  });
+
+  it('distinguishes errors by message only', () => {
+    expect(sameCompatibility(withError('boom'), withError('boom'))).toBe(true);
+    expect(sameCompatibility(withError('boom'), withError('bang'))).toBe(false);
   });
 });

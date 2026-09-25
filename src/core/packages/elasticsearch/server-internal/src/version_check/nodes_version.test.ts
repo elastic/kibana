@@ -15,16 +15,11 @@ import {
   initialState,
   model,
   pollEsNodesVersion,
-  sameCompatibility,
   type NodesVersionResult,
   type NodesVersionConfig,
   type NodesVersionState,
 } from './nodes_version';
-import {
-  mapNodesVersionCompatibility,
-  type NodesInfo,
-  type NodesVersionCompatibility,
-} from './nodes_version_compatibility';
+import { mapNodesVersionCompatibility, type NodesInfo } from './nodes_version_compatibility';
 import { virtualClock } from './state_action_machine.test_helpers';
 
 // `satisfies` keeps the optional intervals as `number` where the tests read them.
@@ -220,26 +215,6 @@ describe('the event of a step', () => {
     const { state: used, event } = model(config, normal, fail(requestError));
     expect(event).toEqual({ type: 'retried' });
     expect(model(config, used, ok(compatible)).event).toEqual({ type: 'compatibilityUnchanged' });
-  });
-});
-
-describe('sameCompatibility', () => {
-  const withError = (message: string): NodesVersionCompatibility =>
-    compatibilityOf({ nodes: {}, nodesInfoRequestError: new Error(message) });
-
-  it('treats two compatibilities of the same cluster as equal', () => {
-    expect(sameCompatibility(compatibilityOf(compatible), compatibilityOf(compatible))).toBe(true);
-  });
-
-  it('distinguishes a changed node version', () => {
-    expect(sameCompatibility(compatibilityOf(compatible), compatibilityOf(incompatible))).toBe(
-      false
-    );
-  });
-
-  it('distinguishes errors by message only', () => {
-    expect(sameCompatibility(withError('boom'), withError('boom'))).toBe(true);
-    expect(sameCompatibility(withError('boom'), withError('bang'))).toBe(false);
   });
 });
 
