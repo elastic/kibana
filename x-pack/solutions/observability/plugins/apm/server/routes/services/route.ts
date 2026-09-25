@@ -222,7 +222,7 @@ const serviceMetadataIconsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
     const { serviceName } = params.path;
-    const { start, end } = params.query;
+    const { start, end, environment } = params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
@@ -234,6 +234,7 @@ const serviceMetadataIconsRoute = createApmServerRoute({
 
     return getServiceMetadataIcons({
       serviceName,
+      environment,
       apmEventClient,
       searchAggregatedTransactions,
       start,

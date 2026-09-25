@@ -31,6 +31,7 @@ import { SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common/service_metada
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
+import { environmentQuery } from '../../../common/utils/environment_query';
 
 export const should = [
   { exists: { field: CONTAINER_ID } },
@@ -45,18 +46,24 @@ export const should = [
 
 export async function getServiceMetadataIcons({
   serviceName,
+  environment,
   apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
 }: {
   serviceName: string;
+  environment: string;
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }): Promise<ServiceMetadataIcons> {
-  const filter = [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)];
+  const filter = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    ...environmentQuery(environment),
+    ...rangeQuery(start, end),
+  ];
 
   const fields = asMutableArray([
     CLOUD_PROVIDER,
