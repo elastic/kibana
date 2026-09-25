@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH, MAX_QUERY_LENGTH } from '../../schema/zod/limits';
+import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
 import { groupSummarySchema } from '../../schema/zod/common';
 
 const groupBySchema = z.union([
@@ -28,8 +28,8 @@ const findSLOGroupsParamsSchema = z.object({
       groupsFilter: z
         .union([z.array(z.string().max(MAX_KEYWORD_LENGTH)), z.string().max(MAX_KEYWORD_LENGTH)])
         .optional(),
-      kqlQuery: z.string().max(MAX_QUERY_LENGTH).optional(),
-      filters: z.string().max(MAX_QUERY_LENGTH).optional(),
+      kqlQuery: z.string().optional(),
+      filters: z.string().optional(),
     })
     .optional(),
 });

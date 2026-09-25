@@ -6,13 +6,11 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_QUERY_LENGTH } from '../../schema/zod/limits';
-
 const getSLOStatsOverviewParamsSchema = z.object({
   query: z
     .object({
-      kqlQuery: z.string().max(MAX_QUERY_LENGTH).optional(),
-      filters: z.string().max(MAX_QUERY_LENGTH).optional(),
+      kqlQuery: z.string().optional(),
+      filters: z.string().optional(),
     })
     .optional(),
 });
