@@ -394,7 +394,7 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 serverless: preview
 ```
 
-In {{serverless-full}}, {{kib}} audit logs are delivered through [audit trail log delivery](docs-content://deploy-manage/monitor/log-delivery/audit-trail.md) and use the following OpenTelemetry field names instead of the ECS fields described above. This mapping is specific to {{serverless-full}}. On self-managed and {{ech}} deployments, the `otel` appender ships the ECS fields described above unchanged.
+In {{serverless-full}}, {{kib}} audit logs are delivered through [audit trail log delivery](docs-content://deploy-manage/monitor/log-delivery/audit-trail.md) and use the following OpenTelemetry field names instead of the ECS fields in the [audit schema](#xpack-security-ecs-audit-schema). This mapping is specific to {{serverless-full}}. On self-managed and {{ech}} deployments, the `otel` appender ships the ECS audit schema fields unchanged.
 
 | **Audit schema field** | **OpenTelemetry field** |
 | --- | --- |
