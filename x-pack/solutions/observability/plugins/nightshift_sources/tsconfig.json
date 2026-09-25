@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["server/**/*", "public/**/*"],
+  "include": ["server/**/*", "public/**/*", "test/scout/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
@@ -17,6 +17,7 @@
     "@kbn/nightshift-shared",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-client",
+    "@kbn/scout-oblt",
     "@kbn/streams-schema",
     "@kbn/zod"
   ]

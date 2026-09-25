@@ -2,8 +2,8 @@
   "type": "plugin",
   "id": "@kbn/nightshift-sources-plugin",
   "owner": "@elastic/nightshift-sre-agent-team",
-  "group": "platform",
-  "visibility": "shared",
+  "group": "observability",
+  "visibility": "private",
   "description": "Nightshift Sources — the space-scoped catalog of ES|QL sources every Nightshift engine consumes",
   "plugin": {
     "id": "nightshiftSources",

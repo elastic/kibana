@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/nightshift-sources-plugin
   channel: ''
   owner: '@elastic/nightshift-sre-agent-team'
-  sourceRoot: x-pack/platform/plugins/shared/nightshift_sources
+  sourceRoot: x-pack/solutions/observability/plugins/nightshift_sources
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
@@ -28,18 +28,20 @@ dependsOn:
   - '@kbn/nightshift-shared'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-client'
+  - '@kbn/scout-oblt'
   - '@kbn/streams-schema'
   - '@kbn/zod'
 tags:
   - plugin
   - prod
-  - group-platform
-  - shared
+  - group-observability
+  - private
   - jest-unit-tests
 fileGroups:
   src:
     - server/**/*
     - public/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
