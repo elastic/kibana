@@ -222,10 +222,10 @@ function byKey<T>([a]: [string, T], [b]: [string, T]): number {
 }
 
 export interface AgentCredentialVars {
-  method: 'direct_access_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
-  /** direct_access_keys / temporary_keys — access key id (non-secret) */
+  method: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
+  /** static_keys / temporary_keys — access key id (non-secret) */
   access_key_id?: string;
-  /** direct_access_keys / temporary_keys — secret (memory-only, never persisted) */
+  /** static_keys / temporary_keys — secret (memory-only, never persisted) */
   secret_access_key?: string;
   /** temporary_keys — session token (memory-only, never persisted) */
   session_token?: string;
@@ -252,7 +252,7 @@ export function buildPackageVars(
 
   if (agentCredentials) {
     const { method } = agentCredentials;
-    if (method === 'direct_access_keys' || method === 'temporary_keys') {
+    if (method === 'static_keys' || method === 'temporary_keys') {
       if (agentCredentials.access_key_id && agentCredentials.secret_access_key) {
         if (pkgVarNames.has('access_key_id')) vars.access_key_id = agentCredentials.access_key_id;
         if (pkgVarNames.has('secret_access_key'))

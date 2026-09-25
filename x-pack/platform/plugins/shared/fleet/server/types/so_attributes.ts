@@ -385,7 +385,7 @@ export interface CloudOnboardingDeploymentSOAttributes {
   provider: CloudProvider;
   /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. Absent for static-keys deployments. Null after MI→ECF transition clears the association. */
   connectorId?: string | null;
-  /** Active delivery mechanisms included in this deployment's IaC stack (agentless, firehose, cloud_forwarder, agent_based). */
+  /** Active delivery mechanisms included in this deployment (managed_integration, ecf, agent_based). */
   mechanisms: DeploymentMethod[];
   /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
   deploymentId?: string;
@@ -405,14 +405,19 @@ export interface CloudOnboardingDeploymentSOAttributes {
   globalRegion?: string;
   /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
-  /** Authentication method used for managed integrations. Null after MI→ECF transition clears the field. */
+  /**
+   * Authentication method for this deployment.
+   * - managed_integration: identity_federation | static_keys
+   * - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
+   * Null after MI→ECF transition clears the field.
+   */
   authMethod?: CloudOnboardingDeploymentAuthMethod | null;
-  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
+  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policies tracked in agentPolicyIds. */
   packagePolicyIds?: string[];
   /** instanceId → policyId mapping persisted after deploy. Hydrated into session storage on resume so cleanup correctly targets stale policies when services are removed after reopening a deployed onboarding URL. */
   policyIdsByInstance?: Record<string, string>;
-  /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless, agentPolicyId equals packagePolicyId and is not stored separately. */
-  agentPolicyId?: string;
-  /** Elasticsearch API key ID for push mechanisms (firehose, cloud_forwarder). Set by the backend after key creation; used to identify the key for rotation/revocation. No package policy exists for push services. */
+  /** Agent policy IDs for agent_based mechanism — the user-managed policies the package policies are attached to. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies. */
+  agentPolicyIds?: string[];
+  /** Elasticsearch API key ID for push mechanisms (ecf). Set by the backend after key creation; used to identify the key for rotation/revocation. */
   apiKeyId?: string;
 }

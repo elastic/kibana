@@ -21,6 +21,7 @@ import {
   KibanaVersionContext,
   sendGetCloudOnboardingDeployment,
 } from '@kbn/fleet-plugin/public';
+import { fromSOAuthMethod } from './step_components/authenticate_and_deploy_step/agent_based_section/credential_method_selector';
 import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
@@ -87,17 +88,47 @@ export async function hydrateOnboardingSession(
         serviceVars: item.serviceVars ?? {},
       })
     );
+    const isAgentBased = item.mechanisms?.includes('agent_based') ?? false;
+    const policyIds = item.agentPolicyIds ?? [];
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'authenticateAndDeployStep'),
-      item.connectorId
+      isAgentBased
+        ? JSON.stringify({
+            deploymentMethod: 'agent_based',
+            // Any persisted policy ids mean the policies already exist, so resume in
+            // 'existing' mode — otherwise the hook's new-policy route would create another.
+            agentHostsMode: policyIds.length ? 'existing' : 'new',
+            selectedAgentPolicyIds: policyIds,
+            // agentPolicyId is intentionally NOT seeded here: useAgentPolicySummary falls back to
+            // selectedAgentPolicyIds[0] for enrollment-token/count queries, and seeding it would
+            // cause useAgentBasedDeploy to narrow a multi-policy deployment to only the first id.
+            // Secrets are never persisted; restoring the method puts the right form in front of the user.
+            agentCredentialMethod: fromSOAuthMethod(item.authMethod ?? undefined), // CodeQL[js/clear-text-storage-of-sensitive-data] false positive: authMethod is a UI selector enum ('static_keys', 'assume_role', etc.), not a credential
+          })
+        : item.connectorId
         ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
         : JSON.stringify({ authMethod: 'static_keys' })
     );
+    // Seed policyIdsByInstance from packagePolicyIds so isAlreadyDeployed evaluates correctly
+    // on resume. Without this, Back→Next would re-run deployToExistingAgentPolicies and create
+    // duplicate package policies for every service instance.
+    // packagePolicyIds is a flat list — we don't know which id maps to which instance, but any
+    // truthy value per instance is enough to satisfy the isAlreadyDeployed check. Use the first
+    // id as a placeholder for all services in the SO's services list.
+    // Only seed for fully succeeded deploys — a failed status means some services need retry
+    // and fabricating completion for them would prevent that retry path from running.
+    // Fallback for V1 docs that lack policyIdsByInstance: use packagePolicyIds[0] for every
+    // service — we can't reconstruct the per-instance mapping from a flat list, but any truthy
+    // value satisfies the isAlreadyDeployed check on resume.
+    const policyIdsByInstance: Record<string, string> =
+      item.status === 'succeeded' && item.packagePolicyIds?.length && item.services?.length
+        ? Object.fromEntries(item.services.map((svc) => [svc, item.packagePolicyIds![0]]))
+        : {};
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'detectAndReviewStep'),
       JSON.stringify({
         serviceStatuses: {},
-        policyIdsByInstance: item.policyIdsByInstance ?? {},
+        policyIdsByInstance: item.policyIdsByInstance ?? policyIdsByInstance,
         ...(item.ecfStacks ? { ecfStacks: item.ecfStacks } : {}),
         failedInstances: [],
         deployErrors: {},

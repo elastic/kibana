@@ -24,6 +24,18 @@ jest.mock('./agent_based_deploy', () => ({
   buildAgentPolicyName: jest.fn(),
 }));
 
+jest.mock('./use_onboarding_so', () => ({
+  useOnboardingSO: jest.fn(),
+}));
+
+jest.mock('./package_inputs', () => ({
+  toSOServiceVars: jest.fn().mockReturnValue({}),
+}));
+
+jest.mock('./agent_based_section/credential_method_selector', () => ({
+  toSOAuthMethod: jest.fn().mockReturnValue('static_keys'),
+}));
+
 jest.mock('./policy_cleanup_agent_based', () => ({
   cleanupAgentBasedPolicies: jest.fn(),
 }));
@@ -33,17 +45,22 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   buildAgentBasedTargets,
   deployToExistingAgentPolicies,
+  deployNewAgentPolicy,
   buildAgentBasedInstanceStatuses,
   extractErrorMessage,
 } from './agent_based_deploy';
+import { useOnboardingSO } from './use_onboarding_so';
 import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
 
 import { useAgentBasedDeploy } from './use_agent_based_deploy';
+
+const mockUseOnboardingSO = useOnboardingSO as jest.Mock;
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockBuildAgentBasedTargets = buildAgentBasedTargets as jest.Mock;
 const mockDeployToExistingAgentPolicies = deployToExistingAgentPolicies as jest.Mock;
+const mockDeployNewAgentPolicy = deployNewAgentPolicy as jest.Mock;
 const mockBuildAgentBasedInstanceStatuses = buildAgentBasedInstanceStatuses as jest.Mock;
 const mockExtractErrorMessage = extractErrorMessage as jest.Mock;
 const mockCleanupAgentBasedPolicies = cleanupAgentBasedPolicies as jest.Mock;
@@ -68,13 +85,14 @@ function makeFlowMock({
   agentPolicyId = 'existing-policy-id',
   agentHostsMode = 'existing' as const,
   policyIdsByInstance = {} as Record<string, string>,
+  onboardingDeploymentId = undefined as string | undefined,
 } = {}) {
   const updateDetectAndReviewStep = jest.fn();
   const removeDeployInstances = jest.fn();
   mockUseOnboardingFlow.mockReturnValue({
-    servicesStep: { selectedServiceIds: [] },
+    servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
     authenticateAndDeployStep: {},
-    detectAndReviewStep: { policyIdsByInstance },
+    detectAndReviewStep: { policyIdsByInstance, onboardingDeploymentId },
     updateDetectAndReviewStep,
     removeDeployInstances,
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
@@ -91,12 +109,429 @@ function makeFlowMock({
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
+const mockCreateDeployment = jest.fn().mockResolvedValue(null);
+const mockUpdateDeployment = jest.fn().mockResolvedValue(undefined);
+const mockPersistDeploymentId = jest.fn();
+
+describe('useAgentBasedDeploy — SO persistence', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
+    mockBuildAgentBasedInstanceStatuses.mockReturnValue({});
+    mockExtractErrorMessage.mockReturnValue('error');
+    mockUseOnboardingSO.mockReturnValue({
+      createDeployment: mockCreateDeployment,
+      updateDeployment: mockUpdateDeployment,
+      persistDeploymentId: mockPersistDeploymentId,
+    });
+  });
+
+  it('creates SO on first deploy, persists id in URL, and updates with agentPolicyIds + status:succeeded', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-123');
+    makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: {} });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCreateDeployment).toHaveBeenCalledTimes(1);
+    expect(mockCreateDeployment).toHaveBeenCalledWith(
+      expect.objectContaining({ mechanisms: ['agent_based'], provider: 'aws' })
+    );
+    expect(mockPersistDeploymentId).toHaveBeenCalledWith('so-id-123');
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-123',
+      expect.objectContaining({ status: 'succeeded' })
+    );
+  });
+
+  it('update carries agentPolicyIds from existing-policy deploy', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-456');
+    makeFlowMock({
+      agentHostsMode: 'existing',
+      agentPolicyId: undefined as unknown as string,
+      policyIdsByInstance: {},
+    });
+    // Override selectedAgentPolicyIds to have two policies.
+    mockUseOnboardingFlow.mockReturnValue({
+      ...mockUseOnboardingFlow.mock.results[0]?.value,
+      servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: { policyIdsByInstance: {} },
+      updateDetectAndReviewStep: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: undefined,
+        selectedAgentPolicyIds: ['policy-1', 'policy-2'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-456',
+      expect.objectContaining({ agentPolicyIds: ['policy-1', 'policy-2'], status: 'succeeded' })
+    );
+  });
+
+  it('updates SO with status:failed when deploy has failures', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-789');
+    makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: {} });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: {},
+      failedInstances: ['serviceA'],
+      errorsByInstance: { serviceA: 'deploy error' },
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-789',
+      expect.objectContaining({ status: 'failed' })
+    );
+  });
+
+  it('does not create a second SO on Back→Next re-entry (onboardingDeploymentId already set)', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-new');
+    makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: {} });
+    // Simulate an existing deployment id in session storage.
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: { policyIdsByInstance: {}, onboardingDeploymentId: 'so-id-existing' },
+      updateDetectAndReviewStep: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'existing-policy-id',
+        selectedAgentPolicyIds: ['existing-policy-id'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCreateDeployment).not.toHaveBeenCalled();
+    expect(mockPersistDeploymentId).not.toHaveBeenCalled();
+    // Update still fires against the existing id.
+    expect(mockUpdateDeployment).toHaveBeenCalledWith('so-id-existing', expect.any(Object));
+  });
+
+  it('does not create a second SO on retry when an ID already exists', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-retry');
+    // onboardingDeploymentId already set — create must be skipped regardless of isRetry.
+    makeFlowMock({
+      agentHostsMode: 'existing',
+      policyIdsByInstance: { serviceA: 'pkg-A' },
+      onboardingDeploymentId: 'existing-so-id',
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: {},
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy(['serviceA']);
+    });
+
+    expect(mockCreateDeployment).not.toHaveBeenCalled();
+    expect(mockPersistDeploymentId).not.toHaveBeenCalled();
+  });
+
+  it('creates SO on retry when initial create failed (no onboardingDeploymentId)', async () => {
+    // If the first deploy attempt's SO create returned null and the deploy failed,
+    // a retry must still be able to create the record so the successful Fleet result has a
+    // durable home. The !onboardingDeploymentId guard is sufficient; !isRetry would block this.
+    mockCreateDeployment.mockResolvedValue('so-id-retry-recovery');
+    makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: {} });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy(['serviceA']);
+    });
+
+    expect(mockCreateDeployment).toHaveBeenCalledTimes(1);
+    expect(mockPersistDeploymentId).toHaveBeenCalledWith('so-id-retry-recovery');
+  });
+
+  it('continues deploy even when SO create fails (createDeployment returns null)', async () => {
+    mockCreateDeployment.mockResolvedValue(null);
+    makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: {} });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    let deployResult: { failed: boolean } | undefined;
+    await act(async () => {
+      deployResult = await result.current.handleDeploy();
+    });
+
+    expect(deployResult?.failed).toBe(false);
+    expect(mockPersistDeploymentId).not.toHaveBeenCalled();
+    // No SO id → updateDeployment must not be called.
+    expect(mockUpdateDeployment).not.toHaveBeenCalled();
+  });
+
+  // services/serviceVars refresh on success-path update
+  it('success-path update includes services and serviceVars so SO stays current after incremental additions', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-refresh');
+    // Simulate: service A already deployed, now deploying service A+B (B is new).
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['serviceA', 'serviceB'], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { serviceA: 'pkg-A' },
+        onboardingDeploymentId: 'so-id-refresh',
+        pendingCleanupPolicyIds: {},
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'existing-policy-id',
+        selectedAgentPolicyIds: ['existing-policy-id'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    // targets = both A and B; the hook filters to only B since A is already in policyIdsByInstance
+    mockBuildAgentBasedTargets.mockReturnValue([groupA, groupB]);
+    mockCleanupAgentBasedPolicies.mockResolvedValue({ removedPolicyIds: [] });
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceB: 'pkg-B' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // The update must carry the FULL service list, not just the newly deployed one.
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-refresh',
+      expect.objectContaining({
+        services: ['serviceA', 'serviceB'],
+        serviceVars: expect.any(Object),
+        status: 'succeeded',
+      })
+    );
+  });
+
+  // catch-path update includes services/serviceVars/authMethod so a resumed-after-error
+  // deployment restores the correct service set and credential method.
+  it('catch-path update includes services, serviceVars, and authMethod so resume after unexpected error is consistent', async () => {
+    mockCreateDeployment.mockResolvedValue(null);
+    // Set up with a pre-existing SO id so the catch update fires.
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['serviceA'], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: {},
+        onboardingDeploymentId: 'so-id-catch',
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'existing-policy-id',
+        selectedAgentPolicyIds: ['existing-policy-id'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    // Make the deploy function throw to exercise the catch block.
+    mockDeployToExistingAgentPolicies.mockRejectedValue(new Error('unexpected network failure'));
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockUpdateDeployment).toHaveBeenCalledTimes(1);
+    const [, payload] = mockUpdateDeployment.mock.calls[0];
+    expect(payload).toHaveProperty('status', 'failed');
+    // Catch path must carry services/serviceVars/authMethod so resume after an unexpected error
+    // restores the correct service set and credential method rather than a stale snapshot.
+    expect(payload).toHaveProperty('services', ['serviceA']);
+    expect(payload).toHaveProperty('serviceVars');
+    expect(payload).toHaveProperty('authMethod');
+  });
+
+  it('create payload includes agentPolicyIds for existing-policy mode so mid-deploy tab-close leaves a resumable record', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-existing-create');
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['serviceA'], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: { policyIdsByInstance: {} },
+      updateDetectAndReviewStep: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: undefined,
+        selectedAgentPolicyIds: ['policy-x', 'policy-y'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockCreateDeployment).toHaveBeenCalledWith(
+      expect.objectContaining({ agentPolicyIds: ['policy-x', 'policy-y'] })
+    );
+  });
+
+  it('create payload includes agentPolicyIds for pre-created new-policy mode so mid-deploy tab-close hydrates back into existing mode', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-precreated');
+    // agentHostsMode is 'new' but agentPolicyId is already set (flyout created it on a prior Next).
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['serviceA'], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: { policyIdsByInstance: {} },
+      updateDetectAndReviewStep: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'new' as const,
+        agentPolicyId: 'pre-created-policy-id',
+        selectedAgentPolicyIds: [],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployNewAgentPolicy.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+      agentPolicyId: 'pre-created-policy-id',
+      agentPolicyName: 'AWS Agent Policy 1',
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // The create payload must include agentPolicyIds wrapping the pre-created id so a
+    // mid-deploy tab-close hydrates as existing mode, not new-policy mode.
+    expect(mockCreateDeployment).toHaveBeenCalledWith(
+      expect.objectContaining({ agentPolicyIds: ['pre-created-policy-id'] })
+    );
+  });
+
+  it('partial retry status uses merged failure set, not just current-call failures', async () => {
+    mockCreateDeployment.mockResolvedValue(null);
+    makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: { serviceA: 'pkg-A' } });
+    // Set up flow with onboardingDeploymentId so the update fires.
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { serviceA: 'pkg-A' },
+        onboardingDeploymentId: 'so-id-partial',
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      // serviceB was a prior failure and is NOT being retried.
+      getLatestFailedInstances: jest.fn().mockReturnValue(['serviceB']),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'existing-policy-id',
+        selectedAgentPolicyIds: ['existing-policy-id'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA, groupB]);
+    // Retry only serviceA — it succeeds.
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy(['serviceA']);
+    });
+
+    // serviceB is still failed from before → merged status must be 'failed', not 'succeeded'.
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-partial',
+      expect.objectContaining({ status: 'failed' })
+    );
+  });
+});
+
 describe('useAgentBasedDeploy — incremental deploy filtering', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
     mockBuildAgentBasedInstanceStatuses.mockReturnValue({});
     mockExtractErrorMessage.mockReturnValue('error');
+    mockUseOnboardingSO.mockReturnValue({
+      createDeployment: mockCreateDeployment,
+      updateDeployment: mockUpdateDeployment,
+      persistDeploymentId: mockPersistDeploymentId,
+    });
   });
 
   it('skips already-deployed instances and only deploys new ones (A deployed, B added → only B deployed)', async () => {
@@ -343,6 +778,100 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     expect(deployResult).toEqual({ failed: false });
     expect(mockDeployToExistingAgentPolicies).not.toHaveBeenCalled();
     expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
+  });
+
+  it('cleanup-only path: refreshes SO with current services so removed service is not restored on resume', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-cleanup');
+    // Both pkg-policy-A (explicit pendingCleanupPolicyIds) and pkg-policy-B (live-stale from instB
+    // being in policyIdsByInstance but not in active targets) must succeed for the SO to be updated.
+    mockCleanupAgentBasedPolicies.mockResolvedValue({
+      toDelete: ['pkg-policy-A', 'pkg-policy-B'],
+      toUpdate: [],
+    });
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svcB'] },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { instA: 'pkg-policy-A', instB: 'pkg-policy-B' },
+        pendingCleanupPolicyIds: { instA: 'pkg-policy-A' },
+        onboardingDeploymentId: 'so-id-cleanup',
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'agent-policy-1',
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
+    mockBuildAgentBasedTargets.mockReturnValue([]);
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-cleanup',
+      expect.objectContaining({
+        services: ['svcB'],
+        // After cleanup of instA (pkg-policy-A) and instB (pkg-policy-B), neither deleted ID
+        // should appear in the persisted policy list.
+        packagePolicyIds: [],
+        policyIdsByInstance: {},
+      })
+    );
+  });
+
+  it('no-cleanup no-deploy path: reconciles SO services and packagePolicyIds when a failed service with no policy is deselected', async () => {
+    // Scenario: A was deployed (instA→pkg-policy-A), B failed with no package policy.
+    // User deselects B. targets=[instA already deployed], no cleanup (B had no policy),
+    // so handleDeploy hits the early return. SO must be refreshed to remove B from services.
+    mockCreateDeployment.mockResolvedValue('so-id-reconcile');
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svcA'] },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { instA: 'pkg-policy-A' },
+        pendingCleanupPolicyIds: {},
+        onboardingDeploymentId: 'so-id-reconcile',
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: undefined,
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
+    // All instances are already deployed → targetsToDeploy is empty.
+    mockBuildAgentBasedTargets.mockReturnValue([{ instanceIds: ['instA'], packageIds: [] }]);
+    // policyIdsByInstance has instA, so targets.filter(not already deployed) = []
+    // and hasPendingCleanup = false → early return path.
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    let deployResult: { failed: boolean } | undefined;
+    await act(async () => {
+      deployResult = await result.current.handleDeploy();
+    });
+
+    expect(deployResult).toEqual({ failed: false });
+    expect(mockCleanupAgentBasedPolicies).not.toHaveBeenCalled();
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-reconcile',
+      expect.objectContaining({
+        services: ['svcA'],
+        packagePolicyIds: ['pkg-policy-A'],
+      })
+    );
   });
 
   it('runs cleanup on retry when pendingCleanupPolicyIds is non-empty', async () => {

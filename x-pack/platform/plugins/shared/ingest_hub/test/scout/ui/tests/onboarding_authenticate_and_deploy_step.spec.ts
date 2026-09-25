@@ -169,9 +169,9 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
 
-    // Deploy must be enabled WITHOUT credentials — this exercises the isCleanupOnly bypass
-    // (!isDeployReady && !isCleanupOnly → disabled). Filling credentials first would mask a
-    // regression where the button is only enabled because isDeployReady, not isCleanupOnly.
+    // The managed-integrations deploy button is enabled for cleanup-only scenarios (agentless path)
+    // regardless of credential state — no credentials are required because the agentless handler
+    // does not rebuild package-level vars.
     const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
     await expect(deployButton).toBeEnabled();
 
@@ -300,6 +300,15 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     });
 
     await expect(page.testSubj.locator('agentBasedSection')).toBeVisible();
+
+    // Credentials are required even in cleanup-only scenarios — cleanupAgentBasedPolicies
+    // rebuilds the shared policy's vars, so entering credentials prevents stripping them
+    // from the surviving integration.
+    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId');
+    const secretKeyField = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
+    await expect(accessKeyField).toBeVisible();
+    await accessKeyField.fill('AKIATEST');
+    await secretKeyField.fill('secrettest');
 
     const updateRequestPromise = page.waitForRequest(
       (req) =>

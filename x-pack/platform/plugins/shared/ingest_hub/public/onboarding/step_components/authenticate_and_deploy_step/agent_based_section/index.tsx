@@ -7,7 +7,8 @@
 
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { useLocation } from 'react-router-dom';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -65,6 +66,10 @@ export function AgentBasedSection({
   failedInstances,
   deployErrors,
 }: AgentBasedSectionProps) {
+  const location = useLocation();
+  // True when the wizard was opened via ?deploymentId=<id> (resume / edit mode).
+  const isEditMode = new URLSearchParams(location.search).has('deploymentId');
+
   const { agentBasedDeployment, setAgentBasedDeployment } = useOnboardingFlow();
   const {
     agentHostsMode,
@@ -124,7 +129,7 @@ export function AgentBasedSection({
           : persistedCredentialProfileName;
       const resolvedArn = overrides?.arn !== undefined ? overrides.arn : persistedRoleArn;
 
-      if (method === 'direct_access_keys' && resolvedStatic) {
+      if (method === 'static_keys' && resolvedStatic) {
         onCredentialsChange({ method, ...resolvedStatic });
       } else if (method === 'temporary_keys' && resolvedTemp) {
         onCredentialsChange({ method, ...resolvedTemp });
@@ -161,7 +166,16 @@ export function AgentBasedSection({
 
   const handleCredentialMethodChange = (method: AgentCredentialMethod) => {
     setAgentBasedDeployment({ agentCredentialMethod: method });
-    setIsCredentialReady(false);
+    // For text-field methods, recompute readiness from retained persisted values so switching
+    // back to a previously populated assume_role/shared_credentials method doesn't leave Next
+    // permanently disabled until the user manually edits an already-valid field.
+    if (method === 'assume_role') {
+      setIsCredentialReady(!!persistedRoleArn);
+    } else if (method === 'shared_credentials') {
+      setIsCredentialReady(!!(persistedSharedCredentialFile || persistedCredentialProfileName));
+    } else {
+      setIsCredentialReady(false);
+    }
     // Reset in-memory secrets on method switch (safety: don't carry static keys into temporary slot).
     setStaticKeyCreds(undefined);
     setTemporaryKeyCreds(undefined);
@@ -203,10 +217,16 @@ export function AgentBasedSection({
 
   // ── Next-button readiness ─────────────────────────────────────────────────
   // Tells the parent step whether its Next button should be enabled.
+  // All three branches require isCredentialReady:
+  // - isPolicyCreated: flyout created the policy; agentCredentialsRef resets to undefined on every
+  //   mount, so navigating to step 4 and back clears in-memory secrets. An incremental deploy
+  //   (add service after first success) must re-enter credentials.
+  // - agentHostsMode === 'existing': user selected an existing policy; credentials always in-memory.
+  // - new-policy: credentials must be entered before the flyout runs.
   const isNextReady = isPolicyCreated
-    ? true // policy exists; Next will attach package policies to it
+    ? isCredentialReady
     : agentHostsMode === 'existing'
-    ? selectedAgentPolicyIds.length > 0
+    ? selectedAgentPolicyIds.length > 0 && isCredentialReady
     : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
 
   const onNextReadyChangeRef = useRef(onNextReadyChange);
@@ -232,7 +252,11 @@ export function AgentBasedSection({
   );
 
   // ── Existing policy multi-select ──────────────────────────────────────────
-  const { data: policiesData, isLoading: isPoliciesLoading } = useGetAgentPoliciesQuery(
+  const {
+    data: policiesData,
+    isLoading: isPoliciesLoading,
+    isError: isPoliciesError,
+  } = useGetAgentPoliciesQuery(
     {
       full: false,
       perPage: 1000,
@@ -259,6 +283,26 @@ export function AgentBasedSection({
   );
 
   const isEmpty = !isPoliciesLoading && policyOptions.length === 0;
+
+  // After policies load successfully, filter out any persisted ids that no longer exist or are
+  // now managed/Fleet-Server policies (deleted between sessions, or policy type changed).
+  // Guard on !isPoliciesError: React Query sets isLoading=false on error while policiesData stays
+  // undefined, which would produce an empty policyOptions and incorrectly wipe the selection.
+  useEffect(() => {
+    if (isPoliciesLoading || isPoliciesError || agentHostsMode !== 'existing') return;
+    const validIds = new Set(policyOptions.map((o) => o.value));
+    const reconciled = selectedAgentPolicyIds.filter((id) => validIds.has(id));
+    if (reconciled.length !== selectedAgentPolicyIds.length) {
+      setAgentBasedDeployment({ selectedAgentPolicyIds: reconciled });
+    }
+  }, [
+    policyOptions,
+    isPoliciesLoading,
+    isPoliciesError,
+    agentHostsMode,
+    selectedAgentPolicyIds,
+    setAgentBasedDeployment,
+  ]);
 
   // ── Flyout ────────────────────────────────────────────────────────────────
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -300,10 +344,30 @@ export function AgentBasedSection({
             </p>
           </EuiText>
 
-          {/* Credential fields — show until the policy is created; in existing mode always show. */}
-          {(!isPolicyCreated || agentHostsMode === 'existing') && (
+          {/* Credential fields — show in existing mode always; in new-policy mode until the policy
+              is created AND credentials are in memory (re-show after Back navigation remount). */}
+          {(!isPolicyCreated || agentHostsMode === 'existing' || !isCredentialReady) && (
             <>
               <EuiSpacer size="m" />
+
+              {/* Resume callout — credentials are never persisted; user must re-enter them. */}
+              {isEditMode && !isCredentialReady && (
+                <>
+                  <KbnWarningCallout
+                    announceOnMount
+                    size="s"
+                    title={i18n.translate(
+                      'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.resumeCredentialsCallout',
+                      {
+                        defaultMessage:
+                          'Credentials aren’t saved between sessions — re-enter them to continue.',
+                      }
+                    )}
+                    data-test-subj="agentBasedSection-resumeCredentialsCallout"
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
 
               {/* Credential method selector */}
               <CredentialMethodSelector
@@ -315,12 +379,12 @@ export function AgentBasedSection({
 
               {/* Credential fields */}
               <Suspense fallback={<EuiLoadingSpinner />}>
-                {credentialMethod === 'direct_access_keys' && (
+                {credentialMethod === 'static_keys' && (
                   <LazyAwsStaticKeysForm
                     onReadyChange={setIsCredentialReady}
                     onFieldsChange={(creds) => {
                       setStaticKeyCreds(creds ?? undefined);
-                      notifyCredentialChange('direct_access_keys', {
+                      notifyCredentialChange('static_keys', {
                         staticCreds: creds ?? undefined,
                       });
                     }}
@@ -344,11 +408,14 @@ export function AgentBasedSection({
                     onSharedCredentialFileChange={(val) => {
                       setAgentBasedDeployment({ sharedCredentialFile: val });
                       notifyCredentialChange('shared_credentials', { sharedFile: val });
-                      setIsCredentialReady(true);
+                      // Recompute from both fields: either one non-empty is sufficient.
+                      setIsCredentialReady(!!(val || persistedCredentialProfileName));
                     }}
                     onCredentialProfileNameChange={(val) => {
                       setAgentBasedDeployment({ credentialProfileName: val });
                       notifyCredentialChange('shared_credentials', { profileName: val });
+                      // Recompute from both fields: either one non-empty is sufficient.
+                      setIsCredentialReady(!!(persistedSharedCredentialFile || val));
                     }}
                   />
                 )}

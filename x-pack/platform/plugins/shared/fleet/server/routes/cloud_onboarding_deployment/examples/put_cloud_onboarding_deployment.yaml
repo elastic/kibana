@@ -30,6 +30,8 @@ responses:
                   - 'cloudtrail'
                 status: 'deploying'
                 attemptCount: 1
+                agentPolicyIds:
+                  - 'agent-policy-id-1'
                 packagePolicyIds:
                   - 'package-policy-id-1'
   400:
