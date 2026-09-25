@@ -23,7 +23,7 @@ entries:
     name: 290076.yaml
     checksum: 3cdb1f82e779a947e40c84c131bac57811870da7
   type: bug-fix
-  title: Fix empty rule-details alerts table when data table is uninitialized
+  title: Fix empty rule details Alerts table when data table is uninitialized
   products:
   - product: cloud-serverless
   - product: kibana
@@ -36,7 +36,7 @@ entries:
     name: 290109.yaml
     checksum: aa59f9bd291bfcbca5e9f7506eb938930be853a7
   type: enhancement
-  title: Replace (null) with - in Discover and table visualizations
+  title: Replace `(null)` with `-` in Discover and table visualizations
   products:
   - product: cloud-serverless
   - product: kibana
@@ -62,7 +62,7 @@ entries:
     name: 292143.yaml
     checksum: a67c3023f9b4e50ddc7c251cad8461daede85393
   type: feature
-  title: Enable `--kill-descendants` for the `kill-process` response action
+  title: Enable `--kill-descendants` for the Elastic Defend `kill-process` response action
   products:
   - product: cloud-serverless
   - product: kibana
@@ -106,7 +106,7 @@ entries:
     name: 291142.yaml
     checksum: dda758648adf8625af91c95430a93e84b782a093
   type: bug-fix
-  title: Fix Kibana crash when product documentation downloads a corrupt zip
+  title: Fix Kibana crash when product documentation installer downloads a corrupt artifact
   products:
   - product: cloud-serverless
   - product: kibana
@@ -146,7 +146,7 @@ entries:
     name: 292132.yaml
     checksum: 0ff86e9bb45b193fbcef70f5ef1f0da4d3c91832
   type: enhancement
-  title: Replace the LLM Embedding and Rerank buttons with a Model type filter
+  title: Replace the LLM, Embedding, and Rerank buttons with a Model type filter on the Elastic Inference Service models page
   products:
   - product: cloud-serverless
   - product: kibana
@@ -247,7 +247,7 @@ entries:
     name: 290859.yaml
     checksum: 8ff74864ae7cab4883b1ec084e1b990a8cbd4600
   type: bug-fix
-  title: Fix Content Connectors delete leaving connectors in the list
+  title: Fix Content Connectors delete action leaving deleted connectors in the list
   products:
   - product: cloud-serverless
   - product: kibana
@@ -299,7 +299,7 @@ entries:
     name: 292761.yaml
     checksum: 165b965d8ec45c30208179b403943e6432dbd057
   type: bug-fix
-  title: Fix case creation modal appearing without permission
+  title: Fix case creation modal appearing for users who don't have the right permissions
   products:
   - product: cloud-serverless
   - product: kibana
