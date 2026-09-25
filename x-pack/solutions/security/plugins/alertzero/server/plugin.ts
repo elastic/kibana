@@ -43,6 +43,7 @@ import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerStepDefinitions } from './step_types';
 
 export class AlertZeroPlugin
   implements
@@ -96,6 +97,12 @@ export class AlertZeroPlugin
     registerAgentType(agentBuilder);
     registerAttachments(agentBuilder);
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
+    // Steps register during setup but only run after start; deps resolve lazily.
+    registerStepDefinitions({
+      workflowsExtensions,
+      getActionsService: () => this.requireActionsService(),
+      getConversations: () => this.requireAgentBuilderConversations(),
+    });
     // Registered in setup so the builtin tool is available to Agent Builder before
     // the first agent run; the handler resolves the service lazily like the routes do.
     agentBuilder.tools.register({
