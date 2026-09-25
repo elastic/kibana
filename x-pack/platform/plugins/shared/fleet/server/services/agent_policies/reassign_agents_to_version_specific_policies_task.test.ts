@@ -48,6 +48,7 @@ describe('ReassignAgentsToVersionSpecificPoliciesTask', () => {
           '(policy_id:"policy-with-agents" AND agent.version:9.3.*) OR (policy_id:policy-with-agents* AND agent.version:9.3.* AND upgraded_at:*)',
         showInactive: false,
         spaceId: '*',
+        _internalCrossSpace: true,
       },
       'policy-with-agents#9.3'
     );
