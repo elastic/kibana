@@ -16,14 +16,8 @@ const barTarget = 200;
 const roundInterval = (interval: number) => {
   {
     switch (true) {
-      case interval <= 500: // <= 0.5s
-        return '100 millisecond';
-      case interval <= 5000: // <= 5s
-        return '1 second';
-      case interval <= 7500: // <= 7.5s
-        return '5 second';
-      case interval <= 15000: // <= 15s
-        return '10 second';
+      case interval <= 15000: // <= 15s (floor)
+        return '15 second';
       case interval <= 45000: // <= 45s
         return '30 second';
       case interval <= 180000: // <= 3m

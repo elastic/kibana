@@ -29,7 +29,7 @@ describe('computeInterval', () => {
         },
         dataMock
       )
-    ).toEqual('1 second');
+    ).toEqual('15 second');
   });
 
   it('should return correct interval for 1 hour timerange', () => {

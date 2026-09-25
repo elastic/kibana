@@ -12,7 +12,6 @@ import { isEqual } from 'lodash';
 import {
   removeDropCommandsFromESQLQuery,
   appendToESQLQuery,
-  isESQLColumnSortable,
   hasTransformationalCommand,
   getCategorizeField,
   convertTimeseriesCommandToFrom,
@@ -642,17 +641,14 @@ export class LensVisService {
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     const normalizedQuery = convertTimeseriesCommandToFrom(safeQuery);
     const breakdown = breakdownColumn ? `\`${breakdownColumn.name}\`, ` : '';
-
-    // sort by breakdown column if it's sortable
-    const sortBy =
-      breakdownColumn && isESQLColumnSortable(breakdownColumn)
-        ? ` | sort \`${breakdownColumn.name}\` asc`
-        : '';
+    const topPerBucket = breakdownColumn
+      ? ` | SORT results DESC | LIMIT 5 BY ${TIMESTAMP_COLUMN}`
+      : '';
 
     const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${dataView.timeFieldName}, ${queryInterval})`;
     return appendToESQLQuery(
       normalizedQuery,
-      `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${sortBy}`
+      `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${topPerBucket}`
     );
   };
 
