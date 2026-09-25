@@ -58,6 +58,7 @@
     "@kbn/unified-data-table",
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
+    "@kbn/ui-callout",
     "@kbn/storybook",
     "@kbn/react-field",
     "@kbn/storage-adapter",
@@ -130,6 +131,7 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/mock-idp-utils",
     "@kbn/discover-session-constants",
+    "@kbn/ci-stats-reporter",
   ],
   "exclude": ["target/**/*"]
 }

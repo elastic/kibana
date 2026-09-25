@@ -17,10 +17,9 @@ export type { User } from './user';
 // Each entity this plugin owns keeps its own barrel; the umbrella re-exports
 // them so consumers have a single entry point per the plugin's public surface.
 export {
+  IMPACT_ATTACHMENT_TYPE,
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
-  IMPACT_UI_CAPABILITY_MANAGE,
-  IMPACT_UI_CAPABILITY_SHOW,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,
@@ -36,24 +35,47 @@ export {
 export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
 
 export {
+  ESCALATION_ASSIGNEES_FIELD,
+  ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_SUGGEST_USERS_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
+  ESCALATIONS_UI_CAPABILITY_SHOW,
   INVESTIGATION_TEMPLATE_ID,
+  MAX_ESCALATION_ASSIGNEES,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
+  MAX_ESCALATIONS_PAGE_SIZE,
   createEscalationRequestSchema,
+  escalationStatusSchema,
   escalationVisibilitySchema,
+  listEscalationsQuerySchema,
   updateEscalationRequestSchema,
 } from './escalations';
+
+export {
+  INVESTIGATION_ASSIGN_URL,
+  INVESTIGATIONS_INTERNAL_URL,
+  INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_SHOW,
+} from './investigations/constants';
+
+export {
+  assignConversationRequestBodySchema,
+  assignConversationRequestParamsSchema,
+} from './assignments/assignment';
+export type { AssignConversationRequest } from './assignments/assignment';
 
 export type {
   CreateEscalationRequest,
   EscalationConversation,
   EscalationConversationSummary,
+  EscalationStatus,
   EscalationVisibility,
+  ListEscalationsQuery,
   ListEscalationsResponse,
   UpdateEscalationRequest,
 } from './escalations';
