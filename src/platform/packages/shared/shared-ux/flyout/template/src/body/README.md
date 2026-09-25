@@ -17,7 +17,7 @@
 ```
 
 - **Props** — everything `KbnCalloutProps` takes (`title`, `text`, `actionProps`, `onDismiss`, …) except `size`, `heading`, `className`, `css`, and `style`, which the template owns so every banner callout looks the same. The title stays a `<p>`, out of the flyout's heading outline. `id` is the part's identity, unique among sibling callouts, and is generated when omitted.
-- **Visibility** — stays with the consumer: render the callout conditionally, and remove it from `onDismiss`.
+- **Visibility** — stays with the consumer: render the callout conditionally, and remove it from `onDismiss`. Give every conditional callout, and the callouts after it, an explicit `id`. A generated `id` follows the callout's position, so removing one callout shifts the generated `id` of each one after it, and those remount.
 - **Placement** — any number of callouts render as one stack in source order, with template-owned spacing, wherever they sit among `Body`'s children. Add no `EuiSpacer` around them. The banner scrolls with the body content.
 - **Tabs** — a callout directly under `Body` is flyout-wide and stays in place across tab switches. A callout inside a `Body.TabPanel` renders nothing; nothing warns about it.
 
