@@ -70,6 +70,55 @@ describe('buildCandidateQuery', () => {
     expect(result.ids).toContain('rpt-abc');
   });
 
+  describe('manually named ids', () => {
+    it('searches every named id rather than only the first `limit` of them', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf(['rpt-a', 'rpt-b']));
+
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-a', 'rpt-b'],
+        spaceId: 'default',
+        limit: 1,
+      });
+
+      expect(searchBodyOf(esClient).size).toBe(2);
+    });
+
+    it('does not claim a named report is missing just because it fell outside `limit`', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      // Honours `size` the way Elasticsearch does, so asking for too few really
+      // does hide the remaining ids from the `not_found` comparison below.
+      esClient.search.mockImplementation(async (request) =>
+        searchResponseOf(['rpt-a', 'rpt-b'].slice(0, (request as { size: number }).size), 2)
+      );
+
+      const result = await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-a', 'rpt-b'],
+        spaceId: 'default',
+        limit: 1,
+      });
+
+      expect(result.skipped).toEqual([]);
+      expect(result.ids).toEqual(['rpt-a']);
+      expect(result.truncated).toBe(true);
+    });
+
+    it('still reports a named id that genuinely matched nothing', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf(['rpt-a']));
+
+      const result = await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-a', 'rpt-gone'],
+        spaceId: 'default',
+      });
+
+      expect(result.skipped).toEqual([{ id: 'rpt-gone', reason: 'not_found' }]);
+    });
+  });
+
   it('lifts the hunt-once gate for a manually named report', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue(searchResponseOf(['rpt-abc']));
@@ -244,7 +293,7 @@ describe('buildCandidateQuery', () => {
       spaceId: 'default',
       limit: 5,
     });
-    expect(searchBodyOf(esClient).size).toBe(5);
+    expect(searchBodyOf(esClient).size).toBe(2);
   });
 
   it('sets truncated when total exceeds what was returned', async () => {

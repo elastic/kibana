@@ -57,7 +57,15 @@ const readAllOpenProposalConversationIds = async (
         {
           status,
           excludeSuperseded: true,
-          excludeExpired: true,
+          // Only a pending proposal can expire out of the gate. `excludeExpired`
+          // filters on `expiresAt > now` whatever the status, and an executing
+          // proposal keeps the deadline it was approved under — the proposals
+          // service inherits it deliberately, since the deadline is the analyst's
+          // and not the attempt's. Applying it to `executing` would therefore drop
+          // an action that is still running the moment its original decision
+          // deadline passed, and the gate would let the report be hunted again
+          // while containment is in flight.
+          excludeExpired: status === 'pending',
           size: MAX_PROPOSALS_PAGE_SIZE,
           from,
         },

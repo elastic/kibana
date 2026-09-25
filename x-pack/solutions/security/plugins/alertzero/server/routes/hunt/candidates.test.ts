@@ -169,6 +169,22 @@ describe('registerCandidatesRoute', () => {
       expect(conversationIds.has(`conversation-${MAX_PROPOSALS_PAGE_SIZE + 49}`)).toBe(true);
     });
 
+    it('keeps an executing proposal past its deadline, so containment in flight still blocks a re-hunt', async () => {
+      const { handler, context, list } = makeDeps();
+      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+      await readerOf()('default');
+
+      expect(list).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'pending', excludeExpired: true }),
+        'default'
+      );
+      expect(list).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'executing', excludeExpired: false }),
+        'default'
+      );
+    });
+
     it('collects both pending and executing proposals', async () => {
       const { handler, context, list } = makeDeps();
       list.mockImplementation(async ({ status }: { status: string }) => ({
