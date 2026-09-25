@@ -183,6 +183,30 @@ function getAgentPolicyCreateMock() {
   });
   return soClient;
 }
+
+function mockPackagePolicySOs(
+  soClient: ReturnType<typeof getSavedObjectMock>,
+  attributesList: Array<Record<string, unknown>>
+) {
+  soClient.find.mockImplementation(async (options) => {
+    if (options.type === PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
+      return {
+        saved_objects: attributesList.map((attributes, index) => ({
+          id: `pp-${index}`,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes,
+        })),
+        total: attributesList.length,
+        page: 1,
+        per_page: attributesList.length,
+      };
+    }
+    return { saved_objects: [], total: 0, page: 1, per_page: 1 };
+  });
+}
+
 let mockedLogger: jest.Mocked<Logger>;
 
 let otelExporter: tracing.InMemorySpanExporter;
@@ -1154,17 +1178,15 @@ describe('Agent policy', () => {
       const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+      mockPackagePolicySOs(soClient, [
         {
-          id: 'pp-1',
           package: { name: 'apache', title: 'Apache', version: '1.3.2' },
           package_agent_version_condition: '>=9.3.0',
-        } as any,
+        },
         {
-          id: 'pp-2',
           package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
           package_agent_version_condition: '>=8.0.0',
-        } as any,
+        },
       ]);
 
       await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
@@ -1189,12 +1211,7 @@ describe('Agent policy', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       // Omit `package` so that no EPM fallback lookup is triggered
-      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
-        {
-          id: 'pp-1',
-          package_agent_version_condition: undefined,
-        } as any,
-      ]);
+      mockPackagePolicySOs(soClient, [{ package_agent_version_condition: undefined }]);
 
       await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
 
@@ -1209,6 +1226,25 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should treat inputs_for_versions as a template-level version condition', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      mockPackagePolicySOs(soClient, [{ inputs_for_versions: { '9.1.0': [] } }]);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          has_agent_version_conditions: true,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
+        })
+      );
+    });
+
     it('should not fetch full package policies when deploying asynchronously', async () => {
       const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1217,10 +1253,10 @@ describe('Agent policy', () => {
         asyncDeploy: true,
       });
 
-      // computeMinAgentVersionData always fetches package policies once, but `_update`'s eager
-      // full fetch (for the deploy event it never triggers on this branch) should now be skipped,
-      // so the total should stay at 1 instead of the 2 it would be if `_update` also fetched.
-      expect(mockedPackagePolicyService.findAllForAgentPolicy).toHaveBeenCalledTimes(1);
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
+      );
+      expect(mockedPackagePolicyService.findAllForAgentPolicy).not.toHaveBeenCalled();
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
   });
@@ -2223,12 +2259,11 @@ describe('Agent policy', () => {
         saved_objects: [{ attributes: {}, id: 'agent-policy', type: 'mocked', references: [] }],
       });
 
-      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+      mockPackagePolicySOs(soClient, [
         {
-          id: 'pp-1',
           package: { name: 'apache', title: 'Apache', version: '1.3.2' },
           package_agent_version_condition: '>=9.3.0',
-        } as any,
+        },
       ]);
 
       await agentPolicyService.update(soClient, esClient, 'agent-policy', {
