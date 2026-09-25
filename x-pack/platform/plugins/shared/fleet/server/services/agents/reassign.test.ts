@@ -419,7 +419,7 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
         { agentIds: ['agent-1'], spaceId: '*' },
         regularAgentPolicySO2.id
       )
-    ).rejects.toThrow(FleetError);
+    ).rejects.toThrow(`spaceId '*' requires _internalCrossSpace: true`);
   });
 
   it('throws when spaceId "*" with _internalCrossSpace is used with a custom-space scoped soClient', async () => {
@@ -433,7 +433,7 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
         { agentIds: ['agent-1'], spaceId: '*', _internalCrossSpace: true },
         regularAgentPolicySO2.id
       )
-    ).rejects.toThrow(FleetError);
+    ).rejects.toThrow(`spaceId '*' requires an unscoped SO client`);
   });
 
   it('with spaceId "*", passes skipNamespaceFilter to getAgentsById and spaceId to reassignBatch', async () => {
