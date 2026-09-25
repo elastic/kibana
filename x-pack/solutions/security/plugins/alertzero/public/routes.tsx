@@ -8,8 +8,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import { useAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { PlaceholderPage } from './components/placeholder_page';
 import {
   NAV_ALERTS,
@@ -28,10 +27,7 @@ import { LandingPage } from './pages/landing_page';
  * on a page whose list requests would be rejected with 403.
  */
 const EscalationsRoute: React.FC = () => {
-  const { services } = useKibana<CoreStart>();
-  const showEscalations =
-    services.application.capabilities.agenticInvestigations?.showEscalations === true;
-
+  const { showEscalations } = useAgenticInvestigationsCapabilities();
   return showEscalations ? <EscalationsPage /> : <Redirect to="/" />;
 };
 
