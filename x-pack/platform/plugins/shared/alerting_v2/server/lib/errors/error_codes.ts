@@ -114,6 +114,13 @@ export const ALERTING_ERROR_CODES = {
    * it; bulk delete reports it per item.
    */
   API_KEY_INVALIDATION_FAILED: 'API_KEY_INVALIDATION_FAILED',
+  /**
+   * The current license does not support action policies. Action policies
+   * dispatch to Workflows, which require an active Enterprise license, so
+   * create / update / upsert / enable are rejected. Reading, disabling,
+   * snoozing and deleting existing policies stay available.
+   */
+  ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `episode_id`). */
@@ -186,6 +193,12 @@ export const ALERTING_LOG_CODES = {
    */
   HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
     'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
+  /**
+   * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
+   * limit, so rows past it were dropped. Episodes whose ack, snooze or
+   * deactivate state was in the dropped rows may be dispatched.
+   */
+  FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED: 'FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED',
   // ──────────────── Action policy API key invalidation ───────────────
   /**
    * A delete refused to remove one or more action policies because their API
