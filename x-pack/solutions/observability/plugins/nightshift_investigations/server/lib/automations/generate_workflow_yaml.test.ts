@@ -84,14 +84,18 @@ describe('generateWorkflowYaml', () => {
 
     it('filters by substring rule name pattern', () => {
       const automation = baseAutomation();
-      automation.trigger.rows = [{ kind: 'alert', ruleNamePattern: 'memory', ruleNameMatchMode: 'substring' }];
+      automation.trigger.rows = [
+        { kind: 'alert', ruleNamePattern: 'memory', ruleNameMatchMode: 'substring' },
+      ];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.triggers[0].on.condition).toBe('rule.name: "*memory*"');
     });
 
     it('omits rule name filter for regex mode', () => {
       const automation = baseAutomation();
-      automation.trigger.rows = [{ kind: 'alert', ruleNamePattern: 'mem.*', ruleNameMatchMode: 'regex' }];
+      automation.trigger.rows = [
+        { kind: 'alert', ruleNamePattern: 'mem.*', ruleNameMatchMode: 'regex' },
+      ];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.triggers[0].on).toBeUndefined();
     });
