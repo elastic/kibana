@@ -2954,6 +2954,29 @@ module.exports = {
       },
     },
     {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          {
+            alternativeFixtures: [
+              'esClient',
+              'detectionsApi',
+              'endpointExceptionsApi',
+              'endpointManagementApi',
+              'entityAnalyticsApi',
+              'exceptionsApi',
+              'listsApi',
+              'osqueryApi',
+              'timelinesApi',
+            ],
+          },
+        ],
+      },
+    },
+    {
       // Deployment-agnostic test files must use proper context and services
       files: [
         'x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
