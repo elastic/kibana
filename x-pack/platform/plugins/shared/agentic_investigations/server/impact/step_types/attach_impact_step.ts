@@ -41,9 +41,10 @@ export const getAttachImpactStepDefinition = ({
         await privileges.assertCanManage(request);
 
         const service = getImpactService();
-        const [attachments, conversations] = await Promise.all([
+        const [attachments, conversations, user] = await Promise.all([
           getAttachmentClient(request),
           getConversationClient(request),
+          resolveUser(request),
         ]);
         const impact = await attachImpactToInvestigation({
           attachments,
@@ -53,7 +54,7 @@ export const getAttachImpactStepDefinition = ({
           writeImpact: () =>
             service.attach(input, {
               spaceId,
-              user: await resolveUser(request),
+              user,
             }),
           revertImpact: (args) => service.revertAttach(args),
         });
