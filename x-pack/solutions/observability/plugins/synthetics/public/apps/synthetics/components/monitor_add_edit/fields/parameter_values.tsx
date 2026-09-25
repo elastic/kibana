@@ -20,7 +20,10 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { canRevealParameterValues } from '../../../../../../common/utils/can_reveal_parameter_values';
-import { MASKED_PARAM_VALUE } from '../../../../../../common/utils/mask_monitor_params';
+import {
+  MASKED_PARAM_VALUE,
+  maskMonitorParams,
+} from '../../../../../../common/utils/mask_monitor_params';
 import type { Pair } from './key_value_field';
 import { JSONEditor } from './code_editor';
 
@@ -87,6 +90,7 @@ export const ParameterValuesEditor = ({
 }: ParameterValuesEditorProps): React.ReactElement => {
   const { application } = useKibana().services;
   const [visibleRows, setVisibleRows] = useState<Record<number, boolean>>({});
+  const [isJsonValueVisible, setIsJsonValueVisible] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number>();
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const valueBeforeEdit = useRef<Record<number, string>>({});
@@ -155,15 +159,39 @@ export const ParameterValuesEditor = ({
   );
 
   if (!useParameterPairs) {
+    const visibilityLabel = !canReveal
+      ? NO_READ_PARAMETER_VALUES_PERMISSION
+      : isJsonValueVisible
+      ? HIDE_PARAMETER_VALUE_LABEL
+      : SHOW_PARAMETER_VALUE_LABEL;
     return (
-      <JSONEditor
-        ariaLabel={PARAMETER_JSON_EDITOR_LABEL}
-        height="100px"
-        id="syntheticsMonitorConfigParams"
-        onChange={onChange}
-        readOnly={readOnly}
-        value={value ?? ''}
-      />
+      <div data-test-subj="syntheticsMonitorConfigParams">
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={visibilityLabel} disableScreenReaderOutput>
+              <span tabIndex={canReveal ? -1 : 0}>
+                <EuiButtonIcon
+                  aria-label={visibilityLabel}
+                  data-test-subj="syntheticsParamValueVisibilityJson"
+                  iconType={isJsonValueVisible ? 'eyeSlash' : 'eye'}
+                  isDisabled={!canReveal}
+                  onClick={() => setIsJsonValueVisible((visible) => !visible)}
+                  size="s"
+                />
+              </span>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <JSONEditor
+          ariaLabel={PARAMETER_JSON_EDITOR_LABEL}
+          height="100px"
+          id="syntheticsMonitorConfigParams"
+          onChange={onChange}
+          readOnly={readOnly || (canReveal && !isJsonValueVisible)}
+          value={isJsonValueVisible ? value ?? '' : maskMonitorParams(value) ?? ''}
+        />
+      </div>
     );
   }
 
