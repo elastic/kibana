@@ -139,7 +139,10 @@ export const ParameterValuesEditor = ({
             data-test-subj="syntheticsMonitorConfigParams__button"
             iconType="plus"
             isDisabled={readOnly}
-            onClick={() => updatePairs([['', ''], ...pairs])}
+            onClick={() => {
+              setVisibleRows({});
+              updatePairs([['', ''], ...pairs]);
+            }}
             size="s"
           >
             {ADD_PARAMETER_LABEL}
@@ -176,6 +179,21 @@ export const ParameterValuesEditor = ({
               : isValueVisible
               ? HIDE_PARAMETER_VALUE_LABEL
               : SHOW_PARAMETER_VALUE_LABEL;
+            const parameterName = key || String(index + 1);
+            const keyInputLabel = i18n.translate(
+              'xpack.synthetics.monitorConfig.params.keyInput.label',
+              {
+                defaultMessage: 'Parameter {parameterName}',
+                values: { parameterName },
+              }
+            );
+            const valueInputLabel = i18n.translate(
+              'xpack.synthetics.monitorConfig.params.valueInput.label',
+              {
+                defaultMessage: 'Value for parameter {parameterName}',
+                values: { parameterName },
+              }
+            );
 
             return (
               <Fragment key={index}>
@@ -183,7 +201,7 @@ export const ParameterValuesEditor = ({
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   <EuiFlexItem>
                     <EuiFieldText
-                      aria-label={PARAMETER_KEY_LABEL}
+                      aria-label={keyInputLabel}
                       compressed
                       data-test-subj={`keyValuePairsKey${index}`}
                       fullWidth
@@ -219,7 +237,7 @@ export const ParameterValuesEditor = ({
                           </span>
                         </EuiToolTip>
                       }
-                      aria-label={PARAMETER_VALUE_LABEL}
+                      aria-label={valueInputLabel}
                       autoComplete="new-password"
                       compressed
                       data-test-subj={`keyValuePairsValue${index}`}
@@ -232,7 +250,7 @@ export const ParameterValuesEditor = ({
                         const previous = valueBeforeEdit.current[index];
                         delete valueBeforeEdit.current[index];
                         setEditingIndex((current) => (current === index ? undefined : current));
-                        if (previous && paramValue === '') {
+                        if (previous === MASKED_PARAM_VALUE && paramValue === '') {
                           const nextPairs = [...pairs];
                           nextPairs[index] = [key, previous];
                           updatePairs(nextPairs);
@@ -277,6 +295,7 @@ export const ParameterValuesEditor = ({
                             isDisabled={readOnly}
                             size="s"
                             onClick={() => {
+                              setVisibleRows({});
                               const nextPairs = [...pairs];
                               nextPairs.splice(index, 1);
                               updatePairs(nextPairs);

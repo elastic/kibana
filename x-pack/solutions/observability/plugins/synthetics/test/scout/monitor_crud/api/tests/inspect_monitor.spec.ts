@@ -273,6 +273,30 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'masks browser monitor parameters when an authorized inspector requests it',
+      async ({ apiClient }) => {
+        const apiResponse = await inspectMonitor(
+          apiClient,
+          parameterReaderHeaders,
+          {
+            ...inspectBrowserMonitorFixture,
+            timeout: '30',
+            params: JSON.stringify({
+              username: 'elastic',
+              password: 'changeme',
+            }),
+            locations: [LOCAL_PUBLIC_LOCATION],
+          },
+          { hideParams: true }
+        );
+
+        const params = apiResponse.result.publicConfigs![0].monitors[0].streams[0].params;
+        expect(params.username).toBe('"********"');
+        expect(params.password).toBe('"********"');
+      }
+    );
+
     apiTest('inspect http monitor in private location', async ({ apiClient, apiServices }) => {
       const location = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
       const apiResponse = await inspectMonitor(

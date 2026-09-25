@@ -298,6 +298,52 @@ describe('editSyntheticsMonitorRoute', () => {
     );
   });
 
+  it('keeps a literal masked value submitted by a parameter reader', async () => {
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
+    const forbidden = { status: 403 };
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
+
+    const { mergeSourceMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
+    const { routeContext, serverMock } = getRouteContextMock();
+    serverMock.coreStart!.capabilities = {
+      resolveCapabilities: jest.fn().mockResolvedValue({
+        uptime: { save: true, canReadParamValues: true },
+      }),
+    } as any;
+    routeContext.request = {
+      params: { monitorId },
+      query: {},
+      body: { [ConfigKey.PARAMS]: '{"password":"********"}' },
+    } as any;
+    routeContext.spaceId = 'default';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: {
+        id: monitorId,
+        type: 'synthetics-monitor-multi-space',
+        namespaces: ['default'],
+      },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.REVISION]: 3,
+          [ConfigKey.PARAMS]: '{"password":"changeme"}',
+          locations: [],
+        },
+      },
+    });
+
+    await editSyntheticsMonitorRoute().handler(routeContext);
+
+    expect(mergeSourceMonitor).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ [ConfigKey.PARAMS]: '{"password":"********"}' })
+    );
+  });
+
   it('rejects a masked parameter that has no stored value', async () => {
     const { mergeSourceMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
     mergeSourceMonitor.mockClear();

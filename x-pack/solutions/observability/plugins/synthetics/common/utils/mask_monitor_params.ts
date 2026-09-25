@@ -69,6 +69,22 @@ export const getUnrestorableMaskedParamKeys = ({
   previousParams?: string;
   submittedParams?: string;
 }): string[] => {
+  const parsedSubmittedParamArray = submittedParams
+    ? parseMonitorParamArray(submittedParams)
+    : undefined;
+  if (parsedSubmittedParamArray) {
+    const parsedPreviousParamArray = previousParams
+      ? parseMonitorParamArray(previousParams)
+      : undefined;
+    return parsedSubmittedParamArray
+      .map((value, index) =>
+        value === MASKED_PARAM_VALUE && parsedPreviousParamArray?.[index] === undefined
+          ? String(index)
+          : undefined
+      )
+      .filter((index): index is string => index !== undefined);
+  }
+
   const parsedSubmittedParams = submittedParams ? parseMonitorParams(submittedParams) : undefined;
   if (!parsedSubmittedParams) {
     return [];
@@ -99,8 +115,16 @@ export const restoreMaskedMonitorParams = ({
   }
 
   const parsedSubmittedParamArray = parseMonitorParamArray(submittedParams);
-  if (parsedSubmittedParamArray?.every((value) => value === MASKED_PARAM_VALUE)) {
-    return previousParams;
+  if (parsedSubmittedParamArray) {
+    const parsedPreviousParamArray = previousParams
+      ? parseMonitorParamArray(previousParams)
+      : undefined;
+    return JSON.stringify(
+      parsedSubmittedParamArray.map((value, index) => {
+        const previousValue = parsedPreviousParamArray?.[index];
+        return value === MASKED_PARAM_VALUE && previousValue !== undefined ? previousValue : value;
+      })
+    );
   }
 
   const parsedSubmittedParams = parseMonitorParams(submittedParams);
