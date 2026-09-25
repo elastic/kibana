@@ -86,30 +86,55 @@ const METADATA_COLUMNS: ReadonlySet<string> = new Set([
   '_ignored',
 ]);
 
+/** A pipeline's own row filters, and the branches of each `FORK` whose rows it unions. */
+interface PipelineFilters {
+  predicates: ESQLAstNode[];
+  forks: ESQLAstQueryExpression[][];
+}
+
 /**
- * Collects the predicates a query uses to restrict which rows it reads. Two positions
- * qualify: the `WHERE` command, and the aggregation filter in `STATS ... WHERE ...`, which
- * the parser represents as a `where` function inside the `STATS` command rather than as a
- * command of its own. `FORK` branches are reached because their `WHERE`s are ordinary
- * nested commands.
+ * Collects the predicates one pipeline uses to restrict which rows it reads, keeping the
+ * branches of a `FORK` separate because they combine differently. Two positions filter rows:
+ * the `WHERE` command, and the aggregation filter in `STATS ... WHERE ...`, which the parser
+ * represents as a `where` function inside the `STATS` command rather than as a command of its
+ * own.
  *
  * Everything else in a pipeline describes the shape of the output rather than narrowing the
  * input: an `EVAL` assignment, a `SORT` key, a `LIMIT`, a `GROK` pattern, an index name.
  */
-const collectFilterPredicates = (root: ESQLAstQueryExpression): ESQLAstNode[] => {
+const collectPipelineFilters = (query: ESQLAstQueryExpression): PipelineFilters => {
   const predicates: ESQLAstNode[] = [];
-  Walker.walk(root, {
-    visitCommand: (command) => {
-      if (command.name === 'where') predicates.push(...command.args);
-    },
-    visitFunction: (fn) => {
-      // `STATS c = COUNT(*) WHERE user.name == "x"` parses as a `where` function whose first
-      // argument is the aggregation and second is the predicate. Only the second filters rows —
-      // the aggregation may hold literals of its own.
-      if (fn.name === 'where' && fn.args.length > 1) predicates.push(fn.args[1]);
-    },
-  });
-  return predicates;
+  const forks: ESQLAstQueryExpression[][] = [];
+  for (const command of query.commands) {
+    if (command.name === 'fork') {
+      forks.push(
+        // Each branch is a pipeline of its own, wrapped in parentheses.
+        command.args.flatMap((arg) =>
+          !Array.isArray(arg) && arg.type === 'parens' && 'commands' in arg.child ? [arg.child] : []
+        )
+      );
+      continue;
+    }
+    if (command.name === 'where') {
+      predicates.push(...command.args);
+      continue;
+    }
+    Walker.walk(command, {
+      visitFunction: (fn) => {
+        // `STATS c = COUNT(*) WHERE user.name == "x"` parses as a `where` function whose first
+        // argument is the aggregation and second is the predicate. Only the second filters rows —
+        // the aggregation may hold literals of its own.
+        if (fn.name === 'where' && fn.args.length > 1) predicates.push(fn.args[1]);
+      },
+    });
+  }
+  return { predicates, forks };
+};
+
+/** Every predicate in a query, `FORK` branches included. */
+const allFilterPredicates = (query: ESQLAstQueryExpression): ESQLAstNode[] => {
+  const { predicates, forks } = collectPipelineFilters(query);
+  return [...predicates, ...forks.flat().flatMap(allFilterPredicates)];
 };
 
 /** Operators and functions that constrain matching rows to the value they carry. */
@@ -140,6 +165,30 @@ const NEGATING_OPERATORS: ReadonlySet<string> = new Set([
   'not rlike',
 ]);
 
+/** Operators reading their literal as a pattern rather than as the value itself. */
+const PATTERN_OPERATORS: ReadonlySet<string> = new Set(['like', 'rlike']);
+
+const WORD_CHARACTER = /[\p{L}\p{N}_]/u;
+
+/**
+ * True when `value` appears in `text` as a term of its own rather than buried inside a longer
+ * word. A report describing an `unsuccessful login` contains the characters of `success`, but the
+ * rows `WHERE event.outcome == "success"` brings back are the opposite of what it describes, and
+ * counting them as corroboration inverts the report.
+ *
+ * Only an operator reading its literal as the whole value asks for this. A pattern's fragment is
+ * part of a word by construction — `RLIKE "assumerol.*"` is the shape the generation contract
+ * asks for — so requiring it to stand alone would reject the queries this gate exists to admit.
+ */
+const appearsAsTerm = (text: string, value: string): boolean => {
+  for (let at = text.indexOf(value); at !== -1; at = text.indexOf(value, at + 1)) {
+    const before = text[at - 1] ?? ' ';
+    const after = text[at + value.length] ?? ' ';
+    if (!WORD_CHARACTER.test(before) && !WORD_CHARACTER.test(after)) return true;
+  }
+  return false;
+};
+
 const asFunction = (node: ESQLAstNode): ESQLFunction | undefined =>
   !Array.isArray(node) && 'type' in node && node.type === 'function' ? node : undefined;
 
@@ -150,7 +199,37 @@ const isMetadataColumn = (node: ESQLAstNode): boolean =>
   METADATA_COLUMNS.has(node.name.toLowerCase());
 
 const LIKE_WILDCARDS = /[*?]+/;
-const REGEXP_METACHARACTERS = /[.*+?()[\]{}^$\\]+/;
+const REGEXP_METACHARACTERS = /[.*+?()[\]{}^$\\]+/g;
+/** A quantifier admitting zero occurrences of the character in front of it. */
+const OPTIONAL_CHARACTER = /^[?*]/;
+/** The same quantifier applied to a group, which can make a whole artifact optional. */
+const OPTIONAL_GROUP = /\)\s*[?*]/;
+/** A repeat whose lower bound is zero, wherever it sits and whatever it governs. */
+const ZERO_BOUNDED_REPEAT = /\{\s*0\s*[,}]/;
+
+/**
+ * The fragments of one regular-expression alternative that every row it matches has to contain.
+ *
+ * A quantifier admitting zero occurrences makes what precedes it optional, so the fragment before
+ * one is shortened by the character it governs. Applied to a group it can make an entire artifact
+ * optional — `.*(AssumeRole)?.*` names the report's evidence while matching every row in scope —
+ * and which fragments sat inside that group is not something splitting the pattern can recover,
+ * so an alternative carrying one requires nothing and grounds nothing.
+ */
+const requiredRegexpFragments = (alternative: string): string[] => {
+  if (OPTIONAL_GROUP.test(alternative) || ZERO_BOUNDED_REPEAT.test(alternative)) {
+    return [];
+  }
+  const fragments: string[] = [];
+  let from = 0;
+  for (const run of alternative.matchAll(REGEXP_METACHARACTERS)) {
+    const fragment = alternative.slice(from, run.index);
+    fragments.push(OPTIONAL_CHARACTER.test(run[0]) ? fragment.slice(0, -1) : fragment);
+    from = run.index + run[0].length;
+  }
+  fragments.push(alternative.slice(from));
+  return [alternative, ...fragments];
+};
 
 /**
  * What a literal has to match for the operator reading it to be grounded, expressed as a list
@@ -161,11 +240,12 @@ const REGEXP_METACHARACTERS = /[.*+?()[\]{}^$\\]+/;
  * pattern derived from an artifact is a shape the generation contract explicitly asks for.
  * Splitting on those characters is what lets the fragment be recognised.
  *
- * Two places a fragment is *optional* rather than required, and both get the `OR` rule because
- * they are the `OR` problem written inside a string:
+ * Three places a fragment is *optional* rather than required, and each gets the `OR` rule because
+ * each is the `OR` problem written inside a string:
  *
  * - a regular expression's alternation, so `|` splits the pattern into alternatives that must
  *   each be grounded;
+ * - a regular expression's quantifiers, which can drop the fragment they govern altogether;
  * - a full-text match's terms, which are ORed by default, so each term has to be grounded.
  *   Terms below `MIN_GROUNDING_LENGTH` are dropped rather than required, because that is the
  *   length at which this gate stops being able to judge a value in either direction.
@@ -175,9 +255,7 @@ const groundingRequirements = (operator: string, literal: string): string[][] =>
     return [[literal, ...literal.split(LIKE_WILDCARDS)]];
   }
   if (operator === 'rlike') {
-    return literal
-      .split('|')
-      .map((alternative) => [alternative, ...alternative.split(REGEXP_METACHARACTERS)]);
+    return literal.split('|').map(requiredRegexpFragments);
   }
   if (FULL_TEXT_FUNCTIONS.has(operator)) {
     const terms = literal.split(/\s+/).filter((term) => term.length >= MIN_GROUNDING_LENGTH);
@@ -246,6 +324,29 @@ const isPositivelyGrounded = (
 };
 
 /**
+ * Whether the rows a pipeline hands back are constrained by the report.
+ *
+ * The `WHERE`s of a linear pipeline compose with `AND`, so one grounded predicate anywhere in it
+ * constrains every row that reaches the end. `FORK` is the exception: it unions the rows of its
+ * branches, so a branch that filters on nothing of the report's contributes rows no report value
+ * selected, and Tier 2 reads them as corroboration alongside the grounded ones. A fork grounds
+ * the query only when every branch grounds itself — the rule the alternatives of an `OR` already
+ * follow, applied to alternatives written as branches.
+ */
+const isPipelineGrounded = (
+  query: ESQLAstQueryExpression,
+  grounds: (operator: string, literal: string) => boolean
+): boolean => {
+  const { predicates, forks } = collectPipelineFilters(query);
+  // A predicate outside the fork applies to the union, so it grounds the branches too.
+  if (predicates.some((predicate) => isPositivelyGrounded(predicate, grounds))) return true;
+  return forks.some(
+    (branches) =>
+      branches.length > 0 && branches.every((branch) => isPipelineGrounded(branch, grounds))
+  );
+};
+
+/**
  * A generated query must search for at least one value drawn from the report, so a hit means
  * the environment matched *the report* rather than merely that a required index has rows.
  *
@@ -257,11 +358,15 @@ const isPositivelyGrounded = (
  * rather than away from it: `WHERE event.action != "AssumeRole"` filters on the report's
  * artifact to return everything that is not the report's evidence.
  *
- * A literal grounds the query when it equals an extracted IOC or appears verbatim in the report
- * text — or, for a pattern operator, when a fragment of it does, since the wildcards in
- * `LIKE "*AssumeRole*"` are not in the report and the generation contract asks for exactly that
- * shape. A query written in another language (`QSTR`, `KQL`) grounds nothing at all: its own
- * syntax can widen the result in ways reading it as text cannot see.
+ * A literal grounds the query when it equals an extracted IOC or stands as a term of its own in
+ * the report text — or, for a pattern operator, when a required fragment of it does, since the
+ * wildcards in `LIKE "*AssumeRole*"` are not in the report and the generation contract asks for
+ * exactly that shape. A query written in another language (`QSTR`, `KQL`) grounds nothing at all:
+ * its own syntax can widen the result in ways reading it as text cannot see.
+ *
+ * Where the predicate sits decides how much it has to carry. One grounded `WHERE` grounds a linear
+ * pipeline, because its filters compose with `AND`; a `FORK` unions rows instead, so every branch
+ * of one has to ground itself.
  *
  * It remains a value test rather than a semantic one: it establishes that the report constrains
  * the rows, not that the constraint is tight. A tautology disjoined onto a grounded comparison is
@@ -277,7 +382,7 @@ export const assertEsqlGroundedInReport = (
     return { ok: false, reason: 'query failed to parse' };
   }
 
-  const predicates = collectFilterPredicates(root);
+  const predicates = allFilterPredicates(root);
   if (predicates.length === 0) {
     return {
       ok: false,
@@ -293,18 +398,25 @@ export const assertEsqlGroundedInReport = (
   const haystack = normalize(reportText);
   const groundingIocs = new Set(iocValues.map(normalize).filter((value) => value.length > 0));
 
-  const qualifies = (candidate: string): boolean => {
+  const qualifies = (candidate: string, standalone: boolean): boolean => {
     const value = normalize(candidate);
     if (value.length < MIN_GROUNDING_LENGTH || sources.has(value)) {
       return false;
     }
-    return groundingIocs.has(value) || haystack.includes(value);
+    if (groundingIocs.has(value)) {
+      return true;
+    }
+    return standalone ? appearsAsTerm(haystack, value) : haystack.includes(value);
   };
 
-  const grounds = (operator: string, literal: string): boolean =>
-    groundingRequirements(operator, literal).every((alternatives) => alternatives.some(qualifies));
+  const grounds = (operator: string, literal: string): boolean => {
+    const standalone = !PATTERN_OPERATORS.has(operator);
+    return groundingRequirements(operator, literal).every((alternatives) =>
+      alternatives.some((candidate) => qualifies(candidate, standalone))
+    );
+  };
 
-  if (predicates.some((predicate) => isPositivelyGrounded(predicate, grounds))) {
+  if (isPipelineGrounded(root, grounds)) {
     return { ok: true };
   }
 
