@@ -6,14 +6,12 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import { PUBLIC_HEADERS } from '../../../common/fixtures/constants';
 import { installEntityStoreSuite, startAllEntityTypes } from '../../../common/fixtures/helpers';
 
 globalSetupHook(
   'Install Entity Store once for logs extraction API suite',
-  async ({ apiClient, samlAuth, kbnClient }) => {
-    await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
+  async ({ apiClient, samlAuth }) => {
     await installEntityStoreSuite({ apiClient, samlAuth });
 
     const credentials = await samlAuth.asInteractiveUser('admin');
