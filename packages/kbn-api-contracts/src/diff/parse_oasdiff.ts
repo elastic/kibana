@@ -8,6 +8,7 @@
  */
 
 import type { BreakingChange } from './breaking_rules';
+import { getRulePolicy, isPromotedRule, isReportOnlyRule } from './rule_policy';
 
 export interface OasdiffEntry {
   id: string;
@@ -31,18 +32,10 @@ const ID_TO_TYPE: Readonly<Record<string, BreakingChange['type']>> = {
   'kbn:request-additional-properties-tightened': 'request_body_tightened',
 };
 
-// These oasdiff warning-level (level 2) checks are promoted to blocking because
-// removing a request field, request parameter, or optional response property is a
-// genuine breaking change for any client that sends or reads it, even though
-// oasdiff only flags them as warnings.
-const PROMOTED_WARNING_IDS = new Set([
-  'request-property-removed',
-  'request-parameter-removed',
-  'response-optional-property-removed',
-]);
-
+// Errors are included on oasdiff's own level. Warnings are included only when the
+// declared policy promotes them or keeps them as report-only.
 const isIncluded = ({ id, level }: OasdiffEntry): boolean =>
-  level >= 3 || PROMOTED_WARNING_IDS.has(id);
+  level >= 3 || isPromotedRule(id) || isReportOnlyRule(id);
 
 const mapEntryToBreakingChange = ({
   id,
@@ -52,6 +45,7 @@ const mapEntryToBreakingChange = ({
   source,
 }: OasdiffEntry): BreakingChange => {
   const type = ID_TO_TYPE[id] ?? 'operation_breaking';
+  const policy = getRulePolicy(id);
   return {
     type,
     path,
@@ -59,6 +53,9 @@ const mapEntryToBreakingChange = ({
     reason: text,
     oasdiffId: id,
     source,
+    ...(policy?.disposition === 'report_only'
+      ? { reportOnly: true, policyReason: policy.reason }
+      : {}),
   };
 };
 

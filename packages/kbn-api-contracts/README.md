@@ -63,6 +63,30 @@ oasdiff detects these as breaking:
 
 ⚠️ oasdiff classifies these as warnings, but they are treated as breaking here because clients depend on these fields: removing a request field, request parameter, or optional response property breaks any consumer that sends or reads it.
 
+### Rule policy
+
+oasdiff decides what changed. `src/diff/rule_policy.ts` decides what that means for Kibana, so the call is declared once instead of being re-argued per PR. Every entry carries a reason. A report-only reason is rendered with the change in the CI log and the PR comment. Blocking reasons are the ones in the table below.
+
+Two dispositions:
+
+- **`blocking`** — a warning-level oasdiff rule treated as a breaking change. These are the ⚠️ rows above.
+- **`report_only`** — stays in the report and does not gate the check, whatever level oasdiff assigned. A warning listed here is kept instead of dropped. An error listed here does not gate.
+
+Rules that are not in the table keep oasdiff's own level: error gates, warning is dropped.
+
+| oasdiff ID                       | Disposition   | Why                                                                                      |
+| -------------------------------- | ------------- | ---------------------------------------------------------------------------------------- |
+| `request-property-removed`       | `blocking`    | Removing a request property breaks any client that sends it                              |
+| `request-parameter-removed`      | `blocking`    | Removing a request parameter breaks any client that sends it                             |
+| `response-optional-property-removed` | `blocking` | Removing an optional response property breaks any client that reads it                   |
+| `response-property-one-of-added` | `report_only` | Adding a variant to a response `oneOf` is additive; clients keep receiving what they handle |
+| `response-body-one-of-added`     | `report_only` | Same, for the response body `oneOf`                                                      |
+| `response-property-enum-value-added` | `report_only` | Adding a response enum value is additive. oasdiff 1.15.1 warns; later versions error. Either way it is reported and does not gate |
+
+The request side stays strict. A new variant a client may have to send is not the same as a new variant it may receive, so request-side rules are not demoted.
+
+Report-only changes still reach the PR comment in a non-blocking section, so the owning team can decide whether a release note is warranted. Suppressing a change entirely is the [allowlist](#allowlist)'s job, not this table's: the allowlist is per change, this table is per rule.
+
 ## Allowlist
 
 For approved breaking changes, add entries to `allowlist.json`. **Always prefer the granular form below** — it scopes suppression to one specific breaking change instead of muting everything on the endpoint.
@@ -127,9 +151,11 @@ The tier of a breaking change is resolved from the affected operation's `x-state
 - **stable** / **tech_preview** — gate the check. A breaking change here fails the check.
 - **experimental** — reported for visibility only. Experimental APIs are allowed to introduce breaking changes, so these never fail the check.
 
+Tier and rule policy are independent. A stable-tier change still doesn't gate when its oasdiff rule is `report_only` (see [Rule policy](#rule-policy)).
+
 ### CI notifications
 
-CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted or only experimental changes were found). The comment groups changes by stability tier, with experimental changes in a clearly labeled **non-blocking** section. When there is nothing to report, no comment is posted.
+CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted, only experimental changes were found, or only report-only rules matched). The comment groups gating changes by stability tier. Experimental changes and report-only rules each appear in their own non-blocking section. When there is nothing to report, no comment is posted.
 
 ## Usage
 

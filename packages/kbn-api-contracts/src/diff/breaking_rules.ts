@@ -24,6 +24,8 @@ export interface BreakingChange {
   oasdiffId?: string;
   source?: string;
   details?: unknown;
+  reportOnly?: boolean;
+  policyReason?: string;
 }
 
 export interface FilterResult {

@@ -98,6 +98,34 @@ describe('buildCommentBody', () => {
     expect(body).toContain('`/components/schemas/Output/properties/name`');
   });
 
+  it('renders report-only changes in their own non-blocking section', () => {
+    const body = buildCommentBody([
+      entry(),
+      entry({
+        path: '/api/cases/{caseId}/user_actions/_find',
+        reason: 'added a variant to the payload oneOf',
+        oasdiffId: 'response-property-one-of-added',
+        reportOnly: true,
+        policyReason: 'Adding a variant to a response oneOf is additive.',
+      }),
+    ]);
+
+    // the demoted change is stable tier, but must not be counted as gating
+    expect(body).toContain('### Stable (GA) (1)');
+    expect(body).toContain('### Reported only — not blocking merge (1)');
+    expect(body).toContain('- Adding a variant to a response oneOf is additive.');
+    expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Reported only'));
+  });
+
+  it('posts a report-only comment with no gating section', () => {
+    const body = buildCommentBody([
+      entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
+    ]);
+
+    expect(body).not.toContain('### Stable (GA)');
+    expect(body).toContain('### Reported only — not blocking merge (1)');
+  });
+
   it('includes granular suppression guidance in the what-to-do section', () => {
     const body = buildCommentBody([entry()]);
 

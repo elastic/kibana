@@ -255,6 +255,10 @@ run(
         if (since !== undefined) {
           entry.since = since;
         }
+        if (change.reportOnly) {
+          entry.reportOnly = true;
+          entry.policyReason = change.policyReason;
+        }
         return entry;
       });
 
@@ -263,11 +267,21 @@ run(
         log.info(`Impact report written to ${opts.reportPath}`);
       }
 
-      const gatingEntries = entries.filter((entry) => isGatingTier(entry.tier));
-      const experimentalCount = entries.length - gatingEntries.length;
+      const gatingEntries = entries.filter(
+        (entry) => isGatingTier(entry.tier) && !entry.reportOnly
+      );
+      const reportOnlyCount = entries.filter((entry) => entry.reportOnly).length;
+      const experimentalCount = entries.filter(
+        (entry) => !entry.reportOnly && !isGatingTier(entry.tier)
+      ).length;
       if (experimentalCount > 0) {
         log.info(
           `${experimentalCount} experimental-tier breaking change(s) reported (informational, not blocking)`
+        );
+      }
+      if (reportOnlyCount > 0) {
+        log.info(
+          `${reportOnlyCount} change(s) matched a report-only rule (informational, not blocking)`
         );
       }
 
