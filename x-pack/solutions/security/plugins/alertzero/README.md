@@ -4,7 +4,17 @@ Security Watch investigation queue and catalog behind the `securitySolution:enab
 
 ## Enablement
 
-Two independent gates, with different scopes and different jobs.
+### Prerequisite: `xpack.agenticInvestigations.enabled`
+
+AlertZero lists `agenticInvestigations` in `requiredPlugins`, so Kibana will not load the AlertZero plugin at all when `agenticInvestigations` is disabled. That plugin defaults to `false`, so on a stock deployment neither of the two gates below has any effect until this is set first:
+
+```yaml
+xpack.agenticInvestigations.enabled: true
+```
+
+Both gates described below are skipped — and the advanced setting is never registered — unless this prerequisite is satisfied.
+
+### Two independent gates, with different scopes and different jobs
 
 ### `securitySolution:enableAlertZero` — the user-facing, per-space gate
 
