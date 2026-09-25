@@ -643,7 +643,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     });
   }
 
-  /** A sub-agent acts as its parent execution's owner, when the request is the same user. */
+  /**
+   * A sub-agent acts as its parent execution's owner: a Task Manager parent's request resolves to
+   * the task's API key, which does not match the owner's id. Trusts `parentExecutionId` to name
+   * the running parent that spawned it.
+   */
   private async getConversationClient({
     request,
     executionClient,
@@ -662,15 +666,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     const parentOwner = (await executionClient.peek(parentExecutionId))?.owner;
-    const requestUser = requestClient.getUser();
 
-    if (!parentOwner || parentOwner.username !== requestUser.username) {
+    if (!parentOwner) {
       return requestClient;
     }
 
     return conversationService.getScopedClientAsUser({
       request,
-      user: { ...requestUser, ...parentOwner },
+      user: { ...requestClient.getUser(), ...parentOwner },
     });
   }
 

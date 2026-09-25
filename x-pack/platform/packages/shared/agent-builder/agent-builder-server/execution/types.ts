@@ -46,7 +46,10 @@ export interface BaseExecutionParams {
   outputSchema?: Record<string, unknown>;
   /** Runtime configuration overrides for this execution only. */
   configurationOverrides?: AgentConfigurationOverrides;
-  /** Id of the parent execution that spawned this execution. */
+  /**
+   * Id of the parent execution that spawned this execution. The execution runs as that
+   * execution's owner, so it must name the running parent, never a value from user or model input.
+   */
   parentExecutionId?: string;
   /**
    * Connector telemetry to attribute this execution's LLM calls to a specific feature

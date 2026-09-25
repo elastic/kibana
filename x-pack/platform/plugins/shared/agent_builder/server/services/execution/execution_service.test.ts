@@ -844,7 +844,7 @@ describe('AgentExecutionService', () => {
         useTaskManager: true,
       });
 
-    it("acts as the parent execution's owner when the request is the same user", async () => {
+    it("acts as the parent execution's owner", async () => {
       mockExecutionClient.peek.mockResolvedValueOnce({
         status: ExecutionStatus.running,
         eventCount: 0,
@@ -859,11 +859,10 @@ describe('AgentExecutionService', () => {
       );
     });
 
-    it("does not borrow the parent owner's identity for a different user", async () => {
+    it('acts as the request user when the parent has no recorded owner', async () => {
       mockExecutionClient.peek.mockResolvedValueOnce({
         status: ExecutionStatus.running,
         eventCount: 0,
-        owner: { id: 'profile-2', username: 'mallory' },
       });
 
       await executeSubAgent();
