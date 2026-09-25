@@ -12,6 +12,7 @@ import type { TimeRange } from '@kbn/es-query';
 
 // follows the same logic with vega auto_date function
 const barTarget = 200;
+const ONE_MINUTE_MS = 60_000;
 
 const roundInterval = (interval: number) => {
   {
@@ -50,6 +51,11 @@ export const computeInterval = (timeRange: TimeRange, data: DataPublicPluginStar
   const bounds = data.query.timefilter.timefilter.calculateBounds(timeRange!);
   const min = bounds.min!.valueOf();
   const max = bounds.max!.valueOf();
-  const interval = (max - min) / barTarget;
+  const rangeMs = max - min;
+  // Keep a 15s floor for typical ranges; last ≤1m would otherwise be only a few 15s bars.
+  if (rangeMs <= ONE_MINUTE_MS) {
+    return '1 second';
+  }
+  const interval = rangeMs / barTarget;
   return roundInterval(interval);
 };

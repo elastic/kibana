@@ -20,6 +20,42 @@ describe('computeInterval', () => {
     return calculateBounds(timeRange);
   };
 
+  it('should return 15 second just above 1 minute timerange', () => {
+    expect(
+      computeInterval(
+        {
+          from: '2023-08-15T10:00:00.000Z',
+          to: '2023-08-15T10:01:01.000Z',
+        },
+        dataMock
+      )
+    ).toEqual('15 second');
+  });
+
+  it('should return 1 second for 1 minute timerange', () => {
+    expect(
+      computeInterval(
+        {
+          from: '2023-08-15T10:00:00.000Z',
+          to: '2023-08-15T10:01:00.000Z',
+        },
+        dataMock
+      )
+    ).toEqual('1 second');
+  });
+
+  it('should return 1 second for 1 second timerange', () => {
+    expect(
+      computeInterval(
+        {
+          from: '2023-08-15T10:00:00.000Z',
+          to: '2023-08-15T10:00:01.000Z',
+        },
+        dataMock
+      )
+    ).toEqual('1 second');
+  });
+
   it('should return correct interval for 15 minutes timerange', () => {
     expect(
       computeInterval(
