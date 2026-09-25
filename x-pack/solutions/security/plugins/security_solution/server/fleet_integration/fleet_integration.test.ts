@@ -73,7 +73,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
-import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import * as PolicyConfigHelpers from '../../common/endpoint/models/policy_config_helpers';
@@ -166,6 +165,7 @@ describe('Fleet integrations', () => {
     experimentalFeatures = {
       trustedDevices: true,
       linuxDnsEvents: true,
+      customYaraSignaturesEnabled: true,
     } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
 
@@ -1251,6 +1251,180 @@ describe('Fleet integrations', () => {
       });
     });
 
+    describe('when custom YARA signatures features are disabled', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const osList = ['windows', 'mac', 'linux'] as const;
+
+      const setCustomYaraSignaturesOnPolicy = (policy: PolicyConfig, value: boolean) => {
+        for (const os of osList) {
+          policy[os].memory_protection.custom_yara_signatures = value;
+        }
+      };
+
+      const expectCustomYaraSignaturesAbsent = (policy: PolicyConfig) => {
+        for (const os of osList) {
+          expect(policy[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
+        }
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it('should omit custom YARA signatures when the product feature is disabled', async () => {
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
+          )
+        );
+
+        const mockPolicy = policyFactory();
+        setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectCustomYaraSignaturesAbsent(updatedPolicyConfig.inputs[0]!.config!.policy.value);
+      });
+
+      it('should omit custom YARA signatures when the experimental flag is off', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.customYaraSignaturesEnabled = false;
+
+        const mockPolicy = policyFactory();
+        setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectCustomYaraSignaturesAbsent(updatedPolicyConfig.inputs[0]!.config!.policy.value);
+      });
+
+      it('should preserve custom YARA signatures when both the product feature and experimental flag are enabled', async () => {
+        const mockPolicy = policyFactory();
+        mockPolicy.windows.memory_protection.custom_yara_signatures = false;
+        mockPolicy.mac.memory_protection.custom_yara_signatures = true;
+        mockPolicy.linux.memory_protection.custom_yara_signatures = false;
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        const updatedPolicy = updatedPolicyConfig.inputs[0]!.config!.policy.value;
+        expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
+        expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+        expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
+      });
+
+      describe('when the license is below Enterprise so the callback throws', () => {
+        beforeEach(() => {
+          licenseEmitter.next(Platinum);
+        });
+
+        it('should strip custom YARA signatures from the shared inbound payload before throwing a license 403 when the experimental flag is off', async () => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            customYaraSignaturesEnabled: false,
+          };
+
+          const mockPolicy = policyFactory();
+          setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            'Platinum license does not support this action. Please upgrade your license.'
+          );
+
+          expectCustomYaraSignaturesAbsent(policyConfig.inputs[0]!.config!.policy.value);
+        });
+
+        it('should strip custom YARA signatures from the shared inbound payload before throwing a license 403 when the product feature is disabled', async () => {
+          productFeaturesService = createProductFeaturesServiceMock(
+            ALL_PRODUCT_FEATURE_KEYS.filter(
+              (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
+            )
+          );
+
+          const mockPolicy = policyFactory();
+          setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            'Platinum license does not support this action. Please upgrade your license.'
+          );
+
+          expectCustomYaraSignaturesAbsent(policyConfig.inputs[0]!.config!.policy.value);
+        });
+      });
+    });
+
     describe('when `antivirus_registration.mode` is changed', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1513,123 +1687,6 @@ describe('Fleet integrations', () => {
     });
   });
 
-  describe('protected artifact policy settings gate', () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    let endpointAppContextServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
-
-    beforeEach(() => {
-      licenseEmitter.next(
-        licenseMock.createLicense({ license: { type: 'enterprise', uid: 'uid' } })
-      );
-      endpointAppContextServiceMock = createMockEndpointAppContextService();
-      endpointAppContextServiceMock.getLicenseService.mockReturnValue(licenseService);
-      (
-        endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
-      ).mockResolvedValue(createMockPolicyData());
-    });
-
-    describe('update callback', () => {
-      const buildUpdateCallback = () =>
-        getPackagePolicyUpdateCallback(
-          endpointAppContextServiceMock,
-          cloudService,
-          productFeaturesService,
-          experimentalFeatures
-        );
-
-      it('throws 403 with apiPassThrough when non-superuser changes artifacts.global.public_key', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: false })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        policyConfig.inputs[0]!.config!.policy.value.windows.advanced = {
-          artifacts: { global: { public_key: 'attacker-key' } },
-        };
-
-        const err = await callback(
-          policyConfig,
-          soClient,
-          esClient,
-          requestContextMock.convertContext(ctx),
-          req
-        ).catch((e) => e);
-
-        expect(err.statusCode).toBe(403);
-        expect(err.apiPassThrough).toBe(true);
-        expect(err.message).toContain('windows.advanced.artifacts.global.public_key');
-      });
-
-      it('throws 403 when non-superuser changes artifacts.global.base_url', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: false })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        policyConfig.inputs[0]!.config!.policy.value.linux.advanced = {
-          artifacts: { global: { base_url: 'http://attacker.evil' } },
-        };
-
-        const err = await callback(
-          policyConfig,
-          soClient,
-          esClient,
-          requestContextMock.convertContext(ctx),
-          req
-        ).catch((e) => e);
-
-        expect(err.statusCode).toBe(403);
-        expect(err.apiPassThrough).toBe(true);
-      });
-
-      it('allows superuser to change artifacts.global.public_key', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: true })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        policyConfig.inputs[0]!.config!.policy.value.windows.advanced = {
-          artifacts: { global: { public_key: 'my-key' } },
-        };
-
-        await expect(
-          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
-        ).resolves.not.toThrow();
-      });
-
-      it('allows non-superuser to change non-protected settings', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: false })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        // Change only a non-protected setting (malware mode)
-        policyConfig.inputs[0]!.config!.policy.value.windows.malware.mode = ProtectionModes.detect;
-
-        await expect(
-          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
-        ).resolves.not.toThrow();
-      });
-
-      it('fails open (no rejection) when request is absent', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: false })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        policyConfig.inputs[0]!.config!.policy.value.windows.advanced = {
-          artifacts: { global: { public_key: 'attacker-key' } },
-        };
-
-        // No request/context passed — internal background caller
-        await expect(
-          callback(policyConfig, soClient, esClient, undefined, undefined)
-        ).resolves.not.toThrow();
-      });
-    });
-  });
-
   describe('package policy delete callback', () => {
     let endpointServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
     let removedPolicies: PostDeletePackagePoliciesResponse;
@@ -1710,7 +1767,7 @@ describe('Fleet integrations', () => {
 
       expect(
         endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
-      ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
+      ).toHaveBeenCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
     });
 
     it('searches for notes across all spaces and both package policy reference types', async () => {
@@ -1765,11 +1822,11 @@ describe('Fleet integrations', () => {
 
       await invokeDeleteCallback();
 
-      expect(endpointServicesMock.savedObjects.createInternalScopedSoClient).toBeCalledWith({
+      expect(endpointServicesMock.savedObjects.createInternalScopedSoClient).toHaveBeenCalledWith({
         spaceId: 'legacy-space',
         readonly: false,
       });
-      expect(soClientMock.delete).toBeCalledWith(
+      expect(soClientMock.delete).toHaveBeenCalledWith(
         'policy-settings-protection-updates-note',
         'legacy-note-id',
         { force: true }

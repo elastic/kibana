@@ -10,6 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@k
 import type { IndicesDataStream, IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
+  InstallablePackage,
   Installation,
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -25,6 +26,8 @@ import {
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
+
+import { appContextService } from '../../app_context';
 
 import { dataStreamService } from '../..';
 
@@ -57,7 +60,7 @@ interface CustomDatasetStream {
 
 export const getCustomDatasetStreams = (
   packagePolicy: NewPackagePolicy | PackagePolicy,
-  pkgInfo: PackageInfo
+  pkgInfo: Pick<PackageInfo, 'type' | 'data_streams' | 'policy_templates'>
 ): CustomDatasetStream[] => {
   if (pkgInfo.type === 'input') {
     const datasetName = getDatasetName(packagePolicy.inputs);
@@ -124,6 +127,17 @@ export const getCustomDatasetStreams = (
   return results;
 };
 
+export const getNormalizedDataStreamsFromPackagePolicy = (
+  packagePolicy: NewPackagePolicy | PackagePolicy,
+  packageInfo: PackageInfo | InstallablePackage
+): RegistryDataStream[] =>
+  getCustomDatasetStreams(packagePolicy, packageInfo).flatMap(({ datasetName, dataStreamType }) =>
+    getNormalizedDataStreams(packageInfo, datasetName, dataStreamType)
+      .filter((ds): ds is RegistryDataStream => !!ds.type)
+      .slice(0, 1)
+      .map((ds) => ({ ...ds, path: datasetName }))
+  );
+
 export const findDataStreamsFromDifferentPackages = async (
   datasetName: string,
   pkgInfo: PackageInfo,
@@ -157,6 +171,12 @@ function hasUncorroboratedUploadAssets(
   dataStreamType: string,
   datasetName: string
 ): boolean {
+  // Same escape hatch as the upload validator: flagged deployments opt out of
+  // the upload takeover protections entirely.
+  if (appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
+    return false;
+  }
+
   if (installation.install_source !== 'upload') {
     return false;
   }
@@ -452,7 +472,7 @@ async function installAssetsForDataStreamType(opts: {
       soClient,
       installedPkgWithAssets.installation.name,
       [],
-      generateESIndexPatterns([{ ...dataStream, path: datasetName }])
+      generateESIndexPatterns([{ ...dataStream, path: datasetName }], pkgInfo)
     );
   } catch (error) {
     logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);

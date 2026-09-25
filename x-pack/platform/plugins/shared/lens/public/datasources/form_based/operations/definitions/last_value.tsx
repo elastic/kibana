@@ -19,16 +19,15 @@ import type {
   IndexPatternField,
   IndexPattern,
 } from '@kbn/lens-common';
+import { adjustTimeScaleLabelSuffix, getSafeName } from '@kbn/lens-common';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
-  getSafeName,
   getFilter,
   getExistsFilter,
   comparePreviousColumnFilter,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { isRuntimeField, isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
@@ -139,10 +138,10 @@ function setDefaultShowArrayValues(
   field: IndexPatternField,
   oldParams: LastValueIndexPatternColumn['params']
 ) {
-  return (
+  return Boolean(
     isScriptedField(field) ||
-    (isRuntimeField(field) && field.type !== 'number') ||
-    oldParams?.showArrayValues
+      (isRuntimeField(field) && field.type !== 'number') ||
+      oldParams?.showArrayValues
   );
 }
 

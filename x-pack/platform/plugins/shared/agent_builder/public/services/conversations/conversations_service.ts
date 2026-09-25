@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { type HttpSetup, buildPath } from '@kbn/core-http-browser';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
-  ListConversationsResponseItem,
+  CreateConversationResponse,
+  AddConversationEventsRequestBody,
+  AddConversationEventsResponse,
   GetConversationResponse,
   ListConversationsResponse,
+  SearchConversationsResponse,
   DeleteConversationResponse,
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  UpdateConversationAccessControlRequestBody,
+  UpdateConversationAccessControlResponse,
 } from '../../../common/http_api/conversations';
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
   ConversationListOptions,
+  ConversationSearchRequestOptions,
   ConversationGetOptions,
   ConversationDeleteOptions,
 } from '../../../common/conversations';
@@ -31,33 +37,68 @@ export class ConversationsService {
     this.http = http;
   }
 
-  async list({ agentId }: ConversationListOptions): Promise<ListConversationsResponseItem[]> {
-    const response = await this.http.get<ListConversationsResponse>(
-      `${publicApiPath}/conversations`,
+  async list({
+    agentId,
+    page,
+    perPage,
+    sortOrder,
+    pinned,
+  }: ConversationListOptions): Promise<ListConversationsResponse> {
+    return await this.http.get<ListConversationsResponse>(
+      buildPath(`${publicApiPath}/conversations`),
       {
         query: {
           agent_id: agentId,
+          page,
+          per_page: perPage,
+          sort_order: sortOrder,
+          pinned,
         },
       }
     );
-    return response.results;
+  }
+
+  async search({
+    query,
+    agentId,
+    page,
+    perPage,
+  }: ConversationSearchRequestOptions): Promise<SearchConversationsResponse> {
+    return await this.http.get<SearchConversationsResponse>(
+      buildPath(`${internalApiPath}/conversations/_search`),
+      {
+        query: {
+          query,
+          agent_id: agentId,
+          page,
+          per_page: perPage,
+        },
+      }
+    );
+  }
+
+  /** Creates an empty conversation so it exists before the first message is sent. */
+  async create({ agentId }: { agentId: string }) {
+    return await this.http.post<CreateConversationResponse>(`${publicApiPath}/conversations`, {
+      body: JSON.stringify({ agent_id: agentId }),
+    });
   }
 
   async get({ conversationId }: ConversationGetOptions) {
     return await this.http.get<GetConversationResponse>(
-      `${publicApiPath}/conversations/${conversationId}`
+      buildPath(`${publicApiPath}/conversations/{conversationId}`, { conversationId })
     );
   }
 
   async delete({ conversationId }: ConversationDeleteOptions) {
     return await this.http.delete<DeleteConversationResponse>(
-      `${publicApiPath}/conversations/${conversationId}`
+      buildPath(`${publicApiPath}/conversations/{conversationId}`, { conversationId })
     );
   }
 
   async rename({ conversationId, title }: { conversationId: string; title: string }) {
     return await this.http.post<RenameConversationResponse>(
-      `${internalApiPath}/conversations/${conversationId}/_rename`,
+      buildPath(`${internalApiPath}/conversations/{conversationId}/_rename`, { conversationId }),
       {
         body: JSON.stringify({ title }),
       }
@@ -72,7 +113,7 @@ export class ConversationsService {
     read: boolean;
   }): Promise<MarkReadConversationResponse> {
     return await this.http.post<MarkReadConversationResponse>(
-      `${internalApiPath}/conversations/${conversationId}/_mark_read`,
+      buildPath(`${internalApiPath}/conversations/{conversationId}/_mark_read`, { conversationId }),
       { body: JSON.stringify({ read }) }
     );
   }
@@ -91,7 +132,10 @@ export class ConversationsService {
     comment?: string;
   }): Promise<void> {
     await this.http.post(
-      `${internalApiPath}/conversations/${conversationId}/rounds/${roundId}/_feedback`,
+      buildPath(`${internalApiPath}/conversations/{conversationId}/rounds/{roundId}/_feedback`, {
+        conversationId,
+        roundId,
+      }),
       { body: JSON.stringify({ vote, chips, comment }) }
     );
   }
@@ -104,8 +148,37 @@ export class ConversationsService {
     pinned: boolean;
   }): Promise<MarkPinnedConversationResponse> {
     return await this.http.post<MarkPinnedConversationResponse>(
-      `${internalApiPath}/conversations/${conversationId}/_set_pinned`,
+      buildPath(`${internalApiPath}/conversations/{conversationId}/_set_pinned`, {
+        conversationId,
+      }),
       { body: JSON.stringify({ pinned }) }
+    );
+  }
+
+  async updateAccessControl({
+    conversationId,
+    accessControl,
+  }: {
+    conversationId: string;
+    accessControl: UpdateConversationAccessControlRequestBody;
+  }): Promise<UpdateConversationAccessControlResponse> {
+    return await this.http.put<UpdateConversationAccessControlResponse>(
+      `${publicApiPath}/conversations/${conversationId}/access_control`,
+      {
+        body: JSON.stringify(accessControl),
+      }
+    );
+  }
+
+  async addEvents({
+    conversationId,
+    events,
+  }: AddConversationEventsRequestBody & {
+    conversationId: string;
+  }): Promise<AddConversationEventsResponse> {
+    return await this.http.post<AddConversationEventsResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/_add_events`, { conversationId }),
+      { body: JSON.stringify({ events }) }
     );
   }
 
@@ -117,7 +190,7 @@ export class ConversationsService {
     path: string;
   }): Promise<ReadWorkspaceFileResponse> {
     return await this.http.get<ReadWorkspaceFileResponse>(
-      `${internalApiPath}/conversations/${conversationId}/files`,
+      buildPath(`${internalApiPath}/conversations/{conversationId}/files`, { conversationId }),
       { query: { path } }
     );
   }

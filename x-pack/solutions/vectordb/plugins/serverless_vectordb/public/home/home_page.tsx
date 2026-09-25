@@ -29,7 +29,7 @@ import { useAuthenticatedUser } from '../hooks/use_authenticated_user';
 
 export const HomePage = () => {
   const {
-    services: { cloud, application, docLinks },
+    services: { cloud, application, chrome, docLinks },
   } = useKibana();
   const { user } = useAuthenticatedUser();
   const { stats, isLoading } = useDeploymentStats();
@@ -37,9 +37,9 @@ export const HomePage = () => {
   const hasData = stats.indicesCount !== 0 || (stats.vectorCount ?? 0) > 0;
 
   const username = user?.full_name || user?.email;
-  const vectorDatabaseDocsUrl = docLinks.links.enterpriseSearch.vectorDatabaseGetStarted;
+  const vectorDatabaseDocsUrl = docLinks.links.enterpriseSearch.vectorDatabaseFullTextSearch;
 
-  const statCardDeps = { application, stats, isLoading };
+  const statCardDeps = { application, chrome, stats, isLoading };
   const dataCard = getDataCard(statCardDeps);
   const secondaryCards = getSecondaryCards(statCardDeps);
 
@@ -97,11 +97,11 @@ export const HomePage = () => {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <HomePageStatPanel {...dataCard} />
+            <HomePageStatPanel {...dataCard} newIndex={stats.newIndex} />
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="m">
+            <EuiFlexGroup gutterSize="l">
               {secondaryCards.map((card) => (
                 <EuiFlexItem key={card.testSubj}>
                   <HomePageStatPanel {...card} />

@@ -15,6 +15,12 @@ import { getAllRuleMigrationStatsTool } from './rules/get_all_rule_migration_sta
 import { getMigrationRulesTool } from './rules/get_migration_rules_tool';
 import { getRuleMigrationStatsTool } from './rules/get_rule_migration_stats_tool';
 import { getRuleMigrationTranslationStatsTool } from './rules/get_rule_migration_translation_stats_tool';
+import { getMissingRuleMigrationResourcesTool } from './rules/get_missing_rule_migration_resources_tool';
+import { stopRuleMigrationTool } from './rules/stop_rule_migration_tool';
+import { updateRuleMigrationTool } from './rules/update_rule_migration_tool';
+import { deleteRuleMigrationTool } from './rules/delete_rule_migration_tool';
+
+import { installMigrationRulesTool } from './rules/install_migration_rules_tool';
 
 export const registerSiemMigrationTools = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -30,4 +36,11 @@ export const registerSiemMigrationTools = (
   agentBuilder.tools.register(
     getRuleMigrationTranslationStatsTool(core, logger, productFeaturesService)
   );
+  agentBuilder.tools.register(
+    getMissingRuleMigrationResourcesTool(core, logger, productFeaturesService)
+  );
+  agentBuilder.tools.register(stopRuleMigrationTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(updateRuleMigrationTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(deleteRuleMigrationTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(installMigrationRulesTool(core, logger, productFeaturesService));
 };

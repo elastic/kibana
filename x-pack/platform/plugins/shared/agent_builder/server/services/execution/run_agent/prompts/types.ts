@@ -14,8 +14,13 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ResolvedConfiguration } from '../types';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../utils/tool_summarization';
-import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
-import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
+import type { CurrentRun } from '../transient_state';
+
+/** Never call from the tool-result path — image bytes must not enter tool results. */
+export type PromptImageResolver = (ref: {
+  attachmentId: string;
+  version?: number;
+}) => Promise<{ base64: string; mimeType: string } | undefined>;
 
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
@@ -46,19 +51,22 @@ export interface PromptFactoryParams {
    * is only the flag.
    */
   relevantSkillsEnabled: boolean;
-  relevantSkills?: RelevantSkillSelection;
+  imageResolver?: PromptImageResolver;
   conversationTemplates: ConversationTemplatesService;
 }
 
+export interface HandoverParams {
+  message: string;
+  forceful: boolean;
+}
+
 export interface ResearchAgentPromptRuntimeParams {
-  cycleLimit: number;
-  actions: ResearchAgentAction[];
+  run: CurrentRun;
 }
 
 export interface AnswerAgentPromptRuntimeParams {
-  cycleLimit: number;
-  actions: ResearchAgentAction[];
-  answerActions: AnswerAgentAction[];
+  run: CurrentRun;
+  handover?: HandoverParams;
 }
 
 export interface PromptFactory {

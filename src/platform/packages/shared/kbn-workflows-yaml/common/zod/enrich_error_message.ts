@@ -219,11 +219,13 @@ function tryDomainSpecificEnrichment(
     return `Unknown step type: "${receivedValue}". Available: elasticsearch.*, kibana.*, slack, http, console, wait, ai.*`;
   }
 
-  if (errorCode === 'invalid_type' && path.length === 1 && path[0] === 'triggers') {
+  const isMissingOrEmptyCollection = errorCode === 'invalid_type' || errorCode === 'too_small';
+
+  if (isMissingOrEmptyCollection && path.length === 1 && path[0] === 'triggers') {
     return 'No triggers found. Add at least one trigger.';
   }
 
-  if (errorCode === 'invalid_type' && path.length === 1 && path[0] === 'steps') {
+  if (isMissingOrEmptyCollection && path.length === 1 && path[0] === 'steps') {
     return 'No steps found. Add at least one step.';
   }
 

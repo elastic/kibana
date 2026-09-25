@@ -65,7 +65,7 @@ export class DiscoverPageObject extends FtrService {
    * chrome has no breadcrumbs, so we rely on the new/open buttons, which are hidden only while editing.
    */
   private async isStandaloneDiscoverSession(): Promise<boolean> {
-    if (await this.globalNav.isNextProjectChrome()) {
+    if (await this.globalNav.isProjectChrome()) {
       return !(await this.isOnDashboardsEditMode());
     }
     return (await this.globalNav.getFirstBreadcrumb()) === 'Discover';
@@ -259,6 +259,27 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.missingOrFail('discoverDataGridUpdating', {
       timeout: this.defaultFindTimeout * 10,
     });
+  }
+
+  /**
+   * Opens a new Discover tab and runs the current query so the tab is initialized.
+   * New ES|QL tabs start empty, so the previous query is copied onto the tab first.
+   * Use `unifiedTabs.createNewTab()` for the uninitialized empty state.
+   */
+  public async createNewTabAndSearch() {
+    const unifiedTabs = this.ctx.getPageObject('unifiedTabs');
+    const esqlQuery = (await this.testSubjects.exists('ESQLEditor'))
+      ? (await this.ctx.getService('esql').getEsqlEditorQuery()).trim()
+      : '';
+
+    await unifiedTabs.createNewTab();
+
+    if (esqlQuery) {
+      await this.ctx.getService('monacoEditor').setCodeEditorValue(esqlQuery);
+    }
+
+    await this.queryBar.clickQuerySubmitButton();
+    await this.waitUntilTabIsLoaded();
   }
 
   public async getColumnHeaders() {
@@ -593,7 +614,7 @@ export class DiscoverPageObject extends FtrService {
     });
 
     const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
     );
     await option.click();
     return await this.header.waitUntilLoadingHasFinished();
@@ -675,7 +696,7 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('doc table to finish rendering', async () => {
       const renderComplete = await this.testSubjects.getAttribute(
         'discoverDocTable',
-        'data-render-complete'
+        'data-table-loaded'
       );
       return renderComplete === 'true';
     });
@@ -905,7 +926,7 @@ export class DiscoverPageObject extends FtrService {
   public async waitForDocTableLoadingComplete() {
     await this.testSubjects.waitForAttributeToChange(
       'discoverDocTable',
-      'data-render-complete',
+      'data-table-loaded',
       'true'
     );
   }

@@ -60,7 +60,11 @@ import {
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
-import { registerTaskManagerUsageCollector } from './usage';
+import {
+  registerEventLogTelemetryTask,
+  registerTaskManagerUsageCollector,
+  scheduleEventLogTelemetryTask,
+} from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
@@ -85,10 +89,6 @@ import {
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
-import {
-  UiamApiKeyProvisioningTask,
-  taskManagerUiamProvisioningEvents,
-} from './uiam_api_key_provisioning';
 import { startHeapProfileLabelsMetrics } from './lib/heap_profile_labels_metrics';
 import type { HeapProfileLabelsMetrics } from './lib/heap_profile_labels_metrics';
 
@@ -176,7 +176,6 @@ export class TaskManagerPlugin
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
-  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
   private enrichFakeRequest?: FakeRequestEnricher;
   private heapProfileLabelsMetrics?: HeapProfileLabelsMetrics;
 
@@ -312,10 +311,13 @@ export class TaskManagerPlugin
         usageCollection,
         monitoredHealth$,
         monitoredUtilization$,
-        this.config.unsafe.exclude_task_types
+        this.config.unsafe.exclude_task_types,
+        () => core.getStartServices().then(([, , startContract]) => startContract),
+        this.logger
       );
     }
 
+    registerEventLogTelemetryTask(this.logger, core.getStartServices, this.definitions);
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
@@ -332,20 +334,6 @@ export class TaskManagerPlugin
       core.getStartServices,
       this.definitions
     );
-
-    taskManagerUiamProvisioningEvents.forEach((eventConfig) =>
-      core.analytics.registerEventType(eventConfig)
-    );
-
-    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
-      logger: this.logger,
-      isServerless,
-      analytics: core.analytics,
-    });
-    this.uiamApiKeyProvisioningTask.register({
-      coreSetup: core,
-      taskTypeDictionary: this.definitions,
-    });
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -532,6 +520,7 @@ export class TaskManagerPlugin
       taskPollingLifecycle: this.taskPollingLifecycle,
     });
 
+    scheduleEventLogTelemetryTask(this.logger, taskScheduling).catch(() => {});
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
     scheduleInvalidateApiKeyTask(
       this.logger,
@@ -569,14 +558,6 @@ export class TaskManagerPlugin
       },
     };
 
-    this.uiamApiKeyProvisioningTask
-      ?.start({
-        core,
-        taskScheduling,
-        removeIfExists: (id: string) => removeIfExists(taskStore, id),
-      })
-      .catch(() => {});
-
     this.heapProfileLabelsMetrics = startHeapProfileLabelsMetrics(this.logger);
 
     return this.startContract;
@@ -585,7 +566,6 @@ export class TaskManagerPlugin
   public async stop() {
     this.heapProfileLabelsMetrics?.stop();
     this.licenseSubscriber?.cleanup();
-    this.uiamApiKeyProvisioningTask?.stop();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {

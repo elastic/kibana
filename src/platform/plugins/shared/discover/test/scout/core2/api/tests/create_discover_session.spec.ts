@@ -9,7 +9,7 @@
 
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import { COMMON_HEADERS, DISCOVER_SESSION_API_BASE_PATH } from '../fixtures/constants';
 
 const createRequestBody = (title: string): DiscoverSessionApiDataInput => ({
@@ -76,10 +76,10 @@ apiTest.describe('POST /api/discover_sessions', { tag: tags.deploymentAgnostic }
         expect.objectContaining({
           id: 'main',
           label: 'Main',
+          type: 'default',
           hide_chart: false,
           hide_table: false,
           sort: [],
-          time_restore: false,
           data_source: {
             type: 'esql',
             query: 'FROM logs-* | LIMIT 10',

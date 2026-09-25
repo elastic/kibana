@@ -218,6 +218,7 @@ export interface FunctionFilterPredicates {
 export enum PromQLFunctionDefinitionTypes {
   WITHIN_SERIES = 'within_series',
   ACROSS_SERIES = 'across_series',
+  ACROSS_SERIES_REDUCTION = 'across_series_reduction',
   VALUE_TRANSFORMATION = 'value_transformation',
   VECTOR_CONVERSION = 'vector_conversion',
   SCALAR = 'scalar',
@@ -226,6 +227,7 @@ export enum PromQLFunctionDefinitionTypes {
   SCALAR_CONVERSION = 'scalar_conversion',
   TIME = 'time',
   HISTOGRAM = 'histogram',
+  METADATA = 'metadata',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -527,6 +529,14 @@ export interface ValidationErrors {
   highlightInvalidQueryExpression: {
     message: string;
     type: { expression: string };
+  };
+  denseVectorInvalidSuffixModifier: {
+    message: string;
+    type: { keyword: string };
+  };
+  denseVectorMultipleFieldsWithTarget: {
+    message: string;
+    type: { target: string };
   };
   tsdbIncompatibleFunction: {
     message: string;

@@ -19,6 +19,7 @@ export type * from './sentinel_one';
 export type * from './microsoft_defender_endpoint';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 export type * from './scripts_library';
+export * from './libyara';
 
 /**
  * Supported React-Router state for the Policy Details page
@@ -1010,7 +1011,7 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     device_control?: DeviceControlFields;
@@ -1061,7 +1062,7 @@ export interface PolicyConfig {
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     ransomware: ProtectionFields & SupportedFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
     device_control?: DeviceControlFields;
     popup: {
       malware: {
@@ -1101,7 +1102,7 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
     popup: {
       malware: {
         message: string;
@@ -1185,6 +1186,11 @@ export interface BlocklistFields {
 
 export interface OnWriteScanFields {
   on_write_scan: boolean;
+}
+
+export interface CustomYaraSignaturesFields {
+  /** Absent means never configured and is treated as disabled. */
+  custom_yara_signatures?: boolean;
 }
 
 /** Policy protection mode options */

@@ -7,5 +7,7 @@
 
 export * from './combine_filters_and_user_search';
 export * from './heartbeat_location_filters';
+export * from './overview_config_key';
+export * from './overview_status_filter_id';
 export * from './stale_run';
 export * from './stringify_kueries';

@@ -7,14 +7,17 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
+  connectorTypeIsDual,
   getConnectorSpec,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
   normalizeConnectorTypeId,
+  parseHandleEventsResult,
   validateEmittedEvents,
 } from '@kbn/connector-specs';
 
 import type { IngestEventsRequestQuery } from '../../common/routes/events/apis/ingest';
-import type { InMemoryConnector } from '../types';
+import type { InMemoryConnector, RawAction } from '../types';
+import { resolveConnectorEventScheduleRequest } from './event_identity';
 import {
   INBOUND_EVENTS_DISABLED_MESSAGE,
   INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
@@ -22,13 +25,21 @@ import {
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
+import { loadIngressCredential, parseIngestToken } from './ingress_credential';
 import { loadInboundConnector } from './load_inbound_connector';
+import { validateSpokeHttpHeaders } from './spoke_http';
 
 export type IngestInboundEventResult =
   | { status: 'forbidden'; body: string }
   | { status: 'not_found' }
   | { status: 'error'; statusCode: 500; body: string }
-  | { status: 'accepted'; body: { ok: true } };
+  | { status: 'accepted'; body: { ok: true } }
+  | {
+      status: 'spoke_http';
+      statusCode: number;
+      body?: unknown;
+      headers?: Record<string, string>;
+    };
 
 export interface IngestInboundEventInput {
   connectorTypeId: string;
@@ -44,9 +55,11 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
   inboundEventsEnabled: boolean;
   isActionTypeEnabled: (actionTypeId: string) => boolean;
   maxEmitted: number;
+  maxBodyBytes: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   logger: Logger;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
+  getDecryptedConnectorAttributes: (connectorId: string, spaceId: string) => Promise<RawAction>;
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -56,7 +69,7 @@ const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, u
 };
 
 /**
- * Orchestrates inbound connector event ingest (no HTTP mapping).
+ * Orchestrates inbound connector event ingest and maps connector HTTP acks to the caller.
  */
 export async function ingestInboundEvent({
   connectorTypeId: connectorTypeIdParam,
@@ -69,9 +82,11 @@ export async function ingestInboundEvent({
   inboundEventsEnabled,
   isActionTypeEnabled,
   maxEmitted,
+  maxBodyBytes,
   emitConnectorEvents,
   logger,
   getUnsecuredSavedObjectsClient,
+  getDecryptedConnectorAttributes,
   inMemoryConnectors,
 }: IngestInboundEventParams): Promise<IngestInboundEventResult> {
   const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
@@ -123,27 +138,40 @@ export async function ingestInboundEvent({
     return { status: 'not_found' };
   }
 
-  const ingestTokenHash =
-    typeof connector.config.ingestTokenHash === 'string'
-      ? connector.config.ingestTokenHash
-      : undefined;
-  if (typeof ingestTokenHash !== 'string' || ingestTokenHash.length === 0) {
-    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
+  if (
+    connectorTypeIsDual(connector.connectorTypeId) &&
+    connector.hasInboundEventIdentity !== true
+  ) {
+    logInboundIngressOutcome(logger, {
+      ...baseLog,
+      outcome: 'load_miss',
+      detail: 'inbound_events_disabled',
+    });
     return { status: 'not_found' };
   }
 
-  // Query is validated by the route schema before ingest runs.
   const providedToken = extractIngestToken({
     query,
     headers,
   });
+  const parsedToken = providedToken ? parseIngestToken(providedToken) : undefined;
+  if (!providedToken || !parsedToken) {
+    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
+    return { status: 'not_found' };
+  }
+
+  const credential = await loadIngressCredential({
+    unsecuredSavedObjectsClient,
+    credentialId: parsedToken.credentialId,
+    connectorId,
+  });
   if (
-    !providedToken ||
+    !credential ||
     !verifyIngestToken({
       connectorId,
       spaceId,
       providedToken,
-      ingestTokenHash,
+      ingestTokenHash: credential.ingestTokenHash,
     })
   ) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
@@ -151,25 +179,56 @@ export async function ingestInboundEvent({
   }
 
   try {
-    const result = await spec.events.handleEvents({
-      connectorId,
-      connectorTypeId,
-      spaceId,
-      config: stripIngestTokenHash(connector.config),
-      rawBody: body,
-      log: logger,
-    });
-
-    if (result.type !== 'emit') {
+    const parsed = parseHandleEventsResult(
+      await spec.events.handleEvents({
+        connectorId,
+        connectorTypeId,
+        spaceId,
+        config: stripIngestTokenHash(connector.config),
+        rawBody: body,
+        log: logger,
+      }),
+      { maxEvents: maxEmitted, maxPayloadBytes: maxBodyBytes }
+    );
+    if (!parsed.ok) {
       logInboundIngressOutcome(logger, {
         ...baseLog,
         outcome: 'handle_fail',
-        detail: 'unexpected_handleEvents_type',
+        detail: `invalid_handleEvents_result ${parsed.message}`,
       });
       return {
         status: 'error',
         statusCode: 500,
         body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
+      };
+    }
+    const result = parsed.data;
+
+    if (result.type === 'http') {
+      const spokeHeaders = validateSpokeHttpHeaders(result.httpResponse.headers);
+      if (spokeHeaders === 'invalid') {
+        logInboundIngressOutcome(logger, {
+          ...baseLog,
+          outcome: 'handle_fail',
+          detail: 'invalid_http_ack',
+        });
+        return {
+          status: 'error',
+          statusCode: 500,
+          body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
+        };
+      }
+      const { status, body: spokeBody } = result.httpResponse;
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'http_ack',
+        detail: `status=${status}`,
+      });
+      return {
+        status: 'spoke_http',
+        statusCode: status,
+        ...(spokeBody !== undefined ? { body: spokeBody } : {}),
+        ...(spokeHeaders !== undefined ? { headers: spokeHeaders } : {}),
       };
     }
 
@@ -200,7 +259,38 @@ export async function ingestInboundEvent({
       };
     }
 
+    if (result.events.length === 0) {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'accepted',
+      });
+      return { status: 'accepted', body: { ok: true } };
+    }
+
+    let scheduleRequest;
+    try {
+      const attributes = await getDecryptedConnectorAttributes(connectorId, spaceId);
+      scheduleRequest = resolveConnectorEventScheduleRequest(attributes, spaceId);
+    } catch (error) {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'identity_missing',
+        detail: `decrypt_failed ${error instanceof Error ? error.message : String(error)}`,
+      });
+      return { status: 'accepted', body: { ok: true } };
+    }
+
+    if (!scheduleRequest) {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'identity_missing',
+        detail: 'missing_api_key',
+      });
+      return { status: 'accepted', body: { ok: true } };
+    }
+
     let emitFailures = 0;
+    const emitFailureDetails: string[] = [];
     for (const event of result.events) {
       try {
         const emitResult = await emitConnectorEvents({
@@ -210,17 +300,17 @@ export async function ingestInboundEvent({
           connectorId,
           connectorTypeId,
           correlationKey: event.correlationKey,
+          request: scheduleRequest,
         });
-        // HTTP stays 202; count failures for emit_partial (dispatch warns once on Result).
+        // HTTP stays 202; ingest logs a single emit_partial outcome.
         if (!emitResult.ok) {
           emitFailures += 1;
+          emitFailureDetails.push(`${event.eventId} ${emitResult.reason}: ${emitResult.message}`);
         }
       } catch (error) {
         emitFailures += 1;
-        logger.warn(
-          `Inbound connector ${connectorId} type ${connectorTypeId} space ${spaceId} event emitter threw for ${
-            event.eventId
-          }: ${error instanceof Error ? error.message : String(error)}`
+        emitFailureDetails.push(
+          `${event.eventId} threw: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     }
@@ -229,10 +319,16 @@ export async function ingestInboundEvent({
       logInboundIngressOutcome(logger, {
         ...baseLog,
         outcome: 'emit_partial',
-        detail: `emit_failures=${emitFailures}_of=${result.events.length}`,
+        detail: `emit_failures=${emitFailures}_of=${result.events.length} ${emitFailureDetails.join(
+          '; '
+        )}`,
       });
     } else {
-      logInboundIngressOutcome(logger, { ...baseLog, outcome: 'accepted' });
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'accepted',
+        detail: result.events.map((event) => event.eventId).join(','),
+      });
     }
 
     return { status: 'accepted', body: { ok: true } };

@@ -21,9 +21,10 @@ interface WorkflowEdgeData extends Record<string, unknown> {
   /** Switch bus routing marker — present on all case/default edges of a switch node. */
   readonly branchType?: EdgeBranchType;
   /**
-   * True when this edge participates in a fan-in that includes a synthetic
-   * placeholder (empty `if` branch lane). Routes the edge on the merge bus
-   * (symmetric inverted-bus fan-in matching the fork-bus fan-out).
+   * True when this edge participates in any fan-in (multiple predecessors
+   * converging on the same target). Routes the edge on the merge bus
+   * (symmetric inverted-bus fan-in matching the fork-bus fan-out) so the
+   * lane change happens as late as possible — just above the target node.
    */
   readonly isMerge?: boolean;
   /**
@@ -34,6 +35,14 @@ interface WorkflowEdgeData extends Record<string, unknown> {
 }
 
 const LABEL_TRUNCATE = 24;
+// Branch labels are annotations on the graph and must paint above the container
+// frames they sit inside — a foreach/while body is a 50%-opaque panel that would
+// otherwise veil them. `.react-flow__edgelabel-renderer` ships no z-index, and it
+// is a sibling of `.react-flow__nodes` (which also has none), so labels tie with
+// nodes at level 0 and lose on DOM order.
+// Must exceed the deepest node z-index, which in `zIndexMode: 'basic'` with
+// `elevateNodesOnSelect={false}` equals the container nesting depth.
+const EDGE_LABEL_Z_INDEX = 10;
 
 function WorkflowGraphEdgeInner(props: EdgeProps) {
   const {
@@ -68,9 +77,9 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
 
   const traversed = edgeData?.traversed ?? false;
   // Traversed edges use the `success` token to match the node's success state.
-  // Non-traversed edges use the neutral `borderBasePlain` tone. Both adapt to
-  // dark mode (borderBasePlain: light `#cad3e2` → dark `#485975`).
-  const stroke = traversed ? euiTheme.colors.success : euiTheme.colors.borderBasePlain;
+  // Non-traversed edges use `borderBaseProminent` — two shade steps darker than
+  // `borderBasePlain` so edges read as the stronger element on the canvas.
+  const stroke = traversed ? euiTheme.colors.success : euiTheme.colors.borderBaseProminent;
   const strokeWidth = 1;
 
   const fullLabel = edgeData?.label ?? '';
@@ -107,16 +116,17 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
           <div
             style={{
               position: 'absolute',
+              zIndex: EDGE_LABEL_Z_INDEX,
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: 'all',
               padding: '0 12px',
-              borderRadius: 8,
-              fontFamily: '"Roboto Mono", monospace',
+              borderRadius: euiTheme.border.radius.medium,
+              fontFamily: euiTheme.font.familyCode,
               fontSize: 11,
               fontWeight: 400,
               lineHeight: '20px',
-              background: euiTheme.colors.backgroundBaseSubdued,
-              border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
+              background: euiTheme.colors.backgroundBasePlain,
+              border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
               color: euiTheme.colors.textParagraph,
               whiteSpace: 'nowrap',
             }}

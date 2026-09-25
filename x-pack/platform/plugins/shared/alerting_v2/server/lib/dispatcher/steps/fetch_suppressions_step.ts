@@ -6,9 +6,11 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { getAlertEpisodeSuppressionsQueries } from '../queries';
+import { ESQL_QUERY_ROW_LIMIT, getAlertEpisodeSuppressionsQueries } from '../queries';
+import { EpisodeScan, SuppressionIndex } from '../state';
 import type {
   AlertEpisodeSuppression,
   DispatcherPipelineState,
@@ -27,16 +29,16 @@ export class FetchSuppressionsStep implements DispatcherStep {
 
   public async execute(
     state: Readonly<DispatcherPipelineState>,
-    _: LoggerServiceContract
+    logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { episodes } = state;
-    if (!episodes || episodes.length === 0) {
-      return { type: 'continue', data: { suppressions: [] } };
+    const { scan = EpisodeScan.empty() } = state;
+    if (scan.isEmpty()) {
+      return { type: 'continue', data: { suppressions: SuppressionIndex.empty() } };
     }
 
     const { signal } = state.input;
 
-    const queries = getAlertEpisodeSuppressionsQueries(episodes);
+    const queries = getAlertEpisodeSuppressionsQueries(scan.episodes);
     const responses = await Promise.all(
       queries.map((request) =>
         this.queryService.executeQueryRows<AlertEpisodeSuppression>({
@@ -45,8 +47,21 @@ export class FetchSuppressionsStep implements DispatcherStep {
         })
       )
     );
+
+    // Chunks are keyed by series but return one row per episode, so the literal
+    // cap cannot bound the row count; a full chunk may have dropped rows.
+    const truncatedChunks = responses.filter((rows) => rows.length >= ESQL_QUERY_ROW_LIMIT).length;
+    if (truncatedChunks > 0) {
+      logger.warn({
+        code: ALERTING_LOG_CODES.FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED,
+        message: () =>
+          `${truncatedChunks} of ${responses.length} suppressions queries returned ` +
+          `${ESQL_QUERY_ROW_LIMIT} rows; suppressions past the limit were dropped`,
+      });
+    }
+
     const suppressions = responses.flat();
 
-    return { type: 'continue', data: { suppressions } };
+    return { type: 'continue', data: { suppressions: SuppressionIndex.of(suppressions) } };
   }
 }

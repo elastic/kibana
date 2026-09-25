@@ -14,6 +14,7 @@ import type {
   ServicesStartDeps,
   ServiceSetupDeps,
 } from './types';
+import type { ConversationEventBus } from '../workflows/triggers/conversation_event_bus';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
@@ -21,6 +22,10 @@ import { ConversationServiceImpl } from './conversation';
 import { createWorkspaceService } from './workspaces';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { type RendererService, createRendererService } from './renderers';
+import {
+  type ConversationEventsService,
+  createConversationEventsService,
+} from './conversation_events';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
@@ -41,6 +46,7 @@ interface ServiceInstances {
   agents: AgentsService;
   attachments: AttachmentService;
   renderers: RendererService;
+  conversationEvents: ConversationEventsService;
   hooks: HooksService;
   skills: SkillService;
   plugins: PluginsService;
@@ -72,6 +78,7 @@ export class ServiceManager {
       agents: new AgentsService(),
       attachments: createAttachmentService(),
       renderers: createRendererService(),
+      conversationEvents: createConversationEventsService(),
       hooks: new HooksService(),
       skills: createSkillService(),
       plugins: createPluginsService(),
@@ -96,6 +103,7 @@ export class ServiceManager {
       agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
       renderers: this.services.renderers.setup(),
+      conversationEvents: this.services.conversationEvents.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
@@ -122,7 +130,9 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
-  }: ServicesStartDeps): InternalStartServices {
+    deductiveRegister,
+    conversationEventBus,
+  }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
@@ -153,6 +163,8 @@ export class ServiceManager {
     });
 
     const renderers = this.services.renderers.start();
+
+    const conversationEvents = this.services.conversationEvents.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -200,6 +212,9 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       agents,
+      attachments,
+      eventBus: conversationEventBus,
+      conversationEvents,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -225,6 +240,7 @@ export class ServiceManager {
       getExecutionService,
       searchInferenceEndpoints,
       conversationTemplates: conversationTemplatesStart,
+      deductiveRegister,
     });
     runner = runnerFactory.getRunner();
 
@@ -284,6 +300,7 @@ export class ServiceManager {
       agents,
       attachments,
       renderers,
+      conversationEvents,
       skills: skillsServiceStart,
       conversations,
       workspaces,

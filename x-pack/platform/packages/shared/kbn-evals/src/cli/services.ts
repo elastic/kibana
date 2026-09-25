@@ -22,13 +22,13 @@ interface ServiceEntry {
   pid: number;
   logFile: string;
   startedAt: string;
-  /** SHA-256 of KIBANA_TESTING_AI_CONNECTORS at boot time (Scout only) */
+  /** SHA-256 of KIBANA_TESTING_INFERENCE_ENDPOINTS + KIBANA_TESTING_AI_CONNECTORS at boot time (Scout only) */
   connectorsHash?: string;
   /** The serverConfigSet used to start Scout */
   serverConfigSet?: string;
   /**
    * SHA-256 of the env the service was started with (Scout: TRACING_EXPORTERS,
-   * GCS_CREDENTIALS; EDOT: ELASTICSEARCH_HOST).
+   * GCS_CREDENTIALS, suite scoutHook output; EDOT: ELASTICSEARCH_HOST).
    */
   envHash?: string;
 }
@@ -74,10 +74,20 @@ const hashParts = (parts: Array<string | undefined>): string =>
     .digest('hex')
     .slice(0, 12);
 
-export const connectorsHash = (): string => hashParts([process.env.KIBANA_TESTING_AI_CONNECTORS]);
+export const connectorsHash = (): string =>
+  hashParts([
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS,
+    process.env.KIBANA_TESTING_AI_CONNECTORS,
+  ]);
 
-export const scoutEnvHash = (env: Record<string, string> | undefined): string =>
-  hashParts([env?.TRACING_EXPORTERS, env?.GCS_CREDENTIALS]);
+export const scoutEnvHash = (env: Record<string, string> | undefined): string => {
+  const { TRACING_EXPORTERS, GCS_CREDENTIALS, ...suiteEnv } = env ?? {};
+  const suiteParts = Object.entries(suiteEnv)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`);
+  // Suite hook output only extends the hash when present, so stacks started without it stay reusable.
+  return hashParts([TRACING_EXPORTERS, GCS_CREDENTIALS, ...suiteParts]);
+};
 
 export const edotEnvHash = (elasticsearchHost: string | undefined): string =>
   hashParts([elasticsearchHost]);
@@ -103,12 +113,15 @@ export const isScoutStale = (
   if (!entry || !isAlive(entry.pid)) return { stale: false };
 
   if (entry.connectorsHash !== connectorsHash()) {
-    return { stale: true, reason: 'KIBANA_TESTING_AI_CONNECTORS changed' };
+    return { stale: true, reason: 'connectors configuration changed' };
   }
 
   const currentEnvHash = scoutEnvHash(scoutEnv);
   if (entry.envHash && entry.envHash !== currentEnvHash) {
-    return { stale: true, reason: 'TRACING_EXPORTERS or GCS_CREDENTIALS changed' };
+    return {
+      stale: true,
+      reason: "TRACING_EXPORTERS, GCS_CREDENTIALS or the suite's scoutHook output changed",
+    };
   }
 
   const runningConfigSet = entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET;

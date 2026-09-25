@@ -24,7 +24,7 @@ import {
   findDuplicateEvaluatorNames,
   getDuplicateEvaluatorNamesMessage,
 } from '../../lib/duplicate_evaluator_names';
-import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
+import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
@@ -140,11 +140,13 @@ export const registerEvaluateRoute = ({
         });
 
         const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
-        const resolvedMapping = getInstrumentationProfile(activeProfile);
-
-        let round: Awaited<ReturnType<typeof awaitTraceReady>>;
+        let round: Awaited<ReturnType<typeof awaitTraceReady>>['round'];
         try {
-          round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
+          ({ round } = await awaitTraceReady(
+            traceAccessor,
+            { mode: 'complete', profile: activeProfile },
+            logger
+          ));
         } catch (error) {
           if (error instanceof TraceReadinessError) {
             return response.notFound({ body: { message: String(error) } });
@@ -223,6 +225,7 @@ export const registerEvaluateRoute = ({
             name: definition.name,
             version: definition.version,
             kind: definition.kind,
+            direction: definition.direction,
           };
           if (definition.kind !== 'llm' || !config.connector_id) {
             return base;
@@ -256,13 +259,15 @@ export const registerEvaluateRoute = ({
                 ? await getInferenceClient(config.connector_id)
                 : undefined;
 
-            const result = await definition.evaluate({
-              trace: traceAccessor,
-              round,
-              referenceData: parsedReferenceData,
-              inferenceClient,
-              log: logger,
-            });
+            const result = await withEvaluatorNameBaggage(definition.name, () =>
+              definition.evaluate({
+                trace: traceAccessor,
+                round,
+                referenceData: parsedReferenceData,
+                inferenceClient,
+                log: logger,
+              })
+            );
 
             results.push({
               status: 'ok',

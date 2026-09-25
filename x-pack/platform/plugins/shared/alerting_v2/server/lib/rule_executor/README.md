@@ -54,6 +54,7 @@ RuleExecutionPipeline
    +--> WaitForResourcesStep
    +--> FetchRuleStep
    +--> ValidateRuleStep
+   +--> FetchActiveGroupsStep
    +--> ExecuteRuleQueryStep
    +--> CreateAlertEventsStep
    +--> ClassifyAbsentGroupsStep
@@ -143,14 +144,25 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Task timeout | `xpack.alerting_v2.rules.run.timeout`, defaults to `DEFAULT_RULE_EXECUTION_TIMEOUT` (`5m`) | [`task_definition.ts`](task_definition.ts) |
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
-| JSON query row cap | Internal `NON_STREAMING_MAX_ROWS` (`1000`); applied on the JSON path as `LIMIT min(alerts.max, NON_STREAMING_MAX_ROWS)` | [`config.ts`](../../config.ts) |
-| ES\|QL response format | `xpack.alerting_v2.esql.responseFormat`, `json` or `arrow`, defaults to `json` | [`config.ts`](../../config.ts) |
+| Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default `10000`, ceiling tied to `alerts.max` | [`config.ts`](../../config.ts) |
+| Max JSON query rows | Internal `NON_STREAMING_MAX_ROWS` (`1000`), declared as the JSON format's `maxRows`; applied as `LIMIT min(alerts.max, maxRows)` | [`json_format.ts`](../services/query_service/formats/json_format.ts) |
+| ES\|QL response format | `alertingV2.esqlResponseFormat` feature flag; allowed values are the names in the format registry (`json`, `arrow`), falls back to `json` | [`registry.ts`](../services/query_service/formats/registry.ts) |
 
 `xpack.alerting_v2.rules.run.timeout`, when set, applies uniformly to the rule executor task. The rule executor task definition owns this via its `resolveTimeout` hook, which resolves the value as `config → DEFAULT_RULE_EXECUTION_TIMEOUT`; other task types (dispatcher, telemetry, API-key invalidation) omit the hook and keep their static `timeout`. The resolved value is applied where tasks are registered with Task Manager in [`setup/bind_tasks.ts`](../../setup/bind_tasks.ts).
 
-`ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. The LIMIT is `alerts.max` on the Arrow path and `min(alerts.max, NON_STREAMING_MAX_ROWS)` on the JSON path, so a transport choice cannot silently change the product-level alerts cap. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
+`ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. The LIMIT is `alerts.max`, further capped by the active format's `maxRows` when it declares one — `alerts.max` on the Arrow path and `min(alerts.max, NON_STREAMING_MAX_ROWS)` on the JSON path, so a transport choice cannot silently change the product-level alerts cap. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
 
-`xpack.alerting_v2.esql.responseFormat` selects how `QueryService.executeQueryStream` fetches results. `json` (default) runs the single-shot JSON query and yields the full result set as one in-memory batch; `arrow` streams self-contained Arrow record batches.
+`CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run.
+
+The cap only ever drops groups that have **no existing episode** — groups that were already active at the start of the run always pass, even past the cap. To do this, `FetchActiveGroupsStep` fetches the rule's active groups up front for every episode-tracked (`kind: 'alert'`) rule and threads them onto `state.activeGroups` so both `CreateAlertEventsStep` (for the cap) and `ClassifyAbsentGroupsStep` reuse the result instead of re-querying.
+
+The `alertingV2.esqlResponseFormat` feature flag selects how `QueryService.executeQueryStream` fetches results. `json` (the fallback) runs the single-shot JSON query, materializes the whole response in memory, then yields it in `JSON_STREAM_BATCH_SIZE` (`100`) row slices so downstream steps never copy the full result set at once; `arrow` streams self-contained Arrow record batches.
+
+Which transport the framework uses is an implementation detail rather than something an operator can reason about, so it is a feature flag we roll out and roll back — not a `kibana.yml` setting. [`EsqlResponseFormatService`](../services/esql_response_format_service/esql_response_format_service.ts) subscribes to the flag once per process and resolves it to a registered format; a variation that names no registered format logs `QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN` and falls back to `json`, because flag values are not schema-validated. A deployment with no flag provider attached — or one whose network blocks it — runs on `json`. To force a value locally or in tests, set `feature_flags.overrides` in `kibana.yml`, or `PUT /internal/core/_settings` with `coreApp.allowDynamicConfigOverrides: true`.
+
+Note that the effective row ceiling moves with the flag: `min(alerts.max, NON_STREAMING_MAX_ROWS)` on `json`, `alerts.max` on `arrow`. `rules.run.query.maxResponseSize` only guards the JSON path — Arrow's chunked transfer carries no `Content-Length` for the transport to check, so there `alerts.max` is the sole bound.
+
+Formats are strategies under [`services/query_service/formats`](../services/query_service/formats). A format implements one method — `open(esClient, request, options)` returning decoded row batches plus optional cleanup — and optionally declares a `maxRows` cap. `QueryService` owns everything else: the execution context, the abort checks either side of `open` and between batches, dropping empty batches, wrapping decode failures as parse errors, logging, and cleanup. To add a format, create `formats/<name>_format.ts` and register it in [`formats/registry.ts`](../services/query_service/formats/registry.ts), then add its name as a variation of the `alertingV2.esqlResponseFormat` flag with the feature flag provider; the query row limit follows from the registry automatically.
 
 ## Pipeline state
 
@@ -163,6 +175,7 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | `queryPayload` | `ExecuteRuleQueryStep` | ES\|QL query/filter/params for the current run. |
 | `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |
 | `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
+| `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
 
 ## Execution steps
 
@@ -173,11 +186,12 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
 | 2 | `FetchRuleStep` | Load the current rule saved object. |
 | 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
-| 4 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
-| 5 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
-| 6 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when both `recovery_strategy` and `no_data_strategy` are `'none'`. |
-| 7 | `DirectorStep` | Enrich alert-type events with episode state. |
-| 8 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
+| 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) and thread them onto `state.activeGroups`. |
+| 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
+| 6 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
+| 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when both `recovery_strategy` and `no_data_strategy` are `'none'`. |
+| 8 | `DirectorStep` | Enrich alert-type events with episode state. |
+| 9 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
 
 The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
 
@@ -398,6 +412,7 @@ Add the export to `steps/index.ts`, then register it in `setup/bind_rule_executo
 bind(RuleExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
 bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
 bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
+bind(RuleExecutionStepsToken).to(FetchActiveGroupsStep).inRequestScope();
 bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
 bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
 bind(RuleExecutionStepsToken).to(MyNewStep).inSingletonScope();

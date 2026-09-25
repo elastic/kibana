@@ -19,6 +19,7 @@ export interface DataTableContext {
   setExpanded?: (hit?: DataTableRecord) => void;
   getRowByIndex: (index: number) => DataTableRecord | undefined;
   onFilter?: DocViewFilterFn;
+  hideFilteringOnComputedColumns?: boolean;
   dataView: DataView;
   selectedDocsState: UseSelectedDocsState;
   valueToStringConverter: ValueToStringConverter;

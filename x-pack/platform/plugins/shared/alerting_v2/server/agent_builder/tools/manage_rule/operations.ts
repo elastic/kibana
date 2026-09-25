@@ -12,7 +12,11 @@ import {
   type SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import {
+  DASHBOARD_ARTIFACT_TYPE,
+  RUNBOOK_ARTIFACT_TYPE,
+  RUNBOOK_CONTENT_LIMIT,
+} from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
   createRuleDataSchema,
@@ -28,14 +32,15 @@ import {
   isStateTransitionAllowed,
   isSignalUsingStandaloneFormat,
   isSignalQueryBreachOnly,
+  isRecoveryTransitionConsistentWithStrategy,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isNoDataQueryConsistentWithStrategy,
   isNoDataQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
-import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 import { resolveTimeFieldForQuery } from './resolve_time_field';
 
@@ -43,11 +48,19 @@ type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
 
 type DashboardArtifact = RuleArtifact & {
   type: typeof DASHBOARD_ARTIFACT_TYPE;
-  data: { dashboardId: string };
+  data: { dashboard_id: string };
+};
+
+type RunbookArtifact = RuleArtifact & {
+  type: typeof RUNBOOK_ARTIFACT_TYPE;
+  data: { content: string };
 };
 
 const isDashboardArtifact = (artifact: RuleArtifact): artifact is DashboardArtifact =>
   artifact.type === DASHBOARD_ARTIFACT_TYPE;
+
+const isRunbookArtifact = (artifact: RuleArtifact): artifact is RunbookArtifact =>
+  artifact.type === RUNBOOK_ARTIFACT_TYPE;
 
 // Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
 // local to avoid forcing an export purely for this guard.
@@ -84,7 +97,7 @@ const toDashboardArtifacts = (
 ): DashboardArtifact[] => {
   const existingIdByDashboardId = new Map<string, string>();
   for (const artifact of existingArtifacts) {
-    existingIdByDashboardId.set(artifact.data.dashboardId, artifact.id);
+    existingIdByDashboardId.set(artifact.data.dashboard_id, artifact.id);
   }
 
   const seen = new Set<string>();
@@ -97,11 +110,28 @@ const toDashboardArtifacts = (
     dashboards.push({
       id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingIdByDashboardId.get(dashboardId)),
       type: DASHBOARD_ARTIFACT_TYPE,
-      data: { dashboardId },
+      data: { dashboard_id: dashboardId },
     });
   }
   return dashboards;
 };
+
+/** True when content is missing or blank after trim — treated as unlink. */
+const isRunbookUnlinkContent = (content: string | null): content is null =>
+  content == null || content.trim().length === 0;
+
+/**
+ * Maps markdown onto a single `runbook` artifact in the create/update API shape.
+ * Reuses the first existing runbook `id` so replace does not churn identifiers.
+ */
+const toRunbookArtifact = (
+  content: string,
+  existingArtifacts: RunbookArtifact[]
+): RunbookArtifact => ({
+  id: resolveArtifactId(RUNBOOK_ARTIFACT_TYPE, existingArtifacts[0]?.id),
+  type: RUNBOOK_ARTIFACT_TYPE,
+  data: { content },
+});
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Every field-level schema is derived from the shared alerting-v2-schemas
@@ -110,7 +140,6 @@ const toDashboardArtifacts = (
 
 export const setMetadataOperationSchema = metadataSchema
   .partial()
-  .omit({ owner: true })
   .extend({ operation: z.literal('set_metadata') })
   .describe(
     'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
@@ -171,7 +200,22 @@ export const setDashboardsOperationSchema = z
       ),
   })
   .describe(
-    'Use `set_dashboards` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a `dashboard` artifact (`{ id, type: "dashboard", data: { dashboardId } }`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.'
+    'Use `set_dashboards` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a `dashboard` artifact (`{ id, type: "dashboard", data: { dashboard_id } }`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.'
+  );
+
+export const setRunbookOperationSchema = z
+  .object({
+    operation: z.literal('set_runbook'),
+    content: z
+      .string()
+      .max(RUNBOOK_CONTENT_LIMIT)
+      .nullable()
+      .describe(
+        `Markdown investigation steps. Stored as a \`runbook\` artifact (\`{ id, type: "runbook", data: { content } }\`). Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Max ${RUNBOOK_CONTENT_LIMIT} characters.`
+      ),
+  })
+  .describe(
+    `Use \`set_runbook\` to attach investigation markdown to the rule. Stored as a \`runbook\` artifact (\`{ id, type: "runbook", data: { content } }\`), matching the create/update API. Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Content longer than ${RUNBOOK_CONTENT_LIMIT} characters is rejected.`
   );
 
 export const validateOperationSchema = z
@@ -192,6 +236,7 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
   setDashboardsOperationSchema,
+  setRunbookOperationSchema,
   validateOperationSchema,
 ]);
 
@@ -450,6 +495,30 @@ export const executeRuleOperations = async (
         break;
       }
 
+      case 'set_runbook': {
+        const existingArtifacts = next.artifacts ?? [];
+        const otherArtifacts: RuleArtifact[] = [];
+        const existingRunbookArtifacts: RunbookArtifact[] = [];
+        for (const artifact of existingArtifacts) {
+          if (isRunbookArtifact(artifact)) {
+            existingRunbookArtifacts.push(artifact);
+          } else {
+            otherArtifacts.push(artifact);
+          }
+        }
+        const runbookArtifacts = isRunbookUnlinkContent(op.content)
+          ? []
+          : [toRunbookArtifact(op.content, existingRunbookArtifacts)];
+        const artifacts = [...otherArtifacts, ...runbookArtifacts];
+        if (artifacts.length > MAX_RULE_ARTIFACTS) {
+          throw new RuleOperationValidationError(
+            `A rule can have at most ${MAX_RULE_ARTIFACTS} artifacts.`
+          );
+        }
+        next = { ...next, artifacts };
+        break;
+      }
+
       case 'validate': {
         const payload = buildRulePayload(next);
         const result = createRuleDataSchema.safeParse(payload);
@@ -498,6 +567,12 @@ export const executeRuleOperations = async (
   if (!isSignalQueryBreachOnly(next)) {
     throw new RuleOperationValidationError(
       'Signal rules cannot set recovery_strategy or no_data_strategy.'
+    );
+  }
+
+  if (!isRecoveryTransitionConsistentWithStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).'
     );
   }
 

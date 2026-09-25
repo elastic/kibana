@@ -42,6 +42,7 @@ export const validateAttackDiscoveries = async ({
   adhocAttackDiscoveryDataClient,
   authenticatedUser,
   esClient,
+  generationSource,
   logger,
   spaceId,
   validateRequestBody,
@@ -49,6 +50,14 @@ export const validateAttackDiscoveries = async ({
   adhocAttackDiscoveryDataClient: IRuleDataClient;
   authenticatedUser: AuthenticatedUser;
   esClient: ElasticsearchClient;
+  /**
+   * Optional producer identity, contributed to the attack hash (and persisted on
+   * the document) so this producer's attacks never de-duplicate against another
+   * producer's attacks built from the same detection alerts. Deliberately NOT
+   * part of `validateRequestBody`: it is not accepted from, or exposed by, the
+   * HTTP API.
+   */
+  generationSource?: string;
   logger: Logger;
   spaceId: string;
   validateRequestBody: PostValidateRequestBody;
@@ -62,6 +71,7 @@ export const validateAttackDiscoveries = async ({
   // Step 1: Transform request body to Elasticsearch alert documents
   const alertDocuments = transformToAlertDocuments({
     authenticatedUser,
+    generationSource,
     now,
     spaceId,
     validateRequestBody,

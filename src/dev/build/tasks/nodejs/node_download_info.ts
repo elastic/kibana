@@ -12,7 +12,7 @@ import { basename } from 'path';
 import type { Config, Platform } from '../../lib';
 
 /** Official Node 24 shipped as `node/default` and `node/pointer-compression` on serverless Linux. */
-export const SERVERLESS_NODE_24_VERSION = '24.19.0';
+export const SERVERLESS_NODE_24_VERSION = '24.21.0';
 /** Custom Node 26 pointer-compression tree: `node/node-26-pointer-compression`. */
 export const SERVERLESS_NODE_26_PC_VARIANT = 'node-26-pointer-compression';
 

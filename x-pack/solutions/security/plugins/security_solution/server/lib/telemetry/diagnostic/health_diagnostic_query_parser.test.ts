@@ -84,6 +84,39 @@ filterlist:
       expect((q as ParseFailureQuery).id).toBe('bad');
     });
 
+    it('strips integrations from a v1 descriptor — index-only result', () => {
+      const yaml = `---
+id: q1
+name: my-v1-query
+index: logs-endpoint.*
+integrations: endpoint
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml) as IndexQuery[];
+      expect(q.kind).toBe('index');
+      expect(q.index).toBe('logs-endpoint.*');
+      expect(q.integrations).toBeUndefined();
+    });
+
+    it('returns ParseFailureQuery for v1 descriptor with integrations but no index', () => {
+      const yaml = `---
+id: q-bad
+name: bad
+integrations: endpoint
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+    });
+
     it('returns ParseFailureQuery when v1 descriptor is missing the enabled field', () => {
       const yaml = `---
 id: no-enabled
@@ -564,6 +597,20 @@ filterlist: {}
         expect(q.integrations).toBeUndefined();
       });
 
+      it('treats empty integrations YAML sequence as no constraint (integrations undefined)', () => {
+        const yaml = `${baseYaml}integrations: []\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect('_raw' in q).toBe(false);
+        expect(q.integrations).toBeUndefined();
+      });
+
+      it('treats empty integrations scalar string as no constraint (integrations undefined)', () => {
+        const yaml = `${baseYaml}integrations: ""\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect('_raw' in q).toBe(false);
+        expect(q.integrations).toBeUndefined();
+      });
+
       it('returns ParseFailureQuery when integrations is an invalid type', () => {
         const yaml = `${baseYaml}integrations:\n  nested: value\n`;
         const [q] = parseHealthDiagnosticQueries(yaml);
@@ -633,5 +680,327 @@ filterlist:
       expect((queries[0] as IndexQuery).kind).toBe('index');
       expect((queries[1] as ParseFailureQuery)._raw).toBeDefined();
     });
+  });
+});
+
+describe('v4 encryptDocument', () => {
+  it('parses a valid v4 index descriptor with encryptDocument and no filterlist', () => {
+    const yaml = [
+      'version: 4',
+      'id: doc-enc-query',
+      'name: Doc Enc Query',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptionKeyId: rsa-key-v1',
+      'encryptDocument: true',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({
+      kind: 'index',
+      id: 'doc-enc-query',
+      encryptDocument: true,
+      encryptionKeyId: 'rsa-key-v1',
+      filterlist: {},
+    });
+  });
+
+  it('parses a valid v4 index descriptor with keep and mask filterlist', () => {
+    const yaml = [
+      'version: 4',
+      'id: doc-enc-query',
+      'name: Doc Enc Query',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptionKeyId: rsa-key-v1',
+      'encryptDocument: true',
+      'filterlist:',
+      '  process.name: keep',
+      '  host.ip: mask',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({
+      kind: 'index',
+      encryptDocument: true,
+      filterlist: { 'process.name': Action.KEEP, 'host.ip': Action.MASK },
+    });
+  });
+
+  it('produces invalid_descriptor when encryptDocument is true and encryptionKeyId is absent', () => {
+    const yaml = [
+      'version: 4',
+      'id: bad-query',
+      'name: Bad',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptDocument: true',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('produces invalid_descriptor when filterlist contains encrypt action', () => {
+    const yaml = [
+      'version: 4',
+      'id: bad-query',
+      'name: Bad',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptionKeyId: rsa-key-v1',
+      'encryptDocument: true',
+      'filterlist:',
+      '  process.name: encrypt',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('does NOT produce unknown_version for version 4', () => {
+    const yaml = [
+      'version: 4',
+      'id: q',
+      'name: Q',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptionKeyId: rsa-key-v1',
+      'encryptDocument: true',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index' });
+  });
+
+  it('produces invalid_descriptor when filterlist is absent and encryptDocument is not set', () => {
+    const yaml = [
+      'version: 4',
+      'id: no-filterlist',
+      'name: No Filterlist',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('accepts a v4 descriptor without encryptDocument when a filterlist is provided', () => {
+    const yaml = [
+      'version: 4',
+      'id: with-filterlist',
+      'name: With Filterlist',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'filterlist:',
+      '  user.name: keep',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({
+      kind: 'index',
+      filterlist: { 'user.name': Action.KEEP },
+    });
+  });
+
+  it('accepts encryptDocument: false with a filterlist and normalises the flag away', () => {
+    const yaml = [
+      'version: 4',
+      'id: enc-false',
+      'name: Enc False',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptDocument: false',
+      'filterlist:',
+      '  user.name: keep',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({
+      kind: 'index',
+      filterlist: { 'user.name': Action.KEEP },
+    });
+    expect((result as { encryptDocument?: boolean }).encryptDocument).toBeUndefined();
+  });
+
+  it('produces invalid_descriptor when encryptDocument: false and filterlist is absent', () => {
+    const yaml = [
+      'version: 4',
+      'id: enc-false-no-filterlist',
+      'name: Enc False No Filterlist',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptDocument: false',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+});
+
+describe('expiresAt', () => {
+  const v4BaseYaml = [
+    'version: 4',
+    'id: q',
+    'name: Q',
+    'type: DSL',
+    'query: \'{"match_all":{}}\'',
+    "scheduleCron: '0 */1 * * *'",
+    'enabled: true',
+    'index: logs-*',
+    'filterlist:',
+    '  user.name: keep',
+  ].join('\n');
+
+  const v3BaseYaml = v4BaseYaml.replace('version: 4', 'version: 3');
+
+  it('normalises a bare expiresAt date to start-of-day UTC on v4', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T00:00:00.000Z' });
+  });
+
+  it('leaves expiresAt undefined when absent on v4', () => {
+    const [result] = parseHealthDiagnosticQueries(v4BaseYaml);
+    expect(result).toMatchObject({ kind: 'index' });
+    expect((result as { expiresAt?: string }).expiresAt).toBeUndefined();
+  });
+
+  it('produces invalid_descriptor for a non-date expiresAt value', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: 'not-a-date'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('produces invalid_descriptor for a date with a trailing suffix', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31-typo'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('preserves the exact instant of a full ISO datetime string', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31T23:59:59Z'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T23:59:59.000Z' });
+  });
+
+  it('accepts an ISO datetime with a timezone offset and normalises it to UTC', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31T23:59:59+01:00'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T22:59:59.000Z' });
+  });
+
+  it('accepts an unquoted YAML date (parsed as Date object by the YAML library)', () => {
+    const yaml = `${v4BaseYaml}\nexpiresAt: 2099-12-31`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T00:00:00.000Z' });
+  });
+
+  it('produces invalid_descriptor when expiresAt is used on a v3 descriptor', () => {
+    const yaml = `${v3BaseYaml}\nexpiresAt: '2099-12-31'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+});
+
+describe('v4 API descriptors', () => {
+  const apiBase = [
+    'version: 4',
+    'id: api-q',
+    'name: API Q',
+    'type: API',
+    'api: _cat/tasks',
+    "scheduleCron: '0 */1 * * *'",
+    'enabled: true',
+  ];
+
+  it('accepts encryptDocument: true without a filterlist', () => {
+    const yaml = [...apiBase, 'encryptionKeyId: rsa-key-v1', 'encryptDocument: true'].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({
+      kind: 'api',
+      api: '_cat/tasks',
+      encryptDocument: true,
+      encryptionKeyId: 'rsa-key-v1',
+      filterlist: {},
+    });
+  });
+
+  it('accepts a descriptor without encryptDocument when a filterlist is provided', () => {
+    const yaml = [...apiBase, 'filterlist:', '  user.name: keep'].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'api', filterlist: { 'user.name': Action.KEEP } });
+  });
+
+  it('produces invalid_descriptor when filterlist is absent and encryptDocument is not set', () => {
+    const yaml = apiBase.join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('produces invalid_descriptor when encryptDocument is true and encryptionKeyId is absent', () => {
+    const yaml = [...apiBase, 'encryptDocument: true'].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('produces invalid_descriptor when filterlist contains encrypt action', () => {
+    const yaml = [
+      ...apiBase,
+      'encryptionKeyId: rsa-key-v1',
+      'encryptDocument: true',
+      'filterlist:',
+      '  process.name: encrypt',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('accepts encryptDocument: false with a filterlist and normalises the flag away', () => {
+    const yaml = [...apiBase, 'encryptDocument: false', 'filterlist:', '  user.name: keep'].join(
+      '\n'
+    );
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'api', filterlist: { 'user.name': Action.KEEP } });
+    expect((result as { encryptDocument?: boolean }).encryptDocument).toBeUndefined();
+  });
+
+  it('normalises a bare expiresAt date to start-of-day UTC', () => {
+    const yaml = [...apiBase, 'filterlist: {}', "expiresAt: '2099-12-31'"].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'api', expiresAt: '2099-12-31T00:00:00.000Z' });
+  });
+
+  it('accepts an ISO datetime with a timezone offset and normalises it to UTC', () => {
+    const yaml = [...apiBase, 'filterlist: {}', "expiresAt: '2099-12-31T23:59:59+01:00'"].join(
+      '\n'
+    );
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'api', expiresAt: '2099-12-31T22:59:59.000Z' });
+  });
+
+  it('produces invalid_descriptor for a date with a trailing suffix', () => {
+    const yaml = [...apiBase, 'filterlist: {}', "expiresAt: '2099-12-31-typo'"].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
   });
 });

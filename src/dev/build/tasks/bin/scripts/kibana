@@ -16,10 +16,6 @@ done
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
 
-{{#rspack}}
-export KBN_USE_RSPACK=true
-{{/rspack}}
-
 test_node() {
   test -x "$NODE"
   if [ ! -x "$NODE" ]; then
@@ -35,7 +31,7 @@ if ! "$NODE" --version >/dev/null 2>&1; then
 fi
 {{/linux}}
 {{#serverless}}
-# Default: official Node 24.19.0. PC is compile-time, so this only selects a tree.
+# Default: official Node 24.21.0. PC is compile-time, so this only selects a tree.
 if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
 fi

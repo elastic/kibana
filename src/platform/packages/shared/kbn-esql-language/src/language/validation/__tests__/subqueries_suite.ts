@@ -57,8 +57,9 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
       it('should validate custom command validation inside deeply nested subqueries', async () => {
         const { expectErrors } = await setup();
 
+        // A nonempty source ensures Elasticsearch does not skip RERANK validation.
         await expectErrors(
-          'FROM index, (FROM other_index, (FROM a_index | RERANK "query" ON keywordField WITH {}))',
+          'FROM index, (FROM other_index, (ROW keywordField = "text" | RERANK "query" ON keywordField WITH {}))',
           ['"inference_id" parameter is required for RERANK.']
         );
       });
@@ -344,6 +345,26 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         await expectErrors('FROM index | EVAL col0 = keywordField IN (FROM missing_index)', [
           'Unknown index "missing_index"',
         ]);
+      });
+    });
+
+    describe('STATS / INLINE STATS IN subqueries', () => {
+      it('validates sources inside STATS IN subqueries', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index | STATS COUNT(*) WHERE keywordField IN (FROM missing_index)',
+          ['Unknown index "missing_index"']
+        );
+      });
+
+      it('validates commands inside INLINE STATS IN subqueries', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index | INLINE STATS COUNT(*) WHERE keywordField IN (FROM other_index | KEEP missingField)',
+          ['Unknown column "missingField"']
+        );
       });
     });
   });

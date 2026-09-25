@@ -17,7 +17,8 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
-import { createToolErrorResult } from '../common/tool_results';
+import { hasRuleMigrationPrivileges } from '../common/privileges';
+import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -77,12 +78,13 @@ Returns { id, rules: { total, success: { total, result: { full, partial, untrans
 
 Field meanings:
 - \`result.full\` = fully translated (ready to install)
-- \`result.partial\` = partially translated (review needed)
+- \`result.partial\` = partially translated (review needed) which can be because of 2 reasons:
+  1. \`missing_index\` = query has a placeholder(\`[indexPattern]\`) for a missing index pattern
+  2. \`missing resources\` = query has a macro or a lookup placeholder for splunk which means resources are missing.
 - \`result.untranslatable\` = could not be translated
 - \`installable\` = successfully translated and installable
 - \`prebuilt\` = matched an Elastic prebuilt rule
-- \`missing_index\` = query has a placeholder for a missing index pattern
-- \`failed\` = translation errored
+- \`failed\` = translation errored for some error. Error available in migration stats -> last_execution -> error
 
 A migration with zero rule items returns the same shape with all counts 0 (204 No Content normalized to a stable shape).
 
@@ -90,6 +92,11 @@ Use this to decide whether translated rules are ready to install, and to surface
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {
+      const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
+      if (!hasPrivilege) {
+        return createMissingPrivilegeError('view rule migration translation stats');
+      }
+
       const response = await callSelfClient<GetRuleMigrationTranslationStatsResponse>(
         request,
         buildPath(migrationId),

@@ -8,9 +8,10 @@
 import type { ExpandWildcards } from '@elastic/elasticsearch/lib/api/types';
 
 /**
- * The plugin-owned `.kibana-threat-*` indices are hidden, so a wildcard read
- * skips them unless it opts in. Every wildcard search, PIT, and update-by-query
- * against them has to spread this.
+ * The plugin-owned threat intel indices (`.kibana-threat-reports`,
+ * `.kibana-threat-intel-sources`, `.threat-intel-indicators`) are hidden, so a
+ * wildcard read skips them unless it opts in. Every wildcard search, PIT, and
+ * update-by-query against them has to spread this.
  *
  * It lives here rather than in `setup/index_templates` because routes and tasks
  * need it and must not depend on the setup layer, and rather than in `common`

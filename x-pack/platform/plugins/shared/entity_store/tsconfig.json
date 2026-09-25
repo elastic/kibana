@@ -50,5 +50,7 @@
     "@kbn/test-es-server",
     "@kbn/scout",
     "@kbn/core-feature-flags-server",
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-saved-objects-api-server-mocks",
   ]
 }

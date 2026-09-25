@@ -129,8 +129,8 @@ export async function runWorkflow({
       workflowRunId,
       spaceId,
       logger,
-      fakeRequest,
       workflowExecutionRepository,
+      stepExecutionRepository,
       internalResumeWorkflowExecution,
       workflowTaskManager,
       meteringService,
@@ -140,7 +140,7 @@ export async function runWorkflow({
   }
 
   const triggeredBy = execution.triggeredBy;
-  const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
+  const isEventDriven = isEventDrivenWorkflowTriggerSource(execution);
   if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
     const cancelledAt = new Date().toISOString();
     await workflowExecutionRepository.updateWorkflowExecution({
@@ -224,8 +224,8 @@ export async function runWorkflow({
     workflowRunId,
     spaceId,
     logger,
-    fakeRequest,
     workflowExecutionRepository,
+    stepExecutionRepository,
     internalResumeWorkflowExecution,
     workflowTaskManager,
     meteringService,

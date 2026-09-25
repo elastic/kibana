@@ -46,9 +46,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
-   * Release: 9.6
+   * Release: 9.6, backported to 9.5.x
    */
-  responseActionsEndpointMemoryDumpRaw: false,
+  responseActionsEndpointMemoryDumpRaw: true,
 
   /**
    * `runscript` response action for Elastic Defend Endpoint
@@ -78,7 +78,7 @@ export const allowedExperimentalValues = Object.freeze({
    * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
    * Release: 9.6
    */
-  responseActionsEndpointKillProcessDescendants: false,
+  responseActionsEndpointKillProcessDescendants: true,
 
   /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
@@ -89,10 +89,12 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
-   * it covers from the internal user to a project-routed current-user client. Off until the request
-   * user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   * it covers from the internal user to a project-routed current-user client. Fan-out additionally
+   * requires the request to resolve at least one linked project via `cps.isCpsActive()`, so a
+   * serverless project with no linked projects reads exactly as it did before CPS. Off until the
+   * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
    */
-  defendCrossProjectSearch: false,
+  defendCrossProjectSearch: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -113,8 +115,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
+
   /**
-   * Enables the new Entity Analytics home page experience.
+   * Retired no-op. The Entity Analytics homepage is always on. Kept so existing
+   * `xpack.securitySolution.enableExperimental` entries, including
+   * `disable:entityAnalyticsNewHomePageEnabled`, remain valid during upgrade.
    */
   entityAnalyticsNewHomePageEnabled: true,
 
@@ -156,6 +161,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
+
+  /**
+   * Enables the v2 rule migration agent graph, which runs pre-built rule matching
+   * (security-team#18589) through a dedicated subgraph that generates its own semantic
+   * queries and calls pre-built rules search as a tool, instead of the v1 one-shot node.
+   */
+  ruleMigrationGraphv2: false,
 
   /**
    * Enables the Defend Insights Policy Response Failure feature
@@ -272,6 +284,12 @@ export const allowedExperimentalValues = Object.freeze({
   endpointForensicAnalysisSkill: false,
 
   /**
+   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
+   * Shipped dark by default; enable per environment via config.
+   */
+  elasticDefendPolicyManagementSkill: false,
+
+  /**
    * Enables the investigate-rule Agent Builder skill.
    * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
@@ -288,6 +306,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
   dexAiSkillRecommendPrebuiltRules: true,
+
+  /**
+   * Enables the detection-coverage Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillDetectionCoverage: false,
 
   /**
    * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
@@ -342,17 +366,23 @@ export const allowedExperimentalValues = Object.freeze({
   mitreAttackUpdatesUIEnabled: true,
 
   /**
+   * Enables the reworked Elastic Defend policy settings form with
+   * per-operating-system protection configuration.
+   * Release: 9.6
+   */
+  perOsPolicySettings: false,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: false,
+
+  /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: false,
-
-  /**
-   * Threat-intel supply pipeline (indices, ingest adapters, create
-   * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
-   * off. Enable with:
-   *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
-   */
-  threatIntelSupplyEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

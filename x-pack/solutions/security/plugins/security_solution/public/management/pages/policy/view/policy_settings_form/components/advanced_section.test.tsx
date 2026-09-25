@@ -13,28 +13,29 @@ import React from 'react';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
-import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
-import { PROTECTED_POLICY_SETTING_PATHS } from '../../../../../../../common/endpoint/service/policy/protected_policy_settings';
 import type { AdvancedSectionProps } from './advanced_section';
 import { AdvancedSection } from './advanced_section';
 import userEvent from '@testing-library/user-event';
-import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
+import { AdvancedPolicySchema } from '../../../../../../../common/endpoint/service/policy/advanced_policy_schema';
 import { within } from '@testing-library/react';
 import { set } from '@kbn/safer-lodash-set';
 
 jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
 jest.mock('../../../../../../common/hooks/use_license');
-jest.mock('../../../../../../common/components/user_privileges');
 
 const useLicenseMock = _useLicense as jest.Mock;
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+
+const CUSTOM_YARA_RESCAN_INTERVAL_KEYS = [
+  'windows.advanced.memory_protection.user_yara_rescan_interval_seconds',
+  'mac.advanced.memory_protection.user_yara_rescan_interval_seconds',
+  'linux.advanced.memory_protection.user_yara_rescan_interval_seconds',
+] as const;
 
 describe('Policy Advanced Settings section', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
 
   let formProps: AdvancedSectionProps;
+  let mockedContext: AppContextTestRender;
   let render: (expanded?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
@@ -42,11 +43,11 @@ describe('Policy Advanced Settings section', () => {
     await userEvent.click(renderResult.getByTestId(testSubj.showHideButton));
   };
 
-  beforeEach(() => {
-    // Default: superuser (canWriteAdminData: true) so all schema entries are visible
-    useUserPrivilegesMock.mockReturnValue(getUserPrivilegesMockDefaultValue());
+  const getCysRowContainer = (key: (typeof CUSTOM_YARA_RESCAN_INTERVAL_KEYS)[number]) =>
+    testSubj.settingRowTestSubjects(key).container;
 
-    const mockedContext = createAppRootMockRenderer();
+  beforeEach(() => {
+    mockedContext = createAppRootMockRenderer();
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -99,7 +100,12 @@ describe('Policy Advanced Settings section', () => {
 
     await render(true);
 
-    for (const advancedOption of AdvancedPolicySchema) {
+    const expectedRenderedOptions = AdvancedPolicySchema.filter(
+      (advancedOption) =>
+        !(CUSTOM_YARA_RESCAN_INTERVAL_KEYS as readonly string[]).includes(advancedOption.key)
+    );
+
+    expectedRenderedOptions.forEach((advancedOption) => {
       const optionTestSubj = testSubj.settingRowTestSubjects(advancedOption.key);
       const renderedRow = within(renderResult.getByTestId(optionTestSubj.container));
 
@@ -124,7 +130,7 @@ describe('Policy Advanced Settings section', () => {
       } else {
         expect(renderedRow.getByTestId<HTMLInputElement>(optionTestSubj.textField).value).toBe('');
       }
-    }
+    });
   });
 
   describe('and when license is lower than Platinum', () => {
@@ -142,67 +148,19 @@ describe('Policy Advanced Settings section', () => {
     it('should not render options that require platinum license', async () => {
       await render(true);
 
-      for (const advancedOption of AdvancedPolicySchema) {
-        if (advancedOption.license) {
-          if (advancedOption.license === 'platinum') {
-            expect(
-              renderResult.queryByTestId(
-                testSubj.settingRowTestSubjects(advancedOption.key).container
-              )
-            ).toBeNull();
-          } else {
-            throw new Error(
-              `${advancedOption.key}: Unknown license value: ${advancedOption.license}`
-            );
-          }
-        }
-      }
-    });
-  });
-
-  describe('and when user does not have admin privileges', () => {
-    beforeEach(() => {
-      useUserPrivilegesMock.mockReturnValue({
-        ...getUserPrivilegesMockDefaultValue(),
-        endpointPrivileges: getEndpointPrivilegesInitialStateMock({ canWriteAdminData: false }),
-      });
-    });
-
-    it('should not render options that require admin privileges', async () => {
-      await render(true);
-
-      for (const advancedOption of AdvancedPolicySchema) {
-        if (advancedOption.requiresAdminPrivileges) {
+      AdvancedPolicySchema.forEach((advancedOption) => {
+        if (advancedOption.license === 'platinum') {
           expect(
             renderResult.queryByTestId(
               testSubj.settingRowTestSubjects(advancedOption.key).container
             )
           ).toBeNull();
+        } else if (advancedOption.license && advancedOption.license !== 'enterprise') {
+          throw new Error(
+            `${advancedOption.key}: Unknown license value: ${advancedOption.license}`
+          );
         }
-      }
-    });
-
-    it('should still render options that do not require admin privileges', async () => {
-      await render(true);
-
-      const unprotectedOptions = AdvancedPolicySchema.filter(
-        (o) => !o.requiresAdminPrivileges && !o.license
-      );
-      expect(unprotectedOptions.length).toBeGreaterThan(0);
-
-      for (const advancedOption of unprotectedOptions) {
-        expect(
-          renderResult.queryByTestId(testSubj.settingRowTestSubjects(advancedOption.key).container)
-        ).not.toBeNull();
-      }
-    });
-
-    it('protected options should match the PROTECTED_POLICY_SETTING_PATHS list', () => {
-      const protectedKeys = AdvancedPolicySchema.filter((o) => o.requiresAdminPrivileges).map(
-        (o) => o.key
-      );
-      expect(protectedKeys).toEqual(expect.arrayContaining(PROTECTED_POLICY_SETTING_PATHS));
-      expect(protectedKeys.length).toBe(PROTECTED_POLICY_SETTING_PATHS.length);
+      });
     });
   });
 
@@ -233,6 +191,106 @@ describe('Policy Advanced Settings section', () => {
       expect(getByTestId(testSubj.settingRowTestSubjects(option2.key).container)).toHaveTextContent(
         exactMatchText('linux.advanced.artifacts.global.intervalInfo 7.9+—')
       );
+    });
+  });
+
+  describe('and when license is lower than Enterprise', () => {
+    beforeEach(() => {
+      const licenseServiceMock = createLicenseServiceMock();
+      licenseServiceMock.isEnterprise.mockReturnValue(false);
+
+      useLicenseMock.mockReturnValue(licenseServiceMock);
+      mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: true });
+    });
+
+    afterEach(() => {
+      useLicenseMock.mockReturnValue(licenseServiceMocked);
+    });
+
+    it('should not render options that require enterprise license', async () => {
+      await render(true);
+
+      for (const advancedOption of AdvancedPolicySchema) {
+        if (advancedOption.license === 'enterprise') {
+          expect(
+            renderResult.queryByTestId(
+              testSubj.settingRowTestSubjects(advancedOption.key).container
+            )
+          ).toBeNull();
+        }
+      }
+    });
+  });
+
+  describe('custom YARA signatures advanced settings', () => {
+    it('should hide custom YARA rescan interval options when the experimental flag is off', async () => {
+      await render(true);
+
+      for (const key of CUSTOM_YARA_RESCAN_INTERVAL_KEYS) {
+        expect(renderResult.queryByTestId(getCysRowContainer(key))).toBeNull();
+      }
+    });
+
+    describe('and custom YARA signatures experimental flag is enabled', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: true });
+      });
+
+      it('should show custom YARA rescan interval options on Enterprise when no PLI upsell is present', async () => {
+        await render(true);
+
+        for (const key of CUSTOM_YARA_RESCAN_INTERVAL_KEYS) {
+          expect(renderResult.getByTestId(getCysRowContainer(key))).toBeInTheDocument();
+        }
+      });
+
+      it('should persist an edited custom YARA rescan interval value on the matching policy path', async () => {
+        const key = 'windows.advanced.memory_protection.user_yara_rescan_interval_seconds';
+        await render(true);
+
+        const input = renderResult.getByTestId(key);
+        await userEvent.click(input);
+        await userEvent.paste('45');
+
+        const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].updatedPolicy;
+        expect(
+          updatedPolicy.windows.advanced.memory_protection.user_yara_rescan_interval_seconds
+        ).toBe('45');
+      });
+
+      describe('and license is lower than Enterprise', () => {
+        beforeEach(() => {
+          const licenseServiceMock = createLicenseServiceMock();
+          licenseServiceMock.isEnterprise.mockReturnValue(false);
+
+          useLicenseMock.mockReturnValue(licenseServiceMock);
+        });
+
+        afterEach(() => {
+          useLicenseMock.mockReturnValue(licenseServiceMocked);
+        });
+
+        it('should hide custom YARA rescan interval options when license is below Enterprise', async () => {
+          await render(true);
+
+          for (const key of CUSTOM_YARA_RESCAN_INTERVAL_KEYS) {
+            expect(renderResult.queryByTestId(getCysRowContainer(key))).toBeNull();
+          }
+        });
+      });
+
+      it('should hide custom YARA rescan interval options when a CYS PLI upsell message is present', async () => {
+        mockedContext.startServices.upselling.setMessages({
+          endpoint_custom_yara_signatures:
+            'To apply custom YARA signatures, you must add Endpoint Complete to your project.',
+        });
+
+        await render(true);
+
+        for (const key of CUSTOM_YARA_RESCAN_INTERVAL_KEYS) {
+          expect(renderResult.queryByTestId(getCysRowContainer(key))).toBeNull();
+        }
+      });
     });
   });
 });

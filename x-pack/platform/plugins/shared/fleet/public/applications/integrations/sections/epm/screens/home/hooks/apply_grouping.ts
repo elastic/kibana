@@ -77,7 +77,13 @@ export const applyGrouping = ({
     const groupConfig = INTEGRATION_GROUPS[groupId];
 
     const memberCards = representativeItems.map((item) => ({
-      ...mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId }),
+      ...mapToCard({
+        getAbsolutePath,
+        getHref,
+        item,
+        addBasePath,
+        packageVerificationKeyId,
+      }),
       fromCollection: { groupId, title: groupConfig.title },
     }));
 
@@ -115,8 +121,6 @@ export const applyGrouping = ({
       isUpdateAvailable: false,
       isReauthorizationRequired: false,
       searchableContent,
-      // Cap height to match min-height so long group descriptions don't overflow the card boundary.
-      maxCardHeight: 127,
     };
 
     collectionCards.push(collectionCard);

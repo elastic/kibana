@@ -31,11 +31,9 @@ import {
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import * as Registry from '../registry';
-import {
-  generatePackageInfoFromArchiveBuffer,
-  setPackageInfo,
-  deleteVerificationResult,
-} from '../archive';
+import { setPackageInfo, deleteVerificationResult } from '../archive';
+
+import { parsePackageAndCollectSignals } from './upload_preflight_authz';
 
 import {
   createInstallation,
@@ -115,9 +113,6 @@ jest.mock('../kibana/index_pattern/install', () => {
 });
 jest.mock('../archive', () => {
   return {
-    generatePackageInfoFromArchiveBuffer: jest.fn(() =>
-      Promise.resolve({ packageInfo: { name: 'apache', version: '1.3.0' } })
-    ),
     unpackBufferToAssetsMap: jest.fn(() =>
       Promise.resolve({
         assetsMap: new Map(),
@@ -128,6 +123,15 @@ jest.mock('../archive', () => {
     deleteVerificationResult: jest.fn(),
   };
 });
+jest.mock('./upload_preflight_authz', () => ({
+  parsePackageAndCollectSignals: jest.fn(() =>
+    Promise.resolve({
+      packageInfo: { name: 'apache', version: '1.3.0' },
+      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
+    })
+  ),
+  checkUploadPackageAssetPrivileges: jest.fn(),
+}));
 jest.mock('../../audit_logging');
 
 jest.mock('../../utils/agentless', () => {
@@ -163,12 +167,12 @@ function parsedArchiveFixture(
   overrides: Pick<ArchivePackage, 'name' | 'version'> &
     Partial<Pick<ArchivePackage, 'data_streams'>>
 ): {
-  paths: string[];
   packageInfo: ArchivePackage;
+  archiveSignals: { gatedTypesFound: Set<any>; hasMlSecurityRules: boolean };
 } {
   return {
-    paths: [],
     packageInfo: archivePackageFixture(overrides),
+    archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
   };
 }
 
@@ -542,7 +546,7 @@ describe('install', () => {
       (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       jest
-        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
       mockGetBundledPackageByPkgKey.mockResolvedValue({
         name: 'test_package',
@@ -843,7 +847,7 @@ describe('install', () => {
 
     it('validates real uploads and skips the install when validation fails', async () => {
       jest
-        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
 
       const response = await installPackage({
@@ -890,7 +894,7 @@ describe('install', () => {
           },
         ],
       });
-      jest.mocked(generatePackageInfoFromArchiveBuffer).mockResolvedValueOnce(
+      jest.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
         parsedArchiveFixture({
           name: 'evilclaim',
           version: '1.0.0',
@@ -952,7 +956,7 @@ describe('install', () => {
           },
         ],
       });
-      jest.mocked(generatePackageInfoFromArchiveBuffer).mockResolvedValueOnce(
+      jest.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
         parsedArchiveFixture({
           name: 'evilclaim',
           version: '1.0.0',
@@ -1015,7 +1019,7 @@ describe('install', () => {
       );
     });
 
-    it('rejects a registry package name when allowRegistryPackageUploads is unset', async () => {
+    it('rejects a registry package name when skipUploadPackageValidation is unset', async () => {
       jest
         .mocked(Registry.fetchFindLatestPackageOrThrow)
         .mockResolvedValue(registryPackageFixture({ name: 'apache', version: '1.3.0' }));
@@ -1131,7 +1135,7 @@ describe('install', () => {
     it('allows a first upload in air-gapped mode when the name has no bundled match', async () => {
       jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
       jest
-        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'custom_probe', version: '1.0.0' }));
 
       try {
@@ -1163,7 +1167,7 @@ describe('install', () => {
     it('rejects a first upload in air-gapped mode when the name matches a bundled package', async () => {
       jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
       jest
-        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'apache', version: '1.0.0' }));
       jest.mocked(getBundledPackageByName).mockResolvedValue({
         name: 'apache',
@@ -1329,8 +1333,8 @@ describe('handleInstallPackageFailure', () => {
       spaceId: 'default',
     });
 
-    expect(mockedLogger.error).not.toBeCalled();
-    expect(installStateMachine._stateMachineInstallPackage).not.toBeCalled();
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+    expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
   });
 
   it('should rollback on upgrade on FleetError', async () => {
@@ -1360,12 +1364,12 @@ describe('handleInstallPackageFailure', () => {
       spaceId: 'default',
     });
 
-    expect(mockedLogger.error).toBeCalledTimes(1);
-    expect(mockedLogger.error).toBeCalledWith(
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockedLogger.error).toHaveBeenCalledWith(
       'Rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
     );
-    expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
-    expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
+    expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledTimes(1);
+    expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
       expect.objectContaining({
         packageInstallContext: expect.objectContaining({
           packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
@@ -1407,17 +1411,17 @@ describe('handleInstallPackageFailure', () => {
         spaceId: 'default',
       });
 
-      expect(mockedLogger.error).toBeCalledWith(
+      expect(mockedLogger.error).toHaveBeenCalledWith(
         'Rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
       );
-      expect(mockedLogger.error).toBeCalledWith(
+      expect(mockedLogger.error).toHaveBeenCalledWith(
         'Uninstalling test_package-1.0.0 after error installing: [Error: test error] with install type: install'
       );
-      expect(mockedLogger.error).toBeCalledWith(
+      expect(mockedLogger.error).toHaveBeenCalledWith(
         expect.stringMatching(/Failed to uninstall or rollback package after installation error/)
       );
-      expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
-      expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledTimes(1);
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
         expect.objectContaining({
           packageInstallContext: expect.objectContaining({
             packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
@@ -1442,10 +1446,10 @@ describe('handleInstallPackageFailure', () => {
         pkgVersion: '1.0.0',
         spaceId: 'default',
       });
-      expect(mockedLogger.error).toBeCalledWith(
+      expect(mockedLogger.error).toHaveBeenCalledWith(
         'Uninstalling test_package-1.0.0 after error installing: [Error: test 123] with install type: install'
       );
-      expect(mockedLogger.error).toBeCalledWith(
+      expect(mockedLogger.error).toHaveBeenCalledWith(
         `Failed to uninstall or rollback package after installation error PackageRemovalError: test_package is not installed`
       );
     });
@@ -1482,19 +1486,19 @@ describe('handleInstallPackageFailure', () => {
         pkgVersion: '2.0.0',
         spaceId: 'default',
       });
-      expect(mockedLogger.error).toBeCalledWith(
+      expect(mockedLogger.error).toHaveBeenCalledWith(
         'Error installing test_package-2.0.0: [Error: test installing]'
       );
-      expect(mockedLogger.debug).toBeCalledWith(
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
         expect.stringMatching(
           /Retrying install of test_package-2.0.0 with install type: reinstall - Attempt 1/
         )
       );
-      expect(mockedLogger.debug).toBeCalledWith(
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
         'Kicking off install of test_package-2.0.0 from registry'
       );
-      expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
-      expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledTimes(1);
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
         expect.objectContaining({
           retryFromLastState: true,
           packageInstallContext: expect.objectContaining({
@@ -1545,8 +1549,8 @@ describe('handleInstallPackageFailure', () => {
         spaceId: 'default',
       });
 
-      expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
-      expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledTimes(1);
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
         expect.objectContaining({
           retryFromLastState: true,
           packageInstallContext: expect.objectContaining({
@@ -1607,7 +1611,7 @@ describe('handleInstallPackageFailure', () => {
         spaceId: 'default',
       });
 
-      expect(installStateMachine._stateMachineInstallPackage).not.toBeCalled();
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
     });
   });
 });
@@ -1702,7 +1706,7 @@ describe('isPackageVersionOrLaterInstalled', () => {
       })
     );
 
-    expect(getInstallationObject).toBeCalledTimes(3);
+    expect(getInstallationObject).toHaveBeenCalledTimes(3);
   });
 
   it('should throw on unexpected error', async () => {
@@ -1715,7 +1719,7 @@ describe('isPackageVersionOrLaterInstalled', () => {
       pkgVersion: '1.0.0',
     });
 
-    await expect(res).rejects.toThrowError('test unexpected error');
+    await expect(res).rejects.toThrow('test unexpected error');
   });
 });
 

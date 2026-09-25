@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-export const publicApiPath = '/api/context_engine';
-export const internalApiPath = '/internal/context_engine';
+import type { AiIndexType } from './http_api/ai_indices';
 
-export const aiIndexPath = `${publicApiPath}/ai_index`;
-export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
-export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
-export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
+export const PUBLIC_API_PATH = '/api/context_engine';
+export const INTERNAL_API_PATH = '/internal/context_engine';
+
+export const AI_INDEX_PATH = `${PUBLIC_API_PATH}/ai_index`;
+export const AI_INDEX_BY_ID_PATH = `${AI_INDEX_PATH}/{aiIndexId}`;
+/** Id-less; ids cannot start with `_` (`AI_INDEX_ID_PATTERN`), so this never collides with `{aiIndexId}`. */
+export const AI_INDEX_QUERY_PATH = `${AI_INDEX_PATH}/_query`;
+export const AI_INDEX_DESCRIBE_PATH = `${AI_INDEX_BY_ID_PATH}/_describe`;
+export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/ki_summary`;
+export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
+export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
+export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
@@ -22,11 +29,23 @@ export const KI_SUMMARY_PAGE_SIZE = 0;
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
-export const signalGroupsPath = `${internalApiPath}/signals/groups`;
-export const signalsPath = `${internalApiPath}/signals`;
+export const SIGNAL_GROUPS_PATH = `${INTERNAL_API_PATH}/signals/groups`;
+export const SIGNALS_PATH = `${INTERNAL_API_PATH}/signals`;
 
 /** Version of the internal Signals API, shared between route registration and the browser client. */
 export const SIGNALS_INTERNAL_API_VERSION = '1';
+
+/** Read-only internal route for searching data streams, backing the AI index trace picker. */
+export const DATA_STREAMS_SEARCH_PATH = `${INTERNAL_API_PATH}/data_streams`;
+
+/** Version of the internal data streams search API, shared between route registration and the browser client. */
+export const DATA_STREAMS_SEARCH_INTERNAL_API_VERSION = '1';
+
+/** Cap on the number of data streams returned by the search API (applied after filtering hidden/managed streams out). */
+export const MAX_DATA_STREAM_SEARCH_RESULTS = 50;
+
+/** Bound on the free-text `search` query param, to prevent unbounded-input DoS. */
+export const MAX_DATA_STREAM_SEARCH_LENGTH = 256;
 
 /** Max number of tag groups returned by the grouped Signals list. */
 export const MAX_SIGNAL_GROUPS = 100;
@@ -34,6 +53,10 @@ export const MAX_SIGNAL_GROUPS = 100;
 /** Default and maximum page size when fetching the individual signals in a group. */
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
+
+/** Default and maximum page size when listing improvements (one entry per improvement lineage). */
+export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
+export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
 
 /**
  * Version of the public AI index API, shared between the server route
@@ -55,6 +78,12 @@ export const AI_INDEX_DATA_STREAM_PREFIX = `${AI_INDEX_DEST_PREFIX}ds-`;
 export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
 
 /**
+ * Storage type used for AI indexes created from the UI. The `data_stream` type still exists
+ * and is supported by the API/server for solutions and expert users; only the UI is defaulted.
+ */
+export const DEFAULT_AI_INDEX_TYPE: AiIndexType = 'index';
+
+/**
  * Hard limit on the number of AI indices returned by the list API.
  * TODO: Remove this limit (or make it configurable) and add pagination support to List API.
  */
@@ -69,6 +98,52 @@ export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;
 export const MAX_AI_INDEX_SOURCES = 100;
+export const MAX_AI_INDEX_TRACES = 100;
+export const MAX_AI_INDEX_TRACE_VALUE_LENGTH = 10240;
+/** Cap on comma-separated index/data-stream/alias expressions inside a single 'index' trace value. */
+export const MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS = 50;
+
+/** AI-index ES|QL query API bounds. */
+export const MAX_AI_INDEX_QUERY_LENGTH = 10000;
+export const MAX_AI_INDEX_QUERY_PARAMS = 100;
+export const MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH = 256;
+export const MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH = 4096;
+
+/** Row limit the server always enforces; a larger trailing `LIMIT` in the query is capped to it. */
+export const DEFAULT_AI_INDEX_QUERY_LIMIT = 100;
+export const MAX_AI_INDEX_QUERY_LIMIT = 1000;
+export const MAX_AI_INDEX_QUERY_RESPONSE_BYTES = 20 * 1024 * 1024;
+
+/** AI-index describe API bounds. */
+export const MAX_AI_INDEX_DESCRIBE_FIELDS = 500;
+/** Byte cap per `_mapping` / `_field_caps` response; field cap applies after download. */
+export const MAX_AI_INDEX_DESCRIBE_METADATA_BYTES = 20 * 1024 * 1024;
+export const MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS = 20;
+export const MAX_AI_INDEX_DESCRIBE_TAG_COUNTS = 20;
+
+export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
+export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;
+export const MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH = 4096;
+
+/** Floor on the feedback-analysis schedule interval. */
+export const MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES = 15;
+
+/** Applied when a feedback-analysis block omits the corresponding field. */
+export const DEFAULT_FEEDBACK_ANALYSIS_INTERVAL = '24h';
+export const DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM = 'now-30d';
+
+/** Cap on the ranked pattern groups handed to a run. */
+export const MAX_ANALYSIS_SIGNAL_GROUPS = 25;
+
+/** Cap on the signal ids recorded per group. */
+export const MAX_GROUP_SIGNAL_IDS = 20;
+
+/** Cap on the proposals one run may record. */
+export const MAX_IMPROVEMENTS_PER_RUN = 25;
+
+/** Bounds on the free text a run may attach to a proposal. */
+export const MAX_IMPROVEMENT_TITLE_LENGTH = 512;
+export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
 
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
@@ -78,8 +153,8 @@ export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';
 export const SIGNAL_GENERATOR_TASK_ID = 'contextengine-signal-generator';
 export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 
-/** Agent id whose tool calls are left untagged. */
-export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
+/** Skill id of the feedback loop's own analysis skill; rounds that load it are excluded from signal generation. */
+export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve';
 
 /**
  * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept

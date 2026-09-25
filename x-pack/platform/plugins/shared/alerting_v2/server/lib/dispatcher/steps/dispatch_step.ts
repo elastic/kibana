@@ -32,6 +32,7 @@ import type {
   DispatcherStepOutput,
   DispatchFailure,
 } from '../types';
+import { DispatchOutcome, DispatchPlan, PolicyCatalog } from '../state';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
@@ -79,23 +80,28 @@ export class DispatchStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { dispatch = [], policies } = state;
+    const { plan = DispatchPlan.empty(), policies = PolicyCatalog.empty() } = state;
     const { signal } = state.input;
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();
     const dispatchFailures: DispatchFailure[] = [];
     const done = (): DispatcherStepOutput => ({
       type: 'continue',
-      data: { dispatchedExecutions, dispatchFailures },
+      data: {
+        outcome: DispatchOutcome.of({
+          executionsByGroup: dispatchedExecutions,
+          failures: dispatchFailures,
+        }),
+      },
     });
 
-    if (dispatch.length === 0 || signal.aborted) {
+    if (plan.toDispatch.length === 0 || signal.aborted) {
       return done();
     }
 
     const groupsByApiKey = new Map<string, ActionGroup[]>();
-    for (const group of dispatch) {
-      const apiKey = policies?.get(group.policyId)?.apiKey;
+    for (const group of plan.toDispatch) {
+      const apiKey = policies.apiKeyOf(group.policyId);
       if (!apiKey) {
         this.recordMissingApiKey(group, dispatchFailures, logger);
         continue;

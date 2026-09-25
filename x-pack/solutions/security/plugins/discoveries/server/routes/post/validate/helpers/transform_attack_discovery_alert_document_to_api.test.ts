@@ -10,6 +10,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_UPDATED_AT,
+  ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-data-utils';
@@ -21,6 +22,7 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
     [ALERT_RULE_UUID]: 'rule-1',
     [ALERT_START]: '2025-12-15T18:39:20.762Z',
     [ALERT_UPDATED_AT]: '2025-12-15T18:39:20.833Z',
+    [ALERT_WORKFLOW_REASON]: 'false_positive',
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_WORKFLOW_STATUS_UPDATED_AT]: '2025-12-15T18:39:20.833Z',
     'kibana.alert.attack_discovery.alert_ids': ['a1'],
@@ -247,5 +249,29 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
     });
 
     expect(result.replacements).toBeUndefined();
+  });
+
+  it('returns alert_workflow_reason from the document', () => {
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: baseDoc,
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.alert_workflow_reason).toEqual('false_positive');
+  });
+
+  it('returns undefined for alert_workflow_reason when it is missing', () => {
+    const { [ALERT_WORKFLOW_REASON]: _ignored, ...docWithoutReason } = baseDoc;
+
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: docWithoutReason,
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.alert_workflow_reason).toBeUndefined();
   });
 });

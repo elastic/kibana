@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/vis-type-vega-plugin",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "private",
@@ -29,6 +29,7 @@
       "kibanaUtils",
       "kibanaReact",
       "visDefaultEditor"
-    ]
+    ],
+    "extraPublicDirs": ["common"]
   }
 }

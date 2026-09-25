@@ -1,11 +1,39 @@
 {
-  "sha1": "b78733fe55e13884ac1b4c44f75e9fdd15011617",
+  "sha1": "611e3a5158a077d009d276b48943d750516019dd",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "07a9893f4bfa48c-8a982de270c8a77",
+      "id": "a002a5dadd7e00b-cbb70278009f3c9",
+      "title": "Onboarding Authenticate and Deploy step policy cleanup same-package: removing a service updates the shared policy (PUT, not DELETE) for the surviving service — cleanup-only when survivor already deployed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 109,
+        "column": 11
+      }
+    },
+    {
+      "id": "a002a5dadd7e00b-38c32bacf1bd50b",
+      "title": "Onboarding Authenticate and Deploy step agent-based cleanup: removing a service updates the shared package policy for the surviving service (PUT, not DELETE)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 196,
+        "column": 24
+      }
+    },
+    {
+      "id": "a002a5dadd7e00b-8a982de270c8a77",
       "title": "Onboarding Authenticate and Deploy step deploy fires POST /api/fleet/managed_integrations and shows success state",
       "expectedStatus": "passed",
       "tags": [
@@ -13,9 +41,79 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_deploy_step.spec.ts",
-        "line": 108,
-        "column": 30
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 337,
+        "column": 11
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-917d88b3f6969ed",
+      "title": "Onboarding ECF Deployment Section pre-launch: ECF section is visible with launch button; no stack name field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 39,
+        "column": 8
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-7e7ee2a63c9223c",
+      "title": "Onboarding ECF Deployment Section post-launch: accordion stays expanded with Done badge; stack name field is pre-filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 52,
+        "column": 24
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-a180c0cddbd1be7",
+      "title": "Onboarding ECF Deployment Section post-launch: ECF version is displayed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 77,
+        "column": 24
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-be7cfaf857fe499",
+      "title": "Onboarding ECF Deployment Section post-launch: editing the stack name is written to session storage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 99,
+        "column": 22
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-16c68e10f90f8d8",
+      "title": "Onboarding ECF Deployment Section post-launch: invalid stack name shows inline error; Next button stays enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 128,
+        "column": 5
       }
     },
     {
@@ -224,22 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 448,
-        "column": 7
-      }
-    },
-    {
-      "id": "f11cb343b6e8637-26047a727d2a7c0",
-      "title": "Onboarding Service Settings step ⋮ actions menu is visible on every row and contains Duplicate service",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 485,
-        "column": 5
+        "line": 447,
+        "column": 11
       }
     },
     {
@@ -252,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 502,
-        "column": 87
+        "line": 484,
+        "column": 8
       }
     },
     {
@@ -266,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 511,
-        "column": 87
+        "line": 493,
+        "column": 30
       }
     },
     {
@@ -280,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 522,
-        "column": 11
+        "line": 501,
+        "column": 24
       }
     },
     {
@@ -294,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 535,
-        "column": 20
+        "line": 514,
+        "column": 100
       }
     },
     {
@@ -308,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 569,
-        "column": 20
+        "line": 548,
+        "column": 24
       }
     },
     {
@@ -322,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 598,
-        "column": 7
+        "line": 576,
+        "column": 17
       }
     },
     {
@@ -336,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 667,
-        "column": 24
+        "line": 640,
+        "column": 11
       }
     },
     {
@@ -350,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 734,
+        "line": 715,
         "column": 24
       }
     },
@@ -364,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 762,
+        "line": 743,
         "column": 24
       }
     },
@@ -435,6 +519,48 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
         "line": 85,
+        "column": 5
+      }
+    },
+    {
+      "id": "7f9cbf00b4a7ca7-c1d4903f431c19f",
+      "title": "Onboarding SO persistence Deploy fires SO POST with connector and provider, then navigates to detect-and-review",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
+        "line": 77,
+        "column": 22
+      }
+    },
+    {
+      "id": "7f9cbf00b4a7ca7-2e1b1d68c38e79e",
+      "title": "Onboarding SO persistence ?deploymentId= resume lands on detect-and-review and keeps the param in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
+        "line": 145,
+        "column": 9
+      }
+    },
+    {
+      "id": "7f9cbf00b4a7ca7-3af4512cd2bfc72",
+      "title": "Onboarding SO persistence static-keys ?deploymentId= resume renders StaticKeysReplaceView",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
+        "line": 180,
         "column": 5
       }
     },

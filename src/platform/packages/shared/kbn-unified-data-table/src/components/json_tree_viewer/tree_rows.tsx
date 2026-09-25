@@ -11,7 +11,7 @@
  * This file contains the presentational layer of the JSON tree: one component per row kind
  * (`NodeRowView`, `ClosingBracketRow`,`PagerRowView`). These hold no state.
  */
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { Children, memo, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -33,14 +33,20 @@ import {
   type CollectionNode,
   type CollectionType,
   type FormatValue,
+  type GetLeafActions,
   type JsonPrimitive,
+  type JsonTreeRowAction,
   type NodeRow,
   type PagerRow,
   type PrimitiveType,
 } from './tree_model';
 
 const LABEL_TEXT_CLASS = 'jsonTreeViewerLabelText';
+const LEAF_LABEL_CLASS = 'jsonTreeViewerLeafLabel';
 const VALUE_CLASS = 'jsonTreeViewerValue';
+
+// After this many lines, the value will be truncated.
+const MAX_WRAP_VALUE_LINES = 100;
 
 // ---- Row view components (one per render-row kind) ----
 
@@ -54,8 +60,9 @@ interface FocusableRowProps {
 
 interface NodeRowViewProps extends FocusableRowProps {
   row: NodeRow;
-  onActivate: () => void;
+  onActivate: (event: React.MouseEvent) => void;
   formatValue?: FormatValue;
+  getLeafActions?: GetLeafActions;
 }
 export const NodeRowView = memo(function NodeRowView({
   row,
@@ -65,10 +72,15 @@ export const NodeRowView = memo(function NodeRowView({
   onFocus,
   onKeyDown,
   formatValue,
+  getLeafActions,
 }: NodeRowViewProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
   const { node, hasChildren, isExpanded } = row;
+  // The row's action buttons (copy, filter) mount only while the row is active or hovered,
+  // so a large tree doesn't flood the document with focusable elements (which makes focus-trap /
+  // tabbable scans dominate page load time). A reserved slot keeps that mount from shifting layout.
+  const [isHovered, setIsHovered] = useState(false);
   return (
     <div
       ref={rowRef}
@@ -83,6 +95,8 @@ export const NodeRowView = memo(function NodeRowView({
       style={{ paddingInlineStart: rowPaddingInlineStart(euiTheme, row.depth) }}
       onClick={onActivate}
       onFocus={onFocus}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onKeyDown={onKeyDown}
       data-test-subj={`jsonTreeViewerRow-${node.id}`}
     >
@@ -97,7 +111,12 @@ export const NodeRowView = memo(function NodeRowView({
       ) : (
         <span css={styles.caret} aria-hidden />
       )}
-      <NodeLabel row={row} formatValue={formatValue} />
+      <NodeLabel
+        row={row}
+        showActions={isActive || isHovered}
+        formatValue={formatValue}
+        getLeafActions={getLeafActions}
+      />
     </div>
   );
 });
@@ -122,7 +141,11 @@ export const PagerRowView = memo(function PagerRowView({
 
   // The primary control shows more while items remain, otherwise it collapses back ("show fewer").
   const primaryLabel = showMore
-    ? showMoreLabel(row.collectionType, Math.min(CHILDREN_INCREMENT, row.hiddenCount))
+    ? showMoreLabel(
+        row.collectionType,
+        Math.min(CHILDREN_INCREMENT, row.hiddenCount),
+        row.totalCount
+      )
     : showFewerLabel(row.collectionType);
 
   // "Show fewer" unmounts the focused button — move focus to the pager row first so it isn't lost.
@@ -160,6 +183,7 @@ export const PagerRowView = memo(function PagerRowView({
             : clickShowFewer
         }
         onKeyDown={pagerButtonKeyDown}
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
         data-test-subj={
           showMore
             ? `jsonTreeViewerMore-${row.collectionId}`
@@ -176,6 +200,7 @@ export const PagerRowView = memo(function PagerRowView({
           iconType="minus"
           onClick={clickShowFewer}
           onKeyDown={pagerButtonKeyDown}
+          onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
           data-test-subj={`jsonTreeViewerFewer-${row.collectionId}`}
         >
           {showFewerLabel(row.collectionType)}
@@ -216,44 +241,11 @@ const KeyPrefix = memo(function KeyPrefix({
   const styles = useEuiMemoizedStyles(treeStyles);
   if (isArrayItem) return null;
   return (
-    <>
+    <span css={styles.keyPrefix}>
       <span css={styles.punctuation}>{'"'}</span>
       <span css={styles.key}>{name}</span>
       <span css={styles.punctuation}>{'"'}</span>
       <span css={styles.punctuation}>:</span>{' '}
-    </>
-  );
-});
-
-const PrimitiveValue = memo(function PrimitiveValue({
-  primitiveType,
-  value,
-  formatted,
-}: {
-  primitiveType: PrimitiveType;
-  value: JsonPrimitive;
-  formatted?: React.ReactNode;
-}) {
-  const styles = useEuiMemoizedStyles(treeStyles);
-  if (primitiveType === 'string') {
-    return (
-      <span className={VALUE_CLASS} css={[styles.value, styles.valueString]}>
-        {'"'}
-        {formatted ?? String(value)}
-        {'"'}
-      </span>
-    );
-  }
-  if (primitiveType === 'number' || primitiveType === 'boolean') {
-    return (
-      <span className={VALUE_CLASS} css={[styles.value, styles.valueScalar]}>
-        {formatted ?? String(value)}
-      </span>
-    );
-  }
-  return (
-    <span className={VALUE_CLASS} css={[styles.value, styles.valueNull]}>
-      null
     </span>
   );
 });
@@ -263,7 +255,70 @@ const Comma = memo(function Comma() {
   return <span css={styles.punctuation}>,</span>;
 });
 
+const PrimitiveValue = memo(function PrimitiveValue({
+  primitiveType,
+  value,
+  formatted,
+  trailingComma,
+}: {
+  primitiveType: PrimitiveType;
+  value: JsonPrimitive;
+  formatted?: React.ReactNode;
+  trailingComma: boolean;
+}) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const comma = trailingComma ? <Comma /> : null;
+  if (primitiveType === 'string') {
+    return (
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueString]}>
+        {'"'}
+        {formatted ?? String(value)}
+        {'"'}
+        {comma}
+      </span>
+    );
+  }
+  if (primitiveType === 'number' || primitiveType === 'boolean') {
+    return (
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueScalar]}>
+        {formatted ?? String(value)}
+        {comma}
+      </span>
+    );
+  }
+  return (
+    <span className={VALUE_CLASS} css={[styles.value, styles.valueNull]}>
+      null
+      {comma}
+    </span>
+  );
+});
+
 const COPIED_FEEDBACK_DURATION = 1200;
+
+const copiedLabel = () =>
+  i18n.translate('unifiedDataTable.jsonTreeViewer.copied', { defaultMessage: 'Copied' });
+
+const useCopyWithFeedback = (getText: () => string, label: string) => {
+  const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(resetTimer.current), []);
+
+  const copy = () => {
+    copyToClipboard(getText());
+    setCopied(true);
+    clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_DURATION);
+  };
+
+  return {
+    copy,
+    iconType: copied ? 'check' : 'copy',
+    color: copied ? 'success' : 'text',
+    displayedLabel: copied ? copiedLabel() : label,
+  } as const;
+};
+
 const CopyButton = function CopyButton({
   getText,
   label,
@@ -274,34 +329,25 @@ const CopyButton = function CopyButton({
   nodeId: string;
 }) {
   const styles = useEuiMemoizedStyles(treeStyles);
-  const [copied, setCopied] = useState(false);
-  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => () => clearTimeout(resetTimer.current), []);
-
-  const copiedLabel = i18n.translate('unifiedDataTable.jsonTreeViewer.copied', {
-    defaultMessage: 'Copied',
-  });
-
-  const displayedLabel = copied ? copiedLabel : label;
+  const { copy, iconType, color, displayedLabel } = useCopyWithFeedback(getText, label);
 
   return (
     <EuiToolTip content={displayedLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={displayedLabel}
-        className="jsonTreeViewerCopyButton"
-        color={copied ? 'success' : 'text'}
-        css={styles.copyButton}
+        className="jsonTreeViewerCopyButton jsonTreeViewerRowAction"
+        color={color}
+        css={styles.rowActionButton}
         data-test-subj={`jsonTreeViewerCopy-${nodeId}`}
         iconSize="s"
-        iconType={copied ? 'check' : 'copy'}
+        iconType={iconType}
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
-          copyToClipboard(getText());
-          setCopied(true);
-          clearTimeout(resetTimer.current);
-          resetTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_DURATION);
+          copy();
         }}
-        onKeyDown={nestedControlKeyDown}
+        // Prevent focusing the Datagrid cell so it does not scroll to the top of it.
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
+        onKeyDown={rowActionKeyDown}
         size="xs"
       />
     </EuiToolTip>
@@ -341,30 +387,124 @@ const SubtreeCopyButton = memo(function SubtreeCopyButton({ node }: { node: Coll
   return <CopyButton getText={() => nodeToJsonString(node)} label={label} nodeId={node.id} />;
 });
 
+// Copies the whole document as pretty-printed JSON.
+export const CopyAllButton = memo(function CopyAllButton({
+  getText,
+  onKeyDown,
+  buttonRef,
+}: {
+  getText: () => string;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+  buttonRef?: React.Ref<HTMLButtonElement>;
+}) {
+  const { copy, iconType, color, displayedLabel } = useCopyWithFeedback(
+    getText,
+    i18n.translate('unifiedDataTable.jsonTreeViewer.copyAll', { defaultMessage: 'Copy all' })
+  );
+
+  return (
+    <EuiButtonEmpty
+      buttonRef={buttonRef}
+      className="jsonTreeViewerHeaderControl"
+      color={color}
+      data-test-subj="jsonTreeViewerCopyAll"
+      flush="left"
+      iconSize="s"
+      iconType={iconType}
+      onClick={() => copy()}
+      onKeyDown={onKeyDown}
+      size="xs"
+    >
+      {displayedLabel}
+    </EuiButtonEmpty>
+  );
+});
+
+const RowActions = memo(function RowActions({
+  nodeId,
+  show,
+  children,
+}: {
+  nodeId: string;
+  show: boolean;
+  children: React.ReactNode;
+}) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      className="jsonTreeViewerRowActions"
+      css={styles.actions}
+      style={{ minInlineSize: rowActionsMinInlineSize(euiTheme, Children.count(children)) }}
+      data-test-subj={`jsonTreeViewerRowActions-${nodeId}`}
+    >
+      {show ? children : null}
+    </span>
+  );
+});
+
+// A host-defined trailing action on a leaf row.
+const RowActionButton = memo(function RowActionButton({ action }: { action: JsonTreeRowAction }) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  return (
+    <EuiToolTip content={action.label} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={action.label}
+        className="jsonTreeViewerRowAction"
+        color="text"
+        css={styles.rowActionButton}
+        data-test-subj={action['data-test-subj']}
+        iconSize="s"
+        iconType={action.iconType}
+        onClick={(event: React.MouseEvent) => {
+          event.stopPropagation();
+          action.onClick();
+        }}
+        // Prevent focusing the Datagrid cell so it does not scroll to the top of it.
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
+        onKeyDown={rowActionKeyDown}
+        size="xs"
+      />
+    </EuiToolTip>
+  );
+});
+
 // The body of a node row: key prefix + value/brackets + comma.
 const NodeLabel = memo(function NodeLabel({
   row,
+  showActions,
   formatValue,
+  getLeafActions,
 }: {
   row: NodeRow;
+  showActions: boolean;
   formatValue?: FormatValue;
+  getLeafActions?: GetLeafActions;
 }) {
   const styles = useEuiMemoizedStyles(treeStyles);
   const { node, isExpanded, hasChildren, trailingComma } = row;
 
   if (node.kind === 'leaf') {
+    const leafActions = getLeafActions
+      ? getLeafActions({ value: node.value, path: node.path, isArrayItem: node.isArrayItem })
+      : [];
     return (
       <span css={styles.label}>
-        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
+        <span className={`${LABEL_TEXT_CLASS} ${LEAF_LABEL_CLASS}`} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <PrimitiveValue
             primitiveType={node.primitiveType}
             value={node.value}
             formatted={formatValue?.({ value: node.value, path: node.path })}
+            trailingComma={trailingComma}
           />
-          {trailingComma && <Comma />}
         </span>
-        <ValueCopyButton nodeId={node.id} value={node.value} />
+        <RowActions nodeId={node.id} show={showActions}>
+          <ValueCopyButton nodeId={node.id} value={node.value} />
+          {leafActions.map((action) => (
+            <RowActionButton key={action.id} action={action} />
+          ))}
+        </RowActions>
       </span>
     );
   }
@@ -394,7 +534,9 @@ const NodeLabel = memo(function NodeLabel({
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{open}</span>
         </span>
-        <SubtreeCopyButton node={node} />
+        <RowActions nodeId={node.id} show={showActions}>
+          <SubtreeCopyButton node={node} />
+        </RowActions>
       </span>
     );
   }
@@ -411,7 +553,9 @@ const NodeLabel = memo(function NodeLabel({
         <span css={styles.bracket}>{close}</span>
         {trailingComma && <Comma />}
       </span>
-      <SubtreeCopyButton node={node} />
+      <RowActions nodeId={node.id} show={showActions}>
+        <SubtreeCopyButton node={node} />
+      </RowActions>
     </span>
   );
 });
@@ -453,6 +597,25 @@ const nestedControlKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
   }
 };
 
+// Accessibility handling for leaf node actions.
+const rowActionKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+    const container = event.currentTarget.closest<HTMLElement>('.jsonTreeViewerRowActions');
+    const buttons = container
+      ? Array.from(container.querySelectorAll<HTMLElement>('.jsonTreeViewerRowAction'))
+      : [];
+    const index = buttons.indexOf(event.currentTarget);
+    const next = event.key === 'ArrowRight' ? buttons[index + 1] : buttons[index - 1];
+    if (next) {
+      event.preventDefault();
+      event.stopPropagation();
+      next.focus();
+      return;
+    }
+  }
+  nestedControlKeyDown(event);
+};
+
 // Accesibility handling for the pager buttons.
 const pagerButtonKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
   if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
@@ -482,15 +645,15 @@ const collectionCountLabel = (collectionType: CollectionType, count: number) =>
         values: { count },
       });
 
-const showMoreLabel = (collectionType: CollectionType, count: number) =>
+const showMoreLabel = (collectionType: CollectionType, count: number, total: number) =>
   collectionType === 'array'
     ? i18n.translate('unifiedDataTable.jsonTreeViewer.showMoreItems', {
-        defaultMessage: 'Show {count} more {count, plural, one {item} other {items}}',
-        values: { count },
+        defaultMessage: 'Show {count} more of {total} {total, plural, one {item} other {items}}',
+        values: { count, total },
       })
     : i18n.translate('unifiedDataTable.jsonTreeViewer.showMoreFields', {
-        defaultMessage: 'Show {count} more {count, plural, one {field} other {fields}}',
-        values: { count },
+        defaultMessage: 'Show {count} more of {total} {total, plural, one {field} other {fields}}',
+        values: { count, total },
       });
 
 const showFewerLabel = (collectionType: CollectionType) =>
@@ -518,6 +681,12 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     paddingInlineEnd: euiTheme.size.xs,
     borderRadius: euiTheme.border.radius.small,
     cursor: 'default',
+    // Skip layout/paint of off-screen rows so large documents (e.g. indices-stats) stay cheap
+    // without giving each cell its own scrollbar. Rows stay in the DOM, so keyboard navigation,
+    // find-in-page, and assistive tech still reach them; `auto` remembers each row's real height, so
+    // the intrinsic size is only an estimate until a row has been shown once.
+    contentVisibility: 'auto',
+    containIntrinsicBlockSize: `auto ${euiTheme.size.base}`,
     '&:hover': {
       backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
     },
@@ -525,7 +694,7 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
       outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
       outlineOffset: `-${euiTheme.focus.width}`,
     },
-    '&:hover .jsonTreeViewerCopyButton, &:focus-within .jsonTreeViewerCopyButton': {
+    '&:hover .jsonTreeViewerRowAction, &:focus-within .jsonTreeViewerRowAction': {
       opacity: 1,
     },
   }),
@@ -541,6 +710,9 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     alignItems: 'center',
     gap: euiTheme.size.xs,
     minHeight: euiTheme.size.base,
+    // See `row`: skip off-screen layout/paint while keeping the closing bracket in the DOM.
+    contentVisibility: 'auto',
+    containIntrinsicBlockSize: `auto ${euiTheme.size.base}`,
   }),
   caret: css({
     flexShrink: 0,
@@ -551,11 +723,13 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
   }),
   label: css({ display: 'flex', alignItems: 'center', minWidth: 0 }),
   labelText: css({ minWidth: 0 }),
+  keyPrefix: css({ flexShrink: 0 }),
   key: css({ color: euiTheme.colors.textPrimary }),
   punctuation: css({ color: euiTheme.colors.textSubdued }),
   bracket: css({ color: euiTheme.colors.textParagraph }),
   count: css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
-  copyButton: css({
+  actions: css({ display: 'flex', alignItems: 'center', flexShrink: 0 }),
+  rowActionButton: css({
     blockSize: euiTheme.size.base,
     inlineSize: euiTheme.size.base,
     flexShrink: 0,
@@ -564,6 +738,21 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     '&:focus-visible': { opacity: 1 },
   }),
   value: css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
+  wrap: css({
+    [`& .${LEAF_LABEL_CLASS}`]: {
+      display: 'flex',
+      minWidth: 0,
+      alignItems: 'flex-start',
+    },
+    [`& .${VALUE_CLASS}`]: css`
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: ${MAX_WRAP_VALUE_LINES};
+      overflow: hidden;
+      min-width: 0;
+      flex: 0 1 auto;
+    `,
+  }),
   noWrap: css({
     [`& .${LABEL_TEXT_CLASS}`]: {
       display: 'block',
@@ -582,5 +771,8 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
 
 const rowPaddingInlineStart = (euiTheme: UseEuiTheme['euiTheme'], depth: number) =>
   `calc(${euiTheme.size.s} + ${depth} * ${euiTheme.size.base})`;
+
+const rowActionsMinInlineSize = (euiTheme: UseEuiTheme['euiTheme'], count: number) =>
+  `calc(${count} * (${euiTheme.size.base} + ${euiTheme.size.xs}))`;
 
 export { treeStyles };

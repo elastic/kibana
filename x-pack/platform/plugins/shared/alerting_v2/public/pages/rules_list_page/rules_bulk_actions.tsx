@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiPopover,
+  EuiTextColor,
 } from '@elastic/eui';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -140,9 +141,11 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
                 onClick={handleBulkDelete}
                 data-test-subj="bulkDeleteRules"
               >
-                {i18n.translate('xpack.alertingV2.rulesList.bulkAction.delete', {
-                  defaultMessage: 'Delete',
-                })}
+                <EuiTextColor color="danger">
+                  {i18n.translate('xpack.alertingV2.rulesList.bulkAction.delete', {
+                    defaultMessage: 'Delete',
+                  })}
+                </EuiTextColor>
               </EuiContextMenuItem>,
             ]}
           />

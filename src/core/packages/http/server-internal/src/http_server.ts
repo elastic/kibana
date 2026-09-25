@@ -774,8 +774,10 @@ export class HttpServer {
               roles: user.roles ? [...user.roles] : undefined,
             }
           : undefined,
-        session: {
-          id: redactedSessionId,
+        kibana: {
+          session: {
+            id: redactedSessionId,
+          },
         },
         http: {
           request: {

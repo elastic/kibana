@@ -1,5 +1,5 @@
 {
-  "sha1": "281ef84be1a90c0b9b47ef571b888be5832e78e1",
+  "sha1": "956b58e204934fb4eb2be15465a942d86d99dacc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -530,7 +530,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/query_behavior.spec.ts",
-        "line": 61,
+        "line": 64,
         "column": 22
       }
     },
@@ -550,7 +550,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/query_behavior.spec.ts",
-        "line": 74,
+        "line": 77,
         "column": 62
       }
     },
@@ -570,7 +570,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/query_behavior.spec.ts",
-        "line": 107,
+        "line": 110,
         "column": 23
       }
     },
@@ -590,7 +590,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/query_behavior.spec.ts",
-        "line": 208,
+        "line": 211,
         "column": 11
       }
     },

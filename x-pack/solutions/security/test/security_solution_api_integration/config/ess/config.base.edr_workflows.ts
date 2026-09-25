@@ -46,7 +46,7 @@ export const generateConfig = async ({
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
         // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
-        `--xpack.fleet.internal.allowRegistryPackageUploads=true`,
+        `--xpack.fleet.internal.skipUploadPackageValidation=true`,
         // set any experimental feature flags for testing
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
 
