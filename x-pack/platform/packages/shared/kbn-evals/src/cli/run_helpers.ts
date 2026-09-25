@@ -296,6 +296,35 @@ export const resolveEvaluationConnectorId = async (
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
 
 /**
+ * IDs already resolvable as a preconfigured Kibana stack connector (from
+ * `xpack.actions.preconfigured` in `kibana.dev.yml`) do not need an EIS
+ * connector-cache entry: Kibana serves them directly, with no dependency on
+ * `KIBANA_TESTING_INFERENCE_ENDPOINTS` or `~/.elastic/eis-connectors-cache.json`.
+ * An `eis-*`-prefixed id can still land here (naming convention only), so this
+ * has to be checked before treating the id as EIS-cache-backed.
+ *
+ * Lazy + memoized per call site: callers only pay for `getAllAvailableConnectors`
+ * (which reads `kibana.dev.yml`) the first time an `eis-*` id is actually seen,
+ * so a run with no EIS ids at all still takes the fast, filesystem-free path.
+ */
+const makePreconfiguredConnectorIdsLookup = (repoRoot: string): (() => Set<string>) => {
+  let cache: Set<string> | undefined;
+  return () => {
+    if (!cache) {
+      cache = new Set(
+        getAllAvailableConnectors(repoRoot)
+          .filter((connector) => connector.source === 'kibana.dev.yml')
+          .map((connector) => connector.id)
+      );
+    }
+    return cache;
+  };
+};
+
+const requiresEisConnectorCacheEntry = (id: string, getPreconfigured: () => Set<string>): boolean =>
+  isEisConnectorId(id) && !getPreconfigured().has(id);
+
+/**
  * Connector ids defined by a `KIBANA_TESTING_INFERENCE_ENDPOINTS` payload, or
  * `undefined` when the payload is not parseable as a JSON object — in that case
  * `loadInferenceEndpoints()`'s own error is the more useful message.
@@ -332,14 +361,15 @@ export const requiredEisConnectorIds = (
   repoRoot: string
 ): string[] => {
   const ids = new Set<string>();
+  const getPreconfigured = makePreconfiguredConnectorIdsLookup(repoRoot);
 
-  if (isEisConnectorId(evaluationConnectorId)) {
+  if (requiresEisConnectorCacheEntry(evaluationConnectorId, getPreconfigured)) {
     ids.add(evaluationConnectorId);
   }
 
   if (projects.length > 0) {
     for (const project of projects) {
-      if (isEisConnectorId(project)) {
+      if (requiresEisConnectorCacheEntry(project, getPreconfigured)) {
         ids.add(project);
       }
     }
@@ -347,7 +377,7 @@ export const requiredEisConnectorIds = (
     // No explicit --model: the run walks every available connector, so every
     // EIS-backed one of them has to be resolvable from the cache.
     for (const connector of getAllAvailableConnectors(repoRoot)) {
-      if (isEisConnectorId(connector.id)) {
+      if (requiresEisConnectorCacheEntry(connector.id, getPreconfigured)) {
         ids.add(connector.id);
       }
     }
@@ -452,11 +482,17 @@ export const requiresEisConnectorCache = (
   evaluationConnectorId: string,
   projects: string[],
   repoRoot: string
-): boolean =>
-  isEisConnectorId(evaluationConnectorId) ||
-  (projects.length > 0
-    ? projects.some(isEisConnectorId)
-    : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
+): boolean => {
+  const getPreconfigured = makePreconfiguredConnectorIdsLookup(repoRoot);
+  return (
+    requiresEisConnectorCacheEntry(evaluationConnectorId, getPreconfigured) ||
+    (projects.length > 0
+      ? projects.some((project) => requiresEisConnectorCacheEntry(project, getPreconfigured))
+      : getAllAvailableConnectors(repoRoot).some((c) =>
+          requiresEisConnectorCacheEntry(c.id, getPreconfigured)
+        ))
+  );
+};
 
 export interface EvalRunContext {
   evaluationConnectorId: string;

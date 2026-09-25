@@ -71,4 +71,30 @@ describe('requiredEisConnectorIds', () => {
       requiredEisConnectorIds('eis-claude-5-sonnet', ['eis-claude-5-sonnet'], '/repo')
     ).toEqual(['eis-claude-5-sonnet']);
   });
+
+  it('excludes an eis-* id that is a preconfigured kibana.dev.yml connector', () => {
+    // "eis-" on an id is a naming convention only — a connector registered via
+    // xpack.actions.preconfigured in kibana.dev.yml is served directly by
+    // Kibana and never resolves through the EIS connector cache.
+    mockGetAllAvailableConnectors.mockReturnValue([
+      { id: 'eis-my-preconfigured-connector', name: 'Preconfigured', source: 'kibana.dev.yml' },
+    ]);
+
+    expect(requiredEisConnectorIds('eis-my-preconfigured-connector', [], '/repo')).toEqual([]);
+  });
+
+  it('keeps a real EIS id in a mixed model list alongside a preconfigured one', () => {
+    mockGetAllAvailableConnectors.mockReturnValue([
+      { id: 'eis-my-preconfigured-connector', name: 'Preconfigured', source: 'kibana.dev.yml' },
+      { id: 'eis-claude-5-sonnet', name: 'Claude', source: 'env' },
+    ]);
+
+    expect(
+      requiredEisConnectorIds(
+        'local-judge',
+        ['eis-my-preconfigured-connector', 'eis-claude-5-sonnet'],
+        '/repo'
+      )
+    ).toEqual(['eis-claude-5-sonnet']);
+  });
 });

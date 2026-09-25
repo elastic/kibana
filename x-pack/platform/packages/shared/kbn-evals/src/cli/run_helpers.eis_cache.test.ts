@@ -152,6 +152,33 @@ describe('resolveEvalRunContext EIS cache guard', () => {
     });
   });
 
+  it('does not require the cache for an eis-* id that is a preconfigured kibana.dev.yml connector', async () => {
+    // Regression: a connector already registered via `xpack.actions.preconfigured`
+    // in kibana.dev.yml is served directly by Kibana, with no dependency on
+    // KIBANA_TESTING_INFERENCE_ENDPOINTS or the EIS connectors cache. Because
+    // "eis-" is only a naming convention, the guard used to treat it the same
+    // as a real EIS connector and reject the run for a cache that was never
+    // going to be needed.
+    mockGetAllAvailableConnectors.mockReturnValue([
+      { id: 'eis-my-preconfigured-connector', name: 'Preconfigured', source: 'kibana.dev.yml' },
+    ]);
+    mockReadCachedEisConnectors.mockReturnValue(undefined);
+    mockGetEisCacheStatus.mockReturnValue('missing');
+
+    await expect(
+      resolveEvalRunContext({
+        repoRoot: '/repo',
+        log,
+        flagsReader: new FlagsReader({
+          'evaluation-connector-id': 'eis-my-preconfigured-connector',
+        }),
+      })
+    ).resolves.toMatchObject({
+      evaluationConnectorId: 'eis-my-preconfigured-connector',
+      requiresEisCcm: false,
+    });
+  });
+
   it('leaves an unparseable env payload to loadInferenceEndpoints to reject', async () => {
     process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = 'provided';
 
