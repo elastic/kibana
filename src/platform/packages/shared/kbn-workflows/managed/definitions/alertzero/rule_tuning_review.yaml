@@ -823,6 +823,8 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
+                title: "Adjust threshold: {{ steps.fetch_rule.output.name }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -843,6 +845,8 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
+                title: "Adjust schedule: {{ steps.fetch_rule.output.name }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
