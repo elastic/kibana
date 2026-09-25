@@ -961,7 +961,6 @@ src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana
 src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-discover
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
-src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-discover
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
 src/platform/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
