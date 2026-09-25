@@ -6,11 +6,7 @@
  */
 
 import { stringify } from 'yaml';
-import type {
-  NightshiftAutomationAttributes,
-  NightshiftTriggerRow,
-  OverlapPolicy,
-} from './types';
+import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
 
 // alerting.alertStatusChanged uses 'active'/'recovered'; our AlertStatus uses 'active'/'inactive'.
 const ALERT_STATUS_TO_KQL: Record<string, string> = {
@@ -99,9 +95,7 @@ function buildTriggers(
   return [trigger];
 }
 
-function buildCondition(
-  rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>
-): string {
+function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>): string {
   const rowConditions = rows.map(buildRowCondition).filter(Boolean);
   if (rowConditions.length === 0) return '';
   if (rowConditions.length === 1) return rowConditions[0];
