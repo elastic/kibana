@@ -80,9 +80,7 @@ function buildTriggers(rows: NightshiftAutomationAttributes['trigger']['rows']):
   return [{ type: 'manual' }];
 }
 
-function deriveStatuses(
-  rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>
-): string[] {
+function deriveStatuses(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>): string[] {
   const statusSet = new Set<string>();
   for (const row of rows) {
     const s = row.alertStatus ?? 'any';
