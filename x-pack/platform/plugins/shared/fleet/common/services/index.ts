@@ -100,6 +100,11 @@ export {
   getRegistryDataStreamAssetBaseName,
   getComponentTemplateNameForDatastream,
 } from './datastream_es_name';
+export {
+  COLUMNAR_INDEX_MODES,
+  isColumnarEligible,
+  isColumnarIndexMode,
+} from './columnar_index_mode';
 
 export * from './file_storage';
 export {

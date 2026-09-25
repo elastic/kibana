@@ -9,7 +9,7 @@ import type { Field } from '../../fields/field';
 import type { IndexTemplateMappings } from '../../../../types';
 import { PackageInvalidArchiveError } from '../../../../errors';
 
-import { getDefaultProperties } from './mappings';
+import { applyColumnarOverrides, getDefaultProperties } from './mappings';
 import type { Properties } from './mappings';
 import {
   fieldPath,
@@ -32,13 +32,15 @@ export interface WalkContext {
 
 export class MappingsBuilder {
   readonly isIndexModeTimeSeries: boolean;
+  readonly isIndexModeColumnar: boolean;
 
   private readonly dynamicTemplates: Array<Record<string, Properties>> = [];
   private readonly dynamicTemplateNames: Record<string, number> = {};
   private readonly runtimeFields: RuntimeFields = {};
 
-  constructor(isIndexModeTimeSeries: boolean) {
+  constructor(isIndexModeTimeSeries: boolean, isIndexModeColumnar = false) {
     this.isIndexModeTimeSeries = isIndexModeTimeSeries;
+    this.isIndexModeColumnar = isIndexModeColumnar;
   }
 
   /**
@@ -109,7 +111,7 @@ export class MappingsBuilder {
   /**
    * Apply per-walker post-processing that is uniform across all field types:
    * field-level metadata (`meta`), TSDB-only flags (`time_series_metric`,
-   * `time_series_dimension`), and `subobjects`.
+   * `time_series_dimension`), columnar-only `doc_values`/`index` overrides, and `subobjects`.
    *
    * Uses key-existence checks (`'metric_type' in field`) rather than truthy
    * checks, which is more correct for fields that explicitly set a falsy value.
@@ -139,6 +141,10 @@ export class MappingsBuilder {
     if (field.subobjects !== undefined) {
       fieldProps.subobjects = field.subobjects;
     }
+
+    // Applied last on purpose: an explicit `columnar` block overrides any `doc_values`/`index`
+    // already set by the type handler (or by `field.doc_values` / `field.index`).
+    applyColumnarOverrides(fieldProps, field, this.isIndexModeColumnar);
   }
 
   private processGroup(context: WalkContext, field: Field): Properties | undefined {

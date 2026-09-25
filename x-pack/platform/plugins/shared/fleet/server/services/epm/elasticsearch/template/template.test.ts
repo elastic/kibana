@@ -1483,6 +1483,122 @@ describe('EPM template', () => {
       expect(mappings).toEqual(expectedMapping);
     });
 
+    describe('field-level columnar overrides', () => {
+      const generate = (yml: string, isIndexModeColumnar: boolean) =>
+        generateMappings(processFields(parse(yml) as Field[]), false, isIndexModeColumnar);
+
+      const docValuesYml = `
+- name: event.original
+  type: keyword
+  doc_values: false
+  columnar:
+    doc_values: true
+`;
+
+      it('overrides doc_values when the index mode is columnar', () => {
+        expect(generate(docValuesYml, true)).toEqual({
+          properties: {
+            event: {
+              properties: {
+                original: {
+                  type: 'keyword',
+                  doc_values: true,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('ignores the columnar block when the index mode is not columnar', () => {
+        expect(generate(docValuesYml, false)).toEqual({
+          properties: {
+            event: {
+              properties: {
+                original: {
+                  type: 'keyword',
+                  doc_values: false,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      const indexYml = `
+- name: event.original
+  type: keyword
+  index: false
+  columnar:
+    index: true
+`;
+
+      it('overrides index when the index mode is columnar', () => {
+        expect(generate(indexYml, true)).toEqual({
+          properties: {
+            event: {
+              properties: {
+                original: {
+                  type: 'keyword',
+                  index: true,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('leaves index untouched when the index mode is not columnar', () => {
+        expect(generate(indexYml, false)).toEqual({
+          properties: {
+            event: {
+              properties: {
+                original: {
+                  type: 'keyword',
+                  index: false,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('only emits the keys present in the columnar block', () => {
+        const yml = `
+- name: message
+  type: keyword
+  columnar:
+    doc_values: true
+`;
+        expect(generate(yml, true)).toEqual({
+          properties: {
+            message: {
+              type: 'keyword',
+              ignore_above: 1024,
+              doc_values: true,
+            },
+          },
+        });
+      });
+
+      it('leaves a field without a columnar block unchanged in columnar mode', () => {
+        const yml = `
+- name: message
+  type: keyword
+  doc_values: false
+`;
+        expect(generate(yml, true)).toEqual(generate(yml, false));
+        expect(generate(yml, true)).toEqual({
+          properties: {
+            message: {
+              type: 'keyword',
+              doc_values: false,
+            },
+          },
+        });
+      });
+    });
+
     it('processes meta fields', () => {
       const metaFieldLiteralYaml = `
 - name: fieldWithMetas
@@ -3030,6 +3146,121 @@ describe('EPM template', () => {
             lazy: true,
           },
         })
+      );
+    });
+
+    describe('index mode reset (rolloverOnIndexModeReset)', () => {
+      const DATA_STREAM = 'logs.prefix1-default';
+      const ROLLOVER_REQUEST = expect.objectContaining({
+        path: `/${DATA_STREAM}/_rollover`,
+        querystring: {
+          lazy: true,
+        },
+      });
+
+      const setupEsClient = ({
+        currentIndexMode,
+        templateIndexMode,
+      }: {
+        currentIndexMode?: string;
+        templateIndexMode?: string;
+      }) => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.indices.getDataStream.mockResponse({
+          data_streams: [{ name: DATA_STREAM }],
+        } as any);
+        esClient.indices.get.mockResponse({
+          [DATA_STREAM]: {
+            mappings: {},
+            settings: {
+              index: currentIndexMode ? { mode: currentIndexMode } : {},
+            },
+          },
+        } as any);
+        esClient.indices.simulateTemplate.mockResponse({
+          template: {
+            settings: {
+              index: templateIndexMode ? { mode: templateIndexMode } : {},
+            },
+            mappings: {},
+          },
+        } as any);
+
+        return esClient;
+      };
+
+      const runUpdate = (
+        esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>,
+        options?: { rolloverOnIndexModeReset?: boolean }
+      ) =>
+        updateCurrentWriteIndices(
+          esClient,
+          loggerMock.create(),
+          [
+            {
+              templateName: 'logs.prefix1',
+              indexTemplate: {
+                index_patterns: ['logs.prefix1-*'],
+                template: {
+                  settings: { index: {} },
+                  mappings: {},
+                },
+              } as any,
+            },
+          ],
+          options
+        );
+
+      it.each(['logsdb_columnar', 'columnar', 'time_series'])(
+        'should rollover when the template no longer defines an index mode and the write index is %s',
+        async (currentIndexMode) => {
+          const esClient = setupEsClient({ currentIndexMode });
+
+          await runUpdate(esClient, { rolloverOnIndexModeReset: true });
+
+          expect(esClient.transport.request).toHaveBeenCalledWith(ROLLOVER_REQUEST);
+        }
+      );
+
+      it('should not rollover on index mode reset when the write index uses the cluster default logsdb mode', async () => {
+        const esClient = setupEsClient({ currentIndexMode: 'logsdb' });
+
+        await runUpdate(esClient, { rolloverOnIndexModeReset: true });
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(ROLLOVER_REQUEST);
+      });
+
+      it('should not rollover on index mode reset when the write index has no index mode', async () => {
+        const esClient = setupEsClient({});
+
+        await runUpdate(esClient, { rolloverOnIndexModeReset: true });
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(ROLLOVER_REQUEST);
+      });
+
+      it('should not rollover on index mode reset when rolloverOnIndexModeReset is not enabled', async () => {
+        const esClient = setupEsClient({ currentIndexMode: 'logsdb_columnar' });
+
+        await runUpdate(esClient);
+
+        expect(esClient.transport.request).not.toHaveBeenCalledWith(ROLLOVER_REQUEST);
+      });
+
+      it.each([
+        ['without the option', undefined],
+        ['with the option', { rolloverOnIndexModeReset: true }],
+      ])(
+        'should rollover when the template declares a new index mode (%s)',
+        async (_name, options) => {
+          const esClient = setupEsClient({
+            currentIndexMode: 'logsdb',
+            templateIndexMode: 'logsdb_columnar',
+          });
+
+          await runUpdate(esClient, options as { rolloverOnIndexModeReset?: boolean } | undefined);
+
+          expect(esClient.transport.request).toHaveBeenCalledWith(ROLLOVER_REQUEST);
+        }
       );
     });
 

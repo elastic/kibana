@@ -304,6 +304,87 @@ describe('EPM index template install', () => {
       });
     });
 
+    describe('field-level columnar overrides', () => {
+      const columnarDataStream = (elasticsearch: any) =>
+        ({
+          type: 'logs',
+          dataset: 'package.dataset',
+          title: 'test data stream',
+          release: 'experimental',
+          package: 'package',
+          path: 'path',
+          ingest_pipeline: 'default',
+          elasticsearch,
+        } as RegistryDataStream);
+
+      const getProperties = (dataStream: RegistryDataStream, experimental?: any) => {
+        mockedLoadFieldsFromYaml.mockReturnValue([
+          {
+            name: 'event.original',
+            type: 'keyword',
+            doc_values: false,
+            index: false,
+            columnar: { doc_values: true, index: true },
+          },
+        ]);
+
+        const { componentTemplates } = prepareTemplate({
+          packageInstallContext,
+          fieldAssetsMap: new Map(),
+          dataStream,
+          experimentalDataStreamFeature: experimental,
+          ilmMigrationStatusMap: new Map(),
+        });
+
+        const packageTemplate = componentTemplates['logs-package.dataset@package'].template as any;
+        return packageTemplate.mappings.properties.event.properties.original;
+      };
+
+      it('applies the overrides when the package declares a columnar index mode', () => {
+        expect(getProperties(columnarDataStream({ index_mode: 'logsdb_columnar' }))).toEqual({
+          type: 'keyword',
+          doc_values: true,
+          index: true,
+        });
+      });
+
+      it('applies the overrides when columnar is opted in through the experimental feature', () => {
+        expect(
+          getProperties(columnarDataStream({}), {
+            data_stream: 'logs-package.dataset',
+            features: { columnar: true },
+          })
+        ).toEqual({
+          type: 'keyword',
+          doc_values: true,
+          index: true,
+        });
+      });
+
+      it('ignores the overrides when the data stream is not in a columnar index mode', () => {
+        expect(getProperties(columnarDataStream({}))).toEqual({
+          type: 'keyword',
+          doc_values: false,
+          index: false,
+        });
+      });
+
+      it('ignores the overrides when time_series wins over the columnar opt-in', () => {
+        // getTemplate gives time_series precedence over the columnar mode, so the mappings must
+        // not be generated as if the index were columnar.
+        expect(
+          getProperties(columnarDataStream({ index_mode: 'time_series' }), {
+            data_stream: 'logs-package.dataset',
+            features: { columnar: true },
+          })
+        ).toEqual({
+          type: 'keyword',
+          doc_values: false,
+          index: false,
+        });
+      });
+    });
+
     it('should default OTel metrics data streams to time_series index mode', () => {
       const otelIntegrationPackageInstallContext = {
         packageInfo: {
