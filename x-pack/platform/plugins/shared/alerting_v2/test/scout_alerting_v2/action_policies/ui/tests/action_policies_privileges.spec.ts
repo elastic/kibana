@@ -24,23 +24,16 @@ test.describe(
   'Action Policies - read/write privileges',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
+    const RUN_ID = Date.now().toString();
     let policyId: string;
     let policyName: string;
 
     test.beforeAll(async ({ apiServices }) => {
-      // Clean up stale policies from prior failed runs (search-scoped, not match-all).
-      const { items } = await apiServices.alertingV2.actionPolicies.list({
-        search: 'scout-action-policy-privileges',
-      });
-      for (const item of items) {
-        await apiServices.alertingV2.actionPolicies.delete(item.id);
-      }
-
+      policyName = `scout-action-policy-privileges-${RUN_ID}`;
       const policy = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({ name: 'scout-action-policy-privileges' })
+        buildCreateActionPolicyData({ name: policyName })
       );
       policyId = policy.id;
-      policyName = policy.name;
     });
 
     test.afterAll(async ({ apiServices }) => {
@@ -51,6 +44,7 @@ test.describe(
       await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_ALL_ROLE);
       const { actionPoliciesList } = pageObjects;
       await actionPoliciesList.goto();
+      await actionPoliciesList.search(policyName);
       await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
       await test.step('create button and the row name link are visible', async () => {
@@ -69,6 +63,7 @@ test.describe(
       await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
       const { actionPoliciesList } = pageObjects;
       await actionPoliciesList.goto();
+      await actionPoliciesList.search(policyName);
       await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
       await test.step('create button is hidden but the row name link remains', async () => {

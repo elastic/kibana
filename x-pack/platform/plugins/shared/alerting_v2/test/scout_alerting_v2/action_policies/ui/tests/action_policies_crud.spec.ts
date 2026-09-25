@@ -37,14 +37,6 @@ test.describe(
     const createdPolicyIds: string[] = [];
 
     test.beforeAll(async ({ apiServices }) => {
-      // Clean up stale policies from prior failed runs (search-scoped, not match-all).
-      const { items } = await apiServices.alertingV2.actionPolicies.list({
-        search: 'scout-action-policy',
-      });
-      for (const item of items) {
-        await apiServices.alertingV2.actionPolicies.delete(item.id);
-      }
-
       // Action policy destinations are workflow references, so the form's
       // workflows combo box needs a real workflow to offer.
       workflowName = `scout-action-policy-destination-${Date.now()}`;

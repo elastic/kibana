@@ -21,6 +21,8 @@ export class ActionPoliciesListPage {
   public readonly detailsFlyout: Locator;
   /** "Take action" button inside the details flyout footer; hidden for read-only users. */
   public readonly detailsFlyoutTakeActionButton: Locator;
+  /** Content list toolbar search box. */
+  private readonly searchBox: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.createButton = this.page.testSubj.locator('createActionPolicyButton');
@@ -28,6 +30,7 @@ export class ActionPoliciesListPage {
     this.detailsFlyoutTakeActionButton = this.page.testSubj.locator(
       'detailsFlyoutTakeActionButton'
     );
+    this.searchBox = this.page.testSubj.locator('contentListToolbar-searchBox');
   }
 
   async goto() {
@@ -42,6 +45,11 @@ export class ActionPoliciesListPage {
 
   detailsLink(policyName: string) {
     return this.page.testSubj.locator(`content-list-table-item-link`, { hasText: policyName });
+  }
+
+  async search(value: string) {
+    await this.searchBox.fill(value);
+    await this.searchBox.press('Enter');
   }
 
   async openDetailsFlyout(policyName: string) {
