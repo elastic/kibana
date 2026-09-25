@@ -164,9 +164,11 @@ export const setupLogsTestDataStream = async (esClient: EsClient) => {
 };
 
 export const teardownLogsTestDataStream = async (esClient: EsClient) => {
-  await esClient.indices
-    .deleteIndexTemplate({ name: 'entity-store-test-logs-override' })
-    .catch(() => {});
+  await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }, { ignore: [404] });
+  await esClient.indices.deleteIndexTemplate(
+    { name: 'entity-store-test-logs-override' },
+    { ignore: [404] }
+  );
 };
 
 /** Sets up a plain (non-logs-*) data stream for query translation tests with ECS field mappings. */
