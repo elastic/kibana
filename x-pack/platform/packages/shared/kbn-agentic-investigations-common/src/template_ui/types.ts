@@ -65,3 +65,32 @@ export interface StatusSlotRenderProps {
  * When absent, the header falls back to a read-only status badge.
  */
 export type RenderStatus = (props: StatusSlotRenderProps) => React.ReactNode;
+
+/**
+ * Props passed to the `renderLinkedInvestigations` render prop.
+ *
+ * The render prop is supplied by the consuming plugin at registration time so that HTTP hooks
+ * and Kibana context remain outside the shared package. `openFullscreenConversation` from the
+ * Agent Builder template context is captured at registration and forwarded here as
+ * `onOpenInvestigation`, so the connected component can navigate without importing Agent Builder.
+ */
+export interface LinkedInvestigationsSlotRenderProps {
+  /** Escalation conversation id — the entity whose linked investigations we are showing. */
+  escalationId: string;
+  /**
+   * The ids of linked investigations read from `metadata.linked_investigations` of the current
+   * escalation conversation. Used as a cache-busting input to the fetch query key so that
+   * the 5 s conversation poll triggers a re-fetch when a new investigation is linked.
+   */
+  linkedInvestigationIds: readonly string[];
+  /** Navigates to the investigation's chat page with its details flyout open. */
+  onOpenInvestigation: (args: { conversationId: string; agentId: string }) => void;
+}
+
+/**
+ * A render prop that the consuming plugin provides to the escalation overview slot to render
+ * the connected linked-investigations list. When absent the slot renders nothing.
+ */
+export type RenderLinkedInvestigations = (
+  props: LinkedInvestigationsSlotRenderProps
+) => React.ReactNode;

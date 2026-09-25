@@ -170,3 +170,23 @@ export interface ListEscalationsResponse {
   pagination: { total: number; page: number; per_page: number };
   results: EscalationConversationSummary[];
 }
+
+/**
+ * A brief summary of an investigation linked to an escalation, as returned by the
+ * `GET /escalations/{id}/linked_investigations` route.
+ *
+ * `status` follows the same "missing or non-closed ⇒ open" rule as the escalations list filter.
+ */
+export interface LinkedInvestigationSummary {
+  /** Investigation conversation id. */
+  id: string;
+  title: string;
+  /** Open/closed status derived from `metadata.status`. */
+  status: 'open' | 'closed';
+  /** Agent Builder agent id, used for deep-linking to the conversation. */
+  agent_id: string;
+}
+
+export interface ListLinkedInvestigationsResponse {
+  results: LinkedInvestigationSummary[];
+}

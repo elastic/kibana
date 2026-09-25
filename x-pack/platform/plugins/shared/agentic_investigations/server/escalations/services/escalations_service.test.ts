@@ -895,3 +895,138 @@ describe('EscalationsService.setStatus — partial close leaves escalation open'
     expect(client.patchMetadata).not.toHaveBeenCalled();
   });
 });
+
+describe('EscalationsService.listLinkedInvestigations', () => {
+  const INV_A = {
+    id: 'inv-a',
+    title: 'Investigation A',
+    template_id: INVESTIGATION_TEMPLATE_ID,
+    agent_id: 'agent-1',
+    metadata: { status: 'open' },
+  };
+  const INV_B = {
+    id: 'inv-b',
+    title: 'Investigation B',
+    template_id: INVESTIGATION_TEMPLATE_ID,
+    agent_id: 'agent-2',
+    metadata: { status: 'closed' },
+  };
+
+  const makeEscalation = (linkedIds: string[]) => ({
+    id: 'escalation-1',
+    template_id: ESCALATION_TEMPLATE_ID,
+    title: 'My Escalation',
+    metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linkedIds },
+  });
+
+  it('returns empty results when no investigations are linked', async () => {
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(makeEscalation([])),
+    });
+
+    const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+    expect(result).toEqual({ results: [] });
+  });
+
+  it('returns summaries in the stored order', async () => {
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'inv-b'])),
+      bulkGet: jest.fn().mockResolvedValue(
+        new Map([
+          ['inv-a', INV_A],
+          ['inv-b', INV_B],
+        ])
+      ),
+    });
+
+    const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+    expect(result.results.map((r) => r.id)).toEqual(['inv-a', 'inv-b']);
+  });
+
+  it('maps status "closed" to "closed"', async () => {
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(makeEscalation(['inv-b'])),
+      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-b', INV_B]])),
+    });
+
+    const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+    expect(result.results[0].status).toBe('closed');
+  });
+
+  it('defaults missing status to "open"', async () => {
+    const invNoStatus = { ...INV_A, metadata: {} };
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a'])),
+      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-a', invNoStatus]])),
+    });
+
+    const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+    expect(result.results[0].status).toBe('open');
+  });
+
+  it('silently drops ids that bulkGet could not resolve (inaccessible / deleted)', async () => {
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'inv-missing'])),
+      // bulkGet only resolves inv-a; inv-missing is absent from the map
+      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-a', INV_A]])),
+    });
+
+    const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+    expect(result.results.map((r) => r.id)).toEqual(['inv-a']);
+  });
+
+  it('throws NotAnEscalationError when the target is not an escalation', async () => {
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue({
+        id: 'not-an-escalation',
+        template_id: INVESTIGATION_TEMPLATE_ID,
+        title: 'Oops',
+        metadata: {},
+      }),
+    });
+
+    await expect(
+      service.listLinkedInvestigations(request, 'not-an-escalation')
+    ).rejects.toBeInstanceOf(NotAnEscalationError);
+  });
+
+  it('includes agent_id in each summary', async () => {
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a'])),
+      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-a', INV_A]])),
+    });
+
+    const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+    expect(result.results[0].agent_id).toBe('agent-1');
+  });
+
+  it('silently drops linked ids that resolved to a non-investigation template', async () => {
+    const escalationEntry: typeof INV_A = {
+      ...INV_A,
+      id: 'another-escalation',
+      title: 'Nested Escalation',
+      // Cast so the Map<string, typeof INV_A> accepts this entry despite the different literal.
+      template_id: ESCALATION_TEMPLATE_ID as typeof INVESTIGATION_TEMPLATE_ID,
+      agent_id: 'agent-3',
+    };
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'another-escalation'])),
+      bulkGet: jest.fn().mockResolvedValue(
+        new Map([
+          ['inv-a', INV_A],
+          ['another-escalation', escalationEntry],
+        ])
+      ),
+    });
+
+    const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+    expect(result.results.map((r) => r.id)).toEqual(['inv-a']);
+  });
+});

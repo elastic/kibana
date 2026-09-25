@@ -25,3 +25,8 @@ export {
 } from './escalation_flyout_header';
 export { OverviewTab } from './details_flyout_tab_contents';
 export { StatusToggle, type StatusToggleProps } from './status_toggle';
+export {
+  LinkedInvestigationsList,
+  type LinkedInvestigationItem,
+  type LinkedInvestigationsListProps,
+} from './linked_investigations_list';

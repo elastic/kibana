@@ -70,13 +70,21 @@ export {
   registerEscalationTemplateUI,
   type RegisterEscalationTemplateUIOptions,
   getInvestigationTabIds,
+  getEscalationTabIds,
 } from './src/template_ui/register';
 export {
   type RenderAssignees,
   type AssigneesSlotRenderProps,
   type RenderStatus,
   type StatusSlotRenderProps,
+  type RenderLinkedInvestigations,
+  type LinkedInvestigationsSlotRenderProps,
 } from './src/template_ui/types';
+export {
+  LinkedInvestigationsList,
+  type LinkedInvestigationItem,
+  type LinkedInvestigationsListProps,
+} from './src/components/details/linked_investigations_list';
 export { conversationToInvestigation } from './src/template_ui/conversation_to_investigation';
 
 export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';

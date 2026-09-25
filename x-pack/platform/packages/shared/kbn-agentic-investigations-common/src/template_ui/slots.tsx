@@ -19,7 +19,7 @@ import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type { RenderAssignees, RenderStatus } from './types';
+import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -154,5 +154,40 @@ export const EscalationHeaderSlot = ({
       assigneesNode={assigneesNode}
       statusNode={statusNode}
     />
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Escalation overview slot (body tab)
+// ---------------------------------------------------------------------------
+
+export interface EscalationOverviewSlotProps {
+  conversation: Conversation;
+  renderLinkedInvestigations?: RenderLinkedInvestigations;
+  onOpenInvestigation: (args: { conversationId: string; agentId: string }) => void;
+}
+
+/**
+ * The body tab for the escalation details flyout. Renders the linked investigations list via
+ * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks).
+ * Returns `null` when no render prop is provided.
+ */
+export const EscalationOverviewSlot = ({
+  conversation,
+  renderLinkedInvestigations,
+  onOpenInvestigation,
+}: EscalationOverviewSlotProps) => {
+  if (!renderLinkedInvestigations) return null;
+
+  const { linkedInvestigationIds } = conversationToEscalationHeader(conversation);
+
+  return (
+    <>
+      {renderLinkedInvestigations({
+        escalationId: conversation.id,
+        linkedInvestigationIds,
+        onOpenInvestigation,
+      })}
+    </>
   );
 };

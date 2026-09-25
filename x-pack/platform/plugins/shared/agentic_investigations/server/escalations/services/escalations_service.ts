@@ -20,8 +20,10 @@ import type { ConversationSearchSort } from '@kbn/agent-builder-common';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
+  LinkedInvestigationSummary,
   ListEscalationsQuery,
   ListEscalationsResponse,
+  ListLinkedInvestigationsResponse,
   UpdateEscalationRequest,
 } from '../../../common/escalations/escalation';
 import type {
@@ -400,5 +402,47 @@ export class EscalationsService {
     });
 
     return { pagination: { total, page: query.page, per_page: query.per_page }, results };
+  }
+
+  /**
+   * Returns brief summaries (id, title, status, agent_id) for the investigations linked to
+   * an escalation. The order matches the stored `linked_investigations` array. Investigations
+   * that are inaccessible to the current user are silently dropped by `client.bulkGet`.
+   *
+   * Status follows the same "missing or non-closed ⇒ open" rule as the escalations list filter.
+   */
+  async listLinkedInvestigations(
+    request: KibanaRequest,
+    escalationId: string
+  ): Promise<ListLinkedInvestigationsResponse> {
+    const client = await this.getConversationClient(request);
+
+    const escalation = await client.get(escalationId);
+    if (escalation.template_id !== ESCALATION_TEMPLATE_ID) {
+      throw new NotAnEscalationError(escalationId);
+    }
+
+    const linkedIds = (
+      (escalation.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as unknown[]
+    ).filter((v): v is string => typeof v === 'string' && v.length > 0);
+
+    if (linkedIds.length === 0) {
+      return { results: [] };
+    }
+
+    const resolved = await client.bulkGet(linkedIds);
+
+    // Preserve stored order; silently omit ids that bulkGet couldn't resolve or that resolved to
+    // a non-investigation conversation (stale/corrupt linked_investigations entries).
+    const results: LinkedInvestigationSummary[] = linkedIds.flatMap((id) => {
+      const conv = resolved.get(id);
+      if (!conv || conv.template_id !== INVESTIGATION_TEMPLATE_ID) return [];
+      const rawStatus = conv.metadata?.status;
+      const status: 'open' | 'closed' =
+        typeof rawStatus === 'string' && rawStatus === 'closed' ? 'closed' : 'open';
+      return [{ id: conv.id, title: conv.title, status, agent_id: conv.agent_id }];
+    });
+
+    return { results };
   }
 }
