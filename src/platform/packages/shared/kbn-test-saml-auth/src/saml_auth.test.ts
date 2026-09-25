@@ -10,6 +10,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 
 import {
+  REQUEST_TIMEOUT_MS,
   createCloudSession,
   createSAMLRequest,
   createSAMLResponse,
@@ -34,12 +35,46 @@ const responseWithSetCookie = (data: unknown, setCookies: string[], status: numb
     headers: { 'set-cookie': setCookies.join(', ') },
   });
 
+// Settles only once the caller's abort signal fires, mimicking a request that stalls on the
+// network — the failure shape that used to consume the caller's whole test timeout.
+const stalledResponse = (_url: unknown, init?: RequestInit) =>
+  new Promise<Response>((_resolve, reject) => {
+    init?.signal?.addEventListener('abort', () => reject(new Error('The operation was aborted')));
+  });
+
 describe('saml_auth', () => {
   const log = new ToolingLog();
 
   describe('createCloudSession', () => {
     afterEach(() => {
       jest.clearAllMocks();
+      jest.useRealTimers();
+    });
+
+    test('aborts a stalled request and retries inside the per-request timeout', async () => {
+      jest.useFakeTimers();
+      fetchMock
+        .mockImplementationOnce(stalledResponse)
+        .mockResolvedValueOnce(jsonResponse({ token: 'mocked_token' }, 200));
+
+      const sessionToken = expect(
+        createCloudSession(
+          {
+            hostname: 'cloud',
+            email: 'viewer@elastic.co',
+            password: 'changeme',
+            log,
+          },
+          {
+            attemptsCount: 2,
+            attemptDelay: 0,
+          }
+        )
+      ).resolves.toBe('mocked_token');
+      await jest.advanceTimersByTimeAsync(REQUEST_TIMEOUT_MS);
+
+      await sessionToken;
+      expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     test('returns token value', async () => {
@@ -175,6 +210,19 @@ describe('saml_auth', () => {
   describe('createSAMLRequest', () => {
     afterEach(() => {
       jest.clearAllMocks();
+      jest.useRealTimers();
+    });
+
+    test('aborts a stalled request instead of hanging', async () => {
+      jest.useFakeTimers();
+      fetchMock.mockImplementation(stalledResponse);
+
+      const samlRequest = expect(
+        createSAMLRequest('https://kbn.test.co', '8.12.0', log)
+      ).rejects.toThrow('The operation was aborted');
+      await jest.advanceTimersByTimeAsync(REQUEST_TIMEOUT_MS);
+
+      await samlRequest;
     });
 
     test('returns { location, sid }', async () => {
@@ -253,6 +301,14 @@ describe('saml_auth', () => {
 
       const actualResponse = await createSAMLResponse(createSAMLResponseParams);
       expect(actualResponse).toBe('PD94bWluc2U+');
+    });
+
+    test('rethrows a request failure instead of reporting it as missing access', async () => {
+      fetchMock.mockRejectedValueOnce(new Error('The operation was aborted'));
+
+      await expect(createSAMLResponse(createSAMLResponseParams)).rejects.toThrow(
+        'The operation was aborted'
+      );
     });
 
     test('throws error when failed to parse SAML response value', async () => {
