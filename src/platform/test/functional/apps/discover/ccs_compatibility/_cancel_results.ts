@@ -156,25 +156,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   | STATS count = COUNT(*) BY buckets, delay`);
         await testSubjects.click('querySubmitButton');
 
-        // Confirm the ES|QL compute task is genuinely running on a data node before cancelling.
-        // We can't infer this from elapsed time — DELAY()'s total wall-clock contribution scales
-        // with however many remote rows the engine happens to evaluate it for, which isn't a
-        // documented contract. Polling real task state removes the guesswork: this action is only
-        // present in the tasks list while a compute driver is actively executing (see the `esql`
-        // action prefix `indices:data/read/esql`; the compute/driver sub-task is
-        // `indices:data/read/esql/compute`, as also relied on by the `query_activity` plugin).
-        await retry.waitFor('esql compute task to be actively running', async () => {
+        // The secondary button becoming enabled signals SearchSessionState.Loading (after a 500ms
+        // delay) — a front-end readiness check confirming the client-side async search id is set.
+        await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
+        await testSubjects.existOrFail('queryCancelButton');
+
+        // Confirm the ES|QL compute task is *still* running right before we cancel it. This must
+        // be the last check before the click, not an earlier one: DELAY()'s total wall-clock
+        // contribution scales with however many remote rows the engine happens to evaluate it for
+        // (not a documented contract), so an earlier "it started running" check says nothing about
+        // whether it's still running by the time we act — only a check immediately preceding the
+        // click does. This action is only present in the tasks list while a compute driver is
+        // actively executing (the `esql` action prefix is `indices:data/read/esql`; the
+        // compute/driver sub-task is `indices:data/read/esql/compute`, as also relied on by the
+        // `query_activity` plugin). If this never becomes true, the query finished before we could
+        // reach it — a real signal to increase the delay, not a flaky timing artifact to paper over.
+        await retry.waitFor('esql compute task to still be running', async () => {
           const { nodes } = await es.tasks.list({ actions: 'indices:data/read/esql/compute*' });
           return Object.values(nodes ?? {}).some(
             (node) => Object.keys(node.tasks ?? {}).length > 0
           );
         });
 
-        // The secondary button becoming enabled signals SearchSessionState.Loading (after a 500ms
-        // delay) — this is a front-end readiness check (the client-side async search id is set),
-        // complementary to the ES-side task confirmation above.
-        await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
-        await testSubjects.existOrFail('queryCancelButton');
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 
