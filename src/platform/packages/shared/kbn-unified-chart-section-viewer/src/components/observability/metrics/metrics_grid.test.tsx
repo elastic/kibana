@@ -187,7 +187,7 @@ describe('MetricsGrid', () => {
     metricItems.forEach((_, index) => {
       expect(Chart).toHaveBeenNthCalledWith(
         index + 1,
-        expect.objectContaining({ yAxisTitle: 'Sum' }),
+        expect.objectContaining({ yAxisTitle: 'sum' }),
         expect.anything()
       );
     });

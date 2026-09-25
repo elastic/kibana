@@ -150,6 +150,10 @@ function assertNoUnexpectedDottedKeys(typeRegistration: EncryptedSavedObjectType
  * Represents the definition of the attributes of the specific saved object that are supposed to be
  * encrypted. The definition also dictates which attributes should be included in AAD and/or
  * stripped from response.
+ *
+ * All attribute names are top-level names, compared to the keys of the saved object's `attributes`
+ * with an exact string match. A dot in a name is not treated as a path and is never resolved into
+ * a nested attribute.
  */
 export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
@@ -205,7 +209,9 @@ export class EncryptedSavedObjectAttributesDefinition {
   /**
    * Determines whether particular attribute should be encrypted. Full list of attributes that
    * should be encrypted can be retrieved via `attributesToEncrypt` property.
-   * @param attributeName Name of the attribute.
+   * @param attributeName Name of the top-level attribute. Matched exactly; dotted paths are not
+   * resolved. If the attribute name contains a dot, it is treated as a literal key and not as a
+   * path into a nested attribute.
    */
   public shouldBeEncrypted(attributeName: string) {
     return this.attributesToEncrypt.has(attributeName);
@@ -213,7 +219,9 @@ export class EncryptedSavedObjectAttributesDefinition {
 
   /**
    * Determines whether particular attribute should be included in AAD.
-   * @param attributeName Name of the attribute.
+   * @param attributeName Name of the top-level attribute. Matched exactly; dotted paths are not
+   * resolved. If the attribute name contains a dot, it is treated as a literal key and not as a
+   * path into a nested attribute. Subfields of an included attribute are covered by its value.
    */
   public shouldBeIncludedInAAD(attributeName: string) {
     return (
@@ -225,14 +233,18 @@ export class EncryptedSavedObjectAttributesDefinition {
 
   /**
    * Determines whether particular attribute should be stripped from the attribute list.
-   * @param attributeName Name of the attribute.
+   * @param attributeName Name of the top-level attribute. Matched exactly; dotted paths are not
+   * resolved, so a dotted path that is not a literal attribute key is never stripped.
    */
   public shouldBeStripped(attributeName: string) {
     return this.attributesToStrip.has(attributeName);
   }
 
   /**
-   * Collects all attributes (both keys and values) that should contribute to AAD.
+   * Collects all attributes (both keys and values) that should contribute to AAD. Only top-level
+   * attributes that are actually present on the object are collected; a registered name that is
+   * not a key of `attributes` (for example, a dotted path into a nested attribute) is silently
+   * omitted from AAD.
    * @param attributes Attributes of the saved object
    */
   public collectAttributesForAAD(attributes: Record<string, unknown>) {

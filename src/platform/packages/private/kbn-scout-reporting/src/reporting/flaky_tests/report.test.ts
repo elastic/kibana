@@ -264,6 +264,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     const fetchBranchStats = jest
       .spyOn(queries, 'fetchBranchStats')
       .mockResolvedValue(activeBranchStats(['jest-flaky']));
+    jest.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
     const fetchSampleFailures = jest
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
@@ -353,6 +354,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
             suiteTitle: 'flaky suite',
             filePath: 'a.test.ts',
             configPath: 'jest.config.js',
+            configCategory: 'unit-test',
             owners: ['elastic/team'],
             areas: ['platform'],
           },
@@ -369,6 +371,19 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
           ],
         ])
       );
+    const targetStats = [
+      {
+        mode: 'unknown',
+        type: 'local',
+        builds: 100,
+        failedBuilds: 30,
+        buildFailRate: 0.3,
+        lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+      },
+    ];
+    const fetchTargetStats = jest
+      .spyOn(queries, 'fetchTargetStats')
+      .mockResolvedValue(new Map([['jest-flaky-high', targetStats]]));
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats').mockResolvedValue(
       new Map([
         [
@@ -439,6 +454,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       suiteTitle: 'flaky suite',
       filePath: 'a.test.ts',
       configPath: 'jest.config.js',
+      configCategory: 'unit-test',
       owners: ['elastic/team'],
       passes: 90,
       buildFailRate: 0.3,
@@ -450,6 +466,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         { branch: 'main', builds: 90, failedBuilds: 30, latestRun: { status: 'passed' } },
         { branch: '9.5', builds: 10, failedBuilds: 0, latestRun: { status: 'skipped' } },
       ],
+      byTarget: targetStats,
       sampleFailures: [{ message: 'boom', buildUrl: 'https://b/1' }],
     });
 
@@ -459,6 +476,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       filePath: '(unknown)',
       owners: [],
       flakiestBranch: qualifyingFlakiestBranch,
+      byTarget: [],
       sampleFailures: [],
     });
     expect(report.consistentlyFailing[0].suiteTitle).toBeUndefined();
@@ -491,6 +509,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       expect.objectContaining({ testId, framework: 'jest' })
     );
     expect(fetchBranchStats).toHaveBeenCalledWith(es, expect.anything(), admitted);
+    expect(fetchTargetStats).toHaveBeenCalledWith(es, expect.anything(), admitted);
     expect(fetchSampleFailures).toHaveBeenCalledWith(
       es,
       expect.anything(),
@@ -538,6 +557,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     const fetchBranchStats = jest
       .spyOn(queries, 'fetchBranchStats')
       .mockResolvedValue(activeBranchStats(['flaky-on-9.5', 'still-running']));
+    jest.spyOn(queries, 'fetchTargetStats').mockResolvedValue(new Map());
     const fetchSampleFailures = jest
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
@@ -589,6 +609,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(new Map());
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
+    const fetchTargetStats = jest.spyOn(queries, 'fetchTargetStats');
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
 
@@ -596,6 +617,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(report.summary.totalFlaky).toBe(0);
     expect(fetchTestMetadata).not.toHaveBeenCalled();
     expect(fetchBranchStats).not.toHaveBeenCalled();
+    expect(fetchTargetStats).not.toHaveBeenCalled();
   });
 
   it('skips metadata, branch stats and sample queries when nothing qualifies', async () => {
@@ -604,6 +626,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     const fetchBranchCounts = jest.spyOn(queries, 'fetchBranchCounts');
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
+    const fetchTargetStats = jest.spyOn(queries, 'fetchTargetStats');
     const fetchSampleFailures = jest.spyOn(queries, 'fetchSampleFailures');
     const fetchFilePipelineStats = jest.spyOn(queries, 'fetchFilePipelineStats');
 
@@ -616,6 +639,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(fetchBranchCounts).not.toHaveBeenCalled();
     expect(fetchTestMetadata).not.toHaveBeenCalled();
     expect(fetchBranchStats).not.toHaveBeenCalled();
+    expect(fetchTargetStats).not.toHaveBeenCalled();
     expect(fetchSampleFailures).not.toHaveBeenCalled();
     expect(fetchFilePipelineStats).not.toHaveBeenCalled();
   });
@@ -683,8 +707,9 @@ describe('ScoutFlakyTests.writeToFile / fromFile', () => {
 
     // reports written before `scope.classifications` existed default to both lists
     expect(report.scope.classifications).toEqual(['flaky', 'consistently-failing']);
-    // likewise for the per-branch counts and the per-file breakdown
+    // likewise for the per-branch counts, the per-target breakdown and the per-file breakdown
     expect(report.summary.flakyByBranch).toEqual({});
+    expect(report.flaky[0].byTarget).toEqual([]);
     expect(report.files).toEqual([]);
 
     const outputPath = path.join(tmpDir, 'nested', 'report.json');
