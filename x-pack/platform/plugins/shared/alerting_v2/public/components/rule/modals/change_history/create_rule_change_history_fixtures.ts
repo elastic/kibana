@@ -9,8 +9,8 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { ChangeHistoryDetail } from '@kbn/change-history-ui';
 import { RULE_CHANGE_HISTORY_STORY_OBJECT_ID } from './constants';
 
-/** Domain rule snapshot persisted as `object.snapshot` (API response minus SO OCC token). */
-type RuleSnapshot = Omit<RuleResponse, 'version'>;
+/** Domain rule snapshot persisted as `object.snapshot` (the API response shape). */
+type RuleSnapshot = RuleResponse;
 type RuleApiResponse = RuleResponse;
 
 export interface CreateRuleChangeHistoryFixturesOptions {
@@ -37,7 +37,6 @@ const buildBaseSnapshot = ({
   enabled: true,
   metadata: {
     name,
-    version: 1,
     description: 'Alert when destination weather is thunder and lightning.',
     tags: ['flights', 'weather'],
   },
@@ -58,7 +57,8 @@ const buildBaseSnapshot = ({
 
 /**
  * Newest-first mock history for Storybook / local UI exploration.
- * Snapshots mirror domain `RuleResponse` minus the SO OCC `version` token.
+ * Snapshots mirror the domain `RuleResponse`; the entry sequence lives on the
+ * row's `metadata.version`, which is what the change-history UI package reads.
  */
 export const createRuleChangeHistoryFixtures = (
   options: CreateRuleChangeHistoryFixturesOptions = {}
@@ -77,7 +77,6 @@ export const createRuleChangeHistoryFixtures = (
     ...baseSnapshot,
     metadata: {
       ...baseSnapshot.metadata,
-      version: 2,
       description: 'Alert when flights see thunder and lightning at destination.',
     },
     schedule: { every: '1m', lookback: '1h' },
@@ -87,10 +86,6 @@ export const createRuleChangeHistoryFixtures = (
 
   const v3: RuleSnapshot = {
     ...v2,
-    metadata: {
-      ...v2.metadata,
-      version: 3,
-    },
     query: {
       format: 'standalone',
       breach: {
@@ -104,10 +99,6 @@ export const createRuleChangeHistoryFixtures = (
 
   const v4: RuleSnapshot = {
     ...v3,
-    metadata: {
-      ...v3.metadata,
-      version: 4,
-    },
     enabled: false,
     updated_at: '2026-08-01T11:05:00.000Z',
     updated_by: { profile_uid: 'user-bailey' },
@@ -183,10 +174,5 @@ export const createRuleApiResponseFromHistoryFixtures = (
     empty: false,
     versionCount: options.versionCount ?? 1,
   });
-  const latest = history[0]?.snapshot as RuleSnapshot;
-
-  return {
-    ...latest,
-    version: 'WzEsMV0=',
-  };
+  return history[0]?.snapshot as RuleSnapshot;
 };

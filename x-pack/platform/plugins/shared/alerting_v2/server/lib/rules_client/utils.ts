@@ -24,7 +24,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
-import type { BulkOperationError, RotationCandidate } from './types';
+import type { BulkOperationError, InternalRule, RotationCandidate } from './types';
 
 /**
  * Maps a saved-object status code to the stable, machine-readable bulk-error
@@ -238,7 +238,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     version: number;
   }
 ): RuleSavedObjectAttributes {
-  const { version, ...restServerFields } = serverFields;
   return {
     kind: data.kind,
     metadata: {
@@ -246,7 +245,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       description: data.metadata.description,
       tags: data.metadata.tags,
       builder_type: data.metadata.builder_type,
-      version,
     },
     time_field: data.time_field,
     schedule: {
@@ -259,7 +257,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     state_transition: data.state_transition,
     grouping: data.grouping,
     artifacts: data.artifacts,
-    ...restServerFields,
+    ...serverFields,
   };
 }
 
@@ -318,7 +316,6 @@ export function buildUpdateRuleAttributes(
     version: number;
   }
 ): RuleSavedObjectAttributes {
-  const { version, ...restServerFields } = serverFields;
   return {
     ...existingAttrs,
     metadata: {
@@ -328,7 +325,6 @@ export function buildUpdateRuleAttributes(
       // `null` clears all tags. The SO schema is `maybe(...)` without
       // `nullable()`, so the cleared value must be stored as `undefined`.
       tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
-      version,
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
@@ -355,7 +351,7 @@ export function buildUpdateRuleAttributes(
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,
-    ...restServerFields,
+    ...serverFields,
     // Immutable fields are forced from storage last, so no preceding override
     // can leak through if someone adds a new immutable field to the registry.
     ...pickImmutable(existingAttrs),
@@ -437,23 +433,21 @@ export function validateMergedRuleAttributes(
 }
 
 /**
- * Converts saved object attributes into the public API response shape.
+ * Converts saved object attributes into the server-internal rule shape.
  */
-export function transformRuleSoAttributesToRuleApiResponse(
+export function transformRuleSoAttributesToInternalRule(
   id: string,
-  attrs: RuleSavedObjectAttributes,
-  version?: string
-): RuleResponse {
+  attrs: RuleSavedObjectAttributes
+): InternalRule {
   return {
     id,
-    version,
+    version: attrs.version ?? RULE_VERSION_FALLBACK,
     kind: attrs.kind,
     metadata: {
       name: attrs.metadata.name,
       description: attrs.metadata.description,
       tags: attrs.metadata.tags,
       builder_type: attrs.metadata.builder_type,
-      version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,
     },
     time_field: attrs.time_field,
     schedule: {
@@ -479,4 +473,9 @@ export function transformRuleSoAttributesToRuleApiResponse(
     updated_by: attrs.updatedBy,
     updated_at: attrs.updatedAt,
   };
+}
+
+/** Projects a server-internal rule onto the public API response shape. */
+export function toRuleApiResponse({ version, ...rule }: InternalRule): RuleResponse {
+  return rule;
 }

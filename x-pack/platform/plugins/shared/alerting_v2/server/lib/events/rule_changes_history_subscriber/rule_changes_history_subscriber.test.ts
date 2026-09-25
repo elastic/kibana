@@ -15,7 +15,7 @@ import type { LoggerService } from '../../services/logger_service/logger_service
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { RuleChangesHistoryAction } from '../../rule_changes_history';
 import { createRuleChangesHistoryServiceMock } from '../../rule_changes_history/rule_changes_history_service.mock';
-import { createRuleResponse } from '../../test_utils';
+import { createInternalRule } from '../../test_utils';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,
@@ -41,8 +41,8 @@ const profile = {
   user: { username: author.username },
 } as UserProfileWithSecurity;
 
-const rule = createRuleResponse({ id: 'rule-1', metadata: { version: 3 } });
-const { version: _occVersion, ...ruleSnapshot } = rule;
+const rule = createInternalRule({ id: 'rule-1', version: 3 });
+const { version: _sequence, ...ruleSnapshot } = rule;
 
 const payload: RuleEvent['payload'] = {
   ruleId: 'rule-1',
@@ -149,24 +149,6 @@ describe('RuleChangesHistorySubscriber', () => {
           spaceId: 'my-space',
           correlationId: 'corr-1',
         }),
-        { request }
-      );
-
-      expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
-    });
-
-    it('skips events whose rule has no version sequence', async () => {
-      subscriber.start();
-      // The API always populates `metadata.version`; drop it to exercise the
-      // subscriber's defensive guard against a malformed runtime event.
-      const { version: _version, ...metadataWithoutVersion } = rule.metadata;
-      const ruleWithoutSequence = {
-        ...rule,
-        metadata: metadataWithoutVersion,
-      } as typeof rule;
-
-      await handlerFor(RULE_UPDATED_EVENT_TYPE)(
-        eventOf(RULE_UPDATED_EVENT_TYPE, { ...payload, rule: ruleWithoutSequence }),
         { request }
       );
 

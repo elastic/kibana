@@ -26,34 +26,33 @@ import { apiTest, buildCreateRuleData } from '../fixtures';
 
 const expectSnapshotShape = (doc: ChangeHistoryDocument, expectedRule: RuleResponse): void => {
   const snapshot = doc.object.snapshot as RuleChangesHistorySnapshot;
-  const { version: _occVersion, ...expectedSnapshot } = expectedRule;
 
   expect(snapshot).toMatchObject(
     omitBy(
       {
-        id: expectedSnapshot.id,
-        kind: expectedSnapshot.kind,
-        enabled: expectedSnapshot.enabled,
-        time_field: expectedSnapshot.time_field,
-        metadata: expectedSnapshot.metadata,
-        schedule: expectedSnapshot.schedule,
-        query: expectedSnapshot.query,
-        recovery_strategy: expectedSnapshot.recovery_strategy,
-        no_data_strategy: expectedSnapshot.no_data_strategy,
-        state_transition: expectedSnapshot.state_transition,
-        grouping: expectedSnapshot.grouping,
-        artifacts: expectedSnapshot.artifacts,
-        created_by: expectedSnapshot.created_by,
-        created_at: expectedSnapshot.created_at,
-        updated_by: expectedSnapshot.updated_by,
-        updated_at: expectedSnapshot.updated_at,
+        id: expectedRule.id,
+        kind: expectedRule.kind,
+        enabled: expectedRule.enabled,
+        time_field: expectedRule.time_field,
+        metadata: expectedRule.metadata,
+        schedule: expectedRule.schedule,
+        query: expectedRule.query,
+        recovery_strategy: expectedRule.recovery_strategy,
+        no_data_strategy: expectedRule.no_data_strategy,
+        state_transition: expectedRule.state_transition,
+        grouping: expectedRule.grouping,
+        artifacts: expectedRule.artifacts,
+        created_by: expectedRule.created_by,
+        created_at: expectedRule.created_at,
+        updated_by: expectedRule.updated_by,
+        updated_at: expectedRule.updated_at,
       },
       isUndefined
     )
   );
 
   // Cover the full payload shape so significant schema drift fails loudly.
-  expect(snapshot).toMatchObject(expectedSnapshot);
+  expect(snapshot).toMatchObject(expectedRule);
 };
 
 const expectSequences = (entries: ChangeHistoryDocument[], expected: number[]): void => {
@@ -109,7 +108,6 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
           sequence: 1,
         },
       });
-      expect(entries[0].object.sequence).toBe(created.metadata.version);
       expectSnapshotShape(entries[0], created);
       expectSequences(entries, [1]);
     }
@@ -162,7 +160,6 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
           sequence: 2,
         },
       });
-      expect(updateEntries[0].object.sequence).toBe(updated.metadata.version);
       expectSnapshotShape(updateEntries[0], updated);
 
       // Snapshot must reflect the post-change state, not the pre-change one.
@@ -222,7 +219,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
     'upsert (update): logs a rule_update entry when the rule already exists',
     async ({ apiServices }) => {
       const ruleId = 'rule-history-upsert-update';
-      const created = await apiServices.alertingV2.rules.upsert(
+      await apiServices.alertingV2.rules.upsert(
         ruleId,
         buildCreateRuleData({
           metadata: { name: 'change-history-upsert-original' },
@@ -264,7 +261,6 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
           sequence: 2,
         },
       });
-      expect(updateEntries[0].object.sequence).toBe(updated.metadata.version);
       expectSnapshotShape(updateEntries[0], updated);
       expect(updateEntries[0].object.snapshot).toMatchObject({
         metadata: { name: 'change-history-upsert-changed' },
@@ -273,8 +269,6 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
 
       const allEntries = await apiServices.alertingV2.ruleChangesHistory.find({ ruleId });
       expectSequences(allEntries, [1, 2]);
-      expect(created.metadata.version).toBe(1);
-      expect(updated.metadata.version).toBe(2);
     }
   );
 
@@ -326,7 +320,6 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
           sequence: 2,
         },
       });
-      expect(disableEntries[0].object.sequence).toBe(disabled.metadata.version);
       expectSnapshotShape(disableEntries[0], disabled);
       expect(disableEntries[0].object.snapshot).toMatchObject({ enabled: false });
 
@@ -394,7 +387,6 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
           sequence: 3,
         },
       });
-      expect(enableEntries[0].object.sequence).toBe(enabled.metadata.version);
       expectSnapshotShape(enableEntries[0], enabled);
       expect(enableEntries[0].object.snapshot).toMatchObject({ enabled: true });
 
@@ -421,10 +413,10 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
       });
 
       // Capture state before delete: RulesClient stamps getNextVersion onto the
-      // emitted snapshot (nothing is persisted on delete), so sequence advances
-      // past the last stored metadata.version.
+      // emitted snapshot (nothing is persisted on delete), so the deletion
+      // orders after the create at sequence 1.
       const beforeDelete = await apiServices.alertingV2.rules.get(created.id);
-      const expectedDeleteSequence = beforeDelete.metadata.version + 1;
+      const expectedDeleteSequence = 2;
 
       await apiServices.alertingV2.rules.delete(created.id);
 
@@ -450,11 +442,8 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
 
-      // Snapshot is the pre-delete rule with the bumped configuration version.
-      expectSnapshotShape(deleteEntries[0], {
-        ...beforeDelete,
-        metadata: { ...beforeDelete.metadata, version: expectedDeleteSequence },
-      });
+      // Snapshot is the pre-delete rule; the bump lives only in the sequence.
+      expectSnapshotShape(deleteEntries[0], beforeDelete);
 
       const allEntries = await apiServices.alertingV2.ruleChangesHistory.find({
         ruleId: created.id,
@@ -478,7 +467,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         action: RuleChangesHistoryAction.ruleCreate,
       });
 
-      const updated = await apiServices.alertingV2.rules.upsert(
+      await apiServices.alertingV2.rules.upsert(
         created.id,
         buildCreateRuleData({
           metadata: { name: 'change-history-http-updated' },
@@ -501,7 +490,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
       expect(list.items[0]).toMatchObject({
         action: RuleChangesHistoryAction.ruleUpdate,
         is_current: true,
-        metadata: { version: updated.metadata.version },
+        version: 2,
       });
       expect('snapshot' in list.items[0]).toBe(false);
       expect(list.items[0].changes?.count).toBeGreaterThan(0);

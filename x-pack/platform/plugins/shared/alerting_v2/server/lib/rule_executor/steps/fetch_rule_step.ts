@@ -26,7 +26,7 @@ export class FetchRuleStep implements RuleExecutionStep {
       logger.debug({ message: 'Starting fetch rule step' });
 
       try {
-        const rule = await this.rulesClient.getRule({ id: ruleId });
+        const rule = await this.rulesClient.getInternalRule({ id: ruleId });
 
         logger.debug({ message: 'Fetched rule' });
 

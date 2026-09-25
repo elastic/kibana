@@ -44,11 +44,7 @@ export function toListItem(
     ...(document.event.reason ? { comment: document.event.reason } : {}),
     ...(isCurrent ? { is_current: true } : {}),
     ...(document.tags && document.tags.length > 0 ? { tags: document.tags } : {}),
-    ...(document.object.sequence !== undefined
-      ? { metadata: { version: document.object.sequence } }
-      : document.metadata
-      ? { metadata: document.metadata }
-      : {}),
+    ...(document.object.sequence !== undefined ? { version: document.object.sequence } : {}),
   };
 
   return item;

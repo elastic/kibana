@@ -9,7 +9,7 @@ import { ValidateRuleStep } from './validate_rule_step';
 import {
   collectStreamResults,
   createPipelineStream,
-  createRuleResponse,
+  createInternalRule,
   createRulePipelineState,
 } from '../test_utils';
 
@@ -21,14 +21,14 @@ describe('ValidateRuleStep', () => {
   });
 
   it('continues when rule is enabled', async () => {
-    const state = createRulePipelineState({ rule: createRuleResponse({ enabled: true }) });
+    const state = createRulePipelineState({ rule: createInternalRule({ enabled: true }) });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({ type: 'continue', state });
   });
 
   it('halts with rule_disabled when rule is disabled', async () => {
-    const state = createRulePipelineState({ rule: createRuleResponse({ enabled: false }) });
+    const state = createRulePipelineState({ rule: createInternalRule({ enabled: false }) });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({

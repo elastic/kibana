@@ -18,7 +18,7 @@ import {
   createEsqlResponse,
   createPipelineStream,
   createRuleExecutionInput,
-  createRuleResponse,
+  createInternalRule,
   createRulePipelineState,
   getStepError,
   mockHelpersEsqlArrowBatches,
@@ -85,7 +85,7 @@ describe('ExecuteRuleQueryStep', () => {
     );
 
     const state = createRulePipelineState({
-      rule: createRuleResponse(),
+      rule: createInternalRule(),
       logger: loggerService,
     });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -111,7 +111,7 @@ describe('ExecuteRuleQueryStep', () => {
   it('passes correct parameters to ES client', async () => {
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
-    const rule = createRuleResponse();
+    const rule = createInternalRule();
     const abortController = new AbortController();
     const input = createRuleExecutionInput({ abortSignal: abortController.signal });
     const state = createRulePipelineState({ input, rule });
@@ -131,7 +131,7 @@ describe('ExecuteRuleQueryStep', () => {
   it('concatenates base and breach segment for composed format rules', async () => {
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
-    const rule = createRuleResponse({
+    const rule = createInternalRule({
       query: {
         format: 'composed',
         base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
@@ -153,7 +153,7 @@ describe('ExecuteRuleQueryStep', () => {
   it('runs base with LIMIT for a conditionless composed rule', async () => {
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
-    const rule = createRuleResponse({
+    const rule = createInternalRule({
       query: {
         format: 'composed',
         base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
@@ -174,7 +174,7 @@ describe('ExecuteRuleQueryStep', () => {
   it('caps the JSON path at NON_STREAMING_MAX_ROWS when alerts.max is higher', async () => {
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
-    const rule = createRuleResponse({
+    const rule = createInternalRule({
       query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
     });
     const state = createRulePipelineState({ rule });
@@ -191,7 +191,7 @@ describe('ExecuteRuleQueryStep', () => {
     step = createStep(500);
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
-    const rule = createRuleResponse({
+    const rule = createInternalRule({
       query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
     });
     const state = createRulePipelineState({ rule });
@@ -208,7 +208,7 @@ describe('ExecuteRuleQueryStep', () => {
     step = createStep(500);
     mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
-    const rule = createRuleResponse({
+    const rule = createInternalRule({
       query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     });
     const state = createRulePipelineState({ rule });
@@ -231,7 +231,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     const state = createRulePipelineState({
       input: createRuleExecutionInput({ abortSignal: abortController.signal }),
-      rule: createRuleResponse(),
+      rule: createInternalRule(),
     });
 
     await expect(
@@ -242,7 +242,7 @@ describe('ExecuteRuleQueryStep', () => {
   it('propagates non-abort errors', async () => {
     mockEsClient.esql.query.mockRejectedValue(new Error('Query execution failed'));
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({ rule: createInternalRule() });
 
     await expect(
       collectStreamResults(step.executeStream(createPipelineStream([state])))
@@ -254,7 +254,7 @@ describe('ExecuteRuleQueryStep', () => {
       new errors.ResponseError({ statusCode: 400 } as DiagnosticResult)
     );
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({ rule: createInternalRule() });
 
     const error = await getStepError(step, state);
 
@@ -269,7 +269,7 @@ describe('ExecuteRuleQueryStep', () => {
       new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
     );
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({ rule: createInternalRule() });
 
     const error = await getStepError(step, state);
 
@@ -281,7 +281,7 @@ describe('ExecuteRuleQueryStep', () => {
   it('does not mark plain ES|QL errors as TaskErrorSource.USER', async () => {
     mockEsClient.esql.query.mockRejectedValue(new Error('ES query failed'));
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({ rule: createInternalRule() });
 
     const error = await getStepError(step, state);
 
@@ -303,7 +303,7 @@ describe('ExecuteRuleQueryStep', () => {
       )
     );
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({ rule: createInternalRule() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(results).toHaveLength(1);
@@ -319,7 +319,7 @@ describe('ExecuteRuleQueryStep', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [])
     );
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({ rule: createInternalRule() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(results).toHaveLength(1);
@@ -341,7 +341,7 @@ describe('ExecuteRuleQueryStep', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a'], ['host-b']])
     );
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({ rule: createInternalRule() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(results).toHaveLength(1);
@@ -358,7 +358,7 @@ describe('ExecuteRuleQueryStep', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [])
     );
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({ rule: createInternalRule() });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result.type).toBe('continue');
@@ -376,7 +376,7 @@ describe('ExecuteRuleQueryStep', () => {
     );
 
     const state = createRulePipelineState({
-      rule: createRuleResponse(),
+      rule: createInternalRule(),
       logger: loggerService,
     });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -406,7 +406,7 @@ describe('ExecuteRuleQueryStep', () => {
     );
 
     const state = createRulePipelineState({
-      rule: createRuleResponse(),
+      rule: createInternalRule(),
       logger: loggerService,
     });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -432,7 +432,7 @@ describe('ExecuteRuleQueryStep', () => {
         { numRows: 1, rows: [{ 'host.name': 'host-a' }] },
       ]);
 
-      const state = createRulePipelineState({ rule: createRuleResponse() });
+      const state = createRulePipelineState({ rule: createInternalRule() });
       const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
       expect(results).toHaveLength(1);
@@ -448,7 +448,7 @@ describe('ExecuteRuleQueryStep', () => {
         { numRows: 1, rows: [{ 'host.name': 'host-a' }] },
       ]);
 
-      const rule = createRuleResponse({
+      const rule = createInternalRule({
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       });
       const state = createRulePipelineState({ rule });
@@ -467,7 +467,7 @@ describe('ExecuteRuleQueryStep', () => {
         { numRows: 1, rows: [{ 'host.name': 'host-c' }] },
       ]);
 
-      const state = createRulePipelineState({ rule: createRuleResponse() });
+      const state = createRulePipelineState({ rule: createInternalRule() });
       const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
       expect(results).toHaveLength(2);
@@ -494,7 +494,7 @@ describe('ExecuteRuleQueryStep', () => {
       ]);
 
       const state = createRulePipelineState({
-        rule: createRuleResponse(),
+        rule: createInternalRule(),
         logger: loggerService,
       });
       const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -523,7 +523,7 @@ describe('ExecuteRuleQueryStep', () => {
     it('yields continue with empty esqlRowBatch when the reader yields no batches', async () => {
       mockHelpersEsqlArrowBatches(mockEsClient, []);
 
-      const state = createRulePipelineState({ rule: createRuleResponse() });
+      const state = createRulePipelineState({ rule: createInternalRule() });
       const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
       expect(results).toHaveLength(1);
@@ -540,7 +540,7 @@ describe('ExecuteRuleQueryStep', () => {
           .mockRejectedValue(new errors.ResponseError({ statusCode: 400 } as DiagnosticResult))
       );
 
-      const state = createRulePipelineState({ rule: createRuleResponse() });
+      const state = createRulePipelineState({ rule: createInternalRule() });
       const error = await getStepError(step, state);
 
       expect(error).toBeInstanceOf(Error);

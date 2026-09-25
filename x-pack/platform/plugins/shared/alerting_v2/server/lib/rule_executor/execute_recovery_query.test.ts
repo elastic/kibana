@@ -10,7 +10,7 @@ import { QueryResponseSizeExceededError } from '../errors/query_response_size_ex
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from './test_utils';
+import { createRuleExecutionInput, createInternalRule, createEsqlResponse } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { buildGroupHash } from './build_alert_events';
@@ -41,7 +41,7 @@ describe('executeRecoveryQuery', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['recovery-host-1']])
     );
 
-    const rule = createRuleResponse({
+    const rule = createInternalRule({
       kind: 'alert',
       recovery_strategy: 'query',
       grouping: { fields: ['host.name'] },
@@ -95,7 +95,7 @@ describe('executeRecoveryQuery', () => {
     const events = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createInternalRule({ kind: 'alert', recovery_strategy: 'query' }),
       effectiveQuery: 'FROM logs-* | WHERE recovered = true',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1', 'hash-2']),
@@ -127,7 +127,7 @@ describe('executeRecoveryQuery', () => {
     const events = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({
+      rule: createInternalRule({
         kind: 'alert',
         recovery_strategy: 'query',
         grouping: { fields: groupingFields },
@@ -155,7 +155,7 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createInternalRule({ kind: 'alert', recovery_strategy: 'query' }),
       effectiveQuery: 'FROM logs-* | WHERE invalid syntax',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -176,7 +176,7 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createInternalRule({ kind: 'alert', recovery_strategy: 'query' }),
       effectiveQuery: 'FROM logs-*',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -198,7 +198,7 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createInternalRule({ kind: 'alert', recovery_strategy: 'query' }),
       effectiveQuery: 'FROM logs-*',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -217,7 +217,7 @@ describe('executeRecoveryQuery', () => {
     const error = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createInternalRule({ kind: 'alert', recovery_strategy: 'query' }),
       effectiveQuery: 'FROM logs-*',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
@@ -239,7 +239,7 @@ describe('executeRecoveryQuery', () => {
     await executeRecoveryQuery({
       queryService,
       logger: loggerService,
-      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      rule: createInternalRule({ kind: 'alert', recovery_strategy: 'query' }),
       effectiveQuery: 'FROM logs-*',
       input,
       activeGroupHashes: toActive(['hash-1']),

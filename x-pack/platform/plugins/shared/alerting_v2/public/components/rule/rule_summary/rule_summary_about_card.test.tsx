@@ -26,7 +26,6 @@ const baseRule: RuleApiResponse = {
     name: 'My Rule',
     description: 'A rule description',
     tags: ['prod', 'latency'],
-    version: 1,
   },
   time_field: '@timestamp',
   schedule: { every: '5m' },
@@ -55,7 +54,7 @@ describe('RuleSummaryAboutCard', () => {
   it('shows placeholders when description and tags are missing', () => {
     renderCard({
       ...baseRule,
-      metadata: { name: 'My Rule', version: 1 },
+      metadata: { name: 'My Rule' },
     });
 
     expect(screen.getByText('Description')).toBeInTheDocument();

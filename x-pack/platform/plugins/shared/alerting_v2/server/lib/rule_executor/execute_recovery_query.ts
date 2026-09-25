@@ -16,7 +16,7 @@ import { getQueryPayload } from './get_query_payload';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import type { ActiveAlertGroupHash } from './queries';
-import type { RuleResponse } from '../rules_client';
+import type { InternalRule } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 
 /**
@@ -39,7 +39,7 @@ export const executeRecoveryQuery = async ({
 }: {
   queryService: QueryServiceContract;
   logger: LoggerServiceContract;
-  rule: RuleResponse;
+  rule: InternalRule;
   effectiveQuery: string;
   input: RuleExecutionInput;
   activeGroupHashes: ActiveAlertGroupHash[];
@@ -70,7 +70,7 @@ export const executeRecoveryQuery = async ({
 
     return buildQueryRecoveryAlertEvents({
       ruleId: rule.id,
-      ruleVersion: rule.metadata.version,
+      ruleVersion: rule.version,
       spaceId: input.spaceId,
       ruleAttributes: rule,
       activeGroupHashes,

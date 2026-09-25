@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import {
   createRuleDataSchema,
-  updateRuleBodySchema,
+  updateRuleDataSchema,
   ruleResponseSchema,
   findRulesResponseSchema,
   ruleTagsResponseSchema,
@@ -21,7 +21,6 @@ import {
   standaloneQuerySchema,
   scheduleSchema,
   metadataSchema,
-  ruleResponseMetadataSchema,
   groupingSchema,
 } from './rule_data_schema';
 import {
@@ -101,7 +100,7 @@ const getMetaId = (schema: z.ZodType): string | undefined => getMeta(schema).id;
 const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   // rules
   [createRuleDataSchema, 'alerting_new_rule'],
-  [updateRuleBodySchema, 'alerting_update_rule'],
+  [updateRuleDataSchema, 'alerting_update_rule'],
   [ruleResponseSchema, 'alerting_rule_response'],
   [findRulesResponseSchema, 'alerting_rule_list_response'],
   [ruleTagsResponseSchema, 'alerting_rule_tags_response'],
@@ -114,7 +113,6 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [standaloneQuerySchema, 'alerting_standalone_rule_query'],
   [scheduleSchema, 'alerting_rule_schedule'],
   [metadataSchema, 'alerting_rule_metadata'],
-  [ruleResponseMetadataSchema, 'alerting_rule_response_metadata'],
   [groupingSchema, 'alerting_rule_grouping'],
   // action policies
   [createActionPolicyDataSchema, 'alerting_new_action_policy'],

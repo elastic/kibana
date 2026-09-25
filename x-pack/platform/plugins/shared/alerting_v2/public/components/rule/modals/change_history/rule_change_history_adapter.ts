@@ -22,7 +22,9 @@ const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryList
   changes: item.changes,
   comment: item.comment,
   tags: item.tags,
-  metadata: item.metadata,
+  // `metadata.version` is the convention the change-history UI package reads for
+  // the restore label and its version-distance telemetry.
+  metadata: item.version !== undefined ? { version: item.version } : undefined,
   isCurrent: item.is_current,
 });
 

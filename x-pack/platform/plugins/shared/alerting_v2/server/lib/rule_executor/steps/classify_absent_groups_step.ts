@@ -27,7 +27,7 @@ import {
 } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import type { ActiveAlertGroupHash } from '../queries';
-import type { RuleResponse } from '../../rules_client';
+import type { InternalRule } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 
 /**
@@ -188,7 +188,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     dataPresentGroupHashes,
     logger,
   }: {
-    rule: RuleResponse;
+    rule: InternalRule;
     input: RulePipelineState['input'];
     activeGroups: ActiveAlertGroupHash[];
     breachedGroupHashes: ReadonlySet<string>;
@@ -212,7 +212,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
 
     return buildRecoveryAlertEvents({
       ruleId: rule.id,
-      ruleVersion: rule.metadata.version,
+      ruleVersion: rule.version,
       spaceId: input.spaceId,
       activeGroupHashes: activeGroups,
       breachedGroupHashes,
@@ -235,7 +235,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     recoveredGroupHashes,
     dataPresentGroupHashes,
   }: {
-    rule: RuleResponse;
+    rule: InternalRule;
     input: RulePipelineState['input'];
     activeGroups: ActiveAlertGroupHash[];
     breachedGroupHashes: ReadonlySet<string>;
@@ -272,7 +272,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       events.push(
         ...buildNoDataAlertEvents({
           ruleId: rule.id,
-          ruleVersion: rule.metadata.version,
+          ruleVersion: rule.version,
           spaceId: input.spaceId,
           groupHashes: noDataGroupHashes,
           scheduledTimestamp: input.scheduledAt,
@@ -285,7 +285,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       events.push(
         ...buildContinuedBreachAlertEvents({
           ruleId: rule.id,
-          ruleVersion: rule.metadata.version,
+          ruleVersion: rule.version,
           spaceId: input.spaceId,
           groupHashes: continuedBreachGroupHashes,
           scheduledTimestamp: input.scheduledAt,

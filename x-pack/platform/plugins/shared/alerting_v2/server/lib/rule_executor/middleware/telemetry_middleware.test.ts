@@ -8,7 +8,7 @@
 import { RuleExecutionTelemetryMiddleware } from './telemetry_middleware';
 import { createRuleExecutionMiddlewareContext } from './test_utils';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
-import { createRuleResponse } from '../../test_utils';
+import { createInternalRule } from '../../test_utils';
 import { QueryResponseSizeExceededError } from '../../errors/query_response_size_exceeded_error';
 import type { RuleExecutionTelemetryContract } from '../otel/rule_execution_telemetry';
 
@@ -43,7 +43,7 @@ describe('RuleExecutionTelemetryMiddleware', () => {
   });
 
   it('counts a response-size guardrail trip with the query type and the rule kind', async () => {
-    const state = createRulePipelineState({ rule: createRuleResponse({ kind: 'signal' }) });
+    const state = createRulePipelineState({ rule: createInternalRule({ kind: 'signal' }) });
     const error = new QueryResponseSizeExceededError('breach', 10 * 1024 * 1024);
     // Consume the input (as a step would) before failing, so the rule kind is observed.
     const next = jest.fn().mockImplementation((input) =>

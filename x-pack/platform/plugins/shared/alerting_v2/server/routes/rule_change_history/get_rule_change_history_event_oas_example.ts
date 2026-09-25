@@ -13,8 +13,6 @@ import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions'
 import { RULE_RESPONSE } from '../rules/rule_oas_shared_examples';
 import { RULE_CHANGE_HISTORY_UNAVAILABLE_RESPONSE } from './list_rule_change_history_oas_example';
 
-const { version: _occVersion, ...RULE_SNAPSHOT } = RULE_RESPONSE;
-
 export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
   id: '0194f0c8-aaaa-7bbb-8ccc-ddddeeeeffff',
   timestamp: '2026-01-15T12:05:00.000Z',
@@ -25,13 +23,12 @@ export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
     summary: { metadata: { name: 'Host CPU high' } },
   },
   is_current: true,
-  metadata: { version: 2 },
+  version: 2,
   snapshot: {
-    ...RULE_SNAPSHOT,
+    ...RULE_RESPONSE,
     metadata: {
-      ...RULE_SNAPSHOT.metadata,
+      ...RULE_RESPONSE.metadata,
       name: 'Host CPU critical',
-      version: 2,
     },
   },
 };

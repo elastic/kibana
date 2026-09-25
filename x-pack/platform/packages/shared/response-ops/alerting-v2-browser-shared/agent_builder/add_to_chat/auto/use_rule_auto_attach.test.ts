@@ -21,7 +21,7 @@ const rule = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Host CPU high', version: 1 },
+  metadata: { name: 'Host CPU high' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-*' } },

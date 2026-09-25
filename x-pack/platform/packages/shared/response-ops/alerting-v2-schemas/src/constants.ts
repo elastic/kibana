@@ -106,8 +106,8 @@ export const MAX_ARTIFACT_DATA_LENGTH = MAX_ARTIFACT_DATA_BYTES;
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
 
 /**
- * Maximum length for the `version` field. Used by the optimistic concurrency control check on `PATCH /{id}`
- * and `PUT /{id}`.
+ * Maximum length for the `version` field. Used by the optimistic concurrency control check on
+ * `PATCH /action_policies/{id}`.
  */
 export const VERSION_MAX_LENGTH = 256;
 

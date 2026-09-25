@@ -97,7 +97,7 @@ describe('RuleChangesHistoryClient', () => {
           count: 1,
           summary: { metadata: { name: 'A' } },
         },
-        metadata: { version: 2 },
+        version: 2,
       });
       // Snapshot must not appear on list rows.
       expect(result.items[0]).not.toHaveProperty('snapshot');

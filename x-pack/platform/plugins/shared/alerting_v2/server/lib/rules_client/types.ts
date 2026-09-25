@@ -40,6 +40,15 @@ export type {
 
 export type BulkOperationError = BulkResponse['errors'][number];
 
+/**
+ * A rule as the server sees it: the public API contract plus the server-managed
+ * version counter, which is never returned over HTTP. It orders rule
+ * change-history entries and is stamped on alert events as `rule.version`.
+ */
+export interface InternalRule extends RuleResponse {
+  version: number;
+}
+
 /** An enabled rule whose executor task API key is a candidate for rotation. */
 export interface RotationCandidate {
   id: string;
@@ -66,5 +75,4 @@ export interface FindRulesArgs {
 export interface UpdateRuleParams {
   id: string;
   data: UpdateRuleData;
-  options?: { version?: string };
 }

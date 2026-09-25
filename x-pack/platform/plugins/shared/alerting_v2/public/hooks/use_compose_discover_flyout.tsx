@@ -36,10 +36,6 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
   created_at: new Date().toISOString(),
   updated_by: null,
   updated_at: new Date().toISOString(),
-  metadata: {
-    ...template.rule.metadata,
-    version: 1,
-  },
 });
 
 interface UseComposeDiscoverFlyoutOptions {

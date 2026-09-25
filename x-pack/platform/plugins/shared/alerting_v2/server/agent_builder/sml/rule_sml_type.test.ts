@@ -45,7 +45,7 @@ const baseRuleResponse = {
   created_at: createdAt,
   updated_by: updatedBy,
   updated_at: updatedAt,
-  metadata: { ...baseRuleAttrs.metadata, version: baseRuleAttrs.metadata?.version ?? 1 },
+  metadata: baseRuleAttrs.metadata,
 };
 
 const buildToAttachmentContext = () => ({

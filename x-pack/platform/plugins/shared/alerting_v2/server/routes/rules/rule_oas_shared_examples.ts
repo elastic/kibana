@@ -52,12 +52,7 @@ export const CREATE_RULE_REQUEST: CreateRuleDataInput = SAMPLE_RULE_DATA;
 export const RULE_RESPONSE: RuleResponse = {
   ...SAMPLE_RULE_DATA,
   id: 'rule-1',
-  version: 'WzAsMV0=',
   enabled: true,
-  metadata: {
-    ...SAMPLE_RULE_DATA.metadata,
-    version: 1,
-  },
   created_by: { profile_uid: 'u_elastic_0' },
   created_at: '2026-01-15T12:00:00.000Z',
   updated_by: { profile_uid: 'u_elastic_0' },

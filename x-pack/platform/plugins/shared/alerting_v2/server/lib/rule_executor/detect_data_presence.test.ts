@@ -10,11 +10,11 @@ import { QueryResponseSizeExceededError } from '../errors/query_response_size_ex
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { createRuleExecutionInput, createRuleResponse, createEsqlResponse } from './test_utils';
+import { createRuleExecutionInput, createInternalRule, createEsqlResponse } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { buildGroupHash } from './build_alert_events';
-import type { RuleResponse } from '../rules_client';
+import type { InternalRule } from '../rules_client';
 import { detectDataPresence } from './detect_data_presence';
 
 const HOST = 'abc';
@@ -38,8 +38,8 @@ describe('detectDataPresence', () => {
     return { queryService: scoped.queryService, scopedEsClient: scoped.mockEsClient };
   }
 
-  function buildRule(overrides: Partial<RuleResponse> = {}): RuleResponse {
-    return createRuleResponse({
+  function buildRule(overrides: Partial<InternalRule> = {}): InternalRule {
+    return createInternalRule({
       kind: 'alert',
       grouping: { fields: groupingFields },
       no_data_strategy: 'emit',
@@ -71,7 +71,7 @@ describe('detectDataPresence', () => {
 
     const result = await detectDataPresence({
       queryService,
-      rule: createRuleResponse({
+      rule: createInternalRule({
         kind: 'alert',
         no_data_strategy: 'emit',
         grouping: { fields: groupingFields },
@@ -154,7 +154,7 @@ describe('detectDataPresence', () => {
     const input = createRuleExecutionInput();
     const result = await detectDataPresence({
       queryService,
-      rule: createRuleResponse({
+      rule: createInternalRule({
         kind: 'alert',
         no_data_strategy: 'emit',
         grouping: { fields: groupingFields },
