@@ -35,7 +35,6 @@ export async function waitForDocumentInIndex<T>({
       }
       return response;
     },
-    retryCount: 10,
   });
 }
 
@@ -57,6 +56,5 @@ export async function waitForIndexToBeEmpty<T>({
       }
       return response;
     },
-    retryCount: 10,
   });
 }
