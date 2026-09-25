@@ -157,8 +157,8 @@ run(
                                  and the data stream) before re-seeding
         --run-discovery          Run detection, seed post-detection evidence, then run AI discovery
                                  and verify an active event (requires a configured inference connector)
-        --es-url <url>           Elasticsearch URL (default: from kibana.dev.yml, falling back to
-                                 the other of http/https — e.g. https for serverless)
+        --es-url <url>           Elasticsearch URL (default: from kibana.dev.yml; local HTTP
+                                 falls back to HTTPS for serverless)
         --es-username <user>     ES username (default: tries elastic, then elastic_serverless)
         --es-password <pass>     ES password (default: changeme)
         --kibana-url <url>       Kibana base URL (default: from kibana.dev.yml, auto-detects dev base path)

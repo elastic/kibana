@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectionOptions } from 'tls';
+import { getCACertificates, type ConnectionOptions } from 'tls';
 import { Client } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -118,7 +118,9 @@ async function resolveKibanaUrl(rawUrl: string, log: ToolingLog): Promise<string
 export function getEsTlsOptions(esUrl: string): ConnectionOptions | undefined {
   const { protocol, hostname } = new URL(esUrl);
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-  return protocol === 'https:' && isLocalhost ? { ca: fs.readFileSync(CA_CERT_PATH) } : undefined;
+  return protocol === 'https:' && isLocalhost
+    ? { ca: [...getCACertificates('default'), fs.readFileSync(CA_CERT_PATH)] }
+    : undefined;
 }
 
 async function canAuthenticate(
@@ -145,31 +147,33 @@ async function canAuthenticate(
 
 function withSwitchedProtocol(url: string): string {
   const parsed = new URL(url);
-  parsed.protocol = parsed.protocol === 'https:' ? 'http:' : 'https:';
+  parsed.protocol = 'https:';
   return parsed.toString().replace(/\/$/, '');
 }
 
 /**
  * Finds a working ES URL + superuser credential pair. Explicit flags are always honoured;
- * otherwise both http/https and the stateful/serverless default users are probed.
+ * otherwise local HTTP can fall back to HTTPS and the stateful/serverless default users are probed.
  */
 async function discoverEsConnection(
   flags: Record<string, unknown>,
   configuredEsUrl: string,
   log: ToolingLog
 ): Promise<{ esUrl: string; username: string; password: string }> {
-  const esUrls = flags['es-url']
-    ? [String(flags['es-url'])]
-    : [configuredEsUrl, withSwitchedProtocol(configuredEsUrl)];
-  const credentials =
-    flags['es-username'] || flags['es-password']
-      ? [
-          {
-            username: String(flags['es-username'] || 'elastic'),
-            password: String(flags['es-password'] || 'changeme'),
-          },
-        ]
-      : DEFAULT_CREDENTIALS;
+  const configuredUrl = new URL(configuredEsUrl);
+  const isLocalhost =
+    configuredUrl.hostname === 'localhost' || configuredUrl.hostname === '127.0.0.1';
+  const esUrls =
+    !flags['es-url'] && configuredUrl.protocol === 'http:' && isLocalhost
+      ? [configuredEsUrl, withSwitchedProtocol(configuredEsUrl)]
+      : [String(flags['es-url'] || configuredEsUrl)];
+  const usernames = flags['es-username']
+    ? [String(flags['es-username'])]
+    : DEFAULT_CREDENTIALS.map(({ username }) => username);
+  const credentials = usernames.map((username) => ({
+    username,
+    password: String(flags['es-password'] || 'changeme'),
+  }));
 
   for (const esUrl of esUrls) {
     for (const { username, password } of credentials) {
