@@ -160,13 +160,13 @@ async function discoverEsConnection(
   configuredEsUrl: string,
   log: ToolingLog
 ): Promise<{ esUrl: string; username: string; password: string }> {
-  const configuredUrl = new URL(configuredEsUrl);
-  const isLocalhost =
-    configuredUrl.hostname === 'localhost' || configuredUrl.hostname === '127.0.0.1';
+  const targetEsUrl = String(flags['es-url'] || configuredEsUrl);
+  const { protocol, hostname } = new URL(targetEsUrl);
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
   const esUrls =
-    !flags['es-url'] && configuredUrl.protocol === 'http:' && isLocalhost
-      ? [configuredEsUrl, withSwitchedProtocol(configuredEsUrl)]
-      : [String(flags['es-url'] || configuredEsUrl)];
+    !flags['es-url'] && protocol === 'http:' && isLocalhost
+      ? [targetEsUrl, withSwitchedProtocol(targetEsUrl)]
+      : [targetEsUrl];
   const usernames = flags['es-username']
     ? [String(flags['es-username'])]
     : DEFAULT_CREDENTIALS.map(({ username }) => username);
