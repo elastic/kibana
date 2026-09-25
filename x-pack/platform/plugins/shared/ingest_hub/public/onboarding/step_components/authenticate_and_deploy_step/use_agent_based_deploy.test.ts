@@ -85,13 +85,14 @@ function makeFlowMock({
   agentPolicyId = 'existing-policy-id',
   agentHostsMode = 'existing' as const,
   policyIdsByInstance = {} as Record<string, string>,
+  onboardingDeploymentId = undefined as string | undefined,
 } = {}) {
   const updateDetectAndReviewStep = jest.fn();
   const removeDeployInstances = jest.fn();
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
     authenticateAndDeployStep: {},
-    detectAndReviewStep: { policyIdsByInstance },
+    detectAndReviewStep: { policyIdsByInstance, onboardingDeploymentId },
     updateDetectAndReviewStep,
     removeDeployInstances,
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
@@ -249,9 +250,14 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     expect(mockUpdateDeployment).toHaveBeenCalledWith('so-id-existing', expect.any(Object));
   });
 
-  it('does not create a second SO on retry', async () => {
+  it('does not create a second SO on retry when an ID already exists', async () => {
     mockCreateDeployment.mockResolvedValue('so-id-retry');
-    makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: { serviceA: 'pkg-A' } });
+    // onboardingDeploymentId already set — create must be skipped regardless of isRetry.
+    makeFlowMock({
+      agentHostsMode: 'existing',
+      policyIdsByInstance: { serviceA: 'pkg-A' },
+      onboardingDeploymentId: 'existing-so-id',
+    });
     mockBuildAgentBasedTargets.mockReturnValue([groupA]);
     mockDeployToExistingAgentPolicies.mockResolvedValue({
       packagePolicyIdsByInstance: {},
@@ -261,12 +267,33 @@ describe('useAgentBasedDeploy — SO persistence', () => {
 
     const { result } = renderHook(() => useAgentBasedDeploy());
     await act(async () => {
-      // Retry call — isRetry is true, so SO create must be skipped.
       await result.current.handleDeploy(['serviceA']);
     });
 
     expect(mockCreateDeployment).not.toHaveBeenCalled();
     expect(mockPersistDeploymentId).not.toHaveBeenCalled();
+  });
+
+  it('creates SO on retry when initial create failed (no onboardingDeploymentId)', async () => {
+    // If the first deploy attempt's SO create returned null and the deploy failed,
+    // a retry must still be able to create the record so the successful Fleet result has a
+    // durable home. The !onboardingDeploymentId guard is sufficient; !isRetry would block this.
+    mockCreateDeployment.mockResolvedValue('so-id-retry-recovery');
+    makeFlowMock({ agentHostsMode: 'existing', policyIdsByInstance: {} });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy(['serviceA']);
+    });
+
+    expect(mockCreateDeployment).toHaveBeenCalledTimes(1);
+    expect(mockPersistDeploymentId).toHaveBeenCalledWith('so-id-retry-recovery');
   });
 
   it('continues deploy even when SO create fails (createDeployment returns null)', async () => {
@@ -755,7 +782,12 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
 
   it('cleanup-only path: refreshes SO with current services so removed service is not restored on resume', async () => {
     mockCreateDeployment.mockResolvedValue('so-id-cleanup');
-    mockCleanupAgentBasedPolicies.mockResolvedValue({ toDelete: ['pkg-policy-A'], toUpdate: [] });
+    // Both pkg-policy-A (explicit pendingCleanupPolicyIds) and pkg-policy-B (live-stale from instB
+    // being in policyIdsByInstance but not in active targets) must succeed for the SO to be updated.
+    mockCleanupAgentBasedPolicies.mockResolvedValue({
+      toDelete: ['pkg-policy-A', 'pkg-policy-B'],
+      toUpdate: [],
+    });
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['svcB'] },
       authenticateAndDeployStep: {},

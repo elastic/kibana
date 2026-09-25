@@ -216,10 +216,18 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         if (targetsToDeploy.length === 0) {
           setIsDeploying(false);
           updateDetectAndReviewStep({ isDeploying: false });
-          // Only refresh the SO services list when all cleanup succeeded (remainingPending is
-          // empty). If some cleanup failed, preserve the full service list so a resume can retry
-          // the failed deletion rather than losing the pending cleanup target permanently.
-          if (onboardingDeploymentId && Object.keys(remainingPending).length === 0) {
+          // Only refresh the SO services list when ALL cleanup succeeded — both explicit
+          // pendingCleanupPolicyIds (Step 4 deselections) AND live-stale entries (Step 1
+          // deselections). A failed live-stale cleanup is not tracked in remainingPending, so
+          // check that every live-stale instance was actually cleaned (i.e., all are in cleanedLiveStale).
+          const allLiveStaleSucceeded = Object.keys(liveStalePolicyIds).every((id) =>
+            cleanedLiveStale.includes(id)
+          );
+          if (
+            onboardingDeploymentId &&
+            Object.keys(remainingPending).length === 0 &&
+            allLiveStaleSucceeded
+          ) {
             await updateDeployment(onboardingDeploymentId, {
               services: selectedServiceIds,
               serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
@@ -233,10 +241,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           return { failed: false };
         }
 
-        // ── SO create (initial deploy only, best-effort) ──────────────────────
-        // Mirror the managed-integration guard: !isRetry && !onboardingDeploymentId avoids
-        // creating a second SO on Back→Next re-entry and on retry.
-        if (!isRetry && !onboardingDeploymentId) {
+        // ── SO create (best-effort, skipped when an ID already exists) ──────────
+        // !onboardingDeploymentId is the only guard needed: it prevents double-creation on
+        // Back→Next re-entry (id set from prior deploy) and on retry when the first deploy
+        // succeeded in creating the record. Intentionally NOT guarded on !isRetry: if the
+        // initial SO create failed (returned null) and the deploy then failed, a retry must
+        // still be able to create the record so the successful Fleet result has a durable home.
+        if (!onboardingDeploymentId) {
           onboardingDeploymentId =
             (await createDeployment({
               provider: 'aws',
@@ -332,10 +343,14 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               ([id]) => !cleanedLiveStale.includes(id)
             )
           );
-          // Only persist the reduced services list when all cleanup succeeded. If cleanup partially
-          // failed, remainingPending is non-empty and the old services must be kept so a resume can
-          // retry the failed cleanup rather than losing the pending target permanently.
-          const cleanupFullySucceeded = Object.keys(remainingPending).length === 0;
+          // Only persist the reduced services list when all cleanup succeeded — both explicit
+          // pendingCleanupPolicyIds and live-stale entries (Step 1 deselections). A failed
+          // live-stale cleanup is not tracked in remainingPending, so check both.
+          const allLiveStaleSucceededInDeploy = Object.keys(liveStalePolicyIds).every((id) =>
+            cleanedLiveStale.includes(id)
+          );
+          const cleanupFullySucceeded =
+            Object.keys(remainingPending).length === 0 && allLiveStaleSucceededInDeploy;
           await updateDeployment(onboardingDeploymentId, {
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
             packagePolicyIds: [...new Set(Object.values({ ...priorIds, ...policyIdsByInstance }))],
@@ -344,6 +359,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             // Without this, agent-based PUTs using assume_role are rejected by the handler, and
             // static_keys PUTs succeed but hydrate back into managed_integration mode on resume.
             mechanisms: ['agent_based'],
+            // Clear the connectorId when reusing an MI-created record. MI creates with a connector
+            // association; agent-based never uses one. If not cleared, the agent-based record remains
+            // returned for the unrelated cloud connector (getByConnectorId), matching MI→ECF behavior.
+            connectorId: null,
             // Refresh authMethod so a credential-method change between deploys (Back→change→Next)
             // is reflected on resume rather than presenting the original method's form.
             authMethod: toSOAuthMethod(agentCredentialMethod),
@@ -426,6 +445,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               string,
               Record<string, unknown>
             >,
+            // Mirror the success-path update: keep mechanisms and connectorId consistent so an
+            // MI-created record that was switched to agent-based doesn't resume as MI after an
+            // unexpected throw (the handler rejects assume_role against stored MI mechanisms).
+            mechanisms: ['agent_based'],
+            connectorId: null,
             authMethod: toSOAuthMethod(agentCredentialMethod),
             status: 'failed',
           });
