@@ -107,7 +107,6 @@ export class DataFederationPage {
   }: {
     name: string;
     description: string;
-    region: string;
     accessKey: string;
     secretKey: string;
   }): Promise<void> {
