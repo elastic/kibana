@@ -7,6 +7,7 @@
 
 import { createConversationAlreadyExistsError } from '@kbn/agent-builder-common';
 import { buildHuntInvestigationConversationId } from '../../services/watches/hunt/common/hunt_investigation_id';
+import { HUNT_INVESTIGATION_TEMPLATE_ID } from '../../conversation_templates/hunt_investigation';
 import { runFindOrCreateInvestigation } from './run_find_or_create_investigation';
 import type { FindOrCreateConversationClient } from './run_find_or_create_investigation';
 
@@ -29,7 +30,7 @@ describe('runFindOrCreateInvestigation', () => {
 
     expect(output).toEqual({ investigationConversationId: conversationId });
     expect(conversationClient.create).toHaveBeenCalledWith(
-      expect.objectContaining({ id: conversationId, rounds: [] })
+      expect.objectContaining({ id: conversationId, templateId: HUNT_INVESTIGATION_TEMPLATE_ID })
     );
     expect(conversationClient.get).not.toHaveBeenCalled();
   });

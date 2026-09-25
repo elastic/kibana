@@ -11,18 +11,21 @@ import {
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
 import { buildHuntInvestigationConversationId } from '../../services/watches/hunt/common/hunt_investigation_id';
+import { HUNT_INVESTIGATION_TEMPLATE_ID } from '../../conversation_templates/hunt_investigation';
 import type { FindOrCreateInvestigationOutput } from '../../../common/step_types/find_or_create_investigation';
 
 /**
- * Narrow slice of `ConversationClient` this step needs, kept separate from the real
- * type so the business logic below is testable without mocking the full client.
+ * Narrow slice of `ConversationPublicClient` this step needs (the client actually
+ * injected at the call site is the public, camelCase wrapper, not the internal
+ * snake_case `ConversationClient`), kept separate from the real type so the
+ * business logic below is testable without mocking the full client.
  */
 export interface FindOrCreateConversationClient {
   create: (request: {
     id: string;
-    agent_id: string;
+    agentId: string;
     title: string;
-    rounds: [];
+    templateId: string;
   }) => Promise<unknown>;
   get: (conversationId: string) => Promise<unknown>;
 }
@@ -47,9 +50,9 @@ export const runFindOrCreateInvestigation = async (
   try {
     await conversationClient.create({
       id: investigationConversationId,
-      agent_id: agentBuilderDefaultAgentId,
+      agentId: agentBuilderDefaultAgentId,
       title: `${DEFAULT_CONVERSATION_TITLE}: Hunt Watch ${reportId}`,
-      rounds: [],
+      templateId: HUNT_INVESTIGATION_TEMPLATE_ID,
     });
   } catch (error) {
     if (!isConversationAlreadyExistsError(error)) {
