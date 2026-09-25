@@ -81,7 +81,9 @@ describe('MappingEditor', () => {
             value={value}
             onChange={(next) =>
               setValue((prev) =>
-                typeof next === 'function' ? (next as (p: MappingEditorValue) => MappingEditorValue)(prev) : next
+                typeof next === 'function'
+                  ? (next as (p: MappingEditorValue) => MappingEditorValue)(prev)
+                  : next
               )
             }
             docLinks={docLinksMock}
