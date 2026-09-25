@@ -56,8 +56,8 @@ export const createThreatIntelRuntime = (): ThreatIntelRuntime => ({
  * Threat-intel supply shares AlertZero's soft-enable switch
  * (`xpack.alertzero.enabled`). Missing or disabled AlertZero means supply stays off.
  */
-export const isThreatIntelSupplyEnabled = (alertzero?: { enabled: boolean }): boolean =>
-  alertzero?.enabled === true;
+export const isThreatIntelSupplyEnabled = (alertzero?: { isEnabled: boolean }): boolean =>
+  alertzero?.isEnabled === true;
 
 export const setupThreatIntel = ({
   alertZeroEnabled,
