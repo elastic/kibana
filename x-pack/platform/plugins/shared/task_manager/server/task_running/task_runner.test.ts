@@ -19,7 +19,13 @@ import {
 import type { TaskEvent, TaskRun } from '../task_events';
 import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
 import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
-import { getDeleteTaskRunResult, TaskStatus, TaskCost, InstanceTaskCost } from '../task';
+import {
+  getDeleteTaskRunResult,
+  getYieldTaskRunResult,
+  TaskStatus,
+  TaskCost,
+  InstanceTaskCost,
+} from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import type { TaskDefinitionRegistry } from '../task_type_dictionary';
@@ -812,6 +818,116 @@ describe('TaskManagerRunner', () => {
       });
 
       expect(getNextRunAtSpy).not.toHaveBeenCalled();
+    });
+
+    test('keeps an ad-hoc task that yields, resets attempts, and stores the handed-off params', async () => {
+      const onTaskEvent = jest.fn();
+      const yielded = getYieldTaskRunResult({
+        state: { phase: 'resume' },
+        params: { step: 2 },
+        delay: '5m',
+      });
+      const { instance, runner, store, usageCounter } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          attempts: 3,
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return yielded;
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(store.remove).not.toHaveBeenCalled();
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runAt: yielded.runAt,
+          state: { phase: 'resume' },
+          params: { step: 2 },
+          attempts: 0,
+          status: TaskStatus.Idle,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        }),
+        {
+          validate: true,
+          doc: instance,
+        }
+      );
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'taskManagerTaskYielded',
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(
+          asTaskRunEvent(
+            instance.id,
+            asOk({
+              task: instance,
+              persistence: TaskPersistence.NonRecurring,
+              result: TaskRunResult.SuccessRescheduled,
+              isExpired: false,
+            })
+          )
+        )
+      );
+    });
+
+    test('treats a yield from a recurring task as a failed run and keeps the schedule', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const { runner, store, logger } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          schedule: { interval: '20m' },
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return getYieldTaskRunResult({ state: { phase: 'resume' } });
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      // the task survives and stays on its 20m schedule
+      expect(store.remove).not.toHaveBeenCalled();
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: TaskStatus.Idle,
+          schedule: { interval: '20m' },
+        }),
+        expect.anything()
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('yield is only supported for ad-hoc tasks'),
+        expect.anything()
+      );
+      // the run is reported as failed
+      const event = onTaskEvent.mock.calls
+        .map(([taskEvent]: [TaskEvent<unknown, unknown>]) => taskEvent)
+        .find((taskEvent) => taskEvent.id === id) as TaskRun;
+      expect(event.event.tag).toBe('err');
     });
 
     test('reschedules tasks that return a schedule', async () => {
