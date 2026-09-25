@@ -74,7 +74,7 @@ export class RelayClient implements RelayClientContract {
   private readonly getSystemIdentity: RelayClientOptions['getSystemIdentity'];
 
   /** `xpack.actions.relay.uiam.enabled`. */
-  get uiamEnabled(): boolean {
+  public get uiamEnabled(): boolean {
     return this.useSystemIdentity;
   }
 
