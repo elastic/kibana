@@ -8,6 +8,7 @@
  */
 
 import type { Download } from 'playwright-core';
+import { euiSelectors } from '../eui_components';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
@@ -42,9 +43,6 @@ export class DashboardApp {
   private readonly dashboardViewport;
   private readonly editInDiscoverLink;
   private readonly embeddablePanel;
-  private readonly controlsGroup;
-  private readonly controlFrame;
-  private readonly optionsListControlSearchInput;
   private readonly tryEsqlLink;
 
   // Add panel flow
@@ -100,11 +98,6 @@ export class DashboardApp {
       'discoverEmbeddableInlineEditEditInDiscoverLink'
     );
     this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
-    this.controlsGroup = this.page.testSubj.locator('controls-group-wrapper');
-    this.controlFrame = this.page.testSubj.locator('control-frame');
-    this.optionsListControlSearchInput = this.page.testSubj.locator(
-      'optionsList-control-search-input'
-    );
     this.tryEsqlLink = this.page.testSubj.locator('tryESQLLink');
 
     // Add panel flow
@@ -362,8 +355,8 @@ export class DashboardApp {
   async closeLibraryFlyout() {
     await expect(this.savedObjectsFinderTable).toBeVisible();
     await this.page
-      .locator('.euiFlyout', { has: this.savedObjectsFinderTable })
-      .locator('[data-test-subj="euiFlyoutCloseButton"]')
+      .locator(euiSelectors.flyout.ROOT_SELECTOR, { has: this.savedObjectsFinderTable })
+      .locator(`[data-test-subj="${euiSelectors.flyout.CLOSE_BUTTON_TEST_SUBJ}"]`)
       .click();
     await expect(this.savedObjectsFinderTable).toBeHidden();
   }
@@ -540,46 +533,8 @@ export class DashboardApp {
     return visibilities.filter(Boolean).length;
   }
 
-  getControlsGroupLocator() {
-    return this.controlsGroup;
-  }
-
-  getControlFramesLocator() {
-    return this.controlFrame;
-  }
-
   getDashboardControlsLocator() {
     return this.dashboardViewport.locator('[data-control-id]');
-  }
-
-  getControlFrameLocator(controlId: string) {
-    return this.getControlFramesLocator()
-      .locator(`[data-control-id='${controlId}']`)
-      .locator('xpath=ancestor::*[@data-test-subj="control-frame"][1]');
-  }
-
-  async getControlIds() {
-    await this.getControlFramesLocator().evaluateAll((frames) => {
-      if (!frames.length) {
-        throw new Error('No control frames found');
-      }
-    });
-
-    return this.getControlFramesLocator()
-      .locator('[data-control-id]')
-      .evaluateAll((controls) => {
-        return controls.map((control) => control.getAttribute('data-control-id') ?? '');
-      });
-  }
-
-  async getOnlyControlId() {
-    const controlIds = await this.getControlIds();
-
-    if (controlIds.length !== 1 || !controlIds[0]) {
-      throw new Error(`Expected exactly one control id, got: ${controlIds.join(', ')}`);
-    }
-
-    return controlIds[0];
   }
 
   /**
@@ -594,61 +549,6 @@ export class DashboardApp {
     }
 
     return controlId;
-  }
-
-  /**
-   * Gets the count of dashboard controls
-   */
-  async getControlCount(): Promise<number> {
-    return this.getControlFramesLocator().count();
-  }
-
-  async removeControl(controlId: string) {
-    const controlFrame = this.getControlFrameLocator(controlId);
-    await controlFrame.locator(`[data-control-id='${controlId}']`).hover();
-
-    const hoverActions = controlFrame.getByTestId(`hover-actions-${controlId}`);
-    await hoverActions.waitFor({ state: 'visible' });
-
-    const deleteAction = hoverActions.getByTestId('embeddablePanelAction-deletePanel');
-    await deleteAction.waitFor({ state: 'visible' });
-    await deleteAction.click();
-  }
-
-  async optionsListOpenPopover(controlId: string) {
-    await this.page.testSubj.locator(`optionsList-control-${controlId}`).click();
-    await this.optionsListControlSearchInput.waitFor({ state: 'visible' });
-  }
-
-  async optionsListPopoverSelectOption(availableOption: string) {
-    await this.optionsListControlSearchInput.fill(availableOption);
-
-    const option = this.page.testSubj.locator(`optionsList-control-selection-${availableOption}`);
-    await option.click();
-  }
-
-  /**
-   * Closes the options-list popover if it is open, and waits for it to disappear.
-   *
-   * Dismisses with Escape rather than by toggling the control button: selecting an option
-   * re-renders the control, so a click aimed at the button can land on a detached node and
-   * leave the popover open.
-   */
-  async optionsListEnsurePopoverIsClosed() {
-    if (await this.optionsListControlSearchInput.isVisible()) {
-      await this.page.keyboard.press('Escape');
-      await this.optionsListControlSearchInput.waitFor({ state: 'hidden' });
-    }
-  }
-
-  /**
-   * Locator for the selected-options label of an options-list control, e.g. `AE`
-   * for a single selection or `AE, CN` for multiple.
-   */
-  getOptionsListSelectionsLocator(controlId: string) {
-    return this.page.testSubj
-      .locator(`optionsList-control-${controlId}`)
-      .getByTestId('optionsListSelections');
   }
 
   async getSavedSearchRowCount(): Promise<number> {

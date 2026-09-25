@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiBadge,
@@ -20,12 +20,13 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
+  EuiSplitPanel,
   EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTextColor,
+  EuiTitle,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -63,6 +64,7 @@ import {
   SignificantEventsTuningConfigEditor,
   configToAnnotatedYaml,
 } from './significant_events_tuning_config_editor';
+import { DeveloperModeBadge } from '../../../../components/developer_mode_badge/developer_mode_badge';
 import { AppsSection } from './apps_section';
 import { MaintenanceSection } from './maintenance_section';
 import { StaleEventCleanupSection } from './stale_event_cleanup_section';
@@ -180,11 +182,19 @@ export function SettingsTab() {
     useState<SignificantEventsTuningConfig | null>(null);
   const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
 
+  useEffect(() => {
+    if (!isDeveloperMode && !isDeveloperModeSaving) {
+      setDraftConfigYaml(savedConfigYamlState);
+      setParsedTuningConfig(null);
+    }
+  }, [isDeveloperMode, isDeveloperModeSaving, savedConfigYamlState]);
+
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirmingZeroMatch, setIsConfirmingZeroMatch] = useState(false);
   const zeroMatchConfirmModalTitleId = useGeneratedHtmlId({ prefix: 'zeroMatchConfirmModalTitle' });
 
-  const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
+  const hasTuningConfigChanges =
+    isDeveloperMode && !isDeveloperModeSaving && draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
     canEditSettings &&
     (indexPatterns !== savedIndexPatterns ||
@@ -221,7 +231,13 @@ export function SettingsTab() {
         await scheduledDiscovery.save();
       }
 
-      if (canEditSettings && hasTuningConfigChanges && parsedTuningConfig) {
+      if (
+        canEditSettings &&
+        isDeveloperMode &&
+        !isDeveloperModeSaving &&
+        hasTuningConfigChanges &&
+        parsedTuningConfig
+      ) {
         const fullConfig = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
         await core.settings.globalClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -253,6 +269,8 @@ export function SettingsTab() {
     hasTuningConfigChanges,
     parsedTuningConfig,
     canEditSettings,
+    isDeveloperMode,
+    isDeveloperModeSaving,
   ]);
 
   const handleSave = useCallback(() => {
@@ -314,25 +332,23 @@ export function SettingsTab() {
 
       <StaleEventCleanupSection canManage={canManage} />
 
-      <CostEstimate />
-
       <EuiSpacer />
 
       <RunLimitsSection />
 
       <EuiSpacer />
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
+      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.llmSectionTitle', {
                 defaultMessage: 'LLM selection',
               })}
             </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <EuiText size="s">
             <p>
               {i18n.translate('xpack.significantEventsApp.settings.modelSettingsDescription', {
@@ -355,34 +371,34 @@ export function SettingsTab() {
               </EuiLink>
             </>
           )}
-        </EuiPanel>
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       <EuiSpacer />
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
+      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.scheduledDiscoveryTitle', {
                 defaultMessage: 'Scheduled discovery',
               })}
             </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem>
-                  <EuiText size="m">
+                  <EuiTitle size="xxs">
                     <h4>
                       {i18n.translate(
                         'xpack.significantEventsApp.settings.scheduledDiscoveryLabel',
                         { defaultMessage: 'Scheduled discovery' }
                       )}
                     </h4>
-                  </EuiText>
+                  </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
@@ -578,33 +594,33 @@ export function SettingsTab() {
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       <EuiSpacer />
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
+      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.dataSourcesSectionTitle', {
                 defaultMessage: 'Data sources',
               })}
             </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem>
-                  <EuiText size="m">
+                  <EuiTitle size="xxs">
                     <h4>
                       {i18n.translate('xpack.significantEventsApp.settings.indexPatternsLabel', {
                         defaultMessage: 'Index patterns',
                       })}
                     </h4>
-                  </EuiText>
+                  </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
@@ -668,34 +684,34 @@ export function SettingsTab() {
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       <EuiSpacer />
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
+      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.continuousKiOnboardingTitle', {
                 defaultMessage: 'Continuous KI onboarding',
               })}
             </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem>
-                  <EuiText size="m">
+                  <EuiTitle size="xxs">
                     <h4>
                       {i18n.translate(
                         'xpack.significantEventsApp.settings.continuousKiOnboardingLabel',
                         { defaultMessage: 'Automatic onboarding' }
                       )}
                     </h4>
-                  </EuiText>
+                  </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
@@ -802,34 +818,33 @@ export function SettingsTab() {
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       <EuiSpacer />
 
-      <EuiPanel
-        hasBorder={true}
+      <EuiSplitPanel.Outer
+        hasBorder
         hasShadow={false}
-        paddingSize="none"
-        grow={false}
+        css={{ flexShrink: 0 }}
         data-test-subj="nightshiftDeveloperModeSection"
       >
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.developerModeTitle', {
-                defaultMessage: 'Developer mode',
+                defaultMessage: 'Nightshift developer mode',
               })}
             </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
                   defaultMessage:
-                    'Unlocks extra Nightshift Management surfaces in this Kibana space. Changes take effect immediately.',
+                    'Show extra tabs, details, and configuration options for expert users.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -840,79 +855,102 @@ export function SettingsTab() {
                     data-test-subj="nightshiftDeveloperModeSwitch"
                     label={i18n.translate(
                       'xpack.significantEventsApp.settings.developerModeToggleSwitch',
-                      { defaultMessage: 'Enable developer mode' }
+                      {
+                        defaultMessage: 'Enable Nightshift developer mode',
+                      }
                     )}
                     checked={isDeveloperMode}
                     onChange={(e) => {
                       void setDeveloperMode(e.target.checked);
                     }}
-                    disabled={!canSaveAdvancedSettings || isDeveloperModeSaving}
+                    disabled={!canSaveAdvancedSettings || isDeveloperModeSaving || isSaving}
                   />
                 </EuiFormRow>
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
-      <EuiSpacer />
+      {isDeveloperMode && <CostEstimate />}
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <h3>
-                  {i18n.translate('xpack.significantEventsApp.settings.tuningTitle', {
-                    defaultMessage: 'Significant Events tuning',
-                  })}
-                </h3>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="significantEventsAppSettingsTabResetToDefaultsButton"
+      {isDeveloperMode && !isDeveloperModeSaving && (
+        <>
+          <EuiSpacer />
+
+          <EuiSplitPanel.Outer
+            hasBorder
+            hasShadow={false}
+            css={{ flexShrink: 0 }}
+            data-test-subj="nightshiftSettingsTuningPanel"
+          >
+            <EuiSplitPanel.Inner color="subdued">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <DeveloperModeBadge />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h3>
+                          {i18n.translate('xpack.significantEventsApp.settings.tuningTitle', {
+                            defaultMessage: 'Significant Events tuning',
+                          })}
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="significantEventsAppSettingsTabResetToDefaultsButton"
+                    size="s"
+                    iconType="refresh"
+                    isDisabled={!canEditSettings}
+                    onClick={() => {
+                      const defaultYaml = configToAnnotatedYaml(
+                        DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
+                      );
+                      setDraftConfigYaml(defaultYaml);
+                      setParsedTuningConfig(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
+                    }}
+                  >
+                    {i18n.translate('xpack.significantEventsApp.settings.resetToDefaults', {
+                      defaultMessage: 'Reset to defaults',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner>
+              <EuiCallOut
+                announceOnMount
                 size="s"
-                iconType="refresh"
-                isDisabled={!canEditSettings}
-                onClick={() => {
-                  const defaultYaml = configToAnnotatedYaml(
-                    DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
-                  );
-                  setDraftConfigYaml(defaultYaml);
-                  setParsedTuningConfig(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
-                }}
-              >
-                {i18n.translate('xpack.significantEventsApp.settings.resetToDefaults', {
-                  defaultMessage: 'Reset to defaults',
+                color="warning"
+                iconType="warning"
+                title={i18n.translate('xpack.significantEventsApp.settings.tuningInfo', {
+                  defaultMessage:
+                    'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior. Changes take effect on the next run.',
                 })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            iconType="warning"
-            title={i18n.translate('xpack.significantEventsApp.settings.tuningInfo', {
-              defaultMessage:
-                'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior. Changes take effect on the next run.',
-            })}
-          />
-          <EuiSpacer size="m" />
-          <SignificantEventsTuningConfigEditor
-            value={draftConfigYaml}
-            isReadOnly={!canEditSettings}
-            onChange={(yaml, parsed) => {
-              setDraftConfigYaml(yaml);
-              setParsedTuningConfig(parsed);
-            }}
-          />
-        </EuiPanel>
-      </EuiPanel>
+              />
+              <EuiSpacer size="m" />
+              <SignificantEventsTuningConfigEditor
+                value={draftConfigYaml}
+                isReadOnly={!canEditSettings}
+                onChange={(yaml, parsed) => {
+                  setDraftConfigYaml(yaml);
+                  setParsedTuningConfig(parsed);
+                }}
+              />
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+        </>
+      )}
 
       {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
+
+      <EuiSpacer />
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal
@@ -972,6 +1010,7 @@ export function SettingsTab() {
                       isLoading={isSaving}
                       isDisabled={
                         !canEditSettings ||
+                        isDeveloperModeSaving ||
                         saveBlockedByPause ||
                         (hasTuningConfigChanges && parsedTuningConfig === null)
                       }

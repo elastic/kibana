@@ -72,11 +72,13 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
     lastAckAction: (row.flattened.last_ack_action as string | undefined) ?? null,
     lastAssigneeUid: (row.flattened.last_assignee_uid as string | undefined) ?? null,
     lastAckActor: (row.flattened.last_ack_actor as string | undefined) ?? null,
+    lastDeactivateAction: null,
+    lastDeactivateActor: null,
   };
 
   const groupAction: EpisodeStatusGroupAction = {
     lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
-    snoozeExpiry: (row.flattened.snooze_expiry as string | undefined) ?? null,
+    snoozedUntil: (row.flattened.snoozed_until as string | undefined) ?? null,
   };
 
   return (

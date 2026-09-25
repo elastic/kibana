@@ -28,7 +28,7 @@ const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null)
 
 /**
  * Provides `ChromeComponentsDeps` to all context-aware Chrome components
- * (`ClassicHeader`, `ChromeNextGlobalHeader`, `GridLayoutProjectSideNav`,
+ * (`ClassicHeader`, `ChromeHeader`, `GridLayoutProjectSideNav`,
  * `HeaderTopBanner`, `ChromelessHeader`, `Sidebar`).
  *
  * The layout layer passes whole service contracts (narrowed via `Pick`) and wraps the

@@ -35,7 +35,7 @@ const rootCss = css`
   min-inline-size: 0;
 `;
 
-const toOutcomeParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
+const toOutcomesParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
   filter === 'all' ? undefined : [filter];
 
 interface Props {
@@ -56,24 +56,24 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
   const trimmedSearch = search.trim();
   const searchParam = trimmedSearch.length > 0 ? trimmedSearch : undefined;
   const ruleIdsParam = ruleFilters.length > 0 ? ruleFilters.map((r) => r.id) : undefined;
-  const outcomeParam = toOutcomeParam(outcome);
+  const outcomesParam = toOutcomesParam(outcome);
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
     perPage,
     search: searchParam,
     ruleIds: ruleIdsParam,
-    outcome: outcomeParam,
+    outcomes: outcomesParam,
   });
 
   const { data: newCountData } = useCountNewActionPolicyExecutions({
     since: lastSeenAt,
     search: searchParam,
     ruleIds: ruleIdsParam,
-    outcome: outcomeParam,
+    outcomes: outcomesParam,
     enabled: !isError,
   });
-  const newEventsCount = newCountData?.total_events ?? 0;
+  const newEventsCount = newCountData?.total ?? 0;
 
   // Once the list refetch settles, hide the banner by advancing the lastSeenAt anchor.
   useEffect(() => {
@@ -111,7 +111,7 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
   };
 
   const items = data?.items ?? [];
-  const totalEvents = data?.total_events ?? 0;
+  const total = data?.total ?? 0;
   const showBanner = newEventsCount > 0 && !isError;
   const isFiltered =
     searchParam !== undefined || ruleFilters.length > 0 || outcome !== DEFAULT_OUTCOME;
@@ -157,7 +157,7 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
         loading={isFetching}
         page={page}
         perPage={perPage}
-        total={totalEvents}
+        total={total}
         onChangePage={onChangePage}
         onChangeItemsPerPage={onChangeItemsPerPage}
         onPolicyClick={onPolicyClick}

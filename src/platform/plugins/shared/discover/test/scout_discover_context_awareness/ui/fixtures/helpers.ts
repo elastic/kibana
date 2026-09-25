@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { euiSelectors } from '@kbn/scout';
 import kbnRison from '@kbn/rison';
 import type { DataGrid, ScoutPage } from '@kbn/scout';
 import type { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
@@ -142,7 +143,9 @@ async function waitForSurroundingDocs(page: ScoutPage) {
  */
 export function getGridColumnIds(page: ScoutPage): Promise<string[]> {
   return page
-    .locator('.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn)')
+    .locator(
+      `${euiSelectors.dataGrid.HEADER_CELL_SELECTOR}:not(${euiSelectors.dataGrid.HEADER_CELL_SELECTOR}--controlColumn)`
+    )
     .evaluateAll((cells) =>
       cells.map((cell) => cell.getAttribute('data-gridcell-column-id') ?? '')
     );
