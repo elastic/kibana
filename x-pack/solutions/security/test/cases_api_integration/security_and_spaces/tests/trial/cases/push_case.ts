@@ -515,21 +515,17 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/157588
-      describe.skip('user profile uid', () => {
+      describe('user profile uid', () => {
         let headers: Record<string, string>;
         let superUserWithProfile: User;
-        let superUserInfo: User;
 
         before(async () => {
-          ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
-            getService
-          ));
+          ({ headers, superUserWithProfile } = await setupSuperUserProfile(getService));
         });
 
         it('sets the closed by profile uid in the case and comment', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
-            supertest: supertestWithoutAuth,
+            supertest,
             serviceNowSimulatorURL,
             actionsRemover,
             auth: null,
@@ -560,11 +556,12 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(pushedComment.pushed_by).to.eql(superUserWithProfile);
         });
 
-        it('falls back to authc to get the user information when the profile uid is not available', async () => {
+        it('sets the pushed by profile uid when authenticating without a session', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
-            supertest: supertestWithoutAuth,
+            supertest,
             serviceNowSimulatorURL,
             actionsRemover,
+            auth: { user: superUser, space: null },
           });
 
           const patchedCase = await createComment({
@@ -585,8 +582,8 @@ export default ({ getService }: FtrProviderContext): void => {
             commentId: patchedCase.comments![0].id,
           });
 
-          expect(theCase.external_service?.pushed_by).to.eql(superUserInfo);
-          expect(pushedComment.pushed_by).to.eql(superUserInfo);
+          expect(theCase.external_service?.pushed_by).to.eql(superUserWithProfile);
+          expect(pushedComment.pushed_by).to.eql(superUserWithProfile);
         });
       });
 

@@ -31,6 +31,7 @@ import {
   updateCase,
   deleteCases,
   deleteAllCaseAnalyticsItems,
+  elasticUserProfileId,
 } from '../../../../../common/lib/api';
 import {
   getPostCaseRequest,
@@ -47,8 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  // FLAKY: https://github.com/elastic/kibana/issues/243870
-  describe.skip('analytics indexes backfill task', () => {
+  describe('analytics indexes backfill task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
           created_by: {
             email: null,
             full_name: null,
-            profile_uid: null,
+            profile_uid: elasticUserProfileId,
             username: 'elastic',
           },
           custom_fields: [
@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runAttachmentsBackfillTask(supertest);
+      await runAttachmentsBackfillTask(supertest, 'space1');
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
@@ -253,6 +253,7 @@ export default ({ getService }: FtrProviderContext): void => {
           created_by: {
             email: null,
             full_name: null,
+            profile_uid: elasticUserProfileId,
             username: 'elastic',
           },
           owner: 'securitySolution',
