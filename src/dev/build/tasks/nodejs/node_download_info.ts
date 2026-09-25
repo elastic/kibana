@@ -13,7 +13,8 @@ import type { Config, Platform } from '../../lib';
 
 /** Official Node 24 shipped as `node/default` and `node/pointer-compression` on serverless Linux. */
 export const SERVERLESS_NODE_24_VERSION = '24.21.0';
-/** Custom Node 26 pointer-compression tree: `node/node-26-pointer-compression`. */
+/** Custom heap-labels Node shipped under `node/node-26-pointer-compression`. */
+export const SERVERLESS_NODE_26_PC_VERSION = '26.8.1';
 export const SERVERLESS_NODE_26_PC_VARIANT = 'node-26-pointer-compression';
 
 interface NodeDownloadSpec {
@@ -41,7 +42,10 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
       specs.length = 0;
       specs.push({ version: SERVERLESS_NODE_24_VERSION, variant: 'default' });
       specs.push({ version: SERVERLESS_NODE_24_VERSION, variant: 'pointer-compression' });
-      specs.push({ version, variant: SERVERLESS_NODE_26_PC_VARIANT });
+      specs.push({
+        version: SERVERLESS_NODE_26_PC_VERSION,
+        variant: SERVERLESS_NODE_26_PC_VARIANT,
+      });
     }
     // Experiment: no glibc-217 build exists for the patched 26.8.1, so only the
     // default Linux variant is bundled. The launcher falls back to glibc-217
