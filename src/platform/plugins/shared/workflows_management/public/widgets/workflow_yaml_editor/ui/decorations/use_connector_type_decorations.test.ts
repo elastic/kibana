@@ -30,6 +30,7 @@ const mockRegisteredStepDefinitions = new Map<string, { id: string }>([
 ]);
 
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
   getBuiltInStepStability: jest.fn().mockReturnValue(undefined),
 }));

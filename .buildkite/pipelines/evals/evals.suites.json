@@ -141,18 +141,17 @@
       "id": "nightshift-investigations",
       "name": "Nightshift Investigations",
       "slackChannel": "#nightshift-alerts",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "serverConfigSet": "evals_nightshift_investigations",
+      "scoutHook": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh",
       "tags": [
-        "platform",
+        "observability",
         "nightshift-investigations"
       ],
       "ciLabels": [
         "evals:nightshift-investigations"
       ],
-      "stepTimeoutInMinutes": 60,
-      "defaultModelGroups": [
-        "eis/anthropic-claude-4.5-haiku"
-      ]
+      "stepTimeoutInMinutes": 60
     },
     {
       "id": "llm-tasks",
@@ -460,6 +459,20 @@
         "evals:detection-watch-rule-creation"
       ],
       "serverConfigSet": "evals_detection_watch_rule_creation"
+    },
+    {
+      "id": "security-attack-discovery-fp-tp",
+      "name": "Attack Discovery FP/TP Analysis",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:security-attack-discovery-fp-tp"
+      ],
+      "serverConfigSet": "evals_attack_discovery_fp_tp"
     },
     {
       "id": "skill-selection-benchmark",

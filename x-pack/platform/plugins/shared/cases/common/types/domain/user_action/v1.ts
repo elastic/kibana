@@ -34,6 +34,7 @@ import { CustomFieldsUserActionRt } from './custom_fields/v1';
 import { ObservablesUserActionRt } from './observables/v1';
 import { ExtendedFieldsUserActionRt } from './extended_fields/v1';
 import { TemplateUserActionRt } from './template/v1';
+import { WorkflowUserActionRt } from './workflow/v1';
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
 export { ActionSourceRt, ActionSourceTypes, isActionSource, isHeaderActionSource, toActionSource };
@@ -83,6 +84,7 @@ const BasicUserActionsRt = rt.union([
   ObservablesUserActionRt,
   ExtendedFieldsUserActionRt,
   TemplateUserActionRt,
+  WorkflowUserActionRt,
 ]);
 
 const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);
@@ -181,3 +183,6 @@ export type ObservablesUserAction = UserAction<rt.TypeOf<typeof ObservablesUserA
 export type ExtendedFieldsUserAction = UserAction<rt.TypeOf<typeof ExtendedFieldsUserActionRt>>;
 export { ExtendedFieldsRt } from './extended_fields/v1';
 export type TemplateUserAction = UserAction<rt.TypeOf<typeof TemplateUserActionRt>>;
+export type WorkflowUserAction = UserAction<rt.TypeOf<typeof WorkflowUserActionRt>>;
+export { WorkflowUserActionRt, WorkflowOriginRt } from './workflow/v1';
+export type { WorkflowPayload, WorkflowOrigin, WorkflowUserActionPayload } from './workflow/v1';

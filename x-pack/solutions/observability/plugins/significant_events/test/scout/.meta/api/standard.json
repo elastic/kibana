@@ -1,5 +1,5 @@
 {
-  "sha1": "a9c406d3daed07578691cc770ded49b9c521016d",
+  "sha1": "ba43df1c1bcb1d50f3be63a4806a418778d12f78",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/global.setup.ts",
-        "line": 16,
+        "line": 14,
         "column": 27
       }
     },

@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { test } from '../fixtures';
 
@@ -36,14 +37,16 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+      await kbnClient.uiSettings.update({ [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: false });
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiServices, config }) => {
+    test.afterAll(async ({ apiServices, config, kbnClient }) => {
       if (config.isCloud) {
         return;
       }
+      await kbnClient.uiSettings.unset(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE);
       await apiServices.core.settings({
         'feature_flags.overrides': {
           [NIGHTSHIFT_ENABLED_FLAG]: null,
@@ -63,21 +66,23 @@ test.describe(
       );
     });
 
-    test('renders navigation tabs', async ({ page }) => {
+    test('renders navigation tabs without Detections and links to Settings', async ({
+      page,
+      pageObjects,
+    }) => {
       await page.gotoApp('significant_events/streams');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
 
-      for (const label of [
-        'Streams',
-        'Knowledge Indicators',
-        'Rules',
-        'Detections',
-        'Significant Events',
-        'Settings',
-      ]) {
+      for (const label of ['Streams', 'Knowledge Indicators', 'Rules', 'Significant Events']) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }
+      await expect(tabBar.getByRole('tab', { name: 'Detections' })).toHaveCount(0);
+
+      await pageObjects.appMenu.clickItem('significantEventsSettingsLink');
+
+      await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Settings');
     });
 
     test('shows the not-enabled empty prompt when the feature flag is disabled', async ({

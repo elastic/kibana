@@ -14,9 +14,10 @@ import {
 import { EscalationsService } from './escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
 import {
+  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
-  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
 } from '../../../common/escalations/constants';
 
 const logger = loggingSystemMock.createLogger();
@@ -275,6 +276,20 @@ describe('EscalationsService.create', () => {
     expect(title).toBe(MOCK_INVESTIGATION.title);
   });
 
+  it('uses a caller-supplied title instead of the investigation title when provided', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      title: 'Custom escalation title',
+      visibility: 'public',
+      collaborators: [],
+    });
+
+    const { title } = client.create.mock.calls[0][0];
+    expect(title).toBe('Custom escalation title');
+  });
+
   it('throws when the escalation template is not found', async () => {
     const { service, conversationTemplates } = makeService();
     conversationTemplates.get.mockResolvedValue(undefined);
@@ -286,6 +301,34 @@ describe('EscalationsService.create', () => {
         collaborators: [],
       })
     ).rejects.toThrow(/"escalation" not found/);
+  });
+
+  it('sets assignees in metadata when provided', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'public',
+      collaborators: [],
+      assignees: ['uid-creator'],
+    });
+
+    const { metadata } = client.create.mock.calls[0][0];
+    expect(metadata.assignees).toEqual(['uid-creator']);
+  });
+
+  it('does not set assignees in metadata when empty', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'public',
+      collaborators: [],
+      assignees: [],
+    });
+
+    const { metadata } = client.create.mock.calls[0][0];
+    expect(metadata).not.toHaveProperty('assignees');
   });
 });
 
@@ -320,7 +363,8 @@ describe('EscalationsService.update', () => {
       'escalation-1',
       expect.objectContaining({
         [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1', 'inv-2'],
-      })
+      }),
+      { access: 'converse' }
     );
   });
 
@@ -370,6 +414,67 @@ describe('EscalationsService.update', () => {
     expect(client.patchMetadata).not.toHaveBeenCalled();
   });
 
+  it('calls patchMetadata with status when status is provided', async () => {
+    const { service, client } = makeService({
+      get: jest.fn().mockResolvedValue({
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
+        metadata: { status: 'open' },
+      }),
+    });
+
+    await service.update(request, 'escalation-1', { status: 'closed' });
+
+    expect(client.patchMetadata).toHaveBeenCalledWith(
+      'escalation-1',
+      expect.objectContaining({ status: 'closed' }),
+      { access: 'converse' }
+    );
+  });
+
+  it('issues exactly one patchMetadata call when linked_investigations and status are both present', async () => {
+    const { service, client } = makeService({
+      get: jest.fn().mockResolvedValue({
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
+        metadata: {
+          [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [],
+          status: 'open',
+        },
+      }),
+    });
+
+    await service.update(request, 'escalation-1', {
+      linked_investigations: ['inv-1'],
+      status: 'closed',
+    });
+
+    // A single OCC-protected write prevents partial application.
+    expect(client.patchMetadata).toHaveBeenCalledTimes(1);
+    expect(client.patchMetadata).toHaveBeenCalledWith(
+      'escalation-1',
+      expect.objectContaining({
+        [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: expect.arrayContaining(['inv-1']),
+        [ESCALATION_STATUS_FIELD]: 'closed',
+      }),
+      { access: 'converse' }
+    );
+  });
+
+  it('does not call client.update for a status-only update', async () => {
+    const { service, client } = makeService({
+      get: jest.fn().mockResolvedValue({
+        id: 'escalation-1',
+        template_id: ESCALATION_TEMPLATE_ID,
+        metadata: { status: 'open' },
+      }),
+    });
+
+    await service.update(request, 'escalation-1', { status: 'closed' });
+
+    expect(client.update).not.toHaveBeenCalled();
+  });
+
   it('does not call client.update for a links-only update', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
@@ -399,7 +504,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 1 }),
     });
 
-    await service.list(request, { page: 1, per_page: 50 });
+    await service.list(request, { page: 1, per_page: 50, status: 'open' });
 
     expect(client.search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -420,12 +525,43 @@ describe('EscalationsService.list', () => {
     );
   });
 
+  it('uses metadata.status: "closed" filter when status is "closed"', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, status: 'closed' });
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.stringContaining('metadata.status: "closed"'),
+      })
+    );
+    // Must not also apply the "not closed" clause.
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    expect(filter).not.toContain('not (metadata.status');
+  });
+
+  it('uses template-only filter (no status clause) when status is "all"', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, status: 'all' });
+
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    // Template clause must be present.
+    expect(filter).toContain(`template_id: "${ESCALATION_TEMPLATE_ID}"`);
+    // No status filtering at all.
+    expect(filter).not.toContain('metadata.status');
+  });
+
   it('passes sort updated_at desc explicitly to client.search', async () => {
     const { service, client } = makeService({
       search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
-    await service.list(request, { page: 1, per_page: 50 });
+    await service.list(request, { page: 1, per_page: 50, status: 'open' });
 
     expect(client.search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -439,7 +575,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
-    await service.list(request, { page: 3, per_page: 25 });
+    await service.list(request, { page: 3, per_page: 25, status: 'open' });
 
     expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ page: 3, perPage: 25 }));
   });
@@ -449,7 +585,7 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 42 }),
     });
 
-    const result = await service.list(request, { page: 2, per_page: 10 });
+    const result = await service.list(request, { page: 2, per_page: 10, status: 'open' });
 
     expect(result).toEqual({
       pagination: { total: 42, page: 2, per_page: 10 },
@@ -462,11 +598,31 @@ describe('EscalationsService.list', () => {
       search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     });
 
-    const result = await service.list(request, { page: 1, per_page: 50 });
+    const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
 
     expect(result).toEqual({
       pagination: { total: 0, page: 1, per_page: 50 },
       results: [],
     });
+  });
+
+  it('forwards the search string to client.search as query', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, status: 'open', search: 'critical' });
+
+    expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: 'critical' }));
+  });
+
+  it('omits query from client.search when search is not provided', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+    expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: undefined }));
   });
 });

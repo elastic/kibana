@@ -49,16 +49,13 @@ export class ServerlessObservabilityPlugin
     const { serverless, navigation, management, security, workflowsManagement } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
-    const significantEventsAvailable = core.featureFlags.getBooleanValue(
-      NIGHTSHIFT_ENABLED_FLAG,
-      false
-    );
 
     const navigationTree$ = combineLatest([
       setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       chatExperience$,
+      core.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
     ]).pipe(
-      map(([{ status }, chatExperience]) => {
+      map(([{ status }, chatExperience, significantEventsAvailable]) => {
         return createNavigationTree({
           core,
           significantEventsAvailable,

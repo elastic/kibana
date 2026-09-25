@@ -338,6 +338,7 @@ export const getSeverityLabel = (severity: Severity): string => SEVERITY_LABELS[
 export const significantEventBaseSchema = z.object({
   event_id: z
     .string()
+    .min(1)
     .max(MAX_ID_LENGTH)
     .describe(
       'Stable incident key shared across all documents that belong to the same event. Auto-generated when creating a new event. Must be preserved unchanged across all subsequent writes for the same incident.'

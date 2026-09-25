@@ -19,7 +19,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_EPISODES_API_PATH,
-  ALERTING_V2_SERIES_API_PATH,
+  ALERTING_V2_INTERNAL_SERIES_API_PATH,
 } from '@kbn/alerting-v2-constants';
 
 const postBulkAction = <TItem>(
@@ -32,13 +32,13 @@ export const bulkSnoozeSeriesActions = (
   http: HttpStart,
   items: BulkSnoozeSeriesActionItem[]
 ): Promise<BulkResponse> =>
-  postBulkAction(http, `${ALERTING_V2_SERIES_API_PATH}/_bulk_snooze`, items);
+  postBulkAction(http, `${ALERTING_V2_INTERNAL_SERIES_API_PATH}/_bulk_snooze`, items);
 
 export const bulkUnsnoozeSeriesActions = (
   http: HttpStart,
   items: BulkUnsnoozeSeriesActionItem[]
 ): Promise<BulkResponse> =>
-  postBulkAction(http, `${ALERTING_V2_SERIES_API_PATH}/_bulk_unsnooze`, items);
+  postBulkAction(http, `${ALERTING_V2_INTERNAL_SERIES_API_PATH}/_bulk_unsnooze`, items);
 
 export const bulkTagEpisodeActions = (
   http: HttpStart,
