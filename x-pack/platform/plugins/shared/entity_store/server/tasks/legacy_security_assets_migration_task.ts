@@ -23,7 +23,7 @@ import type { EntityStoreCoreSetup } from '../types';
 import { EngineDescriptorTypeName, type EngineDescriptor } from '../domain/saved_objects';
 import { installSharedElasticsearchAssets } from '../domain/asset_manager/install_assets';
 import { hasLegacySecurityAssets } from '../domain/asset_manager/migrate_legacy_security_assets';
-import { isLegacySecurityAssetsMigrationEnabled } from '../infra/feature_flags';
+import { getLegacySecurityAssetsMigrationFlag } from '../infra/feature_flags';
 
 const config = TasksConfig[EntityStoreTaskType.enum.legacySecurityAssetsMigration];
 
@@ -134,7 +134,7 @@ export function registerLegacySecurityAssetsMigrationTask({
               logger,
               signal,
               isMigrationEnabled: () =>
-                isLegacySecurityAssetsMigrationEnabled(coreStart.featureFlags),
+                getLegacySecurityAssetsMigrationFlag(coreStart.featureFlags),
             });
             logger.info(
               `Task "${config.type}" finished. Migrated namespaces: [${migrated.join(
@@ -168,18 +168,12 @@ export async function scheduleLegacySecurityAssetsMigrationIfNeeded({
   coreStart,
   taskManager,
   logger,
-  isMigrationEnabled,
 }: {
   coreStart: CoreStart;
   taskManager: TaskManagerStartContract;
   logger: Logger;
-  isMigrationEnabled: () => Promise<boolean>;
 }): Promise<void> {
   const taskLogger = logger.get(config.type);
-  if (!(await isMigrationEnabled())) {
-    taskLogger.info('Skipping legacy security assets migration schedule; feature flag is off');
-    return;
-  }
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
   let namespaces: string[];

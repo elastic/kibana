@@ -7,22 +7,21 @@
 
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
-import { isLegacySecurityAssetsMigrationEnabled } from './legacy_security_assets_migration';
+import { getLegacySecurityAssetsMigrationFlag } from './legacy_security_assets_migration';
 
-describe('isLegacySecurityAssetsMigrationEnabled', () => {
-  it('returns false when the feature flag is not enabled', async () => {
+describe('getLegacySecurityAssetsMigrationFlag', () => {
+  it('resolves with the current value without waiting for it to become true', async () => {
     const getBooleanValue = jest.fn().mockResolvedValue(false);
     const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
 
-    await expect(isLegacySecurityAssetsMigrationEnabled(featureFlags)).resolves.toBe(false);
+    await expect(getLegacySecurityAssetsMigrationFlag(featureFlags)).resolves.toBe(false);
     expect(getBooleanValue).toHaveBeenCalledWith(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
   });
 
-  it('returns true when the feature flag is enabled', async () => {
+  it('resolves true when the feature flag is enabled', async () => {
     const getBooleanValue = jest.fn().mockResolvedValue(true);
     const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
 
-    await expect(isLegacySecurityAssetsMigrationEnabled(featureFlags)).resolves.toBe(true);
-    expect(getBooleanValue).toHaveBeenCalledWith(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
+    await expect(getLegacySecurityAssetsMigrationFlag(featureFlags)).resolves.toBe(true);
   });
 });

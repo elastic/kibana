@@ -9,10 +9,10 @@ import type { FeatureFlagsStart } from '@kbn/core/server';
 import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
 
 /**
- * Returns whether legacy Security-scoped Entity Store assets may be migrated to
- * solution-neutral names. Default is false so existing deployments keep reads and
- * writes on the old concrete indices until this flag is enabled for a given env.
+ * Reads the migration FF's current settled value without waiting for it to become true.
+ * Safe for request and task execution paths (`AssetManagerClient`, the migration task's own
+ * run), which must resolve immediately regardless of the flag's value.
  */
-export const isLegacySecurityAssetsMigrationEnabled = (
+export const getLegacySecurityAssetsMigrationFlag = (
   featureFlags: FeatureFlagsStart
 ): Promise<boolean> => featureFlags.getBooleanValue(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
