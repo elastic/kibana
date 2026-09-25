@@ -527,7 +527,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.intro', {
-      defaultMessage: 'Determines whether certain response actions run automatically.',
+      defaultMessage: 'Determines whether response actions run automatically.',
     }),
     levels: [
       {
