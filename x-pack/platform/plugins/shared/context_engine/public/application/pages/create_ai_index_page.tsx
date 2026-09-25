@@ -14,7 +14,6 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -25,6 +24,7 @@ import React, { useState } from 'react';
 import { DEFAULT_AI_INDEX_TYPE, MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AiIndexDescriptionField } from '../components/ai_index_description_field';
+import { MemorySettingsPanel } from '../components/memory_settings_panel';
 import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
@@ -150,43 +150,11 @@ export const CreateAiIndexPage = () => {
           <>
             <EuiSpacer size="l" />
 
-            <EuiPanel hasBorder paddingSize="l">
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem>
-                  <EuiTitle size="s">
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.contextEngine.createAiIndex.memory.title"
-                        defaultMessage="Memory"
-                      />
-                    </h2>
-                  </EuiTitle>
-                  <EuiSpacer size="xs" />
-                  <EuiText size="s" color="subdued">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.contextEngine.createAiIndex.memory.description"
-                        defaultMessage="Allow agents to save memories in this AI index."
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    label={
-                      <FormattedMessage
-                        id="xpack.contextEngine.createAiIndex.memory.toggleLabel"
-                        defaultMessage="Enable memory"
-                      />
-                    }
-                    checked={memoryEnabled}
-                    onChange={() => setMemoryEnabled((enabled) => !enabled)}
-                    data-test-subj="contextCreateAiIndexMemoryToggle"
-                    compressed
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+            <MemorySettingsPanel
+              checked={memoryEnabled}
+              onChange={() => setMemoryEnabled((enabled) => !enabled)}
+              toggleTestSubject="contextCreateAiIndexMemoryToggle"
+            />
           </>
         )}
 
