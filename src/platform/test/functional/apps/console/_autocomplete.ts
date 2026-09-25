@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'autocomplete to be visible',
       async () => await PageObjects.console.isAutocompleteVisible()
     );
-    await PageObjects.console.acceptAutocompleteSuggestion();
+    await PageObjects.console.pressEnter();
     await retry.try(async () => {
       const request = await PageObjects.console.getEditorText();
       log.debug(request);
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // 4) Accept the first suggestion (likely "term").
-      await PageObjects.console.acceptAutocompleteSuggestion();
+      await PageObjects.console.pressEnter();
 
       // 5) Now check the text in the editor
       await retry.try(async () => {
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           async () => await PageObjects.console.isAutocompleteVisible()
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
-        await PageObjects.console.acceptAutocompleteSuggestion();
+        await PageObjects.console.pressEnter();
         await PageObjects.console.sleepForDebouncePeriod();
 
         // Verify that the autocomplete suggestion is inserted into the editor

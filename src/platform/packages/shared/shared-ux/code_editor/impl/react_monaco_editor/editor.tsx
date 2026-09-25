@@ -178,6 +178,9 @@ const normalizeEndOfLine = (value: string, eol: string): string => {
   return value.replace(ALL_LINE_ENDINGS, eol);
 };
 
+export const getEditorInputSurface = (editorDomNode: HTMLElement | null): HTMLElement | null =>
+  editorDomNode?.querySelector<HTMLElement>('textarea[aria-roledescription="editor"]') ?? null;
+
 // initialize supported languages
 initializeSupportedLanguages();
 
@@ -353,7 +356,7 @@ export function MonacoEditor({
 
         const $editor = currentEditor.getDomNode();
         if ($editor) {
-          const textbox = $editor.querySelector('textarea[aria-roledescription="editor"]');
+          const textbox = getEditorInputSurface($editor);
           textbox?.setAttribute('aria-invalid', hasErrors ? 'true' : 'false');
         }
       });
