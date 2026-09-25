@@ -19,13 +19,21 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
       throw Error('Manifest URL missing');
     }
 
+    const allowedManifestUrlPrefix = `https://storage.googleapis.com/${BASE_BUCKET_DAILY}/`;
+    if (!new URL(MANIFEST_URL).href.startsWith(allowedManifestUrlPrefix)) {
+      throw Error(`Manifest URL must start with ${allowedManifestUrlPrefix}: ${MANIFEST_URL}`);
+    }
+
     const projectRoot = process.cwd();
     const tempDir = fs.mkdtempSync('snapshot-promotion');
     process.chdir(tempDir);
 
-    execSync(`curl '${MANIFEST_URL}' > manifest.json`);
-
-    const manifestJson = fs.readFileSync('manifest.json').toString();
+    const manifestResponse = await fetch(MANIFEST_URL);
+    if (!manifestResponse.ok) {
+      throw Error(`Failed to fetch manifest: ${manifestResponse.status} ${MANIFEST_URL}`);
+    }
+    const manifestJson = await manifestResponse.text();
+    fs.writeFileSync('manifest.json', manifestJson);
     const manifest = JSON.parse(manifestJson);
     const { id, bucket, version, sha } = manifest;
     if (!/^\d+\.\d+\.\d+(-SNAPSHOT)?$/.test(version)) {
