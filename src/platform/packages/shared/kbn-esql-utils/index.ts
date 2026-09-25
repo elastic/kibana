@@ -112,4 +112,4 @@ export {
   buildEsqlSourceCacheKey,
 } from './src';
 
-export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';
+export { ENABLE_ESQL, GROUP_NOT_SET_VALUE, ESQL_DATASET_FILTERING_FEATURE_FLAG } from './constants';
