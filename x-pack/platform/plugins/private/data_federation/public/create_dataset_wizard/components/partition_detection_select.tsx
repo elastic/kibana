@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  type EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -16,23 +23,58 @@ import type {
   DatasetPartitionDetectionFormValue,
 } from '../create_dataset_form_state';
 
-type Option = EuiComboBoxOptionOption<string> & { value: DatasetPartitionDetectionFormValue };
+type Option = EuiComboBoxOptionOption<string> & {
+  value: DatasetPartitionDetectionFormValue;
+  description: string;
+  'data-test-subj': string;
+};
+
+const renderPartitionDetectionOption = (option: EuiComboBoxOptionOption<string>) => {
+  const opt = option as Option;
+  return (
+    <div title={opt.description}>
+      <EuiFlexGroup
+        responsive={false}
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem grow={true}>
+          <EuiText size="s">{opt.label}</EuiText>
+        </EuiFlexItem>
+        {opt.append ? <EuiFlexItem grow={false}>{opt.append}</EuiFlexItem> : null}
+      </EuiFlexGroup>
+      <EuiText size="xs" color="subdued">
+        {opt.description}
+      </EuiText>
+    </div>
+  );
+};
 
 const PARTITION_DETECTION_OPTIONS: Option[] = [
   {
     value: 'auto',
     label: createDatasetWizardStrings.settingsPartitionDetectionAuto,
+    description: createDatasetWizardStrings.settingsPartitionDetectionAutoDescription,
     append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
     'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-auto',
   },
   {
     value: 'hive',
     label: createDatasetWizardStrings.settingsPartitionDetectionHive,
+    description: createDatasetWizardStrings.settingsPartitionDetectionHiveDescription,
     'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-hive',
+  },
+  {
+    value: 'template',
+    label: createDatasetWizardStrings.settingsPartitionDetectionTemplate,
+    description: createDatasetWizardStrings.settingsPartitionDetectionTemplateDescription,
+    'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-template',
   },
   {
     value: 'none',
     label: createDatasetWizardStrings.settingsPartitionDetectionNone,
+    description: createDatasetWizardStrings.settingsPartitionDetectionNoneDescription,
     'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-none',
   },
 ];
@@ -69,6 +111,7 @@ export function PartitionDetectionSelect({
             ]
           : []
       }
+      renderOption={renderPartitionDetectionOption}
       onChange={(nextSelectedOptions) => {
         const next = nextSelectedOptions?.[0] as Option | undefined;
         partitionDetectionField.onChange(next?.value ?? '');

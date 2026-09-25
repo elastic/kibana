@@ -13,7 +13,7 @@ import type { MappingEditorValue } from '../components/mapping_editor';
 export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
 export type DatasetModeFormValue = '' | 'quoted' | 'escaped' | 'plain';
-export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'none';
+export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'template' | 'none';
 export type DatasetSchemaResolutionFormValue = '' | 'first_file_wins' | 'strict' | 'union_by_name';
 export type DatasetBooleanFormValue = '' | 'true' | 'false';
 

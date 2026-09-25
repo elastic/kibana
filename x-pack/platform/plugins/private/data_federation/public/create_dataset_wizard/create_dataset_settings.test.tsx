@@ -110,6 +110,16 @@ describe('CreateDatasetSettings', () => {
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
   });
 
+  it('supports partition_detection template in form state', () => {
+    const { getByTestId } = renderSettings();
+
+    const partitionDetectionCombo = getByTestId('createDatasetSettingsPartitionDetection');
+    fireEvent.click(partitionDetectionCombo.querySelector('input') ?? partitionDetectionCombo);
+    fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-template'));
+
+    expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'template' });
+  });
+
   it('shows schema_resolution and hive_partitioning', () => {
     const { getByTestId } = renderSettings();
 

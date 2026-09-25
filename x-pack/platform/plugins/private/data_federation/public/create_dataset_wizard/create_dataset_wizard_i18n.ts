@@ -425,6 +425,13 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsPartitionDetectionAutoDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionAutoDescription',
+    {
+      defaultMessage: 'Detect partitions automatically from the resource path.',
+    }
+  ),
+
   settingsPartitionDetectionHive: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionHive',
     {
@@ -432,10 +439,38 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsPartitionDetectionHiveDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionHiveDescription',
+    {
+      defaultMessage: 'Use Hive-style partition directories (key=value).',
+    }
+  ),
+
+  settingsPartitionDetectionTemplate: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionTemplate',
+    {
+      defaultMessage: 'Template',
+    }
+  ),
+
+  settingsPartitionDetectionTemplateDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionTemplateDescription',
+    {
+      defaultMessage: 'Read partition values from path template.',
+    }
+  ),
+
   settingsPartitionDetectionNone: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionNone',
     {
       defaultMessage: 'None',
+    }
+  ),
+
+  settingsPartitionDetectionNoneDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionNoneDescription',
+    {
+      defaultMessage: 'Do not infer partitions from the path.',
     }
   ),
 
