@@ -11,16 +11,16 @@ import { servers as defaultConfig } from '../../default/stateful/classic.statefu
 import type { ScoutServerConfig } from '../../../../../types';
 
 // Task Manager polls every 500ms by default, which is too fast to tell a claim nudge apart from the
-// next regular poll cycle. Stretching the interval to a minute means a task claimed within seconds
-// of `runSoon` can only have been claimed because of the nudge, and leaves plenty of room for the
-// test's budget to absorb CI jitter without a regular poll cycle wandering into it.
+// next regular poll cycle. Stretching the interval means a task claimed within seconds of `runSoon`
+// can only have been claimed because of the nudge. Task Manager never lowers a configured interval
+// on its own, so this also bounds how long the tests wait to sync with the poller's cadence.
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--xpack.task_manager.poll_interval=60000',
+      '--xpack.task_manager.poll_interval=30000',
       // Pinned rather than relying on the default so the tests keep exercising the nudge even if
       // the default is ever flipped off.
       '--xpack.task_manager.claim_nudge.enabled=true',

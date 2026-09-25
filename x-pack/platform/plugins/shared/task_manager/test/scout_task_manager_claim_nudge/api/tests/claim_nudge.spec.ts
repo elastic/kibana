@@ -13,8 +13,9 @@ import {
   COMMON_HEADERS,
   NO_CLAIM_OBSERVATION_MS,
   NUDGE_CLAIM_BUDGET_MS,
-  NUDGE_ROUNDS,
+  NUDGE_TEST_TIMEOUT_MS,
   ONE_HOUR_MS,
+  POLL_SYNC_TIMEOUT_MS,
   RESCHEDULE_EVIDENCE_MS,
   TEST_TASK_TYPE,
 } from '../fixtures/constants';
@@ -113,6 +114,40 @@ apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] 
     return status !== 'idle' || new Date(runAt).getTime() > runSoonAt + RESCHEDULE_EVIDENCE_MS;
   };
 
+  const getLastSuccessfulPoll = async (
+    apiClient: ApiClientFixture,
+    cookieHeader: CookieHeader
+  ): Promise<string | undefined> => {
+    const response = await apiClient.get('api/task_manager/_health', {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    });
+    expect(response).toHaveStatusCode(200);
+
+    const { stats } = response.body as {
+      stats: { runtime?: { value: { polling: { last_successful_poll?: string } } } };
+    };
+    return stats.runtime?.value.polling.last_successful_poll;
+  };
+
+  /**
+   * Resolves just after a regular poll cycle finishes, which both leaves the next one a full
+   * `poll_interval` away and outlasts the nudge throttle window the warm-up opened — the throttle
+   * admits one nudge per interval, so without this the measured nudge would be held until the
+   * window closed.
+   */
+  const waitForFreshPollCycle = async (apiClient: ApiClientFixture, cookieHeader: CookieHeader) => {
+    const before = await getLastSuccessfulPoll(apiClient, cookieHeader);
+
+    await expect
+      .poll(async () => (await getLastSuccessfulPoll(apiClient, cookieHeader)) !== before, {
+        timeout: POLL_SYNC_TIMEOUT_MS,
+        intervals: [500],
+        message: 'no poll cycle completed, so the nudge could not be measured in isolation',
+      })
+      .toBe(true);
+  };
+
   /**
    * The first nudge of the Kibana process also creates the signal index, which on a cold cluster
    * can take most of the claim budget on its own. Pay that cost here instead of inside a timed
@@ -153,38 +188,34 @@ apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] 
     }
   });
 
-  /**
-   * Measured over several rounds rather than once, because the poller's cadence is not synchronized
-   * to the test: the next regular cycle can happen to fall inside any single budget window. Since
-   * the poller runs at most one cycle per `poll_interval` and the whole loop is bounded well inside
-   * one, requiring every round to meet the budget leaves regular polling able to account for at most
-   * one of them.
-   */
   apiTest(
     'runSoon gets a task claimed well before the next poll cycle would',
     async ({ apiClient, samlAuth }) => {
+      apiTest.setTimeout(NUDGE_TEST_TIMEOUT_MS);
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-      for (let round = 1; round <= NUDGE_ROUNDS; round++) {
-        const { taskId, runAt: originalRunAt } = await scheduleTaskDueInAnHour(
-          apiClient,
-          cookieHeader
-        );
+      // Anchors the measurement to the poller's cadence, which is what makes a claim inside the
+      // budget attributable to the nudge rather than to a cycle that was already due.
+      await waitForFreshPollCycle(apiClient, cookieHeader);
 
-        const runSoonAt = Date.now();
-        await runSoon(apiClient, cookieHeader, taskId);
+      const { taskId, runAt: originalRunAt } = await scheduleTaskDueInAnHour(
+        apiClient,
+        cookieHeader
+      );
 
-        await expect
-          .poll(
-            () => wasClaimedSince(apiClient, cookieHeader, taskId, { originalRunAt, runSoonAt }),
-            {
-              timeout: NUDGE_CLAIM_BUDGET_MS,
-              intervals: [100],
-              message: `task was not claimed within the nudge budget (round ${round} of ${NUDGE_ROUNDS})`,
-            }
-          )
-          .toBe(true);
-      }
+      const runSoonAt = Date.now();
+      await runSoon(apiClient, cookieHeader, taskId);
+
+      await expect
+        .poll(
+          () => wasClaimedSince(apiClient, cookieHeader, taskId, { originalRunAt, runSoonAt }),
+          {
+            timeout: NUDGE_CLAIM_BUDGET_MS,
+            intervals: [100],
+            message: 'task was not claimed within the nudge budget',
+          }
+        )
+        .toBe(true);
     }
   );
 
@@ -195,8 +226,8 @@ apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] 
       const { taskId, runAt } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
 
       // Shows a task this far out is never claimed on its own, so the test above is measuring one
-      // that only a nudge could bring forward. That test establishes attribution through its round
-      // count, not through this one, which runs at a different point in the poller's cadence.
+      // that only a nudge could bring forward. That test establishes attribution by syncing to the
+      // poll cadence, not through this one, which runs at an arbitrary point in it.
       await new Promise((resolve) => setTimeout(resolve, NO_CLAIM_OBSERVATION_MS));
 
       const response = await getTask(apiClient, cookieHeader, taskId);
