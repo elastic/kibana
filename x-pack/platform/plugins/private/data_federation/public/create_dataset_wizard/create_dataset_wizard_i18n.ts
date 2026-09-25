@@ -23,10 +23,22 @@ export const createDatasetWizardStrings = {
   datasetStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.datasetStepLabel', {
     defaultMessage: 'Define dataset',
   }),
+  datasetStepSubheader: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.datasetStepSubheader',
+    {
+      defaultMessage: 'Select the source and define which dataset you want added',
+    }
+  ),
   additionalStepLabel: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.advancedStepLabel',
     {
       defaultMessage: 'Additional settings',
+    }
+  ),
+  additionalStepSubheader: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalStepSubheader',
+    {
+      defaultMessage: 'Settings you leave unchanged use the default for your file format.',
     }
   ),
   mappingStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappingStepLabel', {
