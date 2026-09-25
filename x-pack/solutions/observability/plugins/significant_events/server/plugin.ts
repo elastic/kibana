@@ -17,6 +17,7 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
   combineLatest,
@@ -107,10 +108,15 @@ import {
   installFeatureIdentificationAgent,
   registerSignificantEventsFeatureIdentificationAgentTypes,
 } from './agent_builder/agents/feature_identification';
+import {
+  installKIQueryGenerationAgent,
+  registerSignificantEventsKIQueryGenerationAgentTypes,
+} from './agent_builder/agents/ki_query_generation';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -239,6 +245,21 @@ export class SignificantEventsPlugin
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
 
+      let alertEventsClientPromise: Promise<AlertEventsClientApi | undefined> | undefined;
+      const getAlertEventsClient = (): Promise<AlertEventsClientApi | undefined> => {
+        alertEventsClientPromise ??= pluginsStart.alertingVTwo
+          .getAlertEventsClientWithRequest(request)
+          .catch((err) => {
+            this.logger.warn(
+              `Failed to acquire AlertEventsClient; .rule-events dual-write skipped: ${
+                err instanceof Error ? err.message : err
+              }`
+            );
+            return undefined;
+          });
+        return alertEventsClientPromise;
+      };
+
       const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
         if (ruleIds.length === 0) {
           return;
@@ -282,6 +303,7 @@ export class SignificantEventsPlugin
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        getAlertEventsClient,
         deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,
@@ -330,6 +352,13 @@ export class SignificantEventsPlugin
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
       registerSignificantEventsFeatureIdentificationAgentTypes({
         agentBuilder: plugins.agentBuilder,
+      });
+      registerSignificantEventsKIQueryGenerationAgentTypes({
+        agentBuilder: plugins.agentBuilder,
+        isSemanticCodeSearchGroundingEnabled: async () =>
+          this.server?.core
+            ? isSignificantEventsSemanticCodeSearchGroundingEnabled(this.server.core.featureFlags)
+            : false,
       });
       void core
         .getStartServices()
@@ -568,6 +597,13 @@ export class SignificantEventsPlugin
         availability,
       }).catch((error: unknown) => {
         this.logManagedResourceError('feature identification agent', error);
+      });
+      void installKIQueryGenerationAgent({
+        agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        availability,
+      }).catch((error: unknown) => {
+        this.logManagedResourceError('KI query generation agent', error);
       });
     }
 

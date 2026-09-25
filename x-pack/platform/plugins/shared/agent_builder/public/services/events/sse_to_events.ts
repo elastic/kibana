@@ -39,6 +39,7 @@ import {
   isToolCallStep,
   isToolProgressEvent,
   isToolResultEvent,
+  isTimelineEvent,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import {
@@ -71,6 +72,10 @@ export type TimelineDisplayEvent = TimelineEvent | ExecutionStreamingEvent;
 export const isExecutionStreamingEvent = (event: {
   type: string;
 }): event is ExecutionStreamingEvent => event.type === EXECUTION_STREAMING_EVENT_TYPE;
+
+/** Narrows any stored or live event to one the built-in timeline knows how to group. */
+export const isTimelineDisplayEvent = (event: ConversationEvent): event is TimelineDisplayEvent =>
+  isTimelineEvent(event) || isExecutionStreamingEvent(event);
 
 /** Identity of the execution currently streaming, learnt from its `execution_started` event. */
 interface ExecutionCursor {

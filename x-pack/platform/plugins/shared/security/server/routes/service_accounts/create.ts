@@ -6,14 +6,11 @@
  */
 
 import { createServiceAccountBodySchema } from './schemas';
+import { serviceAccountsUnavailable } from './unavailable';
 import type { RouteDefinitionParams } from '..';
 import { SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES } from '../../../common/service_accounts';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-
-const unavailable = (reason: string) => ({
-  body: { message: `Service accounts are not available: ${reason}` },
-});
 
 export function defineCreateServiceAccountRoute({
   router,
@@ -40,7 +37,7 @@ export function defineCreateServiceAccountRoute({
       try {
         const serviceAccounts = getServiceAccountsService();
         if (!serviceAccounts) {
-          return response.notFound(unavailable('the feature is disabled'));
+          return response.notFound(serviceAccountsUnavailable('the feature is disabled'));
         }
 
         return response.ok({
