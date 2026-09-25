@@ -1,5 +1,5 @@
 {
-  "sha1": "e09be949b80cd18625ab3e1875c06f98199d1b0f",
+  "sha1": "ea8226d179943d40ee9af4ca9acad1ff0c74f2a8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -370,12 +370,12 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 65,
-        "column": 22
+        "line": 74,
+        "column": 25
       }
     },
     {
-      "id": "84b864bf30250b9-bb6c00e207d6b96",
+      "id": "84b864bf30250b9-426daf58e791802",
       "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] editor stays responsive during rapid edits",
       "expectedStatus": "passed",
       "tags": [
@@ -388,8 +388,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 205,
-        "column": 18
+        "line": 230,
+        "column": 33
       }
     },
     {
@@ -406,12 +406,12 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 65,
-        "column": 22
+        "line": 74,
+        "column": 25
       }
     },
     {
-      "id": "84b864bf30250b9-c189381fa89f5ce",
+      "id": "84b864bf30250b9-9672ab6054b564c",
       "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] editor stays responsive during rapid edits",
       "expectedStatus": "passed",
       "tags": [
@@ -424,8 +424,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 205,
-        "column": 18
+        "line": 230,
+        "column": 33
       }
     },
     {
@@ -864,7 +864,7 @@
     },
     {
       "id": "e5bbd6f9df1d7de-2aaeb1a8c275eeb",
-      "title": "Variable scope validation: use-before-declaration assign: same-line quoted scalar \u2014 use before declaration is flagged, valid after fix",
+      "title": "Variable scope validation: use-before-declaration assign: same-line quoted scalar — use before declaration is flagged, valid after fix",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -882,7 +882,7 @@
     },
     {
       "id": "e5bbd6f9df1d7de-602f7647d2dc3e8",
-      "title": "Variable scope validation: use-before-declaration capture: same-line quoted scalar \u2014 use before declaration is flagged, valid after fix",
+      "title": "Variable scope validation: use-before-declaration capture: same-line quoted scalar — use before declaration is flagged, valid after fix",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -900,7 +900,7 @@
     },
     {
       "id": "e5bbd6f9df1d7de-9c87ec3e05df52c",
-      "title": "Variable scope validation: use-before-declaration assign: cross-line block scalar \u2014 use before declaration is flagged, valid after fix",
+      "title": "Variable scope validation: use-before-declaration assign: cross-line block scalar — use before declaration is flagged, valid after fix",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -918,7 +918,7 @@
     },
     {
       "id": "e5bbd6f9df1d7de-3a4fdb7ede9e974",
-      "title": "Variable scope validation: use-before-declaration capture: cross-line block scalar \u2014 use before declaration is flagged, valid after fix",
+      "title": "Variable scope validation: use-before-declaration capture: cross-line block scalar — use before declaration is flagged, valid after fix",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -954,7 +954,7 @@
     },
     {
       "id": "e5bbd6f9df1d7de-ed1e52e80f59ae2",
-      "title": "Variable scope validation: use-before-declaration multiple assigns interleaved across lines \u2014 only out-of-scope reference is flagged",
+      "title": "Variable scope validation: use-before-declaration multiple assigns interleaved across lines — only out-of-scope reference is flagged",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
