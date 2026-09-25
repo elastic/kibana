@@ -34,7 +34,7 @@ user_activity:
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
-When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, metadata, error, user, kibana.session.id, kibana.space.id, kibana.object, ...}`.
+When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, error, user, kibana.session.id, kibana.space.id, kibana.object, ...}`. Action-specific metadata is logged under a per-producer `kibana.*` bucket (for example, `kibana.dashboard`).
 
 ### Filters
 
@@ -72,18 +72,18 @@ The action also populates the following metadata fields:
 
 | **Field** | **Description** |
 | --- | --- |
-| `metadata.time_range` | (Optional) Dashboard time range at the time of the refresh. |
-| `metadata.refresh_interval` | (Optional) Auto-refresh interval in milliseconds. This field is omitted when auto-refresh is paused. |
-| `metadata.query` | (Optional) Dashboard query, including its expression and language. The language is `kql` or `lucene`. |
-| `metadata.filters` | (Optional) List of dashboard filters. |
-| `metadata.panel_count` | Number of panels on the dashboard. |
-| `metadata.errors` | List of panels with blocking errors. Each item contains the panel ID in `panel_id` and the error message in `error`. The list is empty when no panels return blocking errors. |
+| `kibana.dashboard.time_range` | (Optional) Dashboard time range at the time of the refresh. |
+| `kibana.dashboard.refresh_interval` | (Optional) Auto-refresh interval in milliseconds. This field is omitted when auto-refresh is paused. |
+| `kibana.dashboard.query` | (Optional) Dashboard query, including its expression and language. The language is `kql` or `lucene`. |
+| `kibana.dashboard.filters` | (Optional) List of dashboard filters. |
+| `kibana.dashboard.panel_count` | Number of panels on the dashboard. |
+| `kibana.dashboard.errors` | List of panels with blocking errors. Each item contains the panel ID in `panel_id` and the error message in `error`. The list is empty when no panels return blocking errors. |
 
 :::::{note}
 Dashboard query expressions and filter values are recorded without redaction. Manage access to and retention of user activity logs according to your organization's data-handling requirements.
 :::::
 
-When `metadata.errors` is not empty, `error.type` is `panel_errors` and `error.message` contains the error list as JSON.
+When `kibana.dashboard.errors` is not empty, `error.type` is `panel_errors` and `error.message` contains the error list as JSON.
 
 :::::{image} images/dashboard_user_activity_errors.png
 :alt: Discover results for dashboard refresh events with blocking panel errors
@@ -172,7 +172,7 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 
 | **Field** | **Description** |
 | --- | --- |
-| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. For dashboard refresh metadata, refer to [Dashboard event fields](#dashboard-event-fields). |
+| `kibana.<bucket>` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log; each producer provides its own bucket (for example, `kibana.dashboard`). For dashboard refresh metadata, refer to [Dashboard event fields](#dashboard-event-fields). |
 
 ### Error fields
 
