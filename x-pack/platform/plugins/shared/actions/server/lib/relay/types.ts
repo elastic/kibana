@@ -5,13 +5,36 @@
  * 2.0.
  */
 
-export interface RelayInstallRequest {
-  kibana_api_key: string;
+interface RelayInstallRequestBase {
   kibana_url: string;
   kibana_version: string;
   license_info: string;
   created_by_user_key?: string;
 }
+
+/**
+ * ECH and Serverless with `xpack.actions.relay.uiam.enabled` off. The API key is
+ * the only install credential.
+ */
+export interface RelayApiKeyInstallRequest extends RelayInstallRequestBase {
+  kibana_api_key: string;
+  uiam_service_account_id?: never;
+}
+
+/**
+ * Serverless with `xpack.actions.relay.uiam.enabled` on. The service-account id
+ * is the only install credential; the raw token is never sent.
+ */
+export interface RelayServiceAccountInstallRequest extends RelayInstallRequestBase {
+  uiam_service_account_id: string;
+  kibana_api_key?: never;
+}
+
+/**
+ * Install body. Exactly one credential is set: `kibana_api_key` (M1) or
+ * `uiam_service_account_id` (M2).
+ */
+export type RelayInstallRequest = RelayApiKeyInstallRequest | RelayServiceAccountInstallRequest;
 
 export interface RelayInstallResponse {
   authorize_url: string;
@@ -83,6 +106,11 @@ export interface RelayTriggerResponse {
 }
 
 export interface RelayClientContract {
+  /**
+   * `xpack.actions.relay.uiam.enabled`. When true, install sends a service-account
+   * id and every request carries Kibana's system-identity bearer token.
+   */
+  readonly uiamEnabled: boolean;
   startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse>;
   fetchClaim(claimId: string): Promise<RelayClaimResponse>;
   /** Unbind a single workspace binding identified by its tenant key. */

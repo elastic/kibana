@@ -26,7 +26,7 @@ const connectSlackAppRoute = createServerRoute({
     access: 'internal',
     summary: 'Start the Elastic Slack App install',
     description:
-      'Mints a managed Agent Builder API key for the Nightshift Relay, starts the Slack OAuth install, and returns the Slack authorization URL.',
+      'Starts the Slack OAuth install and returns the authorization URL. Serverless with xpack.actions.relay.uiam.enabled sends a UIAM service-account id; otherwise it mints a managed API key.',
   },
   security: {
     authz: {

@@ -42,6 +42,15 @@ const ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID = '.slack2';
 
 const ELASTIC_APPS_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
 
+/** Stable name for the user-managed account Relay assumes on Serverless. */
+const RELAY_SERVICE_ACCOUNT_NAME = 'nightshift-relay-agent-builder';
+
+/**
+ * Selects the server-owned Relay platform assumer. The id (`relay-service`) is
+ * resolved inside the security plugin; this call cannot name another principal.
+ */
+const RELAY_PLATFORM_ASSUMERS = ['relay'] as const;
+
 const buildConnector = (tenantKey: string): InMemoryConnector => ({
   id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
   actionTypeId: ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID,
@@ -235,6 +244,18 @@ export class SlackAppService {
     // only happens on success.
     const existingConnection = await this.readConnection(soClient);
 
+    // M2: a UIAM service-account id, and only that. The flag is Serverless-only
+    // and default-off, so ECH and flag-off installs stay on the API key below.
+    if (relayClient.uiamEnabled) {
+      return this.connectWithServiceAccount(
+        request,
+        relayClient,
+        soClient,
+        existingConnection,
+        now
+      );
+    }
+
     // Mint a managed, read-only, least-privilege ES API key for the agent. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
     // outlive their owner). Because the grant intersects with the owner's privileges, the
@@ -333,6 +354,162 @@ export class SlackAppService {
     this.withdrawConnector();
 
     return { authorizeUrl: installResponse.authorize_url };
+  }
+
+  /**
+   * Serverless install when `xpack.actions.relay.uiam.enabled` is on.
+   *
+   * Creates a user-managed service account, or reuses the id already stored on
+   * the connection, and tells UIAM that Relay's platform account may assume it.
+   * `startInstall` receives that id and nothing else. A raw token is never minted
+   * here.
+   *
+   * Every connect authorizes through the security service before a stored id is
+   * used or a new account is created. The saved id is not authorization.
+   *
+   * If the Relay rejects the install, the account is retained: Kibana has no
+   * service-account revoke or update API, and the id is not a credential. The id
+   * is recorded so the retry selects it. On a working API-key connection that
+   * record keeps the existing status and key. A 403 on an id we were reusing
+   * clears it, and the next connect has to create another account. Other
+   * failures, including 5xx, leave the id in place. Creation itself refuses an
+   * account whose `assumable_by` does not include Relay, and that refusal is
+   * not registered.
+   */
+  private async connectWithServiceAccount(
+    request: KibanaRequest,
+    relayClient: RelayClientContract,
+    soClient: SavedObjectsClientContract,
+    existingConnection: RelayAppConnectionAttributes | undefined,
+    now: string
+  ): Promise<SlackAppConnectResponse> {
+    if (!this.server.isServerless) {
+      throw new SlackAppUnavailableError(
+        'Relay UIAM install is not supported on this distribution. `xpack.actions.relay.uiam.enabled` is Serverless-only.'
+      );
+    }
+
+    const serviceAccounts = this.server.core.security.serviceAccounts;
+    if (!serviceAccounts.isEnabled()) {
+      throw new SlackAppUnavailableError(
+        'Relay UIAM install requires UIAM service accounts. Enable `xpack.security.serviceAccounts` and configure `xpack.security.uiam`.'
+      );
+    }
+
+    // Same gate as creation. A stored id must not let a caller skip `manage_security`.
+    await serviceAccounts.authorize(request);
+
+    const storedServiceAccountId = existingConnection?.serviceAccountId;
+    const selectingStoredAccount =
+      typeof storedServiceAccountId === 'string' && storedServiceAccountId.length > 0;
+    const serviceAccountId = selectingStoredAccount
+      ? storedServiceAccountId
+      : (
+          await serviceAccounts.create(request, {
+            name: RELAY_SERVICE_ACCOUNT_NAME,
+            trustedPlatformAssumers: RELAY_PLATFORM_ASSUMERS,
+          })
+        ).id;
+
+    const username = this.server.security.authc.getCurrentUser(request)?.username;
+    const license = await this.server.licensing.getLicense();
+
+    let installResponse;
+    try {
+      installResponse = await relayClient.startInstall({
+        uiam_service_account_id: serviceAccountId,
+        kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
+        kibana_version: this.server.kibanaVersion,
+        license_info: license.type ?? 'basic',
+        ...(username ? { created_by_user_key: username } : {}),
+      });
+    } catch (error) {
+      this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
+      if (selectingStoredAccount && this.isStoredServiceAccountRejected(error)) {
+        await this.clearStoredServiceAccount(soClient, existingConnection);
+      } else if (!selectingStoredAccount) {
+        await this.rememberServiceAccount(soClient, existingConnection, serviceAccountId, {
+          error: this.toErrorMessage(error),
+          username,
+          now,
+        });
+      }
+      throw error;
+    }
+
+    if (existingConnection?.apiKeyId) {
+      await this.invalidateApiKey(existingConnection.apiKeyId, 'after successful reconnect');
+    }
+
+    await this.writeConnection(soClient, {
+      status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+      apiKeyId: null,
+      serviceAccountId,
+      claimId: installResponse.claim_id,
+      tenantKey: null,
+      surface: 'slack',
+      createdBy: username,
+      createdAt: now,
+    });
+
+    this.withdrawConnector();
+
+    return { authorizeUrl: installResponse.authorize_url };
+  }
+
+  /** Relay 403 on a reused id means that account cannot be assumed. 5xx stays retryable. */
+  private isStoredServiceAccountRejected(error: unknown): boolean {
+    return error instanceof RelayRequestError && error.statusCode === 403;
+  }
+
+  /**
+   * Drops a reused id Relay refused, without creating a replacement in this request.
+   * The rest of the connection, including a live API key, stays as it was.
+   */
+  private async clearStoredServiceAccount(
+    soClient: SavedObjectsClientContract,
+    existingConnection: RelayAppConnectionAttributes | undefined
+  ): Promise<void> {
+    if (!existingConnection) {
+      return;
+    }
+    this.logger.warn(
+      'Relay rejected the stored service account with 403. The id was cleared so the next connect can create a new account.'
+    );
+    await this.writeConnection(soClient, {
+      ...existingConnection,
+      serviceAccountId: null,
+    });
+  }
+
+  /**
+   * Stores a service-account id after a failed install so the next connect selects
+   * it. An existing connection keeps its status and API key.
+   */
+  private async rememberServiceAccount(
+    soClient: SavedObjectsClientContract,
+    existingConnection: RelayAppConnectionAttributes | undefined,
+    serviceAccountId: string,
+    failure: { error: string; username: string | undefined; now: string }
+  ): Promise<void> {
+    if (existingConnection) {
+      await this.writeConnection(soClient, {
+        ...existingConnection,
+        serviceAccountId,
+      });
+      return;
+    }
+
+    await this.writeConnection(soClient, {
+      status: RELAY_APP_CONNECTION_STATUS.error,
+      apiKeyId: null,
+      serviceAccountId,
+      tenantKey: null,
+      surface: 'slack',
+      error: failure.error,
+      createdBy: failure.username,
+      createdAt: failure.now,
+    });
   }
 
   /**
@@ -530,6 +707,9 @@ export class SlackAppService {
     if (connection.apiKeyId) {
       await this.invalidateApiKey(connection.apiKeyId, 'on disconnect');
     }
+    // A UIAM service account cannot be revoked or updated, so a successful disconnect
+    // keeps its id on a not-connected document. The next connect selects that account
+    // instead of creating another one that Relay can still assume.
 
     // Only ask the Relay to unbind if this connection has a tenantKey: an in-progress
     // install (no tenantKey) has no Relay-side binding to tear down yet.
@@ -556,13 +736,24 @@ export class SlackAppService {
       }
     }
 
-    await soClient
-      .delete(RELAY_APP_CONNECTION_SO_TYPE, RELAY_APP_CONNECTION_SO_ID)
-      .catch((error) => {
-        if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
-          throw error;
-        }
+    const serviceAccountId = connection.serviceAccountId;
+    if (typeof serviceAccountId === 'string' && serviceAccountId.length > 0) {
+      await this.writeConnection(soClient, {
+        status: RELAY_APP_CONNECTION_STATUS.notConnected,
+        apiKeyId: null,
+        serviceAccountId,
+        tenantKey: null,
+        surface: connection.surface ?? 'slack',
       });
+    } else {
+      await soClient
+        .delete(RELAY_APP_CONNECTION_SO_TYPE, RELAY_APP_CONNECTION_SO_ID)
+        .catch((error) => {
+          if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+            throw error;
+          }
+        });
+    }
 
     return { status: 'disconnected' };
   }

@@ -17,6 +17,7 @@ const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
 
 const createDelegate = (): jest.Mocked<ServiceAccountsServiceContract> => ({
   isEnabled: jest.fn().mockReturnValue(true),
+  authorize: jest.fn(),
   create: jest.fn(),
   bindWorkload: jest.fn(),
   unbindWorkload: jest.fn(),
@@ -41,11 +42,13 @@ describe('createPluginScopedServiceAccounts', () => {
     const scoped = scopedTo('alerting');
 
     expect(scoped.isEnabled).toBe(delegate.isEnabled);
+    expect(scoped.authorize).toBe(delegate.authorize);
     expect(scoped.create).toBe(delegate.create);
   });
 
   it('exposes exactly the public service accounts contract', () => {
     expect(Object.keys(scopedTo('alerting')).sort()).toEqual([
+      'authorize',
       'bindWorkload',
       'create',
       'getWorkloadBinding',

@@ -12,6 +12,7 @@ import type { ServiceAccountsServiceStart } from './types';
 export const serviceAccountsServiceMock = {
   createStart: (): jest.MockedObjectDeep<ServiceAccountsServiceStart> => ({
     backend: {
+      authorize: jest.fn().mockResolvedValue(undefined),
       create: jest.fn().mockResolvedValue({
         id: 'mock-service-account-id',
         name: 'mock-service-account-name',

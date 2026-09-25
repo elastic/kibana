@@ -74,6 +74,7 @@ describe('ServiceAccountWorkloadBindings', () => {
     });
 
     backend = {
+      authorize: jest.fn(),
       create: jest.fn(),
       list: jest.fn(),
       get: jest.fn(),

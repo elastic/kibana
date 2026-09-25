@@ -46,6 +46,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     serviceAccounts: {
       isEnabled: () => false,
       create: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      authorize: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       bindWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       unbindWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       getWorkloadBinding: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,

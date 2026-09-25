@@ -129,6 +129,17 @@ describe('EsServiceAccounts', () => {
   });
 
   describe('#create', () => {
+    it('rejects platform assumers, which this backend cannot grant', async () => {
+      await expect(
+        serviceAccounts.create(request, {
+          ...createParams,
+          trustedPlatformAssumers: ['relay'],
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
     it('creates the account, mints its token and stores the credential', async () => {
       mockHappyPath();
 
@@ -639,6 +650,32 @@ describe('EsServiceAccounts', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Could not determine whether the failed create')
       );
+    });
+  });
+
+  describe('#authorize', () => {
+    it('checks `manage_security` and does not call Elasticsearch', async () => {
+      await expect(serviceAccounts.authorize(request)).resolves.toBeUndefined();
+
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when the caller lacks `manage_security`', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(serviceAccounts.authorize(request)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('#createFakeRequest', () => {
+    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
+      await expect(serviceAccounts.createFakeRequest()).rejects.toMatchObject({
+        message: 'Creating requests for Elasticsearch service accounts is not yet implemented',
+        output: { statusCode: 501 },
+      });
     });
   });
 

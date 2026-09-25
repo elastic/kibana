@@ -134,12 +134,15 @@ export type {
   CoreServiceAccountsService,
   ServiceAccount,
   CreateServiceAccountParams,
+  CreateServiceAccountServerParams,
+  TrustedPlatformServiceAccountName,
   AuditEvent,
   AuditHttp,
   AuditKibana,
   AuditRequest,
   AuditLogger,
 } from '@kbn/core-security-server';
+export { TRUSTED_PLATFORM_SERVICE_ACCOUNTS } from '@kbn/core-security-server';
 export type {
   User,
   UserRealm,

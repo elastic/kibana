@@ -8,11 +8,11 @@
 import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
-import { buildAssumableBy } from './assumable_by';
+import { buildAssumableBy, grantsTrustedPlatformAssumers } from './assumable_by';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
@@ -56,6 +56,28 @@ import {
 const serviceAccountSchema = z.object({
   id: serviceAccountIdSchema,
   name: serviceAccountNameSchema,
+});
+
+/**
+ * Parsed only when Kibana asked UIAM for a platform assumer. The rest of a create
+ * response stays unvalidated, but a requested assumer that is not echoed must not
+ * be handed to a caller.
+ */
+const trustedAssumerResponseSchema = z.object({
+  assumable_by: z.array(
+    z.discriminatedUnion('type', [
+      z.object({
+        type: z.literal('project-service-account'),
+        organization_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+        project_type: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+        project_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+      }),
+      z.object({
+        type: z.literal('platform-service-account'),
+        service_account_id: serviceAccountIdSchema,
+      }),
+    ])
+  ),
 });
 
 /**
@@ -160,9 +182,25 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     );
   }
 
+  async authorize(request: KibanaRequest): Promise<void> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot use a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'manage_security',
+      action: 'use a service account',
+    });
+  }
+
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     try {
       const account = await this.createAccount(request, params);
@@ -182,7 +220,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
@@ -191,6 +229,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
 
     const { name, roles } = parseCreateServiceAccountParams(params);
+    const trustedPlatformAssumers = params.trustedPlatformAssumers ?? [];
 
     // UIAM's first iteration grants the account its creator's privileges and offers no way to
     // narrow them, so a caller-supplied role list cannot be honoured. Rejected rather than
@@ -222,7 +261,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           organization_id: this.cloudProjectContext.organizationId,
           name,
           role_assignments: SERVICE_ACCOUNT_ROLE_ASSIGNMENTS,
-          assumable_by: buildAssumableBy(this.cloudProjectContext),
+          assumable_by: buildAssumableBy(this.cloudProjectContext, trustedPlatformAssumers),
         },
         // External API keys must not carry client authentication (`null`); everything else is
         // vouched for with Kibana's own shared secret.
@@ -246,6 +285,22 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           `need to be removed manually: ${parsed.error.message}`
       );
       throw Boom.badGateway('The service account was created but could not be reported back.');
+    }
+
+    if (trustedPlatformAssumers.length > 0) {
+      const granted = trustedAssumerResponseSchema.safeParse(result);
+      if (
+        !granted.success ||
+        !grantsTrustedPlatformAssumers(granted.data.assumable_by, trustedPlatformAssumers)
+      ) {
+        this.logger.error(
+          `Refusing service account [${name}] UIAM created without the required platform assumer. ` +
+            'It may need to be removed manually.'
+        );
+        throw Boom.badGateway(
+          'The service account was created without the required platform assumer, so it was not registered.'
+        );
+      }
     }
 
     return parsed.data;

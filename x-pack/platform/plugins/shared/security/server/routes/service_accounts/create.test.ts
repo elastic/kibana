@@ -287,6 +287,12 @@ describe('Create service account route', () => {
       ]);
     });
 
+    it('rejects `trustedPlatformAssumers`, which only trusted server code may set', () => {
+      expect(issuesFor({ ...requestBody, trustedPlatformAssumers: ['relay'] })).toEqual([
+        expect.objectContaining({ code: 'unrecognized_keys', keys: ['trustedPlatformAssumers'] }),
+      ]);
+    });
+
     it('rejects organization_id, which Kibana derives from cloud context', () => {
       expect(issuesFor({ ...requestBody, organization_id: 'other-organization' })).toEqual([
         expect.objectContaining({ code: 'unrecognized_keys', keys: ['organization_id'] }),

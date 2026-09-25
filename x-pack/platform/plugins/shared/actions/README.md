@@ -85,6 +85,25 @@ on without that configuration, the Relay request fails rather than being sent un
 The setting is rejected outside Serverless; with it off (the default) the header is omitted and the
 Relay identifies Kibana from the mTLS leg alone.
 
+The same flag chooses the Slack install credential. Off (ECH, or Serverless with the default),
+install sends `kibana_api_key` and nothing else. On, install creates or reuses a user-managed UIAM
+service account, adds Relay's platform service account (`relay-service`) to `assumable_by` in the
+security plugin, and sends only `uiam_service_account_id`. The two credentials are mutually
+exclusive. HTTP callers cannot name an assumer: the create-service-account route accepts `{ name }`
+only. A raw service-account token is never put on the install body. If the Relay rejects the
+install, the account is retained — Kibana has no revoke API, and the id is not a credential. A
+failed connect records the id so the retry reuses it. A failed reconnect onto a working
+API-key connection keeps that connection's status and key, and only adds the id. Every connect,
+including one that reuses a stored id, calls the security service's `authorize` and therefore
+requires `manage_security`. The saved id is not authorization. That check does not re-bound the
+application privileges UIAM snapshotted at creation; UIAM has no update API for that. A Relay 403
+on a reused id clears it, and the next connect creates a new account. A 5xx or other non-403
+failure leaves the id in place. Creation refuses an account unless UIAM echoes Relay in
+`assumable_by`, and that account is not registered. Disconnect keeps the id on a `not_connected`
+document so the next connect selects the same account. There is still no API to delete the account
+or to remove Relay from `assumable_by`. Live end-to-end install still depends on Relay storing that id and on
+Agent Builder accepting the exchanged token.
+
 ### Configuration Utilities
 
 This module provides utilities for interacting with the configuration.
