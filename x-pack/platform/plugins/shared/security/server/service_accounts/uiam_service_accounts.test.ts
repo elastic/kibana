@@ -168,6 +168,31 @@ describe('UiamServiceAccounts', () => {
       );
     });
 
+    // UIAM role IDs are case-sensitive, so these are two different roles.
+    it('keeps roles that differ only in case', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+      const roles = ['Viewer', 'viewer'];
+
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          roles,
+        })
+      ).resolves.toEqual({ ...createdAccount, roles });
+
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          role_assignments: {
+            organization: [
+              { ...expectedRoleAssignments.organization[0], application_roles: roles },
+            ],
+          },
+        }),
+        undefined
+      );
+    });
+
     it("rejects an omitted `roles` with a 400 rather than granting the creator's privileges", async () => {
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {

@@ -211,6 +211,21 @@ describe('EsServiceAccounts', () => {
       );
     });
 
+    // Elasticsearch role names are case-sensitive, so these are two different roles.
+    it('keeps roles that differ only in case', async () => {
+      mockHappyPath();
+      const roles = ['Viewer', 'viewer'];
+
+      await expect(serviceAccounts.create(request, { ...createParams, roles })).resolves.toEqual({
+        ...createdAccount,
+        roles,
+      });
+
+      expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ body: { roles } })
+      );
+    });
+
     // The two backends cap roles differently, so UIAM's lower cap must not leak into this one.
     it(`accepts more roles than UIAM allows, up to ${ES_SERVICE_ACCOUNT_MAX_ROLES}`, async () => {
       mockHappyPath();
