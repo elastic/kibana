@@ -184,7 +184,8 @@ export function createEvaluateDataset({
       VisualizationAgentTaskOutput
     >({
       runQuery,
-      predictionExtractor: (output) => output.esql ?? '',
+      predictionExtractor: (output) =>
+        visualizationExtractor(output).map((visualization) => visualization.esql),
       groundTruthExtractor: (expected) => extractGoldQuery(expected),
     });
 

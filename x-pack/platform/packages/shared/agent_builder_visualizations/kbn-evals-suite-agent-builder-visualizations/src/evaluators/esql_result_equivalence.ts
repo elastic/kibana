@@ -70,12 +70,34 @@ const labelFromScore = (score: number): string =>
 const errorMessage = (reason: unknown): string =>
   reason instanceof Error ? reason.message : String(reason);
 
+interface CandidateComparison {
+  candidateQuery: string;
+  jaccard: number;
+  candidateRowCount: number;
+  intersectionRowCount: number;
+  error?: string;
+}
+
+const describeComparison = (comparison: CandidateComparison, goldRowCount: number): string => {
+  if (comparison.error !== undefined) {
+    return `Candidate query failed to execute: ${comparison.error}`;
+  }
+  const { jaccard, intersectionRowCount, candidateRowCount } = comparison;
+  return jaccard === 1
+    ? `Result sets are identical (${goldRowCount} rows).`
+    : `${intersectionRowCount} of ${Math.max(
+        goldRowCount,
+        candidateRowCount
+      )} rows overlap (gold ${goldRowCount}, candidate ${candidateRowCount}).`;
+};
+
 /**
- * CODE evaluator: executes the gold and candidate ES|QL (with the optional
- * time-picker WHERE stripped from both) and scores the Jaccard overlap of
- * their result rows. Sits between "the query runs" and the LLM
- * equivalence judge: a candidate that groups by the wrong field or drops a
- * filter produces different rows no matter how plausible it reads.
+ * CODE evaluator: executes the gold and each candidate ES|QL (with the optional
+ * time-picker WHERE stripped from all of them) and scores the mean Jaccard
+ * overlap of their result rows, one candidate per produced visualization.
+ * Sits between "the query runs" and the LLM equivalence judge: a candidate
+ * that groups by the wrong field or drops a filter produces different rows no
+ * matter how plausible it reads.
  */
 export function createEsqlResultEquivalenceEvaluator<
   TExample extends Example = Example,
@@ -83,7 +105,8 @@ export function createEsqlResultEquivalenceEvaluator<
 >(config: {
   /** Executes ES|QL; share one runner across evaluators so each query runs once. */
   runQuery: EsqlQueryRunner;
-  predictionExtractor: (output: TTaskOutput) => string;
+  /** One query per produced visualization; each is executed and compared on its own. */
+  predictionExtractor: (output: TTaskOutput) => string[];
   groundTruthExtractor: (expected: TExample['output']) => string;
   normalize?: RowNormalizeOptions;
   name?: string;
@@ -101,7 +124,7 @@ export function createEsqlResultEquivalenceEvaluator<
     kind: 'CODE',
     direction: 'maximize',
     evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
-      const candidateQuery = predictionExtractor(output);
+      const candidateQueries = predictionExtractor(output).filter((query) => query.length > 0);
       const goldQuery = groundTruthExtractor(expected);
 
       if (!goldQuery) {
@@ -111,7 +134,7 @@ export function createEsqlResultEquivalenceEvaluator<
           explanation: 'No gold query declared for this example.',
         };
       }
-      if (!candidateQuery) {
+      if (candidateQueries.length === 0) {
         return {
           score: 0,
           label: 'no-visualization',
@@ -120,10 +143,10 @@ export function createEsqlResultEquivalenceEvaluator<
       }
 
       // The suite treats the time-picker WHERE as cosmetic (the chart supplies the
-      // window), so strip it from both sides before executing, as the LLM judge does.
-      const [goldResult, candidateResult] = await Promise.allSettled([
+      // window), so strip it from every side before executing, as the LLM judge does.
+      const [goldResult, ...candidateResults] = await Promise.allSettled([
         runQuery(normalizeEsqlForEquivalence(goldQuery)),
-        runQuery(normalizeEsqlForEquivalence(candidateQuery)),
+        ...candidateQueries.map((query) => runQuery(normalizeEsqlForEquivalence(query))),
       ]);
 
       if (goldResult.status === 'rejected') {
@@ -132,39 +155,46 @@ export function createEsqlResultEquivalenceEvaluator<
           score: null,
           label: 'gold-execution-failure',
           explanation: `Gold query failed to execute: ${errorMessage(goldResult.reason)}`,
-          metadata: { goldQuery, candidateQuery },
-        };
-      }
-      if (candidateResult.status === 'rejected') {
-        return {
-          score: 0,
-          label: 'execution-failure',
-          explanation: `Candidate query failed to execute: ${errorMessage(candidateResult.reason)}`,
-          metadata: { goldQuery, candidateQuery },
+          metadata: { goldQuery, candidateQueries },
         };
       }
 
       const goldRows = normalizeRows(goldResult.value.values ?? [], normalize);
-      const candidateRows = normalizeRows(candidateResult.value.values ?? [], normalize);
-      const { intersectionSize, jaccard } = compareRowMultisets(goldRows, candidateRows);
-
-      return {
-        score: jaccard,
-        label: labelFromScore(jaccard),
-        explanation:
-          jaccard === 1
-            ? `Result sets are identical (${goldRows.length} rows).`
-            : `${intersectionSize} of ${Math.max(
-                goldRows.length,
-                candidateRows.length
-              )} rows overlap (gold ${goldRows.length}, candidate ${candidateRows.length}).`,
-        metadata: {
-          goldRowCount: goldRows.length,
+      const comparisons = candidateResults.map((result, index): CandidateComparison => {
+        const candidateQuery = candidateQueries[index];
+        if (result.status === 'rejected') {
+          return {
+            candidateQuery,
+            jaccard: 0,
+            candidateRowCount: 0,
+            intersectionRowCount: 0,
+            error: errorMessage(result.reason),
+          };
+        }
+        const candidateRows = normalizeRows(result.value.values ?? [], normalize);
+        const { intersectionSize, jaccard } = compareRowMultisets(goldRows, candidateRows);
+        return {
+          candidateQuery,
+          jaccard,
           candidateRowCount: candidateRows.length,
           intersectionRowCount: intersectionSize,
-          jaccard,
+        };
+      });
+
+      const score =
+        comparisons.reduce((sum, comparison) => sum + comparison.jaccard, 0) / comparisons.length;
+      const allFailed = comparisons.every((comparison) => comparison.error !== undefined);
+
+      return {
+        score,
+        label: allFailed ? 'execution-failure' : labelFromScore(score),
+        explanation: comparisons
+          .map((comparison) => describeComparison(comparison, goldRows.length))
+          .join(' '),
+        metadata: {
+          goldRowCount: goldRows.length,
           goldQuery,
-          candidateQuery,
+          candidates: comparisons,
         },
       };
     },

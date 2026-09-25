@@ -63,7 +63,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
   const evaluate = (esClient: ElasticsearchClient, goldQuery = GOLD, candidateQuery = CANDIDATE) =>
     createEsqlResultEquivalenceEvaluator({
       runQuery: createEsqlQueryRunner(esClient),
-      predictionExtractor: () => candidateQuery,
+      predictionExtractor: () => [candidateQuery],
       groundTruthExtractor: () => goldQuery,
     }).evaluate({
       input: { question: 'q' },
