@@ -129,7 +129,7 @@ steps:
   # narrative does not restate them — it just points at what happened.
   - name: write_hunt_results_message
     type: workflow.execute
-    if: "${{ steps.run_hunt_coordinator.output.completedSuccessfully == true }}"
+    if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
     with:
       workflow-id: system-alertzero-journal-note
       inputs:
@@ -159,7 +159,7 @@ steps:
   # convention: a report that has never had a hit event has no count key.
   - name: set_evidence_script
     type: data.set
-    if: "${{ steps.run_hunt_coordinator.output.completedSuccessfully == true }}"
+    if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
     with:
       evidence_script: |
         if (!(ctx._source.evidence instanceof List)) { ctx._source.evidence = new ArrayList(); }
@@ -183,29 +183,37 @@ steps:
           ctx._source.evidence.add(el);
         }
 
-  # `last_hunt_status` collapses to `hit` | `clean` off `tier1.hasConfirmedHit`
-  # (the same collapse the deleted `write_hunt_feedback.ts` did via
-  # `collapseHuntStatus`), not the coordinator's own three-way `status` enum
-  # (`tier1_only` | `tier1_and_tier2` | `tier2_only_skipped`), which describes
-  # which tiers ran, not whether either found anything.
+  # `last_hunt_status` collapses to `hit` | `clean` off the coordinator's
+  # top-level `has_confirmed_hit` (the same collapse the deleted
+  # `write_hunt_feedback.ts` did via `collapseHuntStatus`), not the
+  # coordinator's own three-way `status` enum (`tier1_only` | `tier1_and_tier2`
+  # | `tier2_only_skipped`), which describes which tiers ran, not whether
+  # either found anything. `HuntCoordinatorResult.has_confirmed_hit`'s own doc
+  # comment is explicit: read the top-level field, not `tier1.has_confirmed_hit`
+  # alone (Tier 2 can confirm a hit Tier 1 alone did not). Field names below are
+  # the coordinator's real snake_case wire shape (`hunt_coordinator.ts`), not
+  # the camelCase this step read before (verified live, 2026-09-25: the
+  # mismatch made `completed_successfully` (same bug, this step's own `if`)
+  # and this hit collapse both always resolve nil/false, so no run -- hit or
+  # clean -- ever reached the SSE attach, results message, or evidence write).
   - name: resolve_evidence_values
     type: data.set
-    if: "${{ steps.run_hunt_coordinator.output.completedSuccessfully == true }}"
+    if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
     with:
       last_hunt_status: |-
-        {%- if steps.run_hunt_coordinator.output.tier1.hasConfirmedHit == true -%}
+        {%- if steps.run_hunt_coordinator.output.has_confirmed_hit == true -%}
         hit
         {%- else -%}
         clean
         {%- endif -%}
-      last_hunt_event_hit_count: "${{ steps.run_hunt_coordinator.output.tier1.counts.totalHits | default: null }}"
+      last_hunt_event_hit_count: "${{ steps.run_hunt_coordinator.output.tier1.counts.total_hits | default: null }}"
 
   # Update, not upsert: the report was just loaded by the Worker's own
   # candidate selection before this child ran, so a missing doc must fail
   # loudly rather than materialize a partial row.
   - name: write_evidence
     type: elasticsearch.update
-    if: "${{ steps.run_hunt_coordinator.output.completedSuccessfully == true }}"
+    if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
     with:
       index: .kibana-threat-reports
       id: "{{ inputs.reportId }}"
@@ -228,7 +236,7 @@ steps:
     type: data.set
     with:
       result_status: |-
-        {%- if steps.run_hunt_coordinator.output.completedSuccessfully == true -%}
+        {%- if steps.run_hunt_coordinator.output.completed_successfully == true -%}
         success
         {%- else -%}
         failed
