@@ -16,6 +16,7 @@ import {
   injectESQLQueryIntoLensLayers,
   isPreferredEsqlVisCompatibleWithCurrentQuery,
   deriveLensSuggestionFromLensAttributes,
+  getSuggestionTypeAfterEditorUpdate,
 } from './external_vis_context';
 import type { QueryParams } from './external_vis_context';
 import { getLensVisMock } from '../__mocks__/lens_vis';
@@ -165,6 +166,35 @@ describe('external_vis_context', () => {
           } as UnifiedHistogramVisContext
         )
       ).toBe(true);
+    });
+  });
+
+  describe('getSuggestionTypeAfterEditorUpdate', () => {
+    it('keeps histogramForESQL when the edited vis is still XY', () => {
+      expect(
+        getSuggestionTypeAfterEditorUpdate({
+          currentSuggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+          visualizationType: 'lnsXY',
+        })
+      ).toBe(UnifiedHistogramSuggestionType.histogramForESQL);
+    });
+
+    it('uses lensSuggestion when the edited vis is not XY', () => {
+      expect(
+        getSuggestionTypeAfterEditorUpdate({
+          currentSuggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+          visualizationType: 'lnsPie',
+        })
+      ).toBe(UnifiedHistogramSuggestionType.lensSuggestion);
+    });
+
+    it('uses lensSuggestion when the current vis is already a Lens suggestion', () => {
+      expect(
+        getSuggestionTypeAfterEditorUpdate({
+          currentSuggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+          visualizationType: 'lnsXY',
+        })
+      ).toBe(UnifiedHistogramSuggestionType.lensSuggestion);
     });
   });
 

@@ -895,6 +895,19 @@ function areSuggestionAndVisContextAndQueryParamsStillCompatible({
     return false;
   }
 
+  // Apply Line stamps `lensSuggestion` on an XY histogram. That is still the
+  // ES|QL histogram: keep it when dataset identity already matched above.
+  const isApplyStampedEsqlHistogram =
+    isEsql &&
+    suggestionType === UnifiedHistogramSuggestionType.histogramForESQL &&
+    externalVisContext.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
+    suggestion.visualizationId === 'lnsXY' &&
+    externalVisContext.attributes.visualizationType === 'lnsXY';
+
+  if (isApplyStampedEsqlHistogram) {
+    return true;
+  }
+
   return (
     suggestionType === externalVisContext.suggestionType &&
     // vis shape should match

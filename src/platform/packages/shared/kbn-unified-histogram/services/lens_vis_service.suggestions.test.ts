@@ -554,6 +554,61 @@ describe('LensVisService suggestions', () => {
     expect(lensVis.visContext?.attributes.title).toBe('Line');
   });
 
+  test('should keep an Apply-stamped ES|QL Line histogram when suggestionType is lensSuggestion', async () => {
+    const externalVisContext = {
+      suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+      requestData: {
+        dataViewId: 'esql:the-data-view:@timestamp:',
+        timeField: '@timestamp',
+        timeInterval: undefined,
+        breakdownField: undefined,
+      },
+      attributes: {
+        title: 'Line',
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  index: 'esql-old',
+                  timeField: '@timestamp',
+                  query: {
+                    esql: 'from the-data-view | limit 10 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    } as unknown as UnifiedHistogramVisContext;
+
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'from the-data-view | limit 10' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: true,
+      allSuggestions: [],
+      isTransformationalESQL: false,
+      externalVisContext,
+    });
+
+    expect(lensVis.visContext?.attributes.title).toBe('Line');
+    expect(
+      (lensVis.visContext?.attributes.state.visualization as { preferredSeriesType?: string })
+        ?.preferredSeriesType
+    ).toBe('line');
+  });
+
   test('should drop a customized ES|QL Line histogram when the FROM index pattern changes', async () => {
     const histogramQuery = {
       esql: `from logs* | limit 10

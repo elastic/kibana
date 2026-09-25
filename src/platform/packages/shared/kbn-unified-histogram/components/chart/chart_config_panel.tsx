@@ -16,7 +16,10 @@ import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import { deriveLensSuggestionFromLensAttributes } from '../../utils/external_vis_context';
+import {
+  deriveLensSuggestionFromLensAttributes,
+  getSuggestionTypeAfterEditorUpdate,
+} from '../../utils/external_vis_context';
 
 import type {
   UnifiedHistogramChartLoadEvent,
@@ -94,7 +97,10 @@ export function ChartConfigPanel({
         queryParams: null, // skip validation for matching query
       });
       onSuggestionContextEdit({
-        type: UnifiedHistogramSuggestionType.lensSuggestion,
+        type: getSuggestionTypeAfterEditorUpdate({
+          currentSuggestionType: visContext.suggestionType,
+          visualizationType: attributes.visualizationType,
+        }),
         suggestion: updatedSuggestion,
       });
     },
