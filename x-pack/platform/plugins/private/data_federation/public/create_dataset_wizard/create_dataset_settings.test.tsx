@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -65,6 +65,16 @@ const getSettingsValue = (getByTestId: ReturnType<typeof render>['getByTestId'])
   JSON.parse(getByTestId('settingsValue').textContent ?? '{}');
 
 describe('CreateDatasetSettings', () => {
+  const openComboBox = async (
+    getByTestId: ReturnType<typeof render>['getByTestId'],
+    testId: string
+  ) => {
+    const combo = getByTestId(testId);
+    await act(async () => {
+      fireEvent.click(combo.querySelector('input') ?? combo);
+    });
+  };
+
   const selectFormat = async (
     getByTestId: ReturnType<typeof render>['getByTestId'],
     format: string
@@ -100,22 +110,24 @@ describe('CreateDatasetSettings', () => {
     expect(getSettingsValue(getByTestId)).toMatchObject({ format: 'parquet' });
   });
 
-  it('updates partition_detection in form state', () => {
+  it('updates partition_detection in form state', async () => {
     const { getByTestId } = renderSettings();
 
-    const partitionDetectionCombo = getByTestId('createDatasetSettingsPartitionDetection');
-    fireEvent.click(partitionDetectionCombo.querySelector('input') ?? partitionDetectionCombo);
-    fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-hive'));
+    await openComboBox(getByTestId, 'createDatasetSettingsPartitionDetection');
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-hive'));
+    });
 
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
   });
 
-  it('supports partition_detection template in form state', () => {
+  it('supports partition_detection template in form state', async () => {
     const { getByTestId } = renderSettings();
 
-    const partitionDetectionCombo = getByTestId('createDatasetSettingsPartitionDetection');
-    fireEvent.click(partitionDetectionCombo.querySelector('input') ?? partitionDetectionCombo);
-    fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-template'));
+    await openComboBox(getByTestId, 'createDatasetSettingsPartitionDetection');
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-template'));
+    });
 
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'template' });
   });
@@ -137,6 +149,20 @@ describe('CreateDatasetSettings', () => {
   });
 
   describe('CSV format', () => {
+    it('marks comma as the default delimiter option', async () => {
+      const { getByTestId, getByText } = renderSettings();
+
+      await selectFormat(getByTestId, 'csv');
+      await openComboBox(getByTestId, 'createDatasetSettingsDelimiter');
+
+      const commaLabel = await waitFor(() =>
+        getByText(createDatasetWizardStrings.settingsDelimiterOptionComma)
+      );
+      const commaOption = commaLabel.closest('button') ?? commaLabel.parentElement;
+      expect(commaOption).not.toBeNull();
+      expect(commaOption).toHaveTextContent(createDatasetWizardStrings.defaultBadgeLabel);
+    });
+
     it('shows delimiter, mode, and header_row at the top level (core)', async () => {
       const { getByTestId } = renderSettings();
 
@@ -151,11 +177,28 @@ describe('CreateDatasetSettings', () => {
       const { getByTestId, getByText } = renderSettings();
 
       await selectFormat(getByTestId, 'csv');
-      const delimiterCombo = getByTestId('createDatasetSettingsDelimiter');
-      fireEvent.click(delimiterCombo.querySelector('input') ?? delimiterCombo);
-      fireEvent.click(getByText(createDatasetWizardStrings.settingsDelimiterOptionPipe));
+      await openComboBox(getByTestId, 'createDatasetSettingsDelimiter');
+      await act(async () => {
+        fireEvent.click(getByText(createDatasetWizardStrings.settingsDelimiterOptionPipe));
+      });
 
       expect(getSettingsValue(getByTestId)).toMatchObject({ delimiter: '|' });
+    });
+  });
+
+  describe('TSV format', () => {
+    it('marks tab as the default delimiter option', async () => {
+      const { getByTestId, getByText } = renderSettings();
+
+      await selectFormat(getByTestId, 'tsv');
+      await openComboBox(getByTestId, 'createDatasetSettingsDelimiter');
+
+      const tabLabel = await waitFor(() =>
+        getByText(createDatasetWizardStrings.settingsDelimiterOptionTab)
+      );
+      const tabOption = tabLabel.closest('button') ?? tabLabel.parentElement;
+      expect(tabOption).not.toBeNull();
+      expect(tabOption).toHaveTextContent(createDatasetWizardStrings.defaultBadgeLabel);
     });
   });
 
@@ -267,6 +310,18 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsTrimSpaces')).toBeInTheDocument();
+    const quoteField = getByTestId('createDatasetSettingsQuote') as HTMLInputElement;
+    expect(quoteField).toHaveValue('');
+    expect(quoteField).toHaveAttribute(
+      'placeholder',
+      createDatasetWizardStrings.settingsQuotePlaceholder
+    );
+    const quoteRow = quoteField.closest('.euiFormRow');
+    expect(quoteRow).not.toBeNull();
+    expect(within(quoteRow as HTMLElement).getByText('"')).toBeInTheDocument();
+    expect(
+      within(quoteRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
+    ).toBeInTheDocument();
     // API-only / passthrough-only fields are never shown in the UI
     expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
     expect(queryByTestId('createDatasetSettingsComment')).toBeNull();

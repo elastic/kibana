@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+
+import { EuiBadge } from '@elastic/eui';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
@@ -48,19 +50,31 @@ export function DelimiterSelect({
   value,
   onChange,
   onBlur,
+  defaultValue,
 }: {
   value: string;
   onChange: (next: string) => void;
   onBlur: () => void;
+  /** Format-specific default delimiter (e.g. comma for CSV, tab for TSV). */
+  defaultValue?: string;
 }) {
   const selectedValue = value ?? '';
+  const presetOptions = useMemo((): ComboBoxPresetOption[] => {
+    return PRESET_OPTIONS.map((option) => ({
+      ...option,
+      append:
+        defaultValue && option.value === defaultValue ? (
+          <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>
+        ) : undefined,
+    }));
+  }, [defaultValue]);
 
   return (
     <EuiComboBoxWithCustomOption
       value={selectedValue}
       onChange={onChange}
       onBlur={onBlur}
-      presetOptions={PRESET_OPTIONS}
+      presetOptions={presetOptions}
       getCustomLabel={toDisplayLabel}
       // Don't trim: allow whitespace delimiters (e.g. a single space).
       isValidCustomOption={(searchValue) => Boolean(searchValue) && searchValue.length === 1}

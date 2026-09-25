@@ -815,6 +815,13 @@ export const createDatasetWizardStrings = {
     defaultMessage: 'The character used to quote fields.',
   }),
 
+  settingsQuotePlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsQuotePlaceholder',
+    {
+      defaultMessage: 'Enter a quote character',
+    }
+  ),
+
   settingsQuoteInvalid: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsQuoteInvalid',
     {

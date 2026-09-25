@@ -66,6 +66,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           value={delimiterField.value}
           onChange={(next) => delimiterField.onChange(next)}
           onBlur={delimiterField.onBlur}
+          defaultValue={format === 'tsv' ? '\t' : ','}
         />
       </EuiFormRow>
       <EuiFormRow

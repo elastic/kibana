@@ -6,25 +6,28 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController, useWatch } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
   DEFAULT_COLUMN_PREFIX,
-  DEFAULT_CSV_ESCAPE,
   DEFAULT_CSV_QUOTE,
   validateEscapeCharacter,
   validateQuoteCharacter,
   type CreateDatasetFormValues,
-  type DatasetFormatFormValue,
 } from '../create_dataset_form_state';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { TrimSpaces } from './trim_spaces';
 
+const helpTextDefault = (valueLabel: string) => (
+  <EuiText size="xs" color="subdued">
+    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
+  </EuiText>
+);
+
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
   const { field: quoteField, fieldState: quoteState } = useController({
     name: 'settings.quote',
     control,
@@ -39,18 +42,10 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
   const { field: trimSpacesField } = useController({ name: 'settings.trim_spaces', control });
 
   React.useEffect(() => {
-    if (format === 'csv') {
-      if (!quoteField.value) quoteField.onChange(DEFAULT_CSV_QUOTE);
-      if (!escapeField.value) escapeField.onChange(DEFAULT_CSV_ESCAPE);
-    }
-    if (format === 'tsv') {
-      if (quoteField.value === DEFAULT_CSV_QUOTE) quoteField.onChange('');
-      if (escapeField.value === DEFAULT_CSV_ESCAPE) escapeField.onChange('');
-    }
-    if ((format === 'csv' || format === 'tsv') && !columnPrefixField.value) {
+    if (!columnPrefixField.value) {
       columnPrefixField.onChange(DEFAULT_COLUMN_PREFIX);
     }
-  }, [columnPrefixField, escapeField, format, quoteField]);
+  }, [columnPrefixField]);
 
   return (
     <div data-test-subj="createDatasetCsvTsvAdvancedSettings">
@@ -61,7 +56,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
             infoText={createDatasetWizardStrings.settingsQuoteCharacterDescription}
           />
         }
-        helpText={createDatasetWizardStrings.settingsQuoteHelp}
+        helpText={helpTextDefault(DEFAULT_CSV_QUOTE)}
         fullWidth
         isInvalid={Boolean(quoteState.error)}
         error={quoteState.error?.message}
@@ -69,6 +64,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         <EuiFieldText
           data-test-subj="createDatasetSettingsQuote"
           fullWidth
+          placeholder={createDatasetWizardStrings.settingsQuotePlaceholder}
           maxLength={1}
           isInvalid={Boolean(quoteState.error)}
           value={quoteField.value}

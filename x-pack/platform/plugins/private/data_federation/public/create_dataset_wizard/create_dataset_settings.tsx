@@ -369,6 +369,7 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
           value={delimiterField.value}
           onChange={(next) => delimiterField.onChange(next)}
           onBlur={delimiterField.onBlur}
+          defaultValue={format === 'tsv' ? '\t' : ','}
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsModeLabel} fullWidth>
