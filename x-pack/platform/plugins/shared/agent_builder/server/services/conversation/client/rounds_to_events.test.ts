@@ -239,7 +239,15 @@ describe('userMessageEvent (split builder)', () => {
   it('produces exactly one user_message event with the round input and actor', () => {
     const round = baseRound();
     const conversation = baseConversation([round]);
-    const event = userMessageEvent(round, conversation);
+    const event = userMessageEvent(
+      {
+        id: `${round.id}::user_message`,
+        createdAt: round.started_at,
+        input: round.input,
+        author: round.author,
+      },
+      conversation
+    );
 
     expect(event).toMatchObject({
       id: 'round-1::user_message',
@@ -546,7 +554,14 @@ describe('lastTerminatedExecutionIndex', () => {
 
   it('returns -1 when the round has no execution_terminated', () => {
     const events = [
-      userMessageEvent(baseRound({ id: 'r1' }), conversation),
+      userMessageEvent(
+        {
+          id: 'r1::user_message',
+          input: { message: 'hello' },
+          createdAt: '2024-01-01T00:00:00.000Z',
+        },
+        conversation
+      ),
       lifecycle('r1::execution', TimelineEventType.executionFailed, 'r1::execution_failed'),
     ];
     expect(lastTerminatedExecutionIndex({ events }, 'r1')).toBe(-1);
