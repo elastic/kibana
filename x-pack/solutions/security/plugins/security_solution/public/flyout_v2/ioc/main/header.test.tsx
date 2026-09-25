@@ -20,6 +20,12 @@ import {
   IOC_DETAILS_JSON_TAB_TEST_ID,
 } from './test_ids';
 
+jest.mock('../../shared/components/flyout_header_actions', () => ({
+  FlyoutHeaderActions: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mockFlyoutHeaderActions">{children}</div>
+  ),
+}));
+
 const mockIndicator = generateMockIndicator();
 const tabs = getTabsDisplayed({
   indicator: mockIndicator,
@@ -43,6 +49,7 @@ describe('<Header />', () => {
 
     expect(getByTestId(`${IOC_DETAILS_TITLE_TEST_ID}Text`)).toBeInTheDocument();
     expect(getByTestId(IOC_DETAILS_SUBTITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId('mockFlyoutHeaderActions')).toBeInTheDocument();
   });
 
   it('should render all tabs', () => {

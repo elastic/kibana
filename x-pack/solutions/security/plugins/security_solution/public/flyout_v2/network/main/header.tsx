@@ -12,6 +12,7 @@ import { getNetworkDetailsUrl } from '../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { encodeIpv6 } from '../../../common/lib/helpers';
 
 export interface HeaderProps {
@@ -34,20 +35,23 @@ export const Header: FC<HeaderProps> = memo(({ ip, flowTarget }: HeaderProps) =>
   const href = useMemo(() => getNetworkDetailsUrl(encodeIpv6(ip), flowTarget), [flowTarget, ip]);
 
   return (
-    <SecuritySolutionLinkAnchor
-      deepLinkId={SecurityPageName.network}
-      path={href}
-      target={'_blank'}
-      external={false}
-      override={urlParamOverride}
-    >
-      <FlyoutTitle
-        title={ip}
-        iconType={'globe'}
-        isLink
-        data-test-subj="network-details-flyout-header"
-      />
-    </SecuritySolutionLinkAnchor>
+    <>
+      <FlyoutHeaderActions />
+      <SecuritySolutionLinkAnchor
+        deepLinkId={SecurityPageName.network}
+        path={href}
+        target={'_blank'}
+        external={false}
+        override={urlParamOverride}
+      >
+        <FlyoutTitle
+          title={ip}
+          iconType={'globe'}
+          isLink
+          data-test-subj="network-details-flyout-header"
+        />
+      </SecuritySolutionLinkAnchor>
+    </>
   );
 });
 

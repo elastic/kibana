@@ -25,6 +25,7 @@ import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/type
 import type { RightPanelTabType, RightPanelPaths } from './tabs';
 import { flyoutHeaderBlockStyles } from '../../shared/components/flyout_header_block';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { Timestamp } from '../../shared/components/timestamp';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { HeaderBlock } from './components/header_block';
@@ -161,6 +162,7 @@ export const Header: FC<HeaderProps> = memo(
 
     return (
       <>
+        <FlyoutHeaderActions />
         <FlyoutTitle
           title={i18n.translate('xpack.securitySolution.flyout.iocDetails.panelTitle', {
             defaultMessage: 'Indicator details',
