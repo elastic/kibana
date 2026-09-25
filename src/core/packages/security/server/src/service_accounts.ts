@@ -34,11 +34,11 @@ export interface CoreServiceAccountsService {
   isEnabled(): boolean;
 
   /**
-   * Create a service account whose privileges are bounded by those of the user
-   * bound to the provided request.
+   * Create a service account with the given roles, bounded by the privileges of the user bound to
+   * the provided request. Requires the `manage_security` cluster privilege.
    *
    * @param request The request whose user the service account is created on behalf of.
-   * @param params The name for the new service account.
+   * @param params The name and roles for the new service account.
    */
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
 
