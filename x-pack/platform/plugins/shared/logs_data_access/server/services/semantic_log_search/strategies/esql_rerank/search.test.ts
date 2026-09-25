@@ -14,6 +14,7 @@ import { searchWithEsqlRerank } from './search';
 import {
   DEFAULT_RANK_WINDOW,
   MAX_RERANK_INPUT_LENGTH,
+  RERANK_INFERENCE_TIMEOUT,
   RERANK_REQUEST_TIMEOUT_MS,
 } from '../../constants';
 import { searchDeps } from '../../test_helpers';
@@ -244,6 +245,25 @@ describe('searchWithEsqlRerank', () => {
           input: expect.arrayContaining([expect.any(String)]),
         }),
         expect.any(Object)
+      );
+    });
+
+    // Elasticsearch's default inference budget is below what the local endpoint needs for a full
+    // rank window, and it is the server that gives up first, so the client `requestTimeout` alone
+    // cannot keep the call alive. See RERANK_ENDPOINTS.md.
+    it('sends a server-side timeout that leaves the client budget binding', async () => {
+      const headResponse = makePatternResponse([{ pattern: 'Connection timed out', count: 50 }]);
+      const { esClient, rerank } = buildMockClient({
+        totalDocs: 10_000,
+        headResponse,
+        rerankResult: [{ index: 0, relevance_score: 3.46 }],
+      });
+
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
+
+      expect(rerank).toHaveBeenCalledWith(
+        expect.objectContaining({ timeout: RERANK_INFERENCE_TIMEOUT }),
+        expect.objectContaining({ requestTimeout: RERANK_REQUEST_TIMEOUT_MS })
       );
     });
 

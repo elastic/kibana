@@ -65,15 +65,27 @@ function isTimeoutError(error: unknown): boolean {
  */
 const MODEL_DEPLOYMENT_TIMEOUT_TYPE = 'model_deployment_timeout_exception';
 
-// A cold rerank endpoint can exhaust the budget on either side of the wire: our transport timeout
-// fires as a client `TimeoutError`, while Elasticsearch giving up on the deployment first comes
-// back as a `ResponseError`. Both mean the model is not loaded yet, so both have to reach the same
-// classification, or the second one is reported as a generic execution failure and the caller is
-// told not to retry the one thing that would work.
-function isModelDeploymentTimeoutError(error: unknown): boolean {
+/** Elasticsearch's error type when a hosted inference service exceeds its own budget. */
+const INFERENCE_TIMEOUT_TYPE = 'timeout_exception';
+
+// A rerank call can exhaust its budget in three places, and only one of them arrives as a client
+// `TimeoutError`. The other two come back as a `ResponseError` and were both observed against a
+// serverless project (measurements in `RERANK_ENDPOINTS.md`):
+//
+//   - a cold local deployment           →       `model_deployment_timeout_exception`
+//   - a local deployment that cannot rank the
+//     candidate set within Elasticsearch's budget → `408 status_exception`
+//   - a hosted service shedding the request  →  `429 timeout_exception`
+//
+// All three are retryable, so all three have to reach the same classification, or the caller is told
+// not to retry the one thing that would work. 408 is matched on the status alone because it means
+// exactly this; a 429 is matched only alongside the timeout type, since a plain rate limit is a
+// different failure and must stay `execution`.
+function isInferenceTimeoutError(error: unknown): boolean {
   if (error instanceof errors.ResponseError) {
     const type = (error.body as { error?: { type?: string } } | undefined)?.error?.type;
-    if (type === MODEL_DEPLOYMENT_TIMEOUT_TYPE) return true;
+    if (type === MODEL_DEPLOYMENT_TIMEOUT_TYPE || type === INFERENCE_TIMEOUT_TYPE) return true;
+    if (error.statusCode === 408) return true;
   }
   return error instanceof Error && error.message.includes(MODEL_DEPLOYMENT_TIMEOUT_TYPE);
 }
@@ -137,7 +149,7 @@ export function toFailureResult(
     logger.debug(`Semantic log search cancelled for target "${target}" during ${phase}`);
     return errorResult(ERROR_REASON.CANCELLED, diagnostics);
   }
-  if (isTimeoutError(error) || isModelDeploymentTimeoutError(error)) {
+  if (isTimeoutError(error) || isInferenceTimeoutError(error)) {
     logger.warn(`Semantic log search ${timeoutText} for target "${target}"`);
     return errorResult(timeoutReason, diagnostics);
   }

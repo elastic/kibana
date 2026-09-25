@@ -201,6 +201,80 @@ describe('toFailureResult — execution', () => {
     expect(result).toMatchObject({ status: 'error', reason: 'inference_not_ready' });
   });
 
+  // Regression: reproduced against a serverless project with `.rerank-v1` already started. The
+  // deployment could not rank a full rank window inside Elasticsearch's own inference budget, and
+  // the 408 it answers with carries the generic `status_exception`, so it read as `execution`.
+  it('classifies a 408 status_exception as inference_not_ready in the rerank phase', () => {
+    const logger = loggerMock.create();
+    const error = new errors.ResponseError({
+      statusCode: 408,
+      body: {
+        error: { type: 'status_exception', reason: 'timeout [30s] waiting for inference result' },
+      },
+      headers: {},
+      warnings: null,
+      meta: {} as never,
+    });
+
+    const result = toFailureResult(error, {
+      logger,
+      target: 'logs-*',
+      phase: SEARCH_PHASE.RERANK,
+    });
+
+    expect(result).toMatchObject({
+      status: 'error',
+      reason: 'inference_not_ready',
+      diagnostics: { phase: 'rerank', elasticsearchErrorType: 'status_exception' },
+    });
+  });
+
+  // Observed on a hosted (EIS) endpoint, which sheds a request as 429 rather than 408.
+  it('classifies a 429 timeout_exception as inference_not_ready in the rerank phase', () => {
+    const logger = loggerMock.create();
+    const error = new errors.ResponseError({
+      statusCode: 429,
+      body: {
+        error: {
+          type: 'timeout_exception',
+          reason: 'Request timed out after [30s] for inference id [.jina-reranker-v3]',
+        },
+      },
+      headers: {},
+      warnings: null,
+      meta: {} as never,
+    });
+
+    const result = toFailureResult(error, {
+      logger,
+      target: 'logs-*',
+      phase: SEARCH_PHASE.RERANK,
+    });
+
+    expect(result).toMatchObject({ status: 'error', reason: 'inference_not_ready' });
+  });
+
+  // A 429 on its own is a rate limit, which is a different failure with different advice. Only the
+  // timeout type promotes it, so this must not be swept in with the shape above.
+  it('leaves a 429 that is not a timeout classified as execution', () => {
+    const logger = loggerMock.create();
+    const error = new errors.ResponseError({
+      statusCode: 429,
+      body: { error: { type: 'circuit_breaking_exception', reason: 'too much data' } },
+      headers: {},
+      warnings: null,
+      meta: {} as never,
+    });
+
+    const result = toFailureResult(error, {
+      logger,
+      target: 'logs-*',
+      phase: SEARCH_PHASE.RERANK,
+    });
+
+    expect(result).toMatchObject({ status: 'error', reason: 'execution' });
+  });
+
   it('leaves an unrelated ResponseError in the rerank phase classified as execution', () => {
     const logger = loggerMock.create();
     const error = new errors.ResponseError({

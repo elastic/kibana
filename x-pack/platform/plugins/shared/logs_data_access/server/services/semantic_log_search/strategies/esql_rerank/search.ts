@@ -13,6 +13,7 @@ import type {
 import {
   DEFAULT_MAX_PATTERNS,
   DEFAULT_RANK_WINDOW,
+  RERANK_INFERENCE_TIMEOUT,
   RERANK_REQUEST_TIMEOUT_MS,
 } from '../../constants';
 import type { SemanticLogSearchDeps } from '../../types';
@@ -93,6 +94,9 @@ export async function searchWithEsqlRerank(
         query: nlQuery,
         input: buildRerankInputs(capped),
         top_n: maxPatterns,
+        // Elasticsearch's own budget for the call, which defaults below what the local endpoint
+        // needs for a full rank window. Without it the client `requestTimeout` below never applies.
+        timeout: RERANK_INFERENCE_TIMEOUT,
         // We never read the echoed text; suppress it to avoid transferring the full input back.
         // Must stay inside `task_settings`: as a top-level field, non-`elasticsearch` inference
         // services reject it with `validation_exception`.

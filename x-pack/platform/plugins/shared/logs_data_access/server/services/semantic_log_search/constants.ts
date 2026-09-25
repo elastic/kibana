@@ -103,15 +103,26 @@ export const ESQL_REQUEST_TIMEOUT_MS = 30_000;
  * was measured importing its model for 21 s before deployment even began, so it needs a larger
  * budget than the ES|QL passes.
  *
- * This is not the binding limit on a cold local endpoint. Elasticsearch waits 30 s for the
- * deployment to start and then answers with `model_deployment_timeout_exception`, so raising this
- * value cannot buy more time; it only keeps the client from giving up first. `toFailureResult`
- * classifies that response as `inference_not_ready`, the same as a client timeout.
- *
  * A hosted endpoint has no local deployment to wait for and needs far less, but the budget is
  * shared: `rerankInferenceId` is configurable, so it has to suit the slowest endpoint in use.
+ *
+ * Binding only together with `RERANK_INFERENCE_TIMEOUT`, which raises Elasticsearch's own budget to
+ * match; on its own it is moot, because Elasticsearch gives up first.
  */
 export const RERANK_REQUEST_TIMEOUT_MS = 60_000;
+
+/**
+ * Server-side budget for the rerank call, sent as the inference API's `timeout`.
+ *
+ * Elasticsearch defaults to 30 s and then answers `408 status_exception`, which the default local
+ * endpoint cannot beat at `DEFAULT_RANK_WINDOW` until its ML deployment has scaled up: 500
+ * candidates measured 17.8 s at six allocations and time out below roughly five. Raising the budget
+ * is what lets a scaling deployment answer at all. Kept under `RERANK_REQUEST_TIMEOUT_MS` so the
+ * client stays the binding limit and an overrun is reported once, not raced.
+ *
+ * Measurements and failure shapes: `RERANK_ENDPOINTS.md`.
+ */
+export const RERANK_INFERENCE_TIMEOUT = '55s';
 
 /**
  * Noise exclusion threshold: patterns whose sampled count falls below `NOISE_FRACTION_DEFAULT × total × p` are excluded.

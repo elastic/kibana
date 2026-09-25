@@ -80,6 +80,8 @@ Before running the query the service performs two checks:
 
 The default runs locally and is preconfigured by Elasticsearch in 9.3+, so the feature needs no setup. Pointing it at another `rerank` endpoint trades that for speed — a hosted (EIS) reranker measured 147 ms against 2,311 ms for the same 17 candidates — at two costs: a hosted endpoint sends log message text out of the cluster, and `relevanceScore` is per-model, so scores are not comparable across endpoints.
 
+On a managed deployment the default endpoint's ML deployment can scale to zero, and at the default rank window it cannot answer within Elasticsearch's 30 s inference ceiling until it has scaled back up. [`server/services/semantic_log_search/RERANK_ENDPOINTS.md`](server/services/semantic_log_search/RERANK_ENDPOINTS.md) has the measurements, the failure shapes this produces, and what to configure on serverless.
+
 ### Strategy
 
 The only implemented ranking path is ES|QL `CATEGORIZE` + `RERANK`. Pre-indexed strategies (`semantic_text`, `pattern_text`) and pattern expansion are not implemented.
