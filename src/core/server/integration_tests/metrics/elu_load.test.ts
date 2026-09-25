@@ -69,15 +69,22 @@ describe('GET /api/_elu_load', () => {
         medium: expect.any(Number),
         long: expect.any(Number),
       },
+      historyTimeWeighted: {
+        short: expect.any(Number),
+        medium: expect.any(Number),
+        long: expect.any(Number),
+      },
     });
 
-    expect(body.history.short).toBeGreaterThanOrEqual(0);
-    expect(body.history.short).toBeLessThanOrEqual(1);
+    for (const key of ['history', 'historyTimeWeighted'] as const) {
+      expect(body[key].short).toBeGreaterThanOrEqual(0);
+      expect(body[key].short).toBeLessThanOrEqual(1);
 
-    expect(body.history.medium).toBeGreaterThanOrEqual(0);
-    expect(body.history.medium).toBeLessThanOrEqual(1);
+      expect(body[key].medium).toBeGreaterThanOrEqual(0);
+      expect(body[key].medium).toBeLessThanOrEqual(1);
 
-    expect(body.history.long).toBeGreaterThanOrEqual(0);
-    expect(body.history.long).toBeLessThanOrEqual(1);
+      expect(body[key].long).toBeGreaterThanOrEqual(0);
+      expect(body[key].long).toBeLessThanOrEqual(1);
+    }
   });
 });

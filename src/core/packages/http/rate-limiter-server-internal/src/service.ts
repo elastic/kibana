@@ -141,7 +141,11 @@ export class HttpRateLimiterService
 
   public setup({ http, metrics }: SetupDeps): InternalRateLimiterSetup {
     if (http.rateLimiter.enabled) {
-      this.watch(metrics.getEluMetrics$(), http.rateLimiter);
+      const eluMetrics$ =
+        http.rateLimiter.eluHistory === 'time-weighted'
+          ? metrics.getTimeWeightedEluMetrics$()
+          : metrics.getEluMetrics$();
+      this.watch(eluMetrics$, http.rateLimiter);
       http.registerOnPreAuth(this.handler);
     }
 

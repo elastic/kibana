@@ -87,9 +87,7 @@ Object {
   "protocol": "http1",
   "prototypeHardening": true,
   "rateLimiter": Object {
-    "elu": 0.8,
-    "enabled": true,
-    "term": "medium",
+    "enabled": false,
   },
   "requestId": Object {
     "allowFromAnyIp": false,

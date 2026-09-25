@@ -14,9 +14,9 @@ export {
   type InternalMetricsServiceSetup,
   MetricsService,
 } from './src/metrics_service';
+export { opsConfig, type OpsConfigType } from './src/ops_config';
 export {
-  opsConfig,
-  opsEluHistoryAlgorithms,
-  type OpsConfigType,
-  type OpsEluHistoryAlgorithm,
-} from './src/ops_config';
+  eluHistoryAlgorithms,
+  type EluHistoryAlgorithm,
+  createExponentialMovingAverage,
+} from './src/exponential_moving_average';

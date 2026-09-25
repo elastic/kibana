@@ -18,12 +18,14 @@ interface ELUHistoryResponse {
    *         and the number of samples held in each window. So by default short: 15s, medium: 30s and long 60s.
    */
   history: EluMetrics;
+  /** Same windows as {@link ELUHistoryResponse.history}, with time-weighted EMA smoothing. */
+  historyTimeWeighted: EluMetrics;
 }
 
 /**
  * Intended for exposing metrics over HTTP that we do not want to include in the /api/stats endpoint, yet.
  */
-export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) {
+export function registerEluHistoryRoute(router: IRouter, elu: () => ELUHistoryResponse) {
   router.versioned
     .get({
       access: 'internal',
@@ -49,9 +51,7 @@ export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) 
         validate: false,
       },
       async (ctx, req, res) => {
-        const body: ELUHistoryResponse = {
-          history: elu(),
-        };
+        const body = elu();
         return res.ok({ body });
       }
     );

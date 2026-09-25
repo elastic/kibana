@@ -9,7 +9,12 @@
 
 import { performance } from 'node:perf_hooks';
 import { map, type OperatorFunction, type TimestampProvider } from 'rxjs';
-import type { OpsEluHistoryAlgorithm } from './ops_config';
+
+/** @internal */
+export const eluHistoryAlgorithms = ['ema', 'time-weighted-ema'] as const;
+
+/** @internal */
+export type EluHistoryAlgorithm = (typeof eluHistoryAlgorithms)[number];
 
 const monotonicClock: TimestampProvider = {
   now: () => performance.now(),
@@ -25,7 +30,7 @@ const monotonicClock: TimestampProvider = {
  * @see https://en.wikipedia.org/wiki/Exponential_smoothing
  */
 export function createExponentialMovingAverage(
-  algorithm: OpsEluHistoryAlgorithm,
+  algorithm: EluHistoryAlgorithm,
   period: number,
   expectedInterval: number,
   timestampProvider: TimestampProvider = monotonicClock

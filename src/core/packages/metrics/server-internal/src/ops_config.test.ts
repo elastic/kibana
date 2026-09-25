@@ -12,25 +12,10 @@ import { opsConfig } from './ops_config';
 describe('opsConfig', () => {
   const { schema } = opsConfig;
 
-  it('defaults elu history algorithm to ema', () => {
+  it('validates with defaults', () => {
     expect(schema.validate({})).toMatchObject({
-      eluHistory: {
-        algorithm: 'ema',
-      },
-    });
-  });
-
-  it('accepts time-weighted-ema', () => {
-    expect(
-      schema.validate({
-        eluHistory: {
-          algorithm: 'time-weighted-ema',
-        },
-      })
-    ).toMatchObject({
-      eluHistory: {
-        algorithm: 'time-weighted-ema',
-      },
+      interval: expect.anything(),
+      cGroupOverrides: {},
     });
   });
 });

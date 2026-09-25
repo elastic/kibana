@@ -45,7 +45,6 @@ describe('MetricsService', () => {
     const configService = configServiceMock.create({
       atPath: {
         interval: moment.duration(testInterval),
-        eluHistory: { algorithm: 'ema' },
       },
     });
     const coreContext = mockCoreContext.create({ logger, configService });
@@ -226,24 +225,17 @@ describe('MetricsService', () => {
       ]);
     });
 
-    it('emits time-weighted ELU values when configured', async () => {
+    it('emits time-weighted ELU values on getTimeWeightedEluMetrics$', async () => {
       let now = 1_000;
       jest.spyOn(performance, 'now').mockImplementation(() => now);
-      const configService = configServiceMock.create({
-        atPath: {
-          interval: moment.duration(testInterval),
-          eluHistory: { algorithm: 'time-weighted-ema' },
-        },
-      });
-      metricsService = new MetricsService(mockCoreContext.create({ logger, configService }));
 
       mockOpsCollector.collect
         .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))
         .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0))
         .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0));
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
-      const { getEluMetrics$ } = await metricsService.start();
-      const eluMetricsPromise = lastValueFrom(getEluMetrics$().pipe(toArray()));
+      const { getTimeWeightedEluMetrics$ } = await metricsService.start();
+      const eluMetricsPromise = lastValueFrom(getTimeWeightedEluMetrics$().pipe(toArray()));
 
       now += testInterval;
       jest.advanceTimersByTime(testInterval);

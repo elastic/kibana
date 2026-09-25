@@ -25,6 +25,11 @@ export interface MetricsServiceSetup {
   getEluMetrics$(): Observable<EluMetrics>;
 
   /**
+   * Retrieve an observable emitting {@link EluMetrics} smoothed with time-weighted EMA (α from sample gaps).
+   */
+  getTimeWeightedEluMetrics$(): Observable<EluMetrics>;
+
+  /**
    * Retrieve an observable emitting the {@link OpsMetrics} gathered.
    * The observable will emit an initial value during core's `start` phase, and a new value every fixed interval of time,
    * based on the `opts.interval` configuration property.

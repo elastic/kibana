@@ -18,12 +18,6 @@ export const OPS_CONFIG_PATH = 'ops' as const;
 const OPS_METRICS_INTERVAL = '5s';
 
 /** @internal */
-export const opsEluHistoryAlgorithms = ['ema', 'time-weighted-ema'] as const;
-
-/** @internal */
-export type OpsEluHistoryAlgorithm = (typeof opsEluHistoryAlgorithms)[number];
-
-/** @internal */
 interface OpsConfigCGroupOverridesOps {
   cpuPath?: string;
   cpuAcctPath?: string;
@@ -33,9 +27,6 @@ interface OpsConfigCGroupOverridesOps {
 export interface OpsConfigType {
   interval: Duration;
   cGroupOverrides: OpsConfigCGroupOverridesOps;
-  eluHistory: {
-    algorithm: OpsEluHistoryAlgorithm;
-  };
 }
 
 const configSchema = schema.object({
@@ -43,11 +34,6 @@ const configSchema = schema.object({
   cGroupOverrides: schema.object({
     cpuPath: schema.maybe(schema.string()),
     cpuAcctPath: schema.maybe(schema.string()),
-  }),
-  eluHistory: schema.object({
-    algorithm: schema.oneOf([schema.literal('ema'), schema.literal('time-weighted-ema')], {
-      defaultValue: 'ema',
-    }),
   }),
 });
 
