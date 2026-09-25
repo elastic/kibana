@@ -18553,6 +18553,8 @@
     "xpack.dataFederation.createFlyout.s3.fields.accessKey": "Clé d'accès",
     "xpack.dataFederation.createFlyout.s3.fields.accessKeyRequired": "Une clé d’accès est requise.",
     "xpack.dataFederation.createFlyout.s3.fields.endpoint": "Point de terminaison",
+    "xpack.dataFederation.createFlyout.s3.fields.region": "Région",
+    "xpack.dataFederation.createFlyout.s3.fields.regionRequired": "La région est obligatoire.",
     "xpack.dataFederation.createFlyout.s3.fields.roleArn": "Nom ARN de rôle",
     "xpack.dataFederation.createFlyout.s3.fields.roleArnRequired": "Le rôle ARN est requis.",
     "xpack.dataFederation.createFlyout.s3.fields.secretKey": "Clé secrète",
