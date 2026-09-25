@@ -13,7 +13,7 @@ import type {
   TextMapping,
   BooleanMapping,
   DateMapping,
-  IntegerMapping,
+  IntegerMapping, ObjectMapping,
 } from '../types';
 
 interface FullEsDocumentFields {
@@ -147,3 +147,26 @@ type DefinitionHasIncompatibleFields = EnsureSubsetOf<
 
 // type never because the definition has incompatible fields with the full document fields
 export let testDefinitionHasIncompatibleFields: DefinitionHasIncompatibleFields;
+
+// -- Alias-only parent object test ------------------------------------------
+// An object field whose every child is an alias exists only at query time.
+// EnsureSubsetOf must NOT require it in source documents (the `episode` field
+// below must be invisible because it has no writable _source descendants).
+
+interface AlertDocumentFields {
+  alert: { id: string };
+}
+
+interface AliasOnlyParentDefinition {
+  properties: {
+    alert: ObjectMapping<{ id: KeywordMapping }>;
+    episode: ObjectMapping<{
+      id: { type: 'alias'; path: 'alert.id' };
+    }>;
+  };
+}
+
+// Should succeed: alert.id is the canonical field; episode only has alias
+// children and must not appear in the required source-document keys.
+type AliasParentIsIgnored = EnsureSubsetOf<AliasOnlyParentDefinition, AlertDocumentFields>;
+export const testAliasParentIsIgnored: AliasParentIsIgnored = true;

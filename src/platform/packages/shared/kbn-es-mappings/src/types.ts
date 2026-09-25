@@ -74,14 +74,30 @@ export type MappingProperty =
   | Extract<api.MappingProperty, { type: Exclude<SupportedMappingPropertyType, 'object'> }>
   | MappingPropertyObjectType;
 
+// Returns true when a property contributes at least one writable (non-alias)
+// leaf field to _source. Object fields whose every child is an alias resolve
+// at query time only and must not appear in source-document types.
+type HasNonAliasChild<Props extends Record<string, MappingProperty>> = {
+  [K in keyof Props]: Props[K] extends { type: 'alias' } ? never : K;
+}[keyof Props] extends never
+  ? false
+  : true;
+
 export type ToPrimitives<O extends { properties: Record<string, MappingProperty> }> = {} extends O
   ? never
   : {
       // Alias fields are query-time projections that do not exist in _source.
-      // Key remapping filters them out so EnsureSubsetOf does not require them
-      // in source documents.
+      // Object fields whose every child is an alias are also excluded — they
+      // would resolve to {} in source-document types, causing EnsureSubsetOf
+      // to require them even though _source never contains them.
       [K in keyof O['properties'] as O['properties'][K] extends { type: 'alias' }
         ? never
+        : O['properties'][K] extends { type: 'object'; properties: infer SubProps }
+        ? SubProps extends Record<string, MappingProperty>
+          ? HasNonAliasChild<SubProps> extends true
+            ? K
+            : never
+          : K
         : K]: {} extends O['properties'][K]
         ? never
         : O['properties'][K] extends { type: infer T }
