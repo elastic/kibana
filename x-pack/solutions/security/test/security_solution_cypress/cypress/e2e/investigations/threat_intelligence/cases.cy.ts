@@ -23,7 +23,7 @@ import {
   selectExistingCase,
 } from '../../../tasks/threat_intelligence/cases';
 import {
-  CASE_COMMENT_EXTERNAL_REFERENCE,
+  CASE_COMMENT_INDICATOR_ATTACHMENT,
   FLYOUT_ADD_TO_CASE_ITEM,
   INDICATORS_TABLE_ADD_TO_CASE_ITEM,
 } from '../../../screens/threat_intelligence/cases';
@@ -75,7 +75,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
     createNewCaseFromTI();
     navigateToCaseViaToaster();
 
-    cy.get(CASE_COMMENT_EXTERNAL_REFERENCE)
+    cy.get(CASE_COMMENT_INDICATOR_ATTACHMENT)
       .should('exist')
       .and('contain.text', 'added an indicator of compromise')
       .and('contain.text', 'Indicator name')
@@ -91,7 +91,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
     selectExistingCase();
     navigateToCaseViaToaster();
 
-    cy.get(CASE_COMMENT_EXTERNAL_REFERENCE)
+    cy.get(CASE_COMMENT_INDICATOR_ATTACHMENT)
       .should('exist')
       .and('contain.text', 'added an indicator of compromise')
       .and('contain.text', 'Indicator name')
@@ -108,7 +108,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
     createNewCaseFromTI();
 
     navigateToCaseViaToaster();
-    cy.get(CASE_COMMENT_EXTERNAL_REFERENCE)
+    cy.get(CASE_COMMENT_INDICATOR_ATTACHMENT)
       .should('exist')
       .and('contain.text', 'added an indicator of compromise')
       .and('contain.text', 'Indicator name')
@@ -125,7 +125,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
     selectExistingCase();
 
     navigateToCaseViaToaster();
-    cy.get(CASE_COMMENT_EXTERNAL_REFERENCE)
+    cy.get(CASE_COMMENT_INDICATOR_ATTACHMENT)
       .should('exist')
       .and('contain.text', 'added an indicator of compromise')
       .and('contain.text', 'Indicator name')

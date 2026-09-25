@@ -20,7 +20,7 @@ export const CREATE_NEW_CASE_FROM_MODAL_BUTTON = getDataTestSubjectSelector(
 );
 export const SELECT_EXISTING_CASE = `.euiButton`;
 export const VIEW_CASE_TOASTER_LINK = getDataTestSubjectSelector('toaster-content-case-view-link');
-export const CASE_COMMENT_EXTERNAL_REFERENCE = getDataTestSubjectSelector(
+export const CASE_COMMENT_INDICATOR_ATTACHMENT = getDataTestSubjectSelector(
   `comment-${INDICATOR_ATTACHMENT_TYPE}-${INDICATOR_ATTACHMENT_TYPE}`
 );
 export const NEW_CASE_NAME_INPUT = getDataTestSubjectSelector(
