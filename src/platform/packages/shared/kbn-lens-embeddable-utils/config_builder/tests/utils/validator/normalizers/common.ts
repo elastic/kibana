@@ -1230,8 +1230,8 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     // visualization state types) and never read at render: the displayed title comes from the panel-level
     // title when set, otherwise the document `attributes.title` (`defaultTitle$`) — never from
     // `state.visualization.title`. It is dropped by toAPIFormat.
-    const visualization = attributes.state?.visualization as { title?: unknown } | undefined;
-    if (visualization && 'title' in visualization) {
+    const { visualization } = attributes.state;
+    if (isRecord(visualization) && 'title' in visualization) {
       delete visualization.title;
     }
 
