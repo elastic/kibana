@@ -461,6 +461,65 @@ describe('KibanaEvalsClient', () => {
     expect(maxInFlight).toBe(2);
   });
 
+  describe('concurrency precedence', () => {
+    const measureMaxInFlight = async (
+      client: KibanaEvalsClient,
+      specConcurrency?: number
+    ): Promise<number> => {
+      let inFlight = 0;
+      let maxInFlight = 0;
+      const dataset: EvaluationDataset = {
+        name: 'ds',
+        description: 'desc',
+        examples: Array.from({ length: 10 }, (_, i) => ({ input: { i } })),
+      };
+      const task = async () => {
+        inFlight++;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        inFlight--;
+        return { ok: true };
+      };
+
+      await client.runExperiment({ datasets: [dataset], task, concurrency: specConcurrency }, []);
+      return maxInFlight;
+    };
+
+    it('defaults to 5 when neither the spec nor the run sets it', async () => {
+      expect(await measureMaxInFlight(createClient())).toBe(5);
+    });
+
+    it('uses the run concurrency when the spec does not set one', async () => {
+      const client = createClient({ concurrency: 3, concurrencySetByRun: true });
+      expect(await measureMaxInFlight(client)).toBe(3);
+      expect(mockLog.warning).not.toHaveBeenCalled();
+    });
+
+    it('lets the spec concurrency win and warns that the run value does not apply', async () => {
+      const client = createClient({ concurrency: 8, concurrencySetByRun: true });
+      expect(await measureMaxInFlight(client, 2)).toBe(2);
+      expect(mockLog.warning).toHaveBeenCalledTimes(1);
+      expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('(8) does not apply'));
+    });
+
+    it('does not warn when the concurrency was not set by the run', async () => {
+      const client = createClient({ concurrency: 5, concurrencySetByRun: false });
+      expect(await measureMaxInFlight(client, 1)).toBe(1);
+      expect(mockLog.warning).not.toHaveBeenCalled();
+    });
+
+    it('does not warn when the spec concurrency matches the run value', async () => {
+      const client = createClient({ concurrency: 4, concurrencySetByRun: true });
+      expect(await measureMaxInFlight(client, 4)).toBe(4);
+      expect(mockLog.warning).not.toHaveBeenCalled();
+    });
+
+    it('logs the resolved concurrency in the experiment start line', async () => {
+      await measureMaxInFlight(createClient({ concurrency: 7, concurrencySetByRun: true }));
+      expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining('7 concurrent runs'));
+    });
+  });
+
   it('upserts dataset and resolves upstream dataset when trustUpstreamDataset=true', async () => {
     const getDatasetByName = jest.fn().mockResolvedValue({
       id: 'upstream-dataset-id',

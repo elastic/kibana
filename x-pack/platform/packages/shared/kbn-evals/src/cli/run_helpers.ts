@@ -33,6 +33,7 @@ import {
 import { runScoutHook } from './scout_hook';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
+import { parseConcurrency } from '../utils/concurrency';
 import {
   runConfigInit,
   runConnectorSetup,
@@ -196,6 +197,16 @@ export const resolveEvalSuite = async (
 export const readSpaceIdsFlag = (flagsReader: FlagsReader): string[] | undefined => {
   try {
     return parseSpaceIds(flagsReader.string('space-ids'));
+  } catch (error) {
+    throw createFlagError(error instanceof Error ? error.message : String(error));
+  }
+};
+
+/** `--concurrency`, validated so a bad value stops before a stack boots for it. */
+export const readConcurrencyFlag = (flagsReader: FlagsReader): string | undefined => {
+  try {
+    const concurrency = parseConcurrency(flagsReader.string('concurrency'));
+    return concurrency === undefined ? undefined : String(concurrency);
   } catch (error) {
     throw createFlagError(error instanceof Error ? error.message : String(error));
   }
@@ -404,6 +415,11 @@ export const buildEvalRunEnv = ({
     envOverrides.EVAL_REPETITIONS = repetitions;
   }
 
+  const concurrency = readConcurrencyFlag(flagsReader);
+  if (concurrency) {
+    envOverrides.EVAL_CONCURRENCY = concurrency;
+  }
+
   const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
     envOverrides.EVAL_SPACE_IDS = spaceIds.join(',');
@@ -476,6 +492,11 @@ export const buildEvalRunArgs = ({
     runArgs.push('--repetitions', repetitions);
   }
 
+  const concurrency = readConcurrencyFlag(flagsReader);
+  if (concurrency) {
+    runArgs.push('--concurrency', concurrency);
+  }
+
   const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
     runArgs.push('--space-ids', spaceIds.join(','));
@@ -495,6 +516,7 @@ export const evalRunFlags: FlagOptions = {
     'evaluation-connector-id',
     'project',
     'repetitions',
+    'concurrency',
     'space-ids',
     'grep',
     'profile',

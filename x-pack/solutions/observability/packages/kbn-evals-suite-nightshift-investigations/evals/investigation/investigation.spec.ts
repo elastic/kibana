@@ -25,9 +25,19 @@ import type { InvestigationTaskOutput } from './types';
 evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
   evaluate(
     'persists ungraded investigations and complete agent traces',
-    async ({ executorClient, connector, fetch, evalsClient, traceEsClient, repetitions, log }) => {
+    async ({
+      executorClient,
+      connector,
+      fetch,
+      evalsClient,
+      traceEsClient,
+      repetitions,
+      concurrency: requestedConcurrency,
+      log,
+    }) => {
       const dataset = await loadInvestigationDataset(evalsClient);
-      const concurrency = 16;
+      // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
+      const concurrency = Math.min(16, requestedConcurrency);
       evaluate.setTimeout(
         Math.ceil((dataset.examples.length * repetitions) / concurrency) *
           (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
