@@ -14,6 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import type { AutoAbortedAPMClient } from '../services/rest/create_call_apm_api';
 import { callApmApi } from '../services/rest/create_call_apm_api';
+import { isExpectedTransportFailure } from '../services/rest/report_fetch_error';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -165,11 +166,10 @@ export function useFetcher<TReturn>(
           const errorDetails = 'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError && notifications && rendering) {
-            notifications.toasts.addDanger({
+            const toast = {
               title: i18n.translate('xpack.apm.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
-
               text: toMountPoint(
                 <div>
                   <h5>
@@ -182,7 +182,19 @@ export function useFetcher<TReturn>(
                 </div>,
                 rendering
               ),
-            });
+            };
+
+            // `addDanger` always reports to APM RUM via core. For expected transport
+            // failures, use `add` with danger styling so the user still sees the toast
+            // without polluting the error backlog (see kibana#293215).
+            if (isExpectedTransportFailure(err)) {
+              notifications.toasts.add({
+                color: 'danger',
+                ...toast,
+              });
+            } else {
+              notifications.toasts.addDanger(toast);
+            }
           }
           setResult({
             data: undefined,
