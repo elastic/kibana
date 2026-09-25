@@ -292,6 +292,26 @@ describe('pull_request pipeline generation', () => {
     expect(output).toContain('scout-edr-real-fleet');
   });
 
+  it('triggers Scout EDR real Fleet for a flyout Response section change', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/components/response_section_content.tsx',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-edr-real-fleet');
+  });
+
   it('triggers Scout EDR real Fleet for a suite-only diff', async () => {
     const changes = [
       {

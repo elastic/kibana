@@ -668,6 +668,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/rule_response_actions/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/detection_engine\/rule_response_actions/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/tools\/response/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/main\/components\/response_section/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/common\/components\/response_actions/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/test\/scout_edr_real_fleet/,
         /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/edr_real_fleet/,

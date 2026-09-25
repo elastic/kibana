@@ -6,9 +6,11 @@
  */
 
 import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
-import type { KbnClient } from '@kbn/scout-security';
+import type { EsClient, KbnClient } from '@kbn/scout-security';
+import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
+const ALERTS_INDEX = '.alerts-security.alerts-default';
 
 const SECURITY_INDEX_PATTERNS = [
   'apm-*-transaction*',
@@ -28,11 +30,22 @@ export interface SeededAutomatedResponseActionsRule {
 }
 
 /**
+ * Starts a short-lived sshd process on the enrolled VM so Endpoint emits a
+ * process event after the detection rule is already enabled.
+ *
+ * Uses `sshd -t` (config test) instead of restarting the SSH service so the
+ * Multipass/Vagrant session used for enroll stays up.
+ */
+export const triggerSshdProcessEvent = async (hostname: string): Promise<void> => {
+  await getHostVmClient(hostname).exec('sudo /usr/sbin/sshd -t');
+};
+
+/**
  * Creates an enabled query rule that fires on sshd process events from the
  * enrolled Endpoint agent and attaches isolate / suspend-process / kill-process.
  *
- * Created after the host is healthy so the first interval can produce an alert
- * without a UI enable/disable toggle.
+ * Call `triggerSshdProcessEvent` after this so a matching process event exists
+ * inside the rule lookback window.
  */
 export const createEnabledRuleWithAutomatedResponseActions = async (
   kbnClient: KbnClient,
@@ -96,4 +109,28 @@ export const createEnabledRuleWithAutomatedResponseActions = async (
   });
 
   return { id: data.id, name: data.name };
+};
+
+export const deleteSeededRule = async (kbnClient: KbnClient, ruleId: string): Promise<void> => {
+  await kbnClient.request({
+    method: 'DELETE',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { id: ruleId },
+    headers: PUBLIC_API_HEADERS,
+    ignoreErrors: [404],
+    retries: 0,
+  });
+};
+
+export const deleteAlertsForRule = async (esClient: EsClient, ruleId: string): Promise<void> => {
+  await esClient.indices.refresh({ index: ALERTS_INDEX, ignore_unavailable: true });
+  await esClient.deleteByQuery({
+    index: ALERTS_INDEX,
+    ignore_unavailable: true,
+    query: {
+      term: { 'kibana.alert.rule.uuid': ruleId },
+    },
+    conflicts: 'proceed',
+    refresh: true,
+  });
 };

@@ -17,10 +17,27 @@ This config is listed in `.buildkite/scout_ci_config.yml` `excluded_configs` so 
 
 Requires Multipass and Docker.
 
+`run-tests --location local` starts Elasticsearch and Kibana. Do not also leave `start-server` running — the two commands fight for the same ports.
+
+Start servers and run tests in one step:
+
 ```bash
-node scripts/scout start-server --arch stateful --domain classic --serverConfigSet edr_real_fleet
 node scripts/scout run-tests --location local --arch stateful --domain classic \
   --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts
+```
+
+To iterate against an already-running stack, start servers once:
+
+```bash
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet edr_real_fleet
+```
+
+Then run Playwright only:
+
+```bash
+node scripts/playwright test \
+  --config x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts \
+  --project local
 ```
 
 ## CI

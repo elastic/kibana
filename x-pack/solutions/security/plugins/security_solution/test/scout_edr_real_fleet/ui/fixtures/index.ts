@@ -145,18 +145,28 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
           }
         };
 
+        const enrollOrDestroyVm = async (
+          hostname: string
+        ): Promise<CreateAndEnrollEndpointHostResponse> => {
+          try {
+            return await enrollHost(hostname);
+          } catch (enrollError) {
+            await deleteMultipassVm(hostname).catch((destroyError) => {
+              log.warning(
+                `[edr_real_fleet] destroy VM ${hostname} after failed enroll failed: ${destroyError}`
+              );
+            });
+            throw enrollError;
+          }
+        };
+
         const firstHostname = nextHostname();
         let host: CreateAndEnrollEndpointHostResponse;
         try {
-          host = await enrollHost(firstHostname);
+          host = await enrollOrDestroyVm(firstHostname);
         } catch (error) {
           log.warning(`[edr_real_fleet] host setup failed, retrying once: ${error}`);
-          await deleteMultipassVm(firstHostname).catch((destroyError) => {
-            log.warning(
-              `[edr_real_fleet] destroy VM ${firstHostname} before retry failed: ${destroyError}`
-            );
-          });
-          host = await enrollHost(nextHostname());
+          host = await enrollOrDestroyVm(nextHostname());
         }
 
         created.host = host;
