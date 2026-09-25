@@ -197,13 +197,18 @@ const TakeActionComponent: React.FC<Props> = ({
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
     useAgentBuilderAvailability();
   const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : undefined;
-  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(
+    attackDiscovery != null && isAttackDiscoveryAlert(attackDiscovery)
+      ? attackDiscovery
+      : undefined,
+    replacements
+  );
   const reportAddToChatClick = useReportAddToChat();
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();
     reportAddToChatClick({
       pathway: 'attack_discovery_take_action',
-      attachments: ['alert'],
+      attachments: ['attack_discovery'],
     });
     openAgentBuilderFlyout();
   }, [closePopover, openAgentBuilderFlyout, reportAddToChatClick]);
