@@ -1,5 +1,5 @@
 {
-  "sha1": "d33dd97602b039dbd3bcc2260c633ddd33258546",
+  "sha1": "03e51cf4075e6f901642a6d93f6f3b77cc84ea46",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_claim_nudge/api/tests/claim_nudge.spec.ts",
-        "line": 191,
+        "line": 180,
         "column": 10
       }
     },
@@ -27,7 +27,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_claim_nudge/api/tests/claim_nudge.spec.ts",
-        "line": 222,
+        "line": 213,
         "column": 10
       }
     }

@@ -20,11 +20,11 @@ export const TEST_TASK_TYPE = 'task_manager:invalidate_api_keys';
 export const POLL_INTERVAL_MS = 30_000;
 
 // Absorbs CI jitter while staying far below `POLL_INTERVAL_MS`. The positive test only starts
-// measuring once a poll cycle has just finished, so nothing but a nudge can claim inside it.
+// measuring a poll interval after the warm-up, so nothing but a nudge can claim inside it.
 export const NUDGE_CLAIM_BUDGET_MS = 5_000;
 
-// Bounds the wait for that poll cycle. One interval plus headroom for the health stats to catch up.
-export const POLL_SYNC_TIMEOUT_MS = POLL_INTERVAL_MS + 10_000;
+// Generous, because the warm-up's claim also waits on the signal index being created.
+export const WARM_UP_CLAIM_TIMEOUT_MS = 15_000;
 
 // Playwright's 60s default is not enough once a whole poll interval is spent syncing.
 export const NUDGE_TEST_TIMEOUT_MS = 90_000;

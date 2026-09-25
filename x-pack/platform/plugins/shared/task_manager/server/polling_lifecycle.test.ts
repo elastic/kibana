@@ -822,7 +822,7 @@ describe('TaskPollingLifecycle', () => {
     const claimCalls = () =>
       mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length;
 
-    const startLifecycleWithNudge = async () => {
+    const startLifecycleWithNudge = async (pollInterval?: number) => {
       const errors$ = new Subject<Error>();
       const claimNudgeSubject = new Subject<void>();
       const taskStore = taskStoreMock.create({});
@@ -834,6 +834,10 @@ describe('TaskPollingLifecycle', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       new TaskPollingLifecycle({
         ...taskManagerOpts,
+        config: {
+          ...taskManagerOpts.config,
+          poll_interval: pollInterval ?? taskManagerOpts.config.poll_interval,
+        },
         taskStore,
         elasticsearchAndSOAvailability$,
         claimNudgeService: {
@@ -920,6 +924,37 @@ describe('TaskPollingLifecycle', () => {
       await flushPromises();
 
       expect(claimCalls()).toBe(baseline + 2);
+    });
+
+    test('drops a held claim nudge when the error backoff starts before its window closes', async () => {
+      // The suite's usual poll interval dwarfs the error-count window, so a backoff activated
+      // mid-window would always clear again before the window closed. This one closes while the
+      // first backoff window is still in effect.
+      const pollInterval = ADJUST_THROUGHPUT_INTERVAL * 1.5;
+      const { errors$, claimNudgeSubject } = await startLifecycleWithNudge(pollInterval);
+      // The regular cycle that a held nudge would have replaced falls due at the same moment, so
+      // the claim count cannot tell the two apart; the log is what distinguishes them.
+      const nudgesIgnored = () =>
+        (taskManagerLogger.debug as jest.Mock).mock.calls.filter(([message]) =>
+          String(message).startsWith('Ignoring claim nudge')
+        ).length;
+      const baseline = nudgesIgnored();
+
+      claimNudgeSubject.next();
+      await flushPromises();
+      claimNudgeSubject.next();
+      await flushPromises();
+
+      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      await flushPromises();
+      // The nudge passed the pre-throttle check before the backoff existed.
+      expect(nudgesIgnored()).toBe(baseline);
+
+      clock.tick(pollInterval - ADJUST_THROUGHPUT_INTERVAL);
+      await flushPromises();
+
+      expect(nudgesIgnored()).toBe(baseline + 1);
     });
   });
 

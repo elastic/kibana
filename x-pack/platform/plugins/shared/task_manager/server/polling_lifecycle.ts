@@ -220,20 +220,24 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.errorBackoffSubscription = errorCheck$.subscribe(({ count, isBlockException }) => {
       inErrorBackoff = count > 0 || isBlockException;
     });
+    const nudgeAllowed = () => {
+      if (inErrorBackoff) {
+        logger.debug(
+          'Ignoring claim nudge because task manager is backing off after Elasticsearch errors; the next regular poll cycle will claim the task'
+        );
+        return false;
+      }
+      return true;
+    };
     const claimNudge$ = claimNudgeService?.claimNudge$.pipe(
-      filter(() => {
-        if (inErrorBackoff) {
-          logger.debug(
-            'Ignoring claim nudge because task manager is backing off after Elasticsearch errors; the next regular poll cycle will claim the task'
-          );
-          return false;
-        }
-        return true;
-      }),
+      // Checked before the throttle so an ignored nudge does not open a window that would hold back
+      // a later one, and again after it because backoff can begin while a nudge is held.
+      filter(nudgeAllowed),
       // Caps nudge-triggered cycles at one per poll interval. `trailing` runs a throttled nudge at
       // the end of its window rather than dropping it, so a nudge never costs more than the wait it
       // was avoiding. Re-read per window so it widens with the managed poll interval.
-      throttle(() => timer(this.currentPollInterval), { leading: true, trailing: true })
+      throttle(() => timer(this.currentPollInterval), { leading: true, trailing: true }),
+      filter(nudgeAllowed)
     );
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);

@@ -15,9 +15,10 @@ import {
   NUDGE_CLAIM_BUDGET_MS,
   NUDGE_TEST_TIMEOUT_MS,
   ONE_HOUR_MS,
-  POLL_SYNC_TIMEOUT_MS,
+  POLL_INTERVAL_MS,
   RESCHEDULE_EVIDENCE_MS,
   TEST_TASK_TYPE,
+  WARM_UP_CLAIM_TIMEOUT_MS,
 } from '../fixtures/constants';
 
 /**
@@ -114,49 +115,37 @@ apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] 
     return status !== 'idle' || new Date(runAt).getTime() > runSoonAt + RESCHEDULE_EVIDENCE_MS;
   };
 
-  const getLastSuccessfulPoll = async (
-    apiClient: ApiClientFixture,
-    cookieHeader: CookieHeader
-  ): Promise<string | undefined> => {
-    const response = await apiClient.get('api/task_manager/_health', {
-      headers: { ...COMMON_HEADERS, ...cookieHeader },
-      responseType: 'json',
-    });
-    expect(response).toHaveStatusCode(200);
-
-    const { stats } = response.body as {
-      stats: { runtime?: { value: { polling: { last_successful_poll?: string } } } };
-    };
-    return stats.runtime?.value.polling.last_successful_poll;
-  };
-
   /**
-   * Resolves just after a regular poll cycle finishes, which both leaves the next one a full
-   * `poll_interval` away and outlasts the nudge throttle window the warm-up opened — the throttle
-   * admits one nudge per interval, so without this the measured nudge would be held until the
-   * window closed.
+   * The nudged cycle that claimed the warm-up task, as observed by this suite. The nudge throttle
+   * admits one nudge per poll interval and a nudged cycle resets the poll cadence, so this single
+   * timestamp dates both the open throttle window and the poller's phase.
    */
-  const waitForFreshPollCycle = async (apiClient: ApiClientFixture, cookieHeader: CookieHeader) => {
-    const before = await getLastSuccessfulPoll(apiClient, cookieHeader);
-
-    await expect
-      .poll(async () => (await getLastSuccessfulPoll(apiClient, cookieHeader)) !== before, {
-        timeout: POLL_SYNC_TIMEOUT_MS,
-        intervals: [500],
-        message: 'no poll cycle completed, so the nudge could not be measured in isolation',
-      })
-      .toBe(true);
-  };
+  let warmUpClaimedAt = 0;
 
   /**
    * The first nudge of the Kibana process also creates the signal index, which on a cold cluster
    * can take most of the claim budget on its own. Pay that cost here instead of inside a timed
    * assertion.
+   *
+   * Waiting for the claim rather than just the `runSoon` response matters: the response only proves
+   * the signal was written, while the throttle window opens when the watcher acts on it.
    */
   apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-    const { taskId } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
+    const { taskId, runAt: originalRunAt } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
+
+    const runSoonAt = Date.now();
     await runSoon(apiClient, cookieHeader, taskId);
+
+    await expect
+      .poll(() => wasClaimedSince(apiClient, cookieHeader, taskId, { originalRunAt, runSoonAt }), {
+        timeout: WARM_UP_CLAIM_TIMEOUT_MS,
+        intervals: [100],
+        message: 'the warm-up task was never claimed, so claim nudging is broken outright',
+      })
+      .toBe(true);
+
+    warmUpClaimedAt = Date.now();
   });
 
   /**
@@ -194,9 +183,11 @@ apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] 
       apiTest.setTimeout(NUDGE_TEST_TIMEOUT_MS);
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-      // Anchors the measurement to the poller's cadence, which is what makes a claim inside the
-      // budget attributable to the nudge rather than to a cycle that was already due.
-      await waitForFreshPollCycle(apiClient, cookieHeader);
+      // Both things the warm-up's nudged cycle left behind expire one poll interval after it: the
+      // throttle window that would hold the nudge below, and the wait until the next regular cycle.
+      // Sitting out that interval is what makes a claim inside the budget the nudge's doing.
+      const settleFor = Math.max(0, warmUpClaimedAt + POLL_INTERVAL_MS - Date.now());
+      await new Promise((resolve) => setTimeout(resolve, settleFor));
 
       const { taskId, runAt: originalRunAt } = await scheduleTaskDueInAnHour(
         apiClient,
