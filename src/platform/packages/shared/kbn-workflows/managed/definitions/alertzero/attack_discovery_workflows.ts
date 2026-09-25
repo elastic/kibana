@@ -80,12 +80,15 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
  * internal-workflow management profile: enablement is enforced rather than
  * restorable, because a disabled analysis would leave the review recording every
  * attack as a failure.
+ *
+ * The version is the prompt version. Execution output echoes it as
+ * `workflow_version`, so a result traces back to the prompt that produced it.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML,
 } as const satisfies ManagedWorkflowDefinition;

@@ -18,10 +18,10 @@
  */
 
 /**
- * Which workflow the suite runs. `sample` installs the YAML in `src/sample_workflow/`
- * for the run; `managed` runs the shipped workflow once #19282 lands.
+ * Which workflow the suite runs. `managed` runs the shipped analysis.
+ * `sample` installs the YAML in `src/sample_workflow/` for the run.
  */
-export const FP_TP_WORKFLOW_SOURCE: 'sample' | 'managed' = 'sample';
+export const FP_TP_WORKFLOW_SOURCE: 'sample' | 'managed' = 'managed';
 
 export const FP_TP_MANAGED_WORKFLOW_ID = 'system-security-attack-discovery-fp-tp-analysis';
 
