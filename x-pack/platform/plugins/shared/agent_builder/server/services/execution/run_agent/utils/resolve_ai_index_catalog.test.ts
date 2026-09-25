@@ -33,16 +33,24 @@ describe('resolveAiIndexCatalog', () => {
   });
 
   it('describes custom AI Indices through the resolver', async () => {
-    const resolver = jest
-      .fn()
-      .mockResolvedValue([
-        { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
-      ]);
+    const resolver = jest.fn().mockResolvedValue([
+      {
+        id: 'my-custom',
+        esqlTarget: 'ai-index-idx-custom',
+        description: 'Support tickets.',
+        memoryEnabled: true,
+      },
+    ]);
 
     const catalog = await resolveAiIndexCatalog({ aiIndices: ['my-custom'], request, resolver });
 
     expect(catalog).toEqual([
-      { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
+      {
+        id: 'my-custom',
+        esqlTarget: 'ai-index-idx-custom',
+        description: 'Support tickets.',
+        memoryEnabled: true,
+      },
     ]);
   });
 
