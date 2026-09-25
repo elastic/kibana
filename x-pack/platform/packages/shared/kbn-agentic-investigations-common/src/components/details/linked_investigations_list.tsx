@@ -117,7 +117,7 @@ export const LinkedInvestigationsList = memo<LinkedInvestigationsListProps>(
                   data-test-subj={`linkedInvestigationRow-${item.id}`}
                 >
                   <EuiBadge color="hollow" css={css({ flexShrink: 0 })}>
-                    Investigation
+                    {LINKED_INVESTIGATIONS_LABELS.typeBadge}
                   </EuiBadge>
 
                   <EuiFlexItem css={css({ minWidth: 0 })}>

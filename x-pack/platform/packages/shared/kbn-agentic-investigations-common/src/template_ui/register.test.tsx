@@ -21,7 +21,7 @@ import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
 } from './register';
-import type { RenderAssignees } from './types';
+import type { RenderAssignees, RenderLinkedInvestigations } from './types';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -326,5 +326,84 @@ describe('registerEscalationTemplateUI', () => {
 
     expect(await screen.findByText('open')).toBeInTheDocument();
     expect(screen.getByTestId('escalationHeaderBlocks')).toBeInTheDocument();
+  });
+
+  it('registers the escalation.overview tab', () => {
+    const { contract } = createFakeService();
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      name: 'Escalation',
+    });
+
+    const tab = contract.getTab('escalation.overview');
+    expect(tab).toBeDefined();
+    expect(tab?.label).toBe('Overview');
+  });
+
+  it('renders the overview tab and forwards linkedInvestigationIds to renderLinkedInvestigations', async () => {
+    const { contract } = createFakeService();
+    const renderLinkedInvestigations: RenderLinkedInvestigations = jest.fn(() => null);
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      name: 'Escalation',
+      renderLinkedInvestigations,
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    const conversationWithLinks: Conversation = {
+      ...escalationConversation,
+      metadata: { status: 'open', linked_investigations: ['inv-1', 'inv-2'] },
+    };
+
+    renderWithKibanaRenderContext(
+      <TabContent conversation={conversationWithLinks} isOpenedFromChat={false} />
+    );
+
+    await waitFor(() => expect(renderLinkedInvestigations).toHaveBeenCalled());
+    expect(renderLinkedInvestigations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        escalationId: 'escalation-1',
+        linkedInvestigationIds: ['inv-1', 'inv-2'],
+        onOpenInvestigation: expect.any(Function),
+      })
+    );
+  });
+
+  it('navigates via openFullscreenConversation with openDetails:true when onOpenInvestigation is called', async () => {
+    const { contract, openFullscreenConversation } = createFakeService();
+    let capturedOnOpen: ((args: { conversationId: string; agentId: string }) => void) | undefined;
+    const renderLinkedInvestigations: RenderLinkedInvestigations = jest.fn((props) => {
+      capturedOnOpen = props.onOpenInvestigation;
+      return null;
+    });
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      name: 'Escalation',
+      renderLinkedInvestigations,
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    renderWithKibanaRenderContext(
+      <TabContent conversation={escalationConversation} isOpenedFromChat={false} />
+    );
+
+    await waitFor(() => expect(capturedOnOpen).toBeDefined());
+    capturedOnOpen!({ conversationId: 'inv-1', agentId: 'agent-42' });
+
+    expect(openFullscreenConversation).toHaveBeenCalledWith({
+      conversationId: 'inv-1',
+      agentId: 'agent-42',
+      openDetails: true,
+    });
   });
 });

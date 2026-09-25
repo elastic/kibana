@@ -146,6 +146,10 @@ export const useLinkedInvestigations = ({
         ESCALATION_LINKED_INVESTIGATIONS_URL.replace('{id}', encodeURIComponent(escalationId)),
         { version: AGENTIC_INVESTIGATIONS_API_VERSION }
       ),
+    // Poll at the same cadence as the flyout's own conversation poll (5 s) so that
+    // status and title changes on existing linked investigations are reflected without
+    // waiting for the linked-IDs list itself to change.
+    refetchInterval: 5000,
     retry: retryOnTransientError,
   });
 

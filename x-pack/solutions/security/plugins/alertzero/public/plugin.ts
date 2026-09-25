@@ -55,6 +55,11 @@ const ESCALATION_TEMPLATE_NAME = i18n.translate(
   { defaultMessage: 'Escalation' }
 );
 
+const LINKED_INVESTIGATIONS_LOADING_LABEL = i18n.translate(
+  'xpack.alertzero.linkedInvestigations.loading',
+  { defaultMessage: 'Loading linked investigations…' }
+);
+
 export class AlertZeroPublicPlugin
   implements
     Plugin<
@@ -217,7 +222,7 @@ export class AlertZeroPublicPlugin
     const renderLinkedInvestigations: RenderLinkedInvestigations = (props) =>
       React.createElement(
         EscalationModalBoundary,
-        null,
+        { loadingLabel: LINKED_INVESTIGATIONS_LOADING_LABEL },
         React.createElement(LazyConnectedLinkedInvestigations, props)
       );
 

@@ -11,6 +11,9 @@ export const LINKED_INVESTIGATIONS_LABELS = Object.freeze({
   sectionTitle: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.sectionTitle', {
     defaultMessage: 'Linked investigations',
   }),
+  typeBadge: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.typeBadge', {
+    defaultMessage: 'Investigation',
+  }),
   statusOpen: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusOpen', {
     defaultMessage: 'Open',
   }),
