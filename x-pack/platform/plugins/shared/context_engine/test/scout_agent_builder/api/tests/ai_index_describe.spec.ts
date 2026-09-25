@@ -81,7 +81,7 @@ const DESCRIBE_ROLE: KibanaRole = {
     cluster: [],
     indices: [
       {
-        names: ['ai-index-idx-scout-describe-*', DATA_STREAM],
+        names: ['ai-index-idx-scout-describe-*', DATA_STREAM, 'v-ai-index-scout-describe-*'],
         privileges: ['read', 'view_index_metadata'],
       },
     ],
@@ -224,7 +224,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(block.split('\n').slice(0, 3)).toStrictEqual([
       `AI index: ${SINGLE_AI_INDEX_ID}`,
       `Scout describe fixture ${SINGLE_AI_INDEX_ID}`,
-      `Query with ES|QL against: ${INDEX_A}`,
+      `Query with ES|QL against: v-ai-index-${SINGLE_AI_INDEX_ID}`,
     ]);
     // Fields not truncated: plain heading, no `(showing …)`.
     expect(block).toContain('\n\nFields\n');
@@ -263,7 +263,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${DATA_STREAM}\n`);
+    expect(block).toContain(`\nQuery with ES|QL against: v-ai-index-${DATA_STREAM_AI_INDEX_ID}\n`);
     expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
   });
 
@@ -294,7 +294,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     // Semantic branch needs a deployed inference endpoint: checked structurally here, and by the
     // ES|QL parser in unit tests.
     const hybrid = exampleQuery('Full text search, lexical and semantic fused together');
-    expect(hybrid.startsWith(`FROM ${INDEX_A} METADATA _id, _index, _score\n| FORK\n`)).toBe(true);
+    expect(
+      hybrid.startsWith(
+        `FROM v-ai-index-${SINGLE_AI_INDEX_ID} METADATA _id, _index, _score\n| FORK\n`
+      )
+    ).toBe(true);
     expect(hybrid).toContain('\n| FUSE\n');
 
     const run = async (query: string, params?: Record<string, string>) => {
@@ -314,8 +318,12 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(columnValues(filtered, 'title')).toStrictEqual(['Billing guide']);
 
     const counted = await run(exampleQuery('Count by type'));
-    expect(columnValues(counted, 'type')).toStrictEqual(['document', 'detection']);
-    expect(columnValues(counted, 'count')).toStrictEqual([2, 1]);
+    const countByType = Object.fromEntries(
+      columnValues(counted, 'type').map((type, i) => [type, columnValues(counted, 'count')[i]])
+    );
+    // The view does not apply the space filter. Only managed AI indices carry per-document space
+    // permissions, and those are queried through their backing store.
+    expect(countByType).toStrictEqual({ document: 2, detection: 1, hidden: 1 });
   });
 
   apiTest('returns 404 for an unregistered AI index', async ({ apiClient }) => {
@@ -378,7 +386,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${MISSING_INDEX}\n`);
+    expect(block).toContain(`\nQuery with ES|QL against: v-ai-index-${MISSING_AI_INDEX_ID}\n`);
     expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
   });
 });

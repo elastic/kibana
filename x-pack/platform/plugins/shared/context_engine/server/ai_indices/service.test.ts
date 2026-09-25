@@ -740,10 +740,7 @@ describe('AiIndexService', () => {
           managed: true,
         }),
       });
-      expect(esClient.esql.putView).toHaveBeenCalledWith({
-        name: 'v-ai-index-elastic',
-        query: expect.stringContaining('FROM ai-index-idx-sml-data'),
-      });
+      expect(esClient.esql.putView).not.toHaveBeenCalled();
     });
 
     it('overwrites an existing managed entry (idempotent upsert)', async () => {

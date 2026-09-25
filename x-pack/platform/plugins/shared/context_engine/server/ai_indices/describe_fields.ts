@@ -22,6 +22,9 @@ import type { AiIndexField } from './types';
 
 const CONFLICT_FIELD_TYPE = 'conflict';
 const SEMANTIC_TEXT_TYPE = 'semantic_text';
+const GOVERNANCE_FIELD = 'governance';
+const isGovernanceField = (path: string): boolean =>
+  path === GOVERNANCE_FIELD || path.startsWith(`${GOVERNANCE_FIELD}.`);
 export interface AiIndexFieldsDescription {
   /** Capped at `MAX_AI_INDEX_DESCRIBE_FIELDS`; what gets rendered. */
   fields: AiIndexField[];
@@ -89,7 +92,8 @@ const byPath = (a: AiIndexField, b: AiIndexField) =>
 
 /**
  * Types from `_mapping`, `searchable`/`aggregatable` from `_field_caps`. Mixed types across
- * indices: `conflict`. `semanticFields` is a subset of capped `fields`.
+ * indices: `conflict`. `governance.*` is excluded to match the view. `semanticFields` is a subset
+ * of capped `fields`.
  */
 export const describeAiIndexFields = async ({
   esClient,
@@ -110,6 +114,9 @@ export const describeAiIndexFields = async ({
   const typesByPath = new Map<string, Set<string>>();
   for (const { mappings: mapping } of Object.values(mappings)) {
     for (const [path, type] of flattenMappingTypes(mapping)) {
+      if (isGovernanceField(path)) {
+        continue;
+      }
       typesByPath.set(path, (typesByPath.get(path) ?? new Set<string>()).add(type));
     }
   }

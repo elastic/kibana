@@ -35,7 +35,7 @@ export const buildExampleQueries = (target: string): AiIndexExampleQuery[] => [
   {
     title: 'Filter by knowledge item type and tag (?type, ?tag; tags is multi-valued, so MATCH)',
     esql: [
-      `FROM ${target}`,
+      `FROM ${target} METADATA _id, _index, _score`,
       '| WHERE type == ?type AND MATCH(tags, ?tag)',
       KEEP,
       '| LIMIT 20',
@@ -44,7 +44,7 @@ export const buildExampleQueries = (target: string): AiIndexExampleQuery[] => [
   {
     title: 'Count by type',
     esql: [
-      `FROM ${target}`,
+      `FROM ${target} METADATA _id, _index, _score`,
       '| STATS count = COUNT(*) BY type',
       '| SORT count DESC',
       '| LIMIT 20',

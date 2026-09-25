@@ -22,9 +22,10 @@ the prompt is phrased. Look for that before looking at wording.
 
 Misquoting what an automation does is the most expensive mistake available here: every claim built
 on it inherits the error, and a reviewer who catches one stops trusting the rest. When several
-automations write to the same index, attribute an indicator to one by reading the definitions and
-seeing which writes to that destination and id pattern. If that does not settle it, say attribution
-was not established rather than guessing.
+automations write to the same index, attribute an indicator to one by its
+`governance.provenance.created_by.uri`, which the steps stamp as `workflow://<workflow id>`, and
+confirm against the definition that writes to that destination and id pattern. If that does not
+settle it, say attribution was not established rather than guessing.
 
 The syntax these automations need — Liquid templating, `on-failure` handling, `if` conditions — is
 written out below, alongside the `context-engine` step contracts that no other skill or tool
@@ -103,7 +104,8 @@ written out here — this skill is the only place they exist.
       tags: ['logs'] # optional, <= 100 entries
       references: # optional, <= 100 entries
         - uri: 'index://logs-*'
-          relation: 'derived_from'
+          relation: 'derived_from' # derived_from | relates_to | supersedes
+          description: 'The indices this profile describes'
       expires_at: '2026-10-22T00:00:00Z' # optional; unset never expires
       attributes: # optional, <= 100 keys
         esql: 'FROM logs-* | LIMIT 10'
@@ -124,8 +126,9 @@ it belongs to the cumulative strategy that reads before it merges — it is not 
 
 **`context-engine.deleteKi`** takes `ai_index_id` and `ki_id` and outputs `id`.
 On an index `deleteKi` removes the document; on a data stream it appends a revision with
-`governance.lifecycle.status: deleted`, so the earlier revisions stay in the backing store. It
-fails when the indicator does not exist. This is what pilot cleanup runs.
+`governance.lifecycle.status: deleted`, so the earlier revisions stay in the backing store and
+the view hides the indicator. It fails when the indicator does not exist. This is what pilot
+cleanup runs.
 
 **`context-engine.verifyKi`** takes a partial `ki` and a non-empty, duplicate-free `verifiers` list,
 and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }`. The two
@@ -505,9 +508,11 @@ unique to this attempt. In the templates the indicator is built in a single `dat
 tag goes on that step's `ki.tags` list — the one place all of them read from — not on
 `context-engine.createKi`, which takes the assembled document rather than building it.
 
-That tag is the handle on what the pilot wrote. The KI ids are a second one: on an index a re-run
-overwrites them, and on a data stream each write appends a revision under the same `id`, so the
-tag and the `id` together find every document the pilot left.
+**Prefix every `ki_id` too.** The templates write with stable ids into the user's real destination,
+so an unprefixed pilot replaces a live indicator on an index and stacks a revision on it on a data
+stream, and the cleanup below would then remove the user's indicator rather than yours. Prefix the
+`ki_id` on `context-engine.createKi` with the same `ce-pilot-<runId>-`, so every id the pilot writes
+is its own. The tag and the prefix are the only handles you will have on what the pilot wrote.
 
 Bound the run to a handful of documents while you are iterating. The templates put that bound in
 `consts` — `max_documents`, `corpus_filter`, `discovery_filter`, and `batch_size` together with the
@@ -540,7 +545,8 @@ looking for a fault in the workflow that isn't there. Expanding first gives one 
 `WHERE` then matches the row carrying the pilot tag.
 
 `<destination>` is the `dest.value` from the brief. `FROM ai-index-*` works too when you are unsure
-of it, at the cost of scanning every AI Index.
+of it, at the cost of scanning every AI index. Read the backing store here, not the view: the view
+drops `governance`, and you want to see exactly what was written.
 
 Judge those against what the brief asked for. When one step is what is wrong,
 `platform.workflows.workflow_execute_step` runs that step alone out of the inline YAML, so you can
@@ -565,30 +571,25 @@ FROM <destination>
 Then run a second inline workflow with those ids in its `consts` (`ki_ids: [...]`) and a `foreach`
 over `consts.ki_ids` calling `context-engine.deleteKi` with `ki_id` set to each `id`. Do not select
 the ids inside the cleanup workflow with an `elasticsearch.esql.query` step: it reads the backing
-store directly and skips the space filter the tool applies.
+store directly and skips the space filter the tool applies. The prefix is what makes this safe:
+every `id` under the tag is a pilot write, so nothing the user owned is touched.
 
-Then confirm, with `platform.context_engine.query_ai_indices` again. On an index the tag query
-returns nothing once the cleanup has run. On a data stream it still returns every revision, the
-deleted ones included, so check the newest revision per `id` instead:
+Then confirm through the view with `platform.context_engine.query_ai_indices`:
 
 ```esql
-FROM <destination>
+FROM v-ai-index-<ai_index_id>
 | MV_EXPAND tags
 | WHERE tags == "ce-pilot-<runId>"
-| INLINE STATS latest = MAX(@timestamp) BY id
-| WHERE @timestamp == latest
-| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"
-| KEEP id, title
-| LIMIT 10
+| LIMIT 1
 ```
 
-It returns nothing once the cleanup has run. If ES|QL reports `governance.lifecycle.status` as an
-unknown column, drop that line: nothing in that index has been deleted yet, so the tag query
-alone is the answer. Do this for every `runId` you used, not only the last.
+It returns nothing once the cleanup has run, on an index and on a data stream alike: the view
+hides deleted revisions, while the backing store still holds them. Do this for every `runId` you
+used, not only the last.
 
 **Strip the tag, then hand it back.** Remove the `ce-pilot-*` tag from the indicator's `tags` and
-widen the `consts` bounds back to what the brief specified — the pilot's narrow filter is not the
-automation.
+the `ce-pilot-*` prefix from `ki_id`, and widen the `consts` bounds back to what the brief specified
+— the pilot's narrow filter is not the automation.
 Return the finished YAML in full, a plain-language account of what the workflow does, what the
 pilot indicators looked like, and what the pilot cost: how many units it wrote and how long the
 successful run took, from the `started_at` and `finished_at` on the execution result

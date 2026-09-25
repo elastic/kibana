@@ -68,7 +68,7 @@ describe('describeAiIndexAggregations', () => {
     expect(Object.keys(aggs)).toEqual(['types', 'tags']);
   });
 
-  it('runs one space-filtered, hit-free, non-partial search with a terms agg per field', async () => {
+  it('runs one space- and lifecycle-filtered, hit-free, non-partial search with a terms agg per field', async () => {
     await describeAiIndexAggregations({
       ...params,
       fields: [field('type', true), field('tags', true)],
@@ -82,7 +82,31 @@ describe('describeAiIndexAggregations', () => {
       allow_partial_search_results: false,
       size: 0,
       track_total_hits: false,
-      query: buildAiIndexSpaceFilter('team-a'),
+      query: {
+        bool: {
+          filter: [
+            buildAiIndexSpaceFilter('team-a'),
+            {
+              bool: {
+                should: [
+                  { bool: { must_not: { exists: { field: 'governance.lifecycle.status' } } } },
+                  { term: { 'governance.lifecycle.status': 'active' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  { bool: { must_not: { exists: { field: 'expires_at' } } } },
+                  { range: { expires_at: { gt: 'now' } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
       aggs: {
         types: {
           terms: {

@@ -46,7 +46,7 @@ describe('listAiIndicesHandler', () => {
         },
         {
           id: 'runbooks',
-          esql_target: 'ai-index-runbooks',
+          esql_target: 'v-ai-index-runbooks',
           description: 'runbooks description',
           managed: false,
         },

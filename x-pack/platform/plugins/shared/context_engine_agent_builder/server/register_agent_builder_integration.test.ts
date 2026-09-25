@@ -124,7 +124,19 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     expect(getAiIndexDataReadService).toHaveBeenCalledWith({ esClient: asCurrentUser, request });
   });
 
-  it('registers a resolver mapping registry items to id, esqlTarget (dest.value) and description', async () => {
+  it('maps a managed AI index to its backing store', async () => {
+    const { resolver } = setup({
+      aiIndices: [
+        { id: 'elastic', managed: true, dest: { type: 'index', value: '.ai-index-idx-elastic' } },
+      ],
+    });
+
+    expect(await resolver({ ids: ['elastic'], request })).toEqual([
+      { id: 'elastic', esqlTarget: '.ai-index-idx-elastic' },
+    ]);
+  });
+
+  it('registers a resolver mapping registry items to id, esqlTarget (view name) and description', async () => {
     const { resolver } = setup({
       aiIndices: [
         {
@@ -136,7 +148,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     });
 
     expect(await resolver({ ids: ['my-custom'], request })).toEqual([
-      { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
+      { id: 'my-custom', esqlTarget: 'v-ai-index-my-custom', description: 'Support tickets.' },
     ]);
   });
 
@@ -146,7 +158,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
-      { id: 'wanted', esqlTarget: 'idx-wanted' },
+      { id: 'wanted', esqlTarget: 'v-ai-index-wanted' },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
     expect(list).toHaveBeenCalledWith(['wanted', 'unknown']);

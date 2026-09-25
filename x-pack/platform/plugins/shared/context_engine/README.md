@@ -84,7 +84,10 @@ errors (bad ES|QL, missing index privilege) are returned with their status.
 Every AI index also has an ES|QL view, `v-ai-index-<id>`, that returns only
 its current, active, unexpired knowledge indicators with `governance.*`
 dropped. Data stream views keep the latest revision per `id`. The view is
-created with the AI index and deleted with it.
+created with the AI index and deleted with it. Managed AI indices have no
+view: their documents carry nested per-document space permissions, and ES|QL
+applies the request filter to a view's output, where nested fields are not
+visible.
 
 ## Describing AI Indices
 

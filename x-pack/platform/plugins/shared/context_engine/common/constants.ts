@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AiIndexType } from './http_api/ai_indices';
+import type { AiIndexHttpItem, AiIndexType } from './http_api/ai_indices';
 
 export const PUBLIC_API_PATH = '/api/context_engine';
 export const INTERNAL_API_PATH = '/internal/context_engine';
@@ -82,6 +82,14 @@ export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_INDEX_NAME_BYTES = 255;
 export const KI_VIEW_NAME_PREFIX = 'v-ai-index-';
+export const kiViewName = (aiIndexId: string): string => `${KI_VIEW_NAME_PREFIX}${aiIndexId}`;
+/** ES|QL applies the request filter to a view's output, where the nested space permissions of managed KIs are not visible, so managed AI indices are queried through their backing store. */
+export const aiIndexEsqlTarget = ({
+  id,
+  managed,
+  dest,
+}: Pick<AiIndexHttpItem, 'id' | 'managed' | 'dest'>): string =>
+  managed ? dest.value : kiViewName(id);
 // The view name `v-ai-index-<id>` must fit an index name.
 export const MAX_AI_INDEX_ID_LENGTH = MAX_INDEX_NAME_BYTES - KI_VIEW_NAME_PREFIX.length;
 export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;

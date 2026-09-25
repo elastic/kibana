@@ -141,6 +141,33 @@ describe('describeAiIndexFields', () => {
     ]);
   });
 
+  it('excludes governance fields', async () => {
+    getMapping.mockResolvedValue({
+      'ai-index-idx-a': {
+        mappings: {
+          properties: {
+            title: { type: 'text' },
+            expires_at: { type: 'date' },
+            governance: {
+              properties: {
+                lifecycle: { properties: { status: { type: 'keyword' } } },
+                provenance: { properties: { created_by: { type: 'keyword' } } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const { fields, allFields } = await describeAiIndexFields({
+      esClient,
+      target: 'ai-index-idx-a',
+    });
+
+    expect(fields.map(({ path }) => path)).toEqual(['expires_at', 'title']);
+    expect(allFields).toEqual(fields);
+  });
+
   it('reports conflict when matched indices map a path to different types', async () => {
     getMapping.mockResolvedValue({
       'ai-index-idx-a': { mappings: { properties: { status: { type: 'keyword' } } } },

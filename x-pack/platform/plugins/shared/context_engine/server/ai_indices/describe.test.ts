@@ -39,7 +39,7 @@ const fields = [
 
 const exampleQueriesBlock = [
   'Example queries (adapt field names for non-canonical indices)',
-  ...buildExampleQueries('ai-index-idx-support*').flatMap(({ title, esql }) => ['', title, esql]),
+  ...buildExampleQueries('v-ai-index-support').flatMap(({ title, esql }) => ['', title, esql]),
 ].join('\n');
 
 describe('describeAiIndex', () => {
@@ -81,7 +81,7 @@ describe('describeAiIndex', () => {
       [
         'AI index: support',
         'Support KIs',
-        'Query with ES|QL against: ai-index-idx-support*',
+        'Query with ES|QL against: v-ai-index-support',
         '',
         'Fields',
         'content.semantic: semantic_text, searchable',
@@ -104,6 +104,13 @@ describe('describeAiIndex', () => {
     );
   });
 
+  it('targets the backing store of a managed AI index', async () => {
+    const response = await describeAiIndex({ ...params, aiIndex: { ...aiIndex, managed: true } });
+
+    expect(response).toContain('Query with ES|QL against: ai-index-idx-support*');
+    expect(response).toContain(buildExampleQueries('ai-index-idx-support*')[0].esql);
+  });
+
   it('omits the description line when the AI index has none', async () => {
     const { description, ...withoutDescription } = aiIndex;
 
@@ -111,7 +118,7 @@ describe('describeAiIndex', () => {
 
     expect(response.split('\n').slice(0, 2)).toEqual([
       'AI index: support',
-      'Query with ES|QL against: ai-index-idx-support*',
+      'Query with ES|QL against: v-ai-index-support',
     ]);
   });
 

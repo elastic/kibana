@@ -6,6 +6,7 @@
  */
 
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { aiIndexEsqlTarget } from '@kbn/context-engine-plugin/common/constants';
 import { getAiIndexDataReadServiceForUser, type AiIndexToolDeps } from '../ai_index_read_service';
 
 export interface ListAiIndicesItem {
@@ -35,7 +36,7 @@ export const listAiIndicesHandler = async ({
   return {
     ai_indices: aiIndices.map(({ id, dest, description, managed }) => ({
       id,
-      esql_target: dest.value,
+      esql_target: aiIndexEsqlTarget({ id, managed, dest }),
       description,
       managed,
       ...(assignedIds ? { assigned_to_agent: assignedIds.has(id) } : {}),

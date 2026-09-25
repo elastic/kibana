@@ -6,7 +6,7 @@
  */
 
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
 import { kiRetrievalSkill } from './ki_retrieval_skill';
 
 describe('kiRetrievalSkill', () => {
@@ -29,15 +29,17 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('references the correct AI index pattern in content', () => {
-    expect(kiRetrievalSkill.content).toContain('ai-index-*');
-    expect(kiRetrievalSkill.content).not.toContain('ai-index-idx-*');
-    expect(kiRetrievalSkill.content).not.toContain('ai-index-ds-*');
+  it('queries the AI index targets in content', () => {
+    expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-* METADATA _id, _index, _score');
+    expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-<id> METADATA _id, _index, _score');
+    expect(kiRetrievalSkill.content).not.toContain('FROM ai-index-*');
   });
 
-  it('requires the prompt-provided space filter on every AI-index query', () => {
-    expect(kiRetrievalSkill.content).toContain('pass its exact `filter`');
-    expect(kiRetrievalSkill.content).toContain('on every AI-index query');
+  it('routes every AI-index query through the space-scoped query tool', () => {
+    expect(kiRetrievalSkill.content).toContain(
+      `every AI-index query below through\n\`${contextEngineAiIndexTools.queryAiIndices}\``
+    );
+    expect(kiRetrievalSkill.content).not.toContain('"filter"');
   });
 
   it('has no referencedContent', () => {
@@ -47,6 +49,9 @@ describe('kiRetrievalSkill', () => {
   it('binds the two required registry tools', async () => {
     const toolIds = (await kiRetrievalSkill.getRegistryTools?.()) ?? [];
 
-    expect(toolIds).toEqual([platformCoreTools.executeEsql, platformCoreTools.listIndices]);
+    expect(toolIds).toEqual([
+      contextEngineAiIndexTools.queryAiIndices,
+      contextEngineAiIndexTools.listAiIndices,
+    ]);
   });
 });
