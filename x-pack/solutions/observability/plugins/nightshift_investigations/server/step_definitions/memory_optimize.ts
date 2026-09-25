@@ -32,7 +32,7 @@ export const memoryOptimizeStepDefinition = ({
   telemetry,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
-  getMemoryEsClient: () => ElasticsearchClient;
+  getMemoryEsClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -111,14 +111,14 @@ export const memoryOptimizeStepDefinition = ({
       let summary: Awaited<ReturnType<typeof runMemoryOptimize>>;
       try {
         summary = await withTimeout(
-          (signal) =>
+          async (signal) =>
             runMemoryOptimize({
               request: context.contextManager.getFakeRequest(),
               agentId: context.input.agent_id,
               userMessage: context.input.prompt,
               assistantMessage: context.input.response,
               recalledIds: context.input.recalled_ids ?? [],
-              esClient: getMemoryEsClient(),
+              esClient: await getMemoryEsClient(),
               spaceId,
               signal,
               logger: teeWorkflowLogger(logger, context.logger),
