@@ -76,8 +76,20 @@ export class ListingTableService extends FtrService {
     toggleButtonTestSubject: 'userFilterPopoverButton',
   });
 
+  /**
+   * Waits for either the legacy or the Content List variant of a control and
+   * returns whether the legacy one rendered.
+   */
+  private async isLegacyVariant(legacySubj: string, contentListSubj: string): Promise<boolean> {
+    return await this.retry.tryForTime(5000, async () => {
+      if (await this.testSubjects.exists(legacySubj)) return true;
+      if (await this.testSubjects.exists(contentListSubj)) return false;
+      throw new Error(`Neither ${legacySubj} nor ${contentListSubj} has rendered`);
+    });
+  }
+
   private async getSearchFilter() {
-    if (await this.testSubjects.exists('tableListSearchBox')) {
+    if (await this.isLegacyVariant('tableListSearchBox', CONTENT_LIST_SEARCH_BOX)) {
       return this.testSubjects.find('tableListSearchBox');
     }
     return this.testSubjects.find(CONTENT_LIST_SEARCH_BOX);
@@ -194,7 +206,7 @@ export class ListingTableService extends FtrService {
 
   public async openTagPopover(): Promise<void> {
     this.log.debug('ListingTable.openTagPopover');
-    if (await this.testSubjects.exists('tagFilterPopoverButton')) {
+    if (await this.isLegacyVariant('tagFilterPopoverButton', CONTENT_LIST_TAGS_FILTER_BUTTON)) {
       await this.tagPopoverToggle.open();
       return;
     }
@@ -203,7 +215,7 @@ export class ListingTableService extends FtrService {
 
   public async closeTagPopover(): Promise<void> {
     this.log.debug('ListingTable.closeTagPopover');
-    if (await this.testSubjects.exists('tagFilterPopoverButton')) {
+    if (await this.isLegacyVariant('tagFilterPopoverButton', CONTENT_LIST_TAGS_FILTER_BUTTON)) {
       await this.tagPopoverToggle.close();
       return;
     }
@@ -250,8 +262,8 @@ export class ListingTableService extends FtrService {
 
   public async clickActionButton(actionSelector: string, index: number = 0) {
     await this.retry.tryForTime(10000, async () => {
-      await this.testSubjects.existOrFail(actionSelector, { timeout: 5000 });
-      const buttons = await this.testSubjects.findAll(actionSelector);
+      // The retry provides the wait; look up the buttons without an implicit wait.
+      const buttons = await this.testSubjects.findAll(actionSelector, 0);
       const button = buttons[index];
       if (!button) {
         throw new Error(`Action ${actionSelector} is not available at index ${index}`);
@@ -371,7 +383,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async clickDeleteSelected() {
-    if (await this.testSubjects.exists('deleteSelectedItems')) {
+    if (await this.isLegacyVariant('deleteSelectedItems', CONTENT_LIST_SELECTION_BAR_DELETE)) {
       await this.testSubjects.click('deleteSelectedItems');
       return;
     }
