@@ -10,6 +10,7 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import { pick } from 'lodash';
+import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsType, SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
@@ -86,6 +87,40 @@ describe('SOR - update API', () => {
     };
   };
 
+  const getUpdateSchemaType = (): SavedObjectsType => {
+    const createSchema = schema.object({
+      title: schema.string(),
+      count: schema.maybe(schema.number()),
+    });
+    const updateSchema = createSchema.extends({}, { unknowns: 'ignore' });
+
+    return {
+      name: 'update-schema-type',
+      hidden: false,
+      namespaceType: 'agnostic',
+      mappings: {
+        dynamic: false,
+        properties: {
+          title: { type: 'text' },
+          count: { type: 'integer' },
+        },
+      },
+      management: {
+        importableAndExportable: true,
+      },
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            create: createSchema,
+            forwardCompatibility: updateSchema,
+            update: updateSchema,
+          },
+        },
+      },
+    };
+  };
+
   afterAll(async () => {
     await esServer?.stop();
   });
@@ -94,7 +129,7 @@ describe('SOR - update API', () => {
     const { runMigrations: runMigrationV1, savedObjectsRepository: repositoryV1 } =
       await getKibanaMigratorTestKit({
         ...getBaseMigratorParams(),
-        types: [getCrossVersionType('v1'), getFullUpdateType()],
+        types: [getCrossVersionType('v1'), getFullUpdateType(), getUpdateSchemaType()],
       });
     await runMigrationV1();
 
@@ -104,7 +139,7 @@ describe('SOR - update API', () => {
       client: esClient,
     } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
-      types: [getCrossVersionType('v2'), getFullUpdateType()],
+      types: [getCrossVersionType('v2'), getFullUpdateType(), getUpdateSchemaType()],
     });
     await runMigrationV2();
 
@@ -197,6 +232,40 @@ describe('SOR - update API', () => {
     expect(document.attributes).toEqual({
       over: '9000',
     });
+  });
+
+  it('validates updates against the model version update schema', async () => {
+    const { repositoryV2: repository } = await setup();
+    const type = 'update-schema-type';
+    const id = 'schema-doc';
+
+    await repository.create(type, { title: 'Ops', count: 1 }, { id });
+
+    await repository.update(type, id, { count: 2 });
+    await expect(repository.get(type, id)).resolves.toEqual(
+      expect.objectContaining({
+        attributes: { title: 'Ops', count: 2 },
+      })
+    );
+
+    await repository.update(type, id, { legacyFlag: true });
+    await expect(repository.get(type, id)).resolves.toEqual(
+      expect.objectContaining({
+        attributes: { title: 'Ops', count: 2, legacyFlag: true },
+      })
+    );
+
+    await expect(repository.update(type, id, { count: 'lots' })).rejects.toMatchObject({
+      message: expect.stringMatching(
+        /\[attributes.count\]: expected value of type \[number\] but got \[string\]/
+      ),
+      output: { statusCode: 400 },
+    });
+    await expect(repository.get(type, id)).resolves.toEqual(
+      expect.objectContaining({
+        attributes: expect.objectContaining({ title: 'Ops', count: 2 }),
+      })
+    );
   });
 
   const fetchDoc = async (client: ElasticsearchClient, type: string, id: string) => {
