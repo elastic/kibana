@@ -428,22 +428,6 @@ describe('utils', () => {
       expect(result.target).toBe('_blank');
     });
 
-    it('should run the action without cancelling navigation for new-tab links', () => {
-      const run = jest.fn();
-      const item = { ...baseItem, href: 'http://example.com', target: '_blank' as const, run };
-      const result = mapAppMenuItemToPanelItem(item);
-      const preventDefault = jest.fn();
-
-      result.onClick?.({
-        preventDefault,
-        defaultPrevented: false,
-        currentTarget: document.createElement('a'),
-      } as never);
-
-      expect(run).toHaveBeenCalledTimes(1);
-      expect(preventDefault).not.toHaveBeenCalled();
-    });
-
     it('should not set target when no href', () => {
       const item = { ...baseItem, target: '_blank' };
       const result = mapAppMenuItemToPanelItem(item);

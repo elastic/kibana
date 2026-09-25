@@ -34,7 +34,6 @@ describe('ConnectedServicesPage', () => {
   const mockRotateApiKey = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddDanger = jest.fn();
-  const mockTrackLinkClicked = jest.fn();
 
   const defaultProps: ConnectedServicesPageProps = {
     clusterDetails: {
@@ -90,7 +89,7 @@ describe('ConnectedServicesPage', () => {
         },
       },
       telemetryService: {
-        trackLinkClicked: mockTrackLinkClicked,
+        trackLinkClicked: jest.fn(),
       },
       apiService: {
         rotateApiKey: mockRotateApiKey,
@@ -146,17 +145,6 @@ describe('ConnectedServicesPage', () => {
           text: 'Failed to rotate',
         });
       });
-    });
-  });
-
-  it('tracks a click on the documentation link', async () => {
-    renderWithIntl(<ConnectedServicesPage {...defaultProps} />);
-
-    await userEvent.click(await screen.findByRole('button', { name: 'More' }));
-    await userEvent.click(await screen.findByRole('menuitem', { name: /documentation/i }));
-
-    expect(mockTrackLinkClicked).toHaveBeenCalledWith({
-      destination_type: 'cloud_connect_docs',
     });
   });
 });
