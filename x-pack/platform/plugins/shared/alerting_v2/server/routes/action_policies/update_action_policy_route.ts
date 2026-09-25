@@ -22,6 +22,7 @@ import { updateActionPolicyOasExamples } from './update_action_policy_oas_exampl
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import {
+  ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
@@ -60,6 +61,10 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
       400: {
         body: () => errorResponseSchema,
         description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+      },
+      403: {
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
