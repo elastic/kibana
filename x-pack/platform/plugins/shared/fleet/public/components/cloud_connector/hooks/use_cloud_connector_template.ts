@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useIacProvisioner, useStartServices } from '../../../hooks';
@@ -28,6 +28,7 @@ import type { CloudSetupForCloudConnector } from '../types';
 import {
   getCloudConnectorRemoteRoleTemplate,
   getIacLaunchUrl,
+  getUnresolvedTemplateUrlTokens,
   hasTemplateUrlParam,
 } from '../utils';
 
@@ -179,6 +180,23 @@ export const useCloudConnectorTemplate = ({
   const staticTemplateUrl = cloud
     ? getCloudConnectorRemoteRoleTemplate({ cloud, accountType, iacTemplateUrl })
     : undefined;
+  // Name the deployment facts the package URL needs but this Kibana cannot provide, so a
+  // disabled launch is diagnosable instead of a bare "not available".
+  const unresolvedTokens = useMemo(
+    () =>
+      cloud && iacTemplateUrl && !staticTemplateUrl
+        ? getUnresolvedTemplateUrlTokens({ cloud, accountType, iacTemplateUrl })
+        : [],
+    [cloud, accountType, iacTemplateUrl, staticTemplateUrl]
+  );
+  const missingContextError =
+    unresolvedTokens.length > 0
+      ? i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.unresolvedTemplateTokensError', {
+          defaultMessage:
+            'CloudFormation template is not available: {tokens} could not be resolved for this Elastic deployment.',
+          values: { tokens: unresolvedTokens.join(', ') },
+        })
+      : MISSING_CONTEXT_ERROR;
 
   const launchTemplate = useCallback(async () => {
     setTemplateGenerationError(undefined);
@@ -215,7 +233,7 @@ export const useCloudConnectorTemplate = ({
           return;
         }
       }
-      setTemplateGenerationError(MISSING_CONTEXT_ERROR);
+      setTemplateGenerationError(missingContextError);
       return;
     }
 
@@ -323,6 +341,7 @@ export const useCloudConnectorTemplate = ({
     analytics,
     deploymentId,
     integrations,
+    missingContextError,
     onTemplateRendered,
     packageName,
     policyTemplates,
@@ -337,6 +356,7 @@ export const useCloudConnectorTemplate = ({
       launchButtonProps: { href: staticTemplateUrl, target: '_blank' },
       isDisabled: !staticTemplateUrl,
       isGeneratingTemplate: false,
+      templateGenerationError: unresolvedTokens.length > 0 ? missingContextError : undefined,
       clearIacConfirm,
       isIacProvisionerEnabled,
     };

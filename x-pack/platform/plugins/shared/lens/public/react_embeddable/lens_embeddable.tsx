@@ -139,6 +139,12 @@ export const createLensEmbeddableFactory = (
         };
       }
 
+      /**
+       * Tracks the most recent applySerializedState call so a slow-resolving
+       * older call cannot overwrite newer state.
+       */
+      let applyGeneration = 0;
+
       const stateApi = initializeStateApi<LensWireAPIConfig>({
         uuid,
         parentApi,
@@ -174,10 +180,12 @@ export const createLensEmbeddableFactory = (
           return comparators;
         },
         applySerializedState: async (nextState) => {
-          actionsConfig.reinitializeState(nextState);
-          dashboardConfig.reinitializeState(nextState);
-          searchContextConfig.reinitializeState(nextState);
+          const generation = ++applyGeneration;
           const nextRuntimeState = await deserializeState(services, nextState);
+          if (generation !== applyGeneration) return; // superseded by a newer apply
+          actionsConfig.reinitializeState(nextState);
+          dashboardConfig.reinitializeState(nextRuntimeState);
+          searchContextConfig.reinitializeState(nextState);
           stateConfig.reinitializeRuntimeState(nextRuntimeState);
         },
       });

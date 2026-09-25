@@ -17,7 +17,7 @@ import {
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { OptionalFieldLabel } from '../../optional_field_label';
-import { useGetTemplates } from '../../templates_v2/hooks/use_get_templates';
+import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import {
   DEFAULT_EMPTY_TEMPLATE_NAME,
   TEMPLATE_HELP_TEXT,
@@ -31,9 +31,36 @@ export interface LegacyTemplateRef {
   name: string;
 }
 
+/**
+ * Resolve a stored `templateId` (which may be a legacy v1 key) to the matching v2 template.
+ * Mirrors the three-step bridge used by the server-side connector executor so that the UI and
+ * rule execution always agree on which template is selected.
+ */
+export const findV2Template = (
+  templateId: string | null,
+  v2Templates: TemplateListItem[],
+  legacyTemplates?: LegacyTemplateRef[]
+): TemplateListItem | undefined => {
+  if (!templateId) return undefined;
+  const byTemplateId = v2Templates.find((t) => t.templateId === templateId);
+  if (byTemplateId) return byTemplateId;
+  // Prefer the exact v1 lineage recorded by the migration (`legacyKey`).
+  const byLegacyKey = v2Templates.find((t) => t.legacyKey === templateId);
+  if (byLegacyKey) return byLegacyKey;
+  // Fallback: match by normalised name for environments migrated before `legacyKey` was recorded.
+  const legacyName = legacyTemplates?.find((t) => t.key === templateId)?.name;
+  if (legacyName) {
+    const normalized = legacyName.trim().toLocaleLowerCase();
+    return v2Templates.find((t) => t.name.trim().toLocaleLowerCase() === normalized);
+  }
+  return undefined;
+};
+
 interface Props {
-  owner: string;
   templateId: string | null;
+  /** v2 templates fetched by the parent; the parent owns the single query observer. */
+  templates: TemplateListItem[];
+  isLoadingTemplates: boolean;
   isLoading?: boolean;
   isDisabled?: boolean;
   /**
@@ -48,8 +75,9 @@ interface Props {
 const EMPTY_VALUE = '';
 
 const TemplateSelectorV2Component: React.FC<Props> = ({
-  owner,
   templateId,
+  templates,
+  isLoadingTemplates,
   isLoading = false,
   isDisabled = false,
   legacyTemplates,
@@ -57,54 +85,26 @@ const TemplateSelectorV2Component: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const { data: templatesData, isLoading: isLoadingTemplates } = useGetTemplates({
-    queryParams: { page: 1, perPage: 10000, owner: [owner], isEnabled: true },
-  });
-
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () => [
       { label: DEFAULT_EMPTY_TEMPLATE_NAME, value: EMPTY_VALUE },
-      ...(templatesData?.templates ?? []).map((template) => ({
+      ...templates.map((template) => ({
         key: template.templateId,
         label: template.name,
         value: template.templateId,
       })),
     ],
-    [templatesData?.templates]
+    [templates]
   );
 
   // A rule authored before the v2 migration stores the legacy template `key`, which never matches a
   // v2 `templateId`. Bridge it to the migrated template so it still displays. The stored value stays
   // the legacy key until the user actively picks a template (the connector resolves it at runtime),
   // preserving the deprecated v1 path until it is removed.
-  const effectiveTemplateId = useMemo(() => {
-    if (!templateId) {
-      return null;
-    }
-    const v2Templates = templatesData?.templates ?? [];
-    if (v2Templates.some((template) => template.templateId === templateId)) {
-      return templateId;
-    }
-    // Prefer the exact v1 lineage recorded by the migration (`legacyKey`). v1 keyed identity on
-    // `key`, not name, so this disambiguates v1 templates that shared a name — and mirrors the
-    // server-side connector bridge (`resolveV2TemplateForLegacyKey`).
-    const byLegacyKey = v2Templates.find((template) => template.legacyKey === templateId);
-    if (byLegacyKey) {
-      return byLegacyKey.templateId;
-    }
-    // Fallback for environments migrated before `legacyKey` was recorded: match by normalized name
-    // (case/whitespace-insensitive, mirroring the template-name uniqueness rule).
-    const legacyName = legacyTemplates?.find((template) => template.key === templateId)?.name;
-    if (legacyName) {
-      const normalizedLegacyName = legacyName.trim().toLocaleLowerCase();
-      return (
-        v2Templates.find(
-          (template) => template.name.trim().toLocaleLowerCase() === normalizedLegacyName
-        )?.templateId ?? null
-      );
-    }
-    return null;
-  }, [templateId, templatesData?.templates, legacyTemplates]);
+  const effectiveTemplateId = useMemo(
+    () => findV2Template(templateId, templates, legacyTemplates)?.templateId ?? null,
+    [templateId, templates, legacyTemplates]
+  );
 
   const selectedOptions = useMemo(
     () =>
@@ -124,14 +124,14 @@ const TemplateSelectorV2Component: React.FC<Props> = ({
         return;
       }
 
-      const matched = (templatesData?.templates ?? []).find((t) => t.templateId === selectedValue);
+      const matched = templates.find((t) => t.templateId === selectedValue);
 
       onChange({
         templateId: selectedValue,
         templateVersion: matched?.templateVersion != null ? String(matched.templateVersion) : null,
       });
     },
-    [onChange, templatesData?.templates]
+    [onChange, templates]
   );
 
   return (

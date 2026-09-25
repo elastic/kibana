@@ -16,8 +16,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useTracesEditor } from '../../hooks/use_traces_editor';
 import { TraceDisplay } from '../trace_display';
@@ -66,6 +68,10 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
               onClick={startEditing}
               isDisabled={aiIndex === undefined}
               data-test-subj="contextEditTracesButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
+                action: CONTEXT_ENGINE_UI_EBT.action.traces.EDIT,
+              })}
             >
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.editButton"
@@ -80,7 +86,11 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
         <EuiSkeletonText lines={2} />
       ) : editing ? (
         <>
-          <TraceSelector value={editing.draft} onChange={editing.setDraft} />
+          <TraceSelector
+            value={editing.draft}
+            onChange={editing.setDraft}
+            ebtElement={CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel}
+          />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -88,6 +98,10 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
                 onClick={editing.cancel}
                 isDisabled={editing.isSaving}
                 data-test-subj="contextTracesCancelButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.traces.CANCEL,
+                })}
               >
                 <FormattedMessage
                   id="xpack.contextEngine.aiIndexDetail.traces.cancelButton"
@@ -102,6 +116,10 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
                 onClick={editing.save}
                 isLoading={editing.isSaving}
                 data-test-subj="contextTracesSaveButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.traces.SAVE,
+                })}
               >
                 <FormattedMessage
                   id="xpack.contextEngine.aiIndexDetail.traces.saveButton"

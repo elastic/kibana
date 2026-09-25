@@ -26,9 +26,9 @@
  * Derived from https://github.com/probot/metadata/blob/6ae1523d5035ba727d09c0e7f77a6a154d9a4777/index.js
  *
  * `body` is a string that contains markdown and any existing metadata (eg. an issue or comment body)
- * `prefix` is a string that can be used to namespace the metadata, defaults to `ci`.
+ * `prefix` is a string that can be used to namespace the metadata, defaults to `failed-test`.
  */
-const PREFIX = 'failed-test';
+export const FAILED_TEST_METADATA_PREFIX = 'failed-test';
 const REGEX = /\n\n<!-- kibanaCiData = (.*) -->/;
 
 function safeJsonParse(json: string, onError: any) {
@@ -42,11 +42,16 @@ function safeJsonParse(json: string, onError: any) {
 /**
  * Parse metadata from issue body
  */
-export function getIssueMetadata(body: string, key: string, defaultValue: any = undefined) {
+export function getIssueMetadata(
+  body: string,
+  key: string,
+  defaultValue: any = undefined,
+  prefix: string = FAILED_TEST_METADATA_PREFIX
+) {
   const match = body.match(REGEX);
 
   if (match) {
-    const data = safeJsonParse(match[1], {})[PREFIX];
+    const data = safeJsonParse(match[1], {})[prefix];
     return data && data[key] !== undefined ? data[key] : defaultValue;
   } else {
     return defaultValue;
@@ -56,14 +61,18 @@ export function getIssueMetadata(body: string, key: string, defaultValue: any = 
 /**
  * Set data on the body.
  */
-export function updateIssueMetadata(body: string, values: Record<string, any>) {
+export function updateIssueMetadata(
+  body: string,
+  values: Record<string, any>,
+  prefix: string = FAILED_TEST_METADATA_PREFIX
+) {
   if (REGEX.test(body)) {
     return body.replace(REGEX, (match, json) => {
       const data = safeJsonParse(json, {});
-      data[PREFIX] = Object.assign(data[PREFIX] || {}, values);
+      data[prefix] = Object.assign(data[prefix] || {}, values);
       return match.replace(json, JSON.stringify(data));
     });
   }
 
-  return `${body}\n\n<!-- kibanaCiData = ${JSON.stringify({ [PREFIX]: values })} -->`;
+  return `${body}\n\n<!-- kibanaCiData = ${JSON.stringify({ [prefix]: values })} -->`;
 }

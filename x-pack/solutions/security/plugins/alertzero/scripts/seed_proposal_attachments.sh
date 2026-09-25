@@ -13,6 +13,14 @@ set -euo pipefail
 # internal-only and cannot be called from outside the server process).
 # Agent Builder conversations use the public Kibana API.
 #
+# Display-only: a seeded proposal has no backing gate-workflow execution, so
+# it renders in the queue and as an inline card, but clicking Approve/Decline
+# 409s ("has no gate execution, so its decision cannot be recorded") — that
+# check is intentional, since a real proposal is always created as a step of
+# the running `system-create-proposal` workflow it gets decided through. To
+# exercise the decision flow, create a proposal via that real path instead
+# (e.g. have the AlertZero worker propose an action) rather than seeding one.
+#
 # Prerequisites:
 #   - Kibana running at $KIBANA_URL (default: http://localhost:5601)
 #   - Elasticsearch running at $ES_URL (default: http://localhost:9200)
@@ -63,6 +71,101 @@ gen_uuid() {
     || cat /proc/sys/kernel/random/uuid
 }
 
+# The real ProposalsService writes through an *alias* named `.kibana-proposals`
+# — the storage adapter's index template (index_patterns: ".kibana-proposals-*")
+# points that alias at a concrete backing index like ".kibana-proposals-000001"
+# and maps rootProposalId/category/etc. as `keyword` there. This script writes
+# directly to Elasticsearch instead of through the adapter, so on a brand-new
+# cluster neither the template nor the alias exist yet: a plain
+# `PUT .kibana-proposals` would create a same-named *index*, which then
+# permanently blocks the real adapter from ever creating its alias of the same
+# name (`invalid_alias_name_exception: an index ... exists with the same name
+# as the alias`) — breaking every proposal the real gate workflow tries to
+# create afterwards. Register the same template the adapter would, and create
+# a concrete backing index that matches its pattern, so the alias and mapping
+# come from the template exactly as they would for the real service.
+ensure_index() {
+  # `GET /<name>` succeeds for either an index or an alias, so it cannot tell apart the alias
+  # this script requires from a legacy concrete index left behind by an older version of it (one
+  # that wrote straight to `${PROPOSALS_INDEX}/_doc/...` before this template existed). Checking
+  # `_alias` specifically is what catches that case — rerunning against a concrete index would
+  # otherwise silently write more documents to it and leave the real gate workflow blocked by the
+  # alias-name conflict this template was added to prevent.
+  if es_curl --fail "${ES_URL}/_alias/${PROPOSALS_INDEX}" > /dev/null 2>&1; then
+    return 0
+  fi
+  if es_curl --fail "${ES_URL}/${PROPOSALS_INDEX}" > /dev/null 2>&1; then
+    echo "ERROR: ${PROPOSALS_INDEX} already exists as a concrete index, not an alias." >&2
+    echo "This is left over from an older version of this script. Delete it and re-run:" >&2
+    echo "  curl -X DELETE -u \"\$KIBANA_USER:\$KIBANA_PASSWORD\" \"${ES_URL}/${PROPOSALS_INDEX}\"" >&2
+    echo "(Back up its documents first with a reindex if you want to keep them.)" >&2
+    exit 1
+  fi
+  es_curl \
+    -X PUT \
+    -H "Content-Type: application/json" \
+    "${ES_URL}/_index_template/${PROPOSALS_INDEX}" \
+    -d '{
+      "index_patterns": ["'"${PROPOSALS_INDEX}"'-*"],
+      "template": {
+        "aliases": { "'"${PROPOSALS_INDEX}"'": { "is_write_index": true } },
+        "mappings": {
+          "properties": {
+            "spaceId": { "type": "keyword", "ignore_above": 1024 },
+            "conversationId": { "type": "keyword", "ignore_above": 1024 },
+            "comment": { "type": "text" },
+            "actionWorkflowId": { "type": "keyword", "ignore_above": 1024 },
+            "actionInput": { "type": "flattened" },
+            "status": { "type": "keyword", "ignore_above": 1024 },
+            "decision": { "type": "keyword", "ignore_above": 1024 },
+            "supersededBy": { "type": "keyword", "ignore_above": 1024 },
+            "rootProposalId": { "type": "keyword", "ignore_above": 1024 },
+            "supersedes": { "type": "keyword", "ignore_above": 1024 },
+            "revision": { "type": "long" },
+            "impact": { "type": "keyword", "ignore_above": 1024 },
+            "confidence": { "type": "keyword", "ignore_above": 1024 },
+            "category": { "type": "keyword", "ignore_above": 1024 },
+            "origin": { "type": "keyword", "ignore_above": 1024 },
+            "expiresAt": { "type": "date", "format": "strict_date_optional_time" },
+            "impactRank": { "type": "byte" },
+            "confidenceRank": { "type": "byte" },
+            "decidedBy": {
+              "type": "object",
+              "properties": {
+                "username": { "type": "keyword", "ignore_above": 1024 },
+                "fullName": { "type": "keyword", "ignore_above": 1024 },
+                "email": { "type": "keyword", "ignore_above": 1024 },
+                "profileUid": { "type": "keyword", "ignore_above": 1024 }
+              }
+            },
+            "decidedAt": { "type": "date", "format": "strict_date_optional_time" },
+            "dismissReason": { "type": "keyword", "ignore_above": 1024 },
+            "rationale": { "type": "text" },
+            "executionError": { "type": "text" },
+            "workflowExecutionId": { "type": "keyword", "ignore_above": 1024 },
+            "createdAt": { "type": "date", "format": "strict_date_optional_time" },
+            "createdBy": {
+              "type": "object",
+              "properties": {
+                "username": { "type": "keyword", "ignore_above": 1024 },
+                "fullName": { "type": "keyword", "ignore_above": 1024 },
+                "email": { "type": "keyword", "ignore_above": 1024 },
+                "profileUid": { "type": "keyword", "ignore_above": 1024 }
+              }
+            }
+          }
+        }
+      }
+    }' > /dev/null
+
+  # The template only applies when a matching index is actually created —
+  # `PUT` here, not a document write, so the alias exists even before the
+  # first proposal is indexed.
+  es_curl -X PUT "${ES_URL}/${PROPOSALS_INDEX}-000001" > /dev/null
+}
+
+ensure_index
+
 AGENT_ID="${AGENT_ID:-elastic-ai-agent}"
 
 create_conversation() {
@@ -91,8 +194,10 @@ index_proposal() {
 }
 
 # Creates an Agent Builder attachment that links to an existing proposal via
-# its `origin` field. The card renderer reads `attachment.origin` to look up
-# live proposal data; the `data` snapshot drives the badge rendering only.
+# its `origin` field. Everything rendered is read live from the proposal, so the
+# attachment carries the id and nothing else. Only needed here because this
+# script writes proposals straight to Elasticsearch — a proposal created through
+# the service attaches itself.
 add_attachment() {
   local conversation_id="$1"
   local payload="$2"
@@ -138,32 +243,21 @@ index_proposal "$P1_ID" "$(jq -n \
     origin: "worker",
     impactRank: 3,
     confidenceRank: 0,
-    createdAt: $now
+    createdAt: $now,
+    rootProposalId: $id,
+    revision: 1
   }')" > /dev/null
 
 ATTACH1=$(add_attachment "$CONV1" "$(jq -n \
   --arg type "$PROPOSAL_ATTACHMENT_TYPE" \
   --arg origin "$P1_ID" \
-  --arg cid "$CONV1" \
-  --arg now "$NOW" \
-  --arg space "$KIBANA_SPACE" \
   '{
     type: $type,
     origin: $origin,
     render_inline: true,
     data: {
-      id: $origin,
-      spaceId: $space,
-      conversationId: $cid,
-      comment: "Block outbound traffic from the compromised host to prevent data exfiltration.",
-      actionWorkflowId: "system-alertzero-action-create-rule",
-      status: "pending",
-      impact: "low",
-      confidence: "high",
-      category: "configure",
-      origin: "worker",
-      createdAt: $now,
-      expired: false
+      proposalId: $origin,
+      title: "Block outbound \u2014 seed"
     }
   }')")
 
@@ -199,34 +293,21 @@ index_proposal "$P2_ID" "$(jq -n \
     expiresAt: $expiry,
     impactRank: 2,
     confidenceRank: 0,
-    createdAt: $now
+    createdAt: $now,
+    rootProposalId: $id,
+    revision: 1
   }')" > /dev/null
 
 ATTACH2=$(add_attachment "$CONV2" "$(jq -n \
   --arg type "$PROPOSAL_ATTACHMENT_TYPE" \
   --arg origin "$P2_ID" \
-  --arg cid "$CONV2" \
-  --arg now "$NOW" \
-  --arg expiry "$FUTURE_EXPIRY" \
-  --arg space "$KIBANA_SPACE" \
   '{
     type: $type,
     origin: $origin,
     render_inline: true,
     data: {
-      id: $origin,
-      spaceId: $space,
-      conversationId: $cid,
-      comment: "Create a detection rule for repeated SSH login failures from external IP ranges.",
-      actionWorkflowId: "system-alertzero-action-create-rule",
-      status: "pending",
-      impact: "medium",
-      confidence: "high",
-      category: "configure",
-      origin: "worker",
-      expiresAt: $expiry,
-      createdAt: $now,
-      expired: false
+      proposalId: $origin,
+      title: "Detect repeated SSH login failures"
     }
   }')")
 
@@ -258,36 +339,19 @@ index_proposal "$P3_ID" "$(jq -n \
     rationale: "We already have a rule covering this pattern from last sprint.",
     impactRank: 2,
     confidenceRank: 1,
-    createdAt: $now
+    createdAt: $now,
+    rootProposalId: $id,
+    revision: 1
   }')" > /dev/null
 
 ATTACH3=$(add_attachment "$CONV3" "$(jq -n \
   --arg type "$PROPOSAL_ATTACHMENT_TYPE" \
   --arg origin "$P3_ID" \
-  --arg cid "$CONV3" \
-  --arg now "$NOW" \
-  --arg space "$KIBANA_SPACE" \
   '{
     type: $type,
     origin: $origin,
     render_inline: true,
-    data: {
-      id: $origin,
-      spaceId: $space,
-      conversationId: $cid,
-      comment: "Create a detection rule for repeated failed logins from this IP range.",
-      status: "no_action",
-      decision: "dismissed",
-      impact: "medium",
-      confidence: "medium",
-      origin: "worker",
-      decidedAt: $now,
-      decidedBy: { username: "elastic", fullName: null, email: null },
-      dismissReason: "already_handled",
-      rationale: "We already have a rule covering this pattern from last sprint.",
-      createdAt: $now,
-      expired: false
-    }
+    data: { proposalId: $origin }
   }')")
 
 echo "  conversation: $CONV3, proposal: $P3_ID, attachment: $ATTACH3"

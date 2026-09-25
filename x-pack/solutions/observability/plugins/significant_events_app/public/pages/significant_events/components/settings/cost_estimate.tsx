@@ -7,9 +7,17 @@
 
 import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiAccordion, EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
+import { DeveloperModeBadge } from '../../../../components/developer_mode_badge/developer_mode_badge';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsCost } from '../../../../hooks/use_significant_events_cost';
 import { useRunQuotas } from '../../../../hooks/use_significant_events_run_quotas';
@@ -207,29 +215,32 @@ export const CostEstimate = () => {
         grow={false}
         data-test-subj="significantEventsCostSection"
       >
-        <EuiPanel hasShadow={false} color="subdued" paddingSize="none">
-          <EuiAccordion
-            id="significantEventsCostAccordion"
-            initialIsOpen={false}
-            buttonProps={{
-              paddingSize: 'm',
-              css: { flexGrow: 0, inlineSize: 'auto' },
-              'data-test-subj': 'significantEventsCostAccordionButton',
-            }}
-            buttonContent={
-              <EuiTitle size="s">
+        <EuiPanel hasShadow={false} color="subdued" paddingSize="m">
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            data-test-subj="significantEventsCostHeader"
+          >
+            <EuiFlexItem grow={false}>
+              <DeveloperModeBadge />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
                 <h3>
                   {i18n.translate('xpack.significantEventsApp.settings.costEstimate.sectionTitle', {
                     defaultMessage: 'Approximate inference cost across all spaces',
                   })}
                 </h3>
               </EuiTitle>
-            }
-            extraAction={<CostHeaderActions data={cost.data} />}
-            data-test-subj="significantEventsCostAccordion"
-          >
-            <EuiPanel hasShadow={false}>{renderBody()}</EuiPanel>
-          </EuiAccordion>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CostHeaderActions data={cost.data} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} borderRadius="none">
+          {renderBody()}
         </EuiPanel>
       </EuiPanel>
     </>
