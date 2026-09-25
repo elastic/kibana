@@ -74,63 +74,58 @@ export type MappingProperty =
   | Extract<api.MappingProperty, { type: Exclude<SupportedMappingPropertyType, 'object'> }>
   | MappingPropertyObjectType;
 
-// Keys in a properties map whose type is 'alias'. Alias fields are query-time
-// projections; they do not appear in the document _source and must not be
-// included in ToPrimitives or EnsureSubsetOf checks.
-type AliasFields<P extends Record<string, MappingProperty>> = {
-  [K in keyof P]: P[K] extends { type: 'alias' } ? K : never;
-}[keyof P];
-
 export type ToPrimitives<O extends { properties: Record<string, MappingProperty> }> = {} extends O
   ? never
-  : Omit<
-      {
-        [K in keyof O['properties']]: {} extends O['properties'][K]
-          ? never
-          : O['properties'][K] extends { type: infer T }
-          ? T extends 'keyword'
-            ? O['properties'][K] extends { enum: infer TEnums }
-              ? TEnums extends Array<infer TEnum>
-                ? TEnum
-                : never
-              : string
-            : T extends 'text'
-            ? string
-            : T extends 'match_only_text'
-            ? string
-            : T extends 'semantic_text'
-            ? string
-            : T extends 'integer'
-            ? number
-            : T extends 'long'
-            ? number
-            : T extends 'short'
-            ? number
-            : T extends 'float'
-            ? number
-            : T extends 'double'
-            ? number
-            : T extends 'byte'
-            ? number
-            : T extends 'boolean'
-            ? boolean
-            : T extends 'date'
-            ? O['properties'][K] extends { format: 'strict_date_optional_time' }
-              ? string
-              : string | number
-            : T extends 'date_nanos'
-            ? string
-            : T extends 'flattened'
-            ? Record<string, unknown>
-            : T extends 'object'
-            ? O['properties'][K] extends AnyMappingDefinition
-              ? ToPrimitives<O['properties'][K]>
+  : {
+      // Alias fields are query-time projections that do not exist in _source.
+      // Key remapping filters them out so EnsureSubsetOf does not require them
+      // in source documents.
+      [K in keyof O['properties'] as O['properties'][K] extends { type: 'alias' }
+        ? never
+        : K]: {} extends O['properties'][K]
+        ? never
+        : O['properties'][K] extends { type: infer T }
+        ? T extends 'keyword'
+          ? O['properties'][K] extends { enum: infer TEnums }
+            ? TEnums extends Array<infer TEnum>
+              ? TEnum
               : never
+            : string
+          : T extends 'text'
+          ? string
+          : T extends 'match_only_text'
+          ? string
+          : T extends 'semantic_text'
+          ? string
+          : T extends 'integer'
+          ? number
+          : T extends 'long'
+          ? number
+          : T extends 'short'
+          ? number
+          : T extends 'float'
+          ? number
+          : T extends 'double'
+          ? number
+          : T extends 'byte'
+          ? number
+          : T extends 'boolean'
+          ? boolean
+          : T extends 'date'
+          ? O['properties'][K] extends { format: 'strict_date_optional_time' }
+            ? string
+            : string | number
+          : T extends 'date_nanos'
+          ? string
+          : T extends 'flattened'
+          ? Record<string, unknown>
+          : T extends 'object'
+          ? O['properties'][K] extends AnyMappingDefinition
+            ? ToPrimitives<O['properties'][K]>
             : never
-          : never;
-      },
-      AliasFields<O['properties']>
-    >;
+          : never
+        : never;
+    };
 
 export type AnyMappingDefinition = MappingsDefinition<MappingProperty>;
 
