@@ -277,6 +277,8 @@ const ArtifactsSubsectionBody = ({
   isMatchTruncated,
   isLoading,
   isError,
+  isExpanded,
+  onExpand,
   ruleTags,
   connectorTypesByPolicy,
   onOpen,
@@ -286,11 +288,12 @@ const ArtifactsSubsectionBody = ({
   isMatchTruncated: boolean;
   isLoading: boolean;
   isError: boolean;
+  isExpanded: boolean;
+  onExpand: () => void;
   ruleTags: string[];
   connectorTypesByPolicy: Map<string, string[]>;
   onOpen: (policyId: string) => void;
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
   useRerenderWhenSnoozeExpires(items);
 
   if (isLoading) {
@@ -376,10 +379,7 @@ const ArtifactsSubsectionBody = ({
         <>
           <EuiSpacer size="s" />
           <EuiText size="s">
-            <EuiLink
-              onClick={() => setIsExpanded(true)}
-              data-test-subj="ruleActionPoliciesArtifactsViewMoreLink"
-            >
+            <EuiLink onClick={onExpand} data-test-subj="ruleActionPoliciesArtifactsViewMoreLink">
               {i18n.translate(
                 'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.viewMoreLinkText',
                 {
@@ -412,9 +412,25 @@ export const ActionPoliciesArtifactsSubsection: React.FC<
   const ruleTags = rule.metadata.tags ?? [];
   const { items, evaluatedCount, isMatchTruncated, isLoading, isError } =
     useLinkedActionPolicies(ruleTags);
-  const policies = useMemo(() => items.map((item) => item.action_policy), [items]);
-  const { connectorTypesByPolicy } = useActionPolicyConnectorTypes(policies);
+  const [isListExpanded, setIsListExpanded] = useState(false);
+  // Connector icons are only rendered for rows on screen. Hidden matches stay
+  // out of mgetWorkflows until the operator expands the list.
+  const visibleItems = useMemo(() => {
+    if (isLoading || isError) {
+      return [];
+    }
+    return isListExpanded ? items : items.slice(0, LINKED_ACTION_POLICIES_VISIBLE_LIMIT);
+  }, [isError, isListExpanded, isLoading, items]);
+  const visiblePolicies = useMemo(
+    () => visibleItems.map((item) => item.action_policy),
+    [visibleItems]
+  );
+  const { connectorTypesByPolicy } = useActionPolicyConnectorTypes(visiblePolicies);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
+
+  const handleExpandList = useCallback(() => {
+    setIsListExpanded(true);
+  }, []);
 
   const openActionPoliciesHref = actionPolicyLocators.useUrl({ page: 'list' });
 
@@ -438,6 +454,8 @@ export const ActionPoliciesArtifactsSubsection: React.FC<
           isMatchTruncated={isMatchTruncated}
           isLoading={isLoading}
           isError={isError}
+          isExpanded={isListExpanded}
+          onExpand={handleExpandList}
           ruleTags={ruleTags}
           connectorTypesByPolicy={connectorTypesByPolicy}
           onOpen={setPolicyToViewId}

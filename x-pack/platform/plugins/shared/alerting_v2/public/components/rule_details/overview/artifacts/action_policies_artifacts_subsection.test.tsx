@@ -428,8 +428,21 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     expect(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink')).toHaveTextContent(
       '2 more action policies'
     );
+    const policiesBeforeExpand = mockUseActionPolicyConnectorTypes.mock.calls.at(-1)?.[0] as
+      | Array<{ id: string }>
+      | undefined;
+    expect(policiesBeforeExpand?.map((policy) => policy.id)).toEqual(
+      items.slice(0, LINKED_ACTION_POLICIES_VISIBLE_LIMIT).map((item) => item.action_policy.id)
+    );
 
     fireEvent.click(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink'));
+
+    const policiesAfterExpand = mockUseActionPolicyConnectorTypes.mock.calls.at(-1)?.[0] as
+      | Array<{ id: string }>
+      | undefined;
+    expect(policiesAfterExpand?.map((policy) => policy.id)).toEqual(
+      items.map((item) => item.action_policy.id)
+    );
 
     expect(
       screen.getByTestId(
