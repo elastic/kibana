@@ -19,6 +19,7 @@ export type {
 
 export {
   useAssignEscalation,
+  useLinkedInvestigations,
   useListEscalations,
   useCreateEscalation,
   useAddToEscalation,
