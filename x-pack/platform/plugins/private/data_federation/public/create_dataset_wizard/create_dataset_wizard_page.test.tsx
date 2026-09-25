@@ -406,6 +406,78 @@ describe('CreateDatasetWizardPage', () => {
     });
   });
 
+  it('preserves API-only settings not managed by the UI when saving edits', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
+    const add = jest.fn().mockResolvedValue(undefined);
+    const remove = jest.fn().mockResolvedValue(undefined);
+    const loadDataSets = jest.fn().mockResolvedValue(undefined);
+    const initialDataSet: DataSetWithName = {
+      name: 'logs-dataset',
+      data_source: 'source-1',
+      resource: 'bucket/*',
+      description: '',
+      settings: {
+        format: 'csv',
+        max_split_probes: 17,
+      },
+    };
+
+    const { getByTestId, queryByTestId } = render(
+      <EuiProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router history={history}>
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add, delete: remove },
+                  dataSourcesClient: { add: jest.fn() },
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={['logs-dataset']}
+                  loadDataSets={loadDataSets}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                  initialDataSet={initialDataSet}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    const timestampPathInput = queryByTestId('createDatasetWizardTimestampPath');
+    if (timestampPathInput) {
+      fireEvent.change(timestampPathInput, {
+        target: { value: 'event_time' },
+      });
+    }
+
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
+
+    await waitFor(() => {
+      expect(add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'logs-dataset',
+          settings: expect.objectContaining({ max_split_probes: 17 }),
+        })
+      );
+      expect(remove).not.toHaveBeenCalled();
+      expect(loadDataSets).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('requires at least one mapped field when Define schema is selected', async () => {
     const { getByTestId, findByTestId, queryByTestId } = renderWizard();
 
@@ -497,6 +569,9 @@ describe('CreateDatasetWizardPage', () => {
     // Should remain on Additional settings and not proceed to Mapping.
     expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
     expect(getByTestId('createDatasetWizardAdditionalStep')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toHaveAttribute('aria-invalid', 'true');
+    expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
   });
 });

@@ -21,6 +21,7 @@ import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
 import {
   buildDatasetSettingsFromFormValues,
+  emptyCreateDatasetSettingsFormValues,
   type CreateDatasetFormValues,
 } from './create_dataset_form_state';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
@@ -35,34 +36,22 @@ const { FormWizard, FormWizardStep } = Forms;
 
 const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
 const TIMESTAMP_FIELD_ID = '__timestamp__';
-const passthroughAdditionalSettingsKeys = [
-  'target_split_size',
-  'split_probe_window',
-  'file_sort_by',
-  'file_order',
-  'schema_sample_size',
-  'segment_size',
-  'comment',
-  'multi_value_syntax',
-  'max_field_size',
-  'region',
-] as const;
-
-type PassthroughAdditionalSettingsKey = (typeof passthroughAdditionalSettingsKeys)[number];
-
-// todo: doublecheck this
-const pickPassthroughAdditionalSettings = (
+const getUnmanagedDatasetSettings = (
   settings: DataSetWithName['settings'] | undefined
 ): Partial<NonNullable<DataSetWithName['settings']>> => {
   if (!settings) return {};
-  const picked: Partial<NonNullable<DataSetWithName['settings']>> = {};
-  for (const key of passthroughAdditionalSettingsKeys) {
-    const value = (settings as Record<PassthroughAdditionalSettingsKey, unknown>)[key];
-    if (value !== undefined) {
-      (picked as Record<PassthroughAdditionalSettingsKey, unknown>)[key] = value;
+
+  // Preserve any settings keys we don't manage in the UI. This ensures that
+  // editing a dataset doesn't drop server-supported settings that aren't
+  // currently exposed in the wizard.
+  const managedKeys = new Set(Object.keys(emptyCreateDatasetSettingsFormValues()));
+  const unmanaged: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(settings as Record<string, unknown>)) {
+    if (!managedKeys.has(key) && value !== undefined) {
+      unmanaged[key] = value;
     }
   }
-  return picked;
+  return unmanaged as Partial<NonNullable<DataSetWithName['settings']>>;
 };
 
 const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWizardContent => ({
@@ -141,8 +130,8 @@ export function CreateDatasetWizardPage({
       const desc = values.description?.trim();
       const settings = buildDatasetSettingsFromFormValues(values.settings);
       const mappings = buildDatasetMappings(values.mappings);
-      const passthroughSettings = pickPassthroughAdditionalSettings(initialDataSet?.settings);
-      const mergedSettings = { ...(settings ?? {}), ...passthroughSettings };
+      const unmanagedSettings = getUnmanagedDatasetSettings(initialDataSet?.settings);
+      const mergedSettings = { ...(settings ?? {}), ...unmanagedSettings };
       const payload: DataSetWithName = {
         name: values.name.trim(),
         data_source: values.data_source.trim(),
