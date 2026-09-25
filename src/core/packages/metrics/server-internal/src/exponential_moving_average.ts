@@ -63,8 +63,7 @@ export function createExponentialMovingAverage(
 
         // Intentionally seed the first post-warm-up step from `current`, not warm-up `mean`: startup
         // ELU is often high but expected, and blending from the mean would treat it as sustained load.
-        return (previous =
-          previous == null ? current : alpha * current + (1 - alpha) * previous);
+        return (previous = previous == null ? current : alpha * current + (1 - alpha) * previous);
       })
     );
   };

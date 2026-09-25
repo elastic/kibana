@@ -161,7 +161,10 @@ export class MetricsService
     apm.registerMetric('elu.history.medium', () => this.elu$.value.medium);
     apm.registerMetric('elu.history.long', () => this.elu$.value.long);
     apm.registerMetric('elu.history.time_weighted.short', () => this.timeWeightedElu$.value.short);
-    apm.registerMetric('elu.history.time_weighted.medium', () => this.timeWeightedElu$.value.medium);
+    apm.registerMetric(
+      'elu.history.time_weighted.medium',
+      () => this.timeWeightedElu$.value.medium
+    );
     apm.registerMetric('elu.history.time_weighted.long', () => this.timeWeightedElu$.value.long);
 
     // Report the same metrics to OpenTelemetry
