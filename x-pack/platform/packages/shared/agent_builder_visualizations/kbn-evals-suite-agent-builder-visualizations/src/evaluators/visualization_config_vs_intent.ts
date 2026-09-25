@@ -7,7 +7,7 @@
 
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
-import { isRecord, skippedResult } from '../evaluator_utils';
+import { isRecord, skippedResult, unescapeVegaField } from '../evaluator_utils';
 import {
   extractGoldQuery,
   hasStructuralGoldConfig,
@@ -287,7 +287,7 @@ function readColumn(value: unknown): string | undefined {
     return value.column;
   }
   if (typeof value.field === 'string' && value.field.trim().length > 0) {
-    return value.field;
+    return unescapeVegaField(value.field);
   }
   return undefined;
 }

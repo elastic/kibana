@@ -7,7 +7,7 @@
 
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
-import { isRecord, skippedResult } from '../evaluator_utils';
+import { isRecord, skippedResult, unescapeVegaField } from '../evaluator_utils';
 import { isNumericColumn, type EsqlColumn } from './esql_column_types';
 import type { EsqlQueryRunner } from './esql_query_runner';
 
@@ -123,7 +123,13 @@ function collectVegaBindings(spec: unknown): ColumnBinding[] {
   }
   return Object.entries(parsed.encoding).flatMap(([channel, definition]) =>
     isRecord(definition) && typeof definition.field === 'string'
-      ? [{ path: `spec.encoding.${channel}`, column: definition.field, role: 'other' as const }]
+      ? [
+          {
+            path: `spec.encoding.${channel}`,
+            column: unescapeVegaField(definition.field),
+            role: 'other' as const,
+          },
+        ]
       : []
   );
 }

@@ -13,6 +13,13 @@ import type { ExtractedVisualization } from './extract_visualization';
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/**
+ * Vega-Lite reads `.`, `[` and `]` in an encoding `field` as nested access, so a
+ * flat ES|QL column such as `host.name` must be written `host\\.name`. Returns the
+ * column name the field refers to.
+ */
+export const unescapeVegaField = (field: string): string => field.replace(/\\([.[\]])/g, '$1');
+
 /** Shared result for evaluators with nothing to check; `null` keeps them out of averages. */
 export const skippedResult = (explanation: string): EvaluationResult => ({
   score: null,
