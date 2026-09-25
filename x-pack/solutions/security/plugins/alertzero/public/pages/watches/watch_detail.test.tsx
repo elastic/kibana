@@ -567,7 +567,7 @@ describe('WatchDetailPage', () => {
     ).toBeChecked();
     expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
     expect(within(section).getAllByTestId('alertZeroAutonomyCardWho')[0]).toHaveTextContent(
-      /every containment action waits for you/i
+      /Runs a forensics pass for an investigation and attaches findings to it/i
     );
   });
 
