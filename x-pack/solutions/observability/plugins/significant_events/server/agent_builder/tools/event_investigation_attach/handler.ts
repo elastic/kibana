@@ -26,7 +26,12 @@ export const attachEventInvestigationToolHandler = async ({
   completedAt?: string;
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
-}): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
+}): Promise<{
+  /** Absent when the event was not found for the resolved eventId. */
+  event_uuid?: string;
+  updated: number;
+  ignored: number;
+}> => {
   const { hits } = await eventClient.findByEventUuid(eventUuid);
   const event = hits[0];
   if (!event) {

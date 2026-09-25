@@ -46,27 +46,15 @@ const makeLogger = (): jest.Mocked<Logger> =>
     debug: jest.fn(),
   } as unknown as jest.Mocked<Logger>);
 
-/**
- * @param hits - results returned for the first esql query (findByEventUuid)
- * @param lineageHits - when provided, returned for the second query (findByEventId);
- *   when omitted both queries return the same `hits` (backward-compat behaviour).
- */
-const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEvent[]) => {
+/** @param hits - results returned for the single findByEventId esql query. */
+const createEventClient = (hits: SignificantEvent[]) => {
   const okResponse = { errors: false, items: [] } as unknown as BulkResponse;
   const dataStreamClient = { create: jest.fn().mockResolvedValue(okResponse) };
 
-  const makeResult = (h: SignificantEvent[]) => ({
+  const queryMock = jest.fn().mockResolvedValue({
     columns: [{ name: '_source' }],
-    values: h.map((event) => [{ ...event }]),
+    values: hits.map((event) => [{ ...event }]),
   });
-
-  const queryMock = jest.fn().mockResolvedValue(makeResult(hits));
-  if (lineageHits !== undefined) {
-    // Sequence the two internal esql calls: findByEventUuid first, findByEventId second.
-    queryMock
-      .mockResolvedValueOnce(makeResult(hits))
-      .mockResolvedValueOnce(makeResult(lineageHits));
-  }
 
   const esClient = { esql: { query: queryMock } };
   const client = new EventClient({
@@ -84,7 +72,7 @@ describe('updateSignificantEventStatus', () => {
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
+      eventId: existing.event_id,
       status: 'closed',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
@@ -122,7 +110,7 @@ describe('updateSignificantEventStatus', () => {
     await expect(
       updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'event-1',
+        eventId: existing.event_id,
         status: 'closed',
         alertEventsClient: makeAlertEventsClient(),
         logger: makeLogger(),
@@ -138,7 +126,7 @@ describe('updateSignificantEventStatus', () => {
 
     await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
+      eventId: existing.event_id,
       status: 'closed',
       assessmentNote: 'Automatically closed by cleanup.',
       alertEventsClient: makeAlertEventsClient(),
@@ -159,7 +147,7 @@ describe('updateSignificantEventStatus', () => {
 
     await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
+      eventId: existing.event_id,
       status: 'closed',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
@@ -174,14 +162,13 @@ describe('updateSignificantEventStatus', () => {
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'missing-event',
+      eventId: 'missing-event',
       status: 'closed',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
     });
 
     expect(result).toEqual({
-      event_uuid: 'missing-event',
       updated: 0,
       ignored: 1,
       status: 'closed',
@@ -195,7 +182,7 @@ describe('updateSignificantEventStatus', () => {
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-1',
+      eventId: existing.event_id,
       status: 'closed',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
@@ -205,7 +192,7 @@ describe('updateSignificantEventStatus', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
-  it('resolves lineage: update targets the latest event_id version, not a stale caller reference', async () => {
+  it('targets the latest version in the lineage when multiple versions exist, not the first', async () => {
     const e0 = createSignificantEvent({
       event_uuid: 'event-0',
       event_id: 'event-id-1',
@@ -218,12 +205,12 @@ describe('updateSignificantEventStatus', () => {
       '@timestamp': '2026-01-01T00:01:00.000Z',
       status: 'dismissed',
     });
-    // findByEventUuid returns only E0 (the stale ref); findByEventId returns the full lineage
-    const { client, dataStreamClient } = createEventClient([e0], [e0, e1]);
+    // findByEventId returns the full lineage, ordered ascending by @timestamp.
+    const { client, dataStreamClient } = createEventClient([e0, e1]);
 
     const result = await updateSignificantEventStatus({
       eventClient: client,
-      eventUuid: 'event-0',
+      eventId: 'event-id-1',
       status: 'closed',
       alertEventsClient: makeAlertEventsClient(),
       logger: makeLogger(),
@@ -234,7 +221,7 @@ describe('updateSignificantEventStatus', () => {
     const [[callArg]] = dataStreamClient.create.mock.calls;
     const written: SignificantEvent = callArg.documents[0];
 
-    // Must chain off E1 (the true latest), not E0 (the stale caller reference)
+    // Must chain off E1 (the latest lineage entry), not E0 (the first)
     expect(written.previous_event_uuid).toBe('event-1');
     expect(written.status).toBe('closed');
   });
@@ -248,7 +235,7 @@ describe('updateSignificantEventStatus', () => {
 
       await updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'event-1',
+        eventId: existing.event_id,
         status: 'closed',
         alertEventsClient,
         logger,
@@ -270,7 +257,7 @@ describe('updateSignificantEventStatus', () => {
 
       await updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'event-1',
+        eventId: existing.event_id,
         status: 'closed',
         alertEventsClient,
         logger: makeLogger(),
@@ -285,7 +272,7 @@ describe('updateSignificantEventStatus', () => {
 
       await updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'missing-event',
+        eventId: 'missing-event',
         status: 'closed',
         alertEventsClient,
         logger: makeLogger(),
@@ -305,7 +292,7 @@ describe('updateSignificantEventStatus', () => {
       // Writer still returns success despite .rule-events failure
       const result = await updateSignificantEventStatus({
         eventClient: client,
-        eventUuid: 'event-1',
+        eventId: existing.event_id,
         status: 'closed',
         alertEventsClient,
         logger,

@@ -26,8 +26,8 @@ const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
 interface UseCloseSignificantEventResult {
-  closeSignificantEvent: (eventUuid: string) => void;
-  closingEventUuid?: string;
+  closeSignificantEvent: (eventId: string) => void;
+  closingEventId?: string;
 }
 
 export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
@@ -36,25 +36,25 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
   const queryClient = useQueryClient();
-  const [closingEventUuid, setClosingEventUuid] = useState<string>();
+  const [closingEventId, setClosingEventId] = useState<string>();
 
   const mutation = useMutation({
-    mutationFn: (eventUuid: string) =>
+    mutationFn: (eventId: string) =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/events/{id}/update',
         {
           params: {
-            path: { id: eventUuid },
+            path: { id: eventId },
             body: { status: 'closed' },
           },
           // Unmounting the list must not abort a close that is already in flight.
           signal: null,
         }
       ),
-    onMutate: (eventUuid) => {
-      setClosingEventUuid(eventUuid);
+    onMutate: (eventId) => {
+      setClosingEventId(eventId);
     },
-    onSuccess: (response, eventUuid) => {
+    onSuccess: (response, eventId) => {
       queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
         (current) =>
@@ -62,12 +62,20 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
             ? {
                 ...current,
                 hits: current.hits.map((event) =>
-                  event.event_uuid === eventUuid
+                  event.event_id === eventId
                     ? {
                         ...event,
-                        event_uuid: response.event_uuid,
-                        previous_event_uuid: eventUuid,
-                        status: 'closed',
+                        // `event_uuid` is only absent when the event was missing server-side —
+                        // in that case there's no new version to reflect, so keep the row as-is.
+                        ...(response.event_uuid
+                          ? {
+                              event_uuid: response.event_uuid,
+                              // The row's own prior version uuid, not the (now stable) eventId
+                              // used to find it — event_uuid is minted fresh on every write.
+                              previous_event_uuid: event.event_uuid,
+                              status: 'closed' as const,
+                            }
+                          : {}),
                       }
                     : event
                 ),
@@ -80,7 +88,7 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
       notifications.toasts.addError(toError(error), { title: CLOSE_ERROR_TOAST_TITLE });
     },
     onSettled: async () => {
-      setClosingEventUuid(undefined);
+      setClosingEventId(undefined);
       await queryClient.invalidateQueries({
         queryKey: NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
       });
@@ -88,7 +96,7 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
   });
 
   return {
-    closeSignificantEvent: (eventUuid) => mutation.mutate(eventUuid),
-    closingEventUuid,
+    closeSignificantEvent: (eventId) => mutation.mutate(eventId),
+    closingEventId,
   };
 };

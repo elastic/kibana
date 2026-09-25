@@ -48,7 +48,7 @@ describe('useUpdateSignificantEvent', () => {
     const { result } = renderHook(() => useUpdateSignificantEvent(), { wrapper });
 
     act(() => {
-      result.current.updateEventStatus({ eventUuid: 'event-1', status: 'closed' });
+      result.current.updateEventStatus({ eventId: 'event-1', status: 'closed' });
     });
 
     await waitFor(() => {
@@ -64,7 +64,7 @@ describe('useUpdateSignificantEvent', () => {
 
     act(() => {
       result.current.updateEventStatus({
-        eventUuid: 'event-1',
+        eventId: 'event-1',
         status: 'dismissed',
         assessmentNote: 'known noise',
       });
