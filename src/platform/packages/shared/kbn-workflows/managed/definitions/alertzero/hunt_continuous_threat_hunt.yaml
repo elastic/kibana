@@ -139,7 +139,7 @@ steps:
           workflow-id: system-security-hunt-find-or-create-investigation
           inputs:
             reportId: "{{ foreach.item }}"
-            runId: "{{ workflow.runId }}"
+            runId: "{{ execution.id }}"
 
       - name: hunt
         type: workflow.execute
@@ -148,7 +148,7 @@ steps:
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-            runId: "{{ workflow.runId }}"
+            runId: "{{ execution.id }}"
             trigger: "{{ steps.resolve_trigger_mode.output.trigger_mode }}"
             tier2_when: "{{ consts.worker_settings.tier2When }}"
             technology: "{{ consts.worker_settings.technology }}"
@@ -162,7 +162,7 @@ steps:
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-            runId: "{{ workflow.runId }}"
+            runId: "{{ execution.id }}"
 
       # Outcome derivation (section A): find_or_create failing means no
       # Investigation ever existed, so no conclusion is possible (handled by
