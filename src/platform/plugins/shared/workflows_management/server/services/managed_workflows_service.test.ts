@@ -999,6 +999,82 @@ describe('ManagedWorkflowsService', () => {
       expect(indexedDocument.enabled).toBe(true);
     });
 
+    it('skips the write when the stored document version does not match expectedDocumentVersion', async () => {
+      const definition = createTemplateDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, logger, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            version: 9,
+            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            managedTemplateValues: { recipient: 'World', enabled: true },
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(
+        WORKFLOW_ID,
+        {
+          spaceId: SPACE_ID,
+          values: { recipient: 'Elastic', enabled: true },
+          expectedDocumentVersion: 4,
+        },
+        definition.pluginId
+      );
+
+      expectNoOccWrites(crudService);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping install for '${WORKFLOW_ID}'`)
+      );
+    });
+
+    it('writes when the stored document version matches expectedDocumentVersion', async () => {
+      const definition = createTemplateDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            version: 9,
+            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            managedTemplateValues: { recipient: 'World', enabled: true },
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(
+        WORKFLOW_ID,
+        {
+          spaceId: SPACE_ID,
+          values: { recipient: 'Elastic', enabled: true },
+          expectedDocumentVersion: 9,
+        },
+        definition.pluginId
+      );
+
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalled();
+    });
+
+    it('does not create a document when expectedDocumentVersion is set and the document is missing', async () => {
+      const definition = createTemplateDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(
+        WORKFLOW_ID,
+        {
+          spaceId: SPACE_ID,
+          values: { recipient: 'Elastic', enabled: true },
+          expectedDocumentVersion: 9,
+        },
+        definition.pluginId
+      );
+
+      expectNoOccWrites(crudService);
+    });
+
     it('throws after exhausting version-conflict retries', async () => {
       const definition = createDefinition();
       mockManagedWorkflowDefinitions = [definition];

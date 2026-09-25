@@ -31,13 +31,25 @@ type ManagedWorkflowInstallValuesOption<TId extends ManagedWorkflowId> =
 
 export type ManagedWorkflowOperationOptions = ManagedWorkflowOperationBaseOptions;
 
+/**
+ * When set, install skips the write unless the stored document is still this version.
+ * `null` matches a document that has no version. Omit it to write against the document
+ * install reads. Seq_no concurrency only covers that read-to-write gap, not an earlier list.
+ */
+interface ManagedWorkflowExpectedDocumentVersionOption {
+  expectedDocumentVersion?: number | null;
+}
+
 export type ManagedWorkflowInstallOptions<TId extends ManagedWorkflowId> =
-  ManagedWorkflowOperationBaseOptions & ManagedWorkflowInstallValuesOption<TId>;
+  ManagedWorkflowOperationBaseOptions &
+    ManagedWorkflowInstallValuesOption<TId> &
+    ManagedWorkflowExpectedDocumentVersionOption;
 
 // Service installs can reuse persisted template values during reconciliation.
-export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseOptions & {
-  values?: ManagedWorkflowTemplateValues;
-};
+export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseOptions &
+  ManagedWorkflowExpectedDocumentVersionOption & {
+    values?: ManagedWorkflowTemplateValues;
+  };
 
 export type ExecuteManagedWorkflowOptions = ManagedWorkflowOperationOptions & {
   inputs?: Record<string, unknown>;
