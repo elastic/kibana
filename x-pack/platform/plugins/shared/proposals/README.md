@@ -108,6 +108,20 @@ Re-writing the *same* terminal status is deliberately allowed, so settling stays
 
 `supersededBy` points at the proposal that replaced this one — written when a failed action is re-offered as a fresh proposal. The queue filters superseded records out so a chain of retries appears once rather than per attempt.
 
+### Conversation history
+
+Creation, revisions, and failed-action retries each attach their own proposal to
+the conversation after the proposal writes succeed. Attachment writes are
+best-effort: failure logs a warning without failing the proposal operation.
+Existing conversations are not backfilled.
+
+Each card reads its own proposal. Replaced cards retain their original content,
+show a replaced notice and disabled decision buttons, and do not redirect to the
+successor. Replacement navigation is deferred pending Agent Builder support.
+The agent receives the replaced proposal as historical and non-actionable, with
+the successor ID when available. Queue views continue to show only the latest
+proposal.
+
 ### The revision chain
 
 A proposal that is still undecided can be corrected rather than dismissed and

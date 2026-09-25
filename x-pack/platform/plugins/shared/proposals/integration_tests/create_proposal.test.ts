@@ -188,6 +188,7 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.resume(true);
 
       const [supersededOriginal, revision] = fixture.proposals();
+      expect(fixture.attachedProposalIds()).toEqual(fixture.proposals().map(({ id }) => id));
       expect(supersededOriginal.id).toBe(original.id);
       expect(supersededOriginal.status).toBe('superseded');
       expect(supersededOriginal.supersededBy).toBe(revision.id);
@@ -257,6 +258,7 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.resume(true);
 
       const [original, clone] = fixture.proposals();
+      expect(fixture.attachedProposalIds()).toEqual([original.id, clone.id]);
       expect(clone).toBeDefined();
       expect(original.supersededBy).toBe(clone.id);
       expect(clone.decision).toBeUndefined();

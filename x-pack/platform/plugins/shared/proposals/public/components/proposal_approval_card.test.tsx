@@ -345,77 +345,57 @@ describe('ProposalApprovalCard', () => {
   });
 
   describe('superseded row', () => {
-    it('renders the revision that replaced it, not the superseded row', () => {
-      setupMocks();
-      useProposalMock.mockImplementation(
-        (id: string | undefined) =>
-          ({
-            data:
-              id === 'proposal-1'
-                ? baseProposal({
-                    id: 'proposal-1',
-                    status: 'superseded',
-                    supersededBy: 'proposal-2',
-                  })
-                : baseProposal({ id: 'proposal-2', revision: 2 }),
-            isLoading: false,
-            isError: false,
-          } as unknown as ReturnType<typeof useProposal>)
+    it.each<Partial<ProposalWithMetadata>>([
+      { status: 'superseded', supersededBy: 'proposal-2' },
+      { status: 'failed', decision: 'approved', supersededBy: 'proposal-2' },
+      { status: 'superseded' },
+      { status: 'pending', supersededBy: 'proposal-2', expired: true },
+    ])('renders its own historical content for %j', (overrides) => {
+      setupMocks(baseProposal({ ...overrides, comment: 'Original recommendation' }));
+      const { container, getByText, queryByText } = render(
+        <ProposalApprovalCard proposalId={PROPOSAL_ID} />
       );
 
-      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      expect(useProposalMock).toHaveBeenCalledWith('proposal-2');
+      expect(getByText('Original recommendation')).toBeInTheDocument();
+      expect(getByText('This proposal has been replaced.')).toBeInTheDocument();
       expect(
-        container.querySelector('[data-test-subj="proposalApprove-proposal-2"]')
-      ).toBeInTheDocument();
-      expect(container.querySelector('[data-test-subj="proposalCard-proposal-1"]')).toBeNull();
+        container.querySelector('[data-test-subj="proposalApprove-proposal-1"]')
+      ).toBeDisabled();
+      expect(
+        container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')
+      ).toBeDisabled();
+      expect(queryByText(/No further action is needed/)).not.toBeInTheDocument();
+      expect(queryByText(/The decision deadline has passed/)).not.toBeInTheDocument();
+      expect(useProposalMock.mock.calls.every(([id]) => id === PROPOSAL_ID)).toBe(true);
     });
 
-    it('follows the pointer more than one hop', () => {
+    it('hides an open dismissal form when the proposal is replaced', () => {
       setupMocks();
-      // A three-link chain: reaching the live head takes two redirects, so a
-      // redirect that only ever resolves one level would stop at proposal-2.
-      useProposalMock.mockImplementation((id: string | undefined) => {
-        const askedFor = id ?? PROPOSAL_ID;
-        return {
-          data:
-            askedFor === 'proposal-1'
-              ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-2' })
-              : askedFor === 'proposal-2'
-              ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-3' })
-              : baseProposal({ id: askedFor, revision: 3 }),
-          isLoading: false,
-          isError: false,
-        } as unknown as ReturnType<typeof useProposal>;
-      });
-
-      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      expect(useProposalMock).toHaveBeenCalledWith('proposal-3');
+      const { container, getByDisplayValue } = render(
+        <ProposalApprovalCard proposalId={PROPOSAL_ID} />
+      );
+      const dismissButton = container.querySelector(
+        '[data-test-subj="proposalDismiss-proposal-1"]'
+      );
+      expect(dismissButton).toBeInTheDocument();
+      if (dismissButton) {
+        fireEvent.click(dismissButton);
+      }
       expect(
-        container.querySelector('[data-test-subj="proposalApprove-proposal-3"]')
+        container.querySelector('[data-test-subj="proposalDismissForm-proposal-1"]')
       ).toBeInTheDocument();
-    });
 
-    it('stops instead of looping forever on a chain that points in a circle', () => {
-      setupMocks();
-      useProposalMock.mockImplementation((id: string | undefined) => {
-        const askedFor = id ?? PROPOSAL_ID;
-        return {
-          data: baseProposal({
-            id: askedFor,
-            status: 'superseded',
-            supersededBy: `${askedFor}-next`,
-          }),
-          isLoading: false,
-          isError: false,
-        } as unknown as ReturnType<typeof useProposal>;
-      });
-
-      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      expect(getByTestId('warning-callout')).toBeInTheDocument();
+      setupMocks(baseProposal({ status: 'superseded', supersededBy: 'proposal-2' }));
+      fireEvent.change(getByDisplayValue(''), { target: { value: 'Historical rationale' } });
+      expect(
+        container.querySelector('[data-test-subj="proposalDismissForm-proposal-1"]')
+      ).toBeNull();
+      expect(
+        container.querySelector('[data-test-subj="proposalDismissConfirm-proposal-1"]')
+      ).toBeNull();
+      expect(
+        container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')
+      ).toBeDisabled();
     });
   });
 

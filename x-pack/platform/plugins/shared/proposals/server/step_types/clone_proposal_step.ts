@@ -33,7 +33,8 @@ export const getCloneProposalStepDefinition = ({
             id: input.proposalId,
             executionError: input.executionError,
           },
-          spaceId
+          spaceId,
+          context.contextManager.getFakeRequest()
         );
 
         context.logger.debug(`Proposal ${input.proposalId} was superseded by ${proposalId}`);

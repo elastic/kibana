@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ExecutionStatus } from '@kbn/workflows';
 import { CREATE_PROPOSAL_WORKFLOW_ID, getManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -97,6 +98,7 @@ const GATE_TIMEOUT_MS = 72 * 60 * 60 * 1000;
 
 export interface ProposalGateFixture {
   engine: WorkflowRunFixture;
+  attachedProposalIds: () => string[];
   /** Every proposal written so far, in insertion order. */
   proposals: () => Array<Proposal & { id: string }>;
   /** The only proposal, asserting there is exactly one. */
@@ -148,13 +150,19 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     resumeWorkflowExecution: jest.fn(),
   };
 
+  const attachedProposalIds: string[] = [];
   const service = new ProposalsService({
     storage: client,
     logger: loggerMock.create(),
     getWorkflowsApi: () => workflowsApi as never,
     // The gate's behaviour does not depend on the conversation card, so the
     // attachment write is stubbed rather than simulated.
-    getAttachmentsClient: async () => ({ create: jest.fn() } as never),
+    getAttachmentsClient: async () =>
+      ({
+        create: jest.fn(async ({ origin }: { origin: string }) => {
+          attachedProposalIds.push(origin);
+        }),
+      } as never),
   });
 
   const privileges: ProposalPrivilegesChecker = {
@@ -176,6 +184,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   return {
     engine,
+    attachedProposalIds: () => [...attachedProposalIds],
     proposals,
     onlyProposal: () => {
       const all = proposals();
@@ -220,7 +229,11 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
      */
     revise: async (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => {
       const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);
-      await service.revise({ id: live.id, ...overrides }, live.spaceId ?? 'fake_space_id');
+      await service.revise(
+        { id: live.id, ...overrides },
+        live.spaceId ?? 'fake_space_id',
+        httpServerMock.createKibanaRequest()
+      );
     },
     timeOutGate: async () => {
       // No `resumeInput`, which is the whole signal: the step reads the wait as

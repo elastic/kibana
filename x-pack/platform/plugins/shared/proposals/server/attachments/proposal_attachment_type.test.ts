@@ -144,6 +144,36 @@ describe('proposalAttachmentType', () => {
       expect(value).not.toContain('deadline has passed');
     });
 
+    it.each<Partial<ProposalWithMetadata>>([
+      { status: 'superseded', supersededBy: 'proposal-2' },
+      { status: 'failed', decision: 'approved', supersededBy: 'proposal-2' },
+      { status: 'pending', supersededBy: 'proposal-2', expired: true },
+      { status: 'superseded' },
+    ])('describes replaced proposals as historical: %j', async (overrides) => {
+      const { type, get } = createType();
+      get.mockResolvedValue(proposal(overrides));
+
+      const representation = await represent(type);
+      expect(representation).toEqual({
+        type: 'text',
+        value: expect.stringContaining(
+          'REPLACED: this proposal is historical and cannot be acted on.'
+        ),
+      });
+      expect(representation).toEqual({
+        type: 'text',
+        value: expect.not.stringContaining('Awaiting a human decision'),
+      });
+      if (overrides.supersededBy) {
+        expect(representation).toEqual({
+          type: 'text',
+          value: expect.stringContaining('Replacement proposal ID: proposal-2.'),
+        });
+      }
+      expect(get).toHaveBeenCalledTimes(1);
+      expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID);
+    });
+
     it('should read the id from the payload when the attachment has no origin', async () => {
       const { type, get } = createType();
 
