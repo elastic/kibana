@@ -18,8 +18,12 @@ import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 export interface HuntServices {
   /** The proposals plugin's service, for writing back hunt proposals. */
   getProposalsService: ProposalsPluginStart['getProposalsService'];
-  /** Inference plugin start contract, for building a ScopedModel per hunt run. */
-  getInference: () => InferenceServerStart;
+  /**
+   * Inference plugin start contract, for building a ScopedModel per hunt run.
+   * Optional plugin, so this is undefined on a deployment without it and the
+   * caller degrades at the Tier 2 boundary rather than failing the hunt.
+   */
+  getInference: () => InferenceServerStart | undefined;
   /**
    * Model-tier registry, for resolving the connector an operator picked for an
    * AlertZero tier. Optional plugin, so hunt routes fall back to the connector

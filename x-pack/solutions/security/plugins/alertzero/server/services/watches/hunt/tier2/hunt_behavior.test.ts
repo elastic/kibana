@@ -11,6 +11,7 @@ import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { huntBehavior } from './hunt_behavior';
 import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
+import { getMitreCatalog } from './mitre_catalog';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
@@ -555,5 +556,74 @@ describe('huntBehavior', () => {
       esClient
     );
     expect(result.behaviors[0].affected_hosts_truncated).toBe(true);
+  });
+
+  describe('the generation budget', () => {
+    const GENERATION_BUDGET = 20;
+    const OVER_BUDGET = GENERATION_BUDGET + 5;
+
+    beforeEach(() => {
+      // Every id resolves to a grounded query here, so the only reason a behavior
+      // keeps its placeholder is the budget rather than a generation failure.
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+    });
+
+    /** Real catalog ids, so none are dropped as unknown before generation. */
+    const catalogIds = () => [...getMitreCatalog().techniqueById.keys()].slice(0, OVER_BUDGET);
+
+    /** Ascending confidence, so the lowest-confidence ids are the ones over budget. */
+    const ascendingCandidates = () =>
+      catalogIds().map((technique_id, index) => ({
+        technique_id,
+        evidence_quote: 'evidence',
+        llm_confidence: 0.5 + index * 0.02,
+      }));
+
+    const techniqueIdsSentToGeneration = () =>
+      generateEsqlMock.mock.calls.map(([{ nlQuery }]) => nlQuery);
+
+    it('bounds generation calls, so one report cannot spend unlimited LLM graphs', async () => {
+      const result = await huntBehavior(
+        buildMockModel(ascendingCandidates()),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(result.behaviors).toHaveLength(OVER_BUDGET);
+      expect(generateEsqlMock).toHaveBeenCalledTimes(GENERATION_BUDGET);
+    });
+
+    it('spends the budget on the highest-confidence behaviors', async () => {
+      const ids = catalogIds();
+      await huntBehavior(buildMockModel(ascendingCandidates()), logger, executeParams, esClient);
+
+      const sent = techniqueIdsSentToGeneration();
+      expect(sent.some((nlQuery) => nlQuery.includes(ids[OVER_BUDGET - 1]))).toBe(true);
+      expect(sent.some((nlQuery) => nlQuery.includes(ids[0]))).toBe(false);
+    });
+
+    it('leaves the over-budget behaviors unexecuted, unlike the ones inside it', async () => {
+      const ids = catalogIds();
+      const result = await huntBehavior(
+        buildMockModel(ascendingCandidates()),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      const overBudget = result.behaviors.find((b) => b.technique_id === ids[0]);
+      const insideBudget = result.behaviors.find((b) => b.technique_id === ids[OVER_BUDGET - 1]);
+      expect(overBudget?.execution?.executed).toBe(false);
+      expect(insideBudget?.execution?.executed).toBe(true);
+    });
+
+    it('generates for every behavior when the report stays inside the budget', async () => {
+      const candidates = ascendingCandidates().slice(0, GENERATION_BUDGET);
+
+      await huntBehavior(buildMockModel(candidates), logger, executeParams, esClient);
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(GENERATION_BUDGET);
+    });
   });
 });

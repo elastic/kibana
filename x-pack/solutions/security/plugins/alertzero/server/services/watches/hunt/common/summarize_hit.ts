@@ -26,6 +26,15 @@ const readField = (src: Record<string, unknown>, path: string): string | undefin
 };
 
 /**
+ * Length the Tier 2 request schema declares for a `sample_events` item. The
+ * coordinator calls `huntBehavior` in-process, where no request validation runs,
+ * so the bound has to hold at the source: a document with a very long
+ * `event.action` or rule name would otherwise reach the generation prompt in
+ * full and inflate the token request.
+ */
+const MAX_SUMMARY_CHARS = 2048;
+
+/**
  * One-line digest of a document for Tier 2 LLM grounding (`sample_events`).
  * Built from `_source` before Tier 1 slims wire hits to id/index/timestamp/matched.
  */
@@ -52,5 +61,6 @@ export const summarizeHit = (hit: {
   if (sourceIp) parts.push(`src=${sourceIp}`);
   const destinationIp = readField(src, 'destination.ip');
   if (destinationIp) parts.push(`dst=${destinationIp}`);
-  return parts.length > 0 ? parts.join(' ') : `_index=${hit.index} _id=${hit.id}`;
+  const summary = parts.length > 0 ? parts.join(' ') : `_index=${hit.index} _id=${hit.id}`;
+  return summary.slice(0, MAX_SUMMARY_CHARS);
 };
