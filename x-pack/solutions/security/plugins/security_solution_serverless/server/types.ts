@@ -25,6 +25,7 @@ import type {
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 import type { AutomaticImportPluginSetup } from '@kbn/automatic-import-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
+import type { AlertZeroPluginSetup } from '@kbn/alertzero-plugin/server';
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -46,6 +47,7 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   actions: ActionsPluginSetupContract;
   automaticImport?: AutomaticImportPluginSetup;
   usageApi?: UsageApiSetup;
+  alertzero?: AlertZeroPluginSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {

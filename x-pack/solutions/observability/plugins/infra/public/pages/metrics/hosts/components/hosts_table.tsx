@@ -113,7 +113,10 @@ export const HostsTable = () => {
             <EuiEmptyPrompt
               body={
                 hasDataOnAnotherSchema ? (
-                  <SwitchSchemaMessage dataTestSubj="infraHostsTableNoDataInSelectedSchema" />
+                  <SwitchSchemaMessage
+                    dataTestSubj="infraHostsTableNoDataInSelectedSchema"
+                    nodeType="host"
+                  />
                 ) : (
                   i18n.translate('xpack.infra.waffle.noDataDescription', {
                     defaultMessage: 'Try adjusting your time or filter.',

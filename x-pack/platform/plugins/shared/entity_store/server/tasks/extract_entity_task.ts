@@ -36,9 +36,11 @@ import {
   EntityStoreGlobalStateClient,
 } from '../domain/saved_objects';
 import { wrapTaskRun } from '../telemetry/traces';
-import { entityStoreMetrics } from '../monitor/metrics';
+import { buildExtractionAttributes, entityStoreMetrics } from '../monitor/metrics';
+import { NonPriorityExtractionDisabledError } from '../domain/errors';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import { getMergedConfig } from '../domain/config';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 /** The priority and single processes share one task; non-priority has its own so the two can run
  * on independent schedules and be started, stopped and monitored separately. */
@@ -242,6 +244,10 @@ async function runTask({
   }
 
   let remote = false;
+  const metricAttributes = () =>
+    buildExtractionAttributes(entityType, namespace, extractionMode, remote);
+
+  const extractionStart = Date.now();
 
   try {
     const { logsExtractionClient } = await createLogsExtractionClient({
@@ -253,31 +259,31 @@ async function runTask({
       extractionMode,
     });
 
-    const extractionStart = Date.now();
     const extractionResult = await logsExtractionClient.extractLogs(entityType, {
       signal,
     });
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
     remote = extractionResult.isRemote;
-    if (!extractionResult.success) {
+
+    if (extractionResult.success) {
+      logger.info(
+        `Successfully extracted ${extractionResult.count} entities for ${entityType}, took ${extractionDuration}ms  `
+      );
+      entityStoreMetrics.extractionTaskSuccess.add(1, metricAttributes());
+    } else if (extractionResult.error instanceof NonPriorityExtractionDisabledError) {
+      // Not a failure: the non-priority process is switched off and this tick did nothing.
+      // Counting it as an extraction error would make an idle process look permanently broken.
+      logger.debug(
+        `Non-priority extraction skipped for ${entityType}: ${extractionResult.error.message}`
+      );
+    } else {
       logger.error(
         `Logs extraction failed for ${entityType}: ${extractionResult.error.message}, took ${extractionDuration}ms`
       );
       entityStoreMetrics.extractionTaskError.add(1, {
-        entity_type: entityType,
-        namespace,
+        ...metricAttributes(),
         error_type: extractionResult.error.name ?? 'UnknownError',
-        remote,
-      });
-    } else {
-      logger.info(
-        `Successfully extracted ${extractionResult.count} entities for ${entityType}, took ${extractionDuration}ms  `
-      );
-      entityStoreMetrics.extractionTaskSuccess.add(1, {
-        entity_type: entityType,
-        namespace,
-        remote,
       });
     }
 
@@ -305,10 +311,8 @@ async function runTask({
     logger.error(`Error running extract entity task, received ${e.message}`);
 
     entityStoreMetrics.extractionTaskError.add(1, {
-      entity_type: entityType,
-      namespace,
+      ...metricAttributes(),
       error_type: e.name ?? 'UnknownError',
-      remote,
     });
 
     return {
@@ -320,6 +324,11 @@ async function runTask({
         entityType,
       },
     };
+  } finally {
+    entityStoreMetrics.extractionTaskDurationMs.record(
+      moment().diff(extractionStart, 'milliseconds'),
+      metricAttributes()
+    );
   }
 }
 
@@ -388,29 +397,38 @@ function registerOne({
         executionUuid,
         setCustomTaskRunEventFields,
       }) => ({
-        run: () =>
-          wrapTaskRun({
-            spanName: 'entityStore.task.extract_entity.run',
-            namespace: taskInstance.state.namespace,
-            attributes: {
-              'entity_store.task.id': taskInstance.id,
-              'entity_store.task.type': taskType,
-              'entity_store.entity.type': type,
-            },
-            run: () =>
-              runTask({
-                taskInstance,
-                signal,
-                executionUuid,
-                setCustomTaskRunEventFields,
-                logger: logger.get(taskInstance.id),
-                core,
-                entityType: type,
-                fakeRequest,
-                isServerless,
-                extractionMode,
-              }),
-          }),
+        run: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.executionContext.withContext(
+            buildEaExecutionContext(
+              EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_EXTRACT_TASK,
+              taskInstance.id
+            ),
+            () =>
+              wrapTaskRun({
+                spanName: 'entityStore.task.extract_entity.run',
+                namespace: taskInstance.state.namespace,
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': taskType,
+                  'entity_store.entity.type': type,
+                },
+                run: () =>
+                  runTask({
+                    taskInstance,
+                    signal,
+                    executionUuid,
+                    setCustomTaskRunEventFields,
+                    logger: logger.get(taskInstance.id),
+                    core,
+                    entityType: type,
+                    fakeRequest,
+                    isServerless,
+                    extractionMode,
+                  }),
+              })
+          );
+        },
       }),
     },
   });

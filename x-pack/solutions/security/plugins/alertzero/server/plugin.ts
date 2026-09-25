@@ -30,6 +30,7 @@ import type {
   AlertZeroStartDependencies,
 } from './types';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
+import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
@@ -41,6 +42,7 @@ import { ActionsService } from './services/actions/actions_service';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
+import { registerAttachments } from './agent_builder/attachments/register_attachments';
 
 export class AlertZeroPlugin
   implements
@@ -82,15 +84,20 @@ export class AlertZeroPlugin
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('AlertZero plugin is disabled');
-      return {};
+      return { isEnabled: false };
     }
 
     this.logger.info('Setting up AlertZero plugin');
+
+    // Registered inside the config guard so the deployment kill switch removes the setting
+    // entirely; `withAlertZeroEnabled` then never reads an unregistered key.
+    registerUiSettings(coreSetup.uiSettings);
 
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerOwner({ workflowsExtensions });
     registerAgentType(agentBuilder);
+    registerAttachments(agentBuilder);
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
     // Registered in setup so the builtin tool is available to Agent Builder before
     // the first agent run; the handler resolves the service lazily like the routes do.
@@ -136,7 +143,7 @@ export class AlertZeroPlugin
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
     });
 
-    return {};
+    return { isEnabled: true };
   }
 
   start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {

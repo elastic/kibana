@@ -295,6 +295,14 @@ describe('AutomationsPanel', () => {
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
   });
 
+  it('disables the Edit button while busy, even with a defined AI index', () => {
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ isBusy: true }));
+
+    renderPanel();
+
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeDisabled();
+  });
+
   it('hides the Edit button for managed AI indexes', () => {
     renderPanel({ isManaged: true });
 
