@@ -229,6 +229,65 @@ describe('useTopNavLinks', () => {
       const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
       expect(shareItem).toBeDefined();
     });
+    it('includes Schedule export when CSV reporting is available', async () => {
+      const services = createTestServices();
+
+      jest
+        .spyOn(services.share!, 'availableIntegrations')
+        .mockImplementation((_objectType, groupId) => {
+          if (groupId === 'export') {
+            return [
+              {
+                id: 'csvReports',
+                shareType: 'integration' as const,
+                groupId: 'export',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          if (groupId === 'exportDerivatives') {
+            return [
+              {
+                id: 'scheduledReports',
+                shareType: 'integration' as const,
+                groupId: 'exportDerivatives',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          return [];
+        });
+
+      const appMenuConfig = await setup({ hasShareIntegration: true, services });
+
+      const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
+      expect(exportItem?.items?.map((item) => item.id)).toEqual(['csvReports', 'scheduledReports']);
+    });
+
+    it('hides Schedule export when CSV reporting is not available', async () => {
+      const services = createTestServices();
+
+      jest
+        .spyOn(services.share!, 'availableIntegrations')
+        .mockImplementation((_objectType, groupId) => {
+          if (groupId === 'exportDerivatives') {
+            return [
+              {
+                id: 'scheduledReports',
+                shareType: 'integration' as const,
+                groupId: 'exportDerivatives',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          return [];
+        });
+
+      const appMenuConfig = await setup({ hasShareIntegration: true, services });
+
+      const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
+      expect(exportItem?.items?.map((item) => item.id)).not.toContain('scheduledReports');
+    });
   });
 
   describe('when background search is enabled', () => {
