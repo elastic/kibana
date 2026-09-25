@@ -4,19 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect } from 'react';
-import { EuiPageSection, EuiSpacer, EuiSplitPanel, EuiText } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPageSection,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+} from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { isEmpty } from 'lodash';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
-import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { useEditableSettings } from '../hooks/use_editable_settings';
+import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import { useAnonymizationSettings } from '../hooks/use_anonymization_settings';
+import { BuiltInPatternsTable } from './built_in_patterns_table';
+import { CustomPatternsTable } from './custom_patterns_table';
+import { PatternFlyout } from './pattern_flyout';
+import { PatternTesterTab } from './pattern_tester_tab';
+import { SettingsTab } from './settings_tab';
 import { useKibana } from '../hooks/use_kibana';
-import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 
 interface AnonymizationSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -26,20 +34,33 @@ const pageTitle = i18n.translate('xpack.aiAnonymizationSettings.pageTitle', {
   defaultMessage: 'Anonymization',
 });
 
-const settingsKeys = [aiAnonymizationSettings];
+type TabId = 'builtin' | 'custom' | 'tester' | 'settings';
 
 export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> = ({
   setBreadcrumbs,
 }) => {
   const {
-    services: { application, docLinks, notifications, settings },
+    services: { application },
   } = useKibana();
+  const canEditAdvancedSettings = Boolean(application.capabilities.advancedSettings?.save);
 
-  const { fields, unsavedChanges, handleFieldChange, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings(settingsKeys);
+  const {
+    isLoading,
+    maskingEnabled,
+    onFailure,
+    builtInPatterns,
+    customPatterns,
+    setMaskingEnabled,
+    setOnFailure,
+    setRuleEnabled,
+    addCustomPattern,
+    updateCustomPattern,
+    deleteCustomPattern,
+  } = useAnonymizationSettings();
 
-  const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
-  const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
+  const [selectedTab, setSelectedTab] = useState<TabId>('builtin');
+  const [flyoutPattern, setFlyoutPattern] = useState<RegexAnonymizationRule | undefined>();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -54,81 +75,154 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
     ]);
   }, [setBreadcrumbs]);
 
-  async function handleSave() {
-    try {
-      await saveAll();
-      window.location.reload();
-    } catch (e) {
-      const error = e as Error;
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.aiAnonymizationSettings.save.error', {
-          defaultMessage: 'An error occurred while saving the settings',
-        }),
-        text: error.message,
-      });
+  const tabs = [
+    {
+      id: 'builtin',
+      label: i18n.translate('xpack.aiAnonymizationSettings.tabs.builtIn', {
+        defaultMessage: 'Built-in patterns',
+      }),
+      badge: builtInPatterns.length,
+      isSelected: selectedTab === 'builtin',
+      onClick: () => setSelectedTab('builtin'),
+      'data-test-subj': 'aiAnonymizationSettingsTab-builtin',
+    },
+    {
+      id: 'custom',
+      label: i18n.translate('xpack.aiAnonymizationSettings.tabs.custom', {
+        defaultMessage: 'Custom patterns',
+      }),
+      badge: customPatterns.length,
+      isSelected: selectedTab === 'custom',
+      onClick: () => setSelectedTab('custom'),
+      'data-test-subj': 'aiAnonymizationSettingsTab-custom',
+    },
+    {
+      id: 'tester',
+      label: i18n.translate('xpack.aiAnonymizationSettings.tabs.tester', {
+        defaultMessage: 'Pattern tester',
+      }),
+      isSelected: selectedTab === 'tester',
+      onClick: () => setSelectedTab('tester'),
+      'data-test-subj': 'aiAnonymizationSettingsTab-tester',
+    },
+    {
+      id: 'settings',
+      label: i18n.translate('xpack.aiAnonymizationSettings.tabs.settings', {
+        defaultMessage: 'Settings',
+      }),
+      isSelected: selectedTab === 'settings',
+      onClick: () => setSelectedTab('settings'),
+      'data-test-subj': 'aiAnonymizationSettingsTab-settings',
+    },
+  ];
+
+  const techPreviewBadge = {
+    label: i18n.translate('xpack.aiAnonymizationSettings.techPreviewBadge', {
+      defaultMessage: 'Tech Preview',
+    }),
+    color: 'hollow' as const,
+    'data-test-subj': 'aiAnonymizationSettingsTechPreviewBadge',
+  };
+
+  const enabledRules = [...builtInPatterns, ...customPatterns].filter((rule) => rule.enabled);
+
+  const closeFlyout = () => {
+    setIsFlyoutOpen(false);
+    setFlyoutPattern(undefined);
+  };
+
+  const handleSavePattern = async (pattern: Parameters<typeof addCustomPattern>[0]) => {
+    if (flyoutPattern?.id) {
+      await updateCustomPattern(flyoutPattern.id, pattern);
+    } else {
+      await addCustomPattern(pattern);
     }
-  }
+  };
 
   return (
-    <>
-      <div data-test-subj="aiAnonymizationSettingsPage">
-        <AppHeader title={pageTitle} spacing="bleed" />
+    <div data-test-subj="aiAnonymizationSettingsPage">
+      <AppHeader title={pageTitle} spacing="bleed" tabs={tabs} badges={[techPreviewBadge]} />
+      <EuiPageSection paddingSize="l">
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              {i18n.translate('xpack.aiAnonymizationSettings.maskingEnabledLabel', {
+                defaultMessage: 'Masking enabled',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={i18n.translate('xpack.aiAnonymizationSettings.maskingEnabledTooltip', {
+                defaultMessage:
+                  'Master switch for anonymization. When off, no patterns are applied and content is sent to the model unmasked.',
+              })}
+              position="bottom"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              showLabel={false}
+              label=""
+              checked={maskingEnabled}
+              disabled={!canEditAdvancedSettings}
+              onChange={(e) => setMaskingEnabled(e.target.checked)}
+              data-test-subj="aiAnonymizationSettingsHeaderMaskingSwitch"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiSpacer size="l" />
 
-        <EuiPageSection paddingSize="none">
-          <EuiSplitPanel.Outer hasBorder grow={false}>
-            <EuiSplitPanel.Inner color="subdued">
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.aiAnonymizationSettings.description"
-                  defaultMessage="Configure regex and named-entity-recognition (NER) rules used to anonymize sensitive data before it is sent to the LLM. Applies to every AI feature that uses the inference plugin's chatComplete API."
-                />
-              </EuiText>
-            </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner>
-              {settingsKeys.map((settingKey) => {
-                const field = fields[settingKey];
+        {!isLoading && (
+          <>
+            {selectedTab === 'builtin' && (
+              <BuiltInPatternsTable
+                patterns={builtInPatterns}
+                onToggle={setRuleEnabled}
+                isSavingEnabled={canEditAdvancedSettings}
+              />
+            )}
+            {selectedTab === 'custom' && (
+              <CustomPatternsTable
+                patterns={customPatterns}
+                onToggle={setRuleEnabled}
+                onEdit={(pattern) => {
+                  setFlyoutPattern(pattern);
+                  setIsFlyoutOpen(true);
+                }}
+                onDelete={deleteCustomPattern}
+                onAddClick={() => {
+                  setFlyoutPattern(undefined);
+                  setIsFlyoutOpen(true);
+                }}
+                isSavingEnabled={canEditAdvancedSettings}
+              />
+            )}
+            {selectedTab === 'tester' && (
+              <PatternTesterTab builtInPatterns={builtInPatterns} customPatterns={customPatterns} />
+            )}
+            {selectedTab === 'settings' && (
+              <SettingsTab
+                maskingEnabled={maskingEnabled}
+                onFailure={onFailure}
+                onMaskingEnabledChange={setMaskingEnabled}
+                onOnFailureChange={setOnFailure}
+                isSavingEnabled={canEditAdvancedSettings}
+              />
+            )}
+          </>
+        )}
+      </EuiPageSection>
 
-                if (!field) {
-                  return null;
-                }
-
-                return (
-                  <FieldRowProvider
-                    key={settingKey}
-                    {...{
-                      links: docLinks.links.management,
-                      showDanger: (message: string) => notifications.toasts.addDanger(message),
-                      validateChange: (key: string, value: any) =>
-                        settings.client.validateValue(key, value),
-                    }}
-                  >
-                    <FieldRow
-                      field={field}
-                      isSavingEnabled={!!canEditAdvancedSettings}
-                      onFieldChange={handleFieldChange}
-                      unsavedChange={unsavedChanges[settingKey]}
-                    />
-                  </FieldRowProvider>
-                );
-              })}
-            </EuiSplitPanel.Inner>
-          </EuiSplitPanel.Outer>
-        </EuiPageSection>
-      </div>
-      {!isEmpty(unsavedChanges) && (
-        <BottomBarActions
-          isLoading={isSaving}
-          onDiscardChanges={cleanUnsavedChanges}
-          onSave={handleSave}
-          saveLabel={i18n.translate('xpack.aiAnonymizationSettings.settings.saveButton', {
-            defaultMessage: 'Save changes',
-          })}
-          unsavedChangesCount={Object.keys(unsavedChanges).length}
-          appTestSubj="aiAnonymizationSettings"
-          areChangesInvalid={hasInvalidChanges}
+      {isFlyoutOpen && (
+        <PatternFlyout
+          pattern={flyoutPattern}
+          enabledRules={enabledRules}
+          onSave={handleSavePattern}
+          onClose={closeFlyout}
         />
       )}
-    </>
+    </div>
   );
 };
