@@ -273,13 +273,11 @@ function getDefaultMockWorkflowInsight(endpointId: string) {
 
 export const stubWorkflowInsightsApiResponse = (endpointId: string, count = 1) => {
   cy.intercept('GET', '**/internal/api/endpoint/workflow_insights**', (req) => {
-    req.continue((res) => {
-      const insights = [];
-      for (let i = 0; i < count; i++) {
-        insights.push(getDefaultMockWorkflowInsight(endpointId));
-      }
-      return res.send(200, insights);
-    });
+    const insights = [];
+    for (let i = 0; i < count; i++) {
+      insights.push(getDefaultMockWorkflowInsight(endpointId));
+    }
+    req.reply(200, insights);
   }).as('getWorkflowInsights');
 };
 

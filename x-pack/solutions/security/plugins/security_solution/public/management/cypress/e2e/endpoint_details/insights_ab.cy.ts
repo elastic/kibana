@@ -9,7 +9,6 @@ import {
   createBedrockAIConnector,
   deleteConnectors,
   expectWorkflowInsightsApiToBeCalled,
-  interceptGetWorkflowInsightsApiCall,
   setConnectorIdInLocalStorageAB,
   stubInferenceConnectorsApiResponse,
   stubWorkflowInsightsApiResponse,
@@ -111,7 +110,6 @@ describe(
 
     it('should display results after a completed scan', () => {
       stubWorkflowInsightsPendingApiResponse([]);
-      interceptGetWorkflowInsightsApiCall();
       stubWorkflowInsightsApiResponse(endpointId, 1);
 
       loadEndpointDetailsFlyout(endpointId);
