@@ -57,7 +57,21 @@ export const createSandboxWorkspaceManager = ({
         canUseTelemetry,
       });
       const lastKey = lastConnectorIds.get(session);
-      if (!session.isReset && lastKey === currentKey) return;
+      if (!session.isReset && lastKey === currentKey) {
+        // `isReset` is an edge-triggered signal and another sandbox RPC (for example the
+        // before-agent allocation step) may consume it before tools run. Verify the actual
+        // workspace invariant before trusting the connector cache.
+        const manifests = await session.statFiles([
+          '/workspace/elastic.md',
+          '/workspace/connectors.md',
+        ]);
+        const workspaceReady =
+          manifests.length === 2 &&
+          manifests.every(({ exists, is_dir: isDirectory }) => exists && !isDirectory);
+        if (workspaceReady) {
+          return;
+        }
+      }
 
       if (!canUseTelemetry) {
         lastConnectorIds.delete(session);
