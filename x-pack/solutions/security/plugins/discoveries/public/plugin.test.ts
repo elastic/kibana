@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { DIAGNOSTIC_REPORT_ATTACHMENT_TYPE } from '../common/constants';
@@ -40,7 +41,7 @@ describe('DiscoveriesPublicPlugin', () => {
       const plugin = new DiscoveriesPublicPlugin(context);
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
-      (coreStart.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(enabled);
+      (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReturnValue(of(enabled));
       coreSetup.getStartServices = jest.fn().mockResolvedValue([coreStart, {}, {}]);
       const setupDeps = createSetupDeps();
 

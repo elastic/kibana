@@ -12,7 +12,6 @@ import { useRiskLevelsEsqlQuery } from './use_risk_levels_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
-import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 
 jest.mock('@kbn/esql-utils', () => ({
   prettifyQuery: jest.fn((query) => query),
@@ -38,18 +37,12 @@ jest.mock('../../../../../common/hooks/use_global_filter_query', () => ({
   useGlobalFilterQuery: jest.fn(),
 }));
 
-jest.mock('../../../../api/hooks/use_risk_engine_status', () => ({
-  useRiskEngineStatus: jest.fn(),
-}));
-
 describe('useRiskLevelsEsqlQuery', () => {
   const mockUseKibana = useKibana as jest.Mock;
   const mockUseEsqlGlobalFilterQuery = useEsqlGlobalFilterQuery as jest.Mock;
   const mockUseGlobalFilterQuery = useGlobalFilterQuery as jest.Mock;
-  const mockUseRiskEngineStatus = useRiskEngineStatus as jest.Mock;
   const mockUseQuery = useQuery as jest.Mock;
 
-  const mockRefetchEngineStatus = jest.fn();
   const mockRefetchQuery = jest.fn();
   const mockSearch = jest.fn();
 
@@ -79,12 +72,6 @@ describe('useRiskLevelsEsqlQuery', () => {
     mockUseEsqlGlobalFilterQuery.mockReturnValue('mock-filter-with-time');
     mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: 'mock-filter-no-time' });
 
-    mockUseRiskEngineStatus.mockReturnValue({
-      data: { risk_engine_status: 'STARTED' },
-      isFetching: false,
-      refetch: mockRefetchEngineStatus,
-    });
-
     mockUseQuery.mockImplementation((queryKey, queryFn, options) => {
       return {
         data: {
@@ -95,6 +82,7 @@ describe('useRiskLevelsEsqlQuery', () => {
         },
         error: undefined,
         isError: false,
+        isFetching: false,
         isRefetching: false,
         refetch: mockRefetchQuery,
       };
@@ -109,12 +97,11 @@ describe('useRiskLevelsEsqlQuery', () => {
     expect(result.current.hasEngineBeenInstalled).toBe(true);
   });
 
-  it('should call both refetch functions when refetch is called', () => {
+  it('should call refetch when refetch is called', () => {
     const { result } = renderHook(() => useRiskLevelsEsqlQuery({ spaceId: 'default' }));
 
     result.current.refetch();
 
-    expect(mockRefetchEngineStatus).toHaveBeenCalled();
     expect(mockRefetchQuery).toHaveBeenCalled();
   });
 
@@ -143,19 +130,6 @@ describe('useRiskLevelsEsqlQuery', () => {
 
   it('should set enabled to false if skip is true', () => {
     renderHook(() => useRiskLevelsEsqlQuery({ spaceId: 'default', skip: true }));
-
-    const options = mockUseQuery.mock.calls[0][2];
-    expect(options.enabled).toBe(false);
-  });
-
-  it('should set enabled to false if risk engine is NOT_INSTALLED', () => {
-    mockUseRiskEngineStatus.mockReturnValue({
-      data: { risk_engine_status: 'NOT_INSTALLED' },
-      isFetching: false,
-      refetch: mockRefetchEngineStatus,
-    });
-
-    renderHook(() => useRiskLevelsEsqlQuery({ spaceId: 'default' }));
 
     const options = mockUseQuery.mock.calls[0][2];
     expect(options.enabled).toBe(false);

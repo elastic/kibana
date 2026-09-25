@@ -21,10 +21,13 @@ describe('preferredSchemaForInventoryView', () => {
     );
   });
 
-  it('nulls an omitted schema on the static pod view only when the selector flag is on', () => {
+  it('nulls an omitted schema on the static pod view when the selector flag is on', () => {
     expect(preferredSchemaForInventoryView('pod', staticInventoryViewId, undefined, true)).toBe(
       null
     );
+  });
+
+  it('leaves an omitted schema undefined on the static pod view when the selector flag is off', () => {
     expect(
       preferredSchemaForInventoryView('pod', staticInventoryViewId, undefined, false)
     ).toBeUndefined();

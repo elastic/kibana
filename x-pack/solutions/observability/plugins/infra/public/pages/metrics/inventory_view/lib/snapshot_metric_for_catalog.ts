@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { SnapshotMetricInput } from '../../../../../common/http_api/snapshot_api';
+
+/**
+ * Static Kubernetes Pod snapshot metric types.
+ * Same keys as `metrics_data_access` pod `snapshot` catalog (`cpu`, `memory`, `rx`, `tx`).
+ */
+export const POD_SNAPSHOT_METRIC_TYPES = ['cpu', 'memory', 'rx', 'tx'] as const;
 
 /**
  * Replaces a snapshot metric the current schema catalog does not offer.
@@ -30,4 +36,20 @@ export const snapshotMetricForCatalog = (
   }
 
   return { type: defaultSnapshot };
+};
+
+/**
+ * Metric to send on the inventory snapshot request before the async catalog loads.
+ * Pods use the static snapshot type list so the first request is not `cpuV2`.
+ */
+export const snapshotMetricForInventoryRequest = (
+  nodeType: InventoryItemType,
+  metric: SnapshotMetricInput,
+  defaultSnapshot: SnapshotMetricType
+): SnapshotMetricInput => {
+  if (nodeType !== 'pod') {
+    return metric;
+  }
+
+  return snapshotMetricForCatalog(metric, POD_SNAPSHOT_METRIC_TYPES, defaultSnapshot);
 };
