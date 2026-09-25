@@ -11,7 +11,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ConversationInputShell, formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import {
+  CONVERSATION_INPUT_SHELL_RADIUS,
+  ConversationInputShell,
+  formatAgentBuilderErrorMessage,
+} from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
@@ -43,14 +47,12 @@ const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.pos
   defaultMessage: 'Leaving a post to the team',
 });
 
-// Matches the border radius of ConversationInputShell so the header tucks behind its corners.
-const INPUT_SHELL_RADIUS = 16;
 const POST_TO_TEAM_HEADER_HEIGHT = 24;
 
 const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   flex-grow: 0;
   width: 100%;
-  border-radius: ${INPUT_SHELL_RADIUS}px;
+  border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
   ${euiCanAnimate} {
     transition: background-color ${euiTheme.animation.fast} ease-out;
   }

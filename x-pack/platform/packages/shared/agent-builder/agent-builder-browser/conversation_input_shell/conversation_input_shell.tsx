@@ -11,7 +11,7 @@ import { useEuiShadow, useEuiShadowHover, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 const INPUT_MIN_HEIGHT = '150px';
-const AB_INPUT_RADIUS = 16;
+export const CONVERSATION_INPUT_SHELL_RADIUS = 16;
 
 export interface ConversationInputShellProps extends React.HTMLAttributes<HTMLDivElement> {
   isDisabled?: boolean;
@@ -39,7 +39,7 @@ export const ConversationInputShell = React.forwardRef<
 
   const shellStyles = css`
     border: ${euiTheme.border.thin};
-    border-radius: ${AB_INPUT_RADIUS}px;
+    border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
     border-color: ${euiTheme.colors.borderBaseSubdued};
     background-color: ${isDisabled
       ? euiTheme.colors.backgroundBaseDisabled

@@ -118,6 +118,7 @@ jest.mock('../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
 }));
 jest.mock('@kbn/agent-builder-browser', () => ({
+  CONVERSATION_INPUT_SHELL_RADIUS: 16,
   ConversationInputShell: ({
     children,
     isDisabled,
