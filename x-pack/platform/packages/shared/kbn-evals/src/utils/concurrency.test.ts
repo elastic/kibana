@@ -19,11 +19,14 @@ describe('parseConcurrency', () => {
     expect(parseConcurrency(value)).toBe(expected);
   });
 
-  it.each(['0', '-1', 'abc', '1.5', '8x', '1e2'])('rejects %p', (value) => {
-    expect(() => parseConcurrency(value)).toThrow(
-      `--concurrency must be a positive integer, got "${value}".`
-    );
-  });
+  it.each(['0', '-1', 'abc', '1.5', '8x', '1e2', '9'.repeat(400), '9007199254740993'])(
+    'rejects %p',
+    (value) => {
+      expect(() => parseConcurrency(value)).toThrow(
+        `--concurrency must be a positive integer, got "${value}".`
+      );
+    }
+  );
 });
 
 describe('getConcurrencyFromEnv', () => {

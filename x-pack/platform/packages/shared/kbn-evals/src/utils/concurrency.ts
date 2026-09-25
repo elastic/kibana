@@ -22,7 +22,7 @@ export const parseConcurrency = (value: string | undefined): number | undefined 
   }
 
   const concurrency = Number(trimmed);
-  if (!/^\d+$/.test(trimmed) || concurrency < 1) {
+  if (!/^\d+$/.test(trimmed) || !Number.isSafeInteger(concurrency) || concurrency < 1) {
     throw new Error(`--concurrency must be a positive integer, got "${value}".`);
   }
 
