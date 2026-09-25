@@ -40,8 +40,10 @@ export const isExpectedTransportFailure = (error: unknown): boolean => {
   }
 
   const status = (error as IHttpFetchError).response?.status;
-  if (status != null && EXPECTED_TRANSPORT_STATUS_CODES.has(status)) {
-    return true;
+  // When an HTTP status is present, classify by status only — do not let browser
+  // network-message patterns override a real application response (e.g. 500).
+  if (status != null) {
+    return EXPECTED_TRANSPORT_STATUS_CODES.has(status);
   }
 
   if (error.name === 'NetworkError') {

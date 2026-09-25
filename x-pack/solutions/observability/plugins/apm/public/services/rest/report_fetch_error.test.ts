@@ -71,6 +71,12 @@ describe('report_fetch_error', () => {
       expect(isExpectedTransportFailure(error)).toBe(false);
     });
 
+    it('returns false for HTTP 500 even when the message matches a transport pattern', () => {
+      const error = new Error('Failed to fetch upstream') as IHttpFetchError;
+      Object.assign(error, { response: { status: 500 } });
+      expect(isExpectedTransportFailure(error)).toBe(false);
+    });
+
     it('returns false for non-Error values', () => {
       expect(isExpectedTransportFailure('Failed to fetch')).toBe(false);
       expect(isExpectedTransportFailure(undefined)).toBe(false);
