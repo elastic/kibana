@@ -125,8 +125,25 @@ steps:
 
   # Hunt results write-back: every completed hunt (hit or clean) gets exactly
   # one message here (mvp-slice.md's Investigation write map). The SSE
-  # attachment (above) already carries the structured findings, so this
-  # narrative does not restate them — it just points at what happened.
+  # attachment (above) already carries the structured findings, so the hit
+  # narrative does not restate them - it just points at what happened. The
+  # clean/no-hit narrative (Steph, 2026-09-25: needs to give the user
+  # confidence we actually looked, where, and that it was not found) names
+  # what was searched for (resolved_iocs/resolved_techniques) and the window,
+  # and is honest about degraded cases rather than always claiming a clean
+  # search happened: `tier1.status` distinguishes a real zero-hit search
+  # (environment_hits_found with 0 total, or no_environment_hits - despite the
+  # name, `hunt_for_threat.ts` sets this purely on `total === 0`, not on
+  # missing indices) from hits confined to optional (non-required) indices
+  # only (total_hits > 0 but no sse, since has_confirmed_hit requires a
+  # required-index match), from no usable indicators at all
+  # (no_searchable_terms), from not being able to search at all
+  # (scope_blocked or any other/unrecognized status). `per_index` is not used
+  # here: Elasticsearch's terms aggregation only returns buckets for indices
+  # that matched at least one doc, so on a genuinely clean run it is always
+  # empty - it cannot list "which indices were searched with zero hits."
+  # Verified live (all 4 branches, fabricated coordinator-shaped output) and
+  # against a real clean run (hunt-coverage-ki, no_environment_hits branch).
   - name: write_hunt_results_message
     type: workflow.execute
     if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
@@ -135,11 +152,16 @@ steps:
       inputs:
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: >-
-          {% if steps.run_hunt_coordinator.output.sse != null -%}
-          Hunt Watch: {{ steps.run_hunt_coordinator.output.message }} Technologies hunted: {{ steps.run_hunt_coordinator.output.technologies | join: ", " }}.
+          {%- assign coordinator = steps.run_hunt_coordinator.output -%}
+          {%- if coordinator.sse != null -%}
+          Hunt Watch: {{ coordinator.message }} Technologies hunted: {{ coordinator.technologies | join: ", " }}.
+          {%- elsif coordinator.tier1.status == 'environment_hits_found' or coordinator.tier1.status == 'no_environment_hits' -%}
+          Hunt Watch: searched {{ coordinator.technologies | join: ", " }} telemetry from {{ coordinator.tier1.time_range.from }} to {{ coordinator.tier1.time_range.to }}{% if coordinator.tier1.resolved_iocs.size > 0 %} for indicators {{ coordinator.tier1.resolved_iocs | map: 'value' | join: ", " }}{% endif %}{% if coordinator.tier1.resolved_techniques.size > 0 %} and techniques {{ coordinator.tier1.resolved_techniques | join: ", " }}{% endif %}: {% if coordinator.tier1.counts.total_hits > 0 %}found {{ coordinator.tier1.counts.total_hits }} event(s) in optional telemetry only; none met the required-index confirmation bar{% else %}no matching events found{% endif %}.
+          {%- elsif coordinator.tier1.status == 'no_searchable_terms' -%}
+          Hunt Watch: {{ coordinator.technologies | join: ", " }} telemetry is available, but this report had no usable indicators or techniques to hunt for.
           {%- else -%}
-          Hunt Watch: required searches completed, no hits found. Technologies hunted: {{ steps.run_hunt_coordinator.output.technologies | join: ", " }}.
-          {%- endif %}
+          Hunt Watch: required indices{% if coordinator.technologies.size > 0 %} for {{ coordinator.technologies | join: ", " }}{% endif %} are not available in this space; the hunt could not run. {{ coordinator.next_step }}
+          {%- endif -%}
     on-failure:
       continue: true
 
