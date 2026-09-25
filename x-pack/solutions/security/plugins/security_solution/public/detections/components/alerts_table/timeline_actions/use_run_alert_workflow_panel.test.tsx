@@ -23,7 +23,11 @@ import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
 
-const GENERIC_RUN_PROPS = { runWorkflow: undefined, showSuccessToast: true };
+const GENERIC_RUN_PROPS = {
+  runWorkflow: undefined,
+  showSuccessToast: true,
+  caseRouting: 'outside',
+};
 const mockUseCaseAttachmentWorkflowRun = jest.fn();
 jest.mock('@kbn/cases-plugin/public', () => ({
   useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
@@ -257,6 +261,35 @@ describe('useRunAlertWorkflowPanel', () => {
       expect(result.current.runWorkflowMenuItem).toEqual([]);
       expect(result.current.runAlertWorkflowPanel).toEqual([]);
     });
+
+    it('returns empty lists inside a case where Cases workflow runs are unavailable', () => {
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
+        ...GENERIC_RUN_PROPS,
+        caseRouting: 'unavailable',
+      });
+
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowMenuItem).toEqual([]);
+      expect(result.current.runAlertWorkflowPanel).toEqual([]);
+    });
+
+    it('returns the menu item inside a case where Cases workflow runs are available', () => {
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
+        runWorkflow: jest.fn(),
+        showSuccessToast: false,
+        caseRouting: 'available',
+      });
+
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowMenuItem).toHaveLength(1);
+      expect(result.current.runAlertWorkflowPanel).toHaveLength(1);
+    });
   });
 
   describe('panel content', () => {
@@ -326,6 +359,7 @@ describe('useRunAlertWorkflowPanel', () => {
       mockUseCaseAttachmentWorkflowRun.mockReturnValue({
         runWorkflow: mockExecutor,
         showSuccessToast: false,
+        caseRouting: 'available',
       });
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {

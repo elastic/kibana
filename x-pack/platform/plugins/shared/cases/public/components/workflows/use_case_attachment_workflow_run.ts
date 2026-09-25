@@ -19,22 +19,36 @@ export type CaseAttachmentWorkflowTarget =
   | { attachmentId: string }
   | { attachmentIds: readonly string[] };
 
+/**
+ * Whether the surface renders inside a case, and if so whether the current user may run workflows
+ * through Cases. Independent of the target, so it can gate a menu item before the panel renders.
+ */
+export type CaseAttachmentWorkflowRouting = 'outside' | 'available' | 'unavailable';
+
 export interface UseCaseAttachmentWorkflowRunParams {
   attachmentType: string;
-  /** Omit when the surface has no case attachment target; the run then uses the Workflows API. */
+  /** Omit when the surface has no case attachment target. */
   target?: CaseAttachmentWorkflowTarget;
 }
 
-/** Props to spread onto `RunWorkflowPanel`. */
 export interface CaseAttachmentWorkflowRunProps {
+  /** Pass to `RunWorkflowPanel`. */
   runWorkflow: RunWorkflowExecutor | undefined;
+  /** Pass to `RunWorkflowPanel`. */
   showSuccessToast: boolean;
+  caseRouting: CaseAttachmentWorkflowRouting;
 }
 
 /**
- * Returns `RunWorkflowPanel` props for a registered attachment surface. Inside a case, and when the
- * user may run workflows through Cases, `runWorkflow` is a Cases-routed executor that owns the
- * success toast. Otherwise `runWorkflow` is `undefined` and the panel uses the Workflows API.
+ * Returns `RunWorkflowPanel` props and the case routing state for a registered attachment surface.
+ *
+ * - `outside`: not in a case. `runWorkflow` is `undefined` and the panel uses the Workflows API.
+ * - `available`: in a case and the user may run workflows through Cases. With a target,
+ *   `runWorkflow` is a Cases-routed executor that owns the success toast.
+ * - `unavailable`: in a case but the user cannot run workflows through Cases.
+ *
+ * Inside a case, callers must hide their run action when `caseRouting` is `unavailable`, or when it
+ * is `available` and they have no target, so no run starts from a case without being recorded on it.
  */
 export const useCaseAttachmentWorkflowRun = ({
   attachmentType,
@@ -74,8 +88,11 @@ export const useCaseAttachmentWorkflowRun = ({
   }, [attachmentId, attachmentIds, attachmentType, caseId]);
 
   return useMemo(() => {
+    const caseRouting = context?.status ?? 'outside';
     const runWorkflow =
-      context === undefined || origin === undefined ? undefined : context.createExecutor(origin);
-    return { runWorkflow, showSuccessToast: runWorkflow === undefined };
+      context?.status === 'available' && origin !== undefined
+        ? context.createExecutor(origin)
+        : undefined;
+    return { runWorkflow, showSuccessToast: runWorkflow === undefined, caseRouting };
   }, [context, origin]);
 };

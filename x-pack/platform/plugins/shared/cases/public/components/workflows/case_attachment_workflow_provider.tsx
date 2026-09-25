@@ -22,9 +22,9 @@ interface CaseAttachmentWorkflowProviderProps {
 }
 
 /**
- * Enables Cases-routed workflow runs for attachment-list children. Publishes nothing when the user
- * cannot run workflows through Cases (feature disabled or no case update privilege), so attachment
- * surfaces keep using the generic Workflows API instead of calling an unavailable Cases route.
+ * Enables Cases-routed workflow runs for attachment-list children. Publishes `status: 'unavailable'`
+ * when the user cannot run workflows through Cases (feature disabled or no case update privilege),
+ * so attachment surfaces can hide their run action instead of running outside the case.
  */
 export const CaseAttachmentWorkflowProvider: React.FC<CaseAttachmentWorkflowProviderProps> = ({
   caseId,
@@ -33,14 +33,15 @@ export const CaseAttachmentWorkflowProvider: React.FC<CaseAttachmentWorkflowProv
   const canRunWorkflow = useCanRunCaseWorkflow();
   const executorDeps = useCasesWorkflowExecutorDeps();
   const value = useMemo(
-    (): CaseAttachmentWorkflowContextValue | undefined =>
+    (): CaseAttachmentWorkflowContextValue =>
       canRunWorkflow
         ? {
+            status: 'available',
             caseId,
             createExecutor: (origin) =>
               createCasesWorkflowExecutor(executorDeps, { caseId, origin }),
           }
-        : undefined,
+        : { status: 'unavailable', caseId },
     [canRunWorkflow, caseId, executorDeps]
   );
   return (

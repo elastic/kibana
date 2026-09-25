@@ -22,6 +22,16 @@ jest.mock('@kbn/workflows-ui', () => ({
 }));
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 
+const OUTSIDE_CASE_RUN_PROPS = {
+  runWorkflow: undefined,
+  showSuccessToast: true,
+  caseRouting: 'outside',
+};
+const mockUseCaseAttachmentWorkflowRun = jest.fn();
+jest.mock('@kbn/cases-plugin/public', () => ({
+  useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+}));
+
 const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as jest.MockedFunction<
   typeof useWorkflowsCapabilities
 >;
@@ -70,6 +80,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
+    mockUseCaseAttachmentWorkflowRun.mockReturnValue(OUTSIDE_CASE_RUN_PROPS);
   });
 
   afterEach(() => {
@@ -135,6 +146,35 @@ describe('useBulkRunAlertWorkflowPanel', () => {
 
       expect(result.current.runWorkflowItems).toEqual([]);
       expect(result.current.runWorkflowPanels).toEqual([]);
+    });
+
+    it('returns empty arrays inside a case where Cases workflow runs are unavailable', () => {
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
+        ...OUTSIDE_CASE_RUN_PROPS,
+        caseRouting: 'unavailable',
+      });
+
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowItems).toEqual([]);
+      expect(result.current.runWorkflowPanels).toEqual([]);
+    });
+
+    it('returns run workflow items inside a case where Cases workflow runs are available', () => {
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
+        runWorkflow: jest.fn(),
+        showSuccessToast: false,
+        caseRouting: 'available',
+      });
+
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowItems).toHaveLength(1);
+      expect(result.current.runWorkflowPanels).toHaveLength(1);
     });
   });
 
