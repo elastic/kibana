@@ -283,9 +283,11 @@ steps:
            host, IP, or process AND a concrete bridge (process tree, session, event.id,
            or process.entity_id)? Shared identifiers without a bridge, or theme and
            timing alone, are neutral. Report it; it does not decide the verdict.
-        2. entity_role — entity store only. Does the host or user role make the activity
-           expected (management server, MDM, jump box, service account) or unexpected
-           (ordinary employee workstation or account)?
+        2. entity_role — entity store only. An ordinary employee workstation or
+           account supports.
+           A management server, MDM, jump box, or service account is neutral, not contradicts:
+           the role is context for the other checks, and those machines are also
+           high-value targets. A thin or uncurated record is neutral.
         3. process_parent — raw events only. Is the parent of the suspicious process a
            management agent or scheduler (contradicts), or a user application such as an
            Office program or browser (supports)?

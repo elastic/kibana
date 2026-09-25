@@ -583,6 +583,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         'One known-good callout does not cancel the rest.'
       );
     });
+
+    it('does not treat a management role as a contradiction by itself', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'A management server, MDM, jump box, or service account is neutral, not contradicts'
+      );
+    });
   });
 
   describe('the truncation clear', () => {
