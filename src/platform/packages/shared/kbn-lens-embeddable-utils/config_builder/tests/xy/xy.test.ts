@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYVisualizationState } from '@kbn/lens-common';
+import type { XYDataLayerConfig, XYVisualizationState } from '@kbn/lens-common';
 import type { XYConfig, XYConfigNoESQL } from '../../schema/charts/xy';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
@@ -1035,6 +1035,122 @@ describe('XY', () => {
       const lensState = builder.fromAPIFormat(config);
       const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
 
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toEqual(AUTO_COLOR);
+    });
+
+    it('should persist static Y-metric color when no breakdown is present', () => {
+      const staticColor = { type: 'static' as const, color: '#54B399' };
+      const config = {
+        type: 'xy',
+        title: 'Y-axis static color',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM metrics-* | KEEP @timestamp, system.cpu.user.pct | LIMIT 10',
+            },
+            type: 'line',
+            ignore_global_filters: false,
+            sampling: 1,
+            x: { column: '@timestamp' },
+            y: [{ column: 'system.cpu.user.pct', color: staticColor }],
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizLayer = (lensState.state.visualization as XYVisualizationState)
+        .layers[0] as XYDataLayerConfig;
+      expect(vizLayer.yConfig?.[0]?.color).toBe('#54B399');
+
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toEqual(staticColor);
+    });
+
+    it('should emit AUTO_COLOR on Y metrics when a breakdown is present, even if static color was sent', () => {
+      const staticColor = { type: 'static' as const, color: '#54B399' };
+      const breakdownColor = {
+        mode: 'categorical' as const,
+        palette: 'default',
+        mapping: [
+          {
+            values: ['host-a'],
+            color: { type: 'color_code' as const, value: '#54B399' },
+          },
+        ],
+        unassigned: { type: 'color_code' as const, value: '#D3DAE6' },
+      };
+      const config = {
+        type: 'xy',
+        title: 'Y-axis static color with breakdown',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query:
+                'FROM metrics-* | KEEP @timestamp, host.name, system.cpu.user.pct | LIMIT 10',
+            },
+            type: 'line',
+            ignore_global_filters: false,
+            sampling: 1,
+            x: { column: '@timestamp' },
+            y: [{ column: 'system.cpu.user.pct', color: staticColor }],
+            breakdown_by: {
+              column: 'host.name',
+              collapse_by: 'avg',
+              color: breakdownColor,
+            },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizLayer = (lensState.state.visualization as XYVisualizationState)
+        .layers[0] as XYDataLayerConfig;
+      // Y-metric static color is not stored when the layer is split by breakdown.
+      expect(vizLayer.yConfig?.[0]?.color).toBeUndefined();
+
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toEqual(AUTO_COLOR);
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toMatchObject(
+        breakdownColor
+      );
+    });
+
+    it('should emit AUTO_COLOR on DSL Y metrics when a breakdown is present', () => {
+      const staticColor = { type: 'static' as const, color: '#54B399' };
+      const config = {
+        type: 'xy',
+        title: 'DSL Y-axis static color with breakdown',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false, color: staticColor }],
+            breakdown_by: {
+              operation: 'terms',
+              fields: ['product'],
+              limit: 5,
+              rank_by: { direction: 'desc', metric_index: 0, type: 'metric' },
+            },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizLayer = (lensState.state.visualization as XYVisualizationState)
+        .layers[0] as XYDataLayerConfig;
+      expect(vizLayer.yConfig?.[0]?.color).toBeUndefined();
+
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
       const dataLayer = apiOutput.layers[0];
       expect('y' in dataLayer && dataLayer.y[0].color).toEqual(AUTO_COLOR);
     });

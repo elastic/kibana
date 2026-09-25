@@ -129,9 +129,10 @@ function convertDataLayerToAPI(
           const onAxis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
           return {
             ...apiOperation,
-            ...(breakdown_by
-              ? {}
-              : { color: fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR }),
+            // Split series take color from breakdown_by; Y-metric color is not applicable.
+            color: breakdown_by
+              ? AUTO_COLOR
+              : fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR,
             ...(onAxis !== 'y' ? { axis: onAxis } : {}),
           };
         })
@@ -174,7 +175,8 @@ function convertDataLayerToAPI(
     const axis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
     return {
       ...getValueApiColumn(accessor, layer),
-      ...(breakdown_by ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
+      // Split series take color from breakdown_by; Y-metric color is not applicable.
+      color: breakdown_by ? AUTO_COLOR : fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR,
       ...(axis !== 'y' ? { axis } : {}),
     };
   });
