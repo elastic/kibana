@@ -6744,8 +6744,8 @@ importers:
         specifier: 10.5.2
         version: 10.5.2(sass@1.104.0)(webpack@5.96.1)
       selenium-webdriver:
-        specifier: 4.48.0
-        version: 4.48.0
+        specifier: 4.49.0
+        version: 4.49.0
       sharp:
         specifier: 0.35.2
         version: 0.35.2
@@ -24153,8 +24153,8 @@ packages:
   select-hose@2.0.0:
     resolution: {integrity: sha512-mEugaLK+YfkijB4fx0e6kImuJdCIt2LxCRcbEYPqRGCs4F2ogyfZU5IAZRdjCP8JPq2AtdNoC/Dux63d9Kiryg==}
 
-  selenium-webdriver@4.48.0:
-    resolution: {integrity: sha512-rKM9uXFRWcF9aThrZQDNQH2/9Et/WvMZbg3/x1rnSYWoXiwJuShYeH0IAli8Cuw+c3lEV0UWPfUz88H+fvW9Hg==}
+  selenium-webdriver@4.49.0:
+    resolution: {integrity: sha512-16XqeOEMj+4+p+pzLLyvNWmF5jCY05EKIl3e1anZBgv4+zq7PUTtiNjKtQhMpwosZ0wIMKDFAQ2xdyogOHD4DA==}
     engines: {node: '>= 22.0.0'}
 
   selfsigned@5.5.0:
@@ -43374,7 +43374,7 @@ snapshots:
 
   select-hose@2.0.0: {}
 
-  selenium-webdriver@4.48.0:
+  selenium-webdriver@4.49.0:
     dependencies:
       '@bazel/runfiles': 6.5.0
       jszip: 3.10.1
