@@ -616,6 +616,7 @@ export class AlertsClient {
           index,
           operation,
           lastSortIds,
+          _source: false,
         });
 
         if (lastSortIds != null && result?.hits.hits.length === 0) {
@@ -785,6 +786,7 @@ export class AlertsClient {
           },
         },
         size: 0,
+        _source: false,
         ruleTypeIds,
         consumers,
       });
@@ -835,6 +837,7 @@ export class AlertsClient {
         id,
         index,
         operation: WriteOperations.Update,
+        _source: [ALERT_WORKFLOW_STATUS],
       });
 
       if (alert == null || alert.hits.hits.length === 0) {

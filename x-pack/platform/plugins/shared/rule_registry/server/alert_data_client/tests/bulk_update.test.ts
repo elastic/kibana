@@ -649,6 +649,10 @@ describe('bulkUpdate() - workflow status audit events', () => {
         status: 'acknowledged',
       });
 
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({ _source: false })
+      );
+
       // First call: generic alert_update from queryAndAuditAllAlerts
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
         message: `User is updating alert [id=${fakeAlertId}]`,

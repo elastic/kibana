@@ -133,6 +133,9 @@ describe('update()', () => {
         "result": "updated",
       }
     `);
+    expect(esClientMock.search).toHaveBeenCalledWith(
+      expect.objectContaining({ _source: [ALERT_WORKFLOW_STATUS] })
+    );
     expect(esClientMock.update).toHaveBeenCalledTimes(1);
     expect(esClientMock.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
