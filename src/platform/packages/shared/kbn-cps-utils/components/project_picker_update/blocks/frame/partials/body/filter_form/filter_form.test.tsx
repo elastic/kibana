@@ -49,8 +49,21 @@ const envStagingExpression = {
   tagValue: 'staging',
 } as const;
 
+const envExistsExpression = {
+  operator: FilterOperator.EXISTS,
+  tagName: 'env',
+  tagValue: undefined,
+} as const;
+
+const envOneOfProdExpression: FilterExpressionValue = {
+  operator: FilterOperator.ONE_OF,
+  tagName: 'env',
+  tagValue: ['prod'],
+};
+
 const typeSecurityKey = getFilterExpressionLookupKey(typeSecurityExpression);
 const envStagingKey = getFilterExpressionLookupKey(envStagingExpression);
+const PREFILLED_FILTER_ID = 'prefilled-filter';
 
 const mockUseProjectPickerState = jest.fn();
 const mockUseProjectPickerActions = jest.fn();
@@ -125,6 +138,20 @@ const renderForm = (
   };
 };
 
+const renderPrefilledForm = (
+  expression: FilterExpressionValue,
+  duplicateExpressions: FilterExpressionValue[] = []
+) =>
+  renderForm(
+    {
+      filterExpressions: new Map([
+        ...createFilterExpressions(duplicateExpressions.map((item) => [item])),
+        [PREFILLED_FILTER_ID, { expression, enabled: true }],
+      ]),
+    },
+    { filterId: PREFILLED_FILTER_ID }
+  );
+
 const selectOption = async (user: ReturnType<typeof userEvent.setup>, optionText: string) => {
   await user.click(await screen.findByRole('option', { name: optionText }));
 };
@@ -140,17 +167,6 @@ const fillFilterForm = async (
   const valueCombo = screen.getByTestId('comboBoxInput');
   await user.click(valueCombo);
   await selectOption(user, tagValue);
-};
-
-const fillExistsFilterForm = async (
-  user: ReturnType<typeof userEvent.setup>,
-  { tagName }: { tagName: string }
-) => {
-  await user.click(screen.getByRole('button', { name: 'Select a tag' }));
-  await selectOption(user, tagName);
-
-  await user.click(screen.getByRole('button', { name: 'is' }));
-  await selectOption(user, 'exists');
 };
 
 describe('ProjectPickerFilterForm', () => {
@@ -189,11 +205,9 @@ describe('ProjectPickerFilterForm', () => {
 
   it('surfaces a duplicate validation error on submit and does not mutate state', async () => {
     const user = userEvent.setup();
-    const { onCloseFilterFormRequested } = renderForm({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-    });
-
-    await fillFilterForm(user, { tagName: '_type', tagValue: 'security' });
+    const { onCloseFilterFormRequested } = renderPrefilledForm(typeSecurityExpression, [
+      typeSecurityExpression,
+    ]);
 
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
@@ -205,20 +219,14 @@ describe('ProjectPickerFilterForm', () => {
     );
     expect(mockFetchProjectsByRouting).not.toHaveBeenCalled();
     expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
+    expect(defaultActions.updateFilterExpression).not.toHaveBeenCalled();
     expect(onCloseFilterFormRequested).not.toHaveBeenCalled();
   });
 
   it('surfaces a zero-match validation error on submit and does not mutate state', async () => {
     const user = userEvent.setup();
     mockFetchProjectsByRouting.mockResolvedValue({ origin: null, linkedProjects: [] });
-    const { onCloseFilterFormRequested } = renderForm();
-
-    await fillFilterForm(user, { tagName: 'env', tagValue: 'prod' });
-
-    // Create a custom value that matches no projects.
-    const comboInput = within(screen.getByTestId('comboBoxInput')).getByRole('combobox');
-    await user.clear(comboInput);
-    await user.type(comboInput, 'staging{enter}');
+    const { onCloseFilterFormRequested } = renderPrefilledForm(envStagingExpression);
 
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
@@ -229,16 +237,15 @@ describe('ProjectPickerFilterForm', () => {
     ).toBeInTheDocument();
     expect(mockFetchProjectsByRouting).toHaveBeenCalled();
     expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
+    expect(defaultActions.updateFilterExpression).not.toHaveBeenCalled();
     expect(onCloseFilterFormRequested).not.toHaveBeenCalled();
   });
 
   it('surfaces a duplicate exists validation error on the operator input', async () => {
     const user = userEvent.setup();
-    const { onCloseFilterFormRequested } = renderForm({
-      filterExpressions: createFilterExpressions([[typeExistsExpression]]),
-    });
-
-    await fillExistsFilterForm(user, { tagName: '_type' });
+    const { onCloseFilterFormRequested } = renderPrefilledForm(typeExistsExpression, [
+      typeExistsExpression,
+    ]);
 
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
@@ -256,15 +263,14 @@ describe('ProjectPickerFilterForm', () => {
     );
     expect(mockFetchProjectsByRouting).not.toHaveBeenCalled();
     expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
+    expect(defaultActions.updateFilterExpression).not.toHaveBeenCalled();
     expect(onCloseFilterFormRequested).not.toHaveBeenCalled();
   });
 
   it('surfaces a zero-match exists validation error on the operator input', async () => {
     const user = userEvent.setup();
     mockFetchProjectsByRouting.mockResolvedValue({ origin: null, linkedProjects: [] });
-    const { onCloseFilterFormRequested } = renderForm();
-
-    await fillExistsFilterForm(user, { tagName: 'env' });
+    const { onCloseFilterFormRequested } = renderPrefilledForm(envExistsExpression);
 
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
@@ -282,16 +288,13 @@ describe('ProjectPickerFilterForm', () => {
     );
     expect(mockFetchProjectsByRouting).toHaveBeenCalled();
     expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
+    expect(defaultActions.updateFilterExpression).not.toHaveBeenCalled();
     expect(onCloseFilterFormRequested).not.toHaveBeenCalled();
   });
 
   it('clears a submit validation error when a field changes', async () => {
     const user = userEvent.setup();
-    renderForm({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-    });
-
-    await fillFilterForm(user, { tagName: '_type', tagValue: 'security' });
+    renderPrefilledForm(typeSecurityExpression, [typeSecurityExpression]);
 
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
@@ -315,6 +318,7 @@ describe('ProjectPickerFilterForm', () => {
       'true'
     );
     expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
+    expect(defaultActions.updateFilterExpression).not.toHaveBeenCalled();
   });
 
   it('clears the selected value when switching to an exists operator and can submit', async () => {
@@ -419,14 +423,7 @@ describe('ProjectPickerFilterForm', () => {
   it('keeps a failed custom value on the input but removes it from selectable options', async () => {
     const user = userEvent.setup();
     mockFetchProjectsByRouting.mockResolvedValue({ origin: null, linkedProjects: [] });
-    renderForm();
-
-    await user.click(screen.getByRole('button', { name: 'Select a tag' }));
-    await selectOption(user, 'env');
-
-    const comboInput = within(screen.getByTestId('comboBoxInput')).getByRole('combobox');
-    await user.click(comboInput);
-    await user.type(comboInput, 'staging{enter}');
+    renderPrefilledForm(envStagingExpression);
 
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
@@ -435,6 +432,7 @@ describe('ProjectPickerFilterForm', () => {
         'No projects match this filter. Adjust so at least one project is included in your search.'
       )
     ).toBeInTheDocument();
+    const comboInput = within(screen.getByTestId('comboBoxInput')).getByRole('combobox');
     expect(comboInput).toHaveValue('staging');
 
     await user.click(screen.getByTestId('comboBoxInput'));
@@ -444,16 +442,7 @@ describe('ProjectPickerFilterForm', () => {
 
   it('appends a custom value when using a one-of operator', async () => {
     const user = userEvent.setup();
-    renderForm();
-
-    await user.click(screen.getByRole('button', { name: 'Select a tag' }));
-    await selectOption(user, 'env');
-
-    await user.click(screen.getByRole('button', { name: 'is' }));
-    await selectOption(user, 'is one of');
-
-    await user.click(screen.getByTestId('comboBoxInput'));
-    await selectOption(user, 'prod');
+    renderPrefilledForm(envOneOfProdExpression);
 
     const comboInput = within(screen.getByTestId('comboBoxInput')).getByRole('combobox');
     await user.type(comboInput, 'staging{enter}');
