@@ -7,12 +7,14 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
+import { MEMORY_KI_TYPES } from '../../common/memory';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries } from './example_queries';
+import { buildMemoryExampleQueries } from './memory_example_queries';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
-const MEMORY_KI_TYPES = new Set(['memory.session', 'memory.session_fact']);
+const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(MEMORY_KI_TYPES);
 
 export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
@@ -53,7 +55,9 @@ const countsSection = (heading: string, counts: Array<[key: string, count: numbe
 const kiTypeCountsSection = (counts: KiTypeCount[]): string[] =>
   countsSection(
     'Knowledge item types',
-    counts.filter(({ type }) => !MEMORY_KI_TYPES.has(type)).map(({ type, count }) => [type, count])
+    counts
+      .filter(({ type }) => !MEMORY_KI_TYPE_SET.has(type))
+      .map(({ type, count }) => [type, count])
   );
 
 const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
@@ -70,6 +74,8 @@ const memorySection = (
     return [];
   }
 
+  const { crossSession, currentConversation } = buildMemoryExampleQueries(target);
+
   return [
     'Memory',
     'Memory writes are enabled for this AI-index registry entry.',
@@ -81,32 +87,9 @@ const memorySection = (
     'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:',
     '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")',
     'For cross-session recall, search granular facts with hybrid retrieval:',
-    `FROM ${target} METADATA _id, _index, _score`,
-    '| WHERE type == "memory.session_fact"',
-    '| INLINE STATS latest_at = MAX(@timestamp) BY id',
-    '| WHERE @timestamp == latest_at',
-    '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
-    '  AND (expires_at IS NULL OR expires_at > NOW())',
-    '| FORK',
-    '    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>" | SORT _score DESC | LIMIT 20 )',
-    '    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )',
-    '| FUSE',
-    '| SORT _score DESC, _id ASC',
-    '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description',
-    '| LIMIT 10',
+    crossSession,
     'For recall from the current Agent Builder conversation:',
-    `FROM ${target}`,
-    '| WHERE type IN ("memory.session", "memory.session_fact")',
-    '| INLINE STATS latest_at = MAX(@timestamp) BY id',
-    '| WHERE @timestamp == latest_at',
-    '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
-    '  AND (expires_at IS NULL OR expires_at > NOW())',
-    '| EVAL session_id = FIELD_EXTRACT(attributes, "memory.session_id")',
-    '| WHERE session_id == "<conversation-id>"',
-    '| SORT updated_at DESC, id ASC',
-    '| LIMIT 10',
-    '| SORT updated_at ASC, id ASC',
-    '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description',
+    currentConversation,
     'Select the latest revision before filtering deleted or expired memories, or an older active data-stream revision can reappear.',
     'The second session sort presents the selected recent window chronologically. References identify the source conversations.',
   ];

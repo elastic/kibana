@@ -10,6 +10,9 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { randomUUID } from 'crypto';
+import { isIndexPattern } from '@kbn/context-engine-plugin/common/ai_index_dest';
+import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
+import { MEMORY_KI_TYPES } from '@kbn/context-engine-plugin/common/memory';
 import {
   MAX_KI_CONTENT_LENGTH,
   MAX_KI_DESCRIPTION_LENGTH,
@@ -18,8 +21,6 @@ import {
   MAX_KI_TAGS,
   MAX_KI_TITLE_LENGTH,
 } from '@kbn/context-engine-plugin/common/step_types/ki';
-import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
-import { isIndexPattern } from '@kbn/context-engine-plugin/common/ai_index_dest';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -35,7 +36,7 @@ import {
   updateMemoryProvenance,
 } from '../memory_document';
 
-const memoryTypeSchema = z.enum(['memory.session', 'memory.session_fact']);
+const memoryTypeSchema = z.enum(MEMORY_KI_TYPES);
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
 const rememberSchema = z.object({

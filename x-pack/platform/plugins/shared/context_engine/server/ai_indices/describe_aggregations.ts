@@ -12,12 +12,12 @@ import {
   MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
 } from '../../common/constants';
 import type { KiTypeCount } from '../../common/http_api/ai_indices';
+import { MEMORY_KI_TYPES } from '../../common/memory';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
 const KI_TYPE_FIELD = 'type';
 const KI_TAGS_FIELD = 'tags';
-const MEMORY_KI_TYPES = ['memory.session', 'memory.session_fact'] as const;
 
 /** Bucket keys must be strings: `conflict` and numeric mappings are excluded by construction. */
 const KEYWORD_TYPES: ReadonlySet<string> = new Set(['keyword', 'constant_keyword', 'wildcard']);
