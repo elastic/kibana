@@ -690,6 +690,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           isDone={isMiDone}
           hasFailed={hasFailed}
           isCleanupOnly={isCleanupOnly}
+          isDirty={isDirty}
         />
       )}
 
