@@ -11,9 +11,6 @@ import Fs from 'fs';
 import Path from 'path';
 import { findPackageForPath } from '@kbn/repo-packages';
 import {
-  findDuplicateClassNames,
-  findAllScoutFiles,
-  formatAuditText,
   extractPageObjectKeys,
   extractPageObjectKeysOrThrow,
   fileConsumesKey,
@@ -141,7 +138,6 @@ describe('findScoutTestFiles', () => {
 
     expect(files).toEqual(
       [
-        'src/platform/plugins/shared/fake_plugin_a/test/scout/ui/fixtures/page_objects/fake_solution_page.ts',
         'src/platform/plugins/shared/fake_plugin_a/test/scout/ui/fixtures/page_objects/spec_using_property.ts',
         'src/platform/plugins/shared/fake_plugin_b/test/scout/ui/spec_using_destructure.ts',
         'x-pack/solutions/fake/packages/kbn-scout-fake/src/playwright/page_objects/uses_core.ts',
@@ -179,56 +175,6 @@ describe('censusPageObjectConsumers', () => {
   });
 });
 
-describe('findDuplicateClassNames', () => {
-  beforeEach(() => {
-    (findPackageForPath as jest.Mock).mockImplementation((_repoRoot: string, file: string) => {
-      if (file.includes('fake_plugin_a')) return { id: 'fake-plugin-a' };
-      if (file.includes('fake_plugin_b')) return { id: 'fake-plugin-b' };
-      if (file.includes('kbn-scout-fake')) return { id: '@kbn/scout-fake' };
-      return undefined;
-    });
-  });
-
-  it('reports an exported class name declared in two modules, once, with both modules', () => {
-    const duplicates = findDuplicateClassNames(FAKE_REPO_ROOT, findAllScoutFiles(FAKE_REPO_ROOT));
-    expect(duplicates).toEqual([
-      { className: 'FakeSolutionPage', modules: ['@kbn/scout-fake', 'fake-plugin-a'] },
-    ]);
-  });
-});
-
-describe('formatAuditText', () => {
-  it('lists only keys and classes that need a look, with the reason', () => {
-    const text = formatAuditText({
-      census: [
-        { key: 'overlays', fileCount: 0, modules: [] },
-        { key: 'listingTable', fileCount: 1, modules: ['examples-plugin'] },
-        { key: 'unifiedTabs', fileCount: 45, modules: ['@kbn/discover-plugin'] },
-        { key: 'dashboard', fileCount: 128, modules: ['a', 'b'] },
-      ],
-      duplicateClassNames: [
-        { className: 'SavedObjectsManagementPage', modules: ['spaces', 'tagging'] },
-      ],
-    });
-
-    expect(text).toContain('`pageObjects.overlays` has no consumer');
-    expect(text).toContain('`pageObjects.listingTable` is used by one file (examples-plugin)');
-    expect(text).toContain(
-      '`pageObjects.unifiedTabs` used in 45 files, all in @kbn/discover-plugin'
-    );
-    expect(text).toContain('`SavedObjectsManagementPage` in spaces, tagging');
-    expect(text).not.toContain('dashboard');
-  });
-
-  it('says so when there is nothing to report', () => {
-    const text = formatAuditText({
-      census: [{ key: 'dashboard', fileCount: 128, modules: ['a', 'b'] }],
-      duplicateClassNames: [],
-    });
-    expect(text).toContain('No findings.');
-  });
-});
-
 describe('runAudit', () => {
   beforeEach(() => {
     (findPackageForPath as jest.Mock).mockImplementation((_repoRoot: string, file: string) => {
@@ -239,12 +185,11 @@ describe('runAudit', () => {
     });
   });
 
-  it('wires key extraction, file discovery, the census and duplicate detection together', () => {
-    const report = runAudit(FAKE_REPO_ROOT, FAKE_PAGE_OBJECTS_INDEX);
-    expect(report.census).toEqual([
+  it('wires key extraction, file discovery, and the census together', () => {
+    const census = runAudit(FAKE_REPO_ROOT, FAKE_PAGE_OBJECTS_INDEX);
+    expect(census).toEqual([
       { key: 'dashboard', fileCount: 2, modules: ['fake-plugin-a', 'fake-plugin-b'] },
       { key: 'lens', fileCount: 2, modules: ['@kbn/scout-fake', 'fake-plugin-b'] },
     ]);
-    expect(report.duplicateClassNames.map((d) => d.className)).toEqual(['FakeSolutionPage']);
   });
 });

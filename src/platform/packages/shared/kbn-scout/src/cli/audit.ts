@@ -126,9 +126,12 @@ const SCOUT_TEST_DIR_PATTERN = /(^|\/)(test\/scout[^/]*|kbn-scout-[^/]+\/src\/pl
 // package map for the same reason. `.git` is skipped purely to avoid the walk.
 const IGNORED_DIR_NAMES = new Set(['node_modules', 'target', '__fixtures__', '.git']);
 
-const CORE_SCOUT_PLAYWRIGHT_DIR = 'src/platform/packages/shared/kbn-scout/src/playwright';
-
-function walkTsFiles(rootDir: string, matches: (posixPath: string) => boolean): string[] {
+/**
+ * Recursively lists every `.ts`/`.tsx` file under a `test/scout*` directory or
+ * a solution Scout package's `src/playwright` anywhere below `rootDir`,
+ * skipping `node_modules`, `target`, `__fixtures__` and `.git`.
+ */
+export function findScoutTestFiles(rootDir: string): string[] {
   const results: string[] = [];
 
   function walk(dir: string) {
@@ -151,7 +154,7 @@ function walkTsFiles(rootDir: string, matches: (posixPath: string) => boolean): 
       if (
         entry.isFile() &&
         (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')) &&
-        matches(fullPath.split(Path.sep).join('/'))
+        SCOUT_TEST_DIR_PATTERN.test(fullPath.split(Path.sep).join('/'))
       ) {
         results.push(fullPath);
       }
@@ -160,21 +163,6 @@ function walkTsFiles(rootDir: string, matches: (posixPath: string) => boolean): 
 
   walk(rootDir);
   return results;
-}
-
-/**
- * Recursively lists every `.ts`/`.tsx` file under a `test/scout*` directory or
- * a solution Scout package's `src/playwright` anywhere below `rootDir`,
- * skipping `node_modules`, `target`, `__fixtures__` and `.git`.
- */
-export function findScoutTestFiles(rootDir: string): string[] {
-  return walkTsFiles(rootDir, (posixPath) => SCOUT_TEST_DIR_PATTERN.test(posixPath));
-}
-
-/** Every Scout source file: consumers plus `@kbn/scout`'s own `src/playwright`. */
-export function findAllScoutFiles(rootDir: string): string[] {
-  const core = walkTsFiles(Path.join(rootDir, CORE_SCOUT_PLAYWRIGHT_DIR), () => true);
-  return [...core, ...findScoutTestFiles(rootDir)];
 }
 
 export interface PageObjectConsumerCensus {
@@ -217,96 +205,11 @@ export function censusPageObjectConsumers(
   });
 }
 
-export interface DuplicateClassName {
-  className: string;
-  modules: string[];
-}
-
-/** Exported class names declared in two or more modules across the given Scout files. */
-export function findDuplicateClassNames(repoRoot: string, files: string[]): DuplicateClassName[] {
-  const modulesByClass = new Map<string, Set<string>>();
-
-  for (const file of files) {
-    const pkg = findPackageForPath(repoRoot, file);
-    if (!pkg) continue;
-    const source = ts.createSourceFile(
-      file,
-      Fs.readFileSync(file, 'utf8'),
-      ts.ScriptTarget.Latest,
-      false,
-      file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS
-    );
-    for (const statement of source.statements) {
-      const isExported = ts
-        .getModifiers(statement as ts.HasModifiers)
-        ?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
-      if (ts.isClassDeclaration(statement) && statement.name && isExported) {
-        const name = statement.name.text;
-        if (!modulesByClass.has(name)) modulesByClass.set(name, new Set());
-        modulesByClass.get(name)?.add(pkg.id);
-      }
-    }
-  }
-
-  return [...modulesByClass.entries()]
-    .filter(([, modules]) => modules.size > 1)
-    .map(([className, modules]) => ({ className, modules: [...modules].sort() }))
-    .sort((a, b) => a.className.localeCompare(b.className));
-}
-
-export interface AuditReport {
-  census: PageObjectConsumerCensus[];
-  duplicateClassNames: DuplicateClassName[];
-}
-
-export function runAudit(repoRoot: string, pageObjectsIndexPath: string): AuditReport {
+export function runAudit(repoRoot: string, pageObjectsIndexPath: string) {
   const indexSource = Fs.readFileSync(pageObjectsIndexPath, 'utf8');
   const pageObjectKeys = extractPageObjectKeysOrThrow(indexSource, pageObjectsIndexPath);
   const scoutTestFiles = findScoutTestFiles(repoRoot);
-  return {
-    census: censusPageObjectConsumers(repoRoot, scoutTestFiles, pageObjectKeys),
-    duplicateClassNames: findDuplicateClassNames(repoRoot, findAllScoutFiles(repoRoot)),
-  };
-}
-
-/**
- * Human readable findings, in Slack mrkdwn. Reports only what needs a look and
- * says why, per the placement policy. Nothing to report prints one line.
- */
-export function formatAuditText(report: AuditReport): string {
-  const { census, duplicateClassNames } = report;
-  const unused = census.filter((c) => c.fileCount === 0);
-  const singleFile = census.filter((c) => c.fileCount === 1);
-  const singleModule = census.filter((c) => c.fileCount > 1 && c.modules.length === 1);
-
-  const lines: string[] = [`*Scout quality audit* (${census.length} page object keys)`];
-  const section = (title: string, items: string[]) => {
-    if (items.length === 0) return;
-    lines.push('', `*${title}*`, ...items.map((item) => `• ${item}`));
-  };
-
-  section(
-    'Unused keys, removal candidates',
-    unused.map((c) => `\`pageObjects.${c.key}\` has no consumer`)
-  );
-  section(
-    'Single consumer keys',
-    singleFile.map((c) => `\`pageObjects.${c.key}\` is used by one file (${c.modules[0]})`)
-  );
-  section(
-    'Keys used by one module only, check they wrap a shared component or belong in that module',
-    singleModule.map(
-      (c) => `\`pageObjects.${c.key}\` used in ${c.fileCount} files, all in ${c.modules[0]}`
-    )
-  );
-  section(
-    'Same class name in more than one module, likely duplicates',
-    duplicateClassNames.map((d) => `\`${d.className}\` in ${d.modules.join(', ')}`)
-  );
-
-  if (lines.length === 1) lines.push('', 'No findings.');
-  lines.push('', 'Placement rules: docs/extend/testing/page-objects.md');
-  return lines.join('\n');
+  return censusPageObjectConsumers(repoRoot, scoutTestFiles, pageObjectKeys);
 }
 
 /**
@@ -323,7 +226,7 @@ export function formatAuditText(report: AuditReport): string {
 export const auditCmd: Command<void> = {
   name: 'audit',
   description: `
-  Report Scout page object consumer counts and duplicate class names.
+  Report Scout page object consumer counts (a fixture-key census).
 
   Page objects are reached via the 'pageObjects' fixture, not via imports, so
   import-graph tools report every page object as unused. This command instead
@@ -338,25 +241,18 @@ export const auditCmd: Command<void> = {
 
   Examples:
     node scripts/scout audit
-    node scripts/scout audit --format text
   `,
-  flags: {
-    string: ['format'],
-    default: { format: 'json' },
-    help: `
-    --format  'json' (default, for tooling) or 'text' (findings only, for people and Slack)
-    `,
-  },
-  run: ({ log, flags }) => {
+  flags: {},
+  run: ({ log }) => {
     const pageObjectsIndexPath = Path.resolve(
       REPO_ROOT,
       'src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts'
     );
 
-    const report = runAudit(REPO_ROOT, pageObjectsIndexPath);
+    const census = runAudit(REPO_ROOT, pageObjectsIndexPath);
 
-    // `write` rather than `info`: the report is meant to be piped, and `info`
-    // prefixes the first line with ' info '.
-    log.write(flags.format === 'text' ? formatAuditText(report) : JSON.stringify(report, null, 2));
+    // `write` rather than `info`: the report is meant to be piped (the audit
+    // skill consumes it), and `info` prefixes the first line with ' info '.
+    log.write(JSON.stringify(census, null, 2));
   },
 };
