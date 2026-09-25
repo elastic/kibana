@@ -46,8 +46,6 @@ export interface QueryParams {
    * histogram may be stale after a query change.
    */
   timeFieldName?: string;
-  /** `EsqlSource.datasetKey` (FROM + time field + project routing), used as `requestData.dataViewId`. */
-  datasetKey?: string;
 }
 
 export const exportVisContext = (

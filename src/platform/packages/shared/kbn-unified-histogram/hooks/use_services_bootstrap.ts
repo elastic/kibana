@@ -124,10 +124,6 @@ export const useServicesBootstrap = (
               nextFetchParams.dataSource.kind === 'esql'
                 ? nextFetchParams.dataSource.timeFieldName
                 : undefined,
-            datasetKey:
-              nextFetchParams.dataSource.kind === 'esql'
-                ? nextFetchParams.dataSource.datasetKey
-                : undefined,
           },
           timeInterval:
             !nextFetchParams.isTimeBased && !nextFetchParams.isESQLQuery

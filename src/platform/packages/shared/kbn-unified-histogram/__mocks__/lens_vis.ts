@@ -12,9 +12,6 @@ import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common'
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { ChartType } from '@kbn/visualization-utils';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { EsqlSource } from '@kbn/data-source';
 import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
@@ -70,7 +67,6 @@ export const getLensVisMock = async ({
   externalVisContext,
   getModifiedVisAttributes,
   onLensSuggestionsApiCall,
-  datasetKey,
 }: {
   filters: QueryParams['filters'];
   query: QueryParams['query'];
@@ -89,7 +85,6 @@ export const getLensVisMock = async ({
     preferredChartType: ChartType | undefined,
     preferredVisAttributes: unknown
   ) => void;
-  datasetKey?: string;
 }): Promise<{
   lensService: LensVisService;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -126,15 +121,6 @@ export const getLensVisMock = async ({
     currentSuggestionContext = state.currentSuggestionContext;
   });
 
-  const esqlDatasetKey =
-    datasetKey ??
-    (isPlainRecord && query && isOfAggregateQueryType(query)
-      ? EsqlSource.getDatasetKey(
-          getIndexPatternFromESQLQuery(query.esql) ?? '',
-          dataView.timeFieldName
-        )
-      : undefined);
-
   lensService.update({
     queryParams: {
       query,
@@ -143,7 +129,6 @@ export const getLensVisMock = async ({
       timeRange: timeRange ?? TIME_RANGE,
       columns,
       isPlainRecord,
-      datasetKey: esqlDatasetKey,
     },
     timeInterval,
     breakdownField,
