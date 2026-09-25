@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ChatCompleteOptions } from '@kbn/inference-common';
-import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
+import type { AnonymizationFailureMode, AnonymizationRule } from '@kbn/ai-anonymization-common';
 import { createInferenceRequestError } from '@kbn/inference-common';
 import { anonymizeMessages } from '@kbn/ai-anonymization-server';
 import type { RegexWorkerService } from '@kbn/ai-anonymization-server';
@@ -27,6 +27,7 @@ interface PrepareAnonymizationOptions {
   usePersistentReplacements?: boolean;
   requireReplacementsEncryptionKey?: boolean;
   saltPromise?: Promise<string | undefined>;
+  onFailurePromise?: Promise<AnonymizationFailureMode>;
   metadata?: ChatCompleteOptions['metadata'];
   system?: ChatCompleteOptions['system'];
   messages: ChatCompleteOptions['messages'];
@@ -50,11 +51,13 @@ export const prepareAnonymization = async ({
   usePersistentReplacements = true,
   requireReplacementsEncryptionKey = false,
   saltPromise,
+  onFailurePromise,
   metadata,
   system,
   messages,
 }: PrepareAnonymizationOptions) => {
   const salt = await saltPromise;
+  const onFailure = (await onFailurePromise) ?? 'block';
   if (!usePersistentReplacements) {
     const anonymization = await anonymizeMessages({
       system,
@@ -63,6 +66,8 @@ export const prepareAnonymization = async ({
       regexWorker,
       esClient,
       salt: salt ?? undefined,
+      onFailure,
+      logger,
     });
     return { anonymization, replacementsId: undefined };
   }
@@ -110,6 +115,8 @@ export const prepareAnonymization = async ({
     regexWorker,
     esClient,
     salt: salt ?? undefined,
+    onFailure,
+    logger,
     knownReplacements: (existingReplacements?.replacements ?? []).filter(
       (r): r is { anonymized: string; original: string } =>
         typeof r.anonymized === 'string' && typeof r.original === 'string'

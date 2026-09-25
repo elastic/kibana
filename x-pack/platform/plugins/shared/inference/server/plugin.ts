@@ -9,8 +9,15 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
-import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
-import type { AnonymizationRule, AnonymizationSettings } from '@kbn/ai-anonymization-common';
+import {
+  aiAnonymizationSettings,
+  refreshBuiltInAnonymizationRules,
+} from '@kbn/ai-anonymization-common';
+import type {
+  AnonymizationFailureMode,
+  AnonymizationRule,
+  AnonymizationSettings,
+} from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -42,14 +49,14 @@ import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
 
-const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
+const parseLegacyAnonymizationSettings = (value: unknown): AnonymizationSettings | undefined => {
   let parsed: unknown = value;
 
   if (typeof value === 'string') {
     try {
       parsed = JSON.parse(value);
     } catch {
-      return [];
+      return undefined;
     }
   }
 
@@ -58,13 +65,28 @@ const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
     typeof parsed !== 'object' ||
     !Array.isArray((parsed as AnonymizationSettings).rules)
   ) {
+    return undefined;
+  }
+
+  return parsed as AnonymizationSettings;
+};
+
+const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
+  const settings = parseLegacyAnonymizationSettings(value);
+  if (!settings) {
     return [];
   }
 
-  const allRules = (parsed as AnonymizationSettings).rules;
-  const enabledRules = allRules.filter((rule) => rule.enabled);
-  return enabledRules;
+  // Master switch: when masking is disabled, no rule should run at all.
+  if (settings.maskingEnabled === false) {
+    return [];
+  }
+
+  return refreshBuiltInAnonymizationRules(settings.rules).filter((rule) => rule.enabled);
 };
+
+const parseLegacyOnFailureMode = (value: unknown): AnonymizationFailureMode =>
+  parseLegacyAnonymizationSettings(value)?.onFailure ?? 'block';
 
 export const resolveReplacementsEncryptionKey = async ({
   namespace,
@@ -116,6 +138,7 @@ export class InferencePlugin
       router,
       coreSetup,
       logger: this.logger,
+      getRegexWorker: () => this.regexWorker,
     });
 
     return {};
@@ -200,6 +223,20 @@ export class InferencePlugin
       return [...regexRules, ...nerRules];
     };
 
+    const createOnFailureModePromise = async (
+      request: KibanaRequest
+    ): Promise<AnonymizationFailureMode> => {
+      // The profile-based path doesn't define a failure-mode concept; keep the safe default.
+      if (anonymizationEnabled) {
+        return 'block';
+      }
+
+      const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+      const legacySettings = await uiSettingsClient.get<unknown>(aiAnonymizationSettings);
+      return parseLegacyOnFailureMode(legacySettings);
+    };
+
     const getAnonymizationOptions = (request: KibanaRequest) => {
       const namespace =
         core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
@@ -223,6 +260,7 @@ export class InferencePlugin
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         anonymization: {
           saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
+          onFailurePromise: createOnFailureModePromise(request),
           replacements: {
             esClient: core.elasticsearch.client.asInternalUser,
             encryptionKeyPromise: replacementsEncryptionKeyPromise,
