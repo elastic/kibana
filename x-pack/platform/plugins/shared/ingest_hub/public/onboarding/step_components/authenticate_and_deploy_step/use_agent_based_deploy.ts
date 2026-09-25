@@ -38,6 +38,10 @@ export interface UseAgentBasedDeployResult {
   failedInstances: string[];
   /** True when a successful deploy result already exists in persisted state. */
   isAlreadyDeployed: boolean;
+  /** True when the next Next click will only run cleanup (no new services to deploy).
+   *  Used by the parent to relax the credential gate — cleanup doesn't require re-entering
+   *  credentials to enable the Next button (the in-memory ref carries whatever was last set). */
+  isCleanupOnly: boolean;
   /** Trigger a deploy (or retry). Defaults to all targets; pass specific instanceIds for retry.
    *  Returns a Promise that resolves to `{ failed: boolean }` when the deploy settles. */
   handleDeploy: (instanceIds?: string[]) => Promise<{ failed: boolean }>;
@@ -115,6 +119,28 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     return targets.every((group) =>
       group.instanceIds.every((instanceId) => !!policyIdsByInstance[instanceId])
     );
+  }, [
+    targets,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+  ]);
+
+  // True when clicking Next will only run cleanup — no new services need deploying.
+  // In this case the parent relaxes the credential gate: Next is enabled without re-entering
+  // credentials (the in-memory ref carries whatever was last set, and cleanup uses it).
+  const isCleanupOnly = useMemo(() => {
+    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+    const alreadyDeployedIds = new Set(Object.keys(policyIdsByInstance));
+    const newTargets = targets.filter((g) =>
+      g.instanceIds.some((id) => !alreadyDeployedIds.has(id))
+    );
+    if (newTargets.length > 0) return false;
+    const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
+    const liveStalePolicyIds = buildLiveStalePolicyIds(policyIdsByInstance, activeInstanceIds);
+    const hasPendingCleanup =
+      Object.keys(liveStalePolicyIds).length > 0 ||
+      Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+    return hasPendingCleanup;
   }, [
     targets,
     detectAndReviewStep.policyIdsByInstance,
@@ -510,6 +536,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     isDeploying,
     failedInstances,
     isAlreadyDeployed,
+    isCleanupOnly,
     handleDeploy,
     namespace,
     setNamespace,
