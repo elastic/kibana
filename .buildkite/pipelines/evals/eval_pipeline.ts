@@ -105,12 +105,9 @@ export function getForwardablePrLabels(githubPrLabels: string): string {
  * `models:weekly-eis-models`. Keep in sync with &weekly_eis_core_models in llm_evals.yml.
  */
 const DEFAULT_WEEKLY_EIS_MODELS: string[] = [
-  'eis/anthropic-claude-4.6-sonnet',
   'eis/anthropic-claude-4.6-opus',
-  'eis/google-gemini-3.0-flash',
   'eis/google-gemini-3.1-pro',
   'eis/openai-gpt-5.4',
-  'eis/openai-gpt-oss-120b',
 ];
 
 const WEEKLY_EIS_MODELS_ALIAS = 'weekly-eis-models';
