@@ -19,6 +19,7 @@
 - [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 - [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
 - [GitHub](/reference/connectors-kibana/github-action-type.md): Search code, issues, and pull requests, and access repository contents and metadata from GitHub.
+- [GitLab](/reference/connectors-kibana/gitlab-action-type.md): Search projects, manage issues and merge requests, browse repository files, and trigger CI/CD pipelines in GitLab.
 - [Gmail](/reference/connectors-kibana/gmail-action-type.md): Search, read, label, quarantine, and send emails in Gmail.
 - [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md): Search and access events and calendars in Google Calendar.
 - [Google Cloud Monitoring](/reference/connectors-kibana/google-cloud-monitoring-action-type.md): Find, silence, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data.
@@ -33,6 +34,7 @@
 - [Kubernetes](/reference/connectors-kibana/kubernetes-action-type.md): Read and modify resources in a Kubernetes cluster through its REST API.
 - [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams.
 - [Monday.com](/reference/connectors-kibana/monday-com-action-type.md): Search boards, read and create items, post updates, and manage workspaces in Monday.com.
+- [MongoDB](/reference/connectors-kibana/mongodb-action-type.md): Query MongoDB collections using find, aggregate, count, and listCollections, and write with insertOne, updateOne, and deleteOne in workflows.
 - [MySQL](/reference/connectors-kibana/mysql-action-type.md): Query tables, search rows, explore schema, and execute SQL in a MySQL database.
 - [New Relic](/reference/connectors-kibana/new-relic-action-type.md): Acknowledge and resolve AI issues, manage muting rules, and run NRQL queries.
 - [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
@@ -80,6 +82,7 @@
 - [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
 - [MISP](/reference/connectors-kibana/misp-action-type.md): Search attributes and events, check indicators and warninglists, and write sightings, events, attributes, and tags back to MISP.
 - [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.
+- [ThreatQ](/reference/connectors-kibana/threatq-action-type.md): Search and enrich intelligence, update indicators, link objects, and run operations.
 - [URLScan.io](/reference/connectors-kibana/urlscan-io-action-type.md): Search historical URL scans, detonate a URL in a sandboxed browser, and retrieve verdicts, screenshots, and page content.
 - [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
 - [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL and domain analysis, result retrieval, and threat intelligence lookups.

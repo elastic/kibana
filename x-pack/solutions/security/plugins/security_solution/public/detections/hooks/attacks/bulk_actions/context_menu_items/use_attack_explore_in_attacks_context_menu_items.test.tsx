@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type React from 'react';
-import { render, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import {
   useAttackExploreInAttacksContextMenuItems,
@@ -68,8 +67,7 @@ describe('useAttackExploreInAttacksContextMenuItems', () => {
     const { result } = renderHook(() =>
       useAttackExploreInAttacksContextMenuItems({ attack: createAttack(), closePopover })
     );
-    const { getByText } = render(result.current.items[0].name as React.ReactElement);
-    expect(getByText('Explore in Attacks')).toBeInTheDocument();
+    expect(result.current.items[0].name).toBe('Explore in Attacks');
   });
 
   describe('onClick', () => {

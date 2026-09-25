@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Parser } from '@elastic/esql';
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import { z } from '@kbn/zod/v4';
 import {
@@ -18,17 +19,19 @@ import {
   getNoDataEsqlQuery,
   getRootEsqlQuery,
   bulkGetRulesResponseSchema,
-  bulkGetRulesParamsSchema,
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
   ruleTagsParamsSchema,
+  findRulesRequestSchema,
 } from './rule_data_schema';
 import { tagsResponseSchema } from './common';
 import {
-  ID_MAX_LENGTH,
+  FIND_MAX_RESULT_WINDOW,
   MAX_ARTIFACT_DATA_FIELDS,
+  MAX_ARTIFACT_DATA_LENGTH,
   MAX_BULK_ITEMS,
+  MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
 } from './constants';
 
@@ -56,7 +59,7 @@ describe('createRuleDataSchema', () => {
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
+        metadata: { name: 'test rule', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
         recovery_strategy: 'no_breach',
@@ -74,7 +77,7 @@ describe('createRuleDataSchema', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
+          metadata: { name: 'test rule', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
           recovery_strategy: 'no_breach',
@@ -952,17 +955,37 @@ describe('createRuleDataSchema', () => {
     const parseWithArtifact = (artifact: Record<string, unknown>) =>
       createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] });
 
-    // How large a value may be depends on the artifact type, so it is bounded
-    // server-side where the artifact-type registry is available: by the type's
-    // own `dataSchema`, or by a generic per-field ceiling for unregistered types.
-    it('does not bound the size of a data value', () => {
+    // Per-type limits are registry-enforced server-side; the envelope only caps the
+    // serialized size of `data`, which is the sole bound for unregistered types.
+    it('accepts data up to the serialized size ceiling', () => {
+      const wrapper = JSON.stringify({ value: '' }).length;
       const result = parseWithArtifact({
         id: 'artifact-1',
         type: 'host',
-        data: { value: 'a'.repeat(100_000) },
+        data: { value: 'a'.repeat(MAX_ARTIFACT_DATA_LENGTH - wrapper) },
       });
 
       expect(result.success).toBe(true);
+    });
+
+    it('rejects data above the serialized size ceiling', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(MAX_ARTIFACT_DATA_LENGTH) },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('measures structured values against the ceiling, not just strings', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { list: new Array(MAX_ARTIFACT_DATA_LENGTH).fill(1) },
+      });
+
+      expect(result.success).toBe(false);
     });
 
     it('accepts runbook-sized content, since per-type limits are registry-enforced', () => {
@@ -1020,16 +1043,6 @@ describe('createRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              path: ['artifacts', 0, 'data'],
-              message: `Artifact data must have at most ${MAX_ARTIFACT_DATA_FIELDS} fields.`,
-            }),
-          ])
-        );
-      }
     });
 
     it('rejects a field name longer than the limit', () => {
@@ -1058,16 +1071,6 @@ describe('createRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              path: ['artifacts', 1, 'id'],
-              message: 'Artifact id "same" must be unique within the rule.',
-            }),
-          ])
-        );
-      }
     });
   });
 
@@ -1257,14 +1260,14 @@ describe('updateRuleDataSchema', () => {
     const parseWithArtifact = (artifact: Record<string, unknown>) =>
       updateRuleDataSchema.safeParse({ artifacts: [artifact] });
 
-    it('does not bound the size of a data value', () => {
+    it('rejects data above the serialized size ceiling', () => {
       const result = parseWithArtifact({
         id: 'artifact-1',
         type: 'host',
-        data: { value: 'a'.repeat(100_000) },
+        data: { value: 'a'.repeat(MAX_ARTIFACT_DATA_LENGTH) },
       });
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
 
     it('accepts runbook-sized content, since per-type limits are registry-enforced', () => {
@@ -1653,56 +1656,126 @@ describe('rule field immutability classification', () => {
   });
 });
 
-describe('bulkGetRulesParamsSchema', () => {
-  it('accepts a single id', () => {
-    const result = bulkGetRulesParamsSchema.parse({ ids: ['rule-1'] });
-    expect(result).toEqual({ ids: ['rule-1'] });
+describe('ES|QL query length cap', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  it('accepts up to MAX_BULK_ITEMS ids', () => {
-    const ids = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => `rule-${i}`);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids })).not.toThrow();
+  const oversized = `FROM logs-* | WHERE ${'a'.repeat(MAX_ESQL_QUERY_LENGTH)}`;
+
+  it('rejects an oversized standalone query on length alone, without invoking the parser', () => {
+    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+
+    const result = createRuleDataSchema.safeParse({
+      ...validCreateData,
+      query: { format: 'standalone', breach: { query: oversized } },
+    });
+
+    expect(result.success).toBe(false);
+    expect(parseErrors).not.toHaveBeenCalled();
   });
 
-  it('preserves caller-provided id order (no sorting)', () => {
-    const ids = ['rule-z', 'rule-a', 'rule-m'];
-    const result = bulkGetRulesParamsSchema.parse({ ids });
-    expect(result.ids).toEqual(ids);
+  it('rejects an oversized composed base without invoking the parser', () => {
+    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+    const parse = jest.spyOn(Parser, 'parse');
+
+    const result = createRuleDataSchema.safeParse({
+      ...validCreateData,
+      query: { format: 'composed', base: oversized, breach: { segment: 'WHERE cpu > 0.9' } },
+    });
+
+    expect(result.success).toBe(false);
+    expect(parseErrors).not.toHaveBeenCalled();
+    expect(parse).not.toHaveBeenCalled();
   });
 
-  it('trims whitespace around ids', () => {
-    const result = bulkGetRulesParamsSchema.parse({ ids: ['  rule-1  '] });
-    expect(result.ids).toEqual(['rule-1']);
+  it('does not compose or parse an oversized segment', () => {
+    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+    const parse = jest.spyOn(Parser, 'parse');
+
+    const result = createRuleDataSchema.safeParse({
+      ...validCreateData,
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: `WHERE ${'a'.repeat(MAX_ESQL_QUERY_LENGTH)}` },
+      },
+    });
+
+    expect(result.success).toBe(false);
+    expect(parse).not.toHaveBeenCalled();
+    for (const [query] of parseErrors.mock.calls) {
+      expect(query.length).toBeLessThanOrEqual(MAX_ESQL_QUERY_LENGTH);
+    }
   });
 
-  it('rejects a missing ids field', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({})).toThrow();
+  it('still parses queries within the limit', () => {
+    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+
+    const result = createRuleDataSchema.safeParse(validCreateData);
+
+    expect(result.success).toBe(true);
+    expect(parseErrors).toHaveBeenCalled();
+  });
+});
+
+describe('findRulesRequestSchema', () => {
+  it('accepts an empty query', () => {
+    expect(findRulesRequestSchema.parse({})).toEqual({});
   });
 
-  it('rejects an empty ids array', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [] })).toThrow();
+  it('accepts valid query params', () => {
+    expect(
+      findRulesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        filter: 'kind: alert',
+        sort_field: 'name',
+        sort_order: 'asc',
+        search: 'cpu',
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      filter: 'kind: alert',
+      sort_field: 'name',
+      sort_order: 'asc',
+      search: 'cpu',
+    });
   });
 
-  it('rejects more than MAX_BULK_ITEMS ids', () => {
-    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `rule-${i}`);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids })).toThrow();
+  it('coerces numeric strings for page and per_page', () => {
+    expect(findRulesRequestSchema.parse({ page: '2', per_page: '50' })).toEqual({
+      page: 2,
+      per_page: 50,
+    });
   });
 
-  it('rejects an id longer than ID_MAX_LENGTH', () => {
-    const tooLong = 'a'.repeat(ID_MAX_LENGTH + 1);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [tooLong] })).toThrow();
+  it.each([0, -1, 1.5, 'abc', FIND_MAX_RESULT_WINDOW + 1, 1e9])('rejects page %p', (page) => {
+    expect(findRulesRequestSchema.safeParse({ page }).success).toBe(false);
   });
 
-  it('rejects an empty-string id', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [''] })).toThrow();
+  it.each([0, 1.5, 1001])('rejects per_page %p', (perPage) => {
+    expect(findRulesRequestSchema.safeParse({ per_page: perPage }).success).toBe(false);
   });
 
-  it('rejects a whitespace-only id (after trim it is empty)', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['   '] })).toThrow();
+  it('accepts the last page inside the max result window', () => {
+    expect(findRulesRequestSchema.safeParse({ page: 10, per_page: 1000 }).success).toBe(true);
   });
 
-  it('rejects unknown top-level fields (strict)', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['rule-1'], foo: 'bar' })).toThrow();
+  it('rejects a page beyond the max result window', () => {
+    const result = findRulesRequestSchema.safeParse({ page: 11, per_page: 1000 });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('applies the default page size to the result window check when per_page is omitted', () => {
+    expect(findRulesRequestSchema.safeParse({ page: 500 }).success).toBe(true);
+    expect(findRulesRequestSchema.safeParse({ page: 501 }).success).toBe(false);
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => findRulesRequestSchema.parse({ unknown_key: 'kind: alert' })).toThrow();
   });
 });
 
@@ -1715,9 +1788,9 @@ describe('bulkGetRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    created_by: 'user-a',
+    created_by: { profile_uid: 'user-a' },
     created_at: '2026-01-01T00:00:00.000Z',
-    updated_by: 'user-a',
+    updated_by: { profile_uid: 'user-a' },
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
@@ -1817,9 +1890,9 @@ describe('bulkCreateRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    created_by: 'user-a',
+    created_by: { profile_uid: 'user-a' },
     created_at: '2026-01-01T00:00:00.000Z',
-    updated_by: 'user-a',
+    updated_by: { profile_uid: 'user-a' },
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 

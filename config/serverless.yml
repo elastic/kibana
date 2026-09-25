@@ -173,8 +173,8 @@ xpack.cloud_integrations.data_migration.enabled: false
 
 # Other disabled plugins
 xpack.canvas.enabled: false
-# Significant Events is re-enabled only for Observability Complete
-xpack.significantEvents.enabled: false
+# Nightshift Sources is re-enabled only for Observability Complete
+xpack.nightshiftSources.enabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
 xpack.security.showInsecureClusterWarning: false

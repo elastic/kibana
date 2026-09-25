@@ -63,7 +63,7 @@ import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/component
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
-import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
+import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
@@ -85,6 +85,7 @@ import {
   EPISODE_ACTIONS_PRIVILEGE,
 } from '../../utils/filter_episode_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { useManageRulesHref } from '../../application/manage_rules_href_context';
 
 const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {
@@ -215,6 +216,9 @@ const AlertEpisodesListPageContent = () => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
   const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
+  const [sourceRuleInfoToView, setSourceRuleInfoToView] = useState<
+    { category?: string } | undefined
+  >();
   const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
   const {
     flyout: composeFlyout,
@@ -225,9 +229,10 @@ const AlertEpisodesListPageContent = () => {
 
   // The rule and the episode flyout occupy the same edge of the screen, so only one of them
   // can be open at a time.
-  const openRuleFlyout = useCallback((ruleId: string) => {
+  const openRuleFlyout = useCallback((ruleId: string, sourceRuleInfo?: { category?: string }) => {
     setExpandedDoc(undefined);
     setRuleIdToView(ruleId);
+    setSourceRuleInfoToView(sourceRuleInfo);
   }, []);
 
   const expandDoc = useCallback((doc?: DataTableRecord) => {
@@ -402,8 +407,14 @@ const AlertEpisodesListPageContent = () => {
   );
 
   const getRuleDetailsHref = useCallback(
-    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
-    [rulesLocators]
+    (ruleId: string, isSourceRule?: boolean): string | undefined => {
+      if (isSourceRule) {
+        const sourceHref = additionalDataSource?.getRuleDetailsHref?.(ruleId);
+        return sourceHref ? services.http.basePath.prepend(sourceHref) : undefined;
+      }
+      return rulesLocators.getRedirectUrl({ ruleId });
+    },
+    [rulesLocators, additionalDataSource, services.http.basePath]
   );
   const getEpisodeDetailsHref = useCallback(
     (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
@@ -427,7 +438,7 @@ const AlertEpisodesListPageContent = () => {
           groupHash={hit.flattened.group_hash as string | undefined}
           onClose={closeFlyout}
           actions={episodeActions}
-          getRuleDetailsHref={getRuleDetailsHref}
+          getRuleDetailsHref={(ruleId) => getRuleDetailsHref(ruleId) ?? ''}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
           services={{
             data: services.data,
@@ -505,7 +516,9 @@ const AlertEpisodesListPageContent = () => {
     [setVisibleColumns]
   );
 
-  const manageRulesHref = rulesLocators.useUrl({});
+  const locatorHref = rulesLocators.useUrl({});
+  const manageRulesHrefOverride = useManageRulesHref();
+  const manageRulesHref = manageRulesHrefOverride ?? locatorHref;
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
@@ -676,7 +689,8 @@ const AlertEpisodesListPageContent = () => {
       {ruleIdToView ? (
         <RuleSummaryFlyoutContainer
           ruleId={ruleIdToView}
-          type="overlay"
+          sourceRuleInfo={sourceRuleInfoToView}
+          cachedRule={rulesCache[ruleIdToView]}
           onClose={closeRuleFlyout}
           onEdit={(rule) => {
             setRuleIdToView(null);

@@ -8,9 +8,7 @@
  */
 
 import type { ConcurrencySettings, EsWorkflowExecution } from '@kbn/workflows';
-import { DEFAULT_CONCURRENCY_QUEUE_TTL } from '@kbn/workflows';
-
-import { parseDuration } from '../utils/parse-duration/parse-duration';
+import { DEFAULT_CONCURRENCY_QUEUE_TTL, parseDuration } from '@kbn/workflows';
 
 export const resolveQueueTtlSetting = (concurrencySettings?: ConcurrencySettings): string =>
   concurrencySettings?.['queue-ttl'] ?? DEFAULT_CONCURRENCY_QUEUE_TTL;

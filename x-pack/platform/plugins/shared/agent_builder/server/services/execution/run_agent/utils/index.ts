@@ -11,14 +11,18 @@ export { prepareMessages } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
 export {
   groupTimelineRounds,
-  sliceTimelineRounds,
+  dropTimelineRounds,
   type ProcessedTimelineEvent,
   type TimelineRound,
 } from './context_timeline';
 export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
-export { getPendingRound } from './prompts';
-export { evictInternalEvents } from './evict_internal_events';
+export {
+  foldConversationTurns,
+  getPendingTurn,
+  type ConversationTurn,
+  type PendingTurn,
+} from './conversation_turn';
 export { formatAttachmentsMetadata } from './attachment_presentation';
 export { createPreExecutionSteps } from './round_steps';
 export {
@@ -32,4 +36,5 @@ export {
   createSummarizationTransformer,
 } from './tool_summarization';
 export { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
+export { legacyEligibleRoundIds, coveredRoundIds } from './compaction_coverage';
 export { createImageResolver, type CreateImageResolverOptions } from './image_resolver';

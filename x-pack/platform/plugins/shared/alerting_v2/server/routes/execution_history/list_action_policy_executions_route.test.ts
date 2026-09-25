@@ -23,7 +23,7 @@ const createMocks = () => {
       items: [],
       page: 1,
       perPage: 100,
-      totalEvents: 0,
+      total: 0,
       searchMatches: null,
     }),
   };
@@ -55,7 +55,10 @@ describe('ListActionPolicyExecutionsRoute', () => {
       ruleIds: undefined,
       outcome: ['throttled'],
       episodeIds: undefined,
-      startDate: undefined,
+      from: undefined,
+      to: undefined,
+      sort: undefined,
+      sortOrder: undefined,
     });
   });
 
@@ -73,17 +76,31 @@ describe('ListActionPolicyExecutionsRoute', () => {
     );
   });
 
-  it('forwards start_date from the query to the client', async () => {
+  it('forwards from / to from the query to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      query: { start_date: '2026-01-01T00:00:00.000Z' },
+      query: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
     expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
-      expect.objectContaining({ startDate: '2026-01-01T00:00:00.000Z' })
+      expect.objectContaining({ from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' })
+    );
+  });
+
+  it('forwards sort / sort_order from the query to the client as sort / sortOrder', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { sort: 'dispatched_at', sort_order: 'asc' },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ sort: 'dispatched_at', sortOrder: 'asc' })
     );
   });
 
@@ -102,7 +119,10 @@ describe('ListActionPolicyExecutionsRoute', () => {
       ruleIds: undefined,
       outcome: undefined,
       episodeIds: undefined,
-      startDate: undefined,
+      from: undefined,
+      to: undefined,
+      sort: undefined,
+      sortOrder: undefined,
     });
   });
 
@@ -112,7 +132,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
       items: [{ id: 'x' }],
       page: 4,
       perPage: 25,
-      totalEvents: 137,
+      total: 137,
       searchMatches: null,
     };
     mocks.executionHistoryClient.listExecutionHistory.mockResolvedValue(clientResult as any);
@@ -127,7 +147,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
       items: [{ id: 'x' }],
       page: 4,
       per_page: 25,
-      total_events: 137,
+      total: 137,
       search_matches: null,
     });
   });
@@ -155,7 +175,10 @@ describe('toListExecutionHistoryArgs', () => {
         rule_ids: ['rule-1', 'rule-2'],
         outcome: ['dispatched'],
         episode_ids: ['ep-1'],
-        start_date: '2026-01-01T00:00:00.000Z',
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+        sort: 'dispatched_at',
+        sort_order: 'asc',
       })
     ).toEqual({
       page: 1,
@@ -164,7 +187,10 @@ describe('toListExecutionHistoryArgs', () => {
       ruleIds: ['rule-1', 'rule-2'],
       outcome: ['dispatched'],
       episodeIds: ['ep-1'],
-      startDate: '2026-01-01T00:00:00.000Z',
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+      sort: 'dispatched_at',
+      sortOrder: 'asc',
     });
   });
 });

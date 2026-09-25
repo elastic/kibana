@@ -7,8 +7,19 @@
 
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
-import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
-import { durationSchema, tagsResponseSchema, tagsSchema } from './common';
+import {
+  validateEsqlQuery,
+  validateMinDuration,
+  composeEsqlQuery,
+  validateComposedEsqlQuery,
+} from './validation';
+import {
+  actorSchema,
+  durationSchema,
+  queryIntSchema,
+  tagsResponseSchema,
+  tagsSchema,
+} from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
@@ -23,15 +34,19 @@ import {
   ID_MAX_LENGTH,
   VERSION_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
+  MAX_ARTIFACT_DATA_LENGTH,
+  FIND_DEFAULT_PER_PAGE,
+  FIND_MAX_RESULT_WINDOW,
 } from './constants';
 import { bulkErrorSchema } from './bulk_operation_schema';
 
 /** Primitives */
 
+// `abort` makes the length cap final so the parser never runs on oversized input.
 export const esqlQuerySchema = z
   .string()
   .min(1)
-  .max(MAX_ESQL_QUERY_LENGTH)
+  .max(MAX_ESQL_QUERY_LENGTH, { abort: true })
   .superRefine((value, ctx) => {
     const error = validateEsqlQuery(value);
     if (error) {
@@ -72,7 +87,6 @@ export const metadataSchema = z
       .max(MAX_DESCRIPTION_LENGTH)
       .optional()
       .describe('Human-readable description of the rule.'),
-    owner: z.string().max(256).optional().describe('Owner of the rule.'),
     tags: tagsSchema
       .min(1)
       .optional()
@@ -175,7 +189,7 @@ export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 export const esqlQuerySegmentSchema = z
   .string()
   .min(1)
-  .max(MAX_ESQL_QUERY_LENGTH)
+  .max(MAX_ESQL_QUERY_LENGTH, { abort: true })
   .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' });
 
 /** Composed wrappers (segment-based, appended to `base`). */
@@ -233,9 +247,7 @@ export const composedQuerySchema = z
   .strict()
   .check((ctx) => {
     if (ctx.value.breach) {
-      const breachError = validateEsqlQuery(
-        composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
-      );
+      const breachError = validateComposedEsqlQuery(ctx.value.base, ctx.value.breach.segment);
       if (breachError) {
         ctx.issues.push({
           code: 'custom',
@@ -246,9 +258,7 @@ export const composedQuerySchema = z
       }
     }
     if (ctx.value.recovery) {
-      const recoveryError = validateEsqlQuery(
-        composeEsqlQuery(ctx.value.base, ctx.value.recovery.segment)
-      );
+      const recoveryError = validateComposedEsqlQuery(ctx.value.base, ctx.value.recovery.segment);
       if (recoveryError) {
         ctx.issues.push({
           code: 'custom',
@@ -415,16 +425,26 @@ const artifactSchema = z
   })
   .strict()
   .check((ctx) => {
-    // Only type-agnostic structure belongs here. How large a `data` value may be
+    // Only type-agnostic structures belong here. How large a `data` value may be
     // depends on the artifact type, which this schema deliberately does not know:
     // registered types are bounded by their own `dataSchema` (applied server-side,
-    // where the artifact-type registry is available) and unregistered types pass
-    // through verbatim so a disabled or rolled-back plugin cannot fail writes.
+    // where the artifact-type registry is available). Unregistered types pass
+    // through with a limit of MAX_ARTIFACT_DATA_LENGTH so a disabled or rolled-back
+    // plugin cannot fail writes.
     if (Object.keys(ctx.value.data).length > MAX_ARTIFACT_DATA_FIELDS) {
       ctx.issues.push({
         code: 'custom',
         path: ['data'],
         message: `Artifact data must have at most ${MAX_ARTIFACT_DATA_FIELDS} fields.`,
+        input: ctx.value.data,
+      });
+    }
+
+    if (JSON.stringify(ctx.value.data).length > MAX_ARTIFACT_DATA_LENGTH) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['data'],
+        message: `Artifact data must not exceed ${MAX_ARTIFACT_DATA_LENGTH} characters when serialized.`,
         input: ctx.value.data,
       });
     }
@@ -749,9 +769,9 @@ export const ruleResponseSchema = createRuleDataBaseSchema
     id: z.string().describe('Unique rule identifier.'),
     metadata: ruleResponseMetadataSchema,
     enabled: z.boolean().describe('Whether the rule is enabled.'),
-    created_by: z.string().nullable().describe('User who created the rule.'),
+    created_by: actorSchema.nullable().describe('Actor who created the rule.'),
     created_at: z.string().describe('ISO timestamp when the rule was created.'),
-    updated_by: z.string().nullable().describe('User who last updated the rule.'),
+    updated_by: actorSchema.nullable().describe('Actor who last updated the rule.'),
     updated_at: z.string().describe('ISO timestamp when the rule was last updated.'),
     version: z
       .string()
@@ -769,25 +789,32 @@ export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
-export const findRulesRequestSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  per_page: z.coerce
-    .number()
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe('The number of rules to return per page. Defaults to 20.'),
-  filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
-  sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
-  sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(MAX_SEARCH_LENGTH)
-    .optional()
-    .describe('A text string to search across rule fields.'),
-});
+export const findRulesRequestSchema = z
+  .object({
+    page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
+      .optional()
+      .describe(
+        `The page number to return. Defaults to 1. \`page * per_page\` cannot exceed ${FIND_MAX_RESULT_WINDOW}.`
+      ),
+    per_page: queryIntSchema({ min: 1, max: 1000 })
+      .optional()
+      .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}.`),
+    filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
+    sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+    sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+    search: z
+      .string()
+      .trim()
+      .min(1)
+      .max(MAX_SEARCH_LENGTH)
+      .optional()
+      .describe('A text string to search across rule fields.'),
+  })
+  .strict()
+  .refine(
+    ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
+    { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
+  );
 
 export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 
@@ -831,22 +858,6 @@ export const ruleIdSchema = z
   .min(1)
   .max(ID_MAX_LENGTH)
   .describe('A rule identifier.');
-
-/**
- * Request body schema for `POST /api/alerting/v2/rules/_bulk_get`.
- */
-export const bulkGetRulesParamsSchema = z
-  .object({
-    ids: z
-      .array(ruleIdSchema)
-      .min(1)
-      .max(MAX_BULK_ITEMS)
-      .describe('Rule identifiers to retrieve. The response preserved this order.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_bulk_get_rules_request' });
-
-export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.

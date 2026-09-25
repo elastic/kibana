@@ -395,6 +395,7 @@ function getMockMonitoredUtilization(overrides = {}): MonitoredUtilization {
       timestamp: new Date().toISOString(),
       value: {
         load: 6,
+        es_backpressure_active: 0,
         adhoc: {
           created: {
             counter: 5,

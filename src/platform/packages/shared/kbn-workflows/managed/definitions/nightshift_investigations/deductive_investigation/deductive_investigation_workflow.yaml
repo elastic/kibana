@@ -22,6 +22,12 @@ triggers:
         message:
           type: string
           description: The prompt to investigate.
+        title:
+          type: string
+          maxLength: 512
+          description: >
+            Short human-readable headline for the investigation. Shown in the investigations list
+            and details flyout from the moment the run starts, so never an id or UUID.
         stream_names:
           type: array
           items:
@@ -36,6 +42,7 @@ triggers:
           description: Optional key for concurrency deduplication. Defaults to the workflow execution ID.
       required:
         - message
+        - title
       additionalProperties: false
 
 steps:
@@ -92,6 +99,12 @@ steps:
       schema:
         type: object
         properties:
+          title:
+            type: string
+            maxLength: 512
+            description: >
+              Short headline (under ~80 characters) naming the affected entity and the problem.
+              Start from the trigger's title and sharpen it as the cause becomes clear.
           summary:
             type: string
             maxLength: 10000
@@ -164,7 +177,10 @@ steps:
                 title:
                   type: string
                   maxLength: 512
-                  description: The action itself, stated concretely (e.g. "Revert the pool-size config change").
+                  description: >
+                    The action itself, stated concretely as concise plain text. Do not use Markdown
+                    or HTML, including links, emphasis, backticks, headings, lists, or code fences.
+                    Put explanations and links in description, and commands or snippets in code.
                 confidence:
                   type: number
                   minimum: 0
@@ -199,6 +215,7 @@ steps:
         x-elastic-internal-origin: 'kibana'
       body:
         status: "completed"
+        title: "${{ steps.investigate.output.structured_output.title }}"
         summary: "${{ steps.investigate.output.structured_output.summary }}"
         conclusion: "${{ steps.investigate.output.structured_output.conclusion }}"
         severity: "${{ steps.investigate.output.structured_output.severity }}"
