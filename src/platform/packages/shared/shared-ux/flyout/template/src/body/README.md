@@ -1,5 +1,28 @@
 # Body
 
+## Callouts
+
+`Body.Callout` puts a callout in the body's banner, above all other body content. The template renders the callout itself: `level` (`info`, `success`, `warning`, or `danger`) selects one of the `@kbn/ui-callout` components, so nothing but a semantic callout can reach the banner.
+
+```tsx
+<FlyoutTemplate.Body>
+  <FlyoutTemplate.Body.Callout level="warning" title="Rule is disabled" text="…" />
+  <FlyoutTemplate.Body.Callout
+    level="danger"
+    title="3 actions failed"
+    actionProps={{ primary: { children: 'Retry', onClick: onRetry } }}
+  />
+  <FlyoutTemplate.Body.Section title="Summary">…</FlyoutTemplate.Body.Section>
+</FlyoutTemplate.Body>
+```
+
+- **Props** — everything `KbnCalloutProps` takes (`title`, `text`, `actionProps`, `onDismiss`, …) except `size`, `heading`, `className`, `css`, and `style`, which the template owns so every banner callout looks the same. The title stays a `<p>`, out of the flyout's heading outline. `id` is the part's identity, unique among sibling callouts, and is generated when omitted.
+- **Visibility** — stays with the consumer: render the callout conditionally, and remove it from `onDismiss`.
+- **Placement** — any number of callouts render as one stack in source order, with template-owned spacing, wherever they sit among `Body`'s children. Add no `EuiSpacer` around them. The banner scrolls with the body content.
+- **Tabs** — a callout directly under `Body` is flyout-wide and stays in place across tab switches. A callout inside a `Body.TabPanel` renders nothing; nothing warns about it.
+
+The body stays mounted across tab switches, and each callout is memoized, so a switch neither remounts nor re-renders a callout. With uncontrolled tabs (`defaultSelectedTabId`) this holds on its own. With controlled tabs (`selectedTabId` and `onTabChange`) the consumer re-renders on every switch and builds new callout elements, so the callout skips its re-render only while its props are shallowly equal: memoize `actionProps` and handlers such as `onDismiss`, or memoize the `<FlyoutTemplate.Body.Callout>` elements themselves.
+
 ## Sections
 
 `Body.Section` and `Body.Accordion` give body content a title and consistent spacing. Pick one style per flyout — mixing sections and accordions in the same body is not supported. Both accept `Subsection` children for a second level.
@@ -28,7 +51,7 @@ An `id` also doubles as the part's identity within its parent, so it must be uni
 
 ## Unstructured content
 
-The body also takes plain content — a callout, a search bar, a filter row, a data grid — with no wrapper part. It renders as-is, in JSX order relative to the sections around it, and gets no title, box, or divider.
+The body also takes plain content — a search bar, a filter row, a data grid — with no wrapper part. Callouts belong in the banner, through `Body.Callout`. It renders as-is, in JSX order relative to the sections around it, and gets no title, box, or divider.
 
 ```tsx
 <FlyoutTemplate.Body>

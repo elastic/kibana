@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
@@ -22,11 +22,15 @@ import {
   useFlyoutTemplateConfig,
 } from '../context';
 import { Accordion, ACCORDION_PART_NAME, accordionPart } from './accordion';
+import { Callout, renderCalloutBanner } from './callout';
 import { Section, SECTION_PART_NAME, sectionPart } from './section';
 import { Subsection } from './subsection';
 import { TAB_PANEL_PART_NAME, TabPanel } from './tab_panel';
 
-/** Renders `Section`, `Accordion`, and unstructured children from pre-parsed items in source order. */
+/**
+ * Renders `Section`, `Accordion`, and unstructured children from pre-parsed items in source order.
+ * `Callout` parts are skipped: they render in the banner, never inline.
+ */
 const renderBodyItems = (items: ParsedItem[]) =>
   items.map((item, index) => {
     if (item.type === 'child') {
@@ -51,40 +55,40 @@ const renderBodyItems = (items: ParsedItem[]) =>
     return null;
   });
 
+/**
+ * Keyed by the tab id, so the error boundary and the panel's content reset per tab while the
+ * surrounding `EuiFlyoutBody` and its banner stay mounted. A panel that is not yet supplied (e.g.
+ * on-demand mounting) keeps the tabpanel wrapper, so the selected tab's `aria-controls` points at a
+ * real element.
+ */
 const ActiveTabPanel = ({
   activeTab,
   activePanel,
-  bodyTestSubj,
-  scrollContainerRef,
 }: {
   activeTab: FlyoutTabDescriptor;
-  activePanel: ParsedPart;
-  bodyTestSubj: string | undefined;
-  scrollContainerRef: (node: HTMLElement | null) => void;
+  activePanel: ParsedPart | undefined;
 }) => {
-  const panelChildren = activePanel.attributes.children as ReactNode;
+  const panelChildren = activePanel?.attributes.children as ReactNode;
   const content = useMemo(
     () =>
-      renderBodyItems(bodyAssembly.parseChildren(panelChildren, { supportsOtherChildren: true })),
+      activePanel
+        ? renderBodyItems(
+            bodyAssembly.parseChildren(panelChildren, { supportsOtherChildren: true })
+          )
+        : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activePanel]
   );
   return (
-    <KibanaErrorBoundaryProvider>
-      <EuiFlyoutBody data-test-subj={bodyTestSubj} scrollContainerRef={scrollContainerRef}>
-        <KibanaErrorBoundary>
-          <div
-            role="tabpanel"
-            id={activeTab.panelDomId}
-            aria-labelledby={activeTab.tabDomId}
-            tabIndex={0}
-            data-test-subj={activePanel.attributes['data-test-subj'] as string | undefined}
-          >
-            {content}
-          </div>
-        </KibanaErrorBoundary>
-      </EuiFlyoutBody>
-    </KibanaErrorBoundaryProvider>
+    <div
+      role="tabpanel"
+      id={activeTab.panelDomId}
+      aria-labelledby={activeTab.tabDomId}
+      tabIndex={0}
+      data-test-subj={activePanel?.attributes['data-test-subj'] as string | undefined}
+    >
+      {content && <KibanaErrorBoundary>{content}</KibanaErrorBoundary>}
+    </div>
   );
 };
 
@@ -98,6 +102,7 @@ const BaseBody = bodyPart.createComponent<FlyoutBodyProps>();
 BaseBody.displayName = 'FlyoutTemplate.Body';
 
 export const Body = Object.assign(BaseBody, {
+  Callout,
   Section: Object.assign(Section, { Subsection }),
   Accordion: Object.assign(Accordion, { Subsection }),
   TabPanel,
@@ -112,62 +117,50 @@ export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBod
     [children]
   );
   const { scrollContainerRef } = useFlyoutHeaderCollapse();
+  const scrollNodeRef = useRef<HTMLElement | null>(null);
+  const bodyScrollContainerRef = useCallback(
+    (node: HTMLElement | null) => {
+      scrollNodeRef.current = node;
+      scrollContainerRef(node);
+    },
+    [scrollContainerRef]
+  );
 
-  const tabPanelItems = partsOf(items, TAB_PANEL_PART_NAME);
+  // Keyed on `items`, which holds its identity across a tab switch, so `EuiFlyoutBody` receives
+  // the same banner element and React skips the subtree.
+  const banner = useMemo(() => renderCalloutBanner(items), [items]);
+
   const isTabbedMode = tabs.length > 0;
+  const activeTab = isTabbedMode ? tabs.find((tab) => tab.id === selectedTabId) : undefined;
+
+  // The body stays mounted across tab switches, so its scroll position has to be reset by hand.
+  // The resulting `scroll` event re-runs the header-collapse evaluation.
+  useLayoutEffect(() => {
+    if (scrollNodeRef.current) scrollNodeRef.current.scrollTop = 0;
+  }, [activeTab?.id]);
 
   const bodyTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body');
 
-  if (isTabbedMode) {
-    const seenPanelIds = new Set<string>();
-    const uniquePanels = tabPanelItems.filter((panel) => {
-      const tabId = panel.attributes.tabId as string;
-      if (seenPanelIds.has(tabId)) return false;
-      seenPanelIds.add(tabId);
-      return true;
-    });
-
-    const activeTab = tabs.find((tab) => tab.id === selectedTabId);
-    const activePanel = uniquePanels.find(
-      (panel) => (panel.attributes.tabId as string) === activeTab?.id
+  const renderTabbedContent = () => {
+    if (!activeTab) return null;
+    const activePanel = partsOf(items, TAB_PANEL_PART_NAME).find(
+      (panel) => (panel.attributes.tabId as string) === activeTab.id
     );
-
-    if (!activeTab) {
-      return (
-        <EuiFlyoutBody data-test-subj={bodyTestSubj} scrollContainerRef={scrollContainerRef} />
-      );
-    }
-
-    // Panel not yet supplied (e.g. on-demand mounting). Keep the tabpanel wrapper so the selected
-    // tab's aria-controls points at a real element rather than dangling.
-    if (!activePanel) {
-      return (
-        <EuiFlyoutBody data-test-subj={bodyTestSubj} scrollContainerRef={scrollContainerRef}>
-          <div
-            role="tabpanel"
-            id={activeTab.panelDomId}
-            aria-labelledby={activeTab.tabDomId}
-            tabIndex={0}
-          />
-        </EuiFlyoutBody>
-      );
-    }
-
-    return (
-      <ActiveTabPanel
-        key={activeTab.id}
-        activeTab={activeTab}
-        activePanel={activePanel}
-        bodyTestSubj={bodyTestSubj}
-        scrollContainerRef={scrollContainerRef}
-      />
-    );
-  }
+    return <ActiveTabPanel key={activeTab.id} activeTab={activeTab} activePanel={activePanel} />;
+  };
 
   return (
     <KibanaErrorBoundaryProvider>
-      <EuiFlyoutBody data-test-subj={bodyTestSubj} scrollContainerRef={scrollContainerRef}>
-        <KibanaErrorBoundary>{renderBodyItems(items)}</KibanaErrorBoundary>
+      <EuiFlyoutBody
+        data-test-subj={bodyTestSubj}
+        banner={banner}
+        scrollContainerRef={bodyScrollContainerRef}
+      >
+        {isTabbedMode ? (
+          renderTabbedContent()
+        ) : (
+          <KibanaErrorBoundary>{renderBodyItems(items)}</KibanaErrorBoundary>
+        )}
       </EuiFlyoutBody>
     </KibanaErrorBoundaryProvider>
   );
