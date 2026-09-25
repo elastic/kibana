@@ -201,10 +201,20 @@ export class LensVisService {
       table,
     });
 
+    const nextState = {
+      status: LensVisServiceStatus.completed,
+      currentSuggestionContext: editedSuggestionContext,
+      visContext: lensAttributesState.visContext,
+    };
+
+    this.state$.next(nextState);
+
     onVisContextChanged?.(
       lensAttributesState.visContext,
       UnifiedHistogramExternalVisContextStatus.manuallyCustomized
     );
+
+    return lensAttributesState.visContext;
   };
 
   private getCurrentSuggestionState = ({
