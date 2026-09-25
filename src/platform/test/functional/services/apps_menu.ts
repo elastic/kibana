@@ -12,34 +12,11 @@ import { FtrService } from '../ftr_provider_context';
 export class AppsMenuService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly log = this.ctx.getService('log');
-  private readonly config = this.ctx.getService('config');
   private readonly find = this.ctx.getService('find');
-
-  private readonly defaultFindTimeout = this.config.get('timeouts.find');
+  private readonly loadingIndicator = this.ctx.getService('loadingIndicator');
 
   private async waitUntilLoadingHasFinished() {
-    try {
-      await this.isGlobalLoadingIndicatorVisible();
-    } catch (exception) {
-      if (exception.name === 'ElementNotVisible') {
-        // selenium might just have been too slow to catch it
-      } else {
-        throw exception;
-      }
-    }
-    await this.awaitGlobalLoadingIndicatorHidden();
-  }
-
-  private async isGlobalLoadingIndicatorVisible() {
-    this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
-  }
-
-  private async awaitGlobalLoadingIndicatorHidden() {
-    await this.testSubjects.existOrFail('globalLoadingIndicator-hidden', {
-      allowHidden: true,
-      timeout: this.defaultFindTimeout * 10,
-    });
+    await this.loadingIndicator.waitUntilLoadingHasFinished();
   }
   /**
    * Close the collapsible nav
