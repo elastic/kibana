@@ -112,13 +112,11 @@ export async function reassignAgents(
 ): Promise<{ actionId: string } | { count: number }> {
   // '*' is only valid with an unscoped internal SO client. Reject it when the client is
   // already scoped to a concrete space to prevent cross-space privilege escalation.
-  /* TODO commented out for testing
   if (options.spaceId === '*' && soClient.getCurrentNamespace() !== undefined) {
     throw new FleetError(
       `spaceId '*' requires an unscoped SO client; got client scoped to '${soClient.getCurrentNamespace()}'`
     );
   }
-  */
   await verifyNewAgentPolicy(soClient, newAgentPolicyId, { spaceId: options.spaceId });
 
   const currentSpaceId = getCurrentNamespace(soClient);
