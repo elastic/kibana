@@ -6,6 +6,7 @@
  */
 
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolCallStep } from '@kbn/agent-builder-common';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -154,6 +155,67 @@ it.each([
 
 it('accepts full payload evidence for the investigation conversation', () => {
   expect(() => assertAgentTrace(attributes, expected)).not.toThrow();
+});
+
+it('checks executed progress arguments after schema ordering without losing the raw model call', () => {
+  const low = { title: 'Low priority gap', description: 'Missing low signal', confidence: 0.2 };
+  const high = { title: 'High priority gap', description: 'Missing high signal', confidence: 0.9 };
+  const params = { summary: 'Investigating', hypotheses: [], blind_spots: [low, high] };
+  const progressCall = {
+    ...toolCall,
+    tool_id: 'platform.streams.investigation_progress_report',
+    params,
+  };
+  const spans = [
+    {
+      ...attributes[0],
+      'gen_ai.tool.name': progressCall.tool_id,
+      'gen_ai.tool.call.arguments': JSON.stringify({ ...params, blind_spots: [high, low] }),
+      'gen_ai.output.messages': JSON.stringify([
+        {
+          role: 'assistant',
+          parts: [
+            { type: 'text', content: expected.rounds[0].response.message },
+            {
+              ...toolCallPart,
+              name: sanitizeToolId(progressCall.tool_id),
+              arguments: JSON.stringify(params),
+            },
+          ],
+        },
+      ]),
+    },
+  ];
+  const progressExpected = {
+    ...expected,
+    rounds: [{ ...expected.rounds[0], steps: [progressCall] }],
+  };
+  expect(() => assertAgentTrace(spans, progressExpected)).not.toThrow();
+  expect(() =>
+    assertAgentTrace(
+      [
+        {
+          ...spans[0],
+          'gen_ai.tool.call.arguments': JSON.stringify({ ...params, blind_spots: [high] }),
+        },
+      ],
+      progressExpected
+    )
+  ).toThrow('must retain arguments');
+  expect(() =>
+    assertAgentTrace(
+      [
+        {
+          ...spans[0],
+          'gen_ai.output.messages': spans[0]['gen_ai.output.messages'].replace(
+            'Low priority gap',
+            'Redacted'
+          ),
+        },
+      ],
+      progressExpected
+    )
+  ).toThrow('must retain the model tool call');
 });
 
 it('rejects a trace that retains message attributes but has redacted the user question', () => {

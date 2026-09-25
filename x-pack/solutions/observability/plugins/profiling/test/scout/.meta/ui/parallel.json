@@ -1,5 +1,5 @@
 {
-  "sha1": "7225db96775fde484e6e368432d07265e3c5ec8b",
+  "sha1": "93b9f64fbcbc79d16291b3925e7e017ed8cb14a3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 21,
-        "column": 8
+        "line": 19,
+        "column": 5
       }
     },
     {
