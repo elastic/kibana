@@ -68,8 +68,14 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     irreversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.irreversible', {
       defaultMessage: 'Irreversible',
     }),
-    ariaLabel: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.ariaLabel', {
-      defaultMessage: 'Review proposed action',
-    }),
+    /**
+     * Distinct per row: a screen reader announces this button-by-button, so a fixed string would
+     * leave every proposed action indistinguishable from the others in the list.
+     */
+    ariaLabel: ({ title, status }: { title: string; status: string }) =>
+      i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.ariaLabel', {
+        defaultMessage: 'Review proposed action: {title}, {status}',
+        values: { title, status },
+      }),
   },
 });

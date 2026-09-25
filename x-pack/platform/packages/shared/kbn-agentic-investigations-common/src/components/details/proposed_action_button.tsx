@@ -153,7 +153,10 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           paddingSize="m"
           role="button"
           tabIndex={0}
-          aria-label={DETAILS_FLYOUT_LABELS.proposedAction.ariaLabel}
+          aria-label={DETAILS_FLYOUT_LABELS.proposedAction.ariaLabel({
+            title: getProposalTitle(proposal),
+            status: badge.label,
+          })}
           data-test-subj={dataTestSubj}
           css={css({
             borderRadius: euiTheme.border.radius.medium,

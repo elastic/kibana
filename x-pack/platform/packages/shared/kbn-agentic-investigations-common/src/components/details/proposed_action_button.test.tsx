@@ -73,6 +73,15 @@ describe('ProposedActionButton', () => {
     expect(screen.getByText('Response action • Irreversible')).toBeInTheDocument();
   });
 
+  it('names the row with its own title and status, not a fixed string every row shares', () => {
+    renderButton();
+    expect(
+      screen.getByRole('button', {
+        name: 'Review proposed action: Isolate cfo-mbp-14 — host isolation, Needs review',
+      })
+    ).toBeInTheDocument();
+  });
+
   it('opens the approval modal on click, matching the one the card recommended-action opens', () => {
     renderButton();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
