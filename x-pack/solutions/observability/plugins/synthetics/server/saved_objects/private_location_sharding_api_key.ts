@@ -7,12 +7,18 @@
 
 import type { SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 import type { SyntheticsServerSetup } from '../types';
 
 const PRIVATE_LOCATION_SHARDING_API_KEY_ID = 'd5e4b09b-9c8a-4e85-b8f5-f5a922ceb39d';
 const PRIVATE_LOCATION_SHARDING_API_KEY_TYPE = 'synthetics-private-location-sharding-api-key';
+const privateLocationShardingApiKeySchemaV1 = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+  apiKey: schema.string(),
+});
 
 export const privateLocationShardingApiKey: SavedObjectsType = {
   name: PRIVATE_LOCATION_SHARDING_API_KEY_TYPE,
@@ -23,6 +29,18 @@ export const privateLocationShardingApiKey: SavedObjectsType = {
     properties: {
       apiKey: {
         type: 'binary',
+      },
+    },
+  },
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        create: privateLocationShardingApiKeySchemaV1,
+        forwardCompatibility: privateLocationShardingApiKeySchemaV1.extends(
+          {},
+          { unknowns: 'ignore' }
+        ),
       },
     },
   },
