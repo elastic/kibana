@@ -242,6 +242,21 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     expect(screen.getByLabelText(`View details for ${name}`)).toBeInTheDocument();
   });
 
+  it('keeps an emoji whole when it sits on the truncation boundary', () => {
+    const name = `${'a'.repeat(27)}😀 and the rest of the policy name`;
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      items: [buildItem('tags', { id: 'policy-emoji', name, matcher: { tags: ['prod'] } })],
+    });
+
+    renderSubsection();
+
+    expect(screen.getByTestId('ruleActionPolicyArtifactName-policy-emoji')).toHaveTextContent(
+      `${'a'.repeat(27)}😀...`
+    );
+    expect(screen.getByLabelText(`View details for ${name}`)).toBeInTheDocument();
+  });
+
   it('shows a tag icon and an expression badge when the policy matches both ways', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
       ...idleHookResult,

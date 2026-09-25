@@ -15,8 +15,13 @@ interface UseMatchedActionPoliciesParams {
   tags?: string[];
 }
 
+/** Prefix for every matched-policy query. Invalidate this after a policy mutation. */
+export const matchedActionPoliciesQueryKey = ['matchedActionPolicies'] as const;
+
 export interface UseMatchedActionPoliciesResult {
   isLoading: boolean;
+  /** True while `keepPreviousData` is still showing matches for the previous tags. */
+  isPreviousData: boolean;
   error: Error | null;
   items: MatchedActionPolicy[];
   total: number;
@@ -30,8 +35,8 @@ export const useMatchedActionPolicies = ({
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
   const body = { rule: tags?.length ? { tags } : {} };
 
-  const { isLoading, error, data } = useQuery({
-    queryKey: ['matchedActionPolicies', tags],
+  const { isLoading, isPreviousData, error, data } = useQuery({
+    queryKey: [...matchedActionPoliciesQueryKey, tags],
     queryFn: () =>
       http.fetch<MatchActionPoliciesResponse>(ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH, {
         method: 'POST',
@@ -43,6 +48,7 @@ export const useMatchedActionPolicies = ({
 
   return {
     isLoading,
+    isPreviousData,
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
     total: data?.total ?? 0,

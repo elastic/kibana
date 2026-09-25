@@ -72,7 +72,10 @@ export type {
   InlineActionStepType,
   InlineWorkflowActionDraft,
 } from './actions_form';
-export { useMatchedActionPolicies } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
+export {
+  matchedActionPoliciesQueryKey,
+  useMatchedActionPolicies,
+} from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 export { MatchedPolicyReason } from './flyout/compose_discover/compose_discover_form/matched_policy_reason';
 export { WorkflowConnectorIcons } from './flyout/compose_discover/compose_discover_form/workflow_connector_icons';

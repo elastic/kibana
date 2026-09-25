@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { useService, CoreStart } from '@kbn/core-di-browser';
-import { useMatchedActionPolicies } from '@kbn/alerting-v2-rule-form';
+import { useEffect, useMemo } from 'react';
+import {
+  matchedActionPoliciesQueryKey,
+  useMatchedActionPolicies,
+} from '@kbn/alerting-v2-rule-form';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
+import { useService, CoreStart } from '@kbn/core-di-browser';
+import { useQueryClient } from '@kbn/react-query';
+import { actionPolicyKeys } from '../../../../hooks/query_key_factory';
 
 const CATEGORY_ORDER: Record<MatchedActionPolicy['category'], number> = {
   tags: 0,
@@ -37,20 +42,53 @@ export interface UseLinkedActionPoliciesResult {
   error: Error | null;
 }
 
+const isActionPolicyListInvalidation = (queryKey: readonly unknown[]): boolean => {
+  const listKey = actionPolicyKeys.lists();
+  return listKey.every((part, index) => queryKey[index] === part);
+};
+
 export const useLinkedActionPolicies = (tags: string[]): UseLinkedActionPoliciesResult => {
   const http = useService(CoreStart('http'));
-  const { isLoading, error, items, evaluatedCount, isTruncated } = useMatchedActionPolicies({
+  const queryClient = useQueryClient();
+
+  // Policy mutations already drop action-policy list queries. Refresh matches from that signal.
+  useEffect(() => {
+    return queryClient.getQueryCache().subscribe((event) => {
+      if (event.type !== 'updated' || event.action.type !== 'invalidate') {
+        return;
+      }
+      if (!isActionPolicyListInvalidation(event.query.queryKey)) {
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: matchedActionPoliciesQueryKey, exact: false });
+    });
+  }, [queryClient]);
+
+  const {
+    isLoading,
+    isPreviousData = false,
+    error,
+    items,
+    evaluatedCount,
+    isTruncated,
+  } = useMatchedActionPolicies({
     http,
     tags,
   });
+  // keepPreviousData keeps the last tag query on screen with isLoading false.
+  // Hide those rows until the match for the current tags arrives.
+  const awaitingCurrentMatches = isPreviousData && error == null;
 
-  const sortedItems = useMemo(() => sortMatchedActionPolicies(items), [items]);
+  const sortedItems = useMemo(
+    () => (awaitingCurrentMatches ? [] : sortMatchedActionPolicies(items)),
+    [awaitingCurrentMatches, items]
+  );
 
   return {
     items: sortedItems,
-    evaluatedCount,
-    isMatchTruncated: isTruncated,
-    isLoading,
+    evaluatedCount: awaitingCurrentMatches ? 0 : evaluatedCount,
+    isMatchTruncated: awaitingCurrentMatches ? false : isTruncated,
+    isLoading: isLoading || awaitingCurrentMatches,
     isError: error != null,
     error,
   };

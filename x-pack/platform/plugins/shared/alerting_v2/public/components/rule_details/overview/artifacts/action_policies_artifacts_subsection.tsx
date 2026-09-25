@@ -32,17 +32,36 @@ import { ActionPolicyDetailsFlyoutContainer } from '../../../action_policy/detai
 import { isSnoozed } from '../../../action_policy/is_snoozed';
 import type { RuleSummarySectionProps } from '../../../rule/types';
 import { useLinkedActionPolicies } from './use_linked_action_policies';
+import { useRerenderWhenSnoozeExpires } from './use_rerender_when_snooze_expires';
 
 /** Max matched policies rendered in the artifacts card before a "show more" control. */
 export const LINKED_ACTION_POLICIES_VISIBLE_LIMIT = 8;
 
-/** Visible policy name length before the label is cut with an ellipsis. */
+/** Visible policy name length, in graphemes, before the label is cut with an ellipsis. */
 const ACTION_POLICY_NAME_CHARACTER_LIMIT = 28;
 
-const truncateActionPolicyName = (name: string): string =>
-  name.length > ACTION_POLICY_NAME_CHARACTER_LIMIT
-    ? `${name.slice(0, ACTION_POLICY_NAME_CHARACTER_LIMIT).trimEnd()}...`
-    : name;
+const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+
+const truncateActionPolicyName = (name: string): string => {
+  // Each grapheme is at least one UTF-16 code unit, so a short string cannot need a cut.
+  if (name.length <= ACTION_POLICY_NAME_CHARACTER_LIMIT) {
+    return name;
+  }
+
+  const graphemes: string[] = [];
+  for (const { segment } of graphemeSegmenter.segment(name)) {
+    graphemes.push(segment);
+    if (graphemes.length > ACTION_POLICY_NAME_CHARACTER_LIMIT) {
+      break;
+    }
+  }
+
+  if (graphemes.length <= ACTION_POLICY_NAME_CHARACTER_LIMIT) {
+    return name;
+  }
+
+  return `${graphemes.slice(0, ACTION_POLICY_NAME_CHARACTER_LIMIT).join('').trimEnd()}...`;
+};
 
 const openLinkLabel = i18n.translate(
   'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.openLink',
@@ -255,6 +274,7 @@ const ArtifactsSubsectionBody = ({
   onOpen: (policyId: string) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  useRerenderWhenSnoozeExpires(items);
 
   if (isLoading) {
     return <EuiLoadingSpinner size="m" data-test-subj="ruleActionPoliciesArtifactsLoading" />;
