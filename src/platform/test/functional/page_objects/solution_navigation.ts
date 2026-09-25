@@ -23,14 +23,19 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   const browser = ctx.getService('browser');
   const retry = ctx.getService('retry');
   const log = ctx.getService('log');
+  const find = ctx.getService('find');
 
   async function expandMoreIfNeeded() {
     log.debug(
       'SolutionNavigation.sidenav.expandMoreIfNeeded - checking if "More" menu needs to be expanded'
     );
-    const moreMenuExists = await testSubjects.waitForExists('kbnChromeNav-moreMenuTrigger', {
-      timeout: TIMEOUT_CHECK,
-    });
+    // The nav decides which items overflow into More in a layout effect of the same render, so
+    // once the nav root is present the trigger's presence is final. Callers can override the
+    // root's data-test-subj, but its id is fixed.
+    if (!(await find.existsByDisplayedByCssSelector('#kbnChromeNav-root', TIMEOUT_CHECK))) {
+      throw new Error('Side navigation has not rendered');
+    }
+    const moreMenuExists = await testSubjects.exists('kbnChromeNav-moreMenuTrigger');
 
     if (moreMenuExists) {
       await retry.try(async () => {

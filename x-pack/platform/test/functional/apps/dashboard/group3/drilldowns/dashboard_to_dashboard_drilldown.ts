@@ -60,11 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
     });
     await dashboardDrilldownsManage.saveChanges();
-    await retry.waitForWithTimeout(
-      'dashboard drilldown to be saved',
-      10000,
-      async () => (await dashboardDrilldownPanelActions.getPanelDrilldownCount()) === 1
-    );
+    await dashboardDrilldownPanelActions.expectPanelDrilldownCount(1);
     await dashboardDrilldownsManage.closeFlyout();
 
     // save dashboard, navigate to view mode
@@ -182,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           // ensure drilldown creates filter on destination.
-          expect(await filterBar.hasFilter('memory', '40,000 to 80,000')).to.be(true);
+          await filterBar.expectFilter('memory', '40,000 to 80,000');
         });
 
         it('drills to destination dashboard via getHref action', async () => {
@@ -207,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           // ensure drilldown creates filter on destination.
-          expect(await filterBar.hasFilter('memory', '40,000 to 80,000')).to.be(true);
+          await filterBar.expectFilter('memory', '40,000 to 80,000');
         });
 
         it('carries over all filters from source dashboard', async () => {
@@ -227,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           // ensure that the unrelated filter has been carried over.
-          expect(await filterBar.hasFilter('machine.os', 'ios')).to.be(true);
+          await filterBar.expectFilter('machine.os', 'ios');
         });
 
         it('carries over time range from source dashboard', async () => {
@@ -289,7 +285,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardDrilldownsManage.closeFlyout();
 
           // check that drilldown notification badge is not shown
-          expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(0);
+          await dashboardDrilldownPanelActions.expectPanelDrilldownCount(0);
 
           // this drilldown will be available again in the next test because the session storage is cleared.
         });
@@ -346,10 +342,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           // check that we drilled-down with filter from pie chart
-          expect(await filterBar.hasFilter('memory', '40,000 to 80,000')).to.be(true);
+          await filterBar.expectFilter('memory', '40,000 to 80,000');
 
           // drilldown creates filter pills for control selections
-          expect(await filterBar.hasFilter('geo.src', 'CN, US')).to.be(true);
+          await filterBar.expectFilter('geo.src', 'CN, US');
           await retry.waitForWithTimeout('range slider control filter to be applied', 5000, () =>
             filterBar.hasFilter('bytes', '1,000 to 15,000')
           );

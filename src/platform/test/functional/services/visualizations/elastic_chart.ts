@@ -65,9 +65,13 @@ export class ElasticChartService extends FtrService {
     });
   }
 
+  /**
+   * Checks immediately for a named chart; `timeout` only applies to the unnamed lookup. To wait
+   * for a chart to render, use `getChart`.
+   */
   public async hasChart(dataTestSubj?: string, timeout?: number): Promise<boolean> {
     if (dataTestSubj) {
-      return await this.testSubjects.waitForExists(dataTestSubj, { timeout });
+      return await this.testSubjects.exists(dataTestSubj);
     } else {
       const charts = await this.getAllCharts(timeout);
 

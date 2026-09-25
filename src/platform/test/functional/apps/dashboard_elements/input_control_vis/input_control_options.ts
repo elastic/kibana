@@ -82,15 +82,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');
 
-        const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(false);
+        await filterBar.expectNoFilter(FIELD_NAME, 'ios');
       });
 
       it('should add filter pill when submit button is clicked', async () => {
         await visEditor.inputControlSubmit();
 
-        const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(true);
+        await filterBar.expectFilter(FIELD_NAME, 'ios');
       });
 
       it('should replace existing filter pill(s) when new item is selected', async () => {
@@ -103,10 +101,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.inputControlSubmit();
         await common.sleep(1000);
 
-        const hasOldFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        const hasNewFilter = await filterBar.hasFilter(FIELD_NAME, 'osx');
-        expect(hasOldFilter).to.equal(false);
-        expect(hasNewFilter).to.equal(true);
+        await filterBar.expectNoFilter(FIELD_NAME, 'ios');
+        await filterBar.expectFilter(FIELD_NAME, 'osx');
       });
 
       it('should clear dropdown when filter pill removed', async () => {
@@ -120,21 +116,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
         await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
         await visEditor.inputControlSubmit();
-        const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilterBeforeClearBtnClicked).to.equal(true);
+        await filterBar.expectFilter(FIELD_NAME, 'ios');
 
         await visEditor.inputControlClear();
         const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
         expect(hasValue).to.equal(false);
 
-        const hasFilterAfterClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilterAfterClearBtnClicked).to.equal(true);
+        await filterBar.expectFilter(FIELD_NAME, 'ios');
       });
 
       it('should remove filter pill when cleared form is submitted', async () => {
         await visEditor.inputControlSubmit();
-        const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(false);
+        await filterBar.expectNoFilter(FIELD_NAME, 'ios');
       });
     });
 
@@ -166,8 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');
 
-        const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(true);
+        await filterBar.expectFilter(FIELD_NAME, 'ios');
       });
     });
 

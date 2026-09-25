@@ -13,6 +13,7 @@ import { TestSubjects } from './test_subjects';
 describe('TestSubjects existence checks', () => {
   const existsByCssSelector = jest.fn();
   const existsByDisplayedByCssSelector = jest.fn();
+  const firstDisplayedIndexByCssSelector = jest.fn();
 
   const getTestSubjects = () => {
     const config = {
@@ -31,7 +32,11 @@ describe('TestSubjects existence checks', () => {
     };
     const services = {
       config,
-      find: { existsByCssSelector, existsByDisplayedByCssSelector },
+      find: {
+        existsByCssSelector,
+        existsByDisplayedByCssSelector,
+        firstDisplayedIndexByCssSelector,
+      },
       log: { debug: jest.fn() },
       retry: {},
     };
@@ -45,6 +50,7 @@ describe('TestSubjects existence checks', () => {
   beforeEach(() => {
     existsByCssSelector.mockReset().mockResolvedValue(true);
     existsByDisplayedByCssSelector.mockReset().mockResolvedValue(true);
+    firstDisplayedIndexByCssSelector.mockReset().mockResolvedValue(-1);
   });
 
   it('performs an immediate displayed check with exists', async () => {
@@ -108,6 +114,29 @@ describe('TestSubjects existence checks', () => {
     expect(existsByDisplayedByCssSelector).toHaveBeenCalledWith(
       '[data-test-subj="selector"]',
       120000
+    );
+  });
+
+  it('returns the first displayed test subject with waitForFirst', async () => {
+    firstDisplayedIndexByCssSelector.mockResolvedValue(1);
+    const testSubjects = getTestSubjects();
+
+    await expect(testSubjects.waitForFirst(['legacy', 'next'])).resolves.toBe('next');
+    expect(firstDisplayedIndexByCssSelector).toHaveBeenCalledWith(
+      ['[data-test-subj="legacy"]', '[data-test-subj="next"]'],
+      2500
+    );
+  });
+
+  it('returns undefined when no test subject appears with waitForFirst', async () => {
+    const testSubjects = getTestSubjects();
+
+    await expect(testSubjects.waitForFirst(['legacy', 'next'], { timeout: 50 })).resolves.toBe(
+      undefined
+    );
+    expect(firstDisplayedIndexByCssSelector).toHaveBeenCalledWith(
+      ['[data-test-subj="legacy"]', '[data-test-subj="next"]'],
+      50
     );
   });
 });

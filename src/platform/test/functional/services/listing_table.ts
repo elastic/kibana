@@ -81,11 +81,13 @@ export class ListingTableService extends FtrService {
    * returns whether the legacy one rendered.
    */
   private async isLegacyVariant(legacySubj: string, contentListSubj: string): Promise<boolean> {
-    return await this.retry.tryForTime(5000, async () => {
-      if (await this.testSubjects.exists(legacySubj)) return true;
-      if (await this.testSubjects.exists(contentListSubj)) return false;
-      throw new Error(`Neither ${legacySubj} nor ${contentListSubj} has rendered`);
+    const variant = await this.testSubjects.waitForFirst([legacySubj, contentListSubj], {
+      timeout: 5000,
     });
+    if (!variant) {
+      throw new Error(`Neither ${legacySubj} nor ${contentListSubj} has rendered`);
+    }
+    return variant === legacySubj;
   }
 
   private async getSearchFilter() {

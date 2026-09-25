@@ -102,6 +102,27 @@ export class TestSubjects extends FtrService {
   }
 
   /**
+   * Races the given test subjects and returns the first one that is displayed, or `undefined`
+   * if none appears within `options.timeout` (default: `timeouts.waitForExists`).
+   *
+   * Use this to detect which of several UI variants rendered, instead of probing one variant
+   * and falling back to the other. Selectors are checked in order on each poll, so an earlier
+   * selector wins when several are displayed.
+   */
+  public async waitForFirst(
+    selectors: readonly string[],
+    options: { timeout?: number } = {}
+  ): Promise<string | undefined> {
+    const { timeout = this.WAIT_FOR_EXISTS_TIME } = options;
+    this.log.debug(`TestSubjects.waitForFirst(${selectors.join(', ')})`);
+    const index = await this.findService.firstDisplayedIndexByCssSelector(
+      selectors.map((selector) => testSubjSelector(selector)),
+      timeout
+    );
+    return index === -1 ? undefined : selectors[index];
+  }
+
+  /**
    * Get a promise that resolves when an element no longer exists, if the element does exist
    * it will wait until the element does not exist. If we wait until the timeout and the element
    * still exists the promise will reject.

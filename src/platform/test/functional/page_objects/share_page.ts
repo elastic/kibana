@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { FtrService } from '../ftr_provider_context';
 
 export class SharePageObject extends FtrService {
@@ -45,7 +45,12 @@ export class SharePageObject extends FtrService {
 
   async clickShareTopNavButton() {
     // The project header renders share as a title action revealed on header hover, outside the menu.
-    if (await this.testSubjects.exists(APP_HEADER_TEST_SUBJECTS.root)) {
+    // The app menu renders inside the project header, so list the header first.
+    const variant = await this.testSubjects.waitForFirst(
+      [APP_HEADER_TEST_SUBJECTS.root, APP_MENU_TEST_SUBJECTS.root],
+      { timeout: 5000 }
+    );
+    if (variant === APP_HEADER_TEST_SUBJECTS.root) {
       await this.testSubjects.moveMouseTo(APP_HEADER_TEST_SUBJECTS.root);
       await this.testSubjects.click(`~${APP_HEADER_TEST_SUBJECTS.shareButton}`);
       return;
