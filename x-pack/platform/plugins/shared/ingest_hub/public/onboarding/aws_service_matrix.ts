@@ -579,6 +579,42 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     policyTemplate: 'aws.ecs',
     packageName: 'aws_cloudwatch_input_otel',
   },
+
+  // ── aws_billing package — Cloud Financial Management ─────────────────────
+  {
+    id: 'aws_billing',
+    name: 'AWS Cost and Usage Report (CUR 2.0)',
+    category: 'cloud_financial_management',
+    packageName: 'aws_billing',
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
+  },
+
+  // ── awsfirehose package — Application Integration ─────────────────────────
+  {
+    id: 'awsfirehose',
+    name: 'Amazon Data Firehose',
+    category: 'application_integration',
+    packageName: 'awsfirehose',
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
+  },
+
+  // ── amazon_security_lake package — Security, Identity & Compliance ────────
+  {
+    id: 'amazon_security_lake',
+    name: 'Amazon Security Lake',
+    category: 'security_identity_compliance',
+    packageName: 'amazon_security_lake',
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
+  },
+
+  // ── endace package — Networking and Content Delivery ──────────────────────
+  {
+    id: 'endace',
+    name: 'Endace',
+    category: 'networking_content_delivery',
+    packageName: 'endace',
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
+  },
 ];
 
 // ── Private helpers ──────────────────────────────────────────────────────────
