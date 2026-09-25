@@ -80,7 +80,7 @@ export async function reassignBatch(
   }
 
   const newAgentPolicy = await agentPolicyService.get(soClient, options.newAgentPolicyId, true, {
-    spaceId: options.spaceId,
+    ...(spaceId === '*' ? { spaceId } : {}),
   });
 
   await bulkUpdateAgents(
