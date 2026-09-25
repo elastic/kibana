@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './action_types';
-export type * from './alert_formatter_types';
-export type * from './rule_types';
-export type * from './spec_action_params';
+export interface SpecActionParams {
+  subAction?: string;
+  subActionParams?: Record<string, unknown>;
+}

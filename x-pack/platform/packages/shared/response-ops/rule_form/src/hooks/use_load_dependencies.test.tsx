@@ -10,6 +10,8 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 
 import { useLoadDependencies } from './use_load_dependencies';
 import type { RuleTypeRegistryContract } from '../common/types';
@@ -47,6 +49,10 @@ jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings', 
   useFetchFlappingSettings: jest.fn(),
 }));
 
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_spec_action_type_models', () => ({
+  useSpecActionTypeModels: jest.fn(),
+}));
+
 const { useLoadUiConfig } = jest.requireMock('../common/hooks/use_load_ui_config');
 const { useHealthCheck } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_health_check'
@@ -62,6 +68,9 @@ const { useGetRuleTypesPermissions } = jest.requireMock(
 );
 const { useFetchFlappingSettings } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings'
+);
+const { useSpecActionTypeModels } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_spec_action_type_models'
 );
 
 const uiConfigMock = {
@@ -113,6 +122,14 @@ useFetchFlappingSettings.mockReturnValue({
     lookBackWindow: 20,
     statusChangeThreshold: 20,
   },
+});
+
+const specActionTypeModelsMock: never[] = [];
+
+useSpecActionTypeModels.mockReturnValue({
+  models: specActionTypeModelsMock,
+  isLoading: false,
+  isInitialLoading: false,
 });
 
 const indexThresholdRuleType = {
@@ -220,6 +237,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 const httpMock = jest.fn();
 const toastsMock = jest.fn();
+const docLinksMock = {} as DocLinksStart;
+const actionTypeRegistryMock: ActionTypeRegistryContract = {
+  has: jest.fn(),
+  register: jest.fn(),
+  get: jest.fn(),
+  list: jest.fn(),
+};
 
 const ruleTypeRegistryMock: RuleTypeRegistryContract = {
   has: jest.fn(),
@@ -240,6 +264,8 @@ describe('useLoadDependencies', () => {
           http: httpMock as unknown as HttpStart,
           toasts: toastsMock as unknown as ToastsStart,
           ruleTypeRegistry: ruleTypeRegistryMock,
+          actionTypeRegistry: actionTypeRegistryMock,
+          docLinks: docLinksMock,
           capabilities: {
             actions: {
               show: true,
@@ -271,6 +297,7 @@ describe('useLoadDependencies', () => {
       },
       connectors: [mockConnector],
       connectorTypes: [mockConnectorType],
+      specActionTypeModels: [],
       alertFields: [mockAlertField],
     });
   });
@@ -282,6 +309,8 @@ describe('useLoadDependencies', () => {
           http: httpMock as unknown as HttpStart,
           toasts: toastsMock as unknown as ToastsStart,
           ruleTypeRegistry: ruleTypeRegistryMock,
+          actionTypeRegistry: actionTypeRegistryMock,
+          docLinks: docLinksMock,
           filteredRuleTypes: ['test-rule-type'],
           capabilities: {
             actions: {
@@ -313,6 +342,8 @@ describe('useLoadDependencies', () => {
           http: httpMock as unknown as HttpStart,
           toasts: toastsMock as unknown as ToastsStart,
           ruleTypeRegistry: ruleTypeRegistryMock,
+          actionTypeRegistry: actionTypeRegistryMock,
+          docLinks: docLinksMock,
           id: 'test-rule-id',
           capabilities: {
             actions: {
@@ -350,6 +381,8 @@ describe('useLoadDependencies', () => {
           http: httpMock as unknown as HttpStart,
           toasts: toastsMock as unknown as ToastsStart,
           ruleTypeRegistry: ruleTypeRegistryMock,
+          actionTypeRegistry: actionTypeRegistryMock,
+          docLinks: docLinksMock,
           ruleTypeId: '.index-threshold',
           consumer: 'stackAlerts',
           capabilities: {
@@ -384,6 +417,8 @@ describe('useLoadDependencies', () => {
           http: httpMock as unknown as HttpStart,
           toasts: toastsMock as unknown as ToastsStart,
           ruleTypeRegistry: ruleTypeRegistryMock,
+          actionTypeRegistry: actionTypeRegistryMock,
+          docLinks: docLinksMock,
           id: 'rule-id',
           consumer: 'stackAlerts',
           capabilities: {
@@ -403,5 +438,48 @@ describe('useLoadDependencies', () => {
     });
 
     expect(result.current.ruleType).toBeFalsy();
+  });
+
+  test('returns spec action type models and waits on their initial load', async () => {
+    const specModels = [{ id: '.slack2' }];
+    useSpecActionTypeModels.mockReturnValue({
+      models: specModels,
+      isLoading: false,
+      isInitialLoading: true,
+    });
+
+    const { result, rerender } = renderHook(
+      () => {
+        return useLoadDependencies({
+          http: httpMock as unknown as HttpStart,
+          toasts: toastsMock as unknown as ToastsStart,
+          ruleTypeRegistry: ruleTypeRegistryMock,
+          actionTypeRegistry: actionTypeRegistryMock,
+          docLinks: docLinksMock,
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          } as unknown as ApplicationStart['capabilities'],
+        });
+      },
+      { wrapper }
+    );
+
+    expect(result.current.isInitialLoading).toBe(true);
+
+    useSpecActionTypeModels.mockReturnValue({
+      models: specModels,
+      isLoading: false,
+      isInitialLoading: false,
+    });
+    rerender();
+
+    await waitFor(() => {
+      expect(result.current.isInitialLoading).toBe(false);
+    });
+    expect(result.current.specActionTypeModels).toBe(specModels);
   });
 });

@@ -57,6 +57,11 @@ export const TestConnectorForm = ({
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
   useEffect(() => {
+    if (hideActionParamsStep) {
+      setActionErrors({});
+      setHasErrors(false);
+      return;
+    }
     (async () => {
       const res = (
         await actionTypeModel.validateParams(
@@ -67,7 +72,7 @@ export const TestConnectorForm = ({
       setActionErrors({ ...res });
       setHasErrors(!!Object.values(res).find((errors) => (errors.length as number) > 0));
     })();
-  }, [actionTypeModel, actionParams, connector]);
+  }, [actionTypeModel, actionParams, connector, hideActionParamsStep]);
 
   const createActionStep = {
     title: i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.createActionHeader', {

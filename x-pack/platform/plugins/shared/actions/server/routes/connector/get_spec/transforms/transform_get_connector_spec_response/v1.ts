@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { ConnectorMetadata } from '@kbn/connector-specs';
+import type { ConnectorAlertingHint, ConnectorMetadata } from '@kbn/connector-specs';
 import type { GetConnectorSpecResponseV1 } from '../../../../../../common/routes/connector/response';
 
 export interface GetConnectorSpecServiceResult {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
+  actions: Record<string, { input: Record<string, unknown>; description?: string; scope: string }>;
+  alerting?: ConnectorAlertingHint;
   isTestable: boolean;
 }
 
@@ -30,5 +32,16 @@ export const transformGetConnectorSpecResponse = (
       : {}),
   },
   schema: spec.schema,
+  actions: spec.actions ?? {},
+  ...(spec.alerting !== undefined
+    ? {
+        alerting: {
+          default_action: spec.alerting.defaultAction,
+          ...(spec.alerting.messageField !== undefined
+            ? { message_field: spec.alerting.messageField }
+            : {}),
+        },
+      }
+    : {}),
   is_testable: spec.isTestable,
 });

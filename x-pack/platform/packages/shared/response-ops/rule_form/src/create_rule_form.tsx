@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
+import { createCompositeActionTypeRegistry } from '@kbn/alerts-ui-shared';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
@@ -108,6 +109,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     healthCheckError,
     connectors,
     connectorTypes,
+    specActionTypeModels,
     alertFields,
     flappingSettings,
   } = useLoadDependencies({
@@ -115,6 +117,9 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     toasts: notifications.toasts,
     capabilities: plugins.application.capabilities,
     ruleTypeRegistry,
+    actionTypeRegistry: plugins.actionTypeRegistry,
+    docLinks,
+    uiSettings: plugins.settings.client,
     ruleTypeId,
     consumer,
     validConsumers,
@@ -122,6 +127,11 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     connectorFeatureId,
     fieldsMetadata,
   });
+
+  const compositeActionTypeRegistry = useMemo(
+    () => createCompositeActionTypeRegistry(plugins.actionTypeRegistry, specActionTypeModels),
+    [plugins.actionTypeRegistry, specActionTypeModels]
+  );
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -192,7 +202,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           ...initialValues,
         },
         metadata: initialMetadata,
-        plugins,
+        plugins: { ...plugins, actionTypeRegistry: compositeActionTypeRegistry },
         connectors,
         connectorTypes,
         alertFields,

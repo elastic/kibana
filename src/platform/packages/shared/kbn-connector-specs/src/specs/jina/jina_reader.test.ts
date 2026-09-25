@@ -33,6 +33,10 @@ describe('JinaReaderConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('requires an enterprise license', () => {
+    expect(JinaReaderConnector.metadata.minimumLicense).toBe('enterprise');
+  });
+
   describe('browse action', () => {
     it('should browse URL and return markdown content', async () => {
       const mockResponse = {
