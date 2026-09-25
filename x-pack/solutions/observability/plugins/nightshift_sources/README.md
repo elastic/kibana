@@ -125,8 +125,8 @@ List still answers without those Elasticsearch privileges; `GET /{sourceId}` rep
 
 ## Configuration
 
-`xpack.nightshiftSources.enabled` defaults to `true`. Serverless turns it off for every
-project type in `config/serverless.yml` and back on for Observability Complete in
+`xpack.nightshiftSources.enabled` defaults to `true`. Serverless turns it off for Observability
+in `config/serverless.oblt.yml` and back on for Observability Complete in
 `config/serverless.oblt.complete.yml`, mirroring `xpack.significantEvents.enabled`.
 
 ## Known limitations
