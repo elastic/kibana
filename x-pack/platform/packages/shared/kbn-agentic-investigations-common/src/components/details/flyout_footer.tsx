@@ -6,14 +6,18 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AiButtonEmpty } from '@kbn/ui-ai-components';
 import type { Investigation } from '../../types';
 import { BaseActions, type CardActionType } from '../actions';
 import {
   InvestigationActionModals,
+  type CloseInvestigationModalRenderProps,
   type EscalationModalRenderProps,
 } from '../modals/investigation_action_modals';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+
+export type { CloseInvestigationModalRenderProps };
 
 export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
@@ -24,6 +28,11 @@ export interface ConversationDetailsFlyoutFooterProps {
    * Supplied by the caller who has access to Kibana HTTP hooks unavailable in this package.
    */
   onOpenEscalation?: (props: EscalationModalRenderProps) => React.ReactNode;
+  /**
+   * When provided, the "Close investigation" action renders a confirmation modal.
+   * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   */
+  onCloseInvestigation?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
 }
 
 interface ModalState {
@@ -41,6 +50,7 @@ export const ConversationDetailsFlyoutFooter = ({
   investigation,
   onOpenChat,
   onOpenEscalation,
+  onCloseInvestigation,
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
 
@@ -53,18 +63,22 @@ export const ConversationDetailsFlyoutFooter = ({
     []
   );
 
+  const renderCloseModal = onCloseInvestigation
+    ? (props: CloseInvestigationModalRenderProps) => onCloseInvestigation(props)
+    : undefined;
+
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <AiButtonEmpty
+            size="s"
             iconType="productAgent"
             onClick={onOpenChat}
-            size="s"
             data-test-subj="investigationFlyoutOpenChat"
           >
             {DETAILS_FLYOUT_LABELS.actions.openChat}
-          </EuiButton>
+          </AiButtonEmpty>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -76,6 +90,7 @@ export const ConversationDetailsFlyoutFooter = ({
             isFlyout={true}
             onClickAction={onClickAction}
             canManageEscalations={Boolean(onOpenEscalation)}
+            canCloseInvestigation={Boolean(renderCloseModal)}
             data-test-subj="investigationFlyoutActions"
           />
         </EuiFlexItem>
@@ -88,6 +103,7 @@ export const ConversationDetailsFlyoutFooter = ({
         investigation={investigation}
         onCloseAction={closeModal}
         onCloseApproval={closeModal}
+        renderCloseModal={renderCloseModal}
         renderEscalationModal={onOpenEscalation}
       />
     </>

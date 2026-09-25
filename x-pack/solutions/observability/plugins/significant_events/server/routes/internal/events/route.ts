@@ -13,7 +13,6 @@ import {
   severitySchema,
   MAX_ID_LENGTH,
   MAX_ASSESSMENT_NOTE_LENGTH,
-  triggerFeedbackSchema,
   type ChangePointType,
   type Detection,
   type InvestigationRunStatus,
@@ -25,10 +24,7 @@ import {
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import {
-  attachInvestigationToEvent,
-  type SignificantEventTriggerFeedback,
-} from '../../../lib/significant_events/events/attach_investigation';
+import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import {
   cleanupStaleEvents,
@@ -123,7 +119,7 @@ const eventsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<SignificantEventResponse>> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -138,7 +134,7 @@ const eventsSearchRoute = createServerRoute({
       ...rest
     } = params.query ?? {};
 
-    const eventClient = await getEventClient();
+    const eventClient = await getEventSearchClient();
     return eventClient.findLatestByCurrentStatePaginated({
       ...rest,
       from,
@@ -236,8 +232,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
-    description:
-      'Record a completed investigation against a significant event and apply any trigger feedback in the same append-only version.',
+    description: 'Record a completed investigation against a significant event.',
   },
   security: {
     authz: {
@@ -248,24 +243,18 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema
-      .extend({
-        trigger_feedback: z.array(triggerFeedbackSchema).max(3).optional(),
-      })
-      .required({ completed_at: true }),
+    body: significantEventInvestigationSchema.required({ completed_at: true }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
-
-    const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
 
     return attachInvestigationToEvent({
       eventClient: await getEventClient(),
       eventId: params.path.id,
-      investigation,
-      triggerFeedback: triggerFeedback as SignificantEventTriggerFeedback | undefined,
+      investigation: params.body,
+      alertEventsClient: await getAlertEventsClient(),
       logger,
     });
   },
@@ -402,8 +391,8 @@ const eventsUpdateRoute = createServerRoute({
         }
       }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, server, logger }) => {
+    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -412,6 +401,8 @@ const eventsUpdateRoute = createServerRoute({
       eventUuid: params.path.id,
       status: params.body.status,
       assessmentNote: params.body.assessment_note,
+      alertEventsClient: await getAlertEventsClient(),
+      logger,
     });
   },
 });
@@ -440,17 +431,21 @@ const cleanupStaleEventsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<CleanupStaleEventsResult> => {
     const scopedClients = await getScopedClients({ request });
-    const { getEventClient, licensing } = scopedClients;
+    const { getEventClient, getAlertEventsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+
     return cleanupStaleEvents({
       eventClient: await getEventClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
+      alertEventsClient: await getAlertEventsClient(),
+      logger,
     });
   },
 });

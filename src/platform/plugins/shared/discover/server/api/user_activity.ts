@@ -18,17 +18,17 @@ type DiscoverSessionActivityResult = Pick<DiscoverSessionApiResponse, 'id'> & {
 const operationConfig = {
   create: {
     action: 'discover_session_create',
-    eventType: 'creation',
+    eventType: ['creation'],
     verb: 'created',
   },
   update: {
     action: 'discover_session_update',
-    eventType: 'change',
+    eventType: ['change'],
     verb: 'updated',
   },
   delete: {
     action: 'discover_session_delete',
-    eventType: 'deletion',
+    eventType: ['deletion'],
     verb: 'deleted',
   },
 } as const;

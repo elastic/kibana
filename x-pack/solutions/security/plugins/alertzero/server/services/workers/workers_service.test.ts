@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/alertzero-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -21,8 +25,21 @@ import { WorkersService } from './workers_service';
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const FORENSICS = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
+const WORKERS_WITHOUT_FORENSIC_SKILL = SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== FORENSICS);
+
+const agentBuilderWithSkill = (present: boolean): AgentBuilderPluginStart =>
+  ({
+    skills: {
+      getRegistry: jest.fn(async () => ({
+        has: jest.fn(
+          async (skillId: string) => present && skillId === 'endpoint-forensic-analysis'
+        ),
+      })),
+    },
+  } as unknown as AgentBuilderPluginStart);
 
 interface PersistentWorkerDocument {
   id: string;
@@ -146,11 +163,12 @@ const createPersistentHarness = () => {
     managedWorkflows,
     scheduledTasks,
     updateWorkflow,
-    createService: () =>
+    createService: (agentBuilder?: AgentBuilderPluginStart) =>
       new WorkersService(
         management,
         Promise.resolve(managedWorkflows),
-        loggingSystemMock.createLogger() as Logger
+        loggingSystemMock.createLogger() as Logger,
+        { agentBuilder }
       ),
   };
 };
@@ -159,7 +177,8 @@ describe('WorkersService', () => {
   it('lists every registered Worker with default settings before install', async () => {
     const response = await createPersistentHarness().createService().list(request, SPACE);
 
-    expect(response.workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
+    // Endpoint analysis stays hidden until its skill is registered.
+    expect(response.workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
     expect(
       response.workers.every(
         ({ enabled, settingsRevision, workflowId }) =>
@@ -404,16 +423,20 @@ describe('WorkersService', () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
     await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
-    // A document from an older development shape: no interval, no extras. It stays in the
-    // persistent store, so every read (list and get) sees it.
+    // A present value outside its bounds is not repaired, so the Worker stays unavailable.
     const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
     if (!document) throw new Error('Expected the Rule Tuning document to be installed');
-    document.values = { settingsVersion: 1, autonomyLevel: 'manual' };
+    document.values = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+      extras: { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 0 },
+    };
 
     const { workers } = await service.list(request, SPACE);
     const ruleTuning = workers.find(({ id }) => id === RULE_TUNING);
 
-    expect(workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
+    expect(workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
     expect(ruleTuning).toMatchObject({
       state: 'unavailable',
       stateReason: 'Worker settings could not be read from durable storage',
@@ -423,7 +446,7 @@ describe('WorkersService', () => {
         workerId: RULE_TUNING,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 14 },
+        extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
       },
     });
     expect(
@@ -512,6 +535,64 @@ describe('WorkersService', () => {
   });
 
   describe('Worker-specific settings under extras', () => {
+    /** A complete extras replacement, every field away from its default. */
+    const SAVED_EXTRAS = {
+      analysisWindowDays: 21,
+      fpCountThreshold: 4,
+      fpRateThresholdPct: 80,
+    };
+
+    const version4Values = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+    };
+
+    it('reads a document stored before extras existed and keeps its revision', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+      const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
+      if (!document) throw new Error('Expected the Rule Tuning document to be installed');
+      document.values = version4Values;
+
+      const worker = await service.get(RULE_TUNING, request, SPACE);
+
+      expect(worker).toMatchObject({
+        state: 'ok',
+        settingsRevision: document.version,
+        settings: {
+          workerId: RULE_TUNING,
+          autonomy: 'manual',
+          scheduleInterval: '2h',
+          extras: RULE_TUNING_DEFAULT_EXTRAS,
+        },
+      });
+    });
+
+    it('persists default extras when a document stored without them is updated', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+      const document = harness.documents.get(`${RULE_TUNING}-${SPACE}`);
+      if (!document) throw new Error('Expected the Rule Tuning document to be installed');
+      document.values = version4Values;
+
+      const updated = await service.update(
+        RULE_TUNING,
+        { settings: { scheduleInterval: '6h' }, settingsRevision: document.version },
+        SPACE,
+        request
+      );
+
+      expect(updated.outcome).toBe('updated');
+      expect(harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.values).toEqual({
+        ...version4Values,
+        scheduleInterval: '6h',
+        extras: RULE_TUNING_DEFAULT_EXTRAS,
+      });
+    });
+
     const enableRuleTuning = async () => {
       const harness = createPersistentHarness();
       const service = harness.createService();
@@ -520,12 +601,12 @@ describe('WorkersService', () => {
       return { harness, service, revision: enabled.response.worker.settingsRevision };
     };
 
-    it('persists an extras-only save and forwards the window into the rendered YAML', async () => {
+    it('persists an extras-only save and forwards all three inputs into the rendered YAML', async () => {
       const { harness, service, revision } = await enableRuleTuning();
 
       const result = await service.update(
         RULE_TUNING,
-        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: revision },
+        { settings: { extras: SAVED_EXTRAS }, settingsRevision: revision },
         SPACE,
         request
       );
@@ -536,18 +617,32 @@ describe('WorkersService', () => {
         workerId: RULE_TUNING,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 7 },
+        extras: SAVED_EXTRAS,
       });
-      const yaml = harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml;
-      expect(yaml).toContain('analysis_window_days: 7');
+      // The saved values are rendered into consts.worker_settings.extras; the sweep inputs
+      // read them from there, so both halves are asserted.
+      const yaml = harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml ?? '';
+      const { consts } = parse(yaml) as { consts: { worker_settings: { extras: unknown } } };
+      expect(consts.worker_settings.extras).toEqual(SAVED_EXTRAS);
+      expect(yaml).toContain(
+        'analysis_window_days: "${{ consts.worker_settings.extras.analysisWindowDays }}"'
+      );
+      expect(yaml).toContain(
+        'min_fp_count: "${{ consts.worker_settings.extras.fpCountThreshold }}"'
+      );
+      expect(yaml).toContain(
+        'min_fp_rate_pct: "${{ consts.worker_settings.extras.fpRateThresholdPct }}"'
+      );
       expect(yaml).not.toContain('__WORKER_ANALYSIS_WINDOW_DAYS__');
+      expect(yaml).not.toContain('__WORKER_FP_COUNT_THRESHOLD__');
+      expect(yaml).not.toContain('__WORKER_FP_RATE_THRESHOLD_PCT__');
     });
 
     it('keeps the saved extras when a shared-field patch omits them', async () => {
       const { service, revision } = await enableRuleTuning();
       const withWindow = await service.update(
         RULE_TUNING,
-        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: revision },
+        { settings: { extras: SAVED_EXTRAS }, settingsRevision: revision },
         SPACE,
         request
       );
@@ -566,7 +661,7 @@ describe('WorkersService', () => {
       expect(result.outcome).toBe('updated');
       if (result.outcome !== 'updated') throw new Error('Expected autonomy save to succeed');
       expect(result.response.worker.settings).toEqual(
-        expect.objectContaining({ autonomy: 'assisted', extras: { analysisWindowDays: 7 } })
+        expect.objectContaining({ autonomy: 'assisted', extras: SAVED_EXTRAS })
       );
     });
 
@@ -574,7 +669,7 @@ describe('WorkersService', () => {
       const { service, revision } = await enableRuleTuning();
       const first = await service.update(
         RULE_TUNING,
-        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: revision },
+        { settings: { extras: SAVED_EXTRAS }, settingsRevision: revision },
         SPACE,
         request
       );
@@ -584,14 +679,17 @@ describe('WorkersService', () => {
       await expect(
         service.update(
           RULE_TUNING,
-          { settings: { extras: { analysisWindowDays: 21 } }, settingsRevision: revision },
+          {
+            settings: { extras: { ...SAVED_EXTRAS, analysisWindowDays: 30 } },
+            settingsRevision: revision,
+          },
           SPACE,
           request
         )
       ).resolves.toEqual({ outcome: 'conflict' });
-      expect((await service.get(RULE_TUNING, request, SPACE))?.settings.extras).toEqual({
-        analysisWindowDays: 7,
-      });
+      expect((await service.get(RULE_TUNING, request, SPACE))?.settings.extras).toEqual(
+        SAVED_EXTRAS
+      );
     });
 
     it('rejects an extras replacement missing a required field, naming it', async () => {
@@ -637,6 +735,30 @@ describe('WorkersService', () => {
       expect(result.outcome).toBe('invalid');
       if (result.outcome !== 'invalid') throw new Error('Expected an invalid outcome');
       expect(result.message).toContain('scheduleInterval');
+    });
+  });
+
+  describe('endpoint analysis skill gate', () => {
+    it('lists endpoint analysis when the skill is registered', async () => {
+      const { workers } = await createPersistentHarness()
+        .createService(agentBuilderWithSkill(true))
+        .list(request, SPACE);
+
+      expect(workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
+    });
+
+    it('hides endpoint analysis when the registry does not have the skill', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService(agentBuilderWithSkill(false));
+
+      const { workers } = await service.list(request, SPACE);
+
+      expect(workers.map(({ id }) => id)).toEqual([...WORKERS_WITHOUT_FORENSIC_SKILL]);
+      expect(await service.get(FORENSICS, request, SPACE)).toBeUndefined();
+      expect(await service.update(FORENSICS, { enabled: true }, SPACE, request)).toEqual({
+        outcome: 'not-found',
+      });
+      expect(harness.documents.has(`${FORENSICS}-${SPACE}`)).toBe(false);
     });
   });
 });
