@@ -43807,7 +43807,7 @@ paths:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       policyIdsByInstance:
                         additionalProperties:
@@ -44141,7 +44141,7 @@ paths:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       policyIdsByInstance:
                         additionalProperties:
@@ -44291,6 +44291,9 @@ paths:
                     type: string
                   maxItems: 1000
                   type: array
+                apiKeyId:
+                  maxLength: 255
+                  type: string
                 attemptCount:
                   description: Incremented by callers performing a retry.
                   minimum: 1
@@ -44303,6 +44306,12 @@ paths:
                     - temporary_keys
                     - shared_credentials
                     - assume_role
+                    - null
+                  nullable: true
+                  type: string
+                connectorId:
+                  maxLength: 255
+                  nullable: true
                   type: string
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
@@ -44358,24 +44367,15 @@ paths:
                     type: string
                   maxItems: 1000
                   type: array
-                services:
-                  description: Current service set for this deployment. Refreshed on each successful deploy so resume after an incremental service addition restores all deployed services.
-                  items:
-                    maxLength: 256
-                    minLength: 1
-                    type: string
-                  maxItems: 1000
-                  minItems: 1
-                  type: array
                 policyIdsByInstance:
                   additionalProperties:
                     maxLength: 255
                     type: string
                   type: object
                 services:
-                  description: Updated service list. Replaces the stored services array.
+                  description: Current service set for this deployment. Refreshed on each successful deploy so resume after an incremental service addition restores all deployed services.
                   items:
-                    maxLength: 255
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 1000
@@ -44522,7 +44522,7 @@ paths:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       policyIdsByInstance:
                         additionalProperties:
@@ -44783,7 +44783,7 @@ paths:
                           description: Package policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         policyIdsByInstance:
                           additionalProperties:
