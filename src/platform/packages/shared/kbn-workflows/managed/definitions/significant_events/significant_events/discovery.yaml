@@ -436,54 +436,38 @@ steps:
                       ${{ steps.resolve_open_event.error == null
                         and steps.resolve_open_event.output.hits.hits[0] != null }}
                     steps:
-                      # Keep the dedupe condition as a wrapping step so the
-                      # quota gate can run only after event deduplication.
+                      # Keep the dedupe condition as a wrapping step so an investigation starts
+                      # only after event deduplication.
                       - name: guard_missing_investigation
                         type: if
                         condition: >-
                           ${{ steps.check_prior_investigation.error != null
                             or steps.check_prior_investigation.output.count == 0 }}
                         steps:
-                          - name: consume_investigation_quota
-                            type: kibana.request
-                            if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
+                          - name: trigger_investigation
+                            type: nightshift.triggerInvestigation
                             with:
-                              method: POST
-                              path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
-                              body:
-                                group: 'investigation'
-                              headers:
-                                x-elastic-internal-origin: 'kibana'
-                            timeout: '10s'
+                              subject_type: significant_event
+                              subject_id: '{{ foreach.item.event_id }}'
+                              message: |
+                                {{ steps.resolve_open_event.output.hits.hits[0]._source.title | truncate: 512, '' }}
+
+                                {{ steps.resolve_open_event.output.hits.hits[0]._source.summary | truncate: 7000, '' }}
+
+                                Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis | truncate: 2000, '' }}
+                              title: '{{ steps.resolve_open_event.output.hits.hits[0]._source.title }}'
+                              summary: '{{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}'
+                              stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'
+                              concurrency_key: '{{ foreach.item.event_id }}'
+                              trigger_type: automatic
+                              context:
+                                event_uuid: '{{ foreach.item.event_uuid }}'
+                                event_id: '{{ foreach.item.event_id }}'
+                                status: '{{ foreach.item.status }}'
+                                causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
+                                blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
                             on-failure:
                               continue: true
-
-                          - name: guard_investigation_quota
-                            type: if
-                            condition: '${{ steps.consume_investigation_quota.output.allowed != false }}'
-                            steps:
-                              - name: trigger_investigation
-                                type: workflow.executeAsync
-                                with:
-                                  workflow-id: 'system-significant-events-investigation'
-                                  inputs:
-                                    message: |
-                                      {{ steps.resolve_open_event.output.hits.hits[0]._source.title }}
-
-                                      {{ steps.resolve_open_event.output.hits.hits[0]._source.summary }}
-
-                                      Probable cause: {{ steps.resolve_open_event.output.hits.hits[0]._source.symptom_hypothesis }}
-                                    title: '{{ steps.resolve_open_event.output.hits.hits[0]._source.title }}'
-                                    stream_names: '${{ steps.resolve_open_event.output.hits.hits[0]._source.stream_names | default: [] }}'
-                                    concurrency_key: '{{ foreach.item.event_id }}'
-                                    context:
-                                      source: 'significant_event'
-                                      trigger_type: 'automatic'
-                                      event_uuid: '{{ foreach.item.event_uuid }}'
-                                      event_id: '{{ foreach.item.event_id }}'
-                                      status: '{{ foreach.item.status }}'
-                                      causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
-                                      blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
 
   - name: output_result
     type: workflow.output

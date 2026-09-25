@@ -237,6 +237,21 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     }
   };
 
+  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    // The EuiCodeBlock info buttons submit the form and make the flyout jump,
+    // ignore any submit that is not from the real submit button.
+    const { nativeEvent } = event;
+    const submitter =
+      typeof SubmitEvent !== 'undefined' && nativeEvent instanceof SubmitEvent
+        ? nativeEvent.submitter
+        : null;
+    if (submitter && submitter.getAttribute('type') !== 'submit') {
+      event.preventDefault();
+      return;
+    }
+    return handleSubmit(onSubmit)(event);
+  };
+
   const flyoutTitle = isEditMode
     ? createDataSourceFlyoutStrings.editTitle()
     : createDataSourceFlyoutStrings.createTitle();
@@ -268,7 +283,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm component="form" id="createDataSourceForm" onSubmit={handleSubmit(onSubmit)}>
+        <EuiForm component="form" id="createDataSourceForm" onSubmit={onFormSubmit}>
           <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
             <EuiSuperSelect
               options={dataSourceTypeOptions}
@@ -361,8 +376,8 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
                 <EuiButton
                   fill
                   type="submit"
+                  form="createDataSourceForm"
                   data-test-subj="createDataSourceFlyoutSubmit"
-                  onClick={handleSubmit(onSubmit)}
                   isLoading={isSaving}
                   disabled={isSaving}
                 >

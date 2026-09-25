@@ -16,11 +16,12 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
+import { Subject, filter, take, type Subscription } from 'rxjs';
 import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
+  ALERTZERO_ENABLED_SETTING_ID,
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_ESCALATION,
 } from '@kbn/alertzero-common';
@@ -29,6 +30,8 @@ import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
   type RenderAssignees,
+  type RenderStatus,
+  type CloseInvestigationModalRenderProps,
   type RenderLinkedInvestigations,
 } from '@kbn/agentic-investigations-common';
 import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
@@ -75,6 +78,8 @@ export class AlertZeroPublicPlugin
     >
 {
   private readonly config: AlertZeroClientConfig;
+  private templateRegistration?: Subscription;
+  private statusSubscription?: Subscription;
   private readonly logger: Logger;
   /**
    * Allows `start()` to push updated deep links (with capability-resolved visibility)
@@ -101,7 +106,10 @@ export class AlertZeroPublicPlugin
       appRoute: ALERTZERO_APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       euiIconType: 'securitySignalDetected',
-      status: AppStatus.accessible,
+      // Inaccessible until the per-space setting is on. Core then empties `visibleIn` and
+      // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
+      // navigation tree — those trees hold no check of their own.
+      status: AppStatus.inaccessible,
       visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       order: 101,
       // Initial deep links without capability filtering — capabilities are not available at
@@ -131,6 +139,17 @@ export class AlertZeroPublicPlugin
     this.appUpdater$.next(() => ({
       deepLinks: getAlertZeroDeepLinks(core.application.capabilities),
     }));
+
+    // Reactively gate the app status on the per-space setting so toggling it makes the app
+    // accessible/inaccessible without a reload.
+    this.statusSubscription = core.uiSettings
+      .get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)
+      .subscribe((settingEnabled) => {
+        this.appUpdater$.next(() => ({
+          status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+          deepLinks: getAlertZeroDeepLinks(core.application.capabilities),
+        }));
+      });
 
     // ---------------------------------------------------------------------------
     // Lazy provider wrapper
@@ -235,6 +254,30 @@ export class AlertZeroPublicPlugin
     });
 
     // ---------------------------------------------------------------------------
+    // Status toggle (embedded in both investigation and escalation flyout headers)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedStatusToggle = makeLazyWithProviders(async () => {
+      const { ConnectedStatusToggle } = await import(
+        './components/connected_status/connected_status_toggle'
+      );
+      return ConnectedStatusToggle as React.ComponentType<
+        React.ComponentProps<typeof ConnectedStatusToggle>
+      >;
+    });
+
+    // ---------------------------------------------------------------------------
+    // Close investigation modal (used from the flyout footer and queue card actions)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedCloseInvestigationModal = makeLazyWithProviders(async () => {
+      const { ConnectedCloseInvestigationModal } = await import(
+        './components/connected_status/connected_close_investigation_modal'
+      );
+      return ConnectedCloseInvestigationModal as React.ComponentType<
+        React.ComponentProps<typeof ConnectedCloseInvestigationModal>
+      >;
+    });
+
+    // ---------------------------------------------------------------------------
     // Linked investigations list (escalation flyout overview tab body)
     // ---------------------------------------------------------------------------
     const LazyConnectedLinkedInvestigations = makeLazyWithProviders(async () => {
@@ -246,8 +289,11 @@ export class AlertZeroPublicPlugin
       >;
     });
 
-    const { manageEscalations: canManageEscalations, showEscalations: canShowEscalations } =
-      getAgenticInvestigationsCapabilities(core.application.capabilities);
+    const {
+      manageEscalations: canManageEscalations,
+      manageInvestigations: canManageInvestigations,
+      showEscalations: canShowEscalations,
+    } = getAgenticInvestigationsCapabilities(core.application.capabilities);
 
     // ---------------------------------------------------------------------------
     // renderAssignees render prop — shared by both templates
@@ -260,6 +306,28 @@ export class AlertZeroPublicPlugin
       );
 
     // ---------------------------------------------------------------------------
+    // renderStatus render prop — shared by both templates
+    // ---------------------------------------------------------------------------
+    const renderStatus: RenderStatus = (props) =>
+      React.createElement(
+        EscalationModalBoundary,
+        null,
+        React.createElement(LazyConnectedStatusToggle, props)
+      );
+
+    // ---------------------------------------------------------------------------
+    // renderCloseInvestigationModal — flyout footer close action
+    // ---------------------------------------------------------------------------
+    const renderCloseInvestigationModal = canManageInvestigations
+      ? (props: CloseInvestigationModalRenderProps) =>
+          React.createElement(
+            EscalationModalBoundary,
+            null,
+            React.createElement(LazyConnectedCloseInvestigationModal, props)
+          )
+      : undefined;
+
+    // ---------------------------------------------------------------------------
     // renderLinkedInvestigations render prop — escalation overview tab
     // ---------------------------------------------------------------------------
     const renderLinkedInvestigations: RenderLinkedInvestigations = (props) =>
@@ -269,27 +337,61 @@ export class AlertZeroPublicPlugin
         React.createElement(LazyConnectedLinkedInvestigations, props)
       );
 
-    registerAgenticInvestigationTemplateUI({
-      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
-      templateId: TEMPLATE_ID_INVESTIGATION,
-      name: INVESTIGATION_TEMPLATE_NAME,
-      icon: 'securitySignalDetected',
-      renderAssignees,
-      renderEscalationModal: canManageEscalations
-        ? (props) =>
-            React.createElement(
-              EscalationModalBoundary,
-              null,
-              React.createElement(LazyEscalationModal, props)
-            )
-        : undefined,
-      renderProposedActions: (props) =>
-        React.createElement(
-          ProposedActionsBoundary,
-          null,
-          React.createElement(LazyProposedActionsSlot, props)
-        ),
-    });
+    // The template registration API has no deregistration counterpart, so this is one-shot: we
+    // register on the first `true` and cannot remove the entry if the setting is later disabled.
+    // The setting is therefore registered with `requiresPageReload`, so disabling it prompts for a
+    // reload and the next session starts without the registration.
+    //
+    // Errors from registerAgenticInvestigationTemplateUI are re-raised as unhandled rejections
+    // so they surface in the browser console and unhandledrejection listeners, rather than
+    // being silently swallowed by RxJS's global error handler.
+    this.templateRegistration = core.uiSettings
+      .get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)
+      .pipe(filter(Boolean), take(1))
+      .subscribe({
+        next: () => {
+          try {
+            registerAgenticInvestigationTemplateUI({
+              conversationTemplates: startDeps.agentBuilder.conversationTemplates,
+              templateId: TEMPLATE_ID_INVESTIGATION,
+              name: INVESTIGATION_TEMPLATE_NAME,
+              icon: 'securitySignalDetected',
+              renderAssignees,
+              renderStatus: canManageInvestigations ? renderStatus : undefined,
+              renderCloseInvestigationModal,
+              renderEscalationModal: canManageEscalations
+                ? (props) =>
+                    React.createElement(
+                      EscalationModalBoundary,
+                      null,
+                      React.createElement(LazyEscalationModal, props)
+                    )
+                : undefined,
+              renderProposedActions: (props) =>
+                React.createElement(
+                  ProposedActionsBoundary,
+                  null,
+                  React.createElement(LazyProposedActionsSlot, props)
+                ),
+            });
+
+            registerEscalationTemplateUI({
+              conversationTemplates: startDeps.agentBuilder.conversationTemplates,
+              templateId: TEMPLATE_ID_ESCALATION,
+              name: ESCALATION_TEMPLATE_NAME,
+              icon: 'warning',
+              renderAssignees,
+              renderStatus:
+                canManageEscalations && canManageInvestigations ? renderStatus : undefined,
+              renderLinkedInvestigations: canShowEscalations
+                ? renderLinkedInvestigations
+                : undefined,
+            });
+          } catch (err) {
+            return Promise.reject(err);
+          }
+        },
+      });
 
     // Space id comes from the base path so registration starts synchronously.
     const { spaceId } = getSpaceIdFromPath(
@@ -307,17 +409,11 @@ export class AlertZeroPublicPlugin
       this.logger.error('Failed to register AlertZero attachment UI definitions', error);
     });
 
-    registerEscalationTemplateUI({
-      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
-      templateId: TEMPLATE_ID_ESCALATION,
-      name: ESCALATION_TEMPLATE_NAME,
-      icon: 'warning',
-      renderAssignees,
-      renderLinkedInvestigations: canShowEscalations ? renderLinkedInvestigations : undefined,
-    });
-
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.statusSubscription?.unsubscribe();
+    this.templateRegistration?.unsubscribe();
+  }
 }
