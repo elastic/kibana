@@ -84,6 +84,12 @@ export interface BaseActionsProps {
   onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
   /** When true the escalation actions (create / add-to) appear in the menu. Requires the manage capability. */
   canManageEscalations?: boolean;
+  /**
+   * When true the "Close investigation" action appears in the menu.
+   * Should only be true when the caller supplies a real close handler that performs
+   * the HTTP mutation. Without it the fallback modal does nothing.
+   */
+  canCloseInvestigation?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -94,6 +100,7 @@ export const BaseActions = memo<BaseActionsProps>(
     onClickAction,
     onClickRecommendedAction,
     canManageEscalations = false,
+    canCloseInvestigation = false,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -168,16 +175,31 @@ export const BaseActions = memo<BaseActionsProps>(
                 name: ACTIONS_TRANSLATIONS.buttons.assign,
                 onClick: () => onClickAction('assign', investigation.recordId),
               },
-              {
-                key: 'close',
-                icon: 'cross',
-                name: ACTIONS_TRANSLATIONS.buttons.close,
-                onClick: () => onClickAction('close', investigation.recordId),
-                separator: true,
-              },
+              // Only show Close when the caller has the capability AND the investigation is not
+              // already closed. Flyout investigations are conversation-derived and have no
+              // `recommendedAction`, so `isDecided` alone is not a reliable gate; we also
+              // check `status` to prevent offering a Close that would submit a redundant mutation.
+              ...(canCloseInvestigation && investigation.status !== 'closed'
+                ? [
+                    {
+                      key: 'close',
+                      icon: 'cross' as IconType,
+                      name: ACTIONS_TRANSLATIONS.buttons.close,
+                      onClick: () => onClickAction('close', investigation.recordId),
+                      separator: true,
+                    },
+                  ]
+                : []),
             ]),
       ],
-      [onClickRecommendedAction, decided, investigation, onClickAction, canManageEscalations]
+      [
+        onClickRecommendedAction,
+        decided,
+        investigation,
+        onClickAction,
+        canManageEscalations,
+        canCloseInvestigation,
+      ]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);

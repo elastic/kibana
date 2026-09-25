@@ -34,7 +34,12 @@ import {
   AiIndexAlreadyExistsError,
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
-import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
+import {
+  aiIndicesIndexName,
+  buildManagedAiIndexDocId,
+  createAiIndexStorageClient,
+} from './storage';
+import { deleteKiView, putKiView } from './ki_view';
 import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 
@@ -133,7 +138,7 @@ export class AiIndexService {
     }
 
     // Uniqueness is a read-then-write check rather than `op_type: 'create'`, matching the Agent Builder persisted clients.
-    await this.writeDocument(
+    await this.writeDocumentWithView(
       aiIndexId,
       spaceId,
       { ...properties, id: aiIndexId, space: spaceId, managed: false },
@@ -159,7 +164,7 @@ export class AiIndexService {
       throw new AiIndexManagedError(aiIndexId);
     }
 
-    return this.writeDocument(
+    return this.writeDocumentWithView(
       aiIndexId,
       spaceId,
       { ...properties, id: aiIndexId, space: spaceId, managed: false },
@@ -188,13 +193,50 @@ export class AiIndexService {
     if (existing && !existing.document.managed) {
       throw new AiIndexIdConflictError(aiIndexId);
     }
-    return this.writeDocument(
+    return this.writeDocumentWithView(
       aiIndexId,
       spaceId,
       { ...properties, id: aiIndexId, space: spaceId, managed: true },
       existing,
       { docId: buildManagedAiIndexDocId(spaceId, aiIndexId) }
     );
+  }
+
+  /** Publishes the view, then writes the document. A rejected write re-syncs the view to what is stored. */
+  private async writeDocumentWithView(
+    aiIndexId: string,
+    spaceId: string,
+    document: Omit<AiIndexDocument, 'date_created' | 'date_modified'>,
+    existing: Awaited<ReturnType<typeof this.findDocument>>,
+    options?: { docId?: string }
+  ): Promise<'created' | 'updated'> {
+    await this.putView(aiIndexId, document.dest);
+    try {
+      return await this.writeDocument(aiIndexId, spaceId, document, existing, options);
+    } catch (error) {
+      await this.restoreView(aiIndexId, spaceId);
+      throw error;
+    }
+  }
+
+  /** Best-effort: repoints the view at the stored dest, or removes it when nothing is stored. */
+  private async restoreView(aiIndexId: string, spaceId: string): Promise<void> {
+    try {
+      // The winning write is on the shard but may not be searchable yet.
+      await this.esClient.indices.refresh({ index: aiIndicesIndexName, ignore_unavailable: true });
+      const current = await this.findDocument(aiIndexId, spaceId);
+      if (current) {
+        await this.putView(aiIndexId, current.document.dest);
+        return;
+      }
+      await deleteKiView({ esClient: this.esClient, logger: this.logger, aiIndexId });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to restore the view for AI index '${aiIndexId}' after a rejected write: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   private async writeDocument(
@@ -406,6 +448,10 @@ export class AiIndexService {
     if (result === 'not_found') {
       throw new AiIndexNotFoundError(aiIndexId);
     }
+  }
+
+  private putView(aiIndexId: string, dest: AiIndexDest): Promise<void> {
+    return putKiView({ esClient: this.esClient, aiIndexId, dest });
   }
 
   private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {

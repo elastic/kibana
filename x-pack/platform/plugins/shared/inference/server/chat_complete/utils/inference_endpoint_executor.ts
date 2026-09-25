@@ -7,7 +7,15 @@
 
 import type { Readable } from 'stream';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ChatCompleteMetadata } from '@kbn/inference-common';
+import type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from '@kbn/inference-common';
+
+export const pickConnectorTelemetryForConnector = ({
+  pluginId,
+  aggregateBy,
+}: ConnectorTelemetryMetadata): Pick<ConnectorTelemetryMetadata, 'pluginId' | 'aggregateBy'> => ({
+  pluginId,
+  aggregateBy,
+});
 
 export interface InferenceEndpointInvokeOptions {
   body: Record<string, unknown>;
@@ -29,6 +37,8 @@ export const createInferenceEndpointExecutor = ({
 }): InferenceEndpointExecutor => {
   return {
     async invoke({ body, signal, metadata, timeout = 180_000 }): Promise<Readable> {
+      const { pluginId, productSolution, productFeature, interactionId } =
+        metadata?.connectorTelemetry ?? {};
       const response = await esClient.transport.request(
         {
           method: 'POST',
@@ -44,7 +54,15 @@ export const createInferenceEndpointExecutor = ({
           requestTimeout: timeout,
           headers: {
             // always send a value for EIS
-            'X-Elastic-Product-Use-Case': metadata?.connectorTelemetry?.pluginId ?? 'inference',
+            'X-Elastic-Product-Use-Case': pluginId ?? 'inference',
+            ...(productSolution ? { 'X-Elastic-Product-Solution': productSolution } : undefined),
+            ...(productFeature ? { 'X-Elastic-Product-Feature': productFeature } : undefined),
+            ...(interactionId
+              ? { 'X-Elastic-Inference-Interaction-Id': interactionId }
+              : undefined),
+            // asStream bypasses the transport's decompression step, so explicitly request
+            // an uncompressed response to avoid receiving raw gzipped bytes as SSE events.
+            'accept-encoding': 'identity',
           },
           ...(signal ? { signal } : {}),
         }

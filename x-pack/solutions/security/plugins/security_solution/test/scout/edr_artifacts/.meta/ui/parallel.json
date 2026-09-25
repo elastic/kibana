@@ -1,5 +1,5 @@
 {
-  "sha1": "aa0fae9ebf7e979f0d367a67ee12b6eada44319e",
+  "sha1": "8c4587690118ead463cd38ff1b549a079db924f5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -107,7 +107,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 60,
+        "line": 62,
         "column": 26
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 72,
+        "line": 74,
         "column": 29
       }
     },
@@ -139,7 +139,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 80,
+        "line": 82,
         "column": 17
       }
     },
@@ -155,8 +155,72 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_list_suite.ts",
-        "line": 103,
+        "line": 105,
         "column": 57
+      }
+    },
+    {
+      "id": "d387931216749a8-a09e14ec3fec2b5",
+      "title": "Blocklist signature operator field creates a blocklist item with the is operator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/blocklist_operator_suite.ts",
+        "line": 51,
+        "column": 35
+      }
+    },
+    {
+      "id": "d387931216749a8-f0f2b01bf0b590a",
+      "title": "Blocklist signature operator field creates a blocklist item with the is one of operator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/blocklist_operator_suite.ts",
+        "line": 66,
+        "column": 22
+      }
+    },
+    {
+      "id": "d387931216749a8-253203f799eb121",
+      "title": "Blocklist signature operator field updates a match_any signature item to is",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/blocklist_operator_suite.ts",
+        "line": 84,
+        "column": 25
+      }
+    },
+    {
+      "id": "d387931216749a8-54f0af56addc58d",
+      "title": "Blocklist signature operator field updates a match signature item to is one of",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/blocklist_operator_suite.ts",
+        "line": 104,
+        "column": 15
       }
     },
     {
