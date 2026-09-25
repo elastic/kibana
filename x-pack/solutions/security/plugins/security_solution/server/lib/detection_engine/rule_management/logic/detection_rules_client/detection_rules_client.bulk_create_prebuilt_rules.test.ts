@@ -9,11 +9,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import {
   SecurityRuleChangeTrackingAction,
   type SecurityRuleChangeTracking,
 } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { DETECTION_RULE_INSTALL_EVENT } from '../../../../telemetry/event_based/events';
 
 import { PREBUILT_RULES_BULK_CREATE_BATCH_SIZE } from '../../../prebuilt_rules/constants';
 import { getCreateRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -52,6 +54,7 @@ const getOptionsId = (rule: { options?: { id?: string } }): string => {
 describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
+  let analytics: AnalyticsServiceSetup;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
   const rulesAuthz = getMockRulesAuthz();
@@ -68,6 +71,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       errors: [],
       total: 0,
     });
+    analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
 
     const savedObjectsClient = savedObjectsClientMock.create();
     detectionRulesClient = createDetectionRulesClient({
@@ -79,6 +83,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
+      analytics,
     });
   });
 
@@ -461,5 +466,92 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
         }),
       })
     );
+  });
+
+  it('sends detection_rule_install telemetry for each successfully created rule', async () => {
+    const queryRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'query-rule' };
+    const eqlRule = {
+      ...getCreateRulesSchemaMock(),
+      type: 'eql' as const,
+      language: 'eql' as const,
+      query: 'process where true',
+      version: 2,
+      rule_id: 'eql-rule',
+    };
+
+    rulesClient.bulkCreateRules.mockImplementation(async ({ rules: inputRules }) => ({
+      successfulIds: inputRules.map((r) => getOptionsId(r)),
+      errors: [],
+      total: inputRules.length,
+    }));
+
+    const result = await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [queryRule, eqlRule],
+      changeTracking,
+    });
+
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(2);
+    expect(analytics.reportEvent).toHaveBeenCalledWith(DETECTION_RULE_INSTALL_EVENT.eventType, {
+      ruleId: result.results[0].id,
+      ruleType: 'query',
+      isPrebuilt: true,
+      isCustomized: false,
+    });
+    expect(analytics.reportEvent).toHaveBeenCalledWith(DETECTION_RULE_INSTALL_EVENT.eventType, {
+      ruleId: result.results[1].id,
+      ruleType: 'eql',
+      isPrebuilt: true,
+      isCustomized: false,
+    });
+  });
+
+  it('does not send telemetry for failed or empty installs', async () => {
+    await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [],
+      changeTracking,
+    });
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
+
+    const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' };
+    const failId = 'fail-uuid';
+    (uuidv4 as jest.Mock).mockReturnValueOnce(failId);
+    rulesClient.bulkCreateRules.mockResolvedValueOnce({
+      successfulIds: [],
+      errors: [{ message: 'Conflict', status: 409, rule: { id: failId, name: params.name } }],
+      total: 1,
+    });
+
+    await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [params],
+      changeTracking,
+    });
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('sends telemetry only for successful rules in a mixed batch', async () => {
+    const successRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'success-rule' };
+    const failRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'fail-rule' };
+    const successId = 'success-uuid';
+    const failId = 'fail-uuid';
+    (uuidv4 as jest.Mock).mockReturnValueOnce(successId).mockReturnValueOnce(failId);
+
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [successId],
+      errors: [{ message: 'Conflict', status: 409, rule: { id: failId, name: failRule.name } }],
+      total: 2,
+    });
+
+    await detectionRulesClient.bulkCreatePrebuiltRules({
+      rules: [successRule, failRule],
+      changeTracking,
+    });
+
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analytics.reportEvent).toHaveBeenCalledWith(DETECTION_RULE_INSTALL_EVENT.eventType, {
+      ruleId: successId,
+      ruleType: 'query',
+      isPrebuilt: true,
+      isCustomized: false,
+    });
   });
 });
