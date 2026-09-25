@@ -131,31 +131,20 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         )}`
       );
 
-      let result: Awaited<ReturnType<typeof hydrateMemoryWorkspace>>;
-      try {
-        result = await withTimeout(
-          async (signal) =>
-            hydrateMemoryWorkspace({
-              session,
-              esClient: await getMemoryEsClient(),
-              spaceId,
-              agentId: trimmedAgentId,
-              query: prompt,
-              signal,
-              logger: teeWorkflowLogger(logger, context.logger),
-            }),
-          MATERIALIZE_TIMEOUT_MS,
-          `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`
-        );
-      } catch (error) {
-        telemetry.reportSemanticMemoryMaterialized({
-          agent_id: trimmedAgentId,
-          ...(conversationId ? { conversation_id: conversationId } : {}),
-          workflow_execution_id: workflowExecutionId,
-          outcome: 'failure',
-        });
-        throw error;
-      }
+      const result = await withTimeout(
+        async (signal) =>
+          hydrateMemoryWorkspace({
+            session,
+            esClient: await getMemoryEsClient(),
+            spaceId,
+            agentId: trimmedAgentId,
+            query: prompt,
+            signal,
+            logger: teeWorkflowLogger(logger, context.logger),
+          }),
+        MATERIALIZE_TIMEOUT_MS,
+        `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`
+      );
 
       telemetry.reportSemanticMemoryMaterialized({
         agent_id: trimmedAgentId,

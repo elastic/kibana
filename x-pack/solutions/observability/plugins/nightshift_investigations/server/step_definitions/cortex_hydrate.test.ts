@@ -33,10 +33,14 @@ describe('cortexHydrateStepDefinition', () => {
     getScopedEsClient.mockReturnValue(esClient);
   });
 
-  const createContext = (sandboxId: string, spaceId = 'default') =>
+  const createContext = (
+    sandboxId: string | undefined,
+    spaceId = 'default',
+    conversationId?: string
+  ) =>
     ({
-      input: { sandbox_id: sandboxId },
-      rawInput: { sandbox_id: sandboxId },
+      input: { sandbox_id: sandboxId, conversation_id: conversationId },
+      rawInput: { sandbox_id: sandboxId, conversation_id: conversationId },
       contextManager: {
         getContext: jest.fn().mockReturnValue({ workflow: { spaceId } }),
         getFakeRequest: jest.fn(),
@@ -84,6 +88,35 @@ describe('cortexHydrateStepDefinition', () => {
       expect.objectContaining({ spaceId: 'marketing' })
     );
     expect(result).toEqual({ output: { sandbox_id: 'marketing__conv-1', notification: '' } });
+  });
+
+  it('scopes a legacy conversation_id using the workflow Space', async () => {
+    const sandboxStart = makeSandboxStart();
+    const definition = cortexHydrateStepDefinition({
+      getSandboxStart: () => sandboxStart,
+      logger: loggerMock.create(),
+    });
+
+    const result = await definition.handler(createContext(undefined, 'marketing', 'conv-1'));
+
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
+    expect(hydrateCortexWorkspace).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'marketing' })
+    );
+    expect(result).toEqual({ output: { sandbox_id: 'marketing__conv-1', notification: '' } });
+  });
+
+  it('rejects input missing both sandbox_id and conversation_id', async () => {
+    const definition = cortexHydrateStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      logger: loggerMock.create(),
+    });
+
+    expect(definition.inputSchema.safeParse({}).success).toBe(false);
+    await expect(definition.handler(createContext(undefined))).rejects.toThrow(
+      'Either sandbox_id or conversation_id is required.'
+    );
+    expect(hydrateCortexWorkspace).not.toHaveBeenCalled();
   });
 
   it('throws when the sandbox is not configured', async () => {
