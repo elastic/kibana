@@ -30,6 +30,11 @@ export const initializeCspTransforms = async (
     await initializeTransform(esClient, latestFindingsTransform, logger);
   }
   await initializeTransform(esClient, latestVulnerabilitiesTransform, logger);
+
+  // The CSPM metering_state transform (security-team#17662) is installed by the
+  // cloud_security_posture package, not here. It writes a system index, so it
+  // runs as the internal user, and Fleet owns the destination index template
+  // and lifecycle — duplicating that here would fight the package on upgrade.
 };
 
 export const initializeTransform = async (
