@@ -22,7 +22,7 @@ export const getAutomationRoute = createNightshiftInvestigationsServerRoute({
     authz: { requiredPrivileges: ['read_nightshift'] },
   },
   params: z.object({
-    path: z.object({ id: z.string().min(1) }),
+    path: z.object({ id: z.string().min(1).max(512) }),
   }),
   handler: async ({ request, params, getAutomationsSoClient, context }) => {
     const spaceId =
