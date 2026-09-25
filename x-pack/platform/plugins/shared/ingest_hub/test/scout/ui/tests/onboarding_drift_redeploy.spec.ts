@@ -171,9 +171,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     const miPutPromise = page.waitForRequest(
       (req) =>
         req.method() === 'PUT' &&
-        /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(
-          new URL(req.url()).pathname
-        )
+        /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(new URL(req.url()).pathname)
     );
     const soPutPromise = page.waitForRequest(
       (req) =>
@@ -184,8 +182,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     );
     await page.route(
       (url) =>
-        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname) &&
-        true,
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname) && true,
       async (route) => {
         if (route.request().method() === 'PUT') {
           await route.fulfill({
@@ -212,10 +209,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
   });
 
-  test('auth drift: connector change detected and callout shown', async ({
-    browserAuth,
-    page,
-  }) => {
+  test('auth drift: connector change detected and callout shown', async ({ browserAuth, page }) => {
     // SO has connectorId: 'old-connector'. Session will be hydrated with that, then overwritten
     // to 'new-connector' to simulate the user swapping identity in Step 3.
     const DEP_ID = 'dep-auth-drift-001';
