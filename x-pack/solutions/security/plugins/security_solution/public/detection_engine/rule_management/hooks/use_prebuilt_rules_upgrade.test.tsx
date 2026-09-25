@@ -23,6 +23,8 @@ import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_pa
 import { useOutdatedMlJobsUpgradeModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_ml_jobs_upgrade_modal';
 import { useUpgradeWithConflictsModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal';
 import { reviewRuleUpgrade } from '../api/api';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
 
 jest.mock('../api/api', () => ({ reviewRuleUpgrade: jest.fn() }));
 jest.mock('../logic/prebuilt_rules/use_perform_rule_upgrade');
@@ -36,6 +38,7 @@ jest.mock(
   '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal'
 );
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/hooks/use_app_toasts');
 
 const mockUsePerformUpgradeRules = usePerformUpgradeRules as jest.Mock;
 const mockUsePrebuiltRulesUpgradeReview = usePrebuiltRulesUpgradeReview as jest.Mock;
@@ -44,6 +47,7 @@ const mockUseIsUpgradingSecurityPackages = useIsUpgradingSecurityPackages as jes
 const mockUseOutdatedMlJobsUpgradeModal = useOutdatedMlJobsUpgradeModal as jest.Mock;
 const mockUseUpgradeWithConflictsModal = useUpgradeWithConflictsModal as jest.Mock;
 const mockReviewRuleUpgrade = reviewRuleUpgrade as jest.Mock;
+const appToastsMock = useAppToastsMock.create();
 
 describe('usePrebuiltRulesUpgrade', () => {
   const mutateAsync = jest.fn().mockResolvedValue({});
@@ -56,6 +60,7 @@ describe('usePrebuiltRulesUpgrade', () => {
     confirmLegacyMLJobs.mockResolvedValue(true);
 
     mockUsePerformUpgradeRules.mockReturnValue({ mutateAsync });
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
     mockUsePrebuiltRulesCustomizationStatus.mockReturnValue({
       isRulesCustomizationEnabled: true,
     });
@@ -610,7 +615,7 @@ describe('usePrebuiltRulesUpgrade', () => {
       expect(mockReviewRuleUpgrade).not.toHaveBeenCalled();
     });
 
-    it('fetchAllRulesCustomizationCounts resolves to null when counting customized rules fails', async () => {
+    it('fetchAllRulesCustomizationCounts resolves to null and shows an error toast when counting customized rules fails', async () => {
       const refetch = jest.fn().mockResolvedValue({
         isSuccess: true,
         data: buildReviewResult([], { total: 5 }).data,
@@ -623,6 +628,10 @@ describe('usePrebuiltRulesUpgrade', () => {
       });
 
       await expect(result.current.fetchAllRulesCustomizationCounts()).resolves.toBeNull();
+      expect(appToastsMock.addError).toHaveBeenCalledTimes(1);
+      expect(appToastsMock.addError).toHaveBeenCalledWith(expect.any(Error), {
+        title: expect.any(String),
+      });
     });
 
     it('fetchAllRulesCustomizationCounts resolves to null when the re-fetch fails even though cached data is retained', async () => {
