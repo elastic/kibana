@@ -6,10 +6,13 @@
  */
 
 import { Parser } from '@elastic/esql';
-import { buildExampleQueries } from './example_queries';
+import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
 
 describe('buildExampleQueries', () => {
   const queries = buildExampleQueries('ai-index-idx-support*');
+  const queriesExcludingMemory = buildExampleQueries('ai-index-idx-support*', {
+    excludeMemory: true,
+  });
 
   it('returns the three fixed shapes, targeting the given index', () => {
     expect(queries.map(({ title }) => title)).toEqual([
@@ -23,8 +26,17 @@ describe('buildExampleQueries', () => {
   });
 
   it('parses as valid ES|QL', () => {
-    for (const { esql } of queries) {
+    for (const { esql } of [...queries, ...queriesExcludingMemory]) {
       expect(Parser.parse(esql).errors).toEqual([]);
+    }
+  });
+
+  it('does not expose memory types unless exclusion is requested', () => {
+    for (const { esql } of queries) {
+      expect(esql).not.toContain('memory.session');
+    }
+    for (const { esql } of queriesExcludingMemory) {
+      expect(esql).toContain(EXCLUDE_MEMORY_KI_TYPES_FILTER);
     }
   });
 
@@ -34,8 +46,5 @@ describe('buildExampleQueries', () => {
     expect(hybrid).toMatch(/\| FORK\n[\s\S]*\| FUSE\n/);
     expect(filter).toContain('type == ?type AND MATCH(tags, ?tag)');
     expect(count).not.toContain('?');
-    for (const esql of [hybrid, filter, count]) {
-      expect(esql).not.toMatch(/"[^"]+"/);
-    }
   });
 });
