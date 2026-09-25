@@ -28,7 +28,7 @@ export const LandingPage: React.FC = () => {
   const hasInvestigations = (investigations.data ?? 0) > 0;
   const hasAnyError = workers.error != null || investigations.error != null;
 
-  const showQueue = decision === 'queue' || hasAnyError || hasEnabledWorker || hasInvestigations;
+  const showQueue = hasAnyError || hasEnabledWorker || hasInvestigations;
 
   // isFetching covers background refetches of stale cached empty results that
   // would otherwise fall through to onboarding before the fresh response lands.
@@ -46,7 +46,7 @@ export const LandingPage: React.FC = () => {
     setDecision(showQueue ? 'queue' : 'onboarding');
   }, [decision, showQueue, isUnresolved]);
 
-  if (showQueue) return <ConversationsPage />;
+  if (decision === 'queue' || (decision === null && showQueue)) return <ConversationsPage />;
 
   // Guard on decision === null so the spinner only appears before the initial
   // resolution; after the onboarding decision is latched we render directly.
