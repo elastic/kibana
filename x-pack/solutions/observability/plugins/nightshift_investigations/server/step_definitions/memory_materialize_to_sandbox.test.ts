@@ -135,6 +135,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       pod_reset: false,
       notification_chars: 0,
     });
+    expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledTimes(1);
   });
 
   it('waits for memory readiness before starting a store operation', async () => {
@@ -225,7 +226,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
   });
 
-  it('reports one failure event and rethrows when materialize fails', async () => {
+  it('leaves terminal failure telemetry to the workflow engine when an attempt fails', async () => {
     hydrateMemoryWorkspaceMock.mockRejectedValueOnce(new Error('write failed'));
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
@@ -244,13 +245,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
         )
       )
     ).rejects.toThrow('write failed');
-    expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledTimes(1);
-    expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledWith({
-      agent_id: 'significant-events.deductive-investigation',
-      conversation_id: 'conv-1',
-      workflow_execution_id: 'workflow-exec-1',
-      outcome: 'failure',
-    });
+    expect(telemetry.reportSemanticMemoryMaterialized).not.toHaveBeenCalled();
   });
 
   it('skips materialize when the memory flag is off', async () => {

@@ -15,11 +15,13 @@ import {
   canonicalizeMemoryLabelIds,
   contentOverlap,
   createLlmProposeMemoryExtractions,
+  createLlmSynthesizeMemoryGroup,
   formatMemoryMergeSources,
   formatRecalled,
   isDuplicateExtraction,
   MAX_FORMATTED_RECALLED_CHARS,
   MAX_FORMATTED_MERGE_CHARS,
+  MAX_MERGE_TASK_CHARS,
   optimizeMemory,
   unwrapUserTask,
 } from './optimize';
@@ -135,7 +137,7 @@ describe('formatMemoryMergeSources', () => {
     expect(formatted).toContain('EXTRACT_FACT');
   });
 
-  it('uses a deterministic total cap and truncates only the final included content', () => {
+  it('uses a deterministic total cap while retaining every selected source id', () => {
     const first = page('memory_first');
     first.content = 'a'.repeat(20_000);
     const second = page('memory_second');
@@ -145,9 +147,45 @@ describe('formatMemoryMergeSources', () => {
     const formatted = formatMemoryMergeSources({ sources: [first, second, third] });
 
     expect(formatted).toBe(formatMemoryMergeSources({ sources: [first, second, third] }));
-    expect(formatted).toHaveLength(MAX_FORMATTED_MERGE_CHARS);
+    expect(formatted.length).toBeLessThanOrEqual(MAX_FORMATTED_MERGE_CHARS);
+    expect(formatted).toContain('id=memory_first');
     expect(formatted).toContain('id=memory_second');
-    expect(formatted).not.toContain('id=memory_third');
+    expect(formatted).toContain('id=memory_third');
+  });
+
+  it('budgets a 65K task together with source and extract signal', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: { title: 'Merged', content: 'Merged content', context: 'Merged context' },
+    });
+    const synthesize = createLlmSynthesizeMemoryGroup({
+      inferenceClient: { output } as never,
+    });
+    const first = page('memory_first', 'First source', `FIRST_SIGNAL${'a'.repeat(40_000)}`);
+    const second = page('memory_second', 'Second source', `SECOND_SIGNAL${'b'.repeat(40_000)}`);
+    const task = `TASK_SIGNAL${'t'.repeat(65_536 - 'TASK_SIGNAL'.length)}`;
+
+    await synthesize({
+      sources: [first, second],
+      extract: {
+        slug: 'new-extract',
+        title: 'New extract',
+        content: `EXTRACT_SIGNAL${'e'.repeat(40_000)}`,
+        tags: [],
+        categories: [],
+      },
+      task,
+    });
+
+    const input = output.mock.calls[0][0].input as string;
+    expect(input).toHaveLength(MAX_FORMATTED_MERGE_CHARS);
+    expect(input).toContain('id=memory_first');
+    expect(input).toContain('id=memory_second');
+    expect(input).toContain('FIRST_SIGNAL');
+    expect(input).toContain('SECOND_SIGNAL');
+    expect(input).toContain('EXTRACT_SIGNAL');
+    expect(input).toContain('TASK_SIGNAL');
+    expect(input).toContain(task.slice(0, MAX_MERGE_TASK_CHARS));
+    expect(input).not.toContain(task.slice(0, MAX_MERGE_TASK_CHARS + 1));
   });
 });
 

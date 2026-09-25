@@ -405,45 +405,76 @@ context is the recall key: compact, semantically rich phrases covering the union
 If you cannot write a non-empty context that covers that union, return an empty context string.`;
 
 export const MAX_FORMATTED_MERGE_CHARS = 32_000;
+export const MAX_MERGE_TASK_CHARS = 4_096;
+const MIN_MERGE_CONTENT_CHARS = 128;
 
 export const formatMemoryMergeSources = ({
   sources,
   extract,
+  maxChars = MAX_FORMATTED_MERGE_CHARS,
 }: {
   sources: readonly MemoryPage[];
   extract?: MemoryExtractProposal;
+  maxChars?: number;
 }): string => {
-  const entries = [
-    ...sources.map((page) => ({
-      prefix: `- id=${page.id}\n  title: ${page.title}\n  context: ${
-        page.context ?? ''
-      }\n  content: `,
+  const boundedMaxChars = Math.max(0, maxChars);
+  const baseEntries = [
+    ...sources.map((page, index) => ({
+      prefix: (titleBudget: number, contextBudget: number) =>
+        `${index === 0 ? '' : '\n'}- id=${page.id}\n` +
+        `  title: ${page.title.slice(0, titleBudget)}\n` +
+        `  context: ${(page.context ?? '').slice(0, contextBudget)}\n` +
+        `  content: `,
       content: page.content,
     })),
     ...(extract
       ? [
           {
-            prefix: `\n\nNew extract to fold in:\n- slug=${extract.slug}\n  title: ${extract.title}\n  content: `,
+            prefix: (titleBudget: number, _contextBudget: number) =>
+              `\n\nNew extract to fold in:\n- slug=${extract.slug.slice(0, 128)}\n` +
+              `  title: ${extract.title.slice(0, titleBudget)}\n` +
+              `  content: `,
             content: extract.content,
           },
         ]
       : []),
   ];
-  let output = '';
-  for (const entry of entries) {
-    const separator = output.length === 0 ? '' : '\n';
-    const prefix = separator + entry.prefix;
-    const remaining = MAX_FORMATTED_MERGE_CHARS - output.length;
-    if (prefix.length > remaining) {
-      break;
-    }
-    const contentBudget = remaining - prefix.length;
-    output += prefix + entry.content.slice(0, contentBudget);
-    if (entry.content.length > contentBudget) {
-      break;
-    }
+  if (baseEntries.length === 0) {
+    return '';
   }
-  return output;
+
+  const baseChars = baseEntries.reduce((total, entry) => total + entry.prefix(0, 0).length, 0);
+  const roomAfterIdsAndLabels = Math.max(0, boundedMaxChars - baseChars);
+  const totalContentReserve = Math.min(
+    MIN_MERGE_CONTENT_CHARS * baseEntries.length,
+    roomAfterIdsAndLabels
+  );
+  const metadataPerEntry = Math.floor(
+    (roomAfterIdsAndLabels - totalContentReserve) / baseEntries.length
+  );
+  const entries = baseEntries.map((entry) => {
+    const titleBudget = Math.min(256, Math.floor(metadataPerEntry / 3));
+    const contextBudget = Math.min(1_024, metadataPerEntry - titleBudget);
+    return { prefix: entry.prefix(titleBudget, contextBudget), content: entry.content };
+  });
+  const metadataChars = entries.reduce((total, entry) => total + entry.prefix.length, 0);
+  const contentRoom = Math.max(0, boundedMaxChars - metadataChars);
+  const reservedPerEntry = Math.min(
+    MIN_MERGE_CONTENT_CHARS,
+    Math.floor(contentRoom / entries.length)
+  );
+  let remainingContentRoom = contentRoom;
+  let output = '';
+  for (let index = 0; index < entries.length; index++) {
+    const entry = entries[index];
+    const laterReserved = reservedPerEntry * (entries.length - index - 1);
+    const contentBudget = Math.max(0, remainingContentRoom - laterReserved);
+    const content = entry.content.slice(0, contentBudget);
+    output += entry.prefix + content;
+    remainingContentRoom -= content.length;
+  }
+
+  return output.slice(0, boundedMaxChars);
 };
 
 export const createLlmSynthesizeMemoryGroup = ({
@@ -452,15 +483,23 @@ export const createLlmSynthesizeMemoryGroup = ({
   inferenceClient: BoundInferenceClient;
 }): SynthesizeMemoryGroup => {
   return async ({ sources, extract, task }) => {
-    const sourceAndExtractBlock = formatMemoryMergeSources({ sources, extract });
     const taskBlock =
       extract && task
-        ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${task}`
+        ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${task.slice(
+            0,
+            MAX_MERGE_TASK_CHARS
+          )}`
         : '';
+    const inputPrefix = 'Sources:\n';
+    const sourceAndExtractBlock = formatMemoryMergeSources({
+      sources,
+      extract,
+      maxChars: MAX_FORMATTED_MERGE_CHARS - inputPrefix.length - taskBlock.length,
+    });
     const response = await inferenceClient.output({
       id: 'nightshift_memory_merge',
       system: MEMORY_MERGE_SYSTEM_PROMPT,
-      input: `Sources:\n${sourceAndExtractBlock}${taskBlock}`,
+      input: `${inputPrefix}${sourceAndExtractBlock}${taskBlock}`,
       schema: {
         type: 'object',
         properties: {

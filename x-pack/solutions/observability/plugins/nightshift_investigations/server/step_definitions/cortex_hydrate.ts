@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
-import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck write so it cannot stall the rest of the parallel hydrate. */
@@ -33,14 +33,28 @@ export const cortexHydrateStepDefinition = ({
     category: StepCategory.Ai,
     description:
       'Writes the current Cortex wiki into /workspace/cortex for the sandbox obtained ' +
-      'earlier in this workflow. Does not allocate; uses sandbox_id as-is.',
-    inputSchema: z.object({
-      sandbox_id: z
-        .string()
-        .min(1)
-        .max(1024)
-        .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
-    }),
+      'earlier in this workflow. Does not allocate; accepts its sandbox_id or a legacy conversation_id.',
+    inputSchema: z
+      .object({
+        sandbox_id: z
+          .string()
+          .min(1)
+          .max(1024)
+          .optional()
+          .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
+        conversation_id: z
+          .string()
+          .min(1)
+          .max(1024)
+          .optional()
+          .describe('Legacy unscoped conversation id. Scoped using the workflow Space.'),
+      })
+      .refine(
+        ({ sandbox_id: sandboxId, conversation_id: conversationId }) => {
+          return sandboxId !== undefined || conversationId !== undefined;
+        },
+        { message: 'Either sandbox_id or conversation_id is required.' }
+      ),
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that was hydrated.'),
       skipped: z.boolean().optional(),
@@ -51,8 +65,14 @@ export const cortexHydrateStepDefinition = ({
         ),
     }),
     handler: async (context) => {
-      const { sandbox_id: sandboxId } = context.input;
+      const { sandbox_id: providedSandboxId, conversation_id: conversationId } = context.input;
       const { spaceId } = context.contextManager.getContext().workflow;
+      const sandboxId =
+        providedSandboxId ??
+        (conversationId !== undefined ? scopeConversationId(spaceId, conversationId) : undefined);
+      if (sandboxId === undefined) {
+        throw new Error('Either sandbox_id or conversation_id is required.');
+      }
 
       if (isEnabled && !isEnabled()) {
         context.logger.info(`Skipped Cortex hydrate for sandbox ${sandboxId} (flag off)`);
