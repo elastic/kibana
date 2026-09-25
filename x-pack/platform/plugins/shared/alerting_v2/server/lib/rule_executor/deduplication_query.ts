@@ -81,10 +81,22 @@ const notEligible = (query: string): DeduplicationQueryPlan => ({
  * - any command after an `MV_EXPAND` manipulates the expanded column, for
  *   the same reason applied to the fan-out identity.
  *
+ * `MV_EXPAND` is the only fan-out command whose rows receive a distinct
+ * identity, again matching the detection engine. A one-to-many `LOOKUP JOIN`
+ * (or `FORK`) still qualifies, and its rows share the source document's
+ * identity, so only the first is persisted and the rest are counted as
+ * deduplicated. Handling those requires a row identity ES|QL does not expose
+ * today and is a known, documented limitation rather than an oversight.
+ *
  * When eligible, `FROM … METADATA _id, _index, _version` is upserted (fields
- * the author already declared are kept) and the metadata plus expanded
- * columns are appended to every `KEEP` so they survive projection; see
- * {@link addFieldsToKeepCommands}.
+ * the author already declared are kept) and the metadata columns are
+ * appended to every `KEEP` so they survive projection; see
+ * {@link addFieldsToKeepCommands}. Expanded columns are deliberately *not*
+ * added to `KEEP`, matching the detection engine: a `KEEP` may precede the
+ * `EVAL` that creates the expanded column, so injecting it there would make
+ * the query invalid. If an author projects an expanded column away, rows
+ * arrive without its value and `resolveRuleEventId` falls back to an
+ * Elasticsearch-generated id for them — no deduplication, but no lost rows.
  *
  * Called by `ExecuteRuleQueryStep` before the row limit is appended. The
  * stored rule is never modified. Throws only if `@elastic/esql` fails while
@@ -121,7 +133,7 @@ export const planDeduplicationQuery = (query: string): DeduplicationQueryPlan =>
   DEDUPLICATION_METADATA_FIELDS.forEach((field) =>
     mutate.commands.from.metadata.upsert(root, field)
   );
-  addFieldsToKeepCommands(root, [...DEDUPLICATION_METADATA_FIELDS, ...mvExpandFields]);
+  addFieldsToKeepCommands(root, DEDUPLICATION_METADATA_FIELDS);
 
   return { query: BasicPrettyPrinter.print(root), eligible: true, mvExpandFields };
 };
@@ -155,8 +167,8 @@ const getExpandedField = (command: ESQLAstCommand): string | undefined => {
 };
 
 /**
- * Keeps the injected metadata and expanded columns from being projected away
- * by the author's own `KEEP` commands.
+ * Keeps the injected metadata columns from being projected away by the
+ * author's own `KEEP` commands.
  *
  * `METADATA` only makes a column available; a later `KEEP host.name` would
  * drop it and the row would reach the executor without an `_id`, silently
@@ -166,8 +178,13 @@ const getExpandedField = (command: ESQLAstCommand): string | undefined => {
  * drops, renames or reassigns these fields, there are no stop conditions
  * here — every `KEEP` in an eligible query may safely carry them.
  *
- * Columns are built from their dotted parts so `host.ip` is printed as a
+ * Columns are built from their dotted parts so a dotted name is printed as a
  * field path rather than a single backtick-quoted identifier.
+ *
+ * Only the metadata columns are passed here. They exist from the `FROM`
+ * onward, so every `KEEP` in the pipeline can safely list them; the same is
+ * not true of `MV_EXPAND`ed columns, which is why those are left alone (see
+ * {@link planDeduplicationQuery}).
  *
  * Mutates `root` in place. Has no effect when the pipeline has no `KEEP`.
  */

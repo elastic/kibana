@@ -76,10 +76,22 @@ describe('planDeduplicationQuery', () => {
       ).toEqual(['host.ip', 'tags']);
     });
 
-    it('carries the expanded column through KEEP alongside the metadata', () => {
+    it('does not add the expanded column to KEEP (rows that drop it fall back to ES-generated ids)', () => {
       expect(planDeduplicationQuery('FROM logs-* | MV_EXPAND host.ip | KEEP host.name').query).toBe(
-        `FROM logs-* ${METADATA} | MV_EXPAND host.ip | KEEP host.name, _id, _index, _version, host.ip`
+        `FROM logs-* ${METADATA} | MV_EXPAND host.ip | KEEP host.name, _id, _index, _version`
       );
+    });
+
+    it('keeps a query valid when a KEEP precedes the EVAL that creates the expanded column', () => {
+      expect(
+        planDeduplicationQuery(
+          'FROM logs-* | KEEP message | EVAL parts = SPLIT(message, ",") | MV_EXPAND parts'
+        )
+      ).toEqual({
+        query: `FROM logs-* ${METADATA} | KEEP message, _id, _index, _version | EVAL parts = SPLIT(message, ",") | MV_EXPAND parts`,
+        eligible: true,
+        mvExpandFields: ['parts'],
+      });
     });
 
     it('stays eligible when the expanded column is created by an EVAL before the MV_EXPAND', () => {
