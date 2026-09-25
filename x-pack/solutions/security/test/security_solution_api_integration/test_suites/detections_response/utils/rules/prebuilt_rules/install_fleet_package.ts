@@ -15,9 +15,10 @@ import { generatePrebuiltRulesPackageBuffer } from '@kbn/security-solution-test-
 import expect from 'expect';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { refreshSavedObjectIndices } from '../../refresh_index';
+import { retryFleetRequest } from './retry_fleet_request';
 
-const TOTAL_TIMEOUT = 60_000; // applies to all attempts
-const RETRY_DELAY = 10_000;
+// Fleet rate limits package uploads
+const FLEET_UPLOAD_RATE_LIMIT_DELAY = 10_000;
 
 interface InstallFleetPackageParams {
   getService: FtrProviderContext['getService'];
@@ -49,28 +50,25 @@ export const installFleetPackage = async ({
 
   log.debug(`Installing ${packageName} package`);
 
-  const fleetResponse = await retryService.tryForTime<InstallPackageResponse>(
-    FLEET_RATE_LIMIT_TIMEOUT * 3,
-    async () => {
-      const response = await supertest
+  const { body } = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
         .post(epmRouteService.getInstallPath(packageName, packageVersion))
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
-        .send({ force })
-        .expect(200);
-
-      expect((response.body as InstallPackageResponse).items).toBeDefined();
-      expect((response.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
-
-      await refreshSavedObjectIndices(es);
-
-      log.success(`${packageName} has been installed`);
-
-      return response.body;
-    },
+        .send({ force }),
     { description: installFleetPackage.name }
   );
+  const fleetResponse = body as InstallPackageResponse;
+
+  expect(fleetResponse.items).toBeDefined();
+  expect(fleetResponse.items.length).toBeGreaterThan(0);
+
+  await refreshSavedObjectIndices(es);
+
+  log.success(`${packageName} has been installed`);
 
   return fleetResponse;
 };
@@ -94,28 +92,25 @@ export const installFleetPackageByUpload = async ({
 
   log.debug('Uploading a package to Fleet...');
 
-  const fleetResponse = await retryService.tryForTime<InstallPackageResponse>(
-    FLEET_RATE_LIMIT_TIMEOUT * 2,
-    async () => {
-      const response = await supertest
+  const { body } = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
         .post(EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN)
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/zip')
-        .send(packageBuffer)
-        .expect(200);
-
-      expect((response.body as InstallPackageResponse).items).toBeDefined();
-      expect((response.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
-
-      await refreshSavedObjectIndices(es);
-
-      log.success('Mock prebuilt rules package has been installed');
-
-      return response.body;
-    },
-    { description: installFleetPackageByUpload.name, retryDelay: FLEET_RATE_LIMIT_TIMEOUT }
+        .send(packageBuffer),
+    { description: installFleetPackageByUpload.name, retryDelay: FLEET_UPLOAD_RATE_LIMIT_DELAY }
   );
+  const fleetResponse = body as InstallPackageResponse;
+
+  expect(fleetResponse.items).toBeDefined();
+  expect(fleetResponse.items.length).toBeGreaterThan(0);
+
+  await refreshSavedObjectIndices(es);
+
+  log.success('Mock prebuilt rules package has been installed');
 
   return fleetResponse;
 };
@@ -172,23 +167,21 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
   supertest: SuperTest.Agent,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await retryService.tryForTime<InstallPackageResponse>(
-    TOTAL_TIMEOUT,
-    async () => {
-      const testResponse = await supertest
+  const { body } = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
         .post(`/api/fleet/epm/packages/security_detection_engine`)
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
-        .send({ force: true })
-        .expect(200);
-      expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
-      expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
-
-      return testResponse.body;
-    },
-    { description: installPrebuiltRulesPackageViaFleetAPI.name, retryDelay: RETRY_DELAY }
+        .send({ force: true }),
+    { description: installPrebuiltRulesPackageViaFleetAPI.name }
   );
+  const fleetResponse = body as InstallPackageResponse;
+
+  expect(fleetResponse.items).toBeDefined();
+  expect(fleetResponse.items.length).toBeGreaterThan(0);
 
   await refreshSavedObjectIndices(es);
 
@@ -211,27 +204,23 @@ export const installPrebuiltRulesPackageByVersion = async (
   version: string,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await retryService.tryForTime<InstallPackageResponse>(
-    TOTAL_TIMEOUT,
-    async () => {
-      const testResponse = await supertest
+  const { body } = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
         .post(epmRouteService.getInstallPath('security_detection_engine', version))
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
-        .send({ force: true })
-        .expect(200);
-      expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
-      expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
-
-      return testResponse.body;
-    },
-    { description: installPrebuiltRulesPackageByVersion.name, retryDelay: RETRY_DELAY }
+        .send({ force: true }),
+    { description: installPrebuiltRulesPackageByVersion.name }
   );
+  const fleetResponse = body as InstallPackageResponse;
+
+  expect(fleetResponse.items).toBeDefined();
+  expect(fleetResponse.items.length).toBeGreaterThan(0);
 
   await refreshSavedObjectIndices(es);
 
-  return fleetResponse as InstallPackageResponse;
+  return fleetResponse;
 };
-
-const FLEET_RATE_LIMIT_TIMEOUT = 10000; // 10 seconds

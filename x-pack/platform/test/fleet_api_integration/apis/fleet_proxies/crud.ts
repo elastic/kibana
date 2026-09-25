@@ -164,8 +164,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(fleetServerHost.name).to.eql('Test 123 updated');
 
-        await retry.tryForTime(
-          15_000,
+        await retry.try(
           async () => {
             const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
             if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx)
@@ -202,8 +201,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        await retry.tryForTime(
-          15_000,
+        await retry.try(
           async () => {
             const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
             if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx) {

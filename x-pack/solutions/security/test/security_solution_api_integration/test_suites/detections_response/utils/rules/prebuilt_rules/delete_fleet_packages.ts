@@ -15,6 +15,7 @@ import {
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import { refreshSavedObjectIndices } from '../../refresh_index';
+import { retryFleetRequest } from './retry_fleet_request';
 
 interface DeleteFleetPackageDeps {
   supertest: SuperTest.Agent;
@@ -52,32 +53,27 @@ async function deleteFleetPackage(params: DeleteFleetPackageArgs): Promise<void>
   const { packageName, dependencies } = params;
   const { supertest, retryService, log, es } = dependencies;
 
-  await retryService.tryForTime(
-    10_000,
-    async () => {
-      log.debug(`Deleting ${packageName} package`);
+  log.debug(`Deleting ${packageName} package`);
 
-      const response = await supertest
+  const response = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
         .delete(epmRouteService.getRemovePath(packageName))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
-        .send({ force: true });
+        .send({ force: true }),
+    {
+      description: `deleteFleetPackage ${packageName}`,
+      isSuccess: ({ status, body }) =>
+        status === 200 || (status === 400 && body.message === `${packageName} is not installed`),
+    }
+  );
 
-      if (response.status === 200) {
-        log.debug(`Deleted ${packageName} package (was installed)`);
-        return;
-      } else if (
-        response.status === 400 &&
-        response.body.message === `${packageName} is not installed`
-      ) {
-        log.debug(`Deleted ${packageName} package (was not installed)`, response.body);
-        return;
-      } else {
-        log.warning(`Error deleting ${packageName} package`, response.body);
-        throw response.error;
-      }
-    },
-    { description: 'deleteFleetPackage', retryDelay: 3_000 }
+  log.debug(
+    response.status === 200
+      ? `Deleted ${packageName} package (was installed)`
+      : `Deleted ${packageName} package (was not installed)`
   );
 
   await refreshSavedObjectIndices(es);

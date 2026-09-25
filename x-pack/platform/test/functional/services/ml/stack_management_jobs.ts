@@ -185,8 +185,7 @@ export function MachineLearningStackManagementJobsProvider(
     async selectShareToSpacesMode(
       buttonTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId'
     ) {
-      await retry.tryForTime(
-        4 * 60_000,
+      await retry.try(
         async () => {
           const button = await testSubjects.find(buttonTestSubj, 10000);
           await testSubjects.click(buttonTestSubj);
@@ -202,7 +201,7 @@ export function MachineLearningStackManagementJobsProvider(
           const isPressed = await button.getAttribute('aria-pressed');
           expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
         },
-        { description: `select share to spaces mode ${buttonTestSubj}`, retryDelay: 20000 }
+        { description: `select share to spaces mode ${buttonTestSubj}` }
       );
     },
 
