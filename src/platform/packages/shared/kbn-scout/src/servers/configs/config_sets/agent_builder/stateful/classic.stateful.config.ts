@@ -55,6 +55,7 @@ export const servers: ScoutServerConfig = {
       ])}`,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
       '--uiSettings.overrides.contextEngine:enabled=true',
+      '--uiSettings.overrides.contextEngine:memoryEnabled=true',
       '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
       '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
       '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',

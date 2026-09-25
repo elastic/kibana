@@ -193,9 +193,9 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
     expect(block.split('\n').slice(0, 3)).toStrictEqual([
-      `AI index: ${SINGLE_AI_INDEX_ID}`,
+      `AI-index registry ID: ${SINGLE_AI_INDEX_ID}`,
       `Scout describe fixture ${SINGLE_AI_INDEX_ID}`,
-      `Query with ES|QL against: ${INDEX_A}`,
+      `Backing Elasticsearch target (use only in ES|QL queries): ${INDEX_A}`,
     ]);
     // Fields not truncated: plain heading, no `(showing …)`.
     expect(block).toContain('\n\nFields\n');
@@ -234,7 +234,9 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${DATA_STREAM}\n`);
+    expect(block).toContain(
+      `\nBacking Elasticsearch target (use only in ES|QL queries): ${DATA_STREAM}\n`
+    );
     expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
   });
 
