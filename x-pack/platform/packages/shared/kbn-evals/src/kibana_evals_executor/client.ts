@@ -209,9 +209,14 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                     'dataset.id': datasetId,
                   },
                 },
-                async () => {
-                  const _traceId = getCurrentTraceId();
+                async (span) => {
                   const _taskOutput = await task(example);
+                  // Read the trace id from *this* task span rather than the ambient active
+                  // span. Under concurrent (pMap) runs the active-span lookup can surface a
+                  // sibling run's id if the async context leaks, whereas the span handed to
+                  // this callback is always the one started for this run. Fall back to the
+                  // active-span lookup only when tracing produced no span for this call.
+                  const _traceId = span?.spanContext().traceId ?? getCurrentTraceId();
                   return {
                     taskOutput: _taskOutput,
                     traceId: _traceId,
@@ -221,7 +226,22 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
               // Prefer the trace id the task itself surfaced (e.g. converse's response
               // trace_id) over the eval client's own task-span trace id. See #276308.
-              const taskOrClientTraceId = (taskOutput as { traceId?: string })?.traceId || traceId;
+              const taskSurfacedTraceId = (taskOutput as { traceId?: string })?.traceId;
+              const taskOrClientTraceId = taskSurfacedTraceId || traceId;
+
+              // When the task did not surface its own trace id, stamp the per-run task-span
+              // id back onto the output so the recorded `run.output.traceId` and `run.traceId`
+              // are the same deterministic per-run value (the identity investigation.spec.ts
+              // asserts as `run.traceId === output.traceId`). We never overwrite a trace id the
+              // task already surfaced, and we leave the output untouched when no id is available.
+              if (
+                taskOrClientTraceId &&
+                !taskSurfacedTraceId &&
+                taskOutput &&
+                typeof taskOutput === 'object'
+              ) {
+                (taskOutput as { traceId?: string }).traceId = taskOrClientTraceId;
+              }
 
               runs[runKey] = {
                 exampleIndex,
@@ -245,8 +265,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   const { result, evaluatorTraceId } = await withEvaluatorSpan(
                     evaluator.name,
                     {},
-                    async () => {
-                      const _traceId = getCurrentTraceId();
+                    async (span) => {
                       const _result = await evaluator.evaluate({
                         input: example.input,
                         output: {
@@ -256,6 +275,9 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
                       });
+                      // As with the task span, derive the id from this evaluator span so
+                      // concurrent evaluations can't record a sibling's (stale) trace id.
+                      const _traceId = span?.spanContext().traceId ?? getCurrentTraceId();
                       return {
                         result: _result,
                         evaluatorTraceId: _traceId,
