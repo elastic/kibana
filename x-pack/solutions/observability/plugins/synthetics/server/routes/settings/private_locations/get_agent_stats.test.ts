@@ -75,12 +75,14 @@ const makeContext = ({
   hasEnterprise = false,
   rebalanceEnabled = true,
   visibleConfigIds = ['mon-a', 'mon-b', 'mon-c'],
+  visibleMonitors,
 }: {
   listAgentsImpl: jest.Mock;
   buckets?: ReturnType<typeof bucket>[];
   hasEnterprise?: boolean;
   rebalanceEnabled?: boolean;
   visibleConfigIds?: string[];
+  visibleMonitors?: Array<{ id: string; attributes: Record<string, unknown> }>;
 }) => {
   const search = jest.fn().mockResolvedValue({ aggregations: { by_host: { buckets } } });
   const routeContext = {
@@ -108,9 +110,16 @@ const makeContext = ({
     savedObjectsClient: {},
     syntheticsMonitorClient: {},
     monitorConfigRepository: {
-      getAll: jest
-        .fn()
-        .mockResolvedValue(visibleConfigIds.map((id) => ({ id, attributes: { config_id: id } }))),
+      getAll: jest.fn().mockResolvedValue(
+        visibleMonitors ??
+          visibleConfigIds.map((id) => ({
+            id,
+            attributes: {
+              config_id: id,
+              [ConfigKey.LOCATIONS]: [{ id: 'loc-1' }],
+            },
+          }))
+      ),
     },
   } as any;
   return { routeContext, search };
@@ -283,7 +292,7 @@ describe('getPrivateLocationAgentStats route', () => {
     expect(result[0].agents[0].monitorsAssigned).toBe(1);
     expect(routeContext.monitorConfigRepository.getAll).toHaveBeenCalledWith(
       expect.objectContaining({
-        fields: ['config_id', ConfigKey.MONITOR_QUERY_ID],
+        fields: ['config_id', ConfigKey.MONITOR_QUERY_ID, ConfigKey.LOCATIONS],
         showFromAllSpaces: true,
       })
     );
@@ -301,6 +310,7 @@ describe('getPrivateLocationAgentStats route', () => {
         attributes: {
           config_id: 'saved-object-id',
           [ConfigKey.MONITOR_QUERY_ID]: 'project-monitor-id',
+          [ConfigKey.LOCATIONS]: [{ id: 'loc-1' }],
         },
       },
     ]);
@@ -308,6 +318,46 @@ describe('getPrivateLocationAgentStats route', () => {
     const result = await run(routeContext);
 
     expect(result[0].agents[0].monitorsAssigned).toBe(1);
+  });
+
+  it('does not count a same-ID monitor that is only visible at another location', async () => {
+    mockGetLocations.mockResolvedValue({
+      locations: [
+        { id: 'loc-1', label: 'Location 1', agentPolicyId: 'policy-1' },
+        { id: 'loc-2', label: 'Location 2', agentPolicyId: 'policy-2' },
+      ],
+      agentPolicies: [
+        { id: 'policy-1', name: 'Policy One' },
+        { id: 'policy-2', name: 'Policy Two' },
+      ],
+    });
+    mockListByAgentPolicy.mockImplementation(({ agentPolicyId }) =>
+      Promise.resolve([
+        {
+          id: `shared-monitor-${agentPolicyId === 'policy-1' ? 'loc-1' : 'loc-2'}`,
+          condition: agentIdCondition('agent-1'),
+        },
+      ])
+    );
+    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const { routeContext } = makeContext({
+      listAgentsImpl: listAgents,
+      hasEnterprise: true,
+      visibleMonitors: [
+        {
+          id: 'visible-monitor',
+          attributes: {
+            config_id: 'shared-monitor',
+            [ConfigKey.LOCATIONS]: [{ id: 'loc-2' }],
+          },
+        },
+      ],
+    });
+
+    const result = await run(routeContext);
+
+    expect(result[0].agents[0].monitorsAssigned).toBe(0);
+    expect(result[1].agents[0].monitorsAssigned).toBe(1);
   });
 
   it('logs when visible monitors cannot be loaded', async () => {

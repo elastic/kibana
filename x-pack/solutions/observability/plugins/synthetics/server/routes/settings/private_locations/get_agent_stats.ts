@@ -194,23 +194,34 @@ const getHostMetricsFromSystem = async (
  * Package policies are listed across all spaces; counts are limited to monitors
  * in spaces the caller can read so a shared location doesn't leak other spaces.
  */
-const getVisibleMonitorConfigIds = async (
+const getVisibleMonitorConfigIdsByLocation = async (
   monitorConfigRepository: MonitorConfigRepository,
   locationIds: string[]
-): Promise<Set<string>> => {
+): Promise<Map<string, Set<string>>> => {
   if (locationIds.length === 0) {
-    return new Set();
+    return new Map();
   }
+  const requestedLocationIds = new Set(locationIds);
   const monitors = await monitorConfigRepository.getAll({
     filter: getSavedObjectKqlFilter({ field: 'locations.id', values: locationIds }),
-    fields: ['config_id', ConfigKey.MONITOR_QUERY_ID],
+    fields: ['config_id', ConfigKey.MONITOR_QUERY_ID, ConfigKey.LOCATIONS],
     showFromAllSpaces: true,
   });
-  return new Set(
-    monitors.map(
-      ({ id, attributes }) => attributes[ConfigKey.MONITOR_QUERY_ID] || attributes.config_id || id
-    )
-  );
+  const configIdsByLocation = new Map<string, Set<string>>();
+
+  for (const { id, attributes } of monitors) {
+    const configId = attributes[ConfigKey.MONITOR_QUERY_ID] || attributes.config_id || id;
+    for (const { id: locationId } of attributes[ConfigKey.LOCATIONS] ?? []) {
+      if (!requestedLocationIds.has(locationId)) {
+        continue;
+      }
+      const configIds = configIdsByLocation.get(locationId) ?? new Set<string>();
+      configIds.add(configId);
+      configIdsByLocation.set(locationId, configIds);
+    }
+  }
+
+  return configIdsByLocation;
 };
 
 /**
@@ -238,17 +249,17 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
     const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
     const packagePolicyService = new PackagePolicyService(server);
     const isAgentSharding = await isAgentShardingActive(server);
-    const visibleConfigIds = isAgentSharding
-      ? await getVisibleMonitorConfigIds(
+    const visibleConfigIdsByLocation = isAgentSharding
+      ? await getVisibleMonitorConfigIdsByLocation(
           monitorConfigRepository,
           locations.map(({ id }) => id)
         ).catch((error) => {
           server.logger.warn('Unable to load visible monitors for private location agent stats', {
             error,
           });
-          return new Set<string>();
+          return new Map<string, Set<string>>();
         })
-      : new Set<string>();
+      : new Map<string, Set<string>>();
 
     const { elasticsearch } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
@@ -262,14 +273,15 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           isAgentSharding
             ? packagePolicyService
                 .listByAgentPolicy({ agentPolicyId: location.agentPolicyId })
-                .then((policies) =>
-                  countMonitorsByAssignedAgent(
+                .then((policies) => {
+                  const visibleConfigIds = visibleConfigIdsByLocation.get(location.id);
+                  return countMonitorsByAssignedAgent(
                     policies.filter(({ id }) =>
-                      visibleConfigIds.has(configIdOf(id, location.id) ?? '')
+                      visibleConfigIds?.has(configIdOf(id, location.id) ?? '')
                     ),
                     location.id
-                  )
-                )
+                  );
+                })
                 .catch(() => new Map<string, number>())
             : Promise.resolve(new Map<string, number>()),
         ]);
