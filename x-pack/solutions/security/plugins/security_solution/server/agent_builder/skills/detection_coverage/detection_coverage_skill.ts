@@ -79,18 +79,23 @@ Load the sibling skills and follow their search instructions. Do it in this orde
 
 ### Step 1: installed rules
 
-Call \`load_skill\` with \`find-security-rules\`. Follow that skill's instructions to search installed rules. Two constraints from this skill on top of its instructions:
+Call \`load_skill\` with \`find-security-rules\`. Follow that skill's instructions to search installed rules. Three constraints from this skill on top of its instructions:
 
 - Do not pass \`enabled\`. You need enabled and disabled rules in one result.
-- Up to three searches: one by technique id if you have one, one by the distinctive behavior words, and, when both return nothing, one with the **single most distinctive word** (a protocol, product, or tool word: "SMB", "DNS", "kubectl"). Free text searches rule names, index patterns, and MITRE tactic and technique fields. Extra intent words like "attackers" or "exfiltrating" can hide real matches, so use the single-word probe to broaden the search.
+- Do not pass \`ruleSource\`. A custom rule the user wrote counts as coverage exactly like a prebuilt one, and \`ruleSource: "prebuilt"\` hides every custom rule.
+- Run three searches: one by technique id if you have one, one by the distinctive behavior words, and **always** a third with the **single most distinctive word** (a protocol, product, or tool word: "SMB", "DNS", "kubectl", "PowerShell"). Free text searches rule names, index patterns, and MITRE tactic and technique fields. Extra intent words like "attackers" or "exfiltrating" can hide real matches, so run the single-word probe even when an earlier search already returned something.
 
-Judge each returned rule with the Match Rubric. An exact match that is enabled means \`covered_enabled\`. Stop. An exact match that is disabled means \`covered_disabled\`. Stop. A close but insufficient rule is not coverage: note it for the final explanation and continue.
+Keep the technique id at the level the user gave you. A filter on a sub-technique such as \`T1059.001\` does not return a rule mapped to \`T1059\`, so search the parent technique unless the user named the sub-technique.
+
+Judge each returned rule with the Match Rubric. The filter matches only names, index patterns, and MITRE fields, but every result carries its \`description\` and \`query\`: read both before you judge. A rule whose distinctive behavior appears only in its query (\`process.args:*-enc*\` for encoded-command execution, \`network.protocol:smb\` for SMB lateral movement) is still an exact match once you read that query. An exact match that is enabled means \`covered_enabled\`. Stop. An exact match that is disabled means \`covered_disabled\`. Stop. A close but insufficient rule is not coverage: note it for the final explanation and continue.
 
 ### Step 2: installable prebuilt rules
 
 Only when step 1 found no exact match. Call \`load_skill\` with \`recommend-prebuilt-rules\`. Follow its search instructions. Request the \`description\`, \`query\`, and \`threat\` fields, because you must judge the behavior and the technique, not the name. One search, two at most. Unlike Step 1, the \`keywords\` filter in \`security.find_prebuilt_rules\` searches both rule names and descriptions — use the most distinctive behavior words from the gap, not the full sentence.
 
-An exact match means \`prebuilt_available\`, with one guard first: if the single-word probe from step 1 never ran, run it now against installed rules. An installed rule always beats installing a copy of it. Only when that probe also finds nothing, return \`prebuilt_available\`. Stop. Otherwise return \`no_coverage\`, naming any close rule you noted in step 1.
+An exact match means \`prebuilt_available\`, with one guard first: if the single-word probe from step 1 never ran, run it now against installed rules. An installed exact match always beats installing a copy of it. Only when that probe also finds no exact match, return \`prebuilt_available\`. Stop. Otherwise return \`no_coverage\`.
+
+A close installed rule from step 1 never changes the verdict: installing an exact prebuilt rule is cheaper than widening a custom one or authoring a new one. Name that close rule in the explanation with either verdict, so the analyst can choose to widen it instead.
 
 ### Precedence
 
@@ -107,6 +112,8 @@ A rule is an **exact** match when both hold:
 2. Its **data source** is the same. A Windows process rule does not cover a Linux behavior, and an Okta rule does not cover Azure AD.
 
 Everything else is **no match**, including a rule that covers the same behavior but is scoped too narrowly, or one that would cover the gap only after a query change. A shared MITRE technique on its own is never enough. Say "no match" rather than stretching a weak one: a false "already covered" leaves a real gap open. When such a close rule exists, name it in the explanation so the analyst can decide to widen it instead, but the verdict stays \`no_coverage\`.
+
+**Scope is part of the behavior.** A query that limits the rule by namespace (\`kubernetes.audit.objectRef.namespace:"staging"\`), by environment, by host set, or by any other narrowing field does not cover a request about a different or wider scope, even when the behavior and the technique match exactly. A rule scoped to the staging namespace is not coverage for a production namespace.
 
 ## Verdicts and Routes
 
@@ -134,9 +141,11 @@ Then the rule, then the route. Then execute the route:
 - **\`covered_enabled\`**: name the rule and stop.
 - **\`covered_disabled\`**: no chat tool can enable a rule. Call \`security.build_redirect_url\` with \`path: "/app/security/rules/id/<the rule's id>"\` and present the link. The enable switch is at the top of that page. Never claim you enabled anything.
 - **\`prebuilt_available\`**: show the evidence so the user can judge the fit: for each candidate (three at most) give the name, one line from its description, and its related integrations. Note when the user does not seem to collect the data the rule needs. Then call \`security.build_redirect_url\` with \`path: "/app/security/rules/add_rules"\` and present the link, with the exact rule name to search for there. The final call is the user's. Never claim you installed anything.
-- **\`no_coverage\`**: say what you searched, name a close rule when one exists and why it does not cover the gap, then offer: "I can draft a new rule for this." On yes, \`detection-rule-edit\` takes over.
+- **\`no_coverage\`**: say what you searched, name a close rule when one exists and why it does not cover the gap, then offer: "I can draft a new rule for this."
 
 Offer, then wait. Do not start a create until the user agrees.
+
+When the user agrees, finish the job here. Call \`load_skill\` with \`detection-rule-edit\` and follow it to draft the rule in this same conversation. Do not tell the user to ask again in another way: they stated the gap once, and one answer must close it. The same applies when a close rule should be widened instead, which is an edit, not a creation.
 
 ## Grounding
 
@@ -150,7 +159,9 @@ Know one limit for Step 1: the search **filter** on installed rules only matches
 
 ## Structured Output
 
-When the caller asks for structured output, fill every field of the requested schema from tool results. Put the verdict in \`verdict\`, the supporting rule in \`rule_id\` and \`rule_name\`, and the one-sentence justification in \`rationale\`. When the schema has a \`prebuilt_version\` field, fill it from the matched prebuilt rule (its \`version\` in the tool result) for \`prebuilt_available\`, and set 0 for every other verdict. Leave \`rule_id\` and \`rule_name\` empty for \`no_coverage\`. In structured-output mode, skip the redirect link and the offers. The calling workflow owns the actions and gates them with its own approval steps.`;
+When the caller asks for structured output, fill every field of the requested schema from tool results. Put the verdict in \`verdict\`, the supporting rule in \`rule_id\` and \`rule_name\`, and the one-sentence justification in \`rationale\`. When the schema has a \`prebuilt_version\` field, fill it from the matched prebuilt rule (its \`version\` in the tool result) for \`prebuilt_available\`, and set 0 for every other verdict. Leave \`rule_id\` and \`rule_name\` empty for \`no_coverage\`. Those two fields identify the rule the caller acts on, so a close rule never goes there: name it in \`rationale\` instead.
+
+Structured-output mode ends at the verdict. Skip the redirect link and the offer, do not call \`load_skill\` with \`detection-rule-edit\`, do not draft a rule, and do not ask a follow-up question. The calling workflow owns every action and gates it with its own approval steps.`;
 
 export const createDetectionCoverageSkill = (): SkillDefinition<
   'detection-coverage',
@@ -162,8 +173,9 @@ export const createDetectionCoverageSkill = (): SkillDefinition<
     basePath: 'skills/security/rules',
     description:
       'Make a behavior covered by detection. Use when the user wants coverage to exist ' +
-      '("I want a rule that covers X", "we need to detect X", a reported gap) and gives no ' +
-      'rule logic. Checks installed rules (enabled and disabled) and the installable prebuilt ' +
+      '("I need detection for X", "I want a rule that covers X", "we need to detect X", ' +
+      '"we have no coverage for X", "can we catch X", a reported gap or hunt finding) and ' +
+      'gives no rule logic. Checks installed rules (enabled and disabled) and the installable prebuilt ' +
       'catalog, then routes to one action: nothing, enable, install, or create. ' +
       'NOT for questions about existing coverage ("do we have a rule for X?", "which ' +
       'tactics am I missing?") — those are reporting intents for find-security-rules or ' +
