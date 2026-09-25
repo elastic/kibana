@@ -311,7 +311,6 @@ export function useMiDeploy({
                 ) as Record<string, Record<string, unknown>>,
                 authMethod: authenticateAndDeployStep.authMethod ?? null,
                 connectorId: authenticateAndDeployStep.connectorId ?? null,
-                globalRegion: serviceSettings?.globalRegion ?? '',
               });
               if (!soUpdated) {
                 // Toast already shown by updateDeployment. Keep isDirty so the user can retry.

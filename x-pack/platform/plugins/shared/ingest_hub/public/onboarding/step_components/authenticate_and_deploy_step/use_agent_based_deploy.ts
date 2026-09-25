@@ -287,7 +287,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 >,
                 authMethod: authenticateAndDeployStep.authMethod ?? null,
                 connectorId: authenticateAndDeployStep.connectorId ?? null,
-                globalRegion,
               });
               if (!soUpdated) {
                 // Toast already shown by updateDeployment. Keep isDirty so the user can retry.
