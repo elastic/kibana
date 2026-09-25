@@ -22,6 +22,7 @@ const investigation: Investigation = {
   recordId: 'CASE-2047',
   assignee: 'ava',
   pendingProposalCount: 0,
+  assignees: [],
   events: [],
 };
 
@@ -55,12 +56,44 @@ describe('ConversationDetailsFlyoutFooter', () => {
 
   it('owns the close investigation modal', () => {
     renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={() => <div>Dismiss proposal</div>}
+      />
     );
 
     openActionsMenu();
     fireEvent.click(screen.getByText('Close investigation'));
 
     expect(screen.getByText('Dismiss proposal')).toBeInTheDocument();
+  });
+
+  it('hides the close action when onCloseInvestigation is not provided', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
+    );
+
+    openActionsMenu();
+
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+  });
+
+  it('hides the close action when the investigation is already closed', () => {
+    const closedInvestigation: Investigation = { ...investigation, status: 'closed' };
+
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={closedInvestigation}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={() => <div>Dismiss proposal</div>}
+      />
+    );
+
+    openActionsMenu();
+
+    // Even though onCloseInvestigation is provided, the menu item should not appear
+    // because the investigation is already closed.
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
   });
 });

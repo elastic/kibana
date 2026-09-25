@@ -17,6 +17,7 @@ import {
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
@@ -48,8 +49,7 @@ import { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW } from './nightshift_investigations/
 import { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW } from './nightshift_investigations/cortex_optimize';
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW } from './nightshift_investigations/decision_tree_hydrate';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW } from './nightshift_investigations/decision_tree_reinforce';
-import { DEDUCTIVE_INVESTIGATION_WORKFLOW } from './nightshift_investigations/deductive_investigation';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
 import { CREATE_PROPOSAL_WORKFLOW } from './proposals';
 import {
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW,
@@ -109,12 +109,11 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
-export { DEDUCTIVE_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/deductive_investigation';
+export { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
 export { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/cortex_hydrate';
 export { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/cortex_optimize';
 export { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_hydrate';
 export { NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_reinforce';
-export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
 export { CREATE_PROPOSAL_WORKFLOW_ID } from './proposals';
 export {
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
@@ -127,6 +126,7 @@ export {
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
@@ -187,8 +187,7 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW,
   NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW,
   NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW,
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW,
-  DEDUCTIVE_INVESTIGATION_WORKFLOW,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW,
@@ -207,6 +206,7 @@ export const managedWorkflowDefinitions = [
   ALERTZERO_COVERAGE_WORKER_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   // Generic proposal gate, owned by the proposals plugin.
   CREATE_PROPOSAL_WORKFLOW,
@@ -222,7 +222,7 @@ export const managedWorkflowDefinitions = [
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW,
   // Threat intel supply workflows are FF-off safe: registry membership only
   // makes a definition discoverable by id. security_solution installs them
-  // in start() only when `threatIntelSupplyEnabled` is on.
+  // in start() only when `xpack.alertzero.enabled` is on.
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW,
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW,

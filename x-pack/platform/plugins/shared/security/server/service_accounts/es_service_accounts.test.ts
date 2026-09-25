@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -18,8 +20,8 @@ import type { ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import { licenseMock } from '../../common/licensing/index.mock';
 import {
-  ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   SERVICE_ACCOUNT_MAX_ROLES,
+  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
 } from '../../common/service_accounts';
 import { securityTelemetry } from '../otel/instrumentation';
 
@@ -103,6 +105,7 @@ describe('EsServiceAccounts', () => {
       set: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(true),
       getDecrypted: jest.fn().mockResolvedValue(null),
+      findExisting: jest.fn().mockResolvedValue(new Set()),
     } as unknown as jest.Mocked<ServiceAccountCredentialStore>;
 
     mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
@@ -113,6 +116,7 @@ describe('EsServiceAccounts', () => {
     getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
 
     serviceAccounts = new EsServiceAccounts({
+      requestLifetimeMs: 600_000,
       logger,
       license,
       clusterClient,
@@ -267,8 +271,8 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.set).not.toHaveBeenCalled();
     });
 
-    // A third account type, a renamed field, or a role list outside Kibana's caps would
-    // otherwise read as "the name is free", and the PUT that follows is a full replacement.
+    // A third account type or a renamed field would otherwise read as "the name is free", and
+    // the PUT that follows is a full replacement.
     it('refuses rather than overwriting an account it cannot read', async () => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         'kibana/nightshift-relay': { type: 'user_managed', roles: 'superuser', enabled: true },
@@ -310,6 +314,7 @@ describe('EsServiceAccounts', () => {
 
     it('rejects with a 424 when saved object encryption is unavailable', async () => {
       serviceAccounts = new EsServiceAccounts({
+        requestLifetimeMs: 600_000,
         logger,
         license,
         clusterClient,
@@ -351,21 +356,6 @@ describe('EsServiceAccounts', () => {
 
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('refuses a token longer than Elasticsearch should ever report, and rolls back', async () => {
-      esClient.asCurrentUser.transport.request
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({ created: true })
-        .mockResolvedValueOnce({
-          token: { value: 'a'.repeat(ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH + 1) },
-        });
-
-      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
-
-      expect(credentialStore.set).not.toHaveBeenCalled();
-      const calls = esClient.asCurrentUser.transport.request.mock.calls;
-      expect(calls[3][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
     });
 
     it('rolls back the token and the account when the credential cannot be stored', async () => {
@@ -652,24 +642,336 @@ describe('EsServiceAccounts', () => {
     });
   });
 
-  describe('#createFakeRequest', () => {
-    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(serviceAccounts.createFakeRequest()).rejects.toMatchObject({
-        message: 'Creating requests for Elasticsearch service accounts is not yet implemented',
-        output: { statusCode: 501 },
+  describe('#list', () => {
+    const QUERY_PATH = '/_security/_query/service';
+    /** One item as the query API reports it. */
+    const queried = (username: string, overrides = {}) => ({
+      username,
+      type: 'user_managed',
+      roles: ['viewer'],
+      enabled: true,
+      ...overrides,
+    });
+
+    it('queries one page of user-managed accounts sorted by principal and joins the credentials', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 2,
+        count: 2,
+        service_accounts: [
+          queried('acme/billing', { enabled: false, roles: ['billing_read'] }),
+          queried('kibana/nightshift-relay'),
+        ],
+      });
+      credentialStore.findExisting.mockResolvedValue(new Set(['kibana/nightshift-relay']));
+
+      const result = await serviceAccounts.list(request);
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['read_security'], index: {} },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: QUERY_PATH,
+        body: { size: 101, sort: ['username'] },
+      });
+      expect(credentialStore.findExisting).toHaveBeenCalledWith([
+        'acme/billing',
+        'kibana/nightshift-relay',
+      ]);
+      expect(result).toEqual({
+        serviceAccounts: [
+          {
+            id: 'acme/billing',
+            name: 'billing',
+            roles: ['billing_read'],
+            enabled: false,
+            assumable: false,
+          },
+          {
+            id: 'kibana/nightshift-relay',
+            name: 'nightshift-relay',
+            roles: ['viewer'],
+            enabled: true,
+            assumable: true,
+          },
+        ],
+      });
+      expect(result).not.toHaveProperty('nextPage');
+    });
+
+    it('reports no creator, which Elasticsearch does not record yet', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [queried('kibana/nightshift-relay')],
+      });
+      // The credential names whoever asked Kibana to create the account. That is not the
+      // account's creator, so it stays out of the entry until Elasticsearch reports one.
+      credentialStore.findExisting.mockResolvedValue(new Set(['kibana/nightshift-relay']));
+
+      const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
+
+      expect(entry).not.toHaveProperty('createdBy');
+      expect(entry).not.toHaveProperty('createdAt');
+      expect(entry.assumable).toBe(true);
+    });
+
+    it('asks for one more than the page and reports the last principal as the cursor when it arrives', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 3,
+        count: 3,
+        service_accounts: [queried('kibana/a'), queried('kibana/b'), queried('kibana/c')],
+      });
+
+      const result = await serviceAccounts.list(request, { limit: 2 });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: QUERY_PATH,
+        body: { size: 3, sort: ['username'] },
+      });
+      expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/a', 'kibana/b']);
+      expect(result.nextPage).toBe('kibana/b');
+      // The extra row is never reported, so its credential is never looked up either.
+      expect(credentialStore.findExisting).toHaveBeenCalledWith(['kibana/a', 'kibana/b']);
+    });
+
+    it('resumes from the cursor with search_after', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 3,
+        count: 1,
+        service_accounts: [queried('kibana/c')],
+      });
+
+      await serviceAccounts.list(request, { limit: 2, after: 'kibana/b' });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: QUERY_PATH,
+        body: { size: 3, sort: ['username'], search_after: ['kibana/b'] },
       });
     });
-  });
 
-  describe('#reauthenticateFakeRequest', () => {
-    it('resolves to null so unrelated fake requests stay on the not-handled path', async () => {
-      await expect(serviceAccounts.reauthenticateFakeRequest()).resolves.toBeNull();
+    it('returns an empty page without consulting the credential store', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        total: 0,
+        count: 0,
+        service_accounts: [],
+      });
+
+      await expect(serviceAccounts.list(request)).resolves.toEqual({ serviceAccounts: [] });
+
+      expect(credentialStore.findExisting).toHaveBeenCalledWith([]);
+    });
+
+    it('skips an account whose principal it cannot split and still reports the rest of the page', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [queried('no-namespace'), queried('kibana/nightshift-relay')],
+      });
+
+      const result = await serviceAccounts.list(request);
+
+      // One unreadable account costs that account, not the directory.
+      expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/nightshift-relay']);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Skipping service account [no-namespace]')
+      );
+      // The credential join only ever sees the accounts that survived.
+      expect(credentialStore.findExisting).toHaveBeenCalledWith(['kibana/nightshift-relay']);
+    });
+
+    it('takes the cursor from the raw page, so a skipped entry does not rewind paging', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [
+          queried('kibana/a'),
+          // Unreadable, and the last account of the page: the cursor still has to step over it.
+          queried('no-namespace'),
+          queried('kibana/c'),
+        ],
+      });
+
+      const result = await serviceAccounts.list(request, { limit: 2 });
+
+      expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/a']);
+      expect(result.nextPage).toBe('no-namespace');
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.list(request)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(serviceAccounts.list(request)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rethrows Elasticsearch failures', async () => {
+      esClient.asCurrentUser.transport.request.mockRejectedValueOnce(new Error('socket hang up'));
+
+      await expect(serviceAccounts.list(request)).rejects.toThrow('socket hang up');
     });
   });
 
-  describe('#releaseFakeRequest', () => {
-    it('is a no-op since this backend never mints requests', () => {
-      expect(() => serviceAccounts.releaseFakeRequest()).not.toThrow();
+  describe('#get', () => {
+    const ACCOUNT_ID = 'kibana/nightshift-relay';
+
+    it('reads the user-managed account and confirms it is assumable', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
+        // The account still holds Kibana's token, so the stored credential describes it.
+        .mockResolvedValueOnce(accountCredentials(['kibana-managed']));
+      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+
+      // The credential records who asked Kibana to create the account, and none of it is
+      // reported: Elasticsearch does not store a creator yet, and Kibana will not invent one.
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
+        id: ACCOUNT_ID,
+        name: 'nightshift-relay',
+        roles: ['viewer'],
+        enabled: true,
+        assumable: true,
+      });
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['read_security'], index: {} },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
+        ignore: [404],
+      });
+      expect(credentialStore.findExisting).toHaveBeenCalledWith([ACCOUNT_ID]);
+    });
+
+    it('reports an account Kibana cannot assume without asking for its tokens', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry());
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
+        id: ACCOUNT_ID,
+        name: 'nightshift-relay',
+        roles: ['superuser'],
+        enabled: true,
+        assumable: false,
+      });
+
+      // An account Kibana never created costs no extra round trip.
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+    });
+
+    it("stops reporting assumable once the account no longer holds Kibana's token", async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
+        // Deleted and recreated through Elasticsearch: the account is back, Kibana's token is
+        // not, and the credential document outlived both.
+        .mockResolvedValueOnce(accountCredentials([]));
+      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
+        id: ACCOUNT_ID,
+        name: 'nightshift-relay',
+        roles: ['viewer'],
+        enabled: true,
+        assumable: false,
+      });
+    });
+
+    it('ignores tokens an operator deployed under another name', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
+        .mockResolvedValueOnce(accountCredentials(['operator-minted']));
+      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        assumable: false,
+      });
+    });
+
+    it('stays assumable when the token check cannot be completed', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
+        // A reader must not be told an account is unmanaged because one call did not land.
+        .mockRejectedValueOnce(Boom.forbidden('insufficient privileges'));
+      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        assumable: true,
+      });
+    });
+
+    it('rejects with a 404 when there is no such account', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({});
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(credentialStore.findExisting).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 404 for a built-in account, which is not Kibana to list', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        'elastic/kibana': { type: 'built_in', role_descriptor: {} },
+      });
+
+      await expect(serviceAccounts.get(request, 'elastic/kibana')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('reports an id that is not namespace/service as missing, without reaching Elasticsearch', async () => {
+      for (const id of ['nightshift-relay', 'kibana/../_cluster', 'a/b/c', '']) {
+        await expect(serviceAccounts.get(request, id)).rejects.toMatchObject({
+          output: { statusCode: 404 },
+        });
+      }
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    // Elasticsearch caps neither the role count nor the role name length, so an account created
+    // outside Kibana can sit outside the bounds Kibana puts on its own creates. Such an account
+    // lists fine, and must open fine too.
+    it('reads an account whose roles fall outside the bounds of a Kibana create', async () => {
+      const roles = Array.from({ length: SERVICE_ACCOUNT_MAX_ROLES + 1 }, (_, i) => `role-${i}`);
+      roles.push('a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1));
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry({ roles }));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        id: ACCOUNT_ID,
+        roles,
+      });
+    });
+
+    it('rejects with a 502 when the account is reported in an unrecognized shape', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ roles: 'viewer' })
+      );
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
   });
 });

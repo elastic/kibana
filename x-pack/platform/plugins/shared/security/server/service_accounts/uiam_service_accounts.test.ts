@@ -23,7 +23,10 @@ import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH } from '../../common/service_accounts';
+import {
+  SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
+} from '../../common/service_accounts';
 import type { UiamServiceAccount, UiamServicePublic } from '../uiam';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
@@ -341,6 +344,229 @@ describe('UiamServiceAccounts', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to create service account [nightshift-relay]')
       );
+    });
+  });
+
+  describe('#list', () => {
+    const listedAccount = {
+      ...validResponse,
+      creator: {
+        type: 'user' as const,
+        id: 'user-id',
+        first_name: 'Ada',
+        last_name: 'Lovelace',
+      },
+    };
+    const expectedEntry = {
+      id: validResponse.id,
+      name: validResponse.name,
+      roles: [],
+      enabled: true,
+      assumable: true,
+      createdBy: { type: 'user' as const, username: 'user-id', displayName: 'Ada Lovelace' },
+    };
+
+    it('calls UIAM as Kibana, not as the user, and maps the page onto directory entries', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({ service_accounts: [listedAccount] });
+
+      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
+
+      expect(result).toEqual({ serviceAccounts: [expectedEntry] });
+      expect(result).not.toHaveProperty('nextPage');
+      expect(mockUiam.listServiceAccounts).toHaveBeenCalledTimes(1);
+      // The page size is defaulted here as well as at the route, so a programmatic caller and an
+      // HTTP one ask UIAM for the same page.
+      expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith({
+        limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+      });
+    });
+
+    it('forwards limit and after, and passes through the nextPage cursor', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [listedAccount],
+        next_page: 'next',
+      });
+      const params = { limit: 25, after: 'cursor' };
+
+      await expect(
+        serviceAccounts.list(createMockRequest('Bearer essu_my_token'), params)
+      ).resolves.toEqual({ serviceAccounts: [expectedEntry], nextPage: 'next' });
+
+      expect(mockUiam.listServiceAccounts).toHaveBeenCalledWith(params);
+    });
+
+    it('omits the display name when UIAM reports the creator without a name', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [{ ...validResponse, creator: { type: 'user' as const, id: 'user-id' } }],
+      });
+
+      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
+
+      expect(result.serviceAccounts[0].createdBy).toEqual({ type: 'user', username: 'user-id' });
+    });
+
+    it('maps an api-key creator onto an api_key binder', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [
+          {
+            ...validResponse,
+            creator: { type: 'api-key' as const, id: 'api-key-id', description: 'nightshift key' },
+          },
+        ],
+      });
+
+      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
+
+      expect(result.serviceAccounts[0].createdBy).toEqual({
+        type: 'api_key',
+        apiKeyId: 'api-key-id',
+        variant: 'uiam',
+        displayName: 'nightshift key',
+      });
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      await expect(
+        serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(mockUiam.listServiceAccounts).not.toHaveBeenCalled();
+    });
+
+    it('checks the `read_security` cluster privilege for the caller', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({ service_accounts: [] });
+      const request = createMockRequest('Bearer essu_my_token');
+
+      await serviceAccounts.list(request);
+
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['read_security'], index: {} },
+      });
+    });
+
+    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(
+        serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(mockUiam.listServiceAccounts).not.toHaveBeenCalled();
+    });
+
+    it("propagates a 403 when UIAM refuses Kibana's assumable_by", async () => {
+      mockUiam.listServiceAccounts.mockRejectedValue(Boom.forbidden('not assumable'));
+
+      await expect(
+        serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+    });
+
+    it('propagates a 501 when UIAM has no collection GET', async () => {
+      mockUiam.listServiceAccounts.mockRejectedValue(
+        Boom.notImplemented('listing is not implemented')
+      );
+
+      await expect(
+        serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
+      ).rejects.toMatchObject({ output: { statusCode: 501 } });
+    });
+  });
+
+  describe('#get', () => {
+    const retrievedAccount = {
+      ...validResponse,
+      creator: {
+        type: 'user' as const,
+        id: 'user-id',
+        first_name: 'Ada',
+        last_name: 'Lovelace',
+      },
+    };
+
+    it('calls UIAM as Kibana, not as the user, and maps the account onto a directory entry', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue(retrievedAccount);
+
+      await expect(
+        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).resolves.toEqual({
+        id: validResponse.id,
+        name: validResponse.name,
+        roles: [],
+        enabled: true,
+        assumable: true,
+        createdBy: { type: 'user', username: 'user-id', displayName: 'Ada Lovelace' },
+      });
+
+      expect(mockUiam.getServiceAccount).toHaveBeenCalledTimes(1);
+      expect(mockUiam.getServiceAccount).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('maps an api-key creator onto an api_key binder', async () => {
+      const withApiKeyCreator = {
+        ...validResponse,
+        creator: {
+          type: 'api-key' as const,
+          id: 'api-key-id',
+          description: 'nightshift key',
+        },
+      };
+      mockUiam.getServiceAccount.mockResolvedValue(withApiKeyCreator);
+
+      const result = await serviceAccounts.get(
+        createMockRequest('Bearer essu_my_token'),
+        'service-account-id'
+      );
+
+      expect(result.createdBy).toEqual({
+        type: 'api_key',
+        apiKeyId: 'api-key-id',
+        variant: 'uiam',
+        displayName: 'nightshift key',
+      });
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      await expect(
+        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(mockUiam.getServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('checks the `read_security` cluster privilege for the caller', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue(retrievedAccount);
+      const request = createMockRequest('Bearer essu_my_token');
+
+      await serviceAccounts.get(request, 'service-account-id');
+
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['read_security'], index: {} },
+      });
+    });
+
+    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(
+        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(mockUiam.getServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('propagates a 404 when UIAM has no such account', async () => {
+      mockUiam.getServiceAccount.mockRejectedValue(Boom.notFound('Not found'));
+
+      await expect(
+        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
     });
   });
 

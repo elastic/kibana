@@ -50,7 +50,7 @@ const clusterCheckers: SettingsChecker[] = [
 
 export const NoDataPage = () => {
   const title = i18n.translate('xpack.monitoring.noData.routeTitle', {
-    defaultMessage: 'Setup Monitoring',
+    defaultMessage: 'Stack Monitoring',
   });
 
   const { services } = useKibana<NoDataPageSetupDeps>();
