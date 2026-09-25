@@ -19,9 +19,8 @@ export default function (providerContext: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     const retry = getService('retry');
     const logger = getService('log');
-    const RETRY_COUNT = 5;
     const RETRY_DELAY = 1000;
-    const retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY };
+    const retryOptions = { retryDelay: RETRY_DELAY };
     const kibanaServer = getService('kibanaServer');
 
     before(async () => {

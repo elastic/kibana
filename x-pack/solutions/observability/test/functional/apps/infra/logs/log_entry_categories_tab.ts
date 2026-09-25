@@ -18,7 +18,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
 
   const retryNavigationOptions = {
-    retryCount: 2,
     retryDelay: 0,
     timeout: config.get('timeouts.try') * 2,
   };

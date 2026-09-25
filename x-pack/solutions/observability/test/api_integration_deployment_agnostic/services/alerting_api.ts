@@ -67,7 +67,6 @@ interface CreateEsQueryRuleParams {
   index?: string[];
 }
 
-const RETRY_COUNT = 10;
 const RETRY_DELAY = 1000;
 const generateUniqueKey = () => uuidv4().replace(/-/g, '');
 
@@ -88,7 +87,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       indexName,
       ruleId,
       num = 1,
-      retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+      retryOptions = { retryDelay: RETRY_DELAY },
     }: {
       esClient: Client;
       filter: Date;
@@ -174,7 +173,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       ruleId,
       num = 1,
       sort = 'desc',
-      retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+      retryOptions = { retryDelay: RETRY_DELAY },
     }: {
       esClient: Client;
       indexName: string;
@@ -522,7 +521,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       ruleId,
       esClient,
       testStart,
-      retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+      retryOptions = { retryDelay: RETRY_DELAY },
     }: {
       roleAuthc: RoleCredentials;
       numOfRuns: number;
@@ -619,7 +618,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         ruleId,
         num = 1,
         sort = 'desc',
-        retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+        retryOptions = { retryDelay: RETRY_DELAY },
       }: {
         esClient: Client;
         indexName: string;
@@ -685,7 +684,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       async waitForAllTasksIdle({
         esClient,
         filter,
-        retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+        retryOptions = { retryDelay: RETRY_DELAY },
       }: {
         esClient: Client;
         filter: Date;
@@ -738,7 +737,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         filter,
         ruleId,
         num = 1,
-        retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+        retryOptions = { retryDelay: RETRY_DELAY },
       }: {
         esClient: Client;
         filter: Date;
@@ -809,7 +808,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         filter,
         taskType,
         attempts,
-        retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+        retryOptions = { retryDelay: RETRY_DELAY },
       }: {
         esClient: Client;
         filter: Date;
@@ -869,7 +868,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         esClient,
         ruleId,
         filter,
-        retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+        retryOptions = { retryDelay: RETRY_DELAY },
       }: {
         esClient: Client;
         ruleId: string;

@@ -31,19 +31,17 @@ export class ComboBoxService extends FtrService {
    * @param comboBoxSelector data-test-subj selector
    * @param value option text
    * @param options optional configuration
-   * @param options.maxRetries maximum number of retry attempts (default: 0)
+   * @param options.timeout optional timeout for retrying the selection
    */
 
   public async set(
     comboBoxSelector: string,
     value: string,
-    options: { retryCount?: number } = {}
+    options: { timeout?: number } = {}
   ): Promise<void> {
-    const { retryCount = 0 } = options;
-    this.log.debug(
-      `comboBox.set, comboBoxSelector: ${comboBoxSelector}, retryCount: ${retryCount}`
-    );
-    if (retryCount < 1) {
+    const { timeout } = options;
+    this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}, timeout: ${timeout}`);
+    if (timeout === undefined) {
       const comboBox = await this.testSubjects.find(comboBoxSelector);
       await this.setElement(comboBox, value);
     } else {
@@ -53,7 +51,7 @@ export class ComboBoxService extends FtrService {
           const comboBox = await this.testSubjects.find(comboBoxSelector);
           await this.setElement(comboBox, value);
         },
-        { retryCount, retryDelay: 1000 }
+        { timeout, retryDelay: 1000 }
       );
     }
   }
@@ -362,7 +360,6 @@ export class ComboBoxService extends FtrService {
       {
         timeout: 5000,
         initialDelay: 500,
-        retryCount: 3,
       }
     );
 

@@ -221,7 +221,6 @@ export default function (providerContext: FtrProviderContext) {
             }
           },
           {
-            retryCount: 25,
             retryDelay: 10000,
             timeout: 60_000,
           }

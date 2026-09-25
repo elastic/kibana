@@ -496,18 +496,14 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
       let loadingMessage: WebElementWrapper | null = null;
       await navigateTo('/render/core');
-      await retry.tryWithRetries(
-        'injectedMetadata',
-        async () => {
-          await browser.refresh();
-          [injectedMetadata, loadingMessage] = await Promise.all([
-            getInjectedMetadata(),
-            findLoadingMessage(),
-          ]);
-          expect(injectedMetadata).to.not.be.empty();
-        },
-        { retryCount: 5 }
-      );
+      await retry.tryWithRetries('injectedMetadata', async () => {
+        await browser.refresh();
+        [injectedMetadata, loadingMessage] = await Promise.all([
+          getInjectedMetadata(),
+          findLoadingMessage(),
+        ]);
+        expect(injectedMetadata).to.not.be.empty();
+      });
       const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 
       expect(userSettings).to.not.be.empty();
@@ -524,18 +520,14 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
       let loadingMessage: WebElementWrapper | null = null;
       await navigateTo('/render/core?isAnonymousPage=true');
-      await retry.tryWithRetries(
-        'injectedMetadata',
-        async () => {
-          await browser.refresh();
-          [injectedMetadata, loadingMessage] = await Promise.all([
-            getInjectedMetadata(),
-            findLoadingMessage(),
-          ]);
-          expect(injectedMetadata).to.not.be.empty();
-        },
-        { retryCount: 5 }
-      );
+      await retry.tryWithRetries('injectedMetadata', async () => {
+        await browser.refresh();
+        [injectedMetadata, loadingMessage] = await Promise.all([
+          getInjectedMetadata(),
+          findLoadingMessage(),
+        ]);
+        expect(injectedMetadata).to.not.be.empty();
+      });
       const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 
       expect(userSettings).to.be.empty();

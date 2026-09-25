@@ -24,7 +24,7 @@ import type { InitializationFlowId } from '@kbn/security-solution-plugin/common/
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteEndpointFleetPackage, deletePrebuiltRulesFleetPackage } from '../../../../utils';
 
-const PREBUILT_RULES_MAX_RETRIES = 5;
+const PREBUILT_RULES_TIMEOUT = INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS * 5;
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -92,8 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
             return body;
           },
           {
-            retryCount: PREBUILT_RULES_MAX_RETRIES,
-            timeout: INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS * PREBUILT_RULES_MAX_RETRIES,
+            timeout: PREBUILT_RULES_TIMEOUT,
           }
         );
       };
@@ -205,8 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
             return response;
           },
           {
-            retryCount: PREBUILT_RULES_MAX_RETRIES,
-            timeout: INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS * PREBUILT_RULES_MAX_RETRIES,
+            timeout: PREBUILT_RULES_TIMEOUT,
           }
         );
 

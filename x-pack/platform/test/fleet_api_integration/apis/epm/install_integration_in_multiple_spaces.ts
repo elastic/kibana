@@ -93,25 +93,19 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install kibana assets', async function () {
       // These are installed from Fleet along with every package
-      const resIndexPatternLogs = await retry.tryWithRetries(
-        'get logs-* index pattern',
-        () =>
-          kibanaServer.savedObjects.get({
-            type: 'index-pattern',
-            id: 'logs-*',
-          }),
-        { retryCount: 3 }
+      const resIndexPatternLogs = await retry.tryWithRetries('get logs-* index pattern', () =>
+        kibanaServer.savedObjects.get({
+          type: 'index-pattern',
+          id: 'logs-*',
+        })
       );
       expect(resIndexPatternLogs.id).equal('logs-*');
 
-      const resIndexPatternMetrics = await retry.tryWithRetries(
-        'get metrics-* index pattern',
-        () =>
-          kibanaServer.savedObjects.get({
-            type: 'index-pattern',
-            id: 'metrics-*',
-          }),
-        { retryCount: 3 }
+      const resIndexPatternMetrics = await retry.tryWithRetries('get metrics-* index pattern', () =>
+        kibanaServer.savedObjects.get({
+          type: 'index-pattern',
+          id: 'metrics-*',
+        })
       );
       expect(resIndexPatternMetrics.id).equal('metrics-*');
     });

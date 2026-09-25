@@ -154,7 +154,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_ACTION_INDEX,
         ruleId,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -167,7 +166,6 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 1,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -295,7 +293,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_ACTION_INDEX,
         ruleId,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -308,7 +305,6 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 1,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });
@@ -523,7 +519,6 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
         num: 1,
         retryOptions: {
-          retryCount: 20,
           retryDelay: 15_000,
         },
       });

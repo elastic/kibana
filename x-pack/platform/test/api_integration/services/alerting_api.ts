@@ -14,7 +14,6 @@ import { type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-const RETRY_COUNT = 10;
 const RETRY_DELAY = 1000;
 
 export function AlertingApiProvider({ getService }: FtrProviderContext) {
@@ -27,7 +26,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       indexName,
       docCountTarget,
       filters,
-      retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+      retryOptions = { retryDelay: RETRY_DELAY },
     }: {
       esClient: Client;
       indexName: string;

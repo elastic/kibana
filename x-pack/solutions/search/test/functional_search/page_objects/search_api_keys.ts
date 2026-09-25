@@ -41,7 +41,6 @@ export function SearchApiKeysProvider({ getService, getPageObjects }: FtrProvide
           expect(await testSubjects.getVisibleText('apiKeyFormAPIKey')).to.be(APIKEY_MASK);
         },
         {
-          retryCount: 3,
           retryDelay: 1000,
         },
         async () => {
@@ -59,7 +58,6 @@ export function SearchApiKeysProvider({ getService, getPageObjects }: FtrProvide
           expect(apiKey).to.not.be(APIKEY_MASK);
         },
         {
-          retryCount: 3,
           retryDelay: 1000,
         },
         async () => {

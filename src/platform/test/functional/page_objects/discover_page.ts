@@ -1271,7 +1271,7 @@ export class DiscoverPageObject extends FtrService {
           expect(count).to.be(requestCount);
         }
       },
-      { retryCount: 5, retryDelay: 500 }
+      { retryDelay: 500 }
     );
   }
 

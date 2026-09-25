@@ -72,7 +72,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         numOfRuns,
         esClient,
         testStart: new Date(),
-        retryOptions: { retryCount: 10, retryDelay: 3000 },
+        retryOptions: { retryDelay: 3000 },
       });
 
     const getAlertsForRule = async () => {

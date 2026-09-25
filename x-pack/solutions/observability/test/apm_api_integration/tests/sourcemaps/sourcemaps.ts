@@ -50,7 +50,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       throw new Error(`Expected ${expectedCount} source maps, got ${actualCount}`);
     };
     return await retry.tryWithRetries('waitForSourceMapCount', getSourceMapCount, {
-      retryCount: 10,
       retryDelay: 100,
       timeout: 17_000,
     });

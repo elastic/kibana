@@ -78,7 +78,6 @@ async function deleteFleetPackage(params: DeleteFleetPackageArgs): Promise<void>
       }
     },
     {
-      retryCount: 2, // overall max 3 attempts
       timeout: 3 * 60000, // total timeout applied to all attempts altogether
     }
   );

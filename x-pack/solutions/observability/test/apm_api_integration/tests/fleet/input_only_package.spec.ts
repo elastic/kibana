@@ -233,7 +233,6 @@ async function getApmServices(
       return res.body.items;
     },
     {
-      retryCount: 10,
       timeout: 20_000,
     }
   );

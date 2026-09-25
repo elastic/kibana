@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(countTypeEvents[0].attributes.count).to.eql(1);
           return true;
         },
-        { retryCount: 6, retryDelay: 1500, initialDelay: 3000 }
+        { retryDelay: 1500, initialDelay: 3000 }
       );
     });
 
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(secondEventWithCountTypeEvents[0].attributes.count).to.eql(1);
           return true;
         },
-        { retryCount: 6, retryDelay: 1500, initialDelay: 3000 }
+        { retryDelay: 1500, initialDelay: 3000 }
       );
     });
   });

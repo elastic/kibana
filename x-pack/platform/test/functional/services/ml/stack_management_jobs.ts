@@ -203,7 +203,6 @@ export function MachineLearningStackManagementJobsProvider(
           expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
         },
         {
-          retryCount: 10,
           retryDelay: 20000,
           timeout: 60 * 20000,
         }

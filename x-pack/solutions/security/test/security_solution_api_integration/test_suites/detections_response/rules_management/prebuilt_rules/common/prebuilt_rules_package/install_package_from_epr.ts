@@ -72,7 +72,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         },
         {
-          retryCount: 10,
           retryDelay: 5000,
           timeout: 60000 * 10, // total timeout applied to all attempts altogether, 10 mins
         }

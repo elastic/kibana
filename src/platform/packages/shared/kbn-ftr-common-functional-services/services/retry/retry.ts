@@ -14,8 +14,6 @@ import { retryForTruthy } from './retry_for_truthy';
 export interface TryWithRetriesOptions {
   // The initial delay before the first attempt
   initialDelay?: number;
-  // The number of retry attempts
-  retryCount: number;
   // The delay between retry attempts
   retryDelay?: number;
   // The timeout for the retry attempts
@@ -100,25 +98,20 @@ export class RetryService extends FtrService {
   }
 
   /**
-   * Use to retry block {options.retryCount} times within {options.timeout} period and return block result
+   * Retry until the block succeeds within the configured timeout.
    * @param description description for retriable action
    * @param block retriable action
-   * @param options options.retryCount for how many attempts to retry
+   * @param options timeout, delay, and initial delay for retry attempts
    * @param onFailureBlock optional action to run before the new retriable action attempt
    * @returns result from retriable action
    */
   public async tryWithRetries<T>(
     description: string,
     block: () => Promise<T>,
-    options: TryWithRetriesOptions,
+    options: TryWithRetriesOptions = {},
     onFailureBlock?: () => Promise<T>
   ): Promise<T> {
-    const {
-      retryCount,
-      timeout = this.config.get('timeouts.try'),
-      retryDelay = 200,
-      initialDelay,
-    } = options;
+    const { timeout = this.config.get('timeouts.try'), retryDelay = 200, initialDelay } = options;
 
     return await retryForSuccess<T>(this.log, {
       description,
@@ -127,7 +120,6 @@ export class RetryService extends FtrService {
       block,
       onFailureBlock,
       retryDelay,
-      retryCount,
       initialDelay,
     });
   }
