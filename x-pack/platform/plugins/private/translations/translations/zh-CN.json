@@ -18660,8 +18660,6 @@
     "xpack.dataFederation.createFlyout.s3.fields.accessKeyRequired": "访问密钥为必填项。",
     "xpack.dataFederation.createFlyout.s3.fields.endpoint": "终端",
     "xpack.dataFederation.createFlyout.s3.fields.jwtAudience": "JWT 受众",
-    "xpack.dataFederation.createFlyout.s3.fields.region": "地区",
-    "xpack.dataFederation.createFlyout.s3.fields.regionRequired": "“地区”必填。",
     "xpack.dataFederation.createFlyout.s3.fields.roleArn": "角色 ARN",
     "xpack.dataFederation.createFlyout.s3.fields.roleArnRequired": "角色 ARN 为必填项。",
     "xpack.dataFederation.createFlyout.s3.fields.roleSessionName": "角色会话名称",

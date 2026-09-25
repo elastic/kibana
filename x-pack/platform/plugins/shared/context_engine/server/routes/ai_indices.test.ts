@@ -48,6 +48,7 @@ import {
   AiIndexConflictError,
   AiIndexDescribeResponseTooLargeError,
   AiIndexNotFoundError,
+  AiIndexNotReadableError,
   AiIndexAlreadyExistsError,
   AiIndexQueryResponseTooLargeError,
   InvalidAiIndexQueryError,
@@ -892,6 +893,31 @@ describe('ai indices routes', () => {
 
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: "AI index 'missing' not found" },
+      });
+    });
+
+    it('returns 403 when the caller cannot read the backing indices', async () => {
+      readService.describe.mockRejectedValue(new AiIndexNotReadableError('a'));
+
+      await callRoute('GET', AI_INDEX_DESCRIBE_PATH, { params: { aiIndexId: 'a' } });
+
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining("AI index 'a' is not readable") },
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not report a backing index that cannot be searched as forbidden', async () => {
+      readService.describe.mockRejectedValue(
+        new Error("AI index 'a' is not available: index_closed_exception")
+      );
+
+      await callRoute('GET', AI_INDEX_DESCRIBE_PATH, { params: { aiIndexId: 'a' } });
+
+      expect(response.forbidden).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: "AI index 'a' is not available: index_closed_exception" },
       });
     });
 

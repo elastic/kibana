@@ -51,6 +51,7 @@ import {
   AiIndexDescribeResponseTooLargeError,
   AiIndexManagedError,
   AiIndexNotFoundError,
+  AiIndexNotReadableError,
   AiIndexAlreadyExistsError,
   AiIndexIdConflictError,
   AiIndexQueryResponseTooLargeError,
@@ -140,6 +141,9 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
   }
   if (error instanceof AiIndexNotFoundError || error instanceof KiNotFoundError) {
     return response.notFound({ body: { message: error.message } });
+  }
+  if (error instanceof AiIndexNotReadableError) {
+    return response.forbidden({ body: { message: error.message } });
   }
   if (
     error instanceof AiIndexManagedError ||
