@@ -156,6 +156,31 @@ describe('createLlmProposeMemoryExtractions', () => {
       })
     );
   });
+
+  it('rejects a secret-bearing raw slug before canonicalization can hide it', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: {
+        merge_targets: [],
+        extractions: [
+          {
+            slug: 'api_key=sk-live-not-a-real-key',
+            title: 'Harmless title',
+            content: 'Harmless content',
+            tags: [],
+            categories: [],
+          },
+        ],
+      },
+    });
+    const propose = createLlmProposeMemoryExtractions({
+      inferenceClient: { output } as never,
+    });
+
+    await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
+      mergeTargets: [],
+      extractions: [],
+    });
+  });
 });
 
 describe('canonicalizeMemoryLabelId', () => {
