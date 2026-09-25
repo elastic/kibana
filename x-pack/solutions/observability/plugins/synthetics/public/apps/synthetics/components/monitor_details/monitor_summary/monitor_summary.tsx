@@ -20,6 +20,7 @@ import { useParams } from 'react-router-dom';
 import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
 import { MonitorMWsCallout } from '../../common/mws_callout/monitor_mws_callout';
 import { MissingIntegrationCallout } from '../../monitor_add_edit/steps/missing_integration_callout';
+import { MonitorScheduleOverrunCallout } from '../monitor_schedule_overrun_callout';
 import { SummaryPanel } from './summary_panel';
 
 import { useGetUrlParams } from '../../../hooks';
@@ -51,6 +52,7 @@ export const MonitorSummary = () => {
       <MissingIntegrationCallout configId={configId} />
       <MonitorPendingWrapper>
         <MonitorMWsCallout />
+        <MonitorScheduleOverrunCallout />
         <SummaryPanel dateLabel={dateLabel} from={from} to={to} />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="m" wrap={true} direction={isMediumDevice ? 'column' : 'row'}>
