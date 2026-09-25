@@ -124,4 +124,3 @@ describe('StepDataset', () => {
     await waitFor(() => expect(getFormat()).toBe('parquet'));
   });
 });
-
