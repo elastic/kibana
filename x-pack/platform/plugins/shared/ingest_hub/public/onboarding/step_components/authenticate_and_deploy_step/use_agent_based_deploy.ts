@@ -177,6 +177,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // Track instance IDs successfully cleaned up so the SO update can exclude their
         // stale policy IDs when building packagePolicyIds.
         let cleanedLiveStale: string[] = [];
+        // Hoisted so the cleanup-only early return can decide whether to refresh the SO.
+        let remainingPending: Record<string, string> =
+          detectAndReviewStep.pendingCleanupPolicyIds ?? {};
 
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
@@ -203,7 +206,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           // entirely, so no survivingInstanceIds filter is needed here.
           cleanedLiveStale = buildCleanedLiveStale(liveStalePolicyIds, succeededIds);
           removeDeployInstances(cleanedLiveStale);
-          const remainingPending = buildRemainingPending(
+          remainingPending = buildRemainingPending(
             detectAndReviewStep.pendingCleanupPolicyIds,
             succeededIds
           );
@@ -213,10 +216,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         if (targetsToDeploy.length === 0) {
           setIsDeploying(false);
           updateDetectAndReviewStep({ isDeploying: false });
-          // Refresh the SO so the removed service and its policy ID are no longer in the record.
-          // Without this, reopening the deployment restores the obsolete selection and cleanup
-          // can target already-deleted policies.
-          if (onboardingDeploymentId) {
+          // Only refresh the SO services list when all cleanup succeeded (remainingPending is
+          // empty). If some cleanup failed, preserve the full service list so a resume can retry
+          // the failed deletion rather than losing the pending cleanup target permanently.
+          if (onboardingDeploymentId && Object.keys(remainingPending).length === 0) {
             await updateDeployment(onboardingDeploymentId, {
               services: selectedServiceIds,
               serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
