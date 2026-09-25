@@ -32,6 +32,7 @@ describe('memoryOptimizeStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const request = { headers: {} };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
+  const getMemoryEsClient = jest.fn().mockReturnValue(esClient);
   const getFakeRequest = jest.fn().mockReturnValue(request);
   const getAgentBuilder = jest.fn();
   const telemetry = {
@@ -42,6 +43,7 @@ describe('memoryOptimizeStepDefinition', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getScopedEsClient.mockReturnValue(esClient);
+    getMemoryEsClient.mockReturnValue(esClient);
     getFakeRequest.mockReturnValue(request);
   });
 
@@ -76,9 +78,10 @@ describe('memoryOptimizeStepDefinition', () => {
       stepType: 'nightshift.memoryOptimize',
     } as never);
 
-  it('optimizes with the request-scoped ES client and persisted recalled ids', async () => {
+  it('optimizes with the injected internal client and never the scoped client', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -108,6 +111,8 @@ describe('memoryOptimizeStepDefinition', () => {
       getAgentBuilder,
       connectorId: undefined,
     });
+    expect(getMemoryEsClient).toHaveBeenCalledTimes(1);
+    expect(getScopedEsClient).not.toHaveBeenCalled();
     expect(result).toEqual({ output: { status: 'ok' } });
     expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
       agent_id: 'significant-events.deductive-investigation',
@@ -133,6 +138,7 @@ describe('memoryOptimizeStepDefinition', () => {
   it('defaults an absent persisted recalled set to empty', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -158,6 +164,7 @@ describe('memoryOptimizeStepDefinition', () => {
   it('skips when the memory flag is off', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       isEnabled: () => false,
       telemetry: telemetry as never,
@@ -178,6 +185,7 @@ describe('memoryOptimizeStepDefinition', () => {
   it('forwards the Agent Builder connector id from the round', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -201,6 +209,7 @@ describe('memoryOptimizeStepDefinition', () => {
     runMemoryOptimizeMock.mockRejectedValueOnce(new Error('model failed'));
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -230,6 +239,7 @@ describe('memoryOptimizeStepDefinition', () => {
     runMemoryOptimizeMock.mockResolvedValueOnce(undefined);
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -270,6 +280,7 @@ describe('memoryOptimizeStepDefinition', () => {
     });
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -294,5 +305,27 @@ describe('memoryOptimizeStepDefinition', () => {
       outcome: 'failure',
       write_failure_count: 2,
     });
+  });
+
+  it('fails clearly when the internal Memory client is unavailable', async () => {
+    const definition = memoryOptimizeStepDefinition({
+      getAgentBuilder,
+      getMemoryEsClient: () => {
+        throw new Error('Semantic Memory internal Elasticsearch client is unavailable');
+      },
+      logger: loggerMock.create(),
+      telemetry: telemetry as never,
+    });
+
+    await expect(
+      definition.handler(
+        createContext({
+          prompt: 'why?',
+          response: 'because',
+          agent_id: 'significant-events.deductive-investigation',
+        })
+      )
+    ).rejects.toThrow('Semantic Memory internal Elasticsearch client is unavailable');
+    expect(getScopedEsClient).not.toHaveBeenCalled();
   });
 });

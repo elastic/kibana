@@ -21,6 +21,7 @@ describe('ensureMemoryIndex', () => {
       putIndexTemplate: jest.fn().mockResolvedValue({}),
       exists: jest.fn().mockResolvedValue(exists),
       create: jest.fn().mockResolvedValue({}),
+      putSettings: jest.fn().mockResolvedValue({}),
       putMapping: jest.fn().mockResolvedValue({}),
     },
   });
@@ -35,6 +36,7 @@ describe('ensureMemoryIndex', () => {
         name: MEMORY_INDEX_TEMPLATE_NAME,
         index_patterns: [MEMORY_INDEX],
         template: expect.objectContaining({
+          settings: expect.objectContaining({ 'index.hidden': true }),
           mappings: MEMORY_INDEX_MAPPINGS,
         }),
       })
@@ -44,6 +46,7 @@ describe('ensureMemoryIndex', () => {
       settings: {
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
+        'index.hidden': true,
       },
       mappings: MEMORY_INDEX_MAPPINGS,
     });
@@ -59,6 +62,10 @@ describe('ensureMemoryIndex', () => {
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalled();
     expect(esClient.indices.create).not.toHaveBeenCalled();
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+      index: MEMORY_INDEX,
+      settings: { 'index.hidden': true },
+    });
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: MEMORY_INDEX,
       dynamic: MEMORY_INDEX_MAPPINGS.dynamic,

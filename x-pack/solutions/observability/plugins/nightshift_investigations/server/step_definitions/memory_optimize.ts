@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
 import { runMemoryOptimize } from '../memory/register_memory';
@@ -26,11 +26,13 @@ const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const memoryOptimizeStepDefinition = ({
   getAgentBuilder,
+  getMemoryEsClient,
   logger,
   isEnabled,
   telemetry,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  getMemoryEsClient: () => ElasticsearchClient;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -116,7 +118,7 @@ export const memoryOptimizeStepDefinition = ({
               userMessage: context.input.prompt,
               assistantMessage: context.input.response,
               recalledIds: context.input.recalled_ids ?? [],
-              esClient: context.contextManager.getScopedEsClient(),
+              esClient: getMemoryEsClient(),
               spaceId,
               signal,
               logger: teeWorkflowLogger(logger, context.logger),
