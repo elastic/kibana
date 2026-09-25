@@ -99,7 +99,7 @@ export const RiskDistributionBar: React.FC<RiskDistributionBarProps> = ({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiText size="l">
+            <EuiText size="m">
               <strong>
                 {total}{' '}
                 {i18n.translate(
