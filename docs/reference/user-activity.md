@@ -34,6 +34,10 @@ user_activity:
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
+:::::{note}
+On Elastic Cloud Serverless, records emitted through an `otel` appender are additionally shaped for delivery: `log.type: user_activity` is added, and the redundant `message` attribute (already carried as the OTLP body text) and the global `service.*` meta fields are dropped from the per-record attributes.
+:::::
+
 When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, metadata, error, user, kibana.session.id, kibana.space.id, kibana.object, ...}`.
 
 ### Filters
