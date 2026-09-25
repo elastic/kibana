@@ -351,9 +351,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await page.testSubj.locator('staticKeysReplace-accessKeyId-toggle').click();
     await page.testSubj.locator('staticKeysReplace-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
     await page.testSubj.locator('staticKeysReplace-secretAccessKey-toggle').click();
-    await page.testSubj
-      .locator('staticKeysReplace-secretAccessKey')
-      .fill('wJalrXUtnFEMI/K7MDENG');
+    await page.testSubj.locator('staticKeysReplace-secretAccessKey').fill('wJalrXUtnFEMI/K7MDENG');
 
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
   });
