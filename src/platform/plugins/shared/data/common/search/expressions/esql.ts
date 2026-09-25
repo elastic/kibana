@@ -26,6 +26,7 @@ import {
   isComputedColumn,
   getQuerySummary,
   buildRenameSourceFieldMap,
+  resolveSourceField,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { buildEsQuery, type Filter, getTimeZoneFromSettings } from '@kbn/es-query';
@@ -128,9 +129,11 @@ function mapResponseToDatatable(
         ? KBN_FIELD_TYPES.CONFLICT
         : esFieldTypeToKibanaFieldType(type);
 
-      const isSourceFieldFilterable =
-        !querySummary.newColumns.has(name) || (renameSourceFieldMap?.has(name) ?? false);
-      const sourceField = renameSourceFieldMap?.get(name) ?? name;
+      const { isSourceFieldFilterable, sourceField } = resolveSourceField(
+        name,
+        querySummary,
+        renameSourceFieldMap
+      );
 
       return {
         id: name,
