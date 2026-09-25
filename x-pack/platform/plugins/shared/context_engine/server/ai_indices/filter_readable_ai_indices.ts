@@ -9,10 +9,16 @@ import type { MsearchRequestItem, MsearchResponseItem } from '@elastic/elasticse
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 
-interface FilterReadableAiIndicesParams {
+interface ProbeAiIndicesParams {
   esClient: ElasticsearchClient;
   aiIndices: AiIndexHttpItem[];
   logger: Logger;
+}
+
+export interface ProbedAiIndex {
+  aiIndex: AiIndexHttpItem;
+  /** Absent when readable. `privilege` is true for a refusal, false for unavailability. */
+  failure?: { reason: string; privilege: boolean };
 }
 
 /** Strict index options on purpose: `ignore_unavailable` silently drops unreadable indices. */
@@ -39,16 +45,21 @@ const failureReason = (item: MsearchResponseItem): string | undefined => {
   return undefined;
 };
 
+/** A closed index or a cluster block is also a per-probe error, but not a privilege refusal. */
+const isPrivilegeFailure = (item: MsearchResponseItem): boolean =>
+  'error' in item && item.status === 403 && item.error.type === 'security_exception';
+
 /**
- * Keeps the AI Indices whose backing index the caller can read. One `msearch` as the caller, one
- * probe per entry. A backing index that does not exist yet is kept: the entry was just registered.
- * A caller with no read privilege on any index is refused the whole `msearch`: that 403 propagates.
+ * Probes whether the caller can read each AI Index's backing index: one `msearch` as the caller,
+ * one probe per entry. A backing index that does not exist yet is readable: the entry was just
+ * registered. A caller with no read privilege on any index is refused the whole `msearch`: that
+ * 403 propagates.
  */
-export const filterReadableAiIndices = async ({
+export const probeAiIndices = async ({
   esClient,
   aiIndices,
   logger,
-}: FilterReadableAiIndicesParams): Promise<AiIndexHttpItem[]> => {
+}: ProbeAiIndicesParams): Promise<ProbedAiIndex[]> => {
   if (aiIndices.length === 0) {
     return [];
   }
@@ -57,16 +68,24 @@ export const filterReadableAiIndices = async ({
     searches: aiIndices.flatMap(({ dest }) => probe(dest.value)),
   });
 
-  return aiIndices.filter((aiIndex, index) => {
+  return aiIndices.map((aiIndex, index) => {
     const response = responses[index];
     if (isMissingIndex(aiIndex.dest.value, response)) {
-      return true;
+      return { aiIndex };
     }
-    const failure = failureReason(response);
-    if (failure !== undefined) {
-      logger.debug(`AI index '${aiIndex.id}' is not readable: ${failure}`);
-      return false;
+    const reason = failureReason(response);
+    if (reason === undefined) {
+      return { aiIndex };
     }
-    return true;
+    logger.debug(`AI index '${aiIndex.id}' is not readable: ${reason}`);
+    return { aiIndex, failure: { reason, privilege: isPrivilegeFailure(response) } };
   });
 };
+
+/** Keeps the AI Indices whose probe succeeded, dropping failures of either kind. */
+export const filterReadableAiIndices = async (
+  params: ProbeAiIndicesParams
+): Promise<AiIndexHttpItem[]> =>
+  (await probeAiIndices(params))
+    .filter(({ failure }) => failure === undefined)
+    .map(({ aiIndex }) => aiIndex);

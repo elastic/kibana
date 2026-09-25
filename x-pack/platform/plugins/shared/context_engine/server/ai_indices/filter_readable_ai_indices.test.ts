@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
-import { filterReadableAiIndices } from './filter_readable_ai_indices';
+import { filterReadableAiIndices, probeAiIndices } from './filter_readable_ai_indices';
 
 const aiIndex = (id: string, target = `ai-index-idx-${id}`): AiIndexHttpItem => ({
   id,
@@ -30,19 +30,49 @@ const ok = (extra: Record<string, unknown> = {}) => ({
   hits: { hits: [] },
   ...extra,
 });
-const failed = (type: string, reason?: string) => ({ status: 403, error: { type, reason } });
+const failed = (status: number, type: string, reason?: string) => ({
+  status,
+  error: { type, reason },
+});
+
+const msearch = jest.fn();
+const esClient = { msearch } as unknown as ElasticsearchClient;
+const logger = loggingSystemMock.createLogger();
+const params = { esClient, logger };
+
+beforeEach(() => {
+  msearch.mockReset();
+  logger.debug.mockReset();
+});
+
+describe('probeAiIndices', () => {
+  it('tells privilege refusals apart from unavailability', async () => {
+    msearch.mockResolvedValue({
+      responses: [
+        ok(),
+        failed(403, 'security_exception', 'unauthorized for user'),
+        failed(400, 'index_closed_exception'),
+        ok({ timed_out: true }),
+        ok({ _shards: { ...shards, total: 3, successful: 2, failed: 1 } }),
+      ],
+    });
+
+    const result = await probeAiIndices({
+      ...params,
+      aiIndices: ['readable', 'forbidden', 'closed', 'slow', 'degraded'].map((id) => aiIndex(id)),
+    });
+
+    expect(result.map((probed) => ({ id: probed.aiIndex.id, failure: probed.failure }))).toEqual([
+      { id: 'readable', failure: undefined },
+      { id: 'forbidden', failure: { reason: 'unauthorized for user', privilege: true } },
+      { id: 'closed', failure: { reason: 'index_closed_exception', privilege: false } },
+      { id: 'slow', failure: { reason: 'timed out', privilege: false } },
+      { id: 'degraded', failure: { reason: '1 shard(s) failed', privilege: false } },
+    ]);
+  });
+});
 
 describe('filterReadableAiIndices', () => {
-  const msearch = jest.fn();
-  const esClient = { msearch } as unknown as ElasticsearchClient;
-  const logger = loggingSystemMock.createLogger();
-  const params = { esClient, logger };
-
-  beforeEach(() => {
-    msearch.mockReset();
-    logger.debug.mockReset();
-  });
-
   it('skips Elasticsearch when there is nothing to check', async () => {
     expect(await filterReadableAiIndices({ ...params, aiIndices: [] })).toEqual([]);
     expect(msearch).not.toHaveBeenCalled();
@@ -73,9 +103,9 @@ describe('filterReadableAiIndices', () => {
     msearch.mockResolvedValue({
       responses: [
         ok(), // readable
-        failed('index_not_found_exception', 'no such index [ai-index-idx-missing]'), // not created yet
-        failed('security_exception', 'unauthorized for user'),
-        failed('index_closed_exception'),
+        failed(404, 'index_not_found_exception', 'no such index [ai-index-idx-missing]'), // not created yet
+        failed(403, 'security_exception', 'unauthorized for user'),
+        failed(400, 'index_closed_exception'),
         ok({ timed_out: true }),
         ok({ _shards: { ...shards, total: 3, successful: 2, failed: 1 } }),
       ],
@@ -116,7 +146,7 @@ describe('filterReadableAiIndices', () => {
   // `existing,missing` is a 404 as a whole, so it says nothing about `existing`.
   it('does not trust not-found for comma-separated targets', async () => {
     msearch.mockResolvedValue({
-      responses: [failed('index_not_found_exception', 'no such index [ai-index-idx-missing]')],
+      responses: [failed(404, 'index_not_found_exception', 'no such index [ai-index-idx-missing]')],
     });
 
     const result = await filterReadableAiIndices({

@@ -876,6 +876,20 @@ describe('ai indices routes', () => {
       expect(logger.error).not.toHaveBeenCalled();
     });
 
+    it('does not report a backing index that cannot be searched as forbidden', async () => {
+      readService.describe.mockRejectedValue(
+        new Error("AI index 'a' is not available: index_closed_exception")
+      );
+
+      await callRoute('GET', aiIndexDescribePath, { params: { aiIndexId: 'a' } });
+
+      expect(response.forbidden).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: "AI index 'a' is not available: index_closed_exception" },
+      });
+    });
+
     it('returns 400 when the field metadata exceeds the size cap', async () => {
       readService.describe.mockRejectedValue(
         new AiIndexDescribeResponseTooLargeError(20 * 1024 * 1024)

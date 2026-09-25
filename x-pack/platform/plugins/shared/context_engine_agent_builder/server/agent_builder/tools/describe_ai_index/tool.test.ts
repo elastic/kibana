@@ -71,7 +71,7 @@ describe('describe_ai_index tool', () => {
     });
   });
 
-  it('logs at debug and returns an error result when the backing index is not readable', async () => {
+  it('logs and returns an error result when the backing index is not readable', async () => {
     const { deps, readService } = createAiIndexToolDepsMock();
     const error = new AiIndexNotReadableError('parks');
     readService.describe.mockRejectedValue(error);
@@ -82,8 +82,7 @@ describe('describe_ai_index tool', () => {
     expect(result).toEqual({
       results: [{ type: ToolResultType.error, data: { message: error.message } }],
     });
-    expect(ctx.logger.debug).toHaveBeenCalled();
-    expect(ctx.logger.error).not.toHaveBeenCalled();
+    expect(ctx.logger.error).toHaveBeenCalled();
   });
 
   it('returns an error result when the caller lacks the read privilege', async () => {

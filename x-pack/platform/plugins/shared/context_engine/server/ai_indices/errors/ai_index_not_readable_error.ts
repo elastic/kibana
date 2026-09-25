@@ -8,7 +8,7 @@
 export class AiIndexNotReadableError extends Error {
   constructor(aiIndexId: string) {
     super(
-      `AI index '${aiIndexId}' is not readable. Reading it needs the Elasticsearch 'read' privilege on its backing indices.`
+      `AI index '${aiIndexId}' is not readable. Reading it needs the Elasticsearch 'read' and 'view_index_metadata' privileges on its backing indices.`
     );
     this.name = 'AiIndexNotReadableError';
   }
