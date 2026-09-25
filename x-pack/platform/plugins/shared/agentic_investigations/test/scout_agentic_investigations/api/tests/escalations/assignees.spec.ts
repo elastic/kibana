@@ -60,6 +60,9 @@ apiTest.describe(
     let viewerCookieHeader: Record<string, string>;
 
     let editorProfileUid: string;
+    /** Used as the required initial collaborator for private escalations where the editor must not be a member. */
+    let viewerProfileUid: string;
+    let adminProfileUid: string;
 
     // Temporary conversations created during setup / per-test; cleaned up in afterAll.
     const conversationIds: string[] = [];
@@ -69,9 +72,19 @@ apiTest.describe(
       ({ cookieHeader: editorCookieHeader } = await samlAuth.asInteractiveUser('editor'));
       ({ cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
-      const { uid, probeConversationId } = await resolveProfileUid(apiClient, editorCookieHeader);
-      editorProfileUid = uid;
-      conversationIds.push(probeConversationId);
+      const [editorResult, viewerResult, adminResult] = await Promise.all([
+        resolveProfileUid(apiClient, editorCookieHeader),
+        resolveProfileUid(apiClient, viewerCookieHeader),
+        resolveProfileUid(apiClient, adminCookieHeader),
+      ]);
+      editorProfileUid = editorResult.uid;
+      viewerProfileUid = viewerResult.uid;
+      adminProfileUid = adminResult.uid;
+      conversationIds.push(
+        editorResult.probeConversationId,
+        viewerResult.probeConversationId,
+        adminResult.probeConversationId
+      );
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
@@ -159,8 +172,10 @@ apiTest.describe(
       'non-member with manage_escalations receives 404 on a private escalation',
       async ({ apiClient }) => {
         const investigationId = await createInvestigation(apiClient);
-        // Create private escalation with NO collaborators (editor is not a member)
-        const escalationId = await createPrivateEscalation(apiClient, investigationId, []);
+        // Create private escalation with viewer as the only collaborator; editor is not a member.
+        const escalationId = await createPrivateEscalation(apiClient, investigationId, [
+          viewerProfileUid,
+        ]);
 
         const res = await apiClient.put(ESCALATION_ASSIGNEES_PATH(escalationId), {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
@@ -177,8 +192,10 @@ apiTest.describe(
       'owner assigns a non-collaborator; the new assignee can then list the escalation and reassign it',
       async ({ apiClient }) => {
         const investigationId = await createInvestigation(apiClient);
-        // Create private escalation with no collaborators
-        const escalationId = await createPrivateEscalation(apiClient, investigationId, []);
+        // Create private escalation with viewer as collaborator; editor is not yet a member.
+        const escalationId = await createPrivateEscalation(apiClient, investigationId, [
+          viewerProfileUid,
+        ]);
 
         // Admin assigns editor (who is not a collaborator)
         const assignRes = await apiClient.put(ESCALATION_ASSIGNEES_PATH(escalationId), {
@@ -230,7 +247,9 @@ apiTest.describe(
       'removing a uid from assignees revokes their ACL membership (two-way ACL sync)',
       async ({ apiClient }) => {
         const investigationId = await createInvestigation(apiClient);
-        const escalationId = await createPrivateEscalation(apiClient, investigationId, []);
+        const escalationId = await createPrivateEscalation(apiClient, investigationId, [
+          viewerProfileUid,
+        ]);
 
         // Assign editor — they get added to the ACL
         await apiClient.put(ESCALATION_ASSIGNEES_PATH(escalationId), {
@@ -270,19 +289,14 @@ apiTest.describe(
       'removing one assignee leaves the other assignee with full access',
       async ({ apiClient }) => {
         const investigationId = await createInvestigation(apiClient);
-        const escalationId = await createPrivateEscalation(apiClient, investigationId, []);
-
-        // Resolve admin's own uid to use as a second assignee
-        const { uid: adminUid, probeConversationId: adminProbe } = await resolveProfileUid(
-          apiClient,
-          adminCookieHeader
-        );
-        conversationIds.push(adminProbe);
+        const escalationId = await createPrivateEscalation(apiClient, investigationId, [
+          viewerProfileUid,
+        ]);
 
         // Assign both editor and admin
         await apiClient.put(ESCALATION_ASSIGNEES_PATH(escalationId), {
           headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-          body: { assignees: [editorProfileUid, adminUid] },
+          body: { assignees: [editorProfileUid, adminProfileUid] },
           responseType: 'json',
         });
 
