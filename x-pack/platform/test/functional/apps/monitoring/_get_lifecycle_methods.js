@@ -13,6 +13,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const client = getService('es');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['monitoring', 'security', 'common']);
   let _archive;
 
@@ -40,7 +41,6 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
         ]);
       }
 
-      const kibanaServer = getService('kibanaServer');
       const browser = getService('browser');
 
       // provide extra height for the page and avoid clusters sending telemetry during tests
@@ -62,6 +62,9 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
 
     async tearDown() {
       await deleteDataStream('.monitoring-*-8-*');
+      // the seeded range is global and outlives this suite: enable_monitoring.js follows and needs
+      // the default now-15m range to see the live data it turns collection on for
+      await kibanaServer.uiSettings.replace({});
       await security.testUser.restoreDefaults();
       return esArchiver.unload(_archive);
     },
