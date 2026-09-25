@@ -52,8 +52,13 @@ export interface AutomaticImportPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AutomaticImportPluginStart {}
+export interface AutomaticImportPluginStart {
+  /**
+   * Whether an Automatic Import integration-config exists for this id in the space.
+   * Uses the plugin internal repository; the caller does not need Automatic Import privileges.
+   */
+  hasIntegration: (integrationId: string, spaceId: string) => Promise<boolean>;
+}
 
 export interface AutomaticImportPluginSetupDependencies {
   actions: ActionsPluginSetup;
