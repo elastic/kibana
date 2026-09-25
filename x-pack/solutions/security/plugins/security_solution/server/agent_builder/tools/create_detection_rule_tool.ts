@@ -41,8 +41,9 @@ const RULE_CREATION_GENERIC_ERROR_MESSAGE = `${RULE_CREATION_ERROR_PREFIX}. Plea
  * Builds the error message returned to the agent. The underlying reasons are included so the agent
  * can tell the user what actually went wrong (e.g. a missing index privilege) instead of guessing.
  */
-const buildRuleCreationErrorMessage = (reasons: string[]): string => {
+const buildRuleCreationErrorMessage = (reasons: unknown[]): string => {
   const detail = reasons
+    .filter((reason): reason is string => typeof reason === 'string')
     .map((reason) => reason.trim())
     .filter(Boolean)
     .join('; ');
@@ -416,14 +417,16 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           ],
         };
       } catch (error) {
-        logger.error(`Create detection rule tool failed: ${error.message}`, error);
+        // A rejection is not guaranteed to be an Error instance; normalize before reporting.
+        const reason = error instanceof Error ? error.message : String(error);
+        logger.error(`Create detection rule tool failed: ${reason}`, error);
 
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: buildRuleCreationErrorMessage([error.message]),
+                message: buildRuleCreationErrorMessage([reason]),
               },
             },
           ],

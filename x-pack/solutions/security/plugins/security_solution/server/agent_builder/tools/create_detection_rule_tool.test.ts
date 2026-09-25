@@ -819,6 +819,29 @@ describe('createDetectionRuleTool', () => {
       });
     });
 
+    it('reports non-Error rejections without throwing', async () => {
+      mockGetBuildAgent.mockRejectedValue('boom');
+
+      const result = await tool.handler(
+        { user_query: userQuery },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents,
+        })
+      );
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: 'Failed to create detection rule: boom',
+            },
+          },
+        ],
+      });
+    });
+
     it('falls back to the generic message when the failure has no reason', async () => {
       mockGetBuildAgent.mockRejectedValue(new Error(''));
 
