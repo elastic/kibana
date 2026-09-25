@@ -20,6 +20,7 @@ export const MOON_CONFIG_KEY_ORDER = [
 ];
 
 export const KIBANA_JSONC_FILENAME = 'kibana.jsonc';
+export const MOON_WORKSPACE_CONFIG_PATH = '.moon/workspace.yml';
 export const MOON_CONST = {
   MOON_CONFIG_FILE_NAME: 'moon.yml',
   TEMPLATE_FILE_NAME: 'moon.template.yml',
