@@ -67,7 +67,6 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
           dailyDispatchLimit: z.number().int().min(0).optional(),
           timeoutSeconds: z.number().int().min(1).optional(),
           dedupeWindowSeconds: z.number().int().min(0).optional(),
-          dedupeMode: z.enum(['event_id', 'rule_id', 'none']).optional(),
           overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
         })
         .optional(),
