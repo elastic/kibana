@@ -34,10 +34,9 @@ const getResponseActionStatusSchema = z.object({
 });
 
 /**
- * Read-only lookup for a previously dispatched response action by its action ID.
- * Mirrors `GET /api/endpoint/action/{action_id}`. Read-only slice: inspects any
- * action from Response Actions history; once write tools land it is also the
- * follow-up path for actions that returned `pending`.
+ * Read-only lookup of a previously dispatched response action by its action ID.
+ * Mirrors `GET /api/endpoint/action/{action_id}`. Inspects any action from
+ * Response Actions history; it cannot dispatch or modify actions.
  */
 export const getResponseActionStatusTool = (
   endpointAppContextService: EndpointAppContextService
