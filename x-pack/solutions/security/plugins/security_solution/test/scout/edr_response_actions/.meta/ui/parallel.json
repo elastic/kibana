@@ -1,5 +1,5 @@
 {
-  "sha1": "5488f4cc7241e57e51a0cd13347be180dc38fd0d",
+  "sha1": "55da935dbc5adc42ba18d3a9d12879ca1a803871",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/alert_flyout_results.spec.ts",
-        "line": 57,
-        "column": 35
+        "line": 60,
+        "column": 7
       }
     },
     {
