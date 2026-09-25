@@ -366,6 +366,28 @@ describe('useApproveProposal', () => {
     expect(http.get).toHaveBeenCalledTimes(3);
   });
 
+  it('does not fail an already-successful decision over a transient read failure while polling', async () => {
+    // The decide POST already succeeded by the time this poll runs — a network blip reading it
+    // back is not a decision failure and must not be reported as one.
+    const http = makeHttp();
+    http.post.mockResolvedValue({ id: 'p-1', status: 'approved' });
+    http.get
+      .mockRejectedValueOnce(new Error('network blip'))
+      .mockResolvedValueOnce({ decision: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await expect(result.current.mutateAsync({ id: 'p-1', body: {} })).resolves.toEqual({
+      id: 'p-1',
+      status: 'approved',
+    });
+    expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
   it('surfaces the error when the API call rejects', async () => {
     const http = makeHttp();
     http.post.mockRejectedValue(new Error('Server error'));

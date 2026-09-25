@@ -180,5 +180,27 @@ describe('ProposedActionButton', () => {
       expect(within(dialog).getByText('Applied')).toBeInTheDocument();
       expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
     });
+
+    it('shows Applying, not Applied, for an approved proposal whose action is still executing', () => {
+      // Approving only resumes the gate workflow — the action it starts still runs afterward, so
+      // this row must reflect the real execution status, not assume success from `decision` alone.
+      renderButton({ proposal: { ...decidedProposal, status: 'executing' } });
+
+      expect(screen.getByText('Applying')).toBeInTheDocument();
+      expect(screen.queryByText('Applied')).not.toBeInTheDocument();
+    });
+
+    it('shows a Failed badge for an approved proposal whose action did not succeed', () => {
+      renderButton({ proposal: { ...decidedProposal, status: 'failed' } });
+
+      expect(screen.getByText('Failed')).toBeInTheDocument();
+      expect(screen.queryByText('Applied')).not.toBeInTheDocument();
+    });
+
+    it('names the decider without a time when the record carries no decidedAt', () => {
+      renderButton({ proposal: { ...decidedProposal, decidedAt: undefined } });
+
+      expect(screen.getByText(/Bonnie Fishel/)).toBeInTheDocument();
+    });
   });
 });

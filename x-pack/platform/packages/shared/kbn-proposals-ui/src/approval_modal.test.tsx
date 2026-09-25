@@ -240,6 +240,11 @@ describe('ApprovalModal', () => {
     expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
   });
 
+  it('disables declining an expired proposal too, not just approving it', () => {
+    renderModal({ proposal: { ...mockProposal, expired: true } });
+    expect(screen.getByTestId('approvalModal-dismiss')).toBeDisabled();
+  });
+
   it('routes Dismiss to onDismiss rather than silently closing', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('approvalModal-dismiss'));

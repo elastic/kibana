@@ -103,6 +103,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
                     iconType: 'cross',
                     color: 'text',
                     onClick: onDismiss,
+                    isDisabled: isExpired,
                     'data-test-subj': dataTestSubj ? `${dataTestSubj}-dismiss` : undefined,
                   },
                 ]

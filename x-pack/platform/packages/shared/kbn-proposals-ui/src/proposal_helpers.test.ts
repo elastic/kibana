@@ -98,7 +98,9 @@ describe('getProposalDecision', () => {
     ).toMatchObject({ status: 'applied', actorName: 'Someone' });
   });
 
-  it('falls back to a valid timestamp when decidedAt is missing, rather than an invalid one', () => {
+  it('passes decidedAt through as undefined rather than inventing one when the record has none', () => {
+    // A fabricated "now" would read as real audit attribution and would keep changing on every
+    // reopen — `ApprovalActorTime` renders the actor alone when `decidedAt` is absent instead.
     const decision = getProposalDecision(
       proposal({
         decision: 'approved',
@@ -106,7 +108,7 @@ describe('getProposalDecision', () => {
         decidedBy: { fullName: 'Ava', username: 'ava', email: null },
       })
     );
-    expect(Number.isNaN(Date.parse(decision!.decidedAt))).toBe(false);
+    expect(decision!.decidedAt).toBeUndefined();
   });
 
   it("prefers the decider's full name, falling back to username", () => {

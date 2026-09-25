@@ -45,12 +45,12 @@ export const getProposalCaption = (proposal: ApprovalProposal): string | undefin
 /**
  * The read-only decision `ApprovalContent` renders in place of its Approve/Decline buttons.
  * `undefined` only while a proposal is still awaiting one — `decision` itself is the whole
- * condition. Missing `decidedBy`/`decidedAt` is not a reason to hide a real decision: both
- * `decision` and `decidedAt` are written in the same call the moment the record settles (see
- * `proposals_service.ts`), so requiring `decidedAt` too only ever hid decisions that already
- * existed for no reason; `decidedBy` can still be genuinely absent (no resolvable identity), in
- * which case a fallback name still names *someone* rather than reverting to "awaiting a decision"
- * for a proposal that plainly is not.
+ * condition. Missing `decidedBy`/`decidedAt` is not a reason to hide a real decision: `decidedBy`
+ * can be genuinely absent (no resolvable identity), in which case a fallback name still names
+ * *someone* rather than reverting to "awaiting a decision" for a proposal that plainly is not.
+ * `decidedAt` is passed through as-is rather than defaulted to now — inventing a timestamp would
+ * read as real audit attribution and would keep changing on every reopen; `ApprovalActorTime`
+ * renders the actor alone when it is absent.
  */
 export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecision | undefined => {
   if (!proposal.decision) {
@@ -63,7 +63,7 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
   return {
     status: approvedStatusFor(proposal),
     actorName,
-    decidedAt: proposal.decidedAt ?? new Date().toISOString(),
+    decidedAt: proposal.decidedAt,
     reason: proposal.rationale,
   };
 };

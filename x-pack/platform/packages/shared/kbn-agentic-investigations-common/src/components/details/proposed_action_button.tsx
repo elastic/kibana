@@ -14,6 +14,7 @@ import {
   ApprovalModal,
   getApprovalOutcomeBadge,
   getProposalCaption,
+  getProposalDecision,
   getProposalTitle,
   ProposedActionStatusBadge,
   type ApprovalPhase,
@@ -90,7 +91,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const { euiTheme } = useEuiTheme();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
-    const isDecided = proposal.decision !== undefined;
+    const decision = getProposalDecision(proposal);
 
     const openModal = useCallback(() => setIsModalOpen(true), []);
     const closeModal = useCallback(() => setIsModalOpen(false), []);
@@ -114,34 +115,36 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       [onDismiss, closeDismissModal]
     );
 
-    const approvalPhase: ApprovalPhase = isDecided
-      ? proposal.decision === 'approved'
-        ? 'applied'
-        : 'declined'
-      : isSubmitting ?? 'pending';
+    const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
 
     const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
-    const isInteractive = !isDecided && !isSubmitting;
+    const isInteractive = !decision && !isSubmitting;
 
-    const decidedByName = proposal.decidedBy?.fullName ?? proposal.decidedBy?.username ?? undefined;
     const pendingCaption = getProposalCaption(proposal);
 
-    const caption =
-      isDecided && decidedByName && proposal.decidedAt ? (
+    const caption = decision ? (
+      decision.decidedAt ? (
         <FormattedMessage
           id="xpack.alertzero.detailsFlyout.proposedAction.decidedByCaption"
           defaultMessage="{approvalType} by {name} at {time}"
           values={{
             approvalType: badge.label,
-            name: decidedByName,
-            time: <FormattedTime value={proposal.decidedAt} />,
+            name: decision.actorName,
+            time: <FormattedTime value={decision.decidedAt} />,
           }}
         />
-      ) : Boolean(pendingCaption) ? (
-        pendingCaption
       ) : (
-        getEmptyValue()
-      );
+        <FormattedMessage
+          id="xpack.alertzero.detailsFlyout.proposedAction.decidedByCaptionWithoutTime"
+          defaultMessage="{approvalType} by {name}"
+          values={{ approvalType: badge.label, name: decision.actorName }}
+        />
+      )
+    ) : Boolean(pendingCaption) ? (
+      pendingCaption
+    ) : (
+      getEmptyValue()
+    );
 
     return (
       <>

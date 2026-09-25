@@ -36,3 +36,8 @@ export const PROPOSED_ACTIONS_EMPTY_LABEL = i18n.translate(
   'xpack.alertzero.detailsFlyout.proposedActions.empty',
   { defaultMessage: 'No proposed actions for this investigation.' }
 );
+
+export const PROPOSED_ACTIONS_LOAD_ERROR_LABEL = i18n.translate(
+  'xpack.alertzero.detailsFlyout.proposedActions.loadError',
+  { defaultMessage: 'Unable to load proposed actions. Try refreshing the page.' }
+);

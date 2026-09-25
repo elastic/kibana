@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   useApproveProposal,
   useConversationProposals,
@@ -22,7 +23,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton } from '@kbn/agentic-investigations-common';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { decisionErrorMessage } from './decision_errors';
-import { PROPOSED_ACTIONS_EMPTY_LABEL } from './translations';
+import { PROPOSED_ACTIONS_EMPTY_LABEL, PROPOSED_ACTIONS_LOAD_ERROR_LABEL } from './translations';
 
 export interface ProposedActionsSlotProps {
   conversationId: string;
@@ -100,7 +101,7 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   const {
     services: { notifications },
   } = useKibana<CoreStart>();
-  const { data, isLoading } = useConversationProposals(conversationId);
+  const { data, isLoading, isError } = useConversationProposals(conversationId);
   const { data: currentUserProfile } = useCurrentUserProfile();
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
@@ -116,6 +117,12 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
 
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
+  }
+
+  // Distinct from the empty state below: the API could not be reached at all, so there may be
+  // proposed actions this analyst just cannot see right now — telling them "none" would be wrong.
+  if (isError) {
+    return <KbnDangerCallout size="s" title={PROPOSED_ACTIONS_LOAD_ERROR_LABEL} />;
   }
 
   const proposals = data?.proposals ?? [];

@@ -171,15 +171,24 @@ const DECISION_POLL_MAX_ATTEMPTS = 8;
  * Bounded: a slow write should not hang the mutation forever. Giving up here does not lose the
  * update — `usePendingProposals`/`useConversationProposals`/`useProposal`'s own settling-aware
  * poll still catches it once the write lands, just on their cadence instead of this one.
+ *
+ * Best-effort: the decide POST already succeeded by the time this runs, so a read failure here
+ * (a transient network blip, a 5xx) is not a decision failure and must not be treated as one —
+ * swallow it and keep polling on the same schedule rather than rejecting, which would otherwise
+ * surface "could not be recorded" for a decision the gate had already released.
  */
 const waitForDecision = async (http: HttpSetup, id: string): Promise<void> => {
   for (let attempt = 0; attempt < DECISION_POLL_MAX_ATTEMPTS; attempt++) {
-    const proposal = await http.get<ProposalWithMetadata>(
-      `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`,
-      { version: PROPOSALS_API_VERSION }
-    );
-    if (proposal.decision) {
-      return;
+    try {
+      const proposal = await http.get<ProposalWithMetadata>(
+        `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`,
+        { version: PROPOSALS_API_VERSION }
+      );
+      if (proposal.decision) {
+        return;
+      }
+    } catch {
+      // Treated the same as "not decided yet" — see the best-effort note above.
     }
     await new Promise((resolve) => setTimeout(resolve, DECISION_POLL_INTERVAL_MS));
   }

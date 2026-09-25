@@ -11,8 +11,12 @@ import { selectUnit } from '@formatjs/intl-utils';
 
 export interface ApprovalActorTimeProps {
   actorName: string;
-  /** ISO 8601 timestamp. */
-  at: string;
+  /**
+   * ISO 8601 timestamp. Omitted only when the record genuinely carries none — rendering "by
+   * {actorName}" alone rather than inventing a time, since a fabricated one would read as real
+   * audit attribution and would keep changing on every reopen.
+   */
+  at?: string;
   /**
    * Ages itself as a relative time ("8s ago") for a decision still being submitted. A settled
    * decision renders the fixed clock time instead, matching what the proposal was actually
@@ -31,6 +35,16 @@ const INCREMENTABLE_UNITS: ReadonlyArray<ReturnType<typeof selectUnit>['unit']> 
 ];
 
 export const ApprovalActorTime = ({ actorName, at, live = false }: ApprovalActorTimeProps) => {
+  if (at === undefined) {
+    return (
+      <FormattedMessage
+        id="xpack.proposals.approvalActorTime.labelWithoutTime"
+        defaultMessage="by {actorName}"
+        values={{ actorName: <strong>{actorName}</strong> }}
+      />
+    );
+  }
+
   const { unit } = selectUnit(new Date(at));
 
   return (

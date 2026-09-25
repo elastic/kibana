@@ -155,6 +155,23 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('No proposed actions for this investigation.')).toBeInTheDocument();
   });
 
+  it('shows a load-error state rather than claiming there are no proposed actions', () => {
+    mockUseConversationProposals.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    } as unknown as ReturnType<typeof useConversationProposals>);
+
+    renderSlot();
+
+    expect(
+      screen.getByText('Unable to load proposed actions. Try refreshing the page.')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('No proposed actions for this investigation.')
+    ).not.toBeInTheDocument();
+  });
+
   it('approves with the proposal id and its own action input', () => {
     mockUseConversationProposals.mockReturnValue({
       data: { proposals: [mockProposal], total: 1 },

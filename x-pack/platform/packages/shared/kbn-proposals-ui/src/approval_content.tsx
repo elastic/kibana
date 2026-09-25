@@ -54,8 +54,8 @@ export interface ApprovalAction {
 export interface ApprovalDecision {
   status: Exclude<ApprovalPhase, 'pending'>;
   actorName: string;
-  /** ISO 8601 timestamp. */
-  decidedAt: string;
+  /** ISO 8601 timestamp. Optional: the record itself may carry none — see `ApprovalActorTime`. */
+  decidedAt?: string;
   /** Shown in the outcome banner, e.g. why a decline was made. */
   reason?: React.ReactNode;
 }
@@ -232,7 +232,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
                   <>
                     {banner.title}
                     <span css={css({ fontWeight: euiTheme.font.weight.regular })}>
-                      {` • ${bannerSuffix}`}
+                      {' • '}
+                      {bannerSuffix}
                     </span>
                   </>
                 ) : (

@@ -85,8 +85,21 @@ gen_uuid() {
 # a concrete backing index that matches its pattern, so the alias and mapping
 # come from the template exactly as they would for the real service.
 ensure_index() {
-  if es_curl --fail "${ES_URL}/${PROPOSALS_INDEX}" > /dev/null 2>&1; then
+  # `GET /<name>` succeeds for either an index or an alias, so it cannot tell apart the alias
+  # this script requires from a legacy concrete index left behind by an older version of it (one
+  # that wrote straight to `${PROPOSALS_INDEX}/_doc/...` before this template existed). Checking
+  # `_alias` specifically is what catches that case — rerunning against a concrete index would
+  # otherwise silently write more documents to it and leave the real gate workflow blocked by the
+  # alias-name conflict this template was added to prevent.
+  if es_curl --fail "${ES_URL}/_alias/${PROPOSALS_INDEX}" > /dev/null 2>&1; then
     return 0
+  fi
+  if es_curl --fail "${ES_URL}/${PROPOSALS_INDEX}" > /dev/null 2>&1; then
+    echo "ERROR: ${PROPOSALS_INDEX} already exists as a concrete index, not an alias." >&2
+    echo "This is left over from an older version of this script. Delete it and re-run:" >&2
+    echo "  curl -X DELETE -u \"\$KIBANA_USER:\$KIBANA_PASSWORD\" \"${ES_URL}/${PROPOSALS_INDEX}\"" >&2
+    echo "(Back up its documents first with a reindex if you want to keep them.)" >&2
+    exit 1
   fi
   es_curl \
     -X PUT \

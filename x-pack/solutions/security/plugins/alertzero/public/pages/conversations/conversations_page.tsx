@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import {
@@ -22,6 +22,7 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useProposal,
 } from '@kbn/proposals-plugin/public';
 import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
@@ -58,8 +59,9 @@ export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { sections, proposalsById, investigations: conversations } = useQueueSections();
 
-  const approve = useApproveProposal();
-  const dismiss = useDismissProposal();
+  // FIXME: use hook methods to keep in-flight states
+  const { mutateAsync: approveDecision } = useApproveProposal();
+  const { mutateAsync: dismissDecision } = useDismissProposal();
   const dropDecided = useDropDecidedProposal();
   const { data: currentUserProfile } = useCurrentUserProfile();
   const currentActorName = currentUserProfile
@@ -152,14 +154,14 @@ export const ConversationsPage: React.FC = () => {
   const confirmApproval = useCallback(
     async (proposal: ProposalItem) => {
       try {
-        await approve.mutateAsync({ id: proposal.id, body: { actionInput: proposal.actionInput } });
+        await approveDecision({ id: proposal.id, body: { actionInput: proposal.actionInput } });
         void dropDecided(proposal.id);
       } catch (err) {
         onDecisionError(err);
         throw err;
       }
     },
-    [approve, dropDecided, onDecisionError]
+    [approveDecision, dropDecided, onDecisionError]
   );
 
   // Dismissing is a decision with a reason, so the approval modal hands off to the dismiss
@@ -179,7 +181,7 @@ export const ConversationsPage: React.FC = () => {
         onClose={onClose}
         onConfirm={async ({ dismissReason, rationale }) => {
           try {
-            await dismiss.mutateAsync({ id: recordId, body: { dismissReason, rationale } });
+            await dismissDecision({ id: recordId, body: { dismissReason, rationale } });
             void dropDecided(recordId);
             onClose();
           } catch (err) {
@@ -189,7 +191,7 @@ export const ConversationsPage: React.FC = () => {
         }}
       />
     ),
-    [dismiss, dropDecided, onDecisionError]
+    [dismissDecision, dropDecided, onDecisionError]
   );
 
   const renderEscalationModal = useCallback(
@@ -226,9 +228,37 @@ export const ConversationsPage: React.FC = () => {
   );
 
   // Cards are keyed by proposal id, so the click already names the row the modal decides on.
-  const selectedProposal = selectedIdForRecommendedAction
+  const liveSelectedProposal = selectedIdForRecommendedAction
     ? proposalsById.get(selectedIdForRecommendedAction)
     : undefined;
+
+  // `useDropDecidedProposal` removes a just-decided proposal from the open-bucket cache
+  // `proposalsById` is built from, before the analyst has necessarily seen the approval modal
+  // reflect it. Without this, `InvestigationActionModals` would unmount the modal the instant
+  // the row leaves the queue, right when `Applying`/`Applied` is shown.
+  // `useProposal` keeps refreshing the single record independently of that eviction (including
+  // through the settling window), so the sticky fallback below stays live rather than frozen
+  // pre-decision.
+  const [stickySelectedProposal, setStickySelectedProposal] = useState<ProposalItem | undefined>(
+    undefined
+  );
+  useEffect(() => {
+    if (liveSelectedProposal) {
+      setStickySelectedProposal(liveSelectedProposal);
+    }
+  }, [liveSelectedProposal]);
+  useEffect(() => {
+    if (!selectedIdForRecommendedAction) {
+      setStickySelectedProposal(undefined);
+    }
+  }, [selectedIdForRecommendedAction]);
+
+  const selectedProposalQuery = useProposal(selectedIdForRecommendedAction);
+  const selectedProposal: ProposalItem | undefined =
+    liveSelectedProposal ??
+    (stickySelectedProposal && selectedProposalQuery.data
+      ? { ...stickySelectedProposal, ...selectedProposalQuery.data }
+      : stickySelectedProposal);
 
   return (
     <AlertZeroPageSection
