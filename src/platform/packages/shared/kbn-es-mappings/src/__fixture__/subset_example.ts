@@ -13,7 +13,8 @@ import type {
   TextMapping,
   BooleanMapping,
   DateMapping,
-  IntegerMapping, ObjectMapping,
+  IntegerMapping,
+  ObjectMapping,
 } from '../types';
 
 interface FullEsDocumentFields {
