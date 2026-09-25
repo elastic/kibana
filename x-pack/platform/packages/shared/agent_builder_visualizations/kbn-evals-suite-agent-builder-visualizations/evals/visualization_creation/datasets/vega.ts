@@ -11,7 +11,8 @@ import { GOLDEN_TOOL_PATH } from './golden_tool_path';
 /** Vega-Lite path: forms Lens does not express. */
 export const VEGA_EXAMPLES: VisualizationDatasetExample[] = [
   // Vega path: request a form Lens does not express (scatter with size).
-  // Prompt is unranked, so gold must not SORT before LIMIT.
+  // Prompt is unranked, so gold must not SORT before LIMIT. The kept rows are then
+  // arbitrary, so ES|QL Result Equivalence skips this example.
   {
     input: {
       question:

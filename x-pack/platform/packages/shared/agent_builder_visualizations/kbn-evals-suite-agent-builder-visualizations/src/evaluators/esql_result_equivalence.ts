@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { Parser } from '@elastic/esql';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
+import { skippedResult } from '../evaluator_utils';
 import type { EsqlQueryRunner } from './esql_query_runner';
 import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
@@ -62,6 +64,24 @@ export function compareRowMultisets(
     unionSize,
     jaccard: unionSize === 0 ? 1 : intersectionSize / unionSize,
   };
+}
+
+/**
+ * True when a LIMIT truncates rows that no SORT has ordered since the last
+ * STATS (or the source), so which rows survive is up to Elasticsearch.
+ */
+export function hasUnorderedLimit(query: string): boolean {
+  let ordered = false;
+  for (const { name } of Parser.parse(query).root.commands) {
+    if (name === 'stats') {
+      ordered = false;
+    } else if (name === 'sort') {
+      ordered = true;
+    } else if (name === 'limit' && !ordered) {
+      return true;
+    }
+  }
+  return false;
 }
 
 const labelFromScore = (score: number): string =>
@@ -133,6 +153,13 @@ export function createEsqlResultEquivalenceEvaluator<
           label: 'skipped',
           explanation: 'No gold query declared for this example.',
         };
+      }
+      if (hasUnorderedLimit(goldQuery)) {
+        // Rows kept by an unordered LIMIT are arbitrary, so an equivalent candidate
+        // can share none of them; the row comparison would carry no signal.
+        return skippedResult(
+          'Gold query truncates with LIMIT but no SORT; its result rows are not deterministic.'
+        );
       }
       if (candidateQueries.length === 0) {
         return {
