@@ -10,7 +10,6 @@ export type AutomationType = 'custom' | 'managed';
 export type AlertStatus = 'active' | 'inactive' | 'any';
 export type RuleNameMatchMode = 'substring' | 'regex';
 export type SchedulePreset = 'hourly' | 'daily' | 'weekly' | 'custom';
-export type DedupeMode = 'rule_id' | 'alert_id' | 'none';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
 export type ReasoningMode = 'investigate' | 'observe';
 export type CompletionAction = 'create_investigation' | 'post_to_slack' | 'silent';
@@ -53,7 +52,6 @@ export interface NightshiftAutomationRuntime {
   dailyDispatchLimit?: number;
   timeoutSeconds?: number;
   dedupeWindowSeconds?: number;
-  dedupeMode?: DedupeMode;
   overlapPolicy?: OverlapPolicy;
 }
 
