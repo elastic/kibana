@@ -1857,6 +1857,7 @@
     "@kbn/evals-suite-attack-discovery": "workspace:*",
     "@kbn/evals-suite-attack-discovery-agent-builder": "workspace:*",
     "@kbn/evals-suite-attack-discovery-fp-tp": "workspace:*",
+    "@kbn/evals-suite-attack-discovery-fp-tp-real-workflow": "workspace:*",
     "@kbn/evals-suite-detection-watch-rule-creation": "workspace:*",
     "@kbn/evals-suite-endpoint": "workspace:*",
     "@kbn/evals-suite-entity-analytics": "workspace:*",
@@ -2308,8 +2309,7 @@
     "whatwg-fetch": "3.6.20",
     "xml-crypto": "6.1.2",
     "xmlbuilder": "15.1.1",
-    "yaml-language-server": "1.23.0",
-    "@kbn/evals-suite-attack-discovery-fp-tp-real-workflow": "workspace:*"
+    "yaml-language-server": "1.23.0"
   },
   "packageManager": "pnpm@12.4.2"
 }
