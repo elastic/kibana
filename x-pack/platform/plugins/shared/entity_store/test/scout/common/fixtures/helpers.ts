@@ -10,7 +10,6 @@ import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   API_VERSIONS,
-  FF_ENABLE_ENTITY_STORE_V2,
   RESOLUTION_RULE_IDS,
   type GetEntityMaintainersResponse,
 } from '../../../../common';
@@ -193,20 +192,14 @@ export const teardownQueryTranslationTestDataStream = async (esClient: EsClient)
 
 export const installEntityStoreSuite = async ({
   apiClient,
-  kbnClient,
   samlAuth,
 }: {
   apiClient: ApiClientFixture;
-  kbnClient: KbnClientFixture;
   samlAuth: SamlAuthFixture;
 }) => {
   const credentials = await samlAuth.asInteractiveUser('admin');
   const defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
   const internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
-
-  await kbnClient.uiSettings.update({
-    [FF_ENABLE_ENTITY_STORE_V2]: true,
-  });
 
   const installResponse = await installAllEntityTypes(apiClient, defaultHeaders);
   expect([200, 201]).toContain(installResponse.statusCode);
@@ -277,12 +270,10 @@ export const installEntityStoreSuite = async ({
 export const uninstallEntityStoreSuite = async ({
   apiClient,
   esClient,
-  kbnClient,
   samlAuth,
 }: {
   apiClient: ApiClientFixture;
   esClient: EsClient;
-  kbnClient: KbnClientFixture;
   samlAuth: SamlAuthFixture;
 }) => {
   const credentials = await samlAuth.asInteractiveUser('admin');
@@ -291,8 +282,6 @@ export const uninstallEntityStoreSuite = async ({
   const uninstallResponse = await uninstallAllEntityTypes(apiClient, defaultHeaders);
   expect(uninstallResponse.statusCode).toBe(200);
   await clearEntityStoreIndices(esClient);
-
-  await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
 };
 
 export const uninstallEntityStoreSuiteWithKbnClient = async ({
@@ -311,11 +300,7 @@ export const uninstallEntityStoreSuiteWithKbnClient = async ({
       ignoreErrors: [404],
     });
   } finally {
-    try {
-      await clearEntityStoreIndices(esClient);
-    } finally {
-      await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
-    }
+    await clearEntityStoreIndices(esClient);
   }
 };
 
