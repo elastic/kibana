@@ -11,12 +11,12 @@ uploadPrefixWithTimeStamp="${uploadPrefix}${TIME_STAMP}/"
 
 uploadBase() {
   for x in 'src/dev/code_coverage/www/index.html' 'src/dev/code_coverage/www/404.html'; do
-    gsutil -m -q cp -r -z js,css,html "${x}" "${uploadPrefix}"
+    gcloud storage cp --recursive --gzip-local=js,css,html --no-user-output-enabled "${x}" "${uploadPrefix}"
   done
 }
 uploadRest() {
   for x in "${xs[@]}"; do
-    gsutil -m -q cp -r -z js,css,html "target/kibana-coverage/${x}-combined" "${uploadPrefixWithTimeStamp}"
+    gcloud storage cp --recursive --gzip-local=js,css,html --no-user-output-enabled "target/kibana-coverage/${x}-combined" "${uploadPrefixWithTimeStamp}"
   done
 }
 
