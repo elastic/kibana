@@ -120,6 +120,7 @@ export const LICENSE_OVERRIDES = {
   '@elastic/esql-definitions': ['Elastic License 2.0'],
   '@elastic/esql-parser': ['Elastic License 2.0'],
   '@elastic/pretty-printer': ['Elastic License 2.0'],
+  '@elastic/statistics': ['Elastic License 2.0'],
   '@elastic/eui': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
   '@elastic/eui-theme-borealis': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
