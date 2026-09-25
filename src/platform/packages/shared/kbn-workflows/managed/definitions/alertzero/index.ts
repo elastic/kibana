@@ -31,6 +31,7 @@ import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensi
 import { ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
 import { ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID } from './find_or_create_investigation';
 import { ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID } from './hunt_package_report';
+import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID } from './hunt_proposal_gate';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './hunt_continuous_threat_hunt';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID } from './journal_note';
 import {
@@ -105,6 +106,10 @@ export {
   ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
 } from './hunt_package_report';
 export {
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
+} from './hunt_proposal_gate';
+export {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
 } from './hunt_continuous_threat_hunt';
@@ -176,24 +181,28 @@ export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Hunt Watch's untagged children invoked via `workflow.execute` by the tagged
- * Worker (`hunt_continuous_threat_hunt.yaml`): the hunt child (former 3D, now
- * on PR 4, `system-security-hunt-execute`), the find-or-create-Investigation
- * child (added Phase 0 task 7: the deterministic id it mints needs a uuidv5
- * hash Liquid cannot compute, so it cannot live inline in the Worker's
- * `parallel` branch), and the packaging child (Phase 5: wraps `hunt.packageReport`,
- * fans mint payloads out to the proposal-gate child, closes the Investigation
- * on a clean run). Own no trigger, so — like `journal_note` above — all three
- * must be installed globally for the Worker's `workflow.execute` calls to
- * resolve them. Correlation (`system-security-hunt-correlation`) lands with 3B
- * under R.7. The proposal-gate child (Phase 6, not yet written) is not in this
- * list yet; the packaging child's `workflow.executeAsync` reference to it
- * resolves at runtime, not at registration, so this doesn't block Phase 5.
+ * Hunt Watch's children invoked via `workflow.execute`/`workflow.executeAsync`
+ * from the tagged Worker (`hunt_continuous_threat_hunt.yaml`) or from each
+ * other: the hunt child (former 3D, now on PR 4, `system-security-hunt-execute`),
+ * the find-or-create-Investigation child (added Phase 0 task 7: the deterministic
+ * id it mints needs a uuidv5 hash Liquid cannot compute, so it cannot live inline
+ * in the Worker's `parallel` branch), the packaging child (Phase 5: wraps
+ * `hunt.packageReport`, fans mint payloads out to the proposal-gate child, closes
+ * the Investigation on a clean run), and the proposal-gate child (Phase 6: wraps
+ * `system-create-proposal`'s single `waitForApproval`, closes the Investigation
+ * on settlement). Own no trigger, so — like `journal_note` above — all four must
+ * be installed globally for the calling `workflow.execute`/`workflow.executeAsync`
+ * steps to resolve them. Correlation (`system-security-hunt-correlation`) lands
+ * with 3B under R.7. `find_or_create_investigation` and `hunt` stay untagged
+ * (Worker-branch-internal plumbing); `package_report` and `proposal_gate` carry
+ * `security` + `continuous-threat-hunt` (feature children, per the plan's
+ * tag convention) for Workflows-list findability.
  */
 export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [
   ALERTZERO_HUNT_WORKFLOW_ID,
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
   ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
 ] as const;
 
 /**
