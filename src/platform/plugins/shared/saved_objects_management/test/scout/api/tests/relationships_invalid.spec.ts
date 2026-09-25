@@ -47,7 +47,7 @@ apiTest.describe('relationships - invalid references', { tag: tags.deploymentAgn
         {
           id: SAVED_OBJECT_IDS.VISUALIZATION_BASIC,
           meta: {
-            icon: 'visualizeApp',
+            icon: 'chartBarVertical',
             namespaceType: 'multiple-isolated',
             hiddenType: false,
             title: 'Visualization',
