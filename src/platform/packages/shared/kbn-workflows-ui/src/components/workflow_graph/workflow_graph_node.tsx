@@ -18,6 +18,9 @@ import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import { deslugifyStepName } from './deslugify_step_name';
 import { getStepChipPalette } from './step_chip_palette';
 import type { ChipOutcome } from './step_chip_palette';
+
+/** Inset from the node's right edge where spec 07's fork port (failure anchor) sits. */
+const FAILURE_PORT_RIGHT_INSET = 24;
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import { getStepFamily, getStepIconType, getTriggerTypeIconType } from '../step_icons';
@@ -40,6 +43,12 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
     readonly retry?: { readonly 'max-attempts'?: number };
     readonly 'on-failure'?: { readonly retry?: { readonly 'max-attempts'?: number } };
   };
+  /**
+   * Node id of the step that owns this node's fallback lane. Present on every
+   * node inside an `on-failure.fallback` lane; absent elsewhere. Consumed by
+   * the minimap colour callback and specs 03/07 for gestural authoring.
+   */
+  readonly fallbackOf?: string;
 }
 
 /**
@@ -245,6 +254,20 @@ function NodePreviewCard({
         />
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+      {/* Secondary source handle for the fallback edge — always on the bottom
+          edge, inset from the right corner. `Position.Bottom` is unconditional:
+          in LR the fallback margin is below the spine, so the route must leave
+          the bottom edge rather than the right centre. `transform: 'none'`
+          overrides React Flow's `.react-flow__handle-bottom` default of
+          `translate(-50%, 0)` so that `right` + `left: auto` places the handle
+          precisely. The visible port is spec 07's; React Flow reads
+          sourceHandle="fallback" on the edge to pick these coordinates. */}
+      <Handle
+        type="source"
+        id="fallback"
+        position={Position.Bottom}
+        style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
+      />
     </>
   );
 }
@@ -550,6 +573,13 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         )}
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+      {/* See note on the preview-mode component above for fallback handle semantics. */}
+      <Handle
+        type="source"
+        id="fallback"
+        position={Position.Bottom}
+        style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
+      />
     </>
   );
 }
@@ -572,6 +602,7 @@ function nodePropsAreEqual(
     prev.data.stepExecution?.status === next.data.stepExecution?.status &&
     prev.data.preview === next.data.preview &&
     prev.data.step === next.data.step &&
+    prev.data.fallbackOf === next.data.fallbackOf &&
     prev.selected === next.selected &&
     prev.targetPosition === next.targetPosition &&
     prev.sourcePosition === next.sourcePosition &&
