@@ -6,13 +6,56 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import pRetry, { type Options as PRetryOptions } from 'p-retry';
-import type { ConcreteTaskInstance, PartialConcreteTaskInstance } from '../task';
+import type {
+  ConcreteTaskInstance,
+  IntervalSchedule,
+  PartialConcreteTaskInstance,
+  RruleSchedule,
+} from '../task';
 import type { Updatable } from './task_runner';
 
 /** Total attempts = 1 initial + (MAX_ATTEMPTS - 1) retries */
 const MAX_ATTEMPTS = 3;
+
+export function getTaskReclaimReason(
+  currentTask: Pick<ConcreteTaskInstance, 'ownerId' | 'attempts' | 'startedAt'>,
+  originalTask: Pick<ConcreteTaskInstance, 'ownerId' | 'attempts' | 'startedAt'>
+): string | undefined {
+  if (currentTask.ownerId !== originalTask.ownerId) {
+    return 'task has been claimed by another worker';
+  }
+
+  if (currentTask.attempts !== originalTask.attempts) {
+    return 'task attempts has been updated by another worker';
+  }
+
+  if (currentTask.startedAt?.valueOf() !== originalTask.startedAt?.valueOf()) {
+    return 'task startedAt has been updated by another worker';
+  }
+
+  return undefined;
+}
+
+export function isVersionConflictError(error: unknown): boolean {
+  if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+    return true;
+  }
+
+  const maybeConflict = error as {
+    status?: number;
+    statusCode?: number;
+    error?: { type?: string };
+  };
+
+  return (
+    maybeConflict.status === 409 ||
+    maybeConflict.statusCode === 409 ||
+    maybeConflict.error?.type === 'version_conflict_engine_exception'
+  );
+}
 
 export async function resolveTaskDocumentConflicts(
   opts: ResolveTaskDocumentConflictsOpts
@@ -62,6 +105,7 @@ async function resolveTaskDocumentConflictsOnce({
   originalTask,
   bufferedTaskStore,
   logger,
+  getRunAtForSchedule,
   attempt,
   maxAttempts,
   label,
@@ -83,35 +127,28 @@ async function resolveTaskDocumentConflictsOnce({
   // A number of "permanent" conditions can occur that mean we should not retry,
   // so we need to check for those and not retry.
 
-  if (currentTask.ownerId !== originalTask.ownerId) {
+  const reclaimReason = getTaskReclaimReason(currentTask, originalTask);
+  if (reclaimReason) {
     throwNotRetryableError(
-      `Unable to resolve task document conflicts for task "${label}": task has been claimed by another worker`
+      `Unable to resolve task document conflicts for task "${label}": ${reclaimReason}`
     );
   }
 
-  if (currentTask.attempts !== originalTask.attempts) {
-    throwNotRetryableError(
-      `Unable to resolve task document conflicts for task "${label}": task attempts has been updated by another worker`
-    );
-  }
-
-  if (currentTask.startedAt?.valueOf() !== originalTask.startedAt?.valueOf()) {
-    throwNotRetryableError(
-      `Unable to resolve task document conflicts for task "${label}": task startedAt has been updated by another worker`
-    );
-  }
+  const scheduleChanged = !isEqual(originalTask.schedule, currentTask.schedule);
+  const runAtChanged = originalTask.runAt.valueOf() !== currentTask.runAt.valueOf();
 
   const updatedTask: PartialConcreteTaskInstance = {
     ...currentTask,
     ...partialTask,
     version: currentTask.version,
     // use the current task's schedule if it has changed from original
-    ...(!isEqual(originalTask.schedule, currentTask.schedule)
-      ? { schedule: currentTask.schedule }
-      : {}),
+    ...(scheduleChanged ? { schedule: currentTask.schedule } : {}),
     // use the current task's runAt if it has changed from original
-    ...(originalTask.runAt.valueOf() !== currentTask.runAt.valueOf()
-      ? { runAt: currentTask.runAt }
+    ...(runAtChanged ? { runAt: currentTask.runAt } : {}),
+    // otherwise, if only the schedule changed, the runner's next runAt was derived from the stale
+    // schedule, so recompute it from the current one
+    ...(!runAtChanged && scheduleChanged && getRunAtForSchedule && currentTask.schedule
+      ? { runAt: getRunAtForSchedule(currentTask.schedule) }
       : {}),
   };
 
@@ -128,6 +165,8 @@ interface ResolveTaskDocumentConflictsOpts {
   originalTask: ConcreteTaskInstance;
   bufferedTaskStore: Updatable;
   logger: Logger;
+  /** Provided when `partialTask.runAt` was derived from the schedule rather than returned by the task runner. */
+  getRunAtForSchedule?: (schedule: IntervalSchedule | RruleSchedule) => Date;
   pRetryOptions?: PRetryOptions;
 }
 
