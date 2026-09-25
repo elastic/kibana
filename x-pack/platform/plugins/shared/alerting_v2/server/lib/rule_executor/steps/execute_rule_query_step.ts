@@ -17,7 +17,7 @@ import { toQueryResponseSizeExceededError } from '../../errors/query_response_si
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
-import { injectDeduplicationMetadata } from '../deduplication_query';
+import { getMvExpandFields, injectDeduplicationMetadata } from '../deduplication_query';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
@@ -94,6 +94,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       });
 
       const boundedQuery = appendLimitToQuery(effectiveQuery, step.queryRowLimit);
+      const mvExpandFields = getMvExpandFields(effectiveQuery);
 
       logger.debug({
         message: 'Executing ES|QL query',
@@ -130,7 +131,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
           yield {
             type: 'continue',
-            state: { ...state, queryPayload, esqlRowBatch: batch },
+            state: { ...state, queryPayload, esqlRowBatch: batch, mvExpandFields },
             meta: { counters },
           };
         }

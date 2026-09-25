@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { injectDeduplicationMetadata } from './deduplication_query';
+import { getMvExpandFields, injectDeduplicationMetadata } from './deduplication_query';
 
 describe('injectDeduplicationMetadata', () => {
   it('adds METADATA _id, _index, _version to a bare FROM', () => {
@@ -67,6 +67,26 @@ describe('injectDeduplicationMetadata', () => {
     );
   });
 
+  it('stops KEEP injection after RENAME in the `new = old` form', () => {
+    expect(injectDeduplicationMetadata('FROM logs-* | RENAME doc_id = _id | KEEP host.name')).toBe(
+      'FROM logs-* METADATA _id, _index, _version | RENAME doc_id = _id | KEEP host.name, _index, _version'
+    );
+  });
+
+  it('stops KEEP injection when RENAME overwrites the field', () => {
+    expect(
+      injectDeduplicationMetadata('FROM logs-* | RENAME host.name AS _id | KEEP message')
+    ).toBe(
+      'FROM logs-* METADATA _id, _index, _version | RENAME host.name AS _id | KEEP message, _index, _version'
+    );
+  });
+
+  it('keeps injecting when EVAL only reads the field', () => {
+    expect(injectDeduplicationMetadata('FROM logs-* | EVAL doc = _id | KEEP host.name')).toBe(
+      'FROM logs-* METADATA _id, _index, _version | EVAL doc = _id | KEEP host.name, _id, _index, _version'
+    );
+  });
+
   it('stops KEEP injection after EVAL overwrites the field', () => {
     expect(injectDeduplicationMetadata('FROM logs-* | EVAL _version = 1 | KEEP host.name')).toBe(
       'FROM logs-* METADATA _id, _index, _version | EVAL _version = 1 | KEEP host.name, _id, _index'
@@ -78,5 +98,17 @@ describe('injectDeduplicationMetadata', () => {
     ['TS', 'TS metrics-* | WHERE cpu > 0.9'],
   ])('leaves a %s source unchanged because there is no FROM to carry METADATA', (_name, query) => {
     expect(injectDeduplicationMetadata(query)).toBe(query);
+  });
+});
+
+describe('getMvExpandFields', () => {
+  it('returns the expanded columns in pipeline order', () => {
+    expect(
+      getMvExpandFields('FROM logs-* | MV_EXPAND host.ip | WHERE x > 1 | MV_EXPAND tags')
+    ).toEqual(['host.ip', 'tags']);
+  });
+
+  it('returns an empty list when the query has no MV_EXPAND', () => {
+    expect(getMvExpandFields('FROM logs-* | WHERE x > 1')).toEqual([]);
   });
 });

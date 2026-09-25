@@ -97,6 +97,7 @@ describe('ExecuteRuleQueryStep', () => {
     expect(results[0].type).toBe('continue');
     expect(results[0].state.queryPayload).toBeDefined();
     expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
+    expect(results[0].state.mvExpandFields).toEqual([]);
     expect(mockLogger.debug).toHaveBeenCalledWith(
       'Executing ES|QL query',
       expect.objectContaining({
@@ -272,6 +273,22 @@ describe('ExecuteRuleQueryStep', () => {
       }),
       expect.any(Object)
     );
+  });
+
+  it('threads the MV_EXPAND columns onto state for rule-event deduplication', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const rule = createRuleResponse({
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | MV_EXPAND host.ip | WHERE host.ip IS NOT NULL' },
+      },
+    });
+    const state = createRulePipelineState({ rule });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results[0].state.mvExpandFields).toEqual(['host.ip']);
   });
 
   it('throws abort error when signal is aborted', async () => {

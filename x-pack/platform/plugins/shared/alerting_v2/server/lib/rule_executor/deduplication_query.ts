@@ -123,24 +123,77 @@ const listsColumn = (args: readonly ESQLAstItem[], field: string): boolean =>
   args.some((arg) => isColumn(arg) && arg.name === field);
 
 /**
- * Whether the argument list names `field` or contains a wildcard that could
- * match it (`_*`, `*`). Used for `DROP`, where a wildcard is treated as
- * removing the field because it cannot be proven not to.
+ * Whether a `DROP` argument list names `field`, or contains a wildcard.
+ *
+ * Any wildcard (`*`, `_*`, but also `host.*`) is treated as dropping the
+ * field. This is a deliberate over-approximation inherited from the
+ * detection engine: proving that a pattern cannot match `_id` would need
+ * glob semantics, so we err toward *not* injecting. The cost is that a
+ * pattern which clearly cannot match, such as `DROP labels.*`, still stops
+ * KEEP injection, and a later `KEEP` then projects the metadata away and
+ * silently disables deduplication for that rule (rows arrive without `_id`,
+ * `resolveRuleEventId` returns `undefined`, every re-match is written).
+ * Narrowing this to patterns that can actually match `field` is a known
+ * follow-up.
  */
 const hasColumnMatching = (args: readonly ESQLAstItem[], field: string): boolean =>
   args.some((arg) => isColumn(arg) && (arg.name === field || arg.name.includes('*')));
 
-/** Whether the `RENAME` argument list contains `field AS …` or `… = field`. */
+/**
+ * Whether a `RENAME` mentions `field` on either side of `AS` / `=`.
+ *
+ * Both operands are columns, and either position invalidates the field:
+ * `_id AS doc_id` and `doc_id = _id` move the metadata under a new name,
+ * while `other AS _id` overwrites it. The AST puts the source column in
+ * `args[0]` for `AS` but in `args[1]` for `=`, so every argument is checked
+ * rather than a fixed position.
+ */
 const hasRenameOf = (args: readonly ESQLAstItem[], field: string): boolean =>
-  args.some((arg) => isTargetingColumn(arg, field) && (arg.name === 'as' || arg.name === '='));
-
-/** Whether the `EVAL` argument list assigns to `field` (`field = …`). */
-const hasAssignmentTo = (args: readonly ESQLAstItem[], field: string): boolean =>
-  args.some((arg) => isTargetingColumn(arg, field) && arg.name === '=');
+  args.some(
+    (arg) =>
+      isFunctionExpression(arg) &&
+      (arg.name === 'as' || arg.name === '=') &&
+      referencesColumn(arg, field)
+  );
 
 /**
- * Type guard for a function expression whose first argument is the column
- * `columnName`; this is how the AST represents `_id AS alias` and `_id = expr`.
+ * Whether an `EVAL` assigns to `field` (`field = …`).
+ *
+ * Unlike {@link hasRenameOf} this stays positional on purpose: the
+ * assignment target is always `args[0]`, and an `EVAL` that merely *reads*
+ * the field (`EVAL x = _id`) leaves the metadata intact and must not stop
+ * KEEP injection.
  */
-const isTargetingColumn = (arg: ESQLAstItem, columnName: string): arg is ESQLFunction =>
-  isFunctionExpression(arg) && isColumn(arg.args[0]) && arg.args[0].name === columnName;
+const hasAssignmentTo = (args: readonly ESQLAstItem[], field: string): boolean =>
+  args.some(
+    (arg) =>
+      isFunctionExpression(arg) &&
+      arg.name === '=' &&
+      isColumn(arg.args[0]) &&
+      arg.args[0].name === field
+  );
+
+/** Whether any direct argument of `fn` is the column `columnName`. */
+const referencesColumn = (fn: ESQLFunction, columnName: string): boolean =>
+  fn.args.some((arg) => isColumn(arg) && arg.name === columnName);
+
+/**
+ * Column names expanded by `MV_EXPAND` commands, in pipeline order.
+ *
+ * `MV_EXPAND` fans one source document into one row per value, so the
+ * source-document identity alone (`_id`, `_index`, `_version`) is no longer
+ * unique per row. `resolveRuleEventId` folds the values of these columns into
+ * the deterministic `_id` so every expanded row is persisted, matching the
+ * detection engine's `generateAlertId` (`retrieveExpandedValues`).
+ *
+ * `ExecuteRuleQueryStep` derives this once per run from the effective query
+ * and threads it on `state.mvExpandFields`. Returns `[]` for queries without
+ * `MV_EXPAND`, which leaves the identity unchanged.
+ */
+export const getMvExpandFields = (query: string): string[] =>
+  Parser.parse(query)
+    .root.commands.filter((command) => command.name === 'mv_expand')
+    .flatMap((command) => {
+      const [target] = command.args;
+      return isColumn(target) && target.name ? [target.name] : [];
+    });

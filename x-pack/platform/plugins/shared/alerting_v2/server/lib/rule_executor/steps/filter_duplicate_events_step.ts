@@ -49,7 +49,7 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return guardedMapStep(streamState, ['alertEventsBatch'], async (state) => {
       const logger = state.logger.withLabels({ step: this.name });
-      const candidateIds = resolveCandidateIds(state.alertEventsBatch);
+      const candidateIds = resolveCandidateIds(state.alertEventsBatch, state.mvExpandFields);
 
       if (candidateIds.size === 0) {
         return { type: 'continue', state };
@@ -129,10 +129,13 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
  * recovered, no_data, continued-breach) are absent from the map and always
  * pass through the step untouched.
  */
-const resolveCandidateIds = (events: readonly AlertEvent[]): ReadonlyMap<AlertEvent, string> =>
+const resolveCandidateIds = (
+  events: readonly AlertEvent[],
+  mvExpandFields: readonly string[] = []
+): ReadonlyMap<AlertEvent, string> =>
   new Map(
     events.flatMap((event) => {
-      const id = resolveRuleEventId(event);
+      const id = resolveRuleEventId(event, mvExpandFields);
       return id ? [[event, id] as const] : [];
     })
   );

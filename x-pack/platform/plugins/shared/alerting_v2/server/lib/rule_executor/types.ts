@@ -35,6 +35,13 @@ export interface RulePipelineState {
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
+  /**
+   * Columns expanded by `MV_EXPAND` in the effective breach query, derived
+   * once per run by `ExecuteRuleQueryStep`. `resolveRuleEventId` folds their
+   * per-row values into the deterministic rule-event `_id` so expanded rows
+   * from one source document are not deduplicated against each other.
+   */
+  readonly mvExpandFields?: ReadonlyArray<string>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
 }

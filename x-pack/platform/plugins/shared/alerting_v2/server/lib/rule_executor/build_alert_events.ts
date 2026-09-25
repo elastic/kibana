@@ -81,10 +81,11 @@ function sha256(value: string) {
  * document.
  *
  * Mirrors the detection engine's ES|QL alert identity: the source document's
- * `_index`, `_id` and `_version` together with the space and rule ids. Two
- * runs that match the same, unchanged source document therefore produce the
- * same `_id`; `FilterDuplicateEventsStep` drops the second before the
- * director sees it, and anything that slips past collides on the bulk
+ * `_index`, `_id` and `_version` together with the space and rule ids, plus
+ * the values of any `MV_EXPAND`ed columns so each expanded row keeps its own
+ * identity. Two runs that match the same, unchanged source document therefore
+ * produce the same `_id`; `FilterDuplicateEventsStep` drops the second before
+ * the director sees it, and anything that slips past collides on the bulk
  * `create` in `StoreAlertEventsStep`. A re-indexed document has a new
  * `_version` and so a new `_id`, and alerts again.
  *
@@ -97,25 +98,38 @@ export function buildRuleEventId({
   sourceId,
   sourceIndex,
   sourceVersion,
+  expandedValues = [],
 }: {
   spaceId: string;
   ruleId: string;
   sourceId: string;
   sourceIndex: string;
   sourceVersion: string;
+  /** Values of the `MV_EXPAND`ed columns for this row, in query order. */
+  expandedValues?: readonly unknown[];
 }): string {
-  return sha256(`${spaceId}|${ruleId}|${sourceIndex}|${sourceId}|${sourceVersion}`);
+  const expansion = expandedValues.length > 0 ? `|${stableStringify(expandedValues)}` : '';
+  return sha256(`${spaceId}|${ruleId}|${sourceIndex}|${sourceId}|${sourceVersion}${expansion}`);
 }
 
 /**
  * Resolves the deterministic `_id` for a rule event, or `undefined` when
  * Elasticsearch should generate one.
  *
- * An event qualifies only when it is a `breached` event built from an ES|QL
- * row that carries the source document's `_id` (injected by
- * `injectDeduplicationMetadata` for non-aggregating queries). Everything else
- * — rows from aggregating queries, `recovered`, `no_data` and continued-breach
- * events — must keep being written on every run, so they get no id here.
+ * An event qualifies only when it is a `breached` event whose row carries the
+ * complete source-document identity injected by `injectDeduplicationMetadata`
+ * for non-aggregating queries: a string `_id`, a string `_index` and a
+ * `_version`. If any of the three is missing — rows from aggregating queries,
+ * `recovered` / `no_data` / continued-breach events, or a query whose `DROP`
+ * or `RENAME` removed one of the columns — the event falls back to an
+ * Elasticsearch-generated id and is written exactly as it was before
+ * deduplication existed. Requiring all three also stops an author-defined
+ * `_id` column (`EVAL _id = …`, `STATS … BY _id`) from being mistaken for a
+ * source-document identity.
+ *
+ * `mvExpandFields` (from `state.mvExpandFields`, derived by
+ * `ExecuteRuleQueryStep`) names the columns whose per-row values are folded
+ * into the id so `MV_EXPAND`ed rows from one document do not collide.
  *
  * Used at both deduplication points: `FilterDuplicateEventsStep` resolves ids
  * to pre-check `.rule-events`, and `StoreAlertEventsStep` passes it as
@@ -126,17 +140,32 @@ export function buildRuleEventId({
  * Pure; never throws. Returning `undefined` is not an error path — it is the
  * normal outcome for every event that is not a source-document breach.
  */
-export function resolveRuleEventId(event: AlertEvent): string | undefined {
+export function resolveRuleEventId(
+  event: AlertEvent,
+  mvExpandFields: readonly string[] = []
+): string | undefined {
   const ruleId = event.rule?.id;
   const sourceId = event.data?._id;
+  const sourceIndex = event.data?._index;
+  const sourceVersion = event.data?._version;
 
-  return event.status === 'breached' && ruleId != null && typeof sourceId === 'string' && sourceId
+  const hasSourceIdentity =
+    event.status === 'breached' &&
+    ruleId != null &&
+    typeof sourceId === 'string' &&
+    sourceId !== '' &&
+    typeof sourceIndex === 'string' &&
+    sourceIndex !== '' &&
+    (typeof sourceVersion === 'number' || typeof sourceVersion === 'string');
+
+  return hasSourceIdentity
     ? buildRuleEventId({
         spaceId: event.space_id,
         ruleId,
         sourceId,
-        sourceIndex: String(event.data._index ?? ''),
-        sourceVersion: String(event.data._version ?? ''),
+        sourceIndex,
+        sourceVersion: String(sourceVersion),
+        expandedValues: mvExpandFields.map((field) => event.data[field] ?? null),
       })
     : undefined;
 }

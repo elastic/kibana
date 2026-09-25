@@ -171,6 +171,7 @@ Formats are strategies under [`services/query_service/formats`](../services/quer
 | `queryPayload` | `ExecuteRuleQueryStep` | ES\|QL query/filter/params for the current run. |
 | `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |
 | `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
+| `mvExpandFields` | `ExecuteRuleQueryStep` | Columns expanded by `MV_EXPAND` in the effective breach query; folded into the deterministic rule-event `_id`. |
 | `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
 
 ## Execution steps
@@ -197,11 +198,13 @@ The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enable
 Rules run on lookback windows that overlap on purpose, so a non-aggregating query re-matches the same source documents on consecutive runs. The executor deduplicates those re-matches the same way the detection engine's ES|QL rule type does:
 
 1. `ExecuteRuleQueryStep` upserts `METADATA _id, _index, _version` into the `FROM` of any query without a `STATS` command, and appends the same fields to `KEEP` so they survive projection. A query the parser cannot transform runs unchanged.
-2. `resolveRuleEventId` in `build_alert_events.ts` gives a `breached` event whose row carries `_id` a deterministic id: `sha256(space_id | rule.id | _index | _id | _version)`. Events without `_id` (aggregating rows, recovered, no_data, continued-breach) keep Elasticsearch-generated ids and are written on every run.
+2. `resolveRuleEventId` in `build_alert_events.ts` gives a `breached` event whose row carries the complete injected identity (`_id`, `_index` and `_version`) a deterministic id: `sha256(space_id | rule.id | _index | _id | _version [| MV_EXPAND values])`. The values of any `MV_EXPAND`ed columns (`state.mvExpandFields`) are folded in so each expanded row from one document keeps its own identity, as the detection engine's `generateAlertId` does. If any of the three metadata columns is missing — aggregating rows, recovered / no_data / continued-breach events, or a query whose `DROP` / `RENAME` removed a column — the event falls back to an Elasticsearch-generated id and is written on every run, exactly as before deduplication existed. An author-defined `_id` column alone is therefore never treated as a source identity.
 3. `FilterDuplicateEventsStep` runs an `ids` query against `.rule-events` and drops events that already exist, so the director and metrics only see rows that will persist. It sits after `ClassifyAbsentGroupsStep`, which has already recorded the group as breaching for the absence check, and before the director so episode state matches what is written.
 4. `StoreAlertEventsStep` passes the same id as the bulk `create` `_id`. Anything the pre-check could not see, including documents written earlier in the same run, collides here with a 409. `StorageService` treats 409s as expected and `PersistedRuleEventsRecorder` counts them into `ruleEventsDeduplicated` alongside the pre-check drops.
 
 A re-indexed source document has a new `_version` and therefore a new id, so an updated document alerts again. Aggregating queries are never deduplicated because their rows are not documents.
+
+Known limitation: `KEEP` injection stops at any wildcard `DROP` (including patterns that cannot match the metadata, such as `DROP labels.*`), so a rule with a wildcard `DROP` followed by a `KEEP` runs without deduplication. See `hasColumnMatching` in `deduplication_query.ts`.
 
 ## How recovery and no-data fit together
 

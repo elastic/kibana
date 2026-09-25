@@ -34,7 +34,7 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
       const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
-        getDocumentId: (doc) => resolveRuleEventId(doc as AlertEvent),
+        getDocumentId: (doc) => resolveRuleEventId(doc as AlertEvent, state.mvExpandFields),
       });
 
       logger.debug({ message: 'Bulk-indexed alert events batch' });

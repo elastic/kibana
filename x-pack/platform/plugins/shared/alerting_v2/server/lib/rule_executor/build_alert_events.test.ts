@@ -893,6 +893,52 @@ describe('resolveRuleEventId', () => {
     expect(resolveRuleEventId(event)).toBeUndefined();
   });
 
+  it.each([
+    ['_index', { _id: 'doc-1', _version: 2 }],
+    ['_version', { _id: 'doc-1', _index: 'logs-000001' }],
+  ])(
+    'falls back to an Elasticsearch-generated id when %s is missing',
+    (_field, partialIdentity) => {
+      const event = createAlertEvent({
+        status: 'breached',
+        data: { ...partialIdentity, 'host.name': 'a' },
+      });
+      expect(resolveRuleEventId(event)).toBeUndefined();
+    }
+  );
+
+  it('does not treat an author-defined _id column as a source identity', () => {
+    const event = createAlertEvent({ status: 'breached', data: { _id: 'host-a', count: 3 } });
+    expect(resolveRuleEventId(event)).toBeUndefined();
+  });
+
+  describe('with MV_EXPAND fields', () => {
+    const base = {
+      space_id: 'default',
+      rule: { id: 'rule-1', version: 1 },
+      status: 'breached' as const,
+    };
+
+    it('gives each expanded row from one document its own id', () => {
+      const rowA = createAlertEvent({ ...base, data: { ...sourceRow, 'host.ip': '10.0.0.1' } });
+      const rowB = createAlertEvent({ ...base, data: { ...sourceRow, 'host.ip': '10.0.0.2' } });
+
+      expect(resolveRuleEventId(rowA, ['host.ip'])).not.toBe(resolveRuleEventId(rowB, ['host.ip']));
+    });
+
+    it('is stable for the same expanded value across runs', () => {
+      const run1 = createAlertEvent({ ...base, data: { ...sourceRow, 'host.ip': '10.0.0.1' } });
+      const run2 = createAlertEvent({ ...base, data: { ...sourceRow, 'host.ip': '10.0.0.1' } });
+
+      expect(resolveRuleEventId(run1, ['host.ip'])).toBe(resolveRuleEventId(run2, ['host.ip']));
+    });
+
+    it('leaves the id unchanged when no fields are expanded', () => {
+      const event = createAlertEvent({ ...base, data: sourceRow });
+      expect(resolveRuleEventId(event, [])).toBe(resolveRuleEventId(event));
+    });
+  });
+
   it.each(['recovered', 'no_data'] as const)('returns undefined for %s events', (status) => {
     const event = createAlertEvent({ status, data: sourceRow });
     expect(resolveRuleEventId(event)).toBeUndefined();

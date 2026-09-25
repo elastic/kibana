@@ -42,6 +42,7 @@ apiTest.describe('Rule executor - rule-event deduplication', { tag: tags.statefu
       index: SOURCE_INDEX,
       mappings: {
         'host.name': { type: 'keyword' },
+        'host.ip': { type: 'ip' },
         severity: { type: 'keyword' },
       },
     });
@@ -110,6 +111,110 @@ apiTest.describe('Rule executor - rule-event deduplication', { tag: tags.statefu
       expect(event.data._index).toBe(SOURCE_INDEX);
       expect(typeof event.data._version).toBe('number');
       expect(event.episode?.status).toBe('active');
+    }
+  );
+
+  apiTest(
+    'writes a breach event on every run for an aggregating (STATS BY) query',
+    async ({ apiServices }) => {
+      const host = 'host-dedup-stats';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [{ '@timestamp': new Date().toISOString(), 'host.name': host, severity: 'high' }],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-dedup-stats-by' },
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name`,
+            },
+          },
+        })
+      );
+
+      // Aggregated rows are not source documents, so no METADATA is injected
+      // and no deterministic `_id` is derived. The same document therefore
+      // produces a new breach event on every overlapping run, as it did
+      // before deduplication existed.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 3, { status: 'breached' });
+
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+      expect(breachEvents.length).toBeGreaterThanOrEqual(3);
+
+      const groupHashes = new Set(breachEvents.map((event) => event.group_hash));
+      expect(groupHashes.size).toBe(1);
+
+      for (const event of breachEvents) {
+        expect(event.data.count).toBe(1);
+        expect('_id' in event.data).toBe(false);
+        expect('_index' in event.data).toBe(false);
+        expect('_version' in event.data).toBe(false);
+      }
+    }
+  );
+
+  apiTest(
+    'writes one event per MV_EXPAND row of a single source document and none again on re-match',
+    async ({ apiServices }) => {
+      const host = 'host-dedup-mv-expand';
+      const ips = ['10.0.0.1', '10.0.0.2', '10.0.0.3'];
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': host,
+            'host.ip': ips,
+            severity: 'high',
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-dedup-mv-expand' },
+          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+          grouping: { fields: ['host.ip'] },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | MV_EXPAND host.ip`,
+            },
+          },
+        })
+      );
+
+      // One document fans out into three rows that share `_id`, `_index` and
+      // `_version`. The expanded `host.ip` value is folded into each row's
+      // deterministic id, so all three persist on the first run, and later
+      // runs re-matching the same document add nothing.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 3, { status: 'breached' });
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: rule.id, runs: 2 });
+
+      const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      expect(events).toHaveLength(3);
+
+      const expandedIps = events.map((event) => event.data['host.ip']).sort();
+      expect(expandedIps).toStrictEqual(ips);
+
+      const sourceIds = new Set(events.map((event) => event.data._id));
+      expect(sourceIds.size).toBe(1);
+
+      const episodeIds = new Set(events.map((event) => event.episode?.id));
+      expect(episodeIds.size).toBe(3);
+
+      for (const event of events) {
+        expect(event.status).toBe('breached');
+        expect(event.episode?.status).toBe('active');
+      }
     }
   );
 });
