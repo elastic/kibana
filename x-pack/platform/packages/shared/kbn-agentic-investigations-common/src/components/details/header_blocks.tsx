@@ -25,10 +25,6 @@ export interface ConversationHeaderBlocksProps {
   'data-test-subj'?: string;
 }
 
-const getStatusBadge = (status?: string) => (
-  <EuiBadge color={status === 'open' ? 'primary' : 'subdued'}>{status ?? getEmptyValue()}</EuiBadge>
-);
-
 /**
  * Status and assignee tiles shown above the flyout tabs.
  *
@@ -64,7 +60,11 @@ export const ConversationHeaderBlocks = ({
     if (statusNode !== undefined) {
       return statusNode;
     }
-    return <EuiBadge color="hollow">{status ?? getEmptyValue()}</EuiBadge>;
+    return (
+      <EuiBadge color={status === 'open' ? 'primary' : 'hollow'}>
+        {status ?? getEmptyValue()}
+      </EuiBadge>
+    );
   }, [status, statusNode]);
 
   const items = useMemo<InfoBlockItem[]>(
@@ -72,7 +72,7 @@ export const ConversationHeaderBlocks = ({
       {
         id: 'status',
         title: TEMPLATE_UI_LABELS.status,
-        value: getStatusBadge(status),
+        value: statusValue,
       },
       {
         id: 'assignees',
