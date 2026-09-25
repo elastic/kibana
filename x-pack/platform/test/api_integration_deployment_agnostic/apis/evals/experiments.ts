@@ -245,11 +245,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
 
         const listing = body as GetEvaluationExperimentsResponse;
-        expect(listing.total).to.eql(3);
+        expect(listing.total).to.eql(4);
         const ids = listing.experiments.map((experiment) => experiment.experiment_id).sort();
-        expect(ids).to.eql([baselineExperimentId, targetExperimentId, tracedExperimentId].sort());
         expect(ids).to.eql(
-          [baselineExperimentId, targetExperimentId, largePayloadExperimentId].sort()
+          [
+            baselineExperimentId,
+            targetExperimentId,
+            tracedExperimentId,
+            largePayloadExperimentId,
+          ].sort()
         );
       });
 
@@ -260,7 +264,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
 
         const listing = body as GetEvaluationExperimentsResponse;
-        expect(listing.total).to.eql(3);
+        expect(listing.total).to.eql(4);
         expect(listing.experiments.length).to.eql(1);
       });
 
@@ -270,7 +274,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({ suite_id: suiteId })
           .expect(200);
 
-        expect((body as GetEvaluationExperimentsResponse).total).to.eql(3);
+        expect((body as GetEvaluationExperimentsResponse).total).to.eql(4);
       });
     });
 
