@@ -61,3 +61,45 @@ export const renderRuleTuningWorkerYaml = (
     '__WORKER_EXTRAS__',
     JSON.stringify(values.extras)
   );
+
+/**
+ * Hunt Watch Continuous Threat Hunt dials. Shape mirrors
+ * `ContinuousThreatHuntWorkerExtras` in `@kbn/alertzero-common`. Individual
+ * placeholders (not a whole extras blob) so Phase 3 can drop them into
+ * `kibana.request` bodies and child inputs without a nested lookup.
+ */
+export interface HuntWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  extras: {
+    tier2When: 'on_hits' | 'always';
+    candidateLimit: number;
+    fanOutMax: number;
+    technology?: 'aws_iam' | 'fortigate';
+  };
+}
+
+/**
+ * Manual autonomy: manual trigger only. Assisted/supervised: 4h (or configured)
+ * schedule plus manual. String dials are JSON-escaped so a value with quotes or
+ * newlines cannot break the YAML parse. Absent `technology` renders as "" so the
+ * child/coordinator treat it as unset. `extras` is also rendered whole (settings
+ * contract), matching Rule Tuning.
+ */
+export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateValues): string => {
+  const triggers =
+    values.autonomyLevel === 'manual'
+      ? '  - type: manual'
+      : [
+          '  - type: scheduled',
+          '    with:',
+          `      every: ${JSON.stringify(values.scheduleInterval)}`,
+          '  - type: manual',
+        ].join('\n');
+
+  return renderScheduledWorkerYaml(yaml, values)
+    .replaceAll('__WORKER_TRIGGERS__', triggers)
+    .replaceAll('__WORKER_EXTRAS__', JSON.stringify(values.extras))
+    .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(values.extras.tier2When))
+    .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(values.extras.candidateLimit))
+    .replaceAll('__WORKER_FAN_OUT_MAX__', String(values.extras.fanOutMax))
+    .replaceAll('__WORKER_TECHNOLOGY__', JSON.stringify(values.extras.technology ?? ''));
+};

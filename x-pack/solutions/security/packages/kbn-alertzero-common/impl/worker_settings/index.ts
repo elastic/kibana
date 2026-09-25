@@ -80,4 +80,9 @@ export {
   FP_RATE_THRESHOLD_PCT_MIN,
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
+export {
+  CONTINUOUS_THREAT_HUNT_DEFAULT_EXTRAS,
+  CONTINUOUS_THREAT_HUNT_SETTINGS,
+  ContinuousThreatHuntWorkerExtras,
+} from './hunt_watch';
 export type { WorkerSettingsDeclaration } from './types';

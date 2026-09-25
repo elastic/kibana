@@ -5,12 +5,21 @@ enabled: false
 tags:
   - watch
   - watch-hunt
+# Triggers are rendered from autonomy: manual = manual only; assisted/supervised
+# add the schedule. Dial placeholders land in consts so Phase 3 can wire them.
 triggers:
-  - type: manual
+__WORKER_TRIGGERS__
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+    extras: __WORKER_EXTRAS__
+    # Flat dial mirrors for Phase 3 kibana.request / child inputs (same values as extras).
+    tier2When: __WORKER_TIER2_WHEN__
+    candidateLimit: __WORKER_CANDIDATE_LIMIT__
+    fanOutMax: __WORKER_FAN_OUT_MAX__
+    technology: __WORKER_TECHNOLOGY__
 steps:
   - name: stub
     type: console
