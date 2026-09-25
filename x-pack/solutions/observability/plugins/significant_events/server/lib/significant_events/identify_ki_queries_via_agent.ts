@@ -20,6 +20,8 @@ import {
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
   type GeneratedSignificantEventQuery,
 } from '@kbn/significant-events-schema';
 import { EMPTY_TOKENS } from '@kbn/nightshift-ai';
@@ -57,6 +59,7 @@ export interface ExecuteKIQueryGenerationAgentOptions {
   agentBuilder: AgentBuilderPluginStart;
   request: KibanaRequest;
   connectorId: string;
+  interactionId: string;
   definition: Streams.all.Definition;
   existingQueries: ExistingQuerySummary[];
   signal?: AbortSignal;
@@ -67,6 +70,7 @@ export async function executeKIQueryGenerationAgent({
   agentBuilder,
   request,
   connectorId,
+  interactionId,
   definition,
   existingQueries,
   signal,
@@ -101,6 +105,9 @@ export async function executeKIQueryGenerationAgent({
       telemetryMetadata: {
         pluginId: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
         aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+        productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+        productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+        interactionId,
       },
     },
   });

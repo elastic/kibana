@@ -1,5 +1,6 @@
 {
-  "sha1": "f32de9f923dba669127a95a614fd915dfc7cb198",  "testChannels": [
+  "sha1": "61c7045937c1afe31c6ef6106ad53985f3ed3a06",
+  "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
@@ -1702,7 +1703,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 23
       }
     },
@@ -1715,7 +1716,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 79
       }
     },
@@ -1728,7 +1729,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 47,
+        "line": 48,
         "column": 24
       }
     },
@@ -1741,7 +1742,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 13
       }
     },
@@ -1754,21 +1755,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 61,
+        "line": 62,
         "column": 14
       }
     },
     {
-      "id": "becd8b2cff5d550-17c2dac57d3d987",
-      "title": "List action policy execution history API validation: accepts a start_date lower bound",
+      "id": "becd8b2cff5d550-8d0ea03d87fb7be",
+      "title": "List action policy execution history API validation: rejects an unknown sort field",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 7
+      }
+    },
+    {
+      "id": "becd8b2cff5d550-43148742ae09b7e",
+      "title": "List action policy execution history API returns the schema defaults for page, per_page and total",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 78,
+        "column": 42
       }
     },
     {
@@ -1780,8 +1794,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 77,
-        "column": 54
+        "line": 87,
+        "column": 67
       }
     },
     {
@@ -1793,8 +1807,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 88,
-        "column": 50
+        "line": 97,
+        "column": 24
       }
     },
     {
@@ -1806,8 +1820,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 94,
-        "column": 69
+        "line": 104,
+        "column": 7
       }
     },
     {
@@ -1819,8 +1833,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 99,
-        "column": 14
+        "line": 109,
+        "column": 20
       }
     },
     {
@@ -1832,8 +1846,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 106,
-        "column": 8
+        "line": 115,
+        "column": 24
       }
     },
     {
@@ -1845,8 +1859,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 111,
-        "column": 81
+        "line": 123,
+        "column": 13
       }
     },
     {
@@ -1858,8 +1872,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 121,
-        "column": 24
+        "line": 132,
+        "column": 62
       }
     },
     {
@@ -1889,8 +1903,8 @@
       }
     },
     {
-      "id": "f825e947215b0f4-9c3299cf0e9b518",
-      "title": "List rule executions API validation: rejects page=0",
+      "id": "f825e947215b0f4-bb06426c3a1c831",
+      "title": "List rule executions API validation: accepts perPage=0 with a count only read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1902,16 +1916,16 @@
       }
     },
     {
-      "id": "f825e947215b0f4-554c6ef42ef9692",
-      "title": "List rule executions API validation: rejects perPage=0",
+      "id": "f825e947215b0f4-9c3299cf0e9b518",
+      "title": "List rule executions API validation: rejects page=0",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 123,
-        "column": 14
+        "line": 127,
+        "column": 11
       }
     },
     {
@@ -1923,8 +1937,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 130,
-        "column": 7
+        "line": 132,
+        "column": 12
       }
     },
     {
@@ -1936,8 +1950,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 136,
-        "column": 82
+        "line": 138,
+        "column": 78
       }
     },
     {
@@ -1949,7 +1963,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 143,
+        "line": 145,
         "column": 69
       }
     },
@@ -1962,7 +1976,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 147,
+        "line": 149,
         "column": 12
       }
     },
@@ -1975,7 +1989,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 152,
+        "line": 154,
         "column": 22
       }
     },
@@ -1988,7 +2002,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 161,
+        "line": 163,
         "column": 16
       }
     },
