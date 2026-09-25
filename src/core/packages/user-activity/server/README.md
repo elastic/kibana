@@ -122,8 +122,9 @@ Here's the current schema reference: [`docs/reference/user-activity.md`](../../.
 
 Some of the fields in the schema come from:
 
-- `trackUserAction()` params (for example `message`, `event.*`, `object.*`, `metadata.*`)
+- `trackUserAction()` params (for example `message`, `event.*`, `metadata.*`; the `object` param is emitted as `kibana.object.*`)
 - Injected context (for example `user.*`, `client.*`, `source.*`, `kibana.session.id`, `kibana.space.id`, and `http.request.referrer`)
+- Fields derived by the service (`kibana.saved_object.type` and `kibana.saved_object.id`, emitted when `object.type` is a registered saved object type)
 - Fields automatically added by the logging system / JSON layout (for example `@timestamp`)
 
 > **Important**
