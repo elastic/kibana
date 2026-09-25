@@ -179,7 +179,7 @@ describe('UserActivityService', () => {
       });
     });
 
-    it('logs optional event timing fields and metadata', () => {
+    it('logs optional event timing fields and caller-provided kibana metadata buckets', () => {
       const params: TrackUserActionParams = {
         message: 'Action with metadata',
         event: {
@@ -189,24 +189,27 @@ describe('UserActivityService', () => {
           end: '2026-01-01T00:00:00.250Z',
           duration: 250000000,
         },
-        object: { id: 'obj-meta', name: 'Object', type: 'rule', tags: [] },
-        metadata: {
-          field1: 'val1',
-          field2: 'val2',
-          num1: 1,
+        object: { id: 'obj-meta', name: 'Object', type: 'dashboard', tags: [] },
+        kibana: {
+          dashboard: {
+            field1: 'val1',
+            field2: 'val2',
+            num1: 1,
+          },
         },
       };
 
       service.trackUserAction(params);
 
-      const { object, ...paramsWithoutObject } = params;
+      const { object, kibana, ...paramsWithoutObjectAndKibana } = params;
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls).toHaveLength(1);
       expect(logCalls[0][0]).toBe('Action with metadata');
       expect(logCalls[0][1]).toMatchObject({
-        ...paramsWithoutObject,
-        kibana: { object },
+        ...paramsWithoutObjectAndKibana,
+        kibana: { object, ...kibana },
       });
+      expect(logCalls[0][1]).not.toHaveProperty('metadata');
     });
 
     it('logs optional event.outcome on the event object', () => {
@@ -250,7 +253,7 @@ describe('UserActivityService', () => {
         message: 'Merged payload',
         event: { action: TEST_ACTION, type: ['change'], outcome: 'success' },
         object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
-        metadata: { attempt: 1 },
+        kibana: { dashboard: { attempt: 1 } },
         error: { message: 'ignored downstream' },
       };
 
@@ -259,10 +262,13 @@ describe('UserActivityService', () => {
       expect(loggingSystemMock.collect(core.logger).info[0][1]).toMatchObject({
         message: 'Merged payload',
         event: { action: TEST_ACTION, type: ['change'], outcome: 'success' },
-        kibana: { object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] } },
-        metadata: { attempt: 1 },
+        kibana: {
+          object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
+          dashboard: { attempt: 1 },
+        },
         error: { message: 'ignored downstream' },
       });
+      expect(loggingSystemMock.collect(core.logger).info[0][1]).not.toHaveProperty('metadata');
     });
 
     it('generates default message when not provided', () => {
