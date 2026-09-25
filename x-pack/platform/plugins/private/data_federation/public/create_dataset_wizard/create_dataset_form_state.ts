@@ -67,6 +67,10 @@ export interface CreateDatasetFormValues {
   data_source: string;
   resource: string;
   settings: CreateDatasetSettingsFormValues;
+  /** UI-only state (never sent to the API). */
+  ui: {
+    formatWasAutoDetected: boolean;
+  };
   mappings: MappingEditorValue;
 }
 

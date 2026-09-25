@@ -191,6 +191,10 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  autoDetectedSuffix: i18n.translate('xpack.dataFederation.createDatasetForm.autoDetectedSuffix', {
+    defaultMessage: '(auto-detected)',
+  }),
+
   settingsFormatParquet: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsFormatParquet',
     {

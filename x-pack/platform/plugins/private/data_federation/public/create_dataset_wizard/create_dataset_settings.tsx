@@ -88,6 +88,10 @@ export function CreateDatasetFormatField({
         value?.trim() ? true : createDatasetWizardStrings.settingsFormatRequired,
     },
   });
+  const { field: formatWasAutoDetectedField } = useController({
+    name: 'ui.formatWasAutoDetected',
+    control,
+  });
 
   return (
     <EuiFormRow
@@ -98,9 +102,13 @@ export function CreateDatasetFormatField({
     >
       <FormatSelect
         value={formatField.value}
-        onChange={formatField.onChange}
+        onChange={(next) => {
+          formatWasAutoDetectedField.onChange(false);
+          formatField.onChange(next);
+        }}
         onBlur={formatField.onBlur}
         isInvalid={Boolean(formatFieldState.error)}
+        isAutoDetected={Boolean(formatWasAutoDetectedField.value)}
       />
     </EuiFormRow>
   );

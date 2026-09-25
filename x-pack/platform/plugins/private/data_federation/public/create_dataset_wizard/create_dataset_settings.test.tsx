@@ -42,6 +42,7 @@ const renderSettings = () => {
         data_source: '',
         resource: '',
         settings: emptyCreateDatasetSettingsFormValues(),
+        ui: { formatWasAutoDetected: false },
       },
     });
 
@@ -185,6 +186,7 @@ const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
         data_source: '',
         resource: '',
         settings: { ...emptyCreateDatasetSettingsFormValues(), format },
+        ui: { formatWasAutoDetected: false },
       },
     });
 

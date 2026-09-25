@@ -69,8 +69,9 @@ export function StepDataset({
       format !== lastAutoSelectedFormatRef.current
     ) {
       lastAutoSelectedFormatRef.current = null;
+      setValue('ui.formatWasAutoDetected', false);
     }
-  }, [format]);
+  }, [format, setValue]);
 
   useEffect(() => {
     const inferredFormat = inferFormatFromResource(resource);
@@ -82,6 +83,7 @@ export function StepDataset({
     if (!format || format === lastAutoSelectedFormatRef.current) {
       lastAutoSelectedFormatRef.current = inferredFormat;
       setValue('settings.format', inferredFormat, { shouldValidate: true });
+      setValue('ui.formatWasAutoDetected', true);
     }
   }, [format, resource, setValue]);
 
