@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { SchemaOutput } from './schema_output';
+import { syntheticsCCSSettingsSchema } from './zod/settings';
 
-export const syntheticsCCSSettingsSchema = t.type({
-  useAllRemoteClusters: t.boolean,
-  selectedRemoteClusters: t.array(t.string),
-});
+export { syntheticsCCSSettingsSchema };
 
-export type SyntheticsCCSSettings = t.TypeOf<typeof syntheticsCCSSettingsSchema>;
+export type SyntheticsCCSSettings = SchemaOutput<typeof syntheticsCCSSettingsSchema>;

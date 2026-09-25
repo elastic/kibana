@@ -7,10 +7,8 @@
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import {
-  OBSERVABILITY_ALERTING_BASE_PATH,
-  OBSERVABILITY_ALERTING_RULES_V1_PATH,
-} from '../../../../../public/constants';
+import { OBSERVABILITY_ALERTING_BASE_PATH } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ALERTING_RULES_V1_PATH } from '../../../../../public/constants';
 
 const V1_BASE = `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`;
 const escapeRe = (value: string) => value.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');

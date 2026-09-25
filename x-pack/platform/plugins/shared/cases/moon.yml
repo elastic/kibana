@@ -107,8 +107,10 @@ dependsOn:
   - '@kbn/securitysolution-es-utils'
   - '@kbn/response-ops-retry-service'
   - '@kbn/openapi-generator'
+  - '@kbn/deeplinks-workflows'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows'
+  - '@kbn/workflows-ui'
   - '@kbn/workflows-management-plugin'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-common'
@@ -129,6 +131,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
   - '@kbn/core-http-common'
+  - '@kbn/workflows-ui'
 tags:
   - plugin
   - prod

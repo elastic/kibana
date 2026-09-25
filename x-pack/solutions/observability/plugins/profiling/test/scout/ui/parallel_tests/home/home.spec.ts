@@ -23,8 +23,7 @@ test.describe('Home page', { tag: tags.stateful.classic }, () => {
   }) => {
     await profilingHomePage.gotoWithTimeRange(rangeFrom, rangeTo);
     await profilingHomePage.expectTopNContent();
-    // Since we're using loginAsAdmin(), the user has privileges and won't see the limitation message
-    // Instead, we should verify the page loads successfully. The default location is Stacktraces > Executables, so we can check for content specific to that tab.
+    // The default location is Stacktraces > Executables, so we check for content specific to that tab.
     await expect(
       profilingHomePage.page.getByTestId(APP_HEADER_TEST_SUBJECTS.title).getByText('Stacktraces')
     ).toBeVisible();

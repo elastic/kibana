@@ -814,7 +814,7 @@ export const getXyVisualization = ({
       return null;
     }
 
-    return () => (
+    return (
       <SubtypeSwitch
         layer={layer}
         setLayerState={(newLayer: XYDataLayerConfig) =>
@@ -1630,8 +1630,9 @@ const SubtypeSwitch = ({
         panelPaddingSize="s"
         button={
           <ToolbarButton
-            aria-label={i18n.translate('xpack.lens.xyChart.stackingOptions', {
-              defaultMessage: 'Stacking',
+            aria-label={i18n.translate('xpack.lens.xyChart.stackingOptionsButtonAriaLabel', {
+              defaultMessage: 'Stacking: {stackingType}',
+              values: { stackingType: stackingType.label },
             })}
             onClick={() => setFlyoutOpen(true)}
             fullWidth

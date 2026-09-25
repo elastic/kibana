@@ -11,7 +11,11 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from './mappings';
 import { flattenMapping, getIndexMappings } from './mappings';
 import type { GetIndexMappingsResult } from './mappings/get_index_mappings';
-import { processFieldCapsResponse, processFieldCapsResponsePerIndex } from './field_caps';
+import {
+  fetchFieldCaps,
+  processFieldCapsResponse,
+  processFieldCapsResponsePerIndex,
+} from './field_caps';
 import { batchByUrlLength } from './batch_by_url_length';
 import { listSearchSources } from '../steps/list_search_sources';
 
@@ -55,11 +59,13 @@ export const partitionByCcs = <T extends { name: string }>(
 export const getFieldsFromFieldCaps = async ({
   resource,
   esClient,
+  includeFrozen = false,
 }: {
   resource: string;
   esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
 }): Promise<MappingField[]> => {
-  const fieldCapRes = await esClient.fieldCaps({ index: resource, fields: ['*'] });
+  const fieldCapRes = await fetchFieldCaps({ index: resource, esClient, includeFrozen });
   const { fields } = processFieldCapsResponse(fieldCapRes);
   return fields;
 };
@@ -72,9 +78,11 @@ export const getFieldsFromFieldCaps = async ({
 export const getBatchedFieldsFromFieldCaps = async ({
   resources,
   esClient,
+  includeFrozen = false,
 }: {
   resources: string[];
   esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
 }): Promise<Record<string, MappingField[]>> => {
   if (resources.length === 0) {
     return {};
@@ -84,9 +92,10 @@ export const getBatchedFieldsFromFieldCaps = async ({
 
   const batchResults = await Promise.all(
     batches.map(async (batch) => {
-      const fieldCapRes = await esClient.fieldCaps({
+      const fieldCapRes = await fetchFieldCaps({
         index: batch.join(','),
-        fields: ['*'],
+        esClient,
+        includeFrozen,
       });
       return processFieldCapsResponsePerIndex(fieldCapRes);
     })
@@ -171,10 +180,14 @@ export const getIndexFields = async ({
   indices,
   esClient,
   cleanup = true,
+  includeFrozen = false,
+  skipUnauthorized = false,
 }: {
   indices: string[];
   esClient: ElasticsearchClient;
   cleanup?: boolean;
+  includeFrozen?: boolean;
+  skipUnauthorized?: boolean;
 }): Promise<Record<string, IndexFieldsResult>> => {
   const local = indices.filter((i) => !isCcsTarget(i));
   const remote = indices.filter((i) => isCcsTarget(i));
@@ -216,7 +229,7 @@ export const getIndexFields = async ({
         bucket.map(async (b) => ({
           input: b.input,
           fields: await fetchLimit(() =>
-            getFieldsFromFieldCaps({ resource: b.concrete, esClient })
+            getFieldsFromFieldCaps({ resource: b.concrete, esClient, includeFrozen })
           ),
         }))
       );
@@ -227,6 +240,7 @@ export const getIndexFields = async ({
             getIndexMappings({
               indices: buckets.index.map((i) => i.concrete),
               cleanup,
+              skipUnauthorized,
               esClient,
             })
           )
@@ -265,6 +279,7 @@ export const getIndexFields = async ({
     const fieldsByIndex = await getBatchedFieldsFromFieldCaps({
       resources: remote,
       esClient,
+      includeFrozen,
     });
     for (const idx of remote) {
       result[idx] = { type: 'indexPattern', fields: fieldsByIndex[idx] ?? [] };

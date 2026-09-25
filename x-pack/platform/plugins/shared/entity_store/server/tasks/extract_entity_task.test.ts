@@ -33,6 +33,8 @@ import type * as types from '../types';
 import { EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../domain/constants';
 import { EngineDescriptorTypeName } from '../domain/saved_objects';
+import { entityStoreMetrics } from '../monitor/metrics';
+import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../domain/errors';
 
 const createTaskInstance = (schedule?: ConcreteTaskInstance['schedule']): ConcreteTaskInstance =>
   ({
@@ -192,6 +194,112 @@ describe('feature flag gates non-priority execution', () => {
   });
 });
 
+describe('extract entity task metrics', () => {
+  const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
+    typeof isDualProcessEnabled
+  >;
+  const mockCreateClient = createLogsExtractionClient as jest.MockedFunction<
+    typeof createLogsExtractionClient
+  >;
+
+  let taskSuccess: jest.SpyInstance;
+  let taskError: jest.SpyInstance;
+  let taskDuration: jest.SpyInstance;
+
+  const runWith = async (
+    taskTypeSuffix: string,
+    extractionResult: Record<string, unknown>,
+    flagEnabled = true
+  ) => {
+    jest.clearAllMocks();
+    taskSuccess = jest.spyOn(entityStoreMetrics.extractionTaskSuccess, 'add').mockImplementation();
+    taskError = jest.spyOn(entityStoreMetrics.extractionTaskError, 'add').mockImplementation();
+    taskDuration = jest
+      .spyOn(entityStoreMetrics.extractionTaskDurationMs, 'record')
+      .mockImplementation();
+
+    mockIsDualProcessEnabled.mockResolvedValue(flagEnabled);
+    mockCreateClient.mockResolvedValue({
+      logsExtractionClient: {
+        extractLogs: jest.fn().mockResolvedValue(extractionResult),
+        getMergedConfigForType: jest.fn().mockResolvedValue({ frequency: '1m' }),
+      },
+    } as unknown as Awaited<ReturnType<typeof createLogsExtractionClient>>);
+
+    const definitions: Record<string, { createTaskRunner: Function }> = {};
+    registerExtractEntityTasks({
+      taskManager: {
+        registerTaskDefinitions: (defs: Record<string, { createTaskRunner: Function }>) =>
+          Object.assign(definitions, defs),
+      } as unknown as TaskManagerSetupContract,
+      logger: loggerMock.create(),
+      entityTypes: ['user'],
+      core: {
+        getStartServices: jest.fn().mockResolvedValue([{ featureFlags: {} }]),
+      } as unknown as types.EntityStoreCoreSetup,
+      isServerless: false,
+    });
+
+    await definitions[`entity_store:v2:${taskTypeSuffix}:user`]
+      .createTaskRunner({
+        taskInstance: { id: 'task-id', state: { namespace: 'default' } },
+        fakeRequest: {},
+        signal: new AbortController().signal,
+      })
+      .run();
+  };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('records no task error when the non-priority process is switched off', async () => {
+    await runWith('extract_entity_non_priority_task', {
+      success: false,
+      isRemote: false,
+      error: new NonPriorityExtractionDisabledError(),
+    });
+
+    // A deliberately idle process must not look permanently broken on a dashboard.
+    expect(taskError).not.toHaveBeenCalled();
+    expect(taskSuccess).not.toHaveBeenCalled();
+  });
+
+  it('records a task error with a diagnostic error_type for a real failure', async () => {
+    await runWith('extract_entity_task', {
+      success: false,
+      isRemote: false,
+      error: new EntityStoreNotRunningError('Entity store is not started for type user'),
+    });
+
+    expect(taskError).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({
+        extraction_mode: EXTRACTION_MODE.priority,
+        // Previously every soft failure collapsed to the generic 'Error'.
+        error_type: 'EntityStoreNotRunningError',
+      })
+    );
+  });
+
+  it('labels task metrics with the extraction mode and records run duration', async () => {
+    await runWith('extract_entity_non_priority_task', {
+      success: true,
+      isRemote: false,
+      count: 3,
+    });
+
+    expect(taskSuccess).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ extraction_mode: EXTRACTION_MODE.nonPriority })
+    );
+    expect(taskDuration).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.objectContaining({ extraction_mode: EXTRACTION_MODE.nonPriority })
+    );
+  });
+});
+
 describe('non-priority task orphan cleanup', () => {
   const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
     typeof isDualProcessEnabled
@@ -277,14 +385,24 @@ describe('bootstrapNonPriorityTask', () => {
     score: 0,
   });
 
+  const makeGlobalStateSo = (logsExtraction: Record<string, unknown> = {}) => ({
+    id: 'entity-store-global-state-default',
+    type: 'entity-store-global-state',
+    attributes: { logsExtraction },
+    references: [],
+    score: 0,
+  });
+
   const runPriorityTask = async ({
     engineStatus,
     mergedFrequency = '1m',
     logExtractionConfig,
+    globalStateOverrides = {},
   }: {
     engineStatus: string;
     mergedFrequency?: string;
     logExtractionConfig?: Record<string, unknown>;
+    globalStateOverrides?: Record<string, unknown>;
   }) => {
     jest.clearAllMocks();
     mockIsDualProcessEnabled.mockResolvedValue(true);
@@ -306,6 +424,7 @@ describe('bootstrapNonPriorityTask', () => {
       per_page: 10,
       page: 1,
     });
+    soClient.get.mockResolvedValue(makeGlobalStateSo(globalStateOverrides));
 
     const definitions: Record<string, { createTaskRunner: Function }> = {};
     registerExtractEntityTasks({
@@ -319,7 +438,12 @@ describe('bootstrapNonPriorityTask', () => {
         getStartServices: jest.fn().mockResolvedValue([
           {
             featureFlags: {},
-            savedObjects: { createInternalRepository: jest.fn().mockReturnValue(soClient) },
+            savedObjects: {
+              createInternalRepository: jest.fn().mockReturnValue(soClient),
+              getUnsafeInternalClient: jest.fn().mockReturnValue({
+                asScopedToNamespace: jest.fn().mockReturnValue(soClient),
+              }),
+            },
           },
           { taskManager: { ensureScheduled: mockEnsureScheduled } },
         ]),
@@ -376,9 +500,25 @@ describe('bootstrapNonPriorityTask', () => {
 
     expect(mockGetMergedConfig).toHaveBeenCalledWith(
       'user',
-      {},
+      expect.any(Object),
       logExtractionConfig,
-      EXTRACTION_MODE.nonPriority
+      EXTRACTION_MODE.nonPriority,
+      undefined
+    );
+  });
+
+  it('passes global overrides to getMergedConfig so frequency changes reschedule the non-priority task', async () => {
+    await runPriorityTask({
+      engineStatus: ENGINE_STATUS.STARTED,
+      globalStateOverrides: { frequency: '5m' },
+    });
+
+    expect(mockGetMergedConfig).toHaveBeenCalledWith(
+      'user',
+      expect.objectContaining({ frequency: '5m' }),
+      null,
+      EXTRACTION_MODE.nonPriority,
+      undefined
     );
   });
 });
