@@ -1334,6 +1334,22 @@ describe('dynamic timeout schema', () => {
     expect(TimeoutPropSchema.safeParse({ timeout: '1h30m' }).success).toBe(true);
   });
 
+  it('accepts a duration or a Liquid template on the wait step duration', () => {
+    const wait = { name: 's', type: 'wait' as const };
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: '5s' } }).success).toBe(true);
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: '1h30m' } }).success).toBe(true);
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: templated } }).success).toBe(true);
+  });
+
+  it('rejects a non-duration, non-template wait step duration', () => {
+    const wait = { name: 's', type: 'wait' as const };
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: 'soon' } }).success).toBe(false);
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: '{{ open' } }).success).toBe(
+      false
+    );
+    expect(WaitStepSchema.safeParse({ ...wait, with: {} }).success).toBe(false);
+  });
+
   it('emits duration and Liquid patterns in JSON Schema for Monaco', () => {
     const jsonSchema = z.toJSONSchema(DynamicTimeoutSchema, {
       target: 'draft-7',
