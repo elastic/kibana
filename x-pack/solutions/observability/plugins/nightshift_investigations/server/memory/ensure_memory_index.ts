@@ -37,6 +37,9 @@ export const MEMORY_INDEX_MAPPINGS = {
 const MEMORY_INDEX_SETTINGS = {
   number_of_shards: 1,
   auto_expand_replicas: '0-1',
+  // Hidden discovery plus no end-user privilege or API keeps Memory internal for ordinary users.
+  // Elasticsearch superusers can still explicitly inspect the backing index when necessary.
+  'index.hidden': true,
 };
 
 const isAlreadyExistsError = (err: unknown): boolean => {
@@ -89,6 +92,10 @@ export const ensureMemoryIndex = async ({
     }
   }
 
+  await esClient.indices.putSettings({
+    index: MEMORY_INDEX,
+    settings: { 'index.hidden': true },
+  });
   await esClient.indices.putMapping({
     index: MEMORY_INDEX,
     dynamic: MEMORY_INDEX_MAPPINGS.dynamic,

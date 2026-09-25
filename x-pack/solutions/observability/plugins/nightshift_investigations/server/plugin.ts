@@ -46,6 +46,7 @@ import { createCortexStore, registerCortexAiIndex } from './cortex/register_cort
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { ensureMemoryIndex } from './memory/ensure_memory_index';
+import { createMemoryInternalClient, type MemoryInternalClient } from './memory/internal_client';
 import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
@@ -104,9 +105,13 @@ export class NightshiftInvestigationsPlugin
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
+  private readonly memoryInternalClient: MemoryInternalClient;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
+    this.memoryInternalClient = createMemoryInternalClient({
+      getElasticsearch: () => this.elasticsearch,
+    });
   }
 
   setup(
@@ -274,6 +279,7 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryMaterializeToSandboxStepDefinition({
             getSandboxStart: () => this.sandboxStart,
+            getMemoryEsClient: this.memoryInternalClient.getClient,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
@@ -292,6 +298,7 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryOptimizeStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getMemoryEsClient: this.memoryInternalClient.getClient,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
@@ -386,7 +393,7 @@ export class NightshiftInvestigationsPlugin
 
     if (this.memoryEnabled) {
       void ensureMemoryIndex({
-        esClient: coreStart.elasticsearch.client.asInternalUser,
+        esClient: this.memoryInternalClient.getClient(),
         logger: this.logger.get('memory'),
       }).catch((err) => {
         this.logger.error(`Failed to ensure Semantic Memory index: ${err.message}`);

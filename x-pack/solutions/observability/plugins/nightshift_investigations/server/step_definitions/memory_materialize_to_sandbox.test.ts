@@ -32,6 +32,7 @@ const hydrateMemoryWorkspaceMock = jest.mocked(hydrateMemoryWorkspace);
 describe('memoryMaterializeToSandboxStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
+  const getMemoryEsClient = jest.fn().mockReturnValue(esClient);
   const mockSession = { writeFiles: jest.fn(), mkdirs: jest.fn() } as unknown as SandboxSession;
   const telemetry = {
     reportSemanticMemoryMaterialized: jest.fn(),
@@ -46,6 +47,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getScopedEsClient.mockReturnValue(esClient);
+    getMemoryEsClient.mockReturnValue(esClient);
   });
 
   const createContext = (
@@ -82,10 +84,11 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
       stepType: 'nightshift.memoryMaterializeToSandbox',
     } as never);
 
-  it('materializes memory into the sandbox with the request-scoped ES client', async () => {
+  it('materializes memory with the injected internal client, never the scoped client', async () => {
     const sandboxStart = makeSandboxStart();
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -100,6 +103,8 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     );
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
+    expect(getMemoryEsClient).toHaveBeenCalledTimes(1);
+    expect(getScopedEsClient).not.toHaveBeenCalled();
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith({
       session: mockSession,
       esClient,
@@ -136,6 +141,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     const sandboxStart = makeSandboxStart();
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -168,6 +174,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
   it('throws when the sandbox is not configured', async () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => undefined,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -189,6 +196,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     hydrateMemoryWorkspaceMock.mockRejectedValueOnce(new Error('write failed'));
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -215,6 +223,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
   it('skips materialize when the memory flag is off', async () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
+      getMemoryEsClient,
       logger: loggerMock.create(),
       isEnabled: () => false,
       telemetry: telemetry as never,
@@ -236,6 +245,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
   it('skips memory materialize when agent_id is missing', async () => {
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => makeSandboxStart(),
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -257,6 +267,7 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     const sandboxStart = makeSandboxStart();
     const definition = memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
+      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -275,5 +286,28 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
         notification: '',
       },
     });
+  });
+
+  it('fails clearly when the internal Memory client is unavailable', async () => {
+    const definition = memoryMaterializeToSandboxStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      getMemoryEsClient: () => {
+        throw new Error('Semantic Memory internal Elasticsearch client is unavailable');
+      },
+      logger: loggerMock.create(),
+      telemetry: telemetry as never,
+    });
+
+    await expect(
+      definition.handler(
+        createContext(
+          'default__conv-1',
+          'default',
+          'task',
+          'significant-events.deductive-investigation'
+        )
+      )
+    ).rejects.toThrow('Semantic Memory internal Elasticsearch client is unavailable');
+    expect(getScopedEsClient).not.toHaveBeenCalled();
   });
 });
