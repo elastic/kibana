@@ -273,7 +273,7 @@ export function useMiDeploy({
             if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
             byPolicy.get(policyId)!.push(instanceId);
           }
-          await Promise.allSettled(
+          const redeployResults = await Promise.allSettled(
             [...byPolicy.entries()].map(([policyId, instanceIds]) =>
               updateManagedIntegrationsPolicy(policyId, instanceIds, {
                 instances: serviceSettings?.instances ?? [],
@@ -285,6 +285,20 @@ export function useMiDeploy({
               })
             )
           );
+          redeployResults.forEach((result) => {
+            if (result.status === 'rejected') {
+              // eslint-disable-next-line no-console
+              console.error('Failed to update managed-integration policy during dirty redeploy:', result.reason);
+            }
+          });
+          const redeployFailed = redeployResults.some((r) => r.status === 'rejected');
+          if (redeployFailed) {
+            // At least one policy update failed — leave isDirty so the Deploy button stays
+            // visible and the user can retry without losing the drift callout.
+            setIsDeploying(false);
+            updateDetectAndReviewStep({ isDeploying: false });
+            return { cleanupFailed: false };
+          }
 
           if (onboardingDeploymentId) {
             await updateDeployment(onboardingDeploymentId, {

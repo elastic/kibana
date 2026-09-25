@@ -215,7 +215,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
             byPolicy.get(policyId)!.push(instanceId);
           }
-          await Promise.allSettled(
+          const redeployResults = await Promise.allSettled(
             [...byPolicy.entries()].map(([policyId, instanceIds]) =>
               updateAgentBasedPolicy(policyId, instanceIds, {
                 instances: serviceSettings?.instances ?? [],
@@ -229,6 +229,18 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               })
             )
           );
+          redeployResults.forEach((result) => {
+            if (result.status === 'rejected') {
+              // eslint-disable-next-line no-console
+              console.error('Failed to update agent-based policy during dirty redeploy:', result.reason);
+            }
+          });
+          const redeployFailed = redeployResults.some((r) => r.status === 'rejected');
+          if (redeployFailed) {
+            setIsDeploying(false);
+            updateDetectAndReviewStep({ isDeploying: false });
+            return { failed: true };
+          }
 
           const { onboardingDeploymentId } = detectAndReviewStep;
           if (onboardingDeploymentId) {

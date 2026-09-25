@@ -78,9 +78,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
 
   // ── Drift detection ───────────────────────────────────────────────────────────
-  // At Deploy step mount (edit mode only), compare current session values against the SO to
-  // detect settings drift. isDirty gates the callout and enables a redeploy on Next/Deploy.
+  // Compare current session values against the SO whenever edit mode is active and the user
+  // changes auth (connector / auth method). serviceVars drift is checked at the same time;
+  // static-key replacement additionally sets isDirty via onReadyChange in ManagedIntegrationsSection.
   const { onboardingDeploymentId } = detectAndReviewStep;
+  const { authMethod, connectorId } = authenticateAndDeployStep;
   useEffect(() => {
     if (!onboardingDeploymentId || awsServicesMap === undefined) return;
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
@@ -92,22 +94,19 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           awsServicesMap
         );
         const authDirty = detectAuthDrift(
-          {
-            authMethod: authenticateAndDeployStep.authMethod,
-            connectorId: authenticateAndDeployStep.connectorId,
-          },
+          { authMethod, connectorId },
           { authMethod: item.authMethod, connectorId: item.connectorId }
         );
         const dirty = dirtyVarIds.length > 0 || authDirty;
         updateDetectAndReviewStep({ isDirty: dirty });
       })
       .catch(() => {});
-    // Run only when the deployment id is set (edit mode) and the matrix is available.
-    // Capturing authenticateAndDeployStep and serviceSettings from the render closure is
-    // intentional: we compare the values in context when the check first becomes runnable,
-    // not on every change. Static-key replacement sets isDirty via onReadyChange instead.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingDeploymentId, awsServicesMap]);
+  // serviceSettings.serviceVars is intentionally captured from the closure: service-var
+  // changes come from Step 2 navigation (full remount), not same-step edits. Only auth
+  // mutations (connector swap, authMethod change) happen in this component's lifetime and
+  // need to re-trigger the check; adding them to deps is sufficient.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingDeploymentId, awsServicesMap, authMethod, connectorId]);
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
