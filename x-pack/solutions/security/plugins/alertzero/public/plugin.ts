@@ -30,6 +30,7 @@ import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
   type RenderAssignees,
+  type RenderLinkedInvestigations,
 } from '@kbn/agentic-investigations-common';
 import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { getAlertZeroDeepLinks } from './deep_links';
@@ -56,6 +57,11 @@ const INVESTIGATION_TEMPLATE_NAME = i18n.translate('xpack.alertzero.conversation
 const ESCALATION_TEMPLATE_NAME = i18n.translate(
   'xpack.alertzero.escalationConversationTemplate.name',
   { defaultMessage: 'Escalation' }
+);
+
+const LINKED_INVESTIGATIONS_LOADING_LABEL = i18n.translate(
+  'xpack.alertzero.linkedInvestigations.loading',
+  { defaultMessage: 'Loading linked investigations…' }
 );
 
 export class AlertZeroPublicPlugin
@@ -205,9 +211,20 @@ export class AlertZeroPublicPlugin
       >;
     });
 
-    const { manageEscalations: canManageEscalations } = getAgenticInvestigationsCapabilities(
-      core.application.capabilities
-    );
+    // ---------------------------------------------------------------------------
+    // Linked investigations list (escalation flyout overview tab body)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedLinkedInvestigations = makeLazyWithProviders(async () => {
+      const { ConnectedLinkedInvestigations } = await import(
+        './components/connected_linked_investigations/connected_linked_investigations'
+      );
+      return ConnectedLinkedInvestigations as React.ComponentType<
+        React.ComponentProps<typeof ConnectedLinkedInvestigations>
+      >;
+    });
+
+    const { manageEscalations: canManageEscalations, showEscalations: canShowEscalations } =
+      getAgenticInvestigationsCapabilities(core.application.capabilities);
 
     // ---------------------------------------------------------------------------
     // renderAssignees render prop — shared by both templates
@@ -217,6 +234,16 @@ export class AlertZeroPublicPlugin
         EscalationModalBoundary,
         null,
         React.createElement(LazyConnectedAssignees, props)
+      );
+
+    // ---------------------------------------------------------------------------
+    // renderLinkedInvestigations render prop — escalation overview tab
+    // ---------------------------------------------------------------------------
+    const renderLinkedInvestigations: RenderLinkedInvestigations = (props) =>
+      React.createElement(
+        EscalationModalBoundary,
+        { loadingLabel: LINKED_INVESTIGATIONS_LOADING_LABEL },
+        React.createElement(LazyConnectedLinkedInvestigations, props)
       );
 
     // The template registration API has no deregistration counterpart, so this is one-shot: we
@@ -255,6 +282,7 @@ export class AlertZeroPublicPlugin
               name: ESCALATION_TEMPLATE_NAME,
               icon: 'warning',
               renderAssignees,
+              renderLinkedInvestigations: canShowEscalations ? renderLinkedInvestigations : undefined,
             });
           } catch (err) {
             return Promise.reject(err);
