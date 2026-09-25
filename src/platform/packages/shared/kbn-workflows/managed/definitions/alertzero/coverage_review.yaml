@@ -70,15 +70,22 @@ steps:
   # fails, the run fails. The indicator stays pending, and the next sweep starts a new
   # review. If the read finds no indicator, the check in step 3 does not run, and
   # `emit_result` reports `check_error`.
+  #
+  # All spaces share one indicator index. The space filter keeps a review from reading
+  # another space's indicator.
   - name: read_ki
     type: elasticsearch.search
     with:
       index: "ai-index-idx-{{ inputs.ai_index_id }}"
       size: 1
       query:
-        ids:
-          values:
-            - "{{ inputs.ki_id }}"
+        bool:
+          filter:
+            - ids:
+                values:
+                  - "{{ inputs.ki_id }}"
+            - term:
+                attributes.space_id: "{{ workflow.spaceId }}"
 
   # Step 2 of 6: prepare the gap text for the model. The text is truncated. Indicator
   # content can be 64 kB.
@@ -368,7 +375,7 @@ steps:
       # check ran and returned no verdict. In both cases no branch ran and nobody was
       # asked.
       check_error: >-
-        {% if steps.read_ki.output.hits.total.value == 0 %}knowledge indicator not found{% elsif steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' %}coverage_check produced no verdict{% endif %}
+        {% if steps.read_ki.output.hits.total.value == 0 %}knowledge indicator not found in this space{% elsif steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' %}coverage_check produced no verdict{% endif %}
       # Rule-creation path only.
       rule_created: "${{ steps.run_rule_creation.output.created == true }}"
       created_rule_name: "{{ steps.run_rule_creation.output.rule_name }}"
