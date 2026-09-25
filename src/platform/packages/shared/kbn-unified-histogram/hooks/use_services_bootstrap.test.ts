@@ -16,7 +16,6 @@ import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewSource } from '@kbn/data-source';
-import * as processFetchParamsModule from '../utils/process_fetch_params';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
