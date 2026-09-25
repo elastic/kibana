@@ -39,4 +39,22 @@ describe('createSignificantEventsClients', () => {
     expect(initializeClient).toHaveBeenNthCalledWith(1, detectionsDataStream.name);
     expect(initializeClient).toHaveBeenNthCalledWith(2, eventsDataStream.name);
   });
+
+  it('rejects getEventClient() when useRuleEventsRead is true (no call site is migrated yet)', async () => {
+    const services: SignificantEventsServices = {
+      detection: { getClient: jest.fn() } as never,
+      event: { getClient: jest.fn() } as never,
+    };
+    const clients = createSignificantEventsClients({
+      services,
+      dataStreams: { initializeClient: jest.fn().mockResolvedValue({}) } as never,
+      esClient: {} as never,
+      space: 'default',
+      useRuleEventsRead: true,
+    });
+
+    await expect(clients.getEventClient()).rejects.toThrow(
+      /SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ is not yet safe/
+    );
+  });
 });

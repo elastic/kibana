@@ -1216,6 +1216,21 @@ describe('detection rule workflows', () => {
         expect(search['on-failure']).toEqual({ continue: true });
       });
 
+      // All spaces share one indicator index. The sweep and the review filter on the same field.
+      it('scopes the sweep search and the review read to the current space', () => {
+        const spaceFilter = { term: { 'attributes.space_id': '{{ workflow.spaceId }}' } };
+        const sweepQuery = withOf('search_pending_indicators').query as {
+          bool: { filter: unknown[] };
+        };
+        const reviewRead = flattenSteps(review.steps as unknown as NestedStep[]).find(
+          ({ name }) => name === 'read_ki'
+        );
+        const reviewQuery = reviewRead?.with?.query as { bool?: { filter?: unknown[] } };
+
+        expect(sweepQuery.bool.filter).toContainEqual(spaceFilter);
+        expect(reviewQuery?.bool?.filter).toContainEqual(spaceFilter);
+      });
+
       // Only `_id` reaches the review. An indicator's content can be 64 kB, so 50 hits
       // would move megabytes the sweep never reads.
       it('reads no indicator content', () => {

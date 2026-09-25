@@ -1,10 +1,10 @@
 version: "1"
 name: Detection Coverage Worker
 description: >
-  Finds knowledge indicators that report a detection gap, are still pending, and were
-  created inside the lookback window. Starts one Detection Coverage Review for each, up
-  to a limit of active reviews per space. Skips indicators that already have an active
-  review. Does not write to indicators. One run is one sweep.
+  Finds knowledge indicators in this space that report a detection gap, are still
+  pending, and were created inside the lookback window. Starts one Detection Coverage
+  Review for each, up to a limit of active reviews per space. Skips indicators that
+  already have an active review. Does not write to indicators. One run is one sweep.
 enabled: true
 tags:
   - security
@@ -135,6 +135,9 @@ steps:
   # indicator is created, so the range is a creation-time window and marking an indicator
   # processed does not move it.
   #
+  # All spaces share one indicator index, so the query also matches the space. The
+  # producer writes it in `attributes.space_id`. An indicator without it is not reviewed.
+  #
   # The query excludes indicators with an active review. An excluded indicator does not
   # use a place in the result. If step 1 failed or the parse was unsound, the list is
   # empty, and an empty list excludes nothing.
@@ -166,6 +169,8 @@ steps:
                 type: security.coverage
             - term:
                 attributes.status: pending
+            - term:
+                attributes.space_id: "{{ workflow.spaceId }}"
             - range:
                 "@timestamp":
                   gte: "now-{{ inputs.lookback_days | default: consts.lookback_days }}d"
