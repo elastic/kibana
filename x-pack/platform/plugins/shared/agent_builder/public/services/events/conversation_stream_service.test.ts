@@ -265,7 +265,8 @@ describe('ConversationStreamService', () => {
     // The gap this closes: a run begins before anything subscribes and before `execution_started`
     // sets the cursor. Without the start signal the stream would be reclaimed immediately.
     const { source, getSubject, startRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    // The constructor wires the start listener; we assert its side effect, not the instance.
+    new ConversationStreamService(source);
 
     startRun('A');
 
@@ -275,7 +276,8 @@ describe('ConversationStreamService', () => {
 
   it('releases a start-retained stream once the run ends with nothing to keep', () => {
     const { source, getSubject, startRun, endRun } = makeFakeSource();
-    const service = new ConversationStreamService(source);
+    // The constructor wires the start listener; we assert its side effect, not the instance.
+    new ConversationStreamService(source);
 
     startRun('A');
     expect(getSubject('A').observed).toBe(true);
