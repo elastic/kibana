@@ -409,7 +409,7 @@ print_summary
 if [[ ${#FAILED[@]} -gt 0 ]]; then
   # Track how many lane attempts ended with real test failures (exit 10).
   # Agent-lost retries (exit -1) never reach this block, so they don't bump the counter.
-  # post_command.sh uses this counter to skip GitHub issue updates until the same lane
+  # post_command.sh uses this counter to skip GitHub issue updates and Slack alerts until the same lane
   # has failed in at least 2 attempts of the current build.
   if [[ -n "${BUILDKITE_STEP_KEY:-}" ]]; then
     SCOUT_FAILURE_COUNT_KEY="${BUILDKITE_STEP_KEY}_scout_failure_count"
