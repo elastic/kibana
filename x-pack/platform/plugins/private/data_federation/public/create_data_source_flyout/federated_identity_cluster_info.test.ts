@@ -9,11 +9,11 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import { buildFederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 
 describe('buildFederatedIdentityClusterInfo', () => {
-  it('returns empty strings when cloud is undefined', () => {
+  it('returns no cluster values when cloud is undefined', () => {
     expect(buildFederatedIdentityClusterInfo(undefined)).toEqual({
-      jwtIssuer: '',
-      cloudOrgId: '',
-      deploymentId: '',
+      jwtIssuer: undefined,
+      cloudOrgId: undefined,
+      deploymentId: undefined,
       isServerless: false,
     });
   });
@@ -73,7 +73,7 @@ describe('buildFederatedIdentityClusterInfo', () => {
     });
   });
 
-  it('returns empty issuer when no URL is injected', () => {
+  it('returns no issuer when no URL is injected', () => {
     const cloud = {
       organizationId: 'org-abc123',
       deploymentId: 'dep-xyz456',
@@ -83,10 +83,10 @@ describe('buildFederatedIdentityClusterInfo', () => {
       serverless: {},
     } as unknown as CloudSetup;
 
-    expect(buildFederatedIdentityClusterInfo(cloud).jwtIssuer).toBe('');
+    expect(buildFederatedIdentityClusterInfo(cloud).jwtIssuer).toBeUndefined();
   });
 
-  it('returns empty deploymentId when both deploymentId and serverless.projectId are missing', () => {
+  it('returns no deploymentId when both deploymentId and serverless.projectId are missing', () => {
     const cloud = {
       organizationId: 'org-abc123',
       deploymentId: undefined,
@@ -96,6 +96,6 @@ describe('buildFederatedIdentityClusterInfo', () => {
       serverless: {},
     } as unknown as CloudSetup;
 
-    expect(buildFederatedIdentityClusterInfo(cloud).deploymentId).toBe('');
+    expect(buildFederatedIdentityClusterInfo(cloud).deploymentId).toBeUndefined();
   });
 });

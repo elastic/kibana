@@ -35,10 +35,18 @@ const aiIndex: GetAiIndexResponse = {
 
 const createProvider = ({
   hasAgentBuilder = true,
-  hasPrivilege = true,
+  hasAgentBuilderPrivilege = true,
+  hasContextEngineWritePrivilege = true,
+  hasWorkflowsReadPrivilege = true,
+  hasWorkflowsCreatePrivilege = true,
+  hasWorkflowsExecutePrivilege = true,
 }: {
   hasAgentBuilder?: boolean;
-  hasPrivilege?: boolean;
+  hasAgentBuilderPrivilege?: boolean;
+  hasContextEngineWritePrivilege?: boolean;
+  hasWorkflowsReadPrivilege?: boolean;
+  hasWorkflowsCreatePrivilege?: boolean;
+  hasWorkflowsExecutePrivilege?: boolean;
 } = {}) => {
   const openChat = jest.fn();
   const activeConversation$ = new BehaviorSubject<{ id?: string } | null>({
@@ -63,7 +71,13 @@ const createProvider = ({
   const application = coreMock.createStart().application;
   application.capabilities = {
     ...application.capabilities,
-    agentBuilder: { show: hasPrivilege },
+    agentBuilder: { show: hasAgentBuilderPrivilege },
+    contextEngine: { write: hasContextEngineWritePrivilege },
+    workflowsManagement: {
+      readWorkflow: hasWorkflowsReadPrivilege,
+      createWorkflow: hasWorkflowsCreatePrivilege,
+      executeWorkflow: hasWorkflowsExecutePrivilege,
+    },
   };
 
   const provider = createSuggestAutomationProvider({ agentBuilder, application });
@@ -91,7 +105,31 @@ describe('createSuggestAutomationProvider', () => {
   });
 
   it('returns canSuggest false without agent builder privilege', () => {
-    const { provider } = createProvider({ hasPrivilege: false });
+    const { provider } = createProvider({ hasAgentBuilderPrivilege: false });
+
+    expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
+  });
+
+  it('returns canSuggest false without contextEngine write privilege', () => {
+    const { provider } = createProvider({ hasContextEngineWritePrivilege: false });
+
+    expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
+  });
+
+  it('returns canSuggest false without workflowsManagement read privilege', () => {
+    const { provider } = createProvider({ hasWorkflowsReadPrivilege: false });
+
+    expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
+  });
+
+  it('returns canSuggest false without workflowsManagement create privilege', () => {
+    const { provider } = createProvider({ hasWorkflowsCreatePrivilege: false });
+
+    expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
+  });
+
+  it('returns canSuggest false without workflowsManagement execute privilege', () => {
+    const { provider } = createProvider({ hasWorkflowsExecutePrivilege: false });
 
     expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
   });
@@ -104,6 +142,29 @@ describe('createSuggestAutomationProvider', () => {
     const { initialMessage } = openChat.mock.calls[0][0];
     expect(initialMessage).not.toMatch(/skill:\/\//);
     expect(initialMessage).not.toMatch(/attachment/i);
+  });
+
+  it('uses a short attachment label even when the AI index description is long', () => {
+    const { provider, openChat } = createProvider();
+    const longDescription = 'a'.repeat(1500);
+
+    provider.suggestAutomation({
+      aiIndex: { ...aiIndex, description: longDescription },
+      onSaved: jest.fn(),
+    });
+
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            description: 'AI index my-ai-index',
+            data: expect.objectContaining({
+              description: longDescription,
+            }),
+          }),
+        ],
+      })
+    );
   });
 
   it('opens agent builder chat with the AI index attachment', () => {
@@ -122,6 +183,7 @@ describe('createSuggestAutomationProvider', () => {
           expect.objectContaining({
             id: 'my-ai-index',
             type: AI_INDEX_ATTACHMENT_TYPE,
+            description: 'AI index my-ai-index',
             data: {
               id: 'my-ai-index',
               description: 'Support tickets',

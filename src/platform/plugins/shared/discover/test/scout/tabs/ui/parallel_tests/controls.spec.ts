@@ -45,12 +45,12 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
   spaceTest(
     'creates an ES|QL value control and keeps it after refresh',
     async ({ page, pageObjects }) => {
-      const { dashboard, discover } = pageObjects;
+      const { controls, discover } = pageObjects;
 
       await discover.createEsqlControl(LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
 
-      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
+      await expect(controls.group).toBeVisible();
       expect(await discover.getEsqlQueryValue()).toContain(
         'FROM logstash-* | WHERE geo.dest == ?geo_dest'
       );
@@ -58,20 +58,20 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await page.reload();
       await discover.waitUntilTabIsLoaded();
 
-      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
-      await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
+      await expect(controls.group).toBeVisible();
+      await expect(controls.frames).toHaveCount(1);
     }
   );
 
   spaceTest(
     'creates an ES|QL multi-value control and filters grid rows',
     async ({ pageObjects }) => {
-      const { dashboard, dataGrid, discover } = pageObjects;
+      const { controls, dataGrid, discover } = pageObjects;
 
       await discover.createEsqlControl(ESQL_MULTI_VALUE_QUERY_START, { values: ['IN', 'US'] });
       await discover.waitUntilTabIsLoaded();
 
-      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
+      await expect(controls.group).toBeVisible();
       expect(await discover.getEsqlQueryValue()).toContain(
         'FROM logstash-* | WHERE MV_CONTAINS( ?values'
       );
@@ -84,9 +84,9 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
 
-      const controlId = await dashboard.getOnlyControlId();
-      await dashboard.optionsListOpenPopover(controlId);
-      await dashboard.optionsListPopoverSelectOption('US');
+      const controlId = await controls.getOnlyControlId();
+      await controls.optionsList.openPopover(controlId);
+      await controls.optionsList.selectOption('US');
       await discover.waitUntilTabIsLoaded();
       await dataGrid.waitForLoad();
       await dataGrid.waitForDocTableRendered();
@@ -98,23 +98,23 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
   spaceTest(
     'persists controls through saved sessions and unsaved-change revert',
     async ({ pageObjects, scoutSpace }) => {
-      const { dashboard, discover } = pageObjects;
+      const { controls, discover } = pageObjects;
       const savedSession = createSessionName('esql-control-session', scoutSpace.id);
 
       await discover.createEsqlControl(LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
-      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
+      await expect(controls.group).toBeVisible();
 
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
-      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
-      await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
+      await expect(controls.group).toBeVisible();
+      await expect(controls.frames).toHaveCount(1);
 
-      const controlId = await dashboard.getOnlyControlId();
-      await dashboard.optionsListOpenPopover(controlId);
-      await dashboard.optionsListPopoverSelectOption('CN');
+      const controlId = await controls.getOnlyControlId();
+      await controls.optionsList.openPopover(controlId);
+      await controls.optionsList.selectOption('CN');
       await discover.waitUntilTabIsLoaded();
 
       await expect(discover.unsavedChangesIndicator()).toBeVisible();
@@ -126,7 +126,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
   spaceTest(
     'carries controls into Dashboard panels and saved visualizations',
     async ({ pageObjects, scoutSpace }) => {
-      const { dashboard, discover } = pageObjects;
+      const { controls, dashboard, discover } = pageObjects;
       const savedSession = createSessionName('esql-control-dashboard-session', scoutSpace.id);
       const savedChart = createSessionName('esql-control-chart', scoutSpace.id);
 
@@ -137,7 +137,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
-      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
+      await expect(controls.group).toBeVisible();
 
       await discover.saveVisualizationToNewDashboard(savedChart);
       await dashboard.waitForRenderComplete();
@@ -153,28 +153,28 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
   spaceTest(
     'persists saved sessions after removing controls',
     async ({ pageObjects, scoutSpace }) => {
-      const { dashboard, discover } = pageObjects;
+      const { controls, discover } = pageObjects;
       const savedSession = createSessionName('esql-control-removed-session', scoutSpace.id);
 
       await discover.createEsqlControl(LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
-      await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
+      await expect(controls.frames).toHaveCount(1);
 
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
 
-      await dashboard.removeControl(await dashboard.getOnlyControlId());
-      await expect(dashboard.getControlFramesLocator()).toHaveCount(0);
+      await controls.remove(await controls.getOnlyControlId());
+      await expect(controls.frames).toHaveCount(0);
       await discover.waitUntilTabIsLoaded();
-      await expect(dashboard.getControlsGroupLocator()).toBeHidden();
+      await expect(controls.group).toBeHidden();
 
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
 
-      await expect(dashboard.getControlsGroupLocator()).toBeHidden();
-      await expect(dashboard.getControlFramesLocator()).toHaveCount(0);
+      await expect(controls.group).toBeHidden();
+      await expect(controls.frames).toHaveCount(0);
     }
   );
 });

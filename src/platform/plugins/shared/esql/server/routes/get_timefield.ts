@@ -25,9 +25,9 @@ const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 // ANTLR ALL(*) adaptive-prediction cost grows super-linearly with parenthesis nesting depth.
 // Reject deep queries before touching the parser to prevent event-loop stalls (DoS via a single
 // small request from a low-privileged account).
-const MAX_NESTING_DEPTH = 50;
+export const MAX_NESTING_DEPTH = 50;
 
-const getMaxNestingDepth = (query: string): number => {
+export const getMaxNestingDepth = (query: string): number => {
   let max = 0;
   let depth = 0;
   for (const ch of query) {

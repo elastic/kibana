@@ -26,7 +26,10 @@ import type {
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { persistPendingCloudConnectorIac } from './pending_cloud_connector_iac';
+import {
+  type CloudConnectorIacPersistOptions,
+  persistPendingCloudConnectorIac,
+} from './pending_cloud_connector_iac';
 
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
@@ -34,7 +37,11 @@ import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 /**
  * @deprecated use sendCreatePackagePolicyForRq instead
  */
-export const sendCreatePackagePolicy = async (body: CreatePackagePolicyRequest['body']) => {
+export const sendCreatePackagePolicy = async (
+  body: CreatePackagePolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
+) => {
   const response = await sendRequest<CreatePackagePolicyResponse>({
     path: packagePolicyRouteService.getCreatePath(),
     method: 'post',
@@ -45,12 +52,17 @@ export const sendCreatePackagePolicy = async (body: CreatePackagePolicyRequest['
     await persistPendingCloudConnectorIac({
       policyName: body.name,
       cloudConnectorId: response.data?.item.cloud_connector_id,
+      onError: onIacPersistError,
     });
   }
   return response;
 };
 
-export const sendCreatePackagePolicyForRq = async (body: CreatePackagePolicyRequest['body']) => {
+export const sendCreatePackagePolicyForRq = async (
+  body: CreatePackagePolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
+) => {
   const result = await sendRequestForRq<CreatePackagePolicyResponse>({
     path: packagePolicyRouteService.getCreatePath(),
     method: 'post',
@@ -60,13 +72,16 @@ export const sendCreatePackagePolicyForRq = async (body: CreatePackagePolicyRequ
   await persistPendingCloudConnectorIac({
     policyName: body.name,
     cloudConnectorId: result.item.cloud_connector_id,
+    onError: onIacPersistError,
   });
   return result;
 };
 
 export const sendUpdatePackagePolicy = async (
   packagePolicyId: string,
-  body: UpdatePackagePolicyRequest['body']
+  body: UpdatePackagePolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
 ) => {
   const response = await sendRequest<UpdatePackagePolicyResponse>({
     path: packagePolicyRouteService.getUpdatePath(packagePolicyId),
@@ -78,6 +93,7 @@ export const sendUpdatePackagePolicy = async (
     await persistPendingCloudConnectorIac({
       policyName: body.name,
       cloudConnectorId: response.data?.item.cloud_connector_id ?? body.cloud_connector_id,
+      onError: onIacPersistError,
     });
   }
   return response;

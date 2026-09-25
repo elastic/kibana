@@ -13,6 +13,11 @@ import { footerAssembly } from '../../assembly';
 export const PRIMARY_ACTION_PART_NAME = 'primaryAction';
 /** Part name for the secondary (empty, left-of-primary) footer action. */
 export const SECONDARY_ACTION_PART_NAME = 'secondaryAction';
+/** Part name for the primary footer action that opens a context menu. */
+export const PRIMARY_ACTION_MENU_PART_NAME = 'primaryActionMenu';
 
 export const primaryActionPart = footerAssembly.definePart({ name: PRIMARY_ACTION_PART_NAME });
 export const secondaryActionPart = footerAssembly.definePart({ name: SECONDARY_ACTION_PART_NAME });
+export const primaryActionMenuPart = footerAssembly.definePart({
+  name: PRIMARY_ACTION_MENU_PART_NAME,
+});

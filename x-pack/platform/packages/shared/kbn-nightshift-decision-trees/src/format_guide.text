@@ -1,0 +1,74 @@
+## Decision Trace Node Types
+
+The decision trace is a directed graph with exactly **4 node types**:
+
+1. **Symptom / Question** — Describes the observable symptom, alert condition, or user question that initiated the investigation (e.g. "High error rate on /api/checkout", "Pod restarts exceeding threshold", "Why is checkout latency high?"). These are the starting points of the trace.
+
+2. **Evidence Gatherer** — A step that gathers evidence from a data source. Group related queries of the same type into one node (e.g. multiple metric label queries = one node). But keep different operation types separate (querying metrics vs searching logs vs listing resources).
+
+3. **Decision** — A reasoning step that uses the gathered evidence to draw a conclusion, choose a branch, or form a hypothesis. Decision nodes should state the question being answered and have 2+ outgoing edges with condition labels describing the possible outcomes.
+
+4. **End** — A terminal node representing the conclusion of an investigation path (e.g. root cause identified, issue resolved, escalated). End nodes have no outgoing edges.
+
+## Mermaid Decision Trace Format
+
+The decision trace MUST follow this exact format for parsing:
+
+1. **Start with**: `flowchart TD` (top-down flowchart)
+
+2. **Node ID format**: Use short alphanumeric IDs prefixed by node type: `S` for Symptom/Question, `E` for Evidence Gatherer, `D` for Decision, `X` for End (e.g. S1, S2, E1, E2, D1, D2, X1, X2).
+
+3. **Node shapes by type** (MUST use these consistently):
+   - `([label])` — **Symptom / Question nodes**: Observable symptoms, alert conditions, or user questions
+   - `[label]` — **Evidence Gatherer nodes**: A single data-gathering step
+   - `{{label}}` — **Decision nodes**: Reasoning steps with branching outcomes
+   - `((label))` — **End nodes**: Terminal conclusions (root cause found, resolved, escalated)
+
+4. **Labels** — Keep node labels short (2-6 words). Put exact reusable query entities from the investigation/tool calls (metric names, fields, log keywords, indices, filters, namespaces, resources, and service names) in `evidence_gatherer_metadata`.
+
+5. **Edge format**:
+   - Simple: `S1 --> E1`
+   - With condition label: `D1 -->|error_rate > 5%| E3` or `D1 -->|error_rate normal| E4`
+   - Decision node outgoing edges MUST have condition labels
+   - Do NOT include parentheses `()` or brackets `[]` in edge labels; use commas or hyphens instead
+
+6. **Rules**:
+   - Each node must have a unique ID
+   - Define each node (with its shape and label) EXACTLY ONCE. After a node is defined, refer to it by its ID only (e.g. `E3 --> D2` not `E3 --> D2{{label again}}`).
+   - Symptom/Question nodes (`([...])`) are entry points — they have no incoming edges
+   - Decision nodes (`{{...}}`) must have 2+ outgoing edges with condition labels
+   - End nodes (`((...))`) are terminal — they have no outgoing edges
+   - Keep labels concise (2-6 words); exact reusable query entities belong in `evidence_gatherer_metadata`
+   - Avoid special characters in labels that conflict with Mermaid syntax. In particular, do not use parentheses `()` inside labels — rephrase instead (e.g. "Which apps drove load increase" not "Which application(s) drove the load increase").
+   - Mark edges on the path actually taken during the investigation by prefixing the edge label with `✅` (e.g. `-->|✅ error_code starts with DB|`). Edges NOT taken should have no prefix. For simple edges (no condition label) on the taken path, add `-->|✅|`.
+   - Do NOT use `linkStyle`, `style`, `classDef`, subgraphs, or any other Mermaid styling/directives. Only `flowchart TD`, nodes, and edges.
+   - The trace should reflect the actual conversation flow: Symptoms/Questions lead to Evidence Gathering, which feeds into Decisions, which may lead to further Evidence Gathering or terminate at an End node.
+
+## Example Mermaid Diagram
+
+The diagram must start directly with `flowchart TD` — no code fences, no triple backticks:
+
+flowchart TD
+    S1([High error rate on API]) -->|✅| E1[Query error logs]
+    S2([Increased P99 latency]) --> E2[Query latency metrics]
+    E1 -->|✅| D1{{Database-related errors?}}
+    E2 --> D1
+    D1 -->|✅ yes| E3[Query DB pool metrics]
+    D1 -->|no| E4[Search traces for failures]
+    E3 -->|✅| D2{{Connection pool exhausted?}}
+    D2 -->|✅ yes| E5[Check recent deploys]
+    D2 -->|no| E5
+    E4 --> D3{{Memory issue?}}
+    D3 -->|high memory usage| E7[Check memory allocation trends]
+    D3 -->|memory normal| E8[Query upstream dependencies]
+    E5 -->|✅| D4{{Leak found in recent deploy?}}
+    D4 -->|✅ Yes| E9[Identify leaking code path]
+    D4 -->|No| E6[Profile slow queries]
+    E9 -->|✅| X1((Connection leak in deploy))
+    E6 --> X2((Slow query performance))
+    E7 --> X3((Memory pressure from allocation growth))
+    E8 --> D5{{Is upstream degraded?}}
+    D5 -->|unhealthy| E10[Check upstream service logs]
+    D5 -->|all healthy| E11[Collect thread dump and heap snapshot]
+    E10 --> X4((Upstream service degradation))
+    E11 --> X5((Escalate with diagnostics))

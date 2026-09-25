@@ -304,6 +304,8 @@ export interface WorkflowExecutionDto {
   /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
+  /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
+  stepExecutionIds?: string[];
   duration: number | null;
   executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
@@ -904,6 +906,13 @@ export interface ValidateWorkflowResponseDto {
   valid: boolean;
   diagnostics: WorkflowDiagnostic[];
   parsedWorkflow?: WorkflowYaml;
+  /**
+   * What the checks did not cover, each with the reason: a check either never
+   * ran or stopped at a budget part-way through. Reported separately from
+   * `diagnostics` because the absence of a diagnostic here means "not checked",
+   * not "nothing wrong".
+   */
+  notChecked?: string[];
 }
 
 export interface GetAvailableConnectorsResponse {
