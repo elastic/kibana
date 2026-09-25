@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
@@ -37,23 +37,52 @@ const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.
   defaultMessage: 'Message input form',
 });
 
-const flexGrowZeroStyles = css`
-  flex-grow: 0;
-`;
+const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.postToTeam.label', {
+  defaultMessage: 'Leaving a post to the team',
+});
+
+// Matches the border radius of ConversationInputShell so the header tucks behind its corners.
+const INPUT_SHELL_RADIUS = 16;
+const POST_TO_TEAM_HEADER_HEIGHT = 24;
 
 const InputContainer: React.FC<
-  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean }>
-> = ({ children, isDisabled, isCollapsed }) => (
-  <ConversationInputShell
-    isDisabled={isDisabled}
-    isCollapsed={isCollapsed}
-    css={flexGrowZeroStyles}
-    data-test-subj="agentBuilderConversationInputForm"
-    aria-label={containerAriaLabel}
-  >
-    {children}
-  </ConversationInputShell>
-);
+  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean; isPostToTeam: boolean }>
+> = ({ children, isDisabled, isCollapsed, isPostToTeam }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const wrapperStyles = css`
+    flex-grow: 0;
+    width: 100%;
+    border-radius: ${INPUT_SHELL_RADIUS}px;
+    background-color: ${isPostToTeam ? euiTheme.colors.backgroundBaseDisabled : 'transparent'};
+  `;
+  const headerStyles = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+    height: ${POST_TO_TEAM_HEADER_HEIGHT}px;
+    padding-inline: ${euiTheme.size.base};
+  `;
+
+  return (
+    <div css={wrapperStyles}>
+      {isPostToTeam && (
+        <div css={headerStyles} data-test-subj="agentBuilderConversationInputPostToTeamHeader">
+          <EuiIcon type="megaphone" size="s" aria-hidden={true} />
+          <EuiText size="xs">{postToTeamLabel}</EuiText>
+        </div>
+      )}
+      <ConversationInputShell
+        isDisabled={isDisabled}
+        isCollapsed={isCollapsed}
+        data-test-subj="agentBuilderConversationInputForm"
+        aria-label={containerAriaLabel}
+      >
+        {children}
+      </ConversationInputShell>
+    </div>
+  );
+};
 
 interface ConversationInputProps {
   onSubmit?: () => void;
@@ -170,6 +199,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isNewConversation = !conversationId;
   const { title: conversationTitle } = useConversationTitle();
 
+  const isTriggerModeSelectable = !isNewConversation && isExperimentalEnabled;
+  const effectiveTriggerMode = isTriggerModeSelectable ? triggerMode : ChatTriggerMode.Always;
+  const isPostToTeam = effectiveTriggerMode === ChatTriggerMode.Never;
+
   const messageEditorAriaLabel = getMessageEditorAriaLabel({
     isNewConversation,
     conversationTitle,
@@ -224,7 +257,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
-    if (triggerMode === ChatTriggerMode.Never) {
+    if (isPostToTeam) {
       sendUserMessage(content)
         .then(() => {
           messageEditorController.clear();
@@ -249,7 +282,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   }
 
   return (
-    <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
+    <InputContainer
+      isDisabled={isInputDisabled}
+      isCollapsed={shouldCollapseInput}
+      isPostToTeam={isPostToTeam}
+    >
       {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
           <AttachmentPillsRow
@@ -280,8 +317,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
           isSubmitting={isCreatingConversation || isSendingUserMessage}
-          showTriggerModeToggle={!isNewConversation && isExperimentalEnabled}
-          triggerMode={triggerMode}
+          showTriggerModeSelector={isTriggerModeSelectable}
+          triggerMode={effectiveTriggerMode}
           onTriggerModeChange={setTriggerMode}
         />
       )}

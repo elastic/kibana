@@ -71,21 +71,23 @@ jest.mock('./message_editor', () => ({
 }));
 jest.mock('./input_actions', () => ({
   InputActions: ({
-    showTriggerModeToggle,
+    showTriggerModeSelector,
     triggerMode,
     onTriggerModeChange,
   }: {
-    showTriggerModeToggle: boolean;
+    showTriggerModeSelector: boolean;
     triggerMode: string;
     onTriggerModeChange: (mode: string) => void;
   }) =>
-    showTriggerModeToggle ? (
-      <input
-        data-test-subj="mock-agent-toggle"
-        type="checkbox"
-        checked={triggerMode === 'always'}
-        onChange={(event) => onTriggerModeChange(event.target.checked ? 'always' : 'never')}
-      />
+    showTriggerModeSelector ? (
+      <select
+        data-test-subj="mock-trigger-mode-selector"
+        value={triggerMode}
+        onChange={(event) => onTriggerModeChange(event.target.value)}
+      >
+        <option value="always">Talk to agent and users</option>
+        <option value="never">Talk to users</option>
+      </select>
     ) : null,
 }));
 jest.mock('./attachment_pill', () => ({
@@ -233,11 +235,16 @@ describe('ConversationInput', () => {
     expect(editorController.clear).toHaveBeenCalledTimes(1);
   });
 
-  describe('run agent toggle', () => {
+  describe('trigger mode selector', () => {
+    const selectTalkToUsers = () =>
+      fireEvent.change(screen.getByTestId('mock-trigger-mode-selector'), {
+        target: { value: 'never' },
+      });
+
     it('is not offered for a new conversation', () => {
       render(<ConversationInput />);
 
-      expect(screen.queryByTestId('mock-agent-toggle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
     });
 
     it('is not offered when experimental features are off', () => {
@@ -246,16 +253,50 @@ describe('ConversationInput', () => {
 
       render(<ConversationInput />);
 
-      expect(screen.queryByTestId('mock-agent-toggle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
     });
 
-    it('sends without running the agent when switched off and clears the editor on success', async () => {
+    it('shows the post to team header only when talking to users', () => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+
+      render(<ConversationInput />);
+
+      expect(
+        screen.queryByTestId('agentBuilderConversationInputPostToTeamHeader')
+      ).not.toBeInTheDocument();
+
+      selectTalkToUsers();
+
+      expect(screen.getByTestId('agentBuilderConversationInputPostToTeamHeader')).toHaveTextContent(
+        'Leaving a post to the team'
+      );
+    });
+
+    it('falls back to running the agent once the selector is no longer offered', () => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      const { rerender } = render(<ConversationInput />);
+
+      selectTalkToUsers();
+      mockedUseConversationId.mockReturnValue(undefined);
+      rerender(<ConversationInput />);
+
+      expect(
+        screen.queryByTestId('agentBuilderConversationInputPostToTeamHeader')
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(submitMessage).toHaveBeenCalledWith('hello agent');
+      expect(sendUserMessage).not.toHaveBeenCalled();
+    });
+
+    it('sends without running the agent when talking to users and clears the editor on success', async () => {
       mockedUseConversationId.mockReturnValue('conv-1');
       const onSubmit = jest.fn();
 
       render(<ConversationInput onSubmit={onSubmit} />);
 
-      fireEvent.click(screen.getByTestId('mock-agent-toggle'));
+      selectTalkToUsers();
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
       expect(sendUserMessage).toHaveBeenCalledWith('hello agent');
@@ -270,14 +311,14 @@ describe('ConversationInput', () => {
 
       render(<ConversationInput />);
 
-      fireEvent.click(screen.getByTestId('mock-agent-toggle'));
+      selectTalkToUsers();
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
       await waitFor(() => expect(addErrorToast).toHaveBeenCalledWith({ title: 'boom' }));
       expect(editorController.clear).not.toHaveBeenCalled();
     });
 
-    it('runs the agent when switched on', () => {
+    it('runs the agent when talking to agent and users', () => {
       mockedUseConversationId.mockReturnValue('conv-1');
 
       render(<ConversationInput />);
