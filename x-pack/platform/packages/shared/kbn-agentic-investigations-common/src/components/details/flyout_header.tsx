@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { Investigation } from '../../types';
-import { InvestigationHeaderBlocks } from './header_blocks';
+import { ConversationHeaderBlocks } from './header_blocks';
 
 export interface ConversationDetailsFlyoutHeaderProps {
   investigation: Investigation;
@@ -58,7 +58,7 @@ export const ConversationDetailsFlyoutHeader = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <InvestigationHeaderBlocks investigation={investigation} assigneesNode={assigneesNode} />
+      <ConversationHeaderBlocks status={investigation.status} assigneesNode={assigneesNode} />
     </>
   );
 };

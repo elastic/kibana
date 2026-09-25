@@ -16,7 +16,6 @@ export {
 export {
   ConversationHeaderBlocks,
   type ConversationHeaderBlocksProps,
-  InvestigationHeaderBlocks,
   type InvestigationHeaderBlocksProps,
 } from './header_blocks';
 export {

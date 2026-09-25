@@ -21,6 +21,10 @@ export interface ConversationHeaderBlocksProps {
   'data-test-subj'?: string;
 }
 
+const getStatusBadge = (status?: string) => (
+  <EuiBadge color={status === 'open' ? 'primary' : 'subdued'}>{status ?? getEmptyValue()}</EuiBadge>
+);
+
 /**
  * Status and assignee tiles shown above the flyout tabs.
  *
@@ -56,7 +60,7 @@ export const ConversationHeaderBlocks = ({
       {
         id: 'status',
         title: TEMPLATE_UI_LABELS.status,
-        value: <EuiBadge color="hollow">{status ?? getEmptyValue()}</EuiBadge>,
+        value: getStatusBadge(status),
       },
       {
         id: 'assignees',
@@ -79,21 +83,3 @@ export interface InvestigationHeaderBlocksProps {
   /** Optional pre-rendered interactive assignee picker from the consuming plugin. */
   assigneesNode?: React.ReactNode;
 }
-
-/**
- * @deprecated Use `ConversationHeaderBlocks` directly. This wrapper exists only
- * so existing call sites don't need to be updated all at once.
- */
-export const InvestigationHeaderBlocks = ({
-  investigation,
-  assigneesNode,
-}: InvestigationHeaderBlocksProps) => (
-  <ConversationHeaderBlocks
-    status={investigation.status}
-    assigneesNode={assigneesNode}
-    assigneeUids={
-      investigation.assignees ?? (investigation.assignee ? [investigation.assignee] : [])
-    }
-    data-test-subj="investigationHeaderBlocks"
-  />
-);
