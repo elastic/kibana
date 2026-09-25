@@ -156,13 +156,28 @@ describe('ConversationsActionsGroup', () => {
       expect(screen.queryByText('Add to an escalation')).not.toBeInTheDocument();
     });
 
-    it('keeps assign and close while the decision is open', () => {
-      const { onClickAction } = renderGroup(makeInvestigation());
+    it('keeps assign and close while the decision is open when canCloseInvestigation is true', () => {
+      const onClickAction = jest.fn();
+      renderWithKibanaRenderContext(
+        <ConversationsActionsGroup
+          investigation={makeInvestigation()}
+          onClickAction={onClickAction}
+          onOpenChat={jest.fn()}
+          canCloseInvestigation={true}
+        />
+      );
       openMenu();
 
       fireEvent.click(screen.getByText('Close investigation'));
 
       expect(onClickAction).toHaveBeenCalledWith('close', 'inv-1');
+    });
+
+    it('hides close when canCloseInvestigation is false (default)', () => {
+      renderGroup(makeInvestigation());
+      openMenu();
+
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
     });
   });
 });

@@ -79,20 +79,9 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
   } = useKibana().services;
   const { connectors, setCurrentConnector } = useConnectors({ http });
 
-  const [isWorkflowsEnabledFlag, setIsWorkflowsEnabledFlag] = useState(false);
-
-  useEffect(() => {
-    const loadFeatureFlag = async () => {
-      const ffEnabled = await featureFlags.getBooleanValue(
-        'securitySolution.attackDiscoveryWorkflowsEnabled',
-        true
-      );
-      setIsWorkflowsEnabledFlag(
-        ffEnabled && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false)
-      );
-    };
-    loadFeatureFlag();
-  }, [featureFlags, uiSettings]);
+  const isWorkflowsEnabledFlag =
+    featureFlags.useBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true) &&
+    uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
   const isWorkflowsEnabled = isWorkflowsEnabledProp ?? isWorkflowsEnabledFlag;
 
