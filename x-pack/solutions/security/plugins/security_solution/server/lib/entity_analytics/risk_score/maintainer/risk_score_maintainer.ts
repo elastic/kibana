@@ -46,11 +46,9 @@ import { ensureLookupIndex, getLookupIndexName } from './lookup/lookup_index';
 import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
-import { buildLookupIndex } from './steps/build_lookup_index';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan, wrapTaskRun } from '../../telemetry/traces';
 import {
   buildRiskScoreEntityMaintainerRunSummary,
-  buildRiskScorePhase0EntityMaintainerRunSummary,
   buildRiskScoreSkipEntityMaintainerRunSummary,
   type RiskScoreFrameworkStageSummary,
 } from './entity_maintainer_run_summary';
@@ -192,52 +190,14 @@ export const createRiskScoreMaintainer = ({
           const maintainerRunStartedAtMs = Date.now();
           const metricsTracker = createRunMetricsTracker();
           telemetryReporter.clearGlobalSkipReason();
-          const phase0LookupStage = telemetryReporter.startPhase0LookupBuildStage({
-            namespace: runContext.namespace,
-            idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
-          });
-          const phase0StartedAtMs = Date.now();
-          try {
-            const phase0Summary = await runWithSpan({
-              name: ENTITY_ANALYTICS_SPAN_NAMES.phase0LookupBuild,
-              namespace: runContext.namespace,
-              cb: () =>
-                buildLookupIndex({
-                  esClient: runContext.esClient,
-                  crudClient,
-                  logger,
-                  lookupIndex: runContext.lookupIndex,
-                  entityTypes: runConfig.entityTypes,
-                  calculationRunId,
-                  now: runNow,
-                  abortSignal: signal,
-                }),
-            });
-            phase0LookupStage.success({
-              lookupRowsWritten: phase0Summary.lookupRowsWritten,
-              entitiesIterated: phase0Summary.entitiesIterated,
-              pagesProcessed: phase0Summary.pagesProcessed,
-              bulkBatches: phase0Summary.bulkBatches,
-              lookupRowsFailed: phase0Summary.lookupRowsFailed,
-            });
-            frameworkTelemetry.report(
-              buildRiskScorePhase0EntityMaintainerRunSummary({
-                status: 'success',
-                durationMs: Date.now() - phase0StartedAtMs,
-                summary: phase0Summary,
-              })
-            );
-          } catch (error) {
-            phase0LookupStage.error({ errorKind: 'unexpected' });
-            frameworkTelemetry.report(
-              buildRiskScorePhase0EntityMaintainerRunSummary({
-                status: 'error',
-                durationMs: Date.now() - phase0StartedAtMs,
-                errorKind: 'unexpected',
-              })
-            );
-            throw error;
-          }
+
+          // Phase 0 skipped: Phase 2 joins entities-latest directly instead of
+          // reading from the pre-built lookup index.
+          logger.info(
+            `[risk_score_maintainer] Phase 0 (lookup index build) skipped — Phase 2 will query entities-latest directly`
+          );
+          const entityStoreIndex = await crudClient.latestIndexName();
+
           // Entity types are scored in parallel: each run reads alerts independently
           // and writes to the same risk-score data stream and entity store, with no
           // shared per-run state in this maintainer. A failure in one entity type
@@ -260,6 +220,7 @@ export const createRiskScoreMaintainer = ({
                       entityType,
                       crudClient,
                       logger,
+                      entityStoreIndex,
                       abortSignal: signal,
                       telemetryReporter,
                       frameworkTelemetry,
@@ -473,6 +434,7 @@ const executeEntityTypeRun = async ({
   entityType,
   crudClient,
   logger,
+  entityStoreIndex,
   abortSignal,
   telemetryReporter,
   frameworkTelemetry,
@@ -485,6 +447,7 @@ const executeEntityTypeRun = async ({
   entityType: EntityType;
   crudClient: Parameters<NonNullable<RiskScoreMaintainerConfig['run']>>[0]['crudClient'];
   logger: Logger;
+  entityStoreIndex: string;
   abortSignal?: AbortSignal;
   // Dual telemetry: Entity Maintainers framework (`frameworkTelemetry`) plus the
   // legacy risk-score reporter (`telemetryReporter`). Goal is to migrate all
@@ -619,7 +582,7 @@ const executeEntityTypeRun = async ({
             logger: runLogger,
             entityType,
             alertsIndex: runConfig.alertsIndex,
-            lookupIndex: runContext.lookupIndex,
+            entityStoreIndex,
             pageSize: runConfig.pageSize,
             sampleSize: runConfig.sampleSize,
             now: runNow,

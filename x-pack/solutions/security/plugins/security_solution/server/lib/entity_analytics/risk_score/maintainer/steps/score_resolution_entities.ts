@@ -30,7 +30,7 @@ interface ScoreResolutionEntitiesParams {
   logger: ScopedLogger;
   entityType: EntityType;
   alertsIndex: string;
-  lookupIndex: string;
+  entityStoreIndex: string;
   pageSize: number;
   sampleSize: number;
   now: string;
@@ -54,7 +54,7 @@ export const calculateResolutionEntityScores = async function* ({
   logger,
   entityType,
   alertsIndex,
-  lookupIndex,
+  entityStoreIndex,
   pageSize,
   sampleSize,
   now,
@@ -75,7 +75,7 @@ export const calculateResolutionEntityScores = async function* ({
     // Per page: fetch groups, score them, then apply merged group modifiers.
     const pageResult = await fetchNextResolutionPage({
       esClient,
-      lookupIndex,
+      entityStoreIndex,
       pageSize,
       afterKey,
       targetEntityIds,
@@ -97,7 +97,7 @@ export const calculateResolutionEntityScores = async function* ({
       sampleSize,
       pageSize,
       alertsIndex,
-      lookupIndex,
+      entityStoreIndex,
     });
     logger.debug(
       `[resolution][page:${pagesProcessed}] parsed_scores=${parsedScores.length}, esql_rows=${esqlRows}`
@@ -109,7 +109,7 @@ export const calculateResolutionEntityScores = async function* ({
       const lookupMemberIds = await fetchResolutionGroupMemberIds({
         esClient,
         logger,
-        lookupIndex,
+        entityStoreIndex,
         resolutionTargetIds: pageResult.resolutionTargetIds,
       });
       for (const memberId of lookupMemberIds) {
@@ -145,13 +145,13 @@ export const calculateResolutionEntityScores = async function* ({
 
 const fetchNextResolutionPage = async ({
   esClient,
-  lookupIndex,
+  entityStoreIndex,
   pageSize,
   afterKey,
   targetEntityIds,
 }: {
   esClient: ElasticsearchClient;
-  lookupIndex: string;
+  entityStoreIndex: string;
   pageSize: number;
   afterKey: Record<string, string> | undefined;
   targetEntityIds?: string[];
@@ -163,7 +163,7 @@ const fetchNextResolutionPage = async ({
 
   const compositeResponse = await esClient.search(
     getResolutionCompositeQuery(
-      lookupIndex,
+      entityStoreIndex,
       Math.min(pageSize, MAX_RESOLUTION_TARGETS_PER_PAGE),
       afterKey,
       targetEntityIds
@@ -187,12 +187,12 @@ const fetchNextResolutionPage = async ({
 export const fetchResolutionGroupMemberIds = async ({
   esClient,
   logger,
-  lookupIndex,
+  entityStoreIndex,
   resolutionTargetIds,
 }: {
   esClient: ElasticsearchClient;
   logger: ScopedLogger;
-  lookupIndex: string;
+  entityStoreIndex: string;
   resolutionTargetIds: string[];
 }): Promise<Set<string>> => {
   if (resolutionTargetIds.length === 0) {
@@ -208,23 +208,24 @@ export const fetchResolutionGroupMemberIds = async ({
   let searchAfter: string | undefined;
 
   do {
-    const response = await esClient.search<{
-      entity_id?: string;
-    }>({
-      index: lookupIndex,
+    const response = await esClient.search({
+      index: entityStoreIndex,
       size: RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE,
-      _source: ['entity_id'],
+      _source: false,
+      docvalue_fields: ['entity.id'],
       track_total_hits: false,
-      sort: [{ entity_id: { order: 'asc' } }],
-      // Strict undefined: a truthy check would fold an empty-string entity_id
-      // (assigned via the typeof check below) into "no cursor" and re-page
-      // from the start forever.
+      sort: [{ 'entity.id': { order: 'asc' } }],
+      // Strict undefined: a truthy check would fold an empty-string entity.id
+      // into "no cursor" and re-page from the start forever.
       search_after: searchAfter !== undefined ? [searchAfter] : undefined,
       query: {
         bool: {
           filter: [
-            { terms: { resolution_target_id: resolutionTargetIds } },
-            { term: { relationship_type: RESOLUTION_RELATIONSHIP_TYPE } },
+            {
+              terms: {
+                'entity.relationships.resolution.resolved_to': resolutionTargetIds,
+              },
+            },
           ],
         },
       },
@@ -232,7 +233,8 @@ export const fetchResolutionGroupMemberIds = async ({
 
     const hits = response.hits.hits ?? [];
     for (const hit of hits) {
-      const entityId = hit._source?.entity_id;
+      const fields = hit.fields as Record<string, unknown[]> | undefined;
+      const entityId = (fields?.['entity.id'] as string[] | undefined)?.[0];
       if (typeof entityId === 'string') {
         memberIds.add(entityId);
       }
@@ -261,7 +263,7 @@ const scoreResolutionPage = async ({
   sampleSize,
   pageSize,
   alertsIndex,
-  lookupIndex,
+  entityStoreIndex,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -269,7 +271,7 @@ const scoreResolutionPage = async ({
   sampleSize: number;
   pageSize: number;
   alertsIndex: string;
-  lookupIndex: string;
+  entityStoreIndex: string;
 }): Promise<{ parsedScores: ParsedResolutionScore[]; esqlRows: number }> => {
   const query = getResolutionScoreESQLByIds(
     entityType,
@@ -277,7 +279,7 @@ const scoreResolutionPage = async ({
     sampleSize,
     pageSize,
     alertsIndex,
-    lookupIndex
+    entityStoreIndex
   );
   const esqlResponse = await esClient.esql.query({ query });
   return {
