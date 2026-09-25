@@ -11,31 +11,19 @@ import { DEFAULT_MINIMUM_SCHEDULE_INTERVAL, MIN_SCHEDULE_INTERVAL } from '@kbn/a
 import { parseDurationToMs, validateDuration } from './lib/duration';
 import type { EsqlResponseFormat } from './lib/services/query_service/formats';
 
-/** Default value of `xpack.alerting_v2.rules.minimumScheduleInterval`. */
 const MINIMUM_SCHEDULE_INTERVAL_DEFAULT = DEFAULT_MINIMUM_SCHEDULE_INTERVAL;
 /**
- * Lowest value `xpack.alerting_v2.rules.minimumScheduleInterval` may be set to.
- * Tied to the absolute minimum a rule `schedule.every` can be, so functional
- * tests can relax the guardrail and run rules every few seconds. The default
- * remains 1m, so production deployments keep the 1m minimum unless an operator
- * deliberately lowers it.
+ * Lower bound for `minimumScheduleInterval`. Set below the default so
+ * functional tests can relax the guardrail and run rules every few seconds.
  */
 const MINIMUM_SCHEDULE_INTERVAL_FLOOR = MIN_SCHEDULE_INTERVAL;
-/** Highest value `xpack.alerting_v2.rules.minimumScheduleInterval` may be set to. */
 const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 
-/** Default and highest value of `xpack.alerting_v2.rules.run.alerts.max`. */
+/** Default and maximum value of `xpack.alerting_v2.rules.run.alerts.max`. */
 const MAX_ALERTS_PER_RUN = 10000;
-/** Default cap on the ES response body size for non-streaming rule queries. */
 const DEFAULT_MAX_QUERY_RESPONSE_SIZE = '50mb';
-/** Anything smaller than this cannot hold a single ES|QL row with metadata. */
+/** Minimum that can still hold a single ES|QL row with metadata. */
 const MIN_MAX_QUERY_RESPONSE_SIZE = '1kb';
-/**
- * Upper bound on `maxResponseSize`. At Task Manager capacity 10 and the 4× heap
- * multiplier, 200 MB requires ~8 GB Kibana heap — a large but real deployment.
- * The active transport (JSON vs streaming) is determined by the
- * `alertingV2.esqlResponseFormat` feature flag, not by this setting.
- */
 const MAX_MAX_QUERY_RESPONSE_SIZE = '200mb';
 
 const rulesRunSchema = schema.object({
@@ -44,45 +32,28 @@ const rulesRunSchema = schema.object({
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
   }),
   /**
-   * Cap on **new** alert episodes a single execution may open. A row is dropped
-   * only when all four conditions hold: grouped rule, first appearance of this
-   * group in the run, no existing open episode for the group, and the cap is
-   * reached. Rows for already-seen groups always pass — the cap protects episode
-   * creation, action dispatch fan-out, and `.rule-events` volume, not query results.
+   * Cap on **new** alert episodes a single execution may open. Rows for
+   * already-seen groups always pass — only genuinely new groups count toward the cap.
    *
    * default === max: can only be tightened; tied to `alerts.max` as the upper
-   * bound because a single run cannot produce more new groups than it fetches rows.
-   *
-   * When the `alertingV2.esqlResponseFormat` flag resolves to `json`, the
-   * effective row ceiling is `min(alerts.max, NON_STREAMING_MAX_ROWS=1000)`, so
-   * this cap can never fire at its default 10000 — it only becomes live when
-   * explicitly lowered below the active row ceiling.
+   * bound. With the `json` response format the effective row ceiling is 1000,
+   * so this cap only fires when explicitly lowered below that.
    */
   maxGroupsPerExecution: schema.number({
     defaultValue: MAX_ALERTS_PER_RUN,
     min: 1,
-    // default === max: can only be tightened; loosening would be breaking.
     max: MAX_ALERTS_PER_RUN,
   }),
   timeout: schema.maybe(schema.string({ validate: validateDuration })),
   query: schema.object({
     /**
-     * Maximum allowed Elasticsearch response body size (in bytes) for
-     * non-streaming rule queries: the breach query on the JSON response path,
-     * plus the recovery and data-presence queries. Queries whose response
-     * exceeds this limit are aborted and the execution fails as a user error
-     * so the rule owner can narrow the query (KEEP / STATS) or raise the limit.
+     * Maximum ES response body size for non-streaming rule queries. Each
+     * execution transiently holds roughly 4× this value in heap; size this as
+     * `heap budget / (capacity × 4)`. Defaults to 50mb; `config/serverless.yml`
+     * lowers it to 10mb for Serverless.
      *
-     * Every execution transiently holds roughly 4x the response size in heap,
-     * and Task Manager capacity decides how many run at once, so size this as
-     * `heap budget / (capacity x 4)`. Accepts a byte-size string (`10mb`, `512kb`)
-     * or a plain number of bytes. Defaults to 50mb; `config/serverless.yml`
-     * lowers it to 10mb for the default Serverless background-tasks pod.
-     *
-     * This guard applies only when the `alertingV2.esqlResponseFormat` feature
-     * flag resolves to `json`. Streaming transports (Arrow, NDJSON) use chunked
-     * transfer without `Content-Length`, so there `alerts.max` is the sole bound.
-     * The active transport is selected by the feature flag, not by this setting.
+     * Applies only when `alertingV2.esqlResponseFormat` resolves to `json` —
+     * streaming transports use chunked transfer without `Content-Length`.
      */
     maxResponseSize: schema.byteSize({
       defaultValue: DEFAULT_MAX_QUERY_RESPONSE_SIZE,
@@ -116,19 +87,14 @@ const rulesSchema = schema.object({
     },
   }),
   /**
-   * Upper bound on the combined number of rule runs per minute across all
-   * spaces. Creating, updating or enabling a rule that would push the total
-   * past this limit is rejected.
+   * Combined rule runs per minute cap across all spaces. Creating or enabling a
+   * rule that would exceed the limit is rejected.
    *
-   * Setting this to `0` is a valid "freeze" mode: creates and enables are
-   * rejected, but existing enabled rules keep running. Useful during high-load
-   * incidents to stop new scheduling load from being added.
-   *
-   * The default matches the alerting v1 hosted budget (`xpack.alerting.rules.maxScheduledPerMinute`).
-   * Serverless projects are capped at 400 via `config/serverless.yml`, mirroring v1.
+   * `0` is a freeze mode: creates and enables are rejected while existing rules
+   * keep running. Defaults to 32000 (v1 hosted budget); `config/serverless.yml`
+   * overrides to 400 for Serverless.
    */
   maxScheduledPerMinute: schema.number({ defaultValue: 32000, min: 0, max: 32000 }),
-  /** Per-execution guardrails applied while a rule runs. */
   run: rulesRunSchema,
 });
 
