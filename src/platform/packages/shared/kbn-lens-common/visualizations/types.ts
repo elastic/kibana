@@ -364,7 +364,12 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     props: VisualizationLayerWidgetProps<T>
   ) => undefined | ReactElement<VisualizationLayerWidgetProps<T>>;
 
-  getSubtypeSwitch?: (props: VisualizationLayerWidgetProps<T>) => (() => JSX.Element) | null;
+  /**
+   * Stacking (subtype) control rendered next to the chart switch in the layer header.
+   * Returns an element (not a component) so the header can render it in place and React
+   * preserves its state (e.g. an open popover) across header re-renders.
+   */
+  getSubtypeSwitch?: (props: VisualizationLayerWidgetProps<T>) => ReactElement | null;
 
   /**
    * Layer panel content rendered. This can be used to render a custom content below the title,

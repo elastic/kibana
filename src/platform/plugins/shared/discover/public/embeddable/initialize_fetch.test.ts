@@ -36,11 +36,12 @@ describe('initialize fetch', () => {
     setters,
   } = getMockedSearchApi({ searchSource, savedSearch });
   const refreshTrigger$ = new BehaviorSubject<void>(undefined);
+  let cleanupFetch: (() => void) | undefined;
 
   const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
   beforeAll(async () => {
-    initializeFetch({
+    const { cleanup } = initializeFetch({
       api: mockedApi,
       stateManager,
       discoverServices: discoverServiceMock,
@@ -52,6 +53,7 @@ describe('initialize fetch', () => {
       ...setters,
       setApproximationApplied: jest.fn(),
     });
+    cleanupFetch = cleanup;
     await waitOneTick();
   });
 
@@ -144,5 +146,13 @@ describe('initialize fetch', () => {
     await waitOneTick();
 
     expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBeforeRefresh);
+  });
+
+  it('aborts the current request on cleanup', () => {
+    const signal = mockedApi.abortSignal$.getValue();
+
+    expect(signal).toBeDefined();
+    cleanupFetch?.();
+    expect(signal?.aborted).toBe(true);
   });
 });

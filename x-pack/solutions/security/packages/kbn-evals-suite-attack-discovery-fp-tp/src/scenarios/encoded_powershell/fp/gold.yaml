@@ -1,0 +1,12 @@
+classification: false_positive
+why: Entity role and parent process show Intune/SCCM management activity, not an adversary. The network destination is Microsoft management infrastructure.
+must_retrieve:
+  - entity_store
+  - raw_events
+evidence_ids:
+  entity:
+    - host:ad-scenario-host-56ef10417335cd10
+  event:
+    - ad-scenario-process-60dbaa25778652fe
+    - ad-scenario-network-7b7486fe0317b3ef
+must_not_cite: []

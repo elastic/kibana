@@ -34,7 +34,7 @@ user_activity:
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
-When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, error, user, kibana.session.id, kibana.space.id, ...}`.
+When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, metadata, error, user, kibana.session.id, kibana.space.id, kibana.object, ...}`.
 
 ### Filters
 
@@ -56,7 +56,7 @@ Each filter has:
 
 ## Dashboard event fields
 
-All dashboard actions include the [common log fields](#logs-schema) and populate `object.id`, `object.name`, `object.type`, and `object.tags`. The `object.type` value is `dashboard`, and `object.tags` contains the dashboard tag names.
+All dashboard actions include the [common log fields](#logs-schema) and populate `kibana.object.id`, `kibana.object.name`, `kibana.object.type`, and `kibana.object.tags`. The `kibana.object.type` value is `dashboard`, and `kibana.object.tags` contains the dashboard tag names.
 
 ### Dashboard view
 
@@ -96,7 +96,7 @@ This example uses a custom `user-activity-logs` index. User activity events are 
 
 ## Logs schema
 
-User activity events are written as JSON log entries. When using the JSON logging layout, these entries are ECS-compatible (see [Elastic Common Schema (ECS)](ecs://reference/index.md)) and may include additional non-ECS fields used by Kibana (for example, `kibana.space.id` and `object.*`).
+User activity events are written as JSON log entries. When using the JSON logging layout, these entries are ECS-compatible (see [Elastic Common Schema (ECS)](ecs://reference/index.md)) and may include additional non-ECS fields used by Kibana (for example, `kibana.space.id` and `kibana.object.*`).
 
 ### Base fields
 
@@ -144,7 +144,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | `user.roles` | Kibana roles of the user at the time of the action. |
 
 :::::{note}
-Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthenticated requests. For these events, the `user.*` and `kibana.session.id` fields may not be populated. The identity of the user can still be determined from the `object.*` fields.
+Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthenticated requests. For these events, the `user.*` and `kibana.session.id` fields may not be populated. The identity of the user can still be determined from the `kibana.object.*` fields.
 :::::
 
 ### Client and HTTP fields
@@ -161,10 +161,12 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 
 | **Field** | **Description** |
 | --- | --- |
-| `object.id` | Unique id of the target. |
-| `object.name` | Target resource name. |
-| `object.type` | Target resource type of the action. |
-| `object.tags` | List of tags assigned to the target. |
+| `kibana.object.id` | Unique id of the target. |
+| `kibana.object.name` | Target resource name. |
+| `kibana.object.type` | Target resource type of the action. |
+| `kibana.object.tags` | List of tags assigned to the target. |
+| `kibana.saved_object.type` | Type of the target saved object. Present only when the target of the action is a saved object. |
+| `kibana.saved_object.id` | ID of the target saved object. Present only when the target of the action is a saved object. |
 
 ### Metadata fields
 
