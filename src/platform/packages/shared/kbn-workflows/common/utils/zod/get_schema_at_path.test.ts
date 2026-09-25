@@ -35,11 +35,7 @@ describe('parsePath', () => {
   });
 
   it('treats a dotted Liquid expression as a single dynamic segment', () => {
-    expect(parsePath('rules[ep.a.b].name')).toEqual([
-      'rules',
-      '__liquid_dynamic_key__',
-      'name',
-    ]);
+    expect(parsePath('rules[ep.a.b].name')).toEqual(['rules', '__liquid_dynamic_key__', 'name']);
   });
 
   it('returns null for leading dots', () => {
