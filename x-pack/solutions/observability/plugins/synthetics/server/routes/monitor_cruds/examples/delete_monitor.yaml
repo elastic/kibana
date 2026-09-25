@@ -1,0 +1,16 @@
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../oas_schemas.yaml#/deleteResult'
+        examples:
+          deleteMonitorResponseExample1:
+            value:
+              - id: monitor1-id
+                deleted: true
+  404:
+    description: The monitor does not exist.

@@ -12,6 +12,7 @@
  * `./edit_monitor_bulk.ts`) for the ES write + Fleet sync.
  */
 
+import path from 'path';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -49,6 +50,14 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_UPDATE,
+  options: {
+    summary: 'Bulk update monitors',
+    description:
+      'Partially update multiple monitors in a single request.\n\nEach `updates` entry has its own `id` and `attributes` patch, so one request can apply a different change per monitor. Unspecified fields are left unchanged. Patches use the same merge, validate, and encrypt path as `PUT /api/synthetics/monitors/{id}`.\n\nFor private-location monitors, Fleet is synced once for the batch instead of once per monitor.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'put-synthetic-monitors-bulk-update',
+    availability: { since: '9.5.0' },
+    oasOperationObject: () => path.join(__dirname, '../examples/bulk_update_monitors.yaml'),
+  },
   validate: {},
   validation: {
     request: {
@@ -56,12 +65,20 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
         updates: z
           .array(
             z.strictObject({
-              id: routeId,
-              attributes: z.looseObject({}).default({}),
+              id: routeId.describe('The monitor config ID to update.'),
+              attributes: z
+                .looseObject({})
+                .default({})
+                .describe(
+                  'Attributes to update for the monitor. You can specify the same fields as in `PUT /api/synthetics/monitors/{id}`. An empty object is rejected.'
+                ),
             })
           )
           .min(1)
-          .max(MAX_MONITOR_FANOUT_SIZE),
+          .max(MAX_MONITOR_FANOUT_SIZE)
+          .describe(
+            'Monitors to update. Each `id` may appear at most once. `attributes` must contain at least one field.'
+          ),
       }),
     },
   },
