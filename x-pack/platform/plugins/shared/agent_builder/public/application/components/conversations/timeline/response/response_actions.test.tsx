@@ -24,6 +24,14 @@ jest.mock('../../../../hooks/use_tracing_enabled', () => ({
   useTracingEnabled: () => false,
 }));
 
+jest.mock('../../../../hooks/use_conversation', () => ({
+  useAgentId: () => undefined,
+}));
+
+jest.mock('../../../../context/conversation/use_conversation_id', () => ({
+  useConversationId: () => undefined,
+}));
+
 const copyMock = copy as jest.MockedFunction<typeof copy>;
 const useToastsMock = useToasts as jest.MockedFunction<typeof useToasts>;
 const addSuccessToast = jest.fn();

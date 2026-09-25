@@ -118,7 +118,7 @@ const enrichWithSnoozeState = async (
       return {
         ...ep,
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snooze_expiry: snoozedInstances!.get(instanceId) ?? null,
+        snoozed_until: snoozedInstances!.get(instanceId) ?? null,
         ...(isMuted ? { is_muted: true } : {}),
       };
     }
@@ -127,7 +127,7 @@ const enrichWithSnoozeState = async (
       return {
         ...ep,
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snooze_expiry: null,
+        snoozed_until: null,
         is_muted: true,
       };
     }

@@ -10,6 +10,7 @@
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { map } from 'rxjs';
 import { AsyncLocalStorage } from 'async_hooks';
 import type { TrackUserActionParams, UserActivityEventType } from '@kbn/core-user-activity-server';
@@ -30,6 +31,11 @@ interface UserActivitySetupDeps {
   logging: InternalLoggingServiceSetup;
 }
 
+/** @internal */
+interface UserActivityStartDeps {
+  typeRegistry: ISavedObjectTypeRegistry;
+}
+
 /**
  * Service for recording user actions within Kibana.
  *
@@ -42,6 +48,8 @@ export class UserActivityService
   private enabled = false;
   private filters: UserActivityFiltersType = [];
   private readonly injectedContextAsyncStorage: AsyncLocalStorage<InjectedContext>;
+  // set of SO types so we can know when to copy kibana.object to kibana.saved_object
+  private savedObjectTypeNames = new Set<string>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('user_activity', 'event');
@@ -80,7 +88,9 @@ export class UserActivityService
     };
   }
 
-  start() {
+  start({ typeRegistry }: UserActivityStartDeps): InternalUserActivityServiceStart {
+    this.savedObjectTypeNames = new Set(typeRegistry.getAllTypes().map((type) => type.name));
+
     return {
       trackUserAction: this.trackUserAction,
       setInjectedContext: this.setInjectedContext,
@@ -109,6 +119,8 @@ export class UserActivityService
     // ECS `source` is a role-agnostic copy of the role-annotated `client` fields.
     const clientIp = injectedContext.client?.ip;
 
+    const isSavedObject = this.savedObjectTypeNames.has(object.type);
+
     this.logger.info(message, {
       message,
       event: {
@@ -116,10 +128,14 @@ export class UserActivityService
         type: event.type as UserActivityEventType[],
         outcome: event.outcome ?? 'unknown',
       },
-      object,
       ...(metadata ? { metadata } : {}),
       ...(error ? { error } : {}),
       ...injectedContext,
+      kibana: {
+        ...injectedContext.kibana,
+        object,
+        ...(isSavedObject ? { saved_object: { type: object.type, id: object.id } } : {}),
+      },
       ...(clientIp ? { source: { address: clientIp, ip: clientIp } } : {}),
     });
   };

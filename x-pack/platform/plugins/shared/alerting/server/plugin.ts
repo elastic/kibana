@@ -806,7 +806,6 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
-      uiamConvert: core.security.authc.apiKeys.uiam?.convert,
     });
 
     this.eventLogService!.registerSavedObjectProvider(
