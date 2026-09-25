@@ -141,9 +141,10 @@ export function FieldMappingForm({
           gutterSize="m"
           alignItems="flexStart"
           responsive={false}
+          wrap
           style={{ width: '100%' }}
         >
-          <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
+          <EuiFlexItem grow={false} style={{ maxWidth: 200, minWidth: 200 }}>
             <EuiFormRow
               label={i18n.translate('xpack.dataFederation.mappingEditor.typeLabel', {
                 defaultMessage: 'Field type',
@@ -171,7 +172,7 @@ export function FieldMappingForm({
             </EuiFormRow>
           </EuiFlexItem>
 
-          <EuiFlexItem>
+          <EuiFlexItem style={{ minWidth: 240 }}>
             <EuiFormRow
               label={i18n.translate('xpack.dataFederation.mappingEditor.logicalName', {
                 defaultMessage: 'Field name',
@@ -190,7 +191,7 @@ export function FieldMappingForm({
             </EuiFormRow>
           </EuiFlexItem>
 
-          <EuiFlexItem>
+          <EuiFlexItem style={{ minWidth: 260 }}>
             <EuiFormRow
               label={i18n.translate('xpack.dataFederation.mappingEditor.physicalPath', {
                 defaultMessage: 'Original field name (optional)',
@@ -210,7 +211,7 @@ export function FieldMappingForm({
           </EuiFlexItem>
 
           {isDateType ? (
-            <EuiFlexItem>
+            <EuiFlexItem style={{ minWidth: 260, maxWidth: 260 }}>
               <EuiFormRow
                 label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
                   defaultMessage: 'format (optional)',

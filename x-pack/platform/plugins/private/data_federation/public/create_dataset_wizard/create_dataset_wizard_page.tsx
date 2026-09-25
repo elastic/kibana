@@ -225,7 +225,7 @@ export function CreateDatasetWizardPage({
                 >
                   <div
                     data-test-subj="createDatasetWizardContent"
-                    style={{ maxWidth: MAX_WIDTH_NARROW_PX, marginInline: 'auto' }}
+                    style={{ width: '100%', maxWidth: MAX_WIDTH_NARROW_PX }}
                   >
                     <StepDataset
                       dataSources={dataSources}
@@ -242,7 +242,7 @@ export function CreateDatasetWizardPage({
                 >
                   <div
                     data-test-subj="createDatasetWizardContent"
-                    style={{ maxWidth: MAX_WIDTH_NARROW_PX, marginInline: 'auto' }}
+                    style={{ width: '100%', maxWidth: MAX_WIDTH_NARROW_PX }}
                   >
                     <StepAdditional />
                   </div>

@@ -404,7 +404,12 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                       borderRadius: 0,
                     }}
                   >
-                    <EuiFlexGroup gutterSize="m" alignItems={isEditing ? 'flexStart' : 'center'}>
+                    <EuiFlexGroup
+                      gutterSize="m"
+                      alignItems={isEditing ? 'flexStart' : 'center'}
+                      responsive={false}
+                      wrap
+                    >
                       {isEditing ? (
                         <FieldMappingForm
                           value={f}
