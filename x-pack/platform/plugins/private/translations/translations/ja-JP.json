@@ -50085,7 +50085,6 @@
     "xpack.serverlessVectordb.nav.mngt.access": "アクセス",
     "xpack.serverlessVectordb.nav.mngt.alertsAndInsights": "アラートとインサイト",
     "xpack.serverlessVectordb.nav.mngt.content": "コンテンツ",
-    "xpack.serverlessVectordb.nav.performance": "パフォーマンス",
     "xpack.sessionView.alert": "アラート",
     "xpack.sessionView.alertDetailsAllFilterItem": "すべてのアラートを表示",
     "xpack.sessionView.alertDetailsAllSelectedCategory": "表示：アラートを表示",

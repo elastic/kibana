@@ -49921,7 +49921,6 @@
     "xpack.serverlessVectordb.nav.mngt.access": "Zugriff",
     "xpack.serverlessVectordb.nav.mngt.alertsAndInsights": "Alerts und Einblicke",
     "xpack.serverlessVectordb.nav.mngt.content": "Inhalt",
-    "xpack.serverlessVectordb.nav.performance": "Performance",
     "xpack.sessionView.alert": "Alarm",
     "xpack.sessionView.alertDetailsAllFilterItem": "Alle Warnungen anzeigen",
     "xpack.sessionView.alertDetailsAllSelectedCategory": "Anzeigen: Alle Warnungen",
