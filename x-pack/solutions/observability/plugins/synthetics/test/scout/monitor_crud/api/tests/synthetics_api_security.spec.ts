@@ -59,6 +59,14 @@ const expectedBodyTag = (route: SweepRoute, readUser: boolean): string => {
       : '[uptime-read,private-location-write,uptime-write]';
   }
 
+  const isParamsWrite =
+    (method === 'POST' || method === 'DELETE' || method === 'PUT') &&
+    path.startsWith(COMMON_API_URLS.PARAMS);
+
+  if (isParamsWrite) {
+    return readUser ? '[params-write,uptime-write]' : '[uptime-read,params-write,uptime-write]';
+  }
+
   // Routes with an OR-set (e.g. run-test: `uptime-write` OR `monitor-run-manually`). A read
   // user is missing every OR member; a no-access user is additionally missing `uptime-read`.
   if (route.anyRequiredPrivileges?.length) {

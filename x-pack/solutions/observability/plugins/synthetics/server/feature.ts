@@ -32,6 +32,7 @@ import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
 export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
 export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';
+export const PARAMS_WRITE_API = 'params-write';
 
 const alertingFeatures = SYNTHETICS_ALERTING_FEATURES;
 
@@ -91,6 +92,28 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
         read: [],
       },
       ui: ['canManagePrivateLocations'],
+    },
+  ],
+};
+
+const canManageParamsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_manage_params',
+      name: i18n.translate('xpack.synthetics.features.canManageParams', {
+        defaultMessage: 'Can manage',
+      }),
+      // Included in `all` so existing roles with the base `all` privilege keep the
+      // ability to create/edit/delete global parameters. Admins can opt out of this
+      // sub-feature to build a monitor-only role that cannot manage global parameters.
+      includeIn: 'all',
+      api: [PARAMS_WRITE_API],
+      savedObject: {
+        all: [syntheticsParamType],
+        read: [],
+      },
+      ui: ['canManageParams'],
     },
   ],
 };
@@ -171,12 +194,18 @@ export const syntheticsFeature = {
           legacySyntheticsMonitorTypeSingle,
           syntheticsMonitorSavedObjectType,
           syntheticsApiKeyObjectType,
-          syntheticsParamType,
 
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
         ],
-        read: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
+        // `syntheticsParamType` is read-only in the base `all` privilege so monitor
+        // writers can still reference global parameters by key. Write access (savedObject.all)
+        // is granted through the `can_manage_params` sub-feature, which is included in `all`.
+        read: [
+          syntheticsParamType,
+          privateLocationSavedObjectName,
+          legacyPrivateLocationsSavedObjectName,
+        ],
       },
       alerting: {
         rule: {
@@ -262,9 +291,9 @@ export const syntheticsFeature = {
         defaultMessage: 'Global Parameters',
       }),
       description: i18n.translate('xpack.synthetics.features.app.params.description', {
-        defaultMessage: 'This feature allows you to read global parameters values',
+        defaultMessage: 'This feature allows you to manage and read global parameters values',
       }),
-      privilegeGroups: [canReadParamsPrivilege],
+      privilegeGroups: [canManageParamsPrivilege, canReadParamsPrivilege],
     },
     {
       name: i18n.translate('xpack.synthetics.features.app.rules', {
