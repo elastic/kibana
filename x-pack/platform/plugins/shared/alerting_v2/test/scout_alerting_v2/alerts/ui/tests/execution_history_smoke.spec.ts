@@ -42,7 +42,7 @@ const SMOKE_VIEWER_ROLE: KibanaRole = {
  */
 test.describe(
   'Execution history — smoke',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: ['@local-stateful-classic'] },
   () => {
     let policyId: string;
     let policyName: string;

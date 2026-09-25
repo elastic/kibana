@@ -22,7 +22,7 @@ import {
  */
 test.describe(
   'Action Policies - read/write privileges',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: ['@local-stateful-classic'] },
   () => {
     const RUN_ID = Date.now().toString();
     let policyId: string;

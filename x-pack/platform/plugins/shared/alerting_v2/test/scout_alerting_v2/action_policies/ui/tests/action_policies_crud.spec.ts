@@ -22,7 +22,7 @@ import {
  */
 test.describe(
   'Action Policies - create and edit',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: ['@local-stateful-classic'] },
   () => {
     const RUN_ID = Date.now().toString();
     const CREATED_POLICY_NAME = `scout-action-policy-created-${RUN_ID}`;
@@ -53,7 +53,7 @@ test.describe(
       await apiServices.alertingV2.workflows.bulkDelete([workflowId]);
     });
 
-    test('creates a policy from the form and persists what was typed', async ({
+    test('creates a policy from the form and persists what was typed', { tag: ['@local-serverless-observability_complete'] }, async ({
       apiServices,
       browserAuth,
       pageObjects,
