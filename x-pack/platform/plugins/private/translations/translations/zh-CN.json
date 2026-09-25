@@ -56446,6 +56446,7 @@
     "xpack.synthetics.monitorConfig.params.error": "JSON 格式无效",
     "xpack.synthetics.monitorConfig.params.helpText": "请使用 JSON 来定义可在您的脚本中通过 {paramsValue} 引用的参数",
     "xpack.synthetics.monitorConfig.params.label": "参数",
+    "xpack.synthetics.monitorConfig.paramsAria.label": "监测参数代码编辑器",
     "xpack.synthetics.monitorConfig.password.helpText": "用于在服务器上进行身份验证的密码。",
     "xpack.synthetics.monitorConfig.password.label": "密码",
     "xpack.synthetics.monitorConfig.playwrightOptions.codeEditor.json.ariaLabel": "Playwright 选项 JSON 代码编辑器",

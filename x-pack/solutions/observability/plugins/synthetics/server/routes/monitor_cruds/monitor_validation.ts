@@ -401,7 +401,10 @@ const RecordSchema = z.record(z.string(), z.string());
 const validateParams = (jsonString: string | any) => {
   if (typeof jsonString === 'string') {
     try {
-      JSON.parse(jsonString);
+      const parsed = JSON.parse(jsonString);
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return { error: new Error('Params must be a JSON object.') };
+      }
       return { value: jsonString };
     } catch (e) {
       return { error: e };

@@ -63,5 +63,22 @@ describe('[Monitor Management] validation', () => {
     });
   });
 
+  describe('Browser params', () => {
+    const validateParams = validate[MonitorTypeEnum.BROWSER][ConfigKey.PARAMS];
+
+    it.each(['[]', 'null', '"value"', '42'])('rejects non-object JSON: %s', (params) => {
+      expect(validateParams?.({ [ConfigKey.PARAMS]: params } as Partial<MonitorFields>)).toBe(true);
+    });
+
+    it.each(['{}', '{"token":"value"}', '{"retries":3,"options":{"mode":"x"}}'])(
+      'accepts object JSON: %s',
+      (params) => {
+        expect(validateParams?.({ [ConfigKey.PARAMS]: params } as Partial<MonitorFields>)).toBe(
+          false
+        );
+      }
+    );
+  });
+
   // TODO: Add test for other monitor types if needed
 });

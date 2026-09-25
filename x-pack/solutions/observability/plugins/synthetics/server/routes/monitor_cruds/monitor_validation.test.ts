@@ -918,6 +918,31 @@ describe('normalizeAPIConfig', () => {
         params: '{}',
       },
     });
+    expect(normalizeAPIConfig({ type: 'browser', params: '[]' } as any)).toEqual({
+      errorMessage: 'Invalid params: Params must be a JSON object.',
+      formattedConfig: {
+        type: 'browser',
+        params: '[]',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', params: 'null' } as any)).toEqual({
+      errorMessage: 'Invalid params: Params must be a JSON object.',
+      formattedConfig: {
+        type: 'browser',
+        params: 'null',
+      },
+    });
+    expect(
+      normalizeAPIConfig({
+        type: 'browser',
+        params: '{"retries":3,"options":{"mode":"x"}}',
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params: '{"retries":3,"options":{"mode":"x"}}',
+      },
+    });
     expect(normalizeAPIConfig({ type: 'browser', params: '{d}' } as any)).toEqual({
       errorMessage:
         "Invalid params: Expected property name or '}' in JSON at position 1 (line 1 column 2)",

@@ -66,6 +66,15 @@ export const validJSONFormat = (value: string) => {
   return true;
 };
 
+export const validParamsJSONFormat = (value: string) => {
+  try {
+    const parsed = JSON.parse(value);
+    return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
+  } catch {
+    return false;
+  }
+};
+
 // validation functions return true when invalid
 const validateCommon: ValidationLibrary = {
   [ConfigKey.SCHEDULE]: ({ [ConfigKey.SCHEDULE]: value }) => {
@@ -154,7 +163,7 @@ const validateBrowser: ValidationLibrary = {
   [ConfigKey.PLAYWRIGHT_OPTIONS]: ({ [ConfigKey.PLAYWRIGHT_OPTIONS]: playwrightOptions }) =>
     playwrightOptions ? !validJSONFormat(playwrightOptions) : false,
   [ConfigKey.PARAMS]: ({ [ConfigKey.PARAMS]: params }) =>
-    params ? !validJSONFormat(params) : false,
+    params ? !validParamsJSONFormat(params) : false,
 };
 
 // API monitors share validation with browser monitors except for throttling,

@@ -56269,6 +56269,7 @@
     "xpack.synthetics.monitorConfig.params.error": "Ungültiges JSON-Format",
     "xpack.synthetics.monitorConfig.params.helpText": "Verwenden Sie JSON, um Parameter zu definieren, auf die in Ihrem Skript mit {paramsValue} verwiesen werden kann",
     "xpack.synthetics.monitorConfig.params.label": "Parameter",
+    "xpack.synthetics.monitorConfig.paramsAria.label": "Code-Editor zum Überwachen von Parametern",
     "xpack.synthetics.monitorConfig.password.helpText": "Passwort zur Authentifizierung mit dem Server.",
     "xpack.synthetics.monitorConfig.password.label": "Passwort",
     "xpack.synthetics.monitorConfig.playwrightOptions.codeEditor.json.ariaLabel": "JSON-Code-Editor für Playwright-Optionen",

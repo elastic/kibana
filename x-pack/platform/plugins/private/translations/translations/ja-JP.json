@@ -56443,6 +56443,7 @@
     "xpack.synthetics.monitorConfig.params.error": "無効なJSONフォーマット",
     "xpack.synthetics.monitorConfig.params.helpText": "JSONを使用して、{paramsValue}のスクリプトで参照できるパラメーターを定義します",
     "xpack.synthetics.monitorConfig.params.label": "パラメーター",
+    "xpack.synthetics.monitorConfig.paramsAria.label": "モニターパラメーターコードエディター",
     "xpack.synthetics.monitorConfig.password.helpText": "サーバーと認証するためのパスワード。",
     "xpack.synthetics.monitorConfig.password.label": "パスワード",
     "xpack.synthetics.monitorConfig.playwrightOptions.codeEditor.json.ariaLabel": "PlaywrightオプションJSONコードエディター",

@@ -56023,6 +56023,7 @@
     "xpack.synthetics.monitorConfig.params.error": "Format JSON non valide",
     "xpack.synthetics.monitorConfig.params.helpText": "Utilisez le format JSON pour définir les paramètres qui peuvent être référencés dans votre script avec {paramsValue}",
     "xpack.synthetics.monitorConfig.params.label": "Paramètres",
+    "xpack.synthetics.monitorConfig.paramsAria.label": "Éditeur de code des paramètres du moniteur",
     "xpack.synthetics.monitorConfig.password.helpText": "Mot de passe pour l'authentification avec le serveur.",
     "xpack.synthetics.monitorConfig.password.label": "Mot de passe",
     "xpack.synthetics.monitorConfig.playwrightOptions.codeEditor.json.ariaLabel": "Éditeur de code JSON pour les options Playwright",
