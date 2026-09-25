@@ -9,7 +9,7 @@ import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server
 import type { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import type { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
-import { privateLocationShardingApiKeySavedObject } from '../../saved_objects/private_location_sharding_api_key';
+import { privateLocationShardingAPIKeySavedObject } from '../../saved_objects/service_api_key';
 import type { SyntheticsServerSetup } from '../../types';
 import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
 
@@ -31,7 +31,7 @@ export const getPrivateLocationShardingApiKey = async ({
   server: SyntheticsServerSetup;
 }): Promise<{ apiKey?: SyntheticsServiceApiKey; isValid: boolean }> => {
   try {
-    const apiKey = await privateLocationShardingApiKeySavedObject.get(server);
+    const apiKey = await privateLocationShardingAPIKeySavedObject.get(server);
     if (!apiKey) {
       return { isValid: false };
     }
@@ -90,6 +90,6 @@ export const generateAndSavePrivateLocationShardingApiKey = async ({
     name: result.name,
     apiKey: result.api_key,
   };
-  await privateLocationShardingApiKeySavedObject.set(savedObjectsClient, apiKey);
+  await privateLocationShardingAPIKeySavedObject.set(savedObjectsClient, apiKey);
   return apiKey;
 };

@@ -7,7 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SyntheticsServerSetup } from '../../types';
-import { privateLocationShardingApiKeySavedObject } from '../../saved_objects/private_location_sharding_api_key';
+import {
+  privateLocationShardingAPIKeySavedObject,
+  syntheticsApiKeyID,
+  syntheticsServiceApiKey,
+} from '../../saved_objects/service_api_key';
 import {
   generateAndSavePrivateLocationShardingApiKey,
   getPrivateLocationShardingApiKey,
@@ -44,15 +48,13 @@ describe('private location sharding API key', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('creates and stores a dedicated key with minimal read privileges', async () => {
-    const savedObjectsClient = {} as never;
+    const create = jest.fn();
+    const savedObjectsClient = { create } as never;
     grantAsInternalUser.mockResolvedValue({
       id: 'key-id',
       name: 'synthetics-private-location-sharding',
       api_key: 'secret',
     });
-    const set = jest
-      .spyOn(privateLocationShardingApiKeySavedObject, 'set')
-      .mockResolvedValue(undefined);
 
     await generateAndSavePrivateLocationShardingApiKey({
       server,
@@ -76,15 +78,22 @@ describe('private location sharding API key', () => {
         },
       })
     );
-    expect(set).toHaveBeenCalledWith(savedObjectsClient, {
-      id: 'key-id',
-      name: 'synthetics-private-location-sharding',
-      apiKey: 'secret',
-    });
+    expect(create).toHaveBeenCalledWith(
+      syntheticsServiceApiKey.name,
+      {
+        id: 'key-id',
+        name: 'synthetics-private-location-sharding',
+        apiKey: 'secret',
+      },
+      {
+        id: expect.not.stringMatching(syntheticsApiKeyID),
+        overwrite: true,
+      }
+    );
   });
 
   it('accepts a stored key only when it is valid and has both required privileges', async () => {
-    jest.spyOn(privateLocationShardingApiKeySavedObject, 'get').mockResolvedValue({
+    jest.spyOn(privateLocationShardingAPIKeySavedObject, 'get').mockResolvedValue({
       id: 'key-id',
       name: 'synthetics-private-location-sharding',
       apiKey: 'secret',

@@ -5,7 +5,10 @@
  * 2.0.
  */
 import type { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsServiceAPIKeySavedObject } from '../../saved_objects/service_api_key';
+import {
+  privateLocationShardingAPIKeySavedObject,
+  syntheticsServiceAPIKeySavedObject,
+} from '../../saved_objects/service_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   generateAndSaveServiceAPIKey,
@@ -16,7 +19,6 @@ import {
   generateAndSavePrivateLocationShardingApiKey,
   getPrivateLocationShardingApiKey,
 } from '../../synthetics_service/private_location/get_sharding_api_key';
-import { privateLocationShardingApiKeySavedObject } from '../../saved_objects/private_location_sharding_api_key';
 
 export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
@@ -49,7 +51,7 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
     if (!shouldEnableApiKey && !isValid) {
       const shardingApiKey = await getPrivateLocationShardingApiKey({ server });
       if (shardingApiKey.apiKey && !shardingApiKey.isValid) {
-        await privateLocationShardingApiKeySavedObject.delete(savedObjectsClient);
+        await privateLocationShardingAPIKeySavedObject.delete(savedObjectsClient);
         await security.authc.apiKeys.invalidateAsInternalUser({
           ids: [shardingApiKey.apiKey.id],
         });
@@ -109,7 +111,7 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
     });
     const { apiKey: shardingApiKey } = await getPrivateLocationShardingApiKey({ server });
     await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
-    await privateLocationShardingApiKeySavedObject.delete(savedObjectsClient);
+    await privateLocationShardingAPIKeySavedObject.delete(savedObjectsClient);
     if (apiKey?.id) {
       await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey.id] });
     }

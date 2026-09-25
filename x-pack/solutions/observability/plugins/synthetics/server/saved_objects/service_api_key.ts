@@ -13,6 +13,7 @@ import type { SyntheticsServiceApiKey } from '../../common/runtime_types/synthet
 
 export const syntheticsApiKeyID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
 export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
+const privateLocationShardingApiKeyID = 'd5e4b09b-9c8a-4e85-b8f5-f5a922ceb39d';
 
 export const syntheticsServiceApiKey: SavedObjectsType = {
   name: syntheticsApiKeyObjectType,
@@ -53,12 +54,12 @@ const getEncryptedSOClient = (server: SyntheticsServerSetup) => {
   return encryptedClient;
 };
 
-const getSyntheticsServiceAPIKey = async (server: SyntheticsServerSetup) => {
+const getSyntheticsAPIKey = async (server: SyntheticsServerSetup, id: string) => {
   try {
     const soClient = getEncryptedSOClient(server);
     const obj = await soClient.getDecryptedAsInternalUser<SyntheticsServiceApiKey>(
       syntheticsServiceApiKey.name,
-      syntheticsApiKeyID
+      id
     );
     return obj?.attributes;
   } catch (getErr) {
@@ -69,19 +70,20 @@ const getSyntheticsServiceAPIKey = async (server: SyntheticsServerSetup) => {
   }
 };
 
-export const setSyntheticsServiceApiKey = async (
+const setSyntheticsAPIKey = async (
   soClient: SavedObjectsClientContract,
-  apiKey: SyntheticsServiceApiKey
+  apiKey: SyntheticsServiceApiKey,
+  id: string
 ) => {
   await soClient.create(syntheticsServiceApiKey.name, apiKey, {
-    id: syntheticsApiKeyID,
+    id,
     overwrite: true,
   });
 };
 
-const deleteSyntheticsServiceApiKey = async (soClient: SavedObjectsClientContract) => {
+const deleteSyntheticsAPIKey = async (soClient: SavedObjectsClientContract, id: string) => {
   try {
-    return await soClient.delete(syntheticsServiceApiKey.name, syntheticsApiKeyID);
+    return await soClient.delete(syntheticsServiceApiKey.name, id);
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       return;
@@ -90,8 +92,16 @@ const deleteSyntheticsServiceApiKey = async (soClient: SavedObjectsClientContrac
   }
 };
 
-export const syntheticsServiceAPIKeySavedObject = {
-  get: getSyntheticsServiceAPIKey,
-  set: setSyntheticsServiceApiKey,
-  delete: deleteSyntheticsServiceApiKey,
-};
+const createSyntheticsAPIKeySavedObject = (id: string) => ({
+  get: (server: SyntheticsServerSetup) => getSyntheticsAPIKey(server, id),
+  set: (soClient: SavedObjectsClientContract, apiKey: SyntheticsServiceApiKey) =>
+    setSyntheticsAPIKey(soClient, apiKey, id),
+  delete: (soClient: SavedObjectsClientContract) => deleteSyntheticsAPIKey(soClient, id),
+});
+
+export const syntheticsServiceAPIKeySavedObject =
+  createSyntheticsAPIKeySavedObject(syntheticsApiKeyID);
+
+export const privateLocationShardingAPIKeySavedObject = createSyntheticsAPIKeySavedObject(
+  privateLocationShardingApiKeyID
+);

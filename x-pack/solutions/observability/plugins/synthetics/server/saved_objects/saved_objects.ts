@@ -27,7 +27,6 @@ import {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
 } from './synthetics_monitor/legacy_synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
-import { privateLocationShardingApiKey } from './private_location_sharding_api_key';
 
 export const registerSyntheticsSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
@@ -53,13 +52,6 @@ export const registerSyntheticsSavedObjects = (
   savedObjectsService.registerType(syntheticsServiceApiKey);
   encryptedSavedObjects.registerType({
     type: syntheticsServiceApiKey.name,
-    attributesToEncrypt: new Set(['apiKey']),
-    attributesToIncludeInAAD: new Set(['id', 'name']),
-  });
-
-  savedObjectsService.registerType(privateLocationShardingApiKey);
-  encryptedSavedObjects.registerType({
-    type: privateLocationShardingApiKey.name,
     attributesToEncrypt: new Set(['apiKey']),
     attributesToIncludeInAAD: new Set(['id', 'name']),
   });
