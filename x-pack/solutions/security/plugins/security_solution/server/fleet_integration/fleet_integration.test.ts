@@ -1065,6 +1065,34 @@ describe('Fleet integrations', () => {
         );
         expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
       });
+
+      it('does not throw and populates meta when the incoming policy value has no meta', async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          logger,
+          licenseService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
+          cloudService,
+          esClient,
+          productFeaturesService
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        // Simulate a partially-populated policy value from an update request
+        // that omits the `meta` object entirely.
+        delete (
+          policyConfig.inputs[0]!.config!.policy.value as { meta?: PolicyConfig['meta'] }
+        ).meta;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.meta.license).toBe('platinum');
+      });
     });
 
     describe('when `antivirus_registration.mode` is changed', () => {
