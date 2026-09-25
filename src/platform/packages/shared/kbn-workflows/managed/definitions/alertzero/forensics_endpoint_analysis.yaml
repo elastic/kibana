@@ -147,8 +147,6 @@ steps:
           inputs:
             ki_id: "{{ foreach.item._source.id | default: foreach.item._id }}"
             ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
-            # `${{ }}` preserves the value's type so the editor does not type-check the
-            # template source against the child's enum.
             autonomy: "${{ consts.worker_settings.autonomy }}"
 
   - name: emit_result

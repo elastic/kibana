@@ -527,7 +527,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.intro', {
-      defaultMessage: 'Decides whether containment actions wait for your approval.',
+      defaultMessage: 'Determines whether certain response actions run automatically.',
     }),
     levels: [
       {
@@ -536,7 +536,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.who',
           {
             defaultMessage:
-              'Analyzes each endpoint an Investigation hands it; every containment action waits for you.',
+              'Runs a forensics pass for an investigation and attaches findings to it.',
           }
         ),
         facts: [
@@ -547,7 +547,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
             ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.analysisValue',
-              '<worker> reconstructs the attack and adds its findings to the investigation'
+              '<worker> attaches a timeline, IOCs and its rationale to the investigation'
             ),
           },
           {
@@ -567,8 +567,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.who',
           {
-            defaultMessage:
-              'Analyzes each endpoint an Investigation hands it and carries out containment on its own.',
+            defaultMessage: 'Runs a forensics pass and executes responses automatically.',
           }
         ),
         facts: [
@@ -579,7 +578,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
             ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.analysisValue',
-              '<worker> reconstructs the attack and adds its findings to the investigation'
+              '<worker> attaches a timeline, IOCs and its rationale to the investigation'
             ),
           },
           {
@@ -589,7 +588,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
             ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.containmentValue',
-              '<worker> carries out each proposed response — isolate host, kill process, or suspend process'
+              '<worker> executes responses automatically'
             ),
           },
         ],

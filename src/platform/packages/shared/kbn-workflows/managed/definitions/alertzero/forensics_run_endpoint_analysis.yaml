@@ -126,8 +126,7 @@ steps:
         ${{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id != blank
           and steps.read_ki.output.hits.hits[0]._source.attributes.investigation_id != blank }}
 
-  # Verify the investigation exists and is readable and writable by this run
-  # before proceeding.
+  # Verify the investigation exists and is readable before proceeding with the run.
   # If the investigation does not exist, the indicator is retired by `mark_unreachable`.
   - name: verify_investigation
     type: ai.conversation.metadata.read
@@ -155,8 +154,7 @@ steps:
       # analysis but could not retire the indicator. Finding them lets this run
       # skip the agent and retry just the write. Fewer than both after an attempt
       # was already recorded skips the agent too: a later run does not start
-      # another 15m analysis. Another indicator's files do not count. The
-      # assessment is a journal note, not an attachment, so it is not in this count.
+      # another 15m analysis. Another indicator's files do not count.
       #
       # Listing rather than reading an attachment by id, because `ai.attachment.read`
       # reports "no such attachment" and "the attachment service is broken" the same
