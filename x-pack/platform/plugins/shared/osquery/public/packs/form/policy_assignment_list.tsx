@@ -7,12 +7,13 @@
 
 import { reduce } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -23,6 +24,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -32,22 +34,36 @@ import { useKibana } from '../../common/lib/kibana';
 interface PolicyRow {
   id: string;
   name: string;
+  description: string;
   agents: number;
 }
+
+const EMPTY_POLICY_ROWS: PolicyRow[] = [];
+
+const shardAssignedTooltip = i18n.translate('xpack.osquery.pack.policyList.shardAssignedTooltip', {
+  defaultMessage:
+    'This policy already receives the pack through partial deployment (shards). Remove it from the shards section to assign it here instead.',
+});
 
 interface CheckboxCellProps {
   policyId: string;
   policyName: string;
   checked: boolean;
   disabled: boolean;
+  isShardAssigned: boolean;
   onToggle: (id: string) => void;
 }
 
 const CheckboxCell: React.FC<CheckboxCellProps> = React.memo(
-  ({ policyId, policyName, checked, disabled, onToggle }) => {
+  ({ policyId, policyName, checked, disabled, isShardAssigned, onToggle }) => {
     const handleChange = useCallback(() => onToggle(policyId), [onToggle, policyId]);
 
-    return (
+    const tooltipAnchorProps = useMemo(
+      () => ({ 'data-test-subj': `shardAssignedTooltip-${policyId}` }),
+      [policyId]
+    );
+
+    const checkbox = (
       <EuiCheckbox
         id={`policy-checkbox-${policyId}`}
         checked={checked}
@@ -59,10 +75,32 @@ const CheckboxCell: React.FC<CheckboxCellProps> = React.memo(
         })}
       />
     );
+
+    if (!isShardAssigned) {
+      return checkbox;
+    }
+
+    return (
+      <EuiToolTip content={shardAssignedTooltip} position="right" anchorProps={tooltipAnchorProps}>
+        {checkbox}
+      </EuiToolTip>
+    );
   }
 );
 
 CheckboxCell.displayName = 'CheckboxCell';
+
+interface DescriptionCellProps {
+  description: string;
+}
+
+const DescriptionCell: React.FC<DescriptionCellProps> = React.memo(({ description }) => (
+  <EuiText size="s" color="subdued" className="eui-textTruncate">
+    {description}
+  </EuiText>
+));
+
+DescriptionCell.displayName = 'DescriptionCell';
 
 interface AgentCountCellProps {
   count: number;
@@ -107,12 +145,9 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     defaultValue: [],
   });
 
-  const {
-    field: { value: shards },
-  } = useController<PolicyAssignmentFormValues, 'shards'>({
-    name: 'shards',
-    defaultValue: {},
-  });
+  // No `defaultValue`: react-hook-form only reads `_defaultValues` on the first
+  // render when it is omitted, so passing one would mask a seeded `shards`.
+  const shards = useWatch<PolicyAssignmentFormValues, 'shards'>({ name: 'shards' });
 
   // Keys already assigned via partial (shard) deployment must not be newly
   // added to policy_ids — mirrors the shard half of availableOptions that
@@ -128,23 +163,33 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     return Object.entries(agentPoliciesById).map(([id, policy]) => ({
       id,
       name: policy.name ?? id,
+      description: policy.description ?? '',
       agents: policy.agents ?? 0,
     }));
   }, [agentPoliciesById]);
 
   // Saved policy_ids that Fleet no longer returns still need a row so the
   // user can uncheck them individually (Select all must not silently drop them).
-  const orphanPolicies = useMemo<PolicyRow[]>(() => {
-    if (!selectedIds?.length) return [];
+  //
+  // Keyed on the orphan id set rather than on `selectedIds` directly:
+  // `EuiInMemoryTable` resets to page 1 whenever the `items` reference changes,
+  // so toggling a known policy must not produce a new `allPolicies` array.
+  const orphanIdsKey = useMemo(
+    () =>
+      (selectedIds ?? [])
+        .filter((id) => !agentPoliciesById?.[id])
+        .sort()
+        .join('\u0000'),
+    [selectedIds, agentPoliciesById]
+  );
 
-    return selectedIds
-      .filter((id) => !agentPoliciesById?.[id])
-      .map((id) => ({
-        id,
-        name: id,
-        agents: 0,
-      }));
-  }, [selectedIds, agentPoliciesById]);
+  const orphanPolicies = useMemo<PolicyRow[]>(
+    () =>
+      orphanIdsKey
+        ? orphanIdsKey.split('\u0000').map((id) => ({ id, name: id, description: '', agents: 0 }))
+        : EMPTY_POLICY_ROWS,
+    [orphanIdsKey]
+  );
 
   const allPolicies = useMemo<PolicyRow[]>(
     () => [...knownPolicies, ...orphanPolicies],
@@ -152,6 +197,15 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   );
 
   const selectedSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
+
+  // Shard-targeted policies cannot be assigned here, so they are not part of
+  // the "N of M selected" denominator unless they are already selected.
+  const assignableTotal = useMemo(
+    () =>
+      allPolicies.filter((policy) => !shardKeySet.has(policy.id) || selectedSet.has(policy.id))
+        .length,
+    [allPolicies, shardKeySet, selectedSet]
+  );
 
   const totalAgents = useMemo(
     () =>
@@ -195,21 +249,39 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     onChange([]);
   }, [onChange]);
 
+  // `useAgentPolicies` uses `initialData: []`, so an empty map alone is not a
+  // settled Fleet response — gate empty / error / loading on fetch status.
+  // Orphan rows are synthesized from `policy_ids` and say nothing about the
+  // request, so they must not be part of these conditions: a pack with saved
+  // assignments would otherwise present a failed fetch as a complete list.
+  const hasNoFleetPolicies = knownPolicies.length === 0;
+  const hasNoPolicyRows = hasNoFleetPolicies && orphanPolicies.length === 0;
+  const isInitialLoad = isFetching && hasNoFleetPolicies && !isError;
+  const isLoadError = isError && hasNoFleetPolicies;
+
+  // Until Fleet has answered, the visible rows are an incomplete picture of the
+  // assignment, so editing it would save against data the user cannot see.
+  const isAssignmentDisabled = isReadOnly || isInitialLoad || isLoadError;
+
   const columns = useMemo<Array<EuiBasicTableColumn<PolicyRow>>>(
     () => [
       {
-        field: '',
         name: '',
         width: '40px',
-        render: (item: PolicyRow) => (
-          <CheckboxCell
-            policyId={item.id}
-            policyName={item.name}
-            checked={selectedSet.has(item.id)}
-            disabled={isReadOnly || (shardKeySet.has(item.id) && !selectedSet.has(item.id))}
-            onToggle={togglePolicy}
-          />
-        ),
+        render: (item: PolicyRow) => {
+          const isShardAssigned = shardKeySet.has(item.id) && !selectedSet.has(item.id);
+
+          return (
+            <CheckboxCell
+              policyId={item.id}
+              policyName={item.name}
+              checked={selectedSet.has(item.id)}
+              disabled={isAssignmentDisabled || isShardAssigned}
+              isShardAssigned={isShardAssigned}
+              onToggle={togglePolicy}
+            />
+          );
+        },
       },
       {
         field: 'name',
@@ -217,6 +289,14 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
           defaultMessage: 'Policy name',
         }),
         sortable: true,
+      },
+      {
+        field: 'description',
+        name: i18n.translate('xpack.osquery.pack.policyList.descriptionColumn', {
+          defaultMessage: 'Description',
+        }),
+        truncateText: true,
+        render: (description: string) => <DescriptionCell description={description} />,
       },
       {
         field: 'agents',
@@ -228,7 +308,6 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         render: (agents: number) => <AgentCountCell count={agents} />,
       },
       {
-        field: '',
         name: '',
         width: '120px',
         align: 'right' as const,
@@ -248,7 +327,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         ),
       },
     ],
-    [selectedSet, togglePolicy, isReadOnly, getUrlForApp, shardKeySet]
+    [selectedSet, togglePolicy, isAssignmentDisabled, getUrlForApp, shardKeySet]
   );
 
   const search = useMemo(
@@ -258,12 +337,13 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         placeholder: i18n.translate('xpack.osquery.pack.policyList.searchPlaceholder', {
           defaultMessage: 'Search policies',
         }),
+        'data-test-subj': 'policyAssignmentSearch',
       },
     }),
     []
   );
 
-  const executeQueryOptions = useMemo(() => ({ defaultFields: ['name'] }), []);
+  const executeQueryOptions = useMemo(() => ({ defaultFields: ['name', 'description'] }), []);
 
   // `allPolicies` comes from `Object.entries` over the Fleet response, so
   // without an explicit default sort a server-side reorder silently reshuffles
@@ -280,12 +360,6 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     }),
     []
   );
-
-  // `useAgentPolicies` uses `initialData: []`, so an empty map alone is not a
-  // settled Fleet response — gate empty / error / loading on fetch status.
-  const hasNoPolicyRows = knownPolicies.length === 0 && orphanPolicies.length === 0;
-  const isInitialLoad = isFetching && hasNoPolicyRows && !isError;
-  const isLoadError = isError && hasNoPolicyRows;
 
   // Distinguish in-flight / failed fetch, "Fleet has no policies" (copy-only
   // empty prompt), and "the search matched nothing". Orphan rows alone still
@@ -374,12 +448,31 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       fullWidth
     >
       <EuiPanel hasBorder paddingSize="s">
+        {isLoadError && !hasNoPolicyRows && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              size="s"
+              data-test-subj="policyAssignmentLoadError"
+              title={i18n.translate('xpack.osquery.pack.policyList.partialErrorTitle', {
+                defaultMessage: 'Unable to load agent policies',
+              })}
+            >
+              <FormattedMessage
+                id="xpack.osquery.pack.policyList.partialErrorBody"
+                defaultMessage="Only the policies already assigned to this pack are listed. Reload before changing the assignment."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
               onClick={handleSelectAll}
-              disabled={isReadOnly || knownPolicies.length === 0}
+              disabled={isAssignmentDisabled || knownPolicies.length === 0}
               data-test-subj="policyAssignmentSelectAll"
             >
               <FormattedMessage
@@ -392,7 +485,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
             <EuiButtonEmpty
               size="xs"
               onClick={handleUnselectAll}
-              disabled={isReadOnly || selectedSet.size === 0}
+              disabled={isAssignmentDisabled || selectedSet.size === 0}
               data-test-subj="policyAssignmentUnselectAll"
             >
               <FormattedMessage
@@ -409,7 +502,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 values={{
                   selected: selectedSet.size,
-                  total: allPolicies.length,
+                  total: assignableTotal,
                   agents: totalAgents,
                 }}
               />

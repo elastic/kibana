@@ -573,6 +573,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <>
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
+                {/* Scheduled agent policies / shards / Type stay editable for prebuilt
+                    packs (a writePacks user may re-target them) — only a fully read-only
+                    user is blocked. Matches the prebuiltPackModeDescription callout. */}
                 <PolicyAssignmentList isReadOnly={isReadOnly} />
               </EuiFlexItem>
             </EuiFlexGroup>

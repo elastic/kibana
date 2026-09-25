@@ -31,6 +31,7 @@ export const activeStateSwitchComponentSelector = (packName: string) =>
   `[aria-label="${packName}"]`;
 
 export const POLICY_ASSIGNMENT_TABLE = 'policyAssignmentTable';
+export const POLICY_ASSIGNMENT_SEARCH = 'policyAssignmentSearch';
 export const SAVED_QUERY_DROPDOWN_SELECT = 'savedQuerySelect';
 
 export const TABLE_ROWS = 'tbody > tr';

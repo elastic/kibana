@@ -27,9 +27,14 @@ jest.mock('../../common/lib/kibana', () => ({
 }));
 
 const mockAgentPoliciesById = {
-  'policy-1': { name: 'Alpha Policy', agents: 5, id: 'policy-1', description: '' },
-  'policy-2': { name: 'Beta Policy', agents: 10, id: 'policy-2', description: '' },
-  'policy-3': { name: 'Gamma Policy', agents: 3, id: 'policy-3', description: '' },
+  'policy-1': { name: 'Alpha Policy', agents: 5, id: 'policy-1', description: 'Linux servers' },
+  'policy-2': {
+    name: 'Beta Policy',
+    agents: 10,
+    id: 'policy-2',
+    description: 'Windows workstations',
+  },
+  'policy-3': { name: 'Gamma Policy', agents: 3, id: 'policy-3', description: 'macOS laptops' },
 };
 
 const mockUseAgentPolicies = jest.fn();
@@ -145,6 +150,36 @@ describe('PolicyAssignmentList', () => {
       ).not.toBeInTheDocument();
     });
 
+    it('still surfaces a failed fetch when seeded policy_ids produce orphan rows', () => {
+      // Orphan rows are synthesized from the form value, so they must not make
+      // a failed request look like a settled, complete policy list.
+      mockUseAgentPolicies.mockReturnValue({
+        data: { agentPoliciesById: {} },
+        isFetching: false,
+        isError: true,
+      });
+      render(<FormWrapper defaultValues={{ policy_ids: ['policy-1'] }} />);
+
+      expect(screen.getByTestId('policyAssignmentLoadError')).toBeInTheDocument();
+      expect(screen.getByText('policy-1')).toBeInTheDocument();
+      // The assignment must not be editable against an incomplete list.
+      expect(screen.getByRole('checkbox', { name: 'Select policy policy-1' })).toBeDisabled();
+      expect(screen.getByTestId('policyAssignmentUnselectAll')).toBeDisabled();
+    });
+
+    it('blocks editing while the first fetch is still in flight', () => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: { agentPoliciesById: {} },
+        isFetching: true,
+        isError: false,
+      });
+      render(<FormWrapper defaultValues={{ policy_ids: ['policy-1'] }} />);
+
+      expect(screen.getByRole('checkbox', { name: 'Select policy policy-1' })).toBeDisabled();
+      expect(screen.getByTestId('policyAssignmentSelectAll')).toBeDisabled();
+      expect(screen.getByTestId('policyAssignmentUnselectAll')).toBeDisabled();
+    });
+
     it('gives each checkbox a unique accessible name from the policy name', () => {
       render(<FormWrapper />);
 
@@ -192,6 +227,13 @@ describe('PolicyAssignmentList', () => {
       expect(rows[1]).toHaveTextContent('Zeta Policy');
     });
 
+    it('renders the policy description next to the name', () => {
+      render(<FormWrapper />);
+      expect(screen.getByText('Linux servers')).toBeInTheDocument();
+      expect(screen.getByText('Windows workstations')).toBeInTheDocument();
+      expect(screen.getByText('macOS laptops')).toBeInTheDocument();
+    });
+
     it('renders View policy links for all rows', () => {
       render(<FormWrapper />);
       const links = screen.getAllByText('View policy');
@@ -233,7 +275,16 @@ describe('PolicyAssignmentList', () => {
       expect(screen.queryByText('No agent policies found')).not.toBeInTheDocument();
     });
 
-    it('does not match on policy id, only name', () => {
+    it('filters rows by description', () => {
+      render(<FormWrapper />);
+      const searchInput = screen.getByPlaceholderText('Search policies');
+      fireEvent.change(searchInput, { target: { value: 'Windows' } });
+
+      expect(screen.getByText('Beta Policy')).toBeInTheDocument();
+      expect(screen.queryByText('Alpha Policy')).not.toBeInTheDocument();
+    });
+
+    it('does not match on policy id', () => {
       render(<FormWrapper />);
       const searchInput = screen.getByPlaceholderText('Search policies');
       fireEvent.change(searchInput, { target: { value: 'policy-1' } });
@@ -386,6 +437,51 @@ describe('PolicyAssignmentList', () => {
       expect(afterReturn.policy_ids).toEqual(['policy-01']);
     });
 
+    it('stays on the current page when a checkbox is toggled there', () => {
+      // `EuiInMemoryTable` resets to page 1 whenever the `items` reference
+      // changes, so a toggle must not rebuild the row array.
+      const manyPolicies = Object.fromEntries(
+        Array.from({ length: 11 }, (_, i) => {
+          const id = `policy-${String(i + 1).padStart(2, '0')}`;
+
+          return [
+            id,
+            { name: `Policy ${String(i + 1).padStart(2, '0')}`, agents: 1, id, description: '' },
+          ];
+        })
+      );
+      mockUseAgentPolicies.mockReturnValue({
+        data: { agentPoliciesById: manyPolicies },
+        isFetching: false,
+        isError: false,
+      });
+
+      render(<FormWrapper />);
+
+      fireEvent.click(screen.getByTestId('pagination-button-1'));
+      const page2Checkbox = screen.getByRole('checkbox', { name: 'Select policy Policy 11' });
+
+      fireEvent.click(page2Checkbox);
+
+      expect(screen.getByRole('checkbox', { name: 'Select policy Policy 11' })).toBeChecked();
+      expect(
+        screen.queryByRole('checkbox', { name: 'Select policy Policy 01' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('excludes shard-targeted policies from the selectable total', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: [], shards: { 'policy-2': 50 } }} />);
+
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('0 of 2 selected');
+    });
+
+    it('explains why a shard-targeted policy cannot be selected', () => {
+      render(<FormWrapper defaultValues={{ policy_ids: [], shards: { 'policy-2': 50 } }} />);
+
+      expect(screen.getByTestId('shardAssignedTooltip-policy-2')).toBeInTheDocument();
+      expect(screen.queryByTestId('shardAssignedTooltip-policy-1')).not.toBeInTheDocument();
+    });
+
     it('does not add a shard policy id via checkbox', () => {
       const handleChange = jest.fn();
       render(
@@ -510,7 +606,9 @@ describe('PolicyAssignmentList', () => {
     });
 
     it('select all and un-select all buttons are disabled in read-only mode', () => {
-      render(<FormWrapper isReadOnly={true} />);
+      // Seed a selection so Un-select all is disabled by read-only rather than
+      // by there being nothing to clear.
+      render(<FormWrapper isReadOnly={true} defaultValues={{ policy_ids: ['policy-1'] }} />);
       expect(screen.getByTestId('policyAssignmentSelectAll')).toBeDisabled();
       expect(screen.getByTestId('policyAssignmentUnselectAll')).toBeDisabled();
     });
@@ -520,7 +618,7 @@ describe('PolicyAssignmentList', () => {
       const links = screen.getAllByText('View policy');
       expect(links).toHaveLength(3);
       links.forEach((link) => {
-        expect(link.closest('a')).not.toHaveAttribute('disabled');
+        expect(link.closest('a')).toHaveAttribute('href', expect.stringContaining('/policies/'));
       });
     });
   });

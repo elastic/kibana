@@ -7,7 +7,7 @@
 
 import { recurse } from 'cypress-recurse';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
-import { POLICY_ASSIGNMENT_TABLE } from '../screens/packs';
+import { POLICY_ASSIGNMENT_SEARCH, POLICY_ASSIGNMENT_TABLE } from '../screens/packs';
 import { navigateTo } from './navigation';
 
 export const preparePack = (packName: string) => {
@@ -75,18 +75,17 @@ export const changePackActiveStatus = (packName: string) => {
  * Replaces the former `policyIdsComboBox` interaction. The list keeps selection
  * in form state rather than in `EuiInMemoryTable`'s built-in `selection` prop,
  * so the checkbox is an ordinary cell: narrow the table with the search box,
- * then tick the checkbox on the matching row.
+ * then tick the checkbox by its accessible name, which is exact per policy.
  */
 export const selectPackPolicy = (policyName: string) => {
   cy.getBySel(POLICY_ASSIGNMENT_TABLE).should('exist');
-  // EuiInMemoryTable puts data-test-subj on the table node; the search bar is a
-  // sibling under the panel, not a descendant — locate by placeholder instead.
-  cy.get('input[placeholder="Search policies"]').clear().type(policyName);
+  cy.getBySel(POLICY_ASSIGNMENT_SEARCH).clear().type(policyName);
 
-  cy.contains('.euiTableRow', policyName).within(() => {
-    cy.get('input[type="checkbox"]').should('not.be.disabled').check().should('be.checked');
-  });
+  cy.get(`input[type="checkbox"][aria-label="Select policy ${policyName}"]`)
+    .should('not.be.disabled')
+    .check()
+    .should('be.checked');
 
   // Clear the filter so later assertions see the full list again.
-  cy.get('input[placeholder="Search policies"]').clear();
+  cy.getBySel(POLICY_ASSIGNMENT_SEARCH).clear();
 };
