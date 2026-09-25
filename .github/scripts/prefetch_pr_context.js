@@ -115,6 +115,7 @@ const metadataQuery = `
           }
         }
         baseRefName
+        baseRefOid
         headRefName
         labels(first: 100) {
           nodes {
@@ -268,6 +269,7 @@ const getPrMetadata = async ({ github, owner, repo, pullNumber }) => {
         }
       : null,
     baseRefName: pullRequest.baseRefName,
+    baseRefOid: pullRequest.baseRefOid,
     body: pullRequest.body,
     headRefName: pullRequest.headRefName,
     isDraft: pullRequest.isDraft,
@@ -452,6 +454,10 @@ const prefetchPrContext = async ({
     }),
   ]);
 
+  if (!/^[0-9a-f]{40}$/i.test(metadata.baseRefOid ?? '')) {
+    throw new Error(`PR #${pullNumber} has no valid base commit SHA`);
+  }
+
   const reviewComments = await getReviewComments({
     github,
     owner,
@@ -467,6 +473,7 @@ const prefetchPrContext = async ({
   writeJson({ outputDir, filename: 'pr-reviews.json', value: reviews });
   writeText({ outputDir, filename: 'pr-diff.txt', value: buildPrDiffFromFiles(filesWithPatch) });
 
+  core.setOutput('base_sha', metadata.baseRefOid);
   core.info(`Wrote PR context to ${outputDir}`);
 };
 

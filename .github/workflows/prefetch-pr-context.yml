@@ -16,9 +16,16 @@ on:
         required: true
         type: string
 
+    outputs:
+      base_sha:
+        description: Base commit SHA of the selected pull request.
+        value: ${{ jobs.prefetch_pr_context.outputs.base_sha }}
+
 jobs:
   prefetch_pr_context:
     runs-on: ubuntu-latest
+    outputs:
+      base_sha: ${{ steps.fetch_pr_context.outputs.base_sha }}
     permissions:
       contents: read
       issues: read
@@ -31,6 +38,7 @@ jobs:
           persist-credentials: false
 
       - name: Fetch PR context
+        id: fetch_pr_context
         env:
           PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ inputs.repo }}
