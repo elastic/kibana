@@ -144,3 +144,16 @@ export const taskSchemaV13 = taskSchemaV12.extends({
     })
   ),
 });
+
+export const taskSchemaV14 = taskSchemaV13.extends({
+  // Adds the 'waiting' status for yielded ad-hoc tasks
+  status: schema.oneOf([
+    schema.literal('idle'),
+    schema.literal('claiming'),
+    schema.literal('running'),
+    schema.literal('waiting'),
+    schema.literal('failed'),
+    schema.literal('unrecognized'),
+    schema.literal('dead_letter'),
+  ]),
+});

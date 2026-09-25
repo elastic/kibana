@@ -181,7 +181,8 @@ export interface RunContext {
 export type SuccessfulRunResult = {
   /**
    * The state which will be passed to the next run of this task (if this is a
-   * recurring task). See the RunContext type definition for more details.
+   * recurring task, or an ad-hoc task that yielded). See the RunContext type
+   * definition for more details.
    */
   state: Record<string, unknown>;
   taskRunError?: DecoratedError;
@@ -198,6 +199,17 @@ export type SuccessfulRunResult = {
        */
       runAt?: Date;
       schedule?: never;
+      /**
+       * When true, an ad-hoc task releases its capacity slot and moves to the
+       * `waiting` status with the returned state and params. It resumes when its
+       * `runAt` deadline arrives, or earlier via `runSoon`. Recurring tasks
+       * cannot yield.
+       */
+      shouldYieldTask?: boolean;
+      /**
+       * Replaces the task params for the next run. Only applied when the task yields.
+       */
+      params?: Record<string, any>;
     }
   | {
       /**
@@ -207,6 +219,8 @@ export type SuccessfulRunResult = {
        */
       schedule?: IntervalSchedule | RruleSchedule;
       runAt?: never;
+      shouldYieldTask?: never;
+      params?: never;
     }
 );
 
@@ -224,6 +238,43 @@ export const getDeleteTaskRunResult = () => ({
   state: {},
   shouldDeleteTask: true,
 });
+
+export interface YieldTaskRunResultOptions {
+  /** Checkpoint stored on the task and passed to the next run. */
+  state?: Record<string, unknown>;
+  /** Replaces the task params for the next run. Omit to keep the current params. */
+  params?: Record<string, any>;
+  /**
+   * Resume deadline, as an interval (`30s`, `5m`): how long the task stays in the
+   * `waiting` status before it is claimable again. `runSoon` resumes it earlier.
+   * Omit to make the task eligible on the next claim cycle.
+   */
+  delay?: string;
+}
+
+/**
+ * Builds a run result that ends the current ad-hoc execution and suspends the
+ * task in the `waiting` status with the handed-off state and params. The task
+ * resumes when the `delay` deadline arrives, or earlier via `runSoon`.
+ */
+export const getYieldTaskRunResult = ({
+  state,
+  params,
+  delay,
+}: YieldTaskRunResultOptions = {}): SuccessfulRunResult => {
+  if (delay !== undefined && !isInterval(delay)) {
+    throw new Error(
+      `Invalid yield delay "${delay}". Delay must be of the form "{number}{cadence}" where cadence is s, m, h, or d. Example: 5m.`
+    );
+  }
+
+  return {
+    state: state ?? {},
+    ...(params !== undefined ? { params } : {}),
+    shouldYieldTask: true,
+    runAt: delay ? new Date(Date.now() + parseIntervalAsMillisecond(delay)) : new Date(),
+  };
+};
 
 export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
@@ -365,6 +416,8 @@ export enum TaskStatus {
   Idle = 'idle',
   Claiming = 'claiming',
   Running = 'running',
+  // Ad-hoc task that yielded and is waiting to be resumed (by `runAt` elapsing or `runSoon`)
+  Waiting = 'waiting',
   Failed = 'failed',
   ShouldDelete = 'should_delete',
   Unrecognized = 'unrecognized',

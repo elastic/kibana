@@ -279,6 +279,48 @@ Normal tasks will wait a default amount of 5m before trying again and every subs
 
 Recurring tasks will also get retried, but instead of using the 5m interval for the retry, they will be retried on their next scheduled run.
 
+### Yielding an ad-hoc task
+
+An ad-hoc task that returns without `runAt` or `schedule` is deleted when the run finishes. Long-running work that needs to pause — wait for input, finish a step, or give other tasks the capacity slot — can yield instead. The current run ends and the task moves to the `waiting` status: the same task document stays in the index with the returned state and params, suspended until it resumes.
+
+A waiting task resumes in one of two ways:
+
+- **Deadline**: the yield `delay` sets the task's `runAt`, which acts as a resume deadline. When it arrives, the task becomes claimable again. Omit `delay` to make the task eligible on the next claim cycle.
+- **Signal**: `runSoon(taskId)` resumes the task immediately, before its deadline.
+
+Because `waiting` is a dedicated status, suspended tasks are queryable (`task.status: waiting`) and distinguishable from `idle` tasks that are simply scheduled for later. Due-but-unclaimed waiting tasks count as overdue in Task Manager health and metrics.
+
+Yield is ad-hoc only. A recurring task that returns a yield result fails that run and stays on its schedule.
+
+```js
+import { getYieldTaskRunResult } from '@kbn/task-manager-plugin/server';
+
+taskManager.registerTaskDefinitions({
+  myTask: {
+    createTaskRunner({ taskInstance }) {
+      return {
+        async run() {
+          const phase = taskInstance.state.phase ?? 'start';
+          if (phase === 'start') {
+            // The task parks in 'waiting' and resumes when the 30s deadline
+            // arrives, or earlier via runSoon(taskId).
+            return getYieldTaskRunResult({
+              state: { phase: 'resume' },
+              params: { step: 2 },
+              delay: '30s',
+            });
+          }
+
+          return { state: {} };
+        },
+      };
+    },
+  },
+});
+```
+
+The task id, stored API key, and user scope are unchanged across yields, and `attempts` resets to 0 because a yield is a successful run.
+
 ### Force failing a task
 
 If you wish to purposely fail a task, you can throw an error of any kind and the retry logic will apply.
