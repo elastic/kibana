@@ -308,6 +308,54 @@ describe('runBeforeAgentWorkflows', () => {
     );
   });
 
+  it('accumulates and deduplicates recalled ids across configured workflows', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices, resolveAgentConfiguration } = createDeps();
+    resolveAgentConfiguration.mockResolvedValue({ workflow_ids: ['wf-1', 'wf-2'] });
+    executeWorkflowMock
+      .mockResolvedValueOnce({
+        success: true,
+        execution: {
+          execution_id: 'exec-memory-1',
+          status: ExecutionStatus.COMPLETED,
+          workflow_id: 'wf-1',
+          started_at: '2026-01-01T00:00:00.000Z',
+          output: {
+            workflow_context: {
+              semantic_memory: { recalled_ids: ['memory-a', 'memory-shared'] },
+            },
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        execution: {
+          execution_id: 'exec-memory-2',
+          status: ExecutionStatus.COMPLETED,
+          workflow_id: 'wf-2',
+          started_at: '2026-01-01T00:00:00.000Z',
+          output: {
+            workflow_context: {
+              semantic_memory: { recalled_ids: ['memory-shared', 'memory-b'] },
+            },
+          },
+        },
+      });
+
+    const result = await runBeforeAgentWorkflows({
+      context,
+      workflowApi,
+      getInternalServices,
+      logger,
+    });
+
+    expect(result?.preExecutionWorkflow?.workflow_context?.semantic_memory.recalled_ids).toEqual([
+      'memory-a',
+      'memory-shared',
+      'memory-b',
+    ]);
+  });
+
   it('throws workflowAborted when output requests abort', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices } = createDeps();

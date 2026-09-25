@@ -103,6 +103,21 @@ const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined =
   };
 };
 
+const mergeWorkflowContexts = (
+  previous: WorkflowContext | undefined,
+  next: WorkflowContext
+): WorkflowContext => {
+  const recalledIds = [
+    ...(previous?.semantic_memory.recalled_ids ?? []),
+    ...next.semantic_memory.recalled_ids,
+  ];
+  return {
+    semantic_memory: {
+      recalled_ids: [...new Set(recalledIds)].slice(0, WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT),
+    },
+  };
+};
+
 /**
  * Runs the agent's configured before-agent workflows in sequence, updating the
  * round input when a workflow returns `new_prompt` and accumulating workflow context. Throws
@@ -193,7 +208,10 @@ export async function runBeforeAgentWorkflows({
     if (workflowContext) {
       preExecutionWorkflow = {
         ...preExecutionWorkflow,
-        workflow_context: workflowContext,
+        workflow_context: mergeWorkflowContexts(
+          preExecutionWorkflow?.workflow_context,
+          workflowContext
+        ),
       };
     }
 
