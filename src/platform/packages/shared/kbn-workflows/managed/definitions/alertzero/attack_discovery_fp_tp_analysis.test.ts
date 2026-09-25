@@ -571,5 +571,51 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           .trim()
       );
     });
+
+    it('tells the agent a truncated event list cannot clear the attack', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'A truncated raw-event list is missing evidence and cannot clear an attack.'
+      );
+    });
+  });
+
+  describe('the truncation clear', () => {
+    const render = (field: string, total: number, verdict: string, summary: string): string =>
+      createWorkflowLiquidEngine().parseAndRenderSync(
+        String(stepIn('block_truncated_clear')?.with?.[field]),
+        {
+          steps: {
+            load_events: { output: { hits: { total: { value: total } } } },
+            analyze: { output: { structured_output: { verdict, summary_markdown: summary } } },
+          },
+        }
+      );
+
+    it('returns inconclusive when a truncated event page would clear the attack', () => {
+      expect(render('verdict', 51, 'false_positive', 'Cleared.')).toBe('inconclusive');
+    });
+
+    it('keeps false_positive when every matched event is shown', () => {
+      expect(render('verdict', 50, 'false_positive', 'Cleared.')).toBe('false_positive');
+    });
+
+    it('keeps true_positive when the event page is truncated', () => {
+      expect(render('verdict', 51, 'true_positive', 'Escalate.')).toBe('true_positive');
+    });
+
+    it('replaces the summary when truncation blocks a clear', () => {
+      expect(render('summary_markdown', 51, 'false_positive', 'Cleared.')).toBe(
+        'Raw events were truncated, so this cannot be cleared as a false positive.'
+      );
+    });
+
+    it('runs after the payload guard and before emit', () => {
+      expect(
+        stepNames.slice(
+          stepNames.indexOf('require_supported_verdict'),
+          stepNames.indexOf('emit_result') + 1
+        )
+      ).toEqual(['require_supported_verdict', 'block_truncated_clear', 'emit_result']);
+    });
   });
 });

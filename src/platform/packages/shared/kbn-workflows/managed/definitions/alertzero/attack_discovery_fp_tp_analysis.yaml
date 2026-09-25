@@ -198,8 +198,8 @@ steps:
         cited alerts were found for Attack Discovery "{{ inputs.attack_discovery_id }}".
         Required source unavailable; no classification was produced.
 
-  # Optional. An empty or failed query does not fail the run: missing evidence
-  # cannot clear an alert, and the gate blocks `false_positive` for that.
+  # Optional. An empty or failed query does not fail the run. The verdict rules
+  # treat a missing source as unable to clear an alert.
   - name: load_entities
     type: elasticsearch.search
     on-failure:
@@ -217,7 +217,8 @@ steps:
                 user.name: "${{ steps.count_alerts.output.user_names }}"
 
   # Optional. Raw endpoint events on the cited hosts, within two hours of the
-  # discovery, one shared cap of 50. Truncation is coverage, not a failure.
+  # discovery, one shared cap of 50. A truncated page does not fail the run;
+  # `block_truncated_clear` stops it from clearing the attack.
   - name: load_events
     type: elasticsearch.search
     on-failure:
@@ -281,7 +282,7 @@ steps:
         1. alert_linkage — cited alerts only. Do at least two cited alerts share a user,
            host, IP, or process AND a concrete bridge (process tree, session, event.id,
            or process.entity_id)? Shared identifiers without a bridge, or theme and
-           timing alone, are neutral. This is a precondition, not world evidence.
+           timing alone, are neutral. Report it; it does not decide the verdict.
         2. entity_role — entity store only. Does the host or user role make the activity
            expected (management server, MDM, jump box, service account) or unexpected
            (ordinary employee workstation or account)?
@@ -306,6 +307,9 @@ steps:
            entity_role and alert_linkage corroborate but are never enough on their own.
         4. inconclusive — anything else: every world check is skipped or neutral, or
            only entity_role or alert_linkage supports.
+
+        A truncated raw-event list is missing evidence and cannot clear an attack. If more
+        events matched than are shown below, do not return false_positive.
 
         Claims:
         - claims.world: one entry for each world-check result the verdict relies on, with
@@ -334,7 +338,7 @@ steps:
         Entity store (query failed: {{ steps.source_status.output.entities_failed }}):
         {{ steps.load_entities.output.hits.hits | default: consts.no_rows | json }}
 
-        Raw events within 2 hours of the discovery, at most 50 (query failed: {{ steps.source_status.output.events_failed }}):
+        Raw events within 2 hours of the discovery, showing at most 50 of {{ steps.load_events.output.hits.total.value | default: 0 }} that matched (query failed: {{ steps.source_status.output.events_failed }}):
         {{ steps.load_events.output.hits.hits | default: consts.no_rows | json }}
       schema:
         type: object
@@ -468,6 +472,15 @@ steps:
         {{ consts.supported_verdicts | join: ", " }}, or the summary was empty.
         No classification was produced.
 
+  # A truncated event page is missing evidence. The review closes the attack on
+  # `false_positive`, so that verdict becomes `inconclusive` before it is emitted.
+  # `true_positive` is left alone: truncation blocks a clear, not an escalation.
+  - name: block_truncated_clear
+    type: data.set
+    with:
+      verdict: "{% if steps.load_events.output.hits.total.value > 50 and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
+      summary_markdown: "{% if steps.load_events.output.hits.total.value > 50 and steps.analyze.output.structured_output.verdict == 'false_positive' %}Raw events were truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
+
   # `workflow.execute` resolves to the child's `context.output`, so a child with no
   # `workflow.output` step hands its parent nothing.
   #
@@ -480,8 +493,8 @@ steps:
     type: workflow.output
     status: completed
     with:
-      verdict: "{{ steps.analyze.output.structured_output.verdict }}"
-      summary_markdown: "{{ steps.analyze.output.structured_output.summary_markdown }}"
+      verdict: "{{ steps.block_truncated_clear.output.verdict }}"
+      summary_markdown: "{{ steps.block_truncated_clear.output.summary_markdown }}"
       # `${{ }}`, not `{{ }}`: `{{ }}` stringifies undefined to `""`, and the
       # attachment null-checks the field, so an empty string would render an empty
       # `## Rationale` section.
@@ -505,8 +518,8 @@ steps:
           cap: 50
           truncated: "${{ steps.load_events.output.hits.total.value > 50 }}"
       payload:
-        verdict: "${{ steps.analyze.output.structured_output.verdict }}"
-        summary_markdown: "${{ steps.analyze.output.structured_output.summary_markdown }}"
+        verdict: "${{ steps.block_truncated_clear.output.verdict }}"
+        summary_markdown: "${{ steps.block_truncated_clear.output.summary_markdown }}"
         rationale_markdown: "${{ steps.analyze.output.structured_output.rationale_markdown }}"
       checks: "${{ steps.analyze.output.structured_output.checks }}"
       claims: "${{ steps.analyze.output.structured_output.claims }}"
