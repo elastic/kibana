@@ -50,6 +50,11 @@ steps:
             type: nightshift.cortexHydrate
             with:
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+                strategy: exponential
       - name: memory
         steps:
           - name: memory_materialize_to_sandbox
@@ -59,6 +64,11 @@ steps:
               prompt: '{{ inputs.prompt }}'
               agent_id: '{{ inputs.agent_id }}'
               conversation_id: '{{ inputs.conversation_id }}'
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+                strategy: exponential
   - name: compose_prompt
     type: nightshift.composeHydrateNotifications
     with:
