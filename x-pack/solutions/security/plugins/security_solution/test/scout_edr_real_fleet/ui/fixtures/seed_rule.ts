@@ -34,10 +34,11 @@ export interface SeededAutomatedResponseActionsRule {
  * process event after the detection rule is already enabled.
  *
  * Uses `sshd -t` (config test) instead of restarting the SSH service so the
- * Multipass/Vagrant session used for enroll stays up.
+ * Multipass/Vagrant session used for enroll stays up. OpenSSH exits 255 when
+ * that test fails; wrap it so the VM exec still succeeds after the process ran.
  */
 export const triggerSshdProcessEvent = async (hostname: string): Promise<void> => {
-  await getHostVmClient(hostname).exec('sudo /usr/sbin/sshd -t');
+  await getHostVmClient(hostname).exec('bash -c "sudo /usr/sbin/sshd -t; exit 0"');
 };
 
 /**
