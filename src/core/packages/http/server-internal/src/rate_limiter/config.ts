@@ -10,19 +10,19 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const rateLimiterConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   elu: schema.conditional(
     schema.siblingRef('enabled'),
     false,
     schema.never(),
-    schema.number({ min: 0, max: 1 })
+    schema.number({ min: 0, max: 1, defaultValue: 0.8 })
   ),
   term: schema.conditional(
     schema.siblingRef('enabled'),
     false,
     schema.never(),
     schema.oneOf([schema.literal('short'), schema.literal('medium'), schema.literal('long')], {
-      defaultValue: 'long',
+      defaultValue: 'medium',
     })
   ),
 });
