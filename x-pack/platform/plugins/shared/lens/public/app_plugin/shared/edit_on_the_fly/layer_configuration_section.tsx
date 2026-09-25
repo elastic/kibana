@@ -34,7 +34,6 @@ export function LayerConfiguration({
   editorContainer,
   onTextBasedQueryStateChange,
   isESQLResultsAccordionOpen,
-  setIsESQLResultsAccordionOpen,
   onESQLResultsAccordionToggle,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
@@ -77,7 +76,6 @@ export function LayerConfiguration({
     editorContainer,
     onTextBasedQueryStateChange,
     isESQLResultsAccordionOpen,
-    setIsESQLResultsAccordionOpen,
     onESQLResultsAccordionToggle,
   };
   return (

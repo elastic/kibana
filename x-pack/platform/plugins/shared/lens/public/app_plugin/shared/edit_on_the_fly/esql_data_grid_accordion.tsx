@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -32,8 +32,7 @@ interface ESQLDataGridAccordionProps {
   query: AggregateQuery;
   isTableView: boolean;
   isApproximate: boolean;
-  setIsAccordionOpen: (flag: boolean) => void;
-  onAccordionToggleCb: (status: boolean) => void;
+  onToggle: (isOpen: boolean) => void;
 }
 
 export const ESQLDataGridAccordion = ({
@@ -44,16 +43,8 @@ export const ESQLDataGridAccordion = ({
   query,
   isTableView,
   isApproximate,
-  setIsAccordionOpen,
-  onAccordionToggleCb,
+  onToggle,
 }: ESQLDataGridAccordionProps) => {
-  const onAccordionToggle = useCallback(
-    (openStatus: boolean) => {
-      setIsAccordionOpen(!isAccordionOpen);
-      onAccordionToggleCb(openStatus);
-    },
-    [isAccordionOpen, onAccordionToggleCb, setIsAccordionOpen]
-  );
   const styles = useMemoCss(componentStyles);
   const isEmpty = !isLoading && !dataGridAttrs;
   const fillsAvailableSpace = isAccordionOpen && Boolean(dataGridAttrs);
@@ -81,7 +72,7 @@ export const ESQLDataGridAccordion = ({
         }}
         initialIsOpen={isAccordionOpen}
         forceState={isAccordionOpen ? 'open' : 'closed'}
-        onToggle={onAccordionToggle}
+        onToggle={onToggle}
         extraAction={
           dataGridAttrs ? (
             <EuiNotificationBadge size="m" color="subdued">

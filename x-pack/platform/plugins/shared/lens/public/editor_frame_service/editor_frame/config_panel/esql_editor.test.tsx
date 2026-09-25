@@ -84,7 +84,7 @@ describe('ESQLEditor', () => {
     },
   } as unknown as TypedLensSerializedState['attributes'];
 
-  const renderEditor = () => {
+  const renderEditor = (overrides: Partial<ESQLEditorProps> = {}) => {
     const props = {
       data: mockDataPlugin(),
       http: coreStart.http,
@@ -102,6 +102,7 @@ describe('ESQLEditor', () => {
       setCurrentAttributes: jest.fn(),
       updateSuggestion: jest.fn(),
       onTextBasedQueryStateChange: jest.fn(),
+      ...overrides,
     } as unknown as ESQLEditorProps;
 
     return renderWithReduxStore(
@@ -273,5 +274,36 @@ describe('ESQLEditor', () => {
     const results = screen.getByTestId('ESQLQueryResults');
     expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
     expect(within(results).queryByTestId('ESQLQueryResultsErrorIcon')).not.toBeInTheDocument();
+  });
+
+  it('reports toggles to the parent without changing its own state when controlled', async () => {
+    const onESQLResultsAccordionToggle = jest.fn();
+    renderEditor({ isESQLResultsAccordionOpen: false, onESQLResultsAccordionToggle });
+    const button = screen.getByRole('button', { name: /ES\|QL Query Results/i });
+
+    await userEvent.click(button);
+
+    expect(onESQLResultsAccordionToggle).toHaveBeenCalledWith(true);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('reports closing to the parent when the parent has it open', async () => {
+    const onESQLResultsAccordionToggle = jest.fn();
+    renderEditor({ isESQLResultsAccordionOpen: true, onESQLResultsAccordionToggle });
+
+    await userEvent.click(screen.getByRole('button', { name: /ES\|QL Query Results/i }));
+
+    expect(onESQLResultsAccordionToggle).toHaveBeenCalledWith(false);
+  });
+
+  it('opens and closes the ES|QL results accordion on its own when no parent controls it', async () => {
+    renderEditor();
+    const button = screen.getByRole('button', { name: /ES\|QL Query Results/i });
+
+    await userEvent.click(button);
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+
+    await userEvent.click(button);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
   });
 });

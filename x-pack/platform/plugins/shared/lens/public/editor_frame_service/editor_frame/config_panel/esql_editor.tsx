@@ -58,7 +58,6 @@ export type ESQLEditorProps = Simplify<
     | 'parentApi'
     | 'onTextBasedQueryStateChange'
     | 'isESQLResultsAccordionOpen'
-    | 'setIsESQLResultsAccordionOpen'
     | 'onESQLResultsAccordionToggle'
   >
 >;
@@ -88,7 +87,6 @@ export function ESQLEditor({
   updateSuggestion,
   onTextBasedQueryStateChange,
   isESQLResultsAccordionOpen: isESQLResultsAccordionOpenProp,
-  setIsESQLResultsAccordionOpen: setIsESQLResultsAccordionOpenProp,
   onESQLResultsAccordionToggle,
 }: ESQLEditorProps) {
   // recomputed every render but only read by the useRef/useState initializers
@@ -116,8 +114,7 @@ export function ESQLEditor({
   const [isPreviewLoading, setIsPreviewLoading] = useState(() => !lastPreviewRef?.current);
   const [internalResultsAccordionOpen, setInternalResultsAccordionOpen] = useState(false);
   const isESQLResultsAccordionOpen = isESQLResultsAccordionOpenProp ?? internalResultsAccordionOpen;
-  const setIsESQLResultsAccordionOpen =
-    setIsESQLResultsAccordionOpenProp ?? setInternalResultsAccordionOpen;
+  const onESQLResultsToggle = onESQLResultsAccordionToggle ?? setInternalResultsAccordionOpen;
   const [isInitialized, setIsInitialized] = useState(false);
 
   const currentAttributes = useCurrentAttributes({
@@ -337,11 +334,8 @@ export function ESQLEditor({
         isAccordionOpen={isESQLResultsAccordionOpen}
         isTableView={visualization.activeId !== 'lnsDatatable'}
         isApproximate={isApproximate}
-        setIsAccordionOpen={setIsESQLResultsAccordionOpen}
+        onToggle={onESQLResultsToggle}
         query={query}
-        onAccordionToggleCb={(openStatus) => {
-          onESQLResultsAccordionToggle?.(openStatus);
-        }}
       />
     </>
   );

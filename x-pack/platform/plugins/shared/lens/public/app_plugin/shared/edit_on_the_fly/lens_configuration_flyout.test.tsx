@@ -525,6 +525,23 @@ describe('LensEditConfigurationFlyout', () => {
     expect(resultsButton).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('closes the ES|QL results accordion from its own header', async () => {
+    await renderEsqlConfigFlyout();
+    await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
+    const resultsButton = screen.getByRole('button', { name: /ES\|QL Query Results/i });
+    const layerButton = screen.getByRole('button', { name: /Visualization parameters/i });
+
+    await userEvent.click(resultsButton);
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'true');
+
+    await userEvent.click(resultsButton);
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'false');
+    expect(layerButton).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(resultsButton);
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('keeps the ES|QL results accordion open after results load', async () => {
     await renderEsqlConfigFlyout();
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());

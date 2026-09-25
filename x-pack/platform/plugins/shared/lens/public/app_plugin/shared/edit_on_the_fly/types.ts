@@ -126,7 +126,6 @@ export interface LayerConfigurationProps {
   /** Callback to report text-based query state changes */
   onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
   isESQLResultsAccordionOpen?: boolean;
-  setIsESQLResultsAccordionOpen?: (flag: boolean) => void;
   onESQLResultsAccordionToggle?: (isOpen: boolean) => void;
 }
 

@@ -247,6 +247,7 @@ export function LensEditConfigurationFlyout({
   }, []);
 
   const onESQLResultsAccordionToggle = useCallback((isOpen: boolean) => {
+    setIsESQLResultsAccordionOpen(isOpen);
     if (isOpen) {
       setIsLayerAccordionOpen(false);
       setIsSuggestionsAccordionOpen(false);
@@ -513,7 +514,6 @@ export function LensEditConfigurationFlyout({
             panelId={panelId}
             onTextBasedQueryStateChange={onTextBasedQueryStateChange}
             isESQLResultsAccordionOpen={isESQLResultsAccordionOpen}
-            setIsESQLResultsAccordionOpen={setIsESQLResultsAccordionOpen}
             onESQLResultsAccordionToggle={onESQLResultsAccordionToggle}
           />
         </FlyoutWrapper>
@@ -662,7 +662,6 @@ export function LensEditConfigurationFlyout({
                     editorContainer={editorContainer.current || undefined}
                     onTextBasedQueryStateChange={onTextBasedQueryStateChange}
                     isESQLResultsAccordionOpen={isESQLResultsAccordionOpen}
-                    setIsESQLResultsAccordionOpen={setIsESQLResultsAccordionOpen}
                     onESQLResultsAccordionToggle={onESQLResultsAccordionToggle}
                   />
                 </>
