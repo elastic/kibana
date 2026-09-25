@@ -37,7 +37,7 @@ export abstract class TransformGenerator {
   }
 
   public buildDescription(slo: SLODefinition): string {
-    return `Rolled-up SLI data for SLO: ${slo.name.slice(0, 900)} [id: ${slo.id}, revision: ${
+    return `Rolled-up SLI data for SLO: ${slo.name.slice(0, 850)} [id: ${slo.id}, revision: ${
       slo.revision
     }]`;
   }

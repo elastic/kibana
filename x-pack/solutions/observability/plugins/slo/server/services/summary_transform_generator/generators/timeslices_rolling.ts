@@ -125,7 +125,7 @@ export function generateSummaryTransformForTimeslicesAndRolling(
         ...buildBurnRateAgg('oneDayBurnRate', slo),
       },
     },
-    description: `Summarise the rollup data of SLO: ${slo.name.slice(0, 900)} [id: ${
+    description: `Summarise the rollup data of SLO: ${slo.name.slice(0, 850)} [id: ${
       slo.id
     }, revision: ${slo.revision}].`,
     frequency: '1m',
