@@ -92,6 +92,26 @@ export const buildDashboardPanel = (index: number) => ({
 });
 
 /**
+ * Builds attributes with one or more large string blob fields. The `salt` suffix is used to
+ * mutate a blob on each update so the diff engine sees a replace op rather than a noOp.
+ */
+export const buildBlobAttributes = (
+  title: string,
+  blobCount: number,
+  blobSizeKb: number,
+  salt = ''
+) => {
+  const attrs: Record<string, unknown> = { title };
+  for (let i = 0; i < blobCount; i++) {
+    const total = blobSizeKb * 1024;
+    attrs[`blob${i}`] = salt
+      ? 'A'.repeat(Math.max(0, total - salt.length)) + salt
+      : 'A'.repeat(total);
+  }
+  return attrs;
+};
+
+/**
  * Builds dashboard saved object attributes with `panelCount` Lens panels serialized into
  * `panelsJSON`. A title-only update holds both the before and after `panelsJSON` strings
  * simultaneously during the diff phase, exercising the large-string allocation path.
