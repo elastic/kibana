@@ -13,7 +13,7 @@ import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
 import type { SLODefinition } from '../../domain/models';
-import { getSloProjectRouting } from '../utils';
+import { buildTransformDescription, getSloProjectRouting } from '../utils';
 
 export abstract class TransformGenerator {
   constructor(
@@ -37,11 +37,7 @@ export abstract class TransformGenerator {
   }
 
   public buildDescription(slo: SLODefinition): string {
-    const prefix = 'Rolled-up SLI data for SLO: ';
-    const suffix = ` [id: ${slo.id}, revision: ${slo.revision}]`;
-    const maxNameLen = 1000 - prefix.length - suffix.length;
-    const name = slo.name.length > maxNameLen ? slo.name.slice(0, maxNameLen) : slo.name;
-    return `${prefix}${name}${suffix}`;
+    return buildTransformDescription('Rolled-up SLI data for SLO: ', slo);
   }
 
   public buildCommonGroupBy(
