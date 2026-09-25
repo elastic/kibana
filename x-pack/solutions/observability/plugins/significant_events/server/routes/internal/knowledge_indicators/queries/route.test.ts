@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { QueryLink } from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, type QueryLink } from '@kbn/significant-events-schema';
+import { DeepStrict } from '@kbn/zod-helpers';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { internalKIQueriesRoutes } from './route';
 
@@ -477,6 +478,7 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
 describe('generateQueriesRoute', () => {
   const generateRoute =
     internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];
+  const strictGenerateParams = DeepStrict(generateRoute.params);
 
   beforeEach(() => {
     mockGenerateKIQueries.mockReset();
@@ -487,18 +489,19 @@ describe('generateQueriesRoute', () => {
     });
   });
 
-  it('passes a 300000 ms duration budget to query generation', async () => {
-    const handlerParams = {
-      params: { path: { streamName: 'logs.test' }, body: { connectorId: 'test-connector' } },
+  const makeHandlerParams = ({
+    agentBuilder,
+    body = { connectorId: 'test-connector' },
+  }: {
+    agentBuilder: unknown;
+    body?: Record<string, unknown>;
+  }) =>
+    ({
+      params: { path: { streamName: 'logs.test' }, body },
       request: { events: { aborted$: { subscribe: jest.fn() } } },
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {},
-        inferenceClient: {},
-        soClient: {},
-        scopedClusterClient: { asCurrentUser: {} },
-        streamDataEsClient: {},
         licensing: {},
-        tuningConfig: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
       }),
       server: {
@@ -506,7 +509,7 @@ describe('generateQueriesRoute', () => {
           featureFlags: {},
         },
         searchInferenceEndpoints: undefined,
-        agentBuilder: undefined,
+        agentBuilder,
       },
       maintenanceService: makeMaintenanceService(),
       logger: {
@@ -514,15 +517,45 @@ describe('generateQueriesRoute', () => {
         get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
       },
       telemetry: {},
-    } as unknown as GenerateHandlerParams;
+    } as unknown as GenerateHandlerParams);
 
-    const result = await generateRoute.handler(handlerParams);
+  it('retains valid run ids and rejects blank or overlong run ids during route validation', () => {
+    const parsed = strictGenerateParams.safeParse({
+      path: { streamName: 'logs.test' },
+      body: { runId: 'run-1' },
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.body?.runId).toBe('run-1');
+    }
+    expect(
+      strictGenerateParams.safeParse({
+        path: { streamName: 'logs.test' },
+        body: { runId: '   ' },
+      }).success
+    ).toBe(false);
+    expect(
+      strictGenerateParams.safeParse({
+        path: { streamName: 'logs.test' },
+        body: { runId: 'x'.repeat(MAX_ID_LENGTH + 1) },
+      }).success
+    ).toBe(false);
+  });
+
+  it('delegates to query generation and returns its result', async () => {
+    const result = await generateRoute.handler(
+      makeHandlerParams({
+        agentBuilder: {},
+        body: { connectorId: 'test-connector', runId: 'run-1' },
+      })
+    );
 
     expect(mockGenerateKIQueries).toHaveBeenCalledWith(
       expect.objectContaining({
         streamName: 'logs.test',
         connectorId: 'test-connector',
-        maxDurationMs: 300000,
+        runId: 'run-1',
       }),
       expect.any(Object)
     );
@@ -531,6 +564,21 @@ describe('generateQueriesRoute', () => {
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
       connectorId: 'test-connector',
     });
+  });
+
+  it('generates a run id when one is not provided', async () => {
+    await generateRoute.handler(makeHandlerParams({ agentBuilder: {} }));
+
+    const { runId } = mockGenerateKIQueries.mock.calls[0][0];
+    expect(runId).toEqual(expect.any(String));
+    expect(runId).not.toBe('');
+  });
+
+  it('fails when agent builder is unavailable', async () => {
+    await expect(
+      generateRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
+    ).rejects.toThrow('Agent Builder is required');
+    expect(mockGenerateKIQueries).not.toHaveBeenCalled();
   });
 });
 

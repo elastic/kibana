@@ -14,14 +14,17 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerFeatures } from './features';
+import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import { createImpactPrivilegesChecker } from './impact/services/check_impact_privileges';
 import { createImpactClient } from './impact/services/impact_client';
 import { ImpactService } from './impact/services/impact_service';
+import { registerImpactStepDefinitions } from './impact/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
+import { InvestigationStatusService } from './investigations/services/investigation_status_service';
 import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { createUserResolver } from './services/resolve_user';
 import type { ResolveUser } from './services/resolve_user';
@@ -45,6 +48,7 @@ export class AgenticInvestigationsPlugin
   private impactService?: ImpactService;
   private escalationsService?: EscalationsService;
   private assignmentsService?: AssignmentsService;
+  private investigationStatusService?: InvestigationStatusService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveUser;
 
@@ -54,9 +58,24 @@ export class AgenticInvestigationsPlugin
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    { features }: AgenticInvestigationsSetupDependencies
+    { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features });
+
+    registerImpactAttachment(agentBuilder);
+
+    registerImpactStepDefinitions({
+      workflowsExtensions,
+      getImpactService: () => this.requireImpactService(),
+      resolveUser: (request) => this.requireUserResolver()(request),
+      // Steps register during setup but only run once Kibana has started, so
+      // the authorization service is resolved per call rather than captured
+      // here — `security.authz` does not exist yet.
+      privileges: createImpactPrivilegesChecker({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        logger: this.logger,
+      }),
+    });
 
     const router = coreSetup.http.createRouter();
 
@@ -81,6 +100,7 @@ export class AgenticInvestigationsPlugin
       router,
       logger: this.logger,
       getAssignmentsService: () => this.requireAssignmentsService(),
+      getInvestigationStatusService: () => this.requireInvestigationStatusService(),
     });
 
     return {};
@@ -106,11 +126,20 @@ export class AgenticInvestigationsPlugin
       }),
     });
 
+    this.investigationStatusService = new InvestigationStatusService({
+      getConversationClient: (request) =>
+        plugins.agentBuilder.conversations.getScopedClient({ request }),
+      getProposals: () => plugins.proposals,
+      getSpaceId: (request) => this.getSpaceId(request),
+      logger: this.logger,
+    });
+
     this.escalationsService = new EscalationsService({
       logger: this.logger,
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
       conversationTemplates: plugins.agentBuilder.conversationTemplates,
+      getInvestigationStatusService: () => this.requireInvestigationStatusService(),
     });
 
     this.assignmentsService = new AssignmentsService({
@@ -158,6 +187,15 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.assignmentsService;
+  }
+
+  private requireInvestigationStatusService(): InvestigationStatusService {
+    if (!this.investigationStatusService) {
+      throw new Error(
+        'InvestigationStatusService is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.investigationStatusService;
   }
 
   private getSpaceId(request: KibanaRequest): string {
