@@ -21,6 +21,18 @@ interface IndicatorMatchParamsView {
 const escapeKql = (value: string): string => value.replace(/["\\]/g, '\\$&');
 
 /**
+ * Whether a threat index entry names `index`: the exact name, or a wildcard pattern
+ * (`.items-*`) that Elasticsearch would resolve to it. An exclusion entry (`-name`) never
+ * names anything.
+ */
+export const threatIndexEntryMatches = (entry: string, index: string): boolean => {
+  if (entry.startsWith('-')) return false;
+  if (!entry.includes('*')) return entry === index;
+  const pattern = new RegExp(`^${entry.split('*').map(escapeRegExp).join('.*')}$`);
+  return pattern.test(index);
+};
+
+/**
  * Whether each rule's API key can read `index`, through the alerting method that
  * authenticates the stored key. A rule with no key (disabled) or a failed check is left
  * undefined, so the caller can tell "cannot read" from "unknown".
@@ -127,9 +139,13 @@ export const findRulesReferencingValueList = async ({
         name: rule.name,
         reason: 'threat_index',
       };
-      if (threatIndex.some((name) => accessNames.includes(name))) {
+      // A pattern such as `.items-*` resolves to the shared stream, and after migration
+      // to the list's alias as well, so it counts the same as the exact name.
+      const names = (index: string): boolean =>
+        threatIndex.some((name) => threatIndexEntryMatches(name, index));
+      if (accessNames.some(names)) {
         referenced.set(rule.id, entry);
-      } else if (threatIndex.includes(itemsIndex)) {
+      } else if (names(itemsIndex)) {
         if (listIdToken.test(String(params.threatQuery ?? ''))) {
           referenced.set(rule.id, entry);
         } else {

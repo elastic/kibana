@@ -226,6 +226,22 @@ describe('canonicalLookupValue', () => {
     ])('rejects "%s", a spelling that would be guessed rather than parsed', (spelling) => {
       expect(rejected('date', spelling)).toBe(true);
     });
+
+    it('keeps an epoch beyond the JavaScript date range as its digits, as Elasticsearch stores it', () => {
+      // Elasticsearch stores these as two instants in the year 287396, one millisecond apart
+      expect(canonical('date', '9007199254740992')).toBe('9007199254740992');
+      expect(canonical('date', '9007199254740993')).toBe('9007199254740993');
+      expect(canonical('date', '09007199254740992')).toBe('9007199254740992');
+      expect(canonical('date', '-8640000000000001')).toBe('-8640000000000001');
+      // the last millisecond a JavaScript date represents still formats as an instant
+      expect(canonical('date', '8640000000000000')).toBe('+275760-09-13T00:00:00.000Z');
+    });
+
+    it('rejects an epoch beyond what Elasticsearch stores for the type', () => {
+      expect(rejected('date', '9223372036854775808')).toBe(true); // past a signed 64-bit number
+      expect(rejected('date_nanos', '9223372036855')).toBe(true); // past 2262, the date_nanos span
+      expect(canonical('date_nanos', '9223372036854')).toBe('2262-04-11T23:47:16.854Z');
+    });
   });
 
   describe('other types', () => {

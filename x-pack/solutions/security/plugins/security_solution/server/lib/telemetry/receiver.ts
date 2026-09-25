@@ -1259,12 +1259,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
     // A rule reads the shared stream when its threat index names one of the `.items-<space>`
     // data streams. It reads a lookup list when it names a `.value-list` concrete index
-    // (present, or orphaned by a delete), an alias or index recorded in a list's locator,
-    // or a name under `.items` that is not a stream (an alias dropped by a restrict). A
-    // rule that reads both counts once, as a lookup reader: the legacy count is the rules
-    // that read only the shared stream. `threatIndex` is an array, so the last clause
-    // cannot tell a dropped alias from a stream inside one rule; the locator names cover
-    // every alias that still exists.
+    // (present, or orphaned by a delete) or an alias or index recorded in a list's locator.
+    // A rule that reads both counts once, as a lookup reader: the legacy count is the rules
+    // that read only the shared stream.
     const [legacyStreamNames, lookupAccessNames] = await Promise.all([
       this.fetchLegacyItemStreamNames(),
       this.fetchLookupListAccessNames(),
@@ -1273,17 +1270,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       legacyStreamNames.length > 0
         ? [{ terms: { 'alert.params.threatIndex': legacyStreamNames } }]
         : [{ match_none: {} }];
+    // Only names that exist decide: a concrete `.value-list` index or a name recorded in
+    // a list's locator. A pattern such as `.items-*` is neither, so it does not count as a
+    // lookup reader, and an alias dropped by a restrict is not counted either.
     const readsLookupList: QueryDslQueryContainer[] = [
       { prefix: { 'alert.params.threatIndex': '.value-list' } },
       ...(lookupAccessNames.length > 0
         ? [{ terms: { 'alert.params.threatIndex': lookupAccessNames } }]
         : []),
-      {
-        bool: {
-          must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
-          must_not: readsLegacyStream,
-        },
-      },
     ];
     // indicator-match rules whose threat index is the shared `.items-<space>` stream
     const indicatorMatchRuleQuery: SearchRequest = {

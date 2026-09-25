@@ -14,7 +14,11 @@ import type {
 import { TaskCost, throwRetryableError } from '@kbn/task-manager-plugin/server';
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ensureLookupIndexCurrent, reconcileCoalesced } from '../services/lookup';
+import {
+  assertLookupNames,
+  ensureLookupIndexCurrent,
+  reconcileCoalesced,
+} from '../services/lookup';
 import type { PluginsStart } from '../types';
 
 export const COALESCE_REBUILD_TASK_TYPE = 'lists:coalesce-rebuild';
@@ -84,6 +88,9 @@ export const registerCoalesceRebuildTask = ({
           },
           run: async (): Promise<{ state: Record<string, unknown> }> => {
             const { index, type } = taskInstance.params as { index: string; type: Type };
+            // The params come from a task document; only a concrete index name this plugin
+            // builds is acted on. The task is keyed by that name, never by the alias.
+            assertLookupNames({ index });
             const [coreStart] = await getStartServices();
             const esClient = coreStart.elasticsearch.client.asInternalUser;
             // The task may be the first writer to an index created by an earlier build (a
@@ -149,6 +156,9 @@ export const scheduleCoalesceRebuild = ({
   index: string;
   type: Type;
 }): void => {
+  // One task for each list: the key is the concrete index, which never changes, so a
+  // restrict or unrestrict cannot leave two tasks converging the same index.
+  assertLookupNames({ index });
   const id = coalesceRebuildTaskId(index);
   const enqueue = async (): Promise<boolean> => {
     const existing = await taskManager.get(id).catch(() => undefined);

@@ -65,16 +65,20 @@ import listsItemsPolicy from '../items/list_item_policy.json';
 import listItemMappings from '../items/list_item_mappings.json';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import {
+  LOOKUP_ITEM_SOURCE,
   addLookupAlias,
+  assertStorageDescriptor,
   buildLookupListItem,
   countLookupItems,
   createLookupIndex,
+  deleteAuthoredLookupItem,
   deleteLookupIndex,
   deleteLookupItemByValue,
   ensureLookupIndexCurrent,
   findAllLookupItems,
   findListByLookupIndex,
   findLookupItems,
+  formatLookupValue,
   getLookupAliasName,
   getLookupIndexName,
   importLookupItemsToStream,
@@ -89,6 +93,7 @@ import {
   rejectedLookupValues,
   removeLookupAlias,
   searchLookupItemsByValues,
+  stampsOf,
   streamLookupItemValues,
   writeLookupItems,
   writeValuesToStream,
@@ -219,7 +224,49 @@ export class ListClient {
   public getList = async ({ id }: GetListOptions): Promise<ListSchema | null> => {
     const { esClient } = this;
     const listName = this.getListName();
-    return getList({ esClient, id, listIndex: listName });
+    const list = await getList({ esClient, id, listIndex: listName });
+    if (list != null) this.assertStorage(list);
+    return list;
+  };
+
+  /**
+   * Refuse a lookup descriptor whose names are not the ones this space derives from the
+   * list id. A list user holds Elasticsearch write on the container, so the descriptor
+   * can be set by hand; its names go to the internal client and are never trusted as read.
+   */
+  private assertStorage = (list: ListSchema): void =>
+    assertStorageDescriptor({
+      list,
+      listItemIndex: this.getListItemName(),
+      spaceId: this.spaceId,
+    });
+
+  /**
+   * Refuse a caller who cannot read a lookup list through its access name: the alias
+   * while shared, which every list role can read, or the concrete index once restricted,
+   * which only the roles the restriction admits can. Restricting is an Elasticsearch
+   * boundary, and the operations that undo or destroy it must not be open to every list
+   * writer. A legacy list has no such boundary.
+   */
+  private assertReadableThroughAccessName = async (list: ListSchema): Promise<void> => {
+    const accessName = lookupAccessNameOf(list);
+    if (accessName == null) return;
+    if (!(await this.canReadIndex({ index: accessName }))) {
+      throw new ErrorWithStatusCode(
+        `list "${list.id}" is restricted to roles that can read "${accessName}", which this user cannot`,
+        403
+      );
+    }
+  };
+
+  /**
+   * The check `deleteList` applies, for a route to run before it touches anything else
+   * (the references a delete removes first, for example). A missing list passes: the
+   * route reports that itself.
+   */
+  public assertCanDeleteList = async ({ id }: { id: string }): Promise<void> => {
+    const list = await this.getList({ id });
+    if (list != null) await this.assertReadableThroughAccessName(list);
   };
 
   /**
@@ -379,6 +426,7 @@ export class ListClient {
     const orphan = await this.provisioningClient.indices.exists({ index });
     if (orphan) {
       const owner = await findListByLookupIndex({ esClient, index, listIndex: this.getListName() });
+      if (owner != null) this.assertStorage(owner);
       if (owner == null) {
         await deleteLookupIndex({ esClient: this.provisioningClient, index });
       }
@@ -425,7 +473,7 @@ export class ListClient {
       throw err;
     }
     if (isRangeType(list.type)) {
-      this.scheduleCoalesceRebuild({ index: alias, type: list.type });
+      this.scheduleCoalesceRebuild({ index, type: list.type });
     }
 
     return { alias, alreadyLookup: false, dropped, index, itemsCopied };
@@ -465,6 +513,17 @@ export class ListClient {
    */
   private ensureCurrent = (type: Type, index: string): Promise<void> =>
     ensureLookupIndexCurrent({ esClient: this.provisioningClient, index, type });
+
+  /**
+   * Enqueue the coalesced rebuild of a range list. The task is keyed by the concrete
+   * index, which never changes, so a list has one task whether it is shared or restricted.
+   */
+  private scheduleRebuildFor = (list: ListSchema): void => {
+    const index = lookupIndexOf(list);
+    if (index != null && isRangeType(list.type)) {
+      this.scheduleCoalesceRebuild({ index, type: list.type });
+    }
+  };
 
   /** The concrete index and alias a list id maps to, whether or not the list exists yet. */
   public lookupNamesFor = ({ id }: { id: string }): { alias: string; index: string } => ({
@@ -533,8 +592,7 @@ export class ListClient {
     await this.writeStorage(id, lookupStorage(index));
     await removeLookupAlias({ alias, esClient: this.provisioningClient, index });
     if (isRangeType(list.type)) {
-      // The task id is per access name; enqueue one under the concrete index so the
-      // coalesced set keeps converging after the alias is gone.
+      // Writes through the alias may have left the state dirty; make sure a pass is queued.
       this.scheduleCoalesceRebuild({ index, type: list.type });
     }
     return { changed: true, index };
@@ -563,11 +621,19 @@ export class ListClient {
       return { alias: existingAlias, changed: false, index };
     }
 
+    // Restricting is an Elasticsearch boundary; undoing it must not be open to every list
+    // writer, so the caller has to be able to read the restricted index already.
+    if (!(await this.canReadIndex({ index }))) {
+      throw new ErrorWithStatusCode(
+        `list "${id}" is restricted to roles that can read "${index}", which this user cannot`,
+        403
+      );
+    }
     const alias = getLookupAliasName(this.getListItemName(), id);
     await addLookupAlias({ alias, esClient: this.provisioningClient, index });
     await this.writeStorage(id, lookupStorage(index, alias));
     if (isRangeType(list.type)) {
-      this.scheduleCoalesceRebuild({ index: alias, type: list.type });
+      this.scheduleCoalesceRebuild({ index, type: list.type });
     }
     return { alias, changed: true, index };
   };
@@ -1057,9 +1123,11 @@ export class ListClient {
     const resolved = await this.resolveLookupItem(id);
     if (resolved != null) {
       const { accessName, list, value } = resolved;
-      // A delete by id is a single document; wait for the refresh so the caller's
-      // next read (the items table, a repeated delete) sees it.
-      await deleteLookupItemByValue({
+      // A delete by id is a single document, the one the resolved value names; on a
+      // range list that value is a range string, so it is removed as a document rather
+      // than searched as a member. Wait for the refresh so the caller's next read (the
+      // items table, a repeated delete) sees it.
+      await deleteAuthoredLookupItem({
         esClient,
         index: accessName,
         listId: list.id,
@@ -1067,10 +1135,23 @@ export class ListClient {
         type: list.type,
         value,
       });
-      if (isRangeType(list.type)) {
-        this.scheduleCoalesceRebuild({ index: accessName, type: list.type });
-      }
-      return buildLookupListItem({ listId: list.id, type: list.type, user, value });
+      this.scheduleRebuildFor(list);
+      // The write was an upsert: the value may have existed already, in which case its
+      // creation stamps are older than this request. Read the stored stamps back.
+      const stored = await esClient
+        .get<Record<string, unknown>>({
+          _source: LOOKUP_ITEM_SOURCE,
+          id: lookupItemId(list.type, value, list.id),
+          index: accessName,
+        })
+        .catch(() => undefined);
+      return buildLookupListItem({
+        listId: list.id,
+        stamps: stored != null ? stampsOf(stored._source) : undefined,
+        type: list.type,
+        user,
+        value,
+      });
     }
 
     return deleteListItem({ esClient, id, listItemIndex: listItemName, refresh });
@@ -1096,6 +1177,7 @@ export class ListClient {
       index: located.index,
       listIndex: this.getListName(),
     });
+    if (list != null) this.assertStorage(list);
     const accessName = list != null ? lookupAccessNameOf(list) : undefined;
     if (list == null || accessName == null) {
       return undefined;
@@ -1142,8 +1224,10 @@ export class ListClient {
     });
     // Another spelling of the same value (an `ip` in another form) shares the document
     // id, so the write above already replaced it; deleting would remove the new value.
+    // The old value is removed as the document it names: on a range list it is a range
+    // string, which a delete by value would search for as an address and fail on.
     if (lookupItemId(list.type, value, list.id) !== lookupItemId(list.type, current, list.id)) {
-      await deleteLookupItemByValue({
+      await deleteAuthoredLookupItem({
         esClient,
         index: accessName,
         listId: list.id,
@@ -1152,9 +1236,7 @@ export class ListClient {
         value: current,
       });
     }
-    if (isRangeType(list.type)) {
-      this.scheduleCoalesceRebuild({ index: accessName, type: list.type });
-    }
+    this.scheduleRebuildFor(list);
     return item(value);
   };
 
@@ -1181,16 +1263,11 @@ export class ListClient {
     const list = await this.getList({ id: listId });
     const lookupIndex = list != null ? lookupAccessNameOf(list) : undefined;
     if (list != null && lookupIndex != null) {
-      // A value that is not in the list is not found, as on the shared stream (the
-      // delete route turns an empty array into a 404).
-      const exists = await esClient.exists({
-        id: lookupItemId(list.type, value, list.id),
-        index: lookupIndex,
-      });
-      if (!exists) {
-        return [];
-      }
-      await deleteLookupItemByValue({
+      await this.ensureCurrent(list.type, lookupIndex);
+      // The shared stream's meaning of the value applies (a range list deletes the ranges
+      // containing it), and a value that is not in the list is not found: the delete route
+      // turns an empty array into a 404, as on the shared stream.
+      const deleted = await deleteLookupItemByValue({
         esClient,
         index: lookupIndex,
         listId: list.id,
@@ -1198,29 +1275,20 @@ export class ListClient {
         type: list.type,
         value,
       });
-      if (isRangeType(list.type)) {
-        this.scheduleCoalesceRebuild({ index: lookupIndex, type: list.type });
+      if (deleted.length === 0) {
+        return [];
       }
-      // Return a representation of the deleted item so callers see that the value
-      // was removed. The lookup index keys items by a hash of the value, not a stored
-      // item id, so the id here is synthesized.
-      const now = new Date().toISOString();
-      return [
-        {
-          '@timestamp': now,
-          _version: undefined,
-          created_at: now,
-          created_by: user,
-          id: uuidv4(),
-          list_id: listId,
-          meta: undefined,
-          tie_breaker_id: uuidv4(),
+      this.scheduleRebuildFor(list);
+      // The removed documents, as the shared stream returns the items it removed.
+      return deleted.map(({ source }) =>
+        buildLookupListItem({
+          listId: list.id,
+          stamps: stampsOf(source),
           type: list.type,
-          updated_at: now,
-          updated_by: user,
-          value,
-        },
-      ];
+          user,
+          value: formatLookupValue(source.value),
+        })
+      );
     }
 
     return deleteListItemByValue({
@@ -1248,7 +1316,10 @@ export class ListClient {
     // An index delete must name the concrete index, never the alias.
     const list = await this.getList({ id });
     const lookupIndex = list != null ? lookupIndexOf(list) : undefined;
-    if (lookupIndex != null) {
+    if (list != null && lookupIndex != null) {
+      // The index goes with the list, deleted by the provisioning client, so the caller
+      // must be able to read the list through its access name.
+      await this.assertReadableThroughAccessName(list);
       await deleteLookupIndex({ esClient: this.provisioningClient, index: lookupIndex });
     }
 
@@ -1363,9 +1434,7 @@ export class ListClient {
           type: list.type,
           user: this.user,
         });
-        if (isRangeType(list.type)) {
-          this.scheduleCoalesceRebuild({ index: lookupIndex, type: list.type });
-        }
+        this.scheduleRebuildFor(list);
         return list;
       }
     } else {
@@ -1400,11 +1469,8 @@ export class ListClient {
         user: this.user,
       });
       const list: ListSchema | null = created;
-      if (list != null && isRangeType(type)) {
-        const accessName = lookupAccessNameOf(list);
-        if (accessName != null) {
-          this.scheduleCoalesceRebuild({ index: accessName, type });
-        }
+      if (list != null) {
+        this.scheduleRebuildFor(list);
       }
       return list;
     }
@@ -1490,9 +1556,7 @@ export class ListClient {
         user: this.user,
         values: [value],
       });
-      if (isRangeType(list.type)) {
-        this.scheduleCoalesceRebuild({ index: lookupIndex, type: list.type });
-      }
+      this.scheduleRebuildFor(list);
       const now = new Date().toISOString();
       return {
         '@timestamp': now,
@@ -1863,6 +1927,7 @@ export class ListClient {
     const list = await this.getList({ id: listId });
     const accessName = list != null ? lookupAccessNameOf(list) : undefined;
     if (list != null && accessName != null) {
+      await this.ensureCurrent(list.type, accessName);
       return findLookupItems({
         currentIndexPosition,
         esClient,
@@ -1996,6 +2061,7 @@ export class ListClient {
     const list = await this.getList({ id: listId });
     const lookupIndex = list != null ? lookupAccessNameOf(list) : undefined;
     if (list != null && lookupIndex != null) {
+      await this.ensureCurrent(list.type, lookupIndex);
       return findAllLookupItems({
         esClient,
         index: lookupIndex,

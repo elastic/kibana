@@ -10,7 +10,8 @@ import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
-import { buildLookupMappings } from './build_lookup_mappings';
+import { LOOKUP_AUTO_EXPAND_REPLICAS, buildLookupMappings } from './build_lookup_mappings';
+import { assertLookupNames } from './get_lookup_index';
 
 /**
  * Creates the per-list lookup-mode index for a value list together with its alias, in
@@ -33,6 +34,7 @@ export const createLookupIndex = async ({
   alias: string;
   type: Type;
 }): Promise<void> => {
+  assertLookupNames({ alias, index });
   const [indexExists, aliasExists] = await Promise.all([
     esClient.indices.exists({ index }),
     esClient.indices.exists({ index: alias }),
@@ -49,7 +51,10 @@ export const createLookupIndex = async ({
       aliases: { [alias]: {} },
       index,
       mappings: buildLookupMappings(type),
-      settings: { index: { mode: 'lookup' } },
+      // One replica wherever a second data node exists, none on a single node: a fixed
+      // replica there can never be allocated, yet counts against the shard budget and
+      // keeps the cluster yellow.
+      settings: { index: { auto_expand_replicas: LOOKUP_AUTO_EXPAND_REPLICAS, mode: 'lookup' } },
     })
     .catch((err: { meta?: { body?: { error?: { type?: string } } } }) => {
       // Two concurrent creates both pass the existence check; the loser of the race
@@ -74,6 +79,7 @@ export const addLookupAlias = async ({
   index: string;
   alias: string;
 }): Promise<void> => {
+  assertLookupNames({ alias, index });
   const aliasExists = await esClient.indices.exists({ index: alias });
   if (aliasExists) {
     const current = await esClient.indices.getAlias({ name: alias }).catch(() => ({}));
@@ -95,6 +101,7 @@ export const removeLookupAlias = async ({
   index: string;
   alias: string;
 }): Promise<void> => {
+  assertLookupNames({ alias, index });
   await esClient.indices
     .updateAliases({ actions: [{ remove: { alias, index } }] })
     .catch((err: { meta?: { statusCode?: number } }) => {

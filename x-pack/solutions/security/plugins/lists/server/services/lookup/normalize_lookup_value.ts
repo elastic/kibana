@@ -47,6 +47,12 @@ const ISO_DATE =
 // Epoch milliseconds. Elasticsearch reads a shorter digit string as a year or as epoch
 // milliseconds depending on its length, which no list author means, so it is rejected.
 const EPOCH_MILLIS = /^-?\d{11,}$/;
+// The widest epoch millisecond Elasticsearch stores on a `date` (a signed 64-bit number),
+// on a `date_nanos` (nanoseconds in the same width, so 2262-04-11), and the widest a
+// JavaScript `Date` can represent (year 275760).
+const EPOCH_MILLIS_MAX = 9223372036854775807n;
+const DATE_NANOS_MILLIS_MAX = 9223372036854n;
+const DATE_MAX_MILLIS = 8640000000000000n;
 
 /**
  * `ip`: dotted IPv4, or IPv6 in hex groups, or an IPv4-mapped IPv6 address in either
@@ -238,15 +244,27 @@ const canonicalFloat = (type: Type, value: string): CanonicalResult => {
  * offset is UTC, as Elasticsearch reads it. Zone names, week and ordinal dates, a space
  * separator, and bare years are rejected rather than guessed.
  */
+/**
+ * Epoch milliseconds. Elasticsearch reads them as a signed 64-bit number; `date_nanos`
+ * holds nanoseconds in the same width, so its span ends in 2262. JavaScript dates stop
+ * far earlier (year 275760), so an instant beyond them is kept as its normalized digits,
+ * the one spelling Elasticsearch stores for it.
+ */
+const canonicalEpoch = (type: Type, value: string): CanonicalResult => {
+  const millis = BigInt(value);
+  const max = type === 'date' ? EPOCH_MILLIS_MAX : DATE_NANOS_MILLIS_MAX;
+  if (millis > max || millis < -max) return reject(`"${value}" is out of range for ${type}`);
+  if (millis > DATE_MAX_MILLIS || millis < -DATE_MAX_MILLIS) return accept(millis.toString());
+  const instant = moment.utc(Number(millis));
+  if (!instant.isValid()) return reject(`"${value}" is not a date`);
+  if (type === 'date') return accept(instant.toISOString());
+  const [seconds, fraction] = instant.toISOString().replace(/Z$/, '').split('.');
+  const trimmed = fraction.replace(/0+$/, '');
+  return accept(trimmed === '' ? `${seconds}Z` : `${seconds}.${trimmed}Z`);
+};
+
 const canonicalDate = (type: Type, value: string): CanonicalResult => {
-  if (EPOCH_MILLIS.test(value)) {
-    const instant = moment.utc(Number(value));
-    if (!instant.isValid()) return reject(`"${value}" is not a date`);
-    if (type === 'date') return accept(instant.toISOString());
-    const [seconds, millis] = instant.toISOString().replace(/Z$/, '').split('.');
-    const trimmedMillis = millis.replace(/0+$/, '');
-    return accept(trimmedMillis === '' ? `${seconds}Z` : `${seconds}.${trimmedMillis}Z`);
-  }
+  if (EPOCH_MILLIS.test(value)) return canonicalEpoch(type, value);
   const parsed = ISO_DATE.exec(value);
   if (parsed == null) return reject(`"${value}" is not an ISO 8601 date or epoch milliseconds`);
   const [, day, hourMinute, second, fraction = '', offset = ''] = parsed;

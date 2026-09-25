@@ -27,6 +27,13 @@ export const RANGE_BOUND_TYPE: Partial<Record<Type, string>> = {
 export const isRangeType = (type: Type): boolean => RANGE_BOUND_TYPE[type] != null;
 
 /**
+ * Replicas follow the data nodes: one copy wherever a second node exists, none on a
+ * single node, where a fixed replica can never be allocated yet counts against the shard
+ * budget and keeps the cluster yellow. Recalculated by Elasticsearch as nodes join and leave.
+ */
+export const LOOKUP_AUTO_EXPAND_REPLICAS = '0-1';
+
+/**
  * Who wrote an item and when, on every value document (equality) and source document
  * (range). Set once on creation and moved on every later write of the same value; the
  * items table sorts on them, as it does on the shared stream.

@@ -13,13 +13,17 @@ import { TEST_INDEX, TEST_LIST_ID, createEsClientMock, equalityId } from './test
 describe('deleteLookupItemByValue (equality / native types)', () => {
   let esClient: EsClientMock;
 
+  const stored = { created_at: '2026-01-01T00:00:00.000Z', created_by: 'u', value: 'a' };
+
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = createEsClientMock();
   });
 
-  it('deletes the single doc keyed on the authored value', async () => {
-    await deleteLookupItemByValue({
+  it('reads then deletes the single doc keyed on the authored value, and returns it', async () => {
+    (esClient.get as jest.Mock).mockResolvedValueOnce({ _id: equalityId('a'), _source: stored });
+
+    const deleted = await deleteLookupItemByValue({
       esClient,
       index: TEST_INDEX,
       listId: TEST_LIST_ID,
@@ -32,12 +36,16 @@ describe('deleteLookupItemByValue (equality / native types)', () => {
       index: TEST_INDEX,
       refresh: 'wait_for',
     });
+    expect(deleted).toEqual([{ id: equalityId('a'), source: stored }]);
     // equality deletes never touch the coalesced machinery
     expect(esClient.search).not.toHaveBeenCalled();
     expect(esClient.bulk).not.toHaveBeenCalled();
+    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
   });
 
   it('honors an explicit refresh option', async () => {
+    (esClient.get as jest.Mock).mockResolvedValueOnce({ _id: equalityId('a'), _source: stored });
+
     await deleteLookupItemByValue({
       esClient,
       index: TEST_INDEX,
@@ -50,8 +58,8 @@ describe('deleteLookupItemByValue (equality / native types)', () => {
     expect(esClient.delete).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
   });
 
-  it('swallows a missing document (a missing value is not an error)', async () => {
-    (esClient.delete as jest.Mock).mockRejectedValueOnce(
+  it('returns nothing and deletes nothing when the value is not in the list', async () => {
+    (esClient.get as jest.Mock).mockRejectedValueOnce(
       Object.assign(new Error('not found'), { meta: { statusCode: 404 } })
     );
 
@@ -63,11 +71,12 @@ describe('deleteLookupItemByValue (equality / native types)', () => {
         type: 'keyword',
         value: 'gone',
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual([]);
+    expect(esClient.delete).not.toHaveBeenCalled();
   });
 
-  it('raises any other delete failure, so a caller without write is not told 200', async () => {
-    (esClient.delete as jest.Mock).mockRejectedValueOnce(
+  it('raises any other failure, so a caller without privileges is not told 200', async () => {
+    (esClient.get as jest.Mock).mockRejectedValueOnce(
       Object.assign(new Error('forbidden'), { meta: { statusCode: 403 } })
     );
 
@@ -79,6 +88,6 @@ describe('deleteLookupItemByValue (equality / native types)', () => {
         type: 'keyword',
         value: 'gone',
       })
-    ).rejects.toMatchObject({ message: 'forbidden' });
+    ).rejects.toThrow('forbidden');
   });
 });

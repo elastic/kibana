@@ -6,7 +6,7 @@ This document reports the response times of the value list endpoints on the two 
 
 Each operation goes through the public API with the default refresh policy (`wait_for`) on both storages. Every cell has its own list. The `ip` cells hold single addresses; the `ip_range` cells hold `/24` blocks with a gap between every two, so no two ranges merge and the coalesced set holds one interval per range, which is the worst case for the background task. Per cell: 200 item creates one at a time, 100 reads by value, 20 find pages of 100, a burst of 50 concurrent creates, 100 deletes by value (`ip` only), one import of 10,000 lines, and the list delete. List create and delete are measured on 30 empty lists per storage. Latencies are wall clock at the client, p50 and p95 per request, or a single wall time for the burst, the import, and the list delete.
 
-Two operations are not compared the same way on purpose. An import is measured until its items are visible in the store, because the legacy import answers before it writes and the lookup import answers after. Delete by value is compared on `ip` lists only, because on a range list the two storages delete different things by value (the ranges containing an address versus the authored range string).
+Two operations are not compared the same way on purpose. An import is measured until its items are visible in the store, because the legacy import answers before it writes and the lookup import answers after. Delete by value was measured on `ip` lists only. On a range list the current implementation returns 400 whenever a range contains the value, so there is nothing to compare; the lookup storage removes the containing ranges, found by the same containment query, and that case has not been measured.
 
 ## Results
 

@@ -10,6 +10,8 @@ export {
   getLookupIndexName,
   getLookupIndexPattern,
   normalizeListId,
+  assertLookupAccessName,
+  assertLookupNames,
   VALUE_LIST_INDEX_PREFIX,
 } from './get_lookup_index';
 export { buildLookupMappings, isRangeType, RANGE_BOUND_TYPE } from './build_lookup_mappings';
@@ -17,6 +19,7 @@ export { addLookupAlias, createLookupIndex, removeLookupAlias } from './create_l
 export { deleteLookupIndex } from './delete_lookup_index';
 export {
   writeLookupItems,
+  deleteAuthoredLookupItem,
   deleteLookupItemByValue,
   lookupItemId,
   reconcileCoalesced,
@@ -30,6 +33,8 @@ export {
   findListByLookupIndex,
   findLookupItems,
   locateLookupItem,
+  LOOKUP_ITEM_SOURCE,
+  stampsOf,
 } from './item_crud';
 export type { LookupItemStamps } from './item_crud';
 export {
@@ -42,16 +47,18 @@ export {
 export { paginateHits, collectHits, streamListValues } from './paginate_hits';
 export { canonicalLookupValue, normalizeLookupValue } from './normalize_lookup_value';
 export { ensureLookupIndexCurrent } from './upgrade_lookup_index';
+export { formatLookupValue } from './format_lookup_value';
+export type { DeletedLookupItem } from './write_lookup_items';
 export { findAllLookupItems, searchLookupItemsByValues } from './membership_lookup_items';
 export { importLookupItemsToStream } from './import_lookup_items';
 export { coalesceRangeValues } from './coalesce_ranges';
 export {
-  STORAGE_META_KEY,
   readStorageDescriptor,
   isLookupList,
   lookupAccessNameOf,
   lookupAliasOf,
   lookupIndexOf,
   lookupStorage,
+  assertStorageDescriptor,
 } from './storage';
 export type { ListStorageSource } from './storage';

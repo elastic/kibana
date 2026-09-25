@@ -14,7 +14,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { isRangeType } from './build_lookup_mappings';
-import { buildLookupListItem } from './item_crud';
+import { LOOKUP_ITEM_SOURCE, buildLookupListItem, stampsOf } from './item_crud';
+import type { LookupItemSource, LookupItemStamps } from './item_crud';
 import { readLookupItemValues } from './read_lookup_items';
 
 /**
@@ -112,25 +113,34 @@ export const searchLookupItemsByValues = async ({
     scalars.length === 0 ? [] : clausesForValue(type, valueIndex, values[valueIndex], scalars)
   );
 
-  const matched = new Set<string>();
+  // the stamps of the first document that matched each value, so a read by value
+  // returns what is stored rather than the request time
+  const matched = new Map<string, LookupItemStamps>();
   if (should.length > 0) {
-    const response = await esClient.search({
-      _source: false,
+    const response = await esClient.search<LookupItemSource>({
+      _source: LOOKUP_ITEM_SOURCE,
       index,
       query: { bool: { minimum_should_match: 1, should } },
       size: 10000,
     });
     for (const hit of response.hits.hits) {
-      matchedNames(hit).forEach((name) => matched.add(name.split('.')[0]));
+      for (const name of matchedNames(hit)) {
+        const [valueIndex] = name.split('.');
+        if (!matched.has(valueIndex)) matched.set(valueIndex, stampsOf(hit._source));
+      }
     }
   }
 
-  return values.map((value, valueIndex) => ({
-    items: matched.has(`${valueIndex}`)
-      ? elements[valueIndex].map((scalar) =>
-          buildLookupListItem({ listId, type, user, value: String(scalar) })
-        )
-      : [],
-    value,
-  }));
+  return values.map((value, valueIndex) => {
+    const stamps = matched.get(`${valueIndex}`);
+    return {
+      items:
+        stamps != null
+          ? elements[valueIndex].map((scalar) =>
+              buildLookupListItem({ listId, stamps, type, user, value: String(scalar) })
+            )
+          : [],
+      value,
+    };
+  });
 };

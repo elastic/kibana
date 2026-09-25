@@ -187,7 +187,13 @@ const numericCodec = (boundType: Type): RangeCodec => ({
 const parseDate = (text: string): number => {
   const canonical = canonicalLookupValue('date', text);
   if (!canonical.ok) throw new Error(canonical.reason);
-  return Date.parse(canonical.value);
+  const millis = Date.parse(canonical.value);
+  // An epoch past the JavaScript date range is a valid `date` value (kept as digits) but
+  // cannot be an endpoint here: the coalescer formats endpoints back through `Date`.
+  if (Number.isNaN(millis)) {
+    throw new Error(`"${text}" is beyond the range a date_range endpoint supports (year 275760)`);
+  }
+  return millis;
 };
 
 const dateCodec: RangeCodec = {

@@ -7,7 +7,14 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-/** Deleting a lookup list is a single index drop. */
+import { assertLookupNames } from './get_lookup_index';
+
+/**
+ * Delete a value list's concrete lookup index. Runs as the provisioning client, so the
+ * name is checked to be one this module built. A missing index is not a failure (a
+ * rerun after an interrupted delete); any other error, including one Elasticsearch
+ * reports for an index the client cannot see, is raised rather than treated as done.
+ */
 export const deleteLookupIndex = async ({
   esClient,
   index,
@@ -15,5 +22,9 @@ export const deleteLookupIndex = async ({
   esClient: ElasticsearchClient;
   index: string;
 }): Promise<void> => {
-  await esClient.indices.delete({ ignore_unavailable: true, index });
+  assertLookupNames({ index });
+  await esClient.indices.delete({ index }).catch((err: { meta?: { statusCode?: number } }) => {
+    if (err?.meta?.statusCode === 404) return;
+    throw err;
+  });
 };

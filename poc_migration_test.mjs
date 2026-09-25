@@ -22,6 +22,9 @@ const MAYBE_LIST = 'poc-mig-maybe';
 const EXC_LIST = 'poc-mig-exc';
 const REJ_LIST = 'poc-mig-rejected';
 const IM_RULE = 'poc-mig-im';
+// a list read by an indicator match rule through the wildcard `.items-*` rather than the exact stream name
+const WILD_LIST = 'poc-mig-wild';
+const WILD_RULE = 'poc-mig-wild-im';
 const EXC_RULE = 'poc-mig-exc-rule';
 const EXC_CONTAINER = 'poc-mig-exc-container';
 const MIG_INDEX = `.value-list-v2-${SPACE}-${MIG_LIST}`;
@@ -77,7 +80,7 @@ const createLegacyList = async (id, value) => {
   await kbn('POST', '/api/lists/items', { list_id: id, value });
 };
 
-const createImRule = (ruleId, listId) =>
+const createImRule = (ruleId, listId, threatIndex = [ITEMS_INDEX]) =>
   kbn('POST', '/api/detection_engine/rules', {
     rule_id: ruleId,
     name: ruleId,
@@ -91,7 +94,7 @@ const createImRule = (ruleId, listId) =>
     index: ['nonexistent-*'],
     query: '*',
     language: 'kuery',
-    threat_index: [ITEMS_INDEX],
+    threat_index: threatIndex,
     threat_query: `list_id: "${listId}"`,
     threat_language: 'kuery',
     threat_mapping: [{ entries: [{ field: 'destination.ip', type: 'mapping', value: 'ip' }] }],
@@ -148,9 +151,10 @@ const createExceptionRule = async (ruleId, listId) => {
 
 const cleanup = async () => {
   await kbn('DELETE', `/api/detection_engine/rules?rule_id=${IM_RULE}`);
+  await kbn('DELETE', `/api/detection_engine/rules?rule_id=${WILD_RULE}`);
   await kbn('DELETE', `/api/detection_engine/rules?rule_id=${EXC_RULE}`);
   await kbn('DELETE', `/api/exception_lists?list_id=${EXC_CONTAINER}&namespace_type=single`);
-  for (const id of [MIG_LIST, MAYBE_LIST, EXC_LIST, REJ_LIST])
+  for (const id of [MIG_LIST, MAYBE_LIST, EXC_LIST, REJ_LIST, WILD_LIST])
     await kbn('DELETE', `/api/lists?id=${id}&deleteReferences=true`);
   await es('DELETE', `/${MIG_INDEX}`);
   await es('DELETE', `/.value-list-v2-${SPACE}-${REJ_LIST}`);
@@ -261,6 +265,18 @@ const main = async () => {
       (r) => r.id === excRule.json.id && r.reason === 'exception' && r.canRead === true
     )
   );
+
+  log('\n=== a rule that reads the shared stream through the wildcard .items-* ===');
+  // The pattern resolves to the stream, so the rule reads the list exactly as one that
+  // names `.items-default`; the report must treat both the same.
+  await createLegacyList(WILD_LIST, '6.6.6.6');
+  const wildRule = await createImRule(WILD_RULE, WILD_LIST, ['.items-*']);
+  if (wildRule.status >= 400) throw new Error(`create wildcard IM rule failed: ${wildRule.status} ${JSON.stringify(wildRule.json)}`);
+  await sleep(1500);
+  const wildDry = await kbn('POST', '/internal/lists/_migrate', { id: WILD_LIST, dryRun: true }, ih);
+  const wildReported = (wildDry.json?.referencingRules?.rules ?? []).find((r) => r.id === wildRule.json.id);
+  check('a wildcard threat index that names the list is reported as referenced and blocks', wildDry.json?.warningLevel === 'referenced' && wildReported?.reason === 'threat_index' && wildDry.json?.blocked === true, `${wildDry.json?.warningLevel} ${JSON.stringify(wildReported)}`);
+  await kbn('DELETE', `/api/detection_engine/rules?rule_id=${WILD_RULE}`);
 
   log('\n=== migrate a list holding values the lookup grammar refuses ===');
   // Elasticsearch stores `1.9` on a long field as 1, so the legacy list accepts it; the

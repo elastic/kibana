@@ -306,6 +306,20 @@ const main = async () => {
     rFind.json.total === 2 && rFind.json.data.every((d) => d.value.includes('-')),
     JSON.stringify(rFind.json.data?.map((d) => d.value))
   );
+  // a range item id names a range string; deleting by id removes that document, it
+  // does not search the range field for the string (which Elasticsearch would reject)
+  const rDel = await kbn('DELETE', `/api/lists/items?id=${rUpd.json.id}`);
+  check(
+    'range DELETE by id returns the authored range',
+    rDel.status === 200 && rDel.json.value === '10.0.1.0-10.0.1.10',
+    JSON.stringify(rDel.json)
+  );
+  merged = await waitFor(() => coalesced(rangeIndex), ['10.0.0.50-10.0.0.200']);
+  check(
+    'coalesced set follows the delete by id',
+    JSON.stringify(merged) === JSON.stringify(['10.0.0.50-10.0.0.200']),
+    JSON.stringify(merged)
+  );
 
   log('\n=== import without list_id ===');
   const imported = await importValues(['1.1.1.1', '2.2.2.2', '1.1.1.1'], IMPORT_FILE, 'type=ip');
@@ -334,6 +348,46 @@ const main = async () => {
     're-import into the same file name appends to the same list',
     reimported.status === 200 && afterReimport.json.total === 3
   );
+
+  log('\n=== range list: delete by value on both storages ===');
+  // The current implementation means "delete the ranges that contain the value", but its
+  // second step rebuilds the delete query from the range strings it found, and a `term`
+  // on the range field rejects a CIDR, so the request returns 400 whenever a range
+  // matches. The lookup list carries the intended meaning through and returns 200 with
+  // the removed ranges. A range string is refused by Elasticsearch on both, and a value
+  // no range contains is 404 on both.
+  const twins = [
+    { id: 'poc-crud-del-legacy', storage: 'legacy' },
+    { id: 'poc-crud-del-lookup', storage: 'lookup' },
+  ];
+  const answers = {};
+  for (const twin of twins) {
+    await kbn('DELETE', `/api/lists?id=${twin.id}`);
+    const body = { id: twin.id, type: 'ip_range', name: twin.id, description: twin.id };
+    if (twin.storage === 'legacy') body.meta = { __forceLegacy: true };
+    await kbn('POST', '/api/lists', body);
+    for (const value of ['10.9.0.0/24', '10.9.0.128-10.9.1.255', '10.9.5.0/24']) {
+      await kbn('POST', '/api/lists/items', { list_id: twin.id, value });
+    }
+    const byAddress = await kbn('DELETE', `/api/lists/items?list_id=${twin.id}&value=10.9.0.200`);
+    const remaining = await kbn('GET', `/api/lists/items/_find?list_id=${twin.id}&page=1&per_page=10`);
+    const byRangeString = await kbn('DELETE', `/api/lists/items?list_id=${twin.id}&value=${encodeURIComponent('10.9.5.0/24')}`);
+    const missing = await kbn('DELETE', `/api/lists/items?list_id=${twin.id}&value=192.168.7.7`);
+    answers[twin.storage] = {
+      byAddress: { status: byAddress.status, removed: Array.isArray(byAddress.json) ? byAddress.json.length : 0 },
+      byRangeString: byRangeString.status,
+      missing: missing.status,
+      remaining: (remaining.json?.data ?? []).map((d) => d.value).sort(),
+    };
+    await kbn('DELETE', `/api/lists?id=${twin.id}`);
+  }
+  log(`  legacy: ${JSON.stringify(answers.legacy)}`);
+  log(`  lookup: ${JSON.stringify(answers.lookup)}`);
+  check('the current implementation fails an address delete when a range contains it', answers.legacy.byAddress.status === 400 && answers.legacy.remaining.length === 3, JSON.stringify(answers.legacy.byAddress));
+  check('the lookup list removes the two ranges containing the address', answers.lookup.byAddress.status === 200 && answers.lookup.byAddress.removed === 2, JSON.stringify(answers.lookup.byAddress));
+  check('the range that did not contain it remains on the lookup list', answers.lookup.remaining.length === 1, JSON.stringify(answers.lookup.remaining));
+  check('a range string gets the same rejection on both storages', answers.legacy.byRangeString >= 400 && answers.legacy.byRangeString === answers.lookup.byRangeString, `${answers.legacy.byRangeString} vs ${answers.lookup.byRangeString}`);
+  check('a value in no range is 404 on both', answers.legacy.missing === 404 && answers.lookup.missing === 404, `${answers.legacy.missing} vs ${answers.lookup.missing}`);
 
   log('\n=== geo_point list: authored spelling survives find and export ===');
   // A `lat,lon` value is stored as an object by the shared serializer. Two spellings of

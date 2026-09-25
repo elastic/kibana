@@ -11,6 +11,7 @@ import type { CoalescedBound } from './coalesce_ranges';
 import {
   coalesceBounds,
   createStreamingCoalescer,
+  parseValueToBound,
   uncoveredBounds,
   uncoveredInStreams,
 } from './coalesce_ranges';
@@ -136,5 +137,17 @@ describe('uncoveredInStreams', () => {
       expect(actual.count).toBe(expected.length);
       expect(actual.first).toEqual(expected[0]);
     }
+  });
+});
+
+describe('date_range endpoints', () => {
+  it('rejects an epoch the date grammar accepts but a JavaScript date cannot format', () => {
+    // a valid `date` value, kept as digits, but the coalescer formats endpoints through `Date`
+    expect(parseValueToBound('date_range', '9007199254740993')).toBeUndefined();
+    // date ranges are written `start,end`
+    expect(parseValueToBound('date_range', '1577836800000,1577836900000')).toEqual({
+      range_end: '2020-01-01T00:01:40.000Z',
+      range_start: '2020-01-01T00:00:00.000Z',
+    });
   });
 });

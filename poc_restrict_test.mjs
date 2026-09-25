@@ -384,6 +384,18 @@ const main = async () => {
   const again = await kbn('POST', '/internal/lists/_restrict', { id: LIST }, ih);
   check('restrict is idempotent', again.status === 200 && again.json.changed === false);
 
+  log('\n=== a writer without read on the restricted index can neither open nor delete it ===');
+  // Restricting is an Elasticsearch boundary; the two operations that undo it must not be
+  // open to every list writer. The wildcard-role user has Kibana `all` and the `.items*`
+  // wildcard, and nothing on the concrete index.
+  const wih = { ...ih, authorization: basic(WILDCARD_USER) };
+  const deniedUnrestrict = await kbn('POST', '/internal/lists/_unrestrict', { id: LIST }, wih);
+  check('wildcard-role user cannot un-restrict (403)', deniedUnrestrict.status === 403, `${deniedUnrestrict.status} ${JSON.stringify(deniedUnrestrict.json).slice(0, 120)}`);
+  const deniedDelete = await kbn('DELETE', `/api/lists?id=${LIST}`, undefined, wh);
+  check('wildcard-role user cannot delete the restricted list (403)', deniedDelete.status === 403, `${deniedDelete.status}`);
+  check('the list and its index are still there', (await kbn('GET', `/api/lists?id=${LIST}`)).status === 200 && (await es('HEAD', `/${INDEX}`)).status === 200);
+  check('the alias is still absent', (await es('HEAD', `/_alias/${ALIAS}`)).status === 404);
+
   log('\n=== unrestrict ===');
   const un = await kbn('POST', '/internal/lists/_unrestrict', { id: LIST }, ih);
   log(`  response: ${JSON.stringify(un.json)}`);

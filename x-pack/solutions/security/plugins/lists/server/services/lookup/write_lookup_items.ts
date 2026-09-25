@@ -722,7 +722,37 @@ const ignoreNotFound = (err: { meta?: { statusCode?: number } }): void => {
   throw err;
 };
 
-/** Delete a single authored value from a lookup list. */
+/** A document a delete by value removed: its id and the fields the item response is built from. */
+export interface DeletedLookupItem {
+  id: string;
+  source: Record<string, unknown>;
+}
+
+const DELETED_ITEM_SOURCE = [
+  'value',
+  'src_start',
+  'src_end',
+  'created_at',
+  'created_by',
+  'updated_at',
+  'updated_by',
+];
+
+/**
+ * Delete by value, with the current implementation's meaning of "value". On an equality
+ * list the value names one document. On a range list the current implementation looks
+ * for every stored range that CONTAINS the value with a `term` on the range field, so
+ * this does the same on `src_range`: `10.0.0.5` removes every range holding that
+ * address. (The current implementation then rebuilds its delete query from the range
+ * strings it found, which the same `term` rejects, so it returns 400 whenever a range
+ * matches; this carries the intended meaning through and returns the removed ranges.)
+ * A range string such as `10.0.0.0/24` or `1-10` is not a value a range field can be
+ * queried by, and Elasticsearch rejects it; the current implementation returns that
+ * error to the caller, and so does this, on purpose, rather than deleting the authored
+ * range by its id, so both storages answer that request the same way. The by-id paths
+ * use `deleteAuthoredLookupItem` instead.
+ * @returns The documents removed, empty when the value was not in the list
+ */
 export const deleteLookupItemByValue = async ({
   esClient,
   index,
@@ -737,19 +767,81 @@ export const deleteLookupItemByValue = async ({
   type: Type;
   value: string;
   refresh?: estypes.Refresh;
-}): Promise<void> => {
-  const id = lookupItemId(type, value, listId);
+}): Promise<DeletedLookupItem[]> => {
   if (isRangeType(type)) {
-    await esClient.delete({ id, index, refresh }).catch(ignoreNotFound);
-    // Only a parseable value contributed a bound; an unparseable one changed no
-    // interval, so nothing is owed to the coalesced set. Marker before version bump, as
-    // on insert.
+    const query: estypes.QueryDslQueryContainer = {
+      bool: { filter: [{ term: { kind: 'source' } }, { term: { src_range: value } }] },
+    };
+    const found = await esClient.search<Record<string, unknown>>({
+      _source: DELETED_ITEM_SOURCE,
+      index,
+      query,
+      size: 10000,
+    });
+    const hits = found.hits.hits.filter((hit) => hit._source != null);
+    if (hits.length === 0) return [];
+    // the same two steps as the shared stream: find, then delete by the same query
+    await esClient.deleteByQuery({
+      conflicts: 'proceed',
+      index,
+      query,
+      refresh: refresh !== false,
+    });
+    // Every removed source contributed a bound, so its region owes a re-coalesce. Marker
+    // before version bump, as on insert.
+    const bounds = hits
+      .map((hit) => hit._source as { src_end?: string; src_start?: string })
+      .filter(
+        (s): s is { src_end: string; src_start: string } => s.src_start != null && s.src_end != null
+      )
+      .map((s) => ({ range_end: s.src_end, range_start: s.src_start }));
+    await writeDirtyMarkers(esClient, index, capWindows(coalesceBounds(type, bounds)));
+    await markCoalesceDirty(esClient, index);
+    return hits.map((hit) => ({ id: hit._id as string, source: hit._source ?? {} }));
+  }
+
+  return deleteAuthoredLookupItem({ esClient, index, listId, refresh, type, value });
+};
+
+/**
+ * Delete exactly the document one authored value names, whatever the type. The by-id
+ * paths need this: an item id resolves to its authored value, and on a range list that
+ * value is a range string, which is a document to remove, not an address to search
+ * for. A removed range owes its region a re-coalesce, marker before version bump, as
+ * on insert.
+ * @returns The document removed, empty when the value was not in the list
+ */
+export const deleteAuthoredLookupItem = async ({
+  esClient,
+  index,
+  listId,
+  type,
+  value,
+  refresh = 'wait_for',
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  listId: string;
+  type: Type;
+  value: string;
+  refresh?: estypes.Refresh;
+}): Promise<DeletedLookupItem[]> => {
+  const id = lookupItemId(type, value, listId);
+  const existing = await esClient
+    .get<Record<string, unknown>>({ _source: DELETED_ITEM_SOURCE, id, index })
+    .catch((err: { meta?: { statusCode?: number } }) => {
+      if (err?.meta?.statusCode === 404) return undefined;
+      throw err;
+    });
+  if (existing == null) return [];
+  await esClient.delete({ id, index, refresh }).catch(ignoreNotFound);
+  if (isRangeType(type)) {
+    // Only a parseable value contributed a bound; an unparseable one changed no interval.
     const bound = parseValueToBound(type, value);
     if (bound != null) {
       await writeDirtyMarkers(esClient, index, [bound]);
       await markCoalesceDirty(esClient, index);
     }
-    return;
   }
-  await esClient.delete({ id, index, refresh }).catch(ignoreNotFound);
+  return [{ id, source: existing._source ?? {} }];
 };

@@ -65,7 +65,8 @@ export const buildLookupListItem = ({
 }): ListItemSchema => {
   const now = new Date().toISOString();
   return {
-    '@timestamp': stamps?.updated_at ?? now,
+    // creation time, as on the shared stream
+    '@timestamp': stamps?.created_at ?? now,
     _version: undefined,
     created_at: stamps?.created_at ?? now,
     created_by: stamps?.created_by ?? user,
@@ -89,11 +90,12 @@ export interface LookupItemStamps {
 }
 
 /** The stored shape of a lookup item document, as far as the item routes read it. */
-type LookupItemSource = { value?: unknown } & LookupItemStamps;
+export type LookupItemSource = { value?: unknown } & LookupItemStamps;
 
-const LOOKUP_ITEM_SOURCE = ['value', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+export const LOOKUP_ITEM_SOURCE = ['value', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
-const stampsOf = (source: LookupItemSource | undefined): LookupItemStamps => ({
+/** The stamps stored on a lookup item document, as the item routes return them. */
+export const stampsOf = (source: LookupItemSource | undefined): LookupItemStamps => ({
   created_at: source?.created_at,
   created_by: source?.created_by,
   updated_at: source?.updated_at,

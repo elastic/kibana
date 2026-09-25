@@ -250,15 +250,10 @@ describe('TelemetryReceiver', () => {
 
       expect(getDataStream).toHaveBeenCalledWith(expect.objectContaining({ name: '.items-*' }));
       const { legacy, lookup } = indicatorMatchQueries();
+      // a pattern such as `.items-*` names no lookup list, so no clause counts it as one
       const readsLookupList = [
         { prefix: { 'alert.params.threatIndex': '.value-list' } },
         { terms: { 'alert.params.threatIndex': [ALIAS, INDEX] } },
-        {
-          bool: {
-            must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
-            must_not: [{ terms: { 'alert.params.threatIndex': [STREAM] } }],
-          },
-        },
       ];
       expect(legacy?.query?.bool?.must).toEqual([
         { terms: { 'alert.params.threatIndex': [STREAM] } },

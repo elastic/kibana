@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { MetaOrUndefined, Storage } from '@kbn/securitysolution-io-ts-list-types';
+import type { Storage } from '@kbn/securitysolution-io-ts-list-types';
+
+import { ErrorWithStatusCode } from '../../error_with_status_code';
+
+import { getLookupAliasName, getLookupIndexName } from './get_lookup_index';
 
 /**
  * The storage descriptor lives in a top-level `storage` field on the
@@ -19,38 +23,56 @@ import type { MetaOrUndefined, Storage } from '@kbn/securitysolution-io-ts-list-
  * alias, so only roles that grant the concrete name can reach it.
  *
  * Absence of `storage` reads as a legacy data-stream list, so pre-existing lists
- * need no migration. An earlier POC stashed the descriptor inside `meta` under
- * `STORAGE_META_KEY`; that form is still read so lists it migrated keep resolving.
+ * need no migration. Only provisioning and migration write the field, and the public
+ * update and patch routes never do, but a list user holds Elasticsearch write on the
+ * container and can set it directly. The names it holds go to the internal client for
+ * index deletion, alias changes, mapping upgrades, and the coalesce task, so they are
+ * never trusted as read: `assertStorageDescriptor` checks that they are exactly the names
+ * this module derives from the space and the list id, and every read of a list runs it.
  */
-export const STORAGE_META_KEY = '__vlStorage';
 
 /** The parts of a list this module reads to resolve its storage. */
 export interface ListStorageSource {
+  id: string;
   storage?: Storage | null;
-  meta?: MetaOrUndefined;
 }
 
 const DATA_STREAM: Storage = { type: 'data_stream' };
 
-/** Read the legacy `meta.__vlStorage` stash, normalized to the current shape. */
-const readLegacyMetaDescriptor = (meta: MetaOrUndefined): Storage | undefined => {
-  const stash = (meta as Record<string, unknown> | undefined)?.[STORAGE_META_KEY] as
-    | { type?: string; index?: string; locator?: { index?: string } }
-    | undefined;
-  if (stash == null) return undefined;
-  if (stash.type === 'lookup' || stash.type === 'lookup_index') {
-    const index = stash.locator?.index ?? stash.index;
-    return { locator: index != null ? { index } : undefined, type: 'lookup_index' };
-  }
-  return undefined;
-};
-
 export const readStorageDescriptor = (list: ListStorageSource): Storage => {
   const fromField = list.storage ?? undefined;
   if (fromField?.type === 'lookup_index') return fromField;
-  const fromMeta = readLegacyMetaDescriptor(list.meta);
-  if (fromMeta != null) return fromMeta;
   return DATA_STREAM;
+};
+
+/**
+ * Refuse a lookup descriptor whose names are not the ones derived from the space and the
+ * list id. The descriptor is derived data; a different name means it was written by hand,
+ * and acting on it would let a list writer point the internal client at another list's
+ * index, in this space or another. A legacy list has nothing to check.
+ */
+export const assertStorageDescriptor = ({
+  list,
+  spaceId,
+  listItemIndex,
+}: {
+  list: ListStorageSource;
+  spaceId: string;
+  listItemIndex: string;
+}): void => {
+  const descriptor = readStorageDescriptor(list);
+  if (descriptor.type !== 'lookup_index') return;
+  const expectedIndex = getLookupIndexName(spaceId, list.id);
+  const expectedAlias = getLookupAliasName(listItemIndex, list.id);
+  const { index, alias } = descriptor.locator ?? {};
+  if (index !== expectedIndex || (alias != null && alias !== expectedAlias)) {
+    throw new ErrorWithStatusCode(
+      `list "${list.id}" has a storage descriptor naming "${
+        alias ?? index
+      }", which is not this list's index; the descriptor was not written by the lists plugin`,
+      500
+    );
+  }
 };
 
 export const isLookupList = (list: ListStorageSource): boolean =>
