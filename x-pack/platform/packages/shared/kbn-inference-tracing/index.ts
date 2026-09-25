@@ -30,6 +30,11 @@ export {
   EVALUATOR_NAME_BAGGAGE_KEY,
   CONVERSATION_ID_BAGGAGE_KEY,
 } from './src/baggage';
+export {
+  WORKFLOW_RUN_ID_ATTRIBUTE_NAME,
+  getWorkflowRunIdFromContext,
+  withWorkflowRunIdContext,
+} from './src/workflow_run_id';
 export { parseJsonAttr } from './src/util/parse_json_attr';
 
 export { isInferenceSpan } from './src/is_inference_span';

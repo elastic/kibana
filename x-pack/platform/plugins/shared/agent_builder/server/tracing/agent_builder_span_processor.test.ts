@@ -16,6 +16,7 @@ import {
   ElasticGenAIAttributes,
   GenAISemanticConventions,
   UserAttributes,
+  WORKFLOW_RUN_ID_ATTRIBUTE_NAME,
 } from '@kbn/inference-tracing';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
@@ -641,6 +642,24 @@ describe('AgentBuilderSpanProcessor', () => {
       expect(exported.attributes['elastic.workflow.id']).not.toBe('workflow-uuid-456');
       expect(exported.attributes['elastic.workflow.execution_id']).toMatch(/^[a-f0-9]{16}$/);
       expect(exported.attributes['elastic.workflow.execution_id']).not.toBe('exec-uuid-789');
+    });
+
+    it('hashes kibana.workflows.run_id when real IDs are disabled, like elastic.workflow.execution_id', () => {
+      // Same identifier class as `elastic.workflow.execution_id` above, so it obeys the same
+      // includeRealIds policy: a second attribute name must not re-expose what it anonymizes.
+      const hashed = exportWith(
+        { includeRealIds: false },
+        { [WORKFLOW_RUN_ID_ATTRIBUTE_NAME]: 'workflow-exec-uuid-abc' }
+      );
+      expect(hashed.attributes[WORKFLOW_RUN_ID_ATTRIBUTE_NAME]).toMatch(/^[a-f0-9]{16}$/);
+      expect(hashed.attributes[WORKFLOW_RUN_ID_ATTRIBUTE_NAME]).not.toBe('workflow-exec-uuid-abc');
+
+      // The join key still works when real IDs are on: the value stays queryable as-is.
+      const raw = exportWith(
+        { includeRealIds: true },
+        { [WORKFLOW_RUN_ID_ATTRIBUTE_NAME]: 'workflow-exec-uuid-abc' }
+      );
+      expect(raw.attributes[WORKFLOW_RUN_ID_ATTRIBUTE_NAME]).toBe('workflow-exec-uuid-abc');
     });
 
     it('does NOT hash gen_ai.tool.call.id', () => {
