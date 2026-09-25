@@ -11,13 +11,18 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../common/siem_migrations/constants';
+import { SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT } from '../../../../../common/siem_migrations/tool_events';
 import type { GetRuleMigrationRulesResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
-import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
+import {
+  createToolErrorResult,
+  createToolError,
+  createMissingPrivilegeError,
+} from '../common/tool_results';
 import { MigrationId } from '../common/schemas';
 import { getValidateEsql } from '../../../../lib/siem_migrations/common/task/agent/helpers/validate_esql';
 import {
@@ -25,6 +30,7 @@ import {
   cleanMarkdown,
 } from '../../../../lib/siem_migrations/common/task/util/comments';
 import { SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID } from './tool_ids';
+import type { UpdateElasticRulePatch } from './utils/update_translated_rule';
 import {
   getEsqlQueryUpdatePatch,
   getUpdatePrebuiltRulePatch,
@@ -51,13 +57,17 @@ const schema = z.object({
       'The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. ' +
         'Can be combined with new integration_ids, provided the index in the query is created ' +
         'from those integrations. Mutually exclusive with prebuilt_rule — if both are supplied, ' +
-        'prebuilt_rule takes precedence.'
+        'prebuilt_rule takes precedence. ' +
+        'When supplied for a rule that currently has a prebuilt rule match, the match is cleared ' +
+        'and the rule title and description revert to the original rule values. ' +
+        'Cannot be used on rules that are already installed (elastic_rule.id is set).'
     ),
   prebuilt_rule: PreBuiltRuleSchema.optional().describe(
     'The correct prebuilt rule match (id and title). Provide ONLY when the matched prebuilt rule ' +
       'needs to be updated. Can be combined with new integration_ids, provided the prebuilt rule ' +
       'relies on data from those integrations. Mutually exclusive with esql_query — if both are ' +
-      'supplied, prebuilt_rule takes precedence.'
+      'supplied, prebuilt_rule takes precedence. ' +
+      'Cannot be used on rules that are already installed (elastic_rule.id is set).'
   ),
   integration_ids: z
     .array(z.string().min(1).max(256))
@@ -110,6 +120,8 @@ Mandatory params:
 - rule_id (required): the id of the specific rule migration item to update
 - comment (required): markdown explanation of what changed and why — appended to the rule's comment history and shown to the user in the rule details flyout
 
+Rules that are already installed (elastic_rule.id is set) are immutable and cannot be updated — this tool will reject the call.
+
 Two write paths — supply exactly one:
 
 ### Write path 1 — prebuilt rule match:
@@ -117,7 +129,9 @@ Two write paths — supply exactly one:
 - integration_ids (optional): corrected integration ids related to the prebuilt rule
 
 ### Write path 2 — ES|QL query:
-- esql_query: corrected ES|QL query (validated before applying)
+- esql_query: corrected ES|QL query (validated before applying). If the rule currently has a
+  prebuilt rule match, supplying esql_query clears the match and resets the title and description
+  to the original rule values.
 - integration_ids (optional): corrected integration ids whose index pattern the query uses
 
 If both prebuilt_rule and esql_query are supplied, prebuilt_rule takes precedence.
@@ -125,7 +139,7 @@ integration_ids cannot be updated on its own — always supply it with esql_quer
 `,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
-    handler: async (input, { request }) => {
+    handler: async (input, { request, events }) => {
       const {
         migration_id: migrationId,
         rule_id: ruleId,
@@ -140,46 +154,8 @@ integration_ids cannot be updated on its own — always supply it with esql_quer
         return createMissingPrivilegeError('update a translated migration rule');
       }
 
-      // Determine patch via two-branch dispatch.
-      // prebuilt_rule takes precedence; integration_ids alone is not a valid update.
-      let patchResult;
-      if (prebuiltRule != null) {
-        patchResult = getUpdatePrebuiltRulePatch(prebuiltRule, integrationIds);
-      } else if (esqlQuery != null) {
-        patchResult = await getEsqlQueryUpdatePatch(esqlQuery, integrationIds, { validateEsql });
-      } else {
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message:
-                  'Provide either esql_query or prebuilt_rule. integration_ids cannot be updated ' +
-                  'on its own — supply it together with a new esql_query (when the index pattern ' +
-                  'changes) or a new prebuilt_rule.',
-              },
-            },
-          ],
-        };
-      }
-
-      if (!patchResult.ok) {
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: { message: patchResult.error },
-            },
-          ],
-        };
-      }
-
-      const elasticRule = patchResult.patch;
-
-      // The PATCH persists via an ES partial-doc update, which replaces arrays wholesale, so the
-      // new comment must be appended here and the full array resent.
+      // Fetch the current rule first — needed for the installed guard, the not-found check,
+      // and to detect a prebuilt match that the ES|QL path must clear.
       const currentResponse = await callSelfClient<GetRuleMigrationRulesResponse>(
         request,
         buildPath(migrationId),
@@ -188,55 +164,78 @@ integration_ids cannot be updated on its own — always supply it with esql_quer
       if (!currentResponse.ok) {
         return createToolErrorResult(
           currentResponse,
-          `Failed to read translated rule "${ruleId}" in migration "${migrationId}"`
+          `Failed to read translated rule "${ruleId}" in migration "${migrationId}" : ${currentResponse.message}`
         );
       }
       const currentRule = currentResponse.body.data[0];
       if (currentRule == null) {
+        return createToolError(
+          `Translated rule "${ruleId}" not found in migration "${migrationId}"`
+        );
+      }
+
+      // Installed rules are immutable — no write path applies.
+      if (currentRule.elastic_rule?.id != null) {
+        const ruleTitle = currentRule.elastic_rule.title ?? currentRule.original_rule.title;
+        return createToolError(
+          `Cannot update translated rule "${ruleId}" in migration "${migrationId}": ` +
+            `it is already installed as "${ruleTitle}" (elastic_rule.id is set).`
+        );
+      }
+
+      // Determine patch via two-branch dispatch.
+      // prebuilt_rule takes precedence; integration_ids alone is not a valid update.
+      let elasticRulePatch: UpdateElasticRulePatch;
+      try {
+        if (prebuiltRule) {
+          elasticRulePatch = getUpdatePrebuiltRulePatch(prebuiltRule, integrationIds);
+        } else if (esqlQuery) {
+          elasticRulePatch = await getEsqlQueryUpdatePatch(esqlQuery, integrationIds, {
+            validateEsql,
+            currentRule,
+          });
+        } else {
+          return createToolError('Provide either esql_query or prebuilt_rule.');
+        }
+
+        const comments = [
+          ...(currentRule.comments ?? []),
+          generateAssistantComment(cleanMarkdown(comment)),
+        ];
+
+        const response = await callSelfClient(request, buildPath(migrationId), {
+          method: 'PATCH',
+          body: [{ id: ruleId, elastic_rule: elasticRulePatch, comments }],
+        });
+
+        if (!response.ok) {
+          return createToolErrorResult(
+            response,
+            `Failed to update translated rule "${ruleId}" in migration "${migrationId}"`
+          );
+        }
+
+        events.sendUiEvent(SIEM_MIGRATION_RULE_UPDATED_TOOL_EVENT, { migrationId, ruleId });
+
         return {
           results: [
             {
               tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
+              type: ToolResultType.other,
               data: {
-                message: `Rule "${ruleId}" was not found in migration "${migrationId}". Check the rule id and try again.`,
+                ok: true,
+                migration_id: migrationId,
+                rule_id: ruleId,
+                ...(response.body != null ? (response.body as object) : {}),
               },
             },
           ],
         };
-      }
-
-      const comments = [
-        ...(currentRule.comments ?? []),
-        generateAssistantComment(cleanMarkdown(comment)),
-      ];
-
-      const response = await callSelfClient(request, buildPath(migrationId), {
-        method: 'PATCH',
-        body: [{ id: ruleId, elastic_rule: elasticRule, comments }],
-      });
-
-      if (!response.ok) {
-        return createToolErrorResult(
-          response,
-          `Failed to update translated rule "${ruleId}" in migration "${migrationId}"`
+      } catch (error) {
+        return createToolError(
+          error instanceof Error ? error.message : 'Failed to update translated rule'
         );
       }
-
-      return {
-        results: [
-          {
-            tool_result_id: getToolResultId(),
-            type: ToolResultType.other,
-            data: {
-              ok: true,
-              migration_id: migrationId,
-              rule_id: ruleId,
-              ...(response.body != null ? (response.body as object) : {}),
-            },
-          },
-        ],
-      };
     },
   };
 };

@@ -35,11 +35,17 @@ export const convertEsqlQueryToTranslationResult = (
 export const transformToInternalUpdateRuleMigrationData = (
   ruleMigration: UpdateRuleMigrationRule
 ): InternalUpdateRuleMigrationRule => {
-  if (ruleMigration.elastic_rule?.query == null) {
+  const { elastic_rule } = ruleMigration;
+  // Prebuilt match takes precedence. Must use truthiness (not != null) so a `prebuilt_rule_id: null`
+  // unmatch falls through to the query branch below.
+  if (elastic_rule?.prebuilt_rule_id) {
+    return { ...ruleMigration, translation_result: MigrationTranslationResultEnum.full };
+  }
+  if (elastic_rule?.query == null) {
     return ruleMigration;
   }
   return {
     ...ruleMigration,
-    translation_result: convertEsqlQueryToTranslationResult(ruleMigration.elastic_rule.query),
+    translation_result: convertEsqlQueryToTranslationResult(elastic_rule.query),
   };
 };

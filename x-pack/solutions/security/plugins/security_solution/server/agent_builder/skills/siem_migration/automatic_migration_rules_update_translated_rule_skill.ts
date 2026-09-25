@@ -50,6 +50,11 @@ Integration is never written on its own.
 This skill is mutating: it writes the correction back to a single migration rule and requires user
 confirmation before applying. If user asks to update multiple rules, take them one at a time and confirm each update.
 
+**This skill applies only to rules that have not been installed yet.** A migration rule with
+\`elastic_rule.id\` set has already been installed as a detection rule and is immutable from the
+migration's perspective — no write path applies to it. Check for this after the mandatory rule
+fetch (see Workflow) and stop if it is already installed.
+
 ${AUTOMATIC_MIGRATION_GENERAL_GUIDELINES}
 
 ${AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK}
@@ -81,13 +86,18 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 1. **Fetch the rule first**: call \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` to retrieve the
    current state — original query, vendor, translated ES|QL, prebuilt rule match, integration ids,
    and any comments. Always do this before presenting options or asking questions.
-2. **Present options**: ask the user what they want to fix:
+2. **Stop if the rule is already installed.** If the fetched rule has \`elastic_rule.id\` set, do
+   not present the correction options and do not call
+   \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\`. Explain that the rule has already been
+   installed as a detection rule and can no longer be corrected through the migration. Stop there.
+3. **Present options**: ask the user what they want to fix:
    - Fix **ES|QL query**
    - Fix **Prebuilt rule match**
    - Fix **Integration match**
 3. Based on the user's selection, follow the appropriate sub-workflow below.
 
 ### Pre-built rule update workflow
+
 
 1. Ready the Title, Description and query of the original rule.
 2. Search for appropriate pre-built rule use cases using following strategies. It is mandatory to find rule uuid.
@@ -142,8 +152,8 @@ and field details, and rewriting both the query and the integration match in one
    and what field names they think it should be, and present your analysis.
 
 Example tool call for a placeholder or field-name fix (query only). Note: the tool hard-rejects any
-query still containing \`[macro:…]\` or \`[lookup:…]\` tokens, and then validates the ES|QL syntax —
-so ensure both conditions are met before calling.
+query still containing \`[macro:…]\`, \`[lookup:…]\`, or the missing-index-pattern placeholder, and
+then validates the ES|QL syntax — so ensure all placeholders are resolved before calling.
 
 \`\`\`json
 {
@@ -251,9 +261,16 @@ and \`CommandLine\` → \`process.args\`. Detection logic unchanged.
   fall back immediately to \`platform.core.product_documentation\` as the authoritative source
   for index patterns and field names — do not retry or ask the user to wait.
 - Never apply a query that still contains macro or lookup placeholders (\`[macro:…]\`,
-  \`[lookup:…]\`). Check missing resources first if such placeholders appear in the original.
+  \`[lookup:…]\`) or the missing-index-pattern placeholder. Check missing resources first if such
+  placeholders appear in the original.
 - **\`esql_query\` and \`prebuilt_rule\` are mutually exclusive** write paths. If both are supplied the tool applies \`prebuilt_rule\` and ignores \`esql_query\`. Always supply exactly one.
+- **Supplying \`esql_query\` for a rule that currently has a prebuilt match unmatches it** —
+  \`prebuilt_rule_id\` is cleared and title/description revert to the original rule's values. Only
+  do this when the user genuinely wants a custom translation instead of the prebuilt rule, and
+  say so in the \`comment\`.
 - **\`integration_ids\` cannot be supplied alone.** It must accompany either \`esql_query\` or \`prebuilt_rule\`.
+- **Never call the tool for a rule with \`elastic_rule.id\` set.** Installed rules are immutable —
+  say so and stop.
 - Only propose ES|QL (query_language: esql). No other query languages are accepted by this tool.
 - All ids, statuses, and query content must come from tool results — never invent them.
 - Every call must include a \`comment\` explaining every aspect changed. Never send a placeholder,

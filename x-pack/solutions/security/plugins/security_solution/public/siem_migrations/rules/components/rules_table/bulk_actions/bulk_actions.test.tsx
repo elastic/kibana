@@ -16,7 +16,10 @@ import {
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { SiemMigrationsService } from '../../../../service';
 import { getRuleMigrationRuleMock } from '../../../../../../common/siem_migrations/model/__mocks__';
-import { getRuleMigrationTranslationStatsMock } from '../../../__mocks__';
+import {
+  getRuleMigrationStatsMock,
+  getRuleMigrationTranslationStatsMock,
+} from '../../../__mocks__';
 
 jest.mock('../../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -26,6 +29,8 @@ const mockSiemMigrationsService = {
     getMissingCapabilities: jest.fn(),
   },
 } as unknown as jest.MockedObjectDeep<SiemMigrationsService>;
+
+const mockMigrationStats = getRuleMigrationStatsMock();
 
 describe('BulkActions', () => {
   beforeEach(() => {
@@ -66,6 +71,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -99,6 +105,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -132,6 +139,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           reprocessFailedRules={reprocessFailedRules}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
@@ -173,6 +181,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -206,6 +215,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -239,6 +249,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           installTranslatedRule={installTranslatedRule}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
@@ -280,6 +291,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -320,6 +332,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           installSelectedRule={installSelectedRule}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
@@ -361,6 +374,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           installSelectedRule={jest.fn()}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
@@ -406,6 +420,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           installSelectedRule={jest.fn()}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />

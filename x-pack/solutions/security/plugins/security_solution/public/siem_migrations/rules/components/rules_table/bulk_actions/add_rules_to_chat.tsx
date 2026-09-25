@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiToolTip } from '@elastic/eui';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationStats } from '../../../types';
 import { useAgentBuilderAttachment } from '../../../../../agent_builder/hooks/use_agent_builder_attachment';
@@ -13,12 +14,22 @@ import { NewAgentBuilderAttachment } from '../../../../../agent_builder/componen
 import type { AgentBuilderAddToChatTelemetry } from '../../../../../agent_builder/hooks/use_report_add_to_chat';
 import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
 import { WithMissingPrivilegesTooltip } from '../../../../common/components/missing_privileges';
+import { useKibana } from '../../../../../common/lib/kibana';
+import {
+  REQUIRED_UI_SETTING_IDS,
+  RequiredUiSettingsTooltipContent,
+} from '../../../../common/components/required_ui_settings';
 import {
   ADD_TO_CHAT_BUTTON_LABEL,
   ADD_TO_CHAT_ATTACHMENT_LABEL,
   ADD_TO_CHAT_PROMPT_WITH_SELECTION,
   ADD_TO_CHAT_PROMPT_ALL_RULES,
 } from './translations';
+
+const TOOLTIP_ANCHOR_PROPS = {
+  style: { width: 'fit-content' },
+  'data-test-subj': 'requiredAgentBuilderSettingsTooltipAnchor',
+};
 
 interface AddRulesToChatButtonProps {
   isAuthorized: boolean;
@@ -72,13 +83,39 @@ const AddRulesToChatButtonComponent: React.FC<AddRulesToChatButtonProps> = ({
     [selectedCount, migrationStats.items.total]
   );
 
-  return (
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
+  const disabledSettings = useMemo(
+    () =>
+      REQUIRED_UI_SETTING_IDS.filter(
+        (id) => !uiSettings.isDeclared(id) || uiSettings.get<boolean>(id, false) !== true
+      ).map((id) => uiSettings.getAll()[id]?.name ?? id),
+    [uiSettings]
+  );
+
+  const button = (
     <NewAgentBuilderAttachment
       label={buttonLabel}
       onClick={openAgentBuilderFlyout}
-      disabled={!isAuthorized}
+      disabled={!isAuthorized || disabledSettings.length > 0}
       telemetry={telemetry}
     />
+  );
+
+  if (disabledSettings.length === 0) {
+    return button;
+  }
+
+  return (
+    <EuiToolTip
+      data-test-subj="requiredAgentBuilderSettingsTooltip"
+      anchorProps={TOOLTIP_ANCHOR_PROPS}
+      content={<RequiredUiSettingsTooltipContent settingNames={disabledSettings} />}
+    >
+      {button}
+    </EuiToolTip>
   );
 };
 

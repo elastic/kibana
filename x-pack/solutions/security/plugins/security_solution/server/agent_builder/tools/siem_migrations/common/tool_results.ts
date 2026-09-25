@@ -23,19 +23,23 @@ export const createToolErrorResult = (
     response.body && typeof response.body === 'object' && 'message' in response.body
       ? String((response.body as { message: unknown }).message)
       : undefined;
-  return {
-    results: [
-      {
-        tool_result_id: getToolResultId(),
-        type: ToolResultType.error,
-        data: {
-          message:
-            bodyMessage ?? `${fallbackMessage} (HTTP ${response.status}): ${response.message}`,
-        },
-      },
-    ],
-  };
+  const message =
+    bodyMessage ?? `${fallbackMessage} (HTTP ${response.status}): ${response.message}`;
+
+  return createToolError(message);
 };
+
+export const createToolError = (message: string) => ({
+  results: [
+    {
+      tool_result_id: getToolResultId(),
+      type: ToolResultType.error,
+      data: {
+        message,
+      },
+    },
+  ],
+});
 
 /**
  * Builds a privilege-denied error result for mutating SIEM migration actions.

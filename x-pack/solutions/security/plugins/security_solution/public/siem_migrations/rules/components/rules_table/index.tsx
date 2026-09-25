@@ -56,6 +56,8 @@ import {
 } from '../../../../common/components/utility_bar';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
+import { useOnMigrationRuleUpdatedToolEvent } from '../../hooks/use_on_migration_rule_updated_tool_event';
+import type { SiemMigrationRuleUpdatedToolEventData } from '../../../../../common/siem_migrations/tool_events';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -293,13 +295,14 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const ruleActionsFactory = useCallback(
       (migrationRule: RuleMigrationRule, closeRulePreview: () => void) => {
+        const isInstalled = !!migrationRule.elastic_rule?.id;
         const canMigrationRuleBeInstalled =
           !isRulesLoading &&
-          !migrationRule.elastic_rule?.id &&
+          !isInstalled &&
           migrationRule.translation_result === MigrationTranslationResult.FULL;
         return (
           <EuiFlexGroup>
-            {isSiemMigrationAgentBuilderEnabled && (
+            {isSiemMigrationAgentBuilderEnabled && !isInstalled && (
               <EuiFlexItem grow={false}>
                 <AddMigrationRuleToChatButton rule={migrationRule} />
               </EuiFlexItem>
@@ -377,6 +380,19 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       getMigrationRuleData,
       ruleActionsFactory,
     });
+
+    const onRuleUpdatedByAgent = useCallback(
+      ({ migrationId: updatedMigrationId }: SiemMigrationRuleUpdatedToolEventData) => {
+        if (updatedMigrationId !== migrationId) {
+          return;
+        }
+        // invalidateGetMigrationRules uses refetchType:'active', so cached data is kept and
+        // isLoading stays false — the open flyout will not remount or lose draft edits.
+        refetchData?.();
+      },
+      [migrationId, refetchData]
+    );
+    useOnMigrationRuleUpdatedToolEvent(onRuleUpdatedByAgent);
 
     const { euiTheme } = useEuiTheme();
     // Stable identity: never changes with selection, so EuiBasicTable rows are not
