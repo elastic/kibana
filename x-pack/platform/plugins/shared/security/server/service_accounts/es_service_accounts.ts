@@ -23,6 +23,11 @@ import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindin
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import type { ServiceAccountCredentialStore } from './credentials';
+import {
+  ES_SERVICE_ACCOUNT_MAX_ROLES,
+  ES_SERVICE_ACCOUNT_ROLE_LIMITS,
+  ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
+} from './es_role_limits';
 import type { EsServiceAccountPrincipal } from './es_service_account_id';
 import { parseEsServiceAccountId } from './es_service_account_id';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
@@ -35,13 +40,11 @@ import type {
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';
 import {
-  ES_SERVICE_ACCOUNT_FALLBACK_ROLE,
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
-  serviceAccountRolesSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
@@ -57,13 +60,14 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
  * principal. Parsed separately from the discriminator above, so "this is not Kibana's account"
  * and "Kibana cannot read this account" stay different answers.
  *
- * Shape only, matching what {@link list} takes from the query API. The caps Kibana puts on a
- * create are its own and Elasticsearch enforces none of them, so an account created outside
- * Kibana may hold more roles, or longer role names, than Kibana would ever have written. Holding
- * a read to the bounds of a write would let such an account list cleanly and then fail to open.
+ * Bounded by what Elasticsearch allows, the same limits Kibana sends with: an account written
+ * outside Kibana can hold that much, and it still has to read as "taken" rather than as
+ * unreadable.
  */
 const accountEntrySchema = z.object({
-  roles: z.array(z.string()),
+  roles: z
+    .array(z.string().min(1).max(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH))
+    .max(ES_SERVICE_ACCOUNT_MAX_ROLES),
   enabled: z.boolean(),
 });
 
@@ -206,12 +210,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    // The schema refuses an empty `roles` rather than letting it fall through to the derivation
-    // below, which would answer an explicit "no roles" with the widest possible grant.
-    const { name, roles: requestedRoles } = parseCreateServiceAccountParams(params);
+    const { name, roles } = parseCreateServiceAccountParams(params, ES_SERVICE_ACCOUNT_ROLE_LIMITS);
     const serviceAccountId = `${namespace}/${name}`;
-
-    const roles = requestedRoles ?? this.deriveRoles(user, serviceAccountId);
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
 
@@ -264,36 +264,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
       throw e;
     }
-    return { id: serviceAccountId, name };
-  }
-
-  /**
-   * The roles a new account gets when the caller named none: the creator's own, or the fallback
-   * role when the creator reports none, as an API-key authentication does.
-   *
-   * The creator's roles are held to the same bounds as an explicit `roles`, so that an account
-   * Kibana fills in for is never given something a caller could not have asked for by name.
-   */
-  private deriveRoles(user: AuthenticatedUser, serviceAccountId: string): string[] {
-    if (user.roles.length === 0) {
-      this.logger.warn(
-        `No roles could be derived for service account [${serviceAccountId}] from the current ` +
-          `credentials, so it was granted [${ES_SERVICE_ACCOUNT_FALLBACK_ROLE}]. Specify \`roles\` ` +
-          `explicitly to scope it down.`
-      );
-      return [ES_SERVICE_ACCOUNT_FALLBACK_ROLE];
-    }
-
-    const parsed = serviceAccountRolesSchema.safeParse(user.roles);
-    if (!parsed.success) {
-      throw Boom.badRequest(
-        `Cannot create a service account: the roles of the current user cannot be copied to it ` +
-          `(${parsed.error.issues.map(({ message }) => message).join('; ')}). Specify \`roles\` ` +
-          `explicitly.`
-      );
-    }
-
-    return parsed.data;
+    return { id: serviceAccountId, name, roles };
   }
 
   /**

@@ -161,6 +161,32 @@ describe('useProposalsByCategory', () => {
     await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
     jest.useRealTimers();
   });
+
+  it('does not poll faster while a loaded row is settling, so a just-decided row stays dropped', async () => {
+    // Deliberate: a faster poll here would refetch the row `useDropDecidedProposal` just
+    // removed optimistically. Search consistency for a just-written decision can lag behind
+    // the plain GET the decision is confirmed with, so a too-soon refetch reads the row as
+    // still pending and restores it. Only the slow 60s baseline should ever re-check.
+    jest.useFakeTimers();
+    http.get.mockResolvedValue({
+      proposals: [{ id: 'prop-0', decision: 'approved', status: 'executing' }],
+      total: 1,
+    });
+
+    const { result } = renderHook(
+      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      { wrapper: createWrapper().Wrapper }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenCalledTimes(1);
+
+    // Well short of the 60s baseline — long enough that a settling-triggered fast poll (were
+    // one wired here) would have fired several times over by now.
+    jest.advanceTimersByTime(10_000);
+    expect(http.get).toHaveBeenCalledTimes(1);
+
+    jest.useRealTimers();
+  });
 });
 
 describe('useClosedProposals', () => {

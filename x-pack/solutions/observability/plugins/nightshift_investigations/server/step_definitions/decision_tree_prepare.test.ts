@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { decisionTreePrepareStepDefinition } from './decision_tree_prepare';
 
@@ -62,11 +62,11 @@ describe('decisionTreePrepareStepDefinition', () => {
     expect(result).toEqual({ output: { message: '', tree_count: 0, skipped: true } });
   });
 
-  it('prepares a reinforcement turn for the deductive investigator', async () => {
+  it('prepares a reinforcement turn for the Nightshift investigator', async () => {
     const result = await run({
       prompt: 'why is checkout slow?',
       response: 'pool leak',
-      agent_id: NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID,
+      agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
     });
 
     expect(prepareReinforcementTurn).toHaveBeenCalledWith(

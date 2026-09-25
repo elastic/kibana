@@ -25,6 +25,7 @@ describe('registerStepDefinitions', () => {
       isContextEngineEnabled: async () => true,
       checkWritePrivilege: async () => true,
       ...telemetry,
+      verifyKi: jest.fn(),
       feedbackAnalysis: {
         getAiIndexService: () => ({} as AiIndexService),
         getImprovementsService: () => ({} as ImprovementsServiceApi),

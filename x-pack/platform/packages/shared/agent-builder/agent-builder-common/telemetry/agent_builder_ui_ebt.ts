@@ -209,6 +209,8 @@ const ebtAction = {
     FEEDBACK_MODAL_CANCEL: 'feedback_modal_cancel',
     FEEDBACK_INVITE_TELL_US_MORE: 'feedback_invite_tell_us_more',
     FEEDBACK_INVITE_DISMISSED: 'feedback_invite_dismissed',
+    DOWNLOAD_CONVERSATION: 'download_conversation',
+    LOAD_TRACE_FROM_FILE: 'load_trace_from_file',
   },
   libraryPanel: {
     MANAGE_ALL: 'manage_all',

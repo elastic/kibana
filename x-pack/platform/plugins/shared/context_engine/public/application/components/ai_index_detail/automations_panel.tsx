@@ -194,7 +194,7 @@ export const AutomationsPanel = ({
                   size="s"
                   iconType="pencil"
                   onClick={startEditing}
-                  isDisabled={aiIndex === undefined}
+                  isDisabled={isBusy || aiIndex === undefined}
                   data-test-subj="contextEditAutomationsButton"
                   {...getEbtProps({
                     element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
@@ -244,7 +244,7 @@ export const AutomationsPanel = ({
         <>
           {automations.length === 0 && !isEditing ? (
             <EuiEmptyPrompt
-              iconType="indexRuntime"
+              iconType="tablePlay"
               titleSize="xs"
               data-test-subj="contextAiIndexAutomationsEmpty"
               title={

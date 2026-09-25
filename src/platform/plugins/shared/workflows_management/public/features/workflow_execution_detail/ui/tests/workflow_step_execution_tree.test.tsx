@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../common';
 import { TestWrapper } from '../../../../shared/test_utils/test_wrapper';
 import { WorkflowStepExecutionTree } from '../workflow_step_execution_tree';
 
@@ -484,7 +485,7 @@ describe('WorkflowStepExecutionTree', () => {
         <TestWrapper>
           <WorkflowStepExecutionTree
             execution={execution}
-            stepExecutionsTotal={1842}
+            stepExecutionsTotal={WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE + 842}
             definition={createMockDefinition({
               steps: [{ name: 'step-1', type: 'action', with: { message: 'test' } }],
             })}

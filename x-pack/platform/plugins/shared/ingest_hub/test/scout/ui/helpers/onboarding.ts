@@ -9,6 +9,7 @@ import type { BrowserAuthFixture, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ServiceVars } from '../../../../public/onboarding/step_components/service_settings_step/use_service_settings';
 import type { PersistedEcfLaunchStep } from '../../../../public/onboarding/step_components/ecf_deployment_section';
+import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../../../common/constants';
 import { test } from '../fixtures';
 
 export const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
@@ -16,6 +17,42 @@ export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep'
 export const ECF_LAUNCH_STEP_SESSION_KEY = 'onboarding.aws.ecfLaunchStep';
 export const AUTHENTICATE_AND_DEPLOY_SESSION_KEY = 'onboarding.aws.authenticateAndDeployStep';
 export const DETECT_AND_REVIEW_SESSION_KEY = 'onboarding.aws.detectAndReviewStep';
+
+/** Minimal aws manifest with one managed_integration service (elb) that supports identity federation. */
+export const MOCK_AWS_PACKAGE_IDENTITY_FEDERATION_SUPPORTED = {
+  item: {
+    version: '7.1.1',
+    policy_templates: [
+      {
+        name: 'elb',
+        title: 'AWS ELB',
+        data_streams: ['elb_logs'],
+        deployment_modes: { agentless: { enabled: true } },
+        inputs: [{ type: 'aws-s3' }],
+      },
+    ],
+    data_streams: [
+      {
+        path: 'elb_logs',
+        type: 'logs',
+        streams: [
+          {
+            input: 'aws-s3',
+            vars: [
+              {
+                name: 'bucket_arn',
+                type: 'text',
+                title: 'Bucket ARN',
+                required: true,
+                show_user: true,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+};
 
 // Derives the root test-subj for a step from its id, matching the convention used in each step's
 // root <div data-test-subj={`onboardingStep-${id}`}>.
@@ -144,20 +181,22 @@ export async function navigateToOnboardingStep(
   await expect(page.testSubj.locator(stepSubj(step))).toBeVisible();
 }
 
-export function useOnboardingFeatureFlag(): void {
+/** Enables the onboarding flag plus any extra overrides for the describe block; afterAll removes them (null deletes an override). */
+export function useOnboardingFeatureFlag(extraOverrides: Record<string, boolean> = {}): void {
   // eslint-disable-next-line playwright/require-top-level-describe
   test.beforeAll(async ({ apiServices, config }) => {
     // eslint-disable-next-line playwright/no-skipped-test
     test.skip(
       config.isCloud === true,
-      `Core API returns 404 for 'ingestHub.onboardingEnabled' on ECH`
+      `Core API returns 404 for '${INGEST_HUB_ONBOARDING_ENABLED_FLAG}' on ECH`
     );
     if (config.isCloud) {
       return;
     }
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'true',
+        [INGEST_HUB_ONBOARDING_ENABLED_FLAG]: true,
+        ...extraOverrides,
       },
     });
   });
@@ -167,10 +206,9 @@ export function useOnboardingFeatureFlag(): void {
     if (config.isCloud) {
       return;
     }
+    const keysToReset = [INGEST_HUB_ONBOARDING_ENABLED_FLAG, ...Object.keys(extraOverrides)];
     await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'false',
-      },
+      'feature_flags.overrides': Object.fromEntries(keysToReset.map((key) => [key, null])),
     });
   });
 }

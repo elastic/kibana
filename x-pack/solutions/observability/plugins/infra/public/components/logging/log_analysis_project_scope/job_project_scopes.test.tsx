@@ -41,7 +41,7 @@ const renderJobProjectScopes = (
   useKibanaContextForPluginMock.mockReturnValue({
     services: {
       cps: { isTierEligible, cpsManager },
-      featureFlags: { getBooleanValue: jest.fn().mockReturnValue(true) },
+      featureFlags: { useBooleanValue: jest.fn().mockReturnValue(true) },
     },
   } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
 
