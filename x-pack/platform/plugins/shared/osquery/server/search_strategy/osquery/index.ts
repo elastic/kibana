@@ -24,8 +24,60 @@ import type {
 } from '../../../common/search_strategy/osquery';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
-import type { OsqueryFactory } from './factory/types';
+import type { OsqueryFactory, OsqueryFactoryRequest } from './factory/types';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+
+/**
+ * Factory query types constrained by an `action_id` and reading documents that
+ * can actually carry `action_data`, and which may therefore also match the
+ * agent-carried `action_data.space_id` (see {@link buildSpaceIdFilter}).
+ *
+ * SECURITY: the id binding narrows the read to documents the caller named, but it
+ * is not an authorization gate on its own — route-level ownership checks are
+ * uneven (`get_action_results_route.ts` verifies the action document only when CPS
+ * is active). Isolation rests on the clause itself matching only documents whose
+ * surviving provenance already names the active space. Do not add a query type
+ * here unless its builder unconditionally filters on an `action_id`.
+ *
+ * Types not allowlisted for `action_data.space_id`: `actions` enumerates across
+ * actions; `exportResults` is not unconditionally id-bound in the factory
+ * (opaque `baseFilter` KQL), so named-space live-query export remains a known
+ * gap; `actionDetails` is an id-bound lookup of Kibana-written action metadata
+ * on `ACTIONS_INDEX`, not agent `action_data`.
+ *
+ * `scheduledActionResults` is deliberately absent even though it is `schedule_id`
+ * bound. `action_data` only exists on documents produced by a Fleet action, and
+ * scheduled pack executions never create one — their `space_id` travels in the
+ * agent policy (`routes/pack/utils.ts`), which is not subject to Fleet Server's
+ * per-field action whitelist, so those documents already carry the top-level
+ * field. Allowlisting it would widen a space-isolation decision to an
+ * agent-writable field in exchange for a clause that can never match.
+ *
+ * Membership here is necessary but not sufficient: `results` serves scheduled
+ * reads too, because `get_scheduled_query_results_route.ts` passes a
+ * `scheduleId`/`executionCount` pair that selects the `schedule_id` branch of
+ * `buildResultsQuery`. `schedule_id` is minted per pack query
+ * (`create_pack_route.ts`) and delivered by the policy, so that branch matches
+ * the same action-less documents as `scheduledActionResults`. See
+ * {@link isScheduleBoundRequest}, which withholds the flag there for the same
+ * reason.
+ */
+export const ID_BOUND_FACTORY_QUERY_TYPES: readonly FactoryQueryTypes[] = [
+  OsqueryQueries.results,
+  OsqueryQueries.actionResults,
+];
+
+/**
+ * True when the request selects a builder's `schedule_id` branch rather than its
+ * `action_id` one, mirroring the condition in `buildResultsQuery`.
+ */
+const isScheduleBoundRequest = <T extends FactoryQueryTypes>(
+  request: StrategyRequestType<T>
+): boolean =>
+  'scheduleId' in request &&
+  request.scheduleId != null &&
+  'executionCount' in request &&
+  request.executionCount != null;
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
@@ -36,11 +88,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
   return {
     search: (request, options, deps) => {
-      if (request.factoryQueryType == null) {
+      const factoryQueryType = request.factoryQueryType;
+      if (factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
 
-      const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
+      const queryFactory: OsqueryFactory<T> = osqueryFactory[factoryQueryType];
 
       return from(hasOsqueryReadPrivilege(osqueryContext.security, deps.request)).pipe(
         mergeMap((isAuthorized) => {

@@ -122,6 +122,52 @@ describe('createActionHandler', () => {
     expect(bulk).toHaveBeenCalledTimes(1);
   });
 
+  // The top-level space_id above is dropped by Fleet Server before it reaches the
+  // agent. `data` is the only field with opaque passthrough, and osquerybeat copies
+  // it onto result / action-response documents as `action_data`, so this is what
+  // actually makes results visible in a named space.
+  it('also writes space_id inside the action data blob for a named space', async () => {
+    const { context, bulkCreate } = buildOsqueryContext();
+
+    await createActionHandler(
+      context,
+      { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
+      { space: { id: 'production' } }
+    );
+
+    const [actions] = bulkCreate.mock.calls[0];
+    expect(actions[0].data).toMatchObject({ space_id: 'production' });
+  });
+
+  it('writes space_id inside the action data blob in the default space', async () => {
+    const { context, bulkCreate } = buildOsqueryContext();
+
+    await createActionHandler(
+      context,
+      { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
+      {}
+    );
+
+    const [actions] = bulkCreate.mock.calls[0];
+    expect(actions[0].data.space_id).toBe('default');
+  });
+
+  it('preserves the existing action data fields when adding space_id', async () => {
+    const { context, bulkCreate } = buildOsqueryContext();
+
+    await createActionHandler(
+      context,
+      { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
+      { space: { id: 'production' } }
+    );
+
+    const [actions] = bulkCreate.mock.calls[0];
+    expect(actions[0].data).toMatchObject({
+      id: 'q1',
+      query: 'SELECT * FROM os_version;',
+    });
+  });
+
   it('throws when no agents are selected', async () => {
     mockedParseAgentSelection.mockResolvedValueOnce([]);
     const { context, bulkCreate } = buildOsqueryContext();
