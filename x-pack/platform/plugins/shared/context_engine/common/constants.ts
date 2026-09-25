@@ -83,7 +83,10 @@ export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_INDEX_NAME_BYTES = 255;
 export const KI_VIEW_NAME_PREFIX = 'v-ai-index-';
 export const kiViewName = (aiIndexId: string): string => `${KI_VIEW_NAME_PREFIX}${aiIndexId}`;
-/** ES|QL applies the request filter to a view's output, where the nested space permissions of managed KIs are not visible, so managed AI indices are queried through their backing store. */
+/**
+ * ES|QL applies the request filter to a view's output, where the nested space permissions of
+ * managed KIs are not visible, so managed AI indices are queried through their backing store.
+ */
 export const aiIndexEsqlTarget = ({
   id,
   managed,
