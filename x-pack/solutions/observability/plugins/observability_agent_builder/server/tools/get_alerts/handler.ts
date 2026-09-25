@@ -39,6 +39,7 @@ export async function getToolHandler({
   const { ruleRegistry } = pluginStart;
 
   const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
+  const fieldsToReturn = fields ?? defaultFields;
 
   const response = await alertsClient.find({
     ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
@@ -68,10 +69,10 @@ export async function getToolHandler({
       },
     },
     size: 10,
+    _source: fieldsToReturn,
   });
 
   const total = getTotalHits(response);
-  const fieldsToReturn = fields ?? defaultFields;
   const alerts = response.hits.hits.map((hit) => pick(hit._source ?? {}, fieldsToReturn));
 
   return { alerts, total };
