@@ -36,8 +36,22 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('rules-list-clear-filter');
     } else if (existsRefreshButton) {
       await testSubjects.click('refreshRulesButton');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
     }
+    await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+    await find.byCssSelector(
+      '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
+    );
+  };
+
+  // Full navigation remounts the rules list. The old logs/rules tab toggle did
+  // this; those tabs are no longer on this page.
+  const openRulesApp = async () => {
+    await pageObjects.common.navigateToApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
+    await find.byCssSelector(
+      '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
+    );
   };
 
   const toggleRuleStatusFilter = (selector: string) => {
@@ -130,7 +144,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         objectRemover,
         overwrites: { name: 'c', tags: [] },
       });
-      await refreshAlertsList();
+      await openRulesApp();
       await pageObjects.triggersActionsUI.searchAlerts('b');
       await find.byCssSelector(
         '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
@@ -144,7 +158,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         expect(searchResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
 
-      const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
+      const searchClearButton = await find.byCssSelector(
+        '.euiFormControlLayout:has([data-test-subj="ruleSearchField"]) .euiFormControlLayoutClearButton'
+      );
       await searchClearButton.click();
       await find.byCssSelector(
         '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
@@ -307,7 +323,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         supertest,
         objectRemover,
       });
-      await refreshAlertsList();
+      await openRulesApp();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
@@ -322,19 +338,17 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await header.waitUntilLoadingHasFinished();
 
+      await openRulesApp();
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
         'statusDropdown',
         'disabled'
       );
 
-      await testSubjects.click('collapsedItemActions');
-
-      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
-        return await testSubjects.isDisplayed('disableButton');
+      await retry.try(async () => {
+        await testSubjects.click('collapsedItemActions');
+        await testSubjects.click('disableButton');
       });
-
-      await testSubjects.click('disableButton');
 
       await header.waitUntilLoadingHasFinished();
 
@@ -779,7 +793,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         },
       });
 
-      await refreshAlertsList();
+      await openRulesApp();
       await testSubjects.click('ruleTagFilter');
 
       // Select a -> selected: a
