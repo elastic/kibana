@@ -128,8 +128,8 @@ const uiamErrorResponseSchema = z.object({
 const CREATE_REFUSALS: Record<string, string> = {
   // CREATE_SA_RESULTS_IN_NO_PRIVS
   '0x138916':
-    'your credential grants no application roles in this organization, so the account would have ' +
-    'none. An account can only exercise roles its creator also holds',
+    'your credential grants no application roles in this organization. An account is limited to ' +
+    "the privileges of both its own roles and its creator's, so it would have none",
   // ALREADY_DOWNSCOPED
   '0x91249F':
     'the credential making this request is itself downscoped, and an account cannot be downscoped ' +
