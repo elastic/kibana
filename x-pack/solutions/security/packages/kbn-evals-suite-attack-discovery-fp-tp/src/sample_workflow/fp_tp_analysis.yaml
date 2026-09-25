@@ -220,7 +220,12 @@ steps:
         - false_positive: the world affirmatively refutes the story.
         - inconclusive: you cannot decide from the evidence.
 
-        Missing telemetry is never a false_positive; only an affirmative contradiction is.
+        Two rules that are never negotiable:
+        - Missing telemetry is never a false_positive; only an affirmative contradiction is.
+        - A contradiction is never negotiable. If any world check contradicts, you may not
+          dismiss it as neutral, as "not relevant", as "not explaining the activity", or as
+          outweighed by other checks. A contradicting check is a fixed input to the rules
+          below, and it blocks every true_positive and false_positive rule that excludes it.
         The discovery's own markdown is a claim to test, not evidence.
 
         Run every check below and report exactly one entry per check. Status is
@@ -234,10 +239,17 @@ steps:
            (ordinary employee workstation or account)?
         3. process_parent — raw events only. Is the parent of the suspicious process a
            management agent or scheduler (contradicts), or a user application such as an
-           Office program or browser (supports)?
+           Office program or browser (supports)? A management-agent parent (e.g. an SCCM,
+           MDM, RMM, or patch-management executable such as ccmexec.exe) contradicts
+           regardless of what happens downstream of the suspicious process — the parent
+           being routine tooling is itself evidence the discovery cites nothing suspicious.
         4. network_destination — raw events only. Is the destination a known vendor or
            internal management service (contradicts), or an unknown or known-bad
-           endpoint (supports)?
+           endpoint (supports)? A vendor management domain (e.g. manage.microsoft.com,
+           an MDM/RMM console, or a software-distribution point) contradicts even when the
+           process making the connection is the one under scrutiny — routine management
+           traffic to a named vendor endpoint is not attacker C2, independent of any other
+           check's result.
 
         The world checks are entity_role, process_parent, and network_destination.
 
@@ -258,6 +270,33 @@ steps:
            entity_role and alert_linkage corroborate but are never enough on their own.
         4. inconclusive — anything else: every world check is skipped or neutral, or
            only entity_role or alert_linkage supports.
+
+        MANDATORY SELF-CHECK — do this before you pick a rule, and write the result as the
+        first bullet of rationale_markdown: list every world check (entity_role,
+        process_parent, network_destination) with its status and result, exactly as you
+        will report it below. Then re-read that list once, specifically hunting for any
+        check you marked "contradicts" and then talked yourself out of in your own
+        reasoning. If you find one, its result is still "contradicts" — you do not get to
+        downgrade a contradiction to neutral or supports because another check disagrees,
+        because it seems unrelated to the process chain, or because the overall story
+        otherwise looks compelling. Apply rule 1 above the instant two checks disagree; do
+        not skip past it looking for a rule that lets you pick a side.
+
+        Two worked examples of the failure mode this self-check exists to catch:
+        - entity_role reads "contradicts" (host is a known MDM/management distribution
+          point) and process_parent reads "supports" (an Office app spawned the process).
+          These disagree, so the verdict is inconclusive under rule 1 — NOT true_positive.
+          It is wrong to reason "the management role doesn't explain this specific process
+          chain, so it doesn't count"; a contradiction never gets explained away, it only
+          gets weighed against other checks by rule 1.
+        - process_parent shows a patch-management executable (ccmexec.exe or equivalent)
+          launching the suspicious process, AND network_destination shows that process
+          connecting to a named vendor management domain (e.g. manage.microsoft.com). Both
+          checks contradict. The verdict is inconclusive (if entity store is also empty) or
+          false_positive (if entity store has hits and shows no support) — NOT
+          true_positive. It is wrong to reason "the connection happened, so it supports the
+          story"; the identity of the destination, not the fact that a connection occurred,
+          is what process_parent and network_destination test.
 
         Claims:
         - claims.world: one entry for each world-check result the verdict relies on, with
