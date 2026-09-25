@@ -101,9 +101,95 @@ export const createDatasetWizardStrings = {
   notSet: i18n.translate('xpack.dataFederation.createDatasetWizard.notSetValue', {
     defaultMessage: 'Not set',
   }),
-  editButton: i18n.translate('xpack.dataFederation.createDatasetWizard.editButtonLabel', {
-    defaultMessage: 'Edit',
+  reviewTitle: (name: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.reviewTitle', {
+      defaultMessage: 'Review configuration for {name}',
+      values: { name },
+    }),
+  reviewSummaryTabLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.reviewSummaryTabLabel',
+    {
+      defaultMessage: 'Summary',
+    }
+  ),
+  reviewRequestTabLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.reviewRequestTabLabel',
+    {
+      defaultMessage: 'Request',
+    }
+  ),
+  reviewRequestDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.reviewRequestDescription',
+    {
+      defaultMessage: 'This request will create or update the dataset.',
+    }
+  ),
+  customBadgeLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.customBadgeLabel', {
+    defaultMessage: 'Custom',
   }),
+  dataSourceTypeLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.dataSourceTypeLabel',
+    {
+      defaultMessage: 'Type',
+    }
+  ),
+  schemaMappingModeLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.schemaMappingModeLabel',
+    {
+      defaultMessage: 'Schema mapping mode',
+    }
+  ),
+  schemaMappingModeInferred: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.schemaMappingModeInferred',
+    {
+      defaultMessage: 'Inferred from dataset',
+    }
+  ),
+  schemaMappingModeDeclared: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.schemaMappingModeDeclared',
+    {
+      defaultMessage: 'Declared in wizard',
+    }
+  ),
+  dynamicFieldsLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.dynamicFieldsLabel',
+    {
+      defaultMessage: 'Dynamic fields',
+    }
+  ),
+  mappedFieldsLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappedFieldsLabel', {
+    defaultMessage: 'Mapped fields',
+  }),
+  timestampMappingLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.timestampMappingLabel',
+    {
+      defaultMessage: 'Timeseries data',
+    }
+  ),
+  timestampFieldLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.timestampFieldLabel',
+    {
+      defaultMessage: 'Timestamp field',
+    }
+  ),
+  timestampFormatLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.timestampFormatLabel',
+    {
+      defaultMessage: 'Timestamp format',
+    }
+  ),
+  onLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.onLabel', {
+    defaultMessage: 'On',
+  }),
+  offLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.offLabel', {
+    defaultMessage: 'Off',
+  }),
+  saveDatasetButton: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.saveDatasetButtonLabel',
+    {
+      defaultMessage: 'Save dataset',
+    }
+  ),
 
   // Form strings
   editTitleWithId: (id: string) =>

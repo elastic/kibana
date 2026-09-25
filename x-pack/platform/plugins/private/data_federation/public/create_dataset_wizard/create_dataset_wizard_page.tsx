@@ -16,11 +16,10 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
 import { DATASETS_PATH } from '../app_paths';
-import { buildDatasetMappings } from '../components/mapping_editor';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
+import { buildDatasetPayload } from './build_dataset_payload';
 import {
-  buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
   type CreateDatasetFormValues,
 } from './create_dataset_form_state';
@@ -127,17 +126,11 @@ export function CreateDatasetWizardPage({
 
     setIsSaving(true);
     try {
-      const desc = values.description?.trim();
-      const settings = buildDatasetSettingsFromFormValues(values.settings);
-      const mappings = buildDatasetMappings(values.mappings);
+      const formPayload = buildDatasetPayload(values);
       const unmanagedSettings = getUnmanagedDatasetSettings(initialDataSet?.settings);
-      const mergedSettings = { ...(settings ?? {}), ...unmanagedSettings };
+      const mergedSettings = { ...(formPayload.settings ?? {}), ...unmanagedSettings };
       const payload: DataSetWithName = {
-        name: values.name.trim(),
-        data_source: values.data_source.trim(),
-        resource: values.resource.trim(),
-        ...(desc ? { description: desc } : {}),
-        ...(mappings ? { mappings } : {}),
+        ...formPayload,
         ...(Object.keys(mergedSettings).length > 0 ? { settings: mergedSettings } : {}),
       };
       await datasetsClient.add(payload);
@@ -204,7 +197,7 @@ export function CreateDatasetWizardPage({
                 texts={{
                   save: isEditMode
                     ? createDatasetWizardStrings.saveButton
-                    : createDatasetWizardStrings.addButton,
+                    : createDatasetWizardStrings.saveDatasetButton,
                 }}
               >
                 <FormWizardStep
@@ -243,7 +236,7 @@ export function CreateDatasetWizardPage({
                 </FormWizardStep>
                 <FormWizardStep id="review" label={createDatasetWizardStrings.reviewStepLabel}>
                   <div data-test-subj="createDatasetWizardContent">
-                    <StepReview />
+                    <StepReview dataSources={dataSources} />
                   </div>
                 </FormWizardStep>
               </FormWizard>

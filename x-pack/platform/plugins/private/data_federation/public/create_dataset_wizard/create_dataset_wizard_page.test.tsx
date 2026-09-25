@@ -165,6 +165,7 @@ describe('CreateDatasetWizardPage', () => {
 
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    // Timeseries is on by default and requires a field name before Next is allowed.
     fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
       target: { value: 'event_time' },
     });
@@ -179,10 +180,12 @@ describe('CreateDatasetWizardPage', () => {
     await clickNext(getByTestId);
 
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
-    expect(getByTestId('createDatasetWizardReviewName')).toHaveTextContent('logs-dataset');
-    expect(getByTestId('createDatasetWizardReviewDataSource')).toHaveTextContent('source-1');
-    expect(getByTestId('createDatasetWizardReviewFormat')).toHaveTextContent('csv');
-    expect(getByTestId('createDatasetWizardReviewPartitionDetection')).toHaveTextContent('hive');
+    expect(getByText('Review configuration for logs-dataset')).toBeInTheDocument();
+    expect(getByTestId('createDatasetWizardReview-name')).toHaveTextContent('logs-dataset');
+    expect(getByTestId('createDatasetWizardReview-partition_detection')).toHaveTextContent('Hive');
+    expect(getByTestId('nextButton')).toHaveTextContent(
+      createDatasetWizardStrings.saveDatasetButton
+    );
 
     await clickNext(getByTestId);
     await waitFor(() => {

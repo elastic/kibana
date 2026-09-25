@@ -7,29 +7,17 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { isNil, omit, omitBy } from 'lodash';
 
-import type { DataSetWithName, Dataset } from '../common';
+import type { DataSetWithName } from '../common';
 import {
   DATA_SETS_LIST_ROUTE_PATH,
   getDataSetByIdApiPath,
   validateIndexNameRules,
 } from '../common';
+import { buildDatasetRequestBody } from './dataset_request';
 
 interface GetDataSetsResponse {
   data_sets: DataSetWithName[];
-}
-
-function omitEmptySettingsFields(settings: object): Record<string, unknown> {
-  return omitBy(settings as Record<string, unknown>, (value) => {
-    if (value === undefined || value === null) {
-      return true;
-    }
-    if (typeof value === 'string' && value.trim() === '') {
-      return true;
-    }
-    return false;
-  });
 }
 
 /**
@@ -60,18 +48,8 @@ export class DatasetsClient {
       throw new Error(nameValidation.message);
     }
 
-    const withoutName = omit(dataSet, 'name');
-    const body = omitBy(
-      {
-        ...withoutName,
-        settings: dataSet.settings
-          ? omitEmptySettingsFields(dataSet.settings as object)
-          : undefined,
-      },
-      isNil
-    ) as unknown as Dataset;
     await this.http.put(getDataSetByIdApiPath(nameTrimmed), {
-      body: JSON.stringify(body),
+      body: JSON.stringify(buildDatasetRequestBody(dataSet)),
     });
   }
 
