@@ -149,8 +149,8 @@ describe('UiamServiceAccounts', () => {
       );
     });
 
-    // Neither backend dedupes for Kibana: Elasticsearch drops duplicates silently and UIAM has
-    // deferred its request validation, so the request is normalized before it leaves.
+    // UIAM counts duplicates against its 50-role cap before dropping them, so the request is
+    // normalized before it leaves.
     it('drops duplicate roles, keeping first occurrences in order', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
 

@@ -35,8 +35,8 @@ export const serviceAccountNameSchema = z
  * since accounts can be written there without Kibana.
  *
  * Duplicate roles are dropped first, keeping first occurrences in order, so that the limit counts
- * distinct roles on every entry point. Elasticsearch would drop duplicates silently and UIAM has
- * not said what it does, so neither is relied on.
+ * distinct roles on every entry point. Both backends count duplicates against their own cap before
+ * dropping them, so without this a list within the limit could still be refused.
  */
 export const getServiceAccountRolesSchema = ({
   maxRoles,
