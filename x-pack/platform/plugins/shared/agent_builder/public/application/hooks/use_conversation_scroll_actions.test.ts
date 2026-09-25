@@ -138,4 +138,69 @@ describe('useConversationScrollActions', () => {
 
     expect(result.current.showScrollButton).toBe(false);
   });
+
+  describe('scrollToAttachment', () => {
+    // Inline attachment events at the given viewport tops, in timeline order.
+    const withAttachmentEvents = (
+      scrollContainer: HTMLDivElement,
+      events: Array<{ id: string; version: number; top: number }>
+    ) => {
+      const timelineContent = document.createElement('div');
+      for (const { id, version, top } of events) {
+        const event = document.createElement('div');
+        event.setAttribute('data-attachment-id', id);
+        event.setAttribute('data-attachment-version', String(version));
+        event.getBoundingClientRect = () => ({ top, bottom: top + 100 } as DOMRect);
+        timelineContent.appendChild(event);
+      }
+      scrollContainer.firstElementChild!.appendChild(timelineContent);
+      return timelineContent;
+    };
+
+    const setup = () => {
+      const scrollContainer = scrolledUp();
+      scrollContainer.scrollTo = jest.fn();
+      const timelineContent = withAttachmentEvents(scrollContainer, [
+        { id: 'att-1', version: 1, top: 50 },
+        { id: 'att-2', version: 1, top: 150 },
+        { id: 'att-1', version: 2, top: 250 },
+      ]);
+      const { result } = renderScrollActions(scrollContainer, timelineContent);
+      return { scrollContainer, result };
+    };
+
+    it('scrolls the matching version to the top of the view', () => {
+      const { scrollContainer, result } = setup();
+
+      let found = false;
+      act(() => {
+        found = result.current.scrollToAttachment({ id: 'att-1', version: 1 });
+      });
+
+      expect(found).toBe(true);
+      expect(scrollContainer.scrollTo).toHaveBeenCalledWith({ top: 150, behavior: 'smooth' });
+    });
+
+    it('scrolls to the latest occurrence when no version is given', () => {
+      const { scrollContainer, result } = setup();
+
+      act(() => {
+        result.current.scrollToAttachment({ id: 'att-1' });
+      });
+
+      expect(scrollContainer.scrollTo).toHaveBeenCalledWith({ top: 350, behavior: 'smooth' });
+    });
+
+    it('leaves the view alone when nothing matches', () => {
+      const { scrollContainer, result } = setup();
+
+      let found = true;
+      act(() => {
+        found = result.current.scrollToAttachment({ id: 'att-1', version: 3 });
+      });
+
+      expect(found).toBe(false);
+      expect(scrollContainer.scrollTo).not.toHaveBeenCalled();
+    });
+  });
 });

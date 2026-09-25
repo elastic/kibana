@@ -8,6 +8,7 @@
 import { createContext, useContext } from 'react';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ScrollToAttachmentTarget } from '../../hooks/use_conversation_scroll_actions';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
@@ -18,6 +19,10 @@ interface ConversationContextValue {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
   greetingMessage?: string;
+  /** Inline attachment to scroll to once the conversation has loaded. Full screen only. */
+  scrollToAttachment?: ScrollToAttachmentTarget;
+  /** Removes `scrollToAttachment` from the URL once it has been handled. */
+  clearScrollToAttachment?: () => void;
   onSubmit?: () => void;
   resetInitialMessage?: () => void;
   attachments?: ConversationAttachment[];

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
@@ -20,6 +20,7 @@ import { useConversationActions } from './use_conversation_actions';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
+import { parseScrollToAttachment, removeScrollToAttachment } from './parse_scroll_to_attachment';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -51,6 +52,23 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   // passes false to prefill the input without sending.
   const autoSendInitialMessage = location.state?.autoSendInitialMessage ?? true;
   const entryPointSource = location.state?.entryPointSource ?? 'direct';
+  const { id: scrollToAttachmentId, version: scrollToAttachmentVersion } =
+    parseScrollToAttachment(location.search) ?? {};
+
+  const scrollToAttachment = useMemo(
+    () =>
+      scrollToAttachmentId === undefined
+        ? undefined
+        : { id: scrollToAttachmentId, version: scrollToAttachmentVersion },
+    [scrollToAttachmentId, scrollToAttachmentVersion]
+  );
+  const history = useHistory();
+  const clearScrollToAttachment = useCallback(() => {
+    history.replace({
+      ...history.location,
+      search: removeScrollToAttachment(history.location.search),
+    });
+  }, [history]);
 
   const hasFiredEntryPointRef = useRef(false);
   useEffect(() => {
@@ -124,6 +142,8 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       conversationActions,
       initialMessage,
       autoSendInitialMessage,
+      scrollToAttachment,
+      clearScrollToAttachment,
       agentId: agentIdFromPath,
       attachments,
       upsertAttachments,
@@ -135,6 +155,8 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       conversationActions,
       initialMessage,
       autoSendInitialMessage,
+      scrollToAttachment,
+      clearScrollToAttachment,
       agentIdFromPath,
       attachments,
       upsertAttachments,

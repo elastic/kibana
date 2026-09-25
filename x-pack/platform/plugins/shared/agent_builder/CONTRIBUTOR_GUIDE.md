@@ -1045,6 +1045,25 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', (con
 Sidebar navigation accepts a conversation ID and delegates to the existing sidebar opening behavior.
 Fullscreen navigation accepts `{ conversationId, agentId }`, closes the sidebar, and opens the
 canonical conversation route in the Agent Builder app without fetching the conversation.
+Pass `openDetails: true` to also open the conversation details flyout. Pass
+`attachment: { id, version? }` to scroll to where that attachment was rendered inline in the
+timeline, for example when a tab lists a conversation's attachments and a row drills down into
+the chat:
+
+```tsx
+onOpenAttachment={(attachment) =>
+  context.openFullscreenConversation({
+    conversationId: conversation.id,
+    agentId: conversation.agent_id,
+    attachment: { id: attachment.id, version: attachment.current_version },
+  })
+}
+```
+
+The chat first opens at the bottom as usual, then scrolls to the attachment once it has loaded.
+Only attachment events rendered inline (`render_inline`) can be targeted; without a version, the
+latest inline occurrence is used. If the attachment is not in the timeline, the view stays at the
+bottom. Scrolling only happens in the full-screen app, never in the sidebar.
 Callers should apply the same access checks as other programmatic chat entry points.
 Consumers pass an inline registration callback; they do not construct the navigation methods.
 Callbacks that do not need navigation can ignore the context argument.
