@@ -6,15 +6,16 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { AiButtonEmpty } from '@kbn/ui-ai-components';
 import type { Investigation } from '../../types';
-import { BaseActions, type CardActionType } from '../actions';
+import { type CardActionType } from '../actions';
 import {
   InvestigationActionModals,
   type EscalationModalRenderProps,
 } from '../modals/investigation_action_modals';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
 export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
@@ -69,16 +70,14 @@ export const ConversationDetailsFlyoutFooter = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          {/* No `onClickRecommendedAction`: approving needs the proposal, and this footer is
-              handed a conversation-derived investigation. Omitting it drops the menu entry
-              rather than offering a decision this host cannot record. */}
-          <BaseActions
-            investigation={investigation}
-            isFlyout={true}
-            onClickAction={onClickAction}
-            canManageEscalations={Boolean(onOpenEscalation)}
-            data-test-subj="investigationFlyoutActions"
-          />
+          <EuiButton
+            color="primary"
+            iconType="document"
+            onClick={() => onClickAction('createEscalation', investigation.recordId)}
+            size="s"
+          >
+            {ACTIONS_TRANSLATIONS.buttons.openEscalation}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
 
