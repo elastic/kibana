@@ -54,38 +54,6 @@ describe('ChartConfigPanel', () => {
     expect(container).not.toBeEmptyDOMElement();
   });
 
-  it('should return a jsx element to edit the visualization without Lens table adapters', async () => {
-    const lensAttributes = {
-      visualizationType: 'lnsXY',
-      title: 'test',
-    } as TypedLensByValueInput['attributes'];
-    const { container } = render(
-      <ChartConfigPanel
-        {...{
-          services: unifiedHistogramServicesMock,
-          dataView: dataViewWithTimefieldMock,
-          visContext: {
-            attributes: lensAttributes,
-          } as unknown as UnifiedHistogramVisContext,
-          isFlyoutVisible: true,
-          setIsFlyoutVisible: jest.fn(),
-          onSuggestionContextChange: jest.fn(),
-          onSuggestionContextEdit: jest.fn(),
-          isPlainRecord: true,
-          query: {
-            esql: 'from test',
-          },
-          currentSuggestionContext: {
-            suggestion: currentSuggestionMock,
-            type: UnifiedHistogramSuggestionType.lensSuggestion,
-          },
-        }}
-      />
-    );
-    await act(() => setTimeout(0));
-    expect(container).not.toBeEmptyDOMElement();
-  });
-
   it('should return null if not in text based mode', async () => {
     const lensAttributes = {
       visualizationType: 'lnsXY',

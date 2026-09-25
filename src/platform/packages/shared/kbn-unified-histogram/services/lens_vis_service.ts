@@ -763,14 +763,8 @@ export class LensVisService {
     let visContext: UnifiedHistogramVisContext | undefined;
 
     if (externalVisContext?.attributes) {
-      // ES|QL is not stored on `attributes.state.query` (it lives on the layers).
-      // Keep/drop uses `datasetKey` via requestData.dataViewId instead.
-      const queryStillMatches =
-        Boolean(queryParams.isPlainRecord) ||
-        isEqual(currentQuery, externalVisContext.attributes?.state?.query);
-
       if (
-        queryStillMatches &&
+        isEqual(currentQuery, externalVisContext.attributes?.state?.query) &&
         areSuggestionAndVisContextAndQueryParamsStillCompatible({
           suggestionType,
           suggestion,

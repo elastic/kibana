@@ -9,7 +9,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import type { DataSource } from '@kbn/data-source';
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type {
@@ -39,41 +39,6 @@ export interface HistogramProps {
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
 
-/**
- * ES|QL Lens executions must not share Discover's document abort controller: `cancel(REPLACED)`
- * on a document refetch would leave the chart on "The expression was aborted". Abort only when
- * this histogram starts a new fetch (search session / reload).
- */
-const useLensAbortController = ({
-  isPlainRecord,
-  parentAbortController,
-  searchSessionId,
-  lastReloadRequestTime,
-}: {
-  isPlainRecord: boolean;
-  parentAbortController: AbortController | undefined;
-  searchSessionId: string | undefined;
-  lastReloadRequestTime: number | undefined;
-}): AbortController | undefined => {
-  const esqlAbortRef = useRef<AbortController>(new AbortController());
-  const fetchKey = `${searchSessionId ?? ''}:${lastReloadRequestTime ?? ''}`;
-  const prevFetchKeyRef = useRef(fetchKey);
-
-  if (isPlainRecord && prevFetchKeyRef.current !== fetchKey) {
-    esqlAbortRef.current.abort();
-    esqlAbortRef.current = new AbortController();
-    prevFetchKeyRef.current = fetchKey;
-  }
-
-  useEffect(() => {
-    return () => {
-      esqlAbortRef.current.abort();
-    };
-  }, []);
-
-  return isPlainRecord ? esqlAbortRef.current : parentAbortController;
-};
-
 export function Histogram({
   services: { lens, uiSettings },
   dataSource,
@@ -91,12 +56,6 @@ export function Histogram({
   onApiAvailable,
   abortController,
 }: HistogramProps) {
-  const lensAbortController = useLensAbortController({
-    isPlainRecord,
-    parentAbortController: abortController,
-    searchSessionId: lensProps.searchSessionId,
-    lastReloadRequestTime: lensProps.lastReloadRequestTime,
-  });
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
@@ -155,7 +114,7 @@ export function Histogram({
           // forceDSL is set to true to ensure that the Lens always uses DSL to fetch the data
           // as some consumers (discover) rely on the total hits count which is not provided by ESQL
           forceDSL={true}
-          abortController={lensAbortController}
+          abortController={abortController}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           onFilter={onFilter}

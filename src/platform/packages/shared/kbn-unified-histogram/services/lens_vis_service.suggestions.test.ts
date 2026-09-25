@@ -502,6 +502,10 @@ describe('LensVisService suggestions', () => {
   });
 
   test('should keep a customized ES|QL Line histogram when EsqlSource.datasetKey is unchanged', async () => {
+    const histogramQuery = {
+      esql: `from the-data-view | limit 10
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
+    };
     const externalVisContext = {
       suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
       requestData: {
@@ -514,6 +518,7 @@ describe('LensVisService suggestions', () => {
         title: 'Line',
         visualizationType: 'lnsXY',
         state: {
+          query: histogramQuery,
           visualization: { preferredSeriesType: 'line' },
           datasourceStates: {
             textBased: {
