@@ -61,6 +61,31 @@ describe('publicBaseUrl warning', () => {
     expect(addWarningToastSpy).not.toHaveBeenCalled();
   });
 
+  describe.each([
+    '[::1]',
+    '::1',
+    'ip6-localhost',
+    'ip6-loopback',
+    'localhost6',
+    'localhost.localdomain',
+    'LOCALHOST',
+    'kibana.localhost',
+    '127.0.0.2',
+  ])('loopback hostname %s', (hostname) => {
+    it('does not show any toast', () => {
+      const http = httpServiceMock.createStartContract();
+
+      setupPublicBaseUrlConfigWarning({
+        ...startServices,
+        docLinks,
+        http,
+        location: { hostname } as Location,
+      });
+
+      expect(addWarningToastSpy).not.toHaveBeenCalled();
+    });
+  });
+
   it('does not show toast if configured correctly', () => {
     const http = httpServiceMock.createStartContract({ publicBaseUrl: 'http://myhost.com' });
 
