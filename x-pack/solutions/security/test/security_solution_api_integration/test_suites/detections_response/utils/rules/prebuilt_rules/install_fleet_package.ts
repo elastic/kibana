@@ -16,7 +16,8 @@ import expect from 'expect';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 
-const TOTAL_TIMEOUT = 6 * 60000; // 6 mins, applies to all attempts
+const TOTAL_TIMEOUT = 60_000; // applies to all attempts
+const RETRY_DELAY = 10_000;
 
 interface InstallFleetPackageParams {
   getService: FtrProviderContext['getService'];
@@ -186,7 +187,7 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
 
       return testResponse.body;
     },
-    { description: installPrebuiltRulesPackageViaFleetAPI.name }
+    { description: installPrebuiltRulesPackageViaFleetAPI.name, retryDelay: RETRY_DELAY }
   );
 
   await refreshSavedObjectIndices(es);
@@ -225,7 +226,7 @@ export const installPrebuiltRulesPackageByVersion = async (
 
       return testResponse.body;
     },
-    { description: installPrebuiltRulesPackageByVersion.name }
+    { description: installPrebuiltRulesPackageByVersion.name, retryDelay: RETRY_DELAY }
   );
 
   await refreshSavedObjectIndices(es);

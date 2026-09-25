@@ -14,7 +14,8 @@ import type { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 
-const TOTAL_TIMEOUT = 6 * 60000; // 6 mins, applies to all attempts
+const TOTAL_TIMEOUT = 60_000; // applies to all attempts
+const RETRY_DELAY = 10_000;
 
 /**
  * Installs the `security_detection_engine` package via fleet API. This will
@@ -54,7 +55,7 @@ export const installPrebuiltRulesFleetPackage = async ({
 
         return testResponse.body;
       },
-      { description: installPrebuiltRulesFleetPackage.name }
+      { description: installPrebuiltRulesFleetPackage.name, retryDelay: RETRY_DELAY }
     );
 
     await refreshSavedObjectIndices(es);
@@ -85,7 +86,7 @@ export const installPrebuiltRulesFleetPackage = async ({
 
         return body;
       },
-      { description: installPrebuiltRulesFleetPackage.name }
+      { description: installPrebuiltRulesFleetPackage.name, retryDelay: RETRY_DELAY }
     );
 
     await refreshSavedObjectIndices(es);

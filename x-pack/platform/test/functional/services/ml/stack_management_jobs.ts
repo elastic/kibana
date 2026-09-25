@@ -186,7 +186,7 @@ export function MachineLearningStackManagementJobsProvider(
       buttonTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId'
     ) {
       await retry.tryForTime(
-        60 * 20000,
+        4 * 60_000,
         async () => {
           const button = await testSubjects.find(buttonTestSubj, 10000);
           await testSubjects.click(buttonTestSubj);

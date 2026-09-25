@@ -165,7 +165,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(fleetServerHost.name).to.eql('Test 123 updated');
 
         await retry.tryForTime(
-          30_1000,
+          15_000,
           async () => {
             const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
             if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx)
@@ -203,7 +203,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         await retry.tryForTime(
-          30_1000,
+          15_000,
           async () => {
             const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
             if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx) {
