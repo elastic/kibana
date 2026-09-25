@@ -21,8 +21,12 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { buildTaskRunEventFields } from './execution_outcome';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal' | 'executionUuid'>;
+type TaskRunParams = Pick<
+  RunContext,
+  'taskInstance' | 'signal' | 'executionUuid' | 'setCustomTaskRunEventFields'
+>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
@@ -31,10 +35,23 @@ export class RuleExecutorTaskRunner {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async run({ taskInstance, signal, executionUuid }: TaskRunParams): Promise<RunResult> {
+  public async run({
+    taskInstance,
+    signal,
+    executionUuid,
+    setCustomTaskRunEventFields,
+  }: TaskRunParams): Promise<RunResult> {
     const input = this.createRuleExecutionInput(taskInstance, signal, executionUuid);
 
-    const result = await this.pipeline.execute(input);
+    let result: RuleExecutionPipelineResult;
+    try {
+      result = await this.pipeline.execute(input);
+    } catch (error) {
+      setCustomTaskRunEventFields(buildTaskRunEventFields({ input, error }));
+      throw error;
+    }
+
+    setCustomTaskRunEventFields(buildTaskRunEventFields({ input, result }));
 
     return this.buildRunResult(result, input.logger, taskInstance);
   }

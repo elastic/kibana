@@ -26,6 +26,7 @@ import type {
 } from './metrics/types';
 import { MetricCollectorFactoryToken } from './metrics/tokens';
 import { RULE_EXECUTION_COUNTERS } from './metrics/counters';
+import { tagRunReport } from './execution_outcome/run_report';
 import {
   RuleExecutorEventPublisher,
   type RuleExecutorEventPublisherContract,
@@ -118,7 +119,10 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       };
     } catch (error) {
       this.publishExecutionFailed(rawInput, pipelineState.logger, error);
-      throw error;
+      throw tagRunReport(error, {
+        ruleVersion: pipelineState.rule?.metadata.version,
+        counters: collector.finalize().counters,
+      });
     } finally {
       collector.finalize();
     }
