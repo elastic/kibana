@@ -23,15 +23,18 @@ import { ManagementApp } from './management_app';
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
     dataTestSubj,
+    isDisabled,
     onTextLangQueryChange,
     query,
   }: {
     dataTestSubj?: string;
+    isDisabled?: boolean;
     onTextLangQueryChange: (nextQuery: { esql: string }) => void;
     query: { esql: string };
   }) => (
     <textarea
       data-test-subj={dataTestSubj}
+      disabled={isDisabled}
       onChange={({ target }) => onTextLangQueryChange({ esql: target.value })}
       value={query.esql}
     />
@@ -235,6 +238,41 @@ describe('ManagementApp', () => {
     );
     expect(await screen.findByText('Production logs')).toBeInTheDocument();
     expect(client.getViews).toHaveBeenCalledTimes(2);
+  });
+
+  it('locks editable fields while saving', async () => {
+    const client = createClient();
+    let resolveCreate: (() => void) | undefined;
+    client.getViews.mockResolvedValue({ views: [] });
+    client.createView.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveCreate = () => resolve({ acknowledged: true });
+        })
+    );
+
+    renderApp(client);
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+    fireEvent.change(await screen.findByTestId('esqlViewNameInput'), {
+      target: { value: 'sales-view' },
+    });
+    fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+    await waitFor(() => expect(client.createView).toHaveBeenCalled());
+    expect(screen.getByTestId('esqlViewNameInput')).toBeDisabled();
+    expect(screen.getByTestId('esqlViewDescriptionInput')).toBeDisabled();
+    expect(screen.getByTestId('esqlViewQueryEditor')).toBeDisabled();
+
+    await act(async () => {
+      if (!resolveCreate) {
+        throw new Error('Create request was not started');
+      }
+      resolveCreate();
+    });
+
+    await waitFor(() => expect(screen.queryByTestId('esqlViewFormFlyout')).not.toBeInTheDocument());
   });
 
   it('shows a stable name conflict with the exact Elasticsearch error in a tooltip', async () => {

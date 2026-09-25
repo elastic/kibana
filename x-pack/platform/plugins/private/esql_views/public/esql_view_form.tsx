@@ -212,6 +212,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
           >
             <EuiFieldText
               data-test-subj="esqlViewNameInput"
+              disabled={isSaving}
               fullWidth
               isInvalid={Boolean(nameError)}
               onChange={({ target }) => {
@@ -237,6 +238,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
           >
             <EuiTextArea
               data-test-subj="esqlViewDescriptionInput"
+              disabled={isSaving}
               fullWidth
               isInvalid={Boolean(descriptionError)}
               onChange={({ target }) => {
@@ -269,6 +271,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
               hasOutline
               hideQueryHistory
               hideRunQueryButton
+              isDisabled={isSaving}
               mergeExternalMessages
               onTextLangQueryChange={(nextQuery) => {
                 setQuery(nextQuery.esql);
