@@ -275,15 +275,13 @@ describe('ConversationInput', () => {
     it('shows the post to team header only when talking to users', () => {
       render(<ConversationInput />);
 
-      expect(
-        screen.queryByTestId('agentBuilderConversationInputPostToTeamHeader')
-      ).not.toBeInTheDocument();
+      const header = screen.getByTestId('agentBuilderConversationInputPostToTeamHeader');
+      expect(header).toHaveAttribute('aria-hidden', 'true');
 
       selectTalkToUsers();
 
-      expect(screen.getByTestId('agentBuilderConversationInputPostToTeamHeader')).toHaveTextContent(
-        'Leaving a post to the team'
-      );
+      expect(header).toHaveAttribute('aria-hidden', 'false');
+      expect(header).toHaveTextContent('Leaving a post to the team');
     });
 
     it('falls back to running the agent once the conversation is no longer shared', () => {
@@ -293,9 +291,10 @@ describe('ConversationInput', () => {
       mockedUseIsSharedConversation.mockReturnValue(false);
       rerender(<ConversationInput />);
 
-      expect(
-        screen.queryByTestId('agentBuilderConversationInputPostToTeamHeader')
-      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderConversationInputPostToTeamHeader')).toHaveAttribute(
+        'aria-hidden',
+        'true'
+      );
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiIcon, EuiText, euiCanAnimate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
@@ -51,13 +51,29 @@ const InputContainer: React.FC<
 > = ({ children, isDisabled, isCollapsed, isPostToTeam }) => {
   const { euiTheme } = useEuiTheme();
 
+  const transitionDuration = euiTheme.animation.fast;
+
   const wrapperStyles = css`
     flex-grow: 0;
     width: 100%;
     border-radius: ${INPUT_SHELL_RADIUS}px;
     background-color: ${isPostToTeam ? euiTheme.colors.backgroundBaseDisabled : 'transparent'};
+    ${euiCanAnimate} {
+      transition: background-color ${transitionDuration} ease-out;
+    }
   `;
+  // The header stays mounted so it can slide back behind the input on the way out;
+  // visibility is delayed on exit so it only leaves the accessibility tree once collapsed.
   const headerStyles = css`
+    height: ${isPostToTeam ? POST_TO_TEAM_HEADER_HEIGHT : 0}px;
+    overflow: hidden;
+    visibility: ${isPostToTeam ? 'visible' : 'hidden'};
+    ${euiCanAnimate} {
+      transition: height ${transitionDuration} ease-out,
+        visibility 0s linear ${isPostToTeam ? '0s' : transitionDuration};
+    }
+  `;
+  const headerContentStyles = css`
     display: flex;
     align-items: center;
     gap: ${euiTheme.size.xs};
@@ -67,12 +83,16 @@ const InputContainer: React.FC<
 
   return (
     <div css={wrapperStyles}>
-      {isPostToTeam && (
-        <div css={headerStyles} data-test-subj="agentBuilderConversationInputPostToTeamHeader">
+      <div
+        css={headerStyles}
+        aria-hidden={!isPostToTeam}
+        data-test-subj="agentBuilderConversationInputPostToTeamHeader"
+      >
+        <div css={headerContentStyles}>
           <EuiIcon type="megaphone" size="s" aria-hidden={true} />
           <EuiText size="xs">{postToTeamLabel}</EuiText>
         </div>
-      )}
+      </div>
       <ConversationInputShell
         isDisabled={isDisabled}
         isCollapsed={isCollapsed}
