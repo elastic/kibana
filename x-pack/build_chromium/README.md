@@ -180,11 +180,11 @@ $ nvm install 20.18.2
 $ nvm use 20.18.2
 ```
 
-From the branch on your local laptop, find the relevant ES build via  yarn es snapshot
+From the branch on your local laptop, find the relevant ES build via  pnpm es snapshot
 
 ```sh
-$ yarn es snapshot 
-yarn run v1.22.22
+$ pnpm es snapshot 
+pnpm run v1.22.22
 _ node scripts/es snapshot --license trial
  info Installing from snapshot
  info version: 9.1.0

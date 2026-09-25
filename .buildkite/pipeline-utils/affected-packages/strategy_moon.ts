@@ -21,7 +21,7 @@ function getMoonBinPath(): string {
     return moonBinPath;
   }
 
-  return execSync('yarn --silent which moon', { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
+  return execSync('pnpm --silent exec which moon', { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
 }
 
 export function getAffectedProjectsMoon(

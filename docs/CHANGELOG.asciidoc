@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.22>>
 * <<release-notes-8.19.21>>
 * <<release-notes-8.19.20>>
 * <<release-notes-8.19.19>>
@@ -128,6 +129,51 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.19.22]]
+== {kib} 8.19.22
+
+The 8.19.22 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.22]]
+=== Fixes
+Alerting::
+* Fix alerting resource installation using unbounded concurrency, which could exhaust {kib} heap when many contexts and namespaces install at once ({kibana-pull}287643[#287643]).
+* Fix the email connector HTTP test sending caller-supplied subject and message content. The test now sends fixed content ({kibana-pull}288664[#288664]).
+Dashboards and Visualizations::
+* Increase the TinyMath expression length limit so longer visualization formulas no longer fail ({kibana-pull}290314[#290314]).
+* Fix Canvas functions API creating data tables with more than 50 columns per row ({kibana-pull}287935[#287935]).
+Data ingestion and Fleet::
+* Fix deleting a managed integration policy leaving the agent listed as active ({kibana-pull}290181[#290181]).
+* Fix Elastic Defend metadata transforms accumulating as duplicates in {es} across stack upgrades ({kibana-pull}288379[#288379]) ({kibana-pull}288902[#288902]).
+* Fix comment-only values in {fleet} agent policy advanced YAML settings leaving agents stuck on an outdated policy ({kibana-pull}288430[#288430]).
+Data management::
+* Fix Index Management moving component templates listed in `ignore_missing_component_templates` to the end of `composed_of` when you edit or clone an index template ({kibana-pull}290171[#290171]).
+Developer tools::
+* Fix Console treating request-like lines inside an unterminated triple-quoted string as standalone requests ({kibana-pull}287547[#287547]).
+* Fix Console body autocomplete preferring a same-name global rule over an explicit field rule ({kibana-pull}286703[#286703]).
+Elastic Observability solution::
+* Add a confirmation modal in Synthetics **Alerting defaults** settings when disabling an active default status or TLS rule. Custom synthetics rules are not affected ({kibana-pull}287914[#287914]).
+* Add a **Can manage rules** Synthetics sub-feature privilege so users with Synthetics **Read** can create and manage Synthetics and Uptime alert rules without monitor write access ({kibana-pull}289952[#289952]).
+* Add a **Can run tests manually** Synthetics sub-feature privilege so users with Synthetics **Read** can run a test without monitor write access ({kibana-pull}282149[#282149]).
+* Fix Custom threshold and Metric threshold grouped alerts recovering when **If there is no data** is set to **Do nothing** ({kibana-pull}289623[#289623]).
+* Fix Observability AI Assistant hanging on **Help me understand this alert** for custom threshold alerts that have no entity filters ({kibana-pull}290244[#290244]).
+* Fix a 500 error when hovering over AWS RDS instances in the **Infrastructure Inventory** map tooltip, caused by unquoted ARN identifiers containing `:` characters being misinterpreted as KQL field-value separators ({kibana-pull}288209[#288209]).
+* Fix Synthetics global parameters shared across all spaces being dropped from private location monitor configurations during all-spaces sync ({kibana-pull}282575[#282575]).
+Elastic Security solution::
+For the Elastic Security 8.19.22 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Elasticsearch solution::
+* Add an **Expand role members** toggle to ServiceNow connectors for compact document-level security ({kibana-pull}288071[#288071]).
+// !!DEFERRED!! Not yet confirmed in build candidate 8.19.22-022cc937 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
+// * Add an **Expand site group members** toggle to SharePoint Online connectors for compact document-level security ({kibana-pull}288070[#288070]).
+Kibana platform::
+* Hide the **Activate user** action on deactivated users when you have read-only access ({kibana-pull}289801[#289801]).
+* Fix PKI authentication sessions being invalidated when in-flight HTTP/2 requests are canceled, which logged you out. This affects deployments with `server.protocol: http2` ({kibana-pull}285153[#285153]).
+* Fix {kib} failing to start when the file-based audit log appender cannot write. {kib} reports a degraded state instead ({kibana-pull}282347[#282347]).
+* Fix a failed audit log write after startup crashing {kib}. {kib} now reports a degraded state and turns the audit logger off instead ({kibana-pull}287360[#287360]).
+// !!DEFERRED!! Not yet confirmed in build candidate 8.19.22-022cc937 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
+// * Fix {kib} shutting down when the product documentation installer downloads a corrupt or incomplete artifact ({kibana-pull}291142[#291142]).
+
 [[release-notes-8.19.21]]
 == {kib} 8.19.21
 
@@ -152,14 +198,12 @@ Per-host `xpack.actions.customHostSettings` (custom CA or relaxed hostname) does
 [[fixes-v8.19.21]]
 === Fixes
 Alerting::
-* Limit alerts-as-data resource installation concurrency to reduce peak heap usage ({kibana-pull}287643[#287643]).
 * Fix alert suppression for alerts stored with nested `_source` fields to prevent creating duplicate alerts instead of updating existing ones ({kibana-pull}282192[#282192]).
 Data ingestion and Fleet::
 * Fix {fleet} to ignore cluster privileges other than `monitor` in package manifests when applying permissions to agent API keys ({kibana-pull}286084[#286084]).
 * Fix {fleet} Kafka output to accept custom multi-field format strings entered directly in the Dynamic Topic field instead of producing an invalid topic expression ({kibana-pull}285581[#285581]).
 Developer tools::
 * Fix duplicate Cut, Copy, and Paste actions in the Console context menu ({kibana-pull}286704[#286704]).
-* Fix Console body autocomplete to prioritize explicit field rules over same-name global rules ({kibana-pull}286703[#286703]).
 * Fix Console autocomplete inserting boolean and numeric values as quoted strings instead of JSON primitives ({kibana-pull}286699[#286699]).
 * Fix Console body autocomplete failing after closed triple-quoted string values ({kibana-pull}286695[#286695]).
 * Fix Console autocomplete not triggering at request body positions, and correct template expansion and text corruption bugs when accepting suggestions ({kibana-pull}284530[#284530]).
@@ -171,9 +215,6 @@ Elastic Security solution::
 For the Elastic Security 8.19.21 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
 Elasticsearch solution::
 * Fix query rule set and rule ID validation to reject invalid characters before sending requests to {es} ({kibana-pull}276710[#276710]).
-Kibana platform::
-* Fix PKI session invalidation when in-flight HTTP/2 requests are canceled ({kibana-pull}285153[#285153]).
-* Fix {kib} to detect a misconfigured audit log file path on startup and report a degraded state instead of crashing ({kibana-pull}282347[#282347]).
 Machine Learning::
 * Fix the trained model testing endpoint to require admin-level permissions and run inference as the requesting user ({kibana-pull}282002[#282002]).
 

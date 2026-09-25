@@ -767,7 +767,7 @@
     },
     {
       "groupName": "OpenAPI Spec",
-      "matchDepNames": ["@apidevtools/swagger-parser", "@redocly/cli", "openapi-types"],
+      "matchDepNames": ["@apidevtools/swagger-parser", "@redocly/cli", "openapi-types", "bump-cli"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core"],

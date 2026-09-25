@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.19.22",
+  "version": "8.19.23",
   "branch": "8.19",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -48,7 +48,7 @@
     "es": "node scripts/es",
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
-    "lint": "yarn run lint:es && yarn run lint:style",
+    "lint": "node scripts/eslint_all_files && node scripts/stylelint",
     "lint:es": "node scripts/eslint_all_files",
     "lint:style": "node scripts/stylelint",
     "makelogs": "node scripts/makelogs",
@@ -73,8 +73,7 @@
   },
   "engines": {
     "node": "24.21.0",
-    "pnpm": "~11.27.0",
-    "yarn": "^1.22.19"
+    "pnpm": "~12.4.2"
   },
   "resolutions": {
     "**/@babel/core": "7.29.7",
@@ -118,6 +117,8 @@
     "@elastic/opamp-client-node/undici": "6.28.1",
     "@elastic/transport/undici": "6.28.1",
     "@emotion/serialize/csstype": "3.0.7",
+    "@storybook/addon-docs/react": "17.0.2",
+    "@storybook/addon-docs/react-dom": "17.0.2",
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
@@ -1344,7 +1345,7 @@
     "suricata-sid-db": "1.0.2",
     "swr": "2.3.3",
     "symbol-observable": "4.0.0",
-    "tar": "7.5.19",
+    "tar": "7.5.22",
     "textarea-caret": "3.1.0",
     "tinycolor2": "1.4.1",
     "tinygradient": "0.4.3",
@@ -1550,6 +1551,7 @@
     "@kbn/mock-idp-plugin": "workspace:*",
     "@kbn/mock-idp-utils": "workspace:*",
     "@kbn/moon": "workspace:*",
+    "@kbn/oas-docs": "workspace:*",
     "@kbn/observability-synthetics-test-data": "workspace:*",
     "@kbn/openapi-bundler": "workspace:*",
     "@kbn/openapi-generator": "workspace:*",
@@ -1634,7 +1636,7 @@
     "@mswjs/http-middleware": "0.10.1",
     "@octokit/rest": "22.0.1",
     "@parcel/watcher": "2.5.1",
-    "@playwright/test": "1.62.1",
+    "@playwright/test": "1.63.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.3",
     "@redocly/cli": "2.35.1",
     "@statoscope/webpack-plugin": "5.28.2",
@@ -1804,6 +1806,7 @@
     "blob-polyfill": "9.0.20240710",
     "browserslist": "4.28.8",
     "buildkite-test-collector": "1.8.1",
+    "bump-cli": "2.10.0",
     "cache-manager": "7.0.0",
     "cache-manager-fs-hash": "2.0.0",
     "callsites": "3.1.0",
@@ -1912,7 +1915,7 @@
     "picomatch": "4.0.4",
     "pirates": "4.0.7",
     "pixelmatch": "5.3.0",
-    "playwright": "1.62.1",
+    "playwright": "1.63.0",
     "pngjs": "3.4.0",
     "postcss": "8.5.26",
     "postcss-loader": "8.2.1",
@@ -1970,5 +1973,6 @@
     "xml-crypto": "6.1.2",
     "xmlbuilder": "13.0.2",
     "yargs": "15.4.1"
-  }
+  },
+  "packageManager": "pnpm@12.4.2"
 }

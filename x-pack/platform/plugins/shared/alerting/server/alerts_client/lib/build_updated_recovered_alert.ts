@@ -9,12 +9,20 @@ import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_DURATION,
+  ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_SEVERITY_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_STATUS_RECOVERED,
+  ALERT_TIME_RANGE,
+  ALERT_TRACKED,
+  EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import type { RawAlertInstance } from '@kbn/alerting-state-types';
@@ -22,6 +30,8 @@ import { get, omit } from 'lodash';
 import type { RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
+import { shouldKeepTrackingRecovered } from '../../lib/flapping/optimize_task_state_for_flapping';
+import { nanosToMicros } from './nanos_to_micros';
 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;
@@ -29,6 +39,7 @@ interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   runTimestamp?: string;
   timestamp: string;
   rule: AlertRule;
+  recoveryActionGroup?: string;
 }
 
 /**
@@ -41,12 +52,40 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   legacyRawAlert,
   runTimestamp,
   timestamp,
+  recoveryActionGroup = 'recovered',
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
   // Make sure that any alert fields that are updatable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
 
   // Omit fields that are overwrite-able with undefined value
   const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
+
+  const sourceStatus = get(alert, ALERT_STATUS);
+  const recoveredState = legacyRawAlert.state;
+  const recoveredEnd = recoveredState?.end ?? timestamp;
+  const recoveredStart = get(alert, ALERT_START) ?? recoveredState?.start;
+  // Task state is the source of truth for recovery. If the original recovered
+  // write never landed, close the source doc with the canonical recovery fields.
+  const recoveryRepair =
+    sourceStatus !== ALERT_STATUS_RECOVERED
+      ? {
+          [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+          [EVENT_ACTION]: 'close',
+          [ALERT_ACTION_GROUP]: recoveryActionGroup,
+          [ALERT_END]: recoveredEnd,
+          ...(recoveredStart
+            ? {
+                [ALERT_TIME_RANGE]: {
+                  gte: recoveredStart,
+                  lte: recoveredEnd,
+                },
+              }
+            : {}),
+          ...(recoveredState?.duration
+            ? { [ALERT_DURATION]: nanosToMicros(recoveredState.duration) }
+            : {}),
+        }
+      : {};
 
   const alertUpdates = {
     // Update the timestamp to reflect latest update time
@@ -57,10 +96,14 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     // Set latest flapping history
     [ALERT_FLAPPING_HISTORY]: legacyRawAlert.meta?.flappingHistory,
     // For an "ongoing recovered" alert, we do not want to update the execution UUID to the current one so it does
-    // not get returned for summary alerts. In the future, we may want to restore this and add another field to the
-    // alert doc indicating that this is an ongoing recovered alert that can be used for querying.
+    // not get returned for summary alerts.
     [ALERT_RULE_EXECUTION_UUID]: get(alert, ALERT_RULE_EXECUTION_UUID),
+    [ALERT_TRACKED]: shouldKeepTrackingRecovered({
+      flapping: legacyRawAlert.meta?.flapping,
+      flappingHistory: legacyRawAlert.meta?.flappingHistory,
+    }),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
+    ...recoveryRepair,
   };
 
   // Clean the existing alert document so any nested fields that will be updated
