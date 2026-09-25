@@ -16,6 +16,8 @@ import {
   DiscoverInDashboardEventName,
 } from '../../../../../ebt_manager/discover_in_dashboard_event_definition';
 import type { DiscoverServices } from '../../../../../build_services';
+import { DISCOVER_SESSION_HTTP_ERROR_NAME } from '../../../../../session/api_client';
+import { sessionSaveErrorMessages } from '../../../../../session/session_error_messages';
 import { TransferAction } from '../../../../../plugin_imports/embeddable_editor_service';
 import {
   getSerializedSearchSourceDataViewDetails,
@@ -184,6 +186,25 @@ export const DiscoverSessionSaveModalContainer = ({
 
       onClose();
     } catch (error) {
+      const errorMessage =
+        error.name === DISCOVER_SESSION_HTTP_ERROR_NAME
+          ? sessionSaveErrorMessages[Number(error.code)]
+          : undefined;
+
+      if (errorMessage) {
+        // The HTTP wrapper's client stack is not part of the server error details.
+        const toastError: Error & { code?: string } = {
+          name: error.name,
+          code: error.code,
+          message: error.message,
+        };
+        services.toastNotifications.addError(toastError, {
+          title: errorMessage.title,
+          toastMessage: errorMessage.description,
+        });
+        return;
+      }
+
       services.toastNotifications.addDanger({
         title: i18n.translate('discover.notifications.notSavedSearchTitle', {
           defaultMessage: `Discover session ''{savedSearchTitle}'' was not saved`,

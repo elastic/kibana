@@ -52,6 +52,7 @@ import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
+import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -416,7 +417,13 @@ export const initializeTabs = createInternalStateAsyncThunk(
         return undefined;
       }
       try {
-        return await services.savedSearch.getDiscoverSession(discoverSessionId);
+        const { session, warnings } = await services.sessionService.get(discoverSessionId);
+
+        if (warnings.length) {
+          showSessionWarnings({ session, warnings, core: services.core });
+        }
+
+        return session;
       } catch (error) {
         if (error instanceof SavedObjectNotFound) {
           forgetDiscoverSession(services.core.http, services.chrome, discoverSessionId);

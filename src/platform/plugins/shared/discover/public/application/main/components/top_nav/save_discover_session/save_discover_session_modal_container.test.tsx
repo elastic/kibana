@@ -14,7 +14,9 @@ import { DiscoverSessionSaveDashboardModal } from './discover_session_save_dashb
 import { DiscoverSessionSaveModalContainer } from './save_discover_session_modal_container';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { SessionService } from '../../../../../session';
+import { DISCOVER_SESSION_HTTP_ERROR_NAME } from '../../../../../session/api_client';
+import { sessionSaveErrorMessages } from '../../../../../session/session_error_messages';
 import type { DiscoverServices } from '../../../../../build_services';
 import {
   fromTabStateToSavedObjectTab,
@@ -89,7 +91,7 @@ const setup = async ({
   initialCopyOnSave?: boolean;
   initialTabDataView?: DataView;
   isEmbedded?: boolean;
-  mockSaveDiscoverSession?: SavedSearchPublicPluginStart['saveDiscoverSession'];
+  mockSaveDiscoverSession?: SessionService['save'];
   onSaveCb?: () => void;
   persistedDiscoverSession?: DiscoverSession | false;
   services?: DiscoverServices;
@@ -124,9 +126,7 @@ const setup = async ({
     persistedDataViews: uniqueDataViews,
   });
 
-  jest
-    .spyOn(services.savedSearch, 'saveDiscoverSession')
-    .mockImplementation(mockSaveDiscoverSession);
+  jest.spyOn(services.sessionService, 'save').mockImplementation(mockSaveDiscoverSession);
 
   await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
   await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
@@ -792,24 +792,92 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
     });
 
-    it('should show a danger toast on error', async () => {
-      const services = createDiscoverServicesMock();
-      const dangerSpy = jest.spyOn(services.toastNotifications, 'addDanger');
-      const { modalProps } = await setup({
-        isEmbedded: true,
-        mockSaveDiscoverSession: () => Promise.reject(new Error('Save error')),
-        services,
-      });
+    it.each([
+      { name: 'Error', code: undefined },
+      { name: 'Error', code: '403' },
+      { name: DISCOVER_SESSION_HTTP_ERROR_NAME, code: '418' },
+    ])(
+      'should keep the existing toast for an unmapped error ($name, $code)',
+      async ({ name, code }) => {
+        const services = createDiscoverServicesMock();
+        const dangerSpy = jest.spyOn(services.toastNotifications, 'addDanger');
+        const error = Object.assign(new Error('Save error'), { name, code });
+        const { modalProps } = await setup({
+          isEmbedded: true,
+          mockSaveDiscoverSession: () => Promise.reject(error),
+          services,
+        });
 
-      await act(async () => {
-        await modalProps?.onSave(getOnSaveProps());
-      });
+        await act(async () => {
+          await modalProps?.onSave(getOnSaveProps());
+        });
 
-      expect(dangerSpy).toHaveBeenCalledWith({
-        text: 'Save error',
-        title: "Discover session 'title' was not saved",
-      });
-    });
+        expect(dangerSpy).toHaveBeenCalledWith({
+          text: 'Save error',
+          title: "Discover session 'title' was not saved",
+        });
+        expect(services.toastNotifications.addError).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      {
+        status: 400,
+        format: 'validation JSON',
+        message: JSON.stringify(
+          [
+            { code: 'invalid_type', path: ['title'], message: 'Expected string' },
+            { code: 'too_small', path: ['tabs'], message: 'At least one tab is required' },
+          ],
+          null,
+          2
+        ),
+      },
+      {
+        status: 400,
+        format: 'multiline validation',
+        message: '✖ Expected string\n  → at title\n✖ At least one tab is required\n  → at tabs',
+      },
+      { status: 403, format: 'plain text', message: 'Unable to update Discover sessions' },
+      { status: 409, format: 'text containing markup', message: 'Conflict for session <example>' },
+      {
+        status: 500,
+        format: 'generic server error',
+        message: 'An internal server error occurred. Check Kibana server logs for details.',
+      },
+    ])(
+      'should show one HTTP $status toast with $format details and no client stack',
+      async ({ status, message }) => {
+        const services = createDiscoverServicesMock();
+        const error = Object.assign(new Error(message), {
+          name: DISCOVER_SESSION_HTTP_ERROR_NAME,
+          code: String(status),
+        });
+        const originalStack = error.stack;
+        const { modalProps, onClose } = await setup({
+          isEmbedded: true,
+          mockSaveDiscoverSession: () => Promise.reject(error),
+          services,
+        });
+
+        await act(async () => {
+          await modalProps?.onSave(getOnSaveProps());
+        });
+
+        expect(services.toastNotifications.addError).toHaveBeenCalledTimes(1);
+        expect(services.toastNotifications.addError).toHaveBeenCalledWith(
+          { name: error.name, code: error.code, message: error.message },
+          {
+            title: sessionSaveErrorMessages[status]?.title,
+            toastMessage: sessionSaveErrorMessages[status]?.description,
+          }
+        );
+        expect(error.stack).toBe(originalStack);
+        expect(services.toastNotifications.addDanger).not.toHaveBeenCalled();
+        expect(services.toastNotifications.addSuccess).not.toHaveBeenCalled();
+        expect(onClose).not.toHaveBeenCalled();
+      }
+    );
 
     it('should not close modal when navigating to dashboard', async () => {
       const services = createDiscoverServicesMock();
