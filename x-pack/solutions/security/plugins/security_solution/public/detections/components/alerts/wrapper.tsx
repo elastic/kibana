@@ -8,8 +8,6 @@
 import React, { memo, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiSkeletonLoading,
   EuiSkeletonRectangle,
@@ -18,10 +16,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { HeaderPage } from '../../../common/components/header_page';
+import { AppHeaderLoading } from '@kbn/app-header';
 import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { AlertsPageContent } from './content';
-import { PAGE_TITLE } from '../../pages/alerts/translations';
 
 export const DATA_VIEW_LOADING_PROMPT_TEST_ID = 'alerts-page-data-view-loading-prompt';
 export const DATA_VIEW_ERROR_TEST_ID = 'alerts-page-data-view-error';
@@ -95,22 +92,13 @@ export const Wrapper = memo(({ dataView, status }: WrapperProps) => {
       isLoading={isLoading}
       loadingContent={
         <div data-test-subj={SKELETON_TEST_ID}>
-          <EuiSkeletonRectangle height={40} width="100%" />
-          <EuiSpacer />
-          <HeaderPage title={PAGE_TITLE}>
-            <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem>
-                <EuiSkeletonRectangle height={40} width={110} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSkeletonRectangle height={40} width={110} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </HeaderPage>
+          <AppHeaderLoading menu={{ buttonCount: 0, hasPrimary: true }} spacing="largeBleed" />
           <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="l" />
+          <EuiSpacer size="s" />
           <EuiSkeletonRectangle height={32} width="100%" />
-          <EuiSpacer />
+          <EuiSpacer size="s" />
+          <EuiSkeletonRectangle height={32} width="100%" />
+          <EuiSpacer size="l" />
           <EuiSkeletonRectangle height={375} width="100%" />
           <EuiSpacer />
           <EuiSkeletonRectangle height={600} width="100%" />
