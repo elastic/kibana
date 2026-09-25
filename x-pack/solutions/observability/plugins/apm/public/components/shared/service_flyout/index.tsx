@@ -8,7 +8,7 @@
 import { EuiFlyoutBody, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -114,6 +114,11 @@ export function ServiceFlyout({
   const [flyoutTransactionType, setFlyoutTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
+  // Local only — do not call refreshTimeRange() (app-wide timeRangeId / unrelated page fetchers).
+  const onRefresh = useCallback(() => {
+    setRefreshToken(Date.now());
+  }, []);
+
   const capabilities = useServiceFlyoutCapabilities({
     serviceName: service.name,
     environment: flyoutEnvironment,
@@ -182,9 +187,11 @@ export function ServiceFlyout({
             setEnvironment: setFlyoutEnvironment,
             rangeFrom: flyoutRange.rangeFrom,
             rangeTo: flyoutRange.rangeTo,
+            start,
+            end,
             setRange: setFlyoutRange,
             refreshToken,
-            onRefresh: () => setRefreshToken(Date.now()),
+            onRefresh,
             transactionType: flyoutTransactionType,
             setTransactionType: setFlyoutTransactionType,
             latencyAggregationType,

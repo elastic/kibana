@@ -76,6 +76,13 @@ interface ConversationQueueProps {
   isFiltered?: boolean;
   /** Plural: the flyout shows an investigation, which several rows can share. */
   selectedIds?: readonly string[];
+  /** When true escalation actions are shown on every card. Requires the manage capability. */
+  canManageEscalations?: boolean;
+  /**
+   * Optional: render the assignee picker widget for a non-closed investigation card.
+   * Supplied by the page so that hook calls stay outside this package.
+   */
+  renderAssignees: (investigation: Investigation) => React.ReactNode;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -115,6 +122,8 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     getChatHref,
     getOutcomeLabel,
     selectedIds,
+    canManageEscalations,
+    renderAssignees,
   }) => {
     const { euiTheme } = useEuiTheme();
     // Work already finished reads as a list. Pinned to the bucket, not a prop: which
@@ -156,7 +165,8 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     const rowList = (
       <EuiFlexGroup direction="column" gutterSize="none">
         {rows.map((investigation, i) => {
-          const cardProps = {
+          // Props shared by both card variants (closed compact + open full).
+          const sharedProps = {
             investigation,
             hasBorder: i < rows.length - 1,
             isSelected: selectedIds?.includes(investigation.id),
@@ -165,17 +175,20 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             onOpenChat,
             onClickRecommendedAction,
             chatHref: getChatHref?.(investigation.id),
+            canManageEscalations,
           };
 
           return (
             <EuiFlexItem key={investigation.id} grow={false}>
               {isClosedBucket ? (
                 <ConversationCardCompact
-                  {...cardProps}
+                  {...sharedProps}
                   outcome={getOutcomeLabel?.(investigation.id)}
                 />
               ) : (
-                <ConversationCard {...cardProps} />
+                // renderAssignees is only passed to the full card — decided rows (compact)
+                // do not expose the assignee widget.
+                <ConversationCard {...sharedProps} renderAssignees={renderAssignees} />
               )}
             </EuiFlexItem>
           );

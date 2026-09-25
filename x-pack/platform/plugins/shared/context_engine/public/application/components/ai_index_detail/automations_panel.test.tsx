@@ -69,9 +69,14 @@ const suggestResult = (
   ...overrides,
 });
 
-const summariesResult = (summaries: Array<[string, WorkflowSummary]> = [], isLoading = false) => ({
+const summariesResult = (
+  summaries: Array<[string, WorkflowSummary]> = [],
+  isLoading = false,
+  missingReadPrivilege = false
+) => ({
   summaries: new Map(summaries),
   isLoading,
+  missingReadPrivilege,
 });
 
 const aiIndex: GetAiIndexResponse = {
@@ -251,6 +256,17 @@ describe('AutomationsPanel', () => {
     const row = screen.getByTestId('contextAiIndexAutomationRow');
     expect(row).toHaveTextContent('My workflow');
     expect(row).not.toHaveTextContent('wf-1');
+  });
+
+  it('shows a missing-privilege callout when the user lacks the workflows read privilege', () => {
+    mockUseWorkflowSummaries.mockReturnValue(summariesResult([], false, true));
+
+    renderPanel();
+
+    expect(screen.getByTestId('contextAutomationsMissingPrivilegeCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsMissingPrivilegeCallout')).toHaveTextContent(
+      'You need the Workflows read privilege to see automation details.'
+    );
   });
 
   it('swaps the Edit button for Save and Cancel while editing', () => {

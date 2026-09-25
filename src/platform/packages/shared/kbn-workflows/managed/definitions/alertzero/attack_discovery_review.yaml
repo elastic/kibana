@@ -5,7 +5,9 @@ description: >
   its alerts, runs FP/TP analysis, and applies the resulting verdict — closing the
   attack outright, or proposing a handoff to Forensics Watch.
 
-  Only `run_fp_tp_analysis` is still a console stub; it lands in #19211.
+  Every step is real. The FP/TP analysis it calls is its own workflow, whose shell
+  landed with this one; the analysis BODY — evidence, agent, claim verification —
+  is #19282.
 enabled: true
 tags:
   - security
@@ -88,19 +90,6 @@ triggers:
             same handoff. Two of the three shared levels, because this workflow gates
             exactly one thing and `assisted` would mean the same as `manual`. Defaults
             to `manual`.
-        stub_verdict:
-          type: string
-          enum:
-            - false_positive
-            - true_positive
-            - inconclusive
-            - failed
-          description: >-
-            Stands in for the verdict the real FP/TP analysis workflow will return
-            (#19211). Defaults to
-            `inconclusive`, which routes to the same escalation gate as true_positive.
-            Overridable by hand so every branch of the switch below is reachable
-            before the real analysis exists.
         parent_run_id:
           type: string
           maxLength: 128
@@ -132,8 +121,14 @@ outputs:
   - name: proposal_decision
     type: string
 consts:
-  default_verdict: inconclusive
+  # What `resolve_analysis` falls back to when the analysis child produced no
+  # payload. `failed` is an EXECUTION STATE, not a classification: the analysis
+  # never returns it, and it is reachable here only by the child failing after its
+  # own retries. The `failed` arm of the switch below is what makes that visible on
+  # the Investigation without taking any lifecycle action.
+  failed_verdict: failed
   default_autonomy: manual
+  fp_tp_analysis: system-security-attack-discovery-fp-tp-analysis
   # Mirrors ALERTS_BATCH_MAX_SIZE in security_solution's common/constants, which is
   # what the `security.alerts` attachment schema caps `alertIds` at. Duplicated
   # rather than imported because this is YAML; if that constant moves, the
@@ -349,29 +344,71 @@ steps:
       workflow-id: "{{ consts.journal_note }}"
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
-        message: Starting FP/TP analysis (stub until #19211).
+        message: Starting FP/TP analysis.
     on-failure:
       continue: true
 
-  # STUB — #19211 replaces this
-  # with the real AlertZero FP/TP analysis workflow, which generates a
-  # corroborating-evidence report and returns the verdict this workflow switches
-  # on. Its own built-in retries live in that workflow, not here.
+  # The FP/TP analysis. It judges the CORRELATION and returns a payload; every write
+  # the verdict produces is this workflow's, which is why nothing below reads its
+  # result from anywhere but `resolve_analysis`.
   #
-  # This is the ONLY console stub left in this workflow. `report_unknown_verdict`
-  # below is also a console step, but it is a defensive default arm rather than a
-  # placeholder for work that has not landed.
+  # Handed IDS ONLY: the analysis loads the authoritative Attack Discovery and this
+  # Investigation itself, so a retry cannot reason over a copy of either that went
+  # stale. That is also why `title`, `alert_ids` and `summary_markdown` are not
+  # passed — they are all on the document the analysis reads.
   #
-  # When it is replaced it must NOT analyze against the Investigation conversation:
-  # posting there wakes the agent. Use `ai.agent` with `create-conversation: true`
-  # against a separate backing conversation and attach the result here.
+  # Synchronous, and the run parks here for as long as the analysis takes (its own
+  # `timeout` bounds that). The workflow timeout above already accommodates a 176h
+  # gate, so a bounded analysis costs nothing against it.
+  #
+  # `on-failure: continue` is the failure contract, not leniency: the analysis fails
+  # its run rather than classifying when a required source is unavailable, and its
+  # built-in retries have already been exhausted by the time control reaches here.
+  # Continuing is what lets `resolve_analysis` turn that into the `failed` arm, which
+  # records the failure on the Investigation and takes no lifecycle action. Failing
+  # the review instead would leave the Investigation open with nothing said about why.
   - name: run_fp_tp_analysis
-    type: console
+    type: workflow.execute
     with:
-      message: >-
-        STUB run_fp_tp_analysis (#19211): would run the AlertZero FP/TP analysis
-        workflow for "{{ inputs.title }}" and return a verdict.
-        Summary under review: {{ inputs.summary_markdown }}
+      workflow-id: "{{ consts.fp_tp_analysis }}"
+      inputs:
+        attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+        investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+    on-failure:
+      continue: true
+
+  # The one place the analysis result is interpreted, so the `failed` mapping is
+  # written once. Everything downstream — the attachment, the verdict switch, the
+  # escalation, the journal and the run output — reads it from here.
+  #
+  # A child that failed leaves `steps.run_fp_tp_analysis.output` empty, because
+  # `workflow.execute` resolves to the child's `context.output` and a failed run
+  # never reaches its `workflow.output` step. So an absent verdict IS the failure
+  # signal, and `| default:` is the whole mapping. The analysis deliberately never
+  # emits `failed` itself.
+  - name: resolve_analysis
+    type: data.set
+    with:
+      verdict: "{{ steps.run_fp_tp_analysis.output.verdict | default: consts.failed_verdict }}"
+      # The attachment REQUIRES a summary, and it is what an analyst opens the
+      # Investigation to read — so a failed analysis has to supply one rather than
+      # attach an empty verdict. The execution reference is what makes the failure
+      # investigable, since the error itself lives in workflow history.
+      #
+      # An `{% if %}` rather than `| default:`, because the fallback interpolates
+      # `execution.id`: a filter argument cannot itself be a template, and appending
+      # it after the `default:` would append to the child's summary too.
+      summary_markdown: |-
+        {%- if steps.run_fp_tp_analysis.output.summary_markdown -%}
+        {{ steps.run_fp_tp_analysis.output.summary_markdown }}
+        {%- else -%}
+        FP/TP analysis failed for this attack after its retries were exhausted. No classification was produced. See review execution {{ execution.id }} for the error.
+        {%- endif -%}
+      # `${{ }}`, not `{{ }}`: the rationale is OPTIONAL, and `{{ }}` would
+      # stringify an absent one to `""`. The attachment renderer tests the field for
+      # null rather than for emptiness, so that would render an empty `## Rationale`
+      # heading to the analyst on every failed run.
+      rationale_markdown: "${{ steps.run_fp_tp_analysis.output.rationale_markdown }}"
 
   # The verdict and its narrative, as their own attachment rather than folded into
   # the evidence above: written after the analysis so it reflects the result, and
@@ -379,8 +416,15 @@ steps:
   #
   # A domain type, like the two evidence attachments above, so the verdict stays an
   # enum a reader can branch on. The markdown an analyst sees is rendered by the type
-  # from these fields rather than assembled here. `rationale_markdown` is omitted
-  # until #19211 produces one; the type already accepts it.
+  # from these fields rather than assembled here: it draws the
+  # `# Analysis verdict: {verdict}` heading and the `## Rationale` section itself, so
+  # what goes on is body markdown only.
+  #
+  # The summary is the ANALYSIS's, not the discovery's `inputs.summary_markdown` —
+  # this attachment is the conclusion, and the discovery's own narrative is already
+  # on the Investigation via `attach_discovery` and its metadata. A failed analysis
+  # still lands here, with `failed` and the failure summary `resolve_analysis`
+  # supplies, because the type accepts that verdict for exactly this case.
   - name: attach_verdict
     type: ai.attachment.add
     with:
@@ -388,13 +432,44 @@ steps:
       id: analysis-verdict
       type: security.attack_discovery.verdict
       data:
-        summary_markdown: "{{ inputs.summary_markdown }}"
-        verdict: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
+        summary_markdown: "{{ steps.resolve_analysis.output.summary_markdown }}"
+        verdict: "{{ steps.resolve_analysis.output.verdict }}"
+        # `${{ }}` so an analysis with no rationale leaves the field absent. The
+        # type has it optional and its renderer null-checks it, so `{{ }}` would
+        # stringify the absence into an empty `## Rationale` section.
+        rationale_markdown: "${{ steps.resolve_analysis.output.rationale_markdown }}"
       description: FP/TP analysis verdict and summary
       # Same as the discovery above: the conclusion is what an analyst opens the
       # Investigation to read, so it renders on open rather than waiting for the agent
       # to reference it — which on this path never happens, because nothing wakes it.
       render_inline: true
+    on-failure:
+      continue: true
+
+  # The one attachment that MUST refresh on a re-review. The evidence attachments
+  # above keep the first review's snapshot deliberately — the discovery and its
+  # alerts are facts about the attack, and the first reading of them is the right
+  # one. This is not evidence, it is the conclusion of one analysis run, and the
+  # re-review's switch, journal and output all act on the NEW verdict. Leaving the
+  # add's 409 to stand would show an analyst the previous run's verdict next to the
+  # lifecycle action the current one took — a `failed` notice beside a live
+  # escalation, or an `inconclusive` beside an Investigation closed false positive.
+  #
+  # Only on the 409 path: on a first review the add above already wrote this, and
+  # `update` versions rather than overwrites, so the superseded verdict stays in
+  # the attachment's history.
+  - name: refresh_verdict
+    type: ai.attachment.update
+    if: "${{ steps.attach_verdict.error != null }}"
+    with:
+      conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      attachment_id: analysis-verdict
+      data:
+        summary_markdown: "{{ steps.resolve_analysis.output.summary_markdown }}"
+        verdict: "{{ steps.resolve_analysis.output.verdict }}"
+        rationale_markdown: "${{ steps.resolve_analysis.output.rationale_markdown }}"
+    # Continues for the same reason the add does: a verdict that could not be
+    # recorded is not a reason to abandon the review that produced it.
     on-failure:
       continue: true
 
@@ -406,7 +481,7 @@ steps:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           Analysis finished:
-          {{ inputs.stub_verdict | default: consts.default_verdict }}.
+          {{ steps.resolve_analysis.output.verdict }}.
     on-failure:
       continue: true
 
@@ -417,8 +492,10 @@ steps:
   # `inputs.autonomy | default: consts.default_autonomy == 'supervised'` is a
   # tokenization error, not a comparison. Anything below that needs to test this
   # value against a literal reads it from here instead. Steps that only interpolate
-  # a value still read `inputs` directly, because `data.set` outputs are untyped and
-  # the editor warns on every `steps.*.output.*` read.
+  # autonomy still read `inputs` directly, because `data.set` outputs are untyped and
+  # the editor warns on every `steps.*.output.*` read. The verdict has no such
+  # choice: it arrives from another workflow, so `resolve_analysis` is the only place
+  # to read it from.
   - name: resolve_context
     type: data.set
     with:
@@ -430,12 +507,10 @@ steps:
   # Only the two terminal verdicts act here. True positive and inconclusive take
   # the same escalation, which needs a proposal gate and the read-back that follows
   # it, so those steps live after the switch rather than being written twice inside
-  # it. Verdict and autonomy read `inputs` with `| default` rather than a
-  # `data.set` step: `data.set` outputs are untyped, and the editor warns on every
-  # `steps.*.output.*` read.
+  # it.
   - name: apply_verdict
     type: switch
-    expression: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
+    expression: "{{ steps.resolve_analysis.output.verdict }}"
     cases:
       - match: false_positive
         steps:
@@ -548,8 +623,10 @@ steps:
           #
           # The execution reference is what makes the failure investigable, since the
           # error itself lives in workflow history rather than here. The failure
-          # category and attempt count the RFC also asks for arrive with #19211 —
-          # today's `failed` comes from `stub_verdict`, which carries no error.
+          # CATEGORY and attempt count the RFC also asks for are not available yet:
+          # a failed child hands its parent nothing, so all this arm can observe is
+          # the absence of a payload. Surfacing why needs the analysis to carry
+          # structured failure detail on its execution output, which is #19282.
           - name: record_analysis_failure
             type: ai.conversation.metadata.patch
             with:
@@ -578,14 +655,16 @@ steps:
               continue: true
     default:
       # Unreachable through the four cases above; only a verdict outside the enum
-      # lands here. Reported rather than ignored so a contract drift after #19211
-      # is visible instead of silent. A console step by design, not a stub.
+      # lands here. Reported rather than ignored so a drift between the analysis's
+      # vocabulary and this switch is visible instead of silent — which matters more
+      # now that the verdict comes from another workflow than it did from an input.
+      # A console step by design, not a stub.
       - name: report_unknown_verdict
         type: console
         with:
           message: >-
             Attack Discovery review for "{{ inputs.title }}" received an unexpected
-            verdict "{{ inputs.stub_verdict | default: consts.default_verdict }}" and took no action.
+            verdict "{{ steps.resolve_analysis.output.verdict }}" and took no action.
 
   # ---------------------------------------------------------------------------
   # Escalation. Shared by the true_positive and inconclusive verdicts.
@@ -616,7 +695,7 @@ steps:
 
 
         FP/TP analysis classified this attack as
-        **{{ inputs.stub_verdict | default: consts.default_verdict }}**, covering
+        **{{ steps.resolve_analysis.output.verdict }}**, covering
         {{ inputs.alert_ids | default: consts.no_alert_ids | size }} detection alert(s).
 
 
@@ -631,7 +710,7 @@ steps:
         ai_index_id: "{{ consts.forensics_ai_index_id }}"
         attack_discovery_id: "{{ inputs.attack_discovery_id }}"
         investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
-        classification: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
+        classification: "{{ steps.resolve_analysis.output.verdict }}"
         workflow_execution_id: "{{ execution.id }}"
 
   # One gate for both escalating verdicts. The shared workflow creates the proposal,
@@ -641,7 +720,7 @@ steps:
     type: workflow.execute
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
     with:
-      workflow-id: system-create-investigation-proposal
+      workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         comment: "{{ steps.resolve_escalation.output.comment }}"
@@ -661,7 +740,7 @@ steps:
     with:
       request:
         method: GET
-        path: "/internal/investigations/proposals/{{ steps.escalation_gate.output.proposalId }}"
+        path: "/internal/proposals/{{ steps.escalation_gate.output.proposalId }}"
         headers:
           elastic-api-version: "1"
     on-failure:
@@ -823,7 +902,7 @@ steps:
     status: completed
     with:
       title: "{{ inputs.title }}"
-      verdict: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
+      verdict: "{{ steps.resolve_analysis.output.verdict }}"
       attack_discovery_id: "{{ inputs.attack_discovery_id }}"
       investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
       # Sourced from the guard, not from the create: the create continues past the

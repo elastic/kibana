@@ -8,6 +8,7 @@
  */
 
 import type { Template } from 'liquidjs';
+import { toValue } from 'liquidjs';
 import { i18n } from '@kbn/i18n';
 import type { LiquidSettings } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
@@ -77,7 +78,9 @@ export class WorkflowTemplatingEngine {
       .trim();
 
     try {
-      return this.engine.evalValueSync(resolvedExpression, context);
+      // Liquid literals such as `nil`, `empty` and `blank` evaluate to Drop instances; unwrap them so
+      // `${{ value | default: nil }}` yields `null` rather than an opaque object.
+      return toValue(this.engine.evalValueSync(resolvedExpression, context));
     } catch (err) {
       throw new Error(`The provided expression is invalid. Got: ${template}.`);
     }
