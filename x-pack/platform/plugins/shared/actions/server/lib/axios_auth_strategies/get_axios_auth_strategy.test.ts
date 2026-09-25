@@ -6,12 +6,16 @@
  */
 
 import { getAxiosAuthStrategy } from './get_axios_auth_strategy';
+import { OAuthPasswordStrategy } from './oauth_password_strategy';
 import { EarsStrategy } from './ears_strategy';
 import { OAuthAuthCodeStrategy } from './oauth_auth_code_strategy';
 import { OAuthClientCredentialsStrategy } from './oauth_client_credentials_strategy';
 import { OAuthClientCredentialsPrivateKeyJwtStrategy } from './oauth_client_credentials_private_key_jwt_strategy';
 
 describe('getAxiosAuthStrategy', () => {
+  it('returns OAuthPasswordStrategy for password grants', () => {
+    expect(getAxiosAuthStrategy('oauth_password')).toBeInstanceOf(OAuthPasswordStrategy);
+  });
   it('returns EarsStrategy for "ears"', () => {
     expect(getAxiosAuthStrategy('ears')).toBeInstanceOf(EarsStrategy);
   });

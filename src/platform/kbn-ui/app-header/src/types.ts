@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * This contract is declarative on purpose: apps describe what to show (text, options, callbacks),
+ * and the header decides how it looks. Do not add `ReactNode`, `ReactElement`, JSX, or render-prop
+ * fields here. They let every app paint its own UI, and the header stops looking like one
+ * component. The renderer also coerces text to plain strings and drops undeclared keys, see
+ * "Strict props" in the `@kbn/app-header` README.
+ *
+ * When the existing props cannot express something, add a new declarative field for it (for
+ * example a text badge variant) rather than a slot for arbitrary content. `renderCustomBadge` is a
+ * deprecated exception, not a pattern to copy.
+ */
+
 import type { ReactElement, MouseEventHandler } from 'react';
 import type { IconType } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/ui-app-menu';
@@ -227,6 +239,17 @@ export interface AppHeaderShareAction {
 }
 
 /**
+ * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+ * Not a stable App Header contract.
+ */
+export interface AppHeaderExperimentalDashboardAiAction {
+  onClick: (context: { returnFocus: () => void }) => void;
+  isDisabled?: boolean;
+  testId?: string;
+  tooltip: string;
+}
+
+/**
  * Plain-text page description. Use the object form to add a URL rendered with a fixed
  * "Learn more" label.
  */
@@ -246,8 +269,14 @@ interface AppHeaderConfigBase {
   favorite?: AppHeaderFavoriteAction;
   share?: AppHeaderShareAction;
   /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
+  /**
    * Defaults to `standard`, except a sparse header (no title, badges, tabs, description, metadata,
-   * title append, favorite, or share) defaults to `compact`. An explicit value always wins.
+   * title append, favorite, share, or experimental dashboard AI action) defaults to `compact`.
+   * An explicit value always wins.
    */
   spacing?: AppHeaderSpacing;
 }

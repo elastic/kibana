@@ -14,8 +14,7 @@ import {
   MAX_FINGERPRINT_FIELDS,
   MAX_FINGERPRINT_LENGTH,
 } from './constants';
-
-export const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
+import { alertEventSeveritySchema } from './severity';
 
 /**
  * Same four lifecycle states as {@link ALERT_EPISODE_STATUS} / alert_events.ts.
@@ -76,7 +75,12 @@ const createAlertEventBodyBaseObjectSchema = z
           });
         }
       }),
-    timestamp: z.iso.datetime().optional(),
+    timestamp: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'The ISO datetime when the event occurred at the source. Defaults to the time the request is received.'
+      ),
     severity: alertEventSeveritySchema.optional(),
   })
   .strict();
@@ -96,17 +100,7 @@ const refineIdentityFields = (
 };
 
 /**
- * HTTP edge only — POST /api/alerting/v2/alerts/:source request body.
- * `source` is supplied by the path; the route merges it before calling the client.
- * Do not use this type inward of the route layer.
- */
-export const createAlertEventPathBodySchema =
-  createAlertEventBodyBaseObjectSchema.superRefine(refineIdentityFields);
-
-/**
- * Canonical create-alert payload (source required).
- * Also the POST /api/alerting/v2/alerts request body schema.
- * Prefer this type everywhere past the HTTP edge.
+ * Used as the input schema for the `alerting.create_alert` workflow step.
  */
 export const createAlertEventDataSchema = createAlertEventBodyBaseObjectSchema
   .extend({
@@ -114,13 +108,6 @@ export const createAlertEventDataSchema = createAlertEventBodyBaseObjectSchema
   })
   .strict()
   .superRefine(refineIdentityFields);
-
-/** Path params for POST /api/alerting/v2/alerts/:source */
-export const createAlertEventSourceParamsSchema = z.object({
-  source: sourceSchema.describe(
-    'The external source system that produced the alert event (for example, "datadog"). Cannot start with "elastic".'
-  ),
-});
 
 export const createAlertEventResponseSchema = z.object({
   group_hash: z.string(),

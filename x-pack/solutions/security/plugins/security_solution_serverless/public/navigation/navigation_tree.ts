@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -21,52 +21,39 @@ import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { type Services } from '../common/services';
 import { createManagementFooterItemsTree } from './management_footer_items';
 
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.projectType.title',
-  { defaultMessage: 'Security' }
-);
-
 export const createNavigationTree = async (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): Promise<NavigationTreeDefinition> => {
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
-  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
-    AGENT_BUILDER_NAV_AT_TOP_FLAG,
-    false
+  const agentBuilderNavAtTop = await firstValueFrom(
+    services.featureFlags.getBooleanValue$(AGENT_BUILDER_NAV_AT_TOP_FLAG, false)
   );
   const agentBuilderLink = {
     icon: 'productAgent',
     link: 'agent_builder' as AppDeepLinkId,
   };
   const contextEngineLink = {
-    icon: 'sparkles',
+    icon: 'tableSparkles',
     link: 'context_engine' as AppDeepLinkId,
   };
 
   return {
     body: [
-      {
-        id: 'security_solution_home',
-        link: securityLink(SecurityPageName.landing),
-        title: SOLUTION_NAME,
-        icon: 'logoSecurity',
-        renderAs: 'home',
-      },
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       contextEngineLink,
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // PND body (nodes omitted when xpack.pnd.enabled is false)
-      ...defaultNavigationTree.pnd(),
+      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
+      ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      ...defaultNavigationTree.pndSecondary(),
+      ...defaultNavigationTree.alertZeroSecondary(),
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -92,9 +79,7 @@ export const createNavigationTree = async (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(
-        services.experimentalFeatures.entityAnalyticsNewHomePageEnabled
-      ),
+      defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {

@@ -245,8 +245,10 @@ The `page_objects` directory contains all the Page Objects that represent Platfo
 `@kbn/scout` is a critical package for Scout: any change to it triggers a full Scout test run. To keep CI fast, only add Page Objects here when they are shared across plugins. Use the following guidance to decide where a Page Object belongs:
 
 - If it is used by a single plugin, keep it in that plugin under `test/scout/ui/fixtures/page_objects/` and register it locally (see ["Registering a plugin-local Page Object"](#registering-a-plugin-local-page-object)). Changes are then scoped to that plugin's tests instead of the whole suite.
-- If it is used by a few plugins that already depend on the owning plugin, keep it in the owning plugin and import it from the others as a test helper (see ["Reusing a Page Object from another plugin"](#reusing-a-page-object-from-another-plugin)).
+- If it is used by a few plugins that already depend on the owning plugin, keep it in the owning plugin and import it from the others as a test helper (see ["Reusing a Page Object from another plugin"](#reusing-a-page-object-from-another-plugin)). This applies to a screen or feature a single plugin owns. A shared Kibana **component** (rendered by two or more plugins, such as the search bar's saved query menu) is different: it belongs in `@kbn/scout` even with only one consumer today, per the placement policy linked below, because moving it into the first consuming plugin makes that plugin the de facto owner and the next consumer copies it.
 - If it represents a core Platform surface with no natural owner (Discover, Dashboard, etc.), add it here so other teams can reuse it.
+
+For the full rules (three tiers, shared vs solution vs plugin-local, frozen fixture keys) see the [placement policy](../../../../../docs/extend/testing/page-objects.md#scout-page-objects-placement).
 
 Page Objects must be registered with the `createLazyPageObject` function, which guarantees its instance is lazy-initialized. This way, we can have all the page objects available in the test context, but only the ones that are called will be actually initialized:
 
@@ -341,6 +343,12 @@ Here we have logic to start Kibana and Elasticsearch servers using `kbn-test` fu
 ### Test Types and Directory Structure
 
 Scout supports two distinct types of tests: UI and API, each with their own directory structure and import patterns:
+
+##### Auditing page object usage
+
+`node scripts/scout audit` prints, for every `pageObjects.<key>` in this package, how many files and which modules use it. It walks each `.ts` file under `test/scout*` and the solution Scout packages with the TypeScript compiler, so it counts property access and destructuring and ignores comments and strings. Import graph tools cannot do this because page objects are Proxy fixtures, not imports.
+
+Run it by hand when you add, move, or remove a page object, or when doing a quality pass over the package. Read the output against the placement policy above: a key with zero external consumers is a removal candidate, a key used from one plugin only may belong in that plugin, and a plugin-local class whose name also exists elsewhere is a duplicate. The command reports facts only, it does not decide.
 
 #### Setting up Test Directory
 
@@ -697,7 +705,7 @@ Ensure you have the latest local copy of the Kibana repository.
 
 Install dependencies by running the following commands:
 
-- `yarn kbn bootstrap` to install dependencies.
+- `pnpm kbn bootstrap` to install dependencies.
 - `node scripts/build_kibana_platform_plugins.js` to build plugins.
 
 Move to the `src/platform/packages/shared/kbn-scout` directory to begin development.
@@ -834,6 +842,26 @@ On merge commits, Scout tests run in a non-blocking mode.
 | 1         | Missing configuration (e.g. SCOUT_CONFIG_GROUP_KEY and SCOUT_CONFIG_GROUP_TYPE environment variables not set) |
 | 2         | No tests in Playwright config                                                                                 |
 | 10        | Tests failed                                                                                                  |
+
+#### Finding flaky tests
+
+Test events from every framework (Jest, FTR, Cypress and Scout/Playwright) are shipped to the AppEx QA cluster. The `discover-flaky-tests` command aggregates them into a ranked list of flaky and consistently failing tests and stores it under `.scout/flaky_tests.json`:
+
+```bash
+# Last 7 days of kibana-on-merge, all frameworks
+node scripts/scout discover-flaky-tests
+
+# Include PR builds, widen the window, restrict to Jest and FTR
+node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14 --frameworks jest,ftr
+
+# Flaky tests only, leaving consistently failing tests out of the report
+node scripts/scout discover-flaky-tests --classifications flaky
+
+# Show the 25 worst offenders in the printed summary (the JSON report is bounded by --maxTests)
+node scripts/scout discover-flaky-tests --summaryLimit 25
+```
+
+The command is read-only and needs `SCOUT_REPORTER_ES_URL` and `SCOUT_REPORTER_ES_API_KEY` (or the matching `--esURL` / `--esAPIKey` flags). Run `node scripts/scout discover-flaky-tests --help` for the full list of thresholds and filters.
 
 ### AI prompts to help you migrate from FTR
 

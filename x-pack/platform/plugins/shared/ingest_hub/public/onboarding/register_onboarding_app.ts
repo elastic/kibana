@@ -6,14 +6,17 @@
  */
 
 import type { AppMountParameters, AppUpdater, CoreSetup } from '@kbn/core/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { from, map, switchMap } from 'rxjs';
+import { firstValueFrom, from, map, switchMap } from 'rxjs';
 import type { IngestHubStartDependencies } from '../types';
 import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../common/constants';
 
 export function registerOnboardingApp(
   coreSetup: CoreSetup<IngestHubStartDependencies>,
-  startServicesPromise: ReturnType<CoreSetup<IngestHubStartDependencies>['getStartServices']>
+  startServicesPromise: ReturnType<CoreSetup<IngestHubStartDependencies>['getStartServices']>,
+  kibanaVersion: string,
+  cloudSetup?: CloudSetup
 ) {
   coreSetup.application.register({
     id: 'onboarding',
@@ -34,9 +37,8 @@ export function registerOnboardingApp(
     ),
     mount: async (params: AppMountParameters) => {
       const [coreStart, deps] = await startServicesPromise;
-      const isEnabled = coreStart.featureFlags.getBooleanValue(
-        INGEST_HUB_ONBOARDING_ENABLED_FLAG,
-        false
+      const isEnabled = await firstValueFrom(
+        coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ONBOARDING_ENABLED_FLAG, false)
       );
 
       if (!isEnabled) {
@@ -45,7 +47,7 @@ export function registerOnboardingApp(
       }
 
       const { renderOnboardingApp } = await import('./onboarding_app');
-      return renderOnboardingApp(coreStart, params, deps);
+      return renderOnboardingApp(coreStart, params, deps, kibanaVersion, cloudSetup);
     },
   });
 }

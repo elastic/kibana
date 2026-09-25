@@ -6,26 +6,43 @@
  */
 
 import Boom from '@hapi/boom';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import type { Connector } from '../../types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
-import type { HookServices, ActionResult } from '../../../../types';
+import type { HookServices, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
+import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
+import {
+  invalidateStoredConnectorEventIdentity,
+  mintInboundEventIdentityAttributes,
+  toRawActionIdentityAttributes,
+} from '../../../../inbound/event_identity';
+import {
+  assertInboundEventsToggleAllowed,
+  resolveCreateInboundEventsEnabled,
+} from '../../../../inbound/inbound_events_enabled';
 
 export async function create({
   context,
-  action: { actionTypeId, name, config, secrets },
+  action: {
+    actionTypeId,
+    name,
+    config,
+    secrets,
+    isInboundEventsEnabled: requestedInboundEventsEnabled,
+  },
   options,
-}: ConnectorCreateParams): Promise<ActionResult> {
+}: ConnectorCreateParams): Promise<Connector> {
   const id = options?.id || SavedObjectsUtils.generateId();
 
   try {
@@ -72,6 +89,12 @@ export async function create({
       })
     );
   }
+
+  ensureNotKibanaManagedAuthType({ actionTypeId, secrets, config });
+  assertInboundEventsToggleAllowed({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+  });
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
@@ -138,21 +161,38 @@ export async function create({
         )
       : validatedActionTypeConfig;
 
+  const isInboundEventsEnabled = resolveCreateInboundEventsEnabled({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+  });
+  const identityAttributes = isInboundEventsEnabled
+    ? await mintInboundEventIdentityAttributes(context, {
+        connectorId: id,
+        actionTypeId,
+      })
+    : undefined;
+
   const result = await tryCatch(
     async () =>
-      await context.unsecuredSavedObjectsClient.create(
+      await context.unsecuredSavedObjectsClient.create<RawAction>(
         'action',
         {
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: configForSave as SavedObjectAttributes,
-          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          config: configForSave,
+          secrets: validatedActionTypeSecrets,
           ...(authMode !== undefined ? { authMode } : {}),
+          ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
+          hasInboundEventIdentity: Boolean(identityAttributes),
         },
         { id }
       )
   );
+
+  if (result instanceof Error) {
+    await invalidateStoredConnectorEventIdentity(context, id, identityAttributes);
+  }
 
   const wasSuccessful = !(result instanceof Error);
   const label = `connectorId: "${id}"; type: ${actionTypeId}`;
@@ -216,5 +256,6 @@ export async function create({
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
+    ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
   };
 }

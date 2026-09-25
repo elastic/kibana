@@ -1,0 +1,165 @@
+{
+  "sha1": "b3e364e4c193c9610b64fe042a1c13d8316b3bfb",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "aa03bbd173bd12e-9a17f71a4f5ef91",
+      "title": "Discover App - Performance Metrics & Bundle Analysis collects and validates JS Bundles loaded on page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@perf"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/discover_cdp_perf.spec.ts",
+        "line": 106,
+        "column": 7
+      }
+    },
+    {
+      "id": "aa03bbd173bd12e-0744d4070723e77",
+      "title": "Discover App - Performance Metrics & Bundle Analysis measures Performance Metrics before and after Discover load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@perf"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/discover_cdp_perf.spec.ts",
+        "line": 141,
+        "column": 7
+      }
+    },
+    {
+      "id": "a4d47d3a35e4789-12853e01d90ebcd",
+      "title": "Discover App - Lighthouse Performance Audit runs audit on Discover Page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@perf"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/discover_lighthouse.spec.ts",
+        "line": 26,
+        "column": 20
+      }
+    },
+    {
+      "id": "46b994c39174ab8-843fa5bab50f38c",
+      "title": "recently accessed hover list shows viewed Discover sessions in the Discover hover list and navigates on click",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/recently_accessed.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "25ac42be44ba990-8dadab4458b6f58",
+      "title": "Discover app - saved search embeddable should allow removing the dashboard panel after the underlying saved search has been deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts",
+        "line": 106,
+        "column": 9
+      }
+    },
+    {
+      "id": "25ac42be44ba990-6fa084b019106a6",
+      "title": "Discover app - saved search embeddable should support URL drilldown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts",
+        "line": 134,
+        "column": 11
+      }
+    },
+    {
+      "id": "25ac42be44ba990-78fdfa89f81e7b2",
+      "title": "Discover app - saved search embeddable should apply data, columns and sorting from selected Discover tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts",
+        "line": 173,
+        "column": 11
+      }
+    },
+    {
+      "id": "25ac42be44ba990-150bb2a091fee78",
+      "title": "Discover app - saved search embeddable should recover a deleted selected tab through inline editing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/saved_search_embeddable.spec.ts",
+        "line": 210,
+        "column": 12
+      }
+    }
+  ]
+}

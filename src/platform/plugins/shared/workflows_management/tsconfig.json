@@ -23,6 +23,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/shared-ux-ai-components",
     "@kbn/core-chrome-browser",
     "@kbn/core-chrome-browser-context",
     "@kbn/core-chrome-browser-hooks",
@@ -57,6 +58,7 @@
     "@kbn/unified-data-table",
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
+    "@kbn/ui-callout",
     "@kbn/storybook",
     "@kbn/react-field",
     "@kbn/storage-adapter",
@@ -89,7 +91,6 @@
     "@kbn/connector-specs",
     "@kbn/workflows-extensions",
     "@kbn/alerts-ui-shared",
-    "@kbn/ai-assistant-icon",
     "@kbn/licensing-plugin",
     "@kbn/securitysolution-rules",
     "@kbn/alerts-as-data-utils",
@@ -129,6 +130,8 @@
     "@kbn/deeplinks-workflows",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/mock-idp-utils",
+    "@kbn/discover-session-constants",
+    "@kbn/ci-stats-reporter",
   ],
   "exclude": ["target/**/*"]
 }

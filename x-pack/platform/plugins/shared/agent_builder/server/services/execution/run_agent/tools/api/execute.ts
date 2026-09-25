@@ -7,7 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
-import { AgentExecutionMode, ToolType } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, isApiAutoApproved, ToolType } from '@kbn/agent-builder-common';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
@@ -16,8 +17,9 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { HttpSelfService } from '@kbn/core-http-server';
 import { capitalize } from 'lodash';
 import { dispatchApiRequest, getFailureDetails, prepareApiRequest, targetSchema } from '../../api';
-import type { ApiTarget } from '../../api';
 import { apiFailureToErrorResult } from './errors';
+
+export type ApiExecuteApproval = 'pre_approved' | 'user_confirmed';
 
 export interface ApiExecuteResultData {
   target: ApiTarget;
@@ -25,6 +27,7 @@ export interface ApiExecuteResultData {
   method: string;
   path: string;
   response: unknown;
+  approval?: ApiExecuteApproval;
 }
 
 const executeSchema = z.object({
@@ -32,8 +35,8 @@ const executeSchema = z.object({
   api: z
     .string()
     .describe(
-      `The API identifier returned by the ${internalTools.discoverApis} tool, formed from the namespace ` +
-        'and name (e.g. "indices.create", "bulk", "cluster.health").'
+      'The API identifier, formed from the namespace and name (e.g. "indices.create", "bulk", ' +
+        '"cluster.health").'
     ),
   params: z
     .record(z.string(), z.unknown())
@@ -47,16 +50,24 @@ const executeSchema = z.object({
 
 export const createExecuteApiTool = ({
   selfClient,
+  discoveryEnabled,
 }: {
   selfClient: HttpSelfService;
+  discoveryEnabled: boolean;
 }): InternalBuiltinToolDefinition<typeof executeSchema> => {
+  const identifierGuidance = discoveryEnabled
+    ? `- Use \`${internalTools.discoverApis}\` to find the \`api\` identifier, then
+  \`${internalTools.describeApi}\` to see the \`params\` it accepts.`
+    : `- The \`api\` identifier comes from the instruction you are following, or from what you already
+  know the target exposes. Call \`${internalTools.describeApi}\` first to confirm it exists and to
+  see the \`params\` it accepts, rather than guessing params here.`;
+
   return {
     id: internalTools.executeApi,
     type: ToolType.builtin,
     description: `Execute an HTTP API call on behalf of the current user.
 
-- Use \`${internalTools.discoverApis}\` to find the \`api\` identifier, then
-  \`${internalTools.describeApi}\` to see the \`params\` it accepts.
+${identifierGuidance}
 - Responses are not summarized, and many of these APIs return very large payloads. Prefer params
   that narrow the response (a filter, a \`size\`/\`per_page\` limit, a \`page\`/\`from\` offset, or an
   explicit field selection) over fetching everything, because an oversized result is truncated
@@ -66,7 +77,7 @@ The response is the raw API response body.`,
     schema: executeSchema,
     handler: async (
       { target, api, params = {} },
-      { esClient, request, spaceId, logger, prompts, callContext, executionMode }
+      { esClient, request, spaceId, logger, prompts, callContext, executionMode, interactivity }
     ) => {
       const preparedApiRequest = await prepareApiRequest({ target, api, params, spaceId });
       if (preparedApiRequest.status !== 'prepared') {
@@ -77,6 +88,7 @@ The response is the raw API response body.`,
               target,
               api,
               logger,
+              discoveryEnabled,
             }),
           ],
         };
@@ -85,14 +97,18 @@ The response is the raw API response body.`,
       const { request: apiRequest, destructive } = preparedApiRequest;
       const { method, path } = apiRequest;
 
-      if (destructive) {
-        if (executionMode === AgentExecutionMode.standalone) {
+      const preApproved = destructive && isApiAutoApproved({ interactivity, target, api });
+      let approval: ApiExecuteApproval | undefined = preApproved ? 'pre_approved' : undefined;
+
+      if (destructive && !preApproved) {
+        if (executionMode === AgentExecutionMode.standalone || !interactivity.enabled) {
           return {
             results: [
               createErrorResult({
                 message:
                   `API "${api}" is destructive and needs the user to confirm it, which is not possible ` +
-                  `in a non-interactive execution. Use a non-destructive API, or tell the user to run this from a conversation.`,
+                  `in a non-interactive execution. Use a non-destructive API, or tell the user to run this from a conversation. ` +
+                  `The caller that started this execution can also pre-approve "${api}" on the ${target} target for the whole run.`,
                 metadata: { target, api, method, path },
               }),
             ],
@@ -135,9 +151,14 @@ The response is the raw API response body.`,
             ),
           });
         }
+
+        approval = 'user_confirmed';
       }
 
-      logger.debug(`${internalTools.executeApi}: ${method} ${path} (target=${target}, api=${api})`);
+      logger.debug(
+        `${internalTools.executeApi}: ${method} ${path} (target=${target}, api=${api}` +
+          `${approval ? `, approval=${approval}` : ''})`
+      );
 
       try {
         const response = await dispatchApiRequest({
@@ -148,7 +169,14 @@ The response is the raw API response body.`,
           request,
         });
 
-        const data: ApiExecuteResultData = { target, api, method, path, response };
+        const data: ApiExecuteResultData = {
+          target,
+          api,
+          method,
+          path,
+          response,
+          ...(approval ? { approval } : {}),
+        };
 
         return {
           results: [
@@ -167,7 +195,14 @@ The response is the raw API response body.`,
           results: [
             createErrorResult({
               message: `API request failed: ${message}`,
-              metadata: { target, api, method, path, ...getFailureDetails(err) },
+              metadata: {
+                target,
+                api,
+                method,
+                path,
+                ...(approval ? { approval } : {}),
+                ...getFailureDetails(err),
+              },
             }),
           ],
         };

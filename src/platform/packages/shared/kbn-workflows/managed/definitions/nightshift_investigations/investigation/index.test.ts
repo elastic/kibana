@@ -8,16 +8,23 @@
  */
 
 import { parse } from 'yaml';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from '.';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from '.';
 
 interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
-  with?: { body?: { status?: string }; path?: string };
+  'plugin-id'?: string;
+  'product-solution'?: string;
+  'product-feature'?: string;
+  with?: { method?: string; path?: string; message?: string; body?: Record<string, unknown> };
+  'on-failure'?: unknown;
+  steps?: WorkflowStep[];
+  else?: WorkflowStep[];
 }
 
-const investigation = parse(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.yaml) as {
+const investigation = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
+  name: string;
   steps: WorkflowStep[];
 };
 
@@ -27,40 +34,71 @@ const requireStep = (name: string): WorkflowStep => {
   return step;
 };
 
-describe('investigation lifecycle contracts', () => {
-  it('emits lifecycle events and fails unsuccessful executions', () => {
-    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(10);
-    expect(investigation.steps[0].name).toBe('ensure_investigation_agent');
-
-    const expectedStatuses: Record<string, string> = {
-      emit_investigation_started: 'running',
-      emit_investigation_completed: 'completed',
-      emit_investigation_failed: 'failed',
-    };
-    for (const [stepName, status] of Object.entries(expectedStatuses)) {
-      const step = requireStep(stepName);
-      expect(step.type).toBe('kibana.request');
-      expect(step.with?.body).toEqual({ status });
+const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[] => {
+  const matches: WorkflowStep[] = [];
+  for (const step of steps) {
+    if (step.type === type) matches.push(step);
+    for (const nested of [step.steps, step.else]) {
+      if (Array.isArray(nested)) {
+        matches.push(...collectStepsByType(nested, type));
+      }
     }
+  }
+  return matches;
+};
 
-    expect(investigation.steps[investigation.steps.length - 1]).toMatchObject({
-      name: 'fail_investigation',
-      type: 'workflow.fail',
-      if: '${{ steps.investigate.error != null }}',
+describe('Nightshift investigation workflow', () => {
+  it('persists the shared investigation output without sig-events write-back', () => {
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(1);
+    expect(investigation.name).toBe('Nightshift Investigation');
+    expect(investigation.steps.map((step) => step.name)).toEqual([
+      'ensure_investigation_agent',
+      'persist_investigation_started',
+      'emit_investigation_started',
+      'investigate',
+      'persist_investigation_completed',
+      'persist_investigation_failed',
+      'emit_investigation_completed',
+      'emit_investigation_failed',
+      'fail_investigation',
+    ]);
+    expect(investigation.steps.some((step) => step.name === 'merge_investigation_gaps')).toBe(
+      false
+    );
+
+    const persistCompleted = requireStep('persist_investigation_completed');
+    expect(persistCompleted.with?.body).toEqual(
+      expect.objectContaining({
+        status: 'completed',
+        conversation_id: '${{ steps.investigate.output.conversation_id }}',
+      })
+    );
+    expect(persistCompleted.with?.body).not.toHaveProperty('trigger_feedback');
+    expect(persistCompleted.with?.body).toEqual(
+      expect.objectContaining({
+        blind_spots: '${{ steps.investigate.output.structured_output.blind_spots }}',
+        impact: '${{ steps.investigate.output.structured_output.impact }}',
+      })
+    );
+    expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
+  });
+
+  it('attributes agent calls to Nightshift under the shared investigation id', () => {
+    expect(requireStep('investigate')).toMatchObject({
+      'plugin-id': 'significant_events_investigation',
+      'product-solution': 'observability',
+      'product-feature': 'nightshift',
     });
   });
 
   it('space-scopes the path of every kibana.request step', () => {
-    // Only generated `kibana.*` connector steps get a space prefix from the engine; a raw
-    // `kibana.request` is sent verbatim, so an unprefixed path writes to the default space and
-    // still returns 200. Asserting over every request step, rather than the ones that exist
-    // today, keeps steps added later covered too.
-    const requestSteps = investigation.steps.filter((step) => step.type === 'kibana.request');
+    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
     const unscoped = requestSteps.filter(
-      (step) => !step.with?.path?.startsWith('/s/{{ workflow.spaceId }}/')
+      ({ with: params }) => !params?.path?.startsWith('/s/{{ workflow.spaceId }}/')
     );
 
     expect(requestSteps.length).toBeGreaterThan(0);
-    expect(unscoped.map((step) => `${step.name}: ${step.with?.path}`)).toEqual([]);
+    expect(unscoped.map(({ name, with: params }) => `${name}: ${params?.path}`)).toEqual([]);
   });
 });

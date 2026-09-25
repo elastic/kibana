@@ -19,7 +19,11 @@ import type { VisContextUnmapped } from '@kbn/saved-search-plugin/common/types';
 import { isEqualFilters } from '../../utils/state_comparators';
 import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
-import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
+import {
+  selectTabRuntimeState,
+  selectTabTypeForPersistence,
+  type RuntimeStateManager,
+} from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
   fromSavedObjectTabToAppState,
@@ -74,36 +78,55 @@ export const selectHasUnsavedChanges = (
       continue;
     }
 
+    const tabState = selectTab(state, tabId);
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+
+    // Normalize both sides against the same tab type to avoid phantom changes.
+    const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });
+
     // Ensure the persisted tab accounts for default app state values when comparing,
     // otherwise initializing a tab could automatically trigger unsaved changes.
+    const initialAppState = getInitialAppState({
+      initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
+      persistedTab,
+      dataView: getSerializedSearchSourceDataViewDetails(
+        persistedTab.serializedSearchSource,
+        state.savedDataViews
+      ),
+      services,
+      defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
+    });
+
     const persistedTabWithDefaults = fromTabStateToSavedObjectTab({
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
-        initialAppState: getInitialAppState({
-          initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
-          persistedTab,
-          dataView: getSerializedSearchSourceDataViewDetails(
-            persistedTab.serializedSearchSource,
-            state.savedDataViews
-          ),
-          services,
-          defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
-        }),
+        profileStateRegistry: services.profileStateRegistry,
+        initialAppState,
       }),
       overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
       currentDataView: undefined,
+      tabType,
     });
-
-    const tabState = selectTab(state, tabId);
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
 
     const normalizedTab = fromTabStateToSavedObjectTab({
       tab: tabState,
       currentDataView,
       services,
+      tabType,
     });
+
+    if (persistedTab.serializedSearchSource.query === undefined) {
+      // API-created sessions can have no query. Filling in an empty one in the UI
+      // shouldn't trigger "Unsaved changes".
+      for (const tab of [persistedTabWithDefaults, normalizedTab]) {
+        tab.serializedSearchSource = {
+          ...tab.serializedSearchSource,
+          query: tab.serializedSearchSource.query ?? initialAppState.query,
+        };
+      }
+    }
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;
@@ -242,4 +265,5 @@ const TAB_COMPARATORS: TabComparators = {
     const testB = JSON.parse(b ?? '{}');
     return isEqual(testA, testB);
   },
+  tabTypeState: fieldComparator('tabTypeState', undefined),
 };

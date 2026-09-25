@@ -15,6 +15,7 @@ import {
   selectAllTabs,
   selectTab,
   selectTabRuntimeState,
+  selectTabTypeForPersistence,
   TabInitializationStatus,
   type DiscoverInternalState,
   type RuntimeStateManager,
@@ -69,6 +70,7 @@ export const buildDiscoverSessionExportRequest = ({
       currentDataView,
       overridenTimeRestore: includeCurrentTimeSettings,
       services,
+      tabType: selectTabTypeForPersistence({ runtimeStateManager, tabState: tab }),
     });
 
     if (

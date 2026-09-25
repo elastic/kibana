@@ -44,7 +44,13 @@ import type {
   BeatsSoBaseAttributes,
   BeatsOutputSOAttributes,
 } from '../types';
-import type { NewBeatsOutput, UpdateOutput, UpdateTypedOutput } from '../../common/types';
+import type {
+  NewBeatsOutput,
+  OtlpGrpcExporterConfig,
+  OtlpHttpExporterConfig,
+  UpdateOutput,
+  UpdateTypedOutput,
+} from '../../common/types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -62,11 +68,14 @@ import {
   kafkaCompressionType,
   kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
+  otlpProtocol,
+  OTLP_GRPC_ONLY_COMPRESSION_TYPES,
   RESERVED_CONFIG_YML_KEYS,
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
+
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
@@ -80,6 +89,8 @@ import { OUTPUT_ENCRYPTED_FIELDS } from '../saved_objects';
 import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
+import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
+import { buildAgentStatusRuntimeField } from './agents/build_status_runtime_field';
 import { packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -91,7 +102,7 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
-import { findAgentlessPolicies } from './outputs/helpers';
+import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 import {
   validateOutputSslPaths,
@@ -103,6 +114,7 @@ import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
+import { applyManagedOtlpDefaults } from './utils/managed_otlp';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -144,22 +156,25 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     } catch (e) {
       logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
     }
+    // canonical id placed last so attributes.id cannot shadow it
     return {
-      id: outputId ?? so.id,
       ...attributes,
       ...(parsedSsl ? { ssl: parsedSsl } : {}),
       ...(proxyId ? { proxy_id: proxyId } : {}),
+      id: outputId ?? so.id,
     };
   }
 
   if (isOtlpSOOutput(so.attributes)) {
     const { output_id: outputId, ...attributes } = so.attributes;
-    return { id: outputId ?? so.id, ...attributes };
+    // canonical id placed last so attributes.id cannot shadow it
+    return { ...attributes, id: outputId ?? so.id };
   }
 
   const { output_id: outputId, ...attributes } =
     so.attributes as unknown as OutputSoBaseAttributes & Record<string, unknown>;
-  return { id: outputId ?? so.id, ...attributes } as unknown as Output;
+  // canonical id placed last so attributes.id cannot shadow it
+  return { ...attributes, id: outputId ?? so.id } as unknown as Output;
 }
 
 async function getAgentPoliciesPerOutput(
@@ -275,6 +290,8 @@ async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDef
 }
 
 const OTLP_SCAN_POLICY_ID_CHUNK_SIZE = 100;
+// ES filters aggregation creates one bucket per ID; stay well under search.max_buckets (default 65536).
+const AGENT_COUNT_POLICY_ID_CHUNK_SIZE = 1000;
 
 async function validateOtlpOutputOnlyUsedInOtelPolicies(
   outputId: string,
@@ -472,6 +489,18 @@ class OutputService {
     return appContextService.getEncryptedSavedObjects();
   }
 
+  private async assertOtlpOutputAllowed(
+    output: { type: ValueOf<OutputType> },
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract
+  ): Promise<void> {
+    if (!isOtlpOutput(output)) return;
+    const { result, error } = await checkOtlpOutputAllowed(esClient, soClient);
+    if (!result) {
+      throw new OutputInvalidError(error!);
+    }
+  }
+
   private async _getDefaultDataOutputsSO() {
     const outputs = await this.soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
@@ -656,9 +685,7 @@ class OutputService {
 
     validateFleetSavedObjectId(options?.id);
 
-    if (isOtlpOutput(output) && !appContextService.getExperimentalFeatures().enableOtlpOutput) {
-      throw new OutputInvalidError('OTLP output type is not enabled');
-    }
+    await this.assertOtlpOutputAllowed(output, esClient, soClient);
 
     await validateOutputServerless(this, output);
     const isPreconfigured =
@@ -671,6 +698,7 @@ class OutputService {
       ...omit(output, ['ssl', 'secrets']),
       ...(options?.id ? { output_id: options.id } : {}),
     } as OutputSOAttributes;
+    this._validateCanBeDefault(data, isPreconfigured);
 
     if (outputTypeSupportPresets(output)) {
       if (
@@ -818,14 +846,16 @@ class OutputService {
       data.proxy_id = null;
     }
 
+    if (output.type === outputType.Otlp && data.type === outputType.Otlp) {
+      data.otlp_exporter = applyManagedOtlpDefaults(data.otlp_exporter);
+    }
+
     await remoteSyncIntegrationsCheck(esClient, output);
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
-    const useSecretStorage = await isOutputSecretStorageEnabled(esClient, soClient);
-
     // Store secret values if enabled; if not, store plain text values
-    if (useSecretStorage) {
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
@@ -1114,27 +1144,31 @@ class OutputService {
 
     const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+    const mergedIsDefaultMonitoring =
+      data.is_default_monitoring ?? originalOutput.is_default_monitoring;
     const isTypeChanged = mergedType !== originalOutput.type;
 
-    if (
-      mergedType === outputType.Otlp &&
-      !appContextService.getExperimentalFeatures().enableOtlpOutput
-    ) {
-      throw new OutputInvalidError('OTLP output type is not enabled');
-    }
+    await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
 
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
     const isPreconfigured = (fromPreconfiguration || originalOutput.is_preconfigured) ?? false;
     this._runOutputValidators(typedFullUpdateData, isPreconfigured);
 
-    // type is always defined here after merging; ssl/secrets omitted at runtime but allowed on the type.
+    // type is always defined here after merging; ssl/secrets/id omitted at runtime but allowed on the type.
+    // id is stripped to prevent poisoning the saved object's identity field.
     const updateData = {
-      ...omit(data, ['ssl', 'secrets']),
+      ...omit(data, ['ssl', 'secrets', 'id']),
       type: mergedType,
     } as Nullable<Partial<OutputSOAttributes>> & {
       type: ValueOf<OutputType>;
     };
+    // Pre-populate is_default / is_default_monitoring in updateData with the merged values
+    // when they are truthy so _validateCanBeDefault can detect and sanitize them in-place.
+    // Falsy merged values need no correction and would unnecessarily pollute the SO update.
+    if (mergedIsDefault) updateData.is_default = mergedIsDefault;
+    if (mergedIsDefaultMonitoring) updateData.is_default_monitoring = mergedIsDefaultMonitoring;
+    this._validateCanBeDefault(updateData, isPreconfigured);
 
     if (outputTypeSupportPresets(updateData)) {
       if (
@@ -1182,6 +1216,62 @@ class OutputService {
       target.broker_timeout = null;
       target.required_acks = null;
       target.ssl = null;
+    };
+
+    const removeBeatsFields = (target: Nullable<Partial<BeatsSoBaseAttributes>>) => {
+      target.hosts = null;
+      target.ca_sha256 = null;
+      target.ca_trusted_fingerprint = null;
+      target.config_yaml = null;
+      target.ssl = null;
+      target.shipper = null;
+      target.preset = null;
+      target.proxy_id = null;
+      target.write_to_logs_streams = null;
+      target.otel_exporter_config_yaml = null;
+      target.otel_disable_beatsauth = null;
+    };
+
+    // Null out fields that are exclusive to HTTP when switching to gRPC.
+    const removeOtlpHttpFields = (target: Nullable<Partial<OtlpHttpExporterConfig>>) => {
+      target.encoding = null;
+      target.traces_endpoint = null;
+      target.metrics_endpoint = null;
+      target.logs_endpoint = null;
+      target.profiles_endpoint = null;
+      target.proxy_url = null;
+      target.max_idle_conns = null;
+      target.max_idle_conns_per_host = null;
+      target.max_conns_per_host = null;
+      target.idle_conn_timeout = null;
+      target.disable_keep_alives = null;
+      target.http2_read_idle_timeout = null;
+      target.http2_ping_timeout = null;
+      target.force_attempt_http2 = null;
+      target.compression_params = null;
+      target.cookies = null;
+    };
+
+    // Null out fields that are exclusive to gRPC when switching to HTTP.
+    const removeOtlpGrpcFields = (
+      target: Nullable<Partial<OtlpGrpcExporterConfig>>,
+      original: { compression?: string }
+    ) => {
+      target.balancer_name = null;
+      target.keepalive = null;
+      target.wait_for_ready = null;
+      target.user_agent = null;
+      target.authority = null;
+      // compression is valid on both protocols but snappy/zstd are gRPC-only. The stored value
+      // survives the deep merge, so clear it — unless this update supplies its own (already
+      // validated against the HTTP schema).
+      if (
+        target.compression === undefined &&
+        original.compression !== undefined &&
+        OTLP_GRPC_ONLY_COMPRESSION_TYPES.includes(original.compression)
+      ) {
+        target.compression = null;
+      }
     };
 
     if (isTypeChanged) {
@@ -1280,6 +1370,42 @@ class OutputService {
           updateData.password = null;
         }
       }
+
+      if (isOtlpOutput(originalOutput)) {
+        // clear OTLP-only fields when leaving OTLP; secrets cleaned up via getOutputSecretPaths
+        (updateData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
+      }
+
+      if (isOtlpOutput(updateData)) {
+        // clear beats-only fields when switching to OTLP
+        removeBeatsFields(updateData as Nullable<BeatsSoBaseAttributes>);
+      }
+    }
+
+    const isOtlpProtocolChange =
+      isOtlpOutput(updateData) &&
+      isOtlpOutput(originalOutput) &&
+      updateData.otlp_exporter?.protocol !== undefined &&
+      updateData.otlp_exporter.protocol !== originalOutput.otlp_exporter.protocol;
+
+    if (isOtlpProtocolChange && isOtlpOutput(updateData) && isOtlpOutput(originalOutput)) {
+      const exporterUpdate = updateData.otlp_exporter;
+      if (exporterUpdate.protocol === otlpProtocol.Grpc) {
+        // Switching to gRPC — null out HTTP-exclusive fields left over in the stored SO
+        removeOtlpHttpFields(
+          exporterUpdate as unknown as Nullable<Partial<OtlpHttpExporterConfig>>
+        );
+      } else {
+        // Switching to HTTP — null out gRPC-exclusive fields left over in the stored SO
+        removeOtlpGrpcFields(
+          exporterUpdate as unknown as Nullable<Partial<OtlpGrpcExporterConfig>>,
+          originalOutput.otlp_exporter
+        );
+      }
+    }
+
+    if (isOtlpOutput(updateData) && updateData.otlp_exporter) {
+      updateData.otlp_exporter = applyManagedOtlpDefaults(updateData.otlp_exporter);
     }
 
     if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {
@@ -1308,8 +1434,8 @@ class OutputService {
       }
     }
 
-    // ensure only default output exists
-    if (data.is_default) {
+    // ensure only default output exists; use updateData (not data) so sanitized OTLP flags are seen
+    if (updateData.is_default) {
       if (defaultDataOutputId && defaultDataOutputId !== id) {
         await this._updateDefaultOutput(
           defaultDataOutputId,
@@ -1318,7 +1444,7 @@ class OutputService {
         );
       }
     }
-    if (data.is_default_monitoring) {
+    if (updateData.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId();
 
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
@@ -1375,10 +1501,8 @@ class OutputService {
     }
     await remoteSyncIntegrationsCheck(esClient, data);
 
-    const useSecretStorage = await isOutputSecretStorageEnabled(esClient, soClient);
-
     // Store secret values if enabled; if not, store plain text values
-    if (useSecretStorage) {
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,
@@ -1488,6 +1612,73 @@ class OutputService {
     );
   }
 
+  async getAgentAndPolicyCountForOutput(
+    esClient: ElasticsearchClient,
+    output: Output
+  ): Promise<{ agentPolicyCount: number; agentCount: number }> {
+    const internalSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const escaped = escapeQuotes(output.id);
+
+    // Include both data_output_id and monitoring_output_id so monitoring-only outputs
+    // are counted correctly. Also cover the is_default fallback (no explicit data_output_id).
+    let agentPoliciesKuery =
+      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escaped}" or ` +
+      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${escaped}"`;
+
+    if (output.is_default) {
+      agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
+    }
+    if (output.is_default_monitoring) {
+      agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:*)`;
+    }
+    const packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escaped}"`;
+
+    // Iterate all pages so counts are correct beyond SO_SEARCH_LIMIT.
+    const directPolicyIds: string[] = [];
+    for await (const ids of await agentPolicyService.fetchAllAgentPolicyIds(internalSoClient, {
+      kuery: agentPoliciesKuery,
+      spaceId: '*',
+    })) {
+      directPolicyIds.push(...ids);
+    }
+
+    const directPolicyIdSet = new Set(directPolicyIds);
+    const pkgDerivedIdSet = new Set<string>();
+    for await (const pkgPolicies of await packagePolicyService.fetchAllItems(internalSoClient, {
+      kuery: packagePoliciesKuery,
+      fields: ['policy_ids'],
+      spaceIds: ['*'],
+    })) {
+      for (const pp of pkgPolicies) {
+        for (const id of pp.policy_ids) {
+          if (!directPolicyIdSet.has(id)) {
+            pkgDerivedIdSet.add(id);
+          }
+        }
+      }
+    }
+
+    const uniqueIds = [...directPolicyIdSet, ...pkgDerivedIdSet];
+    const agentPolicyCount = uniqueIds.length;
+
+    let agentCount = 0;
+    if (agentPolicyCount > 0) {
+      // Build once — getInactivityTimeouts() does an SO find, so avoid per-chunk calls.
+      const runtimeMappings = await buildAgentStatusRuntimeField();
+      const chunks = _.chunk(uniqueIds, AGENT_COUNT_POLICY_ID_CHUNK_SIZE);
+      const chunkResults = await pMap(
+        chunks,
+        (chunk) => getAgentCountForAgentPolicies(esClient, chunk, { runtimeMappings }),
+        { concurrency: 5 }
+      );
+      agentCount = chunkResults
+        .flatMap((counts) => Object.values(counts))
+        .reduce((sum, n) => sum + n, 0);
+    }
+
+    return { agentPolicyCount, agentCount };
+  }
+
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {
     const lastUpdateTime = await this.getOutputLastUpdateTime(id);
 
@@ -1542,6 +1733,33 @@ class OutputService {
       } else {
         throw e;
       }
+    }
+  }
+
+  private _validateCanBeDefault(
+    output: {
+      type: ValueOf<OutputType>;
+      is_default?: boolean | null;
+      is_default_monitoring?: boolean | null;
+    },
+    isPreconfigured: boolean
+  ): void {
+    if (output.type !== outputType.Otlp) return;
+
+    const invalidDefaults = [
+      ['is_default_monitoring', 'An OTLP output cannot be the default monitoring output.'],
+      ['is_default', 'An OTLP output cannot be the default data output.'],
+    ] as const;
+
+    for (const [flag, message] of invalidDefaults) {
+      if (!output[flag]) continue;
+      if (!isPreconfigured) {
+        throw new OutputInvalidError(message);
+      }
+      // Preconfigured outputs must not abort Fleet setup, so clear the invalid flag and leave the
+      // existing valid default in place rather than persisting a misconfigured output as default.
+      appContextService.getLogger().warn(`Preconfigured output failed validation: ${message}`);
+      output[flag] = false;
     }
   }
 

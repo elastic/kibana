@@ -1,5 +1,5 @@
 {
-  "sha1": "5de803050c074c5bcce62ad125d5364fb0320ac6",
+  "sha1": "b00ef84b916792c2fce650173b6da674ba9f8836",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 259,
-        "column": 5
+        "line": 275,
+        "column": 47
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 271,
-        "column": 14
+        "line": 287,
+        "column": 7
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 407,
-        "column": 32
+        "line": 423,
+        "column": 31
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 484,
-        "column": 29
+        "line": 502,
+        "column": 27
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 584,
-        "column": 9
+        "line": 601,
+        "column": 30
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 875,
-        "column": 7
+        "line": 892,
+        "column": 26
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1034,
-        "column": 11
+        "line": 1051,
+        "column": 7
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1108,
-        "column": 26
+        "line": 1125,
+        "column": 7
       }
     },
     {
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1214,
-        "column": 25
+        "line": 1231,
+        "column": 19
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1261,
-        "column": 22
+        "line": 1280,
+        "column": 25
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1324,
-        "column": 27
+        "line": 1341,
+        "column": 26
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1398,
-        "column": 22
+        "line": 1415,
+        "column": 17
       }
     },
     {
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1453,
+        "line": 1468,
         "column": 7
       }
     },
@@ -196,13 +196,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1558,
+        "line": 1573,
         "column": 7
       }
     },
     {
-      "id": "bf3ddf78696d2df-d758464cc268b0d",
-      "title": "Dispatcher rule-scoped policy / dispatches only for the linked rule and skips unrelated rules",
+      "id": "bf3ddf78696d2df-27e46b40bb5dc27",
+      "title": "Dispatcher tag-scoped policy / dispatches only for rules with the matching tag and skips unrelated rules",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -210,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1659,
-        "column": 25
+        "line": 1679,
+        "column": 22
       }
     },
     {
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1718,
-        "column": 19
+        "line": 1736,
+        "column": 17
       }
     },
     {
@@ -238,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1773,
-        "column": 22
+        "line": 1791,
+        "column": 29
       }
     },
     {
@@ -252,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1797,
-        "column": 9
+        "line": 1816,
+        "column": 26
       }
     },
     {
@@ -266,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1839,
-        "column": 7
+        "line": 1857,
+        "column": 29
       }
     },
     {
@@ -280,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1877,
-        "column": 22
+        "line": 1895,
+        "column": 7
       }
     },
     {
@@ -294,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1696,
+        "line": 1727,
         "column": 27
       }
     },
@@ -308,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1732,
+        "line": 1763,
         "column": 27
       }
     }

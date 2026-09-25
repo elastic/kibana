@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux-v7';
@@ -78,6 +79,7 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
     (state: State) => (getTimeline(state, timelineId) ?? timelineDefaults).excludedRowRendererIds
   );
   const [show, setShow] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   const setExcludedRowRendererIds = useCallback(
     (payload: RowRendererId[]) =>
@@ -116,7 +118,11 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
       </EuiToolTip>
 
       {show && (
-        <StyledEuiModal onClose={hideFieldBrowser} data-test-subj="row-renderers-modal">
+        <StyledEuiModal
+          aria-labelledby={modalTitleId}
+          onClose={hideFieldBrowser}
+          data-test-subj="row-renderers-modal"
+        >
           <EuiModalHeader>
             <EuiFlexGroup
               alignItems="center"
@@ -125,7 +131,9 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
               gutterSize="none"
             >
               <EuiFlexItem grow={false}>
-                <EuiModalHeaderTitle>{i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}</EuiModalHeaderTitle>
+                <EuiModalHeaderTitle id={modalTitleId}>
+                  {i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}
+                </EuiModalHeaderTitle>
                 <EuiText size="s">{i18n.CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

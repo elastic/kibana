@@ -10,7 +10,13 @@
 import Path from 'path';
 import Fs from 'fs';
 import Os from 'os';
-import { createCrossPluginExternals, createPluginWrapper } from './create_external_plugin_config';
+import type { Compiler, Compilation } from '@rspack/core';
+import {
+  createCrossPluginExternals,
+  createPluginWrapper,
+  createWatchManifestPlugin,
+  readPluginManifest,
+} from './create_external_plugin_config';
 
 // ──────────────────────────────────────────────
 // Part 2 Tests: createCrossPluginExternals
@@ -22,7 +28,10 @@ describe('createCrossPluginExternals', () => {
     ['@kbn/dashboard-plugin', { pluginId: 'dashboard', targets: ['public'] }],
   ]);
 
-  const externals = createCrossPluginExternals(pluginTargets);
+  const externals = createCrossPluginExternals(pluginTargets, {
+    allowedPluginIds: new Set(['core', 'discover']),
+    manifestPath: '/plugins/my_plugin/kibana.json',
+  });
 
   const call = (request: string): Promise<{ err?: Error; result?: string }> =>
     new Promise((resolve) => {
@@ -57,6 +66,17 @@ describe('createCrossPluginExternals', () => {
     const { err } = await call('@kbn/discover-plugin');
     expect(err).toBeInstanceOf(Error);
     expect(err!.message).toMatch(/references a non-public export/);
+  });
+
+  it('errors on an import of a plugin not declared in requiredPlugins/requiredBundles', async () => {
+    const { err, result } = await call('@kbn/dashboard-plugin/public');
+    expect(err).toBeInstanceOf(Error);
+    expect(err!.message).toBe(
+      'import [@kbn/dashboard-plugin/public] references a public export of the [dashboard] bundle, ' +
+        'but that bundle is not in the "requiredPlugins" or "requiredBundles" list in the ' +
+        'plugin manifest [/plugins/my_plugin/kibana.json]'
+    );
+    expect(result).toBeUndefined();
   });
 
   it('passes through unknown @kbn packages (not in pluginTargets)', async () => {
@@ -107,6 +127,29 @@ describe('createCrossPluginExternals', () => {
     });
     expect(err).toBeUndefined();
     expect(result).toBeUndefined();
+  });
+});
+
+describe('createWatchManifestPlugin', () => {
+  it('registers the manifest as a file dependency of every compilation', () => {
+    const manifestPath = '/plugins/my_plugin/kibana.json';
+    let onCompilation: ((compilation: Compilation) => void) | undefined;
+    const compiler = {
+      hooks: {
+        thisCompilation: {
+          tap: (_name: string, fn: (compilation: Compilation) => void) => {
+            onCompilation = fn;
+          },
+        },
+      },
+    } as unknown as Compiler;
+
+    createWatchManifestPlugin(manifestPath).apply(compiler);
+
+    const fileDependencies = new Set<string>();
+    onCompilation!({ fileDependencies } as unknown as Compilation);
+
+    expect(fileDependencies.has(manifestPath)).toBe(true);
   });
 });
 
@@ -170,5 +213,58 @@ describe('createPluginWrapper', () => {
     expect(() => {
       createPluginWrapper(wrapperDir, 'emptyPlugin', pluginDir, ['server', 'nonexistent']);
     }).toThrow(/No entry points found for plugin emptyPlugin/);
+  });
+});
+
+describe('readPluginManifest', () => {
+  const tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-manifest-test-'));
+
+  afterAll(() => {
+    Fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  const writeManifest = (name: string, raw: string) => {
+    const pluginDir = Path.join(tmpDir, name);
+    Fs.mkdirSync(pluginDir, { recursive: true });
+    Fs.writeFileSync(Path.join(pluginDir, 'kibana.jsonc'), raw);
+    return pluginDir;
+  };
+
+  it('parses JSONC with comments, trailing commas and comment-like strings', () => {
+    const pluginDir = writeManifest(
+      'jsonc',
+      `{
+        // plugin manifest
+        "type": "plugin",
+        "plugin": {
+          "id": "myPlugin",
+          "description": "docs: https://example.com/x /* keep */",
+          "requiredPlugins": ["data",],
+          "requiredBundles": ["kibanaReact"],
+          "extraPublicDirs": ["common"],
+        },
+      }`
+    );
+
+    expect(readPluginManifest(pluginDir)).toEqual({
+      path: Path.join(pluginDir, 'kibana.jsonc'),
+      id: 'myPlugin',
+      description: 'docs: https://example.com/x /* keep */',
+      requiredPlugins: ['data'],
+      requiredBundles: ['kibanaReact'],
+      extraPublicDirs: ['common'],
+    });
+  });
+
+  it('returns an empty manifest when kibana.jsonc is missing', () => {
+    const pluginDir = Path.join(tmpDir, 'missing');
+    expect(readPluginManifest(pluginDir)).toEqual({
+      path: Path.join(pluginDir, 'kibana.jsonc'),
+    });
+  });
+
+  it('throws on a malformed manifest instead of dropping declarations', () => {
+    const pluginDir = writeManifest('malformed', '{ "plugin": { "requiredPlugins": [ }');
+    expect(() => readPluginManifest(pluginDir)).toThrow();
   });
 });

@@ -128,6 +128,9 @@ const services: Partial<KibanaServices> = {
     getBooleanValue$: (_flagName, fallback) => of(fallback),
     getStringValue$: (_flagName, fallback) => of(fallback),
     getNumberValue$: (_flagName, fallback) => of(fallback),
+    useBooleanValue: (_flagName, fallback) => fallback,
+    useStringValue: (_flagName, fallback) => fallback,
+    useNumberValue: (_flagName, fallback) => fallback,
   },
   kql: {
     autocomplete: {

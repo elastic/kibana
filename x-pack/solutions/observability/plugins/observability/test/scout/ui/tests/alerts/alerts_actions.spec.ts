@@ -24,7 +24,7 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.alertsTablePage.goto();
-      await pageObjects.alertControls.clearControlSelections(ALERT_STATUS_CONTROL_ID);
+      await pageObjects.controls.clearSelections(ALERT_STATUS_CONTROL_ID);
       await pageObjects.alertsTablePage.waitForTableToLoad();
     });
 

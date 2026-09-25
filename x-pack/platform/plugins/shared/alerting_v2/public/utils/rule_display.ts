@@ -1,0 +1,206 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { formatDuration } from '@kbn/alerting-plugin/common';
+import type { NoDataStrategy, RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import { recoveryStrategy, type Query, type RecoveryStrategy } from '@kbn/alerting-v2-schemas';
+import { i18n } from '@kbn/i18n';
+
+export const EMPTY_VALUE = '-';
+
+const IMMEDIATE_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.immediateValue', {
+  defaultMessage: 'Immediate',
+});
+
+const AND_OPERATOR_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.delayConnectorAnd', {
+  defaultMessage: 'and',
+});
+
+const OR_OPERATOR_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.delayConnectorOr', {
+  defaultMessage: 'or',
+});
+
+const QUERY_OVERFLOW_MAX_VISIBLE_LINES = 5;
+const QUERY_OVERFLOW_HEIGHT = 240;
+
+/**
+ * Builds a human-readable delay string from a count, timeframe, and operator.
+ *
+ * Possible outputs:
+ *  - count only:     "After 3 matches"
+ *  - timeframe only: "After 5 min"
+ *  - both (or):      "After 3 matches or 5 min"
+ *  - both (and):     "After 3 matches and 5 min"
+ */
+const formatDelay = ({
+  count,
+  countLabel,
+  timeframe,
+  operator,
+}: {
+  count?: number;
+  countLabel: (n: number) => string;
+  timeframe?: string;
+  operator?: string;
+}): string => {
+  const hasCount = count != null && count > 0;
+  const hasTimeframe = timeframe != null;
+
+  if (hasCount && hasTimeframe) {
+    const connector = operator === 'and' ? AND_OPERATOR_LABEL : OR_OPERATOR_LABEL;
+
+    return i18n.translate('xpack.alertingV2.ruleDetails.delayCountAndTimeframe', {
+      defaultMessage: 'After {countPart} {connector} {timeframePart}',
+      values: {
+        countPart: countLabel(count),
+        connector,
+        timeframePart: formatDuration(timeframe),
+      },
+    });
+  }
+
+  if (hasCount) {
+    return i18n.translate('xpack.alertingV2.ruleDetails.delayCountOnly', {
+      defaultMessage: 'After {countPart}',
+      values: { countPart: countLabel(count) },
+    });
+  }
+
+  if (hasTimeframe) {
+    return i18n.translate('xpack.alertingV2.ruleDetails.delayTimeframeOnly', {
+      defaultMessage: 'After {timeframePart}',
+      values: { timeframePart: formatDuration(timeframe) },
+    });
+  }
+
+  return EMPTY_VALUE;
+};
+
+const matchLabel = (n: number) =>
+  i18n.translate('xpack.alertingV2.ruleDetails.matchCount', {
+    defaultMessage: '{n} {n, plural, one {match} other {matches}}',
+    values: { n },
+  });
+
+const recoveryLabel = (n: number) =>
+  i18n.translate('xpack.alertingV2.ruleDetails.recoveryCount', {
+    defaultMessage: '{n} {n, plural, one {recovery} other {recoveries}}',
+    values: { n },
+  });
+
+export function formatAlertDelay(stateTransition: RuleAttachmentData['state_transition']): string {
+  if (stateTransition?.pending_count == null && stateTransition?.pending_timeframe == null) {
+    return EMPTY_VALUE;
+  }
+
+  if (stateTransition.pending_count === 0 && stateTransition.pending_timeframe == null) {
+    return IMMEDIATE_LABEL;
+  }
+
+  return formatDelay({
+    count: stateTransition.pending_count,
+    countLabel: matchLabel,
+    timeframe: stateTransition.pending_timeframe,
+    operator: stateTransition.pending_operator,
+  });
+}
+
+export function formatRecoveryDelay(
+  stateTransition: RuleAttachmentData['state_transition']
+): string {
+  if (stateTransition?.recovering_count == null && stateTransition?.recovering_timeframe == null) {
+    return EMPTY_VALUE;
+  }
+
+  if (stateTransition.recovering_count === 0 && stateTransition.recovering_timeframe == null) {
+    return IMMEDIATE_LABEL;
+  }
+
+  return formatDelay({
+    count: stateTransition.recovering_count,
+    countLabel: recoveryLabel,
+    timeframe: stateTransition.recovering_timeframe,
+    operator: stateTransition.recovering_operator,
+  });
+}
+
+const NO_DATA_STRATEGY_LABELS: Record<NoDataStrategy, string> = {
+  last_known_status: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.lastKnownStatus', {
+    defaultMessage: 'Keep last known status',
+  }),
+  emit: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.emit', {
+    defaultMessage: 'Use no data status',
+  }),
+  recover: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.recover', {
+    defaultMessage: 'Recover immediately',
+  }),
+  none: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.none', {
+    defaultMessage: 'Do nothing',
+  }),
+};
+
+export function formatNoDataStrategy(strategy?: NoDataStrategy | null): string {
+  if (!strategy) return EMPTY_VALUE;
+  return NO_DATA_STRATEGY_LABELS[strategy] ?? EMPTY_VALUE;
+}
+
+export function getDisplayRecoveryCondition(
+  query: Query,
+  strategy?: RecoveryStrategy
+): string | undefined {
+  if (strategy !== recoveryStrategy.query || !query.recovery) return undefined;
+  if (query.format === 'composed') {
+    return query.recovery.segment;
+  }
+  return query.recovery.query;
+}
+
+/**
+ * Display parts for the conditions panel. Composed rules use the stored base /
+ * breach segment; standalone rules have a single query and no alert condition.
+ */
+export function getDisplayQueryParts(query: Query): {
+  baseQuery: string;
+  alertCondition?: string;
+} {
+  if (query.format === 'composed') {
+    const segment = query.breach?.segment?.trim();
+    return {
+      baseQuery: query.base,
+      ...(segment ? { alertCondition: segment } : {}),
+    };
+  }
+
+  return { baseQuery: query.breach.query };
+}
+
+export function getQueryOverflowHeight(query: string): number | undefined {
+  if (!query.trim()) {
+    return undefined;
+  }
+
+  return query.split('\n').length > QUERY_OVERFLOW_MAX_VISIBLE_LINES
+    ? QUERY_OVERFLOW_HEIGHT
+    : undefined;
+}
+
+const RECOVERY_STRATEGY_LABELS: Record<RecoveryStrategy, string> = {
+  query: i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
+    defaultMessage: 'Custom',
+  }),
+  no_breach: i18n.translate('xpack.alertingV2.ruleDetails.recoveryDefault', {
+    defaultMessage: 'Default',
+  }),
+  none: i18n.translate('xpack.alertingV2.ruleDetails.recoveryNone', {
+    defaultMessage: 'No recovery',
+  }),
+};
+
+export function formatRecoveryStrategy(strategy?: RecoveryStrategy | null): string {
+  if (strategy == null) return EMPTY_VALUE;
+  return RECOVERY_STRATEGY_LABELS[strategy];
+}

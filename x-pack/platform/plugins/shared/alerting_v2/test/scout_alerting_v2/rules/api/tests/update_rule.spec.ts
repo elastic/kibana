@@ -17,8 +17,6 @@ import {
   testData,
 } from '../fixtures';
 
-const MAX_OWNER_LENGTH = 256;
-
 apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
@@ -60,7 +58,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       // Audit fields: createdAt/createdBy preserved, updatedAt/updatedBy refreshed.
       expect(response.body.id).toBe(created.id);
       expect(response.body.created_at).toBe(created.created_at);
-      expect(response.body.created_by).toBe(created.created_by);
+      expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.updated_at).not.toBe(created.updated_at);
       expect(response.body.metadata.version).toBe(created.metadata.version + 1);
     }
@@ -333,6 +331,65 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest(
+    'update: should clear all tags when metadata.tags is set to null',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-with-tags', tags: ['prod', 'infra'] },
+        })
+      );
+      expect(created.metadata.tags).toStrictEqual(['prod', 'infra']);
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { tags: null } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.tags).toBeUndefined();
+
+      // The cleared tags must survive a re-read (the original bug: they came back).
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.metadata.tags).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'update: should replace tags when metadata.tags is a non-empty array',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-retag', tags: ['old'] } })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { tags: ['prod', 'infra'] } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.tags).toStrictEqual(['prod', 'infra']);
+    }
+  );
+
+  apiTest(
+    'validation: should reject metadata.tags as an empty array (null clears tags)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-empty-tags', tags: ['keep'] } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { tags: [] } },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+      // The rejected update must not have persisted.
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.metadata.tags).toStrictEqual(['keep']);
+    }
+  );
+
   apiTest('status: should return 404 when the rule does not exist', async ({ apiClient }) => {
     const response = await apiClient.patch(getRuleUrl('does-not-exist'), {
       headers: writerHeaders,
@@ -394,21 +451,6 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: { metadata: { description: 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1) } },
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
-
-  apiTest(
-    'validation: should reject body when metadata.owner exceeds the maximum length',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-with-long-owner' } })
-      );
-      const response = await apiClient.patch(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: { metadata: { owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) } },
       });
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('BAD_REQUEST');
@@ -483,6 +525,30 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('INVALID_STATE_TRANSITION');
+    }
+  );
+
+  apiTest(
+    'validation: should reject disabling recovery that would leave a stored recovering delay inert',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-inert-recovery-delay-on-update' },
+          recovery_strategy: 'no_breach',
+          state_transition: { pending_count: 0, recovering_count: 3 },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'none' },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_STATE_TRANSITION_CONFIG');
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.recovery_strategy).toBe('no_breach');
     }
   );
 

@@ -72,8 +72,8 @@ describe('DocumentList', () => {
         <DocumentList {...values} />
       </I18nProvider>
     );
-    expect(screen.getByText('Document id: M9ntXoIBTq5dF-1Xnc8A')).toBeInTheDocument();
-    expect(screen.getByText('Document id: NNntXoIBTq5dF-1Xnc8A')).toBeInTheDocument();
+    expect(screen.getByText('Document ID: M9ntXoIBTq5dF-1Xnc8A')).toBeInTheDocument();
+    expect(screen.getByText('Document ID: NNntXoIBTq5dF-1Xnc8A')).toBeInTheDocument();
   });
 
   test('renders callout when total results are 10.000', () => {

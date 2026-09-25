@@ -27,12 +27,13 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useTelemetry } from '../../hooks/use_telemetry';
 
 export const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_ID = 'actions';
-const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_WIDTH = 64;
+const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_WIDTH = 56;
 
 export interface WorkflowExecutionActionContext {
   executionId?: string;
   workflowId?: string;
   context?: Record<string, unknown>;
+  isTestRun?: boolean;
 }
 
 export const getWorkflowExecutionActionContext = (
@@ -58,7 +59,7 @@ const menuAriaLabel = i18n.translate('workflowsManagement.executionsPage.actions
 });
 
 const useExecutionActionListItems = (
-  { executionId, workflowId, context }: WorkflowExecutionActionContext,
+  { executionId, workflowId, context, isTestRun }: WorkflowExecutionActionContext,
   onClosePopover: () => void,
   origin: 'table_actions' | 'flyout_actions',
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void,
@@ -92,7 +93,7 @@ const useExecutionActionListItems = (
           }
 
           onClosePopover();
-          void onReRunExecution({ workflowId, executionId, context });
+          void onReRunExecution({ workflowId, executionId, context, isTestRun });
         },
         isDisabled: !workflowId || !onReRunExecution,
         'data-test-subj': 'workflowExecutionActionReRun',
@@ -149,6 +150,7 @@ const useExecutionActionListItems = (
     origin,
     telemetry,
     workflowId,
+    isTestRun,
   ]);
 };
 
@@ -190,7 +192,7 @@ export const WorkflowExecutionActionsMenu = ({
   });
 
   const anchorPosition: EuiPopoverProps['anchorPosition'] =
-    variant === 'takeAction' ? 'upRight' : 'upCenter';
+    variant === 'takeAction' ? 'upRight' : 'downLeft';
 
   if (!listItems?.length) {
     return null;
@@ -213,7 +215,7 @@ export const WorkflowExecutionActionsMenu = ({
           aria-label={showActionsLabel}
           color="text"
           data-test-subj="workflowExecutionActionsButton"
-          iconType="boxesVertical"
+          iconType="ellipsis"
           onClick={() => setIsOpen((prev) => !prev)}
         />
       </EuiToolTip>

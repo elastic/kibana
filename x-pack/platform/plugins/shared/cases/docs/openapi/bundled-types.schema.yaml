@@ -364,6 +364,11 @@ paths:
                             type: string
                             description: The observable type label.
                             example: My observable type
+                    extractObservables:
+                      type: boolean
+                      description: |
+                        Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+                      example: true
                     owner:
                       $ref: '#/components/schemas/owner'
                     templates:
@@ -549,6 +554,11 @@ paths:
                           type: string
                           description: The observable type label.
                           example: My observable type
+                  extractObservables:
+                    type: boolean
+                    description: |
+                      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+                    example: true
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -736,6 +746,11 @@ paths:
                           type: string
                           description: The observable type label.
                           example: My observable type
+                  extractObservables:
+                    type: boolean
+                    description: |
+                      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+                    example: true
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -1145,6 +1160,397 @@ paths:
               examples:
                 response404:
                   $ref: '#/components/examples/response_404'
+  /api/cases/field_definitions:
+    get:
+      summary: Get all field definitions
+      operationId: getCaseFieldDefinitionsDefaultSpace
+      description: |
+        Returns a paginated list of field definitions (field library entries) for the given owner. Requires the Cases feature to be enabled in the space.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - in: query
+          name: owner
+          description: |
+            The application that owns the field definitions (for example `cases`, `observability`, or `securitySolution`). Required.
+          required: true
+          schema:
+            oneOf:
+              - type: string
+                maxLength: 50
+              - type: array
+                items:
+                  type: string
+                  maxLength: 50
+                maxItems: 10
+        - in: query
+          name: isGlobal
+          description: |
+            When true, returns only global field definitions (rendered on every case). When false, returns all definitions. Omit to return all.
+          required: false
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/page_size'
+        - in: query
+          name: sortField
+          description: |
+            The field to sort by. When omitted, results are sorted by `fieldDefinitionId` ascending and `sortOrder` is ignored.
+          required: false
+          schema:
+            type: string
+            enum:
+              - name
+              - owner
+              - isGlobal
+              - displayOrder
+        - $ref: '#/components/parameters/sort_order'
+        - in: query
+          name: search
+          description: |
+            A case-insensitive substring to match against each definition's `name` and `description` fields. Definitions where neither field contains the substring are excluded.
+          required: false
+          schema:
+            type: string
+            maxLength: 1000
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_case_field_definitions_response'
+              examples:
+                getCaseFieldDefinitionsResponse:
+                  $ref: '#/components/examples/get_case_field_definitions_response'
+        '400':
+          description: The request is invalid. For example, the `owner` query parameter is missing or `page`/`perPage` are not integers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response400:
+                  $ref: '#/components/examples/response_400_invalid_template'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have permission to read field definitions for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+    post:
+      summary: Create a field definition
+      operationId: createCaseFieldDefinitionDefaultSpace
+      description: |
+        Creates a field definition in the field library. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - in: query
+          name: dry_run
+          description: |
+            When true, runs authorization, body, and name-uniqueness validation without creating the field definition. Returns `{ "valid": true }` on success.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/field_definition_write_request'
+            examples:
+              createCaseFieldDefinitionRequest:
+                $ref: '#/components/examples/field_definition_write_request'
+      responses:
+        '200':
+          description: |
+            Indicates a successful call. Returns the created field definition, or `{ "valid": true }` when `dry_run=true`.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/field_definition_response'
+                  - type: object
+                    required:
+                      - valid
+                    properties:
+                      valid:
+                        type: boolean
+              examples:
+                createCaseFieldDefinitionResponse:
+                  $ref: '#/components/examples/get_case_field_definition_response'
+        '400':
+          description: |
+            The request body is invalid, the YAML definition is malformed, the `name` does not match the YAML definition's `name`, or the owner already has 200 field definitions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response400:
+                  $ref: '#/components/examples/response_400_invalid_template'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the manage templates privilege for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '409':
+          description: A field definition with the same name already exists for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response409:
+                  $ref: '#/components/examples/response_409'
+  /api/cases/field_definitions/{field_definition_id}:
+    get:
+      summary: Get a field definition by ID
+      operationId: getCaseFieldDefinitionDefaultSpace
+      description: |
+        Returns a single field definition by its ID. Requires the Cases feature to be enabled in the space.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/field_definition_id'
+      responses:
+        '200':
+          description: Indicates a successful call. Returns the field definition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/field_definition_response'
+              examples:
+                getCaseFieldDefinitionResponse:
+                  $ref: '#/components/examples/get_case_field_definition_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have permission to read field definitions for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '404':
+          description: The field definition was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
+    put:
+      summary: Update a field definition
+      operationId: updateCaseFieldDefinitionDefaultSpace
+      description: |
+        Updates editable attributes of a field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Setting `isGlobal` to `false` when the field is linked to an active custom field in the Cases configuration returns `409`; otherwise demotion is allowed. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/field_definition_id'
+        - in: query
+          name: dry_run
+          description: |
+            When true, runs authorization, body, and identity-immutability validation without updating the field definition. Returns `{ "valid": true }` on success.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/field_definition_put_request'
+            examples:
+              updateCaseFieldDefinitionRequest:
+                $ref: '#/components/examples/field_definition_write_request'
+      responses:
+        '200':
+          description: |
+            Indicates a successful call. Returns the updated field definition, or `{ "valid": true }` when `dry_run=true`.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/field_definition_response'
+                  - type: object
+                    required:
+                      - valid
+                    properties:
+                      valid:
+                        type: boolean
+              examples:
+                updateCaseFieldDefinitionResponse:
+                  $ref: '#/components/examples/get_case_field_definition_response'
+        '400':
+          description: |
+            The request body is invalid, the YAML definition is malformed, the `name` does not match the YAML definition's `name`, or the owner would be changed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response400:
+                  $ref: '#/components/examples/response_400_invalid_template'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the manage templates privilege for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '404':
+          description: The field definition was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
+        '409':
+          description: |
+            A field's name or type cannot be changed after creation, or a global field cannot be demoted while linked to an active custom field.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - description: Identity-immutable conflict — name or type was changed.
+                    type: object
+                    required:
+                      - statusCode
+                      - error
+                      - message
+                      - attributes
+                    properties:
+                      statusCode:
+                        type: integer
+                      error:
+                        type: string
+                      message:
+                        type: string
+                      attributes:
+                        type: object
+                        required:
+                          - code
+                          - changed
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                              - field_identity_immutable
+                          changed:
+                            type: array
+                            items:
+                              type: string
+                  - $ref: '#/components/schemas/response_4xx'
+              examples:
+                response409:
+                  $ref: '#/components/examples/response_409'
+    delete:
+      summary: Delete a field definition
+      operationId: deleteCaseFieldDefinitionDefaultSpace
+      description: |
+        Deletes a field definition. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field definition cannot be deleted while it is referenced by an active template or linked to an active custom field in the Cases configuration. Requires the Cases feature to be enabled in the space.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/field_definition_id'
+      responses:
+        '204':
+          description: The field definition was deleted.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the manage templates privilege for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '404':
+          description: The field definition was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
+        '409':
+          description: |
+            The field definition is referenced by one or more active templates, or is linked to an active custom field in the Cases configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response409:
+                  $ref: '#/components/examples/response_409'
   /api/cases/fields:
     get:
       summary: Get the fields applicable to a case
@@ -1974,6 +2380,14 @@ components:
         type: integer
         minimum: 1
       example: 1
+    field_definition_id:
+      in: path
+      name: field_definition_id
+      description: The identifier for the field definition.
+      required: true
+      schema:
+        type: string
+        maxLength: 36
     case_id:
       in: path
       name: caseId
@@ -2023,6 +2437,7 @@ components:
             - tags
             - title
             - user
+            - workflow
           example: create_case
   schemas:
     assignees:
@@ -2345,9 +2760,9 @@ components:
           example: true
         extractObservables:
           description: |
-            When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.
+            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
           type: boolean
-          example: false
+          example: true
     case_severity:
       type: string
       description: The severity of the case.
@@ -3406,6 +3821,10 @@ components:
                 enum:
                   - text
                   - toggle
+        extractObservables:
+          type: boolean
+          description: |
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
         owner:
           $ref: '#/components/schemas/owner'
         templates:
@@ -3481,6 +3900,10 @@ components:
                 enum:
                   - text
                   - toggle
+        extractObservables:
+          type: boolean
+          description: |
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
         templates:
           $ref: '#/components/schemas/templates'
         version:
@@ -3672,6 +4095,163 @@ components:
           description: Always `true` — validation failures return a 4xx error instead.
           enum:
             - true
+    field_definition_response:
+      title: Field definition response
+      description: |
+        A field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated custom field, is not included in the public API response.
+      type: object
+      required:
+        - fieldDefinitionId
+        - name
+        - definition
+        - owner
+      properties:
+        fieldDefinitionId:
+          type: string
+          maxLength: 36
+          description: |
+            Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.
+        name:
+          type: string
+          description: |
+            The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.
+        definition:
+          type: string
+          description: |
+            The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.
+        owner:
+          type: string
+          maxLength: 50
+          description: The application that owns this field definition.
+        description:
+          type: string
+          description: Optional human-readable description of the field's purpose.
+        isGlobal:
+          type: boolean
+          description: |
+            When true, this field is rendered in every case regardless of which template the case uses.
+        displayOrder:
+          type: integer
+          minimum: 0
+          description: |
+            Position of a global field in the case details view. Assigned by the server and changed via the Field Library reorder controls.
+    get_case_field_definitions_response:
+      title: Get case field definitions response
+      description: A paginated list of reusable field definitions.
+      type: object
+      required:
+        - fieldDefinitions
+        - page
+        - perPage
+        - total
+      properties:
+        fieldDefinitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/field_definition_response'
+        page:
+          type: integer
+          minimum: 1
+          description: The current page number.
+        perPage:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: The number of items per page.
+        total:
+          type: integer
+          minimum: 0
+          description: The total number of field definitions matching the query (before pagination).
+    field_definition_write_request:
+      title: Field definition write request
+      description: |
+        The body for creating or updating a field definition.
+
+        Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.
+
+        Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+      type: object
+      additionalProperties: false
+      required:
+        - owner
+        - definition
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: |
+            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
+        owner:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: The application that owns this field definition.
+        definition:
+          type: string
+          maxLength: 30000
+          description: The field definition as a YAML string describing a single field (type, label, control, metadata).
+          example: |
+            name: priority
+            label: Priority
+            type: keyword
+            control: SELECT_BASIC
+            metadata:
+              options: [low, medium, high]
+              default: medium
+        description:
+          type: string
+          maxLength: 1000
+          description: Optional human-readable description of the field's purpose.
+        isGlobal:
+          type: boolean
+          description: |
+            When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
+    field_definition_put_request:
+      title: Field definition PUT request
+      description: |
+        The body for updating a field definition.
+
+        Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+
+        Unlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds 30 000 characters, so that field definitions created through internal tooling remain modifiable. When the submitted `definition` differs from the stored value, the 30 000-character limit is enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the definition is changed.
+      type: object
+      additionalProperties: false
+      required:
+        - owner
+        - definition
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: |
+            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.
+        owner:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: The application that owns this field definition.
+        definition:
+          type: string
+          maxLength: 1000000
+          description: The field definition as a YAML string describing a single field (type, label, control, metadata).
+          example: |
+            name: priority
+            label: Priority
+            type: keyword
+            control: SELECT_BASIC
+            metadata:
+              options: [low, medium, high]
+              default: medium
+        description:
+          type: string
+          maxLength: 1000
+          description: Optional human-readable description of the field's purpose.
+        isGlobal:
+          type: boolean
+          description: |
+            When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
     applicable_fields_response:
       type: object
       description: |
@@ -4394,6 +4974,115 @@ components:
               type: string
               enum:
                 - user
+    payload_workflow:
+      type: object
+      description: The payload for a workflow user action, recorded when a user runs a workflow from a case.
+      required:
+        - workflow
+      properties:
+        workflow:
+          type: object
+          description: Identifies the workflow that was run.
+          required:
+            - id
+            - name
+            - executionId
+          properties:
+            id:
+              type: string
+              description: The workflow ID.
+            name:
+              type: string
+              description: The workflow name at the time the run was triggered.
+            executionId:
+              type: string
+              description: The execution ID returned by the Workflows engine.
+        origin:
+          description: The context from which the workflow was triggered.
+          oneOf:
+            - type: object
+              required:
+                - type
+                - id
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.case
+                id:
+                  type: string
+                  description: The case ID.
+            - type: object
+              required:
+                - type
+                - id
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.observable
+                id:
+                  type: string
+                  description: The observable ID.
+                typeKey:
+                  type: string
+                  description: The observable type key.
+                value:
+                  type: string
+                  description: The observable value.
+            - type: object
+              required:
+                - type
+                - id
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.observables
+                id:
+                  type: string
+                  description: The case ID.
+                count:
+                  type: number
+                  description: The number of selected observables.
+            - type: object
+              required:
+                - type
+                - id
+                - attachmentType
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.attachment
+                id:
+                  type: string
+                  description: The attachment target ID.
+                attachmentType:
+                  type: string
+                  description: The normalized registered attachment type.
+                index:
+                  type: string
+                  description: The Elasticsearch index the target document lives in.
+            - type: object
+              required:
+                - type
+                - id
+                - attachmentType
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - cases.attachments
+                id:
+                  type: string
+                  description: The case ID.
+                attachmentType:
+                  type: string
+                  description: The normalized registered attachment type.
+                count:
+                  type: number
+                  description: The number of selected attachment targets.
     user_actions_find_response_properties:
       type: object
       required:
@@ -4459,6 +5148,7 @@ components:
             - $ref: '#/components/schemas/payload_tags'
             - $ref: '#/components/schemas/payload_title'
             - $ref: '#/components/schemas/payload_user_comment'
+            - $ref: '#/components/schemas/payload_workflow'
         version:
           type: string
           example: WzM1ODg4LDFd
@@ -4482,6 +5172,7 @@ components:
             - status
             - tags
             - title
+            - workflow
           example: create_case
     add_case_file_request:
       title: Add case file request properties
@@ -4738,6 +5429,7 @@ components:
               required: false
               type: text
           observableTypes: []
+          extractObservables: true
           owner: cases
           created_at: '2024-07-01T17:07:17.767Z'
           created_by:
@@ -4841,6 +5533,7 @@ components:
             description: A description of the template.
             tags:
               - Template tag 1
+        extractObservables: true
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
@@ -4905,6 +5598,7 @@ components:
             label: my-toggle
             required: false
             type: toggle
+        extractObservables: true
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
@@ -5036,6 +5730,63 @@ components:
         error: Not Found
         message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
         statusCode: 404
+    get_case_field_definitions_response:
+      summary: A paginated list of reusable field definitions.
+      value:
+        fieldDefinitions:
+          - fieldDefinitionId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+            name: priority
+            owner: cases
+            definition: |
+              name: priority
+              label: Priority
+              type: keyword
+              control: SELECT_BASIC
+              metadata:
+                options: [low, medium, high]
+                default: medium
+            description: Ticket priority level.
+            isGlobal: false
+        page: 1
+        perPage: 20
+        total: 1
+    response_400_invalid_template:
+      summary: The request is invalid.
+      value:
+        error: Bad Request
+        message: Template [invalid-template-id] not found for owner [cases]
+        statusCode: 400
+    field_definition_write_request:
+      summary: Create or update a reusable field definition.
+      value:
+        name: priority
+        owner: cases
+        definition: |
+          name: priority
+          label: Priority
+          type: keyword
+          control: SELECT_BASIC
+          metadata:
+            options: [low, medium, high]
+            default: medium
+        description: Ticket priority level.
+        isGlobal: false
+    get_case_field_definition_response:
+      summary: A reusable field definition.
+      value:
+        fieldDefinitionId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name: priority
+        owner: cases
+        definition: |
+          name: priority
+          label: Priority
+          type: keyword
+          control: SELECT_BASIC
+          metadata:
+            options: [low, medium, high]
+            default: medium
+        description: Ticket priority level.
+        isGlobal: false
     get_case_applicable_fields_response:
       summary: Fields applicable to a case
       value:
@@ -5075,12 +5826,6 @@ components:
             displayOnly: true
             source: template
             isGlobal: false
-    response_400_invalid_template:
-      summary: The request is invalid.
-      value:
-        error: Bad Request
-        message: Template [invalid-template-id] not found for owner [cases]
-        statusCode: 400
     get_case_response:
       summary: Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:
