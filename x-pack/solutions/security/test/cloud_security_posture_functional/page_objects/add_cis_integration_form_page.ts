@@ -536,7 +536,9 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const showCredentialJsonSecretPanel = async () => {
-    return await testSubjects.exists(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL);
+    return await testSubjects.exists(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL, {
+      timeout: 10_000,
+    });
   };
 
   const inputUniqueIntegrationName = async () => {
