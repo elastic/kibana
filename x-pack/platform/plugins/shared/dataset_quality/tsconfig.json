@@ -80,7 +80,8 @@
     "@kbn/ui-callout",
     "@kbn/scout",
     "@kbn/scout-synthtrace",
-    "@kbn/synthtrace-client"
+    "@kbn/synthtrace-client",
+    "@kbn/core-http-browser"
   ],
   "exclude": [
     "target/**/*"

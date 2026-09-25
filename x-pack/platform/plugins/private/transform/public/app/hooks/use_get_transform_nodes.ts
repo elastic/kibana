@@ -10,11 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { GetTransformNodesResponseSchema } from '../../../server/routes/api_schemas/transforms';
-import {
-  addInternalBasePath,
-  DEFAULT_REFRESH_INTERVAL_MS,
-  TRANSFORM_REACT_QUERY_KEYS,
-} from '../../../common/constants';
+import { DEFAULT_REFRESH_INTERVAL_MS, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
 
@@ -25,7 +21,7 @@ export const useGetTransformNodes = ({ enabled } = { enabled: true }) => {
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_NODES],
     async ({ signal }) => {
       const transformNodes = await http.get<GetTransformNodesResponseSchema>(
-        addInternalBasePath('transforms/_nodes'),
+        '/internal/transform/transforms/_nodes',
         {
           version: '1',
           signal,

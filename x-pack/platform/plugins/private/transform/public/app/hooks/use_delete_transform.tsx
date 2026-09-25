@@ -15,7 +15,6 @@ import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
 } from '../../../server/routes/api_schemas/delete_transforms';
-import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
@@ -93,7 +92,7 @@ export const useDeleteTransforms = () => {
 
   const mutation = useMutation({
     mutationFn: (reqBody: DeleteTransformsRequestSchema) =>
-      http.post<DeleteTransformsResponseSchema>(addInternalBasePath('delete_transforms'), {
+      http.post<DeleteTransformsResponseSchema>('/internal/transform/delete_transforms', {
         body: JSON.stringify(reqBody),
         version: '1',
       }),
