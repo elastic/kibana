@@ -5483,9 +5483,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-agent-builder':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder
-      '@kbn/evals-suite-attack-discovery-fp-tp':
+      '@kbn/evals-suite-attack-discovery-fp-tp-real-workflow':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -9697,7 +9697,7 @@ importers:
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
 
-  x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp: {}
+  x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
 

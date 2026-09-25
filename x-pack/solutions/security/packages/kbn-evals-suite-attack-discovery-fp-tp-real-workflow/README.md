@@ -1,4 +1,4 @@
-# @kbn/evals-suite-attack-discovery-fp-tp
+# @kbn/evals-suite-attack-discovery-fp-tp-real-workflow
 
 FP/TP verdict eval suite for the attack-discovery review workflow, built on the
 `@kbn/evals` harness. Ships 7 vendored, validated JSONL corpora (1,017 cases) plus
@@ -59,7 +59,7 @@ is intentionally **not** vendored — see the external
 
 ## Tests
 
-`npx jest x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp`
+`npx jest x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow`
 runs the unit suite: loader validation against the real vendored corpora,
 corrupt-label/duplicate-id/mutation-spec mutation tests, evaluator scoring, and
 workflow task run/poll/verdict plumbing.

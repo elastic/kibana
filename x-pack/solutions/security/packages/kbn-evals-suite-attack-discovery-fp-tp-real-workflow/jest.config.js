@@ -9,6 +9,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: [
-    '<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/src',
+    '<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow/src',
   ],
 };

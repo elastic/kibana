@@ -1,6 +1,6 @@
 {
   "type": "functional-tests",
-  "id": "@kbn/evals-suite-attack-discovery-fp-tp",
+  "id": "@kbn/evals-suite-attack-discovery-fp-tp-real-workflow",
   "owner": "@elastic/security-threat-hunting",
   "group": "security",
   "visibility": "private"

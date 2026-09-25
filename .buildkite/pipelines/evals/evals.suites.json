@@ -292,7 +292,7 @@
     {
       "id": "attack-discovery-fp-tp",
       "name": "Attack Discovery FP/TP Verdict Analysis",
-      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/playwright.config.ts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow/playwright.config.ts",
       "tags": [
         "security",
         "attack-discovery",
