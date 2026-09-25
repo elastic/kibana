@@ -71,7 +71,7 @@ Example: *"Endpoint and Identity pipelines are healthy. Network has a critical p
 
 **This section is mandatory. Use ### headers per dimension and bullet points prefixed with the category name. Do not flatten findings into a plain list.**
 
-Each \`actionableFinding\` has a \`category\` field — use it as the bullet prefix. Required format:
+Each \`actionableFinding\` has a \`categories\` array — use each category as a bullet prefix (a finding may appear under multiple categories). Required format:
 
 \`\`\`
 ### Coverage
@@ -91,10 +91,11 @@ Order of dimensions: Coverage → Quality → Continuity → Retention
 Order within each dimension: Endpoint → Identity → Network → Cloud → Application/SaaS
 
 Rules:
-- Always prefix each bullet with **[Category]:** using the \`category\` field from \`actionableFindings\`.
+- Always prefix each bullet with **[Category]:** using the \`categories\` field from \`actionableFindings\` (list under each matching category when multi-valued).
 - Skip entire dimension sections that have no findings.
 - Skip categories within a dimension that have no findings.
 - Never list a finding without its category prefix.
+- Never filter pipelines or findings by substring in the resource/pipeline name — always use the \`categories\` field.
 
 ### Blast Radius (mandatory for every actionable finding)
 
@@ -198,9 +199,11 @@ Playbook guidance:
 
 ### For category-specific questions (e.g., "How is my Endpoint data?"):
 1. Call the relevant tools
-2. In the Findings section, focus on the Endpoint category but still show other categories if they have findings
+2. Treat the category as a membership test: include every item/finding whose \`categories\` array **contains** the requested category — never require it to equal only that category. A pipeline/index serving multiple categories (e.g. \`["Endpoint","Network"]\`) counts for BOTH an Endpoint question and a Network question, and must appear in each.
+3. In the Findings section, focus on the requested category but still show other categories if they have findings
 
 ### For silence and volume-drop questions:
+- Silence, volume drop, and pipeline failure are time-sensitive. For any current/now/latest question — or any follow-up after an earlier continuity call in this conversation — always re-run \`get_continuity\`; never reuse a prior-turn result.
 - "Which data streams have gone silent?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type === 'silence'\`, report resource name, \`silenceMs\` converted to human-readable duration, and blast radius.
 - "Are any streams showing an unusual volume drop vs last week?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type\` is \`volume_drop_warning\` or \`volume_drop_critical\`, report \`volumeDropPct\`, \`lastFullDayDocs\`, \`baseline7dAvg\`, and blast radius.
 - "Show me the silence status for my cloud integrations" → Call \`get_continuity\`, filter \`items\` by \`categories\` containing "Cloud", then list each with \`isSilent\`, \`silenceMs\`, and \`lastFullDayDocs\`.
@@ -211,7 +214,7 @@ Playbook guidance:
 - \`status\`: \`healthy | actionsRequired | noData\`
 - \`summary\`: pre-computed summary string
 - \`items\`: array of \`CategoryGroup\` — \`{ category, indices: [{ indexName, docs }] }\`
-- \`actionableFindings\`: array of \`{ category, severity, message, resource }\`
+- \`actionableFindings\`: array of \`{ categories, severity, message, resource }\`
 
 ### Quality (\`get_quality\`)
 - \`status\`: \`healthy | actionsRequired | noData\`
@@ -219,21 +222,23 @@ Playbook guidance:
 - \`items\`: array of ECS quality results for **categorized indices only** — includes \`indexName\`, \`incompatibleFieldCount\`, \`incompatibleFieldMappingItems\`, \`ecsFieldCount\`, \`totalFieldCount\`
   - Only indices whose data maps to one of the five main SIEM categories are included. Uncategorized system indices are excluded.
   - The count in \`summary\` reflects the number of categorized indices checked, not total ES indices.
-- \`actionableFindings\`: array of \`{ category, severity, message, resource }\`
+- \`actionableFindings\`: array of \`{ categories, severity, message, resource }\`
 - When reporting: "N of M checked indices have incompatible fields" — N and M are both counts of categorized indices only.
 
 ### Continuity (\`get_continuity\`)
 - \`status\`: \`healthy | actionsRequired | noData\`
 - \`summary\`: pre-computed summary string
-- \`items\`: array of \`PipelineStats\` — \`{ name, indices, docsCount, failedDocsCount, statsAvailable, lastEventMs, silenceMs, isSilent, lastFullDayDocs, baseline7dAvg, volumeDropPct }\`
+- \`items\`: array of \`PipelineStats\` — \`{ name, indices, docsCount, failedDocsCount, statsAvailable, categories, lastEventMs, silenceMs, isSilent, lastFullDayDocs, baseline7dAvg, volumeDropPct }\`
+  - \`categories\`: full union of SIEM main categories this pipeline serves. Filter by this field for tab/panel questions (e.g. "Endpoint continuity tab") using a **contains** check — a pipeline is part of the Endpoint tab if \`categories\` includes "Endpoint", even when it also serves other categories. Never require an exact single-category match, and never filter by substring in the pipeline name.
   - \`statsAvailable: false\` in serverless mode — report pipelines as present but note stats are unavailable
   - \`lastEventMs\`: epoch ms of the most recent event in any index served by this pipeline; \`null\` if never had events
   - \`silenceMs\`: milliseconds since the last event (\`Date.now() - lastEventMs\`); \`null\` when \`lastEventMs\` is null
-  - \`isSilent\`: \`true\` when the pipeline previously had activity and the gap now exceeds the category-specific threshold
+  - \`isSilent\`: \`true\` when the pipeline previously had activity and the gap now exceeds the most lenient category-specific threshold across \`categories\`
   - \`lastFullDayDocs\`: document count for yesterday (the most recent complete day; the in-progress current day is excluded); \`null\` when history < 2 complete days (too young to trust)
   - \`baseline7dAvg\`: average daily doc count over the prior full days; \`null\` when history < 2 complete days
   - \`volumeDropPct\`: percentage drop vs baseline, clamped to [0, ∞); \`null\` when baseline is unavailable or zero
-- \`actionableFindings\`: array of \`{ category, severity, message, resource, type }\`
+- \`actionableFindings\`: array of \`{ categories, severity, message, resource, type }\`
+  - \`categories\`: array of SIEM main categories this finding belongs to (may be multiple)
   - \`type\` values: \`pipeline_failure\` | \`silence\` | \`volume_drop_warning\` | \`volume_drop_critical\`
 - Failure rate = \`failedDocsCount / docsCount * 100\`. A rate ≥ 1% is critical.
 - Silence thresholds by category: Endpoint / Identity / Network 30 min, Cloud 1 h, Application/SaaS 24 h.
@@ -246,7 +251,7 @@ Playbook guidance:
   - Only indices whose data maps to one of the five main SIEM categories are included. Uncategorized system indices (e.g. internal workflow indices) are excluded.
   - \`categories\`: array of all main categories this index belongs to. An index can belong to multiple categories because it ingests data with multiple \`event.category\` values.
   - The count in \`summary\` reflects the number of unique categorized indices, not total ES data streams.
-- \`actionableFindings\`: array of \`{ category, severity, message, resource }\`
+- \`actionableFindings\`: array of \`{ categories, severity, message, resource }\`
 - Threshold: 365 days (FedRAMP). \`retentionDays: null\` means no explicit retention — data kept forever — which is compliant.
 - When reporting retention findings: group by category using the \`categories\` field. Example: "1 index in Cloud has retention below threshold: logs-cloud_security_posture.findings-default (180d)".
 
@@ -256,6 +261,7 @@ Playbook guidance:
 - In serverless environments, ILM is not available — retention is DSL-only for data streams; no standalone indices.
 - Do not report "no issues" for every category — only call out categories with actual findings.
 - Do not re-list raw arrays of indices in prose — reference the specific problematic resources from \`actionableFindings\`.
+- Continuity (silence / volume drop / failure rate) is real-time. Never answer current-state continuity questions from a prior-turn \`get_continuity\` result — re-call the tool.
 `,
   getRegistryTools: () => [
     SIEM_READINESS_COVERAGE_TOOL_ID,
