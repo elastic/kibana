@@ -14,6 +14,9 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
+  'plugin-id'?: string;
+  'product-solution'?: string;
+  'product-feature'?: string;
   with?: { method?: string; path?: string; body?: Record<string, unknown> };
   'on-failure'?: unknown;
   steps?: WorkflowStep[];
@@ -74,6 +77,14 @@ describe('deductive investigation workflow', () => {
     expect(persistCompleted.with?.body).not.toHaveProperty('trigger_feedback');
     expect(persistCompleted.with?.body).not.toHaveProperty('impact');
     expect(persistCompleted.with?.body).not.toHaveProperty('blind_spots');
+  });
+
+  it('attributes agent calls to Nightshift under the shared investigation id', () => {
+    expect(requireStep('investigate')).toMatchObject({
+      'plugin-id': 'significant_events_investigation',
+      'product-solution': 'observability',
+      'product-feature': 'nightshift',
+    });
   });
 
   it('space-scopes the path of every kibana.request step', () => {
