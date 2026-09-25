@@ -155,6 +155,42 @@ describe('defaults', () => {
   });
 
   it.each([
+    [HttpAuthMethod.BASIC, { [ConfigKey.USERNAME]: 'user', [ConfigKey.PASSWORD]: 'pass' }],
+    [
+      HttpAuthMethod.KERBEROS,
+      {
+        [ConfigKey.KERBEROS]: {
+          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP][ConfigKey.KERBEROS],
+          enabled: true,
+          username: 'svc',
+          password: 'secret',
+          config_path: '/etc/krb5.conf',
+        },
+      },
+    ],
+    [
+      HttpAuthMethod.NTLM,
+      {
+        [ConfigKey.NTLM]: {
+          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP][ConfigKey.NTLM],
+          enabled: true,
+          username: 'ntlm-user',
+          password: 'ntlm-pass',
+        },
+      },
+    ],
+  ])('derives authType %s when editing an HTTP monitor', (authType, authFields) => {
+    const monitor = {
+      ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
+      [ConfigKey.USERNAME]: '',
+      [ConfigKey.PASSWORD]: '',
+      ...authFields,
+    } as SyntheticsMonitor;
+    expect(formatDefaultFormValues(monitor)).toMatchObject({ authType });
+  });
+
+  it.each([
     [MonitorTypeEnum.HTTP, FormMonitorType.HTTP],
     [MonitorTypeEnum.TCP, FormMonitorType.TCP],
     [MonitorTypeEnum.ICMP, FormMonitorType.ICMP],

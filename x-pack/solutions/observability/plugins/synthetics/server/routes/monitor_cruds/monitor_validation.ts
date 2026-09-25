@@ -22,6 +22,7 @@ import {
   CodeEditorMode,
   ConfigKey,
   FormMonitorType,
+  KerberosAuthType,
   MonitorTypeEnum,
   type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
@@ -172,10 +173,11 @@ export function validateMonitor(
       monitorFields[ConfigKey.USERNAME] || monitorFields[ConfigKey.PASSWORD]
     );
     const kerberos = monitorFields[ConfigKey.KERBEROS];
+    const ntlm = monitorFields[ConfigKey.NTLM];
     const enabledAuthSchemes = [
       hasBasicAuth,
       Boolean(kerberos?.enabled),
-      Boolean(monitorFields[ConfigKey.NTLM]?.enabled),
+      Boolean(ntlm?.enabled),
     ].filter(Boolean);
 
     if (enabledAuthSchemes.length > 1) {
@@ -199,6 +201,35 @@ export function validateMonitor(
           payload: monitorFields,
         };
       }
+
+      if (kerberos.auth_type === KerberosAuthType.PASSWORD) {
+        if (!kerberos.username?.trim() || !kerberos.password?.trim()) {
+          return {
+            valid: false,
+            reason: INVALID_AUTH_CONFIGURATION_ERROR,
+            details: INVALID_KERBEROS_PASSWORD_CREDENTIALS_DETAILS,
+            payload: monitorFields,
+          };
+        }
+      } else if (kerberos.auth_type === KerberosAuthType.KEYTAB) {
+        if (!kerberos.keytab?.trim()) {
+          return {
+            valid: false,
+            reason: INVALID_AUTH_CONFIGURATION_ERROR,
+            details: INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS,
+            payload: monitorFields,
+          };
+        }
+      }
+    }
+
+    if (ntlm?.enabled && (!ntlm.username?.trim() || !ntlm.password?.trim())) {
+      return {
+        valid: false,
+        reason: INVALID_AUTH_CONFIGURATION_ERROR,
+        details: INVALID_NTLM_CREDENTIALS_DETAILS,
+        payload: monitorFields,
+      };
     }
   }
 
@@ -630,6 +661,27 @@ const INVALID_KERBEROS_CONFIG_DETAILS = i18n.translate(
   {
     defaultMessage:
       'Kerberos requires exactly one of config_path (file on the agent) or krb5_conf (inline krb5.conf body).',
+  }
+);
+
+const INVALID_KERBEROS_PASSWORD_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosPasswordCredentialsDetails',
+  {
+    defaultMessage: 'Kerberos password authentication requires both username and password.',
+  }
+);
+
+const INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosKeytabCredentialsDetails',
+  {
+    defaultMessage: 'Kerberos keytab authentication requires a keytab path.',
+  }
+);
+
+const INVALID_NTLM_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidNtlmCredentialsDetails',
+  {
+    defaultMessage: 'NTLM authentication requires both username and password.',
   }
 );
 

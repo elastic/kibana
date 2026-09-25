@@ -60,16 +60,16 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
   // Package vars are single `kerberos` / `ntlm` text fields (synthetics 1.12.0+).
-  // Emit JSON first so `formatSyntheticsPolicy` can resolve `${params}` before
-  // base64-encoding (see `encodeHttpAuthPackageVars`).
+  // Params are resolved on the nested object in formatSyntheticsPolicy before
+  // this runs; pack the result as base64 JSON for the Fleet text var.
   [ConfigKey.KERBEROS]: (fields) => {
     const value = fields[ConfigKey.KERBEROS];
     if (!value?.enabled) return null;
-    return JSON.stringify(value);
+    return Buffer.from(JSON.stringify(value)).toString('base64');
   },
   [ConfigKey.NTLM]: (fields) => {
     const value = fields[ConfigKey.NTLM];
     if (!value?.enabled) return null;
-    return JSON.stringify(value);
+    return Buffer.from(JSON.stringify(value)).toString('base64');
   },
 };

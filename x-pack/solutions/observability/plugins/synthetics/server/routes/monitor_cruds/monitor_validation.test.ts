@@ -472,8 +472,8 @@ describe('validateMonitor', () => {
           enabled: true,
           auth_type: 'password',
           realm: 'CORP.LOCAL',
-          username: '',
-          password: '',
+          username: 'svc',
+          password: 'secret',
           keytab: '',
           config_path: '/etc/krb5.conf',
           krb5_conf: '',
@@ -494,8 +494,8 @@ describe('validateMonitor', () => {
           enabled: true,
           auth_type: 'password',
           realm: 'CORP.LOCAL',
-          username: '',
-          password: '',
+          username: 'svc',
+          password: 'secret',
           keytab: '',
           config_path: '',
           krb5_conf: '[libdefaults]\n  default_realm = CORP.LOCAL\n',
@@ -507,7 +507,7 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({ valid: true, reason: '', details: '' });
     });
 
-    it('invalidates Kerberos when both config_path and krb5_conf are set', () => {
+    it('invalidates Kerberos password auth without credentials', () => {
       const testMonitor = {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
@@ -518,6 +518,58 @@ describe('validateMonitor', () => {
           realm: 'CORP.LOCAL',
           username: '',
           password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos password authentication requires both username and password.',
+      });
+    });
+
+    it('invalidates Kerberos keytab auth without a keytab path', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos keytab authentication requires a keytab path.',
+      });
+    });
+
+    it('invalidates Kerberos when both config_path and krb5_conf are set', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
           keytab: '',
           config_path: '/etc/krb5.conf',
           krb5_conf: '[libdefaults]\n  default_realm = CORP.LOCAL\n',
@@ -543,8 +595,8 @@ describe('validateMonitor', () => {
           enabled: true,
           auth_type: 'password',
           realm: 'CORP.LOCAL',
-          username: '',
-          password: '',
+          username: 'svc',
+          password: 'secret',
           keytab: '',
           config_path: '',
           krb5_conf: '',
@@ -568,6 +620,23 @@ describe('validateMonitor', () => {
         [ConfigKey.PASSWORD]: '',
         [ConfigKey.NTLM]: {
           enabled: true,
+          username: 'ntlm-user',
+          password: 'ntlm-pass',
+          domain: 'EXAMPLE',
+          workstation: '',
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('invalidates NTLM auth without credentials', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM]: {
+          enabled: true,
           username: '',
           password: '',
           domain: '',
@@ -575,7 +644,11 @@ describe('validateMonitor', () => {
         },
       } as MonitorFields;
       const result = validateMonitor(testMonitor, 'default');
-      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'NTLM authentication requires both username and password.',
+      });
     });
 
     it('invalidates an HTTP monitor combining basic and Kerberos auth', () => {

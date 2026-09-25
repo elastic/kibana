@@ -21,4 +21,7 @@ export const PARAMS_KEYS_TO_SKIP = [
   ConfigKey.SOURCE_INLINE,
   ConfigKey.RESPONSE_JSON_CHECK,
   ConfigKey.CUSTOM_HEARTBEAT_ID,
+  // Resolved on the nested object before base64 encoding (see formatSyntheticsPolicy).
+  ConfigKey.KERBEROS,
+  ConfigKey.NTLM,
 ];

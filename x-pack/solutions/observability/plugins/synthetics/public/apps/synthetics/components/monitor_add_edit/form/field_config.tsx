@@ -867,6 +867,27 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           setValue(ConfigKey.USERNAME, '');
           setValue(ConfigKey.PASSWORD, '');
         }
+        // Disabled Kerberos/NTLM objects are still serialized into encrypted
+        // secrets; reset them to defaults when leaving those methods.
+        if (value !== HttpAuthMethod.KERBEROS) {
+          setValue('kerberos.enabled', false);
+          setValue('kerberos.username', '');
+          setValue('kerberos.password', '');
+          setValue('kerberos.keytab', '');
+          setValue('kerberos.config_path', '');
+          setValue('kerberos.krb5_conf', '');
+          setValue('kerberos.realm', '');
+          setValue('kerberos.service_name', '');
+          setValue('kerberos.auth_type', KerberosAuthType.PASSWORD);
+          setValue('kerberos.enable_krb5_fast', false);
+        }
+        if (value !== HttpAuthMethod.NTLM) {
+          setValue('ntlm.enabled', false);
+          setValue('ntlm.username', '');
+          setValue('ntlm.password', '');
+          setValue('ntlm.domain', '');
+          setValue('ntlm.workstation', '');
+        }
       },
       disabled: readOnly,
     }),
@@ -910,6 +931,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   ['kerberos.auth_type']: {
     fieldKey: 'kerberos.auth_type',
     component: Select,
+    controlled: true,
     label: i18n.translate('xpack.synthetics.monitorConfig.kerberosAuthType.label', {
       defaultMessage: 'Kerberos authentication type',
     }),
@@ -921,7 +943,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       return authType !== HttpAuthMethod.KERBEROS;
     },
     dependencies: ['authType'],
-    props: (): EuiSelectProps => ({
+    props: ({ field, setValue }): EuiSelectProps => ({
       'data-test-subj': 'syntheticsMonitorConfigKerberosAuthType',
       options: [
         {
@@ -937,6 +959,18 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           }),
         },
       ],
+      value: (field?.value as KerberosAuthType) ?? KerberosAuthType.PASSWORD,
+      onChange: (event) => {
+        const value = event.target.value as KerberosAuthType;
+        setValue('kerberos.auth_type', value);
+        // Hidden credential fields remain in the enabled Kerberos payload;
+        // clear the unused method so agents never receive stale secrets.
+        if (value === KerberosAuthType.KEYTAB) {
+          setValue('kerberos.password', '');
+        } else {
+          setValue('kerberos.keytab', '');
+        }
+      },
       disabled: readOnly,
     }),
   },

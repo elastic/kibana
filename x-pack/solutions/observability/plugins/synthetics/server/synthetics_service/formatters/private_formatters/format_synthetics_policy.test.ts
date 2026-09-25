@@ -493,7 +493,7 @@ describe('formatSyntheticsPolicy', () => {
         },
         [ConfigKey.NTLM]: ntlm,
       },
-      { ...gParams, ntlmPassword: 's3cret' },
+      { ...gParams, ntlmPassword: 's3c"ret\nline' },
       []
     );
 
@@ -502,14 +502,10 @@ describe('formatSyntheticsPolicy', () => {
       ?.streams.find((stream) => stream.data_stream.dataset === 'http')?.vars;
 
     expect(vars?.kerberos.value).toBeNull();
-    expect(vars?.ntlm.value).toBe(
-      Buffer.from(
-        JSON.stringify({
-          ...ntlm,
-          password: 's3cret',
-        })
-      ).toString('base64')
-    );
+    expect(JSON.parse(Buffer.from(vars?.ntlm.value as string, 'base64').toString('utf8'))).toEqual({
+      ...ntlm,
+      password: 's3c"ret\nline',
+    });
   });
 
   it('rejects enabled Kerberos when the installed package lacks the kerberos var', () => {
