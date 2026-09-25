@@ -7,15 +7,13 @@
 
 import {
   EuiButtonEmpty,
+  EuiComboBox,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSelectable,
-  EuiSkeletonText,
-  EuiSpacer,
+  EuiFormRow,
 } from '@elastic/eui';
-import type { EuiSelectableOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { ContextEngineConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -24,48 +22,38 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
 import { noop } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useKibana } from '../../hooks/use_kibana';
-import type { DataConnector } from '../../hooks/use_data_connectors';
-import { contextEngineQueryKeys } from '../../hooks/query_keys';
-import { ConnectorTypeIcon } from '../connector_type_icon';
-
 interface ConnectorsTabProps {
-  connectors: DataConnector[];
-  isLoading: boolean;
-  isError: boolean;
   selectedConnectorIds: string[];
   onToggle: (params: { id: string; name: string; checked: boolean }) => void;
 }
 
 interface ConnectorsTabContentProps {
-  connectors: DataConnector[];
-  isLoading: boolean;
   isError: boolean;
-  options: EuiSelectableOption[];
-  onConnectorSelectionChange: (
-    _options: EuiSelectableOption[],
-    _event: unknown,
-    changedOption: EuiSelectableOption
-  ) => void;
+  showEmptyPrompt: boolean;
+  connectorOptions: EuiComboBoxOptionOption<string>[];
+  isComboLoading: boolean;
+  onSearchChange: (search: string) => void;
+  onConnectorPicked: (nextSelectedOptions: EuiComboBoxOptionOption<string>[]) => void;
+  onComboFocus: () => void;
   createConnectorButton: React.ReactNode;
   canCreateConnector: boolean;
 }
 
 const ConnectorsTabContent = ({
-  connectors,
-  isLoading,
   isError,
-  options,
-  onConnectorSelectionChange,
+  showEmptyPrompt,
+  connectorOptions,
+  isComboLoading,
+  onSearchChange,
+  onConnectorPicked,
+  onComboFocus,
   createConnectorButton,
   canCreateConnector,
 }: ConnectorsTabContentProps) => {
-  if (isLoading) {
-    return <EuiSkeletonText lines={3} data-test-subj="contextConnectorsLoading" />;
-  }
-
   if (isError) {
     return (
       <EuiEmptyPrompt
@@ -92,7 +80,7 @@ const ConnectorsTabContent = ({
     );
   }
 
-  if (connectors.length === 0) {
+  if (showEmptyPrompt) {
     return (
       <EuiEmptyPrompt
         iconType="plugs"
@@ -128,28 +116,46 @@ const ConnectorsTabContent = ({
 
   return (
     <div data-test-subj="contextConnectorsTab">
-      <EuiSelectable
-        aria-label={i18n.translate('xpack.contextEngine.sourcePicker.connectors.listAriaLabel', {
-          defaultMessage: 'Select connectors to use as sources',
-        })}
-        searchable
-        options={options}
-        onChange={onConnectorSelectionChange}
-        height={240}
-        listProps={{ bordered: true, onFocusBadge: false }}
-        data-test-subj="contextConnectorsSelectable"
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.contextEngine.sourcePicker.connectors.fieldLabel"
+            defaultMessage="Connector"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.contextEngine.sourcePicker.connectors.fieldHelp"
+            defaultMessage="Start typing to search, then select a connector from the list."
+          />
+        }
       >
-        {(list, search) => (
-          <>
-            {search}
-            <EuiSpacer size="s" />
-            {list}
-          </>
-        )}
-      </EuiSelectable>
+        <EuiComboBox
+          fullWidth
+          singleSelection={{ asPlainText: true }}
+          sortMatchesBy="startsWith"
+          selectedOptions={[]}
+          isClearable={false}
+          aria-label={i18n.translate('xpack.contextEngine.sourcePicker.connectors.comboAriaLabel', {
+            defaultMessage: 'Select a connector',
+          })}
+          placeholder={i18n.translate(
+            'xpack.contextEngine.sourcePicker.connectors.comboPlaceholder',
+            {
+              defaultMessage: 'e.g. Google Drive or GitHub',
+            }
+          )}
+          options={connectorOptions}
+          onChange={onConnectorPicked}
+          onSearchChange={onSearchChange}
+          onFocus={onComboFocus}
+          isLoading={isComboLoading}
+          data-test-subj="contextConnectorComboBox"
+        />
+      </EuiFormRow>
       {createConnectorButton && (
         <>
-          <EuiHorizontalRule margin="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
             <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
           </EuiFlexGroup>
@@ -159,14 +165,10 @@ const ConnectorsTabContent = ({
   );
 };
 
-export const ConnectorsTab = ({
-  connectors,
-  isLoading,
-  isError,
-  selectedConnectorIds,
-  onToggle,
-}: ConnectorsTabProps) => {
+export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabProps) => {
   const [isCreateFlyoutOpen, { on: openCreateFlyout, off: closeCreateFlyout }] = useBoolean(false);
+  const [searchValue, setSearchValue] = useState('');
+  const [hasFocused, setHasFocused] = useState(false);
   const queryClient = useQueryClient();
   const {
     services: { application, triggersActionsUi },
@@ -174,42 +176,62 @@ export const ConnectorsTab = ({
 
   const canCreateConnector = application?.capabilities.actions?.save === true;
 
+  const shouldLoadConnectors = hasFocused || searchValue.trim().length > 0;
+
+  const { connectors, isLoading, isError } = useDataConnectors({
+    enabled: shouldLoadConnectors,
+  });
+
+  const handleSearchChange = useCallback((search: string) => {
+    setSearchValue(search);
+    setHasFocused(true);
+  }, []);
+
   const selectedIds = useMemo(() => new Set(selectedConnectorIds), [selectedConnectorIds]);
 
-  const options = useMemo<EuiSelectableOption[]>(
+  const connectorOptions = useMemo<EuiComboBoxOptionOption<string>[]>(
     () =>
-      connectors.map((connector) => ({
-        key: connector.id,
-        label: connector.name,
-        checked: selectedIds.has(connector.id) ? 'on' : undefined,
-        prepend: <ConnectorTypeIcon actionTypeId={connector.actionTypeId} />,
-        'data-test-subj': `contextConnectorOption-${connector.id}`,
-        ...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
-          action: CONTEXT_ENGINE_UI_EBT.action.sources.TOGGLE_CONNECTOR,
-          detail: connector.actionTypeId,
-        }),
-      })),
+      connectors
+        .filter((connector) => !selectedIds.has(connector.id))
+        .map((connector) => ({
+          label: connector.name,
+          value: connector.id,
+          'data-test-subj': `contextConnectorOption-${connector.id}`,
+          ...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+            action: CONTEXT_ENGINE_UI_EBT.action.sources.TOGGLE_CONNECTOR,
+            detail: connector.actionTypeId,
+          }),
+        })),
     [connectors, selectedIds]
   );
 
-  const handleConnectorSelectionChange = (
-    _options: EuiSelectableOption[],
-    _event: unknown,
-    changedOption: EuiSelectableOption
-  ) => {
-    if (!changedOption.key) {
-      return;
-    }
-    onToggle({
-      id: changedOption.key,
-      name: changedOption.label,
-      checked: changedOption.checked === 'on',
-    });
-  };
+  const showEmptyPrompt =
+    shouldLoadConnectors &&
+    !isLoading &&
+    !isError &&
+    searchValue.trim() === '' &&
+    connectorOptions.length === 0 &&
+    selectedConnectorIds.length === 0;
+
+  const handleConnectorPicked = useCallback(
+    (nextSelectedOptions: EuiComboBoxOptionOption<string>[]) => {
+      const pickedId = nextSelectedOptions[0]?.value;
+      if (!pickedId) {
+        return;
+      }
+      const connector = connectors.find((entry) => entry.id === pickedId);
+      if (!connector) {
+        return;
+      }
+      onToggle({ id: connector.id, name: connector.name, checked: true });
+      setSearchValue('');
+    },
+    [connectors, onToggle]
+  );
 
   const invalidateConnectorQueries = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.connectors.list() });
+    queryClient.invalidateQueries({ queryKey: ['context_engine', 'connectors', 'list'] });
   }, [queryClient]);
 
   const handleConnectorCreated = useCallback(
@@ -259,11 +281,13 @@ export const ConnectorsTab = ({
   return (
     <>
       <ConnectorsTabContent
-        connectors={connectors}
-        isLoading={isLoading}
         isError={isError}
-        options={options}
-        onConnectorSelectionChange={handleConnectorSelectionChange}
+        showEmptyPrompt={showEmptyPrompt}
+        connectorOptions={connectorOptions}
+        isComboLoading={isLoading && shouldLoadConnectors && connectorOptions.length === 0}
+        onSearchChange={handleSearchChange}
+        onConnectorPicked={handleConnectorPicked}
+        onComboFocus={() => setHasFocused(true)}
         createConnectorButton={createConnectorButton}
         canCreateConnector={canCreateConnector}
       />

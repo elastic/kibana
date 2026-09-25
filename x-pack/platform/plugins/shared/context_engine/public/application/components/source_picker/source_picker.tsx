@@ -42,14 +42,8 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     [selectedSources]
   );
 
-  const {
-    connectors,
-    connectorNameById,
-    connectorActionTypeById,
-    isLoading: isLoadingConnectors,
-    isError: isConnectorsError,
-  } = useDataConnectors({
-    enabled: selectedTab === 'connectors' || hasSelectedConnectorSources,
+  const { connectorNameById, connectorActionTypeById } = useDataConnectors({
+    enabled: hasSelectedConnectorSources,
   });
 
   const selectedEsqlCount = useMemo(
@@ -153,9 +147,6 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
       )}
       {selectedTab === 'connectors' && (
         <ConnectorsTab
-          connectors={connectors}
-          isLoading={isLoadingConnectors}
-          isError={isConnectorsError}
           selectedConnectorIds={selectedConnectorIds}
           onToggle={toggleConnectorSource}
         />

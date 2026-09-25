@@ -21,8 +21,12 @@ export interface DataConnector {
   actionTypeId: string;
 }
 
+/** Cap on combobox options after search filtering, to keep the list usable. */
+export const MAX_CONNECTOR_SEARCH_RESULTS = 50;
+
 export interface UseDataConnectorsOptions {
   enabled?: boolean;
+  search?: string;
 }
 
 export interface UseDataConnectorsResult {
@@ -37,9 +41,21 @@ export interface UseDataConnectorsResult {
 /**
  * Lists the connectors whose type declares the `contextEngine` feature id.
  */
+const matchesConnectorSearch = (connector: DataConnector, normalizedSearch: string): boolean => {
+  if (!normalizedSearch) {
+    return true;
+  }
+  return (
+    connector.name.toLowerCase().includes(normalizedSearch) ||
+    connector.id.toLowerCase().includes(normalizedSearch)
+  );
+};
+
 export const useDataConnectors = ({
   enabled = true,
+  search = '',
 }: UseDataConnectorsOptions = {}): UseDataConnectorsResult => {
+  const normalizedSearch = search.trim().toLowerCase();
   const {
     services: { http },
   } = useKibana();
@@ -83,8 +99,10 @@ export const useDataConnectors = ({
           id: connector.id,
           name: connector.name || connector.id,
           actionTypeId: connector.connector_type_id,
-        })),
-    [connectorsResponse, supportedTypeIds]
+        }))
+        .filter((connector) => matchesConnectorSearch(connector, normalizedSearch))
+        .slice(0, MAX_CONNECTOR_SEARCH_RESULTS),
+    [connectorsResponse, normalizedSearch, supportedTypeIds]
   );
 
   const connectorNameById = useMemo(
