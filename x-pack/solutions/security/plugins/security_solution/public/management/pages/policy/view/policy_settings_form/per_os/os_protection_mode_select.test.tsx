@@ -8,12 +8,16 @@
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import React from 'react';
+import { waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
 import type { OsProtectionModeSelectProps } from './os_protection_mode_select';
 import { OsProtectionModeSelect } from './os_protection_mode_select';
-import { selectOsControlOption } from './select_os_control_option.test.helpers';
+import {
+  openOsControlAndScrollPage,
+  selectOsControlOption,
+} from './select_os_control_option.test.helpers';
 
 jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 describe('OsProtectionModeSelect', () => {
@@ -88,6 +92,14 @@ describe('OsProtectionModeSelect', () => {
 
     expect(formProps.onModeChange).toHaveBeenCalledTimes(1);
     expect(formProps.onModeChange).toHaveBeenCalledWith(ProtectionModes.detect);
+  });
+
+  it('closes the options list when the page scrolls', async () => {
+    render();
+
+    await openOsControlAndScrollPage(renderResult, testSubj);
+
+    await waitForElementToBeRemoved(() => renderResult.queryByRole('listbox'));
   });
 
   it('renders disabled when disabled is true', () => {
