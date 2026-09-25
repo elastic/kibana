@@ -20,6 +20,7 @@ import {
   getEndpointListPath,
   getPoliciesPath,
   getPolicyBlocklistsPath,
+  getPolicyCustomYaraSignaturesPath,
   getPolicyDetailPath,
   getPolicyEndpointExceptionsPath,
   getPolicyEventFiltersPath,
@@ -328,6 +329,63 @@ describe('Policy Details', () => {
         await asyncActions;
         policyView.update();
         expect(policyView.find('button#trustedDevices')).toHaveLength(0);
+      });
+    });
+
+    describe('custom YARA signatures tab', () => {
+      const renderWithCustomYaraPrivilege = async (canReadCustomYaraSignatures: boolean) => {
+        setExperimentalFlag({ customYaraSignaturesEnabled: true });
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: {
+            loading: false,
+            canReadCustomYaraSignatures,
+          },
+        });
+        policyView = render();
+        await asyncActions;
+        policyView.update();
+      };
+
+      afterEach(() => {
+        setExperimentalFlag({ customYaraSignaturesEnabled: false });
+        useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
+      });
+
+      it('should not display the custom YARA signatures tab with no privileges', async () => {
+        await renderWithCustomYaraPrivilege(false);
+        expect(policyView.find('button#customYaraSignatures')).toHaveLength(0);
+      });
+
+      it('should display the custom YARA signatures tab with the correct privilege', async () => {
+        await renderWithCustomYaraPrivilege(true);
+        expect(policyView.find('button#customYaraSignatures')).toHaveLength(1);
+        expect(policyView.find('button#customYaraSignatures').text()).toBe(
+          'Custom YARA signatures'
+        );
+      });
+
+      it('should redirect to policy details when no custom YARA signatures required privileges', async () => {
+        history.push(getPolicyCustomYaraSignaturesPath('1'));
+        await renderWithCustomYaraPrivilege(false);
+        expect(history.location.pathname).toBe(policyDetailsPathUrl);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'You do not have the required Kibana permissions to use the given artifact.'
+        );
+      });
+
+      it('should not display custom YARA signatures without the feature flag enabled', async () => {
+        setExperimentalFlag({ customYaraSignaturesEnabled: false });
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: {
+            loading: false,
+            canReadCustomYaraSignatures: true,
+          },
+        });
+        policyView = render();
+        await asyncActions;
+        policyView.update();
+        expect(policyView.find('button#customYaraSignatures')).toHaveLength(0);
       });
     });
 
