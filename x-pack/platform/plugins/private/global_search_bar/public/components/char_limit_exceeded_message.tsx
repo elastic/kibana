@@ -6,33 +6,30 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { SearchPlaceholder } from './search_placeholder';
 
-interface CharLimitExceededMessageProps {
-  basePathUrl: string;
-}
-
-export const CharLimitExceededMessage = ({ basePathUrl }: CharLimitExceededMessageProps) => {
+export const CharLimitExceededMessage = () => {
   const charLimitMessage = (
     <>
-      <EuiText size="m">
-        <p data-test-subj="searchCharLimitExceededMessageHeading">
+      <EuiTitle size="s">
+        <h2 data-test-subj="searchCharLimitExceededMessageHeading">
           <FormattedMessage
             id="xpack.globalSearchBar.searchBar.searchCharLimitExceededHeading"
             defaultMessage="Search character limit exceeded"
           />
+        </h2>
+      </EuiTitle>
+        <p>
+          <FormattedMessage
+            id="xpack.globalSearchBar.searchBar.searchCharLimitExceeded"
+            defaultMessage="Try searching for applications, dashboards, visualizations, and more."
+          />
         </p>
       </EuiText>
-      <p>
-        <FormattedMessage
-          id="xpack.globalSearchBar.searchBar.searchCharLimitExceeded"
-          defaultMessage="Try searching for applications, dashboards, visualizations, and more."
-        />
-      </p>
     </>
   );
 
-  return <SearchPlaceholder basePath={basePathUrl} customPlaceholderMessage={charLimitMessage} />;
+  return <SearchPlaceholder customPlaceholderMessage={charLimitMessage} />;
 };
