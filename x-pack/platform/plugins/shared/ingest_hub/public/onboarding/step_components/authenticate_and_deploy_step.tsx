@@ -577,7 +577,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           >
             <FormattedMessage
               id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
-              defaultMessage="Service settings have changed since last deployment. Click Deploy to apply the updated configuration."
+              defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />
