@@ -68,7 +68,6 @@ const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
       title: i18n.translate('xpack.observability.nav.alerts', {
         defaultMessage: 'Alerts',
       }),
-      badgeType: 'new',
     });
   }
 
@@ -112,6 +111,7 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
   });
 };
 
+// Side nav renders at most two `new` badges per panel. Those slots are Action policies and Execution history.
 const getNotificationsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
   const notificationsChildren: PanelOpenerChildDefinition[] = [];
 

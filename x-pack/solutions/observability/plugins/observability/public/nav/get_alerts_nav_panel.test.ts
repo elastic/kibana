@@ -110,7 +110,6 @@ describe('getAlertsNavPanel', () => {
           expect.objectContaining({
             link: 'observabilityAlerting:alerts',
             title: 'Alerts',
-            badgeType: 'new',
           }),
         ],
       }),
