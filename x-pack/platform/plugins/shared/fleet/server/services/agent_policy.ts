@@ -901,9 +901,7 @@ class AgentPolicyService {
           logger.debug(`Retrieving package policies for agent policies [${agentPolicySO.id}]`);
 
           agentPolicy.package_policies =
-            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id, {
-              spaceIds: agentPolicySO.namespaces,
-            })) || [];
+            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
 
         return agentPolicy;
