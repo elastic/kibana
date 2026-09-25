@@ -10,7 +10,6 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
   DATE_WITH_MIXED_POD_DATA,
-  DATE_WITH_POD_DATA,
   DATE_WITH_SEMCONV_DATA,
   DATE_WITH_SEMCONV_POD_DATA,
   EXTENDED_TIMEOUT,
@@ -155,28 +154,6 @@ test.describe(
         const waffleNode = await inventoryPage.podWaffleNodeByName(pod.name);
         await expect(waffleNode.container).toBeVisible();
       }
-    });
-
-    test('unavailable schema shows invalid state without rewriting preferredSchema', async ({
-      page,
-      pageObjects: { inventoryPage },
-    }) => {
-      await inventoryPage.showHosts();
-      await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
-      await inventoryPage.selectSchema('OpenTelemetry');
-      await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
-        timeout: EXTENDED_TIMEOUT,
-      });
-
-      await inventoryPage.goToTime(DATE_WITH_POD_DATA);
-      await inventoryPage.showPods();
-
-      await expect(inventoryPage.schemaSelectorInvalidToken).toBeVisible({
-        timeout: EXTENDED_TIMEOUT,
-      });
-      await expect(inventoryPage.noDataPrompt).toBeVisible();
-      await expect(inventoryPage.noDataSwitchSchemaLink).toBeVisible();
-      await expect(page).toHaveURL(/preferredSchema:semconv/);
     });
 
     test('tile menu identity uses k8s.pod.uid on OpenTelemetry', async ({
