@@ -45,6 +45,13 @@ triggers:
               type: string
               maxLength: 2048
               description: Why the exception exists, for whoever reads it later.
+            expire_time:
+              type: string
+              maxLength: 256
+              description: >-
+                ISO 8601 datetime after which the exception no longer applies. Optional,
+                but AlertZero-created exceptions should always set one so a wrong
+                diagnosis self-heals instead of permanently muting the rule.
             entries:
               type: array
               minItems: 1
@@ -115,6 +122,7 @@ steps:
       rule_id: "{{ inputs.actionInput.rule_id }}"
       name: "{{ inputs.actionInput.name }}"
       description: "{{ inputs.actionInput.description }}"
+      expire_time: "{{ inputs.actionInput.expire_time }}"
       entries: "${{ inputs.actionInput.entries }}"
 
   # `workflow.execute` declares its output as unknown, so the parent falls back
