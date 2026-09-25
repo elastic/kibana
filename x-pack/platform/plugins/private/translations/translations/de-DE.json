@@ -23216,6 +23216,8 @@
     "xpack.fleet.noAccess.accessDeniedTitle": "Zugriff verweigert",
     "xpack.fleet.noTagsValue": "Keine Tags",
     "xpack.fleet.oldAppTitle": "Ingest Manager",
+    "xpack.fleet.onboardingOverride.awsDescription": "Sammeln Sie Protokolle und Kennzahlen von Amazon Web Services (AWS).",
+    "xpack.fleet.onboardingOverride.awsTitle": "Amazon Web Services",
     "xpack.fleet.otelUi.collectorConfigView.allPipelines": "Alle Pipelines",
     "xpack.fleet.otelUi.collectorConfigView.allSignalPipelines": "Alle {signal} ({count} Pipelines)",
     "xpack.fleet.otelUi.collectorConfigView.noPipelinesBody": "Diese Collector-Konfiguration enthält keine Pipelines zum Visualisieren.",
