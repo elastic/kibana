@@ -105,7 +105,6 @@ import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
 import datemath from '@kbn/datemath';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { useTimefilter } from '../../../hooks/use_timefilter';
@@ -732,37 +731,19 @@ const AllEntitiesViewInner = ({
   );
   const handleTimeRefresh = useCallback(() => refresh(), [refresh]);
 
-  // Override the "Commonly used" quick-select presets so only ≤ 3-day
-  // options appear. Must run synchronously during render (before
-  // QueryBarTopRow captures the setting in a useState initializer).
-  const originalQuickRangesRef = useRef<unknown>(undefined);
-  const quickRangesAppliedRef = useRef(false);
-  if (!quickRangesAppliedRef.current) {
-    try {
-      originalQuickRangesRef.current = uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
-    } catch {
-      originalQuickRangesRef.current = undefined;
-    }
-    uiSettings.set(UI_SETTINGS.TIMEPICKER_QUICK_RANGES, [
-      { from: 'now-15m', to: 'now', display: 'Last 15 minutes' },
-      { from: 'now-1h', to: 'now', display: 'Last 1 hour' },
-      { from: 'now-4h', to: 'now', display: 'Last 4 hours' },
-      { from: 'now-12h', to: 'now', display: 'Last 12 hours' },
-      { from: 'now-24h', to: 'now', display: 'Last 24 hours' },
-      { from: 'now-2d', to: 'now', display: 'Last 2 days' },
-      { from: 'now-3d', to: 'now', display: 'Last 3 days' },
-    ]);
-    quickRangesAppliedRef.current = true;
-  }
-  // Restore the original setting on unmount.
+  // One-time repair: a previous version mutated the global
+  // timepicker:quickRanges uiSetting, which can corrupt other apps
+  // (Dashboard, Discover). If the persisted value is not an array,
+  // remove the override so the platform default is restored.
   useEffect(() => {
-    return () => {
-      if (Array.isArray(originalQuickRangesRef.current)) {
-        uiSettings.set(UI_SETTINGS.TIMEPICKER_QUICK_RANGES, originalQuickRangesRef.current);
-      } else {
-        uiSettings.remove(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
+    try {
+      const stored = uiSettings.get('timepicker:quickRanges');
+      if (stored != null && !Array.isArray(stored)) {
+        uiSettings.remove('timepicker:quickRanges');
       }
-    };
+    } catch {
+      // setting doesn't exist or can't be read — nothing to repair
+    }
   }, [uiSettings]);
 
   // ElasticOn Inventory unified search bar: an ad-hoc data view (fields only,
