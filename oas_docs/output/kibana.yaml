@@ -22768,7 +22768,9 @@ paths:
 
         The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.
 
-        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index
       parameters: []
       responses:
@@ -23062,7 +23064,11 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists. Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: post-context-engine-ai-index
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23522,7 +23528,9 @@ paths:
 
         The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.
 
-        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: post-context-engine-ai-index-query
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23757,7 +23765,9 @@ paths:
 
         The API does not delete the backing data stream or index when another AI Index uses the same destination.
 
-        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): workflowsManagement:delete.
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): workflowsManagement:delete.
       operationId: delete-context-engine-ai-index-aiindexid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23911,7 +23921,11 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Fetches an AI Index by ID from the current space, including the ES|QL query derived from each trace. Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Fetches an AI Index by ID from the current space, including the ES|QL query derived from each trace.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index-aiindexid
       parameters:
         - description: The unique identifier of the AI Index.
@@ -24186,7 +24200,11 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409. Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: put-context-engine-ai-index-aiindexid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -24658,7 +24676,9 @@ paths:
 
         The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.
 
-        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`). For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index-aiindexid-describe
       parameters:
         - description: The unique identifier of the AI Index.
