@@ -23,9 +23,11 @@ test.describe('Search example', { tag: '@local-stateful-classic' }, () => {
 
   test('should have an other bucket', async ({ pageObjects }) => {
     const { searchExamples } = pageObjects;
+
     await test.step('run search with other bucket', async () => {
       await searchExamples.searchSourceWithOther.click();
     });
+
     await test.step('assert other bucket in response', async () => {
       await assertOtherBucketResponse(searchExamples, { expectOtherBucket: true });
     });
@@ -33,9 +35,11 @@ test.describe('Search example', { tag: '@local-stateful-classic' }, () => {
 
   test('should not have an other bucket', async ({ pageObjects }) => {
     const { searchExamples } = pageObjects;
+
     await test.step('run search without other bucket', async () => {
       await searchExamples.searchSourceWithoutOther.click();
     });
+
     await test.step('assert no other bucket in response', async () => {
       await assertOtherBucketResponse(searchExamples, { expectOtherBucket: false });
     });

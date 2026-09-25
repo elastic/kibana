@@ -25,6 +25,7 @@ const SEED_BATCH_SIZE = 10;
 
 test.describe('API keys grid pagination', { tag: tags.stateful.classic }, () => {
   let currentUsername: string | undefined;
+
   test.beforeEach(async ({ browserAuth, page, kbnUrl, esClient }) => {
     currentUsername = undefined;
     await browserAuth.loginWithCustomRole(testData.OWN_API_KEYS_ROLE);

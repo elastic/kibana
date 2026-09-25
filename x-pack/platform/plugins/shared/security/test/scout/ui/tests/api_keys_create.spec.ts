@@ -12,6 +12,7 @@ import { getCurrentUsername, invalidateApiKeysOwnedBy, test, testData } from '..
 
 test.describe('API keys creation', { tag: tags.stateful.classic }, () => {
   let currentUsername: string | undefined;
+
   test.beforeEach(async ({ browserAuth, page, kbnUrl, esClient, pageObjects }) => {
     currentUsername = undefined;
     await browserAuth.loginWithCustomRole(testData.OWN_API_KEYS_ROLE);
