@@ -67,7 +67,7 @@ export async function cleanupAgentBasedPolicies(
   return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
 }
 
-async function updateAgentBasedPolicy(
+export async function updateAgentBasedPolicy(
   policyId: string,
   survivingInstanceIds: string[],
   opts: CleanupAgentBasedOpts

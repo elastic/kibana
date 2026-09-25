@@ -252,6 +252,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     onboardingDeploymentId: detectAndReviewStep.onboardingDeploymentId,
     policyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
     pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds,
+    isDirty: detectAndReviewStep.isDirty ?? false,
   });
 
   return {

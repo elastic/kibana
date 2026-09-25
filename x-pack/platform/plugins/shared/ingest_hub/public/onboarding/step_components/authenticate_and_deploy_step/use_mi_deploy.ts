@@ -18,7 +18,10 @@ import { buildInstanceStatuses, collectDeployResults, deployGroup } from './depl
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
-import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
+import {
+  cleanupManagedIntegrationsPolicies,
+  updateManagedIntegrationsPolicy,
+} from './policy_cleanup_managed_integrations';
 import type { PolicyCleanupOps } from './policy_cleanup';
 import {
   buildLiveStalePolicyIds,
@@ -52,6 +55,7 @@ export interface UseMiDeployParams {
   onboardingDeploymentId: string | undefined;
   policyIdsByInstance: Record<string, string>;
   pendingCleanupPolicyIds: Record<string, string> | undefined;
+  isDirty: boolean;
 }
 
 // ── Module-level planning helpers ────────────────────────────────────────────
@@ -217,6 +221,7 @@ export function useMiDeploy({
   onboardingDeploymentId,
   policyIdsByInstance,
   pendingCleanupPolicyIds,
+  isDirty,
 }: UseMiDeployParams): (instanceIds?: string[]) => Promise<{ cleanupFailed: boolean }> {
   return useCallback(
     async (instanceIds?: string[]) => {
@@ -246,11 +251,53 @@ export function useMiDeploy({
         if (
           plan.targets.length === 0 &&
           Object.keys(plan.newNonAgentlessStatuses).length === 0 &&
-          !plan.hasPendingCleanup
+          !plan.hasPendingCleanup &&
+          !isDirty
         ) {
           onContinue();
           // Everything is already deployed: the only work left is a template-details write that
           // failed last time.
+          await persistPendingIacTemplate();
+          return { cleanupFailed: false };
+        }
+
+        // Dirty redeploy: settings changed since the last deploy. Update all deployed policies
+        // with the current session serviceVars so Fleet reflects the new configuration.
+        if (isDirty && plan.targets.length === 0 && !plan.hasPendingCleanup) {
+          setIsDeploying(true);
+          updateDetectAndReviewStep({ isDeploying: true });
+          onContinue();
+
+          const byPolicy = new Map<string, string[]>();
+          for (const [instanceId, policyId] of Object.entries(policyIdsByInstance)) {
+            if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
+            byPolicy.get(policyId)!.push(instanceId);
+          }
+          await Promise.allSettled(
+            [...byPolicy.entries()].map(([policyId, instanceIds]) =>
+              updateManagedIntegrationsPolicy(policyId, instanceIds, {
+                instances: serviceSettings?.instances ?? [],
+                storedServiceVars: serviceSettings?.serviceVars ?? {},
+                globalRegion: serviceSettings?.globalRegion ?? '',
+                namespace,
+                authenticateAndDeployStep,
+                servicesMap: servicesMap ?? new Map(),
+              })
+            )
+          );
+
+          if (onboardingDeploymentId) {
+            await updateDeployment(onboardingDeploymentId, {
+              services: selectedServiceIds,
+              serviceVars: toSOServiceVars(
+                serviceSettings?.serviceVars ?? {},
+                servicesMap ?? new Map()
+              ) as Record<string, Record<string, unknown>>,
+            });
+          }
+
+          setIsDeploying(false);
+          updateDetectAndReviewStep({ isDeploying: false, isDirty: false });
           await persistPendingIacTemplate();
           return { cleanupFailed: false };
         }
@@ -485,6 +532,7 @@ export function useMiDeploy({
       onboardingDeploymentId,
       policyIdsByInstance,
       pendingCleanupPolicyIds,
+      isDirty,
     ]
   );
 }

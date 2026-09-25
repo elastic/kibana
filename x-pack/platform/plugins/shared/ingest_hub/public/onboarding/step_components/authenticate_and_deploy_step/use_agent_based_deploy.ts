@@ -24,7 +24,10 @@ import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
 import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
 import { useOnboardingSO } from './use_onboarding_so';
-import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
+import {
+  cleanupAgentBasedPolicies,
+  updateAgentBasedPolicy,
+} from './policy_cleanup_agent_based';
 import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
@@ -60,7 +63,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     agentBasedDeployment,
     setAgentBasedDeployment,
   } = useOnboardingFlow();
-
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
 
   const { selectedServiceIds } = servicesStep;
@@ -149,7 +151,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
       const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
 
-      if (targetsToDeploy.length === 0 && !hasPendingCleanup) {
+      if (targetsToDeploy.length === 0 && !hasPendingCleanup && !(detectAndReviewStep.isDirty ?? false)) {
         // No deploy targets and no cleanup to run, but the service selection may still have
         // changed (e.g., a previously-failed service with no package policy was deselected).
         // Reconcile the SO services list so resume reflects the current selection.
@@ -228,6 +230,49 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             succeededIds
           );
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
+        }
+
+        // Dirty redeploy: credentials or service settings changed. Update all deployed package
+        // policies with the current session vars so they reflect the new configuration.
+        if (targetsToDeploy.length === 0 && (detectAndReviewStep.isDirty ?? false)) {
+          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+
+          const byPolicy = new Map<string, string[]>();
+          for (const [instanceId, policyId] of Object.entries(
+            detectAndReviewStep.policyIdsByInstance ?? {}
+          )) {
+            if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
+            byPolicy.get(policyId)!.push(instanceId);
+          }
+          await Promise.allSettled(
+            [...byPolicy.entries()].map(([policyId, instanceIds]) =>
+              updateAgentBasedPolicy(policyId, instanceIds, {
+                instances: serviceSettings?.instances ?? [],
+                storedServiceVars,
+                globalRegion,
+                namespace,
+                authenticateAndDeployStep,
+                servicesMap: servicesMap ?? new Map(),
+                selectedAgentPolicyIds: targetPolicyIds,
+                agentCredentials: agentCredentialsRef.current,
+              })
+            )
+          );
+
+          const { onboardingDeploymentId } = detectAndReviewStep;
+          if (onboardingDeploymentId) {
+            await updateDeployment(onboardingDeploymentId, {
+              services: selectedServiceIds,
+              serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+                string,
+                Record<string, unknown>
+              >,
+            });
+          }
+
+          setIsDeploying(false);
+          updateDetectAndReviewStep({ isDeploying: false, isDirty: false });
+          return { failed: false };
         }
 
         if (targetsToDeploy.length === 0) {
@@ -489,6 +534,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       targets,
       namespace,
       serviceSettings,
+      selectedServiceIds,
       authenticateAndDeployStep,
       agentBasedDeployment,
       setAgentBasedDeployment,

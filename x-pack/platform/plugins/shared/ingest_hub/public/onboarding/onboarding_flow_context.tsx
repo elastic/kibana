@@ -64,6 +64,11 @@ export interface DetectAndReviewStepState {
    * the instance is already gone from policyIdsByInstance.
    */
   pendingCleanupPolicyIds?: Record<string, string>;
+  /**
+   * True when service settings or auth credentials differ from the last-deployed SO state.
+   * Set at Deploy step mount after a drift check; cleared after a successful redeploy.
+   */
+  isDirty?: boolean;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage.
@@ -109,6 +114,7 @@ interface PersistedDetectAndReviewStep {
   onboardingDeploymentId?: string;
   ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
   pendingCleanupPolicyIds?: Record<string, string>;
+  isDirty?: boolean;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];
@@ -334,6 +340,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
             rest.pendingCleanupPolicyIds !== undefined
               ? rest.pendingCleanupPolicyIds
               : prev?.pendingCleanupPolicyIds,
+          isDirty: rest.isDirty !== undefined ? rest.isDirty : prev?.isDirty,
         });
       }
     },
@@ -473,6 +480,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         policyIdsByInstance: {},
         failedInstances: [],
         deployErrors: {},
+        isDirty: false,
       });
     },
     [setPersistedAuthenticateAndDeployStep, setDetectAndReviewStep]
