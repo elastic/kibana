@@ -234,7 +234,9 @@ export const huntForThreat = async (
     ],
     query: {
       bool: {
-        filter: [{ range: { '@timestamp': { gte: from, lte: to } } }],
+        // `to` is exclusive per `IndexScopeWindow`, so an event on the boundary
+        // belongs to the next window only and is never confirmed by both.
+        filter: [{ range: { '@timestamp': { gte: from, lt: to } } }],
         should,
         minimum_should_match: 1,
       },
@@ -274,7 +276,7 @@ export const huntForThreat = async (
   });
   // Digests from full `_source` before wire hits drop source fields — Tier 2
   // grounding still needs rule/host/user/ip context.
-  const sample_event_summaries = docs.map((doc) =>
+  const sampleEventSummaries = docs.map((doc) =>
     summarizeHit({ id: doc.id, index: doc.index, source: doc.source })
   );
   const hits = attributeHits(docs, iocs, techniques);
@@ -321,6 +323,6 @@ export const huntForThreat = async (
     hits,
     affected_assets: { hosts, users, services },
     per_index: perIndex,
-    ...(sample_event_summaries.length > 0 ? { sample_event_summaries } : {}),
+    ...(sampleEventSummaries.length > 0 ? { sample_event_summaries: sampleEventSummaries } : {}),
   };
 };

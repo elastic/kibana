@@ -72,7 +72,11 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
             size,
           });
 
-          const body: HuntForThreatResponse = { scope, result };
+          // Drop internal grounding digests, as the coordinator does: they are built
+          // from `_source` for Tier 2 and are not part of the wire schema.
+          const { sample_event_summaries: _summaries, ...wireResult } = result;
+
+          const body: HuntForThreatResponse = { scope, result: wireResult };
           return response.ok({ body });
         } catch (err) {
           logger.error(`Failed to run hunt_for_threat: ${(err as Error).message}`);

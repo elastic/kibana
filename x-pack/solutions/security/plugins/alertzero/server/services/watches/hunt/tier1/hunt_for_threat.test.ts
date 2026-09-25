@@ -47,6 +47,31 @@ describe('huntForThreat', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['the scope window', undefined, scope.window],
+    [
+      'an explicit time_range',
+      { from: '2026-09-01T00:00:00.000Z', to: '2026-09-02T00:00:00.000Z' },
+      { from: '2026-09-01T00:00:00.000Z', to: '2026-09-02T00:00:00.000Z' },
+    ],
+  ])(
+    'bounds the search by %s with an exclusive upper bound, so a boundary event is not confirmed twice',
+    async (_label, time_range, expected) => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+        time_range,
+      });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      expect(searchBody.query.bool.filter).toEqual([
+        { range: { '@timestamp': { gte: expected.from, lt: expected.to } } },
+      ]);
+    }
+  );
+
   it('returns no_environment_hits when the search finds nothing', async () => {
     const esClient = buildEsClient(emptySearchResponse);
 
