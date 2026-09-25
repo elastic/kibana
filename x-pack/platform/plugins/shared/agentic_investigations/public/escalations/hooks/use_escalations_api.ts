@@ -139,7 +139,12 @@ export const useLinkedInvestigations = ({
 }: {
   escalationId: string;
   linkedInvestigationIds: readonly string[];
-}): { data: LinkedInvestigationSummary[] | undefined; isLoading: boolean; isError: boolean } => {
+}): {
+  data: LinkedInvestigationSummary[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+} => {
   const { services } = useKibana<CoreStart>();
   const linkedIds = linkedInvestigationIds.join(',');
 
@@ -160,7 +165,12 @@ export const useLinkedInvestigations = ({
     retry: retryOnTransientError,
   });
 
-  return { data: result.data?.results, isLoading: result.isLoading, isError: result.isError };
+  return {
+    data: result.data?.results,
+    isLoading: result.isLoading,
+    isError: result.isError,
+    refetch: result.refetch,
+  };
 };
 
 /** Opens or closes an escalation (and its open linked investigations when closing). */
