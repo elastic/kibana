@@ -14,6 +14,7 @@ import type { NodeInfo } from '@kbn/core-node-server';
 import type { IContextProvider, IRouter } from '@kbn/core-http-server';
 import type { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import { scopeConsumerName } from '@kbn/core-pubsub-server';
 import type {
   CoreRequestHandlerContext,
   RequestHandlerContext,
@@ -333,6 +334,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     pubsub: {
       registerTopic: (topic) => deps.pubsub.registerTopic(topic),
+      subscribe: (topic, consumer, namespaces, handler) =>
+        deps.pubsub.subscribe(topic, scopeConsumerName(plugin.name, consumer), namespaces, handler),
     },
     userStorage: {
       register: deps.userStorage.register,
@@ -441,6 +444,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
+    },
+    pubsub: {
+      publish: (topic, input) => deps.pubsub.publish(topic, input),
     },
     userStorage: {
       asScoped: deps.userStorage.asScoped,
