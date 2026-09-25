@@ -19,14 +19,14 @@ rm -rf "${KIBANA_LOAD_TESTING_DIR}"
 rm -rf "${GCS_ARTIFACTS_DIR}"
 
 download_artifacts() {
-  echo Activating service-account for gsutil to access gs://kibana-performance
+  echo Activating service-account for gcloud storage to access gs://kibana-performance
   .buildkite/scripts/common/activate_service_account.sh gs://kibana-performance
 
   mkdir -p "${GCS_ARTIFACTS_DIR}"
 
-  gsutil cp "$GCS_BUCKET/latest" "${GCS_ARTIFACTS_DIR}/"
+  gcloud storage cp "$GCS_BUCKET/latest" "${GCS_ARTIFACTS_DIR}/"
   HASH=`cat ${GCS_ARTIFACTS_DIR}/latest`
-  gsutil cp -r "$GCS_BUCKET/$HASH" "${GCS_ARTIFACTS_DIR}/"
+  gcloud storage cp --recursive "$GCS_BUCKET/$HASH" "${GCS_ARTIFACTS_DIR}/"
 
   export LATEST_RUN_ARTIFACTS_DIR="${GCS_ARTIFACTS_DIR}/${HASH}"
 
