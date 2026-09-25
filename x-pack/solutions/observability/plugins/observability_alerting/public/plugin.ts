@@ -8,9 +8,11 @@
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
 import {
+  OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
+import {
   OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,

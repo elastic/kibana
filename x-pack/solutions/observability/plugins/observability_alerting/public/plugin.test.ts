@@ -7,10 +7,12 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { ObservabilityAlertingPlugin } from './plugin';
 import {
-  OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_INBOX_PATH,
 } from './constants';
