@@ -25,7 +25,8 @@ const getGcsSecureFile = (): string | undefined => {
     tmpdir(),
     `gcs-credentials-${Date.now()}-${process.pid}.json`
   );
-  writeFileSync(gcsCredentialsFilePath, gcsCredentials);
+  // Only this process reads the file (keystore add-file or file_secrets), so keep it owner-only.
+  writeFileSync(gcsCredentialsFilePath, gcsCredentials, { mode: 0o600 });
   process.on('exit', () => {
     try {
       unlinkSync(gcsCredentialsFilePath);
