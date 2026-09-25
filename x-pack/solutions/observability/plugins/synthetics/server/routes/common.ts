@@ -45,23 +45,32 @@ const stringOrArray = z
   .optional()
   .describe('A string or an array of strings.');
 
+const stringOrArrayFilter = (description: string) =>
+  stringOrArray.describe(`${description} Accepts a string or an array of strings.`);
+
 const CommonQuerySchema = {
-  query: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
-  filter: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
-  tags: stringOrArray,
-  monitorTypes: stringOrArray,
-  locations: stringOrArray,
-  projects: stringOrArray,
-  schedules: stringOrArray,
+  query: z.string().max(MAX_ROUTE_STRING_LENGTH).optional().describe('A free-text query string.'),
+  filter: z
+    .string()
+    .max(MAX_ROUTE_STRING_LENGTH)
+    .optional()
+    .describe('Additional KQL filtering criteria.'),
+  tags: stringOrArrayFilter('Tags to filter monitors.'),
+  monitorTypes: stringOrArrayFilter('The monitor types to filter by, such as `http`.'),
+  locations: stringOrArrayFilter('The location IDs to filter by.'),
+  projects: stringOrArrayFilter('The projects to filter by.'),
+  schedules: stringOrArrayFilter('The schedules to filter by.'),
   // Remote cluster aliases. Only honoured by the overview status route, where
   // it scopes pings to documents whose `_index` is prefixed by one of the
   // selected aliases (CCS pattern `<alias>:<index>`). Saved-object-backed
   // routes ignore it because remote monitors have no local saved object.
   remoteNames: stringOrArray,
-  status: stringOrArray,
-  monitorQueryIds: stringOrArray,
-  configIds: stringOrArray,
-  showFromAllSpaces: queryBoolean.optional(),
+  status: stringOrArrayFilter('The monitor statuses to filter by.'),
+  monitorQueryIds: stringOrArrayFilter('The monitor query IDs to filter by.'),
+  configIds: stringOrArrayFilter('The monitor config IDs to filter by.'),
+  showFromAllSpaces: queryBoolean
+    .optional()
+    .describe('If `true`, return monitors from all spaces the user can access.'),
   useLogicalAndFor: z
     .union([
       z.string().max(MAX_FILTER_ITEM_LENGTH),
@@ -75,22 +84,32 @@ const CommonQuerySchema = {
   // Bounded length: these only ever carry a short datemath expression
   // (`now-15m`) or an ISO-8601 timestamp, so cap the input to avoid unbounded
   // strings reaching `datemath.parse` (CodeQL: unbounded string DoS).
-  dateRangeStart: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
-  dateRangeEnd: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
+  dateRangeStart: z
+    .string()
+    .max(MAX_DATE_RANGE_LENGTH)
+    .optional()
+    .describe('The start of the status window, as datemath (`now-15m`) or an ISO-8601 timestamp.'),
+  dateRangeEnd: z
+    .string()
+    .max(MAX_DATE_RANGE_LENGTH)
+    .optional()
+    .describe('The end of the status window, as datemath (`now`) or an ISO-8601 timestamp.'),
 };
 
 export const QuerySchema = z.strictObject({
   ...CommonQuerySchema,
-  page: queryNumber.optional(),
-  perPage: queryNumber.optional(),
-  sortField: MonitorSortFieldSchema,
-  sortOrder: z.enum(['desc', 'asc']).optional(),
+  page: queryNumber.optional().describe('The page number for paginated results.'),
+  perPage: queryNumber.optional().describe('The number of items to return per page.'),
+  sortField: MonitorSortFieldSchema.describe('The field to sort the results by.'),
+  sortOrder: z.enum(['desc', 'asc']).optional().describe('The sort order.'),
   searchAfter: jsonArrayFromString(
     z.string().max(MAX_FILTER_ITEM_LENGTH),
     MAX_SEARCH_AFTER_SIZE,
     MAX_FILTER_ITEM_LENGTH
-  ).optional(),
-  internal: queryBoolean.optional().default(false),
+  )
+    .optional()
+    .describe('A JSON array of sort values from the previous page, for cursor-based paging.'),
+  internal: queryBoolean.optional().default(false).describe('For internal use only.'),
 });
 
 export type MonitorsQuery = z.infer<typeof QuerySchema>;

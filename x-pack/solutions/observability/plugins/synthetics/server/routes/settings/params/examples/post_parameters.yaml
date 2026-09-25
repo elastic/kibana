@@ -1,0 +1,55 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postParametersRequestExample1:
+          summary: Single parameter
+          description: Add a single parameter.
+          value:
+            key: your-key-name
+            value: your-parameter-value
+            description: Param to use in browser monitor
+            tags: [authentication, security]
+            share_across_spaces: true
+        postParametersRequestExample2:
+          summary: Multiple parameters
+          description: Add multiple parameters.
+          value:
+            - key: param1
+              value: value1
+            - key: param2
+              value: value2
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          oneOf:
+            - type: array
+              items:
+                $ref: '../../../oas_schemas.yaml#/postParameterResponse'
+            - $ref: '../../../oas_schemas.yaml#/postParameterResponse'
+        examples:
+          postParametersResponseExample1:
+            summary: Single parameter
+            description: A successful response for a single added parameter.
+            value:
+              id: unique-parameter-id
+              key: your-key-name
+              value: your-param-value
+              description: Param to use in browser monitor
+              tags: [authentication, security]
+              share_across_spaces: true
+          postParametersResponseExample2:
+            summary: Multiple parameters
+            description: A successful response for multiple added parameters.
+            value:
+              - id: param1-id
+                key: param1
+                value: value1
+              - id: param2-id
+                key: param2
+                value: value2
+  409:
+    description: A parameter with the same key already exists in the space.

@@ -1,0 +1,69 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putSyntheticMonitorsRequestExample1:
+          summary: HTTP monitor
+          description: Update an HTTP monitor that checks a website's availability.
+          value:
+            type: http
+            name: Website Availability
+            url: https://example.com
+            tags: [website, availability]
+            locations: [united_kingdom]
+        putSyntheticMonitorsRequestExample2:
+          summary: TCP monitor
+          description: Update a TCP monitor that monitors a server's availability.
+          value:
+            type: tcp
+            name: Server Availability
+            host: example.com
+            private_locations: [my_private_location]
+        putSyntheticMonitorsRequestExample3:
+          summary: ICMP monitor
+          description: Update an ICMP monitor that performs ping checks.
+          value:
+            type: icmp
+            name: Ping Test
+            host: example.com
+            locations: [united_kingdom]
+        putSyntheticMonitorsRequestExample4:
+          summary: Browser monitor
+          description: Update a browser monitor that checks a website.
+          value:
+            type: browser
+            name: Example journey
+            inline_script: "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))"
+            locations: [united_kingdom]
+        putSyntheticMonitorsRequestExample5:
+          summary: Partial update
+          description: Disable a monitor without changing any other field.
+          value:
+            enabled: false
+responses:
+  200:
+    description: >
+      A successful response.
+      The response may include a `warnings` array when the monitor configuration has non-critical issues.
+    content:
+      application/json:
+        schema:
+          $ref: '../../oas_schemas.yaml#/monitorResponse'
+        examples:
+          putSyntheticMonitorResponseWithWarning:
+            summary: Response with warning
+            description: A response when a browser monitor specifies a timeout but has no private locations.
+            value:
+              type: browser
+              name: Example journey
+              enabled: true
+              warnings:
+                - id: monitor-id
+                  message: 'For browser monitors, timeout is only supported on private locations. Browser monitor "Example journey" specifies a timeout and is running on public locations: "public-1, public-2". The timeout will have no effect on these locations.'
+                  publicLocationIds: [public-1, public-2]
+  400:
+    description: >
+      Bad request.
+      For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
+  404:
+    description: The monitor does not exist.

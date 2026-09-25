@@ -1,0 +1,32 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putPrivateLocationRequestExample1:
+          description: Update a private location's label.
+          value:
+            label: Updated Private Location Name
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../oas_schemas.yaml#/getPrivateLocation'
+        examples:
+          putPrivateLocationResponseExample1:
+            value:
+              label: Updated Private Location Name
+              id: test-private-location-id
+              agentPolicyId: test-private-location-id
+              isServiceManaged: false
+              isInvalid: false
+              tags: [private, testing, updated]
+              geo:
+                lat: 37.7749
+                lon: -122.4194
+              spaces: ['*']
+  400:
+    description: If the `label` is shorter than 1 character, the API returns a 400 Bad Request response with a corresponding error message.
+  404:
+    description: If the private location with the specified ID does not exist, the API returns a 404 Not Found response.
