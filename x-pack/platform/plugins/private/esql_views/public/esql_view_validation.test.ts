@@ -13,20 +13,25 @@ import {
 
 describe('ES|QL view validation', () => {
   describe('validateEsqlViewName', () => {
-    it('accepts lowercase letters, numbers, hyphens, and underscores', () => {
-      expect(validateEsqlViewName('sales-view_2026')).toBeUndefined();
+    it('accepts names allowed by the Elasticsearch view API', () => {
+      expect(validateEsqlViewName('sales.view-2026_data')).toBeUndefined();
+      expect(validateEsqlViewName('sales@view=2026')).toBeUndefined();
     });
 
     it('requires a name', () => {
       expect(validateEsqlViewName('')).toBe('required');
     });
 
-    it('rejects unsupported characters while typing', () => {
-      expect(validateEsqlViewName('Sales view')).toBe('invalidFormat');
-    });
+    it.each(['Sales-view', 'sales view', 'sales#view', '-sales-view', '.', '..'])(
+      'rejects the invalid name %s',
+      (name) => {
+        expect(validateEsqlViewName(name)).toBe('invalidFormat');
+      }
+    );
 
-    it('bounds the name length', () => {
+    it('bounds the name length in UTF-8 bytes', () => {
       expect(validateEsqlViewName('a'.repeat(MAX_ESQL_VIEW_NAME_LENGTH + 1))).toBe('tooLong');
+      expect(validateEsqlViewName('é'.repeat(128))).toBe('tooLong');
     });
   });
 

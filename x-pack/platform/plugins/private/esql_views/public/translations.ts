@@ -143,13 +143,14 @@ export const translations = {
   nameInvalidFormatErrorMessage: i18n.translate(
     'xpack.esqlViews.managementPage.nameInvalidFormatErrorMessage',
     {
-      defaultMessage: 'Use lowercase letters, numbers, hyphens, and underscores only.',
+      defaultMessage:
+        'Use lowercase characters. Names can\'t start with -, _, or +, be . or .., or contain spaces, commas, \\, /, *, ?, ", <, >, |, #, or :.',
     }
   ),
   nameTooLongErrorMessage: i18n.translate(
     'xpack.esqlViews.managementPage.nameTooLongErrorMessage',
     {
-      defaultMessage: 'Name cannot be longer than 255 characters.',
+      defaultMessage: 'Name cannot be longer than 255 bytes.',
     }
   ),
   descriptionTooLongErrorMessage: i18n.translate(

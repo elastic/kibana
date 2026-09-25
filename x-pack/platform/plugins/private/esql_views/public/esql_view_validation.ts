@@ -14,18 +14,27 @@ export const MAX_ESQL_VIEW_QUERY_LENGTH = 100_000;
 
 export type EsqlViewNameValidationError = 'required' | 'invalidFormat' | 'tooLong';
 
-const VIEW_NAME_PATTERN = /^[a-z0-9_-]+$/;
+const INVALID_VIEW_NAME_CHARACTERS = /[\\/*?"<>| ,#:]/;
+const INVALID_VIEW_NAME_START = /^[-_+]/;
+
+const getByteLength = (value: string): number => new TextEncoder().encode(value).length;
 
 export const validateEsqlViewName = (name: string): EsqlViewNameValidationError | undefined => {
   if (name.length === 0) {
     return 'required';
   }
 
-  if (name.length > MAX_ESQL_VIEW_NAME_LENGTH) {
+  if (getByteLength(name) > MAX_ESQL_VIEW_NAME_LENGTH) {
     return 'tooLong';
   }
 
-  if (!VIEW_NAME_PATTERN.test(name)) {
+  if (
+    name !== name.toLowerCase() ||
+    INVALID_VIEW_NAME_CHARACTERS.test(name) ||
+    INVALID_VIEW_NAME_START.test(name) ||
+    name === '.' ||
+    name === '..'
+  ) {
     return 'invalidFormat';
   }
 };

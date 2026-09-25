@@ -131,7 +131,7 @@ describe('ManagementApp', () => {
     client.getViews.mockResolvedValueOnce({ views: [] }).mockResolvedValueOnce({
       views: [
         {
-          name: 'sales-view',
+          name: 'sales.view',
           description: 'Sales transactions',
           query: 'FROM transactions-*',
         },
@@ -173,10 +173,12 @@ describe('ManagementApp', () => {
     const nameInput = screen.getByTestId('esqlViewNameInput');
     fireEvent.change(nameInput, { target: { value: 'Sales view' } });
     expect(
-      screen.getByText('Use lowercase letters, numbers, hyphens, and underscores only.')
+      screen.getByText(
+        'Use lowercase characters. Names can\'t start with -, _, or +, be . or .., or contain spaces, commas, \\, /, *, ?, ", <, >, |, #, or :.'
+      )
     ).toBeInTheDocument();
 
-    fireEvent.change(nameInput, { target: { value: 'sales-view' } });
+    fireEvent.change(nameInput, { target: { value: 'sales.view' } });
     fireEvent.change(screen.getByTestId('esqlViewDescriptionInput'), {
       target: { value: 'Sales transactions' },
     });
@@ -187,12 +189,12 @@ describe('ManagementApp', () => {
 
     await waitFor(() =>
       expect(client.createView).toHaveBeenCalledWith({
-        name: 'sales-view',
+        name: 'sales.view',
         description: 'Sales transactions',
         query: 'FROM transactions-*',
       })
     );
-    expect(await screen.findByText('sales-view')).toBeInTheDocument();
+    expect(await screen.findByText('sales.view')).toBeInTheDocument();
     expect(client.getViews).toHaveBeenCalledTimes(2);
     expect(screen.queryByTestId('esqlViewFormFlyout')).not.toBeInTheDocument();
   });
