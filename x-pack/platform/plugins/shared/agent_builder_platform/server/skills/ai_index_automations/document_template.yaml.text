@@ -33,7 +33,8 @@ consts:
   body_field: body
   # The agreed corpus filter, as a complete ES|QL line. Set to "" to take the whole index.
   corpus_filter: "| WHERE published_at >= NOW() - 365 days"
-  # Upper bound on documents summarised in one run. Each costs a model call.
+  # The KI budget: one model call and one KI per document, 100 at most during onboarding. A
+  # one-KI-per-claim variant multiplies it by the claims per document.
   max_documents: 50
   # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
   # context window and silently drop the rest of the batch.
@@ -130,8 +131,8 @@ steps:
             - esql_example: the same query with real values substituted and a small LIMIT.
             - returns: a short description of what the query returns.
 
-            At least one pattern retrieves this exact document; the others reach the documents
-            around it — same topic, same period, whatever the corpus makes sensible.
+            When you return patterns, at least one retrieves this exact document; the others reach
+            the documents around it — same topic, same period, whatever the corpus makes sensible.
 
             ES|QL correctness rules — esql_template and esql_example are both executed by the
             verifier, so both must be valid and runnable:

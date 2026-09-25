@@ -217,38 +217,18 @@ on-failure:
   continue: true
 ```
 
-**A `while` pages through a corpus the row cap would truncate.** Its `condition` is KQL, checked
-after each pass (the first pass always runs), and `max-iterations` caps the passes. State crosses
-passes through `data.set`: every key a `data.set` writes is readable as `variables.<key>` for the
-rest of the execution, as well as at `steps.<name>.output.<key>`, and `variables` is the form that
-survives from one pass to the next. The unit template keeps a keyword cursor this way: the page
-query reads `variables.cursor`, and a `data.set` at the end of the pass advances it and sets the
-count the condition reads.
-
-```yaml
-- name: page_units
-  type: while
-  condition: 'variables.batch_count > 0'
-  max-iterations:
-    limit: 200
-    on-limit: continue
-  steps: [] # ...
-```
-
 **Liquid references and the filters the templates rely on.** `{{ steps.<name>.output.<field> }}`
 reads a step's output — only `output` is reachable, never a step's inputs. `{{ consts.<name> }}`,
-`{{ inputs.<name> }}`, `{{ variables.<name> }}`, `{{ foreach.item }}` and `{{ event }}` reach the
+`{{ inputs.<name> }}`, `{{ foreach.item }}` and `{{ event }}` reach the
 rest. `{%- for x in ... -%}` loops build the `content` block, and `{%- assign x = ... -%}` with
 `{%- if ... -%}` computes a value a `data.set` stores for a condition to read.
 
 | Filter | Use |
 |---|---|
 | `json` | Serialise a value — how a whole step output reaches a prompt, and how a list reaches `foreach` |
-| `json_parse` | Turn a JSON string back into a value; how the unit template's `references`, built as a string with a conditional entry, reach the KI as a list |
 | `map: 'field'` | Pull one field out of a list of objects; how `attributes.esql` collects the runnable examples |
-| `size` | Length, for a `data.set` a condition can read |
 | `default: 'value'` | Fall back when a field is missing |
-| `last`, `first` | The last row of a result and the first column of it; how a cursor advances from a page |
+| ``remove: '`'`` | Drop the backticks from a backquoted field-name const, so it can sit inside a column name the unit template backquotes itself |
 | `replace: '\\', '\\\\' \| replace: '"', '\\"'` | Escape a value being interpolated into an ES\|QL string literal: backslashes first, then quotes |
 
 **Field names with spaces or capitals are backquoted inside the const**, not in the query: a const
@@ -259,8 +239,8 @@ the mapping is almost always a missing backtick.
 Escaping matters more than it looks: an entity value interpolated raw into
 `WHERE field == "{{ ... }}"` breaks the query the moment a value contains a quote, and the failure
 lands on whichever entity happens to carry one. The unit template runs every unit key through
-`replace: '\\', '\\\\' | replace: '"', '\\"'` before it reaches a query, the pagination cursor
-included. Write the arguments exactly so: LiquidJS reads backslash escapes inside a quoted argument,
+`replace: '\\', '\\\\' | replace: '"', '\\"'` before it reaches a query, and hands the prompt the
+escaped key for the example queries it writes. Write the arguments exactly so: LiquidJS reads backslash escapes inside a quoted argument,
 so `'\"'` is a bare quote and a `replace` written with it does nothing.
 
 ## Templates and shapes for each strategy
@@ -297,18 +277,26 @@ and a sink keyed on the index and source document id. When the pass yields many
 near-identically-titled entries, emit one indicator per logical cluster and enumerate the members
 inside its `content` instead of one per record.
 
-**Cumulative / Wiki-style** (`type: entity`) — template **`unit-profile-template`**. A `while`
-pages through the units in `batch_size` batches on a keyword cursor, so a corpus above the row cap
-is walked rather than truncated; inside it a `foreach` handles one page. Per unit: aggregations
-over every document referencing it, its record from a second `catalog_index`, an `ai.prompt`
-synthesising a profile, and a sink keyed on the unit. A re-run regenerates every unit and replaces
-its indicator; narrow `discovery_filter` to re-profile only some. The `consts` are the three
-strategy answers: `unit_index` and `unit_key` are the unit, the metrics, the `activity_field` range
-and `catalog_index` are what one KI carries, `discovery_filter` and `batch_size` are how units are
-found and refreshed. The per-unit metrics are the part to extend, because sibling indicators are
-near-identical to a retriever unless their descriptions carry numbers that separate them; add a
-grounding query per further index the profile should draw on. To accumulate across runs rather than
-replace, read the stored indicator and merge through `context-engine.updateKi`.
+**Cumulative / Wiki-style** (`type: entity`) — template **`unit-profile-template`**. One
+discovery query takes the `max_units` most active units under `corpus_filter`, and a `foreach`
+profiles each: aggregations over the unit's rows in scope, an `ai.prompt` synthesising a profile,
+and a sink keyed on the unit. A re-run regenerates every unit and replaces its indicator. The
+`consts` are the three strategy answers: `unit_index` and `unit_key` are the unit, the metrics,
+the `activity_field` range and the `breakdown_field` distribution are what one KI carries, and
+`corpus_filter` and `max_units` are how units are found and refreshed. `corpus_filter` bounds both
+which units are found and which of their rows the figures describe, so a profile never counts rows
+outside the agreed scope. To refresh only some units, add a `WHERE` to `discover_units` alone. The
+per-unit metrics are the part to extend, because sibling indicators are near-identical to a
+retriever unless their descriptions carry numbers that separate them: add a column to the `STATS`
+in `unit_totals`, and the description and content print it by name. To accumulate across runs
+rather than replace, read the stored indicator and merge through `context-engine.updateKi`.
+
+To ground a profile in a second index — a catalog row or a case header per unit — add a query
+after `unit_breakdown` and hand its result to the prompt. Run the join probe from
+`analyze-and-improve` first: a key populated on one side only gives every unit an empty record.
+Filter that query on the second index's own key field, which is often named differently from
+`unit_key`, with the escaped key (`steps.unit_context.output.unit_escaped`), add its `index://` to
+the KI's `references`, and tell the prompt which index each query it writes may start from.
 
 **Targeted KIs** (`type: constraint`, `workaround`, `disambiguation`, `task_recipe`) — template
 **`targeted-ki-writer`**. No model call: the KIs are written verbatim from a `kis` list in `consts`,
@@ -364,6 +352,10 @@ will invent it confidently. Put in the prompt:
 - the AI Index id, its destination index name, and whether that destination is an index or a
   data stream
 - the sources and the exact corpus filter the automation should apply
+- the KI budget: at most 100 KIs per run during onboarding, set in the template's own bound
+  (`max_units`, or `max_documents` — multiplied by the claims per document for a per-claim
+  variant). This is guidance for the automation, not a figure to put to the user, and it can be
+  raised once the output is trusted
 - the strategy from `analyze-and-improve` **as its three answers** — the unit, what one KI
   carries, how units are found and refreshed — and what the indicators are meant to capture.
   Those three are what fill the `consts`, so a brief that names a strategy without them leaves
@@ -488,7 +480,7 @@ than that and it returns bare ids and labels with no parameters at all — so a 
 you nothing and buys a chain of follow-up calls. Pass `stepType` with an exact id.
 
 The types these automations use are a closed set: `elasticsearch.esql.query`,
-`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `foreach`, `while`, `if`,
+`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `foreach`, `if`,
 `data.set` and `console`, alongside the `context-engine` steps written out above,
 which no lookup can return at all. Every one of them appears in the templates already wired up
 correctly, so a lookup is worth a call only for a step type you are adding that no template uses.
@@ -510,9 +502,8 @@ overwrites them, and on a data stream each write appends a revision under the sa
 tag and the `id` together find every document the pilot left.
 
 Bound the run to a handful of documents while you are iterating. The templates put that bound in
-`consts` — `max_documents`, `corpus_filter`, `discovery_filter`, and `batch_size` together with the
-`max-iterations` limit on the unit template's `while` — so it is one edit to narrow and one to
-widen again, rather than a change threaded through the queries. The writer needs no bound: its
+`consts` — `max_documents`, `max_units` and `corpus_filter` — so it is one edit to narrow and one
+to widen again, rather than a change threaded through the queries. The writer needs no bound: its
 `kis` list is the whole corpus.
 
 **Run it without saving.** `platform.core.execute_workflow` accepts a `yaml` argument and runs the
@@ -610,14 +601,15 @@ has to approve on.
 **State the time estimate from the pilot in the same message.** The save dialog approves a run over
 the whole corpus, so the cost of that run has to be on the table before it opens. Take the pilot's
 duration and the number of units it wrote, divide to get a per-unit time, and multiply by the
-unit count from the proposal's Unit section (units, not rows — a unit profile over 62,884 sales
-rows may have 2,517 units): "the pilot wrote 4 indicators in 64 seconds; the full run covers
-2,517 units, so expect at least 11 hours". Say *at least*: a pilot skips the batch overhead and
+number of units the saved run will write: the unit count from the proposal's Unit section
+(units, not rows — a unit profile over 62,884 sales rows may have 2,517 units), or the
+automation's own bound when that is lower: "the pilot wrote 4 indicators in 64 seconds; the full run writes 100
+units, so expect at least 27 minutes". Say *at least*: a pilot skips the batch overhead and
 the verification retries that a full run pays for, so a straight-line projection is a floor.
 Show the three numbers, not only the result, so the reader can see what was assumed.
 
 **When the projection exceeds one hour, put the estimate in bold between 🚨 markers** so it
-cannot be skimmed past: "🚨 **The full run over 2,517 units will take at least 11 hours** 🚨".
+cannot be skimmed past: "🚨 **The full run over 300 units will take at least 80 minutes** 🚨".
 Under an hour, write it in plain text. A projection that comes out in hours is a finding of its
 own, and the answer is usually a narrower corpus filter or a cheaper unit rather than a shrug, so
 follow the warning with the option you would take. Report token usage only when the execution
@@ -643,12 +635,3 @@ What remains unauthorized is starting a run of your own accord on a workflow alr
 execute a saved workflow unless the run you are in has told you to.
 `platform.core.execute_workflow` starts one and `platform.core.get_workflow_execution_status` reports
 on it.
-
-## Corpora larger than 10,000 documents
-
-ES|QL caps at 10,000 rows per query. An automation over a larger corpus needs cursor pagination —
-the `unit-profile-template` pages with a `while` over a keyword cursor, and the same `while` and
-`advance_cursor` pair transplants into the document template around its `discover_documents` and
-`foreach` — or a parent workflow dispatching per-item children with `workflow.executeAsync`. Note
-the cap rather than drafting a workflow that silently truncates — this fails quietly, and the index
-looks under-covered for reasons no one will connect back to here.

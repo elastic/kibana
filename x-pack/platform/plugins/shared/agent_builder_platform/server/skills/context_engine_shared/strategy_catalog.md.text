@@ -19,8 +19,8 @@ Every strategy answers:
    facts.
 
 State a strategy as those three answers. When findings fit one of the examples below, name it and
-the three answers are already known. When they do not — a support case with a root-cause structure
-and a cursor, a host profiled from three indices — derive the three answers from the findings
+the three answers are already known. When they do not — a support case with a root-cause structure,
+a host profiled from three indices — derive the three answers from the findings
 instead of picking the nearest name and guessing the rest. The `unit-profile-template`'s `consts`
 are these same three choices, so an analysis stated this way is already the template input.
 
@@ -70,8 +70,11 @@ Those are different fixes: widening a filter is cheap and reversible, redesignin
 prompt is neither. A filter is also the natural first lever: when the evidence supports widening a
 window or relaxing a status condition, propose that before proposing a new automation.
 
-## Corpora larger than 10,000 documents
+## The KI budget
 
-ES|QL caps at 10,000 rows per query. A discovery query over a larger corpus needs paging (the
-`unit-profile-template` pages with a keyword cursor) or a parent workflow dispatching per-item
-children. Note the cap rather than proposing something that silently truncates.
+Every generated automation carries its own cap on the KIs one run writes: at most 100 during
+onboarding. It counts KIs, not source rows, so a strategy that writes several KIs per document, or
+one per index across many indices, spends it faster than the row count suggests. The cap lives in
+the template's own bound (`max_units`, `max_documents`) rather than in the Context Engine, which
+does not enforce one. It is guidance for the automation rather than a figure to put to the user,
+and it can be raised once the output has been reviewed and trusted.
