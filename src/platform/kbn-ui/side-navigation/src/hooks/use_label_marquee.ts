@@ -17,6 +17,8 @@ import type { SerializedStyles } from '@emotion/react';
 interface LabelMarqueeOptions {
   /** Horizontal padding of the row; faded and hidden text may extend into it. */
   gutter: string;
+  /** Whether nothing precedes the label in the row, so it may use the leading padding. */
+  isLabelFirst: boolean;
   /** Whether nothing follows the label in the row, so it may also use the trailing padding. */
   isLabelLast: boolean;
 }
@@ -42,8 +44,8 @@ interface LabelMarquee {
 const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
   const delay = euiTheme.animation.slow;
   const duration = 'calc(var(--label-overflow-width) * 20ms)';
-  // The start fade fits in the gutter, so slid text stays fully visible from the
-  // text's normal start position.
+  // With the leading bleed, the start fade fits in the gutter, so slid text stays fully
+  // visible from the text's normal start position.
   const fadeStartWidth = gutter;
   const fadeEndWidth = euiTheme.size.base;
   const fadeDuration = euiTheme.animation.normal;
@@ -87,9 +89,6 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
         inherits: false;
         initial-value: 0px;
       }
-      // Pull the clip area into the row padding without moving the text.
-      margin-left: calc(${gutter} * -1);
-      padding-left: ${gutter};
       --label-fade-start: 0px;
       --label-fade-end: ${fadeEndWidth};
       mask-image: linear-gradient(
@@ -122,6 +121,11 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
         }
       }
     `,
+    // Pull the clip area into the row padding without moving the text.
+    labelOverflowingFirst: css`
+      margin-left: calc(${gutter} * -1);
+      padding-left: ${gutter};
+    `,
     labelOverflowingLast: css`
       margin-right: calc(${gutter} * -1);
       padding-right: ${gutter};
@@ -135,7 +139,11 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
 /**
  * Fades an overflowing label and slides its hidden part into view when the parent button or link is hovered or focused.
  */
-export const useLabelMarquee = ({ gutter, isLabelLast }: LabelMarqueeOptions): LabelMarquee => {
+export const useLabelMarquee = ({
+  gutter,
+  isLabelFirst,
+  isLabelLast,
+}: LabelMarqueeOptions): LabelMarquee => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => getStyles(euiTheme, gutter), [euiTheme, gutter]);
   const labelRef = useRef<HTMLSpanElement>(null);
@@ -171,6 +179,7 @@ export const useLabelMarquee = ({ gutter, isLabelLast }: LabelMarqueeOptions): L
       css: [
         styles.label,
         isOverflowing && styles.labelOverflowing,
+        isOverflowing && isLabelFirst && styles.labelOverflowingFirst,
         isOverflowing && isLabelLast && styles.labelOverflowingLast,
       ],
       style: isOverflowing

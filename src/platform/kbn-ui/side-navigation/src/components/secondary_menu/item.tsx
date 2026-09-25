@@ -112,6 +112,7 @@ export const SecondaryMenuItemComponent = ({
     trackProps,
   } = useLabelMarquee({
     gutter: euiTheme.size.s,
+    isLabelFirst: !iconType,
     isLabelLast: !badge && !hasSubmenu && !isExternal,
   });
 

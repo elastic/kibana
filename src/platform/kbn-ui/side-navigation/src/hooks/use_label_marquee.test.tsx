@@ -17,6 +17,7 @@ const GUTTER = 8;
 const Label = () => {
   const { isOverflowing, labelProps, trackProps } = useLabelMarquee({
     gutter: `${GUTTER}px`,
+    isLabelFirst: true,
     isLabelLast: true,
   });
 
