@@ -53,7 +53,6 @@ export const SecondaryMenuItemComponent = ({
   const { euiTheme } = useEuiTheme();
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
-  const { isOverflowing: isLabelOverflowing, labelProps, trackProps } = useLabelMarquee();
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
 
   const iconSide = iconType ? 'left' : 'right';
@@ -105,13 +104,23 @@ export const SecondaryMenuItemComponent = ({
     if (badgeType && badgeType !== 'new') return <BetaBadge type={badgeType} />;
     if (isNew) return <BetaBadge type="new" />;
   };
+  const badge = getBadge();
+
+  const {
+    isOverflowing: isLabelOverflowing,
+    labelProps,
+    trackProps,
+  } = useLabelMarquee({
+    gutter: euiTheme.size.s,
+    isLabelLast: !badge && !hasSubmenu && !isExternal,
+  });
 
   const content = (
     <div css={labelAndBadgeStyles}>
       <span {...labelProps}>
         <span {...trackProps}>{children}</span>
       </span>
-      {getBadge()}
+      {badge}
       {hasSubmenu && (
         <EuiIcon
           aria-hidden={true}
