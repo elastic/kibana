@@ -20,8 +20,8 @@ import type {
 } from '../../common/sandbox_secrets';
 import {
   MAX_SANDBOX_SECRETS,
-  MIN_SANDBOX_SECRET_VALUE_LENGTH,
   validateSandboxSecretKey,
+  validateSandboxSecretValue,
 } from '../../common/sandbox_secrets';
 import { NIGHTSHIFT_SECRETS_SO_TYPE, type NightshiftSecretsAttributes } from '../saved_objects';
 import {
@@ -78,10 +78,9 @@ const validateEntries = ({ entries }: PutSandboxSecretsRequest): void => {
     if (keyError) {
       throw new SandboxSecretsValidationError(`Secret key '${key}' ${keyError}`);
     }
-    if (value !== undefined && value.length < MIN_SANDBOX_SECRET_VALUE_LENGTH) {
-      throw new SandboxSecretsValidationError(
-        `Secret '${key}' must be at least ${MIN_SANDBOX_SECRET_VALUE_LENGTH} characters long`
-      );
+    const valueError = value !== undefined ? validateSandboxSecretValue(value) : undefined;
+    if (valueError) {
+      throw new SandboxSecretsValidationError(`Secret '${key}' ${valueError}`);
     }
     if (seen.has(key)) {
       throw new SandboxSecretsValidationError(`Secret key '${key}' is listed more than once`);
@@ -106,10 +105,6 @@ export const createSandboxSecretsClient = ({
 }): SandboxSecretsClient => {
   const getSpaceId = (request: KibanaRequest): string =>
     getDeps().spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
-  // Keyed by space and object id; an entry is reused only while the object version is unchanged,
-  // so edits made on any Kibana node invalidate it on the next lookup.
-  const redactionValuesCache = new Map<string, { version?: string; values: string[] }>();
 
   // Access is authorized by the route privileges and `getSandboxAccessDeniedReason`, so the
   // security extension is skipped; the encryption extension stays enabled so `values` is
@@ -163,6 +158,26 @@ export const createSandboxSecretsClient = ({
       }
       throw err;
     }
+  };
+
+  // Injecting a command's env and building the output redactor both need every stored value for
+  // the request's space, and both happen for the same sandbox tool call. Keyed by the
+  // KibanaRequest instance so the decrypted values are fetched at most once per call and cannot
+  // outlive it: nothing here keeps a reference to the request once it is done.
+  const decryptedValuesByRequest = new WeakMap<KibanaRequest, Promise<Record<string, string>>>();
+  const getDecryptedValuesForRequest = (
+    request: KibanaRequest
+  ): Promise<Record<string, string>> => {
+    const cached = decryptedValuesByRequest.get(request);
+    if (cached) {
+      return cached;
+    }
+    const promise = (async () => {
+      const existing = await findSecretsObject(request);
+      return existing ? readDecryptedValues(request, existing.id) : {};
+    })();
+    decryptedValuesByRequest.set(request, promise);
+    return promise;
   };
 
   const isNightshiftEnabled = async (): Promise<boolean> =>
@@ -264,8 +279,7 @@ export const createSandboxSecretsClient = ({
           logger.warn(`Refused sandbox secrets: ${deniedReason}`);
           return { errorMessage: deniedReason };
         }
-        const existing = await findSecretsObject(request);
-        values = await readDecryptedValues(request, existing?.id);
+        values = await getDecryptedValuesForRequest(request);
       } catch (err) {
         return { errorMessage: `Failed to load sandbox secrets: ${err.message}` };
       }
@@ -288,19 +302,9 @@ export const createSandboxSecretsClient = ({
       return { env, secretValues: Object.values(env) };
     },
 
-    getRedactionValues: async (request) => {
-      const existing = await findSecretsObject(request);
-      if (!existing) {
-        return [];
-      }
-      const cacheKey = `${getSpaceId(request)}:${existing.id}`;
-      const cached = redactionValuesCache.get(cacheKey);
-      if (cached && cached.version === existing.version) {
-        return cached.values;
-      }
-      const values = Object.values(await readDecryptedValues(request, existing.id));
-      redactionValuesCache.set(cacheKey, { version: existing.version, values });
-      return values;
-    },
+    // Shares the decrypt with resolveForCommand for the same request/tool call (see
+    // getDecryptedValuesForRequest); not cached beyond that single request.
+    getRedactionValues: async (request) =>
+      Object.values(await getDecryptedValuesForRequest(request)),
   };
 };

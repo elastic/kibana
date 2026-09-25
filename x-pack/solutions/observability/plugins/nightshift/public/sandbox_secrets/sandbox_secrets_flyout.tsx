@@ -30,8 +30,10 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   MAX_SANDBOX_SECRETS,
+  MAX_SANDBOX_SECRET_VALUE_LENGTH,
   MIN_SANDBOX_SECRET_VALUE_LENGTH,
   validateSandboxSecretKey,
+  validateSandboxSecretValue,
   type SandboxSecretEntry,
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useFetchSandboxSecrets } from './use_fetch_sandbox_secrets';
@@ -71,10 +73,14 @@ const getValueError = (row: SecretRow): string | undefined => {
           defaultMessage: 'Enter a value for this secret.',
         });
   }
-  return row.value.length < MIN_SANDBOX_SECRET_VALUE_LENGTH
-    ? i18n.translate('xpack.nightshift.sandboxSecrets.valueTooShortError', {
-        defaultMessage: 'Use at least {minLength} characters.',
-        values: { minLength: MIN_SANDBOX_SECRET_VALUE_LENGTH },
+  // Same bounds, checked the same way, as the server client and the route: validateSandboxSecretValue.
+  return validateSandboxSecretValue(row.value) !== undefined
+    ? i18n.translate('xpack.nightshift.sandboxSecrets.valueInvalidLengthError', {
+        defaultMessage: 'Use between {minLength} and {maxLength} characters.',
+        values: {
+          minLength: MIN_SANDBOX_SECRET_VALUE_LENGTH,
+          maxLength: MAX_SANDBOX_SECRET_VALUE_LENGTH,
+        },
       })
     : undefined;
 };

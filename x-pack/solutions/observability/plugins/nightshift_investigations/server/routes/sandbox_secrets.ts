@@ -17,7 +17,6 @@ import {
   MAX_SANDBOX_SECRETS_VERSION_LENGTH,
   MAX_SANDBOX_SECRET_KEY_LENGTH,
   MAX_SANDBOX_SECRET_VALUE_LENGTH,
-  MIN_SANDBOX_SECRET_VALUE_LENGTH,
 } from '../../common/sandbox_secrets';
 import {
   SandboxSecretsConflictError,
@@ -77,11 +76,10 @@ const putSandboxSecretsRoute = createNightshiftInvestigationsServerRoute({
         .array(
           z.object({
             key: z.string().max(MAX_SANDBOX_SECRET_KEY_LENGTH),
-            value: z
-              .string()
-              .min(MIN_SANDBOX_SECRET_VALUE_LENGTH)
-              .max(MAX_SANDBOX_SECRET_VALUE_LENGTH)
-              .optional(),
+            // Only the upper bound is enforced here, as a DoS guard on request size; the exact
+            // valid range (including the minimum) is the sandboxSecretsClient's job, so both
+            // bounds are defined and checked in one place: validateSandboxSecretValue.
+            value: z.string().max(MAX_SANDBOX_SECRET_VALUE_LENGTH).optional(),
           })
         )
         .max(MAX_SANDBOX_SECRETS),

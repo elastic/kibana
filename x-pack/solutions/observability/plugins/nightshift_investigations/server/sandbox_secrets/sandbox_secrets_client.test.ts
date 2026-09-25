@@ -283,6 +283,17 @@ describe('createSandboxSecretsClient', () => {
       expect(soClient.create).not.toHaveBeenCalled();
     });
 
+    it('rejects values over the maximum length', async () => {
+      const { client, soClient, request } = setup({ storedValues: {} });
+
+      await expect(
+        client.replaceEntries(request, {
+          entries: [{ key: 'A_KEY', value: 'a'.repeat(16385) }],
+        })
+      ).rejects.toThrow('at most 16384 characters');
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
     it('rejects duplicate keys', async () => {
       const { client, request } = setup({ storedValues: {} });
 
@@ -478,31 +489,26 @@ describe('createSandboxSecretsClient', () => {
       expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
     });
 
-    it('decrypts again only when the stored object version changes', async () => {
-      const { client, soClient, getDecryptedAsInternalUser, request } = setup({
+    it('decrypts at most once per request, shared with resolveForCommand for the same call', async () => {
+      const { client, getDecryptedAsInternalUser, request } = setup({
         storedValues: { A_KEY: 'value-123' },
       });
 
-      await client.getRedactionValues(request);
-      await client.getRedactionValues(request);
+      await Promise.all([
+        client.getRedactionValues(request),
+        client.resolveForCommand(request, ['A_KEY']),
+      ]);
       expect(getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
+    });
 
-      soClient.find.mockResolvedValueOnce({
-        page: 1,
-        per_page: 1,
-        total: 1,
-        saved_objects: [
-          {
-            id: STORED_ID,
-            type: NIGHTSHIFT_SECRETS_SO_TYPE,
-            references: [],
-            version: 'v2',
-            score: 0,
-            attributes: { keys: ['A_KEY'] },
-          },
-        ],
+    it('decrypts again for a separate request, never caching beyond a single request', async () => {
+      const { client, getDecryptedAsInternalUser, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
       });
+      const otherRequest = httpServerMock.createKibanaRequest();
+
       await client.getRedactionValues(request);
+      await client.getRedactionValues(otherRequest);
       expect(getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
     });
 

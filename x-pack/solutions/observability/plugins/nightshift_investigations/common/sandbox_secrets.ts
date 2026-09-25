@@ -41,6 +41,21 @@ export const validateSandboxSecretKey = (key: string): string | undefined => {
   return undefined;
 };
 
+/**
+ * Returns a validation error message for a sandbox secret value, or `undefined` when it is
+ * valid. The single source of truth for both bounds, so the API, the server client and the
+ * flyout apply the same rule instead of checking the two lengths in different places.
+ */
+export const validateSandboxSecretValue = (value: string): string | undefined => {
+  if (value.length < MIN_SANDBOX_SECRET_VALUE_LENGTH) {
+    return `must be at least ${MIN_SANDBOX_SECRET_VALUE_LENGTH} characters long`;
+  }
+  if (value.length > MAX_SANDBOX_SECRET_VALUE_LENGTH) {
+    return `must be at most ${MAX_SANDBOX_SECRET_VALUE_LENGTH} characters long`;
+  }
+  return undefined;
+};
+
 export interface SandboxSecretEntry {
   key: string;
   /** New value; omit to keep the currently stored value for an existing key. */

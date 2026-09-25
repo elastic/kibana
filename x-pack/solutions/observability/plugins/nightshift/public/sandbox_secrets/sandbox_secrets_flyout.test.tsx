@@ -125,7 +125,7 @@ describe('SandboxSecretsFlyout', () => {
     });
     await act(async () => fireEvent.click(screen.getByTestId('nightshiftSandboxSecretsSave')));
 
-    expect(screen.getByText('Use at least 8 characters.')).toBeInTheDocument();
+    expect(screen.getByText('Use between 8 and 16384 characters.')).toBeInTheDocument();
     expect(getPutBody()).toBeUndefined();
   });
 
