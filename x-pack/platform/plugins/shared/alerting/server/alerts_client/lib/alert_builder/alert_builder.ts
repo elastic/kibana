@@ -311,6 +311,51 @@ export class AlertBuilder<
           `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - existing alert document not found ${this.ruleInfoMessage}.`,
           this.logTags
         );
+      } else {
+        this.logger.error(
+          `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in tracked alerts ${this.ruleInfoMessage}.`,
+          this.logTags
+        );
+        // The tracked AAD document is missing, but the alert recovered this
+        // run. Synthesize a recovered document from current state so the
+        // instance is not left status: active with no kibana.alert.end.
+        const recoveredAlert = recoveredAlerts[id];
+        if (recoveredAlert) {
+          const synthesizedAlert = buildNewAlert<
+            AlertData,
+            State,
+            Context,
+            ActionGroupIds,
+            RecoveryActionGroupId
+          >({
+            legacyAlert: recoveredAlert,
+            rule: this.rule,
+            ruleData: this.alertRuleData,
+            runTimestamp: this.runTimestampString,
+            timestamp: this.currentTime,
+            payload: this.reportedAlerts[id],
+            kibanaVersion: this.kibanaVersion,
+            dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
+          });
+          const previousActionGroup = recoveredAlert.getLastScheduledActions()?.group;
+          if (previousActionGroup) {
+            synthesizedAlert[ALERT_ACTION_GROUP] = previousActionGroup;
+          }
+          recoveredAlertsToIndex.push(
+            buildRecoveredAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
+              alert: synthesizedAlert,
+              legacyAlert: recoveredAlert,
+              rule: this.rule,
+              ruleData: this.alertRuleData,
+              runTimestamp: this.runTimestampString,
+              timestamp: this.currentTime,
+              payload: this.reportedAlerts[id],
+              recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
+              kibanaVersion: this.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
+            })
+          );
+        }
       }
     }
 
