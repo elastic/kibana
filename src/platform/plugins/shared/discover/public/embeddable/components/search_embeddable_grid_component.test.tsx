@@ -334,7 +334,10 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(getLastFlyoutMenuTrailingActions()).toBeDefined();
       });
 
-      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.();
+      // pass a mock event to the onClick handler to simulate a click without an actual event
+      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.(
+        {} as React.MouseEvent<HTMLButtonElement, MouseEvent>
+      );
 
       await waitFor(() => {
         expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();
@@ -366,7 +369,10 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(getLastFlyoutMenuTrailingActions()).toBeDefined();
       });
 
-      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.();
+      // pass a mock event to the onClick handler to simulate a click without an actual event
+      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.(
+        {} as React.MouseEvent<HTMLButtonElement, MouseEvent>
+      );
 
       await waitFor(() => {
         expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();
