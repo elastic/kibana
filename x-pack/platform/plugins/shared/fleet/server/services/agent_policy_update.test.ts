@@ -13,7 +13,6 @@ import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { appContextService } from './app_context';
 import { getAgentById, getAgentPolicyForAgent, getAgentsByKuery } from './agents';
 import * as apiKeys from './api_keys';
-import { agentPolicyService } from './agent_policy';
 
 jest.mock('./agents/crud', () => ({
   ...jest.requireActual('./agents/crud'),
