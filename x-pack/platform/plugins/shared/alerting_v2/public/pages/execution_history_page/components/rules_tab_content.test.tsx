@@ -96,7 +96,7 @@ const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionVie
   space_id: 'default',
   started_at: '2026-05-05T10:00:00.000Z',
   ended_at: '2026-05-05T10:00:01.500Z',
-  timings: { duration: 1500, scheduled_delay: 0 },
+  timings: { duration_ms: 1500, scheduled_delay_ms: 0 },
   outcome: 'success',
   reason: 'Completed successfully',
   error: null,
@@ -166,8 +166,8 @@ describe('RulesTabContent', () => {
     expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
-      sort: 'startedAt',
+      outcomes: undefined,
+      sortField: 'startedAt',
       sortOrder: 'desc',
     });
   });
@@ -266,8 +266,8 @@ describe('RulesTabContent', () => {
       expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 10,
-        outcome: ['failure'],
-        sort: 'startedAt',
+        outcomes: ['failure'],
+        sortField: 'startedAt',
         sortOrder: 'desc',
       });
     });
@@ -286,7 +286,7 @@ describe('RulesTabContent', () => {
   });
 
   it('formats duration in ms for sub-second values', () => {
-    mockResult(withRows([buildItem({ timings: { duration: 250, scheduled_delay: 0 } })]));
+    mockResult(withRows([buildItem({ timings: { duration_ms: 250, scheduled_delay_ms: 0 } })]));
     renderComponent();
 
     expect(screen.getByText('250 ms')).toBeInTheDocument();
@@ -303,7 +303,7 @@ describe('RulesTabContent', () => {
 
       await waitFor(() => {
         expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith(
-          expect.objectContaining({ page: 1, sort: 'duration', sortOrder: 'asc' })
+          expect.objectContaining({ page: 1, sortField: 'duration', sortOrder: 'asc' })
         );
       });
     });
@@ -321,7 +321,7 @@ describe('RulesTabContent', () => {
 
       await waitFor(() => {
         expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith(
-          expect.objectContaining({ sort: 'startedAt', sortOrder: 'desc' })
+          expect.objectContaining({ sortField: 'startedAt', sortOrder: 'desc' })
         );
       });
     });

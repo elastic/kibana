@@ -46,12 +46,19 @@ export {
   type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
 export {
+  OverviewTab,
+  type OverviewTabProps,
+} from './src/components/details/details_flyout_tab_contents';
+export {
   EscalationFlyoutHeader,
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
-export { OverviewTab } from './src/components/details/details_flyout_tab_contents';
 export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
 export { DetailsBlock } from './src/components/details/detail_block';
+export {
+  ProposedActionButton,
+  type ProposedActionButtonProps,
+} from './src/components/details/proposed_action_button';
 
 export {
   AttachmentSummarySection,

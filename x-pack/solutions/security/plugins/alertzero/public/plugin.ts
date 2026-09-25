@@ -37,6 +37,8 @@ import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_invest
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
+import { ProposedActionsBoundary } from './pages/conversations/proposed_actions_boundary';
+import { getSharedAppQueryClient } from './shared_app_query_client';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -185,6 +187,43 @@ export class AlertZeroPublicPlugin
       >;
     });
 
+    // Lazy-loaded for the same reason as the escalation modal above: the proposals hooks (React
+    // Query, the HTTP client) stay out of alertzero's main chunk until the flyout's overview tab
+    // actually renders its "Proposed actions" section.
+    //
+    // Shares `getSharedAppQueryClient()` with the queue page (`application.tsx`) rather than
+    // creating its own — see https://github.com/elastic/kibana/pull/292946#discussion_r4092473937.
+    // Both read and decide the same proposals; an isolated client here would let a decision made
+    // in one leave the other showing it as still pending.
+    const LazyProposedActionsSlot = React.lazy(async () => {
+      const [
+        { KibanaContextProvider },
+        { QueryClientProvider },
+        { ProposedActionsSlot },
+        queryClient,
+      ] = await Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        import('./pages/conversations/proposed_actions_slot'),
+        getSharedAppQueryClient(),
+      ]);
+
+      const stableServices = { ...core, ...startDeps };
+
+      const WrappedSlot: React.FC<React.ComponentProps<typeof ProposedActionsSlot>> = (props) =>
+        React.createElement(
+          KibanaContextProvider,
+          { services: stableServices },
+          React.createElement(
+            QueryClientProvider,
+            { client: queryClient },
+            React.createElement(ProposedActionsSlot, props)
+          )
+        );
+
+      return { default: WrappedSlot };
+    });
+
     // ---------------------------------------------------------------------------
     // Assignee picker (embedded in both investigation and escalation flyout headers)
     // ---------------------------------------------------------------------------
@@ -297,6 +336,12 @@ export class AlertZeroPublicPlugin
               React.createElement(LazyEscalationModal, props)
             )
         : undefined,
+      renderProposedActions: (props) =>
+        React.createElement(
+          ProposedActionsBoundary,
+          null,
+          React.createElement(LazyProposedActionsSlot, props)
+        ),
     });
 
     // Space id comes from the base path so registration starts synchronously.

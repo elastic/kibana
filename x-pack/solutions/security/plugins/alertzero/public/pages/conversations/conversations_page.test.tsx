@@ -15,7 +15,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
+import {
+  useApproveProposal,
+  useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
+} from '@kbn/proposals-plugin/public';
 import {
   useAssignInvestigation,
   useUserProfiles,
@@ -40,9 +45,14 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   ...jest.requireActual('@kbn/proposals-plugin/public'),
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
+  useIsApprovingProposal: jest.fn(),
+  useIsDecliningProposal: jest.fn(),
 }));
+// Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
+// jest.mock calls for the same module would silently replace one another rather than merge.
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+  useCurrentUserProfile: jest.fn(() => ({ data: null })),
   useAssignInvestigation: jest.fn(),
   useUserProfiles: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
@@ -125,6 +135,8 @@ const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
+const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
+const mockUseIsDecliningProposal = useIsDecliningProposal as jest.Mock;
 const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
@@ -255,14 +267,18 @@ const renderPage = (
   return { core, agentBuilder, closeFlyout, history };
 };
 
-const approveMutate = jest.fn();
-const dismissMutate = jest.fn();
+const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
+const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 const setStatusMutate = jest.fn();
 const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
-  mockUseApproveProposal.mockReturnValue({ mutate: approveMutate });
-  mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate });
+  approveMutateAsync.mockResolvedValue(undefined);
+  dismissMutateAsync.mockResolvedValue(undefined);
+  mockUseApproveProposal.mockReturnValue({ mutateAsync: approveMutateAsync });
+  mockUseDismissProposal.mockReturnValue({ mutateAsync: dismissMutateAsync });
+  mockUseIsApprovingProposal.mockReturnValue(false);
+  mockUseIsDecliningProposal.mockReturnValue(false);
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
@@ -453,32 +469,31 @@ describe('ConversationsPage decisions', () => {
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
-    expect(approveMutate).toHaveBeenCalledWith(
-      { id: 'prop-1', body: { actionInput: { user: 'cfo@corp' } } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(approveMutateAsync).toHaveBeenCalledWith({
+      id: 'prop-1',
+      body: { actionInput: { user: 'cfo@corp' } },
+    });
   });
 
-  it('keeps the approval modal open until the mutation succeeds', () => {
+  it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {
+    mockUseIsApprovingProposal.mockImplementation((id: string) => id === 'prop-1');
     renderPage('/');
     openApproval();
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
-    // A refusal — expired deadline, someone decided first — must not close the modal as
-    // though the decision had landed. onSuccess is the only thing that closes it.
+    // The decision's own outcome shows in place — the modal never auto-closes, so a refusal
+    // (expired deadline, someone decided first) reads the same way: still open. Approving only
+    // resumes the gate workflow, whose action still runs afterward, so being in flight must not
+    // yet claim "Applied" — only a refetched, real decision can.
+    expect(approvalDialog().getAllByText('Applying').length).toBeGreaterThan(0);
+    expect(approvalDialog().queryByText('Applied')).not.toBeInTheDocument();
     expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
-
-    const [, handlers] = approveMutate.mock.calls[0];
-    act(() => handlers.onSuccess());
-
-    expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
   });
 
   it('hands Dismiss off to the dismiss modal rather than deciding without a reason', () => {
     renderPage('/');
     openApproval();
 
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Dismiss' }));
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
     // The approval modal closes and the reason form takes over for the same proposal: a
     // dismissal is a decision with a reason, never a silent close.
@@ -491,10 +506,10 @@ describe('ConversationsPage decisions', () => {
     fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Not worth chasing.' } });
     fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
 
-    expect(dismissMutate).toHaveBeenCalledWith(
-      { id: 'prop-1', body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(dismissMutateAsync).toHaveBeenCalledWith({
+      id: 'prop-1',
+      body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' },
+    });
   });
 
   it('opens the close-investigation modal when the ⋮ Close action is triggered with manage capability', () => {
