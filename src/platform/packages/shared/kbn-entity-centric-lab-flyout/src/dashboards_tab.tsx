@@ -142,13 +142,39 @@ const OOTB_DASHBOARDS: Record<string, readonly DashboardDescriptor[]> = {
 };
 
 /**
- * Resolve the OOTB dashboards for a given entity. Falls back to an empty
- * list for kinds without a seeded set.
+ * Type-specific dashboard overrides. When a specific `entity.type` string
+ * matches a key here, these dashboards are used instead of the kind-level
+ * ones from `OOTB_DASHBOARDS`. This lets workload subtypes (ReplicaSet,
+ * StatefulSet, DaemonSet, CronJob) link to the generic Workloads dashboard
+ * while Deployments keep their own Deployment Detail dashboard.
+ */
+const WORKLOADS_DASHBOARD: DashboardDescriptor = {
+  id: 'kubernetes_otel-0b70c6de-4d53-47c4-9844-5f964ba04a6f',
+  title: '[Kubernetes OTel] Workloads',
+  savedObjectTitle: '[Kubernetes OTel] Workloads',
+  savedObjectId: 'kubernetes_otel-0b70c6de-4d53-47c4-9844-5f964ba04a6f',
+  scopeField: 'k8s.workload.name',
+};
+
+const TYPE_SPECIFIC_DASHBOARDS: Record<string, readonly DashboardDescriptor[]> = {
+  'K8s replicaset': [WORKLOADS_DASHBOARD],
+  'K8s statefulset': [WORKLOADS_DASHBOARD],
+  'K8s daemonset': [WORKLOADS_DASHBOARD],
+};
+
+/**
+ * Resolve the OOTB dashboards for a given entity. Checks type-specific
+ * overrides first (e.g. workload subtypes → Workloads dashboard), then
+ * falls back to the kind-level registry.
  */
 export const getOotbDashboards = (
   entityName: string,
   entityType?: string
 ): readonly DashboardDescriptor[] => {
+  if (entityType) {
+    const typeOverride = TYPE_SPECIFIC_DASHBOARDS[entityType];
+    if (typeOverride) return typeOverride;
+  }
   const kind = entityTypeToKind(entityType) ?? inferEntityKind(entityName);
   if (!kind) return [];
   return OOTB_DASHBOARDS[kind] ?? [];

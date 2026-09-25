@@ -626,6 +626,34 @@ const KUBERNETES_POD_SEED_ROWS: readonly SeedRow[] = [
   { name: 'fraud-pod-9a1c', type: 'K8s pod', health: 'healthy' },
 ];
 
+const KUBERNETES_REPLICASET_SEED_ROWS: readonly SeedRow[] = [
+  { name: 'payments-api-7f8b4d9c', type: 'K8s replicaset', health: 'healthy' },
+  { name: 'checkout-web-5a2c1e3f', type: 'K8s replicaset', health: 'healthy' },
+  { name: 'fraud-scorer-9d4b2a1c', type: 'K8s replicaset', health: 'atRisk' },
+  { name: 'settlement-worker-3e7f', type: 'K8s replicaset', health: 'unhealthy' },
+];
+
+const KUBERNETES_STATEFULSET_SEED_ROWS: readonly SeedRow[] = [
+  { name: 'redis-payments', type: 'K8s statefulset', health: 'healthy' },
+  { name: 'kafka-broker', type: 'K8s statefulset', health: 'atRisk' },
+  { name: 'zookeeper', type: 'K8s statefulset', health: 'healthy' },
+  { name: 'elasticsearch-data', type: 'K8s statefulset', health: 'healthy' },
+];
+
+const KUBERNETES_DAEMONSET_SEED_ROWS: readonly SeedRow[] = [
+  { name: 'fluentbit-logging', type: 'K8s daemonset', health: 'healthy' },
+  { name: 'elastic-agent', type: 'K8s daemonset', health: 'healthy' },
+  { name: 'node-exporter', type: 'K8s daemonset', health: 'atRisk' },
+];
+
+const KUBERNETES_CRONJOB_SEED_ROWS: readonly SeedRow[] = [
+  { name: 'data-export-daily', type: 'K8s cronjob', health: 'healthy' },
+  { name: 'cert-renewal-check', type: 'K8s cronjob', health: 'healthy' },
+  { name: 'db-backup-hourly', type: 'K8s cronjob', health: 'unhealthy' },
+  { name: 'stale-session-cleanup', type: 'K8s cronjob', health: 'healthy' },
+  { name: 'metrics-aggregator', type: 'K8s cronjob', health: 'atRisk' },
+];
+
 const KUBERNETES_SUB_SPECS: readonly KubernetesSubSpec[] = [
   {
     label: 'Clusters',
@@ -674,28 +702,28 @@ const KUBERNETES_SUB_SPECS: readonly KubernetesSubSpec[] = [
     label: 'ReplicaSets',
     total: 12,
     type: 'K8s replicaset',
-    seedRows: [],
+    seedRows: KUBERNETES_REPLICASET_SEED_ROWS,
     fallbackName: (index) => `replicaset-${padIndex(index, 3)}`,
   },
   {
     label: 'StatefulSets',
     total: 4,
     type: 'K8s statefulset',
-    seedRows: [],
+    seedRows: KUBERNETES_STATEFULSET_SEED_ROWS,
     fallbackName: (index) => `statefulset-${padIndex(index, 2)}`,
   },
   {
     label: 'DaemonSets',
     total: 3,
     type: 'K8s daemonset',
-    seedRows: [],
+    seedRows: KUBERNETES_DAEMONSET_SEED_ROWS,
     fallbackName: (index) => `daemonset-${padIndex(index, 2)}`,
   },
   {
     label: 'CronJobs',
     total: 5,
     type: 'K8s cronjob',
-    seedRows: [],
+    seedRows: KUBERNETES_CRONJOB_SEED_ROWS,
     fallbackName: (index) => `cronjob-${padIndex(index, 2)}`,
   },
 ];

@@ -551,11 +551,12 @@ const EntityDetailPageInner = () => {
     [agentBuilder, notifications, charts, renderTabDashboard]
   );
 
-  // Navigate back to inventory. When we arrived from an expandable flyout
-  // (in-app navigation), use history.goBack() so the list view URL —
-  // including the `flyoutEntity` query param — is restored and the flyout
-  // re-opens automatically. Otherwise fall back to a fresh router push.
-  // In both cases, persist the current tab so the destination can restore it.
+  // Navigate back to inventory, restoring the flyout for the current entity.
+  // When we arrived from an expandable flyout (in-app navigation), use
+  // history.goBack() so the list view URL — including the `flyoutEntity`
+  // query param — is restored and the flyout re-opens automatically.
+  // Otherwise navigate to the category page with `?entity=` so the flyout
+  // opens on arrival rather than just closing.
   const handleBack = useCallback(() => {
     try {
       sessionStorage.setItem('entityCentricLab_activeTab', activeTab);
@@ -566,15 +567,9 @@ const EntityDetailPageInner = () => {
       history.goBack();
       return;
     }
-    if (entity?.category) {
-      router.push('/entities/{category}', {
-        path: { category: entity.category },
-        query: {},
-      });
-    } else {
-      router.push('/entities', { path: {}, query: {} });
-    }
-  }, [entity, router, detailVariation, history, activeTab]);
+    const basePath = entity?.category ? `/entities/${entity.category}` : '/entities';
+    history.push(`${basePath}?entity=${encodeURIComponent(entityName)}`);
+  }, [entity, entityName, detailVariation, history, activeTab]);
 
   // "Add to filter" — stashes the entity's K8s context in sessionStorage
   // and navigates back to the inventory so the main page can apply filters.

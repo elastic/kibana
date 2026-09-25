@@ -66,6 +66,8 @@ export const formatGoldenSignalValue = (signal: GoldenSignal): string => {
       return `${signal.value.toFixed(1)}${signal.unit}`;
     case 'throughput':
       return `${Math.round(signal.value)}${signal.unit}`;
+    default:
+      return `${signal.value}${signal.unit}`;
   }
 };
 

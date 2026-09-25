@@ -72,6 +72,7 @@ export type EntityKind =
   | 'pod'
   | 'container'
   | 'deployment'
+  | 'workload'
   | 'cluster'
   | 'namespace'
   | 'database'
@@ -94,10 +95,10 @@ export const entityTypeToKind = (type: string | undefined): EntityKind | undefin
   if (normalized.includes('k8s pod') || normalized.includes('kubernetes pod')) return 'pod';
   if (normalized.includes('namespace')) return 'namespace';
   if (normalized.includes('deployment')) return 'deployment';
-  if (normalized.includes('replicaset')) return 'deployment';
-  if (normalized.includes('statefulset')) return 'deployment';
-  if (normalized.includes('daemonset')) return 'deployment';
-  if (normalized.includes('cronjob')) return 'deployment';
+  if (normalized.includes('replicaset')) return 'workload';
+  if (normalized.includes('statefulset')) return 'workload';
+  if (normalized.includes('daemonset')) return 'workload';
+  if (normalized.includes('cronjob')) return 'workload';
   if (normalized.includes('container')) return 'container';
   if (
     normalized.includes('postgres') ||
@@ -146,10 +147,10 @@ export const inferEntityKind = (name: string): EntityKind | undefined => {
   if (lower.startsWith('host-')) return 'host';
   if (lower.startsWith('container-')) return 'container';
   if (lower.startsWith('deployment-')) return 'deployment';
-  if (lower.startsWith('replicaset-')) return 'deployment';
-  if (lower.startsWith('statefulset-')) return 'deployment';
-  if (lower.startsWith('daemonset-')) return 'deployment';
-  if (lower.startsWith('cronjob-')) return 'deployment';
+  if (lower.startsWith('replicaset-')) return 'workload';
+  if (lower.startsWith('statefulset-')) return 'workload';
+  if (lower.startsWith('daemonset-')) return 'workload';
+  if (lower.startsWith('cronjob-')) return 'workload';
   if (lower.endsWith('-db') || /(^|-)db-/.test(lower)) return 'database';
   if (lower.startsWith('k8s-') || lower.startsWith('cluster-')) return 'cluster';
   if (lower.startsWith('ns-')) return 'namespace';
@@ -552,6 +553,25 @@ const ALERT_RULES_BY_KIND: Record<
       reason: (n) => `Resource quota near limit for namespace hosting ${n}`,
     },
   ],
+  workload: [
+    {
+      ruleName: 'Desired replicas mismatch',
+      reason: (n) => `${n} has fewer ready replicas than desired`,
+    },
+    {
+      ruleName: 'Pod availability',
+      reason: (n) => `${n} available replicas below minimum`,
+    },
+    { ruleName: 'Image pull errors', reason: (n) => `Image pull errors across pods of ${n}` },
+    {
+      ruleName: 'Container restarts',
+      reason: (n) => `Restart rate above threshold across pods managed by ${n}`,
+    },
+    {
+      ruleName: 'Scheduling failures',
+      reason: (n) => `Pods managed by ${n} failing to schedule`,
+    },
+  ],
   cluster: [
     {
       ruleName: 'API server latency',
@@ -648,6 +668,7 @@ const BASE_SECURITY_COUNT: Record<EntityKind, number> = {
   pod: 1,
   container: 1,
   deployment: 1,
+  workload: 1,
   cluster: 2,
   namespace: 0,
   database: 1,
@@ -718,6 +739,10 @@ const SLO_TEMPLATES: Record<string, ReadonlyArray<{
     { name: 'API server availability', indicatorType: 'SLI: Availability', target: '99.99%', metValue: '100%', atRiskValue: '99.98%', unhealthyValue: '99.8%', timeWindow: '30d rolling' },
     { name: 'API server latency p99', indicatorType: 'SLI: Latency', target: '< 1s', metValue: '0.4s', atRiskValue: '0.8s', unhealthyValue: '2.1s', timeWindow: '30d rolling' },
     { name: 'etcd leader elections', indicatorType: 'SLI: Availability', target: '< 2/day', metValue: '0', atRiskValue: '1', unhealthyValue: '5', timeWindow: '7d rolling' },
+  ],
+  workload: [
+    { name: 'Replica availability', indicatorType: 'SLI: Availability', target: '99.9%', metValue: '99.99%', atRiskValue: '99.6%', unhealthyValue: '96.5%', timeWindow: '30d rolling' },
+    { name: 'Pod restart rate', indicatorType: 'SLI: Error rate', target: '< 2/day', metValue: '0', atRiskValue: '1', unhealthyValue: '8', timeWindow: '7d rolling' },
   ],
   database: [
     { name: 'Query latency p99', indicatorType: 'SLI: Latency', target: '< 250ms', metValue: '120ms', atRiskValue: '210ms', unhealthyValue: '480ms', timeWindow: '30d rolling' },
@@ -2240,6 +2265,524 @@ const buildPodTemplate = (
       relationships,
       security,
       { traces: tracesByHealth(name, h), slos: slosByHealth(name, h, 'pod') }
+    ),
+  };
+};
+
+// ---------------------------------------------------------------------------
+// Workload Management template (ReplicaSets, StatefulSets, DaemonSets,
+// CronJobs). Each sub-kind shares the same metrics shape (replicas, pod
+// restarts, CPU/memory across managed pods) but gets a distinct narrative,
+// detail block, and log lines based on `typeLabel`.
+// ---------------------------------------------------------------------------
+
+type WorkloadSubKind = 'replicaset' | 'statefulset' | 'daemonset' | 'cronjob';
+
+const inferWorkloadSubKind = (typeLabel?: string): WorkloadSubKind => {
+  if (!typeLabel) return 'replicaset';
+  const lower = typeLabel.toLowerCase();
+  if (lower.includes('statefulset')) return 'statefulset';
+  if (lower.includes('daemonset')) return 'daemonset';
+  if (lower.includes('cronjob')) return 'cronjob';
+  return 'replicaset';
+};
+
+const WORKLOAD_META: Record<
+  WorkloadSubKind,
+  {
+    kindLabel: string;
+    desiredField: string;
+    desiredValue: (h: EntityHealthVariant) => number;
+    readyField: string;
+    readyValue: (h: EntityHealthVariant) => number;
+    extraDetails: (name: string) => Array<{ id: string; label: string; value: string }>;
+  }
+> = {
+  replicaset: {
+    kindLabel: 'ReplicaSet',
+    desiredField: 'Desired replicas',
+    desiredValue: () => 3,
+    readyField: 'Ready replicas',
+    readyValue: (h) => pick(h, 3, 3, 1),
+    extraDetails: (name) => [
+      { id: 'owner', label: 'Owner', value: `deployment/${name.replace(/^replicaset-/, '')}` },
+      { id: 'selector', label: 'Selector', value: `app=${name.replace(/^replicaset-/, '')}` },
+      { id: 'revision', label: 'Revision', value: '4' },
+    ],
+  },
+  statefulset: {
+    kindLabel: 'StatefulSet',
+    desiredField: 'Desired replicas',
+    desiredValue: () => 3,
+    readyField: 'Ready replicas',
+    readyValue: (h) => pick(h, 3, 2, 0),
+    extraDetails: () => [
+      { id: 'updateStrategy', label: 'Update strategy', value: 'RollingUpdate' },
+      { id: 'volumeTemplate', label: 'Volume claim', value: 'data-pvc (10 Gi)' },
+      { id: 'serviceName', label: 'Headless service', value: 'headless-svc' },
+    ],
+  },
+  daemonset: {
+    kindLabel: 'DaemonSet',
+    desiredField: 'Desired nodes',
+    desiredValue: () => 6,
+    readyField: 'Ready',
+    readyValue: (h) => pick(h, 6, 5, 3),
+    extraDetails: () => [
+      { id: 'updateStrategy', label: 'Update strategy', value: 'RollingUpdate' },
+      { id: 'nodeSelector', label: 'Node selector', value: 'role=worker' },
+      { id: 'maxUnavail', label: 'Max unavailable', value: '1' },
+    ],
+  },
+  cronjob: {
+    kindLabel: 'CronJob',
+    desiredField: 'Schedule',
+    desiredValue: () => 1,
+    readyField: 'Last successful',
+    readyValue: (h) => pick(h, 1, 1, 0),
+    extraDetails: (name) => [
+      { id: 'schedule', label: 'Schedule', value: '*/15 * * * *' },
+      { id: 'lastRun', label: 'Last run', value: pick<string>('healthy' as EntityHealthVariant, `${today} @ 02:30:00`, `${today} @ 02:15:00`, `${today} @ 01:45:00`) },
+      { id: 'concurrency', label: 'Concurrency', value: 'Forbid' },
+      { id: 'activeJobs', label: 'Active jobs', value: name.endsWith('-01') ? '1' : '0' },
+    ],
+  },
+};
+
+const buildWorkloadTemplate = (
+  name: string,
+  h: EntityHealthVariant,
+  typeLabel?: string
+): { overview: EntityOverview; tabs: EntityTabsData } => {
+  const sub = inferWorkloadSubKind(typeLabel);
+  const meta = WORKLOAD_META[sub];
+
+  const tags: EntityTag[] = [
+    { label: 'Kubernetes', color: 'hollow' },
+    { label: kubernetesTagFromTypeLabel(typeLabel, `kubernetes.${sub}`), color: 'hollow' },
+    healthTag(h),
+    { label: 'Production', color: 'hollow' },
+  ];
+
+  const desired = meta.desiredValue(h);
+  const ready = meta.readyValue(h);
+
+  const narratives: Record<
+    WorkloadSubKind,
+    Record<EntityHealthVariant, { headline: string; issues: string[]; nextSteps: string[] }>
+  > = {
+    replicaset: {
+      healthy: {
+        headline: `${name} is healthy — ${desired}/${desired} replicas ready, last rollout 2 days ago.`,
+        issues: [],
+        nextSteps: ['No action required.', 'Monitor replica age for drift from the current Deployment revision.'],
+      },
+      atRisk: {
+        headline: `${name} is at risk — ${ready}/${desired} replicas ready, one pod in Pending state.`,
+        issues: ['1 replica in Pending state — insufficient CPU on target nodes', 'Pod age mismatch: oldest replica 12 h behind newest'],
+        nextSteps: [`Check node resource availability for pods managed by ${name}.`, 'Verify HPA settings if scaling is automatic.'],
+      },
+      unhealthy: {
+        headline: `${name} is unhealthy — only ${ready}/${desired} replicas ready, rollout stalled.`,
+        issues: [`Only ${ready}/${desired} replicas running`, 'Rollout stalled — new pod CrashLoopBackOff', 'Image pull error on registry/payments-worker:v2.1.0-rc1'],
+        nextSteps: [`Roll back the owning Deployment to restore ${name}.`, 'Investigate image pull credentials and tag availability.', 'Page the payments team if the rollback doesn\u2019t stabilise.'],
+      },
+    },
+    statefulset: {
+      healthy: {
+        headline: `${name} is healthy — ${desired}/${desired} pods running, all PVCs bound.`,
+        issues: [],
+        nextSteps: ['No action required.', 'Verify PVC snapshots are running on schedule.'],
+      },
+      atRisk: {
+        headline: `${name} is at risk — ${ready}/${desired} pods ready, one pod restarting.`,
+        issues: ['Pod ordinal-1 restarted twice in the last hour', 'PVC data-1 I/O latency at 18 ms (threshold 10 ms)'],
+        nextSteps: [`Investigate I/O latency on the persistent volume attached to ${name}-1.`, 'Check storage class provisioner logs for errors.'],
+      },
+      unhealthy: {
+        headline: `${name} is unhealthy — ${ready}/${desired} pods ready, rolling update blocked.`,
+        issues: [`${desired - ready} pods stuck in CrashLoopBackOff after config change`, 'PVC data-0 reporting filesystem errors', 'Rolling update paused — partition set to ordinal 2'],
+        nextSteps: [`Revert the ConfigMap change that triggered the update of ${name}.`, 'Inspect filesystem integrity on PVC data-0.', 'Consider a manual partition rollback.'],
+      },
+    },
+    daemonset: {
+      healthy: {
+        headline: `${name} is healthy — running on all ${desired} scheduled nodes.`,
+        issues: [],
+        nextSteps: ['No action required.', 'Confirm new nodes receive the DaemonSet pod within 60 s of joining.'],
+      },
+      atRisk: {
+        headline: `${name} is at risk — ${ready}/${desired} nodes covered, 1 pod evicted.`,
+        issues: ['Pod on node-prod-eu-06 evicted due to node pressure', 'Node taint added — pod rescheduled but not yet Ready'],
+        nextSteps: [`Check node conditions on the node missing ${name}.`, 'Verify tolerations still match current node taints.'],
+      },
+      unhealthy: {
+        headline: `${name} is unhealthy — only ${ready}/${desired} nodes covered, pods failing to start.`,
+        issues: [`${desired - ready} nodes without a running pod`, 'Image pull failures on 2 nodes (registry timeout)', 'Resource limit exceeded on node-prod-eu-02'],
+        nextSteps: [`Investigate registry connectivity from affected nodes for ${name}.`, 'Increase DaemonSet resource requests or free capacity on affected nodes.', 'Escalate to platform team if nodes are drained.'],
+      },
+    },
+    cronjob: {
+      healthy: {
+        headline: `${name} is healthy — last 10 runs completed successfully, next run in 8 min.`,
+        issues: [],
+        nextSteps: ['No action required.', 'Monitor job duration trend for gradual slowdown.'],
+      },
+      atRisk: {
+        headline: `${name} is at risk — last run took 4× longer than average.`,
+        issues: ['Last job duration 12 min (average 3 min)', 'Concurrency policy prevented an overlapping run'],
+        nextSteps: [`Investigate what caused the slow run of ${name}.`, 'Consider adjusting startingDeadlineSeconds if overlap is expected.'],
+      },
+      unhealthy: {
+        headline: `${name} is unhealthy — last 3 runs failed, missed schedule.`,
+        issues: ['Last 3 jobs exited with code 1', 'Missed 2 scheduled runs (startingDeadlineSeconds exceeded)', 'Job pod OOMKilled during data export stage'],
+        nextSteps: [`Check the latest job logs for ${name} to identify the failure.`, 'Increase memory limits on the job pod template.', 'Alert the data-pipeline team if exports are stalled.'],
+      },
+    },
+  };
+
+  const narrative = narratives[sub];
+
+  const overview: EntityOverview = {
+    displayName: name,
+    lastUpdate: `${today} @ 02:47:30`,
+    tags,
+    summary: summaryFromNarrative(h, narrative),
+    goldenSignals: sub === 'cronjob'
+      ? [
+          {
+            id: 'latency',
+            label: 'Success rate',
+            value: pick(h, 100, 90, 40),
+            unit: '%',
+            delta: pick(h, 'All runs succeeded (24 h)', '1 slow run in last 24 h', '3 failures in last 24 h'),
+            color: signalColor(h),
+            trend: trendFor(h, 100, 40, 70),
+            description: 'Percentage of job runs completing successfully.',
+          },
+          {
+            id: 'errorRate',
+            label: 'Avg duration',
+            value: pick(h, 3, 12, 0),
+            unit: 'min',
+            delta: pick(h, 'Stable', '4× slower than average', 'No successful run'),
+            color: signalColor(h),
+            trend: trendFor(h, 3, 12, 71),
+            description: 'Average job run duration.',
+          },
+          {
+            id: 'throughput',
+            label: 'Missed runs',
+            value: pick(h, 0, 0, 2),
+            unit: '',
+            delta: pick(h, 'None in last 7 d', 'None in last 7 d', '2 missed in last 24 h'),
+            color: pick<GoldenSignalLevel>(h, 'success', 'success', 'danger'),
+            trend: trendFor(h, 0, 2, 72),
+            description: 'Scheduled runs that did not start.',
+          },
+        ]
+      : [
+          {
+            id: 'latency',
+            label: sub === 'daemonset' ? 'Nodes covered' : 'Ready replicas',
+            value: ready,
+            unit: `/ ${desired}`,
+            delta: pick(h, `All ${desired} running`, `${desired - ready} not ready`, `${desired - ready} unavailable`),
+            color: signalColor(h),
+            trend: trendFor(h, desired, ready, 70),
+            description: sub === 'daemonset'
+              ? 'Nodes running a pod from this DaemonSet.'
+              : 'Replicas in Ready state out of desired count.',
+          },
+          {
+            id: 'errorRate',
+            label: 'Pod restarts',
+            value: pick(h, 0, 2, 9),
+            unit: '/ 24 h',
+            delta: pick(h, 'No restarts in 24 h', '2 restarts in last hour', '9 restarts in last 30 min'),
+            color: pick<GoldenSignalLevel>(h, 'success', 'warning', 'danger'),
+            trend: trendFor(h, 0, 9, 71),
+            description: 'Total container restarts across managed pods.',
+          },
+          {
+            id: 'throughput',
+            label: 'Avg CPU',
+            value: pick(h, 18, 52, 78),
+            unit: '%',
+            delta: deltaCopy(h),
+            color: signalColor(h),
+            trend: trendFor(h, 18, 78, 72),
+            description: 'Average CPU usage across managed pods.',
+          },
+        ],
+    details: [
+      { id: 'name', label: meta.kindLabel, value: name },
+      { id: 'namespace', label: 'Namespace', value: 'payments' },
+      { id: 'desired', label: meta.desiredField, value: String(desired) },
+      { id: 'ready', label: meta.readyField, value: String(ready) },
+      ...meta.extraDetails(name),
+      { id: 'age', label: 'Age', value: sub === 'cronjob' ? '30 days' : '14 days' },
+    ],
+    ownership: healthyOwnership('payments-team', '#payments-on-call', 'payments-primary'),
+    securityIssueCount: securityIssueCount(h, 'workload'),
+  };
+
+  // --- Metrics ---
+  const metrics: MetricsTabData = sub === 'cronjob'
+    ? {
+        events: eventsByHealth(h),
+        goldenSignals: [
+          {
+            id: 'successRate',
+            label: 'Job success rate',
+            unit: '%',
+            threshold: 90,
+            description: 'Percentage of completed jobs.',
+            series: [series('success', 'Success %', trendFor(h, 100, 40, 73))],
+          },
+          {
+            id: 'duration',
+            label: 'Job duration',
+            unit: 'min',
+            threshold: 10,
+            description: 'Average job run duration.',
+            series: [series('duration', 'Duration', trendFor(h, 3, 12, 74))],
+          },
+        ],
+        otherMetrics: [
+          {
+            id: 'cpuJob',
+            label: 'Job CPU usage',
+            unit: '%',
+            description: 'CPU used by the most recent job pod.',
+            series: [series('cpu-job', 'CPU %', trendFor(h, 25, 88, 75))],
+          },
+          {
+            id: 'memoryJob',
+            label: 'Job memory usage',
+            unit: 'Mi',
+            description: 'Memory used by the most recent job pod.',
+            series: [series('mem-job', 'Memory Mi', trendFor(h, 128, 490, 76))],
+          },
+        ],
+      }
+    : {
+        events: eventsByHealth(h),
+        goldenSignals: [
+          {
+            id: 'replicas',
+            label: sub === 'daemonset' ? 'Nodes covered' : 'Ready replicas',
+            unit: `/ ${desired}`,
+            description: 'Ready vs desired replica count.',
+            series: [series('replicas', 'Ready', trendFor(h, desired, ready, 73))],
+          },
+          {
+            id: 'restarts',
+            label: 'Pod restarts',
+            unit: '',
+            threshold: 5,
+            description: 'Container restarts across managed pods.',
+            series: [series('restarts', 'Restarts', trendFor(h, 0, 9, 74))],
+          },
+          {
+            id: 'cpu',
+            label: 'Avg CPU across pods',
+            unit: '%',
+            threshold: 85,
+            description: 'Average CPU usage across managed pods.',
+            series: [series('cpu', 'CPU %', trendFor(h, 18, 78, 75))],
+          },
+        ],
+        otherMetrics: [
+          {
+            id: 'memory',
+            label: 'Avg memory across pods',
+            unit: '%',
+            threshold: 85,
+            description: 'Average memory usage across managed pods.',
+            series: [series('memory', 'Memory %', trendFor(h, 32, 84, 76))],
+          },
+          {
+            id: 'netIn',
+            label: 'Network in',
+            unit: 'KB/s',
+            description: 'Aggregate inbound throughput across pods.',
+            series: [series('net-in', 'Network in', trendFor(h, 240, 120, 77, 'down'))],
+          },
+        ],
+      };
+
+  // --- Logs ---
+  const workloadLogs: Record<WorkloadSubKind, Record<EntityHealthVariant, LogRow[]>> = {
+    replicaset: {
+      healthy: [
+        log('w-1', `${today} @ 02:47:20`, 'Info', 'body.text', `ReplicaSet ${name}: 3/3 replicas available`),
+        log('w-2', `${today} @ 02:46:50`, 'Info', 'body.text', `Successfully created pod ${name}-7f8b4`),
+        log('w-3', `${today} @ 02:46:30`, 'Info', 'body.text', `Scaled up replica set ${name} to 3 from 2`),
+      ],
+      atRisk: [
+        log('w-1', `${today} @ 02:47:20`, 'Warning', 'body.text', `ReplicaSet ${name}: 2/3 replicas ready — 1 Pending`),
+        log('w-2', `${today} @ 02:46:50`, 'Warning', 'body.text', `Pod ${name}-9c2a1 Pending: Insufficient cpu`),
+        log('w-3', `${today} @ 02:46:30`, 'Info', 'body.text', `Scaled up replica set ${name} to 3`),
+      ],
+      unhealthy: [
+        log('w-1', `${today} @ 02:47:20`, 'Error', 'body.text', `ReplicaSet ${name}: 1/3 replicas ready — rollout stalled`),
+        log('w-2', `${today} @ 02:47:05`, 'Error', 'body.text', `Pod ${name}-a1b2c CrashLoopBackOff: back-off 5m0s`),
+        log('w-3', `${today} @ 02:46:50`, 'Error', 'body.text', `Failed to pull image registry/payments-worker:v2.1.0-rc1: not found`),
+        log('w-4', `${today} @ 02:46:30`, 'Info', 'body.text', `Scaled up replica set ${name} to 3`),
+      ],
+    },
+    statefulset: {
+      healthy: [
+        log('w-1', `${today} @ 02:47:20`, 'Info', 'body.text', `StatefulSet ${name}: 3/3 pods ready, all PVCs bound`),
+        log('w-2', `${today} @ 02:46:50`, 'Info', 'body.text', `Pod ${name}-0 readiness probe succeeded`),
+        log('w-3', `${today} @ 02:46:30`, 'Info', 'body.text', `PVC data-${name}-0: bound to pv-0a1b2c`),
+      ],
+      atRisk: [
+        log('w-1', `${today} @ 02:47:20`, 'Warning', 'body.text', `StatefulSet ${name}: 2/3 pods ready — ordinal-1 restarting`),
+        log('w-2', `${today} @ 02:46:50`, 'Warning', 'body.text', `PVC data-${name}-1 I/O latency 18 ms (threshold 10 ms)`),
+        log('w-3', `${today} @ 02:46:30`, 'Info', 'body.text', `Pod ${name}-1 restarted (exit code 137)`),
+      ],
+      unhealthy: [
+        log('w-1', `${today} @ 02:47:20`, 'Error', 'body.text', `StatefulSet ${name}: 0/3 pods ready — rolling update blocked`),
+        log('w-2', `${today} @ 02:47:05`, 'Error', 'body.text', `Pod ${name}-0 CrashLoopBackOff after ConfigMap change`),
+        log('w-3', `${today} @ 02:46:50`, 'Error', 'body.text', `PVC data-${name}-0: filesystem I/O errors detected`),
+        log('w-4', `${today} @ 02:46:30`, 'Warning', 'body.text', `Rolling update paused at partition ordinal 2`),
+      ],
+    },
+    daemonset: {
+      healthy: [
+        log('w-1', `${today} @ 02:47:20`, 'Info', 'body.text', `DaemonSet ${name}: 6/6 nodes covered`),
+        log('w-2', `${today} @ 02:46:50`, 'Info', 'body.text', `Pod ${name}-k8z9x scheduled on node-prod-eu-06`),
+        log('w-3', `${today} @ 02:46:30`, 'Info', 'body.text', `Rolling update completed for ${name}`),
+      ],
+      atRisk: [
+        log('w-1', `${today} @ 02:47:20`, 'Warning', 'body.text', `DaemonSet ${name}: 5/6 nodes covered — 1 pod evicted`),
+        log('w-2', `${today} @ 02:46:50`, 'Warning', 'body.text', `Pod on node-prod-eu-06 evicted (node memory pressure)`),
+        log('w-3', `${today} @ 02:46:30`, 'Info', 'body.text', `Pod ${name}-t4r2q rescheduled, waiting for Ready`),
+      ],
+      unhealthy: [
+        log('w-1', `${today} @ 02:47:20`, 'Error', 'body.text', `DaemonSet ${name}: 3/6 nodes covered — pods failing to start`),
+        log('w-2', `${today} @ 02:47:05`, 'Error', 'body.text', `ImagePullBackOff on node-prod-eu-03: registry timeout`),
+        log('w-3', `${today} @ 02:46:50`, 'Error', 'body.text', `Pod ${name}-x7a1b exceeded resource limits on node-prod-eu-02`),
+        log('w-4', `${today} @ 02:46:30`, 'Warning', 'body.text', `3 pods not scheduled: insufficient memory`),
+      ],
+    },
+    cronjob: {
+      healthy: [
+        log('w-1', `${today} @ 02:47:20`, 'Info', 'body.text', `CronJob ${name}: last run completed successfully (3 min 12 s)`),
+        log('w-2', `${today} @ 02:46:50`, 'Info', 'body.text', `Job ${name}-28451204 finished — exit code 0`),
+        log('w-3', `${today} @ 02:46:30`, 'Info', 'body.text', `Created job ${name}-28451204 on schedule */15 * * * *`),
+      ],
+      atRisk: [
+        log('w-1', `${today} @ 02:47:20`, 'Warning', 'body.text', `CronJob ${name}: last run took 12 min (avg 3 min)`),
+        log('w-2', `${today} @ 02:46:50`, 'Warning', 'body.text', `Concurrency policy Forbid — skipped overlapping run`),
+        log('w-3', `${today} @ 02:46:30`, 'Info', 'body.text', `Job ${name}-28451204 still running after 10 min`),
+      ],
+      unhealthy: [
+        log('w-1', `${today} @ 02:47:20`, 'Error', 'body.text', `CronJob ${name}: last 3 runs failed — exit code 1`),
+        log('w-2', `${today} @ 02:47:05`, 'Error', 'body.text', `Job ${name}-28451188 OOMKilled during data export stage`),
+        log('w-3', `${today} @ 02:46:50`, 'Error', 'body.text', `Missed 2 scheduled runs (startingDeadlineSeconds exceeded)`),
+        log('w-4', `${today} @ 02:46:30`, 'Info', 'body.text', `Created job ${name}-28451204 on schedule */15 * * * *`),
+      ],
+    },
+  };
+  const logs: LogRow[] = workloadLogs[sub][h];
+
+  // --- Related entities ---
+  const ownerDeployment = name.replace(/^replicaset-/, '').replace(/^statefulset-/, '').replace(/^daemonset-/, '').replace(/^cronjob-/, '');
+  const related: RelatedEntity[] = [
+    ...(sub === 'replicaset'
+      ? [
+          {
+            id: `${name}-rel-deploy`,
+            name: `deployment-${ownerDeployment}`,
+            health: relatedHealth(h) as RelatedEntityHealth,
+            entityType: 'kubernetes.deployment',
+            relation: 'Owned by — manages this ReplicaSet',
+          },
+        ]
+      : []),
+    {
+      id: `${name}-rel-ns`,
+      name: 'payments',
+      health: 'Healthy' as RelatedEntityHealth,
+      entityType: 'kubernetes.namespace',
+      relation: 'Namespace — payments workloads',
+    },
+    {
+      id: `${name}-rel-cluster`,
+      name: 'k8s-eu-prod',
+      health: 'Healthy' as RelatedEntityHealth,
+      entityType: 'kubernetes.cluster',
+      relation: 'Cluster — 48 nodes, 600+ pods',
+    },
+  ];
+
+  const relationships: RelationshipsTabData = {
+    topology: {
+      focalHealth: relatedHealth(h),
+      nodes: [
+        { id: 'focal', label: name, focal: true },
+        ...(sub === 'replicaset'
+          ? [{ id: 'deploy', label: `deployment-${ownerDeployment}` }]
+          : []),
+        { id: 'ns', label: 'payments' },
+        { id: 'cluster', label: 'k8s-eu-prod' },
+      ],
+      edges: [
+        ...(sub === 'replicaset'
+          ? [{ from: 'deploy', to: 'focal', emphasized: true }]
+          : []),
+        { from: 'focal', to: 'ns', emphasized: sub !== 'replicaset' },
+        { from: 'ns', to: 'cluster' },
+      ],
+    },
+    related,
+  };
+
+  // --- Security ---
+  const security = securityByHealth(
+    h,
+    [
+      {
+        id: 'w-cve-1',
+        severity: 'Low',
+        title: `Container image used by ${name} has a low-severity advisory`,
+        detectedAt: 'May 1, 2026, 08:30',
+        source: 'Vulnerabilities',
+        status: 'Triaged',
+      },
+    ],
+    [
+      {
+        id: 'w-cve-h1',
+        severity: 'High',
+        title: `Pods managed by ${name} running privileged containers`,
+        detectedAt: `${today} @ 02:46:55`,
+        source: 'CSPM',
+        status: 'Open',
+      },
+      {
+        id: 'w-cve-h2',
+        severity: 'Medium',
+        title: 'Pod security policy violation: hostNetwork enabled',
+        detectedAt: `${today} @ 02:46:42`,
+        source: 'KSPM',
+        status: 'Open',
+      },
+    ]
+  );
+
+  return {
+    overview,
+    tabs: tabsOf(
+      metrics,
+      logs,
+      alertsByHealth(name, h, 'workload'),
+      relationships,
+      security,
+      { slos: slosByHealth(name, h, 'workload') }
     ),
   };
 };
@@ -4895,6 +5438,11 @@ export const buildKindTemplate = (
       // header tag so the three sub-kinds keep their own identity
       // even though they share this builder.
       result = buildPodTemplate(entityName, health, typeLabel);
+      break;
+    case 'workload':
+      // Workload Management resources — ReplicaSets, StatefulSets,
+      // DaemonSets, CronJobs. typeLabel drives sub-kind selection.
+      result = buildWorkloadTemplate(entityName, health, typeLabel);
       break;
     case 'cluster':
       result = buildClusterTemplate(entityName, health);
