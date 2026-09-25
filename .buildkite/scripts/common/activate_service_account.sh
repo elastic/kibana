@@ -2,11 +2,13 @@
 
 set -euo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
-
 CALL_ARGUMENT="${1:-}"
 GCLOUD_EMAIL_POSTFIX="elastic-kibana-ci.iam.gserviceaccount.com"
 GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
+GCLOUD_WIF_AUDIENCE="//iam.googleapis.com/projects/1003139005402/locations/global/workloadIdentityPools/buildkite/providers/buildkite"
+
+KIBANA_WIF_CREDENTIALS_DIR="${KIBANA_WIF_CREDENTIALS_DIR:-${TMPDIR:-/tmp}/kibana-wif-${BUILDKITE_JOB_ID:-local}}"
+WIF_CREDENTIALS_FILE="$KIBANA_WIF_CREDENTIALS_DIR/credentials.json"
 
 if [[ -z "$CALL_ARGUMENT" ]]; then
   echo "Usage: $0 <bucket_name|email>"
@@ -22,31 +24,34 @@ elif [[ "$CALL_ARGUMENT" == "--logout-gcloud" ]]; then
   if [[ -x "$(command -v gcloud)" ]] && [[ "$(gcloud auth list 2>/dev/null | grep $GCLOUD_SA_PROXY_EMAIL)" != "" ]]; then
     gcloud auth revoke $GCLOUD_SA_PROXY_EMAIL --no-user-output-enabled
   fi
+  rm -rf "$KIBANA_WIF_CREDENTIALS_DIR"
   exit 0
 fi
 
-CURRENT_GCLOUD_USER=$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")
-
-# Verify that the service account proxy is activated
-if [[ "$CURRENT_GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
-    if [[ -x "$(command -v gcloud)" ]]; then
-      if [[ -z "${KIBANA_SERVICE_ACCOUNT_PROXY_KEY:-}" ]]; then
-        echo "KIBANA_SERVICE_ACCOUNT_PROXY_KEY is not set, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
-        exit 1
-      fi
-
-      AUTH_RESULT=$(gcloud auth activate-service-account --key-file="$KIBANA_SERVICE_ACCOUNT_PROXY_KEY" || "FAILURE")
-      if [[ "$AUTH_RESULT" == "FAILURE" ]]; then
-        echo "Failed to activate service account $GCLOUD_SA_PROXY_EMAIL."
-        exit 1
-      else
-        echo "Activated service account $GCLOUD_SA_PROXY_EMAIL"
-      fi
-    else
-      echo "gcloud is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
-      exit 1
-    fi
+if [[ ! -x "$(command -v gcloud)" ]]; then
+  echo "gcloud is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
+  exit 1
 fi
+if [[ ! -x "$(command -v buildkite-agent)" ]]; then
+  echo "buildkite-agent is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
+  exit 1
+fi
+
+GCP_OIDC_TOKEN_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/gcp_oidc_token.sh"
+mkdir -p "$KIBANA_WIF_CREDENTIALS_DIR"
+
+# Request a fresh Buildkite token whenever gcloud refreshes its credentials.
+gcloud iam workload-identity-pools create-cred-config \
+  "${GCLOUD_WIF_AUDIENCE#//iam.googleapis.com/}" \
+  --service-account="$GCLOUD_SA_PROXY_EMAIL" \
+  --executable-command="\"$GCP_OIDC_TOKEN_SCRIPT\"" \
+  --output-file="$WIF_CREDENTIALS_FILE"
+
+if ! gcloud auth login --cred-file="$WIF_CREDENTIALS_FILE" --quiet --no-user-output-enabled; then
+  echo "Failed to activate service account $GCLOUD_SA_PROXY_EMAIL."
+  exit 1
+fi
+echo "Activated service account $GCLOUD_SA_PROXY_EMAIL"
 
 # Check if the arg is a service account e-mail or a bucket name
 EMAIL=""
