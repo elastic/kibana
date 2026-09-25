@@ -41,9 +41,15 @@ EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
 # Per-suite step timeout for suites that legitimately need longer than the 120m default.
 EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
-# The suite's Scout arch/domain, for steps (e.g. the weekly pipeline) that don't pass them.
+# The suite's Scout arch/domain, for steps (e.g. the weekly pipeline) that don't pass them. The
+# suite's domain only applies to its own arch, so an EVAL_SCOUT_ARCH override falls back to the
+# run_suite.sh default domain for that arch instead of e.g. `stateful/observability_complete`.
+_suite_scout_arch="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutArch // "stateful"' 2>/dev/null || echo stateful)"
 EVAL_SCOUT_ARCH="${EVAL_SCOUT_ARCH:-$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutArch // empty' 2>/dev/null || true)}"
-EVAL_SCOUT_DOMAIN="${EVAL_SCOUT_DOMAIN:-$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutDomain // empty' 2>/dev/null || true)}"
+if [[ -z "${EVAL_SCOUT_DOMAIN:-}" && "${EVAL_SCOUT_ARCH:-stateful}" == "$_suite_scout_arch" ]]; then
+  EVAL_SCOUT_DOMAIN="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutDomain // empty' 2>/dev/null || true)"
+fi
+unset _suite_scout_arch
 
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then

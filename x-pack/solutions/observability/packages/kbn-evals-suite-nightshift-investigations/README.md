@@ -480,7 +480,8 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
+- **What runs:** the trace-only investigations. The smoke eval is stateful-only, so it is skipped
+  on the serverless default and snapshot seeding is not checked in CI. The ci-prod Vault config must
   hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
   `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the
   sandbox-api host.
