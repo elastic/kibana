@@ -163,7 +163,9 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            redirectTo: jest.fn(),
+            isLabsShown: false,
+            setIsLabsShown: jest.fn(),
+            maybeRedirect: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -223,7 +225,9 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            redirectTo: jest.fn(),
+            isLabsShown: false,
+            setIsLabsShown: jest.fn(),
+            maybeRedirect: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
