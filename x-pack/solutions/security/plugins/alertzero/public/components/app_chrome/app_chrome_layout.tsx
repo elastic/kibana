@@ -10,10 +10,11 @@ import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
 /**
- * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`)
- * and render their own header band (Watches nav + compact AppHeader).
+ * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`).
  *
  * These must leave `overflow` at `visible`. Any other value makes this element the containing
  * scrollport for `position: sticky` descendants — and because this element sits in a chain of
@@ -21,13 +22,21 @@ import { useLocation } from 'react-router-dom';
  * what kept the Watches subnav scrolling away with the page. The chrome's own stylesheet carries the
  * same warning for `#kibana-body`: "DO NOT ADD ANY OVERFLOW BEHAVIORS HERE / It will break the
  * sticky navigation".
- *
- * The same routes skip the AlertZero app heading so that band is the only header.
  */
 const CHROME_SCROLLED_ROUTES = ['/watches'];
 
 const matchesRoute = (pathname: string, prefixes: string[]) =>
   prefixes.some((prefix) => pathname.startsWith(prefix));
+
+/**
+ * Documentation link for the header overflow (⋮) menu. Together with the globally registered
+ * feedback handler (rendered by the header itself as a "Feedback" entry), this matches the
+ * prototype's overflow menu: Documentation + Give feedback.
+ */
+const useDocumentationLink = (): string | undefined => {
+  const { services } = useKibana<CoreStart>();
+  return services.docLinks?.links.securitySolution.guide;
+};
 
 interface AppChromeLayoutProps {
   children: React.ReactNode;
@@ -38,6 +47,7 @@ interface AppChromeLayoutProps {
  * and left rail (including Launchpad, Dev Tools, Settings, collapse).
  */
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
+  const docLink = useDocumentationLink();
   const { euiTheme } = useEuiTheme();
   const { pathname } = useLocation();
 
@@ -47,7 +57,9 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
 
   return (
     <>
-      {hideAppHeading ? null : <AppHeaderView title="AlertZero" spacing="compact" />}
+      {hideAppHeading ? null : (
+        <AppHeaderView title="AlertZero" spacing="compact" docLink={docLink} />
+      )}
       <div
         css={css`
           display: flex;

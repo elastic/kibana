@@ -24,6 +24,11 @@ async function casesLoader() {
   return m.questions;
 }
 
+async function alertZeroLoader() {
+  const m = await import('./questions/alertzero');
+  return m.questions;
+}
+
 const feedbackRegistry: FeedbackRegistry = new Map([
   [DEFAULT_REGISTRY_ID, () => import('./questions/default').then((m) => m.questions)],
   // Cases has no standalone chrome app of its own — its deep links are embedded in the
@@ -42,6 +47,18 @@ const feedbackRegistry: FeedbackRegistry = new Map([
   ['observability-overview:cases_create', casesLoader],
   ['observability-overview:cases_configure', casesLoader],
   ['observability-overview:cases_templates', casesLoader],
+  // AlertZero is its own chrome app (`alertzero`), so unlike Cases the app id is not
+  // namespaced under a host app. The plain app id is what the header reports on the app root
+  // route, while each deep link registers its own nav link (`alertzero:<deepLinkId>`) and is
+  // therefore reported when the user is on that page. See
+  // x-pack/solutions/security/plugins/alertzero/public/deep_links.ts for the deep link ids.
+  ['alertzero', alertZeroLoader],
+  ['alertzero:alerts', alertZeroLoader],
+  ['alertzero:attacks', alertZeroLoader],
+  ['alertzero:threat_hunt', alertZeroLoader],
+  ['alertzero:streams', alertZeroLoader],
+  ['alertzero:escalations', alertZeroLoader],
+  ['alertzero:watches', alertZeroLoader],
   [
     'ml:anomalyExplorer',
     () => import('./questions/machine_learning').then((m) => m.anomalyExplorerQuestions),
