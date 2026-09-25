@@ -30,18 +30,27 @@ const LOADING_LABEL = i18n.translate('xpack.alertzero.escalationModal.loading', 
   defaultMessage: 'Loading escalation modal…',
 });
 
-const Spinner: React.FC = () => (
+const Spinner: React.FC<{ label: string }> = ({ label }) => (
   <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 120 }}>
     <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="l" aria-label={LOADING_LABEL} />
+      <EuiLoadingSpinner size="l" aria-label={label} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
 
-export const EscalationModalBoundary: React.FC<React.PropsWithChildren> = ({ children }) => (
+export interface EscalationModalBoundaryProps {
+  /** Accessible label for the loading spinner. Defaults to "Loading escalation modal…". */
+  loadingLabel?: string;
+}
+
+export const EscalationModalBoundary: React.FC<
+  React.PropsWithChildren<EscalationModalBoundaryProps>
+> = ({ children, loadingLabel }) => (
   <KibanaErrorBoundaryProvider>
     <KibanaErrorBoundary>
-      <React.Suspense fallback={<Spinner />}>{children}</React.Suspense>
+      <React.Suspense fallback={<Spinner label={loadingLabel ?? LOADING_LABEL} />}>
+        {children}
+      </React.Suspense>
     </KibanaErrorBoundary>
   </KibanaErrorBoundaryProvider>
 );
