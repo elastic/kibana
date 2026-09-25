@@ -44,6 +44,7 @@ const updateInvestigationBodySchema = z.object({
   blind_spots: orAbsent(investigationStateSchema.shape.blind_spots.unwrap()),
   trigger_feedback: orAbsent(z.array(triggerFeedbackSchema).max(MAX_TRIGGER_FEEDBACK)),
   conversation_id: orAbsent(z.string().max(MAX_KEYWORD_LENGTH)),
+  execution_id: orAbsent(z.string().max(MAX_KEYWORD_LENGTH)),
   impact: orAbsent(investigationImpactSchema),
 });
 
@@ -69,10 +70,10 @@ export const updateInvestigationRoute = createNightshiftInvestigationsServerRout
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     try {
-      await client.update(params.path.id, params.body);
+      const acknowledged = (await client.update(params.path.id, params.body)) !== false;
+      return { acknowledged };
     } catch (error) {
       rethrowInvestigationClientError(error);
     }
-    return { acknowledged: true };
   },
 });

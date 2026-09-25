@@ -14,6 +14,25 @@ import type {
   Severity,
 } from '../../common';
 
+export interface InvestigationAdmission {
+  idempotency_key: string;
+  /**
+   * Absent between the moment the admission is reserved and the moment its workflow run starts.
+   * The reservation is what makes admission idempotent across a redelivery that arrives while the
+   * first one is still starting its run.
+   */
+  execution_id?: string;
+}
+
+export interface InvestigationReplyTarget {
+  surface: 'slack';
+  tenant_key: string;
+  channel: string;
+  thread_ts: string;
+  /** Bot message to update for later successful rounds. Absent until the first post succeeds. */
+  message_ts?: string;
+}
+
 export interface InvestigationAttributes extends InvestigationStructuredOutput {
   title: string;
   status: InvestigationStatus;
@@ -28,6 +47,10 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   executed_by?: string;
   error?: string;
   conversation_id?: string;
+  latest_execution_id?: string;
+  source_keys?: string[];
+  admissions?: InvestigationAdmission[];
+  reply_target?: InvestigationReplyTarget;
 }
 
 export interface InvestigationRecord extends InvestigationAttributes {
@@ -52,6 +75,10 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   executed_by?: string;
   error?: string;
   conversation_id?: string;
+  latest_execution_id?: string;
+  source_keys?: string[];
+  admissions?: InvestigationAdmission[];
+  reply_target?: InvestigationReplyTarget;
 }
 
 export interface FindInvestigationsQuery<
@@ -66,6 +93,7 @@ export interface FindInvestigationsQuery<
    */
   query?: string;
   concurrencyKey?: string;
+  sourceKey?: string;
   createdAfter?: string;
   createdBefore?: string;
   startedAfter?: string;

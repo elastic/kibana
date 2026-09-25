@@ -8,16 +8,22 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import {
   createNightshiftInvestigationsRepositoryClient,
   type NightshiftInvestigationsRepositoryClient,
 } from './api';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers';
+import { NIGHTSHIFT_INVESTIGATION_ATTACHMENT_TYPE } from '../common/investigation_attachment';
 
 export interface NightshiftInvestigationsPublicSetupDeps {
   share: SharePluginSetup;
   workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+}
+
+export interface NightshiftInvestigationsPublicStartDeps {
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type NightshiftInvestigationsPublicSetup = void;
@@ -43,7 +49,23 @@ export class NightshiftInvestigationsPublicPlugin
     share.url.locators.create(new InvestigationLocatorDefinition());
   }
 
-  start(core: CoreStart): NightshiftInvestigationsPublicStart {
+  start(
+    core: CoreStart,
+    { agentBuilder }: NightshiftInvestigationsPublicStartDeps
+  ): NightshiftInvestigationsPublicStart {
+    // Async so the Canvas renderer and its EUI/markdown dependencies stay off page load; it is
+    // only needed once a conversation carrying an investigation attachment is opened.
+    if (agentBuilder) {
+      void import('./attachment_types/investigation_attachment').then(
+        ({ investigationAttachmentDefinition }) => {
+          agentBuilder.attachments.addAttachmentType(
+            NIGHTSHIFT_INVESTIGATION_ATTACHMENT_TYPE,
+            investigationAttachmentDefinition
+          );
+        }
+      );
+    }
+
     return {
       investigationsClient: createNightshiftInvestigationsRepositoryClient(core),
     };

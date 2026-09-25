@@ -151,8 +151,8 @@ describe('SlackAppService', () => {
         })
       );
 
-      // Read-only, least-privilege: direct ES read on observability signals only (queried as
-      // this key), everything else (Streams, Significant Events, connectors) via Kibana features.
+      // Least-privilege: direct ES read on observability signals only (queried as this key),
+      // everything else (Streams, Significant Events, connectors) via Kibana features.
       const { kibana_role_descriptors: descriptors } = grantAsInternalUser.mock.calls[0][1];
       expect(descriptors.nightshift_relay_agent_builder).toEqual({
         elasticsearch: {
@@ -176,6 +176,8 @@ describe('SlackAppService', () => {
               workflowsManagement: ['read'],
             },
           },
+          // Write only where Relay delivers inbound events, not in every space.
+          { spaces: ['default'], feature: { agentBuilder: ['all'] } },
         ],
       });
       // The minted key is the caller-supplied credential; no relay-minted

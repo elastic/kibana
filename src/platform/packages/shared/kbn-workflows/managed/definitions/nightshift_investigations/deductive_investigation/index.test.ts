@@ -56,6 +56,8 @@ describe('deductive investigation workflow', () => {
       'investigate',
       'persist_investigation_completed',
       'persist_investigation_failed',
+      'update_investigation_attachment',
+      'create_investigation_attachment',
       'emit_investigation_completed',
       'emit_investigation_failed',
       'fail_investigation',
@@ -69,11 +71,58 @@ describe('deductive investigation workflow', () => {
       expect.objectContaining({
         status: 'completed',
         conversation_id: '${{ steps.investigate.output.conversation_id }}',
+        execution_id: '{{ execution.id }}',
       })
     );
     expect(persistCompleted.with?.body).not.toHaveProperty('trigger_feedback');
     expect(persistCompleted.with?.body).not.toHaveProperty('impact');
     expect(persistCompleted.with?.body).not.toHaveProperty('blind_spots');
+  });
+
+  it('queues inputs by stable investigation and updates one attachment', () => {
+    const parsed = parse(DEDUCTIVE_INVESTIGATION_WORKFLOW.yaml) as {
+      settings: { concurrency: { strategy: string; key: string; max: number } };
+    };
+    expect(parsed.settings.concurrency).toEqual({
+      strategy: 'queue',
+      key: 'deductive-investigation-{{ inputs.investigation_id | default: inputs.concurrency_key | default: execution.id }}',
+      max: 1,
+    });
+    // The findings are attached under the investigation's own type, which is the only attachment
+    // type that renders them on a Canvas; `text` would only ever render as an inline code block.
+    const attachmentData = {
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}',
+      state: '${{ steps.investigate.output.structured_output }}',
+    };
+    expect(requireStep('update_investigation_attachment').with).toEqual(
+      expect.objectContaining({
+        attachment_id: 'nightshift-investigation',
+        data: attachmentData,
+      })
+    );
+    expect(requireStep('update_investigation_attachment').if).toContain('acknowledged == true');
+    expect(requireStep('update_investigation_attachment')['on-failure']).toEqual(
+      expect.objectContaining({ retry: expect.any(Object), continue: true })
+    );
+    expect(requireStep('create_investigation_attachment').with).toEqual(
+      expect.objectContaining({
+        id: 'nightshift-investigation',
+        type: 'platform.nightshift_investigation',
+        data: attachmentData,
+        render_inline: true,
+      })
+    );
+    // A transient update failure must not fall through to a create that cannot succeed.
+    expect(requireStep('create_investigation_attachment').if).toContain(
+      "steps.update_investigation_attachment.error.message contains 'not found'"
+    );
+  });
+
+  it('hands the admission key to _ensure so the run can claim its Slack admission', () => {
+    expect(requireStep('persist_investigation_started').with?.body).toEqual({
+      execution_id: '{{ execution.id }}',
+      admission_key: '{{ inputs.context.admission_key }}',
+    });
   });
 
   it('space-scopes the path of every kibana.request step', () => {

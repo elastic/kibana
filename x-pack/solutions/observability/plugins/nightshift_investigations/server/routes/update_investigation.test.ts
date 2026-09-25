@@ -46,6 +46,7 @@ describe('updateInvestigation body schema', () => {
       conclusion: undefined,
       severity: undefined,
       conversation_id: undefined,
+      execution_id: undefined,
       error: undefined,
       hypotheses: undefined,
       recommendations: undefined,
@@ -135,6 +136,14 @@ describe('updateInvestigation handler', () => {
       acknowledged: true,
     });
     expect(update).toHaveBeenCalledWith('exec-1', body);
+  });
+
+  it('reports a stale execution update as unacknowledged', async () => {
+    const update = jest.fn().mockResolvedValue(false);
+
+    await expect(
+      handler(makeResources({ status: 'completed', execution_id: 'old-exec' }, update) as never)
+    ).resolves.toEqual({ acknowledged: false });
   });
 
   it.each([

@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   RelayRequestError,
   type InMemoryConnector,
@@ -232,7 +233,7 @@ export class SlackAppService {
     // only happens on success.
     const existingConnection = await this.readConnection(soClient);
 
-    // Mint a managed, read-only, least-privilege ES API key for the agent. The key
+    // Mint a managed, least-privilege ES API key for the agent. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
     // outlive their owner). Because the grant intersects with the owner's privileges, the
     // connecting user must themselves hold every privilege below or the key is silently
@@ -245,6 +246,9 @@ export class SlackAppService {
     //   every engine via includeIn), Streams data through `streams` (read), and
     //   connectors/LLM through `actions` (read). Those go via the internal Kibana client,
     //   so no grants on system/dot indices (unsupported in serverless) are needed.
+    // - Agent Builder `all` is granted only in the default space: Relay posts inbound events
+    //   to the unprefixed Kibana URL, so that is the only space whose admitted workflows
+    //   persist their lifecycle through the write-protected Nightshift routes.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
@@ -270,6 +274,10 @@ export class SlackAppService {
                 actions: ['read'],
                 workflowsManagement: ['read'],
               },
+            },
+            {
+              spaces: [DEFAULT_SPACE_ID],
+              feature: { agentBuilder: ['all'] },
             },
           ],
         },
@@ -309,7 +317,6 @@ export class SlackAppService {
       await this.invalidateApiKey(apiKeyResult.id, 'after Relay install error');
       throw error;
     }
-
     // The new key has taken over — safe to invalidate whatever it's replacing now.
     if (existingConnection?.apiKeyId) {
       await this.invalidateApiKey(existingConnection.apiKeyId, 'after successful reconnect');

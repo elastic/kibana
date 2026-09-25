@@ -16,4 +16,5 @@ export type {
   RelayInstallResponse,
   RelayTriggerInput,
   RelayTriggerResponse,
+  RelayUpdateInput,
 } from './types';

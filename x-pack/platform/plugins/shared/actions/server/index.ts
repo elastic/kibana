@@ -52,6 +52,7 @@ export type {
   RelayInstallResponse,
   RelayTriggerInput,
   RelayTriggerResponse,
+  RelayUpdateInput,
 } from './lib/relay';
 
 export {
