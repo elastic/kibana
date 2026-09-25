@@ -77,7 +77,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         } as never
       );
 
-      expect(result).toEqual({ enabled: false });
+      expect(result).toEqual({ isEnabled: false });
       expect(registerOwner).not.toHaveBeenCalled();
       expect(features.registerKibanaFeature).not.toHaveBeenCalled();
       expect(registerRoutes).not.toHaveBeenCalled();
@@ -138,7 +138,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         } as never
       );
 
-      expect(result).toEqual({ enabled: true });
+      expect(result).toEqual({ isEnabled: true });
       expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
       expect(features.registerKibanaFeature).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -168,7 +168,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           features: { registerKibanaFeature: jest.fn() },
           workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
           workflowsManagement: { management: {} },
-          agentBuilder: { tools: { register: jest.fn() } },
+          agentBuilder: { tools: { register: jest.fn() }, attachments: { registerType: jest.fn() } },
         } as never
       );
 
@@ -188,7 +188,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           features: { registerKibanaFeature: jest.fn() },
           workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
           workflowsManagement: { management: {} },
-          agentBuilder: { tools: { register: jest.fn() } },
+          agentBuilder: { tools: { register: jest.fn() }, attachments: { registerType: jest.fn() } },
         } as never
       );
 

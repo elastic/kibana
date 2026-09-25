@@ -248,8 +248,16 @@ export class AlertZeroPublicPlugin
                     )
                 : undefined,
             });
+
+            registerEscalationTemplateUI({
+              conversationTemplates: startDeps.agentBuilder.conversationTemplates,
+              templateId: TEMPLATE_ID_ESCALATION,
+              name: ESCALATION_TEMPLATE_NAME,
+              icon: 'warning',
+              renderAssignees,
+            });
           } catch (err) {
-            Promise.reject(err);
+            return Promise.reject(err);
           }
         },
       });
@@ -268,14 +276,6 @@ export class AlertZeroPublicPlugin
       },
     }).catch((error) => {
       this.logger.error('Failed to register AlertZero attachment UI definitions', error);
-    });
-
-    registerEscalationTemplateUI({
-      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
-      templateId: TEMPLATE_ID_ESCALATION,
-      name: ESCALATION_TEMPLATE_NAME,
-      icon: 'warning',
-      renderAssignees,
     });
 
     return {};

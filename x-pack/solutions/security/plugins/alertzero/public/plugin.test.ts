@@ -150,8 +150,10 @@ describe('AlertZeroPublicPlugin conversation template UI registration', () => {
     setting$.next(false);
     setting$.next(true);
 
+    // Both investigation and escalation templates are registered exactly once on the first `true`
+    // emission; subsequent `true` emissions are ignored because of `take(1)`.
     expect(agentBuilder.conversationTemplates.registerTemplateUIDefinition).toHaveBeenCalledTimes(
-      1
+      2
     );
   });
 
