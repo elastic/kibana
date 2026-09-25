@@ -27,6 +27,7 @@ import {
   isSubagentRosterUpdatedStep,
   isToolCallStep,
   TimelineEventType,
+  type ExecutionStepEvent,
   type SubagentRosterEntry,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
@@ -392,7 +393,8 @@ export const createAgentGraph = ({
  */
 const getPriorPurposes = (processedConversation: ProcessedConversation): Record<string, string> => {
   const step = processedConversation.timeline
-    .flatMap((event) => (event.type === TimelineEventType.executionStep ? [event.data.step] : []))
+    .filter((event): event is ExecutionStepEvent => event.type === TimelineEventType.executionStep)
+    .map((event) => event.data.step)
     .findLast(isSubagentRosterUpdatedStep);
 
   if (!step) return {};

@@ -6,12 +6,14 @@
  */
 
 import type { ConversationEventTypeDefinition } from '@kbn/agent-builder-server/conversation_events';
+import type { ConversationEventTypesService } from '@kbn/agent-builder-server/runner';
 
 export interface ConversationEventsServiceSetup {
   register(definition: ConversationEventTypeDefinition): void;
 }
 
-export interface ConversationEventsServiceStart {
-  getDefinition(type: string): ConversationEventTypeDefinition | undefined;
-  list(): ConversationEventTypeDefinition[];
-}
+/**
+ * Read access to the registered event types. The shape is owned by the package
+ * (`ConversationEventTypesService`) so the agent runtime and this service cannot drift.
+ */
+export type ConversationEventsServiceStart = ConversationEventTypesService;

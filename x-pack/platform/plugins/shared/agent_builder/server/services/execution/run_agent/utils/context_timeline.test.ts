@@ -16,6 +16,7 @@ import {
   T0,
   abortedExec0Timeline,
   completedRoundTimeline,
+  customEventFixture,
   eventsNativeConversation,
   failedExec0Timeline,
   pausedAndResumedRoundTimeline,
@@ -23,21 +24,37 @@ import {
   timelineFromRounds,
 } from '../../../../test_utils/timeline';
 import {
+  customEvents,
   dropTimelineRounds,
   eventsForContext,
   groupTimelineEntries,
   groupTimelineRounds,
   isAwaitingPrompt,
   isInterruptedRound,
+  isTimelineCustomEvent,
   isTimelineRound,
   isTimelineStandaloneUserMessage,
   lastExecutionTerminal,
   roundInterruption,
   roundResponse,
+  sliceTimelineRounds,
+  type ContextTimelineEvent,
+  type TimelineEntry,
 } from './context_timeline';
 
 const userActor = { type: EventActorType.user, id: 'u1', username: 'user1' };
 const agentActor = { type: EventActorType.agent, id: 'agent-1' };
+
+/** The id of the event an entry is ordered by. */
+const entryId = (entry: TimelineEntry<ContextTimelineEvent>): string =>
+  isTimelineCustomEvent(entry) ? entry.event.id : entry.userMessage.id;
+
+/** A completed round's raw timeline events (alias for readability). */
+const completedRoundEvents = completedRoundTimeline;
+
+/** A failed initial execution's raw timeline events. */
+const failedExecutionEvents = (id: string, at: string): TimelineEvent[] =>
+  failedExec0Timeline(id, [], at);
 
 /** A round whose event ids follow no scheme: ownership is only expressed through the trigger link. */
 const independentIdsRound = (): TimelineEvent[] =>
@@ -223,5 +240,156 @@ describe('lastExecutionTerminal (re-export)', () => {
 
   it('is undefined for an empty timeline', () => {
     expect(lastExecutionTerminal([])).toBeUndefined();
+  });
+});
+
+describe('groupTimelineEntries with custom events', () => {
+  const timeline: ContextTimelineEvent[] = [
+    ...completedRoundEvents('a', '2026-01-01T00:00:00.000Z'),
+    customEventFixture({ id: 'note', created_at: '2026-01-01T00:01:00.000Z' }),
+    ...completedRoundEvents('b', '2026-01-01T00:02:00.000Z'),
+  ];
+
+  it('yields a custom entry between the rounds, in timeline order', () => {
+    const entries = groupTimelineEntries(timeline);
+
+    expect(entries.map(entryId)).toEqual(['a::user_message', 'note', 'b::user_message']);
+    expect(isTimelineCustomEvent(entries[1])).toBe(true);
+    expect(isTimelineRound(entries[1])).toBe(false);
+    expect(isTimelineStandaloneUserMessage(entries[1])).toBe(false);
+  });
+
+  it('breaks a timestamp tie with the round by stored position', () => {
+    const sameInstant = '2026-01-01T00:00:00.000Z';
+    const stored: ContextTimelineEvent[] = [
+      ...completedRoundEvents('a', sameInstant),
+      customEventFixture({ id: 'after', created_at: sameInstant }),
+    ];
+    const reversed: ContextTimelineEvent[] = [
+      customEventFixture({ id: 'before', created_at: sameInstant }),
+      ...completedRoundEvents('a', sameInstant),
+    ];
+
+    expect(groupTimelineEntries(stored).map((entry) => isTimelineCustomEvent(entry))).toEqual([
+      false,
+      true,
+    ]);
+    expect(groupTimelineEntries(reversed).map((entry) => isTimelineCustomEvent(entry))).toEqual([
+      true,
+      false,
+    ]);
+  });
+
+  it('breaks a timestamp tie with a failed execution and a standalone message by stored position', () => {
+    const sameInstant = '2026-01-01T00:00:00.000Z';
+    const standalone: TimelineEvent = {
+      id: 'msg',
+      type: TimelineEventType.userMessage,
+      created_at: sameInstant,
+      actor: userActor,
+      data: { message: 'hi' },
+    };
+    const stored: ContextTimelineEvent[] = [
+      ...failedExecutionEvents('f', sameInstant),
+      customEventFixture({ id: 'n1', created_at: sameInstant }),
+      standalone,
+      customEventFixture({ id: 'n2', created_at: sameInstant }),
+    ];
+
+    expect(groupTimelineEntries(stored).map(entryId)).toEqual([
+      'f::user_message',
+      'n1',
+      'msg',
+      'n2',
+    ]);
+    expect(groupTimelineEntries([...stored].reverse()).map(entryId)).toEqual([
+      'n2',
+      'msg',
+      'n1',
+      'f::user_message',
+    ]);
+  });
+
+  it('interleaves several custom events with rounds, failures and messages by timestamp', () => {
+    const at = (minute: number) => `2026-01-01T00:${String(minute).padStart(2, '0')}:00.000Z`;
+    const standalone: TimelineEvent = {
+      id: 'msg',
+      type: TimelineEventType.userMessage,
+      created_at: at(5),
+      actor: userActor,
+      data: { message: 'hi' },
+    };
+    // custom events stored at the tail, as addCustomEvents appends them
+    const stored: ContextTimelineEvent[] = [
+      ...completedRoundEvents('a', at(0)),
+      ...failedExecutionEvents('f', at(2)),
+      ...completedRoundEvents('b', at(4)),
+      standalone,
+      ...completedRoundEvents('c', at(6)),
+      customEventFixture({ id: 'n3', created_at: at(3) }),
+      customEventFixture({ id: 'n1', created_at: at(1) }),
+      customEventFixture({ id: 'n7', created_at: at(7) }),
+    ];
+
+    const entries = groupTimelineEntries(stored);
+
+    expect(entries.map(entryId)).toEqual([
+      'a::user_message',
+      'n1',
+      'f::user_message',
+      'n3',
+      'b::user_message',
+      'msg',
+      'c::user_message',
+      'n7',
+    ]);
+    expect(entries.map((entry) => isTimelineCustomEvent(entry))).toEqual([
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+    ]);
+    expect(groupTimelineRounds(stored).map((round) => round.id)).toEqual(['a', 'f', 'b', 'c']);
+  });
+
+  it('is ignored by groupTimelineRounds and selected by customEvents', () => {
+    expect(groupTimelineRounds(timeline).map((round) => round.id)).toEqual(['a', 'b']);
+    expect(customEvents(timeline).map((event) => event.id)).toEqual(['note']);
+  });
+});
+
+describe('sliceTimelineRounds with custom events', () => {
+  const timeline: ContextTimelineEvent[] = [
+    customEventFixture({ id: 'n0', created_at: '2025-12-31T00:00:00.000Z' }),
+    ...completedRoundEvents('a', '2026-01-01T00:00:00.000Z'),
+    customEventFixture({ id: 'n1', created_at: '2026-01-01T00:01:00.000Z' }),
+    ...completedRoundEvents('b', '2026-01-01T00:02:00.000Z'),
+    customEventFixture({ id: 'n2', created_at: '2026-01-01T00:03:00.000Z' }),
+    ...completedRoundEvents('c', '2026-01-01T00:04:00.000Z'),
+  ];
+  const entryIds = (events: ContextTimelineEvent[]) =>
+    Array.from(new Set(events.map((event) => event.id.split('::')[0])));
+
+  it('keeps every custom event when slicing from the start', () => {
+    expect(entryIds(sliceTimelineRounds(timeline, 0))).toEqual(['n0', 'a', 'n1', 'b', 'n2', 'c']);
+  });
+
+  it('drops custom events older than the first kept round (the cut) and keeps the newer ones', () => {
+    expect(entryIds(sliceTimelineRounds(timeline, 1))).toEqual(['b', 'n2', 'c']);
+  });
+
+  it('keeps custom events older than the first excluded round when an end bound is given', () => {
+    expect(entryIds(sliceTimelineRounds(timeline, 0, 2))).toEqual(['n0', 'a', 'n1', 'b', 'n2']);
+  });
+
+  it('when the cut removes every round, keeps only custom events after the last removed round ended', () => {
+    const late = customEventFixture({ id: 'n3', created_at: '2026-01-01T00:05:00.000Z' });
+
+    expect(entryIds(sliceTimelineRounds([...timeline, late], 3))).toEqual(['n3']);
+    expect(entryIds(sliceTimelineRounds(timeline, 3))).toEqual([]);
   });
 });

@@ -19,9 +19,19 @@ import {
   pausedAndResumedRoundTimeline,
   timelineFromRounds,
 } from '../../../../test_utils/timeline';
-import { eventsForContext, groupTimelineEntries, groupTimelineRounds } from './context_timeline';
+import {
+  eventsForContext,
+  groupTimelineEntries,
+  groupTimelineRounds,
+  isTimelineCustomEvent,
+  type TimelineEntry,
+  type ContextTimelineEvent,
+} from './context_timeline';
 import { prepareConversation } from './prepare_conversation';
 import { prepareMessages } from './to_langchain_messages';
+
+const entryId = (entry: TimelineEntry<ContextTimelineEvent>): string =>
+  isTimelineCustomEvent(entry) ? entry.event.id : entry.userMessage.id;
 
 const message = (id: string, text = id): UserMessageEvent => ({
   id,
@@ -76,11 +86,7 @@ describe('user messages', () => {
         { ...message('b'), created_at: timestamp },
       ])
     );
-    expect(groupTimelineEntries(timeline).map((entry) => entry.userMessage.id)).toEqual([
-      'a',
-      'round::user_message',
-      'b',
-    ]);
+    expect(groupTimelineEntries(timeline).map(entryId)).toEqual(['a', 'round::user_message', 'b']);
   });
 
   it('does not treat running execution triggers or receipt-time input as standalone', () => {
@@ -91,7 +97,7 @@ describe('user messages', () => {
     const normalized = eventsForContext(
       eventsNativeConversation([...running, receipt, message('a')])
     );
-    expect(groupTimelineEntries(normalized).map((entry) => entry.userMessage.id)).toEqual(['a']);
+    expect(groupTimelineEntries(normalized).map(entryId)).toEqual(['a']);
   });
 
   it('keeps user messages through HITL normalization', () => {

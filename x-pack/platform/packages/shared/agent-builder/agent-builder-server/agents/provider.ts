@@ -37,6 +37,7 @@ import type {
   SkillsService,
   PluginsService,
   RenderersService,
+  ConversationEventTypesService,
   ToolManager,
   TodoStateManager,
   IFilesystemService,
@@ -230,6 +231,13 @@ export interface AgentHandlerContext {
    * runner (treated as no renderers).
    */
   renderers?: RenderersService;
+  /**
+   * Conversation event types service, giving read access to the custom conversation
+   * event types registered in agent builder (used to format stored events for the LLM).
+   * Optional: absent when the context is constructed outside agentBuilder's runner
+   * (custom events are then omitted from the agent context).
+   */
+  conversationEvents?: ConversationEventTypesService;
   /**
    * Skills service to interact with skills.
    */

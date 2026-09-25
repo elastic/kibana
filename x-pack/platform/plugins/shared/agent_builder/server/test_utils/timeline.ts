@@ -7,6 +7,7 @@
 
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
   ExecutionOutcome,
@@ -26,7 +27,10 @@ import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
 import { eventsToRounds } from '../services/conversation/client/events_to_rounds';
 import { roundsToEvents } from '../services/conversation/client/rounds_to_events';
-import type { ProcessedTimelineEvent } from '../services/execution/run_agent/utils/context_timeline';
+import type {
+  ProcessedCustomEvent,
+  ProcessedTimelineEvent,
+} from '../services/execution/run_agent/utils/context_timeline';
 
 /** A round fixture whose input is already processed for the agent. */
 export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
@@ -373,6 +377,33 @@ export const danglingResponseTimeline = (roundId = 'r1'): TimelineEvent[] => [
   ...pausedRoundTimeline(roundId),
   promptResponseEvent(roundId, 1, `${roundId}::execution_terminated`),
 ];
+
+/** A stored custom (registered) conversation event: owned by no execution, ordered by timestamp. */
+export const customEventFixture = ({
+  id,
+  type = 'text_note',
+  created_at,
+  data = { text: `${id} note` },
+}: {
+  id: string;
+  type?: string;
+  created_at: string;
+  data?: Record<string, unknown>;
+}): ConversationEvent => ({ id, type, created_at, actor: userActor, data });
+
+/** A custom event with its LLM representation resolved, as `prepareConversation` emits it. */
+export const processedCustomEventFixture = ({
+  representation,
+  ...event
+}: Parameters<typeof customEventFixture>[0] & {
+  representation?: string;
+}): ProcessedCustomEvent => {
+  const data = event.data ?? { text: `${event.id} note` };
+  return {
+    ...customEventFixture({ ...event, data }),
+    representation: { type: 'text', value: representation ?? String(data.text ?? '') },
+  };
+};
 
 /**
  * A round `r1` paused on an ask_user_question (exec_0), answered with option `a` (choice 0), and
