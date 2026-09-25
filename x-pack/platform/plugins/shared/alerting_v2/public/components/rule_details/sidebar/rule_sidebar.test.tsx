@@ -6,25 +6,29 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { render, screen } from '@testing-library/react';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleProvider } from '../rule_context';
 import { RuleSidebar } from './rule_sidebar';
 
-jest.mock('./rule_sidebar_conditions_tab', () => ({
-  RuleSidebarConditionsTab: () => <div data-test-subj="mockConditionsTab" />,
+let capturedSummaryRule: Record<string, unknown> = {};
+
+jest.mock('../../rule/rule_summary', () => ({
+  RuleSummaryBody: ({
+    rule,
+    children,
+  }: {
+    rule: Record<string, unknown>;
+    children: React.ReactNode;
+  }) => {
+    capturedSummaryRule = rule;
+    return <div data-test-subj="mockRuleSummaryBody">{children}</div>;
+  },
+  RuleSummaryAboutSection: () => <div data-test-subj="mockAboutSection" />,
+  RuleSummaryInvestigationSection: () => <div data-test-subj="mockInvestigationSection" />,
 }));
 
-jest.mock('./rule_sidebar_preview_tab', () => ({
-  RuleSidebarPreviewTab: () => <div data-test-subj="mockPreviewTab" />,
-}));
-
-jest.mock('./rule_sidebar_runbook_tab', () => ({
-  RuleSidebarRunbookTab: () => <div data-test-subj="mockRunbookTab" />,
-}));
-
-const baseRule: RuleApiResponse = {
+const rule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
@@ -38,63 +42,21 @@ const baseRule: RuleApiResponse = {
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
-import type { RuleSidebarProps } from './rule_sidebar';
-
-const renderSidebar = (props: RuleSidebarProps = {}) =>
-  render(
-    <I18nProvider>
-      <RuleProvider rule={baseRule}>
-        <RuleSidebar {...props} />
-      </RuleProvider>
-    </I18nProvider>
-  );
-
 describe('RuleSidebar', () => {
-  it('renders two tabs by default (no query preview)', () => {
-    renderSidebar();
-    expect(screen.getByTestId('sidebarTabGroup')).toBeInTheDocument();
-    expect(screen.getByText('Conditions')).toBeInTheDocument();
-    expect(screen.queryByText('Query preview')).not.toBeInTheDocument();
-    expect(screen.getByText('Runbook')).toBeInTheDocument();
+  beforeEach(() => {
+    capturedSummaryRule = {};
   });
 
-  it('renders three tabs when showQueryPreview is true', () => {
-    renderSidebar({ showQueryPreview: true });
-    expect(screen.getByText('Conditions')).toBeInTheDocument();
-    expect(screen.getByText('Query preview')).toBeInTheDocument();
-    expect(screen.getByText('Runbook')).toBeInTheDocument();
-  });
+  it('renders the details-page summary composition with the loaded rule', () => {
+    render(
+      <RuleProvider rule={rule}>
+        <RuleSidebar />
+      </RuleProvider>
+    );
 
-  it('shows conditions tab by default', () => {
-    renderSidebar();
-    expect(screen.getByTestId('mockConditionsTab')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockPreviewTab')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mockRunbookTab')).not.toBeInTheDocument();
-  });
-
-  it('switches to query preview tab when clicked (showQueryPreview)', () => {
-    renderSidebar({ showQueryPreview: true });
-    fireEvent.click(screen.getByText('Query preview'));
-    expect(screen.getByTestId('mockPreviewTab')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockConditionsTab')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mockRunbookTab')).not.toBeInTheDocument();
-  });
-
-  it('switches to runbook tab when clicked', () => {
-    renderSidebar();
-    fireEvent.click(screen.getByText('Runbook'));
-    expect(screen.getByTestId('mockRunbookTab')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockConditionsTab')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mockPreviewTab')).not.toBeInTheDocument();
-  });
-
-  it('switches back to conditions from query preview', () => {
-    renderSidebar({ showQueryPreview: true });
-    fireEvent.click(screen.getByText('Query preview'));
-    expect(screen.getByTestId('mockPreviewTab')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('Conditions'));
-    expect(screen.getByTestId('mockConditionsTab')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockPreviewTab')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockRuleSummaryBody')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAboutSection')).toBeInTheDocument();
+    expect(screen.getByTestId('mockInvestigationSection')).toBeInTheDocument();
+    expect(capturedSummaryRule).toBe(rule);
   });
 });

@@ -23,7 +23,13 @@ import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { UserCapabilities } from '../../../../services/user_capabilities';
 import { EMPTY_VALUE } from '../../../../utils/rule_display';
-import { RuleSummaryBody } from '../../rule_summary';
+import {
+  RuleSummaryAboutSection,
+  RuleSummaryActionPoliciesSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+  RuleSummaryInvestigationSection,
+} from '../../rule_summary';
 
 const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
 
@@ -199,7 +205,12 @@ export const RuleSummaryFlyout = ({
         </Header>
 
         <Body>
-          <RuleSummaryBody rule={rule} />
+          <RuleSummaryBody rule={rule}>
+            <RuleSummaryAboutSection />
+            <RuleSummaryInvestigationSection />
+            <RuleSummaryActionPoliciesSection />
+            <RuleSummaryArtifactsSection />
+          </RuleSummaryBody>
         </Body>
 
         <Footer>
