@@ -30,13 +30,8 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   onServiceUpdate,
   onDisconnect,
 }) => {
-  const {
-    notifications,
-    hasConfigurePermission,
-    docLinks,
-    apiService,
-    licensing,
-  } = useCloudConnectedAppContext();
+  const { notifications, hasConfigurePermission, docLinks, apiService, licensing } =
+    useCloudConnectedAppContext();
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isRotatingApiKey, setIsRotatingApiKey] = useState(false);
