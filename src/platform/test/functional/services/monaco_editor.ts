@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @kbn/imports/no_direct_monaco_import -- we need to import monaco directly for this service
 import type { monaco } from '@kbn/monaco';
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-// Defined inline to avoid importing @kbn/code-editor which loads browser globals (Node.js incompatible).
-// Must stay in sync with KBN_A11Y_HANDLE_ESCAPE_ACTION_ID in @kbn/code-editor/src/code_editor.tsx.
-const KBN_A11Y_HANDLE_ESCAPE_ACTION_ID = 'kbn.a11y.handleEscape' as const;
+
 import { FtrService } from '../ftr_provider_context';
 
 declare global {
@@ -252,7 +251,7 @@ export class MonacoEditorService extends FtrService {
   /**
    * Types text character-by-character via Monaco's 'type' command, firing per-character model
    * change events. Use this when a test depends on incremental change listeners (e.g. live
-   * validation as you type). For bulk content, prefer `appendToCodeEditor` which is faster.
+   * validation as you type).
    */
   public async simulateTyping(
     testSubjId: string,
@@ -289,31 +288,6 @@ export class MonacoEditorService extends FtrService {
         }
       },
       { id: testSubjId, textToType: text, typingSimulationOptions: options }
-    );
-  }
-
-  public async simulateKeyCommand(testSubjId: string, key: string) {
-    const keyToCommandId: Record<string, string> = {
-      ArrowLeft: 'cursorLeft',
-      ArrowRight: 'cursorRight',
-      ArrowUp: 'cursorUp',
-      ArrowDown: 'cursorDown',
-      Escape: KBN_A11Y_HANDLE_ESCAPE_ACTION_ID,
-      Enter: 'acceptSelectedSuggestion',
-    };
-    await this.browser.execute(
-      (id: string, commandId: string) => {
-        const container = document.querySelector(`[data-test-subj="${id}"]`);
-        const editor = window.MonacoEnvironment?.monaco?.editor
-          ?.getEditors()
-          ?.find((e: any) => container?.contains(e.getDomNode()));
-        if (editor) {
-          editor.focus();
-          editor.trigger('keyboard', commandId, {});
-        }
-      },
-      testSubjId,
-      keyToCommandId[key] ?? key
     );
   }
 

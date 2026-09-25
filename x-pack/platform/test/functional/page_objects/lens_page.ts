@@ -2049,7 +2049,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Simulate pressing a key in the formula editor.
      */
     async simulateKeyInFormula(key: string) {
-      await monacoEditor.simulateKeyCommand('lnsFormulaEditor', key);
+      await this.simulateTypingInFormula(key);
     },
 
     async expectFormulaText(formula: string) {
