@@ -15,6 +15,7 @@ import { useConversationId } from '../../../context/conversation/use_conversatio
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useCurrentUser } from '../../../hooks/use_current_user';
 import { useInputDraft } from '../../../hooks/use_input_draft';
+import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
@@ -110,19 +111,33 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const { currentUser } = useCurrentUser();
   const username = currentUser?.user.username;
+  const spaceId = useActiveSpaceId();
+  const { sessionTag } = useConversationContext();
 
-  const { draft, saveDraft, clearDraft } = useInputDraft({ username, agentId, conversationId });
+  const { draft, saveDraft, clearDraft } = useInputDraft({
+    spaceId,
+    sessionTag,
+    username,
+    agentId,
+    conversationId,
+  });
 
   const messageEditorControllerRef = useRef<
     ReturnType<typeof useMessageEditor>['controller'] | null
   >(null);
   const saveDraftDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastEditorContentRef = useRef('');
   const handleContentChange = useCallback(() => {
-    if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
-    saveDraftDebounceRef.current = setTimeout(() => {
+    try {
       const content = messageEditorControllerRef.current?.getContent() ?? '';
-      saveDraft(content);
-    }, 300);
+      lastEditorContentRef.current = content;
+      if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
+      saveDraftDebounceRef.current = setTimeout(() => {
+        saveDraft(lastEditorContentRef.current);
+      }, 300);
+    } catch (err) {
+      if (!(err instanceof CommandBadgeSerializationError)) throw err;
+    }
   }, [saveDraft]);
 
   const { messageEditor, controller: messageEditorController } = useMessageEditor({
@@ -133,9 +148,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   useEffect(() => {
     return () => {
-      if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
+      if (saveDraftDebounceRef.current) {
+        clearTimeout(saveDraftDebounceRef.current);
+        saveDraftDebounceRef.current = null;
+        saveDraft(lastEditorContentRef.current);
+      }
     };
-  }, [agentId, conversationId]);
+  }, [agentId, conversationId, saveDraft]);
 
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
@@ -203,6 +222,16 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     conversationTitle,
   });
 
+  const draftHydratedRef = useRef(false);
+  const isConvSwitchRef = useRef(false);
+  useEffect(() => {
+    if (isConvSwitchRef.current) {
+      messageEditorControllerRef.current?.clear();
+    }
+    isConvSwitchRef.current = true;
+    draftHydratedRef.current = false;
+  }, [agentId, conversationId]);
+
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
     if (isConversationReadOnly) return;
@@ -221,32 +250,24 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     messageEditorController,
     resetInitialMessage,
   ]);
-
-  const draftHydratedRef = useRef(false);
-  const isConvSwitchRef = useRef(false);
-  useEffect(() => {
-    if (isConvSwitchRef.current) {
-      messageEditorControllerRef.current?.clear();
-    }
-    isConvSwitchRef.current = true;
-    draftHydratedRef.current = false;
-  }, [agentId, conversationId]);
   useEffect(() => {
     if (draftHydratedRef.current) return;
-    if (isConversationReadOnly) return;
+    if (isConversationReadOnly || isConversationReadOnlyLoading) return;
     if (initialMessage) {
       draftHydratedRef.current = true;
       return;
     }
-    if (!draft) return;
     draftHydratedRef.current = true;
-    messageEditorController.setContent(draft);
+    if (draft) {
+      messageEditorController.setContent(draft);
+    }
   }, [
     draft,
     agentId,
     conversationId,
     initialMessage,
     isConversationReadOnly,
+    isConversationReadOnlyLoading,
     messageEditorController,
   ]);
 

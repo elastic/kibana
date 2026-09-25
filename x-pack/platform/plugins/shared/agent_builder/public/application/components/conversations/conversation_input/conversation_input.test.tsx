@@ -119,6 +119,9 @@ jest.mock('../../../hooks/use_current_user', () => ({
 jest.mock('../../../hooks/use_input_draft', () => ({
   useInputDraft: jest.fn().mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft: jest.fn() }),
 }));
+jest.mock('../../../context/active_space_context', () => ({
+  useActiveSpaceId: jest.fn().mockReturnValue('default'),
+}));
 jest.mock('@kbn/agent-builder-browser', () => ({
   ConversationInputShell: ({
     children,

@@ -7,8 +7,18 @@
 
 import { useCallback } from 'react';
 
-const buildKey = (username: string, agentId: string, conversationId: string | undefined) =>
-  `agent-builder:draft:${encodeURIComponent(username)}:${encodeURIComponent(agentId)}:${
+const IMAGE_LINK_RE = /\[[^\]]*\]\(image:\/\/[^)]*\)/g;
+
+const buildKey = (
+  spaceId: string,
+  sessionTag: string,
+  username: string,
+  agentId: string,
+  conversationId: string | undefined
+) =>
+  `agent-builder:draft:${encodeURIComponent(spaceId)}:${encodeURIComponent(
+    sessionTag
+  )}:${encodeURIComponent(username)}:${encodeURIComponent(agentId)}:${
     conversationId ? encodeURIComponent(conversationId) : 'new'
   }`;
 
@@ -34,23 +44,31 @@ const removeFromStorage = (key: string): void => {
 
 /** Reads and writes a per-conversation input draft to `sessionStorage`. */
 export const useInputDraft = ({
+  spaceId,
+  sessionTag,
   username,
   agentId,
   conversationId,
 }: {
+  spaceId: string;
+  sessionTag: string | undefined;
   username: string | undefined;
   agentId: string | undefined;
   conversationId: string | undefined;
 }) => {
-  const key = username && agentId ? buildKey(username, agentId, conversationId) : null;
+  const key =
+    username && agentId
+      ? buildKey(spaceId, sessionTag ?? 'default', username, agentId, conversationId)
+      : null;
 
   const draft = key ? getFromStorage(key) : null;
 
   const saveDraft = useCallback(
     (content: string) => {
       if (!key) return;
-      if (content.trim()) {
-        writeToStorage(key, content);
+      const stripped = content.replace(IMAGE_LINK_RE, '').trim();
+      if (stripped) {
+        writeToStorage(key, stripped);
       } else {
         removeFromStorage(key);
       }
