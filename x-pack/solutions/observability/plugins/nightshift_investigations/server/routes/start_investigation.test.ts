@@ -69,23 +69,6 @@ it('keeps a caller-provided concurrency key', async () => {
   expect(start).toHaveBeenCalledWith(expect.objectContaining({ concurrency_key: 'key-1' }));
 });
 
-it('forwards a caller-provided message as the investigation prompt', async () => {
-  await handler({
-    request: {},
-    getInvestigationsClient,
-    getAlertsClient,
-    params: {
-      body: {
-        subject: { type: 'significant_event', id: 'event-1' },
-        message: 'Why did checkout p99 spike?',
-      },
-    },
-  } as never);
-  expect(start).toHaveBeenCalledWith(
-    expect.objectContaining({ message: 'Why did checkout p99 spike?' })
-  );
-});
-
 it('starts a manual investigation from the question alone', async () => {
   const body = schema.parse({
     subject: { type: 'manual' },

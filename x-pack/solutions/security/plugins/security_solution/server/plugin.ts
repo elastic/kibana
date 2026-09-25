@@ -851,6 +851,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
         isServerless: this.isServerless,
+        stackVersion: this.pluginContext.env.packageInfo.version,
       });
 
       this.trialCompanionMilestoneService.setup({

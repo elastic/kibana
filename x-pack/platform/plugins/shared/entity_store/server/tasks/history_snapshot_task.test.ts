@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { registerHistorySnapshotTask } from './history_snapshot_task';
 import type { EntityStoreCoreSetup } from '../types';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 jest.mock('./should_delete_orphaned_task', () => ({
   shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
@@ -45,11 +46,10 @@ describe('registerHistorySnapshotTask — execution context wrap', () => {
     await runner.run();
 
     expect(withContextSpy).toHaveBeenCalledWith(
-      {
-        type: 'security_solution',
-        name: 'entity_analytics-entity_store_history_snapshot_task',
-        id: 'history-snapshot:default',
-      },
+      buildEaExecutionContext(
+        EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_HISTORY_SNAPSHOT_TASK,
+        'history-snapshot:default'
+      ),
       expect.any(Function)
     );
   });
