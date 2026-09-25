@@ -7,45 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 interface ResumeUnavailableCalloutProps {
   onRetry: () => void;
 }
 
+const retryLabel = i18n.translate('workflowsManagement.executionDetail.resumeUnavailable.retry', {
+  defaultMessage: 'Retry',
+});
+
 /** Explains why a waiting run offers no resume control when its step input fails to load. */
 export const ResumeUnavailableCallout = React.memo<ResumeUnavailableCalloutProps>(({ onRetry }) => (
-  <EuiCallOut color="warning" announceOnMount={false} data-test-subj="resumeUnavailableCallout">
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiText size="s">
-          <FormattedMessage
-            id="workflowsManagement.executionDetail.resumeUnavailable.message"
-            defaultMessage="This run is waiting for input, but its details could not be loaded."
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="refresh"
-              onClick={onRetry}
-              data-test-subj="resumeUnavailableRetryButton"
-            >
-              <FormattedMessage
-                id="workflowsManagement.executionDetail.resumeUnavailable.retry"
-                defaultMessage="Retry"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiCallOut>
+  <KbnWarningCallout
+    announceOnMount={false}
+    data-test-subj="resumeUnavailableCallout"
+    title={
+      <FormattedMessage
+        id="workflowsManagement.executionDetail.resumeUnavailable.title"
+        defaultMessage="Unable to load the pending action"
+      />
+    }
+    text={
+      <FormattedMessage
+        id="workflowsManagement.executionDetail.resumeUnavailable.message"
+        defaultMessage="This run is waiting for input, but its details could not be loaded."
+      />
+    }
+    actionProps={{
+      primary: {
+        children: retryLabel,
+        onClick: onRetry,
+        'data-test-subj': 'resumeUnavailableRetryButton',
+      },
+    }}
+  />
 ));
 
 ResumeUnavailableCallout.displayName = 'ResumeUnavailableCallout';
