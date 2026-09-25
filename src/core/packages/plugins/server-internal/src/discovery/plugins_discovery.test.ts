@@ -58,6 +58,7 @@ function getMockPackage(id: string, group: string = 'platform') {
     },
     group,
     isPlugin: () => true,
+    isDevOnly: () => false,
     getPluginCategories: () => ({
       oss: false,
     }),
@@ -639,8 +640,10 @@ describe('plugins discovery system', () => {
       const filterArgs = getPluginPackagesFilterMock.mock.calls[0];
       expect(filterArgs).toEqual([
         {
+          allowlistPluginGroups: undefined,
           examples: false,
           oss: false,
+          devOnly: true,
           parentDirs: [],
           paths: [],
         },
