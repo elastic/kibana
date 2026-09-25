@@ -577,6 +577,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         'A truncated raw-event list is missing evidence and cannot clear an attack.'
       );
     });
+
+    it('judges every network destination instead of one callout', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'One known-good callout does not cancel the rest.'
+      );
+    });
   });
 
   describe('the truncation clear', () => {

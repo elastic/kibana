@@ -289,9 +289,12 @@ steps:
         3. process_parent — raw events only. Is the parent of the suspicious process a
            management agent or scheduler (contradicts), or a user application such as an
            Office program or browser (supports)?
-        4. network_destination — raw events only. Is the destination a known vendor or
-           internal management service (contradicts), or an unknown or known-bad
-           endpoint (supports)?
+        4. network_destination — raw events only. Judge every destination shown.
+           A known vendor or internal management destination contradicts only when
+           every other destination is accounted for. A typosquat, a temporary host
+           (such as *.dev or *.worker), a public numeric IP URL, or another unknown
+           or known-bad endpoint supports.
+           One known-good callout does not cancel the rest.
 
         The world checks are entity_role, process_parent, and network_destination.
 
