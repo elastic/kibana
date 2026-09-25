@@ -59,20 +59,44 @@ const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
       { defaultMessage: 'Simpler setup, no agent required.' }
     ),
   },
+  {
+    value: 'agent_based',
+    text: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.selectText',
+      { defaultMessage: 'Agent-based' }
+    ),
+    name: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.name',
+      { defaultMessage: 'Agent-based' }
+    ),
+    tagline: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.tagline',
+      { defaultMessage: 'Requires a self-managed Elastic Agent.' }
+    ),
+  },
 ];
 
 interface DeploymentMethodCardProps {
   selectedMethod: DeploymentMethod;
   onChange: (method: DeploymentMethod) => void;
+  /** When true, hides the managed integration option and the edit button (agent-based-only services selected). */
+  locked?: boolean;
 }
 
-export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMethodCardProps) {
+export function DeploymentMethodCard({
+  selectedMethod,
+  onChange,
+  locked = false,
+}: DeploymentMethodCardProps) {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draftMethod, setDraftMethod] = useState<DeploymentMethod>(selectedMethod);
 
-  const selectedOption = DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod)!;
+  // Defensive fallback: a stale/hand-edited session-storage value may carry an unknown method.
+  const selectedOption =
+    DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod) ??
+    DEPLOYMENT_METHOD_OPTIONS[0];
 
   const panelCss = css`
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
@@ -117,22 +141,24 @@ export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMet
               <strong>{selectedOption.name}.</strong> {selectedOption.tagline}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              onClick={openModal}
-              data-test-subj="deploymentMethodCard-editButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.editButton"
-                defaultMessage="Edit"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {!locked && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={openModal}
+                data-test-subj="deploymentMethodCard-editButton"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.editButton"
+                  defaultMessage="Edit"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
 
-      {isModalOpen && (
+      {!locked && isModalOpen && (
         <EuiModal
           onClose={handleCancel}
           aria-labelledby={modalTitleId}

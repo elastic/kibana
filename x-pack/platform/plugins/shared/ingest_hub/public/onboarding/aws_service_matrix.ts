@@ -1003,6 +1003,11 @@ export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsSer
 /** Internal static entries — exported for use by buildAwsServiceMatrix in the hook. */
 export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_RAW;
 
+/** True when the service can only be deployed via a self-managed Elastic Agent. */
+export const isAgentBasedOnly = (service: AwsServiceMatrixEntry): boolean =>
+  service.deploymentMethods.length > 0 &&
+  service.deploymentMethods.every((dm) => dm.method === 'agent_based');
+
 /**
  * Static metadata map for service lookups that do not require the manifest
  * (name, category, showInUI, etc.).

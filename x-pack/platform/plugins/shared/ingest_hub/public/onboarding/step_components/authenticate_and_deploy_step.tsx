@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -21,6 +22,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
+import { isAgentBasedOnly } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
@@ -46,6 +48,25 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const { selectedServiceIds, dataFormat } = servicesStep;
 
   const { deploymentMethod, setDeploymentMethod } = useOnboardingFlow();
+
+  // ── Agent-based-only detection ────────────────────────────────────────────────
+  // True when every selected service can only be deployed via a self-managed Elastic Agent.
+  // When this is the case, the managed option is hidden and the deployment method is locked.
+  const allAgentBasedOnly = useMemo(() => {
+    if (!awsServicesMap || selectedServiceIds.length === 0) return false;
+    return selectedServiceIds.every((id) => {
+      const service = awsServicesMap.get(id);
+      return service ? isAgentBasedOnly(service) : false;
+    });
+  }, [selectedServiceIds, awsServicesMap]);
+
+  const isAgentBased = deploymentMethod === 'agent_based';
+
+  useEffect(() => {
+    if (allAgentBasedOnly && deploymentMethod !== 'agent_based') {
+      setDeploymentMethod('agent_based');
+    }
+  }, [allAgentBasedOnly, deploymentMethod, setDeploymentMethod]);
 
   // ── Service settings (region + vars) ─────────────────────────────────────────
   // Read from session storage so ECF URLs can be pre-filled without re-entering data.
@@ -94,10 +115,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const miServiceIds = useMemo(
     () =>
-      selectedServiceIds.filter((id) =>
-        awsServicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'managed_integration')
-      ),
-    [selectedServiceIds, awsServicesMap]
+      isAgentBased
+        ? []
+        : selectedServiceIds.filter((id) =>
+            awsServicesMap
+              ?.get(id)
+              ?.deploymentMethods.some((dm) => dm.method === 'managed_integration')
+          ),
+    [isAgentBased, selectedServiceIds, awsServicesMap]
   );
 
   const showIdentityFederation = useMemo(() => {
@@ -121,12 +146,42 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   });
 
   // ── Next button gating ────────────────────────────────────────────────────────
-  // Disabled until every active deployment section reports done.
-  const isNextDisabled = (miServiceIds.length > 0 && !isMiDone) || (hasAnyEcf && !isEcfDone);
+  // Agent-based-only: Next is always enabled — no API call in this step.
+  const isNextDisabled =
+    !isAgentBased && ((miServiceIds.length > 0 && !isMiDone) || (hasAnyEcf && !isEcfDone));
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
-      <DeploymentMethodCard selectedMethod={deploymentMethod} onChange={setDeploymentMethod} />
+      <DeploymentMethodCard
+        selectedMethod={deploymentMethod}
+        onChange={setDeploymentMethod}
+        locked={allAgentBasedOnly}
+      />
+
+      {isAgentBased && allAgentBasedOnly && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.title"
+                defaultMessage="Self-managed Elastic Agent required"
+              />
+            }
+            iconType="info"
+            color="primary"
+            data-test-subj="authenticateAndDeployStep-agentBasedOnlyCallout"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.body"
+                defaultMessage="Your selected services only support agent-based deployment. After completing this wizard, install the integrations on an Elastic Agent policy and enroll an Elastic Agent that has access to your AWS environment."
+              />
+            </p>
+          </EuiCallOut>
+        </>
+      )}
 
       {miServiceIds.length > 0 && <EuiHorizontalRule margin="l" />}
 
