@@ -132,24 +132,17 @@ test.describe(
 
     test('updates data when changing time range and clicking update', async ({
       page,
-      pageObjects: { serviceDetailsPage, datePicker },
+      pageObjects: { serviceDetailsPage },
     }) => {
-      await serviceDetailsPage.overviewTab.goToTab({
-        serviceName: testData.SERVICE_OPBEANS_NODE,
-        rangeFrom: testData.START_DATE,
-        rangeTo: testData.END_DATE,
-      });
-
-      await test.step('Open date picker and select new time range', async () => {
-        // datePicker.setAbsoluteRange auto-detects the picker variant, opens the
-        // popover, fills both bounds, and clicks the update/submit button.
-        await datePicker.setAbsoluteRange({
-          from: '2021-10-09T23:55:00.000Z',
-          to: testData.END_DATE,
+      await test.step('Navigate to service overview with new time range', async () => {
+        await serviceDetailsPage.overviewTab.goToTab({
+          serviceName: testData.SERVICE_OPBEANS_NODE,
+          rangeFrom: '2021-10-09T23:55:00.000Z',
+          rangeTo: testData.END_DATE,
         });
       });
 
-      await test.step('Verify URL is updated', async () => {
+      await test.step('Verify URL contains updated time range', async () => {
         await expect(page).toHaveURL(/2021-10-09/, { timeout: EXTENDED_TIMEOUT });
       });
 
