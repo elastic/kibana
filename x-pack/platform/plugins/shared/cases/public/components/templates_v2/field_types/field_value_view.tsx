@@ -17,7 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
-import { useProseCss } from '../../markdown_editor';
+import { useProseCss } from '../../markdown_editor/use_prose_css';
 import * as commonI18n from '../../../common/translations';
 import * as i18n from '../translations';
 
