@@ -40,13 +40,6 @@ export interface DiscoverServerPluginStart {
 }
 
 export { config } from './config';
-export type {
-  DiscoverSessionEmbeddableByValueProps,
-  DiscoverSessionEmbeddableByReferenceProps,
-  DiscoverSessionEmbeddableByValueState,
-  DiscoverSessionEmbeddableByReferenceState,
-  DiscoverSessionEmbeddableState,
-} from './embeddable';
 export { discoverSessionApiResponseSchema } from './api/schema';
 export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {

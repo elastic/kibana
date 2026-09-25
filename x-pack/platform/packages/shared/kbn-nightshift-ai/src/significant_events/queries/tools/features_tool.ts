@@ -10,11 +10,7 @@ import {
   INFERRED_FEATURE_TYPES,
   LOG_SAMPLES_FEATURE_TYPE,
 } from '@kbn/significant-events-schema';
-import {
-  createGetFeatureQueryFromToolArgs,
-  resolveFeatureTypeFilters,
-  toFeatureForLlmContext,
-} from '../../features/tool';
+import { toFeatureForLlmContext } from '../../features/tool';
 
 /**
  * Feature types withheld from query generation. `log_samples` is redundant here
@@ -34,8 +30,4 @@ export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = ALL_FEATURE_TOOL_TYPES.filt
   > => !(QUERY_GENERATION_EXCLUDED_FEATURE_TYPES as readonly string[]).includes(type)
 );
 
-export const getFeatureQueryFromToolArgs = createGetFeatureQueryFromToolArgs(
-  SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES
-);
-
-export { resolveFeatureTypeFilters, toFeatureForLlmContext };
+export { toFeatureForLlmContext };
