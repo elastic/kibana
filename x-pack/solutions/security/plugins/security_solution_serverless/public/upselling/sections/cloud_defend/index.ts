@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { SecuritySubPlugin } from '../app/types';
-import { routes } from './routes';
+import { lazy } from 'react';
 
-export class CloudDefend {
-  public setup() {}
-
-  public start(): SecuritySubPlugin {
-    return { routes };
-  }
-}
+export const CloudDefendIntegrationPliBlockLazy = lazy(() =>
+  import('./cloud_defend_integration_pli_block').then(({ CloudDefendIntegrationPliBlock }) => ({
+    default: CloudDefendIntegrationPliBlock,
+  }))
+);
