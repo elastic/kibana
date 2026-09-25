@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useFormContext, useWatch } from 'react-hook-form';
@@ -59,6 +59,7 @@ export function StepDataset({
   const dataSource = useWatch({ control, name: 'data_source' });
   const resource = useWatch({ control, name: 'resource' });
   const format = useWatch({ control, name: 'settings.format' });
+  const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
   const lastAutoSelectedFormatRef = useRef<DatasetFormatFormValue | null>(null);
 
   useEffect(() => {
@@ -86,15 +87,16 @@ export function StepDataset({
   }, [format, resource, setValue]);
 
   useEffect(() => {
-    // FormWizard's validate() treats any content with isValid === undefined as a
-    // failed navigation (Boolean(undefined) === false), including unmounted steps.
-    // Always report a boolean so Next/Back on later steps can proceed.
-    const isValid = Boolean(
-      name?.trim() && dataSource?.trim() && resource?.trim() && format?.trim()
-    );
+    // Don't mark the step invalid (disabling Next) until the user tries to proceed.
+    const isValid =
+      !hasAttemptedValidation ||
+      Boolean(name?.trim() && dataSource?.trim() && resource?.trim() && format?.trim());
     updateContent({
       isValid,
-      validate: async () => trigger(['name', 'data_source', 'resource', 'settings.format']),
+      validate: async () => {
+        setHasAttemptedValidation(true);
+        return trigger(['name', 'data_source', 'resource', 'settings.format']);
+      },
       getData: () => {
         const values = getValues();
         return {
@@ -106,7 +108,16 @@ export function StepDataset({
         };
       },
     });
-  }, [name, dataSource, resource, format, getValues, trigger, updateContent]);
+  }, [
+    name,
+    dataSource,
+    resource,
+    format,
+    getValues,
+    hasAttemptedValidation,
+    trigger,
+    updateContent,
+  ]);
 
   return (
     <div data-test-subj="createDatasetWizardDatasetStep">
