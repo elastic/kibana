@@ -53,7 +53,11 @@ export const memoryOptimizeStepDefinition = ({
         .string()
         .max(MAX_ROUND_TEXT_LENGTH)
         .describe("The assistant's final response for the round."),
-      agent_id: z.string().max(1024).optional().describe('Agent id that produced the round.'),
+      agent_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Supported agent policy selector; never used as a storage boundary.'),
       recalled_ids: z
         .array(z.string().max(2_000))
         .max(100)
@@ -94,6 +98,8 @@ export const memoryOptimizeStepDefinition = ({
       }
 
       const workflowContext = context.contextManager.getContext();
+      // Workflow execution authorization is the capability boundary. Storage tenancy always comes
+      // from the trusted execution context; no workflow input can select another Space.
       const { spaceId } = workflowContext.workflow;
       const workflowExecutionId = workflowContext.execution.id;
       const sandboxId = context.input.sandbox_id?.trim() ? context.input.sandbox_id : undefined;
