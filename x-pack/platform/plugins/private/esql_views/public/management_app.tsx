@@ -7,7 +7,14 @@
 
 import type { FunctionComponent } from 'react';
 import React, { lazy, Suspense, useState } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { EsqlView } from '@kbn/esql-types';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
@@ -120,7 +127,24 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
       <EuiSpacer size="l" />
       {content}
       {formState && (
-        <Suspense fallback={null}>
+        <Suspense
+          fallback={
+            <EuiFlyout
+              aria-label={translations.loadingFormTitle}
+              data-test-subj="esqlViewFormLoading"
+              onClose={() => setFormState(undefined)}
+              ownFocus
+              size="l"
+            >
+              <EuiFlyoutBody>
+                <EuiEmptyPrompt
+                  icon={<EuiLoadingSpinner size="xl" />}
+                  title={<h2>{translations.loadingFormTitle}</h2>}
+                />
+              </EuiFlyoutBody>
+            </EuiFlyout>
+          }
+        >
           <LazyEsqlViewForm
             client={client}
             onClose={() => setFormState(undefined)}

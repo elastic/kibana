@@ -144,6 +144,7 @@ describe('ManagementApp', () => {
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
 
+    expect(screen.getByTestId('esqlViewFormLoading')).toHaveTextContent('Loading ES|QL view form');
     expect(
       await screen.findByText(
         'Changes affect every dashboard, alert, and other saved object that uses this view.'

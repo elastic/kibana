@@ -14,6 +14,9 @@ export const translations = {
   loadingTitle: i18n.translate('xpack.esqlViews.managementPage.loadingTitle', {
     defaultMessage: 'Loading ES|QL views',
   }),
+  loadingFormTitle: i18n.translate('xpack.esqlViews.managementPage.loadingFormTitle', {
+    defaultMessage: 'Loading ES|QL view form',
+  }),
   unsupportedTitle: i18n.translate('xpack.esqlViews.managementPage.unsupportedTitle', {
     defaultMessage: 'ES|QL views are unavailable',
   }),
