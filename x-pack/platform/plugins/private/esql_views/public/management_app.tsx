@@ -6,16 +6,20 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { EsqlView } from '@kbn/esql-types';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
 import { PLUGIN_NAME } from '../common';
-import { EsqlViewForm } from './esql_view_form';
 import { EsqlViewsTable } from './esql_views_table';
 import { translations } from './translations';
 import { useEsqlViews } from './use_esql_views';
+
+const LazyEsqlViewForm = lazy(async () => {
+  const { EsqlViewForm } = await import('./esql_view_form');
+  return { default: EsqlViewForm };
+});
 
 interface ManagementAppProps {
   canCreate: boolean;
@@ -116,15 +120,17 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
       <EuiSpacer size="l" />
       {content}
       {formState && (
-        <EsqlViewForm
-          client={client}
-          onClose={() => setFormState(undefined)}
-          onSave={async () => {
-            await reload();
-            setFormState(undefined);
-          }}
-          view={formState.type === 'edit' ? formState.view : undefined}
-        />
+        <Suspense fallback={null}>
+          <LazyEsqlViewForm
+            client={client}
+            onClose={() => setFormState(undefined)}
+            onSave={async () => {
+              await reload();
+              setFormState(undefined);
+            }}
+            view={formState.type === 'edit' ? formState.view : undefined}
+          />
+        </Suspense>
       )}
     </div>
   );

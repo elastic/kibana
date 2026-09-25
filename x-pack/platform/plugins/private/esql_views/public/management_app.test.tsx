@@ -142,7 +142,7 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
 
     expect(
-      screen.getByText(
+      await screen.findByText(
         'Changes affect every dashboard, alert, and other saved object that uses this view.'
       )
     ).toBeInTheDocument();
@@ -217,7 +217,7 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Actions for legacy.view' }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
 
-    expect(screen.getByTestId('esqlViewNameInput')).toHaveAttribute('readonly');
+    expect(await screen.findByTestId('esqlViewNameInput')).toHaveAttribute('readonly');
     fireEvent.change(screen.getByTestId('esqlViewDescriptionInput'), {
       target: { value: 'Production logs' },
     });
@@ -253,7 +253,7 @@ describe('ManagementApp', () => {
 
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
-    fireEvent.change(screen.getByTestId('esqlViewNameInput'), {
+    fireEvent.change(await screen.findByTestId('esqlViewNameInput'), {
       target: { value: 'sales-view' },
     });
     fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
@@ -293,7 +293,7 @@ describe('ManagementApp', () => {
 
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
-    fireEvent.change(screen.getByTestId('esqlViewNameInput'), {
+    fireEvent.change(await screen.findByTestId('esqlViewNameInput'), {
       target: { value: 'sales-view' },
     });
     fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
@@ -313,7 +313,7 @@ describe('ManagementApp', () => {
 
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
-    fireEvent.change(screen.getByTestId('esqlViewNameInput'), {
+    fireEvent.change(await screen.findByTestId('esqlViewNameInput'), {
       target: { value: 'invalid-query-view' },
     });
     fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
