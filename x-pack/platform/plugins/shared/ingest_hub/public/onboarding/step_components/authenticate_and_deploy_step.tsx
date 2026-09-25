@@ -27,7 +27,10 @@ import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
-import { detectServiceVarsDrift, detectAuthDrift } from './authenticate_and_deploy_step/detect_drift';
+import {
+  detectServiceVarsDrift,
+  detectAuthDrift,
+} from './authenticate_and_deploy_step/detect_drift';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
@@ -533,6 +536,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       {showMiSection && isDirty && !deployAttempted && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"

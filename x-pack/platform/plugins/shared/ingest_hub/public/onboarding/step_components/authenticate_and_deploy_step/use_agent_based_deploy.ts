@@ -22,10 +22,7 @@ import {
 import type { AgentCredentialVars } from './package_inputs';
 import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
-import {
-  cleanupAgentBasedPolicies,
-  updateAgentBasedPolicy,
-} from './policy_cleanup_agent_based';
+import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
 import { useOnboardingSO } from './use_onboarding_so';
 import {
   buildLiveStalePolicyIds,
@@ -150,7 +147,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
       const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
 
-      if (targetsToDeploy.length === 0 && !hasPendingCleanup && !(detectAndReviewStep.isDirty ?? false))
+      if (
+        targetsToDeploy.length === 0 &&
+        !hasPendingCleanup &&
+        !(detectAndReviewStep.isDirty ?? false)
+      )
         return { failed: false };
 
       setIsDeploying(true);
