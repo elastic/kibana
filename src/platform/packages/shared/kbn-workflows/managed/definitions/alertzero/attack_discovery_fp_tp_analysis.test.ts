@@ -595,6 +595,33 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         'A risk score or severity on a cited alert weighs how strong that parent is.'
       );
     });
+
+    it('accepts a path of pivots as alert linkage', () => {
+      expect(String(analyze?.with?.message)).toContain(
+        'Report the strongest pivot; it does not decide the verdict.'
+      );
+    });
+
+    it('allows agent.id and source.ip on the alert-link claim', () => {
+      const schema = analyze?.with?.schema as {
+        properties: {
+          claims: {
+            properties: { alert_link: { properties: { field: { enum: string[] } } } };
+          };
+        };
+      };
+
+      expect(schema.properties.claims.properties.alert_link.properties.field.enum).toEqual([
+        'user.name',
+        'user.id',
+        'host.id',
+        'host.name',
+        'process.entity_id',
+        'process.pid',
+        'agent.id',
+        'source.ip',
+      ]);
+    });
   });
 
   describe('the truncation clear', () => {

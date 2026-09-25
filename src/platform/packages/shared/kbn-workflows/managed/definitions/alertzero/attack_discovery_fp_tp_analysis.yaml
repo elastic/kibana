@@ -279,10 +279,14 @@ steps:
         `completed` or `skipped` (the source is empty or unavailable). A completed check
         also has a result: `supports`, `contradicts`, or `neutral`.
 
-        1. alert_linkage — cited alerts only. Do at least two cited alerts share a user,
-           host, IP, or process AND a concrete bridge (process tree, session, event.id,
-           or process.entity_id)? Shared identifiers without a bridge, or theme and
-           timing alone, are neutral. Report it; it does not decide the verdict.
+        1. alert_linkage — cited alerts only. Alerts may connect by one shared field
+           or a path of pivots: one alert shares a host with a second, which shares a
+           user with a third. A pivot is a user, host, IP, process, agent.id, or
+           source.ip, together with a concrete bridge (process tree, session, event.id,
+           or process.entity_id). Shared identifiers without a bridge, or theme and
+           timing alone, are neutral. When the pivots connect, the time order still
+           has to read as an execution chain.
+           Report the strongest pivot; it does not decide the verdict.
         2. entity_role — entity store only. An ordinary employee workstation or
            account supports.
            A management server, MDM, jump box, or service account is neutral, not contradicts:
@@ -323,9 +327,10 @@ steps:
           `check`, `result` (supports or contradicts), `source` (entity_store or
           raw_event), and `id` — the `entity.id` of an entity store hit or the `_id` of a
           raw event hit. Cite only ids that appear in the hits below.
-        - claims.alert_link: when alert_linkage supports, the shared `field` (one of
-          user.name, user.id, host.id, host.name, process.entity_id, process.pid), its
-          `value`, and the `_id`s of at least two cited alerts that share it.
+        - claims.alert_link: when alert_linkage supports, the strongest pivot. `field`
+          is one of user.name, user.id, host.id, host.name, process.entity_id,
+          process.pid, agent.id, or source.ip. Include its `value` and the `_id`s of
+          at least two cited alerts that share it.
 
         Writing:
         - summary_markdown: one paragraph. State the verdict in prose (no heading), the
@@ -408,6 +413,8 @@ steps:
                       - host.name
                       - process.entity_id
                       - process.pid
+                      - agent.id
+                      - source.ip
                   value:
                     type: string
                   alert_ids:
