@@ -738,11 +738,12 @@ describe('EscalationsService.listLinkedInvestigations', () => {
   });
 
   it('silently drops linked ids that resolved to a non-investigation template', async () => {
-    const escalationEntry = {
+    const escalationEntry: typeof INV_A = {
       ...INV_A,
       id: 'another-escalation',
       title: 'Nested Escalation',
-      template_id: ESCALATION_TEMPLATE_ID,
+      // Cast so the Map<string, typeof INV_A> accepts this entry despite the different literal.
+      template_id: ESCALATION_TEMPLATE_ID as typeof INVESTIGATION_TEMPLATE_ID,
       agent_id: 'agent-3',
     };
     const { service } = makeService({
