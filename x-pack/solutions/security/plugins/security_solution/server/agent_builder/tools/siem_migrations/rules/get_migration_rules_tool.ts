@@ -102,6 +102,7 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
     : undefined,
   translation_result: rule.translation_result,
   status: rule.status,
+  comments: rule.comments,
 });
 
 export const getMigrationRulesTool = (
