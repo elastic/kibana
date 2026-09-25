@@ -13,8 +13,8 @@ import { useEffect, useRef } from 'react';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
 import { HardcodedIconDataUrls } from '@kbn/workflows-ui';
-import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
 import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
+import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
