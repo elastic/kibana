@@ -59,6 +59,7 @@ import type {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
+  TaskClaimCandidate,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 
@@ -112,6 +113,21 @@ export interface FetchResult {
   docs: ConcreteTaskInstance[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
+
+export interface ClaimCandidateFetchResult {
+  docs: TaskClaimCandidate[];
+  versionMap: Map<string, ConcreteTaskInstanceVersion>;
+}
+
+// The claim phase only needs metadata to version-check, cost and select candidates, and the
+// winners are hydrated again by bulkGet afterwards. Excluding the API key fields also keeps
+// decryption off the candidate path entirely.
+const CLAIM_CANDIDATE_SOURCE_EXCLUDES = [
+  'task.state',
+  'task.params',
+  'task.apiKey',
+  'task.uiamApiKey',
+];
 
 export interface BulkUpdateOpts {
   validate: boolean;
@@ -1201,17 +1217,21 @@ export class TaskStore {
     }
   }
 
-  // like search(), only runs multiple searches in parallel returning the combined results
-  async msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
+  /**
+   * Like search(), only runs multiple searches in parallel and returns the combined results as
+   * claim candidates, without the task state, params or API keys.
+   */
+  async msearch(opts: SearchOpts[] = []): Promise<ClaimCandidateFetchResult> {
     return this.executionContextRunner.run(() => this._msearch(opts), {
       id: 'msearch',
     });
   }
 
-  private async _msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
-    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
-      ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
-    );
+  private async _msearch(opts: SearchOpts[] = []): Promise<ClaimCandidateFetchResult> {
+    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) => ({
+      ...ensureQueryOnlyReturnsTaskObjects({ sort, ...opt }),
+      _source: { excludes: CLAIM_CANDIDATE_SOURCE_EXCLUDES },
+    }));
     const searches = queries.flatMap((query) => [{}, query]);
 
     const result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
@@ -1225,7 +1245,7 @@ export class TaskStore {
     const { responses } = result;
 
     const versionMap = this.createVersionMap([]);
-    let allTasks = new Array<ConcreteTaskInstance>();
+    let allTasks = new Array<TaskClaimCandidate>();
 
     for (const response of responses) {
       if (response.status !== 200) {
@@ -1237,14 +1257,10 @@ export class TaskStore {
       const { hits } = response as estypes.MsearchMultiSearchItem<SavedObjectsRawDoc['_source']>;
       const { hits: tasks } = hits;
       this.addTasksToVersionMap(versionMap, tasks);
-      allTasks = allTasks.concat(this.filterTasks(tasks));
+      allTasks = allTasks.concat(this.filterClaimCandidates(tasks));
     }
 
-    const allSortedTasks = claimSort(this.definitions, allTasks);
-    const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(
-      allSortedTasks
-    );
-    return { docs: tasksWithDecryptedApiKeys, versionMap };
+    return { docs: claimSort(this.definitions, allTasks), versionMap };
   }
 
   public async search(opts: SearchOpts = {}, limitResponse: boolean = false): Promise<FetchResult> {
@@ -1303,6 +1319,20 @@ export class TaskStore {
         .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
         .map((doc) => savedObjectToConcreteTaskInstance(doc))
         .filter((doc): doc is ConcreteTaskInstance => !!doc)
+    );
+  }
+
+  private filterClaimCandidates(
+    tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
+  ): TaskClaimCandidate[] {
+    return (
+      tasks
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .filter((doc) => this.serializer.isRawSavedObject(doc))
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .map((doc) => this.serializer.rawToSavedObject(doc))
+        .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+        .map((doc) => savedObjectToTaskClaimCandidate(doc))
     );
   }
 
@@ -1449,6 +1479,33 @@ export function savedObjectToConcreteTaskInstance(
     retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
     state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id),
     params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id),
+  };
+}
+
+/**
+ * Converts a slimmed saved object from the claim candidate search into a TaskClaimCandidate,
+ * dropping rather than parsing the fields excluded from the search source.
+ */
+export function savedObjectToTaskClaimCandidate(
+  savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
+): TaskClaimCandidate {
+  const { userScope } = savedObject.attributes;
+  return {
+    ...omit(savedObject.attributes, 'state', 'params', 'apiKey', 'uiamApiKey', 'userScope'),
+    ...(userScope
+      ? {
+          userScope: {
+            ...userScope,
+            ...(userScope.spaceId ? { spaceId: brandSpaceId(userScope.spaceId) } : {}),
+          },
+        }
+      : {}),
+    id: savedObject.id,
+    version: savedObject.version,
+    scheduledAt: new Date(savedObject.attributes.scheduledAt),
+    runAt: new Date(savedObject.attributes.runAt),
+    startedAt: savedObject.attributes.startedAt ? new Date(savedObject.attributes.startedAt) : null,
+    retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
   };
 }
 

@@ -645,6 +645,16 @@ export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
   id: ConcreteTaskInstance['id'];
 };
 
+/**
+ * A task as returned by the claim candidate search, carrying only the metadata the claim
+ * phase needs. The omitted fields are loaded for the winners of the claim instead, so the
+ * missing type members keep a candidate from being mistaken for a runnable task.
+ */
+export type TaskClaimCandidate = Omit<
+  ConcreteTaskInstance,
+  'state' | 'params' | 'apiKey' | 'uiamApiKey'
+>;
+
 export interface ConcreteTaskInstanceVersion {
   /** The _id of the the document (not the SO id) */
   esId: string;

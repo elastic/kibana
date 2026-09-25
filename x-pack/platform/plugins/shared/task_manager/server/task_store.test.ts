@@ -34,7 +34,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
-import { asErr, asOk } from './lib/result_type';
+import { asErr, asOk, isOk } from './lib/result_type';
 import { MsearchError } from './lib/errors';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type {
@@ -860,7 +860,16 @@ describe('TaskStore', () => {
       });
     });
 
-    test('should return tasks with decrypted API keys', async () => {
+    test('excludes state, params and API keys from the source of every search', async () => {
+      const excludes = ['task.state', 'task.params', 'task.apiKey', 'task.uiamApiKey'];
+      const { args } = await testMsearch([{}, {}], []);
+
+      expect(args).toMatchObject({
+        searches: [{}, { _source: { excludes } }, {}, { _source: { excludes } }],
+      });
+    });
+
+    test('returns claim candidates without state, params or API keys', async () => {
       const { result } = await testMsearch(
         [{}],
         [
@@ -878,315 +887,37 @@ describe('TaskStore', () => {
       );
 
       expect(result.docs[0]).toEqual({
-        ...mockTask,
+        ..._.omit(mockTask, 'state', 'params'),
         retryAt: new Date(mockTask.retryAt),
         runAt: new Date(mockTask.runAt),
         scheduledAt: new Date(mockTask.scheduledAt),
         startedAt: new Date(mockTask.startedAt),
-        state: {},
-        params: {},
-        apiKey: 'decryptedApiKey',
       });
+      // absent rather than defaulted to {}, so a candidate cannot be run as a task
+      expect(result.docs[0]).not.toHaveProperty('state');
+      expect(result.docs[0]).not.toHaveProperty('params');
+      expect(result.docs[0]).not.toHaveProperty('apiKey');
     });
 
-    test('returns all API keys when first getApiKeys search misses a key, but finds after refresh', async () => {
-      const logger = mockLogger();
-      const mockSerializer = savedObjectsServiceMock.createSerializer();
-      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
-      mockSerializer.rawToSavedObject = jest
-        .fn()
-        .mockImplementation((doc: { _source?: { task?: { id?: string } } }) => ({
-          id: doc._source?.task?.id ?? 'task1',
-          version: '123',
-          type: 'task',
-          references: [],
-          attributes: doc._source?.task ?? mockTask,
-        }));
-
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const indicesRefreshSpy = jest
-        .spyOn(mockEsClient.indices, 'refresh')
-        .mockResolvedValue({} as never);
-
-      const refreshStore = new TaskStore({
-        logger,
-        index: 'tasky',
-        taskManagerId: '',
-        serializer: mockSerializer,
-        esClient: mockEsClient,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: false,
-        savedObjectsService: coreStart.savedObjects,
-        security: coreStart.security,
-        canEncryptSavedObjects: true,
-        getIsSecurityEnabled: () => true,
-        executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
-      });
-
-      let getApiKeysCallCount = 0;
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
-        .fn()
-        .mockImplementation(() => {
-          getApiKeysCallCount++;
-          return Promise.resolve({
-            close: jest.fn(),
-            find: function* finder() {
-              if (getApiKeysCallCount === 1) {
-                yield {
-                  saved_objects: [
-                    {
-                      id: 'task1',
-                      attributes: { ...mockTask, id: 'task1', apiKey: 'decryptedKey1' },
-                    },
-                  ],
-                };
-              } else {
-                yield {
-                  saved_objects: [
-                    {
-                      id: 'task2',
-                      attributes: { ...mockTask, id: 'task2', apiKey: 'decryptedKey2' },
-                    },
-                  ],
-                };
-              }
-            },
-          });
-        });
-      refreshStore.registerEncryptedSavedObjectsClient(esoClient);
-
-      mockEsClient.msearch.mockResponse({
-        took: 0,
-        responses: [
+    test('does not decrypt API keys, even when candidates carry one', async () => {
+      await testMsearch(
+        [{}],
+        [
           {
-            hits: {
-              hits: [
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task1', apiKey: 'encryptedKey1' } },
+            hits: [
+              {
+                _index: '.kibana_task_manager_8.16.0_001',
+                _source: {
+                  task: { ...mockTask, apiKey: 'encryptedKey' },
                 },
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task2', apiKey: 'encryptedKey2' } },
-                },
-              ],
-            },
-            took: 0,
-            _shards: { failed: 0, successful: 1, total: 1 },
-            timed_out: false,
-            status: 200,
+              },
+            ],
           },
-        ],
-      });
-
-      const result = await refreshStore.msearch([{}]);
-
-      expect(result.docs).toHaveLength(2);
-      expect(result.docs[0].apiKey).toBe('decryptedKey1');
-      expect(result.docs[1].apiKey).toBe('decryptedKey2');
-      expect(indicesRefreshSpy).toHaveBeenCalledWith({ index: 'tasky' });
-      expect(esoClient.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Refreshing index to get recently created API keys for tasks'
+        ]
       );
-      expect(logger.error).not.toHaveBeenCalled();
-    });
 
-    test('returns partial API keys when first getApiKeys search misses a key, and second search after refresh still does not find it', async () => {
-      const mockSerializer = savedObjectsServiceMock.createSerializer();
-      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
-      mockSerializer.rawToSavedObject = jest
-        .fn()
-        .mockImplementation((doc: { _source?: { task?: { id?: string } } }) => ({
-          id: doc._source?.task?.id ?? 'task1',
-          version: '123',
-          type: 'task',
-          references: [],
-          attributes: doc._source?.task ?? mockTask,
-        }));
-
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.spyOn(mockEsClient.indices, 'refresh').mockResolvedValue({} as never);
-      const logger = mockLogger();
-
-      const refreshStore = new TaskStore({
-        logger,
-        index: 'tasky',
-        taskManagerId: '',
-        serializer: mockSerializer,
-        esClient: mockEsClient,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: false,
-        savedObjectsService: coreStart.savedObjects,
-        security: coreStart.security,
-        canEncryptSavedObjects: true,
-        getIsSecurityEnabled: () => true,
-        executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
-      });
-
-      let getApiKeysCallCount = 0;
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
-        .fn()
-        .mockImplementation(() => {
-          getApiKeysCallCount++;
-          return Promise.resolve({
-            close: jest.fn(),
-            find: function* finder() {
-              if (getApiKeysCallCount === 1) {
-                yield {
-                  saved_objects: [
-                    {
-                      id: 'task1',
-                      attributes: { ...mockTask, id: 'task1', apiKey: 'decryptedKey1' },
-                    },
-                  ],
-                };
-              } else {
-                yield { saved_objects: [] };
-              }
-            },
-          });
-        });
-      refreshStore.registerEncryptedSavedObjectsClient(esoClient);
-
-      mockEsClient.msearch.mockResponse({
-        took: 0,
-        responses: [
-          {
-            hits: {
-              hits: [
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task1', apiKey: 'encryptedKey1' } },
-                },
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task2', apiKey: 'encryptedKey2' } },
-                },
-              ],
-            },
-            took: 0,
-            _shards: { failed: 0, successful: 1, total: 1 },
-            timed_out: false,
-            status: 200,
-          },
-        ],
-      });
-
-      const result = await refreshStore.msearch([{}]);
-
-      expect(result.docs).toHaveLength(2);
-      expect(result.docs[0].apiKey).toBe('decryptedKey1');
-      expect(result.docs[1].apiKey).toBe('encryptedKey2');
-      expect(mockEsClient.indices.refresh).toHaveBeenCalledWith({ index: 'tasky' });
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Refreshing index to get recently created API keys for tasks'
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        'Unable to obtain API key for task task2 after retry'
-      );
-    });
-
-    test('returns partial API keys when refresh fails', async () => {
-      const mockSerializer = savedObjectsServiceMock.createSerializer();
-      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
-      mockSerializer.rawToSavedObject = jest
-        .fn()
-        .mockImplementation((doc: { _source?: { task?: { id?: string } } }) => ({
-          id: doc._source?.task?.id ?? 'task1',
-          version: '123',
-          type: 'task',
-          references: [],
-          attributes: doc._source?.task ?? mockTask,
-        }));
-
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.spyOn(mockEsClient.indices, 'refresh').mockRejectedValue(new Error('bad refresh'));
-      const logger = mockLogger();
-
-      const refreshStore = new TaskStore({
-        logger,
-        index: 'tasky',
-        taskManagerId: '',
-        serializer: mockSerializer,
-        esClient: mockEsClient,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: false,
-        savedObjectsService: coreStart.savedObjects,
-        security: coreStart.security,
-        canEncryptSavedObjects: true,
-        getIsSecurityEnabled: () => true,
-        executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
-      });
-
-      let getApiKeysCallCount = 0;
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
-        .fn()
-        .mockImplementation(() => {
-          getApiKeysCallCount++;
-          return Promise.resolve({
-            close: jest.fn(),
-            find: function* finder() {
-              if (getApiKeysCallCount === 1) {
-                yield {
-                  saved_objects: [
-                    {
-                      id: 'task1',
-                      attributes: { ...mockTask, id: 'task1', apiKey: 'decryptedKey1' },
-                    },
-                  ],
-                };
-              } else {
-                yield { saved_objects: [] };
-              }
-            },
-          });
-        });
-      refreshStore.registerEncryptedSavedObjectsClient(esoClient);
-
-      mockEsClient.msearch.mockResponse({
-        took: 0,
-        responses: [
-          {
-            hits: {
-              hits: [
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task1', apiKey: 'encryptedKey1' } },
-                },
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task2', apiKey: 'encryptedKey2' } },
-                },
-              ],
-            },
-            took: 0,
-            _shards: { failed: 0, successful: 1, total: 1 },
-            timed_out: false,
-            status: 200,
-          },
-        ],
-      });
-
-      const result = await refreshStore.msearch([{}]);
-
-      expect(result.docs).toHaveLength(2);
-      expect(result.docs[0].apiKey).toBe('decryptedKey1');
-      expect(result.docs[1].apiKey).toBe('encryptedKey2');
-      expect(mockEsClient.indices.refresh).toHaveBeenCalledWith({ index: 'tasky' });
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Refreshing index to get recently created API keys for tasks'
-      );
-      expect(logger.error).toHaveBeenCalledWith('Error refreshing index tasky: bad refresh');
+      // decryption belongs to the winners' bulkGet, after the claim is won
+      expect(esoClient.createPointInTimeFinderDecryptedAsInternalUser).not.toHaveBeenCalled();
     });
 
     test('pushes error from call cluster to errors$', async () => {
@@ -3695,6 +3426,147 @@ describe('TaskStore', () => {
         `"Failure"`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    describe('API key decryption', () => {
+      let esClient: ElasticsearchClientMock;
+      let logger: ReturnType<typeof mockLogger>;
+      let decryptingStore: TaskStore;
+
+      const taskWithApiKey = (id: string, apiKey: string) => ({
+        type: 'task',
+        id,
+        version: '123',
+        references: [],
+        attributes: {
+          taskType: 'report',
+          params: '{}',
+          state: '{}',
+          traceparent: '',
+          attempts: 0,
+          status: TaskStatus.Idle,
+          scheduledAt: '2019-02-12T21:01:22.479Z',
+          startedAt: null,
+          retryAt: null,
+          runAt: '2019-02-12T21:01:22.479Z',
+          ownerId: null,
+          apiKey,
+          userScope: {
+            apiKeyId: 'EJYCtpUBGuyFd3FroZmZ',
+            spaceId: asSpaceId('default'),
+            apiKeyCreatedByUser: false,
+          },
+        },
+      });
+
+      // Each call to the decrypting finder yields the next batch, so a test can describe a
+      // first search that misses a key and a post-refresh search that finds it.
+      const mockDecryptedApiKeys = (batches: Array<Record<string, string>>) => {
+        let callCount = 0;
+        esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
+          .fn()
+          .mockImplementation(() => {
+            const batch = batches[callCount++] ?? {};
+            return Promise.resolve({
+              close: jest.fn(),
+              find: function* finder() {
+                yield {
+                  saved_objects: Object.entries(batch).map(([id, apiKey]) => ({
+                    id,
+                    attributes: { apiKey },
+                  })),
+                };
+              },
+            });
+          });
+      };
+
+      const apiKeysOf = (tasks: Awaited<ReturnType<TaskStore['bulkGet']>>) =>
+        tasks.map((task) => (isOk(task) ? task.value.apiKey : undefined));
+
+      beforeEach(() => {
+        logger = mockLogger();
+        esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        decryptingStore = new TaskStore({
+          logger,
+          index: 'tasky',
+          taskManagerId: '',
+          serializer,
+          esClient,
+          definitions: taskDefinitions,
+          savedObjectsRepository: savedObjectsClient,
+          adHocTaskCounter,
+          allowReadingInvalidState: false,
+          savedObjectsService: coreStart.savedObjects,
+          security: coreStart.security,
+          canEncryptSavedObjects: true,
+          getIsSecurityEnabled: () => true,
+          executionContext: mockExecutionContextStart,
+          apiKeyStrategy: new EsApiKeyStrategy(),
+        });
+        decryptingStore.registerEncryptedSavedObjectsClient(esoClient);
+
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            taskWithApiKey('task1', 'encryptedKey1'),
+            taskWithApiKey('task2', 'encryptedKey2'),
+          ],
+        });
+      });
+
+      test('returns tasks with decrypted API keys', async () => {
+        mockDecryptedApiKeys([{ task1: 'decryptedKey1', task2: 'decryptedKey2' }]);
+
+        expect(apiKeysOf(await decryptingStore.bulkGet(['task1', 'task2']))).toEqual([
+          'decryptedKey1',
+          'decryptedKey2',
+        ]);
+        expect(esClient.indices.refresh).not.toHaveBeenCalled();
+      });
+
+      test('returns all API keys when the first search misses a key, but finds it after refresh', async () => {
+        jest.spyOn(esClient.indices, 'refresh').mockResolvedValue({} as never);
+        mockDecryptedApiKeys([{ task1: 'decryptedKey1' }, { task2: 'decryptedKey2' }]);
+
+        expect(apiKeysOf(await decryptingStore.bulkGet(['task1', 'task2']))).toEqual([
+          'decryptedKey1',
+          'decryptedKey2',
+        ]);
+        expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: 'tasky' });
+        expect(esoClient.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Refreshing index to get recently created API keys for tasks'
+        );
+        expect(logger.error).not.toHaveBeenCalled();
+      });
+
+      test('returns partial API keys when a key is still missing after refresh', async () => {
+        jest.spyOn(esClient.indices, 'refresh').mockResolvedValue({} as never);
+        mockDecryptedApiKeys([{ task1: 'decryptedKey1' }, {}]);
+
+        expect(apiKeysOf(await decryptingStore.bulkGet(['task1', 'task2']))).toEqual([
+          'decryptedKey1',
+          'encryptedKey2',
+        ]);
+        expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: 'tasky' });
+        expect(logger.error).toHaveBeenCalledWith(
+          'Unable to obtain API key for task task2 after retry'
+        );
+      });
+
+      test('returns partial API keys when the refresh fails', async () => {
+        jest.spyOn(esClient.indices, 'refresh').mockRejectedValue(new Error('bad refresh'));
+        mockDecryptedApiKeys([{ task1: 'decryptedKey1' }]);
+
+        expect(apiKeysOf(await decryptingStore.bulkGet(['task1', 'task2']))).toEqual([
+          'decryptedKey1',
+          'encryptedKey2',
+        ]);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Refreshing index to get recently created API keys for tasks'
+        );
+        expect(logger.error).toHaveBeenCalledWith('Error refreshing index tasky: bad refresh');
+      });
     });
   });
 

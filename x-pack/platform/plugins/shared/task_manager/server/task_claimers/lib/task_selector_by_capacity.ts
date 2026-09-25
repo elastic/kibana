@@ -10,17 +10,17 @@ import type { TaskClaimingBatches } from '../../queries/task_claiming';
 import { isLimited } from '../../queries/task_claiming';
 import { sharedConcurrencyTaskTypes, type TaskTypeDictionary } from '../../task_type_dictionary';
 
-interface SelectTasksByCapacityOpts {
+interface SelectTasksByCapacityOpts<T> {
   definitions: TaskTypeDictionary;
-  tasks: ConcreteTaskInstance[];
+  tasks: T[];
   batches: TaskClaimingBatches;
 }
 // given a list of tasks and capacity info, select the tasks that meet capacity
-export function selectTasksByCapacity({
+export function selectTasksByCapacity<T extends Pick<ConcreteTaskInstance, 'taskType'>>({
   definitions,
   tasks,
   batches,
-}: SelectTasksByCapacityOpts): ConcreteTaskInstance[] {
+}: SelectTasksByCapacityOpts<T>): T[] {
   // create a map of task type - concurrency
   const limitedBatches = batches.filter(isLimited);
   const limitedMap = new Map<string, number | null>();
@@ -33,7 +33,7 @@ export function selectTasksByCapacity({
   }
 
   // apply the limited concurrency
-  const result: ConcreteTaskInstance[] = [];
+  const result: T[] = [];
   for (const task of tasks) {
     // get concurrency of this task type
     const concurrency = limitedMap.get(task.taskType);
