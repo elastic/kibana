@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
+
 export const CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID =
   'platform.context_engine.save_automation' as const;
 
 export const CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID =
   'platform.context_engine.run_automation' as const;
 
-export const CONTEXT_ENGINE_REMEMBER_TOOL_ID = 'platform.context_engine.remember' as const;
+export const CONTEXT_ENGINE_REMEMBER_TOOL_ID = contextEngineAiIndexTools.remember;
 
-export const CONTEXT_ENGINE_FORGET_TOOL_ID = 'platform.context_engine.forget' as const;
+export const CONTEXT_ENGINE_FORGET_TOOL_ID = contextEngineAiIndexTools.forget;

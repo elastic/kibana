@@ -87,6 +87,8 @@ export const contextEngineAiIndexTools = {
   listAiIndices: `${internalNamespaces.platformContextEngine}.list_ai_indices`,
   describeAiIndex: `${internalNamespaces.platformContextEngine}.describe_ai_index`,
   queryAiIndices: `${internalNamespaces.platformContextEngine}.query_ai_indices`,
+  remember: `${internalNamespaces.platformContextEngine}.remember`,
+  forget: `${internalNamespaces.platformContextEngine}.forget`,
 } as const;
 
 export const attachmentTools = {
