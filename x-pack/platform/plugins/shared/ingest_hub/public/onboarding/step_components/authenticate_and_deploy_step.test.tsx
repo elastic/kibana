@@ -332,6 +332,81 @@ describe('AuthenticateAndDeployStep', () => {
     });
   });
 
+  describe('mixed deployment (MI + agent-based-only)', () => {
+    const agentService = {
+      id: 'awsfargate',
+      name: 'AWS Fargate',
+      deploymentMethods: [{ method: 'agent_based', preferred: true }],
+      showInUI: true,
+    };
+
+    beforeEach(() => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty', 'awsfargate'] },
+        awsServicesMap: new Map([
+          ['guardduty', miService],
+          ['awsfargate', agentService],
+        ]),
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+      });
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
+    });
+
+    it('renders DeploymentMethodCard so the user can switch to agent-based', () => {
+      renderStep();
+      expect(MockDeploymentMethodCard).toHaveBeenCalled();
+    });
+
+    it('renders ManagedIntegrationsSection for the MI service', () => {
+      renderStep();
+      expect(screen.getByTestId('mock-deploy-btn')).toBeInTheDocument();
+    });
+
+    it('shows the mixed deployment callout naming the agent-based service', () => {
+      renderStep();
+      expect(
+        screen.getByTestId('authenticateAndDeployStep-mixedDeploymentCallout')
+      ).toBeInTheDocument();
+    });
+
+    it('does not show the agent-based callout when MI is selected', () => {
+      renderStep();
+      expect(
+        screen.queryByTestId('authenticateAndDeployStep-agentBasedOnlyCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('Next is disabled until MI is deployed', () => {
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+      fireEvent.click(screen.getByTestId('mock-deploy-btn'));
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+
+    it('switching to agent-based hides MI section, shows agent-based callout, hides mixed callout, enables Next', () => {
+      const mockSetDeploymentMethod = jest.fn();
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty', 'awsfargate'] },
+        awsServicesMap: new Map([
+          ['guardduty', miService],
+          ['awsfargate', agentService],
+        ]),
+        deploymentMethod: 'agent_based',
+        setDeploymentMethod: mockSetDeploymentMethod,
+      });
+      renderStep();
+      expect(screen.queryByTestId('mock-deploy-btn')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('authenticateAndDeployStep-agentBasedOnlyCallout')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('authenticateAndDeployStep-mixedDeploymentCallout')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+  });
+
   describe('agent-based-only services', () => {
     const agentService = {
       id: 'awsfargate',
@@ -370,7 +445,7 @@ describe('AuthenticateAndDeployStep', () => {
       );
     });
 
-    it('shows the agent-based-only callout', () => {
+    it('shows the agent-based callout', () => {
       renderStep();
       expect(
         screen.getByTestId('authenticateAndDeployStep-agentBasedOnlyCallout')
