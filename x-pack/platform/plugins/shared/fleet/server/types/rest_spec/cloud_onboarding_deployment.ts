@@ -300,6 +300,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
       )
     ),
+    globalRegion: schema.maybe(schema.string({ maxLength: 255 })),
   }),
 };
 

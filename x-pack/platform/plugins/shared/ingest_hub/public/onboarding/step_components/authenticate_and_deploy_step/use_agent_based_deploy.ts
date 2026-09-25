@@ -203,11 +203,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
         }
 
-        // Dirty redeploy: credentials or service settings changed. Update all deployed package
-        // policies with the current session vars so they reflect the new configuration.
-        if (targetsToDeploy.length === 0 && (detectAndReviewStep.isDirty ?? false)) {
+        // Dirty update: update already-deployed package policies with current settings.
+        // Runs unconditionally when isDirty — before deploying new targets — so that existing
+        // policies are always brought up to date in the same run even when the user adds a service
+        // alongside the setting change.
+        let dirtyUpdateApplied = false;
+        if (detectAndReviewStep.isDirty ?? false) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
-
           const byPolicy = new Map<string, string[]>();
           for (const [instanceId, policyId] of Object.entries(
             detectAndReviewStep.policyIdsByInstance ?? {}
@@ -215,50 +217,61 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
             byPolicy.get(policyId)!.push(instanceId);
           }
-          const redeployResults = await Promise.allSettled(
-            [...byPolicy.entries()].map(([policyId, instanceIds]) =>
-              updateAgentBasedPolicy(policyId, instanceIds, {
-                instances: serviceSettings?.instances ?? [],
-                storedServiceVars,
-                globalRegion,
-                namespace,
-                authenticateAndDeployStep,
-                servicesMap: servicesMap ?? new Map(),
-                selectedAgentPolicyIds: targetPolicyIds,
-                agentCredentials: agentCredentialsRef.current,
-              })
-            )
-          );
-          redeployResults.forEach((result) => {
-            if (result.status === 'rejected') {
-              // eslint-disable-next-line no-console
-              console.error(
-                'Failed to update agent-based policy during dirty redeploy:',
-                result.reason
-              );
-            }
-          });
-          const redeployFailed = redeployResults.some((r) => r.status === 'rejected');
-          if (redeployFailed) {
-            setIsDeploying(false);
-            updateDetectAndReviewStep({ isDeploying: false });
-            return { failed: true };
-          }
-
-          const { onboardingDeploymentId } = detectAndReviewStep;
-          if (onboardingDeploymentId) {
-            await updateDeploymentSO(onboardingDeploymentId, {
-              services: selectedServiceIds,
-              serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
-                string,
-                Record<string, unknown>
-              >,
+          if (byPolicy.size > 0) {
+            const redeployResults = await Promise.allSettled(
+              [...byPolicy.entries()].map(([policyId, instanceIds]) =>
+                updateAgentBasedPolicy(policyId, instanceIds, {
+                  instances: serviceSettings?.instances ?? [],
+                  storedServiceVars,
+                  globalRegion,
+                  namespace,
+                  authenticateAndDeployStep,
+                  servicesMap: servicesMap ?? new Map(),
+                  selectedAgentPolicyIds: targetPolicyIds,
+                  agentCredentials: agentCredentialsRef.current,
+                })
+              )
+            );
+            redeployResults.forEach((result) => {
+              if (result.status === 'rejected') {
+                // eslint-disable-next-line no-console
+                console.error('Failed to update agent-based policy during dirty redeploy:', result.reason);
+              }
             });
+            if (redeployResults.some((r) => r.status === 'rejected')) {
+              setIsDeploying(false);
+              updateDetectAndReviewStep({ isDeploying: false });
+              return { failed: true };
+            }
           }
 
-          setIsDeploying(false);
-          updateDetectAndReviewStep({ isDeploying: false, isDirty: false });
-          return { failed: false };
+          // Pure dirty-redeploy case: no new targets and no cleanup remaining.
+          if (targetsToDeploy.length === 0 && !hasPendingCleanup) {
+            const { onboardingDeploymentId } = detectAndReviewStep;
+            if (onboardingDeploymentId) {
+              const soUpdated = await updateDeploymentSO(onboardingDeploymentId, {
+                services: selectedServiceIds,
+                serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+                  string,
+                  Record<string, unknown>
+                >,
+                authMethod: authenticateAndDeployStep.authMethod ?? null,
+                connectorId: authenticateAndDeployStep.connectorId ?? null,
+                globalRegion,
+              });
+              if (!soUpdated) {
+                // Toast already shown by updateDeploymentSO. Keep isDirty so the user can retry.
+                setIsDeploying(false);
+                updateDetectAndReviewStep({ isDeploying: false });
+                return { failed: true };
+              }
+            }
+            setIsDeploying(false);
+            updateDetectAndReviewStep({ isDeploying: false, isDirty: false });
+            return { failed: false };
+          }
+          dirtyUpdateApplied = true;
+          // Falls through to the new-target deploy path below; isDirty cleared after that succeeds.
         }
 
         if (targetsToDeploy.length === 0) {
@@ -327,6 +340,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             ? [...getLatestFailedInstances().filter((id) => !allTargetIds.includes(id)), ...failed]
             : failed,
           deployErrors: errorsByInstance,
+          // Clear drift flag when new targets were deployed alongside a successful dirty update.
+          ...(dirtyUpdateApplied && failed.length === 0 ? { isDirty: false } : {}),
         });
         return { failed: failed.length > 0 };
       } catch (err) {

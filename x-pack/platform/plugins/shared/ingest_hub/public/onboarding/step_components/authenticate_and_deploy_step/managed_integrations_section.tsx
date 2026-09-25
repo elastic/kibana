@@ -139,6 +139,14 @@ export function ManagedIntegrationsSection({
     [setStaticKeys]
   );
 
+  const handleStaticKeyReplaceReadyChange = useCallback(
+    (ready: boolean) => {
+      setIsDeployReady(ready);
+      if (ready) updateDetectAndReviewStep({ isDirty: true });
+    },
+    [updateDetectAndReviewStep]
+  );
+
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
     'aws',
     undefined,
@@ -294,10 +302,7 @@ export function ManagedIntegrationsSection({
                 />
               ) : isStaticKeysEditMode ? (
                 <StaticKeysReplaceView
-                  onReadyChange={(ready) => {
-                    setIsDeployReady(ready);
-                    if (ready) updateDetectAndReviewStep({ isDirty: true });
-                  }}
+                  onReadyChange={handleStaticKeyReplaceReadyChange}
                   onFieldsChange={handleStaticKeysChange}
                 />
               ) : (

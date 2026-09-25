@@ -145,9 +145,13 @@ export async function updateManagedIntegrationsPolicy(
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
   const policyNamespace = existingNamespace ?? namespace;
 
-  // Preserve the connector already on the policy (a Fleet operator may have reassigned it
-  // since the wizard ran); never substitute the stale wizard connectorId.
-  const existingCloudConnector = existingGetResult.item.cloud_connector;
+  // Use the override connector when the caller explicitly provides one (e.g. a dirty redeploy
+  // that changed identity federation settings). Otherwise preserve the connector already on the
+  // policy — a Fleet operator may have reassigned it since the wizard ran.
+  const cloudConnector =
+    'overrideCloudConnector' in opts
+      ? opts.overrideCloudConnector
+      : existingGetResult.item.cloud_connector;
 
   await sendUpdateAgentlessPolicy(policyId, {
     name: policyName,
@@ -155,6 +159,6 @@ export async function updateManagedIntegrationsPolicy(
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
-    ...(existingCloudConnector ? { cloud_connector: existingCloudConnector } : {}),
+    ...(cloudConnector ? { cloud_connector: cloudConnector } : {}),
   });
 }

@@ -82,4 +82,6 @@ export type UpdateCloudOnboardingDeploymentInput = Partial<
   connectorId?: string | null;
   /** Set to null to clear the auth method (e.g. on MI→ECF transition). */
   authMethod?: CloudOnboardingDeploymentAuthMethod | null;
+  /** Update the global region if the user changed it in Step 2 before redeploying. */
+  globalRegion?: string;
 };
