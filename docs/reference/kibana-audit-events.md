@@ -417,7 +417,7 @@ In {{serverless-full}}, {{kib}} audit logs are delivered through [audit trail lo
 
 `user.id` is the user's login name, the same value as `user.name`. When the event has no login name, the log record omits `user.id`.
 
-`user.domain` is set to the name of the {{es}} realm that authenticated the user. It is present on every event that has an authenticated user, not only on `user_login` events.
+`user.domain` is the name of the {{es}} realm that authenticated the user. It is present on successful `user_login` events and on events logged for authenticated requests. Events that do not carry the realm, such as `user_logout` and `session_cleanup`, omit it even when `user.name` is set.
 
 When the event has no `event.type`, the log record sets `event.type` to `["access"]`. When the event has no `log.type`, the log record sets `log.type` to `audit`.
 
