@@ -24,6 +24,7 @@ tags:
   - private
 fileGroups:
   src:
+    - import_resolver.js
     - javascript.js
     - jest.js
     - react.js
