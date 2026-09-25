@@ -99,10 +99,12 @@ describe('setAlertsToUntracked()', () => {
         ctx._source.kibana.alert.status = 'untracked';
         ctx._source.kibana.alert.end = '2023-03-28T22:27:28.159Z';
         ctx._source.kibana.alert.time_range.lte = '2023-03-28T22:27:28.159Z';
+        ctx._source.kibana.alert.tracked = false;
       } else {
         ctx._source['kibana.alert.status'] = 'untracked';
         ctx._source['kibana.alert.end'] = '2023-03-28T22:27:28.159Z';
         ctx._source['kibana.alert.time_range'].lte = '2023-03-28T22:27:28.159Z';
+        ctx._source['kibana.alert.tracked'] = false;
       }",
           },
         },
@@ -166,10 +168,12 @@ describe('setAlertsToUntracked()', () => {
         ctx._source.kibana.alert.status = 'untracked';
         ctx._source.kibana.alert.end = '2023-03-28T22:27:28.159Z';
         ctx._source.kibana.alert.time_range.lte = '2023-03-28T22:27:28.159Z';
+        ctx._source.kibana.alert.tracked = false;
       } else {
         ctx._source['kibana.alert.status'] = 'untracked';
         ctx._source['kibana.alert.end'] = '2023-03-28T22:27:28.159Z';
         ctx._source['kibana.alert.time_range'].lte = '2023-03-28T22:27:28.159Z';
+        ctx._source['kibana.alert.tracked'] = false;
       }",
           },
         },
