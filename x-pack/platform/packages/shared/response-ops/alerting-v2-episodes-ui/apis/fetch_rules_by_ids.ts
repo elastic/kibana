@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { chunk, take } from 'lodash';
+import { take } from 'lodash';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { FindRulesRequest, FindRulesResponse, RuleResponse } from '@kbn/alerting-v2-schemas';
+import {
+  MAX_KQL_LENGTH,
+  MAX_PER_PAGE,
+  type FindRulesRequest,
+  type FindRulesResponse,
+  type RuleResponse,
+} from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
-import { ALERT_EPISODES_LIST_PAGE_SIZE, RULES_RESOLUTION_BATCH_SIZE } from '../constants';
+import { ALERT_EPISODES_LIST_PAGE_SIZE } from '../constants';
 
 export interface FetchRulesByIdsParams {
   http: HttpStart;
@@ -22,9 +28,33 @@ const buildRuleIdsFilter = (ids: string[]): string =>
     nodeBuilder.or(ids.map((id) => nodeBuilder.is('id', nodeTypes.literal.buildNode(id, true))))
   );
 
+const buildRuleIdBatches = (ids: string[]): string[][] => {
+  const batches: string[][] = [];
+  let currentBatch: string[] = [];
+
+  for (const id of ids) {
+    const candidateBatch = [...currentBatch, id];
+
+    if (
+      currentBatch.length >= MAX_PER_PAGE ||
+      (currentBatch.length > 0 && buildRuleIdsFilter(candidateBatch).length > MAX_KQL_LENGTH)
+    ) {
+      batches.push(currentBatch);
+      currentBatch = [id];
+    } else {
+      currentBatch = candidateBatch;
+    }
+  }
+
+  if (currentBatch.length > 0) {
+    batches.push(currentBatch);
+  }
+
+  return batches;
+};
+
 /**
- * Resolves rules by id via the find API and a KQL id filter, in batches of
- * {@link RULES_RESOLUTION_BATCH_SIZE}.
+ * Resolves rules by id via the find API and KQL filters bounded by the API length limit.
  * Missing/deleted ids are omitted from the response without failing the request.
  */
 export const fetchRulesByIds = async ({
@@ -37,10 +67,10 @@ export const fetchRulesByIds = async ({
   }
 
   const responses = await Promise.all(
-    chunk(idsToFetch, RULES_RESOLUTION_BATCH_SIZE).map((batch) => {
+    buildRuleIdBatches(idsToFetch).map((batch) => {
       const queryInput: FindRulesRequest = {
         filter: buildRuleIdsFilter(batch),
-        per_page: RULES_RESOLUTION_BATCH_SIZE,
+        per_page: batch.length,
         page: 1,
       };
 
