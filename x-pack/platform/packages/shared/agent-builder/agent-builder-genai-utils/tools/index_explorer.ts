@@ -121,7 +121,9 @@ const createDatastreamSummaries = async ({
       const mappings = allMappings[name];
       if (!mappings) {
         // ES omits data streams the user lacks view_index_metadata on
-        // instead of returning 403. Drop them from discovery.
+        // instead of returning 403. Include with no fields — the stream
+        // may still be queryable.
+        descriptors.push({ type: EsResourceType.dataStream, name, fields: [] });
         continue;
       }
       const flattened = flattenMapping(mappings.mappings);

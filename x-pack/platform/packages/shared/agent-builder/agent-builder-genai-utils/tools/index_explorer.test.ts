@@ -413,7 +413,13 @@ describe('gatherResourceDescriptors', () => {
 
     const result = await gatherResourceDescriptors({ indexPattern: '*', esClient });
 
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('logs-nginx');
+    // Both streams are returned; the unauthorized one has empty fields.
+    expect(result).toHaveLength(2);
+    const nginx = result.find((r) => r.name === 'logs-nginx');
+    const denied = result.find((r) => r.name === 'metrics-endpoint.policy-default');
+    expect(nginx?.fields).toEqual(
+      expect.arrayContaining([expect.objectContaining({ path: '@timestamp' })])
+    );
+    expect(denied?.fields).toEqual([]);
   });
 });
