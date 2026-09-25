@@ -117,6 +117,8 @@ describe('createFailureIssue()', () => {
 
       First failure: [kibana-on-merge - main](https://build-url)
 
+      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22a390190e0c2e618-b5e69c6ebadcc39%22')))
+
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js\\",\\"test.name\\":\\"maps app maps loaded from sample data\\",\\"test.failCount\\":1,\\"test.type\\":\\"ftr\\"}} -->",
             Array [
               "failed-test",
@@ -262,6 +264,37 @@ describe('createFailureIssue()', () => {
 });
 
 describe('updateFailureIssue()', () => {
+  it('adds the history link to an existing FTR issue on its next failure', async () => {
+    const api = createGithubApi();
+    const classname = 'FTR Tests.x-pack/platform/test/functional/apps/maps/sample_data·js';
+    const name = 'maps app maps loaded from sample data';
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname,
+        name,
+        github: {
+          htmlUrl: 'https://github.com/elastic/kibana/issues/1234',
+          number: 1234,
+          nodeId: 'abcd',
+          body: 'A test failed\n\n<!-- kibanaCiData = {"failed-test":{"test.failCount":2}} -->',
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      { classname, name, testType: 'ftr', time: '1', failure: 'failure', likelyIrrelevant: false }
+    );
+
+    const [, body] = api.editIssueBodyAndEnsureOpen.mock.calls[0];
+    expect(body).toContain('https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history');
+    expect(body).toContain('"test.failCount":3');
+    expect(api.addIssueComment.mock.calls[0][1]).toContain(
+      'https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history'
+    );
+  });
+
   it('increments failure count and adds new comment to issue', async () => {
     const api = createGithubApi();
 
@@ -635,7 +668,9 @@ describe('updateFailureIssue()', () => {
         "calls": Array [
           Array [
             5678,
-            "New failure for \\"local-serverless-observability_complete\\" target: [kibana-on-merge - main](https://build-url)",
+            "New failure for \\"local-serverless-observability_complete\\" target: [kibana-on-merge - main](https://build-url)
+
+      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-123%22')))",
           ],
         ],
         "results": Array [
@@ -646,6 +681,44 @@ describe('updateFailureIssue()', () => {
         ],
       }
     `);
+  });
+
+  it('keeps the dashboard link out of non-main failure comments', async () => {
+    const api = createGithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        github: {
+          htmlUrl: 'https://github.com/issues/5678',
+          number: 5678,
+          nodeId: 'efgh',
+          body: '# existing issue body',
+        },
+      },
+      api,
+      '9.5',
+      'kibana-on-merge',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        failure: 'test failure',
+        time: '1',
+        likelyIrrelevant: false,
+        id: 'test-id-123',
+        target: 'local',
+        location: 'test.spec.ts',
+        duration: 1000,
+        owners: 'elastic/team',
+      }
+    );
+
+    expect(api.addIssueComment.mock.calls[0][1]).toBe(
+      'New failure for "local" target: [kibana-on-merge - 9.5](https://build-url)'
+    );
+    expect(api.editIssueBodyAndEnsureOpen.mock.calls[0][1]).toContain('Test history:');
   });
 
   it('does not include new error message when error.message is missing', async () => {
@@ -786,10 +859,12 @@ describe('updateFailureIssue()', () => {
       }
     );
 
-    // pin down the exact comment format: target line, blank line, message in a code block
+    // Pin down the order of the build link, history link, and new error message.
     expect(api.addIssueComment.mock.calls[0][1]).toBe(
       dedent`
         New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://build-url)
+
+        Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-1213%22')))
 
         New error message:
         \`\`\`
@@ -932,6 +1007,8 @@ describe('createFailureIssue() - Scout failures', () => {
       \`\`\`
 
       First failure: [kibana-on-merge - main](https://build-url)
+
+      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-123%22')))
 
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"scout.suite\\",\\"test.name\\":\\"scout test name\\",\\"test.failCount\\":1,\\"test.type\\":\\"scout\\"}} -->",
             Array [
