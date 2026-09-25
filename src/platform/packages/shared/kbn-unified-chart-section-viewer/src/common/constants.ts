@@ -71,6 +71,7 @@ export const FEATURE_FLAGS = {
   IS_EDIT_GRID_SETTINGS_ENABLED: 'discover.metricsExperienceEditGridSettingsEnabled',
   IS_SORTING_ENABLED: 'discover.metricsExperienceSortEnabled',
   IS_EXEMPLARS_ENABLED: 'observability.metricsExemplarsEnabled',
+  IS_HEATMAPS_ENABLED: 'observability.metricsHeatmapsEnabled',
 } as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
@@ -80,6 +81,7 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
   [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
   [FEATURE_FLAGS.IS_SORTING_ENABLED]: true,
   [FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]: false,
+  [FEATURE_FLAGS.IS_HEATMAPS_ENABLED]: false,
 };
 
 // OTel exemplars live in a parallel `exemplars-*` stream with the same dataset and namespace.

@@ -83,7 +83,8 @@ export async function getVersionSpecificPolicies(
   soClient: SavedObjectsClientContract,
   fleetServerPolicy: FleetServerPolicy,
   fullPolicy: FullAgentPolicy,
-  agentVersions?: string[]
+  agentVersions?: string[],
+  options?: { spaceId?: string }
 ): Promise<FleetServerPolicy[]> {
   const fleetServerPolicies: FleetServerPolicy[] = [];
 
@@ -95,6 +96,7 @@ export async function getVersionSpecificPolicies(
       // read compiled template for agent version from package policy SO
       updatedFullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, fullPolicy.id, {
         agentVersion: version,
+        spaceId: options?.spaceId,
       });
     }
     const versionedPolicyId = `${fullPolicy.id}${AGENT_POLICY_VERSION_SEPARATOR}${version}`;

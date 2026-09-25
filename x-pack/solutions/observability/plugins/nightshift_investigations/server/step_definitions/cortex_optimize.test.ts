@@ -49,13 +49,13 @@ describe('cortexOptimizeStepDefinition', () => {
       createContext({
         prompt: 'why is checkout slow?',
         response: 'Redis evictions.',
-        agent_id: 'significant-events.investigation',
+        agent_id: 'nightshift.investigation',
       })
     );
 
     expect(runCortexOptimize).toHaveBeenCalledWith({
       request,
-      agentId: 'significant-events.investigation',
+      agentId: 'nightshift.investigation',
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
       esClient,
