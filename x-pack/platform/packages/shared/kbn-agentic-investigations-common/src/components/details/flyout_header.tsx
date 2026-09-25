@@ -20,6 +20,8 @@ import { InvestigationHeaderBlocks } from './header_blocks';
 
 export interface ConversationDetailsFlyoutHeaderProps {
   investigation: Investigation;
+  /** Optional pre-rendered interactive assignee picker from the consuming plugin. */
+  assigneesNode?: React.ReactNode;
 }
 
 /**
@@ -28,6 +30,7 @@ export interface ConversationDetailsFlyoutHeaderProps {
  */
 export const ConversationDetailsFlyoutHeader = ({
   investigation,
+  assigneesNode,
 }: ConversationDetailsFlyoutHeaderProps) => {
   const { title, createdAt } = investigation;
 
@@ -55,7 +58,7 @@ export const ConversationDetailsFlyoutHeader = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <InvestigationHeaderBlocks investigation={investigation} />
+      <InvestigationHeaderBlocks investigation={investigation} assigneesNode={assigneesNode} />
     </>
   );
 };

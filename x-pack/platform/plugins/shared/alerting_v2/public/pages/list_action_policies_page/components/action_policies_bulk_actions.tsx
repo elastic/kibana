@@ -17,6 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { ActionPolicySnoozeModal } from '../../../components/action_policy/action_policy_snooze_modal';
+import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from '../../../components/action_policy/labels';
+import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
 import { BulkDeleteConfirmationModal } from './bulk_delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
 
@@ -35,6 +37,7 @@ export const ActionPoliciesBulkActions = ({
   onBulkAction,
   isLoading,
 }: ActionPoliciesBulkActionsProps) => {
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<'delete' | 'snooze' | 'update_api_key' | null>(
     null
@@ -65,7 +68,9 @@ export const ActionPoliciesBulkActions = ({
           }),
           icon: 'check',
           onClick: () => handleAction('enable'),
-          disabled: isLoading,
+          disabled: isLoading || !isLicenseValid,
+          toolTipContent: isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
+          'data-test-subj': 'bulkEnableActionPolicies',
         },
         {
           name: i18n.translate('xpack.alertingV2.actionPolicy.bulkAction.disable', {

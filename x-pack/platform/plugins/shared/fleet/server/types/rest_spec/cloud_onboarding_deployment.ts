@@ -156,6 +156,17 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
+  policyIdsByInstance: schema.maybe(
+    schema.recordOf(schema.string({ maxLength: 255 }), schema.string({ maxLength: 255 }), {
+      validate: (v) => {
+        if (Object.keys(v).length > 1000) return 'policyIdsByInstance must not exceed 1000 entries';
+      },
+      meta: {
+        description:
+          'instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.',
+      },
+    })
+  ),
   apiKeyId: schema.maybe(
     schema.string({
       meta: {
@@ -280,6 +291,13 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
+    services: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
+        minSize: 1,
+        maxSize: 1000,
+        meta: { description: 'Updated service list. Replaces the stored services array.' },
+      })
+    ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     services: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
@@ -329,11 +347,35 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         },
       })
     ),
+    policyIdsByInstance: schema.maybe(
+      schema.recordOf(schema.string({ maxLength: 255 }), schema.string({ maxLength: 255 }), {
+        validate: (v) => {
+          if (Object.keys(v).length > 1000)
+            return 'policyIdsByInstance must not exceed 1000 entries';
+        },
+      })
+    ),
+    apiKeyId: schema.maybe(schema.string({ maxLength: 255 })),
+    mechanisms: schema.maybe(
+      schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, {
+        maxSize: 10,
+        meta: {
+          description:
+            'Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.',
+        },
+      })
+    ),
     ecfStacks: schema.maybe(
       schema.arrayOf(EcfStackSchema, {
         maxSize: 10,
         meta: { description: 'ECF CloudFormation stacks to record for this deployment.' },
       })
+    ),
+    connectorId: schema.maybe(schema.nullable(schema.string({ maxLength: 255 }))),
+    authMethod: schema.maybe(
+      schema.nullable(
+        schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
+      )
     ),
   }),
 };

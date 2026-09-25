@@ -62,18 +62,18 @@ spaceTest.describe(
         await pageObjects.discover.goto({ queryMode: 'esql', savedSearchId: discoverSessionId });
         await pageObjects.discover.waitUntilTabIsLoaded();
 
-        const discoverControlId = await pageObjects.dashboard.getOnlyControlId();
+        const discoverControlId = await pageObjects.controls.getOnlyControlId();
         await expect(
-          pageObjects.discover.controls.getSelectionsLocator(discoverControlId)
+          pageObjects.controls.optionsList.getSelectionsLocator(discoverControlId)
         ).toHaveText(INITIAL_SELECTION);
 
-        await pageObjects.dashboard.optionsListOpenPopover(discoverControlId);
-        await pageObjects.dashboard.optionsListPopoverSelectOption(UPDATED_SELECTION);
-        await pageObjects.dashboard.optionsListEnsurePopoverIsClosed();
+        await pageObjects.controls.optionsList.openPopover(discoverControlId);
+        await pageObjects.controls.optionsList.selectOption(UPDATED_SELECTION);
+        await pageObjects.controls.optionsList.ensurePopoverIsClosed();
         await pageObjects.discover.waitUntilTabIsLoaded();
 
         await expect(
-          pageObjects.discover.controls.getSelectionsLocator(discoverControlId)
+          pageObjects.controls.optionsList.getSelectionsLocator(discoverControlId)
         ).toHaveText(UPDATED_SELECTION);
 
         await pageObjects.discover.saveTableToNewDashboard(BY_VALUE_TABLE_TITLE);
@@ -90,7 +90,7 @@ spaceTest.describe(
         await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
         await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
         const controlId = await pageObjects.dashboard.getDashboardControlId();
-        await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+        await expect(pageObjects.controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
           UPDATED_SELECTION
         );
       }
@@ -112,7 +112,7 @@ spaceTest.describe(
         await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
         const initialDashboardControlId = await pageObjects.dashboard.getDashboardControlId();
         await expect(
-          pageObjects.dashboard.getOptionsListSelectionsLocator(initialDashboardControlId)
+          pageObjects.controls.optionsList.getSelectionsLocator(initialDashboardControlId)
         ).toHaveText(INITIAL_SELECTION);
 
         // Add a second Discover panel that declares a control for the same variable. The
@@ -131,14 +131,14 @@ spaceTest.describe(
         });
         await pageObjects.discover.waitUntilTabIsLoaded();
 
-        const discoverControlId = await pageObjects.dashboard.getOnlyControlId();
-        await pageObjects.dashboard.optionsListOpenPopover(discoverControlId);
-        await pageObjects.dashboard.optionsListPopoverSelectOption(UPDATED_SELECTION);
-        await pageObjects.dashboard.optionsListEnsurePopoverIsClosed();
+        const discoverControlId = await pageObjects.controls.getOnlyControlId();
+        await pageObjects.controls.optionsList.openPopover(discoverControlId);
+        await pageObjects.controls.optionsList.selectOption(UPDATED_SELECTION);
+        await pageObjects.controls.optionsList.ensurePopoverIsClosed();
         await pageObjects.discover.waitUntilTabIsLoaded();
 
         await expect(
-          pageObjects.discover.controls.getSelectionsLocator(discoverControlId)
+          pageObjects.controls.optionsList.getSelectionsLocator(discoverControlId)
         ).toHaveText(UPDATED_SELECTION);
 
         await pageObjects.discover.saveAndReturnToEditor();
@@ -149,7 +149,7 @@ spaceTest.describe(
         const updatedDashboardControlId = await pageObjects.dashboard.getDashboardControlId();
         expect(updatedDashboardControlId).toBe(initialDashboardControlId);
         await expect(
-          pageObjects.dashboard.getOptionsListSelectionsLocator(updatedDashboardControlId)
+          pageObjects.controls.optionsList.getSelectionsLocator(updatedDashboardControlId)
         ).toHaveText(UPDATED_SELECTION);
       }
     );

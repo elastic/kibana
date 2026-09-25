@@ -90,8 +90,11 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   status: StatusSchema,
   dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
-    schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
+    schema.nullable(
+      schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
+    )
   ),
+  policyIdsByInstance: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   /** @deprecated Replaced by agentPolicyIds (array) in V2. Retained for forward-compat reads of V1 docs. */
   agentPolicyId: schema.maybe(schema.string()),
   ...SharedFields,

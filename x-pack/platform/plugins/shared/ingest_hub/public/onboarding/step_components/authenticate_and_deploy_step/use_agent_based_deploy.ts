@@ -24,6 +24,13 @@ import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
 import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
 import { useOnboardingSO } from './use_onboarding_so';
+import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
+import {
+  buildLiveStalePolicyIds,
+  buildEffectivePendingCleanup,
+  buildCleanedLiveStale,
+  buildRemainingPending,
+} from './cleanup_reconciliation';
 
 export interface UseAgentBasedDeployResult {
   targets: DeployGroup[];
@@ -47,6 +54,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     authenticateAndDeployStep,
     detectAndReviewStep,
     updateDetectAndReviewStep,
+    removeDeployInstances,
     getLatestFailedInstances,
     awsServicesMap: servicesMap,
     agentBasedDeployment,
@@ -86,18 +94,32 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
   );
 
-  // Deploy is "already done" when every target instance has a persisted package policy id.
+  // Deploy is "already done" when every target instance has a persisted package policy id AND
+  // there is no pending cleanup to run.
   // This covers both paths durably:
   //   - New policy: agentPolicyId is set in session storage AND policyIdsByInstance is populated.
   //   - Existing policy: agentPolicyId is never set, but policyIdsByInstance is populated after
   //     a successful deploy — this prevents re-deploying on Back+Next in existing mode.
+  // Returns false when cleanup is needed so handleNext doesn't short-circuit before calling
+  // handleDeploy (which runs the cleanup even when no new targets need to be deployed).
   const isAlreadyDeployed = useMemo(() => {
     if (targets.length === 0) return false;
     const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+    const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
+    // Live-stale: policyIdsByInstance has entries for services no longer in targets (e.g. user
+    // deselected from Step 1). The shared package policy must be updated to drop removed inputs.
+    const liveStalePolicyIds = buildLiveStalePolicyIds(policyIdsByInstance, activeInstanceIds);
+    if (Object.keys(liveStalePolicyIds).length > 0) return false;
+    // Explicit cleanup staged by removeDeployInstance (Step 4 deselection).
+    if (Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0) return false;
     return targets.every((group) =>
       group.instanceIds.every((instanceId) => !!policyIdsByInstance[instanceId])
     );
-  }, [targets, detectAndReviewStep.policyIdsByInstance]);
+  }, [
+    targets,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+  ]);
 
   const handleDeploy = useCallback(
     async (instanceIds?: string[]): Promise<{ failed: boolean }> => {
@@ -112,7 +134,22 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
         : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
-      if (targetsToDeploy.length === 0) return { failed: false };
+      // Services deselected from Step 1 never call removeDeployInstance, so pendingCleanupPolicyIds
+      // won't capture them. Detect stale entries by comparing policyIdsByInstance against the
+      // reconciled targets (which already filters by selectedServiceIds).
+      const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
+      const liveStalePolicyIds = buildLiveStalePolicyIds(
+        detectAndReviewStep.policyIdsByInstance ?? {},
+        activeInstanceIds
+      );
+      const effectivePendingCleanup = buildEffectivePendingCleanup(
+        liveStalePolicyIds,
+        detectAndReviewStep.pendingCleanupPolicyIds
+      );
+
+      const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
+
+      if (targetsToDeploy.length === 0 && !hasPendingCleanup) return { failed: false };
 
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
@@ -136,6 +173,46 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           pkgVersion: '', // overridden per-package inside deploy functions
           agentCredentials: agentCredentialsRef.current,
         };
+
+        // Clean up package policies for removed services before creating new ones.
+        if (hasPendingCleanup) {
+          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+          const cleanupOps = await cleanupAgentBasedPolicies({
+            pendingCleanupPolicyIds: effectivePendingCleanup,
+            currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
+            instances: serviceSettings?.instances ?? [],
+            storedServiceVars,
+            globalRegion,
+            namespace,
+            authenticateAndDeployStep,
+            servicesMap: servicesMap ?? new Map(),
+            selectedAgentPolicyIds: targetPolicyIds,
+            agentCredentials: agentCredentialsRef.current,
+          });
+          // Only prune instances whose policy cleanup actually succeeded — failed cleanups
+          // remain in pendingCleanupPolicyIds for retry on the next deploy attempt.
+          const succeededIds = new Set([
+            ...cleanupOps.toDelete,
+            ...cleanupOps.toUpdate.map((u) => u.policyId),
+          ]);
+          // Agent-based deploy has no "update" semantics — a policy is either deleted or kept
+          // entirely, so no survivingInstanceIds filter is needed here.
+          const cleanedLiveStale = buildCleanedLiveStale(liveStalePolicyIds, succeededIds);
+          removeDeployInstances(cleanedLiveStale);
+          const remainingPending = buildRemainingPending(
+            detectAndReviewStep.pendingCleanupPolicyIds,
+            succeededIds
+          );
+          updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
+        }
+
+        if (targetsToDeploy.length === 0) {
+          setIsDeploying(false);
+          updateDetectAndReviewStep({ isDeploying: false });
+          // Cleanup is best-effort — any entries that couldn't be cleared remain staged for
+          // the next deploy attempt. Don't block navigation on a cleanup-only run.
+          return { failed: false };
+        }
 
         // ── SO create (initial deploy only, best-effort) ──────────────────────
         // Mirror the managed-integration guard: !isRetry && !onboardingDeploymentId avoids
@@ -334,6 +411,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       setAgentBasedDeployment,
       detectAndReviewStep,
       updateDetectAndReviewStep,
+      removeDeployInstances,
       getLatestFailedInstances,
       selectedServiceIds,
       servicesStep,

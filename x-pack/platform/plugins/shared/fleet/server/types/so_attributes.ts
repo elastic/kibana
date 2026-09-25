@@ -383,8 +383,8 @@ export interface CloudConnectorSOAttributes {
 export interface CloudOnboardingDeploymentSOAttributes {
   /** Cloud provider — determines how deploymentId/deploymentName are interpreted (e.g. for AWS, deploymentId is the CFN stack ARN). */
   provider: CloudProvider;
-  /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. Absent for static-keys deployments. */
-  connectorId?: string;
+  /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. Absent for static-keys deployments. Null after MI→ECF transition clears the association. */
+  connectorId?: string | null;
   /** Active delivery mechanisms included in this deployment (managed_integration, ecf, agent_based). */
   mechanisms: DeploymentMethod[];
   /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
@@ -409,10 +409,13 @@ export interface CloudOnboardingDeploymentSOAttributes {
    * Authentication method for this deployment.
    * - managed_integration: identity_federation | static_keys
    * - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
+   * Null after MI→ECF transition clears the field.
    */
-  authMethod?: CloudOnboardingDeploymentAuthMethod;
-  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). */
+  authMethod?: CloudOnboardingDeploymentAuthMethod | null;
+  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policies tracked in agentPolicyIds. */
   packagePolicyIds?: string[];
+  /** instanceId → policyId mapping persisted after deploy. Hydrated into session storage on resume so cleanup correctly targets stale policies when services are removed after reopening a deployed onboarding URL. */
+  policyIdsByInstance?: Record<string, string>;
   /** Agent policy IDs for agent_based mechanism — the user-managed policies the package policies are attached to. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies. */
   agentPolicyIds?: string[];
   /** Elasticsearch API key ID for push mechanisms (ecf). Set by the backend after key creation; used to identify the key for rotation/revocation. */

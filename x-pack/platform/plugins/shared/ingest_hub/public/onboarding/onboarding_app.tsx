@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -126,7 +127,8 @@ export async function hydrateOnboardingSession(
       getOnboardingSessionKey(integrationId, 'detectAndReviewStep'),
       JSON.stringify({
         serviceStatuses: {},
-        policyIdsByInstance,
+        policyIdsByInstance: item.policyIdsByInstance ?? policyIdsByInstance,
+        ...(item.ecfStacks ? { ecfStacks: item.ecfStacks } : {}),
         failedInstances: [],
         deployErrors: {},
         onboardingDeploymentId: item.id,
@@ -149,6 +151,14 @@ export async function hydrateOnboardingSession(
   }
 }
 
+export function getCloudService(
+  cloudSetup: CloudSetup | undefined,
+  cloudStart: CloudStart | undefined
+): (CloudStart & Partial<CloudSetup>) | undefined {
+  if (!cloudStart) return undefined;
+  return { ...cloudSetup, ...cloudStart };
+}
+
 export async function renderOnboardingApp(
   coreStart: CoreStart,
   params: AppMountParameters,
@@ -156,7 +166,8 @@ export async function renderOnboardingApp(
   // kibanaVersion is threaded here so Fleet components that call useKibanaVersion() (e.g.
   // AgentEnrollmentFlyout → installation_message.tsx) don't throw. The context is provided
   // at app root alongside FleetStatusProvider. See: fleet/public/hooks/use_kibana_version.ts
-  kibanaVersion?: string
+  kibanaVersion?: string,
+  cloudSetup?: CloudSetup
 ) {
   // Write session storage before any hooks initialize.
   // useSessionStorage (react-use) writes its default on first mount and re-serializes
@@ -204,7 +215,7 @@ export async function renderOnboardingApp(
         <KibanaContextProvider
           services={{
             ...coreStart,
-            cloud: deps.cloud,
+            cloud: getCloudService(cloudSetup, deps.cloud),
             fleet: deps.fleet,
             spaces: deps.spaces,
             authz: deps.fleet.authz,
