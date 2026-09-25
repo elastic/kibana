@@ -1336,8 +1336,11 @@ async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: S
 export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
   log.info('Stopping serverless ES cluster.');
 
-  await execa('docker', ['container', 'stop'].concat(nodes));
-  await Fsp.rm(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
+  try {
+    await execa('docker', ['container', 'stop'].concat(nodes));
+  } finally {
+    await Fsp.rm(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
+  }
 }
 
 /**
@@ -1350,26 +1353,28 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
       ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) => image)
       : []),
   ];
-  const { stdout } = execa.commandSync(
-    `docker ps --filter status=running ${imagesToKillContainersFor
-      .map((image) => `--filter ancestor=${image}`)
-      .join(' ')} --quiet`
-  );
-  // Filter empty strings
-  const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
+  try {
+    const { stdout } = execa.commandSync(
+      `docker ps --filter status=running ${imagesToKillContainersFor
+        .map((image) => `--filter ancestor=${image}`)
+        .join(' ')} --quiet`
+    );
+    // Filter empty strings
+    const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
 
-  if (runningNodes.length) {
-    log.info('Killing running serverless containers.');
+    if (runningNodes.length) {
+      log.info('Killing running serverless containers.');
 
-    try {
-      execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
-    } catch {
-      log.debug('Some containers had already stopped before kill completed.');
+      try {
+        execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+      } catch {
+        log.debug('Some containers had already stopped before kill completed.');
+      }
     }
+  } finally {
+    // The operator settings carry the cluster secrets, so they must not outlive the cluster.
+    fs.rmSync(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
   }
-
-  // The operator settings carry the cluster secrets, so they must not outlive the cluster.
-  fs.rmSync(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
 }
 
 /**

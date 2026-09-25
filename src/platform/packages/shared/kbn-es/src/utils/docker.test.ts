@@ -1197,6 +1197,15 @@ describe('stopServerlessCluster()', () => {
 
     await expect(Fsp.access(SERVERLESS_SECRETS_DIR)).rejects.toThrow();
   });
+
+  test('should remove the operator secrets directory even when stopping fails', async () => {
+    mockFs({ [SERVERLESS_SECRETS_DIR]: { operator: { 'settings.json': '{}' } } });
+    execa.mockImplementation(() => Promise.reject(new Error('No such container: es01')));
+
+    await expect(stopServerlessCluster(log, ['es01'])).rejects.toThrow('No such container');
+
+    await expect(Fsp.access(SERVERLESS_SECRETS_DIR)).rejects.toThrow();
+  });
 });
 
 describe('teardownServerlessClusterSync()', () => {
@@ -1247,6 +1256,21 @@ describe('teardownServerlessClusterSync()', () => {
     execa.commandSync.mockImplementation(() => ({ stdout: '' }));
 
     teardownServerlessClusterSync(log, defaultOptions);
+
+    expect(rmSync).toHaveBeenCalledWith(SERVERLESS_SECRETS_DIR, {
+      recursive: true,
+      force: true,
+    });
+    rmSync.mockRestore();
+  });
+
+  test('should remove the operator secrets directory even when Docker is unavailable', () => {
+    const rmSync = jest.spyOn(Fs, 'rmSync').mockImplementation(() => {});
+    execa.commandSync.mockImplementation(() => {
+      throw new Error('Cannot connect to the Docker daemon');
+    });
+
+    expect(() => teardownServerlessClusterSync(log, defaultOptions)).toThrow('Docker daemon');
 
     expect(rmSync).toHaveBeenCalledWith(SERVERLESS_SECRETS_DIR, {
       recursive: true,
