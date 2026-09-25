@@ -61,6 +61,54 @@ export function CasesTableServiceProvider(
   const CASE_ROWS_SELECTOR =
     '[data-test-subj^="cases-table-row-"],[data-test-subj^="cases-list-item-clickable-"]';
 
+  const ROW_ACTION_UPDATE_TIMEOUT = 30000;
+  const ROW_ACTION_PANEL_TIMEOUT = 5000;
+  const BADGE_ALREADY_RENDERED_TIMEOUT = 500;
+  const BADGE_AFTER_UPDATE_TIMEOUT = 5000;
+
+  const caseRowHasBadge = async (caseId: string, badgeSubj: string, timeout: number) =>
+    await find.existsByCssSelector(
+      `[data-test-subj="cases-table-row-${caseId}"] [data-test-subj="${badgeSubj}"]`,
+      timeout
+    );
+
+  const getCaseIdByRowIndex = async (index: number) => {
+    const actionButtons = await find.allByCssSelector(
+      '[data-test-subj^="case-action-popover-button-"]',
+      100
+    );
+
+    assertCaseExists(index, actionButtons.length);
+
+    const subject = (await actionButtons[index].getAttribute('data-test-subj')) ?? '';
+    return subject.replace('case-action-popover-button-', '');
+  };
+
+  // The row action `EuiContextMenu` slides between panels, so a click on a status or severity option
+  // can be intercepted by the panel title mid-transition and dropped — `WebElementWrapper` logs the
+  // interception as a warning and blindly re-clicks — leaving the popover open and the case
+  // unchanged. Drive the menu from a closed popover until the row renders the requested badge.
+  const applyRowActionUpdate = async (
+    caseId: string,
+    badgeSubj: string,
+    driveRowActionMenu: () => Promise<void>
+  ) => {
+    await retry.waitForWithTimeout(
+      `case ${caseId} to render ${badgeSubj}`,
+      ROW_ACTION_UPDATE_TIMEOUT,
+      async () => {
+        if (await caseRowHasBadge(caseId, badgeSubj, BADGE_ALREADY_RENDERED_TIMEOUT)) {
+          return true;
+        }
+
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await driveRowActionMenu();
+
+        return await caseRowHasBadge(caseId, badgeSubj, BADGE_AFTER_UPDATE_TIMEOUT);
+      }
+    );
+  };
+
   return {
     /**
      * Whether the redesign card list view is currently rendered (as opposed to the legacy/redesign
@@ -323,39 +371,45 @@ export function CasesTableServiceProvider(
     },
 
     async changeStatus(status: CaseStatuses, index: number) {
-      await this.openRowActions(index);
+      await this.ensureTableView();
+      const caseId = await getCaseIdByRowIndex(index);
 
-      await retry.waitFor('status panel exists', async () => {
-        return find.existsByCssSelector('[data-test-subj*="case-action-status-panel-"');
+      await applyRowActionUpdate(caseId, `case-status-badge-${status}`, async () => {
+        await testSubjects.click(`case-action-popover-button-${caseId}`);
+
+        const statusButton = await find.byCssSelector(
+          `[data-test-subj="case-action-status-panel-${caseId}"]`,
+          ROW_ACTION_PANEL_TIMEOUT
+        );
+
+        await statusButton.click();
+
+        await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
+        await testSubjects.click(`cases-bulk-action-status-${status}`);
+        await header.waitUntilLoadingHasFinished();
+        await this.waitForTableToFinishLoading();
       });
-
-      const statusButton = await find.byCssSelector('[data-test-subj*="case-action-status-panel-"');
-
-      await statusButton.click();
-
-      await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
-      await testSubjects.click(`cases-bulk-action-status-${status}`);
-      await header.waitUntilLoadingHasFinished();
-      await this.waitForTableToFinishLoading();
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
-      await this.openRowActions(index);
+      await this.ensureTableView();
+      const caseId = await getCaseIdByRowIndex(index);
 
-      await retry.waitFor('severity panel exists', async () => {
-        return find.existsByCssSelector('[data-test-subj*="case-action-severity-panel-"');
+      await applyRowActionUpdate(caseId, `case-severity-badge-${severity}`, async () => {
+        await testSubjects.click(`case-action-popover-button-${caseId}`);
+
+        const severityButton = await find.byCssSelector(
+          `[data-test-subj="case-action-severity-panel-${caseId}"]`,
+          ROW_ACTION_PANEL_TIMEOUT
+        );
+
+        await severityButton.click();
+
+        await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
+        await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+        await header.waitUntilLoadingHasFinished();
+        await this.waitForTableToFinishLoading();
       });
-
-      const statusButton = await find.byCssSelector(
-        '[data-test-subj*="case-action-severity-panel-"'
-      );
-
-      await statusButton.click();
-
-      await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
-      await testSubjects.click(`cases-bulk-action-severity-${severity}`);
-      await header.waitUntilLoadingHasFinished();
-      await this.waitForTableToFinishLoading();
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
