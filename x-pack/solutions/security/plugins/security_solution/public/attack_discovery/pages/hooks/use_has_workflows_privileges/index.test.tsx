@@ -46,7 +46,7 @@ const mockServices = ({
         },
       },
       featureFlags: {
-        getBooleanValue: jest.fn().mockResolvedValue(ffValue),
+        useBooleanValue: jest.fn().mockReturnValue(ffValue),
       },
       uiSettings: {
         get: jest.fn().mockReturnValue(settingValue),
@@ -238,18 +238,16 @@ describe('useHasWorkflowsPrivileges', () => {
     });
   });
 
-  it('reads the feature flag with the correct key and a true default (ON by default)', async () => {
+  it('reads the feature flag with the correct key and a true default (ON by default)', () => {
     mockServices({ executeWorkflow: true, readWorkflow: true });
 
     renderHook(() => useHasWorkflowsPrivileges());
 
-    const { getBooleanValue } = mockUseKibana().services.featureFlags;
+    const { useBooleanValue } = mockUseKibana().services.featureFlags;
 
-    await waitFor(() =>
-      expect(getBooleanValue).toHaveBeenCalledWith(
-        'securitySolution.attackDiscoveryWorkflowsEnabled',
-        true
-      )
+    expect(useBooleanValue).toHaveBeenCalledWith(
+      'securitySolution.attackDiscoveryWorkflowsEnabled',
+      true
     );
   });
 });

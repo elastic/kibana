@@ -19,10 +19,16 @@ jest.mock('../../../hooks');
 jest.mock('./hooks/use_locations_api');
 jest.mock('../../../contexts/synthetics_settings_context');
 
+let mockHasEnterprise = false;
+jest.mock('../../../hooks/use_license', () => ({
+  useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
+}));
+
 const queryClient = new QueryClient();
 
 describe('<ManagePrivateLocations />', () => {
   beforeEach(() => {
+    mockHasEnterprise = false;
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
     jest.spyOn(permissionsHooks, 'useFleetPermissions').mockReturnValue({
       canReadAgentPolicies: true,
@@ -174,7 +180,8 @@ describe('<ManagePrivateLocations />', () => {
     expect(queryByTestId('addPrivateLocationButton')).not.toBeInTheDocument();
   });
 
-  it('shows a Scalable badge for a sharded private location', () => {
+  it('shows a Scalable badge with an Enterprise license', () => {
+    mockHasEnterprise = true;
     jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
       canSave: true,
       canManagePrivateLocations: true,
@@ -190,7 +197,6 @@ describe('<ManagePrivateLocations />', () => {
           id: 'loc-sharded',
           agentPolicyId: 'policy-sharded',
           isServiceManaged: false,
-          isAgentSharding: true,
         },
       ],
       onDeleteLocationAPI: jest.fn(),

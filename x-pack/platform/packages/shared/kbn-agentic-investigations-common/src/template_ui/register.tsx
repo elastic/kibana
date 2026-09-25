@@ -11,7 +11,7 @@ import { EuiSkeletonText } from '@elastic/eui';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
-import type { RenderAssignees } from './types';
+import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
 
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
@@ -29,6 +29,9 @@ const LazyFooterSlot = lazy(() =>
 );
 const LazyEscalationHeaderSlot = lazy(() =>
   import('./slots').then(({ EscalationHeaderSlot }) => ({ default: EscalationHeaderSlot }))
+);
+const LazyEscalationOverviewSlot = lazy(() =>
+  import('./slots').then(({ EscalationOverviewSlot }) => ({ default: EscalationOverviewSlot }))
 );
 
 /**
@@ -53,11 +56,27 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderEscalationModal?: import('./slots').FooterSlotProps['onOpenEscalation'];
   /**
+   * When provided, the overview tab renders a "Proposed actions" section with this as its
+   * content. Supplied by the caller because listing and deciding a conversation's proposals
+   * needs Kibana HTTP hooks unavailable in this package.
+   */
+  renderProposedActions?: import('./slots').OverviewSlotProps['renderProposedActions'];
+  /**
    * When provided, the header renders an interactive assignee picker instead of the read-only
    * avatar stack. Supplied by the caller so the picker can use HTTP hooks and Kibana context
    * unavailable in this package.
    */
   renderAssignees?: RenderAssignees;
+  /**
+   * When provided, the header renders an interactive status toggle instead of the read-only
+   * status badge. Supplied by the caller so the toggle can use HTTP hooks unavailable here.
+   */
+  renderStatus?: RenderStatus;
+  /**
+   * When provided, the "Close investigation" footer action renders a confirmation modal.
+   * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   */
+  renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
 }
 
 /**
@@ -73,7 +92,10 @@ export const registerAgenticInvestigationTemplateUI = ({
   name,
   icon,
   renderEscalationModal,
+  renderProposedActions,
   renderAssignees,
+  renderStatus,
+  renderCloseInvestigationModal,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
@@ -82,7 +104,11 @@ export const registerAgenticInvestigationTemplateUI = ({
     content: function OverviewTabContent({ conversation }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyOverviewSlot conversation={conversation} attachmentsService={attachmentsService} />
+          <LazyOverviewSlot
+            conversation={conversation}
+            attachmentsService={attachmentsService}
+            renderProposedActions={renderProposedActions}
+          />
         </Suspense>
       );
     },
@@ -103,6 +129,7 @@ export const registerAgenticInvestigationTemplateUI = ({
               <LazyHeaderSlot
                 conversation={conversation}
                 renderAssignees={renderAssignees}
+                renderStatus={renderStatus}
                 refetchConversation={refetchConversation}
               />
             </Suspense>
@@ -123,6 +150,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                   })
                 }
                 onOpenEscalation={renderEscalationModal}
+                onCloseInvestigation={renderCloseInvestigationModal}
               />
             </Suspense>
           );
@@ -148,14 +176,29 @@ export interface RegisterEscalationTemplateUIOptions {
    * See `RegisterAgenticInvestigationTemplateUIOptions.renderAssignees`.
    */
   renderAssignees?: RenderAssignees;
+  /**
+   * When provided, the header renders an interactive status toggle instead of the read-only
+   * status badge. Supplied by the caller so the toggle can use HTTP hooks unavailable here.
+   */
+  renderStatus?: RenderStatus;
+  /**
+   * When provided, the overview tab body renders the connected linked-investigations list.
+   * Supplied by the caller so the list can use Kibana HTTP hooks unavailable in this package.
+   */
+  renderLinkedInvestigations?: RenderLinkedInvestigations;
 }
+
+/** Returns the tab ids registered by the escalation template. */
+export const getEscalationTabIds = (templateId: string): readonly string[] => [
+  `${templateId}.overview`,
+];
 
 /**
  * Registers the escalation conversation details flyout UI.
  *
- * Unlike investigations the escalation flyout has no tabs and no footer: its header shows the
- * title, the status badge and the assignee picker. The body is empty, which Agent Builder renders
- * as a blank `EuiFlyoutBody`.
+ * The flyout shows a header (title, status, assignees) and — when `renderLinkedInvestigations`
+ * is supplied — an overview tab listing the linked investigations. With a single tab Agent Builder
+ * hides the tab bar, so the list reads as the flyout body.
  *
  * Call once from the plugin's `start`, **after** `registerAgenticInvestigationTemplateUI`.
  * Agent Builder throws if the template id is already registered.
@@ -166,12 +209,32 @@ export const registerEscalationTemplateUI = ({
   name,
   icon,
   renderAssignees,
+  renderStatus,
+  renderLinkedInvestigations,
 }: RegisterEscalationTemplateUIOptions): void => {
+  const [overviewTabId] = getEscalationTabIds(templateId);
+
+  conversationTemplates.registerTab(overviewTabId, ({ openFullscreenConversation }) => ({
+    label: DETAILS_FLYOUT_LABELS.tabs.overview,
+    content: function EscalationOverviewTabContent({ conversation }) {
+      return (
+        <Suspense fallback={<EuiSkeletonText lines={3} />}>
+          <LazyEscalationOverviewSlot
+            conversation={conversation}
+            renderLinkedInvestigations={renderLinkedInvestigations}
+            onOpenInvestigation={({ conversationId, agentId }) =>
+              openFullscreenConversation({ conversationId, agentId, openDetails: true })
+            }
+          />
+        </Suspense>
+      );
+    },
+  }));
+
   conversationTemplates.registerTemplateUIDefinition(templateId, () => ({
     name,
     icon,
-    // No tabs: the body is intentionally empty for this MVP.
-    tabs: [],
+    tabs: [overviewTabId],
     detailsFlyout: {
       header: function EscalationFlyoutHeaderWrapper({ conversation, refetchConversation }) {
         return (
@@ -179,6 +242,7 @@ export const registerEscalationTemplateUI = ({
             <LazyEscalationHeaderSlot
               conversation={conversation}
               renderAssignees={renderAssignees}
+              renderStatus={renderStatus}
               refetchConversation={refetchConversation}
             />
           </Suspense>

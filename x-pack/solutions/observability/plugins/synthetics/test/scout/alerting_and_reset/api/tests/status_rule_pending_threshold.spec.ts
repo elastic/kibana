@@ -24,7 +24,7 @@ const RULE_TAG = 'scout-status-pending-threshold';
 const STATUS_RULE_TYPE_ID = 'xpack.synthetics.alerts.monitorStatus';
 const STATUS_RULE_CONSUMER = 'uptime';
 /** HTTP monitors are pending only after a 1-minute grace period. */
-const SLOW_TEST_TIMEOUT_MS = 180_000;
+const SLOW_TEST_TIMEOUT_MS = 240_000;
 const PENDING_WAIT_MS = 120_000;
 
 interface StatusRuleInspectBody {
@@ -158,6 +158,10 @@ apiTest.describe(
       return { ruleId, dateStart };
     };
 
+    // `enable()` schedules a Task Manager run. Wait for that before `_run_soon`:
+    // on slow serverless the old 5s wait often timed out mid-flight, then
+    // `_run_soon` raced a second evaluation and `pendingCount` jumped to 2 —
+    // so the "does not fire on the first pending evaluation" step saw an alert.
     const runFirstExecution = async (
       apiServices: SyntheticsApiServicesFixture,
       ruleId: string,
@@ -168,19 +172,35 @@ apiTest.describe(
           ruleId,
           1,
           undefined,
-          5_000,
+          60_000,
           dateStart
         );
+        return;
       } catch {
-        await apiServices.alerting.rules.runSoon(ruleId);
+        // Fall through — but only nudge if still at zero executions.
+      }
+      // Brief re-check: the enable-triggered run may have landed in the gap
+      // after the long wait timed out.
+      try {
         await apiServices.alerting.waiting.waitForExecutionCount(
           ruleId,
           1,
           undefined,
-          60_000,
+          2_000,
           dateStart
         );
+        return;
+      } catch {
+        // Still none — safe to nudge.
       }
+      await apiServices.alerting.rules.runSoon(ruleId);
+      await apiServices.alerting.waiting.waitForExecutionCount(
+        ruleId,
+        1,
+        undefined,
+        60_000,
+        dateStart
+      );
     };
 
     const runAdditionalExecution = async (
