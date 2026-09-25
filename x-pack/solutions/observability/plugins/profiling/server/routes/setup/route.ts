@@ -19,6 +19,8 @@ import { setupStatusResponseSchema } from './schemas';
 import { setupCloud } from './setup_cloud';
 import { setupSelfManaged } from './setup_self_managed';
 
+const SERVERLESS_ERROR_MESSAGE = 'Universal Profiling is not supported in serverless';
+
 export function registerSetupRoute({
   router,
   logger,
@@ -71,7 +73,7 @@ export function registerSetupRoute({
         // Fallback: these routes are not registered on serverless builds anyway.
         if (dependencies.esCapabilities.serverless) {
           return response.badRequest({
-            body: { message: 'Universal Profiling is not supported in serverless' },
+            body: { message: SERVERLESS_ERROR_MESSAGE },
           });
         }
 
@@ -157,7 +159,7 @@ export function registerSetupRoute({
         // Fallback: these routes are not registered on serverless builds anyway.
         if (dependencies.esCapabilities.serverless) {
           return response.badRequest({
-            body: { message: 'Universal Profiling is not supported in serverless' },
+            body: { message: SERVERLESS_ERROR_MESSAGE },
           });
         }
 
@@ -264,7 +266,7 @@ export function registerSetupRoute({
         // Fallback: these routes are not registered on serverless builds anyway.
         if (dependencies.esCapabilities.serverless) {
           return response.badRequest({
-            body: { message: 'Universal Profiling is not supported in serverless' },
+            body: { message: SERVERLESS_ERROR_MESSAGE },
           });
         }
 
