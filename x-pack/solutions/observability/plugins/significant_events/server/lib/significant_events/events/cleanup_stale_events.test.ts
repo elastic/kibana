@@ -98,7 +98,7 @@ describe('cleanupStaleEvents', () => {
     expect(updateStatusMock).toHaveBeenCalledTimes(1);
     expect(updateStatusMock).toHaveBeenCalledWith({
       eventClient,
-      eventUuid: 'stale-event',
+      eventId: 'stale-event',
       status: 'closed',
       assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
       alertEventsClient,
@@ -191,7 +191,7 @@ describe('cleanupStaleEvents', () => {
     ).rejects.toThrow('later lookup failed');
     expect(updateStatusMock).toHaveBeenCalledTimes(1000);
     expect(updateStatusMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ eventUuid: 'event-1000' })
+      expect.objectContaining({ eventId: 'event-1000' })
     );
   });
 
@@ -202,13 +202,13 @@ describe('cleanupStaleEvents', () => {
     const rulesClient = createRulesClient([]);
     let activeUpdates = 0;
     let maxActiveUpdates = 0;
-    updateStatusMock.mockImplementation(async ({ eventUuid }) => {
+    updateStatusMock.mockImplementation(async ({ eventId }) => {
       activeUpdates += 1;
       maxActiveUpdates = Math.max(maxActiveUpdates, activeUpdates);
       await Promise.resolve();
       activeUpdates -= 1;
       return {
-        event_uuid: eventUuid,
+        event_uuid: eventId,
         updated: 1,
         ignored: 0,
         status: 'closed',

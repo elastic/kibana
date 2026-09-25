@@ -187,7 +187,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     isLoading: isLifecycleLoading,
     isError: isLifecycleError,
     refetch: refetchLifecycle,
-  } = useFetchSignificantEventLifecycle(event.event_uuid);
+  } = useFetchSignificantEventLifecycle(event.event_id);
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -295,7 +295,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                       if (!isUpdating) {
                         setIsActionsMenuOpen(false);
                         updateEventStatus({
-                          eventUuid: latestEvent.event_uuid,
+                          eventId: latestEvent.event_id,
                           status: 'closed',
                         });
                       }
@@ -311,7 +311,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         )}
         {isDismissModalOpen && (
           <DismissEventModal
-            eventUuid={latestEvent.event_uuid}
+            eventId={latestEvent.event_id}
             onClose={() => setIsDismissModalOpen(false)}
             onSuccess={() => {
               setIsDismissModalOpen(false);
@@ -424,7 +424,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                 <EuiButton
                   iconType="inspect"
                   onClick={() => {
-                    if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
+                    if (!isTriggering) triggerInvestigation(latestEvent.event_id);
                   }}
                   isDisabled={isTriggering || blocksActivity}
                   hasAriaDisabled={blocksActivity}

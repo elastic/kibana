@@ -54,12 +54,12 @@ const CANCEL_BUTTON_LABEL = i18n.translate(
 );
 
 interface DismissEventModalProps {
-  eventUuid: string;
+  eventId: string;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-export const DismissEventModal = ({ eventUuid, onClose, onSuccess }: DismissEventModalProps) => {
+export const DismissEventModal = ({ eventId, onClose, onSuccess }: DismissEventModalProps) => {
   const [assessmentNote, setAssessmentNote] = useState('');
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent({
     onUpdateSuccess: onSuccess ?? onClose,
@@ -73,7 +73,7 @@ export const DismissEventModal = ({ eventUuid, onClose, onSuccess }: DismissEven
       return;
     }
     updateEventStatus({
-      eventUuid,
+      eventId,
       status: 'dismissed',
       assessmentNote: trimmedReason,
     });

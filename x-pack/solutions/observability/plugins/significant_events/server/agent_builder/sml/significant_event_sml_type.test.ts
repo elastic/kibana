@@ -33,7 +33,7 @@ const event: SignificantEvent = {
 };
 
 const findLatestPaginated = jest.fn();
-const findByEventId = jest.fn();
+const findLatestByEventId = jest.fn();
 const getDataStreams = jest.fn().mockResolvedValue({
   initializeClient: jest.fn().mockResolvedValue({}),
 });
@@ -43,7 +43,7 @@ const createGetScopedClients = (
   events: SignificantEvent[]
 ): jest.MockedFunction<GetScopedClients> => {
   const getEventClient = jest.fn(() => ({
-    findByEventId: jest.fn().mockResolvedValue({ hits: events }),
+    findLatestByEventId: jest.fn().mockResolvedValue(events.at(-1)),
   }));
 
   return jest.fn().mockResolvedValue({
@@ -54,7 +54,7 @@ const createGetScopedClients = (
 describe('createSignificantEventSmlType', () => {
   beforeEach(() => {
     findLatestPaginated.mockReset();
-    findByEventId.mockReset();
+    findLatestByEventId.mockReset();
     getDataStreams.mockClear();
     isAvailable.mockReset().mockResolvedValue(true);
     jest.mocked(EventService).mockImplementation(
@@ -62,7 +62,7 @@ describe('createSignificantEventSmlType', () => {
         ({
           getClient: jest.fn(() => ({
             findLatestPaginated,
-            findByEventId,
+            findLatestByEventId,
           })),
         } as unknown as EventService)
     );
@@ -127,7 +127,7 @@ describe('createSignificantEventSmlType', () => {
   });
 
   it('indexes a significant event chunk', async () => {
-    findByEventId.mockResolvedValue({ hits: [event] });
+    findLatestByEventId.mockResolvedValue(event);
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
       getDataStreams,
@@ -148,7 +148,7 @@ describe('createSignificantEventSmlType', () => {
     );
     expect(result).not.toHaveProperty('permissions');
     expect(result?.content).toContain('Payment gateway timeout.');
-    expect(findByEventId).toHaveBeenCalledWith('payment-outage');
+    expect(findLatestByEventId).toHaveBeenCalledWith('payment-outage');
   });
 
   it('getPermissions returns the streams read API privilege', () => {

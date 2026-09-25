@@ -118,7 +118,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
         aria-label={RUN_ARIA_LABEL}
         onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
-          if (!isTriggering) triggerInvestigation(event.event_uuid);
+          if (!isTriggering) triggerInvestigation(event.event_id);
         }}
         isDisabled={isTriggering || blocksActivity}
         isLoading={isTriggering}
@@ -152,7 +152,7 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
         aria-label={CLOSE_EVENT_ARIA_LABEL}
         onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
-          if (!isUpdating) updateEventStatus({ eventUuid: event.event_uuid, status: 'closed' });
+          if (!isUpdating) updateEventStatus({ eventId: event.event_id, status: 'closed' });
         }}
         isDisabled={isUpdating}
         isLoading={isUpdating}
@@ -195,10 +195,7 @@ const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
         />
       </EuiToolTip>
       {isDismissModalOpen && (
-        <DismissEventModal
-          eventUuid={event.event_uuid}
-          onClose={() => setIsDismissModalOpen(false)}
-        />
+        <DismissEventModal eventId={event.event_id} onClose={() => setIsDismissModalOpen(false)} />
       )}
     </>
   );

@@ -27,10 +27,13 @@ export interface SignificantEventsClients {
   getDetectionClient: () => Promise<DetectionClient>;
   getEventClient: () => Promise<EventClient>;
   /**
-   * Flag-aware accessor for `eventsSearchRoute` (the list/count/pagination endpoint) — the only
-   * caller migrated onto `RuleEventsClient` so far (nightshift-program#1516). Honors
-   * `useRuleEventsRead`; every other caller must keep using `getEventClient()`, which always
-   * returns `EventClient` regardless of the flag.
+   * Flag-aware accessor for read-only `{id}`/list lookups migrated onto `RuleEventsClient`
+   * (currently: `eventsSearchRoute`, `eventsLifecycleRoute`, `eventsGetRoute`,
+   * `eventsTriggerInvestigationRoute`). Honors
+   * `useRuleEventsRead`. Only call this for handlers that exclusively call `findByEventId` (or
+   * the list/search equivalent) — any handler needing `EventClient`-only methods (`bulkCreate`,
+   * `findByEventUuid`, `findLatestActive`, `emitTrigger`, …) must keep using `getEventClient()`,
+   * which always returns `EventClient` regardless of the flag.
    */
   getEventSearchClient: () => Promise<EventClient | RuleEventsClient>;
 }
@@ -79,8 +82,8 @@ export function createSignificantEventsClients({
       }),
     getEventClient: async () => {
       const eventClientOptions = await buildEventClientOptions();
-      // Every caller of `getEventClient()` (routes other than `eventsSearchRoute`, agent-builder
-      // tools, workflow triggers) uses the full `EventClient` surface (`bulkCreate`,
+      // Remaining callers of `getEventClient()` (e.g. `eventsUpdateRoute`, agent-builder tools,
+      // workflow triggers, the cleanup job) use the full `EventClient` surface (`bulkCreate`,
       // `findByEventUuid`, `findLatestActive`, `emitTrigger`, …), which `RuleEventsClient`
       // intentionally does not implement (#1517). This accessor always returns `EventClient`,
       // independent of `useRuleEventsRead` — the flag only affects `getEventSearchClient()`.
