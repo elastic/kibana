@@ -25,27 +25,14 @@ export type ValidateEsql = (input: ValidateEsqlInput) => Promise<ValidateEsqlOut
 
 const PLACEHOLDER_RE = /\[(macro|lookup):.*?\]/;
 
-/**
- * Returns true if the query contains any unresolved placeholder that would prevent it from
- * being applied: macro/lookup resource placeholders or the missing-index-pattern placeholder.
- */
 const hasUnresolvedPlaceholder = (query: string): boolean =>
   PLACEHOLDER_RE.test(query) || query.includes(MISSING_INDEX_PATTERN_PLACEHOLDER);
 
 /**
- * Builds the elastic_rule patch for an ES|QL query update.
+ * Builds the elastic_rule patch for an ES|QL query update, clearing any prebuilt match.
  *
- * Rejects queries that still contain unresolved placeholders (macro/lookup resource references
- * or the missing-index-pattern placeholder) — the real ES|QL validator sanitizes them before
- * parsing and would accept them, so the placeholder check must run first.
- *
- * When the current rule was previously matched to a prebuilt rule, the patch additionally clears
- * `prebuilt_rule_id` (by setting it to `null`, which explicitly unsets the field in ES) and
- * resets `title` and `description` to the original rule's values, mirroring the canonical
- * custom-rule defaults applied by `translation_result.ts`.
- *
- * On success returns the patch with `query`, `query_language: 'esql'`, and
- * optionally `integration_ids` when supplied.
+ * @throws if the query has unresolved placeholders — checked before `validateEsql`, which
+ * sanitizes them away and would otherwise accept the query — or if validation fails.
  */
 export const getEsqlQueryUpdatePatch = async (
   esqlQuery: string,
@@ -82,12 +69,7 @@ export const getEsqlQueryUpdatePatch = async (
   };
 };
 
-/**
- * Builds the elastic_rule patch for a prebuilt rule match update.
- *
- * Maps `prebuiltRule.id` → `prebuilt_rule_id` and `prebuiltRule.title` → `title`.
- * Optionally includes `integration_ids` when supplied.
- */
+/** Builds the elastic_rule patch for a prebuilt rule match update. */
 export const getUpdatePrebuiltRulePatch = (
   prebuiltRule: { id: string; title: string },
   integrationIds: string[] | undefined

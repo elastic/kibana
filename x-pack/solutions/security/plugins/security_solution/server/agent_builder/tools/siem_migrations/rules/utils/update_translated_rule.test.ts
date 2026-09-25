@@ -45,7 +45,7 @@ describe('getEsqlQueryUpdatePatch', () => {
     jest.clearAllMocks();
   });
 
-  it('rejects a query that contains a macro placeholder without calling validateEsql', async () => {
+  it('should reject a query that contains a macro placeholder without calling validateEsql', async () => {
     const spy = jest.fn(validateEsql);
     await expect(
       getEsqlQueryUpdatePatch('[macro:foo] | LIMIT 10', undefined, {
@@ -56,7 +56,7 @@ describe('getEsqlQueryUpdatePatch', () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it('rejects a query that contains a lookup placeholder without calling validateEsql', async () => {
+  it('should reject a query that contains a lookup placeholder without calling validateEsql', async () => {
     const spy = jest.fn(validateEsql);
     await expect(
       getEsqlQueryUpdatePatch('FROM logs-* | WHERE field == [lookup:bar]', undefined, {
@@ -67,7 +67,7 @@ describe('getEsqlQueryUpdatePatch', () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it('rejects a query that contains the missing-index-pattern placeholder without calling validateEsql', async () => {
+  it('should reject a query that contains the missing-index-pattern placeholder without calling validateEsql', async () => {
     const spy = jest.fn(validateEsql);
     await expect(
       getEsqlQueryUpdatePatch(`FROM ${MISSING_INDEX_PATTERN_PLACEHOLDER} | LIMIT 10`, undefined, {
@@ -78,7 +78,7 @@ describe('getEsqlQueryUpdatePatch', () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it('surfaces a validateEsql error verbatim', async () => {
+  it('should surface a validateEsql error verbatim', async () => {
     const spy = jest.fn(validateEsql);
     spy.mockResolvedValueOnce({ error: 'Unexpected token at position 5' });
     await expect(
@@ -89,7 +89,7 @@ describe('getEsqlQueryUpdatePatch', () => {
     ).rejects.toThrow('ES|QL validation failed: Unexpected token at position 5');
   });
 
-  it('returns the patch on a valid query without integration_ids (no prebuilt match)', async () => {
+  it('should return the patch on a valid query without integration_ids (no prebuilt match)', async () => {
     const result = await getEsqlQueryUpdatePatch(validQuery, undefined, {
       validateEsql,
       currentRule: makeCurrentRule(),
@@ -98,7 +98,7 @@ describe('getEsqlQueryUpdatePatch', () => {
     expect(result).not.toHaveProperty('prebuilt_rule_id');
   });
 
-  it('includes integration_ids in the patch when supplied (no prebuilt match)', async () => {
+  it('should include integration_ids in the patch when supplied (no prebuilt match)', async () => {
     const result = await getEsqlQueryUpdatePatch(validQuery, ['endpoint'], {
       validateEsql,
       currentRule: makeCurrentRule(),
@@ -113,7 +113,7 @@ describe('getEsqlQueryUpdatePatch', () => {
   describe('when the current rule has a prebuilt match', () => {
     const prebuiltMatchedRule = makeCurrentRule({ prebuilt_rule_id: 'some-prebuilt-uuid' });
 
-    it('clears prebuilt_rule_id and resets title and description to the original rule values', async () => {
+    it('should clear prebuilt_rule_id and reset title and description to the original rule values', async () => {
       const result = await getEsqlQueryUpdatePatch(validQuery, undefined, {
         validateEsql,
         currentRule: prebuiltMatchedRule,
@@ -127,7 +127,7 @@ describe('getEsqlQueryUpdatePatch', () => {
       });
     });
 
-    it('falls back to the original title when original_rule.description is empty', async () => {
+    it('should fall back to the original title when original_rule.description is empty', async () => {
       const ruleNoDescription = {
         ...prebuiltMatchedRule,
         original_rule: {
@@ -143,7 +143,7 @@ describe('getEsqlQueryUpdatePatch', () => {
       expect(result).toMatchObject({ description: 'Original Rule Title' });
     });
 
-    it('includes integration_ids alongside the unmatch fields', async () => {
+    it('should include integration_ids alongside the unmatch fields', async () => {
       const result = await getEsqlQueryUpdatePatch(validQuery, ['endpoint'], {
         validateEsql,
         currentRule: prebuiltMatchedRule,
@@ -151,7 +151,7 @@ describe('getEsqlQueryUpdatePatch', () => {
       expect(result).toMatchObject({ prebuilt_rule_id: null, integration_ids: ['endpoint'] });
     });
 
-    it('still rejects placeholder queries before emitting unmatch fields', async () => {
+    it('should still reject placeholder queries before emitting unmatch fields', async () => {
       const spy = jest.fn(validateEsql);
       await expect(
         getEsqlQueryUpdatePatch('[macro:foo] | LIMIT 10', undefined, {
@@ -165,7 +165,7 @@ describe('getEsqlQueryUpdatePatch', () => {
 });
 
 describe('getUpdatePrebuiltRulePatch', () => {
-  it('maps id→prebuilt_rule_id and title→title', () => {
+  it('should map id→prebuilt_rule_id and title→title', () => {
     const result = getUpdatePrebuiltRulePatch(
       { id: 'a2329f42-9a87-4e8c-9a4e-1b1e7d89f231', title: 'PowerShell Obfuscated Script Block' },
       undefined
@@ -176,12 +176,12 @@ describe('getUpdatePrebuiltRulePatch', () => {
     });
   });
 
-  it('does not include integration_ids when not supplied', () => {
+  it('should not include integration_ids when not supplied', () => {
     const result = getUpdatePrebuiltRulePatch({ id: 'some-id', title: 'Some Rule' }, undefined);
     expect(result).not.toHaveProperty('integration_ids');
   });
 
-  it('includes integration_ids in the patch when supplied', () => {
+  it('should include integration_ids in the patch when supplied', () => {
     const result = getUpdatePrebuiltRulePatch({ id: 'some-id', title: 'Some Rule' }, ['windows']);
     expect(result).toEqual({
       prebuilt_rule_id: 'some-id',

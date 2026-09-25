@@ -11,7 +11,7 @@ import { transformToInternalUpdateRuleMigrationData } from './update_rules';
 describe('transformToInternalUpdateRuleMigrationData', () => {
   const baseRule = { id: 'rule-1' };
 
-  it('sets translation_result to full when prebuilt_rule_id is truthy', () => {
+  it('should set translation_result to full when prebuilt_rule_id is truthy', () => {
     const result = transformToInternalUpdateRuleMigrationData({
       ...baseRule,
       elastic_rule: { prebuilt_rule_id: 'some-prebuilt-uuid' },
@@ -19,7 +19,7 @@ describe('transformToInternalUpdateRuleMigrationData', () => {
     expect(result.translation_result).toBe(MigrationTranslationResultEnum.full);
   });
 
-  it('falls through to the query branch when prebuilt_rule_id is null (unmatch + esql)', () => {
+  it('should fall through to the query branch when prebuilt_rule_id is null (unmatch + esql)', () => {
     // This is the unmatch case: ES|QL update cleared prebuilt_rule_id to null and set a new query.
     const result = transformToInternalUpdateRuleMigrationData({
       ...baseRule,
@@ -33,7 +33,7 @@ describe('transformToInternalUpdateRuleMigrationData', () => {
     expect(result.translation_result).toBe(MigrationTranslationResultEnum.full);
   });
 
-  it('recomputes translation_result from a valid query when no prebuilt_rule_id', () => {
+  it('should recompute translation_result from a valid query when no prebuilt_rule_id', () => {
     const result = transformToInternalUpdateRuleMigrationData({
       ...baseRule,
       elastic_rule: {
@@ -44,7 +44,7 @@ describe('transformToInternalUpdateRuleMigrationData', () => {
     expect(result.translation_result).toBe(MigrationTranslationResultEnum.full);
   });
 
-  it('recomputes translation_result as partial for an invalid query', () => {
+  it('should recompute translation_result as partial for an invalid query', () => {
     const result = transformToInternalUpdateRuleMigrationData({
       ...baseRule,
       elastic_rule: {
@@ -55,14 +55,14 @@ describe('transformToInternalUpdateRuleMigrationData', () => {
     expect(result.translation_result).toBe(MigrationTranslationResultEnum.partial);
   });
 
-  it('returns the rule unchanged when elastic_rule has no prebuilt_rule_id and no query', () => {
+  it('should return the rule unchanged when elastic_rule has no prebuilt_rule_id and no query', () => {
     const input = { ...baseRule, elastic_rule: { title: 'Some Title' } };
     const result = transformToInternalUpdateRuleMigrationData(input);
     expect(result).toEqual(input);
     expect(result).not.toHaveProperty('translation_result');
   });
 
-  it('returns the rule unchanged when elastic_rule is absent', () => {
+  it('should return the rule unchanged when elastic_rule is absent', () => {
     const input = { ...baseRule };
     const result = transformToInternalUpdateRuleMigrationData(input);
     expect(result).toEqual(input);

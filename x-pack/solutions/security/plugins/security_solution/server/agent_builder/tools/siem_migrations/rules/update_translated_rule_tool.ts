@@ -183,7 +183,6 @@ integration_ids cannot be updated on its own — always supply it with esql_quer
         );
       }
 
-      // Determine patch via two-branch dispatch.
       // prebuilt_rule takes precedence; integration_ids alone is not a valid update.
       let elasticRulePatch: UpdateElasticRulePatch;
       try {

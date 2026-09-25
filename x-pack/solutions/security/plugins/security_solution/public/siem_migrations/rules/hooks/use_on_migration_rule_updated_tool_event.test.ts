@@ -45,7 +45,7 @@ describe('useOnMigrationRuleUpdatedToolEvent', () => {
     });
   });
 
-  it('calls callback when the matching event fires', () => {
+  it('should call callback when the matching event fires', () => {
     const callback = jest.fn();
     renderHook(() => useOnMigrationRuleUpdatedToolEvent(callback));
 
@@ -62,7 +62,7 @@ describe('useOnMigrationRuleUpdatedToolEvent', () => {
     expect(callback).toHaveBeenCalledWith({ migrationId: 'm-1', ruleId: 'r-1' });
   });
 
-  it('ignores events with a different custom event name', () => {
+  it('should ignore events with a different custom event name', () => {
     const callback = jest.fn();
     renderHook(() => useOnMigrationRuleUpdatedToolEvent(callback));
 
@@ -73,7 +73,7 @@ describe('useOnMigrationRuleUpdatedToolEvent', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it('ignores non-tool-ui events', () => {
+  it('should ignore non-tool-ui events', () => {
     const callback = jest.fn();
     renderHook(() => useOnMigrationRuleUpdatedToolEvent(callback));
 
@@ -84,7 +84,7 @@ describe('useOnMigrationRuleUpdatedToolEvent', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it('unsubscribes on unmount', () => {
+  it('should unsubscribe on unmount', () => {
     const callback = jest.fn();
     const { unmount } = renderHook(() => useOnMigrationRuleUpdatedToolEvent(callback));
 
@@ -102,7 +102,7 @@ describe('useOnMigrationRuleUpdatedToolEvent', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it('does not resubscribe when only the callback identity changes', () => {
+  it('should not resubscribe when only the callback identity changes', () => {
     const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
     useKibana.mockReturnValue({
       services: {
@@ -126,7 +126,7 @@ describe('useOnMigrationRuleUpdatedToolEvent', () => {
     expect(getChatEvents$).toHaveBeenCalledTimes(1);
   });
 
-  it('does nothing when agentBuilder is not available', () => {
+  it('should do nothing when agentBuilder is not available', () => {
     useKibana.mockReturnValue({ services: { agentBuilder: undefined } });
 
     const callback = jest.fn();

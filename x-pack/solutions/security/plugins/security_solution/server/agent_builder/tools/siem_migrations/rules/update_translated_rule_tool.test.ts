@@ -89,7 +89,7 @@ describe('updateTranslatedRuleTool', () => {
       mockFetch.mockResolvedValueOnce(makePatchResponse());
     });
 
-    it('returns { ok: true } and emits the tool UI event', async () => {
+    it('should return { ok: true } and emit the tool UI event', async () => {
       const sendUiEvent = jest.fn();
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
         events: { reportProgress: jest.fn(), sendUiEvent },
@@ -107,7 +107,7 @@ describe('updateTranslatedRuleTool', () => {
     });
   });
 
-  it('does NOT emit the event when privileges are missing', async () => {
+  it('should NOT emit the event when privileges are missing', async () => {
     mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
     const sendUiEvent = jest.fn();
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
@@ -120,7 +120,7 @@ describe('updateTranslatedRuleTool', () => {
     expect(sendUiEvent).not.toHaveBeenCalled();
   });
 
-  it('does NOT emit the event when the rule is not found', async () => {
+  it('should NOT emit the event when the rule is not found', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: {},
       request: new Request('http://localhost/x'),
@@ -138,7 +138,7 @@ describe('updateTranslatedRuleTool', () => {
     expect(sendUiEvent).not.toHaveBeenCalled();
   });
 
-  it('does NOT emit the event when the PATCH fails', async () => {
+  it('should NOT emit the event when the PATCH fails', async () => {
     mockFetch.mockResolvedValueOnce(makeGetResponse(mockCurrentRule));
     // PATCH fails — simulate HttpSelfFetchError
     const error = new Error('Conflict') as Error & { response?: Response; body?: unknown };
@@ -158,7 +158,7 @@ describe('updateTranslatedRuleTool', () => {
     expect(sendUiEvent).not.toHaveBeenCalled();
   });
 
-  it('rejects input when neither esql_query, prebuilt_rule nor integration_ids is provided', async () => {
+  it('should reject input when neither esql_query, prebuilt_rule nor integration_ids is provided', async () => {
     // GET now runs before the dispatch check, so it must be mocked.
     mockFetch.mockResolvedValueOnce(makeGetResponse(mockCurrentRule));
 
@@ -183,7 +183,7 @@ describe('updateTranslatedRuleTool', () => {
       elastic_rule: { id: 'installed-detection-rule-id', title: 'Some Installed Rule' },
     };
 
-    it('returns an error and does NOT PATCH or emit when rule is installed (esql path)', async () => {
+    it('should return an error and NOT PATCH or emit when rule is installed (esql path)', async () => {
       mockFetch.mockResolvedValueOnce(makeGetResponse(installedRule));
       const sendUiEvent = jest.fn();
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
@@ -199,7 +199,7 @@ describe('updateTranslatedRuleTool', () => {
       expect(sendUiEvent).not.toHaveBeenCalled();
     });
 
-    it('returns an error and does NOT PATCH or emit when rule is installed (prebuilt path)', async () => {
+    it('should return an error and NOT PATCH or emit when rule is installed (prebuilt path)', async () => {
       mockFetch.mockResolvedValueOnce(makeGetResponse(installedRule));
       const sendUiEvent = jest.fn();
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
@@ -223,7 +223,7 @@ describe('updateTranslatedRuleTool', () => {
   });
 
   describe('ES|QL update on a prebuilt-matched rule', () => {
-    it('sends prebuilt_rule_id: null and the original title in the PATCH body', async () => {
+    it('should send prebuilt_rule_id: null and the original title in the PATCH body', async () => {
       const prebuiltMatchedRule = {
         ...mockCurrentRule,
         elastic_rule: { prebuilt_rule_id: 'some-prebuilt-uuid', title: 'Prebuilt Rule Title' },
