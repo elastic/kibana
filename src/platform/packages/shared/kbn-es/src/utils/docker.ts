@@ -55,6 +55,7 @@ import {
   SERVERLESS_SECRETS_SSL_PATH,
   SERVERLESS_ROLES_ROOT_PATH,
   SERVERLESS_OPERATOR_PATH,
+  SERVERLESS_SECRETS_DIR,
 } from '../paths';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
@@ -825,7 +826,6 @@ export async function setupServerlessVolumes(
     dataPath = 'stateless',
   } = options;
   const objectStorePath = resolve(basePath, dataPath);
-  const operatorPath = overrides?.operatorPath ?? SERVERLESS_OPERATOR_PATH;
   const fileSecrets = await readFileSecrets(secureFiles);
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
@@ -948,16 +948,14 @@ export async function setupServerlessVolumes(
       esSettingsProjectTypeFromKbn.get(projectType)!,
       ssl,
       overrides?.projectId,
-      operatorPath,
+      overrides?.operatorPath,
       fileSecrets
     )),
 
     '--volume',
-    `${await getNodeSecretsPath(
-      ssl,
-      fileSecrets,
-      `${operatorPath}_secrets.json`
-    )}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
+    `${
+      ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
+    }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
     '--volume',
     `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}jwks/jwks.json:z`
   );
@@ -1193,7 +1191,7 @@ export async function runLinkedServerlessCluster(log: ToolingLog, options: Serve
     uiam: true,
   };
 
-  const linkedOperatorPath = resolve(REPO_ROOT, '.es', `operator${LINKED_CLUSTER_NAME_SUFFIX}`);
+  const linkedOperatorPath = join(SERVERLESS_SECRETS_DIR, `operator${LINKED_CLUSTER_NAME_SUFFIX}`);
   const volumeCmd = await setupServerlessVolumes(log, linkedOptions, {
     projectId: linkedProject.projectId,
     operatorPath: linkedOperatorPath,
@@ -1339,6 +1337,7 @@ export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
   log.info('Stopping serverless ES cluster.');
 
   await execa('docker', ['container', 'stop'].concat(nodes));
+  await Fsp.rm(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
 }
 
 /**
@@ -1368,6 +1367,9 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
       log.debug('Some containers had already stopped before kill completed.');
     }
   }
+
+  // The operator settings carry the cluster secrets, so they must not outlive the cluster.
+  fs.rmSync(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
 }
 
 /**
@@ -1442,6 +1444,11 @@ async function getOperatorVolume(
   operatorPath: string = SERVERLESS_OPERATOR_PATH,
   fileSecrets: Record<string, string> = {}
 ) {
+  // Other host users cannot enter the owner-only parent, but the container reads the operator
+  // directory through a bind mount that never traverses it, so the directory and settings.json
+  // themselves stay readable by the elasticsearch user, whose uid need not match the host user's.
+  await Fsp.mkdir(SERVERLESS_SECRETS_DIR, { recursive: true });
+  await Fsp.chmod(SERVERLESS_SECRETS_DIR, 0o700);
   await Fsp.mkdir(operatorPath, { recursive: true });
 
   // Settings should include information about the project that's normally populated by the Elasticsearch Controller.
@@ -1477,34 +1484,10 @@ async function getOperatorVolume(
       },
       null,
       2
-    )
-  );
-  return ['--volume', `${operatorPath}:${SERVERLESS_CONFIG_PATH}operator`];
-}
-
-/**
- * Returns the node-level secrets file to mount: the bundled one, or a generated copy that adds
- * `fileSecrets` when there are any. A generated copy left over from an earlier run is removed.
- */
-async function getNodeSecretsPath(
-  ssl: boolean = false,
-  fileSecrets: Record<string, string>,
-  generatedPath: string
-): Promise<string> {
-  const bundledPath = ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH;
-  if (Object.keys(fileSecrets).length === 0) {
-    await Fsp.rm(generatedPath, { force: true });
-    return bundledPath;
-  }
-
-  const bundled = JSON.parse(await Fsp.readFile(bundledPath, 'utf-8'));
-  await Fsp.writeFile(
-    generatedPath,
-    JSON.stringify({ ...bundled, file_secrets: { ...bundled.file_secrets, ...fileSecrets } }),
-    // The container's elasticsearch user must read the bind-mounted file.
+    ),
     { mode: 0o644 }
   );
-  return generatedPath;
+  return ['--volume', `${operatorPath}:${SERVERLESS_CONFIG_PATH}operator`];
 }
 
 // ---------------------------------------------------------------------------

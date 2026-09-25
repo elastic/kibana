@@ -9,6 +9,7 @@
 
 import mockFs from 'mock-fs';
 
+import Fs from 'fs';
 import Fsp from 'fs/promises';
 import { basename, join } from 'path';
 
@@ -46,6 +47,7 @@ import {
   SERVERLESS_JWKS_PATH,
   SERVERLESS_IDP_METADATA_PATH,
   SERVERLESS_OPERATOR_PATH,
+  SERVERLESS_SECRETS_DIR,
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
@@ -943,14 +945,9 @@ describe('setupServerlessVolumes()', () => {
     expect(settings.state.cluster_secrets.file_secrets).toBeUndefined();
   });
 
-  test('should deliver secure files as base64 file_secrets', async () => {
-    const generatedSecretsPath = `${SERVERLESS_OPERATOR_PATH}_secrets.json`;
+  test('should embed secure files as base64 file_secrets in an owner-only operator directory', async () => {
     mockFs({
       ...existingObjectStore,
-      [SERVERLESS_SECRETS_PATH]: JSON.stringify({
-        metadata: { version: '1' },
-        string_secrets: { 'bundled.secret': 'value' },
-      }),
       '/creds/gcs.json': '{"type":"service_account"}',
     });
 
@@ -962,19 +959,16 @@ describe('setupServerlessVolumes()', () => {
 
     const encoded = Buffer.from('{"type":"service_account"}').toString('base64');
     expect(volumeCmd).toContain(
-      `${generatedSecretsPath}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`
+      `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`
     );
-    expect(JSON.parse(await Fsp.readFile(generatedSecretsPath, 'utf-8'))).toEqual({
-      metadata: { version: '1' },
-      string_secrets: { 'bundled.secret': 'value' },
-      file_secrets: { 'gcs.client.default.credentials_file': encoded },
-    });
-    const settings = JSON.parse(
-      await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
-    );
+    const settingsPath = join(SERVERLESS_OPERATOR_PATH, 'settings.json');
+    const settings = JSON.parse(await Fsp.readFile(settingsPath, 'utf-8'));
     expect(settings.state.cluster_secrets.file_secrets).toEqual({
       'gcs.client.default.credentials_file': encoded,
     });
+    expect((await Fsp.stat(SERVERLESS_SECRETS_DIR)).mode.toString(8).slice(-3)).toBe('700');
+    // The container's elasticsearch user reads the mounted file directly, so it stays world-readable.
+    expect((await Fsp.stat(settingsPath)).mode.toString(8).slice(-3)).toBe('644');
   });
 
   test('should reject a malformed secure file entry', async () => {
@@ -1194,6 +1188,15 @@ describe('stopServerlessCluster()', () => {
       expect.arrayContaining(['container', 'stop'].concat(nodes))
     );
   });
+
+  test('should remove the operator secrets directory', async () => {
+    mockFs({ [SERVERLESS_SECRETS_DIR]: { operator: { 'settings.json': '{}' } } });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await stopServerlessCluster(log, ['es01']);
+
+    await expect(Fsp.access(SERVERLESS_SECRETS_DIR)).rejects.toThrow();
+  });
 });
 
 describe('teardownServerlessClusterSync()', () => {
@@ -1237,6 +1240,19 @@ describe('teardownServerlessClusterSync()', () => {
     teardownServerlessClusterSync(log, defaultOptions);
 
     expect(execa.commandSync.mock.calls).toHaveLength(1);
+  });
+
+  test('should remove the operator secrets directory', () => {
+    const rmSync = jest.spyOn(Fs, 'rmSync').mockImplementation(() => {});
+    execa.commandSync.mockImplementation(() => ({ stdout: '' }));
+
+    teardownServerlessClusterSync(log, defaultOptions);
+
+    expect(rmSync).toHaveBeenCalledWith(SERVERLESS_SECRETS_DIR, {
+      recursive: true,
+      force: true,
+    });
+    rmSync.mockRestore();
   });
 });
 
