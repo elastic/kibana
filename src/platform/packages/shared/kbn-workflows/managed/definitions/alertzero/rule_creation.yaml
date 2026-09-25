@@ -59,6 +59,8 @@ outputs:
     type: string
   - name: rule_name
     type: string
+  - name: skip_reason
+    type: string
 steps:
   - name: draft_creation
     type: ai.agent
@@ -87,7 +89,8 @@ steps:
         attachment_id, give every other rule field the plainest value its type
         allows (language and type "esql", severity "low", risk_score 0, empty
         strings for interval, from and to, empty lists for threat and tags),
-        and say why in one sentence.
+        and give the reason in one sentence under "reason". Leave "reason"
+        empty when the tool returned a rule.
       schema:
         type: object
         additionalProperties: false
@@ -149,6 +152,10 @@ steps:
             type: string
           attachment_version:
             type: number
+          reason:
+            type: string
+            description: >-
+              Why the tool returned no rule, in one sentence. Empty when it returned one.
         required:
           - rule
           - attachment_id
@@ -215,6 +222,17 @@ steps:
     on-failure:
       continue: true
 
+  # Only a draft the analyst can inspect on the investigation is proposed. The
+  # proposal comment shows a few fields, but the action creates the whole body,
+  # schedule, tags and threat included. When the copy fails nothing is proposed and
+  # `reviewed` stays false, so the caller keeps the gap open.
+  - name: proposal_ready
+    type: data.set
+    with:
+      ok: >-
+        ${{ steps.draft_ready.output.ok == true
+          and steps.attach_draft.error == null }}
+
   # The proposal gate records the draft on the investigation, parks on the
   # analyst's decision for up to 72h, and on approval runs the create action as
   # the approver with the drafted rule as its input. When nobody answers the gate
@@ -224,9 +242,9 @@ steps:
   # investigation, so it also decides when it closes.
   - name: propose_creation
     type: workflow.execute
-    if: "${{ steps.draft_ready.output.ok == true }}"
+    if: "${{ steps.proposal_ready.output.ok == true }}"
     with:
-      workflow-id: system-create-investigation-proposal
+      workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ inputs.investigation_id }}"
         comment: |-
@@ -275,3 +293,7 @@ steps:
           or steps.propose_creation.output.decision == 'dismissed' }}
       decision: "{{ steps.propose_creation.output.decision }}"
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
+      # Why nothing was proposed, so a gap that keeps coming back can be explained
+      # without opening the agent conversation. Empty when the draft reached the gate.
+      skip_reason: >-
+        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}

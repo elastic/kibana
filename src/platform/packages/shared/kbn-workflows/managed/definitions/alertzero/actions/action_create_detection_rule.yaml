@@ -76,12 +76,17 @@ triggers:
               type: array
               items:
                 type: string
+          # The engine requires `severity` and `risk_score` on every rule, and the
+          # body is passed through with no defaults, so a proposal without them
+          # would only fail after an analyst approved it.
           required:
             - type
             - language
             - name
             - description
             - query
+            - severity
+            - risk_score
           additionalProperties: false
       required:
         - actionInput

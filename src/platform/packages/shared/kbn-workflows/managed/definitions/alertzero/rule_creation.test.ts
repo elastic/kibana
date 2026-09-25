@@ -16,7 +16,7 @@ import {
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { convertJsonSchemaToZod } from '../../../spec/lib/build_fields_zod_validator';
-import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from '../agentic_investigations';
+import { CREATE_PROPOSAL_WORKFLOW } from '../proposals';
 
 interface YamlStep {
   name: string;
@@ -36,7 +36,7 @@ interface YamlWorkflow {
 }
 
 const worker = parse(ALERTZERO_RULE_CREATION_WORKFLOW.yaml) as YamlWorkflow;
-const gate = parse(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW.yaml) as YamlWorkflow;
+const gate = parse(CREATE_PROPOSAL_WORKFLOW.yaml) as YamlWorkflow;
 const action = parse(ALERTZERO_ACTION_CREATE_RULE_WORKFLOW.yaml) as YamlWorkflow;
 
 const stepByName = (name: string) => worker.steps.find((step) => step.name === name);
@@ -70,7 +70,7 @@ describe('Detection Rule Creation worker', () => {
     it('proposes the drafted rule through the create action', () => {
       const proposal = stepByName('propose_creation');
       expect(proposal?.type).toBe('workflow.execute');
-      expect(proposal?.with?.['workflow-id']).toBe(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW.id);
+      expect(proposal?.with?.['workflow-id']).toBe(CREATE_PROPOSAL_WORKFLOW.id);
       const inputs = inputsOf(proposal);
       expect(inputs.actionWorkflowId).toBe(ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID);
       expect(inputs.actionInput).toBe('${{ steps.draft_creation.output.structured_output.rule }}');
@@ -101,7 +101,15 @@ describe('Detection Rule Creation worker', () => {
       );
       expect(props.actionInput.additionalProperties).toBe(false);
       expect(props.actionInput.required).toEqual(
-        expect.arrayContaining(['type', 'language', 'name', 'description', 'query'])
+        expect.arrayContaining([
+          'type',
+          'language',
+          'name',
+          'description',
+          'query',
+          'severity',
+          'risk_score',
+        ])
       );
       const create = action.steps.find((step) => step.name === 'create_rule');
       expect(create?.type).toBe('security.createRule');
@@ -132,9 +140,26 @@ describe('Detection Rule Creation worker', () => {
       expect(evaluate(ready, draftContext({ attachment_id: '', rule: complete }))).toBe(false);
       expect(evaluate(ready, draftContext({ rule: complete }))).toBe(false);
 
-      for (const name of ['preview_creation', 'attach_draft', 'propose_creation']) {
-        expect(stepByName(name)?.if).toContain('steps.draft_ready.output.ok == true');
+      for (const name of ['preview_creation', 'attach_draft', 'proposal_ready']) {
+        expect(JSON.stringify(stepByName(name))).toContain('steps.draft_ready.output.ok == true');
       }
+    });
+
+    // The comment shows a few fields, but the action creates the whole body. A draft
+    // the analyst cannot inspect on the investigation is not proposed.
+    it.each([
+      ['a ready draft that was attached', true, null, true],
+      ['a ready draft whose attachment failed', true, { message: 'boom' }, false],
+      ['a draft that was never ready', false, null, false],
+    ])('decides whether to propose %s', (_scenario, ok, attachError, expected) => {
+      expect(stepByName('propose_creation')?.if).toBe(
+        '${{ steps.proposal_ready.output.ok == true }}'
+      );
+      expect(
+        evaluate(flagOf('proposal_ready', 'ok'), {
+          steps: { draft_ready: { output: { ok } }, attach_draft: { error: attachError } },
+        })
+      ).toBe(expected);
     });
 
     // The no-draft answer the prompt asks for has to satisfy the output schema, or
@@ -147,6 +172,7 @@ describe('Detection Rule Creation worker', () => {
       );
       const noDraft = {
         attachment_id: '',
+        reason: 'The data source does not exist.',
         rule: {
           name: '',
           description: '',
@@ -227,8 +253,44 @@ describe('Detection Rule Creation worker', () => {
 
     it('declares every output the coverage review reads', () => {
       expect(worker.outputs?.map(({ name }) => name)).toEqual(
-        expect.arrayContaining(['created', 'reviewed', 'decision', 'rule_name'])
+        expect.arrayContaining(['created', 'reviewed', 'decision', 'rule_name', 'skip_reason'])
       );
+    });
+
+    // The model's reason lives in the structured output, not only in its conversation,
+    // so a gap that keeps coming back can be explained from the run alone.
+    it.each([
+      [
+        'the model reason for a draft it could not build',
+        { ok: false },
+        { reason: 'No Kubernetes audit data stream exists.' },
+        null,
+        'No Kubernetes audit data stream exists.',
+      ],
+      [
+        'a fallback for an incomplete draft without a reason',
+        { ok: false },
+        { reason: '' },
+        null,
+        'The draft is incomplete: it needs a query, a name, a description and an attachment.',
+      ],
+      [
+        'the attachment error for a draft that could not be copied',
+        { ok: true },
+        { reason: '' },
+        { message: 'boom' },
+        'The draft could not be attached to the investigation: boom',
+      ],
+      ['nothing for a proposed draft', { ok: true }, { reason: '' }, null, ''],
+    ])('reports %s as skip_reason', (_scenario, ready, structured, attachError, expected) => {
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(emit.skip_reason, {
+        steps: {
+          draft_ready: { output: ready },
+          draft_creation: { output: { structured_output: structured } },
+          attach_draft: { error: attachError },
+        },
+      });
+      expect(rendered).toBe(expected);
     });
   });
 

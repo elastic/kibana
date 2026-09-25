@@ -40,7 +40,7 @@ triggers:
           type: integer
           minimum: 1
           maximum: 90
-          description: "How many days back the sweep looks for indicators, counted from their creation time. Default: 7. A manual run can raise or lower it."
+          description: "How many days back the sweep looks for indicators, counted from their creation time. Default: 14. A manual run can raise or lower it."
       additionalProperties: false
 outputs:
   - name: pending
@@ -64,8 +64,11 @@ consts:
   # Task Manager tasks. The ES search size below must be at least this value.
   batch_size: 5
   # How many days back the sweep looks. An indicator older than this is never reviewed,
-  # so the sweep reads the oldest indicators in the window first.
-  lookback_days: 7
+  # so the sweep reads the oldest indicators in the window first. Must stay above the
+  # review's `176h` timeout: a review can park that long on its proposal, and an
+  # expired proposal is only retried while its indicator is still inside the window.
+  # A test pins the relationship.
+  lookback_days: 14
   # The template language has no empty-list literal. `| default: []` returns nothing.
   # This constant is the empty-list fallback.
   no_rows: []

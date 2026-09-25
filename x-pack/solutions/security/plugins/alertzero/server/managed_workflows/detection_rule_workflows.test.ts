@@ -235,8 +235,7 @@ describe('detection rule workflows', () => {
 
       const gates = all.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' &&
-          input?.['workflow-id'] === 'system-create-investigation-proposal'
+          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(gates).toHaveLength(1);
       const inputs = gates[0].with?.inputs as Record<string, unknown>;
@@ -1239,13 +1238,24 @@ describe('detection rule workflows', () => {
           }>
         ).find(({ type }) => type === 'manual')!.inputs!.properties;
 
-        expect(consts.lookback_days).toBe(7);
+        expect(consts.lookback_days).toBe(14);
         expect(query).toContain(
           '"gte":"now-{{ inputs.lookback_days | default: consts.lookback_days }}d"'
         );
         expect(JSON.stringify(search.with?.sort)).toContain('"order":"asc"');
         expect(inputs.lookback_days.minimum).toBe(1);
         expect(inputs.lookback_days.maximum).toBe(90);
+      });
+
+      // A review parks on its proposal for up to its timeout, and an expired proposal
+      // leaves the indicator pending for the next sweep. That sweep only retries it if
+      // the indicator is still inside the window.
+      it('looks back further than the longest review can park', () => {
+        const { timeout } = (review as unknown as { settings: { timeout: string } }).settings;
+        const reviewHours = Number(timeout.replace(/h$/, ''));
+
+        expect(timeout).toMatch(/^\d+h$/);
+        expect(Number(consts.lookback_days) * 24).toBeGreaterThan(reviewHours);
       });
 
       // Async fan-out: the sweep starts one review per indicator and exits. Each review

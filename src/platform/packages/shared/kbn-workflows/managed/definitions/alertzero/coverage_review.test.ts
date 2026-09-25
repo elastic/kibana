@@ -17,7 +17,7 @@ import {
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
-import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from '../agentic_investigations';
+import { CREATE_PROPOSAL_WORKFLOW } from '../proposals';
 
 /**
  * The verdicts the detection-coverage skill may return. Duplicated here as a literal on
@@ -52,11 +52,7 @@ const PROPOSAL_STEPS = [
 
 const REPORT_STEPS = PROPOSAL_STEPS.filter((name) => name.startsWith('report_'));
 
-const APPLIED_FLAGS = [
-  'enable_approved_not_applied',
-  'install_approved_not_applied',
-  'installed_not_enabled',
-] as const;
+const APPLIED_FLAGS = ['enable_approved_not_applied', 'install_approved_not_applied'] as const;
 
 interface YamlStep {
   name: string;
@@ -82,7 +78,7 @@ interface YamlWorkflow {
 }
 
 const reviewDefinition = parse(ALERTZERO_COVERAGE_REVIEW_WORKFLOW.yaml) as YamlWorkflow;
-const gateDefinition = parse(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW.yaml) as YamlWorkflow;
+const gateDefinition = parse(CREATE_PROPOSAL_WORKFLOW.yaml) as YamlWorkflow;
 const creationDefinition = parse(ALERTZERO_RULE_CREATION_WORKFLOW.yaml) as YamlWorkflow;
 
 const flatten = (steps: YamlStep[]): YamlStep[] =>
@@ -120,7 +116,6 @@ const evaluateExpression = (expression: string, context: Record<string, unknown>
 const appliedOutcome = {
   enable_approved_not_applied: false,
   install_approved_not_applied: false,
-  installed_not_enabled: false,
 };
 
 /**
@@ -347,16 +342,41 @@ describe('Detection Coverage review', () => {
       expect((dismissed?.with?.updates as Record<string, string>).status).toBe('closed');
     });
 
+    // An approval whose change did not land leaves the indicator pending, so the
+    // investigation must not claim the gap is resolved.
     it.each([
-      ['an approval', { approved: true, dismissed: false }, 'approved'],
-      ['a dismissal', { approved: false, dismissed: true }, 'dismissed'],
-      ['an expired proposal', { approved: false, dismissed: false }, ''],
-    ])('routes %s to the matching close', (_scenario, decision, expected) => {
+      ['an applied approval', { approved: true, dismissed: false }, {}, 'approved'],
+      [
+        'an approved enable the re-read does not confirm',
+        { approved: true, dismissed: false },
+        { enable_approved_not_applied: true },
+        '',
+      ],
+      [
+        'an approved install the re-read does not confirm',
+        { approved: true, dismissed: false },
+        { install_approved_not_applied: true },
+        '',
+      ],
+      ['a dismissal', { approved: false, dismissed: true }, {}, 'dismissed'],
+      ['an expired proposal', { approved: false, dismissed: false }, {}, ''],
+    ])('routes %s to the matching close', (_scenario, decision, outcome, expected) => {
       const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
         String(stepByName('close_investigation')?.expression),
-        { steps: { record_decision: { output: decision } } }
+        {
+          steps: {
+            record_decision: { output: decision },
+            resolve_outcome: { output: { ...appliedOutcome, ...outcome } },
+          },
+        }
       );
       expect(rendered).toBe(expected);
+    });
+
+    it('verifies what landed before it closes the investigation', () => {
+      expect(stepIndex('refetch_rule')).toBeLessThan(stepIndex('resolve_outcome'));
+      expect(stepIndex('resolve_outcome')).toBeLessThan(stepIndex('close_investigation'));
+      expect(stepIndex('close_investigation')).toBeLessThan(stepIndex('mark_processed'));
     });
 
     // The review runs in the space of the sweep that started it. A link without the
@@ -382,8 +402,7 @@ describe('Detection Coverage review', () => {
     it('proposes through the investigation gate, one proposal per route', () => {
       const proposals = allReviewSteps.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' &&
-          input?.['workflow-id'] === CREATE_INVESTIGATION_PROPOSAL_WORKFLOW.id
+          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW.id
       );
       expect(proposals.map(({ name }) => name)).toEqual(PROPOSAL_STEPS);
 
@@ -513,7 +532,7 @@ describe('Detection Coverage review', () => {
     });
 
     // The child can complete with `created: false` without asking anyone when the draft
-    // has an empty query or no attachment. That must not drop the indicator.
+    // is incomplete or could not be attached. That must not drop the indicator.
     it('leaves the indicator pending when rule creation completes with created: false and no review', () => {
       expect(evaluateMarkProcessed({ created: false, reviewed: false })).toBe(false);
     });
@@ -610,14 +629,6 @@ describe('Detection Coverage review', () => {
       expect(emit?.[flag]).toBe(`\${{ steps.resolve_outcome.output.${flag} }}`);
     });
 
-    it('separates an installed rule that stayed off from a missing install', () => {
-      expect(outcome?.installed_not_enabled).toContain(
-        "steps.propose_install.output.status == 'succeeded'"
-      );
-      expect(outcome?.installed_not_enabled).toContain('steps.refetch_rule.output.id != null');
-      expect(outcome?.installed_not_enabled).toContain('steps.refetch_rule.output.enabled != true');
-    });
-
     it('computes creation_unreviewed from the child reviewed output', () => {
       expect(outcome?.creation_unreviewed).toContain("verdict == 'no_coverage'");
       expect(outcome?.creation_unreviewed).toContain(
@@ -649,6 +660,8 @@ describe('Detection Coverage review', () => {
     it('propagates the creation worker outcome', () => {
       expect(emit?.rule_created).toContain('steps.run_rule_creation.output.created');
       expect(emit?.created_rule_name).toContain('steps.run_rule_creation.output.rule_name');
+      expect(emit?.creation_skip_reason).toBe('{{ steps.run_rule_creation.output.skip_reason }}');
+      expect(creationDefinition.outputs?.map(({ name }) => name)).toContain('skip_reason');
     });
 
     it('hands the investigation back to the caller', () => {
@@ -703,7 +716,6 @@ describe('Detection Coverage review', () => {
         'coverage_confirmed',
         'rule_enabled',
         'rule_installed',
-        'installed_not_enabled',
         'ki_id',
         'ki_processed',
       ])
