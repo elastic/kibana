@@ -82,7 +82,9 @@ describe('Content — legacy asset criticality accordion gating', () => {
   });
 
   it('renders the legacy accordion when entity store v2 is disabled', () => {
-    render(<HostPanelContent {...defaultProps} entityStoreV2Enabled={false} />, { wrapper: TestProviders });
+    render(<HostPanelContent {...defaultProps} entityStoreV2Enabled={false} />, {
+      wrapper: TestProviders,
+    });
     expect(screen.getByTestId('assetCriticalityAccordionMock')).toBeInTheDocument();
   });
 
