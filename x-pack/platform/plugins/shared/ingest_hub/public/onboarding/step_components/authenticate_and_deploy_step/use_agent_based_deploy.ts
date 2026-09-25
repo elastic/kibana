@@ -174,6 +174,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           agentCredentials: agentCredentialsRef.current,
         };
 
+        // Track instance IDs successfully cleaned up so the SO update can exclude their
+        // stale policy IDs when building packagePolicyIds.
+        let cleanedLiveStale: string[] = [];
+
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
@@ -197,7 +201,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           ]);
           // Agent-based deploy has no "update" semantics — a policy is either deleted or kept
           // entirely, so no survivingInstanceIds filter is needed here.
-          const cleanedLiveStale = buildCleanedLiveStale(liveStalePolicyIds, succeededIds);
+          cleanedLiveStale = buildCleanedLiveStale(liveStalePolicyIds, succeededIds);
           removeDeployInstances(cleanedLiveStale);
           const remainingPending = buildRemainingPending(
             detectAndReviewStep.pendingCleanupPolicyIds,
@@ -209,6 +213,18 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         if (targetsToDeploy.length === 0) {
           setIsDeploying(false);
           updateDetectAndReviewStep({ isDeploying: false });
+          // Refresh the SO so the removed service and its policy ID are no longer in the record.
+          // Without this, reopening the deployment restores the obsolete selection and cleanup
+          // can target already-deleted policies.
+          if (onboardingDeploymentId) {
+            await updateDeployment(onboardingDeploymentId, {
+              services: selectedServiceIds,
+              serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+                string,
+                Record<string, unknown>
+              >,
+            });
+          }
           // Cleanup is best-effort — any entries that couldn't be cleared remain staged for
           // the next deploy attempt. Don't block navigation on a cleanup-only run.
           return { failed: false };
@@ -305,16 +321,17 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // services/serviceVars here means a resume after a Back→add-service→Next sequence
         // restores the complete service set, not just what was deployed first.
         if (onboardingDeploymentId) {
+          // Build the persisted policy-ID list from the post-cleanup snapshot: filter out
+          // instance IDs removed by cleanup (cleanedLiveStale) before merging with current
+          // deploy results, so deleted package-policy IDs aren't persisted alongside new ones.
+          const priorIds = Object.fromEntries(
+            Object.entries(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
+              ([id]) => !cleanedLiveStale.includes(id)
+            )
+          );
           await updateDeployment(onboardingDeploymentId, {
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
-            packagePolicyIds: [
-              ...new Set(
-                Object.values({
-                  ...detectAndReviewStep.policyIdsByInstance,
-                  ...policyIdsByInstance,
-                })
-              ),
-            ],
+            packagePolicyIds: [...new Set(Object.values({ ...priorIds, ...policyIdsByInstance }))],
             services: selectedServiceIds,
             serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
               string,

@@ -291,13 +291,6 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
-    services: schema.maybe(
-      schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
-        minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'Updated service list. Replaces the stored services array.' },
-      })
-    ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     services: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {

@@ -165,7 +165,10 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
         request.params.id
       );
       const effectiveMechanisms = request.body.mechanisms ?? existing.mechanisms;
-      const effectiveAuthMethod = request.body.authMethod ?? existing.authMethod;
+      // Explicit null means the field is being cleared (MI→ECF transition); treat it as
+      // "no method" rather than falling back to the stored value, so the PUT is not rejected.
+      const effectiveAuthMethod =
+        'authMethod' in request.body ? request.body.authMethod : existing.authMethod;
       if (effectiveAuthMethod) {
         const authMethodError = validateAuthMethod(effectiveMechanisms, effectiveAuthMethod);
         if (authMethodError) {

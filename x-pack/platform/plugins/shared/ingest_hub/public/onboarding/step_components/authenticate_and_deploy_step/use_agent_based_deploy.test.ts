@@ -753,6 +753,42 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
   });
 
+  it('cleanup-only path: refreshes SO with current services so removed service is not restored on resume', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-cleanup');
+    mockCleanupAgentBasedPolicies.mockResolvedValue({ toDelete: ['pkg-policy-A'], toUpdate: [] });
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svcB'] },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { instA: 'pkg-policy-A', instB: 'pkg-policy-B' },
+        pendingCleanupPolicyIds: { instA: 'pkg-policy-A' },
+        onboardingDeploymentId: 'so-id-cleanup',
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'agent-policy-1',
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
+    mockBuildAgentBasedTargets.mockReturnValue([]);
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockUpdateDeployment).toHaveBeenCalledWith(
+      'so-id-cleanup',
+      expect.objectContaining({ services: ['svcB'] })
+    );
+  });
+
   it('runs cleanup on retry when pendingCleanupPolicyIds is non-empty', async () => {
     // A retry must still process pending cleanup — skipping it only when cleanup was successfully
     // cleared. If cleanup failed on the initial attempt and a target also failed, retrying the
