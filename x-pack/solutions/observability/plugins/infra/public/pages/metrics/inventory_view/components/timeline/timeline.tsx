@@ -113,7 +113,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     }
   );
   const { metricsK8sAnomalies } = useMetricsK8sAnomaliesResults(anomalyParams, {
-    active: nodeType === 'pod',
+    active: nodeType === 'pod' && effectiveSchema !== 'semconv',
   });
 
   const anomalies = useMemo(() => {
