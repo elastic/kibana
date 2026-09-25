@@ -29,6 +29,8 @@ import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
   type RenderAssignees,
+  type RenderStatus,
+  type CloseInvestigationModalRenderProps,
   type RenderLinkedInvestigations,
 } from '@kbn/agentic-investigations-common';
 import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
@@ -235,6 +237,30 @@ export class AlertZeroPublicPlugin
     });
 
     // ---------------------------------------------------------------------------
+    // Status toggle (embedded in both investigation and escalation flyout headers)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedStatusToggle = makeLazyWithProviders(async () => {
+      const { ConnectedStatusToggle } = await import(
+        './components/connected_status/connected_status_toggle'
+      );
+      return ConnectedStatusToggle as React.ComponentType<
+        React.ComponentProps<typeof ConnectedStatusToggle>
+      >;
+    });
+
+    // ---------------------------------------------------------------------------
+    // Close investigation modal (used from the flyout footer and queue card actions)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedCloseInvestigationModal = makeLazyWithProviders(async () => {
+      const { ConnectedCloseInvestigationModal } = await import(
+        './components/connected_status/connected_close_investigation_modal'
+      );
+      return ConnectedCloseInvestigationModal as React.ComponentType<
+        React.ComponentProps<typeof ConnectedCloseInvestigationModal>
+      >;
+    });
+
+    // ---------------------------------------------------------------------------
     // Linked investigations list (escalation flyout overview tab body)
     // ---------------------------------------------------------------------------
     const LazyConnectedLinkedInvestigations = makeLazyWithProviders(async () => {
@@ -246,8 +272,11 @@ export class AlertZeroPublicPlugin
       >;
     });
 
-    const { manageEscalations: canManageEscalations, showEscalations: canShowEscalations } =
-      getAgenticInvestigationsCapabilities(core.application.capabilities);
+    const {
+      manageEscalations: canManageEscalations,
+      manageInvestigations: canManageInvestigations,
+      showEscalations: canShowEscalations,
+    } = getAgenticInvestigationsCapabilities(core.application.capabilities);
 
     // ---------------------------------------------------------------------------
     // renderAssignees render prop — shared by both templates
@@ -258,6 +287,28 @@ export class AlertZeroPublicPlugin
         null,
         React.createElement(LazyConnectedAssignees, props)
       );
+
+    // ---------------------------------------------------------------------------
+    // renderStatus render prop — shared by both templates
+    // ---------------------------------------------------------------------------
+    const renderStatus: RenderStatus = (props) =>
+      React.createElement(
+        EscalationModalBoundary,
+        null,
+        React.createElement(LazyConnectedStatusToggle, props)
+      );
+
+    // ---------------------------------------------------------------------------
+    // renderCloseInvestigationModal — flyout footer close action
+    // ---------------------------------------------------------------------------
+    const renderCloseInvestigationModal = canManageInvestigations
+      ? (props: CloseInvestigationModalRenderProps) =>
+          React.createElement(
+            EscalationModalBoundary,
+            null,
+            React.createElement(LazyConnectedCloseInvestigationModal, props)
+          )
+      : undefined;
 
     // ---------------------------------------------------------------------------
     // renderLinkedInvestigations render prop — escalation overview tab
@@ -275,6 +326,8 @@ export class AlertZeroPublicPlugin
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
       renderAssignees,
+      renderStatus: canManageInvestigations ? renderStatus : undefined,
+      renderCloseInvestigationModal,
       renderEscalationModal: canManageEscalations
         ? (props) =>
             React.createElement(
@@ -313,6 +366,7 @@ export class AlertZeroPublicPlugin
       name: ESCALATION_TEMPLATE_NAME,
       icon: 'warning',
       renderAssignees,
+      renderStatus: canManageEscalations && canManageInvestigations ? renderStatus : undefined,
       renderLinkedInvestigations: canShowEscalations ? renderLinkedInvestigations : undefined,
     });
 
