@@ -252,6 +252,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   ]);
   useEffect(() => {
     if (draftHydratedRef.current) return;
+    if (!username) return;
     if (isConversationReadOnly || isConversationReadOnlyLoading) return;
     if (initialMessage) {
       draftHydratedRef.current = true;
@@ -263,6 +264,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     }
   }, [
     draft,
+    username,
     agentId,
     conversationId,
     initialMessage,
@@ -301,6 +303,12 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
+    if (saveDraftDebounceRef.current) {
+      clearTimeout(saveDraftDebounceRef.current);
+      saveDraftDebounceRef.current = null;
+    }
+    lastEditorContentRef.current = '';
+
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
