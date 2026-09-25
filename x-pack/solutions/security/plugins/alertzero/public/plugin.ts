@@ -143,6 +143,7 @@ export class AlertZeroPublicPlugin
       .subscribe((settingEnabled) => {
         this.appUpdater$.next(() => ({
           status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+          deepLinks: getAlertZeroDeepLinks(core.application.capabilities),
         }));
       });
 
