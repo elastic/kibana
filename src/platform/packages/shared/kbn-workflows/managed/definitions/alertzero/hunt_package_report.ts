@@ -17,13 +17,15 @@ import type { ManagedWorkflowDefinition } from '../../types';
 export const ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID = 'system-security-hunt-package-report';
 
 /**
- * Untagged child invoked by PR 4's tagged Worker
- * (`hunt_continuous_threat_hunt.yaml`) via `workflow.execute`. Wraps the
- * native `hunt.packageReport` step type, fans mint payloads out to per-Proposal
- * gate children, and closes the Investigation benignly on a clean run. Owns no
- * trigger of its own, so enablement is `enforced` (a disabled child would
- * silently break its parent), matching `hunt.yaml` and
- * `find_or_create_investigation.yaml`.
+ * Child invoked by PR 4's tagged Worker (`hunt_continuous_threat_hunt.yaml`)
+ * via `workflow.execute`. Wraps the native `hunt.packageReport` step type,
+ * fans mint payloads out to per-Proposal gate children, and closes the
+ * Investigation benignly on a clean run. Tagged `security` +
+ * `continuous-threat-hunt` (not `watch`/`watch-hunt`, which stays
+ * Worker-only) for Workflows-list findability, matching every other Watch's
+ * own feature children. Owns no trigger of its own, so enablement is
+ * `enforced` (a disabled child would silently break its parent) regardless
+ * of the tags, matching `hunt.yaml` and `find_or_create_investigation.yaml`.
  */
 export const ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW = {
   billable: false,

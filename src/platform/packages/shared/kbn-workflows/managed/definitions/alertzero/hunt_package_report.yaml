@@ -1,7 +1,7 @@
 version: "1"
 name: Hunt Watch - package report
 description: >
-  Untagged child invoked by PR 4's tagged Worker (registered id
+  Child invoked by PR 4's tagged Worker (registered id
   system-security-hunt-package-report; kept in sync with
   kbn-workflows/managed/definitions/alertzero/hunt_continuous_threat_hunt.yaml).
   Wraps the native hunt.packageReport step, which owns the mint-versus-dismiss
@@ -16,7 +16,13 @@ description: >
   failed upstream (empty investigationConversationId), same guard as hunt.yaml's
   run_hunt_coordinator.
 enabled: true
-tags: []
+# security + continuous-threat-hunt: the per-feature child-grouping pair every
+# other Watch's children carry (detection-rule-creation/detection-rule-tuning/
+# attack-discovery/detection-coverage on their own children), for Workflows-list
+# findability. Never watch/watch-hunt, which stays Worker-only.
+tags:
+  - security
+  - continuous-threat-hunt
 triggers:
   - type: manual
     inputs:
