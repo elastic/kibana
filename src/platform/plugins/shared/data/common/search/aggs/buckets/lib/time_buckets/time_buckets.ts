@@ -10,7 +10,7 @@
 import type { Assign } from 'utility-types';
 import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
 import type { Moment } from 'moment';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import type { Unit } from '@kbn/datemath';
 import { parseInterval, splitStringInterval } from '../../../utils';
@@ -52,6 +52,7 @@ export interface TimeBucketsConfig extends Record<string, any> {
   'histogram:barTarget': number;
   dateFormat: string;
   'dateFormat:scaled': string[][];
+  'dateFormat:tz'?: string;
 }
 
 /**
@@ -306,13 +307,28 @@ export class TimeBuckets {
     const interval = this.getInterval();
     const rules = this._timeBucketConfig['dateFormat:scaled'];
 
+    let format = this._timeBucketConfig.dateFormat;
     for (let i = rules.length - 1; i >= 0; i--) {
       const rule = rules[i];
       if (!rule[0] || (interval && interval >= moment.duration(rule[0]))) {
-        return rule[1];
+        format = rule[1];
+        break;
       }
     }
 
-    return this._timeBucketConfig.dateFormat;
+    // If the format shows time but not date, and the time range spans multiple
+    // calendar days in the display timezone, prepend the date — otherwise the
+    // same HH:mm value appears on multiple days and rows look like duplicates.
+    if (this.hasBounds() && /[Hhk]/.test(format) && !/D/.test(format)) {
+      const rawTz = this._timeBucketConfig['dateFormat:tz'];
+      const tz = !rawTz || rawTz === 'Browser' ? moment.tz.guess() : rawTz;
+      const lbInTz = moment.tz(this._lb!.valueOf(), tz);
+      const ubInTz = moment.tz(this._ub!.valueOf(), tz);
+      if (!lbInTz.isSame(ubInTz, 'day')) {
+        format = `YYYY-MM-DD ${format}`;
+      }
+    }
+
+    return format;
   }
 }

@@ -8,11 +8,12 @@
  */
 
 import { esql } from '@elastic/esql';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import type { DateHistogramIndexPatternColumn } from '../../datasources/operations';
 import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '../constants';
+import { convertToAbsoluteDateRange } from '../date_range';
 import {
   AUTO_INTERVAL,
   DEFAULT_DATE_HISTOGRAM_INTERVAL,
@@ -38,14 +39,28 @@ export const getDateHistogramSerializedFormat: GetSerializedFormatFn<
       false
     )?.asMilliseconds() || 3600000;
   const rules = uiSettings?.get<Array<[string, string]>>('dateFormat:scaled');
+  let pattern: string = uiSettings?.get('dateFormat');
   for (let i = rules.length - 1; i >= 0; i--) {
     const rule = rules[i];
     if (!Array.isArray(rule) || rule.length !== 2) continue;
     if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]).asMilliseconds())) {
-      return { id: 'date', params: { pattern: rule[1] } };
+      pattern = rule[1];
+      break;
     }
   }
-  return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
+
+  const absDateRange = convertToAbsoluteDateRange(dateRange, new Date());
+  if (/[Hhk]/.test(pattern) && !/D/.test(pattern)) {
+    const rawTz = uiSettings?.get<string>('dateFormat:tz');
+    const tz = !rawTz || rawTz === 'Browser' ? moment.tz.guess() : rawTz;
+    const fromInTz = moment.tz(absDateRange.fromDate, tz);
+    const toInTz = moment.tz(absDateRange.toDate, tz);
+    if (!fromInTz.isSame(toInTz, 'day')) {
+      pattern = `YYYY-MM-DD ${pattern}`;
+    }
+  }
+
+  return { id: 'date', params: { pattern } };
 };
 
 export const dateHistogramToESQL: ToEsqlFn<DateHistogramIndexPatternColumn> = (

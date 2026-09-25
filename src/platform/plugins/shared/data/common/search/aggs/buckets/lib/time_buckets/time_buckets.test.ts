@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import type { TimeBucketsConfig } from './time_buckets';
 import { TimeBuckets } from './time_buckets';
@@ -27,6 +27,7 @@ describe('TimeBuckets', () => {
       ['P1DT', 'YYYY-MM-DD'],
       ['P1YT', 'YYYY'],
     ],
+    'dateFormat:tz': 'UTC',
   };
 
   test('setBounds/getBounds - bounds is correct', () => {
@@ -139,6 +140,92 @@ describe('TimeBuckets', () => {
     timeBuckets.getScaledDateFormat();
     const format = timeBuckets.getScaledDateFormat();
     expect(format).toEqual('HH:mm');
+  });
+
+  test('getScaledDateFormat - prepends date when range spans multiple calendar days and format is time-only', () => {
+    // Use a high maxBars so a 20m interval is not scaled up past 1h.
+    const config: TimeBucketsConfig = { ...timeBucketConfig, 'histogram:maxBars': 1000 };
+    const timeBuckets = new TimeBuckets(config);
+    // Pin moments in UTC so the test is timezone-agnostic: 23:00–01:00 UTC crosses midnight.
+    timeBuckets.setBounds({
+      min: moment.tz('2020-03-25T23:00:00', 'UTC'),
+      max: moment.tz('2020-03-26T01:00:00', 'UTC'),
+    });
+    timeBuckets.setInterval('20m');
+    const format = timeBuckets.getScaledDateFormat();
+    // The PT1M rule selects 'HH:mm'; because the range crosses a calendar day the date is prepended.
+    expect(format).toEqual('YYYY-MM-DD HH:mm');
+  });
+
+  test('getScaledDateFormat - does not prepend date when range is within same calendar day', () => {
+    const config: TimeBucketsConfig = { ...timeBucketConfig, 'histogram:maxBars': 1000 };
+    const timeBuckets = new TimeBuckets(config);
+    // 00:00–23:00 UTC stays on the same UTC day.
+    timeBuckets.setBounds({
+      min: moment.tz('2020-03-25T00:00:00', 'UTC'),
+      max: moment.tz('2020-03-25T23:00:00', 'UTC'),
+    });
+    timeBuckets.setInterval('20m');
+    const format = timeBuckets.getScaledDateFormat();
+    expect(format).toEqual('HH:mm');
+  });
+
+  test('getScaledDateFormat - prepends date when range crosses midnight only in the configured timezone', () => {
+    // 06:30–07:30 UTC is one UTC day but spans 23:30–00:30 in America/Los_Angeles (UTC-7).
+    const config: TimeBucketsConfig = {
+      ...timeBucketConfig,
+      'histogram:maxBars': 1000,
+      'dateFormat:tz': 'America/Los_Angeles',
+    };
+    const timeBuckets = new TimeBuckets(config);
+    timeBuckets.setBounds({
+      min: moment.tz('2023-06-16T06:30:00', 'UTC'),
+      max: moment.tz('2023-06-16T07:30:00', 'UTC'),
+    });
+    timeBuckets.setInterval('20m');
+    const format = timeBuckets.getScaledDateFormat();
+    expect(format).toEqual('YYYY-MM-DD HH:mm');
+  });
+
+  test('getScaledDateFormat - does not prepend date when range stays within one calendar day in the configured timezone', () => {
+    // 14:00–23:00 UTC is 07:00–16:00 in America/Los_Angeles — same calendar day.
+    const config: TimeBucketsConfig = {
+      ...timeBucketConfig,
+      'histogram:maxBars': 1000,
+      'dateFormat:tz': 'America/Los_Angeles',
+    };
+    const timeBuckets = new TimeBuckets(config);
+    timeBuckets.setBounds({
+      min: moment.tz('2023-06-16T14:00:00', 'UTC'),
+      max: moment.tz('2023-06-16T23:00:00', 'UTC'),
+    });
+    timeBuckets.setInterval('20m');
+    const format = timeBuckets.getScaledDateFormat();
+    expect(format).toEqual('HH:mm');
+  });
+
+  test('getScaledDateFormat - prepends date when format uses kk (1-24 hour) and range crosses midnight', () => {
+    const config: TimeBucketsConfig = {
+      ...timeBucketConfig,
+      'histogram:maxBars': 1000,
+      'dateFormat:scaled': [
+        ['', 'HH:mm:ss.SSS'],
+        ['PT1S', 'HH:mm:ss'],
+        ['PT1M', 'kk:mm'],
+        ['PT1H', 'YYYY-MM-DD HH:mm'],
+        ['P1DT', 'YYYY-MM-DD'],
+        ['P1YT', 'YYYY'],
+      ],
+    };
+    const timeBuckets = new TimeBuckets(config);
+    // 23:00–01:00 UTC crosses midnight.
+    timeBuckets.setBounds({
+      min: moment.tz('2020-03-25T23:00:00', 'UTC'),
+      max: moment.tz('2020-03-26T01:00:00', 'UTC'),
+    });
+    timeBuckets.setInterval('20m');
+    const format = timeBuckets.getScaledDateFormat();
+    expect(format).toEqual('YYYY-MM-DD kk:mm');
   });
 
   test('allows days but throws error on weeks', () => {

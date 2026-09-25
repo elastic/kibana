@@ -118,6 +118,7 @@ export const getDateHistogramBucketAgg = ({
               'histogram:barTarget': getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
               dateFormat: getConfig('dateFormat'),
               'dateFormat:scaled': getConfig('dateFormat:scaled'),
+              'dateFormat:tz': getConfig('dateFormat:tz'),
             });
 
             try {
