@@ -413,7 +413,6 @@ export class ActionPolicyClient {
     const evaluatedCount = allPolicies.items.length;
     return {
       items,
-      total: allPolicies.total,
       evaluated_count: evaluatedCount,
       is_truncated: allPolicies.total > evaluatedCount,
     };
@@ -439,7 +438,15 @@ export class ActionPolicyClient {
     return this.updatePolicyState(id, { snoozedUntil: null });
   }
 
-  public async updateActionPolicyApiKey({ id }: UpdateActionPolicyApiKeyParams): Promise<void> {
+  public async updateActionPolicyApiKey({
+    id,
+  }: UpdateActionPolicyApiKeyParams): Promise<ActionPolicyResponse> {
+    await this.rotateApiKey(id);
+
+    return this.getActionPolicy({ id });
+  }
+
+  private async rotateApiKey(id: string): Promise<void> {
     const { attrs: existingPolicy } = await this.getExistingActionPolicy(id);
 
     const oldAuth = await this.getDecryptedAuth(id);
@@ -549,15 +556,17 @@ export class ActionPolicyClient {
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     // Each id rotates its own API key (SO get + decrypt + key create + write),
-    // so the work is per-item rather than a single SO round-trip. Fan out with a
-    // bounded concurrency; failures are isolated per id inside the mapper so one
-    // bad policy never aborts the rest of the batch. `pMap` preserves input
-    // order, keeping the `errors` ordering deterministic.
+    // so the work is per-item rather than a single SO round-trip. Rotate
+    // directly rather than through `updateActionPolicyApiKey`, whose trailing
+    // read only exists to build a body this response does not carry. Fan out
+    // with a bounded concurrency; failures are isolated per id inside the mapper
+    // so one bad policy never aborts the rest of the batch. `pMap` preserves
+    // input order, keeping the `errors` ordering deterministic.
     const results = await pMap(
       ids,
       async (id): Promise<ActionPolicyBulkError | null> => {
         try {
-          await this.updateActionPolicyApiKey({ id });
+          await this.rotateApiKey(id);
           return null;
         } catch (e) {
           return bulkErrorFromThrown(id, e);
