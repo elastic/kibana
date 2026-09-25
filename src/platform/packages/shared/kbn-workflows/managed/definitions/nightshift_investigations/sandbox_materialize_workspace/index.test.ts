@@ -100,6 +100,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
       expect.objectContaining({
         name: 'compose_prompt',
         type: 'nightshift.composeHydrateNotifications',
+        if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}',
         with: {
           notifications: [
             '{{ steps.hydrate_cortex.output.notification }}',
