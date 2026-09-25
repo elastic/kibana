@@ -9,10 +9,12 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import {
   EuiAccordion,
+  EuiCode,
   EuiFieldText,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
@@ -24,10 +26,14 @@ import {
   type DatasetBooleanFormValue,
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
+  validateDelimiter,
 } from './create_dataset_form_state';
 import { CsvTsvAdvancedSettings } from './components/csv_tsv_advanced_settings';
 import { CsvTsvCommonSettings } from './components/csv_tsv_common_settings';
 import { FormatSelect } from './components/format_select';
+import { DelimiterSelect } from './components/delimiter_select';
+import { HeaderRow } from './components/header_row';
+import { QuoteMode } from './components/quote_mode';
 import { NdjsonCommonSettings } from './components/ndjson_common_settings';
 import { ParquetAdvancedSettings } from './components/parquet_advanced_settings';
 import { ParquetCommonSettings } from './components/parquet_common_settings';
@@ -53,18 +59,11 @@ const SCHEMA_RESOLUTION_OPTIONS = [
   },
 ];
 
-const MODE_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsModePlaceholder },
-  { value: 'quoted', text: createDatasetWizardStrings.settingsModeQuoted },
-  { value: 'escaped', text: createDatasetWizardStrings.settingsModeEscaped },
-  { value: 'plain', text: createDatasetWizardStrings.settingsModePlain },
-];
-
-const HEADER_ROW_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsHeaderRowPlaceholder },
-  { value: 'true', text: createDatasetWizardStrings.settingsHeaderRowTrue },
-  { value: 'false', text: createDatasetWizardStrings.settingsHeaderRowFalse },
-];
+const helpTextDefault = (valueLabel: string) => (
+  <EuiText size="xs" color="subdued">
+    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
+  </EuiText>
+);
 
 const HIVE_PARTITIONING_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsHivePartitioningPlaceholder },
@@ -89,6 +88,10 @@ export function CreateDatasetFormatField({
         value?.trim() ? true : createDatasetWizardStrings.settingsFormatRequired,
     },
   });
+  const { field: formatWasAutoDetectedField } = useController({
+    name: 'ui.formatWasAutoDetected',
+    control,
+  });
 
   return (
     <EuiFormRow
@@ -99,9 +102,13 @@ export function CreateDatasetFormatField({
     >
       <FormatSelect
         value={formatField.value}
-        onChange={formatField.onChange}
+        onChange={(next) => {
+          formatWasAutoDetectedField.onChange(false);
+          formatField.onChange(next);
+        }}
         onBlur={formatField.onBlur}
         isInvalid={Boolean(formatFieldState.error)}
+        isAutoDetected={Boolean(formatWasAutoDetectedField.value)}
       />
     </EuiFormRow>
   );
@@ -339,7 +346,12 @@ function FormatAdvancedSettings({
 // ---------------------------------------------------------------------------
 
 function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: delimiterField } = useController({ name: 'settings.delimiter', control });
+  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
+  const { field: delimiterField, fieldState: delimiterState } = useController({
+    name: 'settings.delimiter',
+    control,
+    rules: { validate: validateDelimiter },
+  });
   const { field: modeField } = useController({ name: 'settings.mode', control });
   const { field: headerRowField } = useController({ name: 'settings.header_row', control });
 
@@ -348,40 +360,29 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
       <EuiSpacer size="m" />
       <EuiFormRow
         label={createDatasetWizardStrings.settingsDelimiterLabel}
-        helpText={createDatasetWizardStrings.settingsDelimiterHelp}
+        helpText={helpTextDefault(format === 'tsv' ? '\\t' : ',')}
         fullWidth
+        isInvalid={Boolean(delimiterState.error)}
+        error={delimiterState.error?.message}
       >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsDelimiter"
-          fullWidth
+        <DelimiterSelect
           value={delimiterField.value}
-          onChange={(e) => delimiterField.onChange(e.target.value)}
-          name={delimiterField.name}
-          inputRef={delimiterField.ref}
+          onChange={(next) => delimiterField.onChange(next)}
+          onBlur={delimiterField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsModeLabel} fullWidth>
-        <EuiSelect
-          options={MODE_OPTIONS}
-          data-test-subj="createDatasetSettingsMode"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsModeLabel}
+        <QuoteMode
           value={modeField.value}
-          onChange={(e) => modeField.onChange(e.target.value)}
-          name={modeField.name}
-          inputRef={modeField.ref}
+          onChange={(next) => modeField.onChange(next)}
+          onBlur={modeField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsHeaderRowLabel} fullWidth>
-        <EuiSelect
-          options={HEADER_ROW_OPTIONS}
-          data-test-subj="createDatasetSettingsHeaderRow"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
+        <HeaderRow
           value={headerRowField.value}
-          onChange={(e) => headerRowField.onChange(e.target.value as DatasetBooleanFormValue)}
-          name={headerRowField.name}
-          inputRef={headerRowField.ref}
+          onChange={(next) => headerRowField.onChange(next)}
+          onBlur={headerRowField.onBlur}
         />
       </EuiFormRow>
     </>

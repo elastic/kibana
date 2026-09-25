@@ -7,7 +7,6 @@
 
 import {
   buildDatasetSettingsFromFormValues,
-  DEFAULT_FILE_EXCLUSIONS,
   emptyCreateDatasetSettingsFormValues,
 } from './create_dataset_form_state';
 
@@ -18,7 +17,7 @@ describe('create_dataset_form_state', () => {
     it('returns empty-string defaults for all fields', () => {
       expect(empty()).toEqual({
         format: '',
-        file_exclusions: [...DEFAULT_FILE_EXCLUSIONS],
+        file_exclusions: [],
         partition_detection: '',
         schema_resolution: '',
         partition_path: '',
@@ -31,13 +30,13 @@ describe('create_dataset_form_state', () => {
         skip_rows: '',
         datetime_format: '',
         null_value: '',
-        encoding: 'UTF-8',
+        encoding: '',
         error_mode: '',
         max_errors: '',
         max_error_ratio: '',
         quote: '',
         escape: '',
-        column_prefix: 'col',
+        column_prefix: '',
         trim_spaces: false,
       });
     });
@@ -66,7 +65,7 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ partition_path: '/year={year}/' });
     });
 
-    it('omits default file_exclusions and includes custom values', () => {
+    it('omits file_exclusions when empty and includes custom values', () => {
       expect(buildDatasetSettingsFromFormValues(empty())).toBeUndefined();
       expect(
         buildDatasetSettingsFromFormValues({
@@ -158,7 +157,7 @@ describe('create_dataset_form_state', () => {
         buildDatasetSettingsFromFormValues({
           ...empty(),
           format: 'csv',
-          datetime_format: 'ISO-8601',
+          datetime_format: 'ISO8601',
         })
       ).toEqual({ format: 'csv' });
     });

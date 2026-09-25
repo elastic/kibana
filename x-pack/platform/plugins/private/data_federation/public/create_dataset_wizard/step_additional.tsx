@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 
@@ -38,6 +38,10 @@ export function StepAdditional() {
       <EuiTitle size="m">
         <h2>{createDatasetWizardStrings.additionalStepLabel}</h2>
       </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size="s" color="subdued">
+        {createDatasetWizardStrings.additionalStepSubheader}
+      </EuiText>
       <EuiSpacer size="m" />
       <CreateDatasetAdditionalSettings control={control} />
     </div>

@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiSelect } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  type EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -16,11 +23,60 @@ import type {
   DatasetPartitionDetectionFormValue,
 } from '../create_dataset_form_state';
 
-const PARTITION_DETECTION_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsPartitionDetectionPlaceholder },
-  { value: 'auto', text: createDatasetWizardStrings.settingsPartitionDetectionAuto },
-  { value: 'hive', text: createDatasetWizardStrings.settingsPartitionDetectionHive },
-  { value: 'none', text: createDatasetWizardStrings.settingsPartitionDetectionNone },
+type Option = EuiComboBoxOptionOption<string> & {
+  value: DatasetPartitionDetectionFormValue;
+  description: string;
+  'data-test-subj': string;
+};
+
+const renderPartitionDetectionOption = (option: EuiComboBoxOptionOption<string>) => {
+  const opt = option as Option;
+  return (
+    <div title={opt.description}>
+      <EuiFlexGroup
+        responsive={false}
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem grow={true}>
+          <EuiText size="s">{opt.label}</EuiText>
+        </EuiFlexItem>
+        {opt.append ? <EuiFlexItem grow={false}>{opt.append}</EuiFlexItem> : null}
+      </EuiFlexGroup>
+      <EuiText size="xs" color="subdued">
+        {opt.description}
+      </EuiText>
+    </div>
+  );
+};
+
+const PARTITION_DETECTION_OPTIONS: Option[] = [
+  {
+    value: 'auto',
+    label: createDatasetWizardStrings.settingsPartitionDetectionAuto,
+    description: createDatasetWizardStrings.settingsPartitionDetectionAutoDescription,
+    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
+    'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-auto',
+  },
+  {
+    value: 'hive',
+    label: createDatasetWizardStrings.settingsPartitionDetectionHive,
+    description: createDatasetWizardStrings.settingsPartitionDetectionHiveDescription,
+    'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-hive',
+  },
+  {
+    value: 'template',
+    label: createDatasetWizardStrings.settingsPartitionDetectionTemplate,
+    description: createDatasetWizardStrings.settingsPartitionDetectionTemplateDescription,
+    'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-template',
+  },
+  {
+    value: 'none',
+    label: createDatasetWizardStrings.settingsPartitionDetectionNone,
+    description: createDatasetWizardStrings.settingsPartitionDetectionNoneDescription,
+    'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-none',
+  },
 ];
 
 export function PartitionDetectionSelect({
@@ -33,18 +89,35 @@ export function PartitionDetectionSelect({
     control,
   });
 
+  const selectedOption = PARTITION_DETECTION_OPTIONS.find(
+    (o) => o.value === partitionDetectionField.value
+  );
+
   return (
-    <EuiSelect
+    <EuiComboBox
+      placeholder={createDatasetWizardStrings.settingsPartitionDetectionPlaceholder}
       options={PARTITION_DETECTION_OPTIONS}
       data-test-subj="createDatasetSettingsPartitionDetection"
-      fullWidth
       aria-label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
-      value={partitionDetectionField.value}
-      onChange={(e) =>
-        partitionDetectionField.onChange(e.target.value as DatasetPartitionDetectionFormValue)
+      singleSelection={{ asPlainText: true }}
+      isClearable
+      selectedOptions={
+        selectedOption
+          ? [
+              {
+                value: selectedOption.value,
+                label: selectedOption.label,
+              },
+            ]
+          : []
       }
-      name={partitionDetectionField.name}
-      inputRef={partitionDetectionField.ref}
+      renderOption={renderPartitionDetectionOption}
+      onChange={(nextSelectedOptions) => {
+        const next = nextSelectedOptions?.[0] as Option | undefined;
+        partitionDetectionField.onChange(next?.value ?? '');
+      }}
+      onBlur={partitionDetectionField.onBlur}
+      fullWidth
     />
   );
 }

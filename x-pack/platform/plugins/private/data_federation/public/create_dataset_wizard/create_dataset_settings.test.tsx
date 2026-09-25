@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render } from '@testing-library/react';
-import { useForm, useWatch } from 'react-hook-form';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CreateDatasetAdditionalSettings, CreateDatasetSettings } from './create_dataset_settings';
 import type { CreateDatasetFormValues, DatasetFormatFormValue } from './create_dataset_form_state';
 import { emptyCreateDatasetSettingsFormValues } from './create_dataset_form_state';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
 const docLinksMock = {
   links: {
@@ -41,6 +42,7 @@ const renderSettings = () => {
         data_source: '',
         resource: '',
         settings: emptyCreateDatasetSettingsFormValues(),
+        ui: { formatWasAutoDetected: false },
       },
     });
 
@@ -63,9 +65,19 @@ const getSettingsValue = (getByTestId: ReturnType<typeof render>['getByTestId'])
   JSON.parse(getByTestId('settingsValue').textContent ?? '{}');
 
 describe('CreateDatasetSettings', () => {
-  const selectFormat = (getByTestId: ReturnType<typeof render>['getByTestId'], format: string) => {
-    fireEvent.click(getByTestId('createDatasetSettingsFormat'));
-    fireEvent.click(getByTestId(`createDatasetSettingsFormatOption-${format}`));
+  const selectFormat = async (
+    getByTestId: ReturnType<typeof render>['getByTestId'],
+    format: string
+  ) => {
+    const optionTestId = `createDatasetSettingsFormatOption-${format}`;
+
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetSettingsFormat'));
+    });
+    await waitFor(() => expect(getByTestId(optionTestId)).toBeInTheDocument());
+    await act(async () => {
+      fireEvent.click(getByTestId(optionTestId));
+    });
   };
 
   it('shows the format select', () => {
@@ -80,10 +92,10 @@ describe('CreateDatasetSettings', () => {
     expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeVisible();
   });
 
-  it('updates format in form state', () => {
+  it('updates format in form state', async () => {
     const { getByTestId } = renderSettings();
 
-    selectFormat(getByTestId, 'parquet');
+    await selectFormat(getByTestId, 'parquet');
 
     expect(getSettingsValue(getByTestId)).toMatchObject({ format: 'parquet' });
   });
@@ -91,11 +103,21 @@ describe('CreateDatasetSettings', () => {
   it('updates partition_detection in form state', () => {
     const { getByTestId } = renderSettings();
 
-    fireEvent.change(getByTestId('createDatasetSettingsPartitionDetection'), {
-      target: { value: 'hive' },
-    });
+    const partitionDetectionCombo = getByTestId('createDatasetSettingsPartitionDetection');
+    fireEvent.click(partitionDetectionCombo.querySelector('input') ?? partitionDetectionCombo);
+    fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-hive'));
 
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
+  });
+
+  it('supports partition_detection template in form state', () => {
+    const { getByTestId } = renderSettings();
+
+    const partitionDetectionCombo = getByTestId('createDatasetSettingsPartitionDetection');
+    fireEvent.click(partitionDetectionCombo.querySelector('input') ?? partitionDetectionCombo);
+    fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-template'));
+
+    expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'template' });
   });
 
   it('shows schema_resolution and hive_partitioning', () => {
@@ -115,49 +137,49 @@ describe('CreateDatasetSettings', () => {
   });
 
   describe('CSV format', () => {
-    it('shows delimiter, mode, and header_row at the top level (core)', () => {
+    it('shows delimiter, mode, and header_row at the top level (core)', async () => {
       const { getByTestId } = renderSettings();
 
-      selectFormat(getByTestId, 'csv');
+      await selectFormat(getByTestId, 'csv');
 
       expect(getByTestId('createDatasetSettingsDelimiter')).toBeVisible();
       expect(getByTestId('createDatasetSettingsMode')).toBeVisible();
       expect(getByTestId('createDatasetSettingsHeaderRow')).toBeVisible();
     });
 
-    it('updates a CSV core field in form state', () => {
-      const { getByTestId } = renderSettings();
+    it('updates a CSV core field in form state', async () => {
+      const { getByTestId, getByText } = renderSettings();
 
-      selectFormat(getByTestId, 'csv');
-      fireEvent.change(getByTestId('createDatasetSettingsDelimiter'), {
-        target: { value: '|' },
-      });
+      await selectFormat(getByTestId, 'csv');
+      const delimiterCombo = getByTestId('createDatasetSettingsDelimiter');
+      fireEvent.click(delimiterCombo.querySelector('input') ?? delimiterCombo);
+      fireEvent.click(getByText(createDatasetWizardStrings.settingsDelimiterOptionPipe));
 
       expect(getSettingsValue(getByTestId)).toMatchObject({ delimiter: '|' });
     });
   });
 
   describe('NDJSON format', () => {
-    it('shows datetime_format when NDJSON is selected', () => {
+    it('shows datetime_format when NDJSON is selected', async () => {
       const { getByTestId } = renderSettings();
 
-      selectFormat(getByTestId, 'ndjson');
+      await selectFormat(getByTestId, 'ndjson');
 
       expect(getByTestId('createDatasetSettingsDatetimeFormat')).toBeVisible();
     });
 
-    it('does not show segment_size (API-only)', () => {
+    it('does not show segment_size (API-only)', async () => {
       const { queryByTestId, getByTestId } = renderSettings();
-      selectFormat(getByTestId, 'ndjson');
+      await selectFormat(getByTestId, 'ndjson');
 
       expect(queryByTestId('createDatasetSettingsSegmentSize')).toBeNull();
     });
   });
 
   describe('Parquet format', () => {
-    it('shows parquet advanced fields when parquet is selected', () => {
+    it('shows parquet advanced fields when parquet is selected', async () => {
       const { getByTestId } = renderSettings();
-      selectFormat(getByTestId, 'parquet');
+      await selectFormat(getByTestId, 'parquet');
 
       expect(getByTestId('createDatasetSettingsOptimizedReader')).toBeVisible();
       expect(getByTestId('createDatasetSettingsLateMaterialization')).toBeVisible();
@@ -167,20 +189,23 @@ describe('CreateDatasetSettings', () => {
 
 const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
   const Wrapper = () => {
-    const { control } = useForm<CreateDatasetFormValues>({
+    const methods = useForm<CreateDatasetFormValues>({
       defaultValues: {
         name: '',
         description: '',
         data_source: '',
         resource: '',
         settings: { ...emptyCreateDatasetSettingsFormValues(), format },
+        ui: { formatWasAutoDetected: false },
       },
     });
 
     return (
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-          <CreateDatasetAdditionalSettings control={control} />
+          <FormProvider {...methods}>
+            <CreateDatasetAdditionalSettings control={methods.control} />
+          </FormProvider>
         </KibanaContextProvider>
       </EuiProvider>
     );
@@ -264,6 +289,20 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSettingsDatetimeFormat')).toBeInTheDocument();
     expect(queryByTestId('createDatasetNdjsonAdvancedSettings')).toBeNull();
     expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
+  });
+
+  it('shows an error message when max error ratio is out of range', () => {
+    const { getByTestId, getByText } = renderAdditionalSettings();
+
+    fireEvent.change(getByTestId('createDatasetSettingsMaxErrorRatio'), {
+      target: { value: '2' },
+    });
+
+    expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
+    expect(getByText('Must be a number between 0 and 1.')).toBeInTheDocument();
   });
 
   // ORC is intentionally disabled in the format selection UI.

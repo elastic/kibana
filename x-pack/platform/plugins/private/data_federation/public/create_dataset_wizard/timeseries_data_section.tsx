@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { MappingEditorValue } from '../components/mapping_editor';
+import { DatetimeFormatComboBox } from '../components/datetime_format_combo_box';
 
 const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
 
@@ -172,15 +173,19 @@ export function TimeseriesDataSection({
                 }
                 fullWidth
               >
-                <EuiFieldText
-                  fullWidth
+                <DatetimeFormatComboBox
+                  value={timestampField?.format ?? ''}
+                  onChange={(next) => onChangeTimestampField({ format: next })}
+                  onBlur={() => {}}
                   placeholder={i18n.translate(
                     'xpack.dataFederation.createDatasetWizard.timestampFieldFormatPlaceholder',
                     { defaultMessage: 'Select or enter a format' }
                   )}
-                  value={timestampField?.format ?? ''}
-                  onChange={(e) => onChangeTimestampField({ format: e.target.value })}
                   data-test-subj="createDatasetWizardTimestampFormat"
+                  aria-label={i18n.translate(
+                    'xpack.dataFederation.createDatasetWizard.timestampFieldFormatAriaLabel',
+                    { defaultMessage: 'Select or enter a format' }
+                  )}
                 />
               </EuiFormRow>
             </EuiFlexItem>

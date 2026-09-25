@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, within } from '@testing-library/react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { MappingEditor } from './mapping_editor';
@@ -29,28 +29,30 @@ const docLinksMock = {
 
 describe('MappingEditor', () => {
   it('does not clear the draft name when a reserved field name is submitted', () => {
-    const value: MappingEditorValue = { dynamic: true, fields: [] };
-    const onChange = jest.fn();
+    const Wrapper = () => {
+      const [value, setValue] = React.useState<MappingEditorValue>({ dynamic: true, fields: [] });
 
-    const { getByTestId, getByText } = render(
-      <EuiProvider>
-        <MappingEditor
-          value={value}
-          onChange={onChange}
-          docLinks={docLinksMock}
-          reservedFieldNames={['@timestamp']}
-        />
-      </EuiProvider>
-    );
+      return (
+        <EuiProvider>
+          <MappingEditor
+            value={value}
+            onChange={setValue}
+            docLinks={docLinksMock}
+            reservedFieldNames={['@timestamp']}
+          />
+        </EuiProvider>
+      );
+    };
+
+    const { getByTestId, getByText } = render(<Wrapper />);
+
+    fireEvent.click(getByTestId('dataFederationMappingEditorAddField'));
 
     fireEvent.change(getByTestId('dataFederationMappingEditorFieldName'), {
       target: { value: '@timestamp' },
     });
 
     fireEvent.click(getByTestId('dataFederationMappingEditorDraftAddField'));
-
-    // Should not have added a field to state.
-    expect(onChange).toHaveBeenCalledTimes(0);
 
     expect(getByText('This field name is reserved.')).toBeInTheDocument();
 
@@ -109,5 +111,40 @@ describe('MappingEditor', () => {
     fireEvent.click(getByTestId('dataFederationMappingEditorUpdateField'));
 
     expect(getByTestId('mappingEditorValueJson').textContent).toContain('"name":"bar"');
+  });
+
+  it('prompts to confirm before removing a field', () => {
+    const Wrapper = () => {
+      const [value, setValue] = React.useState<MappingEditorValue>({ dynamic: true, fields: [] });
+
+      return (
+        <EuiProvider>
+          <MappingEditor value={value} onChange={setValue} docLinks={docLinksMock} />
+        </EuiProvider>
+      );
+    };
+
+    const { getAllByTestId, getByTestId, getByText, queryByText } = render(<Wrapper />);
+
+    fireEvent.click(getByTestId('dataFederationMappingEditorAddField'));
+    fireEvent.change(getByTestId('dataFederationMappingEditorFieldName'), {
+      target: { value: 'foo' },
+    });
+    fireEvent.click(getByTestId('dataFederationMappingEditorDraftAddField'));
+
+    expect(getByText('foo')).toBeInTheDocument();
+
+    fireEvent.click(getAllByTestId('dataFederationMappingEditorRemoveField')[0]);
+    const modal = getByTestId('dataFederationMappingEditorConfirmRemoveFieldModal');
+    expect(modal).toBeInTheDocument();
+
+    fireEvent.click(within(modal).getByText('Cancel'));
+    expect(getByText('foo')).toBeInTheDocument();
+
+    fireEvent.click(getAllByTestId('dataFederationMappingEditorRemoveField')[0]);
+    const modal2 = getByTestId('dataFederationMappingEditorConfirmRemoveFieldModal');
+    fireEvent.click(within(modal2).getByText('Remove field'));
+
+    expect(queryByText('foo')).toBeNull();
   });
 });

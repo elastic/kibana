@@ -23,15 +23,39 @@ export const createDatasetWizardStrings = {
   datasetStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.datasetStepLabel', {
     defaultMessage: 'Define dataset',
   }),
+  datasetStepSubheader: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.datasetStepSubheader',
+    {
+      defaultMessage: 'Select the source and define which dataset you want added',
+    }
+  ),
   additionalStepLabel: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.advancedStepLabel',
     {
       defaultMessage: 'Additional settings',
     }
   ),
+  additionalStepSubheader: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.additionalStepSubheader',
+    {
+      defaultMessage: 'Settings you leave unchanged use the default for your file format.',
+    }
+  ),
   mappingStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappingStepLabel', {
     defaultMessage: 'Mapping',
   }),
+  mappingStepErrorsTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.mappingStepErrorsTitle',
+    {
+      defaultMessage: 'Fix the following errors',
+    }
+  ),
+  defineSchemaRequiresFieldError: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.defineSchemaRequiresField',
+    {
+      defaultMessage: 'When Define schema is selected, you must map at least one field.',
+    }
+  ),
   commonSettingsSectionTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.commonSettingsSectionTitle',
     {
@@ -178,6 +202,10 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Select a format',
     }
   ),
+
+  autoDetectedSuffix: i18n.translate('xpack.dataFederation.createDatasetForm.autoDetectedSuffix', {
+    defaultMessage: '(auto-detected)',
+  }),
 
   settingsFormatParquet: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsFormatParquet',
@@ -409,6 +437,13 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsPartitionDetectionAutoDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionAutoDescription',
+    {
+      defaultMessage: 'Detect partitions automatically from the resource path.',
+    }
+  ),
+
   settingsPartitionDetectionHive: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionHive',
     {
@@ -416,10 +451,38 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsPartitionDetectionHiveDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionHiveDescription',
+    {
+      defaultMessage: 'Use Hive-style partition directories (key=value).',
+    }
+  ),
+
+  settingsPartitionDetectionTemplate: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionTemplate',
+    {
+      defaultMessage: 'Template',
+    }
+  ),
+
+  settingsPartitionDetectionTemplateDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionTemplateDescription',
+    {
+      defaultMessage: 'Read partition values from path template.',
+    }
+  ),
+
   settingsPartitionDetectionNone: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionNone',
     {
       defaultMessage: 'None',
+    }
+  ),
+
+  settingsPartitionDetectionNoneDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionNoneDescription',
+    {
+      defaultMessage: 'Do not infer partitions from the path.',
     }
   ),
 
@@ -546,11 +609,35 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsDelimiterPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterPlaceholder',
+    {
+      defaultMessage: 'Select or enter a delimiter',
+    }
+  ),
+
   settingsDelimiterInvalid: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDelimiterInvalid',
     {
       defaultMessage: 'Must be a single character.',
     }
+  ),
+
+  settingsDelimiterOptionComma: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterOptionComma',
+    { defaultMessage: 'Comma (,)' }
+  ),
+  settingsDelimiterOptionTab: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterOptionTab',
+    { defaultMessage: 'Tab (\\t)' }
+  ),
+  settingsDelimiterOptionSemicolon: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterOptionSemicolon',
+    { defaultMessage: 'Semicolon (;)' }
+  ),
+  settingsDelimiterOptionPipe: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterOptionPipe',
+    { defaultMessage: 'Pipe (|)' }
   ),
 
   settingsModeLabel: i18n.translate('xpack.dataFederation.createDatasetForm.settingsModeLabel', {
@@ -652,14 +739,15 @@ export const createDatasetWizardStrings = {
   settingsEncodingHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEncodingHelp',
     {
-      defaultMessage: 'Character encoding of the file.',
+      defaultMessage:
+        'Character encoding of the file. If your encoding is not available, create a custom one.',
     }
   ),
 
   settingsEncodingPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEncodingPlaceholder',
     {
-      defaultMessage: 'Select encoding',
+      defaultMessage: 'Select or enter an encoding',
     }
   ),
 
@@ -787,6 +875,13 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsTrimSpacesPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsTrimSpacesPlaceholder',
+    {
+      defaultMessage: 'Default',
+    }
+  ),
+
   settingsTrimSpacesHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp',
     {
@@ -873,7 +968,10 @@ export const createDatasetWizardStrings = {
   ),
   settingsFileExclusionsDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.fileExclusions.description',
-    { defaultMessage: 'placeholder' }
+    {
+      defaultMessage:
+        'Patterns naming objects to drop from wildcard discovery. Default skips files starting with _ or . and _temporary/ and _delta_log/ directories. Setting replaces the default list entirely.',
+    }
   ),
   settingsPartitionDetectionDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.partitionDetection.description',
@@ -897,7 +995,10 @@ export const createDatasetWizardStrings = {
   ),
   settingsDelimiterDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.delimiter.description',
-    { defaultMessage: 'placeholder' }
+    {
+      defaultMessage:
+        'The character that separates fields. If your delimiter is not available, create a custom one.',
+    }
   ),
   settingsQuoteModeDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.quoteMode.description',

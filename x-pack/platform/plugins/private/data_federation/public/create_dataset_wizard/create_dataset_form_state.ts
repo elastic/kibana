@@ -13,7 +13,7 @@ import type { MappingEditorValue } from '../components/mapping_editor';
 export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
 export type DatasetModeFormValue = '' | 'quoted' | 'escaped' | 'plain';
-export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'none';
+export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'template' | 'none';
 export type DatasetSchemaResolutionFormValue = '' | 'first_file_wins' | 'strict' | 'union_by_name';
 export type DatasetBooleanFormValue = '' | 'true' | 'false';
 
@@ -25,7 +25,8 @@ export const DEFAULT_FILE_EXCLUSIONS = [
 ] as const;
 
 export const DEFAULT_ENCODING = 'UTF-8';
-export const DEFAULT_DATETIME_FORMAT = 'ISO-8601';
+export const DEFAULT_DATETIME_FORMAT = 'ISO8601';
+export const DEFAULT_DATETIME_FORMAT_LABEL = 'ISO-8601';
 export const DEFAULT_COLUMN_PREFIX = 'col';
 export const DEFAULT_CSV_QUOTE = '"';
 export const DEFAULT_CSV_ESCAPE = '\\';
@@ -66,12 +67,16 @@ export interface CreateDatasetFormValues {
   data_source: string;
   resource: string;
   settings: CreateDatasetSettingsFormValues;
+  /** UI-only state (never sent to the API). */
+  ui: {
+    formatWasAutoDetected: boolean;
+  };
   mappings: MappingEditorValue;
 }
 
 export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFormValues => ({
   format: '',
-  file_exclusions: [...DEFAULT_FILE_EXCLUSIONS],
+  file_exclusions: [],
   partition_detection: '',
   schema_resolution: '',
   partition_path: '',
@@ -84,10 +89,10 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   skip_rows: '',
   datetime_format: '',
   null_value: '',
-  encoding: DEFAULT_ENCODING,
+  encoding: '',
   quote: '',
   escape: '',
-  column_prefix: DEFAULT_COLUMN_PREFIX,
+  column_prefix: '',
   trim_spaces: false,
   error_mode: '',
   max_errors: '',
@@ -115,10 +120,6 @@ const parseBooleanFormValue = (value: DatasetBooleanFormValue): boolean | undefi
   if (value === 'false') return false;
   return undefined;
 };
-
-const fileExclusionsEqualDefault = (value: readonly string[]): boolean =>
-  value.length === DEFAULT_FILE_EXCLUSIONS.length &&
-  DEFAULT_FILE_EXCLUSIONS.every((pattern, index) => value[index] === pattern);
 
 export const validateMaxErrors = (value: string): true | string => {
   if (!value?.trim()) return true;
@@ -179,10 +180,7 @@ export const buildDatasetSettingsFromFormValues = (
   if (settings.format) applied.format = settings.format;
 
   // Universal — applies under every format
-  if (
-    settings.file_exclusions.length > 0 &&
-    !fileExclusionsEqualDefault(settings.file_exclusions)
-  ) {
+  if (settings.file_exclusions.length > 0) {
     applied.file_exclusions = settings.file_exclusions;
   }
   if (settings.partition_detection) applied.partition_detection = settings.partition_detection;

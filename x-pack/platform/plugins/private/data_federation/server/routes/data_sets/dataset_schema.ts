@@ -57,7 +57,12 @@ export const datasetSchema = schema.object({
         schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 256 })
       ),
       partition_detection: schema.maybe(
-        schema.oneOf([schema.literal('auto'), schema.literal('hive'), schema.literal('none')])
+        schema.oneOf([
+          schema.literal('auto'),
+          schema.literal('hive'),
+          schema.literal('template'),
+          schema.literal('none'),
+        ])
       ),
       schema_resolution: schema.maybe(
         schema.oneOf([

@@ -152,9 +152,9 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsFileExclusions')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
-    fireEvent.change(getByTestId('createDatasetSettingsPartitionDetection'), {
-      target: { value: 'hive' },
-    });
+    const partitionDetectionCombo = getByTestId('createDatasetSettingsPartitionDetection');
+    fireEvent.click(partitionDetectionCombo.querySelector('input') ?? partitionDetectionCombo);
+    fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-hive'));
 
     await clickBack(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
@@ -495,8 +495,10 @@ describe('CreateDatasetWizardPage', () => {
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
 
-    // Turn off timeseries so there are zero mappings.
-    fireEvent.click(getByTestId('createDatasetWizardTimeseriesToggle'));
+    // Keep timeseries enabled, but make it valid.
+    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+      target: { value: 'event_time' },
+    });
 
     // Select Define schema (dynamic = false).
     fireEvent.click(getByTestId('createDatasetWizardDefineSchemaCard'));

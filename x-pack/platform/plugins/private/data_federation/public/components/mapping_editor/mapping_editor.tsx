@@ -8,11 +8,14 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +27,7 @@ import { FieldMappingForm } from './field_mapping_form';
 import type { FieldMappingFormValue } from './field_mapping_form';
 import { FieldMappingDisplayMode } from './field_mapping_display_mode';
 import { emptyMappingEditorValue, getTypeInfoByValue } from './constants';
+import { DeleteConfirmModal } from './delete_confirm_modal';
 import { validateMappingEditorValue } from './validate_mapping_editor_value';
 
 export { validateMappingEditorValue };
@@ -99,20 +103,26 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   reservedFieldNames,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isDefineSchemaSelected = !value.dynamic;
+  const isInferSchemaSelected = value.dynamic;
   const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
   const nextId = useRef(0);
-  const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
-  const [creatingFieldIds, setCreatingFieldIds] = useState<readonly string[]>([]);
   const validation = useMemo(
     () => validateMappingEditorValue(value, { reservedFieldNames }),
     [reservedFieldNames, value]
   );
+  const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [validatedFieldIds, setValidatedFieldIds] = useState<readonly string[]>([]);
   const [fieldErrorsById, setFieldErrorsById] = useState<Record<string, FieldValidationErrors>>({});
   const [draftErrors, setDraftErrors] = useState<FieldValidationErrors>({});
   const [draftFormKey, setDraftFormKey] = useState(0);
+  const [isAddFieldFormOpen, setIsAddFieldFormOpen] = useState(false);
+  const [pendingRemoveField, setPendingRemoveField] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const emptyDraftInitialValue = useMemo(
-    () => ({ type: 'keyword', name: '', path: '', format: '' }),
+    () => ({ type: 'keyword' as const, name: '', path: '', format: '' }),
     []
   );
 
@@ -125,24 +135,59 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   // not immediately show "Fix mapping errors".
   const shouldShowValidationCallout = hasValidatedFieldErrors;
 
-  const addField = useCallback(() => {
-    const id = `mapping-field-${nextId.current++}`;
-    onChange((prev) => ({
-      ...prev,
-      fields: [
-        ...prev.fields,
-        {
-          id,
-          name: '',
-          path: '',
-          type: 'keyword',
-          format: '',
-        },
-      ],
-    }));
-    setEditingFieldId(id);
-    setCreatingFieldIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-  }, [onChange]);
+  const openAddFieldForm = useCallback(() => {
+    setIsAddFieldFormOpen(true);
+  }, []);
+
+  const closeAddFieldForm = useCallback(() => {
+    setIsAddFieldFormOpen(false);
+    setDraftErrors({});
+    setDraftFormKey((k) => k + 1);
+  }, []);
+
+  const addDraftField = useCallback(
+    (nextDraft: FieldMappingFormValue) => {
+      const tmpId = '__draft__';
+      const candidate: MappingEditorField = {
+        id: tmpId,
+        name: nextDraft.name,
+        path: nextDraft.path,
+        type: nextDraft.type as MappingEditorField['type'],
+        format: nextDraft.format,
+      };
+
+      const nextValue: MappingEditorValue = {
+        ...value,
+        fields: [...value.fields, candidate],
+      };
+      const nextValidation = validateMappingEditorValue(nextValue, { reservedFieldNames });
+      const errors = nextValidation.fieldErrorsById[tmpId];
+      if (errors) {
+        setDraftErrors(errors);
+        return;
+      }
+
+      const id = `mapping-field-${nextId.current++}`;
+      onChange((prev) => ({
+        ...prev,
+        fields: [
+          ...prev.fields,
+          {
+            ...candidate,
+            id,
+            name: candidate.name.trim(),
+            path: candidate.path.trim(),
+            format: candidate.format.trim(),
+          },
+        ],
+      }));
+
+      // Keep the form open so additional fields can be added.
+      setDraftErrors({});
+      setDraftFormKey((k) => k + 1);
+    },
+    [onChange, reservedFieldNames, value]
+  );
 
   const removeField = useCallback(
     (id: string) => {
@@ -152,7 +197,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
       }));
       setEditingFieldId((current) => (current === id ? null : current));
       setValidatedFieldIds((prev) => prev.filter((v) => v !== id));
-      setCreatingFieldIds((prev) => prev.filter((v) => v !== id));
       setFieldErrorsById((prev) => {
         const { [id]: _removed, ...rest } = prev;
         return rest;
@@ -195,51 +239,59 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     [reservedFieldNames, value]
   );
 
-  const addDraftField = useCallback(
-    (nextDraft: FieldMappingFormValue) => {
-      const tmpId = '__draft__';
-      const candidate: MappingEditorField = {
-        id: tmpId,
-        name: nextDraft.name,
-        path: nextDraft.path,
-        type: nextDraft.type as any,
-        format: nextDraft.format,
-      };
+  const requestRemoveField = useCallback((field: MappingEditorField) => {
+    setPendingRemoveField({ id: field.id, name: field.name.trim() });
+  }, []);
 
-      const nextValue: MappingEditorValue = {
-        ...value,
-        fields: [...value.fields, candidate],
-      };
-      const nextValidation = validateMappingEditorValue(nextValue, { reservedFieldNames });
-      const errors = nextValidation.fieldErrorsById[tmpId];
-      if (errors) {
-        setDraftErrors(errors);
-        return;
-      }
+  const cancelRemoveField = useCallback(() => {
+    setPendingRemoveField(null);
+  }, []);
 
-      const id = `mapping-field-${nextId.current++}`;
-      onChange((prev) => ({
-        ...prev,
-        fields: [
-          ...prev.fields,
-          {
-            ...candidate,
-            id,
-            name: candidate.name.trim(),
-            path: candidate.path.trim(),
-            format: candidate.format.trim(),
-          },
-        ],
-      }));
-
-      setDraftErrors({});
-      setDraftFormKey((k) => k + 1);
-    },
-    [onChange, reservedFieldNames, value]
-  );
+  const confirmRemoveField = useCallback(() => {
+    if (!pendingRemoveField) return;
+    removeField(pendingRemoveField.id);
+    setPendingRemoveField(null);
+  }, [pendingRemoveField, removeField]);
 
   return (
     <div data-test-subj="dataFederationMappingEditor">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h3>
+              {isInferSchemaSelected
+                ? i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsTitleOptional', {
+                    defaultMessage: 'Field mappings (optional)',
+                  })
+                : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsTitle', {
+                    defaultMessage: 'Field mappings',
+                  })}
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {isDefineSchemaSelected ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="danger">
+              {i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsRequiredBadge', {
+                defaultMessage: 'Required',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiText size="s" color="subdued">
+        {isInferSchemaSelected
+          ? i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheadingInfer', {
+              defaultMessage: "Schema will be inferred at query time for fields you don't map.",
+            })
+          : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheading', {
+              defaultMessage:
+                'Map at least one field, unmapped fields will not be inferred at query time, so nothing will be available to query until you add mappings.',
+            })}
+      </EuiText>
+      <EuiSpacer size="m" />
+
       {!validation.isValid && shouldShowValidationCallout ? (
         <>
           <KbnDangerCallout
@@ -266,30 +318,12 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         </>
       ) : null}
       <EuiSpacer size="s" />
-      {value.fields.length === 0 ? (
-        <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
-          <FieldMappingForm
-            key={draftFormKey}
-            value={emptyDraftInitialValue}
-            typeInfoByValue={typeInfoByValue as any}
-            errors={draftErrors}
-            onDraftChange={() => {
-              if (Object.keys(draftErrors).length === 0) return;
-              setDraftErrors({});
-            }}
-            mode="create"
-            onSubmit={addDraftField}
-          />
-        </EuiPanel>
-      ) : (
+      {value.fields.length > 0 ? (
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
             {value.fields.map((f) => {
-              const typeInfo = (
-                typeInfoByValue as Record<string, { label: string; docs: string } | undefined>
-              )[f.type];
+              const typeInfo = f.type ? typeInfoByValue[f.type] : undefined;
               const isEditing = editingFieldId === f.id;
-              const isCreating = creatingFieldIds.includes(f.id);
               const rowErrors = validatedFieldIds.includes(f.id)
                 ? fieldErrorsById[f.id]
                 : undefined;
@@ -308,16 +342,19 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                       borderRadius: 0,
                     }}
                   >
-                    <EuiFlexGroup gutterSize="m" alignItems={isEditing ? 'flexStart' : 'center'}>
+                    <EuiFlexGroup
+                      gutterSize="m"
+                      alignItems={isEditing ? 'flexStart' : 'center'}
+                      responsive={false}
+                      wrap
+                    >
                       {isEditing ? (
                         <FieldMappingForm
                           value={f}
-                          typeInfoByValue={typeInfoByValue as any}
+                          typeInfoByValue={typeInfoByValue}
                           errors={rowErrors}
-                          mode={isCreating ? 'create' : 'edit'}
-                          onCancel={
-                            isCreating ? () => removeField(f.id) : () => cancelEditingField(f.id)
-                          }
+                          mode="edit"
+                          onCancel={() => cancelEditingField(f.id)}
                           onDraftChange={(draftValue) => {
                             if (!validatedFieldIds.includes(f.id)) return;
                             const candidate = { ...f, ...draftValue } as MappingEditorField;
@@ -345,7 +382,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                               format: candidate.format.trim(),
                             });
                             setEditingFieldId(null);
-                            setCreatingFieldIds((prev) => prev.filter((v) => v !== f.id));
                             setFieldErrorsById((prev) => {
                               const { [f.id]: _removed, ...rest } = prev;
                               return rest;
@@ -357,7 +393,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                           field={f}
                           typeLabel={typeInfo?.label}
                           onEdit={() => startEditingField(f.id)}
-                          onRemove={() => removeField(f.id)}
+                          onRemove={() => requestRemoveField(f)}
                           areActionsDisabled={editingFieldId !== null}
                         />
                       )}
@@ -368,25 +404,56 @@ export const MappingEditor: FC<MappingEditorProps> = ({
             })}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          {editingFieldId === null ? (
-            <EuiFlexGroup justifyContent="flexStart" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  color="primary"
-                  fill
-                  onClick={addField}
-                  data-test-subj="dataFederationMappingEditorAddField"
-                >
-                  {i18n.translate('xpack.dataFederation.mappingEditor.addFieldButton', {
-                    defaultMessage: 'Add field',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
         </>
-      )}
+      ) : null}
+      {editingFieldId === null ? (
+        <EuiFlexGroup justifyContent="flexStart" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {!isAddFieldFormOpen ? (
+              <EuiButton
+                size="s"
+                color="primary"
+                fill
+                onClick={openAddFieldForm}
+                data-test-subj="dataFederationMappingEditorAddField"
+              >
+                {i18n.translate('xpack.dataFederation.mappingEditor.addFieldButton', {
+                  defaultMessage: 'Add field',
+                })}
+              </EuiButton>
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
+
+      {isAddFieldFormOpen && editingFieldId === null ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
+            <FieldMappingForm
+              key={draftFormKey}
+              value={emptyDraftInitialValue}
+              typeInfoByValue={typeInfoByValue}
+              errors={draftErrors}
+              onDraftChange={() => {
+                if (Object.keys(draftErrors).length === 0) return;
+                setDraftErrors({});
+              }}
+              mode="create"
+              onSubmit={addDraftField}
+              onCancel={closeAddFieldForm}
+            />
+          </EuiPanel>
+        </>
+      ) : null}
+
+      {pendingRemoveField ? (
+        <DeleteConfirmModal
+          fieldName={pendingRemoveField.name}
+          onCancel={cancelRemoveField}
+          onConfirm={confirmRemoveField}
+        />
+      ) : null}
     </div>
   );
 };

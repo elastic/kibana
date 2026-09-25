@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useFormContext, useWatch } from 'react-hook-form';
 
@@ -70,8 +70,9 @@ export function StepDataset({
       format !== lastAutoSelectedFormatRef.current
     ) {
       lastAutoSelectedFormatRef.current = null;
+      setValue('ui.formatWasAutoDetected', false);
     }
-  }, [format]);
+  }, [format, setValue]);
 
   useEffect(() => {
     const inferredFormat = inferFormatFromResource(resource);
@@ -83,6 +84,7 @@ export function StepDataset({
     if (!format || format === lastAutoSelectedFormatRef.current) {
       lastAutoSelectedFormatRef.current = inferredFormat;
       setValue('settings.format', inferredFormat, { shouldValidate: true });
+      setValue('ui.formatWasAutoDetected', true);
     }
   }, [format, resource, setValue]);
 
@@ -124,6 +126,10 @@ export function StepDataset({
       <EuiTitle size="m">
         <h2>{createDatasetWizardStrings.datasetStepLabel}</h2>
       </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size="s" color="subdued">
+        {createDatasetWizardStrings.datasetStepSubheader}
+      </EuiText>
       <EuiSpacer size="m" />
       <CreateDatasetDetailsFields
         control={control}

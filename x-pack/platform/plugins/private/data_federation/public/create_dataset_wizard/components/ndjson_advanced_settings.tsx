@@ -6,20 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { type CreateDatasetFormValues } from '../create_dataset_form_state';
+import { DatetimeFormatSelect } from './datetime_format_select';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 
 export function NdjsonAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: datetimeFormatField } = useController({
-    name: 'settings.datetime_format',
-    control,
-  });
-
   return (
     <div data-test-subj="createDatasetNdjsonAdvancedSettings">
       <EuiFormRow
@@ -32,14 +27,7 @@ export function NdjsonAdvancedSettings({ control }: { control: Control<CreateDat
         helpText={createDatasetWizardStrings.settingsDatetimeFormatHelp}
         fullWidth
       >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsDatetimeFormat"
-          fullWidth
-          value={datetimeFormatField.value}
-          onChange={(e) => datetimeFormatField.onChange(e.target.value)}
-          name={datetimeFormatField.name}
-          inputRef={datetimeFormatField.ref}
-        />
+        <DatetimeFormatSelect control={control} />
       </EuiFormRow>
     </div>
   );

@@ -6,42 +6,25 @@
  */
 
 import React from 'react';
-import {
-  EuiCode,
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCode, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
-  DEFAULT_DATETIME_FORMAT,
+  DEFAULT_DATETIME_FORMAT_LABEL,
   DEFAULT_ENCODING,
   validateDelimiter,
   validateSkipRows,
   type CreateDatasetFormValues,
-  type DatasetBooleanFormValue,
-  type DatasetModeFormValue,
+  type DatasetFormatFormValue,
 } from '../create_dataset_form_state';
+import { DatetimeFormatSelect } from './datetime_format_select';
+import { DelimiterSelect } from './delimiter_select';
 import { EncodingSelect } from './encoding_select';
+import { HeaderRow } from './header_row';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
-
-const MODE_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsModePlaceholder },
-  { value: 'quoted', text: createDatasetWizardStrings.settingsModeQuoted },
-  { value: 'escaped', text: createDatasetWizardStrings.settingsModeEscaped },
-  { value: 'plain', text: createDatasetWizardStrings.settingsModePlain },
-];
-
-const HEADER_ROW_OPTIONS = [
-  { value: '', text: createDatasetWizardStrings.settingsHeaderRowPlaceholder },
-  { value: 'true', text: createDatasetWizardStrings.trueLabel },
-  { value: 'false', text: createDatasetWizardStrings.falseLabel },
-];
+import { QuoteMode } from './quote_mode';
 
 const helpTextDefault = (valueLabel: string) => (
   <EuiText size="xs" color="subdued">
@@ -50,6 +33,7 @@ const helpTextDefault = (valueLabel: string) => (
 );
 
 export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
   const { field: delimiterField, fieldState: delimiterState } = useController({
     name: 'settings.delimiter',
     control,
@@ -62,10 +46,6 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
     control,
     rules: { validate: validateSkipRows },
   });
-  const { field: datetimeFormatField } = useController({
-    name: 'settings.datetime_format',
-    control,
-  });
   const { field: nullValueField } = useController({ name: 'settings.null_value', control });
 
   return (
@@ -77,20 +57,15 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDelimiterDescription}
           />
         }
-        helpText={createDatasetWizardStrings.settingsDelimiterHelp}
+        helpText={helpTextDefault(format === 'tsv' ? '\\t' : ',')}
         fullWidth
         isInvalid={Boolean(delimiterState.error)}
         error={delimiterState.error?.message}
       >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsDelimiter"
-          fullWidth
-          maxLength={1}
-          isInvalid={Boolean(delimiterState.error)}
+        <DelimiterSelect
           value={delimiterField.value}
-          onChange={(e) => delimiterField.onChange(e.target.value)}
-          name={delimiterField.name}
-          inputRef={delimiterField.ref}
+          onChange={(next) => delimiterField.onChange(next)}
+          onBlur={delimiterField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -102,15 +77,10 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         }
         fullWidth
       >
-        <EuiSelect
-          options={MODE_OPTIONS}
-          data-test-subj="createDatasetSettingsMode"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsModeLabel}
+        <QuoteMode
           value={modeField.value}
-          onChange={(e) => modeField.onChange(e.target.value as DatasetModeFormValue)}
-          name={modeField.name}
-          inputRef={modeField.ref}
+          onChange={(next) => modeField.onChange(next)}
+          onBlur={modeField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -122,15 +92,10 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         }
         fullWidth
       >
-        <EuiSelect
-          options={HEADER_ROW_OPTIONS}
-          data-test-subj="createDatasetSettingsHeaderRow"
-          fullWidth
-          aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
+        <HeaderRow
           value={headerRowField.value}
-          onChange={(e) => headerRowField.onChange(e.target.value as DatasetBooleanFormValue)}
-          name={headerRowField.name}
-          inputRef={headerRowField.ref}
+          onChange={(next) => headerRowField.onChange(next)}
+          onBlur={headerRowField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -165,18 +130,10 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDatetimeFormatDescription}
           />
         }
-        helpText={helpTextDefault(DEFAULT_DATETIME_FORMAT)}
+        helpText={helpTextDefault(DEFAULT_DATETIME_FORMAT_LABEL)}
         fullWidth
       >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsDatetimeFormat"
-          fullWidth
-          placeholder={createDatasetWizardStrings.settingsDatetimeFormatPlaceholder}
-          value={datetimeFormatField.value}
-          onChange={(e) => datetimeFormatField.onChange(e.target.value)}
-          name={datetimeFormatField.name}
-          inputRef={datetimeFormatField.ref}
-        />
+        <DatetimeFormatSelect control={control} />
       </EuiFormRow>
       <EuiFormRow
         label={
@@ -201,7 +158,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         label={
           <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsEncodingLabel}
-            infoText={createDatasetWizardStrings.settingsEncodingDescription}
+            infoText={createDatasetWizardStrings.settingsEncodingHelp}
           />
         }
         helpText={helpTextDefault(DEFAULT_ENCODING)}

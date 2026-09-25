@@ -14,6 +14,7 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
 import { emptyDatasetFormValues } from './dataset_form_initial_values';
 import { StepDataset } from './step_dataset';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
 jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
   Forms: {
@@ -77,7 +78,7 @@ const renderStep = () => {
 
 describe('StepDataset', () => {
   it('auto-selects format based on file extension in resource', async () => {
-    const { getMethods, getFormat } = renderStep();
+    const { getMethods, getFormat, getByTestId } = renderStep();
 
     expect(getFormat()).toBe('');
 
@@ -86,6 +87,11 @@ describe('StepDataset', () => {
     });
 
     await waitFor(() => expect(getFormat()).toBe('parquet'));
+    await waitFor(() =>
+      expect(getByTestId('createDatasetSettingsFormat')).toHaveTextContent(
+        createDatasetWizardStrings.autoDetectedSuffix
+      )
+    );
   });
 
   it('keeps auto-selected format in sync while user has not manually overridden it', async () => {

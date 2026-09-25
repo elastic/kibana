@@ -15,9 +15,6 @@ import type { MappingEditorValue } from '../components/mapping_editor';
 import { emptyMappingEditorValue } from '../components/mapping_editor';
 import {
   emptyCreateDatasetSettingsFormValues,
-  DEFAULT_COLUMN_PREFIX,
-  DEFAULT_ENCODING,
-  DEFAULT_FILE_EXCLUSIONS,
   type CreateDatasetFormValues,
   type CreateDatasetSettingsFormValues,
   type DatasetBooleanFormValue,
@@ -54,6 +51,9 @@ export const emptyDatasetFormValues = (): CreateDatasetFormValues => ({
   data_source: '',
   resource: '',
   settings: emptyCreateDatasetSettingsFormValues(),
+  ui: {
+    formatWasAutoDetected: false,
+  },
   mappings: {
     ...emptyMappingEditorValue,
     fields: [
@@ -94,7 +94,7 @@ const settingsToFormValues = (
     ...defaults,
     format: (s.format ?? '') as DatasetFormatFormValue,
     // Universal
-    file_exclusions: s.file_exclusions ? [...s.file_exclusions] : [...DEFAULT_FILE_EXCLUSIONS],
+    file_exclusions: s.file_exclusions ? [...s.file_exclusions] : [...defaults.file_exclusions],
     partition_detection: (s.partition_detection ?? '') as DatasetPartitionDetectionFormValue,
     schema_resolution: (s.schema_resolution ?? '') as DatasetSchemaResolutionFormValue,
     partition_path: s.partition_path ?? '',
@@ -106,10 +106,10 @@ const settingsToFormValues = (
     mode: (s.mode ?? '') as DatasetModeFormValue,
     header_row: boolToFormValue(s.header_row),
     skip_rows: s.skip_rows !== undefined ? String(s.skip_rows) : '',
-    datetime_format: s.datetime_format ?? '',
+    datetime_format: s.datetime_format === 'ISO-8601' ? 'ISO8601' : s.datetime_format ?? '',
     null_value: s.null_value ?? '',
-    encoding: s.encoding ?? DEFAULT_ENCODING,
-    column_prefix: s.column_prefix ?? DEFAULT_COLUMN_PREFIX,
+    encoding: s.encoding ?? defaults.encoding,
+    column_prefix: s.column_prefix ?? defaults.column_prefix,
     quote: s.quote ?? '',
     escape: s.escape ?? '',
     trim_spaces: s.trim_spaces ?? false,
@@ -127,5 +127,8 @@ export const dataSetToFormValues = (data: DataSetWithName): CreateDatasetFormVal
   data_source: data.data_source,
   resource: data.resource,
   settings: settingsToFormValues(data.settings),
+  ui: {
+    formatWasAutoDetected: false,
+  },
   mappings: mappingsToEditorValue(data.mappings),
 });
