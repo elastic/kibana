@@ -169,7 +169,14 @@ export function ManagedIntegrationsSection({
   }, [initialConnectorId, isStaticKeysEditMode]);
 
   const handleIdentityFedReadyChange = useCallback((ready: boolean) => {
-    if (connectorPreloaded.current && !ready) return;
+    if (connectorPreloaded.current && !ready) {
+      // Suppress the loading flash (form calls false on mount while re-validating a known-good
+      // connector). Clear the flag so a second false — meaning the connector is actually invalid —
+      // still reaches setIsDeployReady and disables the button.
+      connectorPreloaded.current = false;
+      setIsConnectorPreloaded(false);
+      return;
+    }
     setIsDeployReady(ready);
   }, []);
 

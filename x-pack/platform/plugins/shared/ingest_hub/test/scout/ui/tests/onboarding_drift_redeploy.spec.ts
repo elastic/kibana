@@ -199,8 +199,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
 
     await deployButton.click();
 
-    // Dirty redeploy must PUT the MI policy with updated vars.
-    await miPutPromise;
+    // Dirty redeploy must PUT the MI policy — body must carry the changed bucket_arn value.
+    const miPutRequest = await miPutPromise;
+    expect(miPutRequest.postData()).toContain('new-drift-bucket');
     // After dirty redeploy, SO must be written with the new serviceVars.
     await soPutPromise;
 
@@ -283,6 +284,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           body: JSON.stringify({
             item: makeSoItem(DEP_ID, {
               policyIdsByInstance: { elb: 'mock-mi-elb-policy', ec2: 'mock-ec2-policy' },
+              // EC2 has SO serviceVars so the drift loop actually visits it — exercises the
+              // `if (!typedSession[instanceId]) continue` guard that skips removed instances.
+              serviceVars: { ec2: { enabledDataStreams: ['ec2_logs'] } },
             }),
           }),
         })

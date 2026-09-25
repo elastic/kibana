@@ -86,10 +86,25 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Stores the SO-derived dirty result so the replace-form cancel handler can merge it without
   // re-fetching. Starts false; updated once the SO fetch resolves.
   const driftDirtyRef = useRef(false);
+  // Sequence counter used to discard responses from stale drift fetches (e.g. connector changed
+  // while a prior fetch was in flight). Only the response whose id matches the current counter
+  // updates state.
+  const driftCheckIdRef = useRef(0);
+  // False until the drift check resolves — gates isMiDone and isAgentDone so that Next is never
+  // enabled based on a stale "no drift" assumption while a fetch is in flight.
+  // Initialised to true when there is no deployment to check (fresh deploy / no edit mode) so
+  // that isMiDone is not blocked for users who have never deployed before.
+  const [driftSettled, setDriftSettled] = useState(!onboardingDeploymentId);
   useEffect(() => {
+    const thisId = ++driftCheckIdRef.current;
+    // Nothing to fetch — leave driftSettled unchanged (already true for fresh deploys; remains
+    // false for edit mode while awsServicesMap is still loading, allowing it to settle once the
+    // effect re-runs with a loaded map).
     if (!onboardingDeploymentId || awsServicesMap === undefined) return;
+    setDriftSettled(false);
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
       .then(({ item }) => {
+        if (thisId !== driftCheckIdRef.current) return; // stale response — discard
         if (!item) return;
         // policyIdsByInstance is captured from the closure: it is hydrated at mount from the SO
         // (same as serviceVars) and does not change during the component's lifetime at Step 3.
@@ -114,7 +129,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           updateDetectAndReviewStep({ isDirty: dirty });
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (thisId === driftCheckIdRef.current) setDriftSettled(true);
+      });
     // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
     // service-var and region changes come from Step 2 navigation (full remount), not same-step
     // edits. Only auth mutations (connector swap, authMethod change) happen in this component's
@@ -164,9 +182,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Not done when isDirty: force the Deploy button visible so the user can apply updated settings.
   // isDirty is checked in both branches: a failed dirty redeploy leaves isDirty true, so a
   // deploy attempt with zero failedInstances must not enable Next while drift is unresolved.
+  // driftSettled gates both: Next must not enable while the SO fetch is in flight, because the
+  // response could flip isDirty=true and make isMiDone false again.
   const isMiDone =
-    (isAlreadyDeployed && !isDirty) ||
-    (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty);
+    driftSettled &&
+    ((isAlreadyDeployed && !isDirty) ||
+      (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty));
   // hasFailed is NOT gated on deployAttempted: if the hook is seeded with persisted failures on
   // remount (after navigating Back/Next), the callout and Retry must still appear even though no
   // deploy was attempted in this component lifetime.
@@ -209,10 +230,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const [isAgentNextReady, setIsAgentNextReady] = useState(false);
   // isDirty is checked in both branches so that Next doesn't short-circuit when drift has been
   // detected on an already-deployed agent setup — the dirty-redeploy path in useAgentBasedDeploy
-  // must run before navigation is allowed.
+  // must run before navigation is allowed. driftSettled gates both for the same reason as isMiDone.
   const isAgentDone =
-    (isAgentAlreadyDeployed && !isDirty) ||
-    (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0 && !isDirty);
+    driftSettled &&
+    ((isAgentAlreadyDeployed && !isDirty) ||
+      (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0 && !isDirty));
   // Unlike MI's hasFailed, this IS gated on agentDeployAttempted. failedInstances is a single
   // shared session key that the MI path also writes, so an un-gated check would surface a stale
   // MI failure (or one from a previous session) as an agent-based "Deployment failed" callout.

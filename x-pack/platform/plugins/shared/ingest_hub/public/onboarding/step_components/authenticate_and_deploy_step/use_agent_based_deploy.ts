@@ -219,8 +219,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           }
           if (byPolicy.size > 0) {
             const redeployResults = await Promise.allSettled(
-              [...byPolicy.entries()].map(([policyId, instanceIds]) =>
-                updateAgentBasedPolicy(policyId, instanceIds, {
+              [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
+                updateAgentBasedPolicy(policyId, instanceIdsForPolicy, {
                   instances: serviceSettings?.instances ?? [],
                   storedServiceVars,
                   globalRegion,
