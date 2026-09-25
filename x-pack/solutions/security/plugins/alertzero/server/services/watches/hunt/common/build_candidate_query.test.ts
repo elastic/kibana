@@ -49,6 +49,15 @@ describe('buildCandidateQuery', () => {
     ).rejects.toThrow('index_not_found_exception');
   });
 
+  it('does not ignore a missing reports index, so an outage cannot read as an empty pool', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue(searchResponseOf([]));
+
+    await buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'default' });
+
+    expect(searchBodyOf(esClient).ignore_unavailable).toBe(false);
+  });
+
   it('returns ids for scheduled trigger (hunt-once gate)', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue(searchResponseOf(['rpt-1', 'rpt-2']));

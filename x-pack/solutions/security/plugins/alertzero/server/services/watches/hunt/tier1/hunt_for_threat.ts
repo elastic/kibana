@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AffectedAsset, HuntForThreatResult, HuntIoc } from '@kbn/alertzero-common';
+import { assertHuntWindow } from '../common/assert_hunt_window';
 import { buildMatchesRequired } from '../common/matches_required';
 import { summarizeHit } from '../common/summarize_hit';
 import {
@@ -15,6 +16,7 @@ import {
   HASH_ALGO_BY_LENGTH,
   hashFieldsForAlgo,
   IOC_FIELDS_BY_TYPE,
+  normalizeIocValue,
   type HitDocument,
 } from './attribute_hits';
 import type { HuntForThreatParams, HuntForThreatServiceResult } from './types';
@@ -35,7 +37,11 @@ const buildIocShould = (iocs: HuntIoc[]): Array<Record<string, unknown>> => {
   for (const { type, value } of iocs) {
     if (type === 'hash') {
       const algo = HASH_ALGO_BY_LENGTH[value.length];
-      if (algo) clauses.push(...hashFieldsForAlgo(algo).map((field) => termClause(field, value)));
+      // A `term` query is case-sensitive and integrations index digests
+      // lowercase, so an uppercase digest from a report has to be folded to
+      // match the same file. `matchIoc` folds the same way.
+      const digest = normalizeIocValue(type, value);
+      if (algo) clauses.push(...hashFieldsForAlgo(algo).map((field) => termClause(field, digest)));
       continue;
     }
     for (const field of IOC_FIELDS_BY_TYPE[type] ?? []) {
@@ -64,6 +70,46 @@ const buildTechniqueShould = (techniques: string[]): Array<Record<string, unknow
  * real hit as clean.
  */
 const PER_INDEX_MAX_BUCKETS = 500;
+
+/**
+ * Fields the wire hit, the entity chips and the Tier 2 digest read, independent
+ * of what was searched.
+ */
+const DISPLAY_SOURCE_FIELDS = [
+  '@timestamp',
+  'event.dataset',
+  'event.module',
+  'event.action',
+  'event.provider',
+  'host.name',
+  'host.os.family',
+  'user.name',
+  'source.ip',
+  'destination.ip',
+  'url.full',
+  'kibana.alert.rule.name',
+  // Alerts store this as a dotted top-level key whose value is the threat
+  // array (`[{ tactic, technique: [{ id, subtechnique: [{ id }] }] }]`), so
+  // the filter names the key as stored, not a path inside it.
+  'kibana.alert.rule.threat',
+] as const;
+
+/**
+ * The display fields plus every ECS field the searched IOC types can match on.
+ * `attributeHits` re-derives `matched.ioc` by comparing `_source` against those
+ * same fields, so a field that is searched but not projected yields a confirmed
+ * hit that cannot say which IOC confirmed it — `related.ip`, `user.email`,
+ * `dns.question.name`, `url.original` and the hash fields were all in that gap.
+ * Scoped to the types actually present so an IP-only hunt does not pay for hash
+ * fields.
+ */
+const sourceFieldsFor = (iocs: HuntIoc[]): string[] => {
+  const fields = new Set<string>(DISPLAY_SOURCE_FIELDS);
+  for (const { type } of iocs) {
+    for (const field of IOC_FIELDS_BY_TYPE[type] ?? []) fields.add(field);
+  }
+  return [...fields];
+};
 
 export const emptyHuntForThreatResult = (
   status: HuntForThreatResult['status'],
@@ -180,6 +226,8 @@ export const huntForThreat = async (
   const to = time_range?.to ?? scope.window.to;
   const rowLimit = size ?? scope.row_limit;
 
+  assertHuntWindow({ from, to });
+
   const iocShould = buildIocShould(iocs);
   const techniqueShould = buildTechniqueShould(techniques);
   const should = [...iocShould, ...techniqueShould];
@@ -207,6 +255,16 @@ export const huntForThreat = async (
   // from (e.g. `logs-aws.*`). Shared with Tier 2 so both hit bars agree.
   const matchesRequired = buildMatchesRequired(scope.required);
 
+  const huntQuery = {
+    bool: {
+      // `to` is exclusive per `IndexScopeWindow`, so an event on the boundary
+      // belongs to the next window only and is never confirmed by both.
+      filter: [{ range: { '@timestamp': { gte: from, lt: to } } }],
+      should,
+      minimum_should_match: 1,
+    },
+  };
+
   const response = await esClient.search({
     index: searchIndices,
     ignore_unavailable: true,
@@ -214,33 +272,8 @@ export const huntForThreat = async (
     size: rowLimit,
     track_total_hits: true,
     sort: [{ '@timestamp': { order: 'desc' } }],
-    _source: [
-      '@timestamp',
-      'event.dataset',
-      'event.module',
-      'event.action',
-      'event.provider',
-      'host.name',
-      'host.os.family',
-      'user.name',
-      'source.ip',
-      'destination.ip',
-      'url.full',
-      'kibana.alert.rule.name',
-      // Alerts store this as a dotted top-level key whose value is the threat
-      // array (`[{ tactic, technique: [{ id, subtechnique: [{ id }] }] }]`), so
-      // the filter names the key as stored, not a path inside it.
-      'kibana.alert.rule.threat',
-    ],
-    query: {
-      bool: {
-        // `to` is exclusive per `IndexScopeWindow`, so an event on the boundary
-        // belongs to the next window only and is never confirmed by both.
-        filter: [{ range: { '@timestamp': { gte: from, lt: to } } }],
-        should,
-        minimum_should_match: 1,
-      },
-    },
+    _source: sourceFieldsFor(iocs),
+    query: huntQuery,
     aggs: {
       per_index: {
         terms: { field: '_index', size: PER_INDEX_MAX_BUCKETS },
@@ -304,7 +337,25 @@ export const huntForThreat = async (
     required: matchesRequired(b.key),
   }));
 
-  const hasConfirmedHit = perIndex.some((bucket) => bucket.required && bucket.hit_count > 0);
+  // The hit bar cannot be read off `per_index`: those buckets are ordered by doc
+  // count and capped, so a required index holding a single real match can be
+  // absent from the response while optional indices fill the cap, and the hunt
+  // would call that clean. Count the required patterns on their own instead, and
+  // let Elasticsearch resolve them exactly as the main search does rather than
+  // re-implementing pattern matching over `_index` here. `per_index` stays as
+  // display context.
+  // An empty `required` would count across every index rather than none, so the
+  // bar is unreachable by definition instead.
+  const requiredMatches =
+    scope.required.length === 0
+      ? { count: 0 }
+      : await esClient.count({
+          index: scope.required,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          query: huntQuery,
+        });
+  const hasConfirmedHit = requiredMatches.count > 0;
 
   return {
     status: total === 0 ? 'no_environment_hits' : 'environment_hits_found',

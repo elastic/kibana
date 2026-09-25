@@ -13,7 +13,17 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
-const resolveConnectorId = async ({
+/**
+ * Every deployment-default connector worth trying, in preference order: the
+ * operator's `genAi:defaultAIConnector`, then the inference default.
+ *
+ * Both are collected rather than just the first that resolves. The setting can
+ * name a connector that has since been deleted or had its credentials revoked,
+ * and returning only that id meant a stale setting took Tier 2 down even where
+ * another usable default existed — the caller could not tell "this id is the
+ * answer" from "this id is the first guess".
+ */
+const resolveFallbackConnectors = async ({
   uiSettingsClient,
   inference,
   request,
@@ -21,24 +31,29 @@ const resolveConnectorId = async ({
   uiSettingsClient: IUiSettingsClient;
   inference: InferenceServerStart;
   request: KibanaRequest;
-}): Promise<string | undefined> => {
+}): Promise<Array<{ connectorId: string; label: string }>> => {
+  const candidates: Array<{ connectorId: string; label: string }> = [];
+
   try {
     const defaultSetting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
     if (defaultSetting && defaultSetting !== NO_DEFAULT_CONNECTOR) {
-      return defaultSetting;
+      candidates.push({ connectorId: defaultSetting, label: 'genAi-default' });
     }
   } catch {
-    // UI setting may not be registered; fall through to the inference default.
+    // UI setting may not be registered; the inference default still applies.
   }
 
   try {
     const connector = await inference.getDefaultConnector(request);
-    return connector?.connectorId;
+    const connectorId = connector?.connectorId;
+    if (connectorId && !candidates.some((candidate) => candidate.connectorId === connectorId)) {
+      candidates.push({ connectorId, label: 'inference-default' });
+    }
   } catch {
     // No connectors available.
   }
 
-  return undefined;
+  return candidates;
 };
 
 const buildScopedModel = async ({
@@ -159,9 +174,9 @@ export const resolveScopedModel = async ({
     }
   }
 
-  const fallbackId = await resolveConnectorId({ inference, request, uiSettingsClient });
-  if (fallbackId) {
-    const model = await tryBuildScoped(inference, request, fallbackId, 'genAi-default', logger);
+  const fallbacks = await resolveFallbackConnectors({ inference, request, uiSettingsClient });
+  for (const { connectorId, label } of fallbacks) {
+    const model = await tryBuildScoped(inference, request, connectorId, label, logger);
     if (model) return { ok: true, model };
   }
 

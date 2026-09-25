@@ -124,4 +124,64 @@ describe('resolveScopedModel', () => {
     expect(result.ok).toBe(true);
     expect(mockInference.getConnectorById).toHaveBeenCalledWith('fallback-connector', mockRequest);
   });
+
+  describe('a stale genAi:defaultAIConnector setting', () => {
+    beforeEach(() => {
+      // The setting names a connector that has since been deleted, while the
+      // deployment still has a usable inference default.
+      mockUiSettingsClient.get.mockResolvedValue('deleted-connector');
+      mockInference.getDefaultConnector.mockResolvedValue({ connectorId: 'live-connector' });
+      mockInference.getChatModel.mockImplementation(async ({ connectorId }) =>
+        connectorId === 'deleted-connector'
+          ? Promise.reject(new Error('connector not found'))
+          : mockChatModel
+      );
+    });
+
+    it('falls through to the inference default instead of losing Tier 2', async () => {
+      const result = await resolveScopedModel({
+        inference: mockInference as never,
+        featureId,
+        request: mockRequest,
+        uiSettingsClient: mockUiSettingsClient as never,
+        logger,
+      });
+
+      expect(result.ok).toBe(true);
+      expect(mockInference.getConnectorById).toHaveBeenCalledWith('live-connector', mockRequest);
+    });
+
+    it('still prefers the setting when it does build', async () => {
+      mockInference.getChatModel.mockResolvedValue(mockChatModel);
+
+      const result = await resolveScopedModel({
+        inference: mockInference as never,
+        featureId,
+        request: mockRequest,
+        uiSettingsClient: mockUiSettingsClient as never,
+        logger,
+      });
+
+      expect(result.ok).toBe(true);
+      expect(mockInference.getConnectorById).toHaveBeenCalledWith('deleted-connector', mockRequest);
+      expect(mockInference.getConnectorById).not.toHaveBeenCalledWith(
+        'live-connector',
+        mockRequest
+      );
+    });
+
+    it('reports no_connector only when neither candidate builds', async () => {
+      mockInference.getChatModel.mockRejectedValue(new Error('connector not found'));
+
+      const result = await resolveScopedModel({
+        inference: mockInference as never,
+        featureId,
+        request: mockRequest,
+        uiSettingsClient: mockUiSettingsClient as never,
+        logger,
+      });
+
+      expect(result).toEqual({ ok: false, reason: 'no_connector', message: expect.any(String) });
+    });
+  });
 });

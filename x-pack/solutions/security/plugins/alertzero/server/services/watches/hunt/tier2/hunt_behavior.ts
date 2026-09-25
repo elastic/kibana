@@ -647,6 +647,24 @@ export const huntBehavior = async (
     for (const behavior of validated) {
       const esql = groundedEsql.get(behavior.technique_id);
       if (!esql) continue;
+      // Publication clears a source gate of its own. A staged rule reads as
+      // grounded and authoritative to whoever picks it up in Investigation, so a
+      // query reaching outside the indices a hunt may read must not be handed on
+      // as one — it keeps the non-executable placeholder instead. The allowlist is
+      // the one generation was steered by: the required scope when there is one,
+      // every known technology pattern otherwise, since a caller that passed no
+      // scope still never asked for `.kibana-*` or `*`.
+      const sourcesAllowed = assertEsqlSourcesAllowed(
+        prepareEsqlForExecute(esql),
+        requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns()
+      );
+      if (!sourcesAllowed.ok) {
+        logger.warn(
+          `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +
+            `${sourcesAllowed.reason}. Keeping the non-executable placeholder.`
+        );
+        continue;
+      }
       behavior.proposed_esql_rule = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
       if (!canExecute) continue;
       const executed = await executeValidatedEsql({

@@ -15,6 +15,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { randomUUID } from 'crypto';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
 import { resolveScopedModel } from './lib/scoped_model';
@@ -131,6 +132,9 @@ export const registerHuntCoordinatorRoute = ({
 
           return response.ok({ body });
         } catch (err) {
+          if (err instanceof InvalidHuntWindowError) {
+            return response.badRequest({ body: { message: err.message } });
+          }
           logger.error(`hunt_coordinator route failed: ${(err as Error).message}`);
           return response.customError({
             statusCode: 500,

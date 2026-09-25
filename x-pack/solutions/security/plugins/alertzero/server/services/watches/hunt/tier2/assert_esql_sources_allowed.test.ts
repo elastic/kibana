@@ -64,4 +64,45 @@ describe('assertEsqlSourcesAllowed', () => {
       reason: 'query must start with a valid FROM',
     });
   });
+
+  describe('commands other than FROM that read an index', () => {
+    it('returns not ok for a LOOKUP JOIN outside the allowlist, despite an allowed FROM', () => {
+      expect(
+        assertEsqlSourcesAllowed(
+          'FROM logs-aws.* | LOOKUP JOIN .kibana-secrets ON host.name | LIMIT 1',
+          allowed
+        )
+      ).toEqual({
+        ok: false,
+        reason: expect.stringContaining('.kibana-secrets'),
+      });
+    });
+
+    it('returns not ok for an ENRICH policy, which resolves to an index this hunt never allowed', () => {
+      expect(
+        assertEsqlSourcesAllowed('FROM logs-aws.* | ENRICH some_policy ON host.name', allowed)
+      ).toEqual({
+        ok: false,
+        reason: expect.stringContaining('some_policy'),
+      });
+    });
+
+    it('names the command that reached out of scope, not just the source', () => {
+      const result = assertEsqlSourcesAllowed(
+        'FROM logs-aws.* | LOOKUP JOIN evil ON host.name',
+        allowed
+      );
+
+      expect(result).toEqual({ ok: false, reason: expect.stringContaining('JOIN source "evil"') });
+    });
+
+    it('returns ok for a LOOKUP JOIN that stays inside the allowlist', () => {
+      expect(
+        assertEsqlSourcesAllowed(
+          'FROM logs-aws.* | LOOKUP JOIN logs-aws.inventory ON host.name | LIMIT 1',
+          allowed
+        )
+      ).toEqual({ ok: true });
+    });
+  });
 });

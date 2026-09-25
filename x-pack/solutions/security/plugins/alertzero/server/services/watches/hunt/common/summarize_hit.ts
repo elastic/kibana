@@ -35,6 +35,24 @@ const readField = (src: Record<string, unknown>, path: string): string | undefin
 const MAX_SUMMARY_CHARS = 2048;
 
 /**
+ * The `_source` fields `summarizeHit` reads, in the order the digest emits them.
+ * Exported so a search that wants nothing but digests can project exactly these:
+ * at up to 50 samples a report, a whole `_source` on log documents is transferred
+ * and then almost entirely discarded. Keep in step with the reads below.
+ */
+export const SUMMARIZE_HIT_SOURCE_FIELDS = [
+  'kibana.alert.rule.name',
+  'event.dataset',
+  'data_stream.dataset',
+  'event.action',
+  'event.provider',
+  'host.name',
+  'user.name',
+  'source.ip',
+  'destination.ip',
+] as const;
+
+/**
  * One-line digest of a document for Tier 2 LLM grounding (`sample_events`).
  * Built from `_source` before Tier 1 slims wire hits to id/index/timestamp/matched.
  */

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { huntCoordinator } from './hunt_coordinator';
+import { SUMMARIZE_HIT_SOURCE_FIELDS } from './common/summarize_hit';
 
 jest.mock('./common/resolve_index_scope', () => ({
   resolveHuntScope: jest.fn().mockResolvedValue({
@@ -507,6 +508,63 @@ describe('huntCoordinator', () => {
     expect(result.has_confirmed_hit).toBe(true);
   });
 
+  describe('merging caller inputs with the report', () => {
+    const { loadReportHuntContext: mockLoadReport } = jest.requireMock(
+      './common/load_report_context'
+    );
+
+    beforeEach(() => {
+      mockLoadReport.mockResolvedValue({
+        iocs: [{ type: 'ip', value: '203.0.113.7' }],
+        techniques: ['T1078.004'],
+        text: 'report body',
+      });
+    });
+
+    it('falls back to the report when an array is omitted', async () => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-omitted',
+        report_id: 'rpt-1',
+      });
+
+      expect(mockT1).toHaveBeenCalledWith(
+        esClient,
+        expect.objectContaining({
+          iocs: [{ type: 'ip', value: '203.0.113.7' }],
+          techniques: ['T1078.004'],
+        })
+      );
+    });
+
+    it.each([
+      ['iocs', { iocs: [] }, { iocs: [], techniques: ['T1078.004'] }],
+      [
+        'techniques',
+        { techniques: [] },
+        { iocs: [{ type: 'ip', value: '203.0.113.7' }], techniques: [] },
+      ],
+    ])(
+      'lets an explicitly empty %s override the report rather than silently restoring it',
+      async (_label, override, expected) => {
+        const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+
+        await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+          spaceId: 'default',
+          trigger: 'manual',
+          run_id: 'run-empty',
+          report_id: 'rpt-1',
+          ...override,
+        });
+
+        expect(mockT1).toHaveBeenCalledWith(esClient, expect.objectContaining(expected));
+      }
+    );
+  });
+
   it('surfaces a budget-truncated Tier 2 without failing the run', async () => {
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT2.mockResolvedValueOnce({
@@ -587,6 +645,9 @@ describe('huntCoordinator', () => {
     );
 
     expect(search).toHaveBeenCalled();
+    // These documents only ever become one-line digests, so a full `_source` would
+    // move whole log events across the wire to be thrown away.
+    expect(search.mock.calls[0][0]._source).toEqual([...SUMMARIZE_HIT_SOURCE_FIELDS]);
     expect(mockT2).toHaveBeenCalledWith(
       mockModel,
       logger,

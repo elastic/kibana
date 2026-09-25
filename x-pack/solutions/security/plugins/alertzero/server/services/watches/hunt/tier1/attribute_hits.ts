@@ -48,6 +48,17 @@ export const IOC_FIELDS_BY_TYPE: Record<string, string[]> = {
   hash: Object.values(HASH_ALGO_BY_LENGTH).flatMap(hashFieldsForAlgo),
 };
 
+/**
+ * Canonical form of an IOC value for comparison. Hex digests are
+ * case-insensitive as identifiers but ECS hash fields are `keyword`, so a report
+ * quoting `ABC…` and an integration indexing `abc…` name the same file and not
+ * the same term. Applied to both sides — the query built in `hunt_for_threat.ts`
+ * and the `_source` comparison in `matchIoc` — so a hit that the search found is
+ * a hit attribution can also explain.
+ */
+export const normalizeIocValue = (type: string, value: string): string =>
+  type === 'hash' ? value.toLowerCase() : value;
+
 const asString = (value: unknown): string | undefined => {
   if (typeof value === 'string') return value;
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
@@ -108,9 +119,10 @@ const matchIoc = (
 ): { ioc: HuntIoc; field: string } | undefined => {
   for (const ioc of iocs) {
     const candidates = IOC_FIELDS_BY_TYPE[ioc.type] ?? [];
+    const wanted = normalizeIocValue(ioc.type, ioc.value);
     for (const field of candidates) {
       const values = fields.get(field) ?? [];
-      if (values.some((v) => v === ioc.value)) {
+      if (values.some((v) => normalizeIocValue(ioc.type, v) === wanted)) {
         return { ioc, field };
       }
     }
