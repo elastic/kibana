@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -84,13 +84,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // static-key replacement additionally sets isDirty via onReadyChange in ManagedIntegrationsSection.
   const { onboardingDeploymentId } = detectAndReviewStep;
   const { authMethod, connectorId } = authenticateAndDeployStep;
-  // Mirror isDirty into a ref so the async fetch callback can see the latest value without
-  // capturing a stale closure. This prevents the mount-time GET from overwriting isDirty: true
-  // that was set locally (e.g. by onReadyChange) while the request was in flight.
-  const isDirtyRef = useRef(detectAndReviewStep.isDirty ?? false);
-  useEffect(() => {
-    isDirtyRef.current = detectAndReviewStep.isDirty ?? false;
-  });
   useEffect(() => {
     if (!onboardingDeploymentId || awsServicesMap === undefined) return;
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
@@ -106,9 +99,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           { authMethod: item.authMethod, connectorId: item.connectorId }
         );
         const dirty = dirtyVarIds.length > 0 || authDirty;
-        // Preserve any locally-set dirty flag (e.g. from static-key replacement) that arrived
-        // while this async fetch was in flight.
-        updateDetectAndReviewStep({ isDirty: dirty || isDirtyRef.current });
+        // SO fetch is authoritative: write dirty regardless of current value so that
+        // reverting auth back to match the SO correctly clears isDirty.
+        updateDetectAndReviewStep({ isDirty: dirty });
       })
       .catch(() => {});
   // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
