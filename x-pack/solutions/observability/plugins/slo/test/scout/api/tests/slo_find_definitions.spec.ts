@@ -129,6 +129,7 @@ apiTest.describe(
     });
 
     apiTest('finds SLOs with health data when includeHealth is true', async ({ apiClient }) => {
+      apiTest.setTimeout(210_000); // > the 180s pollUntilTrue budget below
       const sloBody = { ...DEFAULT_SLO, name: 'Test SLO with health' };
       const createResponse = await apiClient.post('api/observability/slos', {
         headers,
