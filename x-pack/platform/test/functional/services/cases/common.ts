@@ -153,6 +153,9 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async selectUserInAssigneesPopover(username: string) {
+      await retry.waitFor(`assignee option for ${username} to appear`, async () => {
+        return testSubjects.exists(`userProfileSelectableOption-${username}`);
+      });
       await testSubjects.click(`userProfileSelectableOption-${username}`);
       await header.waitUntilLoadingHasFinished();
     },
