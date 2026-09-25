@@ -1143,6 +1143,12 @@ export const insightsFromValidatedDiscoveries = (
       // the shape honestly instead of us fabricating content.
       summaryMarkdown: typeof d.summary_markdown === 'string' ? d.summary_markdown : '',
       detailsMarkdown: typeof d.details_markdown === 'string' ? d.details_markdown : '',
+      // Same unambiguous-equivalent rule: pass the pipeline's entity summary
+      // through when present; omit rather than fabricate. The rubric evaluator
+      // reads entitySummaryMarkdown and degrades to '' when absent.
+      ...(typeof d.entity_summary_markdown === 'string'
+        ? { entitySummaryMarkdown: d.entity_summary_markdown }
+        : {}),
       alertIds: Array.isArray(d.alert_ids) ? (d.alert_ids as string[]) : [],
     } as AttackDiscovery;
   });

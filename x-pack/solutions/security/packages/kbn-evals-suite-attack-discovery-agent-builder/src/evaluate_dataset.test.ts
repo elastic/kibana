@@ -1362,6 +1362,7 @@ describe('slow-path handoff (#293046): insights from pipeline validated discover
         summary_markdown: 'summary B',
         details_markdown: 'details B',
         alert_ids: ['b1'],
+        entity_summary_markdown: 'entities B',
       },
     ]);
 
@@ -1376,9 +1377,17 @@ describe('slow-path handoff (#293046): insights from pipeline validated discover
         title: 'Cloud OAuth abuse',
         summaryMarkdown: 'summary B',
         detailsMarkdown: 'details B',
+        entitySummaryMarkdown: 'entities B',
         alertIds: ['b1'],
       },
     ]);
+  });
+
+  it('omits entitySummaryMarkdown when the pipeline entry has none', () => {
+    const insights = insightsFromValidatedDiscoveries([
+      { title: 't', summary_markdown: 's', details_markdown: 'd', alert_ids: [] },
+    ]);
+    expect(insights![0].entitySummaryMarkdown).toBeUndefined();
   });
 
   it('returns undefined for a non-array (no fabrication when the pipeline has none)', () => {
