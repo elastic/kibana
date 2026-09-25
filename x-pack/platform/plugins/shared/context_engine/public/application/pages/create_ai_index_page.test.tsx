@@ -15,7 +15,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
-import { searchDataStreams } from '../api/data_streams';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
@@ -39,8 +38,11 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
   }),
 }));
 
-jest.mock('../api/data_streams');
-const mockedSearchDataStreams = jest.mocked(searchDataStreams);
+const mockUseIndices = jest.fn();
+
+jest.mock('../hooks/use_indices', () => ({
+  useIndices: (args: { search: string; enabled: boolean }) => mockUseIndices(args),
+}));
 
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -79,7 +81,7 @@ const VALID_ID = 'support-ticket-triage';
 
 describe('CreateAiIndexPage', () => {
   beforeEach(() => {
-    mockedSearchDataStreams.mockResolvedValue({ dataStreams: [] });
+    mockUseIndices.mockReturnValue({ indexNames: [], isFetching: false });
   });
 
   afterEach(() => {
@@ -219,7 +221,10 @@ describe('CreateAiIndexPage', () => {
   it('includes a selected data stream trace in the create request', async () => {
     const services = coreMock.createStart();
     services.http.post.mockResolvedValue({});
-    mockedSearchDataStreams.mockResolvedValue({ dataStreams: ['logs-genai-default'] });
+    mockUseIndices.mockReturnValue({
+      indexNames: ['logs-genai-default'],
+      isFetching: false,
+    });
 
     renderWithProviders(services);
 
@@ -233,9 +238,8 @@ describe('CreateAiIndexPage', () => {
     fireEvent.change(input, { target: { value: 'lo' } });
 
     await waitFor(() => {
-      expect(mockedSearchDataStreams).toHaveBeenCalledWith(
-        services.http,
-        expect.objectContaining({ search: 'lo' })
+      expect(mockUseIndices).toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'lo', enabled: true })
       );
     });
 

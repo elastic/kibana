@@ -48,6 +48,7 @@ import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
 import { DEFAULT_SCHEMA } from '../../../../common/constants';
+import { getInventoryRuleSchema } from '../../../../common/inventory/get_inventory_rule_schema';
 import { schemaTranslationMap } from '../../../components/schema_selector';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
@@ -378,7 +379,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
                 sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}
                 region={ruleParams.region}
-                schema={ruleParams.schema}
+                schema={getInventoryRuleSchema(ruleParams.nodeType, ruleParams.schema)}
                 data-test-subj="preview-chart"
               />
             </ExpressionRow>
