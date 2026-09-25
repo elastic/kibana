@@ -99,7 +99,6 @@ export const runInvestigation = async (
       hypotheses,
       recommendations,
       blind_spots: blindSpots,
-      trigger_feedback: triggerFeedback,
       impact,
     } = investigation;
     output.structured_report = {
@@ -109,7 +108,6 @@ export const runInvestigation = async (
       hypotheses,
       recommendations,
       blind_spots: blindSpots,
-      trigger_feedback: triggerFeedback,
       impact,
     };
     if (output.conversation_id) {

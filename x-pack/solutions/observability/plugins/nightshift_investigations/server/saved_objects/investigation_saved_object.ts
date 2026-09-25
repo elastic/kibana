@@ -12,7 +12,6 @@ import {
   MAX_HYPOTHESES,
   MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
-  MAX_TRIGGER_FEEDBACK,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   SEVERITY_OPTIONS,
@@ -28,6 +27,7 @@ import type { InvestigationAttributes } from '../storage/types';
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
 const MAX_ISO_DATE_LENGTH = 64;
+const LEGACY_MAX_TRIGGER_FEEDBACK = 3;
 
 const isoDateStringSchema = schema.string({
   maxLength: MAX_ISO_DATE_LENGTH,
@@ -55,7 +55,7 @@ const enumOf = <T extends readonly string[]>(options: T) =>
 const opaqueArray = (maxSize: number) =>
   schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize }));
 
-const investigationAttributesSchemaV1 = schema.object({
+const investigationAttributesSchemaBase = schema.object({
   status: enumOf(INVESTIGATION_STATUSES),
   subject_type: enumOf(INVESTIGATION_SUBJECT_TYPES),
   subject_id: keyword,
@@ -73,7 +73,6 @@ const investigationAttributesSchemaV1 = schema.object({
   hypotheses: opaqueArray(MAX_HYPOTHESES),
   recommendations: opaqueArray(MAX_RECOMMENDATIONS),
   blind_spots: opaqueArray(MAX_BLIND_SPOTS),
-  trigger_feedback: opaqueArray(MAX_TRIGGER_FEEDBACK),
   conversation_id: optionalKeyword,
   impact: schema.maybe(
     schema.object({
@@ -84,7 +83,15 @@ const investigationAttributesSchemaV1 = schema.object({
   ),
 });
 
+const investigationAttributesSchemaV1 = investigationAttributesSchemaBase.extends({
+  trigger_feedback: opaqueArray(LEGACY_MAX_TRIGGER_FEEDBACK),
+});
+
 const investigationAttributesSchemaV2 = investigationAttributesSchemaV1.extends({
+  title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
+});
+
+const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extends({
   title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
 });
 
@@ -126,6 +133,13 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       schemas: {
         create: investigationAttributesSchemaV2,
         forwardCompatibility: investigationAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    3: {
+      changes: [],
+      schemas: {
+        create: investigationAttributesSchemaV3,
+        forwardCompatibility: investigationAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
       },
     },
   },
