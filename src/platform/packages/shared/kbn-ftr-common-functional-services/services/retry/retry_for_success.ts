@@ -59,7 +59,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     onFailureBlock,
     onFailure = defaultOnFailure(methodName),
     accept = returnTrue,
-    retryDelay = 502,
+    retryDelay = 100,
     retryCount,
     initialDelay,
   } = options;
