@@ -953,7 +953,7 @@ const mergeMemoryGroup = async ({
   let canonicalId = initialCanonicalId;
   let canonicalIsSource = initialCanonicalId !== undefined;
   let writtenCanonicalId: string | undefined;
-  let committedSources: MemoryPage[] = [];
+  let committedSources: VersionedMemoryPage[] = [];
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const requiredSourceIds = unionStrings(
@@ -1099,13 +1099,10 @@ const mergeMemoryGroup = async ({
       );
       return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
     }
+    const revalidatedSources = validatedSources as VersionedMemoryPage[];
     const sourceChanged = versionedSources.some((source, index) => {
-      const validated = validatedSources[index];
-      return (
-        !validated ||
-        validated.seqNo !== source.seqNo ||
-        validated.primaryTerm !== source.primaryTerm
-      );
+      const validated = revalidatedSources[index];
+      return validated.seqNo !== source.seqNo || validated.primaryTerm !== source.primaryTerm;
     });
     if (sourceChanged) {
       if (attempt === 2) {
@@ -1122,7 +1119,7 @@ const mergeMemoryGroup = async ({
         await store.create(write);
       }
       writtenCanonicalId = targetCanonicalId;
-      committedSources = currentSources;
+      committedSources = revalidatedSources;
       break;
     } catch (err) {
       if ((err as { statusCode?: number }).statusCode !== 409) {
@@ -1145,12 +1142,15 @@ const mergeMemoryGroup = async ({
 
   let archivedSourceCount = 0;
   let writeFailureCount = 0;
-  for (const page of committedSources) {
+  for (const source of committedSources) {
+    const { page } = source;
     if (page.id === writtenCanonicalId) {
       continue;
     }
     try {
-      await store.archive(page.id, 'merged');
+      // A merge may only consume the source snapshot incorporated into the committed canonical.
+      // Chasing a conflict here could archive a newer source that the canonical does not contain.
+      await store.archiveVersioned(source, 'merged');
       archivedSourceCount += 1;
     } catch (err) {
       writeFailureCount += 1;
@@ -1159,7 +1159,7 @@ const mergeMemoryGroup = async ({
     }
   }
   logger.debug(
-    `Merged ${committedSources.map((page) => page.id).join(', ')} into ${writtenCanonicalId}` +
+    `Merged ${committedSources.map(({ page }) => page.id).join(', ')} into ${writtenCanonicalId}` +
       (extract ? ` (folded extract ${extract.slug})` : '')
   );
   return { merged: true, archivedSourceCount, writeFailureCount };

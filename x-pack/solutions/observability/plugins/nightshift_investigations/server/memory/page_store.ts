@@ -73,6 +73,10 @@ export interface MemoryPageStore {
   update: (id: string, page: MemoryPageWrite, version: VersionedMemoryPage) => Promise<MemoryPage>;
   applyCounterUpdates: (updates: readonly CounterUpdate[]) => Promise<void>;
   archive: (id: string, reason: MemoryArchiveReason) => Promise<MemoryPage | undefined>;
+  archiveVersioned: (
+    version: VersionedMemoryPage,
+    reason: MemoryArchiveReason
+  ) => Promise<MemoryPage>;
   delete: (id: string) => Promise<void>;
   pruneDuplicates: () => Promise<number>;
 }
@@ -275,6 +279,49 @@ export const createMemoryPageStore = ({
       throw new Error(`Failed to map standard index response to MemoryPage for ${id}`);
     }
     return updated;
+  };
+
+  const writeVersionedPage = async (
+    id: string,
+    page: MemoryPageWrite,
+    version: VersionedMemoryPage
+  ): Promise<MemoryPage> => {
+    const document = buildDocument(page, version.page);
+    await esClient.index(
+      {
+        index: MEMORY_INDEX,
+        id: toStoredId(id),
+        document,
+        if_seq_no: version.seqNo,
+        if_primary_term: version.primaryTerm,
+        refresh: 'wait_for',
+      },
+      { signal }
+    );
+    return mapWrittenPage(id, document);
+  };
+
+  const toArchiveWrite = (
+    version: VersionedMemoryPage,
+    reason: MemoryArchiveReason
+  ): MemoryPageWrite => {
+    const latest = version.page;
+    return {
+      slug: latest.slug,
+      title: latest.title,
+      description: latest.description,
+      content: latest.content,
+      context: latest.context,
+      tags: latest.tags,
+      categories: latest.categories,
+      references: latest.references,
+      status: 'archived',
+      source: latest.source,
+      merged_from: latest.merged_from,
+      archive_reason: reason,
+      telemetry: latest.telemetry,
+      user: latest.updated_by,
+    };
   };
 
   const listAll = async (): Promise<MemoryPage[]> => {
@@ -568,19 +615,7 @@ export const createMemoryPageStore = ({
     },
 
     async update(id, page, version) {
-      const document = buildDocument(page, version.page);
-      await esClient.index(
-        {
-          index: MEMORY_INDEX,
-          id: toStoredId(id),
-          document,
-          if_seq_no: version.seqNo,
-          if_primary_term: version.primaryTerm,
-          refresh: 'wait_for',
-        },
-        { signal }
-      );
-      return mapWrittenPage(id, document);
+      return writeVersionedPage(id, page, version);
     },
 
     async applyCounterUpdates(updates) {
@@ -673,28 +708,8 @@ export const createMemoryPageStore = ({
         if (!versioned || versioned.page.status === 'archived') {
           return undefined;
         }
-        const latest = versioned.page;
         try {
-          return await this.update(
-            id,
-            {
-              slug: latest.slug,
-              title: latest.title,
-              description: latest.description,
-              content: latest.content,
-              context: latest.context,
-              tags: latest.tags,
-              categories: latest.categories,
-              references: latest.references,
-              status: 'archived',
-              source: latest.source,
-              merged_from: latest.merged_from,
-              archive_reason: reason,
-              telemetry: latest.telemetry,
-              user: latest.updated_by,
-            },
-            versioned
-          );
+          return await this.archiveVersioned(versioned, reason);
         } catch (err) {
           if ((err as { statusCode?: number }).statusCode !== 409) {
             throw err;
@@ -707,6 +722,10 @@ export const createMemoryPageStore = ({
         }
       }
       return undefined;
+    },
+
+    async archiveVersioned(version, reason) {
+      return writeVersionedPage(version.page.id, toArchiveWrite(version, reason), version);
     },
 
     async delete(id) {
