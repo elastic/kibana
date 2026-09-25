@@ -25,7 +25,6 @@ import {
   type Clock,
   type InitialEvent,
   type Scheduled,
-  type StateActionMachine,
 } from './state_action_machine';
 
 const MAX_CLOCK_SKEW_MS = 60_000;
@@ -45,18 +44,18 @@ export interface ClockSkew {
   readonly elasticsearchTime: number;
 }
 
-export type ClockSkewClassification =
+type ClockSkewClassification =
   | { readonly type: 'unmeasured' }
   | { readonly type: 'inSync' }
   | { readonly type: 'skewed'; readonly skew: ClockSkew };
 
-export type ClockSkewState = Scheduled &
+type ClockSkewState = Scheduled &
   (
     | { readonly controlState: 'healthy' }
     | { readonly controlState: 'skewed'; readonly remindAt: number }
   );
 
-export type ClockSkewEvent =
+type ClockSkewEvent =
   /** The request failed or measured nothing. */
   | { readonly type: 'unavailable' }
   | { readonly type: 'inSync' }
@@ -66,7 +65,7 @@ export type ClockSkewEvent =
   | { readonly type: 'skewPersists' }
   | { readonly type: 'skewReminder'; readonly skew: ClockSkew };
 
-export const initialState = (nextActionAt: number): ClockSkewState => ({
+const initialState = (nextActionAt: number): ClockSkewState => ({
   controlState: 'healthy',
   nextActionAt,
 });
@@ -112,7 +111,7 @@ export const classifyClockSkew = ({
   };
 };
 
-export const model = (
+const model = (
   state: ClockSkewState,
   result: ActionResult<ClockSkewSample>
 ): AugmentedState<ClockSkewState, ClockSkewEvent> => {
@@ -157,20 +156,12 @@ export const model = (
   };
 };
 
-export const clockSkewMachine = (
-  action: Action<ClockSkewSample>
-): StateActionMachine<ClockSkewState, ClockSkewSample, ClockSkewEvent> => ({
-  initialState,
-  next: () => action,
-  model,
-});
-
 const describeSkew = (still: '' | 'still ', { ms, kibanaTime, elasticsearchTime }: ClockSkew) =>
   `Kibana and Elasticsearch clocks are ${still}out of sync by at least ${ms}ms. Kibana time: ${new Date(
     kibanaTime
   ).toISOString()}; Elasticsearch time: ${new Date(elasticsearchTime).toISOString()}.`;
 
-export const logClockSkewEvent = (log: Logger, event: ClockSkewEvent | InitialEvent): void => {
+const logClockSkewEvent = (log: Logger, event: ClockSkewEvent | InitialEvent): void => {
   switch (event.type) {
     case 'initial':
     case 'unavailable':
@@ -200,8 +191,8 @@ export const pollEsNodesClockSkew = async (
   { internalClient, log, signal }: PollEsNodesClockSkewOptions,
   clock: Clock = realClock
 ): Promise<void> => {
-  const machine = clockSkewMachine(sampleClocks(internalClient));
-  for await (const { event } of run(machine, clock, signal)) {
+  const action = sampleClocks(internalClient);
+  for await (const { event } of run({ initialState, next: () => action, model }, clock, signal)) {
     logClockSkewEvent(log, event);
   }
 };
