@@ -98,10 +98,6 @@ apiTest.describe(
         const storedSecret = `stored-secret-${uuidv4()}`;
         const replacement = `visible-note-${uuidv4()}`;
         const originalParams = JSON.stringify({ token: storedSecret });
-        const submittedParams = JSON.stringify({
-          token: MASKED_PARAM_VALUE,
-          note: replacement,
-        });
         const name = `mask params run once ${uuidv4()}`;
 
         const created = await saveMonitorInternal(apiClient, editorHeaders, {
@@ -128,6 +124,15 @@ apiTest.describe(
           const hidden = await getMonitorWithParams(apiClient, restrictedHeaders, monitorId);
           expect(hidden).toHaveStatusCode(200);
           expect(JSON.stringify(hidden.body)).not.toContain(storedSecret);
+          expect(hidden.body.params).toBe(
+            JSON.stringify({
+              token: MASKED_PARAM_VALUE,
+            })
+          );
+          const submittedParams = JSON.stringify({
+            ...JSON.parse(hidden.body.params),
+            note: replacement,
+          });
 
           const run = await apiClient.post(
             `internal/synthetics/service/monitors/run_once/${uuidv4()}`,
@@ -172,7 +177,7 @@ apiTest.describe(
           try {
             await deleteRunOncePolicies();
           } finally {
-            await deleteMonitors(apiClient, editorHeaders, [monitorId], { ignoreErrors: true });
+            await deleteMonitors(apiClient, editorHeaders, [monitorId]);
           }
         }
       }

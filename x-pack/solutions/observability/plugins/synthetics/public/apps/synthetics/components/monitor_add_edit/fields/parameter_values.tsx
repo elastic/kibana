@@ -62,7 +62,7 @@ export const canUseParameterPairs = (params?: string): boolean => {
       parsed !== null &&
       typeof parsed === 'object' &&
       !Array.isArray(parsed) &&
-      Object.values(parsed).every((value) => typeof value === 'string')
+      Object.values(parsed).every((value) => typeof value === 'string' && !value.includes('\n'))
     );
   } catch {
     return false;
@@ -100,7 +100,11 @@ export const ParameterValuesEditor = ({
   });
 
   useEffect(() => {
-    setPairs((prevPairs) => (isEqual(prevPairs, pairsFromValue) ? prevPairs : pairsFromValue));
+    setPairs((prevPairs) => {
+      const keylessPairs = prevPairs.filter(([key]) => !key);
+      const nextPairs = [...keylessPairs, ...pairsFromValue];
+      return isEqual(prevPairs, nextPairs) ? prevPairs : nextPairs;
+    });
   }, [pairsFromValue]);
 
   const updatePairs = useCallback(

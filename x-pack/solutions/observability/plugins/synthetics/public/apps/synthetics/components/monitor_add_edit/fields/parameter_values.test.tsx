@@ -207,6 +207,24 @@ describe('ParameterValuesEditor', () => {
     expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
     expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue(params);
   });
+
+  it('keeps the first blank row while adding a parameter to an empty object', () => {
+    const { getByTestId } = render(<ParameterValuesEditorForm defaultParams="{}" />);
+
+    fireEvent.click(getByTestId('syntheticsMonitorConfigParams__button'));
+
+    expect(getByTestId('keyValuePairsKey0')).toHaveValue('');
+  });
+
+  it('uses the JSON editor for multiline string values', () => {
+    const params = JSON.stringify({ certificate: 'first line\nsecond line' });
+    const { getByTestId, queryByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={params} />
+    );
+
+    expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
+    expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue(params);
+  });
 });
 
 const ParameterValuesEditorForm = ({
