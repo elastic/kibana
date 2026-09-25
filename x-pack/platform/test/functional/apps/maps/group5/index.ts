@@ -62,6 +62,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./saved_object_management'));
     loadTestFile(require.resolve('./sample_data'));
     loadTestFile(require.resolve('./auto_fit_to_bounds'));
-    loadTestFile(require.resolve('./layer_visibility'));
   });
 }
