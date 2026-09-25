@@ -2073,7 +2073,7 @@ importers:
         version: link:src/platform/packages/private/kbn-esql-editor
       '@kbn/esql-language':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-language
+        version: link:src/platform/packages/shared/esql/kbn-esql-language
       '@kbn/esql-language-inspector-plugin':
         specifier: workspace:*
         version: link:examples/esql_ast_inspector
@@ -2082,13 +2082,13 @@ importers:
         version: link:src/platform/packages/shared/kbn-esql-resource-browser
       '@kbn/esql-server-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-server-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-server-utils
       '@kbn/esql-types':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-types
+        version: link:src/platform/packages/shared/esql/kbn-esql-types
       '@kbn/esql-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-utils
       '@kbn/esql-ux-example-plugin':
         specifier: workspace:*
         version: link:examples/esql_ux_example
@@ -3502,6 +3502,9 @@ importers:
       '@kbn/serverless-workplace-ai-settings':
         specifier: workspace:*
         version: link:src/platform/packages/shared/serverless/settings/workplace_ai_project
+      '@kbn/service-accounts-test-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
       '@kbn/session-notifications-plugin':
         specifier: workspace:*
         version: link:src/platform/test/plugin_functional/plugins/session_notifications
@@ -5480,6 +5483,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-agent-builder':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder
+      '@kbn/evals-suite-attack-discovery-fp-tp':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -7875,6 +7881,14 @@ importers:
 
   src/platform/packages/shared/esql/kbn-esql-browser: {}
 
+  src/platform/packages/shared/esql/kbn-esql-language: {}
+
+  src/platform/packages/shared/esql/kbn-esql-server-utils: {}
+
+  src/platform/packages/shared/esql/kbn-esql-types: {}
+
+  src/platform/packages/shared/esql/kbn-esql-utils: {}
+
   src/platform/packages/shared/home/sample_data_card: {}
 
   src/platform/packages/shared/home/sample_data_tab: {}
@@ -8045,17 +8059,9 @@ importers:
 
   src/platform/packages/shared/kbn-esql-composer: {}
 
-  src/platform/packages/shared/kbn-esql-language: {}
-
   src/platform/packages/shared/kbn-esql-resource-browser: {}
 
   src/platform/packages/shared/kbn-esql-resource-browser/.storybook: {}
-
-  src/platform/packages/shared/kbn-esql-server-utils: {}
-
-  src/platform/packages/shared/kbn-esql-types: {}
-
-  src/platform/packages/shared/kbn-esql-utils: {}
 
   src/platform/packages/shared/kbn-eval-kql: {}
 
@@ -9513,6 +9519,8 @@ importers:
 
   x-pack/platform/test/security_api_integration/plugins/saml_provider: {}
 
+  x-pack/platform/test/security_api_integration/plugins/service_accounts: {}
+
   x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer: {}
 
   x-pack/platform/test/security_functional/plugins/test_endpoints: {}
@@ -9688,6 +9696,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
 
