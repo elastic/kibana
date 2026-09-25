@@ -22,7 +22,7 @@ To apply these settings in your deployment, refer to [Elastic Stack settings](do
 - {applies_to}`serverless: ga` {applies_to}`stack: ga 9.6+` English, French, Japanese, Simplified Chinese, German, and Portuguese (Brazil)
 - {applies_to}`stack: ga 9.0-9.5` English, French, Japanese, Simplified Chinese, and German
 
-Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served; locales without translation files fall back to English.
+Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served. Locales without translation files fall back to English.
 
 ## Per-user language selection
 ```{applies_to}
