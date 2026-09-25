@@ -43,7 +43,7 @@ import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
 import { HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { useVariation } from './variation_context';
 import type { PhaseVariation } from './variation_registry';
-import { readPageSizeForTable, writePageSizeForTable } from './storage_keys';
+import { readPageSizeForTable, hasStoredPageSize, writePageSizeForTable } from './storage_keys';
 import { CLOUD_PROVIDERS } from './cloud_providers';
 import {
   K8S_CONTEXT_KEYS,
@@ -206,11 +206,102 @@ const k8sContextCatalogColumn = (id: K8sContextKey): CatalogColumn => ({
   label: K8S_CONTEXT_LABEL[id],
 });
 
+// Metric columns to show by default per entity type. These surface the most
+// operationally-relevant signals for each resource kind so the user sees
+// actionable data without needing to configure columns.
+const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
+  // Kubernetes
+  'kubernetes:nodes': ['metric:cpu-util', 'metric:memory-util', 'metric:pod-count'],
+  'kubernetes:pods': ['metric:cpu-limit-util', 'metric:memory-limit-util', 'metric:restarts'],
+  'kubernetes:deployments': ['metric:available-replicas', 'metric:restarts'],
+  'kubernetes:containers': ['metric:cpu-usage', 'metric:memory-usage', 'metric:restarts'],
+  'kubernetes:namespaces': ['metric:cpu-usage', 'metric:memory-usage'],
+  'kubernetes:clusters': ['metric:api-latency', 'metric:node-count'],
+  // Hosts
+  hosts: ['metric:cpu-util', 'metric:memory-util'],
+  // Services
+  services: ['metric:latency-p95', 'metric:throughput'],
+  // Databases
+  databases: ['metric:query-latency', 'metric:connection-saturation'],
+  // Cloud
+  cloud: ['metric:cpu-util', 'metric:memory-util'],
+  'cloud:aws ec2 instance': ['metric:cpu-util', 'metric:memory-util'],
+  'cloud:aws lambda function': [
+    'metric:invocations',
+    'metric:error-rate',
+    'metric:p99-duration',
+    'metric:concurrent-executions',
+    'metric:memory-util',
+  ],
+  'cloud:aws s3 bucket': [
+    'metric:request-rate',
+    'metric:s3-4xx',
+    'metric:first-byte',
+    'metric:bucket-size',
+    'metric:object-count',
+  ],
+  // Functions category (same metrics as cloud Lambda)
+  'functions:aws lambda function': [
+    'metric:invocations',
+    'metric:error-rate',
+    'metric:p99-duration',
+    'metric:concurrent-executions',
+    'metric:memory-util',
+  ],
+  'functions:azure function': [
+    'metric:invocations',
+    'metric:error-rate',
+    'metric:p99-duration',
+    'metric:concurrent-executions',
+    'metric:memory-util',
+  ],
+  'functions:gcp cloud function': [
+    'metric:invocations',
+    'metric:error-rate',
+    'metric:p99-duration',
+    'metric:concurrent-executions',
+    'metric:memory-util',
+  ],
+  // Storage category (same metrics as cloud S3)
+  'storage:aws s3 bucket': [
+    'metric:request-rate',
+    'metric:s3-4xx',
+    'metric:first-byte',
+    'metric:bucket-size',
+    'metric:object-count',
+  ],
+  'storage:azure blob storage': [
+    'metric:request-rate',
+    'metric:s3-4xx',
+    'metric:first-byte',
+    'metric:bucket-size',
+    'metric:object-count',
+  ],
+  'storage:gcp cloud storage bucket': [
+    'metric:request-rate',
+    'metric:s3-4xx',
+    'metric:first-byte',
+    'metric:bucket-size',
+    'metric:object-count',
+  ],
+};
+
 const defaultVisibleIdsFor = (bucketKey: string): string[] => {
   const extra = getK8sContextColumnIds(bucketKey).defaultVisible;
-  if (extra.length === 0) return [...DEFAULT_VISIBLE_IDS];
-  const [name, health, ...rest] = DEFAULT_VISIBLE_IDS;
-  return [name, health, ...extra, ...rest];
+  const metricIds = DEFAULT_METRICS_BY_BUCKET[bucketKey] ?? [];
+  const base = [...DEFAULT_VISIBLE_IDS];
+  if (extra.length > 0) {
+    const [name, health, ...rest] = base;
+    return [name, health, ...extra, ...rest, ...metricIds];
+  }
+  return [...base, ...metricIds];
+};
+
+/** Pick a sensible default page size based on how many rows the table has. */
+const smartDefaultPageSize = (rowCount: number): number => {
+  if (rowCount <= 10) return 10;
+  if (rowCount <= 25) return 25;
+  return 50;
 };
 
 const PROVIDER_LABEL: Record<string, string> = Object.fromEntries(
@@ -593,7 +684,9 @@ export const EntityDataGridSection = ({
 
   const tableKey = bucketKey ?? category;
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(() => readPageSizeForTable(tableKey));
+  const [pageSize, setPageSize] = useState(() =>
+    hasStoredPageSize(tableKey) ? readPageSizeForTable(tableKey) : smartDefaultPageSize(rows.length)
+  );
   const pageCount = Math.max(1, Math.ceil(sortedRows.length / pageSize));
   const safePageIndex = Math.min(pageIndex, pageCount - 1);
 

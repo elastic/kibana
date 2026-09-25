@@ -106,11 +106,11 @@ const ALERT_GROUP_LABELS = {
   ),
   noSetup: i18n.translate(
     'xpack.streams.entityCentricLab.entities.groupBy.alerts.noSetup',
-    { defaultMessage: 'Resources with no alerts set up' }
+    { defaultMessage: 'With no alerts set up' }
   ),
   ok: i18n.translate(
     'xpack.streams.entityCentricLab.entities.groupBy.alerts.ok',
-    { defaultMessage: 'Resources with no active alerts' }
+    { defaultMessage: 'With no active alerts' }
   ),
 };
 

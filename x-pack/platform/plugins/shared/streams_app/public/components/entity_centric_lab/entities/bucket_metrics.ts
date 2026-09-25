@@ -284,14 +284,14 @@ const ENTITY_ALERTS_VALUES: readonly CategoricalValue[] = [
   {
     id: 'clear',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.clear', {
-      defaultMessage: 'Resources with no active alerts',
+      defaultMessage: 'With no active alerts',
     }),
     tone: 'good',
   },
   {
     id: 'na',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.na', {
-      defaultMessage: 'Resources with no alert set up',
+      defaultMessage: 'With no alert set up',
     }),
     tone: 'neutral',
   },
@@ -687,6 +687,37 @@ const CLOUD_AWS_LAMBDA_METRICS: readonly MetricDescriptor[] = [
     range: { min: 0, max: 60 },
     thresholds: { warn: 5, crit: 20, direction: 'asc' },
   },
+  {
+    id: 'concurrent-executions',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.concurrentExecutions',
+      { defaultMessage: 'Concurrent executions' }
+    ),
+    kind: 'numeric',
+    range: { min: 0, max: 1000 },
+    thresholds: { warn: 500, crit: 800, direction: 'asc' },
+  },
+  {
+    id: 'memory-util',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.memoryUtil', {
+      defaultMessage: 'Memory utilization',
+    }),
+    kind: 'numeric',
+    unit: '%',
+    range: { min: 10, max: 100 },
+    thresholds: { warn: 75, crit: 90, direction: 'asc' },
+  },
+  {
+    id: 'provisioned-concurrency-util',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.provisionedConcurrencyUtil',
+      { defaultMessage: 'Provisioned concurrency util.' }
+    ),
+    kind: 'numeric',
+    unit: '%',
+    range: { min: 0, max: 100 },
+    thresholds: { warn: 85, crit: 95, direction: 'asc' },
+  },
 ];
 
 const CLOUD_AWS_S3_METRICS: readonly MetricDescriptor[] = [
@@ -745,6 +776,39 @@ const CLOUD_AWS_S3_METRICS: readonly MetricDescriptor[] = [
     unit: 'ms',
     range: { min: 12, max: 220 },
     thresholds: { warn: 80, crit: 140, direction: 'asc' },
+  },
+  {
+    id: 'bucket-size',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.bucketSize',
+      { defaultMessage: 'Bucket size' }
+    ),
+    kind: 'numeric',
+    unit: ' GB',
+    range: { min: 0.1, max: 5000 },
+    thresholds: { warn: 2000, crit: 4000, direction: 'asc' },
+  },
+  {
+    id: 'object-count',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.objectCount',
+      { defaultMessage: 'Object count' }
+    ),
+    kind: 'numeric',
+    unit: 'k',
+    range: { min: 0, max: 50000 },
+    thresholds: { warn: 20000, crit: 40000, direction: 'asc' },
+  },
+  {
+    id: 'get-put-ratio',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.getPutRatio',
+      { defaultMessage: 'GET / PUT ratio' }
+    ),
+    kind: 'numeric',
+    precision: 1,
+    range: { min: 0.1, max: 500 },
+    thresholds: { warn: 100, crit: 300, direction: 'asc' },
   },
 ];
 
@@ -1107,6 +1171,16 @@ const CATALOG: Readonly<Record<BucketKey, readonly MetricDescriptor[]>> = {
   'cloud:aws ec2 instance': CLOUD_AWS_EC2_METRICS,
   'cloud:aws lambda function': CLOUD_AWS_LAMBDA_METRICS,
   'cloud:aws s3 bucket': CLOUD_AWS_S3_METRICS,
+  // Functions category — Lambda / Azure Function / GCP Cloud Function
+  // land here when grouped under the Functions nav entry instead of Cloud.
+  'functions:aws lambda function': CLOUD_AWS_LAMBDA_METRICS,
+  'functions:azure function': CLOUD_AWS_LAMBDA_METRICS,
+  'functions:gcp cloud function': CLOUD_AWS_LAMBDA_METRICS,
+  // Storage category — S3 / Blob / GCS land here when grouped under
+  // the Storage nav entry instead of Cloud.
+  'storage:aws s3 bucket': CLOUD_AWS_S3_METRICS,
+  'storage:azure blob storage': CLOUD_AWS_S3_METRICS,
+  'storage:gcp cloud storage bucket': CLOUD_AWS_S3_METRICS,
   'kubernetes:clusters': K8S_CLUSTERS_METRICS,
   'kubernetes:nodes': K8S_NODES_METRICS,
   'kubernetes:namespaces': K8S_NAMESPACES_METRICS,

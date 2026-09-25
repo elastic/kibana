@@ -29,6 +29,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiSwitch,
+  EuiText,
   EuiTitle,
   EuiTourStep,
   EuiEmptyPrompt,
@@ -36,6 +37,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 // The Streams page body is a column flex container with `height: 100%`.
@@ -47,6 +49,8 @@ import { i18n } from '@kbn/i18n';
 const NO_GROW = css`
   flex-grow: 0;
 `;
+
+
 
 const k8sFilterGroupCss = css`
   gap: 4px;
@@ -100,6 +104,8 @@ const findEntityTypeIdByName = (typeName: string | undefined): string | undefine
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
+import datemath from '@kbn/datemath';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { useTimefilter } from '../../../hooks/use_timefilter';
@@ -692,11 +698,72 @@ const AllEntitiesViewInner = ({
   const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
   const { refresh } = useTimefilter();
+  const MAX_RANGE_DAYS = 3;
   const handleTimeChange = useCallback(
-    ({ start, end }: { start: string; end: string }) => updateTimeRange({ from: start, to: end }),
-    [updateTimeRange]
+    ({ start, end }: { start: string; end: string }) => {
+      const parsedStart = datemath.parse(start);
+      const parsedEnd = datemath.parse(end, { roundUp: true });
+      if (parsedStart && parsedEnd) {
+        const diffDays = parsedEnd.diff(parsedStart, 'days', true);
+        if (diffDays > MAX_RANGE_DAYS) {
+          notifications.toasts.addWarning({
+            title: i18n.translate(
+              'xpack.streams.entityCentricLab.entities.dateRange.tooWide',
+              {
+                defaultMessage: 'Date range limited to {days} days',
+                values: { days: MAX_RANGE_DAYS },
+              }
+            ),
+            text: i18n.translate(
+              'xpack.streams.entityCentricLab.entities.dateRange.tooWideText',
+              {
+                defaultMessage:
+                  'Please select a date range of {days} days or less.',
+                values: { days: MAX_RANGE_DAYS },
+              }
+            ),
+          });
+          return;
+        }
+      }
+      updateTimeRange({ from: start, to: end });
+    },
+    [updateTimeRange, notifications.toasts]
   );
   const handleTimeRefresh = useCallback(() => refresh(), [refresh]);
+
+  // Override the "Commonly used" quick-select presets so only ≤ 3-day
+  // options appear. Must run synchronously during render (before
+  // QueryBarTopRow captures the setting in a useState initializer).
+  const originalQuickRangesRef = useRef<unknown>(undefined);
+  const quickRangesAppliedRef = useRef(false);
+  if (!quickRangesAppliedRef.current) {
+    try {
+      originalQuickRangesRef.current = uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
+    } catch {
+      originalQuickRangesRef.current = undefined;
+    }
+    uiSettings.set(UI_SETTINGS.TIMEPICKER_QUICK_RANGES, [
+      { from: 'now-15m', to: 'now', display: 'Last 15 minutes' },
+      { from: 'now-1h', to: 'now', display: 'Last 1 hour' },
+      { from: 'now-4h', to: 'now', display: 'Last 4 hours' },
+      { from: 'now-12h', to: 'now', display: 'Last 12 hours' },
+      { from: 'now-24h', to: 'now', display: 'Last 24 hours' },
+      { from: 'now-2d', to: 'now', display: 'Last 2 days' },
+      { from: 'now-3d', to: 'now', display: 'Last 3 days' },
+    ]);
+    quickRangesAppliedRef.current = true;
+  }
+  // Restore the original setting on unmount.
+  useEffect(() => {
+    return () => {
+      if (Array.isArray(originalQuickRangesRef.current)) {
+        uiSettings.set(UI_SETTINGS.TIMEPICKER_QUICK_RANGES, originalQuickRangesRef.current);
+      } else {
+        uiSettings.remove(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
+      }
+    };
+  }, [uiSettings]);
 
   // ElasticOn Inventory unified search bar: an ad-hoc data view (fields only,
   // no backing index) powers autocomplete + "+ Add filter"; the KQL / filters
@@ -2201,41 +2268,53 @@ const AllEntitiesViewInner = ({
                   anchorPosition="downCenter"
                 >
                   <div css={NO_GROW}>
-                    <unifiedSearch.ui.SearchBar
-                      appName="streamsApp"
-                      indexPatterns={labDataView ? [labDataView] : []}
-                      showQueryInput
-                      showQueryMenu
-                      showFilterBar
-                      showDatePicker
-                      isAutoRefreshDisabled={false}
-                      displayStyle="inPage"
-                      query={{ query: search, language: 'kuery' } as Query}
-                      filters={labFilters}
-                      dateRangeFrom={rangeFrom}
-                      dateRangeTo={rangeTo}
-                      onQuerySubmit={(payload, isUpdate) => {
-                        const nextQuery = payload.query?.query;
-                        setSearch(typeof nextQuery === 'string' ? nextQuery : '');
-                        if (payload.dateRange) {
-                          handleTimeChange({
-                            start: payload.dateRange.from,
-                            end: payload.dateRange.to,
-                          });
-                        }
-                        if (!isUpdate) handleLiveRefresh();
-                      }}
-                      onFiltersUpdated={setLabFilters}
-                      onRefresh={handleLiveRefresh}
-                      placeholder={i18n.translate(
-                        'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
-                        {
-                          defaultMessage:
-                            'Search {things} — e.g. health:unhealthy AND environment:production',
-                          values: { things: labThings(isElasticOn) },
-                        }
-                      )}
-                    />
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem>
+                        <unifiedSearch.ui.SearchBar
+                          appName="streamsApp"
+                          indexPatterns={labDataView ? [labDataView] : []}
+                          showQueryInput
+                          showQueryMenu
+                          showFilterBar
+                          showDatePicker
+                          isAutoRefreshDisabled={false}
+                          displayStyle="inPage"
+                          query={{ query: search, language: 'kuery' } as Query}
+                          filters={labFilters}
+                          dateRangeFrom={rangeFrom}
+                          dateRangeTo={rangeTo}
+                          onQuerySubmit={(payload, isUpdate) => {
+                            const nextQuery = payload.query?.query;
+                            setSearch(typeof nextQuery === 'string' ? nextQuery : '');
+                            if (payload.dateRange) {
+                              handleTimeChange({
+                                start: payload.dateRange.from,
+                                end: payload.dateRange.to,
+                              });
+                            }
+                            if (!isUpdate) handleLiveRefresh();
+                          }}
+                          onFiltersUpdated={setLabFilters}
+                          onRefresh={handleLiveRefresh}
+                          placeholder={i18n.translate(
+                            'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
+                            {
+                              defaultMessage:
+                                'Search {things} — e.g. health:unhealthy AND environment:production',
+                              values: { things: labThings(isElasticOn) },
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {i18n.translate(
+                            'xpack.streams.entityCentricLab.entities.dateRange.maxHint',
+                            { defaultMessage: 'Max 3 days' }
+                          )}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </div>
                 </EuiTourStep>
                 <EuiSpacer size="s" />

@@ -92,6 +92,10 @@ export const writePageSizes = (sizes: Record<string, number>): void => {
 export const readPageSizeForTable = (tableKey: string): number =>
   readPageSizes()[tableKey] ?? DEFAULT_PAGE_SIZE;
 
+/** Whether the user has explicitly set a page size for this table. */
+export const hasStoredPageSize = (tableKey: string): boolean =>
+  readPageSizes()[tableKey] !== undefined;
+
 /** Write a single table's page size into the map. */
 export const writePageSizeForTable = (tableKey: string, size: number): void => {
   const sizes = readPageSizes();
