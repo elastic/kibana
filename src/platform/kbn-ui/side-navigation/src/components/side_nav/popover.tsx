@@ -294,7 +294,11 @@ export const Popover = ({
   const popoverContentStyles = css`
     --popover-max-height: 37.5rem;
     width: ${SIDE_PANEL_WIDTH}px;
-    max-height: var(--popover-max-height);
+    // Caps short viewports to the space EUI can position the popover in, between the popover buffers
+    max-height: min(
+      var(--popover-max-height),
+      calc(100dvh - ${TOP_BAR_HEIGHT + TOP_BAR_POPOVER_GAP + BOTTOM_POPOVER_GAP}px)
+    );
     ${scrollStyles};
   `;
 

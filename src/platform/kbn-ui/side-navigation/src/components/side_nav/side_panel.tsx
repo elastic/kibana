@@ -64,7 +64,7 @@ export interface SidePanelProps {
  */
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
-  const scrollStyles = useScroll();
+  const scrollStyles = useScroll(true);
   const wrapperStyles = useMemo(
     () => getSidePanelWrapperStyles(euiThemeContext),
     [euiThemeContext]
