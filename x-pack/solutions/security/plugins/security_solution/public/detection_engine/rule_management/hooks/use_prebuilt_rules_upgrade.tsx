@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { isRuleCustomized } from '../../../../common/detection_engine/rule_management/utils';
@@ -22,6 +23,7 @@ import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use
 import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { reviewRuleUpgrade } from '../api/api';
+import { RULE_AND_TIMELINE_FETCH_FAILURE } from '../logic/translations';
 import {
   type FindRulesSortField,
   type RuleFieldsToUpgrade,
@@ -83,6 +85,7 @@ export function usePrebuiltRulesUpgrade({
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const { addError } = useAppToasts();
 
   const {
     data: upgradeReviewResponse,
@@ -310,31 +313,32 @@ export function usePrebuiltRulesUpgrade({
    */
   const fetchAllRulesCustomizationCounts =
     useCallback(async (): Promise<RuleUpgradeCustomizationCounts | null> => {
-      try {
-        const [result, customizedCount] = await Promise.all([
-          refetch(),
-          fetchCustomizedRulesCount(filter),
-        ]);
-
-        // A failed refetch keeps the previously cached `data`, so the status has to be checked
-        // explicitly or stale counts would be mistaken for fresh ones.
-        if (!result.isSuccess || !result.data) {
+      const [result, customizedCount] = await Promise.all([
+        refetch(),
+        // Unlike the refetch, this request bypasses the review query's error toast, so the failure
+        // has to be surfaced here or the confirmation would silently not show up.
+        fetchCustomizedRulesCount(filter).catch((error) => {
+          addError(error, { title: RULE_AND_TIMELINE_FETCH_FAILURE });
           return null;
-        }
+        }),
+      ]);
 
-        return {
-          total: result.data.total,
-          customizedCount:
-            customizedCount ??
-            result.data.rules.filter((rule) => isRuleCustomized(rule.current_rule)).length,
-          // Rule type changes are a current-vs-target diff, not a stored attribute, so they cannot
-          // be counted for the whole filtered set without a dry run.
-          ruleTypeChangeCount: undefined,
-        };
-      } catch {
+      // A failed refetch keeps the previously cached `data`, so the status has to be checked
+      // explicitly or stale counts would be mistaken for fresh ones.
+      if (!result.isSuccess || !result.data || customizedCount === null) {
         return null;
       }
-    }, [filter, refetch]);
+
+      return {
+        total: result.data.total,
+        customizedCount:
+          customizedCount ??
+          result.data.rules.filter((rule) => isRuleCustomized(rule.current_rule)).length,
+        // Rule type changes are a current-vs-target diff, not a stored attribute, so they cannot
+        // be counted for the whole filtered set without a dry run.
+        ruleTypeChangeCount: undefined,
+      };
+    }, [addError, filter, refetch]);
 
   const subHeaderFactory = useCallback(
     (rule: RuleResponse) =>

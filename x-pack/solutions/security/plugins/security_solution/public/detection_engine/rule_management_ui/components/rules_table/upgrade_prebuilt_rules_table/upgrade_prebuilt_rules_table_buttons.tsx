@@ -24,7 +24,7 @@ import * as i18n from './translations';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useForceUpgradeToTargetModal } from './use_force_upgrade_to_target_modal';
+import { useForceUpgradeToTargetModal } from './force_upgrade_modal';
 
 interface UpgradePrebuiltRulesTableButtonsProps {
   selectedRules: RuleUpgradeState[];
