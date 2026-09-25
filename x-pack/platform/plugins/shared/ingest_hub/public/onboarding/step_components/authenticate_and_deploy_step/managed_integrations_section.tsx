@@ -27,7 +27,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLocation } from 'react-router-dom';
 import {
@@ -39,40 +38,62 @@ import {
 import type {
   AwsStaticKeyCredentials,
   CloudSetupForCloudConnector,
+  IacRenderedTemplate,
+  IacTemplateLaunchedFor,
   RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
-import { getIacRenderIntegrations } from './iac_render_integrations';
-import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
-  serviceIds: string[];
-  serviceVars: Record<string, ServiceVars>;
   showIdentityFederation: boolean;
+  /**
+   * Integration set the Federated Identity must cover (built by buildIacIntegrations). Fleet renders
+   * the CloudFormation template for exactly this set and gates readiness on it.
+   */
+  iacIntegrations: RenderIacTemplateIntegration[];
   onDeploy: () => void;
   isDeploying: boolean;
   isDone: boolean;
   hasFailed: boolean;
+  /** When true, Deploy only runs cleanup (Fleet API calls) — AWS credentials are not required. */
+  isCleanupOnly?: boolean;
 }
 
 export function ManagedIntegrationsSection({
   serviceCount,
-  serviceIds,
-  serviceVars,
   showIdentityFederation,
+  iacIntegrations,
   onDeploy,
   isDeploying,
   isDone,
   hasFailed,
+  isCleanupOnly = false,
 }: ManagedIntegrationsSectionProps) {
-  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { setConnectorId, setStaticKeys, authenticateAndDeployStep, awsServicesMap } =
+  const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
+  const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
     useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
+
+  // The Existing Identity check renders the stack update without writing the key; the template
+  // details are parked on the flow and written to the connector after Deploy succeeds. They are
+  // tagged with the identity and the integration set the render was launched for, not the ones
+  // current when it lands: the render is asynchronous and the user may have switched identities
+  // or changed the enabled inputs meanwhile. Deploy only writes the parked details when both
+  // match what it deploys.
+  const handleIacTemplateRecorded = useCallback(
+    (iac: IacRenderedTemplate, { cloudConnectorId, integrations }: IacTemplateLaunchedFor) => {
+      setPendingIacTemplate({
+        connectorId: cloudConnectorId,
+        integrationsKey: JSON.stringify(integrations),
+        ...iac,
+      });
+    },
+    [setPendingIacTemplate]
+  );
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
   const isStaticKeysEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'static_keys';
@@ -97,7 +118,14 @@ export function ManagedIntegrationsSection({
     if (isDone) setIsOpen(false);
   }, [isDone]);
 
-  const [isDeployReady, setIsDeployReady] = useState(false);
+  // Re-seed from session so the user doesn't have to re-enter credentials they already provided
+  // (e.g. after navigating Back/Forward or adding a new service without changing auth).
+  // isStaticKeysEditMode intentionally skips the seed: the replace-flow requires new credentials.
+  const [isDeployReady, setIsDeployReady] = useState(() => {
+    if (isStaticKeysEditMode) return false;
+    const keys = authenticateAndDeployStep.staticKeys;
+    return Boolean(keys?.access_key_id && keys?.secret_access_key);
+  });
 
   const handleStaticKeysChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
@@ -116,11 +144,6 @@ export function ManagedIntegrationsSection({
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
   );
-  const iacIntegrations: RenderIacTemplateIntegration[] = useMemo(
-    () => getIacRenderIntegrations(serviceIds, awsServicesMap, serviceVars),
-    [serviceIds, awsServicesMap, serviceVars]
-  );
-  const cloud = services.cloud as CloudSetupForCloudConnector | undefined;
 
   const radioOptions = [
     {
@@ -256,11 +279,12 @@ export function ManagedIntegrationsSection({
             <Suspense fallback={<EuiLoadingSpinner />}>
               {preferredMethod === 'identity_federation' ? (
                 <LazyAwsIdentityFederationSetup
-                  cloud={cloud}
+                  cloud={services.cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   integrations={iacIntegrations}
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
+                  onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
                 />
               ) : isStaticKeysEditMode ? (
@@ -324,7 +348,7 @@ export function ManagedIntegrationsSection({
 
             {!hasFailed && !isDone && (
               <EuiButton
-                isDisabled={!isDeployReady}
+                isDisabled={!isDeployReady && !isCleanupOnly}
                 isLoading={isDeploying}
                 onClick={onDeploy}
                 data-test-subj="managedIntegrationsSection-deployButton"

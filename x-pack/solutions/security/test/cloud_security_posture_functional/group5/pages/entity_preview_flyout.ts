@@ -36,8 +36,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const entityFlyout = pageObjects.entityFlyout;
 
-  // Failing: See https://github.com/elastic/kibana/issues/261460
-  describe.skip('Security Network Page - Entity Preview flyout', function () {
+  describe('Security Network Page - Entity Preview flyout', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
@@ -103,8 +102,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/292388
-    describe.skip('via LOOKUP JOIN (v2)', () => {
+    describe('via LOOKUP JOIN (v2)', () => {
       before(async () => {
         // Delete v2 manually since it's not being deleted by the v2 install/uninstall cycle
         try {

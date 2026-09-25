@@ -113,18 +113,7 @@ export const SplitButtonWithNotification = ({
                 }}
               >
                 <span css={{ pointerEvents: 'auto' }}>
-                  <EuiIconTip
-                    type="dot"
-                    size="m"
-                    color="primary"
-                    content={notificationTooltip}
-                    iconProps={{
-                      onClick:
-                        isDisabled || isLoading || isMainButtonLoading
-                          ? undefined
-                          : (onClick as MouseEventHandler),
-                    }}
-                  />
+                  <EuiIconTip type="dot" size="m" color="primary" content={notificationTooltip} />
                 </span>
               </div>
             )}

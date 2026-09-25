@@ -127,7 +127,6 @@ interface SandboxFlyoutMockProps {
   onApply?: () => void;
   onClose: () => void;
   helpText?: React.ReactNode;
-  headerActions?: React.ReactNode;
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
@@ -144,7 +143,6 @@ jest.mock('./query_sandbox_flyout', () => ({
     return (
       <div data-test-subj="composeDiscoverChildMock">
         <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
-        <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onTimeFieldChange ? (
           <select
             data-test-subj="querySandboxTimeField"
@@ -457,13 +455,13 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'CPU high', version: 1, owner: 'test', tags: [] },
+          metadata: { name: 'CPU high', version: 1, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
-          created_by: 'test',
+          created_by: { profile_uid: 'test' },
           created_at: '2026-01-01T00:00:00Z',
-          updated_by: 'test',
+          updated_by: { profile_uid: 'test' },
           updated_at: '2026-01-01T00:00:00Z',
         },
       });
@@ -486,7 +484,7 @@ describe('ComposeDiscoverFlyout', () => {
       id: 'rule-1',
       kind: 'alert',
       enabled: true,
-      metadata: { name: 'CPU high', version: 1, owner: 'test', tags: [] },
+      metadata: { name: 'CPU high', version: 1, tags: [] },
       time_field: '@timestamp',
       schedule: { every: '1m', lookback: '5m' },
       query: {
@@ -494,9 +492,9 @@ describe('ComposeDiscoverFlyout', () => {
         base: 'FROM logs-*',
         breach: { segment: '| WHERE count > 100' },
       },
-      created_by: 'test',
+      created_by: { profile_uid: 'test' },
       created_at: '2026-01-01T00:00:00Z',
-      updated_by: 'test',
+      updated_by: { profile_uid: 'test' },
       updated_at: '2026-01-01T00:00:00Z',
     };
 
@@ -573,13 +571,13 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'signal',
           enabled: true,
-          metadata: { name: 'CPU high', version: 1, owner: 'test', tags: [] },
+          metadata: { name: 'CPU high', version: 1, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
-          created_by: 'test',
+          created_by: { profile_uid: 'test' },
           created_at: '2026-01-01T00:00:00Z',
-          updated_by: 'test',
+          updated_by: { profile_uid: 'test' },
           updated_at: '2026-01-01T00:00:00Z',
         },
       });
@@ -622,13 +620,13 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'signal',
           enabled: true,
-          metadata: { name: 'Signal rule', version: 1, owner: 'test', tags: [] },
+          metadata: { name: 'Signal rule', version: 1, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { format: 'standalone', breach: { query: '' } },
-          created_by: 'test',
+          created_by: { profile_uid: 'test' },
           created_at: '2026-01-01T00:00:00Z',
-          updated_by: 'test',
+          updated_by: { profile_uid: 'test' },
           updated_at: '2026-01-01T00:00:00Z',
         },
       });
@@ -1114,7 +1112,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1122,9 +1120,9 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          created_by: 'test',
+          created_by: { profile_uid: 'test' },
           created_at: '2026-01-01T00:00:00Z',
-          updated_by: 'test',
+          updated_by: { profile_uid: 'test' },
           updated_at: '2026-01-01T00:00:00Z',
         },
       });
@@ -1183,7 +1181,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1191,9 +1189,9 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          created_by: 'test',
+          created_by: { profile_uid: 'test' },
           created_at: '2026-01-01T00:00:00Z',
-          updated_by: 'test',
+          updated_by: { profile_uid: 'test' },
           updated_at: '2026-01-01T00:00:00Z',
         },
       });
@@ -1301,7 +1299,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1310,9 +1308,9 @@ describe('ComposeDiscoverFlyout', () => {
             breach: { segment: '| WHERE count > 100' },
             recovery: { segment: '| WHERE count < 50' },
           },
-          created_by: 'test',
+          created_by: { profile_uid: 'test' },
           created_at: '2026-01-01T00:00:00Z',
-          updated_by: 'test',
+          updated_by: { profile_uid: 'test' },
           updated_at: '2026-01-01T00:00:00Z',
         },
       });
@@ -1475,7 +1473,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1483,9 +1481,9 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          created_by: 'test',
+          created_by: { profile_uid: 'test' },
           created_at: '2026-01-01T00:00:00Z',
-          updated_by: 'test',
+          updated_by: { profile_uid: 'test' },
           updated_at: '2026-01-01T00:00:00Z',
         },
       });

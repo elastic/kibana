@@ -85,6 +85,7 @@ import {
   EPISODE_ACTIONS_PRIVILEGE,
 } from '../../utils/filter_episode_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { useManageRulesHref } from '../../application/manage_rules_href_context';
 
 const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {
@@ -164,11 +165,17 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-export const AlertEpisodesListPage = () => (
-  <EpisodeDataSourceProvider dataSource={CLASSIC_EPISODES_DATA_SOURCE}>
-    <AlertEpisodesListPageContent />
-  </EpisodeDataSourceProvider>
-);
+export const AlertEpisodesListPage = () => {
+  const queryV2Source = useService(UserCapabilities).canRead('alerts');
+  return (
+    <EpisodeDataSourceProvider
+      dataSource={CLASSIC_EPISODES_DATA_SOURCE}
+      queryV2Source={queryV2Source}
+    >
+      <AlertEpisodesListPageContent />
+    </EpisodeDataSourceProvider>
+  );
+};
 
 const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
@@ -515,7 +522,9 @@ const AlertEpisodesListPageContent = () => {
     [setVisibleColumns]
   );
 
-  const manageRulesHref = rulesLocators.useUrl({});
+  const locatorHref = rulesLocators.useUrl({});
+  const manageRulesHrefOverride = useManageRulesHref();
+  const manageRulesHref = manageRulesHrefOverride ?? locatorHref;
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({

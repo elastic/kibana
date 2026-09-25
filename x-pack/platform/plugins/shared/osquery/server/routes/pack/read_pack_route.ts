@@ -20,6 +20,7 @@ import { packSavedObjectType } from '../../../common/types';
 import {
   convertSOQueriesToPack,
   buildScheduleResponseSlice,
+  buildExecutionDefaultsResponseSlice,
   stripPerQueryRruleFields,
 } from './utils';
 import { convertShardsToObject } from '../utils';
@@ -119,6 +120,7 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           read_only: attributes.version !== undefined && osqueryPackAssetReference,
           // Discriminated read response — see buildScheduleResponseSlice.
           ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
+          ...buildExecutionDefaultsResponseSlice(attributes),
         };
 
         return response.ok({
