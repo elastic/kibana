@@ -146,6 +146,14 @@ actions:
       description: >
         Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
       x-displayName: "Streams"
+  - target: '$.tags[?(@.name=="synthetics")]'
+    description: Change tag description and displayName
+    update:
+      description: Synthetics APIs enable you to check the status of your services and applications.
+      x-displayName: Synthetics
+      externalDocs:
+        description: Synthetic monitoring
+        url: https://www.elastic.co/docs/solutions/observability/synthetics
   - target: '$.tags[?(@.name=="data views")]'
     description: Change displayName
     update:

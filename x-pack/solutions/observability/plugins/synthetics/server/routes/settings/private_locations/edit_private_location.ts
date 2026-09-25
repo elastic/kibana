@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import path from 'path';
 import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { asRouteSchema, minLengthMessage, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
+import { minLengthMessage, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
@@ -29,13 +30,25 @@ export const EditPrivateLocationSchema = z.strictObject({
     .string()
     .min(1, { error: minLengthMessage(1) })
     .max(MAX_ROUTE_ID_LENGTH)
-    .optional(),
-  tags: z.array(z.string().max(256)).max(100).optional(),
-  isAgentSharding: z.boolean().optional(),
+    .optional()
+    .describe(
+      'A new label for the private location. Monitors using this location are updated to match.'
+    ),
+  tags: z
+    .array(z.string().max(256))
+    .max(100)
+    .optional()
+    .describe('An array of tags to categorize the private location.'),
+  isAgentSharding: z
+    .boolean()
+    .optional()
+    .describe(
+      'If `true`, Kibana shards monitors across the agents enrolled in the policy so each monitor runs on exactly one agent. Requires an Enterprise license.'
+    ),
 });
 
 const EditPrivateLocationQuery = z.strictObject({
-  locationId: routeId,
+  locationId: routeId.describe('The unique identifier of the private location to update.'),
 });
 
 export type EditPrivateLocationAttributes = Pick<
@@ -134,10 +147,17 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  options: {
+    summary: 'Update a private location',
+    description:
+      "Update an existing private location's label, tags, or agent sharding.\n\nYou must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.\n\nWhen a private location's label is updated, all monitors using this location are also updated to maintain data consistency.",
+    operationId: 'put-private-location',
+    oasOperationObject: () => path.join(__dirname, 'examples/put_private_location.yaml'),
+  },
   validate: {},
   validation: {
     request: {
-      body: asRouteSchema(EditPrivateLocationSchema),
+      body: EditPrivateLocationSchema,
       params: EditPrivateLocationQuery,
     },
   },

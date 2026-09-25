@@ -1,0 +1,5 @@
+responses:
+  200:
+    description: OK.
+  400:
+    description: The private location does not exist, or it is used by one or more monitors in any space.

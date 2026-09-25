@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
@@ -22,17 +23,43 @@ import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
 export const PrivateLocationSchema = z.strictObject({
-  label: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
-  agentPolicyId: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
-  tags: z.array(z.string().max(256)).max(100).optional(),
+  label: z
+    .string()
+    .min(1)
+    .max(MAX_ROUTE_ID_LENGTH)
+    .describe('A label for the private location. Must be unique.'),
+  agentPolicyId: z
+    .string()
+    .min(1)
+    .max(MAX_ROUTE_ID_LENGTH)
+    .describe(
+      'The ID of the agent policy associated with the private location. Each agent policy can back only one private location.'
+    ),
+  tags: z
+    .array(z.string().max(256))
+    .max(100)
+    .optional()
+    .describe('An array of tags to categorize the private location.'),
   geo: z
     .strictObject({
-      lat: z.number(),
-      lon: z.number(),
+      lat: z.number().describe('The latitude of the location.'),
+      lon: z.number().describe('The longitude of the location.'),
     })
-    .optional(),
-  spaces: z.array(z.string().max(256)).max(100).optional(),
-  isAgentSharding: z.boolean().optional(),
+    .optional()
+    .describe('Geographic coordinates (WGS84) for the location.'),
+  spaces: z
+    .array(z.string().max(256))
+    .max(100)
+    .optional()
+    .describe(
+      'An array of space IDs where the private location is available. If it is not provided, the private location is available in all spaces.'
+    ),
+  isAgentSharding: z
+    .boolean()
+    .optional()
+    .describe(
+      'If `true`, Kibana shards monitors across the agents enrolled in the policy so each monitor runs on exactly one agent. Requires an Enterprise license.'
+    ),
 });
 
 export type PrivateLocationObject = z.infer<typeof PrivateLocationSchema>;
@@ -40,6 +67,13 @@ export type PrivateLocationObject = z.infer<typeof PrivateLocationSchema>;
 export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocation> = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
+  options: {
+    summary: 'Create a private location',
+    description:
+      'Create a private location backed by a Fleet agent policy.\n\nYou must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'post-private-location',
+    oasOperationObject: () => path.join(__dirname, 'examples/post_private_location.yaml'),
+  },
   validate: {},
   validation: {
     request: {
