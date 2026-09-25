@@ -563,14 +563,23 @@ groups:
 
       - setting: xpack.security.audit.appender.type
         description: |
-          Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`.
+          Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, `rolling-file`, or `otel`.
 
           Refer to [file appender](#audit-logging-file-appender) and [rolling file appender](#audit-logging-rolling-file-appender) for appender specific settings.
+
+          {applies_to}`stack: ga 9.5` `otel` ships audit logs to an OpenTelemetry-compatible (OTLP) endpoint. For the `otel` appender, `url` is required. `protocol`, `headers`, `ssl`, and `attributes` are optional `otel` settings and use the same keys as the [OpenTelemetry appender](./logging-settings.md#logging-appenders-otel).
+
+          ```yaml
+          xpack.security.audit.appender:
+            type: otel
+            url: https://collector:4318/v1/logs
+          ```
         datatype: enum
         options:
           - option: console
           - option: file
           - option: rolling-file
+          - option: otel
         applies_to:
           stack: ga
           ech: ga
@@ -578,7 +587,9 @@ groups:
 
       - setting: xpack.security.audit.appender.layout.type
         description: |
-          Required. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
+          Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`. Required for `console`, `file`, and `rolling-file`.
+
+          {applies_to}`stack: ga 9.5` Optional for `otel`, for which it defaults to `pattern`.
 
           Refer to [pattern layout](#audit-logging-pattern-layout) for layout specific settings.
         datatype: enum
