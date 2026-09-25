@@ -41,20 +41,29 @@ export function useMetadata({
   request$,
 }: UseMetadataProps) {
   const { data, status, error, refetch } = useFetcher(
-    async (callApi) => {
-      const response = await callApi('/api/infra/metadata', {
-        method: 'POST',
-        body: JSON.stringify({
-          nodeId: entityId,
-          nodeType: entityType,
-          sourceId,
-          timeRange,
-          ...(schema === 'semconv' ? { schema } : {}),
-        }),
-      });
-      return decodeOrThrow(InfraMetadataRT)(response);
+    (callApi) => {
+      // Synchronous `undefined` tells useFetcher not to start a request.
+      // `enabled` is also a dependency so detection finishing (schema still
+      // omitted) recreates this callback and the fetch actually runs.
+      if (!enabled) {
+        return undefined;
+      }
+
+      return (async () => {
+        const response = await callApi('/api/infra/metadata', {
+          method: 'POST',
+          body: JSON.stringify({
+            nodeId: entityId,
+            nodeType: entityType,
+            sourceId,
+            timeRange,
+            ...(schema === 'semconv' ? { schema } : {}),
+          }),
+        });
+        return decodeOrThrow(InfraMetadataRT)(response);
+      })();
     },
-    [entityId, entityType, schema, sourceId, timeRange],
+    [enabled, entityId, entityType, schema, sourceId, timeRange],
     {
       requestObservable$: request$,
       autoFetch: enabled,
