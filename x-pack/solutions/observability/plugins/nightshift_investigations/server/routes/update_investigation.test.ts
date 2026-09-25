@@ -50,19 +50,15 @@ describe('updateInvestigation body schema', () => {
       hypotheses: undefined,
       recommendations: undefined,
       blind_spots: undefined,
-      trigger_feedback: undefined,
       impact: undefined,
     });
   });
 
   it('treats null from an unquoted interpolation as absent', () => {
-    expect(
-      parseBody({ status: 'completed', hypotheses: null, impact: null, trigger_feedback: null })
-    ).toEqual(
+    expect(parseBody({ status: 'completed', hypotheses: null, impact: null })).toEqual(
       expect.objectContaining({
         hypotheses: undefined,
         impact: undefined,
-        trigger_feedback: undefined,
       })
     );
   });

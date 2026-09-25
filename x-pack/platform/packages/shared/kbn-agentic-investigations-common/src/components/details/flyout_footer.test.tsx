@@ -64,11 +64,43 @@ describe('ConversationDetailsFlyoutFooter', () => {
 
   it('omits the escalation button when onOpenEscalation is not supplied', () => {
     renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={() => <div>Dismiss proposal</div>}
+      />
     );
 
     expect(
       screen.queryByRole('button', { name: openEscalationButtonName })
     ).not.toBeInTheDocument();
+  });
+
+  it('hides the close action when onCloseInvestigation is not provided', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
+    );
+
+    openActionsMenu();
+
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+  });
+
+  it('hides the close action when the investigation is already closed', () => {
+    const closedInvestigation: Investigation = { ...investigation, status: 'closed' };
+
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={closedInvestigation}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={() => <div>Dismiss proposal</div>}
+      />
+    );
+
+    openActionsMenu();
+
+    // Even though onCloseInvestigation is provided, the menu item should not appear
+    // because the investigation is already closed.
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
   });
 });

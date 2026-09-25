@@ -13,6 +13,11 @@ import { TEMPLATE_UI_LABELS } from '../../template_ui/translations';
 
 export interface ConversationHeaderBlocksProps {
   status?: string;
+  /**
+   * Pre-rendered interactive status widget from the consuming plugin (e.g. a toggle).
+   * Falls back to a read-only badge when absent.
+   */
+  statusNode?: React.ReactNode;
   /** Pre-rendered assignee content. Falls back to a read-only avatar stack when absent. */
   assigneesNode?: React.ReactNode;
   /** Fallback assignee uid list used to render read-only avatars when `assigneesNode` is absent. */
@@ -32,6 +37,7 @@ const getStatusBadge = (status?: string) => (
  */
 export const ConversationHeaderBlocks = ({
   status,
+  statusNode,
   assigneesNode,
   assigneeUids = [],
   'data-test-subj': dataTestSubj = 'investigationHeaderBlocks',
@@ -54,6 +60,13 @@ export const ConversationHeaderBlocks = ({
     );
   }, [assigneesNode, assigneeUids]);
 
+  const statusValue = useMemo<React.ReactNode>(() => {
+    if (statusNode !== undefined) {
+      return statusNode;
+    }
+    return <EuiBadge color="hollow">{status ?? getEmptyValue()}</EuiBadge>;
+  }, [status, statusNode]);
+
   const items = useMemo<InfoBlockItem[]>(
     () => [
       {
@@ -67,7 +80,7 @@ export const ConversationHeaderBlocks = ({
         value: assigneesValue,
       },
     ],
-    [status, assigneesValue]
+    [statusValue, assigneesValue]
   );
 
   return <InfoBlocks items={items} maxColumns={2} data-test-subj={dataTestSubj} />;

@@ -12,6 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  applyMissingWorkerSettingDefaults,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   formatWorkerSettingsIssues,
@@ -57,14 +58,16 @@ const toTemplateValues = (
 });
 
 /**
- * Reads persisted template values back as stored — nothing defaulted or merged, so an older
- * document fails here and the Worker projects as unavailable. Autonomy is the exception: a level
- * the Worker no longer offers is projected rather than failing the read.
+ * Reads persisted template values. Missing schedule and extras keys are filled from the current
+ * defaults first; a present value is left as stored, so an out-of-range value still fails here
+ * and the Worker projects as unavailable. Autonomy is projected when the Worker no longer offers
+ * the stored level.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
-  raw: Record<string, unknown>
+  stored: Record<string, unknown>
 ): WorkerSettings => {
+  const raw = applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), stored);
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
   const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
@@ -102,6 +105,8 @@ export const createWorkerSettingsRegistration = (
   workerId: RegisteredWorkerId
 ): WorkerSettingsRegistration => ({
   createDefaultValues: () => toTemplateValues(workerId, createDefaultWorkerSettings(workerId)),
+  withMissingDefaults: (raw) =>
+    applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), raw),
   applyPatch: (raw, patch) => {
     const next = applyWorkerSettingsWrite(parseWorkerValues(workerId, raw), patch);
     const result = getCompleteWorkerSettingsSchema(workerId).safeParse(next);
