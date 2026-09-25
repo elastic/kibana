@@ -332,6 +332,7 @@ export const ConversationsPage: React.FC = () => {
               onOpenChat={openChatForProposal}
               getChatHref={getChatHrefForProposal}
               canManageEscalations={canManageEscalations}
+              canCloseInvestigation={canManageInvestigations}
               renderAssignees={renderAssignees}
             />
           </EuiFlexItem>

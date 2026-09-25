@@ -48,6 +48,17 @@ export const ConnectedCloseInvestigationModal: React.FC<CloseInvestigationModalR
   const conversationId = investigation.conversationId ?? investigation.id;
 
   const [targetsChanged, setTargetsChanged] = useState(false);
+  const [closeError, setCloseError] = useState<{
+    kind: 'dismiss_failed';
+    count: number;
+  } | null>(null);
+
+  /** Determines whether an error body carries the `proposal_dismiss_failed` code. */
+  const isProposalDismissFailedError = (error: unknown): boolean => {
+    if (!isHttpFetchError(error)) return false;
+    const body = error.body as { attributes?: { code?: string } } | undefined;
+    return body?.attributes?.code === 'proposal_dismiss_failed';
+  };
 
   const preview = useInvestigationClosePreview(conversationId, {
     enabled: Boolean(conversationId),
@@ -86,6 +97,12 @@ export const ConnectedCloseInvestigationModal: React.FC<CloseInvestigationModalR
               // Keep the modal open, show the changed-callout and refresh the list.
               setTargetsChanged(true);
               void preview.refetch();
+            } else if (isProposalDismissFailedError(err)) {
+              const ids =
+                (err as unknown as { body?: { attributes?: { failed_proposal_ids?: string[] } } })
+                  .body?.attributes?.failed_proposal_ids ?? [];
+              setCloseError({ kind: 'dismiss_failed', count: ids.length });
+              void preview.refetch();
             } else {
               services.notifications?.toasts.addDanger(i18n.STATUS_CHANGE_ERROR);
               onClose();
@@ -102,6 +119,10 @@ export const ConnectedCloseInvestigationModal: React.FC<CloseInvestigationModalR
       preview={preview.data}
       isRefreshing={preview.isFetching}
       targetsChanged={targetsChanged}
+      loadError={preview.isError && !preview.data}
+      onRetry={() => void preview.refetch()}
+      closeErrorKind={closeError?.kind}
+      closeErrorCount={closeError?.count}
       onClose={onClose}
       onConfirm={handleConfirm}
       isLoading={setStatus.isLoading}

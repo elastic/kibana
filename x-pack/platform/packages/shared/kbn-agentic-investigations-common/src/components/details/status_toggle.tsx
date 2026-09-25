@@ -87,10 +87,11 @@ export const StatusToggle: React.FC<StatusToggleProps> = ({
     <EuiBadge
       iconType="chevronSingleDown"
       iconSide="right"
-      onClick={togglePopover}
+      onClick={isLoading ? () => {} : togglePopover}
       onClickAriaLabel={CHANGE_STATUS_LABEL}
       color={config.color}
       data-test-subj={dataTestSubj}
+      style={isLoading ? { cursor: 'default', pointerEvents: 'none' } : undefined}
     >
       {config.label}
     </EuiBadge>
@@ -121,7 +122,7 @@ export const StatusToggle: React.FC<StatusToggleProps> = ({
       anchorPosition="downLeft"
       button={badge}
       closePopover={closePopover}
-      isOpen={isPopoverOpen}
+      isOpen={isPopoverOpen && !isLoading}
       panelPaddingSize="none"
       data-test-subj={`${dataTestSubj}Popover`}
     >

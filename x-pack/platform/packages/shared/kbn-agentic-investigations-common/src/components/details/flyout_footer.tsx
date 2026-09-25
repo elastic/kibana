@@ -90,6 +90,7 @@ export const ConversationDetailsFlyoutFooter = ({
             isFlyout={true}
             onClickAction={onClickAction}
             canManageEscalations={Boolean(onOpenEscalation)}
+            canCloseInvestigation={Boolean(renderCloseModal)}
             data-test-subj="investigationFlyoutActions"
           />
         </EuiFlexItem>

@@ -69,7 +69,10 @@ describe('InvestigationStatusService.getPreview', () => {
     };
     const proposals = {
       getProposalsService: () => proposalsService,
-      getProposalPrivileges: jest.fn(),
+      getProposalPrivileges: () => ({
+        assertCanRead: jest.fn().mockResolvedValue(undefined),
+        assertCanManage: jest.fn().mockResolvedValue(undefined),
+      }),
     };
     const client = {
       get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
@@ -133,7 +136,10 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     };
     const proposals = {
       getProposalsService: () => proposalsService,
-      getProposalPrivileges: () => ({ assertCanManage: jest.fn().mockResolvedValue(undefined) }),
+      getProposalPrivileges: () => ({
+        assertCanRead: jest.fn().mockResolvedValue(undefined),
+        assertCanManage: jest.fn().mockResolvedValue(undefined),
+      }),
     };
     const client = {
       get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),

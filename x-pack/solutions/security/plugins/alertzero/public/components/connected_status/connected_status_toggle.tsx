@@ -62,6 +62,15 @@ interface InvestigationCloseContainerProps {
   }) => Promise<void> | void;
 }
 
+/** Determines whether an error body carries the `proposal_dismiss_failed` code. */
+const isProposalDismissFailedError = (
+  error: unknown
+): error is { attributes: { code: string; failed_proposal_ids: string[] } } => {
+  if (!isHttpFetchError(error)) return false;
+  const body = error.body as { attributes?: { code?: string } } | undefined;
+  return body?.attributes?.code === 'proposal_dismiss_failed';
+};
+
 /**
  * Mounts the close preview hook and renders the investigation modal.
  * Rendered only when the modal is open, so every open starts a fresh fetch.
@@ -73,17 +82,28 @@ const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = 
   onConfirm,
 }) => {
   const [targetsChanged, setTargetsChanged] = useState(false);
+  const [closeError, setCloseError] = useState<{
+    kind: 'dismiss_failed';
+    count: number;
+  } | null>(null);
 
   const preview = useInvestigationClosePreview(conversationId, { enabled: true });
 
   const handleConfirm = useCallback(
     async (params: { dismissReason?: DismissReason; rationale?: string }) => {
       if (!preview.data) return;
+      setCloseError(null);
       try {
         await onConfirm({ ...params, preview: preview.data });
       } catch (err) {
         if (isCloseTargetsChangedError(err)) {
           setTargetsChanged(true);
+          void preview.refetch();
+        } else if (isProposalDismissFailedError(err)) {
+          const ids =
+            (err as unknown as { body?: { attributes?: { failed_proposal_ids?: string[] } } }).body
+              ?.attributes?.failed_proposal_ids ?? [];
+          setCloseError({ kind: 'dismiss_failed', count: ids.length });
           void preview.refetch();
         }
       }
@@ -96,6 +116,10 @@ const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = 
       preview={preview.data}
       isRefreshing={preview.isFetching}
       targetsChanged={targetsChanged}
+      loadError={preview.isError && !preview.data}
+      onRetry={() => void preview.refetch()}
+      closeErrorKind={closeError?.kind}
+      closeErrorCount={closeError?.count}
       onClose={onClose}
       onConfirm={handleConfirm}
       isLoading={isMutating}
@@ -118,6 +142,13 @@ interface EscalationCloseContainerProps {
   }) => Promise<void> | void;
 }
 
+/** Determines whether an error body carries the `escalation_close_incomplete` code. */
+const isEscalationCloseIncompleteError = (error: unknown): boolean => {
+  if (!isHttpFetchError(error)) return false;
+  const body = error.body as { attributes?: { code?: string } } | undefined;
+  return body?.attributes?.code === 'escalation_close_incomplete';
+};
+
 /**
  * Mounts the close preview hook and renders the escalation modal.
  * Rendered only when the modal is open, so every open starts a fresh fetch.
@@ -129,17 +160,37 @@ const EscalationCloseContainer: React.FC<EscalationCloseContainerProps> = ({
   onConfirm,
 }) => {
   const [targetsChanged, setTargetsChanged] = useState(false);
+  const [closeError, setCloseError] = useState<{
+    kind: 'dismiss_failed' | 'escalation_incomplete';
+    count: number;
+  } | null>(null);
 
   const preview = useEscalationClosePreview(conversationId, { enabled: true });
 
   const handleConfirm = useCallback(
     async (params: { dismissReason?: DismissReason; rationale?: string }) => {
       if (!preview.data) return;
+      setCloseError(null);
       try {
         await onConfirm({ ...params, preview: preview.data });
       } catch (err) {
         if (isCloseTargetsChangedError(err)) {
           setTargetsChanged(true);
+          void preview.refetch();
+        } else if (isEscalationCloseIncompleteError(err)) {
+          const attrs = (
+            err as unknown as { body?: { attributes?: { skipped_investigation_ids?: string[] } } }
+          ).body?.attributes;
+          setCloseError({
+            kind: 'escalation_incomplete',
+            count: attrs?.skipped_investigation_ids?.length ?? 1,
+          });
+          void preview.refetch();
+        } else if (isProposalDismissFailedError(err)) {
+          const ids =
+            (err as unknown as { body?: { attributes?: { failed_proposal_ids?: string[] } } }).body
+              ?.attributes?.failed_proposal_ids ?? [];
+          setCloseError({ kind: 'dismiss_failed', count: ids.length });
           void preview.refetch();
         }
       }
@@ -152,6 +203,10 @@ const EscalationCloseContainer: React.FC<EscalationCloseContainerProps> = ({
       preview={preview.data}
       isRefreshing={preview.isFetching}
       targetsChanged={targetsChanged}
+      loadError={preview.isError && !preview.data}
+      onRetry={() => void preview.refetch()}
+      closeErrorKind={closeError?.kind}
+      closeErrorCount={closeError?.count}
       onClose={onClose}
       onConfirm={handleConfirm}
       isLoading={isMutating}

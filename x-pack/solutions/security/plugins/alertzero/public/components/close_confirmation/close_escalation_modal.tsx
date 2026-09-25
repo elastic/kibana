@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiButton,
   EuiCallOut,
   EuiConfirmModal,
   EuiFormRow,
@@ -33,6 +34,21 @@ export interface CloseEscalationModalProps {
   isRefreshing?: boolean;
   /** True when the server rejected the last confirm because proposals changed. */
   targetsChanged?: boolean;
+  /**
+   * When `preview` is still undefined and the initial fetch failed, set this to true
+   * so the modal shows an error message with a retry button instead of a spinner.
+   */
+  loadError?: boolean;
+  /** Called when the user clicks "Retry" on a load error. */
+  onRetry?: () => void;
+  /**
+   * Set when the last confirm failed with a dismissal or escalation error.
+   * - `'dismiss_failed'`: one or more proposals could not be dismissed.
+   * - `'escalation_incomplete'`: one or more linked investigations could not be closed.
+   */
+  closeErrorKind?: 'dismiss_failed' | 'escalation_incomplete';
+  /** Number of items that failed (used for the error callout message). */
+  closeErrorCount?: number;
   onClose: () => void;
   onConfirm: (params: { dismissReason?: DismissReason; rationale?: string }) => void;
   isLoading?: boolean;
@@ -51,6 +67,10 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
   preview,
   isRefreshing = false,
   targetsChanged = false,
+  loadError = false,
+  onRetry,
+  closeErrorKind,
+  closeErrorCount = 0,
   onClose,
   onConfirm,
   isLoading = false,
@@ -98,7 +118,51 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
         </>
       )}
 
-      {preview === undefined ? (
+      {closeErrorKind === 'escalation_incomplete' && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            size="s"
+            title={i18n.ESCALATION_CLOSE_INCOMPLETE(closeErrorCount)}
+            data-test-subj="closeEscalationIncompleteCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {closeErrorKind === 'dismiss_failed' && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            size="s"
+            title={i18n.PROPOSAL_DISMISS_FAILED(closeErrorCount)}
+            data-test-subj="closeEscalationDismissFailedCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {preview === undefined && loadError ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            size="s"
+            title={i18n.PREVIEW_LOAD_ERROR}
+            data-test-subj="closeEscalationPreviewError"
+          />
+          {onRetry && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiButton size="s" onClick={onRetry} data-test-subj="closeEscalationPreviewRetry">
+                {i18n.RETRY_BUTTON}
+              </EuiButton>
+            </>
+          )}
+        </>
+      ) : preview === undefined ? (
         <EuiLoadingSpinner size="m" data-test-subj="closeEscalationPreviewLoading" />
       ) : (
         <>

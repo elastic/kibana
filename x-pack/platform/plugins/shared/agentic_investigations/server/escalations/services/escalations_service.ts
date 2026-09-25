@@ -32,6 +32,7 @@ import type {
 import type { InvestigationStatusService } from '../../investigations/services/investigation_status_service';
 import { assertNoUnexpectedProposals } from '../../investigations/services/investigation_status_service';
 import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
+import { EscalationCloseIncompleteError } from './escalation_close_incomplete_error';
 import {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
@@ -316,10 +317,10 @@ export class EscalationsService {
               status: 'closed',
               dismiss_reason: body.dismiss_reason,
               rationale: body.rationale,
-              // Pass each investigation's subset of the expected ids. Because we already
-              // ran the pre-flight check above, the per-investigation check inside
-              // setStatus will always pass — but we still send it so the service stays
-              // correct if called in isolation.
+              // Pass the full expected_proposal_ids list. The pre-flight check above already
+              // verified that every pending proposal across all open investigations was
+              // expected, so the per-investigation check inside setStatus will always pass.
+              // We still send it so the service stays correct if called in isolation.
               expected_proposal_ids: body.expected_proposal_ids,
             })
           )
@@ -340,6 +341,13 @@ export class EscalationsService {
             );
             skippedInvestigationIds.push(invId);
           }
+        }
+
+        // Do not mark the escalation closed when some investigations could not be closed.
+        // Investigations that did close stay closed; the next confirm only needs to handle
+        // the remaining open ones (the preview only lists open investigations).
+        if (skippedInvestigationIds.length > 0) {
+          throw new EscalationCloseIncompleteError(closedInvestigationIds, skippedInvestigationIds);
         }
       }
     }

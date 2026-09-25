@@ -56,12 +56,26 @@ describe('ConversationDetailsFlyoutFooter', () => {
 
   it('owns the close investigation modal', () => {
     renderWithKibanaRenderContext(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={() => <div>Dismiss proposal</div>}
+      />
     );
 
     openActionsMenu();
     fireEvent.click(screen.getByText('Close investigation'));
 
     expect(screen.getByText('Dismiss proposal')).toBeInTheDocument();
+  });
+
+  it('hides the close action when onCloseInvestigation is not provided', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
+    );
+
+    openActionsMenu();
+
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
   });
 });

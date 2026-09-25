@@ -105,6 +105,32 @@ export const CLOSE_TARGETS_CHANGED = i18n.translate(
   }
 );
 
+export const PREVIEW_LOAD_ERROR = i18n.translate(
+  'xpack.alertzero.closeConfirmation.previewLoadError',
+  {
+    defaultMessage:
+      'Could not load the pending proposals. Check your connection and try again.',
+  }
+);
+
+export const RETRY_BUTTON = i18n.translate('xpack.alertzero.closeConfirmation.retryButton', {
+  defaultMessage: 'Retry',
+});
+
+export const PROPOSAL_DISMISS_FAILED = (count: number) =>
+  i18n.translate('xpack.alertzero.closeConfirmation.proposalDismissFailed', {
+    defaultMessage:
+      '{count, plural, one {# proposal} other {# proposals}} could not be dismissed; the investigation is still open. Try again.',
+    values: { count },
+  });
+
+export const ESCALATION_CLOSE_INCOMPLETE = (count: number) =>
+  i18n.translate('xpack.alertzero.closeConfirmation.escalationCloseIncomplete', {
+    defaultMessage:
+      '{count, plural, one {# linked investigation} other {# linked investigations}} could not be closed; the escalation is still open. Try again.',
+    values: { count },
+  });
+
 // ---------------------------------------------------------------------------
 // Status toggle / reopening
 // ---------------------------------------------------------------------------

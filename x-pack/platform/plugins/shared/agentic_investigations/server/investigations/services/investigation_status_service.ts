@@ -19,21 +19,37 @@ import type {
 } from '../../../common/investigations/status';
 import { MissingDismissReasonError } from './errors';
 import { CloseTargetsChangedError } from './close_targets_changed_error';
+import { ProposalDismissFailedError } from './proposal_dismiss_failed_error';
 
-export { MissingDismissReasonError, CloseTargetsChangedError };
+export { MissingDismissReasonError, CloseTargetsChangedError, ProposalDismissFailedError };
 
 /**
  * Determines whether an error from `releaseGate` means the proposal was already
  * decided or expired (and should count as "skipped") or is a real failure.
  * We duck-type the error because cross-plugin error class imports are forbidden.
+ *
+ * `ProposalConflictError` and `ProposalExpiredError` are plain subclasses of `Error`
+ * that set `this.name`. They do NOT carry `meta.statusCode` — that property is only
+ * on HTTP response errors from the proposals HTTP route, which we do not call here.
+ * We also check `meta.statusCode === 409` to handle Elasticsearch version-conflict
+ * errors from the underlying write operations.
+ *
+ * `ProposalNotFoundError` is treated as skippable too: if the proposal disappeared
+ * between `list` and `releaseGate`, it is already gone and the close should succeed.
  */
 const isProposalAlreadyDecidedOrExpired = (err: unknown): boolean => {
   if (!(err instanceof Error)) return false;
-  // ProposalConflictError (409) and ProposalExpiredError (410) surface their HTTP
-  // status on a `meta.statusCode` property.
+  // Match by error class name (set via `this.name` in the proposals plugin).
+  if (
+    err.name === 'ProposalConflictError' ||
+    err.name === 'ProposalExpiredError' ||
+    err.name === 'ProposalNotFoundError'
+  ) {
+    return true;
+  }
+  // Elasticsearch OCC conflict from the proposals service's underlying write.
   const anyErr = err as { meta?: { statusCode?: number } };
-  const statusCode = anyErr.meta?.statusCode;
-  return statusCode === 409 || statusCode === 410;
+  return anyErr.meta?.statusCode === 409;
 };
 
 /**
@@ -131,11 +147,21 @@ export class InvestigationStatusService {
     return allProposals;
   }
 
-  /** Convenience wrapper for callers that have a request but not a space ID. */
+  /**
+   * Convenience wrapper for callers that have a request but not a space ID.
+   *
+   * Also asserts proposal read privileges so callers don't have to do it themselves.
+   * Throws `ProposalForbiddenError` (403) when the principal lacks read access.
+   */
   async listPendingProposalsForRequest(
     conversationId: string,
     request: KibanaRequest
   ): Promise<ClosePreviewProposal[]> {
+    const proposals = this.getProposals();
+    if (proposals) {
+      // assertCanRead throws ProposalForbiddenError when the principal lacks read access.
+      await proposals.getProposalPrivileges().assertCanRead(request);
+    }
     const spaceId = this.getSpaceId(request);
     return this.listPendingProposals(conversationId, spaceId);
   }
@@ -150,8 +176,7 @@ export class InvestigationStatusService {
       throw new WrongTemplateError(conversationId, INVESTIGATION_TEMPLATE_ID);
     }
 
-    const spaceId = this.getSpaceId(request);
-    const pending = await this.listPendingProposals(conversationId, spaceId);
+    const pending = await this.listPendingProposalsForRequest(conversationId, request);
     return { pending_proposal_count: pending.length, pending_proposals: pending };
   }
 
@@ -170,8 +195,8 @@ export class InvestigationStatusService {
     const failedProposalIds: string[] = [];
 
     if (body.status === 'closed') {
+      const pending = await this.listPendingProposalsForRequest(conversationId, request);
       const spaceId = this.getSpaceId(request);
-      const pending = await this.listPendingProposals(conversationId, spaceId);
 
       // Reject the close when proposals appeared after the dialog was shown, before
       // attempting any destructive operation. This also prevents the
@@ -216,6 +241,13 @@ export class InvestigationStatusService {
               );
               failedProposalIds.push(proposalId);
             }
+          }
+
+          // Do not mark the investigation closed when proposals could not be dismissed.
+          // The caller can retry: proposals that were dismissed are no longer pending,
+          // so the next attempt only needs to handle the remaining ones.
+          if (failedProposalIds.length > 0) {
+            throw new ProposalDismissFailedError(failedProposalIds);
           }
         }
       }
