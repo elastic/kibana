@@ -30,23 +30,23 @@ export interface SeededAutomatedResponseActionsRule {
 }
 
 /**
- * Starts a short-lived sshd process on the enrolled VM so Endpoint emits a
- * process event after the detection rule is already enabled.
+ * Runs `uname` on the enrolled VM so Endpoint emits a process event after the
+ * detection rule is enabled.
  *
- * Uses `sshd -t` (config test) instead of restarting the SSH service so the
- * Multipass/Vagrant session used for enroll stays up. OpenSSH exits 255 when
- * that test fails; wrap it so the VM exec still succeeds after the process ran.
+ * CI uses `vagrant ssh -- <command>`, which forwards extra args to the SSH
+ * client. Short flags such as `-t` or `-c` are eaten there (exit 255) and never
+ * run on the guest, so this command must not take flags.
  */
-export const triggerSshdProcessEvent = async (hostname: string): Promise<void> => {
-  await getHostVmClient(hostname).exec('bash -c "sudo /usr/sbin/sshd -t; exit 0"');
+export const triggerMatchingProcessEvent = async (hostname: string): Promise<void> => {
+  await getHostVmClient(hostname).exec('uname');
 };
 
 /**
- * Creates an enabled query rule that fires on sshd process events from the
+ * Creates an enabled query rule that fires on uname process events from the
  * enrolled Endpoint agent and attaches isolate / suspend-process / kill-process.
  *
- * Call `triggerSshdProcessEvent` after this so a matching process event exists
- * inside the rule lookback window.
+ * Call `triggerMatchingProcessEvent` after this so a matching process event
+ * exists inside the rule lookback window.
  */
 export const createEnabledRuleWithAutomatedResponseActions = async (
   kbnClient: KbnClient,
@@ -63,7 +63,7 @@ export const createEnabledRuleWithAutomatedResponseActions = async (
       index: SECURITY_INDEX_PATTERNS,
       filters: [],
       language: 'kuery',
-      query: `agent.id: "${agentId}" and process.name: "sshd"`,
+      query: `agent.id: "${agentId}" and process.name: "uname"`,
       author: [],
       false_positives: [],
       references: [],

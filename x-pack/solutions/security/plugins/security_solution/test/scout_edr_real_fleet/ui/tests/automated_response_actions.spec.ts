@@ -10,7 +10,7 @@ import {
   createEnabledRuleWithAutomatedResponseActions,
   deleteAlertsForRule,
   deleteSeededRule,
-  triggerSshdProcessEvent,
+  triggerMatchingProcessEvent,
   type SeededAutomatedResponseActionsRule,
 } from '../fixtures/seed_rule';
 import { test } from '../fixtures';
@@ -48,7 +48,7 @@ test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }
       kbnClient,
       enrolledEndpoint.agentId
     );
-    await triggerSshdProcessEvent(enrolledEndpoint.hostname);
+    await triggerMatchingProcessEvent(enrolledEndpoint.hostname);
 
     await pageObjects.alertsTablePage.navigate();
     await pageObjects.alertsTablePage.expandFirstAlertDetailsFlyout(
