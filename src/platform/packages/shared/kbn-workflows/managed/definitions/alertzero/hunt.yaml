@@ -10,7 +10,11 @@ description: >
   Investigation and does not write the run conclusion: those are the
   Worker's own steps (mvp-slice.md's Investigation write map). Never throws
   past its own per-step on-failure fallbacks; a partial run is reported
-  through the typed output, not an exception.
+  through the typed output, not an exception. Skips the real coordinator
+  call entirely when the Worker's own find_or_create_investigation failed
+  upstream (empty investigationConversationId): there is no Investigation to
+  attach findings to, so a report in that state gets a typed failed output
+  without spending a real hunt (Tier 2 included) on it.
 enabled: true
 tags: []
 triggers:
@@ -69,6 +73,11 @@ steps:
   # omitted: resolve the technologies from the environment.
   - name: run_hunt_coordinator
     type: kibana.request
+    # No Investigation to attach findings to (the Worker's find_or_create
+    # failed) means there is nothing useful this hunt can produce: skip the
+    # real coordinator call (and its Tier 2 spend) rather than hunt for a
+    # report that can never get a usable conclusion.
+    if: "${{ inputs.investigationConversationId != nil and inputs.investigationConversationId != empty }}"
     with:
       method: POST
       path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/hunt_coordinator"
@@ -224,6 +233,12 @@ steps:
         {%- else -%}
         failed
         {%- endif -%}
+      result_reason: |-
+        {%- if inputs.investigationConversationId == nil or inputs.investigationConversationId == empty -%}
+        no Investigation available (find_or_create failed upstream; hunt coordinator was not called)
+        {%- else -%}
+        {{ steps.run_hunt_coordinator.error.message }}
+        {%- endif -%}
 
   - name: emit_result
     type: workflow.output
@@ -231,4 +246,4 @@ steps:
     with:
       status: "{{ variables.result_status }}"
       stage: hunt
-      reason: "{{ steps.run_hunt_coordinator.error.message }}"
+      reason: "{{ variables.result_reason }}"
