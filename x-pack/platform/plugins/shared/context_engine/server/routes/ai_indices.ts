@@ -89,6 +89,7 @@ import {
   AiIndexDescribeResponseTooLargeError,
   AiIndexManagedError,
   AiIndexNotFoundError,
+  AiIndexNotReadableError,
   AiIndexAlreadyExistsError,
   AiIndexIdConflictError,
   AiIndexQueryResponseTooLargeError,
@@ -439,6 +440,9 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
   if (error instanceof AiIndexNotFoundError || error instanceof KiNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
+  if (error instanceof AiIndexNotReadableError) {
+    return response.forbidden({ body: { message: error.message } });
+  }
   if (
     error instanceof AiIndexManagedError ||
     error instanceof AiIndexConflictError ||
@@ -748,7 +752,7 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Describe an AI Index',
-      description: `Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way.`,
+      description: `Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach: a caller who cannot read the backing indices gets a 403. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way.`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
