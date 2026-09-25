@@ -138,9 +138,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const isDirty = detectAndReviewStep.isDirty ?? false;
   const [deployAttempted, setDeployAttempted] = useState(false);
   // Not done when isDirty: force the Deploy button visible so the user can apply updated settings.
+  // isDirty is checked in both branches: a failed dirty redeploy leaves isDirty true, so a
+  // deploy attempt with zero failedInstances must not enable Next while drift is unresolved.
   const isMiDone =
     (isAlreadyDeployed && !isDirty) ||
-    (deployAttempted && !isDeploying && failedInstances.length === 0);
+    (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty);
   // hasFailed is NOT gated on deployAttempted: if the hook is seeded with persisted failures on
   // remount (after navigating Back/Next), the callout and Retry must still appear even though no
   // deploy was attempted in this component lifetime.
@@ -181,9 +183,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const [agentDeployAttempted, setAgentDeployAttempted] = useState(false);
   const [isAgentNextReady, setIsAgentNextReady] = useState(false);
+  // isDirty is checked in both branches so that Next doesn't short-circuit when drift has been
+  // detected on an already-deployed agent setup — the dirty-redeploy path in useAgentBasedDeploy
+  // must run before navigation is allowed.
   const isAgentDone =
-    isAgentAlreadyDeployed ||
-    (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0);
+    (isAgentAlreadyDeployed && !isDirty) ||
+    (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0 && !isDirty);
   // Unlike MI's hasFailed, this IS gated on agentDeployAttempted. failedInstances is a single
   // shared session key that the MI path also writes, so an un-gated check would surface a stale
   // MI failure (or one from a previous session) as an agent-based "Deployment failed" callout.
@@ -532,7 +537,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
       {showMiSection && <EuiHorizontalRule margin="l" />}
 
-      {showMiSection && isDirty && !deployAttempted && (
+      {showMiSection && isDirty && (
         <>
           <EuiCallOut
             announceOnMount
