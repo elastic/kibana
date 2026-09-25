@@ -17,6 +17,10 @@ import {
   POD_NAMES,
   SEMCONV_PODS,
 } from '../../fixtures/constants';
+import {
+  cleanInventoryPodsSemconvSynthtraceData,
+  ingestInventoryPodsSemconvSynthtraceData,
+} from '../../fixtures/sequential_pods_synthtrace';
 
 const SEMCONV_POD = SEMCONV_PODS[0];
 const ECS_POD_NAME = POD_NAMES[0];
@@ -25,14 +29,18 @@ test.describe(
   'Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // The override is server-wide. Inventory tests share one Kibana, so this flag
-    // can leak into a parallel worker until afterAll turns it back off.
-    test.beforeAll(async ({ apiServices }) => {
+    // Sequential project (`playwright.config.ts` / `testDir: './tests'`): beforeAll /
+    // afterAll are safe for the temporary pod Schema flag. Parallel Inventory stays
+    // flag-off. This suite also ingests its own fixtures — sequential specs do not
+    // run `parallel_tests/global.setup.ts`.
+    test.beforeAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': {
           'observability.infra.podSchemaSelectorEnabled': true,
         },
       });
+      log.info('Sequential suite: ingesting Inventory SemConv pod metrics');
+      await ingestInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
@@ -41,7 +49,9 @@ test.describe(
       await inventoryPage.goToPage();
     });
 
-    test.afterAll(async ({ apiServices }) => {
+    test.afterAll(async ({ apiServices, esClient, kbnUrl, log, config }) => {
+      log.info('Sequential suite: cleaning Inventory SemConv pod metrics');
+      await cleanInventoryPodsSemconvSynthtraceData({ esClient, kbnUrl, log, config });
       await apiServices.core.settings({
         'feature_flags.overrides': {
           'observability.infra.podSchemaSelectorEnabled': false,
