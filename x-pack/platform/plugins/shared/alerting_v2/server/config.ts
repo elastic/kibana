@@ -32,8 +32,11 @@ const rulesRunSchema = schema.object({
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
   }),
   /**
-   * Cap on **new** alert episodes a single execution may open. Rows for
-   * already-seen groups always pass — only genuinely new groups count toward the cap.
+   * Cap on distinct groups a single execution may introduce. Applies to all
+   * grouped rule types (new episodes for stateful rules, signal events for
+   * signal rules). Already-active groups pass through but their hashes are
+   * added to the counter, so available capacity for new groups is
+   * `maxGroupsPerExecution − active_groups_already_encountered`.
    *
    * default === max: can only be tightened; tied to `alerts.max` as the upper
    * bound. With the `json` response format the effective row ceiling is 1000,
@@ -52,8 +55,9 @@ const rulesRunSchema = schema.object({
      * `heap budget / (capacity × 4)`. Defaults to 50mb; `config/serverless.yml`
      * lowers it to 10mb for Serverless.
      *
-     * Applies only when `alertingV2.esqlResponseFormat` resolves to `json` —
-     * streaming transports use chunked transfer without `Content-Length`.
+     * Applies to all non-streaming queries: recovery and data-presence queries
+     * always use JSON regardless of the feature flag; the breach query uses JSON
+     * only when `alertingV2.esqlResponseFormat` resolves to `json`.
      */
     maxResponseSize: schema.byteSize({
       defaultValue: DEFAULT_MAX_QUERY_RESPONSE_SIZE,
@@ -87,12 +91,13 @@ const rulesSchema = schema.object({
     },
   }),
   /**
-   * Combined rule runs per minute cap across all spaces. Creating or enabling a
-   * rule that would exceed the limit is rejected.
+   * Combined rule runs per minute cap across all spaces. Creating enabled rules
+   * or enabling existing rules that would exceed the limit is rejected; creating
+   * disabled rules is always allowed.
    *
-   * `0` is a freeze mode: creates and enables are rejected while existing rules
-   * keep running. Defaults to 32000 (v1 hosted budget); `config/serverless.yml`
-   * overrides to 400 for Serverless.
+   * `0` is a freeze mode: creating enabled rules and enabling existing rules are
+   * rejected while existing rules keep running. Defaults to 32000 (v1 hosted
+   * budget); `config/serverless.yml` overrides to 400 for Serverless.
    */
   maxScheduledPerMinute: schema.number({ defaultValue: 32000, min: 0, max: 32000 }),
   run: rulesRunSchema,
