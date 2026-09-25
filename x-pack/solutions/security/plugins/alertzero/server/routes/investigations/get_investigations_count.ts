@@ -13,6 +13,7 @@ import {
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 export const registerGetInvestigationsCountRoute = ({
   router,
@@ -34,7 +35,7 @@ export const registerGetInvestigationsCountRoute = ({
     })
     .addVersion(
       { version: API_VERSIONS.internal.v1, validate: false },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const conversations = getAgentBuilderConversations();
           const client = await conversations.getScopedClient({ request });
@@ -50,6 +51,6 @@ export const registerGetInvestigationsCountRoute = ({
             body: { message: 'Failed to count investigations' },
           });
         }
-      }
+      })
     );
 };
