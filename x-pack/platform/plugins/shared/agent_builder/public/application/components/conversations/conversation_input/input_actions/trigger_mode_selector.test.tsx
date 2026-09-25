@@ -11,12 +11,12 @@ import { TriggerModeSelector } from './trigger_mode_selector';
 import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 
 describe('TriggerModeSelector', () => {
-  it('labels the button with the current mode', () => {
+  it('names the button after the current mode', () => {
     render(
       <TriggerModeSelector triggerMode={ChatTriggerMode.Never} onTriggerModeChange={jest.fn()} />
     );
 
-    expect(screen.getByTestId('agentBuilderTriggerModeSelectorButton')).toHaveTextContent(
+    expect(screen.getByTestId('agentBuilderTriggerModeSelectorButton')).toHaveAccessibleName(
       'Talk to users'
     );
   });
