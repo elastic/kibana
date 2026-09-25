@@ -46,6 +46,7 @@ const mappings: MappingsDefinition = {
       },
     },
     episode: {
+      type: 'object',
       properties: {
         id: { type: 'alias', path: 'alert.id' },
         status: { type: 'alias', path: 'alert.status' },

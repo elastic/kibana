@@ -86,7 +86,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
     for (const event of events) {
       expect(event.type).toBe('signal');
-      expect(event.episode).toBeUndefined();
+      expect(event.alert).toBeUndefined();
     }
   });
 
@@ -126,9 +126,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
       for (const event of events) {
         expect(event.type).toBe('alert');
-        expect(event.episode).toBeDefined();
+        expect(event.alert).toBeDefined();
         expect(event.alert?.id).toBeDefined();
-        expect(['inactive', 'pending', 'active', 'recovering']).toContain(event.episode!.status);
+        expect(['inactive', 'pending', 'active', 'recovering']).toContain(event.alert!.status);
       }
     }
   );
@@ -501,7 +501,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
       const pendingCounts = events
         .filter((event) => event.alert?.status === 'pending')
-        .map((event) => event.episode!.status_count)
+        .map((event) => event.alert!.status_count)
         .filter((count): count is number => typeof count === 'number');
 
       expect(pendingCounts).toHaveLength(2);
@@ -705,7 +705,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
       const recoveringCounts = events
         .filter((event) => event.alert?.status === 'recovering')
-        .map((event) => event.episode!.status_count)
+        .map((event) => event.alert!.status_count)
         .filter((count): count is number => typeof count === 'number');
 
       // Every recovering event must carry a status_count, and we must have
@@ -1139,7 +1139,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       // None of the pending events should have status_count high enough to
       // satisfy the count threshold on their own.
       for (const event of pendingEvents) {
-        expect(event.episode!.status_count!).toBeLessThan(1000);
+        expect(event.alert!.status_count!).toBeLessThan(1000);
       }
     }
   );
@@ -1200,7 +1200,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       expect(inactiveEvents.length).toBeGreaterThanOrEqual(1);
 
       for (const event of recoveringEvents) {
-        expect(event.episode!.status_count!).toBeLessThan(1000);
+        expect(event.alert!.status_count!).toBeLessThan(1000);
       }
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
@@ -1280,7 +1280,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       expect(inactiveEvents).toHaveLength(0);
 
       for (const event of recoveringEvents) {
-        expect(event.episode!.status_count!).toBeLessThan(1000);
+        expect(event.alert!.status_count!).toBeLessThan(1000);
       }
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
@@ -1350,7 +1350,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       expect(activeEvents).toHaveLength(0);
 
       for (const event of pendingEvents) {
-        expect(event.episode!.status_count!).toBeLessThan(1000);
+        expect(event.alert!.status_count!).toBeLessThan(1000);
       }
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
@@ -1411,7 +1411,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       // status_count must have observed value 1 in pending (proves the
       // count side was being walked) and must not be set on active events.
       const pendingCounts = pendingEvents
-        .map((event) => event.episode!.status_count)
+        .map((event) => event.alert!.status_count)
         .filter((count): count is number => typeof count === 'number');
 
       expect(pendingCounts).toContain(1);

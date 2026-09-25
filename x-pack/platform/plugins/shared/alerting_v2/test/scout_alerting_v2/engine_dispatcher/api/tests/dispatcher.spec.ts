@@ -74,8 +74,8 @@ const relativeTime = (secondsAgo: number, base: number = Date.now()): string =>
 interface BuildAlertEventInput {
   ruleId: NonNullable<AlertEvent['rule']>['id'];
   groupHash: AlertEvent['group_hash'];
-  episodeId: NonNullable<AlertEvent['episode']>['id'];
-  episodeStatus: NonNullable<AlertEvent['episode']>['status'];
+  episodeId: NonNullable<AlertEvent['alert']>['id'];
+  episodeStatus: NonNullable<AlertEvent['alert']>['status'];
   status: AlertEvent['status'];
   data?: AlertEvent['data'];
   timestamp: AlertEvent['@timestamp'];
