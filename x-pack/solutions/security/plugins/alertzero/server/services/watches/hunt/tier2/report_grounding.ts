@@ -192,11 +192,77 @@ const appearsAsTerm = (text: string, value: string): boolean => {
 const asFunction = (node: ESQLAstNode): ESQLFunction | undefined =>
   !Array.isArray(node) && 'type' in node && node.type === 'function' ? node : undefined;
 
-const isMetadataColumn = (node: ESQLAstNode): boolean =>
-  !Array.isArray(node) &&
-  'type' in node &&
-  node.type === 'column' &&
-  METADATA_COLUMNS.has(node.name.toLowerCase());
+const columnNameOf = (node: ESQLAstNode): string | undefined =>
+  !Array.isArray(node) && 'type' in node && node.type === 'column'
+    ? node.name.toLowerCase()
+    : undefined;
+
+/**
+ * Columns the query fills with a value of its own rather than reading from the document. An `EVAL`
+ * whose definition mentions no column is a constant for every row, so a predicate comparing one
+ * to the report's artifact is satisfied by every row in scope while reading as a hunt for it:
+ *
+ *     FROM logs-aws.* | EVAL label = "AssumeRole" | WHERE label == "AssumeRole" | LIMIT 1
+ *
+ * A column derived *from* a field is not in this set, because a predicate on one does narrow which
+ * documents match — `EVAL lowered = TO_LOWER(user.name)` and a `GROK` capture both do — and the
+ * generation contract invites that shape. Definitions are read in pipeline order so an alias
+ * defined from another constant is itself constant, and a `RENAME` carries the property across.
+ */
+const collectConstantColumns = (
+  query: ESQLAstQueryExpression,
+  inherited: ReadonlySet<string>
+): ReadonlySet<string> => {
+  const constants = new Set(inherited);
+  for (const command of query.commands) {
+    if (command.name === 'rename') {
+      for (const arg of command.args) {
+        // `RENAME old AS new` parses as an `as` function, source first and target second.
+        const assignment = asFunction(arg);
+        if (!assignment || assignment.name !== 'as' || assignment.args.length < 2) continue;
+        const source = columnNameOf(assignment.args[0]);
+        const target = columnNameOf(assignment.args[1]);
+        if (source && target && constants.has(source)) constants.add(target);
+      }
+      continue;
+    }
+    if (command.name !== 'eval') continue;
+    for (const arg of command.args) {
+      const assignment = asFunction(arg);
+      if (!assignment || assignment.name !== '=' || assignment.args.length < 2) continue;
+      const name = columnNameOf(assignment.args[0]);
+      if (!name) continue;
+      let readsDocument = false;
+      Walker.walk(assignment.args[1], {
+        visitColumn: (column) => {
+          if (!constants.has(column.name.toLowerCase())) readsDocument = true;
+        },
+      });
+      if (!readsDocument) constants.add(name);
+    }
+  }
+  return constants;
+};
+
+/**
+ * Whether a comparison reads something that tells nothing about the document it came from: a
+ * metadata field, which restates the scope the hunt already fixed, or a column the query filled
+ * with a constant. The whole comparison is searched, so wrapping either in a function does not
+ * hide it.
+ */
+const readsNothingFromTheDocument = (
+  comparison: ESQLFunction,
+  constantColumns: ReadonlySet<string>
+): boolean => {
+  let found = false;
+  Walker.walk(comparison, {
+    visitColumn: (column) => {
+      const name = column.name.toLowerCase();
+      if (METADATA_COLUMNS.has(name) || constantColumns.has(name)) found = true;
+    },
+  });
+  return found;
+};
 
 const LIKE_WILDCARDS = /[*?]+/;
 const REGEXP_METACHARACTERS = /[.*+?()[\]{}^$\\]+/g;
@@ -282,6 +348,13 @@ const listValuesOf = (args: ESQLAstNode[]): string[] | undefined => {
   return literals.length === list.values.length ? literals : [];
 };
 
+interface GroundingRules {
+  /** Whether a literal read by this operator is a value drawn from the report. */
+  grounds: (operator: string, literal: string) => boolean;
+  /** Columns the query populated itself, so far in this pipeline. */
+  constantColumns: ReadonlySet<string>;
+}
+
 /**
  * Whether a predicate constrains the rows it returns to a value drawn from the report.
  *
@@ -293,27 +366,27 @@ const listValuesOf = (args: ESQLAstNode[]): string[] | undefined => {
  */
 const isPositivelyGrounded = (
   node: ESQLAstNode | ESQLAstNode[],
-  grounds: (operator: string, literal: string) => boolean
+  rules: GroundingRules
 ): boolean => {
   if (Array.isArray(node)) {
-    return node.some((child) => isPositivelyGrounded(child, grounds));
+    return node.some((child) => isPositivelyGrounded(child, rules));
   }
   const fn = asFunction(node);
   // A bare column, literal or list constrains nothing by itself.
   if (!fn) return false;
 
   const operator = fn.name.toLowerCase();
-  if (operator === 'and') return fn.args.some((arg) => isPositivelyGrounded(arg, grounds));
-  if (operator === 'or') return fn.args.every((arg) => isPositivelyGrounded(arg, grounds));
+  if (operator === 'and') return fn.args.some((arg) => isPositivelyGrounded(arg, rules));
+  if (operator === 'or') return fn.args.every((arg) => isPositivelyGrounded(arg, rules));
   if (NEGATING_OPERATORS.has(operator) || QUERY_STRING_FUNCTIONS.has(operator)) return false;
   if (!POSITIVE_MATCH_OPERATORS.has(operator) && !FULL_TEXT_FUNCTIONS.has(operator)) {
     // Range comparisons and everything else: a report value under `>` is a threshold, not a
     // search for the artifact.
     return false;
   }
-  // Comparing a metadata field restates the scope the hunt already fixed.
-  if (fn.args.some(isMetadataColumn)) return false;
+  if (readsNothingFromTheDocument(fn, rules.constantColumns)) return false;
 
+  const { grounds } = rules;
   const listValues = listValuesOf(fn.args);
   if (listValues) {
     // `IN (…)` is a set of alternatives, so it widens exactly as `OR` does: one ungrounded
@@ -335,14 +408,18 @@ const isPositivelyGrounded = (
  */
 const isPipelineGrounded = (
   query: ESQLAstQueryExpression,
-  grounds: (operator: string, literal: string) => boolean
+  grounds: GroundingRules['grounds'],
+  inheritedConstants: ReadonlySet<string> = new Set()
 ): boolean => {
   const { predicates, forks } = collectPipelineFilters(query);
+  const constantColumns = collectConstantColumns(query, inheritedConstants);
   // A predicate outside the fork applies to the union, so it grounds the branches too.
-  if (predicates.some((predicate) => isPositivelyGrounded(predicate, grounds))) return true;
+  if (predicates.some((predicate) => isPositivelyGrounded(predicate, { grounds, constantColumns })))
+    return true;
   return forks.some(
     (branches) =>
-      branches.length > 0 && branches.every((branch) => isPipelineGrounded(branch, grounds))
+      branches.length > 0 &&
+      branches.every((branch) => isPipelineGrounded(branch, grounds, constantColumns))
   );
 };
 
@@ -366,7 +443,8 @@ const isPipelineGrounded = (
  *
  * Where the predicate sits decides how much it has to carry. One grounded `WHERE` grounds a linear
  * pipeline, because its filters compose with `AND`; a `FORK` unions rows instead, so every branch
- * of one has to ground itself.
+ * of one has to ground itself. And what it compares has to come from the document: a column the
+ * query filled with a constant matches every row while reading as a hunt for the value in it.
  *
  * It remains a value test rather than a semantic one: it establishes that the report constrains
  * the rows, not that the constraint is tight. A tautology disjoined onto a grounded comparison is
@@ -433,7 +511,7 @@ export const assertEsqlGroundedInReport = (
   return {
     ok: false,
     reason: mentioned
-      ? 'query carries a report value but no predicate searches for it (negated, or one alternative among ungrounded branches)'
+      ? 'query carries a report value but no predicate searches the document for it (negated, compared against a value the query supplied itself, or one alternative among ungrounded branches)'
       : 'query filters on no value drawn from the report (no matching IOC or report literal in a filtering predicate)',
   };
 };

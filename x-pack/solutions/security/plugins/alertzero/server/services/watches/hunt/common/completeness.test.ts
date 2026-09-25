@@ -25,11 +25,18 @@ describe('huntCompletenessOf', () => {
     expect(completedSuccessfully(huntCompletenessOf([gap(reason)]))).toBe(false);
   });
 
+  it.each<HuntIncompleteReason>(['query_out_of_scope', 'query_ungrounded', 'quote_ungrounded'])(
+    'treats %s as retryable, because the model may answer differently next run',
+    (reason) => {
+      // The gate that refused the output is deterministic; the output is not. Retiring the
+      // report here would record a technique as hunted that was never searched for.
+      expect(huntCompletenessOf([gap(reason)])).toBe('incomplete_retryable');
+      expect(completedSuccessfully(huntCompletenessOf([gap(reason)]))).toBe(false);
+    }
+  );
+
   it.each<HuntIncompleteReason>([
     'generation_budget',
-    'query_out_of_scope',
-    'query_ungrounded',
-    'quote_ungrounded',
     'unknown_technique_id',
     'rows_unclassifiable',
     'refs_unavailable',

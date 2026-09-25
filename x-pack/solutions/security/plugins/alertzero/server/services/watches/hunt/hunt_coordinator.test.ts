@@ -898,7 +898,11 @@ describe('huntCoordinator', () => {
       mockT2.mockResolvedValueOnce(
         tier2Result({
           incomplete: [
-            { reason: 'query_out_of_scope', technique_id: 'T1078.004', detail: 'FROM elsewhere' },
+            {
+              reason: 'unknown_technique_id',
+              technique_id: 'T9999',
+              detail: 'not in the ATT&CK catalog',
+            },
           ],
         })
       );

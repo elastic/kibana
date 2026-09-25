@@ -222,7 +222,7 @@ describe('assertEsqlGroundedInReport', () => {
       const result = assertEsqlGroundedInReport(query, { reportText, iocValues: [] });
       expect(result).toEqual({
         ok: false,
-        reason: expect.stringContaining('no predicate searches for it'),
+        reason: expect.stringContaining('no predicate searches the document for it'),
       });
     });
 
@@ -259,6 +259,48 @@ describe('assertEsqlGroundedInReport', () => {
       // A report value under `>` is a threshold, not a search for the artifact.
       const query = 'FROM logs-aws.* | WHERE aws.cloudtrail.count > 123456789012';
       expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(false);
+    });
+  });
+
+  describe('a predicate has to compare something read from the document', () => {
+    it.each([
+      [
+        'a constant alias',
+        'FROM logs-aws.* | EVAL label = "AssumeRole" | WHERE label == "AssumeRole" | LIMIT 1',
+      ],
+      [
+        'a constant alias defined from another',
+        'FROM logs-aws.* | EVAL label = "AssumeRole", copy = label | WHERE copy == "AssumeRole"',
+      ],
+      [
+        'a renamed constant alias',
+        'FROM logs-aws.* | EVAL label = "AssumeRole" | RENAME label AS tag | WHERE tag == "AssumeRole"',
+      ],
+      [
+        'a constant alias wrapped in a function',
+        'FROM logs-aws.* | EVAL label = "AssumeRole" | WHERE TO_UPPER(label) == "ASSUMEROLE"',
+      ],
+    ])('rejects a filter comparing %s to the report value', (_label, query) => {
+      // Every row satisfies the predicate whatever its telemetry says, so the query returns an
+      // arbitrary row of a required index while reading as a hunt for the report's artifact.
+      const result = assertEsqlGroundedInReport(query, { reportText, iocValues: [] });
+      expect(result).toEqual({
+        ok: false,
+        reason: expect.stringContaining('a value the query supplied itself'),
+      });
+    });
+
+    it.each([
+      [
+        'an EVAL over a document field',
+        'FROM logs-aws.* | EVAL action = TO_LOWER(event.action) | WHERE action == "assumerole"',
+      ],
+      [
+        'a GROK capture',
+        'FROM logs-aws.* | GROK message "%{WORD:verb}" | WHERE verb == "AssumeRole"',
+      ],
+    ])('accepts a filter on %s, which does narrow the rows', (_label, query) => {
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues: [] }).ok).toBe(true);
     });
   });
 
