@@ -34,8 +34,20 @@ import type { RuleAttachmentData } from '../attachments/rule';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
-const RULE_CREATION_GENERIC_ERROR_MESSAGE =
-  'Failed to create detection rule. Please try again or refine your request.';
+const RULE_CREATION_ERROR_PREFIX = 'Failed to create detection rule';
+const RULE_CREATION_GENERIC_ERROR_MESSAGE = `${RULE_CREATION_ERROR_PREFIX}. Please try again or refine your request.`;
+
+/**
+ * Builds the error message returned to the agent. The underlying reasons are included so the agent
+ * can tell the user what actually went wrong (e.g. a missing index privilege) instead of guessing.
+ */
+const buildRuleCreationErrorMessage = (reasons: string[]): string => {
+  const detail = reasons
+    .map((reason) => reason.trim())
+    .filter(Boolean)
+    .join('; ');
+  return detail ? `${RULE_CREATION_ERROR_PREFIX}: ${detail}` : RULE_CREATION_GENERIC_ERROR_MESSAGE;
+};
 
 const isRuleAttachment = (
   attachment: VersionedAttachment
@@ -331,7 +343,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               {
                 type: ToolResultType.error,
                 data: {
-                  message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
+                  message: buildRuleCreationErrorMessage(result.errors),
                 },
               },
             ],
@@ -411,7 +423,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
             {
               type: ToolResultType.error,
               data: {
-                message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
+                message: buildRuleCreationErrorMessage([error.message]),
               },
             },
           ],

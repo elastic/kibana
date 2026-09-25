@@ -788,7 +788,7 @@ describe('createDetectionRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to create detection rule. Please try again or refine your request.',
+              message: 'Failed to create detection rule: Error 1; Error 2',
             },
           },
         ],
@@ -798,6 +798,29 @@ describe('createDetectionRuleTool', () => {
     it('handles exceptions and returns error result', async () => {
       const mockError = new Error('Test error');
       mockGetBuildAgent.mockRejectedValue(mockError);
+
+      const result = await tool.handler(
+        { user_query: userQuery },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents,
+        })
+      );
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: 'Failed to create detection rule: Test error',
+            },
+          },
+        ],
+      });
+    });
+
+    it('falls back to the generic message when the failure has no reason', async () => {
+      mockGetBuildAgent.mockRejectedValue(new Error(''));
 
       const result = await tool.handler(
         { user_query: userQuery },
