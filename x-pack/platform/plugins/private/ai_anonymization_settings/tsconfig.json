@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "test/scout/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/management-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
+    "@kbn/inference-common",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-components-field-row",
+    "@kbn/react-kibana-context-render",
+    "@kbn/app-header",
+    "@kbn/scout"
+  ],
+  "exclude": ["target/**/*"]
+}
