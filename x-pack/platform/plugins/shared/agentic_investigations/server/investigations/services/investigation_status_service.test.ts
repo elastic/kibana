@@ -215,7 +215,8 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
       .mockResolvedValue({});
 
     const get = jest.fn().mockImplementation(() => {
-      if (!getProposalResult) return Promise.resolve({ decision: 'dismissed', status: 'decided', expired: false });
+      if (!getProposalResult)
+        return Promise.resolve({ decision: 'dismissed', status: 'decided', expired: false });
       if (getProposalResult instanceof Error) return Promise.reject(getProposalResult);
       return Promise.resolve(getProposalResult);
     });
@@ -246,7 +247,9 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
   };
 
   it('skips a proposal that was already decided (conflict, re-read shows decided)', async () => {
-    const conflictErr = Object.assign(new Error('already decided'), { name: 'ProposalConflictError' });
+    const conflictErr = Object.assign(new Error('already decided'), {
+      name: 'ProposalConflictError',
+    });
     const { service, releaseGate, patchMetadata } = makeDismissService({
       releaseGateSideEffect: conflictErr,
       getProposalResult: { decision: 'approved', status: 'decided', expired: false },
@@ -289,10 +292,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const proposalsService = {
       list: jest.fn().mockResolvedValue({ proposals: [{ id: 'p-1' }], total: 1 }),
-      releaseGate: jest
-        .fn()
-        .mockRejectedValueOnce(conflictErr)
-        .mockRejectedValueOnce(retryErr),
+      releaseGate: jest.fn().mockRejectedValueOnce(conflictErr).mockRejectedValueOnce(retryErr),
       get: jest.fn().mockResolvedValue({ decision: undefined, status: 'pending', expired: false }),
     };
     const proposals = {
