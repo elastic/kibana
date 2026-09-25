@@ -50,13 +50,6 @@ export const useServicesBootstrap = (
   const enableLensVisService = options?.enableLensVisService;
   const propsRef = useRef<UseUnifiedHistogramProps>(props);
   propsRef.current = props;
-  const stateRef = useRef(state);
-  stateRef.current = state;
-  const fetchGenRef = useRef(0);
-  const enableLensVisServiceRef = useRef(enableLensVisService);
-  enableLensVisServiceRef.current = enableLensVisService;
-  const servicesRef = useRef(services);
-  servicesRef.current = services;
 
   const initialBreakdownField = useMemo(
     () =>
@@ -65,8 +58,6 @@ export const useServicesBootstrap = (
         : undefined,
     [localStorageKeyPrefix, services.storage]
   );
-  const initialBreakdownFieldRef = useRef(initialBreakdownField);
-  initialBreakdownFieldRef.current = initialBreakdownField;
 
   useEffect(() => {
     if (state.fetchParams) {
@@ -77,29 +68,6 @@ export const useServicesBootstrap = (
       });
     }
   }, [state, fetch$]);
-
-  useEffect(() => {
-    if (!lensVisService) {
-      return;
-    }
-    const subscription = lensVisService.state$.subscribe((nextLensVisServiceState) => {
-      setState((prev) => {
-        if (
-          prev.lensVisService !== lensVisService ||
-          prev.lensVisServiceState === nextLensVisServiceState
-        ) {
-          return prev;
-        }
-        return {
-          ...prev,
-          lensVisServiceState: nextLensVisServiceState,
-        };
-      });
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [lensVisService]);
 
   const [stateService] = useState(() => {
     return createStateService({
@@ -127,30 +95,21 @@ export const useServicesBootstrap = (
 
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: async (params) => {
-      const gen = ++fetchGenRef.current;
       const { fetchParams: nextFetchParams, lensDataView } = await processFetchParams({
         params,
-        services: servicesRef.current,
-        initialBreakdownField: initialBreakdownFieldRef.current,
+        services,
+        initialBreakdownField,
       });
-      if (gen !== fetchGenRef.current) {
-        return;
-      }
-      let updatedLensVisService = stateRef.current.lensVisService;
-      if (!updatedLensVisService && enableLensVisServiceRef.current) {
-        const apiHelper = await servicesRef.current.lens.stateHelperApi();
-        if (gen !== fetchGenRef.current) {
-          return;
-        }
-        updatedLensVisService =
-          stateRef.current.lensVisService ??
-          new LensVisService({
-            services: servicesRef.current,
-            lensSuggestionsApi: apiHelper.suggestions,
-          });
+      let updatedLensVisService = lensVisService;
+      if (!updatedLensVisService && enableLensVisService) {
+        const apiHelper = await services.lens.stateHelperApi();
+        updatedLensVisService = new LensVisService({
+          services,
+          lensSuggestionsApi: apiHelper.suggestions,
+        });
       }
       let updatedLensVisServiceState: LensVisServiceState | undefined;
-      if (updatedLensVisService && enableLensVisServiceRef.current && lensDataView) {
+      if (updatedLensVisService && enableLensVisService && lensDataView) {
         updatedLensVisServiceState = updatedLensVisService.update({
           externalVisContext: nextFetchParams.externalVisContext,
           queryParams: {
@@ -185,9 +144,6 @@ export const useServicesBootstrap = (
               }
             : undefined,
         });
-      }
-      if (gen !== fetchGenRef.current) {
-        return;
       }
       setState({
         fetchParams: nextFetchParams,

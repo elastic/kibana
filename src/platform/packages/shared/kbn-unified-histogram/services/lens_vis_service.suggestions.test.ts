@@ -11,7 +11,7 @@ import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { allSuggestionsMock, histogramESQLSuggestionMock } from '../__mocks__/suggestions';
+import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { UnifiedHistogramSuggestionType, type UnifiedHistogramVisContext } from '../types';
@@ -768,44 +768,5 @@ describe('LensVisService suggestions', () => {
     });
 
     expect(onLensSuggestionsApiCall).toHaveBeenCalledWith(expect.anything(), undefined);
-  });
-
-  test('should publish an edited Line histogram to state$', async () => {
-    const lensVis = await getLensVisMock({
-      filters: [],
-      query: { esql: 'from the-data-view | limit 10' },
-      dataView: dataViewMock,
-      timeInterval: 'auto',
-      timeRange: {
-        from: '2023-09-03T08:00:00.000Z',
-        to: '2023-09-04T08:56:28.274Z',
-      },
-      breakdownField: undefined,
-      columns: [],
-      isPlainRecord: true,
-      allSuggestions: [],
-      isTransformationalESQL: false,
-    });
-
-    lensVis.lensService.onSuggestionEdited({
-      editedSuggestionContext: {
-        type: UnifiedHistogramSuggestionType.histogramForESQL,
-        suggestion: {
-          ...histogramESQLSuggestionMock,
-          title: 'Line',
-          visualizationState: {
-            ...histogramESQLSuggestionMock.visualizationState,
-            preferredSeriesType: 'line',
-          },
-        },
-      },
-    });
-
-    const visContext = lensVis.lensService.state$.getValue().visContext;
-    expect(visContext?.attributes.title).toBe('Line');
-    expect(
-      (visContext?.attributes.state.visualization as { preferredSeriesType?: string })
-        .preferredSeriesType
-    ).toBe('line');
   });
 });

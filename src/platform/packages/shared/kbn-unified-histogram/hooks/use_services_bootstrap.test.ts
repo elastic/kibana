@@ -16,7 +16,6 @@ import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewSource } from '@kbn/data-source';
-import { processFetchParams } from '../utils/process_fetch_params';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
@@ -24,25 +23,10 @@ jest.mock('@kbn/discover-utils', () => ({
   ...jest.requireActual('@kbn/discover-utils/src/constants'),
   getBreakdownField: jest.fn(),
 }));
-jest.mock('../utils/process_fetch_params', () => {
-  const actual = jest.requireActual('../utils/process_fetch_params');
-  return {
-    ...actual,
-    processFetchParams: jest.fn((...args: unknown[]) =>
-      actual.processFetchParams(
-        ...(args as Parameters<typeof actual.processFetchParams>)
-      )
-    ),
-  };
-});
 
 const createStateServiceMock = createStateService as jest.MockedFunction<typeof createStateService>;
 const useStatePropsMock = useStateProps as jest.MockedFunction<typeof useStateProps>;
 const getBreakdownFieldMock = getBreakdownField as jest.MockedFunction<typeof getBreakdownField>;
-const processFetchParamsMock = processFetchParams as jest.MockedFunction<typeof processFetchParams>;
-const { processFetchParams: actualProcessFetchParams } = jest.requireActual(
-  '../utils/process_fetch_params'
-);
 
 describe('useServicesBootstrap', () => {
   const localStorageKeyPrefix = 'discover';
@@ -51,7 +35,6 @@ describe('useServicesBootstrap', () => {
   };
 
   beforeEach(() => {
-    processFetchParamsMock.mockImplementation(actualProcessFetchParams);
     useStatePropsMock.mockReturnValue({
       chart: {
         hidden: false,
@@ -117,73 +100,5 @@ describe('useServicesBootstrap', () => {
       fetchParams: hook.result.current.fetchParams,
       lensVisServiceState: hook.result.current.lensVisServiceState,
     });
-  });
-
-  it('reuses LensVisService and ignores a stale overlapping fetch', async () => {
-    const hook = renderHook(() =>
-      useServicesBootstrap(
-        {
-          services: unifiedHistogramServicesMock,
-          localStorageKeyPrefix,
-        },
-        { enableLensVisService: true }
-      )
-    );
-
-    const baseFetchParams: UnifiedHistogramFetchParamsExternal = {
-      searchSessionId: 'first',
-      dataSource: new DataViewSource(dataViewWithTimefieldMock),
-      query,
-      relativeTimeRange: { from: 'now-15m', to: 'now' },
-      requestAdapter: new RequestAdapter(),
-    };
-
-    await act(async () => {
-      await hook.result.current.api.fetch(baseFetchParams);
-    });
-
-    const lensVisService = hook.result.current.lensVisService;
-    expect(lensVisService).toBeDefined();
-
-    let resolveStaleFetch: (value: unknown) => void = () => {};
-    const staleFetchGate = new Promise((resolve) => {
-      resolveStaleFetch = resolve;
-    });
-
-    processFetchParamsMock.mockImplementation(async (args) => {
-      const result = await actualProcessFetchParams(args);
-      if (args.params.searchSessionId === 'stale-area') {
-        await staleFetchGate;
-      }
-      return result;
-    });
-
-    let staleFetchDone = false;
-    const staleFetch = hook.result.current.api.fetch({
-      ...baseFetchParams,
-      searchSessionId: 'stale-area',
-    });
-    void staleFetch.then(() => {
-      staleFetchDone = true;
-    });
-
-    await act(async () => {
-      await hook.result.current.api.fetch({
-        ...baseFetchParams,
-        searchSessionId: 'line',
-      });
-    });
-
-    expect(hook.result.current.fetchParams?.searchSessionId).toBe('line');
-    expect(hook.result.current.lensVisService).toBe(lensVisService);
-
-    await act(async () => {
-      resolveStaleFetch(undefined);
-      await staleFetch;
-    });
-
-    expect(staleFetchDone).toBe(true);
-    expect(hook.result.current.fetchParams?.searchSessionId).toBe('line');
-    expect(hook.result.current.lensVisService).toBe(lensVisService);
   });
 });
