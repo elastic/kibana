@@ -215,7 +215,7 @@ describe('convertGraphEvents', () => {
     expect(events).toEqual([{ type: ChatEventType.backgroundAgentComplete, data: { execution } }]);
   });
 
-  it('emits compaction_started for a compaction request and substitution_applied for substitution appends', async () => {
+  it('emits substitution_applied for substitution appends, and nothing for a compaction request', async () => {
     const substitution = {
       substituted_tool_call_ids: ['c1'],
       trigger: 'intra_round' as const,
@@ -232,10 +232,7 @@ describe('convertGraphEvents', () => {
       }),
       chainEnd(steps.contextManagement, {}),
     ]);
-    expect(events).toEqual([
-      { type: ChatEventType.compactionStarted, data: { token_count_before: 85_000 } },
-      { type: ChatEventType.substitutionApplied, data: substitution },
-    ]);
+    expect(events).toEqual([{ type: ChatEventType.substitutionApplied, data: substitution }]);
   });
 
   it('emits compaction_completed from compactContext compaction appends', async () => {

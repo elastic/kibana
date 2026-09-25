@@ -8,7 +8,12 @@
 import type { ChatCompleteCacheControl, InferenceConnector } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { SubstitutionStepData, ToolCallStep } from '@kbn/agent-builder-common';
-import { ConversationRoundStepType, createSubstitutionStep } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStepType,
+  createSubstitutionStep,
+} from '@kbn/agent-builder-common';
+import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import {
@@ -42,6 +47,7 @@ export interface PreviousRoundInfo {
 export interface ContextManagementDeps extends VisibleContextDeps {
   conversation: ProcessedConversation;
   chatModel: InferenceChatModel;
+  events: AgentEventEmitter;
   connector: InferenceConnector;
   cacheControl?: ChatCompleteCacheControl;
   abortSignal?: AbortSignal;
@@ -210,6 +216,11 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
         conversation: deps.conversation,
         run: toCurrentRun(state),
         tailCapTokens: request.tailCapTokens,
+        onStart: () =>
+          deps.events.emit({
+            type: ChatEventType.compactionStarted,
+            data: { token_count_before: request.tokensBefore },
+          }),
       },
       { ...deps, budget }
     );

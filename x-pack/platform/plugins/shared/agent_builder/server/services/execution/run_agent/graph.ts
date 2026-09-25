@@ -96,13 +96,17 @@ export const createAgentGraph = ({
   /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
-  contextManagement: Omit<ContextManagementDeps, 'conversation' | 'chatModel' | 'cacheControl'>;
+  contextManagement: Omit<
+    ContextManagementDeps,
+    'conversation' | 'chatModel' | 'cacheControl' | 'events'
+  >;
 }) => {
   const contextManagementNodes = createContextManagementNodes({
     ...contextManagement,
     conversation: processedConversation,
     chatModel,
     cacheControl,
+    events,
   });
 
   const init = async (): Promise<StateUpdate> => {
@@ -167,7 +171,7 @@ export const createAgentGraph = ({
       const inputTokens = response.usage_metadata?.input_tokens;
       const usageUpdate: StateUpdate = {
         contextRetryCount: 0,
-        ...(inputTokens !== undefined ? { lastCallUsage: { inputTokens } } : {}),
+        lastCallUsage: inputTokens !== undefined ? { inputTokens } : undefined,
       };
 
       if (turn.outcome.type === 'retry_error') {

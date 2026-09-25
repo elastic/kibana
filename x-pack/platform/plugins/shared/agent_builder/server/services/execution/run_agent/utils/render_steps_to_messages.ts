@@ -290,8 +290,15 @@ const renderToolCallGroup = async (
   const trailing: BaseMessage[] = [];
   if (current) {
     if (current.imageResolver) {
-      const withImages = calls.filter((call) => !isSubstituted(call, context));
-      trailing.push(...(await renderImageMessages(withImages, current.imageResolver)));
+      // Images of a marked call are only dropped when their own result was substituted.
+      const rendered = await Promise.all(
+        calls.map(async (call) =>
+          current.substitution && isSubstituted(call, current)
+            ? { ...call, results: await current.substitution.substitute(call) }
+            : call
+        )
+      );
+      trailing.push(...(await renderImageMessages(rendered, current.imageResolver)));
     }
     if (cycle !== undefined) {
       // Add system reminder about being close to the limit when only 5 cycles left.

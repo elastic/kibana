@@ -20,6 +20,7 @@ import {
   isSubstitutionCandidate,
   selectSubstitutionCandidates,
   substituteToolCallResults,
+  SUBSTITUTION_MIN_RESULT_TOKENS,
 } from './filestore_substitution';
 
 const logger = { warn: jest.fn(), debug: jest.fn() } as unknown as Logger;
@@ -94,7 +95,7 @@ describe('substituteToolCallResults', () => {
         params: {},
         results: [other('r1'), other('r2')],
       },
-      resultStore: store({ r1: 500 }),
+      resultStore: store({ r1: 5_000 }),
       logger,
     });
     expect(results[0]).toEqual(
@@ -104,6 +105,37 @@ describe('substituteToolCallResults', () => {
     expect(results[1]).toEqual(other('r2'));
     expect(logger.warn).toHaveBeenCalledTimes(1);
   });
+
+  it('keeps results at or below the minimum size inline', async () => {
+    const results = await substituteToolCallResults({
+      toolCall: {
+        tool_call_id: 'c',
+        tool_id: 't',
+        params: {},
+        results: [other('big'), other('small')],
+      },
+      resultStore: store({ big: 5_000, small: SUBSTITUTION_MIN_RESULT_TOKENS }),
+      logger,
+    });
+    expect(results.map(({ type }) => type)).toEqual([
+      ToolResultType.fileReference,
+      ToolResultType.other,
+    ]);
+  });
+
+  it('keeps tool-specific summaries inline', async () => {
+    const summary = {
+      type: ToolResultType.other,
+      tool_result_id: 'r1',
+      data: { v: 'short', _summary: true },
+    } as ToolResult;
+    const results = await substituteToolCallResults({
+      toolCall: { tool_call_id: 'c', tool_id: 't', params: {}, results: [summary] },
+      resultStore: store({ r1: 5_000 }),
+      logger,
+    });
+    expect(results).toEqual([summary]);
+  });
 });
 
 describe('createMarkedResultTransformer', () => {
@@ -111,7 +143,7 @@ describe('createMarkedResultTransformer', () => {
     const base = jest.fn(async (tc) => tc.results);
     const transform = createMarkedResultTransformer({
       marks: new Set(['marked']),
-      resultStore: store({ r: 1 }),
+      resultStore: store({ r: 5_000 }),
       base,
       logger,
     });

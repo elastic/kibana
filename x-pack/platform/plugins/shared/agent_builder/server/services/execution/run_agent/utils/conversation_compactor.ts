@@ -44,6 +44,8 @@ export interface CompactContextInput {
   run: CurrentRun;
   /** Max tokens of completed cycles kept verbatim before the current one. */
   tailCapTokens: number;
+  /** Called once the covered range is known, before summarizing: the compaction will complete. */
+  onStart?: () => void;
 }
 
 export interface CompactContextDeps extends VisibleContextDeps {
@@ -118,16 +120,18 @@ interface RenderedUnit {
  *
  * 1. Split what the existing summary leaves visible into cycles: history cycles, then the
  *    current run's.
- * 2. Keep the current (last) cycle unconditionally and walk backwards while the preserved tail
- *    stays under `tailCapTokens`; everything before is covered, up to the last cycle that has a
- *    stable anchor for the cursor.
+ * 2. Keep the current run's last cycle unconditionally and walk backwards while the preserved
+ *    tail stays under `tailCapTokens`; everything before is covered, up to the last cycle that has
+ *    a stable anchor for the cursor.
  * 3. Summarize the covered cycles on top of the existing summary, in requests budgeted on their
- *    rendered size; the programmatic tool-call fields accumulate across compactions.
+ *    rendered size; the programmatic tool-call fields accumulate across compactions. When the
+ *    summarizer fails, the covered cycles are still dropped, with only the programmatic fields
+ *    added to the existing summary.
  *
- * Returns `undefined` when there is nothing to compact or the summarizer failed.
+ * Returns `undefined` when there is nothing to compact or the run was aborted.
  */
 export const compactContext = async (
-  { conversation, run, tailCapTokens }: CompactContextInput,
+  { conversation, run, tailCapTokens, onStart }: CompactContextInput,
   deps: CompactContextDeps
 ): Promise<CompactContextResult | undefined> => {
   const existingSummary = run.compactionSummary;
@@ -142,15 +146,16 @@ export const compactContext = async (
     rendered.push({ unit, messages, tokens: estimateMessagesTokens(messages) });
   }
 
-  // Only the current cycle is left: nothing can be covered.
-  if (rendered.length <= 1) {
+  // At round start with no current step, the last unit is history and can be covered too.
+  const pinnedCount = rendered.at(-1)?.unit.kind === 'current_cycle' ? 1 : 0;
+  if (rendered.length <= pinnedCount) {
     deps.logger.debug(`[compactor] no-op: ${rendered.length} visible unit(s)`);
     return undefined;
   }
 
   let tailTokens = 0;
-  let firstPreserved = rendered.length - 1;
-  for (let i = rendered.length - 2; i >= 0; i--) {
+  let firstPreserved = rendered.length - pinnedCount;
+  for (let i = firstPreserved - 1; i >= 0; i--) {
     if (tailTokens + rendered[i].tokens > tailCapTokens) {
       break;
     }
@@ -185,6 +190,7 @@ export const compactContext = async (
       existingSummary?.token_count ?? 0
     }`
   );
+  onStart?.();
 
   const added = extractProgrammaticSummary(
     covered.flatMap(({ unit }) => unitToolCalls(unit, run.steps))
@@ -200,39 +206,82 @@ export const compactContext = async (
     ],
   };
 
+  let llmOutput: LlmCompactionOutput;
   try {
-    const llmOutput = await generateLlmSummary({
+    llmOutput = await generateLlmSummary({
       covered,
       userMessage: view.history.input.message,
       programmatic,
       existingSummary,
       deps,
     });
-
-    const structuredData: CompactionStructuredData = { ...llmOutput, ...programmatic };
-    const coveredRoundIds = fullyCoveredRoundIds(
-      view.history.entries,
-      resolveVisibility({ entries: view.history.entries, steps: run.steps, cursor })
-    );
-    const summary: CompactionSummary = {
-      summarized_up_to: cursor,
-      summarized_round_count: coveredRoundIds.length,
-      covered_round_ids: coveredRoundIds,
-      created_at: new Date().toISOString(),
-      token_count: estimateTokens(serializeCompactionSummary(structuredData)),
-      structured_data: structuredData,
-    };
-
-    return {
-      summary,
-      tokensBefore,
-      tokensAfter: preserved.reduce((sum, { tokens }) => sum + tokens, 0) + summary.token_count,
-      summarizedCycleCount: covered.length,
-    };
   } catch (error) {
-    deps.logger.error(`Compaction summarization failed, keeping the existing summary: ${error}`);
-    return undefined;
+    if (deps.abortSignal?.aborted) {
+      return undefined;
+    }
+    deps.logger.error(
+      `Compaction summarization failed, falling back to the programmatic summary: ${error}`
+    );
+    llmOutput = fallbackLlmOutput({ existingSummary, userMessage: view.history.input.message });
   }
+
+  const structuredData: CompactionStructuredData = { ...llmOutput, ...programmatic };
+  const coveredRoundIds = fullyCoveredRoundIds(
+    view.history.entries,
+    resolveVisibility({ entries: view.history.entries, steps: run.steps, cursor })
+  );
+  const summary: CompactionSummary = {
+    summarized_up_to: cursor,
+    summarized_round_count: coveredRoundIds.length,
+    covered_round_ids: coveredRoundIds,
+    created_at: new Date().toISOString(),
+    token_count: estimateTokens(serializeCompactionSummary(structuredData)),
+    structured_data: structuredData,
+  };
+
+  return {
+    summary,
+    tokensBefore,
+    tokensAfter: preserved.reduce((sum, { tokens }) => sum + tokens, 0) + summary.token_count,
+    summarizedCycleCount: covered.length,
+  };
+};
+
+/** The LLM half of the summary when the summarizer failed: the existing one, else placeholders. */
+const fallbackLlmOutput = ({
+  existingSummary,
+  userMessage,
+}: {
+  existingSummary?: CompactionSummary;
+  userMessage: string;
+}): LlmCompactionOutput => {
+  if (existingSummary) {
+    const {
+      discussion_summary: discussionSummary,
+      user_intent: userIntent,
+      entities,
+      key_topics: keyTopics,
+      outcomes_and_decisions: outcomesAndDecisions,
+      unanswered_questions: unansweredQuestions,
+    } = existingSummary.structured_data;
+    return {
+      discussion_summary: discussionSummary,
+      user_intent: userIntent,
+      entities,
+      key_topics: keyTopics,
+      outcomes_and_decisions: outcomesAndDecisions,
+      unanswered_questions: unansweredQuestions,
+    };
+  }
+  return {
+    discussion_summary:
+      'The earlier part of this conversation could not be summarized; only the tool calls made are listed.',
+    user_intent: userMessage,
+    entities: [],
+    key_topics: [],
+    outcomes_and_decisions: [],
+    unanswered_questions: [],
+  };
 };
 
 /** The longest prefix of `units` within `budget`; always at least the first one. */
@@ -312,7 +361,15 @@ const generateLlmSummary = async ({
     }
     remaining = remaining.slice(chunk.length);
 
-    output = await structuredModel.invoke(messages, { signal: abortSignal });
+    try {
+      output = await structuredModel.invoke(messages, { signal: abortSignal });
+    } catch (error) {
+      if (abortSignal?.aborted) {
+        throw error;
+      }
+      logger.warn(`Compaction summarizer request failed, retrying once: ${error}`);
+      output = await structuredModel.invoke(messages, { signal: abortSignal });
+    }
     // Only `structured_data` is read when rendering the prior; the other fields are placeholders.
     prior = {
       summarized_round_count: 0,

@@ -16,7 +16,13 @@ import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import { getToolCallEntryAbsolutePath } from '../../runner/store/volumes/tool_results/utils';
 import type { ProcessedTimelineEvent } from './context_timeline';
-import type { ToolCallResultTransformer } from './tool_summarization';
+import { isSummaryResult, type ToolCallResultTransformer } from './tool_summarization';
+
+/**
+ * Results of a marked tool call at or below this size stay inline: marking is per call, but a
+ * call can mix one large result with small ones.
+ */
+export const SUBSTITUTION_MIN_RESULT_TOKENS = 1_000;
 
 /** File references and results of filestore-excluded tools (e.g. `read_file`) are never substituted. */
 export const isSubstitutionCandidate = ({
@@ -70,7 +76,11 @@ export const substituteToolCallResults = async ({
 }): Promise<ToolResult[]> => {
   return Promise.all(
     toolCall.results.map(async (result) => {
-      if (!isSubstitutionCandidate({ toolId: toolCall.tool_id, result })) {
+      // A tool-specific summary keeps the raw result's id but is already short.
+      if (
+        !isSubstitutionCandidate({ toolId: toolCall.tool_id, result }) ||
+        isSummaryResult(result.data)
+      ) {
         return result;
       }
       const entry = await resultStore
@@ -80,6 +90,9 @@ export const substituteToolCallResults = async ({
         logger.warn(
           `Substituted result ${result.tool_result_id} has no filestore entry; rendering raw`
         );
+        return result;
+      }
+      if (entry.metadata.token_count <= SUBSTITUTION_MIN_RESULT_TOKENS) {
         return result;
       }
       return toFileReference(result, entry.path);

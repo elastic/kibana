@@ -463,5 +463,34 @@ describe('renderCurrentRun', () => {
       expect(types(messages)).toEqual(['ai', 'tool']);
       expect(imageResolver).not.toHaveBeenCalled();
     });
+
+    it('injects the images of a marked call that were left inline', async () => {
+      const imageResolver: PromptImageResolver = jest.fn(async () => ({
+        base64: 'AAA',
+        mimeType: 'image/png',
+      }));
+      const image: ToolResult = {
+        tool_result_id: 'i1',
+        type: ToolResultType.image,
+        data: { attachment_id: 'ok', mime_type: 'image/png', name: 'pic', description: '' },
+      };
+      const keepImages: ToolCallResultTransformer = async (toolCall) =>
+        toolCall.results.map((result) =>
+          result.type === ToolResultType.image
+            ? result
+            : {
+                tool_result_id: result.tool_result_id,
+                type: ToolResultType.fileReference,
+                data: { filepath: `/f/${result.tool_result_id}`, comment: 'stored' },
+              }
+        );
+      const messages = await current(
+        [call('c1', { results: [other('c1'), image] })],
+        rendered('c1'),
+        { imageResolver, substitution: { marks: new Set(['c1']), substitute: keepImages } }
+      );
+      expect(types(messages)).toEqual(['ai', 'tool', 'human']);
+      expect(imageResolver).toHaveBeenCalledWith({ attachmentId: 'ok' });
+    });
   });
 });

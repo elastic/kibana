@@ -551,6 +551,27 @@ describe('createAgentGraph', () => {
       expect(result.lastCallUsage).toEqual({ inputTokens: 123 });
     });
 
+    it('clears the last call usage when the latest research call reports none', async () => {
+      const { graph, researchInvoke } = createTestGraph();
+      researchInvoke
+        .mockResolvedValueOnce(
+          new AIMessage({
+            content: 'a',
+            tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }],
+            usage_metadata: { input_tokens: 123, output_tokens: 1, total_tokens: 124 },
+          })
+        )
+        .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+      mockToolNodeOnce([
+        new ToolMessage({ tool_call_id: 'c1', content: 'r1', artifact: { results: [] } }),
+      ]);
+
+      const result = await graph.invoke({ cycleLimit: 10 });
+
+      expect(researchInvoke).toHaveBeenCalledTimes(2);
+      expect(result.lastCallUsage).toBeUndefined();
+    });
+
     it('compacts with the reactive cap and retries when the research call exceeds the context window', async () => {
       const { graph, researchInvoke } = createTestGraph();
       compactContextMock.mockResolvedValue({

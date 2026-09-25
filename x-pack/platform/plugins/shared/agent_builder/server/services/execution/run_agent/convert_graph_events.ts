@@ -44,12 +44,7 @@ import { createUserQuestionAskedEvent } from '@kbn/agent-builder-common/chat';
 import type { StateType } from './state';
 import { steps, tags } from './constants';
 import type { RunStepUpdate } from './step_state';
-import type {
-  CompactionRequest,
-  ResearchOutcome,
-  ToolOutcome,
-  ToolRenderStateUpdate,
-} from './transient_state';
+import type { ResearchOutcome, ToolOutcome, ToolRenderStateUpdate } from './transient_state';
 
 /** What a `researchAgent` node returns, as seen on its `on_chain_end` event. */
 interface ResearchNodeOutput {
@@ -61,7 +56,6 @@ interface ResearchNodeOutput {
 /** What a `contextManagement` node returns, as seen on its `on_chain_end` event. */
 interface ContextManagementNodeOutput {
   steps?: RunStepUpdate[];
-  compactionRequest?: CompactionRequest;
 }
 
 /** What an `executeTool` node returns, as seen on its `on_chain_end` event. */
@@ -280,16 +274,10 @@ export const convertGraphEvents = ({
           }
         }
 
-        // emit compaction start and substitution events decided by the context-management node
+        // emit substitution events decided by the context-management node
         if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.contextManagement)) {
           const output = event.data.output as ContextManagementNodeOutput;
           const contextEvents: ChatAgentEvent[] = [];
-          if (output.compactionRequest) {
-            contextEvents.push({
-              type: ChatEventType.compactionStarted,
-              data: { token_count_before: output.compactionRequest.tokensBefore },
-            });
-          }
           for (const update of output.steps ?? []) {
             if (update.type === 'append' && isSubstitutionStep(update.step)) {
               const { type, ...data } = update.step;

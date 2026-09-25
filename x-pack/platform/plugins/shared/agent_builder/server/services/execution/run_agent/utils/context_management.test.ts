@@ -9,7 +9,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceConnector } from '@kbn/inference-common';
 import type { ConversationRoundStep, ToolCallStep } from '@kbn/agent-builder-common';
-import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStepType,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { createToolResultStoreMock } from '../../../../test_utils/runner';
@@ -74,6 +78,7 @@ const deps = (
   resultStore: createToolResultStoreMock(),
   resultTransformer: async (toolCall) => toolCall.results,
   logger: loggerMock.create(),
+  events: { emit: jest.fn() },
   ...over,
 });
 
@@ -331,6 +336,26 @@ describe('compactContext node', () => {
       compactionRequest: undefined,
       lastContextActionCycle: 7,
     });
+  });
+
+  it('emits compaction_started only when the compactor starts summarizing', async () => {
+    const events = { emit: jest.fn() };
+    compactContextMock.mockImplementationOnce(async ({ onStart }) => {
+      onStart();
+      return compactionResult();
+    });
+    const { compactContext: node } = createContextManagementNodes(deps({ events }));
+
+    await node(baseState({ currentCycle: 7, compactionRequest: request() }));
+    expect(events.emit).toHaveBeenCalledWith({
+      type: ChatEventType.compactionStarted,
+      data: { token_count_before: 85_000 },
+    });
+
+    events.emit.mockClear();
+    compactContextMock.mockResolvedValueOnce(undefined);
+    await node(baseState({ currentCycle: 7, compactionRequest: request() }));
+    expect(events.emit).not.toHaveBeenCalled();
   });
 
   it('clears the request and starts the cooldown when the compaction is skipped', async () => {

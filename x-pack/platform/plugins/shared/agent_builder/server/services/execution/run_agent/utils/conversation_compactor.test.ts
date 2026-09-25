@@ -205,6 +205,22 @@ describe('compactContext', () => {
     expect(invoke).not.toHaveBeenCalled();
   });
 
+  it('calls onStart once it covers something, never on a no-op', async () => {
+    const { deps } = setup();
+    const onStart = jest.fn();
+    await compactContext(
+      { conversation: conversationOf([]), run: run([call('x1')]), tailCapTokens: 1, onStart },
+      deps
+    );
+    expect(onStart).not.toHaveBeenCalled();
+
+    await compactContext(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000, onStart },
+      deps
+    );
+    expect(onStart).toHaveBeenCalledTimes(1);
+  });
+
   it('does nothing below the token floor', async () => {
     const { invoke, deps } = setup();
     const result = await compactContext(
@@ -355,7 +371,44 @@ describe('compactContext', () => {
     expect(result?.summary.covered_round_ids).toEqual(['A', 'B']);
   });
 
-  it('returns nothing when the summarizer fails', async () => {
+  it('covers the last history cycle at round start when the run has no step yet', async () => {
+    const { deps } = setup();
+    const conversation = conversationOf(
+      timelineFromRounds([
+        {
+          id: 'A',
+          input: { message: 'hello A', attachments: [] },
+          steps: [call('a', BIG * 2)],
+          response: { message: 'answer A' },
+        },
+      ])
+    );
+    const result = await compactContext(
+      { conversation, run: run([]), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(result?.summary).toMatchObject({
+      summarized_up_to: { tool_call_id: 'a' },
+      covered_round_ids: ['A'],
+    });
+    expect(result?.summarizedCycleCount).toBe(1);
+  });
+
+  it('retries a failed summarizer request once', async () => {
+    const { invoke, deps } = setup();
+    invoke.mockRejectedValueOnce(new Error('bad json')).mockResolvedValueOnce(llmOutput('RETRIED'));
+    const result = await compactContext(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad json'));
+    expect(result?.summary.structured_data.discussion_summary).toBe('RETRIED');
+  });
+
+  it('falls back to the programmatic summary when the summarizer keeps failing', async () => {
     const { invoke, deps } = setup();
     invoke.mockRejectedValue(new Error('llm down'));
     const result = await compactContext(
@@ -363,7 +416,67 @@ describe('compactContext', () => {
       deps
     );
 
-    expect(result).toBeUndefined();
+    expect(invoke).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('llm down'));
+    expect(result?.summary).toMatchObject({
+      summarized_up_to: { tool_call_id: 'b' },
+      covered_round_ids: ['A', 'B'],
+      structured_data: expect.objectContaining({
+        user_intent: 'CURRENT_REQUEST',
+        tool_calls_summary: [
+          { tool_id: 'my.tool', params_summary: 'q=a' },
+          { tool_id: 'my.tool', params_summary: 'q=b' },
+        ],
+      }),
+    });
+    expect(result?.tokensAfter).toBeLessThan(result?.tokensBefore ?? 0);
+  });
+
+  it('keeps the semantic fields of the existing summary in the fallback', async () => {
+    const { invoke, deps } = setup();
+    invoke.mockRejectedValue(new Error('llm down'));
+    const existing: CompactionSummary = {
+      summarized_up_to: { tool_call_id: 'a' },
+      summarized_round_count: 1,
+      covered_round_ids: ['A'],
+      created_at: '2026-01-01T00:00:00.000Z',
+      token_count: 10,
+      structured_data: structuredData({
+        tool_calls_summary: [{ tool_id: 'my.tool', params_summary: 'q=a' }],
+      }),
+    };
+    const result = await compactContext(
+      {
+        conversation: bigHistory(),
+        run: run([call('x1')], { compactionSummary: existing }),
+        tailCapTokens: 20_000,
+      },
+      deps
+    );
+
+    expect(result?.summary.structured_data).toMatchObject({
+      discussion_summary: 'PRIOR_SUMMARY',
+      tool_calls_summary: [
+        { tool_id: 'my.tool', params_summary: 'q=a' },
+        { tool_id: 'my.tool', params_summary: 'q=b' },
+      ],
+    });
+    expect(result?.summary.covered_round_ids).toEqual(['A', 'B']);
+  });
+
+  it('returns nothing when the run is aborted during summarization', async () => {
+    const { invoke, deps } = setup();
+    const controller = new AbortController();
+    invoke.mockImplementation(async () => {
+      controller.abort();
+      throw new Error('aborted');
+    });
+    const result = await compactContext(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+      { ...deps, abortSignal: controller.signal }
+    );
+
+    expect(invoke).toHaveBeenCalledTimes(1);
+    expect(result).toBeUndefined();
   });
 });
