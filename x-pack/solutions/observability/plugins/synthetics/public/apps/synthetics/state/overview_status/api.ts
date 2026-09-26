@@ -12,10 +12,6 @@ import type {
   OverviewStaleStatus,
   PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
-import {
-  OverviewStaleStatusCodec,
-  PaginatedOverviewStatusCodec,
-} from '../../../../../common/runtime_types/zod/synthetics_overview_status';
 import { apiService } from '../../../../utils/api_service';
 
 export function toStatusOverviewQueryArgs(
@@ -56,11 +52,11 @@ export const fetchOverviewStatus = async ({
   statusFilter?: string;
 }): Promise<PaginatedOverviewStatus> => {
   const params = toStatusOverviewQueryArgs(pageState);
-  return apiService.get(
-    SYNTHETICS_API_URLS.OVERVIEW_STATUS,
-    { ...params, scopeStatusByLocation, ...(statusFilter ? { statusFilter } : {}) },
-    PaginatedOverviewStatusCodec
-  );
+  return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, {
+    ...params,
+    scopeStatusByLocation,
+    ...(statusFilter ? { statusFilter } : {}),
+  });
 };
 
 /**
@@ -77,10 +73,5 @@ export const fetchStaleStatus = async ({
 }): Promise<OverviewStaleStatus> => {
   const { monitorQueryIds: _ignoredMonitorQueryIds, ...params } =
     toStatusOverviewQueryArgs(pageState);
-  return apiService.post(
-    SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE,
-    { monitorQueryIds },
-    OverviewStaleStatusCodec,
-    params
-  );
+  return apiService.post(SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE, { monitorQueryIds }, params);
 };

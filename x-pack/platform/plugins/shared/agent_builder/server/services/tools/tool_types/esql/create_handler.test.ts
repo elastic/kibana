@@ -21,6 +21,8 @@ const mockContext = {
   esClient: mockEsClient,
 };
 
+const frozenTierFilter = { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } };
+
 describe('createHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,6 +55,7 @@ describe('createHandler', () => {
       // Verify ES|QL was called with both parameters (LLM value + default)
       expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
         query: 'FROM users | WHERE status == ?status AND name == ?name',
+        filter: frozenTierFilter,
         params: [{ status: 'active' }, { name: 'John Doe' }],
       });
     });
@@ -79,6 +82,7 @@ describe('createHandler', () => {
       // Verify ES|QL was called with LLM values (not defaults)
       expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
         query: 'FROM users | WHERE status == ?status AND name == ?name',
+        filter: frozenTierFilter,
         params: [{ status: 'active' }, { name: 'Jane Smith' }],
       });
     });
@@ -100,6 +104,7 @@ describe('createHandler', () => {
       // Null parameters should be filtered out, not sent to Elasticsearch
       expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
         query: 'FROM users | WHERE status == ?status',
+        filter: frozenTierFilter,
         params: [{ status: 'active' }],
       });
     });
@@ -120,7 +125,21 @@ describe('createHandler', () => {
       // When all params are null, params should not be sent at all
       expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
         query: 'FROM users | LIMIT 10',
+        filter: frozenTierFilter,
       });
+    });
+
+    it('should exclude frozen tier indices from the query', async () => {
+      const config: EsqlToolConfig = {
+        query: 'FROM users | LIMIT 10',
+        params: {},
+      };
+
+      await createHandler(config)({}, mockContext as any);
+
+      expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: frozenTierFilter })
+      );
     });
 
     it('should throw an error when required parameters are missing', async () => {

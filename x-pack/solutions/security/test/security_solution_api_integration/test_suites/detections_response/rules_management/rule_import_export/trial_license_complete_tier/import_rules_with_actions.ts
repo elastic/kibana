@@ -231,6 +231,10 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId,
           });
 
+          const { body: existing } = await detectionsApi
+            .readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID } }, spaceId)
+            .expect(200);
+
           const overwriteImportResponseBody = await importRules({
             getService,
             rules: IMPORT_PAYLOAD,
@@ -253,6 +257,9 @@ export default ({ getService }: FtrProviderContext): void => {
             .readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID } }, spaceId)
             .expect(200);
 
+          expect(overwritten.id).toBe(existing.id);
+          expect(overwritten.revision).toBe(existing.revision + 1);
+          expect(overwritten.created_at).toBe(existing.created_at);
           // Cross-space import remaps connector SO ids; lock action presence/type.
           expect(overwritten.actions).toHaveLength(1);
           expect(overwritten.actions[0].action_type_id).toBe('.slack');

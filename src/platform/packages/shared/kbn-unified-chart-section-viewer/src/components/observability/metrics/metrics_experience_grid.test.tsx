@@ -215,8 +215,8 @@ const TestWrapper = ({
   </EuiProvider>
 );
 
-// The "Edit grid of metrics" button is gated behind a feature flag (disabled by
-// default); this mock resolves it to `true` for tests that exercise the button.
+// The "Edit grid of metrics" button falls back to enabled; this mock resolves it
+// explicitly to `true` for tests that exercise the button.
 const editGridSettingsEnabledFeatureFlags = createFeatureFlagsMock({
   [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
 });
@@ -758,12 +758,12 @@ describe('MetricsExperienceGrid', () => {
   });
 
   describe('grid settings flyout', () => {
-    it('hides the edit button when the host does not provide featureFlags (safe default)', () => {
+    it('shows the edit button when the host does not provide featureFlags (fallback enabled)', () => {
       const { queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
         wrapper: TestWrapper,
       });
 
-      expect(queryByTestId('metricsExperienceEditGridButton')).not.toBeInTheDocument();
+      expect(queryByTestId('metricsExperienceEditGridButton')).toBeInTheDocument();
     });
 
     it('opens the flyout when the edit button is clicked and forwards its callbacks to state', () => {
@@ -817,6 +817,51 @@ describe('MetricsExperienceGrid', () => {
       });
 
       expect(queryByTestId('metricsExperienceGridSettingsFlyout')).not.toBeInTheDocument();
+    });
+
+    it('closes the metric insights flyout when the edit button is clicked', () => {
+      const onFlyoutStateChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
+        flyoutState: {
+          gridPosition: 0,
+          metricUniqueKey: 'metrics-*:field1',
+          esqlQuery: 'TS metrics-*',
+          selectedTabId: 'overview',
+        },
+        onFlyoutStateChange,
+        onFlyoutSelectedTabChange: jest.fn(),
+        profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
+        onGridSettingsChange: jest.fn(),
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
+        onMetricsSortChange: jest.fn(),
+      });
+
+      const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+        wrapper: ({ children }) => (
+          <TestWrapper externalServices={{ featureFlags: editGridSettingsEnabledFeatureFlags }}>
+            {children}
+          </TestWrapper>
+        ),
+      });
+
+      act(() => {
+        getByTestId('metricsExperienceEditGridButton').click();
+      });
+
+      expect(onFlyoutStateChange).toHaveBeenCalledWith(undefined);
+      expect(getByTestId('metricsExperienceGridSettingsFlyout')).toBeInTheDocument();
     });
   });
 });

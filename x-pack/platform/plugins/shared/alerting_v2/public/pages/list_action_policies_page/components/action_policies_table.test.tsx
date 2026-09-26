@@ -34,6 +34,12 @@ const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all:
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
+let mockIsLicenseValid = true;
+
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -68,6 +74,8 @@ jest.mock('@kbn/core-di-browser', () => {
           get: (id: string) =>
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
+              : id === 'alerting:v2:experimentalFeatures'
+              ? mockAlertingV2ExperimentalFeaturesEnabled
               : undefined,
         };
       }
@@ -134,15 +142,6 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
 }));
 
-let mockTagNames: string[] = [];
-const mockUseFetchTags = jest.fn();
-jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: (params?: { search?: string }) => {
-    mockUseFetchTags(params);
-    return { data: mockTagNames, isLoading: false };
-  },
-}));
-
 jest.mock('../../../hooks/use_bulk_get_user_profiles', () => ({
   useBulkGetUserProfiles: () => ({ data: undefined, isLoading: false }),
 }));
@@ -183,14 +182,12 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   group_by: null,
-  tags: null,
   grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
   snoozed_until: null,
-  auth: { owner: 'elastic', created_by_user: false },
-  created_by: 'elastic_profile_uid',
+  created_by: { profile_uid: 'elastic_profile_uid' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'elastic_profile_uid',
+  updated_by: { profile_uid: 'elastic_profile_uid' },
   updated_at: '2026-01-02T03:04:05.000Z',
   ...overrides,
 });
@@ -208,7 +205,8 @@ describe('ActionPoliciesTable', () => {
     mockCapabilities = WRITE_CAPABILITIES;
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
-    mockTagNames = [];
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
+    mockIsLicenseValid = true;
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -249,6 +247,17 @@ describe('ActionPoliciesTable', () => {
     renderTable();
 
     await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
+  });
+
+  it('hides create-with-agent controls when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderTable();
+
+    await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
+    expect(
+      screen.queryByTestId('createActionPolicyButton-secondary-button')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createActionPolicyWithAgentButton')).not.toBeInTheDocument();
   });
 
   it('navigates to create action policy when the header create button is clicked', async () => {
@@ -322,7 +331,6 @@ describe('ActionPoliciesTable', () => {
       expect(columnHeaders).toEqual(
         expect.arrayContaining([
           'Name',
-          'Tags',
           'Destinations',
           'Last updated',
           'Updated by',
@@ -423,144 +431,9 @@ describe('ActionPoliciesTable', () => {
     });
   });
 
-  describe('Tags filter', () => {
-    const openTagsFilter = async () => {
-      await waitFor(() =>
-        expect(screen.getByTestId('actionPoliciesTagsFilter')).toBeInTheDocument()
-      );
-      fireEvent.click(screen.getByTestId('actionPoliciesTagsFilter'));
-    };
-
-    const lastFindItemsFilters = () => {
-      const calls = mockFindItems.mock.calls;
-      return calls[calls.length - 1][0].filters;
-    };
-
-    beforeEach(() => {
-      mockTagNames = ['critical', 'staging', 'production'];
-    });
-
-    it('renders the Tags filter button in the toolbar', async () => {
-      renderTable();
-
-      await waitFor(() =>
-        expect(screen.getByTestId('actionPoliciesTagsFilter')).toBeInTheDocument()
-      );
-    });
-
-    it('calls findItems with the selected tag when a tag is chosen', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-
-      await waitFor(() => {
-        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] });
-      });
-    });
-
-    it('calls findItems with multiple tags when several are selected', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-      await waitFor(() =>
-        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] })
-      );
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('staging'));
-
-      await waitFor(() => {
-        expect(lastFindItemsFilters().tag).toMatchObject({
-          include: expect.arrayContaining(['critical', 'staging']),
-        });
-      });
-    });
-
-    it('calls findItems without tag filter after deselecting the active tag', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-      await waitFor(() =>
-        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] })
-      );
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-
-      await waitFor(() => {
-        expect(lastFindItemsFilters().tag).toBeUndefined();
-      });
-    });
-
-    it('sends the debounced popover search to the tags API', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.change(await screen.findByTestId('actionPoliciesTagsFilterSearch'), {
-        target: { value: 'prod' },
-      });
-
-      await waitFor(() => {
-        expect(mockUseFetchTags).toHaveBeenCalledWith({ search: 'prod' });
-      });
-    });
-
-    it('keeps a selected tag listed once it falls outside the returned tags', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-      await waitFor(() =>
-        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] })
-      );
-
-      // A search returns tags that no longer include the selected one.
-      mockTagNames = ['production'];
-      await openTagsFilter();
-      fireEvent.change(await screen.findByTestId('actionPoliciesTagsFilterSearch'), {
-        target: { value: 'pro' },
-      });
-
-      await waitFor(() => {
-        expect(screen.getByText('production')).toBeInTheDocument();
-        expect(screen.getByText('critical')).toBeInTheDocument();
-      });
-    });
-
-    it('shows the cap guidance only when the tags cap is reached', async () => {
-      mockTagNames = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
-      renderTable();
-
-      await openTagsFilter();
-
-      expect(await screen.findByTestId('actionPoliciesTagsFilterCapGuidance')).toBeInTheDocument();
-    });
-
-    it('does not show the cap guidance below the tags cap', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      await waitFor(() =>
-        expect(screen.getByTestId('actionPoliciesTagsFilterSearch')).toBeInTheDocument()
-      );
-
-      expect(screen.queryByTestId('actionPoliciesTagsFilterCapGuidance')).not.toBeInTheDocument();
-    });
-  });
-
   describe('Enabled column switch', () => {
     const getSwitch = () => screen.getByRole('switch', { name: /policy one enabled/i });
-
-    it('renders checked when the policy is enabled', async () => {
-      renderTable();
-
-      await waitFor(() => expect(getSwitch()).toBeChecked());
-    });
-
-    it('renders unchecked when the policy is disabled', async () => {
+    const mockDisabledPolicy = () =>
       mockFindItems.mockResolvedValue({
         items: [
           {
@@ -572,6 +445,15 @@ describe('ActionPoliciesTable', () => {
         ],
         total: 1,
       });
+
+    it('renders checked when the policy is enabled', async () => {
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeChecked());
+    });
+
+    it('renders unchecked when the policy is disabled', async () => {
+      mockDisabledPolicy();
       renderTable();
 
       await waitFor(() => expect(getSwitch()).not.toBeChecked());
@@ -589,17 +471,7 @@ describe('ActionPoliciesTable', () => {
     });
 
     it('calls enablePolicy when toggled on', async () => {
-      mockFindItems.mockResolvedValue({
-        items: [
-          {
-            ...createPolicy({ enabled: false }),
-            title: 'Policy One',
-            updatedAt: new Date('2026-01-02T03:04:05.000Z'),
-            policy: createPolicy({ enabled: false }),
-          },
-        ],
-        total: 1,
-      });
+      mockDisabledPolicy();
       const user = userEvent.setup();
       renderTable();
 
@@ -615,6 +487,25 @@ describe('ActionPoliciesTable', () => {
       renderTable();
 
       await waitFor(() => expect(getSwitch()).toBeDisabled());
+    });
+
+    it('is disabled on a disabled policy when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      mockDisabledPolicy();
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeDisabled());
+    });
+
+    it('still allows disabling an enabled policy when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      const user = userEvent.setup();
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeEnabled());
+      await user.click(getSwitch());
+
+      expect(mockDisableActionPolicy).toHaveBeenCalledWith('policy-1', expect.anything());
     });
   });
 
@@ -644,6 +535,15 @@ describe('ActionPoliciesTable', () => {
       await waitFor(() =>
         expect(mockFindItems.mock.calls.length).toBeGreaterThan(findItemsCallsBeforeSuccess)
       );
+    });
+
+    it('disables bulk enable when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      renderTable();
+
+      await selectAllAndOpenMenu();
+
+      expect(await screen.findByTestId('bulkEnableActionPolicies')).toBeDisabled();
     });
 
     it('refetches the list after a bulk action that has no confirmation step', async () => {
@@ -680,6 +580,9 @@ describe('ActionPoliciesTable', () => {
       });
       expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument();
       expect(screen.getByTestId('createActionPolicyWithAgentCard')).toBeInTheDocument();
+      expect(screen.getByTestId('createActionPolicyWithAgentExperimentalBadge')).toHaveTextContent(
+        'Experimental'
+      );
     });
 
     it('hides the header create button in the empty state', async () => {
@@ -687,6 +590,14 @@ describe('ActionPoliciesTable', () => {
 
       await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
       expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
+    });
+
+    it('hides the empty-state create-with-agent card when Alerting V2 experimental features are disabled', async () => {
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+      renderTable();
+
+      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      expect(screen.queryByTestId('createActionPolicyWithAgentCard')).not.toBeInTheDocument();
     });
 
     it('navigates to the create form from the empty state create-policy card', async () => {
@@ -727,6 +638,24 @@ describe('ActionPoliciesTable', () => {
       expect(agentCard).toHaveAttribute('aria-disabled', 'true');
 
       fireEvent.click(agentCard);
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('disables both create cards and shows the license callout when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      renderTable();
+
+      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+
+      const createCard = screen.getByTestId('createActionPolicyCard');
+      const agentCard = screen.getByTestId('createActionPolicyWithAgentCard');
+      expect(createCard).toHaveAttribute('aria-disabled', 'true');
+      expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(createCard);
+      fireEvent.click(agentCard);
+      expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
       expect(mockNavigateToApp).not.toHaveBeenCalled();
     });
   });

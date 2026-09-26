@@ -8,29 +8,27 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
 import {
-  AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID,
-  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-} from '../common/constants';
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+  ESCALATIONS_UI_CAPABILITY_SHOW,
+} from '../common/escalations/constants';
+import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
+import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
-  PROPOSALS_UI_CAPABILITY_DECIDE,
-  PROPOSALS_UI_CAPABILITY_SHOW,
-} from '../common/proposals/constants';
-import { CreateProposalStepId, UpdateProposalStepId } from '../common/proposals/step_types';
+  ESCALATIONS_API_PRIVILEGE_MANAGE,
+  ESCALATIONS_API_PRIVILEGE_READ,
+} from './escalations/constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
+import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
-import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
-import {
-  PROPOSALS_API_PRIVILEGE_MANAGE,
-  PROPOSALS_API_PRIVILEGE_READ,
-} from './proposals/constants';
-import { registerRoutes } from './proposals/routes/register_routes';
 
-jest.mock('./proposals/managed_workflows/initialize_managed_workflows', () => ({
-  initializeManagedWorkflows: jest.fn().mockResolvedValue(undefined),
+jest.mock('./impact/routes/register_routes', () => ({
+  registerImpactRoutes: jest.fn(),
 }));
 
-jest.mock('./proposals/routes/register_routes', () => ({
-  registerRoutes: jest.fn(),
+jest.mock('./escalations/routes/register_routes', () => ({
+  registerEscalationRoutes: jest.fn(),
 }));
 
 const createContext = () =>
@@ -42,37 +40,54 @@ const setupPlugin = () => {
   const plugin = new AgenticInvestigationsPlugin(createContext());
   const coreSetup = coreMock.createSetup();
   const features = { registerKibanaFeature: jest.fn() };
-  const workflowsExtensions = {
-    registerStepDefinition: jest.fn(),
-    registerManagedWorkflowOwner: jest.fn(),
-  };
-  const workflowsManagement = { management: { getWorkflow: jest.fn() } };
+
+  const workflowsExtensions = { registerStepDefinition: jest.fn() };
+  const agentBuilder = { attachments: { registerType: jest.fn() } };
 
   plugin.setup(
     coreSetup as never,
     {
       features,
+      // agentBuilderPlatform is a required dep for ordering; it exposes no API used at setup time.
+      agentBuilderPlatform: {},
+      agentBuilder,
       workflowsExtensions,
-      workflowsManagement,
     } as never
   );
 
-  return { plugin, coreSetup, features, workflowsExtensions, workflowsManagement };
+  return { plugin, coreSetup, features, agentBuilder, workflowsExtensions };
 };
 
 const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
   const coreStart = coreMock.createStart();
-  const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
+  const agentBuilder = {
+    conversations: {
+      getScopedClient: jest.fn().mockReturnValue({
+        get: jest.fn(),
+        bulkGet: jest.fn(),
+        list: jest.fn(),
+        search: jest.fn(),
+        create: jest.fn(),
+        patchMetadata: jest.fn(),
+        update: jest.fn(),
+      }),
+    },
+    conversationTemplates: {
+      get: jest.fn().mockResolvedValue(undefined),
+      list: jest.fn().mockResolvedValue([]),
+    },
+  };
 
   const contract = plugin.start(
     coreStart as never,
     {
-      workflowsExtensions,
+      agentBuilder,
       spaces: undefined,
+      security: undefined,
     } as never
   );
 
-  return { coreStart, contract, workflowsExtensions };
+  return { coreStart, contract, agentBuilder };
 };
 
 /** The single registered feature config, for assertions on its shape. */
@@ -97,77 +112,100 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('grants the proposals capabilities from the top-level all privilege', () => {
+    it('leaves impact off the base privileges until it needs its own', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
-      expect(privileges.all.api).toEqual([
-        PROPOSALS_API_PRIVILEGE_READ,
-        PROPOSALS_API_PRIVILEGE_MANAGE,
-      ]);
-      expect(privileges.all.ui).toEqual([
-        PROPOSALS_UI_CAPABILITY_SHOW,
-        PROPOSALS_UI_CAPABILITY_DECIDE,
-      ]);
+      expect(privileges.all.api).toEqual([]);
+      expect(privileges.all.ui).toEqual([]);
+      expect(privileges.read.api).toEqual([]);
+      expect(privileges.read.ui).toEqual([]);
     });
 
-    it('withholds manage and decide from read, so a reader cannot decide', () => {
+    it('keeps escalations in a sub-feature, joined to the base levels by includeIn', () => {
       const { features } = setupPlugin();
-      const { privileges } = registeredFeature(features);
+      const { subFeatures } = registeredFeature(features);
+      const [escalationsAll, escalationsRead] = subFeatures[0].privilegeGroups[0].privileges;
 
-      expect(privileges.read.api).toEqual([PROPOSALS_API_PRIVILEGE_READ]);
-      expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW]);
-    });
-
-    it('registers as a managed workflow owner, or the startup sweep deletes our workflows', () => {
-      const { workflowsExtensions } = setupPlugin();
-
-      expect(workflowsExtensions.registerManagedWorkflowOwner).toHaveBeenCalledTimes(1);
-      expect(workflowsExtensions.registerManagedWorkflowOwner).toHaveBeenCalledWith(
-        AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID
+      expect(escalationsAll).toEqual(
+        expect.objectContaining({
+          includeIn: 'all',
+          api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
+          ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
+        })
+      );
+      expect(escalationsRead).toEqual(
+        expect.objectContaining({
+          includeIn: 'read',
+          api: [ESCALATIONS_API_PRIVILEGE_READ],
+          ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
+        })
       );
     });
 
-    it('registers both workflow step definitions during setup, not start', () => {
-      const { workflowsExtensions } = setupPlugin();
+    it('keeps investigations in a sub-feature with a manage privilege', () => {
+      const { features } = setupPlugin();
+      const { subFeatures } = registeredFeature(features);
+      const [investigationsAll] = subFeatures[1].privilegeGroups[0].privileges;
+
+      expect(investigationsAll).toEqual(
+        expect.objectContaining({
+          id: 'investigations_all',
+          includeIn: 'all',
+          api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+        })
+      );
+    });
+
+    it('registers the impact attachment type and workflow steps during setup', () => {
+      const { workflowsExtensions, agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
 
       const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
         ([definition]) => definition.id
       );
-      expect(registeredIds).toEqual([CreateProposalStepId, UpdateProposalStepId]);
+      expect(registeredIds).toEqual([AttachImpactStepId, GetImpactStepId]);
     });
 
-    it('registers the HTTP routes', () => {
+    it('does not resolve the authorization service until a step actually runs', () => {
+      const { coreSetup } = setupPlugin();
+
+      // Steps register during setup, when `security.authz` does not exist yet.
+      expect(coreSetup.getStartServices).not.toHaveBeenCalled();
+    });
+
+    it('grants no proposals privilege, which the proposals feature owns instead', () => {
+      const { features } = setupPlugin();
+
+      expect(JSON.stringify(registeredFeature(features))).not.toMatch(/proposals/i);
+    });
+
+    it('registers the HTTP routes for every entity', () => {
       setupPlugin();
 
-      expect(registerRoutes).toHaveBeenCalledTimes(1);
+      expect(registerImpactRoutes).toHaveBeenCalledTimes(1);
+      expect(registerEscalationRoutes).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('start', () => {
-    it('installs the managed gate workflow', () => {
-      const { plugin } = setupPlugin();
-
-      startPlugin(plugin);
-
-      expect(initializeManagedWorkflows).toHaveBeenCalledTimes(1);
-    });
-
-    it('exposes the proposals service for in-process callers', () => {
+    it('exposes a request-scoped impact client and escalations for in-process callers', () => {
       const { plugin } = setupPlugin();
 
       const { contract } = startPlugin(plugin);
 
-      expect(contract.getProposalsService()).toBeDefined();
+      expect(contract.getImpactClient).toEqual(expect.any(Function));
+      expect(contract.getEscalationsService()).toBeDefined();
     });
-  });
 
-  it('fails loudly when a step handler runs before start', () => {
-    const { workflowsExtensions } = setupPlugin();
-    const [[createStep]] = workflowsExtensions.registerStepDefinition.mock.calls;
+    it('exposes no proposals getter, which the proposals plugin owns instead', () => {
+      const { plugin } = setupPlugin();
 
-    // The step factory closes over a getter, so the service is resolved per
-    // call rather than captured at registration time.
-    expect(() => createStep.handler).not.toThrow();
+      const { contract } = startPlugin(plugin);
+
+      expect(contract).not.toHaveProperty('getProposalsService');
+      expect(contract).not.toHaveProperty('getProposalPrivileges');
+    });
   });
 });

@@ -67,8 +67,8 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.description).toBe(body.description);
       expect(response.body.destinations).toStrictEqual(body.destinations);
       expect(response.body.matcher).toMatchObject(body.matcher);
-      // The API key is server-side only and must never be exposed over the wire.
-      expect(response.body.auth.apiKey).toBeUndefined();
+      // API key ownership is server-side only and must never be exposed over the wire.
+      expect(response.body.auth).toBeUndefined();
     }
   );
 
@@ -150,17 +150,19 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest(
-    'matcher: scopes a policy to a single rule via a rule.id matcher',
+    'matcher: scopes a policy to a single rule via tags',
     async ({ apiClient, apiServices }) => {
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-scoped-policy' } })
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-for-scoped-policy', tags: ['notify-scoped'] },
+        })
       );
 
-      const matcher = { expression: `rule.id: "${rule.id}"` };
+      const matcher = { tags: ['notify-scoped'] };
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
-          name: 'rule-scoped-policy',
+          name: 'tag-scoped-policy',
           matcher,
         }),
       });

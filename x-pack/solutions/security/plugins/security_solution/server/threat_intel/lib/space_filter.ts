@@ -17,9 +17,10 @@ import { GLOBAL_SPACE_ID } from '../../../common/threat_intel';
  *
  * Falls back to `'default'` only when the spaces plugin is missing (e.g. legacy
  * setup or test bootstrap) so the rest of the plugin keeps working without
- * spaces installed. When Spaces *is* installed, a failure to resolve the space
- * must fail the request rather than silently reading/writing default/global
- * data — spaces are a security boundary, so this fails closed.
+ * spaces installed. When Spaces *is* installed, `spaces.getSpaceId(request)`
+ * resolves the active space from the request's path; it does not throw, and an
+ * unresolvable request maps to the default space id per the Spaces contract
+ * rather than to another space's data.
  */
 
 export const resolveCurrentSpaceId = (
@@ -38,9 +39,11 @@ export const buildSpaceFilterTerms = (
 
 /**
  * Whether the current space may toggle a source document.
- * Space-owned legacy rows are mutable only in their owning space. Global (`*`)
- * catalog rows are mutable only from the default space so other spaces cannot
- * disable shared feeds.
+ * Space-owned rows are mutable only in their owning space. Global (`*`) catalog
+ * rows are not mutable via this API: flipping `enabled` on a shared feed
+ * affects every space, and the route's space-scoped write privilege does not
+ * grant that. Cluster-wide admin toggle for seeded feeds is the privileges
+ * follow-up; until then the seeded catalog stays at its seeded `enabled` state.
  */
 export const canMutateSourceInSpace = (
   sourceSpaceId: string | undefined,
@@ -48,7 +51,7 @@ export const canMutateSourceInSpace = (
 ): boolean => {
   const ownerSpaceId = sourceSpaceId ?? GLOBAL_SPACE_ID;
   if (ownerSpaceId === GLOBAL_SPACE_ID) {
-    return requestSpaceId === 'default';
+    return false;
   }
   return ownerSpaceId === requestSpaceId;
 };

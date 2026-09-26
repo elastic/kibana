@@ -93,7 +93,7 @@ import type {
 } from './types';
 import { generateExecutionTaskScope } from './utils';
 import {
-  buildWorkflowContext,
+  buildWorkflowRenderContext,
   type WorkflowExecutionForInputRendering,
 } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
@@ -342,8 +342,8 @@ export class WorkflowsExecutionEnginePlugin
                 await handlePostExecutionLoop({
                   workflowRunId,
                   spaceId,
-                  fakeRequest,
                   workflowExecutionRepository,
+                  stepExecutionRepository,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                   workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
                   meteringService: this.meteringService,
@@ -615,8 +615,8 @@ export class WorkflowsExecutionEnginePlugin
                 await handlePostExecutionLoop({
                   workflowRunId,
                   spaceId,
-                  fakeRequest,
                   workflowExecutionRepository,
+                  stepExecutionRepository,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                   workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
                   meteringService: this.meteringService,
@@ -996,6 +996,7 @@ export class WorkflowsExecutionEnginePlugin
                       spaceId: workflowExecution.spaceId,
                       request: fakeRequest,
                       workflowExecutionRepository,
+                      stepExecutionRepository,
                       workflowTaskManager,
                       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                       logger,
@@ -1344,6 +1345,7 @@ export class WorkflowsExecutionEnginePlugin
             spaceId: workflowExecution.spaceId,
             request,
             workflowExecutionRepository,
+            stepExecutionRepository,
             workflowTaskManager,
             internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
             logger: this.logger,
@@ -1424,6 +1426,7 @@ export class WorkflowsExecutionEnginePlugin
             spaceId: workflowExecution.spaceId,
             request,
             workflowExecutionRepository,
+            stepExecutionRepository,
             workflowTaskManager,
             internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
             logger: this.logger,
@@ -1599,6 +1602,7 @@ export class WorkflowsExecutionEnginePlugin
           spaceId: p.workflowExecution.spaceId ?? 'default',
           request,
           workflowExecutionRepository,
+          stepExecutionRepository,
           workflowTaskManager,
           internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
           logger: this.logger,
@@ -1952,7 +1956,7 @@ export class WorkflowsExecutionEnginePlugin
     // Liquid-rendered input defaults or templated input values are not supported here.
     return this.concurrencyManager.evaluateConcurrencyKey(
       workflowSettings.concurrency,
-      buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies),
+      buildWorkflowRenderContext(normalizedWorkflowExecution, coreStart, dependencies),
       workflowSettings.liquid
     );
   }

@@ -6,14 +6,18 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { RULE_TUNING_DEFAULT_EXTRAS } from '@kbn/alertzero-common';
 import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_FORENSICS_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { initializeManagedWorkflows } from './initialize_managed_workflows';
+
+const RULE_TUNING_ID = 'system-security-detection-rule-tuning';
 
 const makeState = (spaceId: string) => ({
   workflowId: `wf-${spaceId}`,
@@ -50,6 +54,7 @@ describe('initializeManagedWorkflows', () => {
       ...ALERTZERO_RULE_WORKFLOW_IDS,
       ...ALERTZERO_ACTION_WORKFLOW_IDS,
       ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+      ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
     ]);
     expect(client.install).not.toHaveBeenCalledWith(
       expect.anything(),
@@ -117,7 +122,12 @@ describe('initializeManagedWorkflows', () => {
 
       await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-      expect(client.listInstalledWorkflowStates).not.toHaveBeenCalled();
+      // Listed once while applying missing defaults, which skips a state with no template values.
+      expect(client.listInstalledWorkflowStates).toHaveBeenCalledTimes(1);
+      expect(client.install).not.toHaveBeenCalledWith(
+        RULE_TUNING_ID,
+        expect.objectContaining({ workflowId: 'wf-space-a' })
+      );
     });
 
     it('logs a warning when ensureAgentForSpace fails for a space', async () => {
@@ -130,6 +140,110 @@ describe('initializeManagedWorkflows', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('"space-a"') && expect.stringContaining('agent ensure failed')
       );
+    });
+
+    it('reinstalls a version-4 rule tuning document with default extras before reconciliation', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      const stored = {
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval: '2h',
+      };
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        {
+          workflowId: `${RULE_TUNING_ID}-default`,
+          spaceId: 'default',
+          definitionId: RULE_TUNING_ID,
+          templateValues: stored,
+          documentVersion: 9,
+        },
+      ]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+      expect(client.install).toHaveBeenCalledWith(RULE_TUNING_ID, {
+        workflowId: `${RULE_TUNING_ID}-default`,
+        spaceId: 'default',
+        values: { ...stored, extras: RULE_TUNING_DEFAULT_EXTRAS },
+      });
+      const migrationOrder = client.install.mock.invocationCallOrder.at(-1) ?? 0;
+      const readyOrder = client.ready.mock.invocationCallOrder[0] ?? 0;
+      expect(migrationOrder).toBeLessThan(readyOrder);
+    });
+
+    it('reinstalls a rule tuning document that has only some extras', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      const stored = {
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 21 },
+      };
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        {
+          workflowId: `${RULE_TUNING_ID}-default`,
+          spaceId: 'default',
+          definitionId: RULE_TUNING_ID,
+          templateValues: stored,
+          documentVersion: 9,
+        },
+      ]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+      expect(client.install).toHaveBeenCalledWith(RULE_TUNING_ID, {
+        workflowId: `${RULE_TUNING_ID}-default`,
+        spaceId: 'default',
+        values: {
+          ...stored,
+          extras: { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 21 },
+        },
+      });
+    });
+
+    it('does not reinstall a rule tuning document whose extras are already complete', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        {
+          workflowId: `${RULE_TUNING_ID}-default`,
+          spaceId: 'default',
+          definitionId: RULE_TUNING_ID,
+          templateValues: {
+            settingsVersion: 1,
+            autonomyLevel: 'manual',
+            scheduleInterval: '2h',
+            extras: RULE_TUNING_DEFAULT_EXTRAS,
+          },
+          documentVersion: 9,
+        },
+      ]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+      expect(client.install).not.toHaveBeenCalledWith(RULE_TUNING_ID, expect.anything());
+    });
+
+    it('does not reinstall a document whose present extras value is invalid', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        {
+          workflowId: `${RULE_TUNING_ID}-default`,
+          spaceId: 'default',
+          definitionId: RULE_TUNING_ID,
+          templateValues: {
+            settingsVersion: 1,
+            autonomyLevel: 'manual',
+            scheduleInterval: '2h',
+            extras: { analysisWindowDays: 0 },
+          },
+          documentVersion: 9,
+        },
+      ]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+      expect(client.install).not.toHaveBeenCalledWith(RULE_TUNING_ID, expect.anything());
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('analysisWindowDays'));
     });
 
     it('logs a warning when listInstalledWorkflowStates throws', async () => {

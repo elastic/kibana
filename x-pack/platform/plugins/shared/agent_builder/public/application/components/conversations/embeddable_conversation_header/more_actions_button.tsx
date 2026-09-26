@@ -14,26 +14,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
+import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../../hooks/use_navigation';
-import {
-  useAgentId,
-  useConversation,
-  useConversationRounds,
-} from '../../../hooks/use_conversation';
+import { useAgentId, useConversation, useConversationTitle } from '../../../hooks/use_conversation';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useLoadTraceFromFile } from '../../../hooks/use_load_trace_from_file';
+import { TraceFlyout } from '../timeline/response/trace_flyout';
 
-const fullscreenLabels = {
-  actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {
-    defaultMessage: 'More',
-  }),
+const labels = {
   actionsAriaLabel: i18n.translate('xpack.agentBuilder.conversationActions.actionsAriaLabel', {
     defaultMessage: 'More',
   }),
@@ -42,15 +37,6 @@ const fullscreenLabels = {
   }),
   genAiSettings: i18n.translate('xpack.agentBuilder.conversationActions.genAiSettings', {
     defaultMessage: 'GenAI Settings',
-  }),
-  externalLinkAriaLabel: i18n.translate(
-    'xpack.agentBuilder.conversationActions.externalLinkAriaLabel',
-    {
-      defaultMessage: 'Open in new tab',
-    }
-  ),
-  view: i18n.translate('xpack.agentBuilder.conversationActions.viewSection', {
-    defaultMessage: 'View',
   }),
   fullScreen: i18n.translate('xpack.agentBuilder.conversationActions.fullScreen', {
     defaultMessage: 'Open in full screen',
@@ -61,11 +47,14 @@ const fullscreenLabels = {
       defaultMessage: 'Full-screen mode is available once this conversation has been created.',
     }
   ),
-  addToDataset: i18n.translate('xpack.agentBuilder.conversationActions.addToDataset', {
-    defaultMessage: 'Add conversation to dataset',
-  }),
-  emptyMessage: i18n.translate('xpack.agentBuilder.conversationActions.emptyMessage', {
-    defaultMessage: '(no message)',
+  downloadConversation: i18n.translate(
+    'xpack.agentBuilder.conversationActions.downloadConversation',
+    {
+      defaultMessage: 'Download conversation',
+    }
+  ),
+  loadTrace: i18n.translate('xpack.agentBuilder.conversationActions.loadTrace', {
+    defaultMessage: 'Load trace from file',
   }),
 };
 
@@ -81,75 +70,27 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const { isEmbeddedContext } = useConversationContext();
   const conversationId = useConversationId();
   const { manageAgents } = useUiPrivileges();
-  const isExperimentalEnabled = useExperimentalFeatures();
-  const { conversation } = useConversation();
-  const conversationRounds = useConversationRounds();
 
   const {
-    services: { application, plugins },
+    services: { application },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
-  const getAddToDatasetAction = plugins.evals?.getAddToDatasetAction;
+  const { conversation } = useConversation();
+  const { title: conversationTitle } = useConversationTitle();
 
-  const completedRounds = useMemo(() => {
-    return conversationRounds.flatMap((round, roundIndex) => {
-      if (!round.response?.message) return [];
-      return [{ round, roundIndex }];
-    });
-  }, [conversationRounds]);
+  const {
+    openFilePicker,
+    isFlyoutOpen: isTraceFlyoutOpen,
+    loadedSpans,
+    loadedTraceId,
+    closeFlyout: closeTraceFlyout,
+    fileInputRef,
+    handleFileChange,
+  } = useLoadTraceFromFile();
 
-  const onAddConversationToDataset = useCallback(() => {
-    if (!getAddToDatasetAction) return;
-
-    setIsPopoverOpen(false);
-    getAddToDatasetAction({
-      label: fullscreenLabels.addToDataset,
-      title: fullscreenLabels.addToDataset,
-      initialExamples: completedRounds.map(({ round, roundIndex }) => {
-        const message =
-          typeof round.input?.message === 'string' && round.input.message.trim()
-            ? round.input.message.trim()
-            : fullscreenLabels.emptyMessage;
-
-        const shortMessage = message.length > 80 ? `${message.slice(0, 77).trimEnd()}…` : message;
-
-        const traceId =
-          round.trace_id == null
-            ? null
-            : Array.isArray(round.trace_id)
-            ? round.trace_id[0] ?? null
-            : round.trace_id;
-
-        return {
-          label: i18n.translate('xpack.agentBuilder.conversationActions.turnLabel', {
-            defaultMessage: 'Turn {turn}: {message}',
-            values: { turn: roundIndex + 1, message: shortMessage },
-          }),
-          input: { round },
-          output: { steps: round.steps },
-          metadata: {
-            source: 'agent_builder',
-            conversation_id: conversation?.id ?? null,
-            turn_index: roundIndex,
-            trace_id: traceId,
-          },
-          selected: true,
-        };
-      }),
-    })?.onClick();
-  }, [completedRounds, conversation?.id, getAddToDatasetAction]);
-
-  const showAddToDatasetItem =
-    isExperimentalEnabled && plugins.evals?.canAddToDataset && completedRounds.length > 0;
-
-  const closePopover = () => {
-    setIsPopoverOpen(false);
-  };
-
-  const togglePopover = () => {
-    setIsPopoverOpen(!isPopoverOpen);
-  };
+  const closePopover = () => setIsPopoverOpen(false);
+  const togglePopover = () => setIsPopoverOpen((v) => !v);
 
   const handleOpenFullScreen = useCallback(() => {
     if (!application) return;
@@ -165,34 +106,62 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     navigateToAgentBuilderUrl(path, undefined, { entryPointSource: 'inapp_escalation' });
   }, [application, conversationId, onCloseSidebar, agentId, navigateToAgentBuilderUrl]);
 
+  const handleDownloadConversation = useCallback(() => {
+    setIsPopoverOpen(false);
+    const slug =
+      conversationTitle
+        .replace(/[^\p{L}\p{N}]+/gu, '-') // replace non-alphanumeric chars (unicode-aware) with hyphens
+        .replace(/^-|-$/g, '') // strip leading/trailing hyphens
+        .toLowerCase() || DEFAULT_CONVERSATION_TITLE;
+    downloadFileAs(`${slug}.json`, {
+      content: JSON.stringify({ conversation }, null, 2),
+      type: 'application/json',
+    });
+  }, [conversationTitle, conversation]);
+
+  const handleLoadTrace = useCallback(() => {
+    setIsPopoverOpen(false);
+    openFilePicker();
+  }, [openFilePicker]);
+
   const fullScreenMenuItemLabel = useMemo(() => {
     if (conversationId) {
-      return fullscreenLabels.fullScreen;
+      return labels.fullScreen;
     }
     return (
-      <EuiToolTip content={fullscreenLabels.fullScreenDisabledTooltip}>
-        <span tabIndex={0}>{fullscreenLabels.fullScreen}</span>
+      <EuiToolTip content={labels.fullScreenDisabledTooltip}>
+        <span tabIndex={0}>{labels.fullScreen}</span>
       </EuiToolTip>
     );
   }, [conversationId]);
 
-  const addToDatasetMenuItem = showAddToDatasetItem
-    ? [
-        <EuiContextMenuItem
-          key="addConversationToDataset"
-          icon="flask"
-          data-test-subj="agentBuilderAddConversationToDataset"
-          onClick={onAddConversationToDataset}
-          {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.pageContent,
-            action: AGENT_BUILDER_UI_EBT.action.conversation.ADD_TO_DATASET,
-            detail: 'conversation',
-          })}
-        >
-          {fullscreenLabels.addToDataset}
-        </EuiContextMenuItem>,
-      ]
-    : [];
+  const exportMenuItems = [
+    <EuiContextMenuItem
+      key="download-conversation"
+      icon="download"
+      disabled={!conversation}
+      onClick={handleDownloadConversation}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.DOWNLOAD_CONVERSATION,
+        detail: 'conversation',
+      })}
+    >
+      {labels.downloadConversation}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="load-trace"
+      icon="export"
+      onClick={handleLoadTrace}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.LOAD_TRACE_FROM_FILE,
+        detail: 'conversation',
+      })}
+    >
+      {labels.loadTrace}
+    </EuiContextMenuItem>,
+  ];
 
   const embeddedContextMenuItems = [
     <EuiContextMenuItem
@@ -207,7 +176,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         detail: 'conversation',
       })}
     >
-      {fullscreenLabels.agentDetails}
+      {labels.agentDetails}
     </EuiContextMenuItem>,
     ...(isEmbeddedContext && application
       ? [
@@ -240,56 +209,20 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
               detail: 'conversation',
             })}
           >
-            {fullscreenLabels.genAiSettings}
+            {labels.genAiSettings}
           </EuiContextMenuItem>,
         ]
       : []),
-    ...addToDatasetMenuItem,
+    ...exportMenuItems,
   ];
 
-  const fullscreenMenuItems = [
-    <EuiContextMenuItem
-      key="view-current-agent"
-      icon="info"
-      disabled={!manageAgents}
-      onClick={closePopover}
-      href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.AGENT_DETAILS,
-        detail: 'conversation',
-      })}
-    >
-      {fullscreenLabels.agentDetails}
-    </EuiContextMenuItem>,
-    ...(hasAccessToGenAiSettings
-      ? [
-          <EuiContextMenuItem
-            key="agentBuilderSettings"
-            icon="gear"
-            onClick={closePopover}
-            href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
-            data-test-subj="agentBuilderGenAiSettingsButton"
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.GENAI_SETTINGS,
-              detail: 'conversation',
-            })}
-          >
-            {fullscreenLabels.genAiSettings}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-    ...addToDatasetMenuItem,
-  ];
-
-  const menuItems = isEmbeddedContext ? embeddedContextMenuItems : fullscreenMenuItems;
+  const menuItems = isEmbeddedContext ? embeddedContextMenuItems : exportMenuItems;
 
   const buttonProps = {
     iconType: 'boxesVertical' as const,
     color: 'text' as const,
     size: 's' as const,
-    'aria-label': fullscreenLabels.actionsAriaLabel,
+    'aria-label': labels.actionsAriaLabel,
     onClick: togglePopover,
     'data-test-subj': 'agentBuilderMoreActionsButton',
     ...getEbtProps({
@@ -301,16 +234,30 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   return (
     <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
       <EuiPopover
         button={<EuiButtonIcon {...buttonProps} />}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downRight"
-        aria-label={fullscreenLabels.actionsAriaLabel}
+        aria-label={labels.actionsAriaLabel}
       >
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
+      {isTraceFlyoutOpen && (
+        <TraceFlyout
+          traceId={loadedTraceId}
+          initialSpans={loadedSpans ?? undefined}
+          onClose={closeTraceFlyout}
+        />
+      )}
     </>
   );
 };

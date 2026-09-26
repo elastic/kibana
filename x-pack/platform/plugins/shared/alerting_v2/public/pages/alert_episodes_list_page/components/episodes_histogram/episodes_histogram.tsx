@@ -33,7 +33,7 @@ import { buildEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/querie
 import { computeBucketInterval } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
 import { HISTOGRAM_BREAKDOWN_COLUMNS } from '@kbn/alerting-v2-episodes-ui/constants';
 import { buildModifiedVisAttributes } from '@kbn/alerting-v2-episodes-ui/utils/episodes_color_mapping';
-import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ApplicationStart, CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -58,6 +58,7 @@ interface EpisodesHistogramServices {
   expressions: ExpressionsStart;
   fieldFormats: FieldFormatsStart;
   http: HttpStart;
+  notifications?: CoreStart['notifications'];
   lens: LensPublicStart;
   spaces: SpacesPluginStart;
   storage: Storage;
@@ -93,6 +94,9 @@ export const EpisodesHistogram = ({
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId(services.spaces);
   const histogramSessionId = useMemo(() => `alerting_v2_histogram_${Date.now()}`, []);
+  // Lens treats a present `abortController` prop as owned. Unified histogram always
+  // forwards the prop, so an undefined value crashes the embeddable before it draws.
+  const abortController = useMemo(() => new AbortController(), []);
   const [bucketInterval, setBucketInterval] = useState(() => autoInterval(timeRange));
   const prevTimeRange = useRef(timeRange);
 
@@ -110,7 +114,12 @@ export const EpisodesHistogram = ({
     error,
     refetch,
   } = useEpisodesHistogramQuery({
-    services: { expressions: services.expressions, spaces: services.spaces, http: services.http },
+    services: {
+      expressions: services.expressions,
+      spaces: services.spaces,
+      http: services.http,
+      notifications: services.notifications,
+    },
     filterState,
     timeRange,
     bucketInterval,
@@ -187,6 +196,7 @@ export const EpisodesHistogram = ({
     if (!table || !dataView) return;
     api.fetch({
       requestAdapter: undefined,
+      abortController,
       searchSessionId: histogramSessionId,
       dataView,
       query: esqlQuery,
@@ -199,6 +209,7 @@ export const EpisodesHistogram = ({
       getModifiedVisAttributes,
     });
   }, [
+    abortController,
     api,
     dataView,
     esqlQuery,
@@ -252,6 +263,7 @@ export const EpisodesHistogram = ({
       {error ? (
         <EuiCallOut
           announceOnMount
+          data-test-subj="episodesHistogramError"
           title={EPISODES_HISTOGRAM_QUERY_ERROR}
           color="danger"
           iconType="error"

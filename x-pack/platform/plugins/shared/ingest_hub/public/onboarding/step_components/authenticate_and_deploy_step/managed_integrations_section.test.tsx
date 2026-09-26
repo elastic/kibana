@@ -42,6 +42,7 @@ import {
   LazyAwsIdentityFederationSetup,
   LazyAwsStaticKeysForm,
 } from '@kbn/fleet-plugin/public';
+import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useLocation } from 'react-router-dom';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
@@ -60,10 +61,15 @@ const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 
 import { ManagedIntegrationsSection } from './managed_integrations_section';
 
+const IAC_INTEGRATIONS: RenderIacTemplateIntegration[] = [
+  { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
+];
+
 function setupMocks({
   cloud = undefined,
   setConnectorId = jest.fn(),
   setStaticKeys = jest.fn(),
+  setPendingIacTemplate = jest.fn(),
   connectorId = undefined,
   authMethod = undefined,
   searchParams = '',
@@ -71,6 +77,7 @@ function setupMocks({
   cloud?: object;
   setConnectorId?: jest.Mock;
   setStaticKeys?: jest.Mock;
+  setPendingIacTemplate?: jest.Mock;
   connectorId?: string;
   authMethod?: 'identity_federation' | 'static_keys';
   searchParams?: string;
@@ -82,17 +89,39 @@ function setupMocks({
   mockUseOnboardingFlow.mockReturnValue({
     setConnectorId,
     setStaticKeys,
+    setPendingIacTemplate,
     authenticateAndDeployStep: { connectorId, authMethod },
+    awsServicesMap: new Map([
+      [
+        'guardduty',
+        {
+          id: 'guardduty',
+          packageName: 'aws',
+          dataStreams: ['guardduty'],
+          inputs: ['aws-s3', 'httpjson'],
+          identityFederationSupported: true,
+        },
+      ],
+    ]),
   });
 
   MockIdentityFederation.mockImplementation(
     ({
       onReadyChange,
       onConnectorIdChange,
+      onIacTemplateRecorded,
       initialConnectorId: initId,
     }: {
       onReadyChange?: (v: boolean) => void;
       onConnectorIdChange?: (id: string | undefined, name?: string) => void;
+      onIacTemplateRecorded?: (
+        iac: {
+          iac_key: string;
+          iac_blueprint_id?: string;
+          iac_blueprint_version?: string;
+        },
+        launchedFor: { cloudConnectorId: string; integrations: RenderIacTemplateIntegration[] }
+      ) => void;
       initialConnectorId?: string;
     }) => (
       <div data-test-subj="identity-federation">
@@ -100,6 +129,20 @@ function setupMocks({
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
         <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
+        <button
+          onClick={() =>
+            onIacTemplateRecorded?.(
+              {
+                iac_key: 'sha256:new',
+                iac_blueprint_id: 'federated-identity',
+                iac_blueprint_version: '1.0.0',
+              },
+              { cloudConnectorId: 'launched-for-connector', integrations: IAC_INTEGRATIONS }
+            )
+          }
+        >
+          record-template
+        </button>
       </div>
     )
   );
@@ -147,6 +190,7 @@ function renderSection(
   props: {
     serviceCount?: number;
     showIdentityFederation?: boolean;
+    iacIntegrations?: RenderIacTemplateIntegration[];
     onDeploy?: () => void;
     isDeploying?: boolean;
     isDone?: boolean;
@@ -159,6 +203,7 @@ function renderSection(
         <ManagedIntegrationsSection
           serviceCount={props.serviceCount ?? 3}
           showIdentityFederation={props.showIdentityFederation ?? true}
+          iacIntegrations={props.iacIntegrations ?? IAC_INTEGRATIONS}
           onDeploy={props.onDeploy ?? jest.fn()}
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
@@ -198,6 +243,13 @@ describe('ManagedIntegrationsSection', () => {
   });
 
   describe('showIdentityFederation=true', () => {
+    it('describes both access keys and federated identity', () => {
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByTestId('managedIntegrationsSection-description')).toHaveTextContent(
+        'Utilize AWS Access Keys or Federated Identity to set up and deploy your AWS account.'
+      );
+    });
+
     it('renders method radio group', () => {
       renderSection({ showIdentityFederation: true });
       expect(
@@ -221,6 +273,15 @@ describe('ManagedIntegrationsSection', () => {
   });
 
   describe('showIdentityFederation=false', () => {
+    it('describes access keys only', () => {
+      renderSection({ showIdentityFederation: false });
+      const description = screen.getByTestId('managedIntegrationsSection-description');
+      expect(description).toHaveTextContent(
+        'Utilize AWS Access Keys to set up and deploy your AWS account.'
+      );
+      expect(description).not.toHaveTextContent('Federated Identity');
+    });
+
     it('hides method radio group', () => {
       renderSection({ showIdentityFederation: false });
       expect(
@@ -290,6 +351,33 @@ describe('ManagedIntegrationsSection', () => {
       renderSection({ showIdentityFederation: true });
       fireEvent.click(screen.getByRole('radio', { name: /access keys/i }));
       expect(setConnectorId).toHaveBeenCalledWith(undefined);
+    });
+  });
+
+  describe('Federated Identity template details', () => {
+    // The Existing Identity check hands the rendered key here instead of writing the connector;
+    // it is parked on the flow for the post-Deploy write.
+    it('parks the rendered template details tagged with the identity and set the render was launched for, not the ones selected', () => {
+      // The render is asynchronous: the user may select another identity or change the enabled
+      // inputs before it lands. The flow carries 'persisted-connector' now, but the details belong
+      // to the identity and set whose Update started the render; Deploy only writes them when
+      // both match.
+      const setPendingIacTemplate = jest.fn();
+      setupMocks({ setPendingIacTemplate, connectorId: 'persisted-connector' });
+      renderSection({ showIdentityFederation: true });
+
+      act(() => {
+        fireEvent.click(screen.getByText('record-template'));
+      });
+
+      expect(setPendingIacTemplate).toHaveBeenCalledTimes(1);
+      expect(setPendingIacTemplate).toHaveBeenCalledWith({
+        connectorId: 'launched-for-connector',
+        integrationsKey: JSON.stringify(IAC_INTEGRATIONS),
+        iac_key: 'sha256:new',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
     });
   });
 
@@ -380,6 +468,7 @@ describe('ManagedIntegrationsSection', () => {
               <ManagedIntegrationsSection
                 serviceCount={3}
                 showIdentityFederation={true}
+                iacIntegrations={IAC_INTEGRATIONS}
                 onDeploy={jest.fn()}
                 isDeploying={false}
                 isDone={true}

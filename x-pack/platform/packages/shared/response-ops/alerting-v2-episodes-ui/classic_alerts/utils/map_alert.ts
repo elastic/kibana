@@ -8,9 +8,11 @@
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_GROUPING,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
-  ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_SEVERITY,
@@ -19,27 +21,17 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { flattenObject } from '@kbn/object-utils';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../../queries/episodes_query';
 import type { HistogramEpisodeRow } from '../../utils/histogram_utils';
 
-/**
- * Maps legacy v1 severity values that don't exist in the v2 `EpisodeSeverity`
- * enum to the nearest v2 equivalent so they are filterable, sortable, and
- * rendered correctly in the v2 table.
- */
-export const V1_SEVERITY_MAP: Record<string, string> = {
-  warning: 'medium',
-  minor: 'low',
-  major: 'high',
-};
-
 const normalizeV1Severity = (severity: string | undefined): string | null => {
   if (severity == null) return null;
-  const lower = severity.toLowerCase();
-  return V1_SEVERITY_MAP[lower] ?? lower;
+  return severity.toLowerCase();
 };
 
 /**
@@ -49,16 +41,20 @@ const normalizeV1Severity = (severity: string | undefined): string | null => {
 export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   TIMESTAMP,
   ALERT_UUID,
+  ALERT_INSTANCE_ID,
   ALERT_START,
   ALERT_END,
   ALERT_DURATION,
   ALERT_STATUS,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
-  ALERT_RULE_TAGS,
+  ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_CONSUMER,
   ALERT_SEVERITY,
+  ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
+  ALERT_GROUPING,
 ] as const;
 
 /**
@@ -79,15 +75,27 @@ export const CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS = [
 export interface ClassicAlertSource {
   [TIMESTAMP]: string;
   [ALERT_UUID]: string;
+  [ALERT_INSTANCE_ID]?: string;
   [ALERT_START]?: string;
   [ALERT_END]?: string;
   [ALERT_DURATION]?: number;
   [ALERT_STATUS]?: string;
   [ALERT_RULE_UUID]?: string;
   [ALERT_RULE_NAME]?: string;
-  [ALERT_RULE_TAGS]?: string | string[];
+  [ALERT_RULE_CATEGORY]?: string;
   [ALERT_SEVERITY]?: string;
   [ALERT_WORKFLOW_STATUS]?: string;
+  [ALERT_WORKFLOW_TAGS]?: string | string[];
+  [ALERT_GROUPING]?: Record<string, unknown>;
+}
+
+export interface ClassicAlertActionContext {
+  readonly index: string;
+  readonly alertUuid: string;
+  readonly instanceId: string | undefined;
+  readonly ruleId: string;
+  readonly workflowStatus: string | undefined;
+  readonly workflowTags: string[];
 }
 
 const asStringArray = (value: string | string[] | undefined): string[] => {
@@ -111,7 +119,10 @@ export const mapClassicStatusToEpisodeStatus = (status: string | undefined): Ale
  * maps to one episode. v2-only fields (ack / assignee / snooze / episode data) are
  * emitted as `null`. Capability flags are set to `false`.
  */
-export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpisode => {
+export const mapClassicAlertToEpisode = (
+  source: ClassicAlertSource,
+  index: string
+): AlertEpisode => {
   const { [TIMESTAMP]: timestamp, [ALERT_UUID]: uuid } = source;
   const start = source[ALERT_START];
   const end = source[ALERT_END];
@@ -125,6 +136,18 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
       ? Math.max(0, new Date(lastTimestamp).getTime() - new Date(start).getTime())
       : 0;
 
+  const workflowTags = asStringArray(source[ALERT_WORKFLOW_TAGS]);
+  const grouping = source[ALERT_GROUPING];
+
+  const actionContext: ClassicAlertActionContext = {
+    index,
+    alertUuid: uuid,
+    instanceId: source[ALERT_INSTANCE_ID],
+    ruleId: source[ALERT_RULE_UUID] ?? '',
+    workflowStatus: source[ALERT_WORKFLOW_STATUS],
+    workflowTags,
+  };
+
   return {
     '@timestamp': timestamp,
     'episode.id': uuid,
@@ -137,11 +160,15 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
     duration: durationMs,
     triggered_at: start,
     last_assignee_uid: null,
-    last_tags: asStringArray(source[ALERT_RULE_TAGS]),
+    last_tags: workflowTags,
+    last_ack_action: source[ALERT_WORKFLOW_STATUS] === 'acknowledged' ? 'ack' : null,
     episode_data: null,
     severity: normalizeV1Severity(source[ALERT_SEVERITY]),
+    rule_category: source[ALERT_RULE_CATEGORY],
     supports_actions: false,
     supports_timeline: false,
+    source_action_context: actionContext,
+    source_grouping: grouping ? flattenObject(grouping) : undefined,
   };
 };
 

@@ -5,76 +5,22 @@
  * 2.0.
  */
 
-import type {
-  BackgroundAgentCompleteEvent,
-  BackgroundAgentCompleteStep,
-  CompactionStep,
-  ConversationRoundStep,
-  ReasoningEvent,
-  ReasoningStep,
-  ToolCallEvent,
-  ToolCallStep,
-  ToolProgressEvent,
-  ToolResultEvent,
-} from '@kbn/agent-builder-common';
+import type { CompactionStep, RelevantSkillsStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType, createRelevantSkillsStep } from '@kbn/agent-builder-common';
 import type { CompactedConversation } from './conversation_compactor';
 import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
 
-/** Builds a tool-call step from its call/result/progress events. */
-export const createToolCallStep = ({
-  toolCall,
-  toolResult,
-  toolProgress,
-}: {
-  toolCall: ToolCallEvent;
-  toolProgress: ToolProgressEvent[];
-  toolResult?: ToolResultEvent;
-}): ToolCallStep => {
-  return {
-    type: ConversationRoundStepType.toolCall,
-    tool_id: toolCall.data.tool_id,
-    params: toolCall.data.params,
-    tool_call_id: toolCall.data.tool_call_id,
-    progression: toolProgress.map(({ data: { message, metadata } }) => ({
-      message,
-      metadata,
-    })),
-    results: toolResult?.data.results ?? [],
-    tool_call_group_id: toolCall.data.tool_call_group_id,
-    tool_origin: toolCall.data.tool_origin,
-    tool_type: toolCall.data.tool_type,
-  };
-};
+export type PreExecutionStep = CompactionStep | RelevantSkillsStep;
 
-/** Builds a reasoning step from a (non-transient) reasoning event. */
-export const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
-  return {
-    type: ConversationRoundStepType.reasoning,
-    reasoning: event.data.reasoning,
-    tool_call_id: event.data.tool_call_id,
-    tool_call_group_id: event.data.tool_call_group_id,
-  };
-};
-
-/** Builds a background-agent-complete step from its completion event. */
-export const createBackgroundAgentStep = (
-  event: BackgroundAgentCompleteEvent
-): BackgroundAgentCompleteStep => {
-  return {
-    type: ConversationRoundStepType.backgroundAgentComplete,
-    ...event.data.execution,
-  };
-};
-
+/** The bookkeeping steps a run starts with, before the agent produces anything. */
 export const createPreExecutionSteps = ({
   compactionResult,
   relevantSkillsSelection,
 }: {
   compactionResult?: CompactedConversation;
   relevantSkillsSelection?: RelevantSkillSelection;
-}): ConversationRoundStep[] => {
-  const steps: ConversationRoundStep[] = [];
+}): PreExecutionStep[] => {
+  const steps: PreExecutionStep[] = [];
 
   if (compactionResult?.compactionTriggered && compactionResult.summary) {
     const compactionStep: CompactionStep = {

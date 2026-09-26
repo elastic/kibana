@@ -13,15 +13,16 @@ import { alertZeroLink } from '../links';
 /**
  * Solution navigation for the AlertZero app, shared by ESS and serverless so the two cannot drift.
  *
- * Nodes are omitted from the rendered tree when `xpack.alertzero.enabled` is false, because the deep links
- * they reference are only registered by the AlertZero plugin when it is enabled.
+ * Nodes are omitted from the rendered tree when the `securitySolution:enableAlertZero` advanced setting is
+ * off (or the `xpack.alertzero.enabled` deployment kill switch is off): the AlertZero app is then either
+ * unregistered or `AppStatus.inaccessible`, and core drops the deep links these nodes reference.
  */
 
 /**
  * The AlertZero nodes that sit directly in the solution navigation body, in display order.
  *
  * Returned as a list rather than a single node because AlertZero contributes several top-level entries that
- * interleave with platform ones (Discover sits between Chats and Alerts).
+ * interleave with platform ones (Discover sits between this group and Alerts).
  */
 export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
   {
@@ -29,10 +30,6 @@ export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
     // Note the sidebar sentence-cases every label, so "AlertZero" is also registered in the `@kbn/shared-ux-label-formatter` title case glossary.
     title: i18nStrings.alertZero.title,
     icon: 'sun',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroChats),
-    icon: 'comment',
   },
 ];
 
@@ -47,16 +44,16 @@ export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
     icon: 'warning',
   },
   {
+    link: alertZeroLink(SecurityPageName.alertZeroEscalations),
+    icon: 'flag',
+  },
+  {
     // Kept a flat entry on purpose: the per-watch, Workers and Skills links are registered as deep
     // links so they stay searchable, but they are not children here — the chrome sub-panel is not the
     // navigation we want for them. The in-page subnav owns that, including the per-watch accent dots
     // that `NodeDefinition` cannot express.
     link: alertZeroLink(SecurityPageName.alertZeroWatches),
     icon: 'eye',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroRecords),
-    icon: 'documents',
   },
   {
     link: alertZeroLink(SecurityPageName.alertZeroThreatHunt),

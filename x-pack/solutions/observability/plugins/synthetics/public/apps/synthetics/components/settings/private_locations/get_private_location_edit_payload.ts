@@ -16,16 +16,13 @@ export const getPrivateLocationEditPayload = (
 ): EditPrivateLocationAttributes | null => {
   const isLabelChanged = formData.label !== existing.label;
   const areTagsChanged = !isEqual(formData.tags, existing.tags);
-  const isAgentShardingChanged =
-    Boolean(formData.isAgentSharding) !== Boolean(existing.isAgentSharding);
 
-  if (!isLabelChanged && !areTagsChanged && !isAgentShardingChanged) {
+  if (!isLabelChanged && !areTagsChanged) {
     return null;
   }
 
   return {
     label: formData.label,
     tags: formData.tags,
-    ...(isAgentShardingChanged ? { isAgentSharding: Boolean(formData.isAgentSharding) } : {}),
   };
 };

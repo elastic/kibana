@@ -18,10 +18,10 @@ import {
 } from '@elastic/eui';
 import { type Investigation } from '../../types';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
+import { CONVERSATION_CARD_ACTIONS } from '../conversation_card/translations';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
-import { getActionButtonIconProps } from '../helpers';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
+import { getActionButtonIconProps, isDecided } from '../helpers';
 
 interface ActionConfig {
   key: string;
@@ -66,12 +66,30 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'openIncident' | 'dismiss' | 'assign';
+export type CardActionType = 'createEscalation' | 'addToEscalation' | 'close' | 'assign';
+
+/**
+ * Returns true when at least one action will appear in the menu for this investigation.
+ * Use this to decide whether to render the menu trigger at all; an empty menu should not
+ * be reachable.
+ */
+export const hasAvailableActions = (
+  investigation: Investigation,
+  canManageEscalations = false
+): boolean => !isDecided(investigation) || canManageEscalations;
 export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
   onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
   onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  /** When true the escalation actions (create / add-to) appear in the menu. Requires the manage capability. */
+  canManageEscalations?: boolean;
+  /**
+   * When true the "Close investigation" action appears in the menu.
+   * Should only be true when the caller supplies a real close handler that performs
+   * the HTTP mutation. Without it the fallback modal does nothing.
+   */
+  canCloseInvestigation?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -81,12 +99,13 @@ export const BaseActions = memo<BaseActionsProps>(
     isFlyout = false,
     onClickAction,
     onClickRecommendedAction,
+    canManageEscalations = false,
+    canCloseInvestigation = false,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
     const handleClose = useCallback(() => setIsOpen(false), []);
     const handleToggle = useCallback(() => setIsOpen((prev) => !prev), []);
-    const onOpenChat = useOpenInChat(investigation.id);
 
     const button = isFlyout ? (
       <EuiButton
@@ -109,15 +128,21 @@ export const BaseActions = memo<BaseActionsProps>(
       />
     );
 
+    // A decided investigation keeps only the read-only items: approving, assigning or
+    // dismissing it again would submit a decision the API refuses.
+    const decided = isDecided(investigation);
+
     const actionConfigs = useMemo<ActionConfig[]>(
       () => [
-        ...(onClickRecommendedAction
+        // First item, and the only one that carries the action's own icon and colour:
+        // it is the decision the card is asking for, the rest are housekeeping.
+        ...(onClickRecommendedAction && !decided
           ? [
               {
                 key: 'proposedAction',
                 icon: getActionButtonIconProps(investigation).type,
                 color: getActionButtonIconProps(investigation).color,
-                name: investigation.primaryActionLabel ?? '',
+                name: investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default,
                 onClick: () =>
                   onClickRecommendedAction({
                     id: investigation.id,
@@ -125,40 +150,62 @@ export const BaseActions = memo<BaseActionsProps>(
               },
             ]
           : []),
-        ...(!isFlyout
+        ...(canManageEscalations
           ? [
               {
-                key: 'openChat',
-                icon: 'productAgent',
-                name: ACTIONS_TRANSLATIONS.buttons.openInChat,
-                onClick: onOpenChat,
+                key: 'createEscalation',
+                icon: 'document' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.openEscalation,
+                onClick: () => onClickAction('createEscalation', investigation.recordId),
+              },
+              {
+                key: 'addToEscalation',
+                icon: 'link' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.addToEscalation,
+                onClick: () => onClickAction('addToEscalation', investigation.recordId),
               },
             ]
           : []),
-        {
-          key: 'openIncident',
-          icon: 'document',
-          name: ACTIONS_TRANSLATIONS.buttons.openIncident,
-          onClick: () => onClickAction('openIncident', investigation.recordId),
-        },
-        {
-          key: 'assign',
-          icon: 'user',
-          name: ACTIONS_TRANSLATIONS.buttons.assign,
-          onClick: () => onClickAction('assign', investigation.recordId),
-          separator: true,
-        },
-        {
-          key: 'dismiss',
-          icon: 'trash',
-          name: ACTIONS_TRANSLATIONS.buttons.dismiss,
-          onClick: () => onClickAction('dismiss', investigation.recordId),
-        },
+        ...(decided
+          ? []
+          : [
+              {
+                key: 'assign',
+                icon: 'user',
+                name: ACTIONS_TRANSLATIONS.buttons.assign,
+                onClick: () => onClickAction('assign', investigation.recordId),
+              },
+              // Only show Close when the caller has the capability AND the investigation is not
+              // already closed. Flyout investigations are conversation-derived and have no
+              // `recommendedAction`, so `isDecided` alone is not a reliable gate; we also
+              // check `status` to prevent offering a Close that would submit a redundant mutation.
+              ...(canCloseInvestigation && investigation.status !== 'closed'
+                ? [
+                    {
+                      key: 'close',
+                      icon: 'cross' as IconType,
+                      name: ACTIONS_TRANSLATIONS.buttons.close,
+                      onClick: () => onClickAction('close', investigation.recordId),
+                      separator: true,
+                    },
+                  ]
+                : []),
+            ]),
       ],
-      [onClickRecommendedAction, investigation, isFlyout, onOpenChat, onClickAction]
+      [
+        onClickRecommendedAction,
+        decided,
+        investigation,
+        onClickAction,
+        canManageEscalations,
+        canCloseInvestigation,
+      ]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);
+
+    // Hook order is stable; we check emptiness after all hooks have run.
+    if (items.length === 0) return null;
 
     return (
       <EuiPopover

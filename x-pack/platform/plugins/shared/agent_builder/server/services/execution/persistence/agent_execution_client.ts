@@ -7,7 +7,12 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ChatEvent, SerializedExecutionError } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ExecutionAbortReason,
+  SerializedExecutionError,
+  UserIdAndName,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecution, FindExecutionsOptions } from '@kbn/agent-builder-server/execution';
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
@@ -25,17 +30,25 @@ type CreateExecutionParams = Pick<
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
+  | 'owner'
 >;
 
-/**
- * Lightweight snapshot returned by {@link AgentExecutionClient.peek}.
- * Includes only the status, error, event count, and last heartbeat — no events payload.
- */
+/** What a status update records alongside the status. */
+export interface UpdateExecutionStatusOptions {
+  /** The error that ended the execution (`failed`, or the abort error for `aborted`). */
+  error?: SerializedExecutionError;
+  /** Where the abort came from; only meaningful with `aborted`. */
+  abortReason?: ExecutionAbortReason;
+}
+
+/** Lightweight snapshot returned by {@link AgentExecutionClient.peek}, without the events. */
 export interface ExecutionPeek {
   status: ExecutionStatus;
   error?: SerializedExecutionError;
   eventCount: number;
   lastHeartbeat?: string;
+  conversationId?: string;
+  owner?: UserIdAndName;
 }
 
 const fromEs = (source: AgentExecutionProperties): AgentExecution => {
@@ -49,10 +62,12 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     ...(source.interactivity ? { interactivity: source.interactivity } : {}),
     ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
     spaceId: source.space_id,
+    ...(source.owner ? { owner: source.owner } : {}),
     agentParams: source.agent_params,
     eventCount: source.event_count ?? 0,
     events: source.events ?? [],
     ...(source.error ? { error: source.error } : {}),
+    ...(source.abort_reason ? { abortReason: source.abort_reason } : {}),
     ...(source.metadata ? { metadata: source.metadata } : {}),
   } as AgentExecution;
 };
@@ -68,10 +83,14 @@ export interface AgentExecutionClient {
   get(executionId: string): Promise<AgentExecution | undefined>;
 
   /** Update the status of an execution, optionally persisting an error. */
+  /**
+   * Updates the execution status. `aborted` is sticky against a later `failed` or `completed`.
+   * `error` and `abortReason` are recorded when given.
+   */
   updateStatus(
     executionId: string,
     status: ExecutionStatus,
-    error?: SerializedExecutionError
+    options?: UpdateExecutionStatusOptions
   ): Promise<void>;
 
   /** Append events to an execution document using a scripted update. */
@@ -136,6 +155,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     executionMode,
     interactivity,
     parentExecutionId,
+    owner,
   }: CreateExecutionParams): Promise<AgentExecution> {
     if (metadata) {
       for (const key of Object.keys(metadata)) {
@@ -156,6 +176,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       ...(interactivity ? { interactivity } : {}),
       parent_execution_id: parentExecutionId,
       space_id: spaceId,
+      ...(owner ? { owner } : {}),
       agent_params: agentParams,
       event_count: 0,
       events: [],
@@ -182,15 +203,26 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
   async updateStatus(
     executionId: string,
     status: ExecutionStatus,
-    error?: SerializedExecutionError
+    { error, abortReason }: UpdateExecutionStatusOptions = {}
   ): Promise<void> {
+    // `aborted` is sticky: once an abort was requested the execution reports it. Neither a later
+    // `failed` / `completed` (the graph ending inside the abort-detection window) nor a later
+    // `running` (the abort landing between a handler's status read and its write) may overwrite
+    // it — otherwise the abort monitor would see `running` and never cancel. The error, when
+    // given, is still recorded.
     await this.esClient.update({
       index: agentExecutionIndexName,
       id: executionId,
       retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
-      doc: {
-        status,
-        ...(error ? { error } : {}),
+      script: {
+        lang: 'painless',
+        source: `
+          boolean keepAborted = ctx._source.status == 'aborted' && params.status != 'aborted';
+          if (!keepAborted) { ctx._source.status = params.status; }
+          if (params.error != null) { ctx._source.error = params.error; }
+          if (params.abort_reason != null) { ctx._source.abort_reason = params.abort_reason; }
+        `,
+        params: { status, error: error ?? null, abort_reason: abortReason ?? null },
       },
     });
   }
@@ -230,17 +262,29 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       const response = await this.esClient.get<AgentExecutionProperties>({
         index: agentExecutionIndexName,
         id: executionId,
-        _source_includes: ['status', 'error', 'event_count', 'last_heartbeat'] as string[],
+        _source_includes: [
+          'status',
+          'error',
+          'event_count',
+          'last_heartbeat',
+          'agent_params.conversationId',
+          'owner',
+        ] as string[],
       });
       const source = response._source;
       if (!source) {
         return undefined;
       }
+      const { agent_params: agentParams, owner } = source;
+      const conversationId =
+        agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
       return {
         status: source.status,
         eventCount: source.event_count ?? 0,
         ...(source.error ? { error: source.error } : {}),
         ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
+        ...(conversationId ? { conversationId } : {}),
+        ...(owner ? { owner } : {}),
       };
     } catch (err) {
       if (err?.meta?.statusCode === 404) {

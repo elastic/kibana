@@ -12,7 +12,21 @@ import type {
   UiamProjectType,
 } from '@kbn/core-security-server';
 
+import type { ServiceAccountWorkloadBindingsApi } from './bindings';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
+
+/**
+ * Paging parameters for listing service accounts. `after` is the `next_page` cursor of the
+ * previous page, opaque to the caller and specific to the backend that issued it.
+ */
+export interface ListServiceAccountsParams {
+  limit?: number;
+  after?: string;
+}
 
 /**
  * A backend capable of managing service accounts for the current runtime.
@@ -24,10 +38,28 @@ export interface ServiceAccountsBackend {
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
 
   /**
+   * Lists the service accounts this Kibana can see, one page at a time.
+   *
+   * Authorizes the Kibana caller first. On UIAM the outbound call is then authenticated as Kibana
+   * over mTLS, not as the user.
+   */
+  list(
+    request: KibanaRequest,
+    params?: ListServiceAccountsParams
+  ): Promise<ListServiceAccountsResponse>;
+
+  /**
+   * Fetches one service account by id, with the same authorization model as {@link list}.
+   */
+  get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry>;
+
+  /**
    * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`
-   * facilities. The credential is transparently replaced when it expires, within the configured
+   * facilities. The credential is transparently replaced after an Elasticsearch token-expiry
+   * failure, within the configured
    * `xpack.security.serviceAccounts.requestLifetime`. Already-issued tokens keep their upstream
-   * expiration. Performs no user authorization: callers must authorize their own users first.
+   * expiration. Kibana self-client calls do not yet trigger renewal (#290877).
+   * Performs no user authorization: callers must authorize their own users first.
    */
   createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest>;
 
@@ -43,13 +75,30 @@ export interface ServiceAccountsBackend {
    * Kibana's to re-mint.
    */
   reauthenticateFakeRequest(request: KibanaRequest): Promise<{ authorization: string } | null>;
+
+  /**
+   * Drops a fake request from the refresh registry: transparent credential replacement is
+   * permanently disabled and its authorization header is removed. Copies of the issued token
+   * remain valid until upstream expiry; release does not remotely invalidate them. Idempotent,
+   * and a no-op for requests this backend did not mint.
+   */
+  releaseFakeRequest(request: KibanaRequest): void;
 }
 
 /**
  * Start contract of the service accounts service. `null` when the feature is
  * disabled.
  */
-export type ServiceAccountsServiceStart = ServiceAccountsBackend;
+export interface ServiceAccountsServiceStart {
+  /** Service account management and credential minting for this deployment's backend. */
+  backend: ServiceAccountsBackend;
+
+  /**
+   * Workload binding management and execution. Consumed exclusively by the Core security
+   * delegate, which scopes every call to the plugin Core identified as the caller.
+   */
+  workloads: ServiceAccountWorkloadBindingsApi;
+}
 
 export interface CloudProjectContext {
   organizationId: string;

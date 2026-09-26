@@ -6,19 +6,34 @@
  */
 
 import type { TimelineEvent } from '@kbn/agent-builder-common';
-import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
 import {
+  ConversationRoundStepType,
+  EventActorType,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
+import {
+  BOOM,
+  T0,
+  abortedExec0Timeline,
+  completedRoundTimeline,
   eventsNativeConversation,
+  failedExec0Timeline,
   pausedAndResumedRoundTimeline,
+  pausedRoundTimeline,
   timelineFromRounds,
 } from '../../../../test_utils/timeline';
 import {
+  dropTimelineRounds,
   eventsForContext,
+  groupTimelineEntries,
   groupTimelineRounds,
   isAwaitingPrompt,
-  lastExecutionTerminated,
+  isInterruptedRound,
+  isTimelineRound,
+  isTimelineStandaloneUserMessage,
+  lastExecutionTerminal,
+  roundInterruption,
   roundResponse,
-  sliceTimelineRounds,
 } from './context_timeline';
 
 const userActor = { type: EventActorType.user, id: 'u1', username: 'user1' };
@@ -107,32 +122,106 @@ describe('groupTimelineRounds', () => {
   });
 });
 
-describe('sliceTimelineRounds', () => {
-  const timeline = [...timelineFromRounds([{ id: 'a' }, { id: 'b' }]), ...independentIdsRound()];
+describe('groupTimelineRounds — interrupted rounds', () => {
+  it('yields an interrupted round with its terminal and steps', () => {
+    const timeline = eventsForContext(
+      eventsNativeConversation(
+        failedExec0Timeline('r1', [{ type: ConversationRoundStepType.reasoning, reasoning: 'x' }])
+      )
+    );
 
-  it('keeps the events of the rounds in the requested range', () => {
-    expect(groupTimelineRounds(sliceTimelineRounds(timeline, 1)).map((round) => round.id)).toEqual([
-      'b',
-      'exec-abc',
-    ]);
-    expect(sliceTimelineRounds(timeline, 2).map((event) => event.id)).toEqual(['um', 'ec']);
+    const [round] = groupTimelineRounds(timeline);
+
+    expect(round.id).toBe('r1');
+    expect(round.terminal.type).toBe(TimelineEventType.executionFailed);
+    expect(round.steps).toHaveLength(1);
+    expect(isInterruptedRound(round)).toBe(true);
+    expect(roundInterruption(round)).toEqual({ type: 'failed', error: BOOM });
+    expect(roundResponse(round)).toEqual({ message: '' });
+    expect(isAwaitingPrompt(round)).toBe(false);
   });
 
-  it('supports an end bound', () => {
-    expect(
-      groupTimelineRounds(sliceTimelineRounds(timeline, 0, 1)).map((round) => round.id)
-    ).toEqual(['a']);
+  it('reports an aborted round with its source', () => {
+    const [round] = groupTimelineRounds(abortedExec0Timeline('r1', T0, 'task_manager'));
+
+    expect(isInterruptedRound(round)).toBe(true);
+    expect(roundInterruption(round)).toEqual({
+      type: 'aborted',
+      aborted_by: { source: 'task_manager' },
+    });
+  });
+
+  it('a completed round has no interruption', () => {
+    const [round] = groupTimelineRounds(completedRoundTimeline());
+
+    expect(isInterruptedRound(round)).toBe(false);
+    expect(roundInterruption(round)).toBeUndefined();
+  });
+
+  it('keeps ordering with standalone messages', () => {
+    const standalone = {
+      id: 'sm',
+      type: TimelineEventType.userMessage,
+      created_at: '2026-01-01T00:00:30.000Z',
+      actor: userActor,
+      data: { message: 'standalone' },
+    } as unknown as TimelineEvent;
+    const timeline = eventsForContext(
+      eventsNativeConversation([
+        ...completedRoundTimeline('r1', T0),
+        standalone,
+        ...abortedExec0Timeline('r2', '2026-01-01T00:01:00.000Z'),
+      ])
+    );
+
+    const entries = groupTimelineEntries(timeline);
+
+    expect(entries.map((entry) => (isTimelineRound(entry) ? entry.id : 'message'))).toEqual([
+      'r1',
+      'message',
+      'r2',
+    ]);
+    expect(isTimelineStandaloneUserMessage(entries[1])).toBe(true);
   });
 });
 
-describe('lastExecutionTerminated', () => {
+describe('dropTimelineRounds', () => {
+  const timeline = [...timelineFromRounds([{ id: 'a' }, { id: 'b' }]), ...independentIdsRound()];
+
+  it('removes exactly the events of the given rounds and keeps stored order', () => {
+    const dropped = dropTimelineRounds(timeline, new Set(['b']));
+
+    expect(groupTimelineRounds(dropped).map((round) => round.id)).toEqual(['a', 'exec-abc']);
+    expect(dropped.map((event) => event.id)).toEqual(
+      timeline.filter((event) => !event.id.startsWith('b::')).map((event) => event.id)
+    );
+  });
+
+  it('drops rounds whose ids follow no scheme through the trigger link', () => {
+    expect(dropTimelineRounds(timeline, new Set(['exec-abc'])).map((event) => event.id)).toEqual(
+      timeline.filter((event) => !['um', 'ec'].includes(event.id)).map((event) => event.id)
+    );
+  });
+
+  it('returns the timeline unchanged for an empty set', () => {
+    expect(dropTimelineRounds(timeline, new Set())).toBe(timeline);
+  });
+});
+
+describe('lastExecutionTerminal (re-export)', () => {
   it('returns the terminal event of the last execution', () => {
-    expect(lastExecutionTerminated(pausedAndResumedRoundTimeline())?.id).toBe(
+    expect(lastExecutionTerminal(pausedAndResumedRoundTimeline())?.id).toBe(
       'r1::execution::1::execution_terminated'
     );
   });
 
+  it('finds an interrupted terminal behind an earlier pause', () => {
+    expect(
+      lastExecutionTerminal([...pausedRoundTimeline('r1'), ...abortedExec0Timeline('r2')])?.type
+    ).toBe(TimelineEventType.executionAborted);
+  });
+
   it('is undefined for an empty timeline', () => {
-    expect(lastExecutionTerminated([])).toBeUndefined();
+    expect(lastExecutionTerminal([])).toBeUndefined();
   });
 });

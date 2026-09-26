@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  touchesWorkerSettings,
   type UpdateWorkerRequestBody,
   type Worker,
 } from '@kbn/alertzero-common';
@@ -29,6 +32,14 @@ import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
 
+/**
+ * Workers hidden until the named skill is registered. These skills may be
+ * behind a feature flag and so are conditionally registered
+ */
+const WORKER_IDS_BY_REQUIRED_SKILL: Readonly<Record<string, readonly string[]>> = {
+  'endpoint-forensic-analysis': [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID],
+};
+
 const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYaml | null => {
   const managedDef: ManagedWorkflowDefinition | undefined = getManagedWorkflowDefinition(
     registration.id
@@ -48,12 +59,13 @@ const templateValuesEqual = (
   right: Record<string, unknown>
 ): boolean =>
   left != null &&
-  Object.keys(right).every((key) => Object.hasOwn(left, key) && left[key] === right[key]);
+  Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
+  | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
   | { outcome: 'failed' };
@@ -105,13 +117,44 @@ export class WorkersService {
     return buildAgentLookup(this.agentOpts.agentBuilder, this.agentTypeMap, request, this.logger);
   }
 
+  private async hiddenWorkerIds(request: KibanaRequest): Promise<ReadonlySet<string>> {
+    const entries = Object.entries(WORKER_IDS_BY_REQUIRED_SKILL);
+    const gatedWorkerIds = entries.flatMap(([, workerIds]) => workerIds);
+    if (gatedWorkerIds.length === 0) return new Set();
+
+    const { agentBuilder } = this.agentOpts;
+    if (!agentBuilder) return new Set(gatedWorkerIds);
+
+    try {
+      const registry = await agentBuilder.skills.getRegistry({ request });
+      const checks = await Promise.all(
+        entries.map(async ([skillId, workerIds]) => ({
+          workerIds,
+          registered: await registry.has(skillId),
+        }))
+      );
+      return new Set(
+        checks.filter(({ registered }) => !registered).flatMap(({ workerIds }) => workerIds)
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to read worker skill gates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return new Set(gatedWorkerIds);
+    }
+  }
+
   async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
     await this.ensureAgent(spaceId);
 
     const agentLookup = await this.buildAgentLookup(request);
+    const hiddenWorkerIds = await this.hiddenWorkerIds(request);
     const workers = await Promise.all(
       workerRegistry
         .list()
+        .filter((registration) => !hiddenWorkerIds.has(registration.id))
         .map((registration) => this.projectWorker(registration, spaceId, agentLookup))
     );
     return ListWorkersResponse.parse({ workers });
@@ -125,6 +168,9 @@ export class WorkersService {
     await this.ensureAgent(spaceId);
     const registration = workerRegistry.get(workerId);
     if (!registration) {
+      return undefined;
+    }
+    if ((await this.hiddenWorkerIds(request)).has(registration.id)) {
       return undefined;
     }
 
@@ -142,8 +188,11 @@ export class WorkersService {
     if (!registration) {
       return { outcome: 'not-found' };
     }
+    if ((await this.hiddenWorkerIds(request)).has(registration.id)) {
+      return { outcome: 'not-found' };
+    }
 
-    const touchesSettings = patch.autonomyLevel != null || patch.scheduleInterval != null;
+    const touchesSettings = touchesWorkerSettings(patch);
     const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
     let status = await managedWorkflows.getWorkflowStatus(registration.id, {
@@ -163,12 +212,10 @@ export class WorkersService {
       if (patch.settingsRevision !== (state?.documentVersion ?? null)) {
         return { outcome: 'conflict' };
       }
-      const currentValues = state?.templateValues
-        ? registration.settings.migrate(state.templateValues).values
-        : registration.settings.createDefaultValues();
-      const applied = registration.settings.applyPatch(currentValues, patch);
-      if ('rejected' in applied) {
-        return { outcome: 'rejected', what: applied.rejected };
+      const currentValues = state?.templateValues ?? registration.settings.createDefaultValues();
+      const applied = registration.settings.applyPatch(currentValues, patch.settings ?? {});
+      if ('invalid' in applied) {
+        return { outcome: 'invalid', message: applied.invalid };
       }
 
       await installRegisteredWorker(managedWorkflows, registration, {
@@ -245,7 +292,8 @@ export class WorkersService {
     let enabled = false;
     let lastRun: string | null = null;
     let settingsRevision: number | null = null;
-    let values = registration.settings.createDefaultValues();
+    // Defaults stand in for an uninstalled Worker and for one whose stored settings cannot be read.
+    let settings = registration.settings.toSettings(registration.settings.createDefaultValues());
     let settingsUnavailable = false;
     let definition: WorkflowYaml | null = null;
 
@@ -256,8 +304,9 @@ export class WorkersService {
         if (!state?.templateValues) {
           settingsUnavailable = true;
         } else {
+          // Parse before taking the revision so an unreadable document reports revision null.
+          settings = registration.settings.toSettings(state.templateValues);
           settingsRevision = state.documentVersion ?? null;
-          values = registration.settings.migrate(state.templateValues).values;
         }
       } catch (error) {
         settingsUnavailable = true;
@@ -300,8 +349,10 @@ export class WorkersService {
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }
         : {}),
-      settings: registration.settings.toSettings(values),
+      settings,
       settingsRevision,
+      // `installed` is any document at this id, including a user workflow that is not ours.
+      workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }

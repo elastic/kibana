@@ -9,6 +9,7 @@ import { API_VERSIONS, INTERNAL_API_ACCESS, ALERTZERO_WATCHES_URL } from '@kbn/a
 import type { ListWatchesResponse } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 export const registerListWatchesRoute = ({
   router,
@@ -34,7 +35,7 @@ export const registerListWatchesRoute = ({
           request: {},
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
           const body: ListWatchesResponse = await getWatchesService().list(getSpaceId(request));
           return response.ok({ body });
@@ -45,6 +46,6 @@ export const registerListWatchesRoute = ({
             body: { message: 'Failed to list watches' },
           });
         }
-      }
+      })
     );
 };

@@ -9,7 +9,7 @@ import { firstValueFrom, of, Subject, throwError, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { chatApiPath } from '../../common/constants';
-import { registerChatApiRoutes } from './chat_api';
+import { chatPayloadSchema, registerChatApiRoutes } from './chat_api';
 
 const mockObservableIntoEventSourceStream = jest.fn();
 jest.mock('@kbn/sse-utils-server', () => ({
@@ -93,7 +93,9 @@ describe('registerChatApiRoutes', () => {
 
   it('returns the conversation with its timeline after a sync converse', async () => {
     const { router, handlers } = captureHandlers();
-    const executeAgent = jest.fn().mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    const maybeExecuteAgent = jest
+      .fn()
+      .mockResolvedValue({ events$: of(conversationCreatedEvent) });
     const conversation = { id: 'conv-1', events: [{ id: 'e1' }], rounds: [] };
     const get = jest.fn().mockResolvedValue(conversation);
     const getScopedClient = jest.fn().mockResolvedValue({ get });
@@ -101,7 +103,7 @@ describe('registerChatApiRoutes', () => {
     registerChatApiRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
+        execution: { maybeExecuteAgent },
         conversations: { getScopedClient },
       }),
       coreSetup: {} as never,
@@ -116,20 +118,26 @@ describe('registerChatApiRoutes', () => {
       response
     );
 
-    expect(executeAgent).toHaveBeenCalled();
+    expect(maybeExecuteAgent).toHaveBeenCalled();
     expect(get).toHaveBeenCalledWith('conv-1');
     expect(result).toEqual({ status: 200, payload: conversation });
   });
 
-  it('404s when the experimental feature flag is disabled', async () => {
+  it('serves the sync route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
-    const executeAgent = jest.fn();
+    const maybeExecuteAgent = jest
+      .fn()
+      .mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    const conversation = { id: 'conv-1', events: [], rounds: [] };
+    const getScopedClient = jest
+      .fn()
+      .mockResolvedValue({ get: jest.fn().mockResolvedValue(conversation) });
 
     registerChatApiRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
-        conversations: { getScopedClient: jest.fn() },
+        execution: { maybeExecuteAgent },
+        conversations: { getScopedClient },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -143,20 +151,20 @@ describe('registerChatApiRoutes', () => {
       response
     );
 
-    expect(response.notFound).toHaveBeenCalled();
-    expect(result).toEqual({ status: 404 });
-    expect(executeAgent).not.toHaveBeenCalled();
+    expect(response.notFound).not.toHaveBeenCalled();
+    expect(maybeExecuteAgent).toHaveBeenCalled();
+    expect(result).toEqual({ status: 200, payload: conversation });
   });
 
   it('returns a 500 when the run emits no conversation event', async () => {
     const { router, handlers } = captureHandlers();
-    const executeAgent = jest.fn().mockResolvedValue({ events$: of() });
+    const maybeExecuteAgent = jest.fn().mockResolvedValue({ events$: of() });
     const get = jest.fn();
 
     registerChatApiRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
+        execution: { maybeExecuteAgent },
         conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
       }),
       coreSetup: {} as never,
@@ -177,14 +185,14 @@ describe('registerChatApiRoutes', () => {
 
   it('surfaces a 500 when the agent stream errors mid-run', async () => {
     const { router, handlers } = captureHandlers();
-    const executeAgent = jest
+    const maybeExecuteAgent = jest
       .fn()
       .mockResolvedValue({ events$: throwError(() => new Error('stream boom')) });
 
     registerChatApiRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
+        execution: { maybeExecuteAgent },
         conversations: { getScopedClient: jest.fn() },
       }),
       coreSetup: {} as never,
@@ -231,7 +239,7 @@ describe('registerChatApiRoutes', () => {
         access_control: { access_mode: 'private', entries: [] },
       },
     };
-    const executeAgent = jest.fn().mockResolvedValue({
+    const maybeExecuteAgent = jest.fn().mockResolvedValue({
       events$: of(
         roundCompleteEvent,
         executionStartedEvent,
@@ -245,7 +253,7 @@ describe('registerChatApiRoutes', () => {
     registerChatApiRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
+        execution: { maybeExecuteAgent },
         conversations: { getScopedClient: jest.fn() },
       }),
       coreSetup: {
@@ -280,15 +288,60 @@ describe('registerChatApiRoutes', () => {
     ]);
   });
 
-  it('404s the streaming route when the experimental feature flag is disabled', async () => {
+  it('serves the streaming route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
-    const executeAgent = jest.fn();
+    const maybeExecuteAgent = jest
+      .fn()
+      .mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    mockObservableIntoEventSourceStream.mockReset();
+    mockObservableIntoEventSourceStream.mockReturnValue('BODY');
 
     registerChatApiRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
+        execution: { maybeExecuteAgent },
         conversations: { getScopedClient: jest.fn() },
+      }),
+      coreSetup: {
+        getStartServices: jest.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
+      },
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const abortedSubject = new Subject<void>();
+    const result = await handlers[`${chatApiPath}/converse/async`](
+      activeContext(false),
+      {
+        body: { agent_id: 'agent-1', input: 'Hello' },
+        events: { aborted$: abortedSubject.asObservable() },
+      },
+      response
+    );
+
+    expect(response.notFound).not.toHaveBeenCalled();
+    expect(maybeExecuteAgent).toHaveBeenCalled();
+    expect(mockObservableIntoEventSourceStream).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ status: 200, payload: 'BODY' });
+  });
+});
+
+describe('user message requests', () => {
+  const conversation = { id: 'conv-1', events: [{ id: 'e1' }], rounds: [] };
+
+  const converse = async (body: Record<string, unknown>) => {
+    const { router, handlers } = captureHandlers();
+    const maybeExecuteAgent = jest
+      .fn()
+      .mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    const get = jest.fn().mockResolvedValue(conversation);
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { maybeExecuteAgent },
+        conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -296,14 +349,71 @@ describe('registerChatApiRoutes', () => {
     } as never);
 
     const response = buildResponse();
-    const result = await handlers[`${chatApiPath}/converse/async`](
-      activeContext(false),
-      { body: { agent_id: 'agent-1', input: 'Hello' } },
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      { body },
       response
     );
 
-    expect(response.notFound).toHaveBeenCalled();
-    expect(result).toEqual({ status: 404 });
-    expect(executeAgent).not.toHaveBeenCalled();
+    return { maybeExecuteAgent, result };
+  };
+
+  it('hands the trigger mode to the execution service, with everything else it was sent', async () => {
+    const { maybeExecuteAgent, result } = await converse({
+      trigger_mode: 'never',
+      conversation_id: '00000000-0000-4000-8000-000000000001',
+      input: 'Pool limit is now 200',
+      connector_id: 'connector-1',
+    });
+
+    expect(maybeExecuteAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          triggerMode: 'never',
+          conversationId: '00000000-0000-4000-8000-000000000001',
+          connectorId: 'connector-1',
+          nextInput: expect.objectContaining({ message: 'Pool limit is now 200' }),
+        }),
+      })
+    );
+    // The route reads the conversation the same way for either mode.
+    expect(result).toEqual({ status: 200, payload: conversation });
+  });
+
+  it('leaves the mode to the service when the request omits it', async () => {
+    // The schema defaults `trigger_mode` to always; a request that never reaches it carries none.
+    const { maybeExecuteAgent } = await converse({ input: 'Hello' });
+
+    const [{ params }] = maybeExecuteAgent.mock.calls[0];
+    expect(params).not.toHaveProperty('triggerMode');
+  });
+});
+
+describe('chatPayloadSchema', () => {
+  it('accepts trigger_mode for sync chat requests', () => {
+    expect(chatPayloadSchema.validate({ input: 'hi' }).trigger_mode).toBe('always');
+    expect(
+      chatPayloadSchema.validate({
+        trigger_mode: 'never',
+        conversation_id: '00000000-0000-4000-8000-000000000001',
+        input: 'hi',
+      })
+    ).toMatchObject({ trigger_mode: 'never' });
+  });
+
+  it('rejects unsupported trigger_mode values', () => {
+    expect(() => chatPayloadSchema.validate({ trigger_mode: 'auto' })).toThrow();
+  });
+
+  it('accepts execution options alongside trigger_mode never', () => {
+    expect(() =>
+      chatPayloadSchema.validate({
+        trigger_mode: 'never',
+        conversation_id: '00000000-0000-4000-8000-000000000001',
+        input: 'hi',
+        connector_id: 'connector-1',
+        read_only: true,
+      })
+    ).not.toThrow();
   });
 });
