@@ -24,7 +24,6 @@ const allSettingsForFormat = (
   hive_partitioning: 'true',
   optimized_reader: 'false',
   late_materialization: 'true',
-  schema_sample_size: '100',
   delimiter: ';',
   mode: 'quoted',
   header_row: 'false',
