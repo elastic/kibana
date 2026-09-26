@@ -10,7 +10,10 @@ import { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CLAIMS_APP } from '@kbn/synthtrace/src/scenarios/sigevents/mock_apps/claims';
 import type { ConnectionConfig } from './seed_sigevents_env/lib/get_connection_config';
-import { getConnectionConfig } from './seed_sigevents_env/lib/get_connection_config';
+import {
+  getConnectionConfig,
+  getEsTlsOptions,
+} from './seed_sigevents_env/lib/get_connection_config';
 import { kibanaRequest } from './seed_sigevents_env/lib/kibana';
 import { CLAIMS_SEED } from './seed_sigevents_env/scenarios/claims';
 import {
@@ -99,6 +102,7 @@ run(
     const esClient = new Client({
       node: config.esUrl,
       auth: { username: config.username, password: config.password },
+      tls: getEsTlsOptions(config.esUrl),
     });
 
     if (flags.clean === true) {
@@ -153,8 +157,9 @@ run(
                                  and the data stream) before re-seeding
         --run-discovery          Run detection, seed post-detection evidence, then run AI discovery
                                  and verify an active event (requires a configured inference connector)
-        --es-url <url>           Elasticsearch URL (default: from kibana.dev.yml)
-        --es-username <user>     ES username (default: elastic)
+        --es-url <url>           Elasticsearch URL (default: from kibana.dev.yml; local HTTP
+                                 falls back to HTTPS for serverless)
+        --es-username <user>     ES username (default: tries elastic, then elastic_serverless)
         --es-password <pass>     ES password (default: changeme)
         --kibana-url <url>       Kibana base URL (default: from kibana.dev.yml, auto-detects dev base path)
 
