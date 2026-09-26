@@ -25,6 +25,7 @@ import type {
   InternalUserActivityServiceStart,
 } from './types';
 import { shouldLog } from './user_activity_filters';
+import { shapeServerlessOtelAppenders } from './user_activity_otel_transform';
 
 /** @internal */
 interface UserActivitySetupDeps {
@@ -66,11 +67,15 @@ export class UserActivityService
       this.filters = config.filters;
     });
 
+    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
+
     logging.configure(
       ['user_activity'],
       config$.pipe(
         map((config) => ({
-          appenders: config.appenders,
+          appenders: isServerless
+            ? shapeServerlessOtelAppenders(config.appenders)
+            : config.appenders,
           loggers: [
             {
               name: 'event',
@@ -101,13 +106,7 @@ export class UserActivityService
     this.enabled = false;
   }
 
-  private trackUserAction = ({
-    message,
-    event,
-    object,
-    metadata,
-    error,
-  }: TrackUserActionParams) => {
+  private trackUserAction = ({ message, event, object, kibana, error }: TrackUserActionParams) => {
     if (!this.enabled || !shouldLog(event.action, this.filters)) return;
 
     const injectedContext = this.getInjectedContext();
@@ -128,10 +127,10 @@ export class UserActivityService
         type: event.type as UserActivityEventType[],
         outcome: event.outcome ?? 'unknown',
       },
-      ...(metadata ? { metadata } : {}),
       ...(error ? { error } : {}),
       ...injectedContext,
       kibana: {
+        ...kibana,
         ...injectedContext.kibana,
         object,
         ...(isSavedObject ? { saved_object: { type: object.type, id: object.id } } : {}),

@@ -996,9 +996,11 @@ export class Authenticator {
             type: 'user',
             tags: [],
           },
-          metadata: {
-            authenticationProvider: provider.name,
-            authenticationType: provider.type,
+          kibana: {
+            security: {
+              authenticationProvider: provider.name,
+              authenticationType: provider.type,
+            },
           },
         });
       }
@@ -1044,9 +1046,11 @@ export class Authenticator {
           type: 'user',
           tags: [],
         },
-        metadata: {
-          authenticationProvider: sessionValue.provider.name,
-          authenticationType: sessionValue.provider.type,
+        kibana: {
+          security: {
+            authenticationProvider: sessionValue.provider.name,
+            authenticationType: sessionValue.provider.type,
+          },
         },
       });
     }
