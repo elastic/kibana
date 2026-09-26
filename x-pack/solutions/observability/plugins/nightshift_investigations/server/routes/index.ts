@@ -21,6 +21,14 @@ import { listDecisionTreesRoute } from './list_decision_trees';
 import { getDecisionTreeRoute } from './get_decision_tree';
 import { listDecisionTreeVersionsRoute } from './list_decision_tree_versions';
 import { getDecisionTreeVersionRoute } from './get_decision_tree_version';
+import {
+  createAutomationRoute,
+  listAutomationsRoute,
+  getAutomationRoute,
+  updateAutomationRoute,
+  deleteAutomationRoute,
+  listAutomationRunsRoute,
+} from './automations';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
@@ -39,6 +47,12 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getDecisionTreeRoute,
   ...listDecisionTreeVersionsRoute,
   ...getDecisionTreeVersionRoute,
+  ...createAutomationRoute,
+  ...listAutomationsRoute,
+  ...getAutomationRoute,
+  ...updateAutomationRoute,
+  ...deleteAutomationRoute,
+  ...listAutomationRunsRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =
