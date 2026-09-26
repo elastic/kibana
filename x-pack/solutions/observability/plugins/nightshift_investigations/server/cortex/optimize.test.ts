@@ -350,6 +350,50 @@ describe('applyCortexEdits', () => {
       expect.objectContaining({ status: 'tentative', corroborations: 3 })
     );
   });
+
+  it('does not promote a page revived earlier in the same run', async () => {
+    const revived = {
+      id: 'cortex_topic_old-note',
+      title: 'Old note',
+      entity_type: 'topic' as const,
+      status: 'tentative' as const,
+      corroborations: 4,
+      updated_at: '2026-09-09T12:00:00.000Z',
+      slug: 'old-note',
+      content: 'Stale.',
+    };
+    const store: CortexPageStore = {
+      list: jest.fn().mockResolvedValue({
+        pages: [{ ...revived, status: 'archived' as const, corroborations: 3 }],
+        stats: { total: 1, established: 0, total_corroborations: 3 },
+      }),
+      get: jest.fn().mockResolvedValue(revived),
+      upsert: jest.fn().mockResolvedValue({}),
+      corroborate: jest.fn().mockResolvedValue(revived),
+      archive: jest.fn(),
+      pruneDuplicates: jest.fn().mockResolvedValue(0),
+    };
+
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      edits: [
+        { action: 'corroborate', entity_type: 'topic', slug: 'old-note', title: 'Old note' },
+        {
+          action: 'upsert',
+          entity_type: 'topic',
+          slug: 'old-note',
+          title: 'Old note',
+          content: 'Relevant again.',
+        },
+      ],
+    });
+
+    expect(store.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'tentative', corroborations: 4 })
+    );
+  });
 });
 
 describe('renderToolCalls', () => {
@@ -374,6 +418,18 @@ describe('renderToolCalls', () => {
     expect(lines[lines.length - 1]).toBe(
       `- (${calls.length - lines.length + 1} more tool calls omitted)`
     );
+  });
+
+  it('bounds large strings and arrays inside the parameters', () => {
+    const line = renderToolCalls([
+      {
+        tool_id: 'nightshift.sandbox_write_file',
+        params: { path: '/workspace/a', content: 'x'.repeat(100_000), lines: Array(1_000).fill(1) },
+      },
+    ]);
+
+    expect(line.length).toBeLessThan(1_100);
+    expect(line).toContain('"path":"/workspace/a"');
   });
 
   it('marks an empty round explicitly', () => {
