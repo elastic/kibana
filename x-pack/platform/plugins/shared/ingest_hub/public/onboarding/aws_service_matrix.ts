@@ -584,6 +584,42 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     policyTemplate: 'aws.ecs',
     packageName: 'aws_cloudwatch_input_otel',
   },
+
+  // ── aws_billing package — Cloud Financial Management ─────────────────────
+  {
+    id: 'aws_billing',
+    name: 'AWS Cost and Usage Report (CUR 2.0)',
+    category: 'cloud_financial_management',
+    packageName: 'aws_billing',
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
+  },
+
+  // ── awsfirehose package — Application Integration ─────────────────────────
+  {
+    id: 'awsfirehose',
+    name: 'Amazon Data Firehose',
+    category: 'application_integration',
+    packageName: 'awsfirehose',
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
+  },
+
+  // ── amazon_security_lake package — Security, Identity & Compliance ────────
+  {
+    id: 'amazon_security_lake',
+    name: 'Amazon Security Lake',
+    category: 'security_identity_compliance',
+    packageName: 'amazon_security_lake',
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
+  },
+
+  // ── endace package — Networking and Content Delivery ──────────────────────
+  {
+    id: 'endace',
+    name: 'Endace',
+    category: 'networking_content_delivery',
+    packageName: 'endace',
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
+  },
 ];
 
 // ── Private helpers ──────────────────────────────────────────────────────────
@@ -949,6 +985,17 @@ export function buildAwsServiceMatrix(
           }
         }
       }
+
+      // Fallback: packages with no matching policy template (e.g. awsfirehose) still expose
+      // their data streams — derive signal types directly from the package manifest.
+      if (!pt) {
+        for (const ds of packageInfo.data_streams ?? []) {
+          const dsType = (ds as any)?.type as string | undefined;
+          if (dsType === 'logs' || dsType === 'metrics') {
+            signalTypesSet.add(dsType as SignalType);
+          }
+        }
+      }
     }
 
     const signalTypes: SignalType[] = [...signalTypesSet];
@@ -1022,6 +1069,11 @@ export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsSer
 
 /** Internal static entries — exported for use by buildAwsServiceMatrix in the hook. */
 export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_RAW;
+
+/** True when the service can only be deployed via a self-managed Elastic Agent. */
+export const isAgentBasedOnly = (service: AwsServiceMatrixEntry): boolean =>
+  service.deploymentMethods.length > 0 &&
+  service.deploymentMethods.every((dm) => dm.method === 'agent_based');
 
 /**
  * Static metadata map for service lookups that do not require the manifest

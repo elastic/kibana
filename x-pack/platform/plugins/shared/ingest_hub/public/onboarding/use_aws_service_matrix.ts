@@ -81,8 +81,26 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
+  const { data: billingData, refetch: billingRefetch } = useGetPackageInfoByKeyQuery(
+    'aws_billing',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
   const { data: firehoseData, refetch: firehoseRefetch } = useGetPackageInfoByKeyQuery(
     'awsfirehose',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
+  const { data: securityLakeData, refetch: securityLakeRefetch } = useGetPackageInfoByKeyQuery(
+    'amazon_security_lake',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
+  const { data: endaceData, refetch: endaceRefetch } = useGetPackageInfoByKeyQuery(
+    'endace',
     undefined,
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
@@ -103,7 +121,10 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
         aws_cloudwatch_input_otel: cloudwatchOtelData.item,
       }),
       ...(securityHubData?.item && { aws_securityhub: securityHubData.item }),
+      ...(billingData?.item && { aws_billing: billingData.item }),
       ...(firehoseData?.item && { awsfirehose: firehoseData.item }),
+      ...(securityLakeData?.item && { amazon_security_lake: securityLakeData.item }),
+      ...(endaceData?.item && { endace: endaceData.item }),
     };
     return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC);
   }, [
@@ -115,7 +136,10 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     logsData,
     cloudwatchOtelData,
     securityHubData,
+    billingData,
     firehoseData,
+    securityLakeData,
+    endaceData,
   ]);
 
   const refetch = useCallback(() => {
@@ -127,7 +151,10 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     logsRefetch();
     cloudwatchOtelRefetch();
     securityHubRefetch();
+    billingRefetch();
     firehoseRefetch();
+    securityLakeRefetch();
+    endaceRefetch();
   }, [
     awsRefetch,
     bedrockRefetch,
@@ -137,7 +164,10 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     logsRefetch,
     cloudwatchOtelRefetch,
     securityHubRefetch,
+    billingRefetch,
     firehoseRefetch,
+    securityLakeRefetch,
+    endaceRefetch,
   ]);
 
   return { matrix, isError: awsIsError, refetch };

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -21,6 +22,8 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
+import { isAgentBasedOnly } from '../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
@@ -63,6 +66,30 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
+
+  // ── Agent-based-only detection ────────────────────────────────────────────────
+  const agentBasedOnlyServices = useMemo((): AwsServiceMatrixEntry[] => {
+    if (!awsServicesMap || selectedServiceIds.length === 0) return [];
+    return selectedServiceIds
+      .map((id) => awsServicesMap.get(id))
+      .filter((s): s is AwsServiceMatrixEntry => !!s && isAgentBasedOnly(s));
+  }, [selectedServiceIds, awsServicesMap]);
+
+  // All selected services require a self-managed Elastic Agent — lock the card.
+  const allAgentBasedOnly =
+    agentBasedOnlyServices.length > 0 &&
+    agentBasedOnlyServices.length === selectedServiceIds.length;
+
+  // Some (but not all) selected services require an Elastic Agent alongside MI/ECF services.
+  const isMixed = agentBasedOnlyServices.length > 0 && !allAgentBasedOnly;
+
+  const isAgentBased = deploymentMethod === 'agent_based';
+
+  useEffect(() => {
+    if (allAgentBasedOnly && deploymentMethod !== 'agent_based') {
+      setDeploymentMethod('agent_based');
+    }
+  }, [allAgentBasedOnly, deploymentMethod, setDeploymentMethod]);
 
   // ── Service settings (region + vars) ─────────────────────────────────────────
   // Read from session storage so ECF URLs can be pre-filled without re-entering data.
@@ -115,8 +142,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       handleDeploy();
     }
   }, [handleDeploy, failedInstances]);
-
-  const isAgentBased = deploymentMethod === 'agent_based';
 
   const miServiceIds = useMemo(
     () =>
@@ -490,8 +515,34 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       <DeploymentMethodCard
         selectedMethod={deploymentMethod}
         onChange={setDeploymentMethod}
+        locked={allAgentBasedOnly}
         disabled={isMethodLocked}
       />
+
+      {isAgentBased && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.title"
+                defaultMessage="Self-managed Elastic Agent required"
+              />
+            }
+            iconType="info"
+            color="primary"
+            data-test-subj="authenticateAndDeployStep-agentBasedOnlyCallout"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.body"
+                defaultMessage="After completing this wizard, install the integrations on an Elastic Agent policy and enroll an Elastic Agent that has access to your AWS environment."
+              />
+            </p>
+          </EuiCallOut>
+        </>
+      )}
 
       {showMiSection && <EuiHorizontalRule margin="l" />}
 
@@ -527,6 +578,35 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       {hasAnyEcf && <EuiHorizontalRule margin="l" />}
 
       {hasAnyEcf && <EcfDeploymentSection {...ecfSectionProps} />}
+
+      {isMixed && !isAgentBased && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.mixedDeploymentCallout.title"
+                defaultMessage="Some services require a self-managed Elastic Agent"
+              />
+            }
+            iconType="info"
+            color="primary"
+            data-test-subj="authenticateAndDeployStep-mixedDeploymentCallout"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.mixedDeploymentCallout.body"
+                defaultMessage="{services} {count, plural, one {requires} other {require}} a self-managed Elastic Agent and cannot be deployed here. After completing this wizard, install {count, plural, one {this integration} other {these integrations}} on an Elastic Agent policy and enroll an Elastic Agent that has access to your AWS environment."
+                values={{
+                  count: agentBasedOnlyServices.length,
+                  services: <strong>{agentBasedOnlyServices.map((s) => s.name).join(', ')}</strong>,
+                }}
+              />
+            </p>
+          </EuiCallOut>
+        </>
+      )}
 
       <EuiSpacer size="l" />
 

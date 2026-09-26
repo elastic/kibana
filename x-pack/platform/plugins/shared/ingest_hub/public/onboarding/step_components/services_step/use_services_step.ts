@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import type { SignalType } from '../../aws_service_matrix';
+import { isAgentBasedOnly } from '../../aws_service_matrix';
 import type { ServiceCategory } from '../../service_categories';
 import { CATEGORY_ORDER } from '../../service_categories';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -37,7 +38,8 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     return awsServiceMatrix.filter(
       (s) =>
         s.showInUI &&
-        (s.dataFormat ?? 'ecs') === dataFormat &&
+        // Agent-based-only services bypass the ECS/OTel pipeline entirely — show them always.
+        (isAgentBasedOnly(s) || (s.dataFormat ?? 'ecs') === dataFormat) &&
         (signalFilter === 'all' || s.signalTypes.includes(signalFilter)) &&
         (q === '' || s.name.toLowerCase().includes(q))
     );
@@ -77,7 +79,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
       awsServiceMatrix.filter(
         (s) =>
           s.showInUI &&
-          (s.dataFormat ?? 'ecs') === dataFormat &&
+          (isAgentBasedOnly(s) || (s.dataFormat ?? 'ecs') === dataFormat) &&
           (signalFilter === 'all' || s.signalTypes.includes(signalFilter))
       ),
     [awsServiceMatrix, signalFilter, dataFormat]
@@ -95,6 +97,11 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     }
     return stats;
   }, [categories, signalFilteredServices, selectedSet]);
+
+  const agentBasedOnlySelected = useMemo(
+    () => awsServiceMatrix?.filter((s) => selectedSet.has(s.id) && isAgentBasedOnly(s)) ?? [],
+    [awsServiceMatrix, selectedSet]
+  );
 
   const isReady = selectedServiceIds.length > 0;
 
@@ -149,5 +156,6 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     handleNext,
     dataFormat,
     setDataFormat,
+    agentBasedOnlySelected,
   };
 }

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
+import { isAgentBasedOnly } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
@@ -438,7 +439,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         // during the load window would change the sorted signature and wrongly mark downstream
         // steps incomplete on every reload.
         if (!entry) return true;
-        return entry.showInUI !== false && (entry.dataFormat ?? 'ecs') === dataFormat;
+        // Agent-based-only services bypass the ECS/OTel pipeline — keep them across data formats.
+        return (
+          entry.showInUI !== false &&
+          (isAgentBasedOnly(entry) || (entry.dataFormat ?? 'ecs') === dataFormat)
+        );
       }),
     [persistedServices, awsServicesMap, dataFormat]
   );
