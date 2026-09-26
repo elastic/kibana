@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
   const xyChartSelector = 'xyVisChart';
+  const requestTimestampSubj = 'inspector.statistics.requestTimestamp';
 
   describe('line charts - split series', function () {
     const initLineChart = async function () {
@@ -131,35 +132,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should request new data when autofresh is enabled', async () => {
-      const intervalS = 3;
-      await timePicker.startAutoRefresh(intervalS);
+      // the request stats table is unmounted while an auto-refresh request is in flight
+      const readRequestTimestamp = async () =>
+        (await testSubjects.exists(requestTimestampSubj, { timeout: 1000 }))
+          ? await testSubjects.getVisibleText(requestTimestampSubj)
+          : undefined;
 
-      // check inspector panel request stats for timestamp
+      await timePicker.startAutoRefresh(3);
+
       await inspector.open();
       await inspector.openInspectorRequestsView();
-      const requestStatsBefore: string[][] = await inspector.getTableData();
-      const requestTimestampBefore = requestStatsBefore.filter((r) =>
-        r[0].includes('Request timestamp')
-      )[0][1];
 
-      // pause to allow time for autorefresh to fire another request
-      await common.sleep(intervalS * 1000 * 1.5);
+      let requestTimestampBefore: string | undefined;
+      await retry.waitForWithTimeout('an initial request timestamp', 20_000, async () => {
+        requestTimestampBefore = await readRequestTimestamp();
+        return requestTimestampBefore !== undefined;
+      });
 
-      // get the latest timestamp from request stats
-      const requestStatsAfter: string[][] = await inspector.getTableData();
-      const requestTimestampAfter = requestStatsAfter.filter((r) =>
-        r[0].includes('Request timestamp')
-      )[0][1];
-      log.debug(
-        `Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`
-      );
+      await retry.waitForWithTimeout('auto refresh to log a new request', 20_000, async () => {
+        const requestTimestampAfter = await readRequestTimestamp();
+        return (
+          requestTimestampAfter !== undefined && requestTimestampAfter !== requestTimestampBefore
+        );
+      });
 
-      // cleanup
       await inspector.close();
       await timePicker.pauseAutoRefresh();
-
-      // if autorefresh is working, timestamps should be different
-      expect(requestTimestampBefore).not.to.equal(requestTimestampAfter);
     });
 
     it('should be able to save and load', async function () {
