@@ -3,5 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "main": "./index.js",
+  "types": "./index.d.ts",
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
 }
