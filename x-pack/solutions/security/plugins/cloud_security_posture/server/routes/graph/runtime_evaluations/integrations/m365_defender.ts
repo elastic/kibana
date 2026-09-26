@@ -118,6 +118,7 @@ export const m365_defenderEvaluations = {
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,
     data_stream.dataset IN ("m365_defender.event", "m365_defender.alert") AND file.hash.sha256 IS NOT NULL, file.hash.sha256,
+    data_stream.dataset == "m365_defender.event" AND m365_defender.event.category == "AdvancedHunting-DeviceFileEvents" AND file.hash.sha1 IS NOT NULL, file.hash.sha1,
     null
   )`,
     },
