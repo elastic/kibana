@@ -47,6 +47,7 @@ const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
   // and must stay untranslated and carry the analyst-directive clause. The UI badge
   // ("No automated action") lives in public/translations.ts.
   const label =
+    proposal.title ??
     proposal.action?.name ??
     proposal.actionWorkflowId ??
     'No automated action — analyst carries this out themselves';

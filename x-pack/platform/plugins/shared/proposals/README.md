@@ -64,7 +64,21 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-proposals` and points at the conversation it belongs to.
 - An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
+- Every proposal declares an **`origin`**: which feature produced it, so that feature's queue can show it and another's cannot. It is a closed enum, required, and fixed for the whole revision chain. See "Origin is a closed routing key" below.
+- A proposal may carry a **`title`**: a short plain-text label, distinct from the markdown `comment`. Optional, so every surface that renders one keeps its `title ?? action.name ?? actionWorkflowId ?? <fallback>` chain.
 - Proposals are immutable once **decided**. An undecided proposal can still be **revised**: `revise()` supersedes the current head with a new revision that carries the correction, and the gate decides whichever revision is live when the analyst answers. The predecessor is marked `superseded` and hidden from the queue by `excludeSuperseded`, so a chain shows one live row at a time.
+
+### Origin is a closed routing key
+
+`origin` is a `z.enum` in `@kbn/proposals-common`, one member per producing feature. That is deliberately unlike `category`, which is an open per-solution keyword, because the two fail differently: a typo'd category still appears, as a group with a silly name, while a typo'd origin matches no queue's filter and the proposal is never seen by anyone.
+
+Consumers filter on **exact equality** — AlertZero's queues pass `ALERTZERO_PROPOSAL_ORIGIN` and therefore never show Nightshift's or Context Engine's rows, nor a proposal raised from the standalone chat surface. So the value is a routing key every producer and consumer must agree on character for character, which is what an enum enforces and an open vocabulary cannot.
+
+Adding a producer is a deliberate change to that enum, reviewed alongside the queue-visibility consequences it carries. Members nothing writes yet are declared intent.
+
+It is also **immutable**: `create()` is the only writer, `revise()` and `clone()` inherit it through the spread, and `UpdateProposalParams` has no field for it. A chain therefore cannot split across two queues.
+
+The one thing the enum cannot catch is a valid member used by the wrong producer — an AlertZero Worker declaring `nightshift` on a copy-paste. `proposal_origin.test.ts` in the AlertZero plugin sweeps every AlertZero managed definition for `system-create-proposal` call sites and pins each to `ALERTZERO_PROPOSAL_ORIGIN`, so a new Worker cannot be added without one.
 
 ### Decision and status are two axes
 
@@ -256,6 +270,8 @@ Call the gate workflow; do not write proposals directly.
     workflow-id: system-create-proposal
     inputs:
       conversationId: '{{ steps.investigate.output.conversation_id }}'
+      origin: my-solution
+      title: 'Tune noisy rule'
       comment: 'Tune the noisy rule that produced this alert'
       actionWorkflowId: '{{ steps.suggest_action.output.structured_output.actionWorkflowId }}'
       actionInput: '${{ steps.suggest_action.output.structured_output.actionInput }}'
@@ -359,7 +375,9 @@ The service surface follows from that: `releaseGate()` makes at most that one an
 - **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `resumeGate` finds the step itself and passes `stepExecutionId`.
 - **The decision actor is server-derived.** Never accepted from a request body. `createdBy` and `decidedBy` store `{ username, fullName, email, profileUid? }`, the shape Cases established: the profile uid is the stable identity a UI resolves an avatar from, and the names are stored rather than looked up so attribution survives a missing profile. The uid is genuinely often absent — security disabled, a `run-as` proxy, a session without a profile, or an API key whose creator has no activated profile, which is exactly what the resume path runs under.
 - **Approval carries the action input the approver was shown**, so an approval that no longer matches the record is refused with a conflict.
-- **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is snapshotted at creation, as `params.impact ?? metadata.impact ?? 'low'`. The caller wins because it knows the situation the proposal came out of, which the action's own metadata cannot; the `low` floor exists because `impactRank` is the queue's primary sort key and must always have a value.
+- **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is snapshotted at creation, as `params.impact ?? metadata.impact ?? 'low'`. The caller wins because it knows the situation the proposal came out of, which the action's own metadata cannot; the `low` floor exists because `ranks.impact` is the queue's primary sort key and must always have a value.
+- **`previousExecutionError` is a deliberate denormalisation.** It holds the `executionError` of the proposal this one supersedes, written once when the successor is created and never updated. The queue answers "did the last attempt fail, and how" on every row it renders, and deriving it through `supersedes` would cost one extra fetch per row. It is the immediately preceding attempt only — "failed three times" is `revision` plus a chain query — and it is absent on a revision whose predecessor never ran, which a consumer must not read as "the previous attempt succeeded".
+- **The derived ranks live under `ranks.*`.** `ranks.impact` and `ranks.confidence` are computed from the snapshotted enums, not authored, and nesting them says so in the document shape. It also keeps `stripRanks` a single deletion however many ranks are added.
 - **`actionInput` is validated at creation**, against the schema the action declares on its manual trigger, so a proposal that could never run never reaches a human. Best-effort: the JSON Schema to zod conversion does not cover every keyword.
 - **The queue's order lives in Elasticsearch.** `impact` and `confidence` are keywords, which sort alphabetically, so each is mirrored by a numeric rank written at creation. That is what makes the list pageable rather than capped at one fetch; the ranks are stripped before a proposal leaves the service.
 - **`category` is an arbitrary keyword this plugin does not own.** Each solution defines the vocabulary its own actions declare and its own queries group by — AlertZero's set is not NightShift's — so there is no shared enum and no default to fall back on. Resolved as `params.category ?? metadata.category`, the same precedence as `impact` and for the same reason; a caller-supplied value is also the *only* way a proposal carrying no action gets one, since there is no action metadata to read it from. That matters because consumers group the queue by category and drop what has none, so an uncategorised non-action proposal would have nowhere to appear. Nothing sorts on it, and which category leads is a UI decision rather than a stored rank.

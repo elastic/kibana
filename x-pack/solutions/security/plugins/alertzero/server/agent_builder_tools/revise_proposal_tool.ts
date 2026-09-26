@@ -13,6 +13,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ALERTZERO_PROPOSALS_REVISE_TOOL_ID } from '@kbn/alertzero-common';
 import {
   boundedActionInput,
+  MAX_TITLE_LENGTH,
   proposalConfidenceSchema,
   proposalImpactSchema,
 } from '@kbn/proposals-common';
@@ -26,6 +27,11 @@ const reviseProposalSchema = z.object({
     .describe(
       'The id of the proposal being replaced. Any id in a revision chain works, not only the root — the live head is resolved before the revision is appended.'
     ),
+  title: z
+    .string()
+    .max(MAX_TITLE_LENGTH)
+    .optional()
+    .describe("Override for the proposal's short plain-text title. Omit to keep the original."),
   comment: z
     .string()
     .max(8192)

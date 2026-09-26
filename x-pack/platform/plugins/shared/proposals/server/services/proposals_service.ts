@@ -47,7 +47,7 @@ import {
 } from './esql';
 import type { ChartsWindow } from './esql';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
-import { toSortRanks } from '../storage/sort_ranks';
+import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
   ProposalConflictError,
   ProposalExpiredError,
@@ -146,15 +146,16 @@ export class ProposalsService {
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
     const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
-    // Both are required on the stored document, so a blank has to resolve to
-    // something rather than to an omission: `confidence` feeds the queue's
-    // secondary sort rank, and `origin` says who proposed it.
+    // Required on the stored document, so a blank has to resolve to something
+    // rather than to an omission: it feeds the queue's secondary sort rank.
     const confidence = blankToUndefined(params.confidence) ?? 'medium';
-    const origin = blankToUndefined(params.origin) ?? 'worker';
 
     const document: ProposalDocument = {
       spaceId,
       conversationId: params.conversationId,
+      // Same precedence as `category`: the caller knows the situation the
+      // proposal came out of, which the action's own name cannot.
+      title: blankToUndefined(params.title),
       comment: params.comment,
       actionWorkflowId,
       actionInput: params.actionInput,
@@ -162,7 +163,7 @@ export class ProposalsService {
       impact,
       confidence,
       category,
-      origin,
+      origin: params.origin,
       ...toSortRanks({ impact, confidence }),
       expiresAt: blankToUndefined(params.expiresAt),
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
@@ -176,13 +177,13 @@ export class ProposalsService {
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
 
-    // The action's name, since a proposal has no title of its own yet; the
-    // workflow id is the last resort so an unnamed action still reads as
-    // something more specific than the generic fallback.
+    // The proposal's own title first, then the action's name; the workflow id
+    // is the last resort so an unnamed action still reads as something more
+    // specific than the generic fallback the UI supplies for none of the three.
     await this.attachToConversation(
       id,
       params.conversationId,
-      metadata?.name ?? actionWorkflowId,
+      document.title ?? metadata?.name ?? actionWorkflowId,
       request
     );
 
@@ -255,8 +256,8 @@ export class ProposalsService {
       from: query.from,
       query: { bool: { filter: toFilterClauses(query, spaceId) } },
       sort: sort ?? [
-        { impactRank: { order: 'asc' } },
-        { confidenceRank: { order: 'asc' } },
+        { [IMPACT_RANK_FIELD]: { order: 'asc' } },
+        { [CONFIDENCE_RANK_FIELD]: { order: 'asc' } },
         // Soonest deadline first; proposals without one come after those with.
         { expiresAt: { order: 'asc', missing: '_last' } },
         // Final tiebreak, so paging over equally-ranked proposals is stable.
@@ -582,6 +583,10 @@ export class ProposalsService {
     const cloneId = uuidv4();
     const { id: _id, ...original } = proposal;
 
+    // What the predecessor will carry once the supersession write below lands,
+    // resolved here so both documents agree on it.
+    const failure = executionError ?? original.executionError;
+
     const document: ProposalDocument = {
       ...original,
       status: 'pending',
@@ -592,6 +597,9 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // Why the attempt this one re-offers failed. Denormalised from the
+      // predecessor so the queue can say so from the row it already has.
+      previousExecutionError: failure,
     };
 
     // The clone is created before the original is marked, deliberately. The
@@ -606,7 +614,7 @@ export class ProposalsService {
     const superseded: ProposalDocument = {
       ...original,
       supersededBy: cloneId,
-      ...(executionError !== undefined ? { executionError } : {}),
+      ...(failure !== undefined ? { executionError: failure } : {}),
     };
 
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
@@ -623,7 +631,7 @@ export class ProposalsService {
    * any single revision — mirroring `clone()`'s inheritance of the same fields.
    */
   async revise(
-    { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
+    { id, title, comment, actionInput, impact, confidence }: ReviseProposalParams,
     spaceId: string
   ): Promise<{ proposalId: string; revision: number }> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
@@ -690,6 +698,12 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // The predecessor's, by the same definition `clone()` uses. A revision an
+      // analyst asked for supersedes a pending proposal, which has no error, so
+      // this clears the one the predecessor itself inherited rather than
+      // carrying a two-attempts-ago failure forward as if it were the last.
+      previousExecutionError: original.executionError,
+      ...(title !== undefined ? { title } : {}),
       ...(comment !== undefined ? { comment } : {}),
       ...(mergedActionInput !== undefined ? { actionInput: mergedActionInput } : {}),
       impact: nextImpact,
@@ -1177,6 +1191,9 @@ const toFilterClauses = (
   if (filters.conversationId) {
     filter.push({ term: { conversationId: filters.conversationId } });
   }
+  if (filters.origin) {
+    filter.push({ term: { origin: filters.origin } });
+  }
   if (filters.category) {
     filter.push({ term: { category: filters.category } });
   }
@@ -1207,10 +1224,10 @@ const toFilterClauses = (
 
 /**
  * Drops the storage-only sort ranks, so they never reach the API contract.
- * Destructuring is the point: adding a rank field forces this to be updated.
+ * One key rather than a list, because they are nested under `ranks`: a third
+ * rank is a change to `ProposalSortRanks` alone.
  */
-const stripRanks = ({ impactRank, confidenceRank, ...proposal }: StoredProposalRecord): Proposal =>
-  proposal;
+const stripRanks = ({ ranks, ...proposal }: StoredProposalRecord): Proposal => proposal;
 
 const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });

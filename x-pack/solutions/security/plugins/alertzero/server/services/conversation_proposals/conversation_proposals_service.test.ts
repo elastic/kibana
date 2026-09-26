@@ -11,6 +11,7 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
 import { ConversationProposalsService } from './conversation_proposals_service';
 
 const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMetadata => ({
@@ -22,7 +23,7 @@ const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
   impact: 'low',
   confidence: 'medium',
   category: 'investigate',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-01T10:00:00.000Z',
   expired: false,
   ...overrides,
@@ -93,6 +94,38 @@ const makeImpactClient = (
   });
 
 describe('ConversationProposalsService', () => {
+  it.each([
+    [
+      'listByCategory',
+      (service: ConversationProposalsService) =>
+        service.listByCategory('respond', request, spaceId, { size: 10, from: 0 }),
+    ],
+    [
+      'listClosed',
+      (service: ConversationProposalsService) =>
+        service.listClosed(request, spaceId, { size: 10, from: 0 }),
+    ],
+  ])('%s shows only AlertZero-produced proposals', async (_name, run) => {
+    const proposalsService = makeProposalsService();
+
+    await run(
+      new ConversationProposalsService(
+        proposalsService,
+        makeAgentBuilder(),
+        logger,
+        makeImpactClient()
+      )
+    );
+
+    // The index is shared with every other solution's proposals, and this
+    // filter is the only thing keeping theirs out of an AlertZero queue.
+    expect(proposalsService.list).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: ALERTZERO_PROPOSAL_ORIGIN }),
+      spaceId,
+      expect.anything()
+    );
+  });
+
   const logger = loggingSystemMock.createLogger();
   const request = httpServerMock.createKibanaRequest();
   const spaceId = 'default';

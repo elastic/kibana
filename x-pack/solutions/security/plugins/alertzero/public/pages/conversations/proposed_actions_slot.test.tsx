@@ -65,7 +65,7 @@ const mockProposal: ProposalWithMetadata = {
   status: 'pending',
   impact: 'critical',
   confidence: 'high',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
   expired: false,
   action: { name: 'Isolate cfo-mbp-14 — host isolation', category: 'Response action' },

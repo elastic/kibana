@@ -66,23 +66,54 @@ describe('proposals.createProposal input schema', () => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
       comment: 'Tune the noisy rule',
+      origin: 'alertzero',
       actionInput: blank,
       expiresIn: blank,
     });
 
-    expect(parsed).toEqual({ conversationId: 'conv-1', comment: 'Tune the noisy rule' });
+    expect(parsed).toEqual({
+      conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
+      origin: 'alertzero',
+    });
   });
 
   it.each(['', null])('should treat %p as absent for the enum inputs', (blank) => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
       comment: 'Tune the noisy rule',
+      origin: 'alertzero',
       impact: blank,
       confidence: blank,
-      origin: blank,
     });
 
-    expect(parsed).toEqual({ conversationId: 'conv-1', comment: 'Tune the noisy rule' });
+    expect(parsed).toEqual({
+      conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
+      origin: 'alertzero',
+    });
+  });
+
+  // `origin` is the one input a blank cannot mean "absent" for: it has no
+  // default to fall back to, and storing `''` would produce a proposal no
+  // queue's filter ever matches.
+  it.each(['', '   '])('should reject %p as an origin rather than storing it', (blank) => {
+    expect(
+      createProposalStepInputSchema.safeParse({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        origin: blank,
+      }).success
+    ).toBe(false);
+  });
+
+  it('should require an origin, since no default could name the caller correctly', () => {
+    expect(
+      createProposalStepInputSchema.safeParse({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+      }).success
+    ).toBe(false);
   });
 
   it('should still reject a value the optional input does not allow', () => {
@@ -90,6 +121,7 @@ describe('proposals.createProposal input schema', () => {
       createProposalStepInputSchema.safeParse({
         conversationId: 'conv-1',
         comment: 'Tune the noisy rule',
+        origin: 'alertzero',
         impact: 'nope',
       }).success
     ).toBe(false);
@@ -104,7 +136,9 @@ describe('proposals.createProposal input schema', () => {
   it('should still pass real values through', () => {
     const parsed = createProposalStepInputSchema.parse({
       conversationId: 'conv-1',
+      title: 'Tune noisy rule',
       comment: 'Tune the noisy rule',
+      origin: 'alertzero',
       actionInput: { name: 'Suspicious PowerShell' },
       expiresIn: '24h',
       impact: 'high',
@@ -112,7 +146,9 @@ describe('proposals.createProposal input schema', () => {
 
     expect(parsed).toEqual({
       conversationId: 'conv-1',
+      title: 'Tune noisy rule',
       comment: 'Tune the noisy rule',
+      origin: 'alertzero',
       actionInput: { name: 'Suspicious PowerShell' },
       expiresIn: '24h',
       impact: 'high',
@@ -130,7 +166,7 @@ describe('proposals.createProposal input schema', () => {
     expect(Object.keys(jsonSchema.properties)).toEqual(
       Object.keys(createProposalStepInputSchema.shape)
     );
-    expect(jsonSchema.required).toEqual(['conversationId', 'comment']);
+    expect(jsonSchema.required).toEqual(['conversationId', 'comment', 'origin']);
   });
 });
 
@@ -210,6 +246,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
         // A caller cannot smuggle in a different execution to resume.
@@ -244,6 +281,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Isolate the host',
         actionWorkflowId: 'system-alertzero-action-isolate-host',
       })
@@ -264,6 +302,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
       })
@@ -283,6 +322,7 @@ describe('proposals.createProposal step', () => {
     const result = await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: 'system-alertzero-action-create-rule',
       })
@@ -304,6 +344,7 @@ describe('proposals.createProposal step', () => {
     await definition.handler(
       createContext({
         conversationId: 'conv-1',
+        origin: 'alertzero',
         comment: 'Tune the noisy rule',
         actionWorkflowId: '',
         impact: '',
@@ -331,7 +372,11 @@ describe('proposals.createProposal step', () => {
     const { definition } = createDefinition(create);
 
     const result = await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+      createContext({
+        conversationId: 'conv-1',
+        origin: 'alertzero',
+        comment: 'Tune the noisy rule',
+      })
     );
 
     expect(result.output?.expiresAt).toBe('2026-09-04T00:00:00.000Z');
@@ -342,11 +387,16 @@ describe('proposals.createProposal step', () => {
     const { definition } = createDefinition(create);
 
     await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule', impact: 'high' })
+      createContext({
+        conversationId: 'conv-1',
+        origin: 'alertzero',
+        comment: 'Tune the noisy rule',
+        impact: 'high',
+      })
     );
 
     expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({ impact: 'high', confidence: 'medium', origin: 'worker' }),
+      expect.objectContaining({ impact: 'high', confidence: 'medium', origin: 'alertzero' }),
       expect.anything()
     );
   });
@@ -356,7 +406,11 @@ describe('proposals.createProposal step', () => {
     const { definition } = createDefinition(create);
 
     await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+      createContext({
+        conversationId: 'conv-1',
+        origin: 'alertzero',
+        comment: 'Tune the noisy rule',
+      })
     );
 
     // The service resolves the fallback chain; the step must not pre-empt it
@@ -374,7 +428,9 @@ describe('proposals.createProposal step', () => {
     const { definition } = createDefinition(create, privileges);
 
     await expect(
-      definition.handler(createContext({ conversationId: 'conv-1', comment: 'Tune' }))
+      definition.handler(
+        createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
+      )
     ).rejects.toMatchObject({ type: 'PermissionError' });
     expect(create).not.toHaveBeenCalled();
   });
@@ -386,7 +442,9 @@ describe('proposals.createProposal step', () => {
     // A distinct type is the only thing a workflow can branch on, since
     // ExecutionError carries nothing else to tell failures apart.
     await expect(
-      definition.handler(createContext({ conversationId: 'conv-1', comment: 'Tune' }))
+      definition.handler(
+        createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
+      )
     ).rejects.toMatchObject({ type: 'ApiError', message: 'index unavailable' });
   });
 });

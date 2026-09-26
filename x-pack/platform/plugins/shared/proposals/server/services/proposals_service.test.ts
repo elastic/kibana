@@ -41,9 +41,8 @@ const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocume
   impact: 'low',
   confidence: 'medium',
   category: 'tune',
-  origin: 'worker',
-  impactRank: 3,
-  confidenceRank: 1,
+  origin: 'alertzero',
+  ranks: { impact: 3, confidence: 1 },
   workflowExecutionId: EXECUTION_ID,
   createdAt: '2026-09-01T00:00:00.000Z',
   ...overrides,
@@ -154,6 +153,31 @@ describe('ProposalsService', () => {
   });
 
   describe('create', () => {
+    it("titles the attachment card with the proposal's own title over the action's name", async () => {
+      const storage = createStorage();
+      const { service, attachmentsClient } = createService(storage);
+
+      await service.create(
+        {
+          conversationId: 'conv-1',
+          title: 'Tune the Okta rule',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          confidence: 'medium',
+          origin: 'alertzero',
+        },
+        { spaceId: SPACE_ID, request: REQUEST }
+      );
+
+      // The caller knows the situation the proposal came out of, which the
+      // action's own name cannot — the same precedence `category` follows.
+      expect(attachmentsClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ title: 'Tune the Okta rule' }),
+        })
+      );
+    });
+
     it('should store a pending proposal with the category resolved from the action workflow', async () => {
       const storage = createStorage();
       const { service } = createService(storage);
@@ -166,7 +190,7 @@ describe('ProposalsService', () => {
           actionInput: { name: 'Suspicious PowerShell' },
           impact: 'high',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
           workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, user: analyst('worker-user'), request: REQUEST }
@@ -191,7 +215,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           actionInput: { name: 'Suspicious PowerShell' },
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -223,7 +247,7 @@ describe('ProposalsService', () => {
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -247,7 +271,7 @@ describe('ProposalsService', () => {
           conversationId: 'conv-1',
           comment: 'Tune the noisy rule',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -291,7 +315,7 @@ describe('ProposalsService', () => {
             actionInput: {},
             impact: 'low',
             confidence: 'medium',
-            origin: 'worker',
+            origin: 'alertzero',
           },
           { spaceId: SPACE_ID, request: REQUEST }
         )
@@ -314,7 +338,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           impact: 'low',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -347,7 +371,7 @@ describe('ProposalsService', () => {
           comment: 'Isolate the host',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -366,7 +390,7 @@ describe('ProposalsService', () => {
           comment: 'Rotate the credentials by hand, then approve',
           category: 'respond',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -391,15 +415,14 @@ describe('ProposalsService', () => {
           comment: 'Contain the host',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
 
       const [[indexArgs]] = storage.index.mock.calls;
       expect(indexArgs.document).toMatchObject({
-        impactRank: 1,
-        confidenceRank: 0,
+        ranks: { impact: 1, confidence: 0 },
       });
     });
 
@@ -422,7 +445,7 @@ describe('ProposalsService', () => {
           // came out of, which the action's own metadata cannot.
           impact: 'critical',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -447,7 +470,7 @@ describe('ProposalsService', () => {
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -469,15 +492,15 @@ describe('ProposalsService', () => {
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
 
-      // impactRank is the queue's primary sort key, so it always has a value.
+      // The impact rank is the queue's primary sort key, so it always has a value.
       expect(proposal.impact).toBe('low');
       const [[indexArgs]] = storage.index.mock.calls;
-      expect(indexArgs.document.impactRank).toBe(3);
+      expect(indexArgs.document.ranks.impact).toBe(3);
     });
 
     it('should treat a blank caller value as absent rather than as a value', async () => {
@@ -501,7 +524,7 @@ describe('ProposalsService', () => {
           impact: '' as never,
           category: '' as never,
           confidence: '' as never,
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -528,7 +551,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           category: 'contain',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -549,7 +572,7 @@ describe('ProposalsService', () => {
           comment: 'Rotate the credentials by hand, then approve',
           category: 'contain',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -571,7 +594,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           impact: 'low',
           confidence: 'low',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -595,7 +618,7 @@ describe('ProposalsService', () => {
           expiresAt: '',
           impact: 'low',
           confidence: 'medium',
-          origin: 'worker',
+          origin: 'alertzero',
           workflowExecutionId: '',
         },
         { spaceId: SPACE_ID, request: REQUEST }
@@ -618,7 +641,7 @@ describe('ProposalsService', () => {
           comment: 'Rotate the credentials by hand, then approve',
           impact: 'medium',
           confidence: 'high',
-          origin: 'worker',
+          origin: 'alertzero',
         },
         { spaceId: SPACE_ID, request: REQUEST }
       );
@@ -1156,6 +1179,33 @@ describe('ProposalsService', () => {
   });
 
   describe('clone', () => {
+    it('inherits the origin, so a retry stays in the queue that raised it', async () => {
+      const storage = createStorage(
+        baseDocument({ origin: 'nightshift', decision: 'approved', status: 'failed' })
+      );
+      const { service } = createService(storage);
+
+      await service.clone({ id: 'proposal-1' }, SPACE_ID);
+
+      const [[cloneArgs]] = storage.index.mock.calls;
+      expect(cloneArgs.document.origin).toBe('nightshift');
+    });
+
+    it('carries the failure it re-offers onto the clone, so the queue need not fetch the predecessor', async () => {
+      const storage = createStorage(baseDocument({ decision: 'approved', status: 'failed' }));
+      const { service } = createService(storage);
+
+      await service.clone({ id: 'proposal-1', executionError: 'rule API rejected it' }, SPACE_ID);
+
+      const [[cloneArgs]] = storage.index.mock.calls;
+      expect(cloneArgs.document).toMatchObject({
+        status: 'pending',
+        previousExecutionError: 'rule API rejected it',
+        // Its own error is the *next* attempt's, which has not happened yet.
+        executionError: undefined,
+      });
+    });
+
     it('should inherit the deadline and creation time from the original', async () => {
       const storage = createStorage(
         baseDocument({
@@ -1204,7 +1254,7 @@ describe('ProposalsService', () => {
         impact: 'low',
         confidence: 'medium',
         category: 'tune',
-        origin: 'worker',
+        origin: 'alertzero',
         status: 'pending',
         // The clone points at the same still-parked gate execution, so
         // approving it resumes that execution rather than stranding.
@@ -1302,6 +1352,43 @@ describe('ProposalsService', () => {
   });
 
   describe('revise', () => {
+    it('inherits the origin, so a chain cannot split across two queues', async () => {
+      const storage = createStorage(baseDocument({ origin: 'nightshift' }));
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', comment: 'Revised' }, SPACE_ID);
+
+      // No revise input can move it, and consumers filter on exact equality:
+      // a revision that relabelled itself would vanish from the queue showing
+      // its predecessor.
+      const [[reviseArgs]] = storage.index.mock.calls;
+      expect(reviseArgs.document.origin).toBe('nightshift');
+    });
+
+    it('applies a title override, since renaming is exactly what produces a revision', async () => {
+      const storage = createStorage(baseDocument({ title: 'Tune noisy rule' }));
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', title: 'Tune the Okta rule' }, SPACE_ID);
+
+      const [[reviseArgs]] = storage.index.mock.calls;
+      expect(reviseArgs.document).toMatchObject({ title: 'Tune the Okta rule' });
+    });
+
+    it('does not inherit a two-attempts-ago failure as if it were the last one', async () => {
+      // The predecessor is pending, so it never ran: whatever failure it was
+      // itself created to re-offer is not this revision's predecessor error.
+      const storage = createStorage(
+        baseDocument({ previousExecutionError: 'rule API rejected it' })
+      );
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+
+      const [[reviseArgs]] = storage.index.mock.calls;
+      expect(reviseArgs.document.previousExecutionError).toBeUndefined();
+    });
+
     it('creates a new pending revision and marks the original superseded', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
@@ -1516,7 +1603,7 @@ describe('ProposalsService', () => {
 
     it('recomputes the sort ranks when the rating overrides change', async () => {
       const storage = createStorage(
-        baseDocument({ impact: 'low', confidence: 'medium', impactRank: 3, confidenceRank: 1 })
+        baseDocument({ impact: 'low', confidence: 'medium', ranks: { impact: 3, confidence: 1 } })
       );
       const { service } = createService(storage);
 
@@ -1529,8 +1616,7 @@ describe('ProposalsService', () => {
           document: expect.objectContaining({
             impact: 'critical',
             confidence: 'low',
-            impactRank: 0,
-            confidenceRank: 2,
+            ranks: { impact: 0, confidence: 2 },
           }),
         })
       );
@@ -1538,7 +1624,7 @@ describe('ProposalsService', () => {
 
     it('keeps the inherited rating rank when only the other rating is overridden', async () => {
       const storage = createStorage(
-        baseDocument({ impact: 'low', confidence: 'medium', impactRank: 3, confidenceRank: 1 })
+        baseDocument({ impact: 'low', confidence: 'medium', ranks: { impact: 3, confidence: 1 } })
       );
       const { service } = createService(storage);
 
@@ -1549,8 +1635,7 @@ describe('ProposalsService', () => {
           document: expect.objectContaining({
             impact: 'low',
             confidence: 'high',
-            impactRank: 3,
-            confidenceRank: 0,
+            ranks: { impact: 3, confidence: 0 },
           }),
         })
       );
@@ -1802,8 +1887,8 @@ describe('ProposalsService', () => {
       // The keyword enums sort alphabetically, so the queue's order comes from
       // the numeric ranks written at creation.
       expect(searchArgs.sort).toEqual([
-        { impactRank: { order: 'asc' } },
-        { confidenceRank: { order: 'asc' } },
+        { 'ranks.impact': { order: 'asc' } },
+        { 'ranks.confidence': { order: 'asc' } },
         { expiresAt: { order: 'asc', missing: '_last' } },
         { createdAt: { order: 'desc' } },
       ]);
@@ -1933,8 +2018,7 @@ describe('ProposalsService', () => {
 
       const { proposals } = await service.list(listQuery(), SPACE_ID);
 
-      expect(proposals[0]).not.toHaveProperty('impactRank');
-      expect(proposals[0]).not.toHaveProperty('confidenceRank');
+      expect(proposals[0]).not.toHaveProperty('ranks');
     });
 
     it('fetches action metadata only once for proposals sharing an actionWorkflowId', async () => {

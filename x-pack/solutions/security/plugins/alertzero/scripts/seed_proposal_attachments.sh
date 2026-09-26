@@ -113,6 +113,7 @@ ensure_index() {
           "properties": {
             "spaceId": { "type": "keyword", "ignore_above": 1024 },
             "conversationId": { "type": "keyword", "ignore_above": 1024 },
+            "title": { "type": "text" },
             "comment": { "type": "text" },
             "actionWorkflowId": { "type": "keyword", "ignore_above": 1024 },
             "actionInput": { "type": "flattened" },
@@ -127,8 +128,13 @@ ensure_index() {
             "category": { "type": "keyword", "ignore_above": 1024 },
             "origin": { "type": "keyword", "ignore_above": 1024 },
             "expiresAt": { "type": "date", "format": "strict_date_optional_time" },
-            "impactRank": { "type": "byte" },
-            "confidenceRank": { "type": "byte" },
+            "ranks": {
+              "type": "object",
+              "properties": {
+                "impact": { "type": "byte" },
+                "confidence": { "type": "byte" }
+              }
+            },
             "decidedBy": {
               "type": "object",
               "properties": {
@@ -142,6 +148,7 @@ ensure_index() {
             "dismissReason": { "type": "keyword", "ignore_above": 1024 },
             "rationale": { "type": "text" },
             "executionError": { "type": "text" },
+            "previousExecutionError": { "type": "text" },
             "workflowExecutionId": { "type": "keyword", "ignore_above": 1024 },
             "createdAt": { "type": "date", "format": "strict_date_optional_time" },
             "createdBy": {
@@ -240,9 +247,8 @@ index_proposal "$P1_ID" "$(jq -n \
     impact: "low",
     confidence: "high",
     category: "configure",
-    origin: "worker",
-    impactRank: 3,
-    confidenceRank: 0,
+    origin: "alertzero",
+    ranks: { impact: 3, confidence: 0 },
     createdAt: $now,
     rootProposalId: $id,
     revision: 1
@@ -289,10 +295,9 @@ index_proposal "$P2_ID" "$(jq -n \
     impact: "medium",
     confidence: "high",
     category: "configure",
-    origin: "worker",
+    origin: "alertzero",
     expiresAt: $expiry,
-    impactRank: 2,
-    confidenceRank: 0,
+    ranks: { impact: 2, confidence: 0 },
     createdAt: $now,
     rootProposalId: $id,
     revision: 1
@@ -332,13 +337,12 @@ index_proposal "$P3_ID" "$(jq -n \
     decision: "dismissed",
     impact: "medium",
     confidence: "medium",
-    origin: "worker",
+    origin: "alertzero",
     decidedAt: $now,
     decidedBy: { username: "elastic", fullName: null, email: null },
     dismissReason: "already_handled",
     rationale: "We already have a rule covering this pattern from last sprint.",
-    impactRank: 2,
-    confidenceRank: 1,
+    ranks: { impact: 2, confidence: 1 },
     createdAt: $now,
     rootProposalId: $id,
     revision: 1

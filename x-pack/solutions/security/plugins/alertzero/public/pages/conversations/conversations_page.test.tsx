@@ -226,7 +226,7 @@ const proposal: ProposalItem = {
   impact: 'high',
   confidence: 'high',
   category: 'investigate',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
   expired: false,
   conversationAssignees: [],

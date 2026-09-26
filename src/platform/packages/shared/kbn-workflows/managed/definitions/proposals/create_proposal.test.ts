@@ -151,13 +151,25 @@ describe('create-investigation-proposal workflow', () => {
       expect(manualTrigger?.inputs?.properties).toEqual(
         expect.objectContaining({
           conversationId: expect.anything(),
+          title: expect.anything(),
           actionWorkflowId: expect.anything(),
           actionInput: expect.anything(),
           impact: expect.anything(),
           category: expect.anything(),
+          origin: expect.anything(),
           autoApprove: expect.anything(),
         })
       );
+    });
+
+    it('forwards the caller-owned display and provenance fields rather than naming any itself', () => {
+      // This workflow is solution-agnostic: an `origin` hardcoded here would
+      // stamp every caller with one solution's name, and a `title` dropped here
+      // would leave the queue showing the action's name for all of them.
+      const create = findStep(workflow.steps, 'create_proposal');
+
+      expect(String(create?.with?.origin)).toContain('inputs.origin');
+      expect(String(create?.with?.title)).toContain('inputs.title');
     });
 
     it('forwards the grouping overrides, or a non-action proposal cannot be grouped', () => {
@@ -180,7 +192,9 @@ describe('create-investigation-proposal workflow', () => {
     it('requires a comment so every proposal carries something a human can read', () => {
       const manualTrigger = workflow.triggers.find(({ type }) => type === 'manual');
 
-      expect(manualTrigger?.inputs?.required).toEqual(['conversationId', 'comment']);
+      // `origin` is required for a different reason: it is an open vocabulary,
+      // so an omitted one would be stored as a value nothing ever filters on.
+      expect(manualTrigger?.inputs?.required).toEqual(['conversationId', 'comment', 'origin']);
     });
 
     it('declares the outputs a caller gets back from workflow.execute', () => {

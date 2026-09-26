@@ -193,6 +193,7 @@ steps:
       workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+        origin: alertzero
         comment: |-
           **Review rule for tuning?**
 
@@ -745,6 +746,7 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -764,6 +766,7 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -784,6 +787,7 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-add-rule-exception
                 actionInput:
@@ -815,6 +819,7 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -835,6 +840,7 @@ steps:
               workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -855,6 +861,7 @@ steps:
           workflow-id: system-create-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            origin: alertzero
             comment: "{{ steps.compose_proposal.output.comment }}"
             impact: low
             # No action, so no inherited category; see the entry gate.
