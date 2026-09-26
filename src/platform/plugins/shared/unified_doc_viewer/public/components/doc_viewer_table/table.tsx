@@ -47,6 +47,7 @@ import {
 } from './table_filters';
 import { FieldRow } from './field_row';
 import { TableGrid } from './table_grid';
+import { TanStackTableGrid } from './tanstack_table_grid';
 
 export interface DocViewerTableRestorableState {
   // Main search input value
@@ -115,6 +116,7 @@ const InternalDocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
   hideFilteringOnComputedColumns,
+  gridImplementation,
 }: DocViewRenderProps) => {
   const styles = useMemoCss(componentStyles);
 
@@ -411,21 +413,40 @@ const InternalDocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem grow={Boolean(containerHeight)} css={styles.fieldsGridWrapper}>
-          <TableGrid
-            id={`fields-table-${hit.id}`}
-            containerWidth={containerWidth}
-            rows={rows}
-            isEsqlMode={isEsqlMode}
-            filter={filter}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
-            columns={columns}
-            onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
-            searchTerm={searchTerm}
-            pinnedFields={pinnedFields}
-            onTogglePinned={onTogglePinned}
-            hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
-          />
+          {gridImplementation === 'tanstack' ? (
+            <TanStackTableGrid
+              key={`fields-table-${hit.id}`}
+              id={`fields-table-${hit.id}`}
+              containerWidth={containerWidth}
+              rows={rows}
+              isEsqlMode={isEsqlMode}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+              columns={columns}
+              onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
+              searchTerm={searchTerm}
+              pinnedFields={pinnedFields}
+              onTogglePinned={onTogglePinned}
+              hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
+            />
+          ) : (
+            <TableGrid
+              id={`fields-table-${hit.id}`}
+              containerWidth={containerWidth}
+              rows={rows}
+              isEsqlMode={isEsqlMode}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+              columns={columns}
+              onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
+              searchTerm={searchTerm}
+              pinnedFields={pinnedFields}
+              onTogglePinned={onTogglePinned}
+              hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
+            />
+          )}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

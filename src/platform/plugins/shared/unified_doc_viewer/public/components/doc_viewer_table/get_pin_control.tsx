@@ -19,46 +19,48 @@ interface PinControlCellProps {
   onTogglePinned: (fieldName: string, params: { isKeyboardEvent: boolean }) => void;
 }
 
-const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onTogglePinned }) => {
-  const { euiTheme } = useEuiTheme();
+export const PinControlCell: React.FC<PinControlCellProps> = React.memo(
+  ({ row, onTogglePinned }) => {
+    const { euiTheme } = useEuiTheme();
 
-  const fieldName = row.name;
-  const isPinned = row.isPinned;
-  const label = isPinned
-    ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
-        defaultMessage: 'Unpin field',
-      })
-    : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', {
-        defaultMessage: 'Pin field',
-      });
+    const fieldName = row.name;
+    const isPinned = row.isPinned;
+    const label = isPinned
+      ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
+          defaultMessage: 'Unpin field',
+        })
+      : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', {
+          defaultMessage: 'Pin field',
+        });
 
-  return (
-    <div
-      data-test-subj={`unifiedDocViewer_pinControl_${fieldName}`}
-      className={!isPinned ? 'kbnDocViewer__fieldsGrid__pinAction' : undefined}
-      css={css`
-        margin-left: ${isPinned ? '-1px' : 0}; // to align filled/unfilled pin icons better
-        width: ${euiTheme.size.l};
-        height: ${euiTheme.size.l};
-        overflow: hidden;
-      `}
-    >
-      <EuiToolTip content={label} disableScreenReaderOutput>
-        <EuiButtonIcon
-          data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
-          iconSize="m"
-          iconType={isPinned ? 'pinFill' : 'pin'}
-          color="text"
-          aria-label={label}
-          onClick={(e: { detail: number }) => {
-            const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
-            onTogglePinned(fieldName, { isKeyboardEvent });
-          }}
-        />
-      </EuiToolTip>
-    </div>
-  );
-});
+    return (
+      <div
+        data-test-subj={`unifiedDocViewer_pinControl_${fieldName}`}
+        className={!isPinned ? 'kbnDocViewer__fieldsGrid__pinAction' : undefined}
+        css={css`
+          margin-left: ${isPinned ? '-1px' : 0}; // to align filled/unfilled pin icons better
+          width: ${euiTheme.size.l};
+          height: ${euiTheme.size.l};
+          overflow: hidden;
+        `}
+      >
+        <EuiToolTip content={label} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
+            iconSize="m"
+            iconType={isPinned ? 'pinFill' : 'pin'}
+            color="text"
+            aria-label={label}
+            onClick={(e: { detail: number }) => {
+              const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
+              onTogglePinned(fieldName, { isKeyboardEvent });
+            }}
+          />
+        </EuiToolTip>
+      </div>
+    );
+  }
+);
 
 export const getPinColumnControl = ({
   rows,

@@ -34,3 +34,36 @@ export const Basic: Story = {
     decreaseAvailableHeightBy: 0,
   },
 };
+
+export const TanStackGrid: Story = {
+  args: {
+    ...Basic.args,
+    gridImplementation: 'tanstack',
+  },
+};
+
+const MANY_FIELDS_COUNT = 2000;
+const manyFieldsHit = {
+  _index: 'many-fields',
+  _id: 'many-fields',
+  _source: Object.fromEntries(
+    Array.from({ length: MANY_FIELDS_COUNT }, (_, i) => [
+      `field_${String(i).padStart(4, '0')}`,
+      i % 5 === 0 ? `A longer value for field ${i} `.repeat(8) : `value ${i}`,
+    ])
+  ),
+};
+
+export const ManyFields: Story = {
+  args: {
+    ...Basic.args,
+    hit: manyFieldsHit,
+  },
+};
+
+export const TanStackGridManyFields: Story = {
+  args: {
+    ...ManyFields.args,
+    gridImplementation: 'tanstack',
+  },
+};

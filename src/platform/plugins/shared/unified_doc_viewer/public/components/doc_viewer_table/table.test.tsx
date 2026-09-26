@@ -113,6 +113,29 @@ describe('DocViewerTable', () => {
     });
   });
 
+  describe('grid implementation', () => {
+    it('should render the EuiDataGrid based table by default', () => {
+      setupComponent();
+
+      expect(screen.getByTestId('UnifiedDocViewerTableGrid')).toHaveClass('euiDataGrid');
+    });
+
+    it('should render the TanStack based table when requested', () => {
+      jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(600);
+      jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(800);
+
+      setupComponent({ gridImplementation: 'tanstack' });
+
+      const grid = screen.getByTestId('UnifiedDocViewerTableGrid');
+      expect(grid).not.toHaveClass('euiDataGrid');
+      expect(grid).toHaveAttribute('role', 'grid');
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText(hit.flattened.bytes as string)).toBeInTheDocument();
+
+      jest.restoreAllMocks();
+    });
+  });
+
   describe('search', () => {
     beforeEach(() => {
       storage.clear();

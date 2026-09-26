@@ -13,5 +13,6 @@ export type {
   DocViewRenderProps,
   DocView,
   DocViewerComponent,
+  DocViewerGridImplementation,
   DocViewActions,
 } from './src/types';
