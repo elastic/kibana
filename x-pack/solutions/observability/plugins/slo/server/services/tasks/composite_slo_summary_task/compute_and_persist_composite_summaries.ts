@@ -16,8 +16,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
-import { ALL_VALUE, compositeSloDefinitionSchema, sloDefinitionSchema } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/Either';
+import { ALL_VALUE, compositeSloDefinitionSchema, sloDefinitionSchemaZod } from '@kbn/slo-schema';
 import { chunk, merge } from 'lodash';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import type {
@@ -442,7 +441,7 @@ function decodeStoredSLO(
   logger: Logger
 ): SLODefinition | undefined {
   const stored = so.attributes;
-  const result = sloDefinitionSchema.decode({
+  const result = sloDefinitionSchemaZod.safeParse({
     ...stored,
     groupBy: stored.groupBy ?? ALL_VALUE,
     version: stored.version ?? 1,
@@ -460,10 +459,10 @@ function decodeStoredSLO(
     artifacts: { dashboards: [] },
   });
 
-  if (isLeft(result)) {
+  if (!result.success) {
     logger.warn(`Invalid stored SLO [${stored.id}], skipping`);
     return undefined;
   }
 
-  return result.right;
+  return result.data;
 }

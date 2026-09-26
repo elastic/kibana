@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { toNumberRt } from '@kbn/io-ts-utils';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const findSLOInstancesParamsSchema = t.intersection([
-  t.type({
-    path: t.type({ id: t.string }),
-  }),
-  t.partial({
-    query: t.partial({
-      search: t.string,
-      size: toNumberRt,
-      searchAfter: t.string,
-      remoteName: t.string,
-    }),
-  }),
-]);
+import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
+
+const findSLOInstancesParamsSchema = z.object({
+  path: z.object({ id: z.string().max(MAX_KEYWORD_LENGTH) }),
+  query: z
+    .object({
+      search: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      size: z.coerce.number().optional(),
+      searchAfter: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      remoteName: z.string().optional(),
+    })
+    .optional(),
+});
 
 interface FindSLOInstancesResponse {
   results: Array<{ instanceId: string; groupings: Record<string, string | number> }>;

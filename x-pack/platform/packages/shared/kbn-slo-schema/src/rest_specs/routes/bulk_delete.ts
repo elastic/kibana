@@ -4,23 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { sloIdSchema } from '../../schema/slo';
+import { z } from '@kbn/zod';
 
-const bulkDeleteParamsSchema = t.type({
-  body: t.type({
-    list: t.array(sloIdSchema),
+import { sloIdSchema } from '../../schema/zod/slo';
+
+const bulkDeleteParamsSchema = z.object({
+  body: z.object({
+    list: z.array(sloIdSchema),
   }),
 });
 
-const bulkDeleteStatusParamsSchema = t.type({
-  path: t.type({
-    taskId: t.string,
+const bulkDeleteStatusParamsSchema = z.object({
+  path: z.object({
+    taskId: z.string().max(1024),
   }),
 });
 
-type BulkDeleteInput = t.OutputOf<typeof bulkDeleteParamsSchema.props.body>;
-type BulkDeleteParams = t.TypeOf<typeof bulkDeleteParamsSchema.props.body>;
+type BulkDeleteInput = z.input<typeof bulkDeleteParamsSchema.shape.body>;
+type BulkDeleteParams = z.output<typeof bulkDeleteParamsSchema.shape.body>;
 interface BulkDeleteResponse {
   taskId: string;
 }
