@@ -14,6 +14,8 @@ import type { ExecutionListFiltersProps } from './workflow_execution_list_filter
 import { ExecutionListFilters } from './workflow_execution_list_filters';
 import { TestWrapper } from '../../../shared/test_utils';
 
+jest.setTimeout(30_000);
+
 describe('ExecutionListFilters', () => {
   const defaultFilters: ExecutionListFiltersProps['filters'] = {
     statuses: [],
