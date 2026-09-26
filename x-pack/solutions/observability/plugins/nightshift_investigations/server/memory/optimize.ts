@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estimateTokens, truncateTokens } from '@kbn/agent-builder-genai-utils';
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
@@ -158,58 +159,65 @@ export const capMergedContent = (content: string, maxChars = MERGED_CONTENT_MAX_
   return head + suffix;
 };
 
-export const MAX_FORMATTED_RECALLED_CHARS = 32_000;
+export const OPTIMIZER_MIN_CONTEXT_WINDOW_TOKENS = 256_000;
+export const OPTIMIZER_EVIDENCE_TOKEN_BUDGET = 128_000;
+export const OPTIMIZER_OUTPUT_TOKEN_LIMIT = 8_000;
+export const OPTIMIZER_EVIDENCE_CHARACTER_HARD_LIMIT = 2_000_000;
 export const MAX_RECALLED_TITLE_CHARS = 256;
 export const MAX_RECALLED_CONTEXT_CHARS = 1_024;
-const MIN_RECALLED_CONTENT_CHARS = 128;
 
-export const formatRecalled = (recalledMemories: readonly MemoryPage[]): string => {
+interface EvidenceEntry {
+  prefix: string;
+  content: string;
+}
+
+const formatEvidenceEntries = (entries: readonly EvidenceEntry[], maxTokens: number): string => {
+  if (entries.length === 0 || maxTokens <= 0) {
+    return '';
+  }
+
+  let output = '';
+  let remainingTokens = maxTokens;
+  for (const entry of entries) {
+    const prefixTokens = estimateTokens(entry.prefix);
+    if (prefixTokens > remainingTokens) {
+      break;
+    }
+    output += entry.prefix;
+    remainingTokens -= prefixTokens;
+
+    const contentTokens = estimateTokens(entry.content);
+    if (contentTokens <= remainingTokens) {
+      output += entry.content;
+      remainingTokens -= contentTokens;
+      continue;
+    }
+    output += truncateTokens(entry.content, remainingTokens);
+    break;
+  }
+
+  return output.slice(0, OPTIMIZER_EVIDENCE_CHARACTER_HARD_LIMIT);
+};
+
+export const formatRecalled = (
+  recalledMemories: readonly MemoryPage[],
+  maxTokens = OPTIMIZER_EVIDENCE_TOKEN_BUDGET
+): string => {
   if (recalledMemories.length === 0) {
     return '(none)';
   }
 
-  const basePrefixes = recalledMemories.map(
-    (memory, index) =>
-      `${index === 0 ? '' : '\n'}- id=${memory.id}\n  title: \n  context: \n  content: `
+  return formatEvidenceEntries(
+    recalledMemories.map((memory, index) => ({
+      prefix:
+        `${index === 0 ? '' : '\n'}- id=${memory.id}\n` +
+        `  title: ${memory.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
+        `  context: ${(memory.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
+        `  content: `,
+      content: memory.content,
+    })),
+    maxTokens
   );
-  const baseChars = basePrefixes.reduce((total, prefix) => total + prefix.length, 0);
-  const roomAfterIdsAndLabels = Math.max(0, MAX_FORMATTED_RECALLED_CHARS - baseChars);
-  const totalContentReserve = Math.min(
-    MIN_RECALLED_CONTENT_CHARS * recalledMemories.length,
-    roomAfterIdsAndLabels
-  );
-  const metadataPerEntry = Math.floor(
-    (roomAfterIdsAndLabels - totalContentReserve) / recalledMemories.length
-  );
-  const titleBudget = Math.min(MAX_RECALLED_TITLE_CHARS, Math.floor(metadataPerEntry / 3));
-  const contextBudget = Math.min(MAX_RECALLED_CONTEXT_CHARS, metadataPerEntry - titleBudget);
-  const entries = recalledMemories.map((memory, index) => ({
-    prefix:
-      `${index === 0 ? '' : '\n'}- id=${memory.id}\n` +
-      `  title: ${memory.title.slice(0, titleBudget)}\n` +
-      `  context: ${(memory.context ?? '').slice(0, contextBudget)}\n` +
-      `  content: `,
-    content: memory.content,
-  }));
-  const metadataChars = entries.reduce((total, entry) => total + entry.prefix.length, 0);
-  // Recalled sets are bounded upstream. Reserving content for every entry prevents an oversized
-  // early page from hiding the IDs and metadata of later selected pages.
-  const contentRoom = Math.max(0, MAX_FORMATTED_RECALLED_CHARS - metadataChars);
-  const reservedPerEntry = Math.min(
-    MIN_RECALLED_CONTENT_CHARS,
-    Math.floor(contentRoom / entries.length)
-  );
-  let remainingContentRoom = contentRoom;
-  let output = '';
-  for (let index = 0; index < entries.length; index++) {
-    const entry = entries[index];
-    const laterReserved = reservedPerEntry * (entries.length - index - 1);
-    const contentBudget = Math.max(0, remainingContentRoom - laterReserved);
-    const content = entry.content.slice(0, contentBudget);
-    output += entry.prefix + content;
-    remainingContentRoom -= content.length;
-  }
-  return output;
 };
 
 /** Pull a page id out of a critique string. LLMs often echo `id=memory_x | title=…`. */
@@ -405,78 +413,41 @@ Return title, markdown content, and context.
 context is the recall key: compact, semantically rich phrases covering the union of the sources' task and goal descriptors. Not verbatim sentences. Not a concatenation of full prompts. Not one source's task copied when the others differ.
 If you cannot write a non-empty context that covers that union, return an empty context string.`;
 
-export const MAX_FORMATTED_MERGE_CHARS = 32_000;
-export const MAX_MERGE_TASK_CHARS = 4_096;
-const MIN_MERGE_CONTENT_CHARS = 128;
+export const MAX_MERGE_TASK_TOKENS = 4_096;
 
 export const formatMemoryMergeSources = ({
   sources,
   extract,
-  maxChars = MAX_FORMATTED_MERGE_CHARS,
+  maxTokens = OPTIMIZER_EVIDENCE_TOKEN_BUDGET,
 }: {
   sources: readonly MemoryPage[];
   extract?: MemoryExtractProposal;
-  maxChars?: number;
-}): string => {
-  const boundedMaxChars = Math.max(0, maxChars);
-  const baseEntries = [
-    ...sources.map((page, index) => ({
-      prefix: (titleBudget: number, contextBudget: number) =>
-        `${index === 0 ? '' : '\n'}- id=${page.id}\n` +
-        `  title: ${page.title.slice(0, titleBudget)}\n` +
-        `  context: ${(page.context ?? '').slice(0, contextBudget)}\n` +
-        `  content: `,
-      content: page.content,
-    })),
-    ...(extract
-      ? [
-          {
-            prefix: (titleBudget: number, _contextBudget: number) =>
-              `\n\nNew extract to fold in:\n- slug=${extract.slug.slice(0, 128)}\n` +
-              `  title: ${extract.title.slice(0, titleBudget)}\n` +
-              `  content: `,
-            content: extract.content,
-          },
-        ]
-      : []),
-  ];
-  if (baseEntries.length === 0) {
-    return '';
-  }
-
-  const baseChars = baseEntries.reduce((total, entry) => total + entry.prefix(0, 0).length, 0);
-  const roomAfterIdsAndLabels = Math.max(0, boundedMaxChars - baseChars);
-  const totalContentReserve = Math.min(
-    MIN_MERGE_CONTENT_CHARS * baseEntries.length,
-    roomAfterIdsAndLabels
+  maxTokens?: number;
+}): string =>
+  formatEvidenceEntries(
+    [
+      ...sources.map((page, index) => ({
+        prefix:
+          `${index === 0 ? '' : '\n'}- id=${page.id}\n` +
+          `  title: ${page.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
+          `  context: ${(page.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
+          `  content: `,
+        content: page.content,
+      })),
+      ...(extract
+        ? [
+            {
+              prefix:
+                `\n\nNew extract to fold in:\n- slug=${extract.slug.slice(0, 128)}\n` +
+                `  title: ${extract.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
+                `  content: `,
+              content: extract.content,
+            },
+          ]
+        : []),
+    ],
+    maxTokens
   );
-  const metadataPerEntry = Math.floor(
-    (roomAfterIdsAndLabels - totalContentReserve) / baseEntries.length
-  );
-  const entries = baseEntries.map((entry) => {
-    const titleBudget = Math.min(256, Math.floor(metadataPerEntry / 3));
-    const contextBudget = Math.min(1_024, metadataPerEntry - titleBudget);
-    return { prefix: entry.prefix(titleBudget, contextBudget), content: entry.content };
-  });
-  const metadataChars = entries.reduce((total, entry) => total + entry.prefix.length, 0);
-  const contentRoom = Math.max(0, boundedMaxChars - metadataChars);
-  const reservedPerEntry = Math.min(
-    MIN_MERGE_CONTENT_CHARS,
-    Math.floor(contentRoom / entries.length)
-  );
-  let remainingContentRoom = contentRoom;
-  let output = '';
-  for (let index = 0; index < entries.length; index++) {
-    const entry = entries[index];
-    const laterReserved = reservedPerEntry * (entries.length - index - 1);
-    const contentBudget = Math.max(0, remainingContentRoom - laterReserved);
-    const content = entry.content.slice(0, contentBudget);
-    output += entry.prefix + content;
-    remainingContentRoom -= content.length;
-  }
-
-  return output.slice(0, boundedMaxChars);
-};
 
 export const createLlmSynthesizeMemoryGroup = ({
   inferenceClient,
@@ -484,18 +455,16 @@ export const createLlmSynthesizeMemoryGroup = ({
   inferenceClient: BoundInferenceClient;
 }): SynthesizeMemoryGroup => {
   return async ({ sources, extract, task }) => {
-    const taskBlock =
-      extract && task
-        ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${task.slice(
-            0,
-            MAX_MERGE_TASK_CHARS
-          )}`
-        : '';
+    const taskText = extract && task ? truncateTokens(task, MAX_MERGE_TASK_TOKENS) : '';
+    const taskBlock = taskText
+      ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${taskText}`
+      : '';
     const inputPrefix = 'Sources:\n';
+    const framingTokens = estimateTokens(inputPrefix) + estimateTokens(taskBlock);
     const sourceAndExtractBlock = formatMemoryMergeSources({
       sources,
       extract,
-      maxChars: MAX_FORMATTED_MERGE_CHARS - inputPrefix.length - taskBlock.length,
+      maxTokens: Math.max(0, OPTIMIZER_EVIDENCE_TOKEN_BUDGET - framingTokens),
     });
     const response = await inferenceClient.output({
       id: 'nightshift_memory_merge',

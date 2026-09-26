@@ -16,6 +16,8 @@ export {
   getFieldsFromFieldCaps,
   getIndexFields,
   validateEsqlQuery,
+  estimateTokens,
+  truncateTokens,
   type IndexFieldsResult,
   type IndexFieldType,
   type MappingField,

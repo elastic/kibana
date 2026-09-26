@@ -11,7 +11,6 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { runCortexOptimize } from '../cortex/register_cortex';
-import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
@@ -84,7 +83,7 @@ export const cortexOptimizeStepDefinition = ({
             esClient: context.contextManager.getScopedEsClient(),
             spaceId: context.contextManager.getContext().workflow.spaceId,
             signal,
-            logger: teeWorkflowLogger(logger, context.logger),
+            logger,
             getAgentBuilder,
             connectorId: context.input.connector_id,
           }),

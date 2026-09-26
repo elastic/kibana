@@ -13,7 +13,6 @@ import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { previewText } from '../memory/log_format';
-import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
@@ -142,7 +141,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
               agentId: trimmedAgentId,
               query: prompt,
               signal,
-              logger: teeWorkflowLogger(logger, context.logger),
+              logger,
             }),
           MATERIALIZE_TIMEOUT_MS,
           `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`
