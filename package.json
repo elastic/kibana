@@ -640,6 +640,7 @@
     "@kbn/data-view-validation": "workspace:*",
     "@kbn/data-views-as-code-plugin": "workspace:*",
     "@kbn/data-views-plugin": "workspace:*",
+    "@kbn/data-views-types": "workspace:*",
     "@kbn/data-visualizer-plugin": "workspace:*",
     "@kbn/data-visualizer-server-schemas": "workspace:*",
     "@kbn/dataset-quality-plugin": "workspace:*",

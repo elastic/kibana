@@ -581,6 +581,7 @@ src/platform/packages/shared/kbn-data-service-server @elastic/kibana-discover
 src/platform/packages/shared/kbn-data-source @elastic/kibana-discover
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-discover
 src/platform/packages/shared/kbn-data-view-validation @elastic/kibana-discover
+src/platform/packages/shared/kbn-data-views-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-datemath @elastic/kibana-discover
 src/platform/packages/shared/kbn-default-tracer @elastic/kibana-core
 src/platform/packages/shared/kbn-design-tools @elastic/appex-sharedux

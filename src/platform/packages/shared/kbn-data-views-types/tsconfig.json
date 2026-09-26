@@ -2,16 +2,21 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@kbn/ambient-common-types"
+    ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/as-code-data-views-schema",
+    "@kbn/es-query",
+    "@kbn/field-formats-plugin"
   ],
   "exclude": [
     "target/**/*"
-  ],
-  "kbn_references": [
-    "@kbn/data-views-types",
-    "@kbn/as-code-data-views-schema",
-    "@kbn/utility-types",
   ]
 }

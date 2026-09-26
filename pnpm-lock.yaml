@@ -1840,6 +1840,9 @@ importers:
       '@kbn/data-views-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/data_views
+      '@kbn/data-views-types':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-data-views-types
       '@kbn/data-visualizer-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/data_visualizer
@@ -8001,6 +8004,8 @@ importers:
   src/platform/packages/shared/kbn-data-view-utils: {}
 
   src/platform/packages/shared/kbn-data-view-validation: {}
+
+  src/platform/packages/shared/kbn-data-views-types: {}
 
   src/platform/packages/shared/kbn-datemath: {}
 

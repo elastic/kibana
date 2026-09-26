@@ -18,7 +18,7 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-cell-actions
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/data-views-plugin'
+  - '@kbn/data-views-types'
   - '@kbn/core'
   - '@kbn/field-types'
   - '@kbn/data-plugin'
