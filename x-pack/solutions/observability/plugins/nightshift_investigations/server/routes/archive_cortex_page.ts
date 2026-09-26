@@ -29,7 +29,12 @@ export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute(
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 
-    const page = await getCortexPageStore(request).archive(params.path.id);
+    const store = getCortexPageStore(request);
+    // An active legacy duplicate would revive the page at the next fold, so fold first and archive
+    // the canonical page that `get` resolves the requested id to.
+    await store.pruneDuplicates();
+    const existing = await store.get(params.path.id);
+    const page = existing && (await store.archive(existing.id));
     if (!page) {
       throw notFound(`Cortex page ${params.path.id} was not found`);
     }
