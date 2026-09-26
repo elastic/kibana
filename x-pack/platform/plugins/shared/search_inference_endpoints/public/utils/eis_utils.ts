@@ -22,7 +22,7 @@ import {
 } from '../../common/type_guards';
 import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
 import { GEO_ORDER } from '../types';
-import type { RegionZoneCount } from '../types';
+import type { RegionOption } from '../types';
 
 // Inference ID prefixes for internal Elastic endpoints kept for backwards
 // compatibility that must not be surfaced in the UI.
@@ -382,79 +382,6 @@ const keepPreferredRegion = (current: CspRegion | undefined, incoming: CspRegion
   return current;
 };
 
-const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
-  const byGeo = new Map<string, Map<string, CspRegion>>();
-
-  for (const ep of endpoints) {
-    if (!isInferenceEndpointWithMetadata(ep)) continue;
-    const regions = ep.metadata.regions;
-    if (!regions) continue;
-
-    for (const region of regions) {
-      if (!isCspRegion(region)) continue;
-      const geo = region.geo ?? 'other';
-      const geoMap = byGeo.get(geo) ?? new Map<string, CspRegion>();
-      const key = regionKey(region);
-      geoMap.set(key, keepPreferredRegion(geoMap.get(key), region));
-      byGeo.set(geo, geoMap);
-    }
-  }
-
-  return new Map([...byGeo.entries()].map(([geo, geoMap]) => [geo, [...geoMap.values()]]));
-};
-
-/**
- * Collects geo codes that appear only as geo-only entries (no csp+region) across the given endpoints.
- * These indicate zone-level availability without specific region data.
- */
-const collectGeoOnlyZones = (endpoints: EisInferenceEndpoint[]): Set<string> => {
-  const geoOnly = new Set<string>();
-  for (const ep of endpoints) {
-    if (!isInferenceEndpointWithMetadata(ep)) continue;
-    const regions = ep.metadata.regions;
-    if (!regions) continue;
-    for (const region of regions) {
-      if (isCspRegion(region)) continue;
-      if (region && typeof region === 'object' && typeof region.geo === 'string') {
-        geoOnly.add(region.geo);
-      }
-    }
-  }
-  return geoOnly;
-};
-
-/**
- * Computes per-zone region availability counts for a specific model relative to
- * all EIS models, for use in the model detail flyout region badges.
- *
- */
-export const getRegionZoneCounts = (
-  modelEndpoints: EisInferenceEndpoint[],
-  allEisEndpoints: EisInferenceEndpoint[]
-): RegionZoneCount[] => {
-  const modelByGeo = collectRegionsPerGeo(modelEndpoints);
-  const allByGeo = collectRegionsPerGeo(allEisEndpoints);
-  const modelGeoOnly = collectGeoOnlyZones(modelEndpoints);
-
-  return GEO_ORDER.flatMap((geo) => {
-    const modelRegions = modelByGeo.get(geo) ?? [];
-    const modelCount = modelRegions.length;
-    const isGeoOnly = modelCount === 0 && modelGeoOnly.has(geo);
-
-    if (modelCount === 0 && !isGeoOnly) return [];
-
-    return [
-      {
-        geo,
-        modelRegions,
-        modelCount,
-        totalCount: allByGeo.get(geo)?.length ?? 0,
-        geoOnly: isGeoOnly,
-      },
-    ];
-  });
-};
-
 /**
  * Aggregates all unique CSP regions from EIS endpoint `regions` metadata.
  * The returned list is deduplicated (by csp+region key) and sorted alphabetically.
@@ -537,4 +464,30 @@ export const getAvailableGeos = (endpoints: EisInferenceEndpoint[]): string[] =>
   const knownOrdered = geoOrderList.filter((g) => seen.has(g));
   const unknownSorted = [...seen].filter((g) => !geoOrderList.includes(g)).sort();
   return [...knownOrdered, ...unknownSorted];
+};
+
+/**
+ * Returns the unique geographies, then the unique CSP regions, where the given endpoints are available.
+ */
+export const getRegionOptions = (endpoints: EisInferenceEndpoint[]): RegionOption[] => {
+  const geoOptions = getAvailableGeos(endpoints)
+    .map((geo) => geo.toLowerCase())
+    .map((geo) => {
+      const displayName = getGeoDisplayName(geo);
+      return {
+        key: `geo-${geo}`,
+        label: displayName === geo ? geo.toUpperCase() : displayName,
+      };
+    });
+  const regionOptions = getAvailableRegions(endpoints).map((region) => ({
+    key: `region-${region.csp}-${region.region}`.toLowerCase(),
+    label: getRegionDisplayName(region),
+  }));
+
+  const seenKeys = new Set<string>();
+  return [...geoOptions, ...regionOptions].filter(({ key }) => {
+    if (seenKeys.has(key)) return false;
+    seenKeys.add(key);
+    return true;
+  });
 };
