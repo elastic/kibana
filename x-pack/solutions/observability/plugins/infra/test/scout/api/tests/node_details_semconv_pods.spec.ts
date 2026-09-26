@@ -9,6 +9,7 @@ import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type {
+  NodeDetailsDataSeries,
   NodeDetailsMetricData,
   NodeDetailsMetricDataResponse,
   NodeDetailsRequest,
@@ -19,9 +20,14 @@ const POD_WITH_LIMITS = testData.SEMCONV_PODS[0];
 const POD_WITHOUT_LIMITS = testData.SEMCONV_PODS[1];
 const SEMCONV_CPU_WITH_LIMIT = 0.46;
 const SEMCONV_CPU_WITHOUT_LIMIT = 0.32;
+const SEMCONV_MEMORY_WITH_LIMIT = 0.55;
+// Matches SemconvPod network counters (`NETWORK_IO_STEP` every 30s generator tick).
+const SEMCONV_NETWORK_IO_STEP = 100_000;
+const SEMCONV_NETWORK_GENERATOR_INTERVAL_SEC = 30;
+const SEMCONV_NETWORK_BYTES_PER_SEC =
+  SEMCONV_NETWORK_IO_STEP / SEMCONV_NETWORK_GENERATOR_INTERVAL_SEC;
 
-const lastNonZero = (metric: NodeDetailsMetricData | undefined): number | undefined => {
-  const points = metric?.series[0]?.data ?? [];
+const lastNonZeroPoints = (points: NodeDetailsDataSeries['data']): number | undefined => {
   for (let i = points.length - 1; i >= 0; i--) {
     const value = points[i]?.value;
     if (typeof value === 'number' && value !== 0) {
@@ -29,6 +35,18 @@ const lastNonZero = (metric: NodeDetailsMetricData | undefined): number | undefi
     }
   }
   return undefined;
+};
+
+const lastNonZero = (metric: NodeDetailsMetricData | undefined): number | undefined => {
+  return lastNonZeroPoints(metric?.series[0]?.data ?? []);
+};
+
+const lastNonZeroSeries = (
+  metric: NodeDetailsMetricData | undefined,
+  seriesId: string
+): number | undefined => {
+  const series = metric?.series.find((candidate) => candidate.id === seriesId);
+  return lastNonZeroPoints(series?.data ?? []);
 };
 
 apiTest.describe(
@@ -105,6 +123,18 @@ apiTest.describe(
       const cpuValue = lastNonZero(cpu);
       expect(cpuValue).toBeDefined();
       expect(Number(cpuValue?.toFixed(2))).toBe(SEMCONV_CPU_WITH_LIMIT);
+
+      const memoryValue = lastNonZero(metrics.find((metric) => metric.id === 'podMemoryUsage'));
+      expect(memoryValue).toBeDefined();
+      expect(Number(memoryValue?.toFixed(2))).toBe(SEMCONV_MEMORY_WITH_LIMIT);
+
+      const network = metrics.find((metric) => metric.id === 'podNetworkTraffic');
+      const networkRx = lastNonZeroSeries(network, 'rx');
+      const networkTx = lastNonZeroSeries(network, 'tx');
+      expect(networkRx).toBeDefined();
+      expect(networkTx).toBeDefined();
+      expect(networkRx).toBeCloseTo(SEMCONV_NETWORK_BYTES_PER_SEC, 2);
+      expect(networkTx).toBeCloseTo(SEMCONV_NETWORK_BYTES_PER_SEC, 2);
 
       const overviewRx = metrics
         .find((metric) => metric.id === 'podOverview')
