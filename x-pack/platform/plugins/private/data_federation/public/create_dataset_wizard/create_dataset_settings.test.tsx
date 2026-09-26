@@ -497,6 +497,17 @@ describe('CreateDatasetAdditionalSettings', () => {
     );
   });
 
+  it('shows an error message when skip rows is not a whole number from 0 through 1000', () => {
+    const { getByTestId, getByText } = renderAdditionalSettings('csv');
+
+    fireEvent.change(getByTestId('createDatasetSettingsSkipRows'), {
+      target: { value: '1001' },
+    });
+
+    expect(getByTestId('createDatasetSettingsSkipRows')).toHaveAttribute('aria-invalid', 'true');
+    expect(getByText(createDatasetWizardStrings.settingsSkipRowsInvalid)).toBeInTheDocument();
+  });
+
   it('shows an error message when max errors is not a positive whole number', () => {
     const { getByTestId, getByText } = renderAdditionalSettings();
 

@@ -12,6 +12,7 @@ import {
   emptyCreateDatasetSettingsFormValues,
   validateMaxErrors,
   validatePartitionPath,
+  validateSkipRows,
 } from './create_dataset_form_state';
 
 const empty = () => emptyCreateDatasetSettingsFormValues();
@@ -40,6 +41,20 @@ describe('create_dataset_form_state', () => {
     it('allows an empty path when partition detection is not template', () => {
       expect(validatePartitionPath('', formWith(''))).toBe(true);
       expect(validatePartitionPath('', formWith('hive'))).toBe(true);
+    });
+  });
+
+  describe('validateSkipRows', () => {
+    it('accepts an empty value and whole numbers from 0 through 1000', () => {
+      expect(validateSkipRows('')).toBe(true);
+      expect(validateSkipRows('0')).toBe(true);
+      expect(validateSkipRows('1000')).toBe(true);
+    });
+
+    it('rejects values outside that range', () => {
+      expect(validateSkipRows('-1')).toBe(createDatasetWizardStrings.settingsSkipRowsInvalid);
+      expect(validateSkipRows('1.5')).toBe(createDatasetWizardStrings.settingsSkipRowsInvalid);
+      expect(validateSkipRows('1001')).toBe(createDatasetWizardStrings.settingsSkipRowsInvalid);
     });
   });
 

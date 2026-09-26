@@ -29,6 +29,7 @@ export function StepAdditional() {
           'settings.partition_path',
           'settings.max_errors',
           'settings.max_error_ratio',
+          'settings.skip_rows',
         ]);
       },
       getData: () => getValues().settings,

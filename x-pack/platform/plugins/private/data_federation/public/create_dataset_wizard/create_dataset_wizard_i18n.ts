@@ -808,7 +808,7 @@ export const createDatasetWizardStrings = {
   settingsSkipRowsInvalid: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsSkipRowsInvalid',
     {
-      defaultMessage: 'Must be an integer between 0 and 1000.',
+      defaultMessage: 'Must be a whole number between 0 and 1000 or empty.',
     }
   ),
 

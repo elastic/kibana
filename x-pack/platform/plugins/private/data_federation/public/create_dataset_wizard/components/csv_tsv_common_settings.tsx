@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
@@ -15,7 +15,6 @@ import {
   DEFAULT_DATETIME_FORMAT_LABEL,
   DEFAULT_ENCODING,
   validateDelimiter,
-  validateSkipRows,
   type CreateDatasetFormValues,
   type DatasetFormatFormValue,
 } from '../create_dataset_form_state';
@@ -25,6 +24,7 @@ import { EncodingSelect } from './encoding_select';
 import { HeaderRow } from './header_row';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { QuoteMode } from './quote_mode';
+import { SkipRowsField } from './skip_rows_field';
 
 const helpTextDefault = (valueLabel: string) => (
   <EuiText size="xs" color="subdued">
@@ -41,11 +41,6 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
   });
   const { field: modeField } = useController({ name: 'settings.mode', control });
   const { field: headerRowField } = useController({ name: 'settings.header_row', control });
-  const { field: skipRowsField, fieldState: skipRowsState } = useController({
-    name: 'settings.skip_rows',
-    control,
-    rules: { validate: validateSkipRows },
-  });
   const { field: nullValueField } = useController({ name: 'settings.null_value', control });
 
   return (
@@ -105,31 +100,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           onBlur={headerRowField.onBlur}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsSkipRowsLabel}
-            infoText={createDatasetWizardStrings.settingsSkipRowsDescription}
-          />
-        }
-        helpText={createDatasetWizardStrings.settingsSkipRowsHelp}
-        fullWidth
-        isInvalid={Boolean(skipRowsState.error)}
-        error={skipRowsState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsSkipRows"
-          fullWidth
-          min={0}
-          max={1000}
-          step={1}
-          isInvalid={Boolean(skipRowsState.error)}
-          value={skipRowsField.value}
-          onChange={(e) => skipRowsField.onChange(e.target.value)}
-          name={skipRowsField.name}
-          inputRef={skipRowsField.ref}
-        />
-      </EuiFormRow>
+      <SkipRowsField control={control} />
       <EuiFormRow
         label={
           <FormRowLabelWithInfo
