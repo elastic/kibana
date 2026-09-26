@@ -193,7 +193,11 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 8 | `DirectorStep` | Enrich alert-type events with episode state. |
 | 9 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
 
-The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
+> [!WARNING]
+> **Two similarly-named switches, different scopes.**
+>
+> - `xpack.alerting_v2.enabled` (`kibana.yml`) — governs the whole plugin, **including the rule executor**. Setting this to `false` stops all rule execution.
+> - `alerting:v2:enabled` (Advanced Settings UI, space-scoped) — gates only the UI and public APIs. **Rules keep executing while this is off.** An operator who turns off this setting expecting execution to stop during an incident will be surprised; only `xpack.alerting_v2.enabled` stops the executor.
 
 ## How recovery and no-data fit together
 
@@ -521,3 +525,10 @@ Useful coverage points:
 - Prefer `requireState(...)` and explicit halts over assuming a field exists.
 - Keep rule execution focused on event production. If a change is really about lifecycle transitions, move toward the director. If it is really about notifications, move toward the dispatcher.
 - If you change stored event shape, verify the resources schema and downstream readers together.
+## Migration from v1
+
+### `minimumScheduleInterval.enforce` removed
+
+Alerting v1 exposed `xpack.alerting.rules.minimumScheduleInterval.enforce` (defaulted to `false`). With `enforce: false`, rules with intervals shorter than `minimumScheduleInterval` produced a warning but were allowed to run. Alerting v2 always enforces the minimum — the `enforce` field does not exist and rules with shorter intervals are rejected at create/update/enable time.
+
+Deployments migrating from a v1 configuration that relied on `enforce: false` (or never set the field, picking up the lenient default) will encounter stricter validation. Rules with short intervals must be updated to a compliant schedule before enabling alerting v2.
