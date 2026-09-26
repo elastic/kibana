@@ -654,6 +654,7 @@ groups:
           observability: preview
           elasticsearch: preview
           security: preview
+        note: "Configure the `ai:anonymizationSettings` setting from the **Anonymization Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md)."
 
   - group: Presentation Labs
     id: presentation-labs

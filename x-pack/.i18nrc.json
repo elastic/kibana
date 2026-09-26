@@ -10,6 +10,7 @@
       "platform/plugins/shared/aiops"
     ],
     "xpack.aiAnonymization": "platform/packages/shared/ai-infra/ai-anonymization-server",
+    "xpack.aiAnonymizationSettings": "platform/plugins/private/ai_anonymization_settings",
     "xpack.aiAssistant": "platform/packages/shared/kbn-ai-assistant",
     "xpack.alerting": "platform/plugins/shared/alerting",
     "xpack.alertingV2": "platform/packages/shared/response-ops/alerting-v2-utils",
