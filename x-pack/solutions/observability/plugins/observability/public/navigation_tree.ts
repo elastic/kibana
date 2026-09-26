@@ -649,6 +649,7 @@ function createNavTree({
             }),
             children: [
               { link: 'management:genAiSettings' },
+              { link: 'management:aiAnonymizationSettings' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },
