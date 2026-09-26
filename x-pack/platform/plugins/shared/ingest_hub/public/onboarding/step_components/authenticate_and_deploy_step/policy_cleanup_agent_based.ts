@@ -18,11 +18,14 @@ import type { AgentCredentialVars } from './package_inputs';
 import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
 
-export interface CleanupAgentBasedOpts extends BuildPolicyBodyOpts {
-  pendingCleanupPolicyIds: Record<string, string>;
-  currentPolicyIdsByInstance: Record<string, string>;
+export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
   selectedAgentPolicyIds: string[];
   agentCredentials?: AgentCredentialVars;
+}
+
+export interface CleanupAgentBasedOpts extends UpdateAgentBasedPolicyOpts {
+  pendingCleanupPolicyIds: Record<string, string>;
+  currentPolicyIdsByInstance: Record<string, string>;
 }
 
 /**
@@ -67,10 +70,10 @@ export async function cleanupAgentBasedPolicies(
   return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
 }
 
-async function updateAgentBasedPolicy(
+export async function updateAgentBasedPolicy(
   policyId: string,
   survivingInstanceIds: string[],
-  opts: CleanupAgentBasedOpts
+  opts: UpdateAgentBasedPolicyOpts
 ): Promise<void> {
   const {
     instances,

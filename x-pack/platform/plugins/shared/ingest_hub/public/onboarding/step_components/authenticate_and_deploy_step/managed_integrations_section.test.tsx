@@ -72,6 +72,7 @@ function setupMocks({
   setPendingIacTemplate = jest.fn(),
   connectorId = undefined,
   authMethod = undefined,
+  staticKeys = undefined,
   searchParams = '',
 }: {
   cloud?: object;
@@ -80,6 +81,7 @@ function setupMocks({
   setPendingIacTemplate?: jest.Mock;
   connectorId?: string;
   authMethod?: 'identity_federation' | 'static_keys';
+  staticKeys?: { access_key_id?: string; secret_access_key?: string };
   searchParams?: string;
 } = {}) {
   mockUseKibana.mockReturnValue({ services: { cloud } });
@@ -90,7 +92,7 @@ function setupMocks({
     setConnectorId,
     setStaticKeys,
     setPendingIacTemplate,
-    authenticateAndDeployStep: { connectorId, authMethod },
+    authenticateAndDeployStep: { connectorId, authMethod, staticKeys },
     awsServicesMap: new Map([
       [
         'guardduty',
@@ -176,6 +178,7 @@ function setupMocks({
     }) => (
       <div data-test-subj="static-keys-replace-view">
         <button onClick={() => onReadyChange?.(true)}>replace-ready</button>
+        <button onClick={() => onReadyChange?.(false)}>replace-cancel</button>
         <button
           onClick={() => onFieldsChange?.({ access_key_id: 'NEW', secret_access_key: 'newsecret' })}
         >
@@ -195,6 +198,8 @@ function renderSection(
     isDeploying?: boolean;
     isDone?: boolean;
     hasFailed?: boolean;
+    isDirty?: boolean;
+    onReplaceFormDirtyChange?: jest.Mock;
   } = {}
 ) {
   return render(
@@ -208,6 +213,8 @@ function renderSection(
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
           hasFailed={props.hasFailed ?? false}
+          isDirty={props.isDirty ?? false}
+          onReplaceFormDirtyChange={props.onReplaceFormDirtyChange}
         />
       </React.Suspense>
     </I18nProvider>
@@ -296,8 +303,77 @@ describe('ManagedIntegrationsSection', () => {
   });
 
   describe('Deploy button readiness', () => {
-    it('Deploy button is disabled initially', () => {
+    it('Deploy button is disabled initially (no credentials, no connector)', () => {
       renderSection();
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+
+    it('Deploy button is enabled immediately when connectorId is present and drift detected', () => {
+      // isDirty=true bypasses form re-validation: the connector was already used in the
+      // previous deploy and is still valid — no need to wait for the form to re-validate it.
+      setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
+      renderSection({ showIdentityFederation: true, isDirty: true });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
+    });
+
+    it('Deploy button is disabled when drift detected but no connector is pre-loaded', () => {
+      // isDirty bypass only applies when a connector is present (identity federation path).
+      // Without a connector the form must signal ready before Deploy is enabled.
+      setupMocks({ connectorId: undefined, authMethod: 'identity_federation' });
+      renderSection({ showIdentityFederation: true, isDirty: true });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+
+    it('onReadyChange(false) is suppressed while connector is pre-loaded (avoids loading flash)', () => {
+      // With a pre-loaded connector, the identity federation form calls onReadyChange(false)
+      // on mount while it re-validates. isDeployReady must stay true during that window.
+      setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
+      renderSection({ showIdentityFederation: true, isDirty: true });
+      act(() => {
+        fireEvent.click(screen.getByText('mark-not-ready'));
+      });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
+    });
+
+    it('isDirty bypass clears after user changes connector, so form validation applies', () => {
+      // After user picks a new connector, isConnectorPreloaded becomes false.
+      // isDirty bypass no longer applies, and isDeployReady=false from the loading form
+      // must disable the button until the new connector is validated.
+      setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
+      renderSection({ showIdentityFederation: true, isDirty: true });
+      // Bypass active initially
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
+      act(() => {
+        fireEvent.click(screen.getByText('mark-named')); // user picks new connector
+      });
+      act(() => {
+        fireEvent.click(screen.getByText('mark-not-ready')); // form loading new connector
+      });
+      // Bypass cleared — button disabled while new connector validates
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+
+    it('Deploy button enabled in static-keys edit mode with service-var drift and existing credentials', () => {
+      // Scenario: user deployed with static keys, changed a service var, returns to Step 3.
+      // isDirty=true from service-var drift. Replace form not touched. Existing keys in session.
+      // Deploy should be enabled using the stored credentials — replace form is optional.
+      setupMocks({
+        authMethod: 'static_keys',
+        staticKeys: { access_key_id: 'AKIA123', secret_access_key: 'secret456' },
+        searchParams: 'deploymentId=dep-abc',
+      });
+      renderSection({ showIdentityFederation: false, isDirty: true });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
+    });
+
+    it('Deploy button disabled in static-keys edit mode with service-var drift but no stored credentials', () => {
+      // Edge case: isDirty but session has no static keys — replace form must be filled first.
+      setupMocks({
+        authMethod: 'static_keys',
+        staticKeys: undefined,
+        searchParams: 'deploymentId=dep-abc',
+      });
+      renderSection({ showIdentityFederation: false, isDirty: true });
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
     });
 
@@ -481,6 +557,48 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
     });
 
+    it('auto-reopens section when isDone transitions true → false (drift detected)', () => {
+      const { rerender } = renderSection({ isDone: false, showIdentityFederation: true });
+      // Deploy: section closes
+      act(() => {
+        rerender(
+          <I18nProvider>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <ManagedIntegrationsSection
+                serviceCount={3}
+                showIdentityFederation={true}
+                iacIntegrations={IAC_INTEGRATIONS}
+                onDeploy={jest.fn()}
+                isDeploying={false}
+                isDone={true}
+                hasFailed={false}
+              />
+            </React.Suspense>
+          </I18nProvider>
+        );
+      });
+      expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
+      // Drift detected: section auto-opens
+      act(() => {
+        rerender(
+          <I18nProvider>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <ManagedIntegrationsSection
+                serviceCount={3}
+                showIdentityFederation={true}
+                iacIntegrations={IAC_INTEGRATIONS}
+                onDeploy={jest.fn()}
+                isDeploying={false}
+                isDone={false}
+                hasFailed={false}
+              />
+            </React.Suspense>
+          </I18nProvider>
+        );
+      });
+      expect(screen.getByTestId('identity-federation')).toBeInTheDocument();
+    });
+
     it('shows Done badge in header when isDone', () => {
       renderSection({ isDone: true });
       expect(screen.getByText('Done')).toBeInTheDocument();
@@ -560,6 +678,26 @@ describe('ManagedIntegrationsSection', () => {
         access_key_id: 'AKIA',
         secret_access_key: 'secret',
       });
+    });
+
+    it('replace form ready calls onReplaceFormDirtyChange(true)', () => {
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({ authMethod: 'static_keys', searchParams: 'deploymentId=dep-abc' });
+      renderSection({ showIdentityFederation: false, onReplaceFormDirtyChange });
+      fireEvent.click(screen.getByText('replace-ready'));
+      expect(onReplaceFormDirtyChange).toHaveBeenCalledWith(true);
+    });
+
+    it('replace form cancel calls onReplaceFormDirtyChange(false) so parent can clear callout', () => {
+      // When user fills then cancels the replace form, the section must report false so the
+      // parent can merge with drift state and clear isDirty if no underlying drift exists.
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({ authMethod: 'static_keys', searchParams: 'deploymentId=dep-abc' });
+      renderSection({ showIdentityFederation: false, onReplaceFormDirtyChange });
+      fireEvent.click(screen.getByText('replace-ready'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
+      fireEvent.click(screen.getByText('replace-cancel'));
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(false);
     });
   });
 });
