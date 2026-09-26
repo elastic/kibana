@@ -6,7 +6,7 @@
  */
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
-import { validateDatasetName } from './validators';
+import { validateDatasetName, validateResource } from './validators';
 
 describe('validateDatasetName', () => {
   const validate = (
@@ -56,5 +56,20 @@ describe('validateDatasetName', () => {
         datasetNameToEdit: '',
       })
     ).toBe(true);
+  });
+});
+
+describe('validateResource', () => {
+  it('rejects an empty resource', () => {
+    expect(validateResource('')).toBe(createDatasetWizardStrings.resourceRequired);
+    expect(validateResource('   ')).toBe(createDatasetWizardStrings.resourceRequired);
+  });
+
+  it('rejects a string that is not a URI', () => {
+    expect(validateResource('bucket/*')).toBe(createDatasetWizardStrings.resourceInvalid);
+  });
+
+  it('accepts a string the URL constructor accepts', () => {
+    expect(validateResource('s3://logs-bucket/access/**/*.parquet')).toBe(true);
   });
 });

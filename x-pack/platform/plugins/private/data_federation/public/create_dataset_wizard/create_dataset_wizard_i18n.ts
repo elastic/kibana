@@ -214,6 +214,10 @@ export const createDatasetWizardStrings = {
     defaultMessage: 'Resource is required.',
   }),
 
+  resourceInvalid: i18n.translate('xpack.dataFederation.createDatasetForm.resourceInvalid', {
+    defaultMessage: 'Resource must be a valid URI.',
+  }),
+
   nameLabel: i18n.translate('xpack.dataFederation.createDatasetForm.nameLabel', {
     defaultMessage: 'Dataset name',
   }),

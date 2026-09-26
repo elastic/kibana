@@ -14,7 +14,7 @@ import type { DataSource } from '../../common';
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { DataSourceSelect } from './components/data_source_select';
-import { validateDatasetName } from './validators';
+import { validateDatasetName, validateResource } from './validators';
 
 const trimRequired =
   (message: string) =>
@@ -67,7 +67,7 @@ export function CreateDatasetDetailsFields({
     name: 'resource',
     control,
     rules: {
-      validate: trimRequired(createDatasetWizardStrings.resourceRequired),
+      validate: validateResource,
     },
   });
 

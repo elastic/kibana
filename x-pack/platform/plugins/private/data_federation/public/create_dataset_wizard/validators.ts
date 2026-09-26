@@ -36,3 +36,14 @@ export const validateDatasetName =
     });
     return isDuplicate ? createDatasetWizardStrings.nameAlreadyExists : true;
   };
+
+export const validateResource = (value: string): true | string => {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return value?.trim()
+      ? createDatasetWizardStrings.resourceInvalid
+      : createDatasetWizardStrings.resourceRequired;
+  }
+};

@@ -140,7 +140,7 @@ describe('CreateDatasetWizardPage', () => {
       target: { value: 'logs-dataset' },
     });
     fireEvent.change(getByTestId('createDatasetResource'), {
-      target: { value: 'bucket/*' },
+      target: { value: 's3://bucket/*' },
     });
     selectFormat(getByTestId, 'csv');
 
@@ -193,7 +193,7 @@ describe('CreateDatasetWizardPage', () => {
         expect.objectContaining({
           name: 'logs-dataset',
           data_source: 'source-1',
-          resource: 'bucket/*',
+          resource: 's3://bucket/*',
           settings: expect.objectContaining({ format: 'csv', partition_detection: 'hive' }),
         })
       );
@@ -211,7 +211,7 @@ describe('CreateDatasetWizardPage', () => {
       target: { value: 'logs-dataset' },
     });
     fireEvent.change(getByTestId('createDatasetResource'), {
-      target: { value: 'bucket/access/**/*.parquet' },
+      target: { value: 's3://bucket/access/**/*.parquet' },
     });
 
     // No manual format selection. The path extension should infer parquet and allow navigation.
@@ -230,7 +230,7 @@ describe('CreateDatasetWizardPage', () => {
       target: { value: 'logs-dataset' },
     });
     fireEvent.change(getByTestId('createDatasetResource'), {
-      target: { value: 'bucket/*' },
+      target: { value: 's3://bucket/*' },
     });
 
     expect(getByTestId('createDatasetSettingsFormat')).toBeInTheDocument();
@@ -255,7 +255,7 @@ describe('CreateDatasetWizardPage', () => {
     const initialDataSet: DataSetWithName = {
       name: 'logs-dataset',
       data_source: 'source-1',
-      resource: 'bucket/*',
+      resource: 's3://bucket/*',
       description: '',
       settings: {
         format: 'csv',
@@ -302,10 +302,10 @@ describe('CreateDatasetWizardPage', () => {
 
     expect(getByTestId('appHeaderTitle')).toHaveTextContent('Edit dataset: logs-dataset');
     expect(getByTestId('createDatasetName')).toHaveValue('logs-dataset');
-    expect(getByTestId('createDatasetResource')).toHaveValue('bucket/*');
+    expect(getByTestId('createDatasetResource')).toHaveValue('s3://bucket/*');
 
     fireEvent.change(getByTestId('createDatasetResource'), {
-      target: { value: 'bucket/updated/*' },
+      target: { value: 's3://bucket/updated/*' },
     });
     await clickNext(getByTestId);
     expect(
@@ -327,7 +327,7 @@ describe('CreateDatasetWizardPage', () => {
       expect(add).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'logs-dataset',
-          resource: 'bucket/updated/*',
+          resource: 's3://bucket/updated/*',
           settings: expect.objectContaining({
             target_split_size: '64mb',
             split_probe_window: '16mb',
@@ -355,7 +355,7 @@ describe('CreateDatasetWizardPage', () => {
     const initialDataSet: DataSetWithName = {
       name: 'logs-dataset',
       data_source: 'source-1',
-      resource: 'bucket/*',
+      resource: 's3://bucket/*',
       description: '',
       settings: { format: 'csv' },
     };
@@ -417,7 +417,7 @@ describe('CreateDatasetWizardPage', () => {
     const initialDataSet: DataSetWithName = {
       name: 'logs-dataset',
       data_source: 'source-1',
-      resource: 'bucket/*',
+      resource: 's3://bucket/*',
       description: '',
       settings: {
         format: 'csv',
@@ -487,7 +487,7 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(getByTestId('createDatasetDataSource'));
     fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
     fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
-    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
     selectFormat(getByTestId, 'csv');
 
     await clickNext(getByTestId);
@@ -520,7 +520,7 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(getByTestId('createDatasetDataSource'));
     fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
     fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
-    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
     selectFormat(getByTestId, 'csv');
 
     await clickNext(getByTestId);
@@ -582,7 +582,7 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(getByTestId('createDatasetDataSource'));
     fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
     fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
-    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
     selectFormat(getByTestId, 'csv');
 
     await clickNext(getByTestId);
@@ -618,7 +618,7 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(getByTestId('createDatasetDataSource'));
     fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
     fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
-    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
     selectFormat(getByTestId, 'parquet');
 
     await clickNext(getByTestId);
