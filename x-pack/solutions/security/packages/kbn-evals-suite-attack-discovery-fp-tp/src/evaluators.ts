@@ -11,6 +11,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import {
   FP_TP_VERDICTS,
   RATIONALE_MARKDOWN_MAX_LENGTH,
+  SOURCE_STATUS_LINE_PATTERN,
   SUMMARY_MARKDOWN_MAX_LENGTH,
   type FpTpOutcome,
 } from './constants';
@@ -93,8 +94,13 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
   if (summary.length > SUMMARY_MARKDOWN_MAX_LENGTH) {
     problems.push(`summary_markdown longer than ${SUMMARY_MARKDOWN_MAX_LENGTH}`);
   }
-  if ((payload.rationale_markdown?.length ?? 0) > RATIONALE_MARKDOWN_MAX_LENGTH) {
+  const rationale = payload.rationale_markdown ?? '';
+  if (rationale.trim() === '') {
+    problems.push('missing rationale_markdown');
+  } else if (rationale.length > RATIONALE_MARKDOWN_MAX_LENGTH) {
     problems.push(`rationale_markdown longer than ${RATIONALE_MARKDOWN_MAX_LENGTH}`);
+  } else if (!SOURCE_STATUS_LINE_PATTERN.test(rationale.split('\n')[0])) {
+    problems.push('rationale_markdown missing the evidence-gate source-status line');
   }
   if (attackDiscoveryIdEcho !== attackDiscoveryId) {
     problems.push(`attack_discovery_id "${attackDiscoveryIdEcho}" does not echo the input`);

@@ -463,6 +463,7 @@ steps:
           EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_SERVER_CONFIG_SET: 'evals_attack_discovery_fp_tp'
           # Extended tier: verdict correctness must hold across smaller/cheaper
           # models too, not just the core frontier set.
           # Keep in sync with `weeklyEisModelGroups` for

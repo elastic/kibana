@@ -80,6 +80,7 @@ outputs:
       required:
         - verdict
         - summary_markdown
+        - rationale_markdown
     checks:
       type: array
       items:
@@ -330,8 +331,9 @@ steps:
         - summary_markdown: one paragraph. State the verdict in prose (no heading), the
           strongest reason, the id it rests on, and any empty or unavailable source.
           At most 8000 characters.
-        - rationale_markdown: one bullet per check (status, result, cited ids) and one per
-          empty or unavailable source. Omit it if it would only repeat the summary.
+        - rationale_markdown: REQUIRED on every run. First line is the source-status line
+          from the evidence gate above, exactly as specified there. Then one bullet per
+          check (status, result, cited ids) and one per empty or unavailable source.
         - No JSON, no confidence scores, no restated instructions.
 
         Attack Discovery:
@@ -448,6 +450,7 @@ steps:
         required:
           - verdict
           - summary_markdown
+          - rationale_markdown
           - checks
           - claims
 
