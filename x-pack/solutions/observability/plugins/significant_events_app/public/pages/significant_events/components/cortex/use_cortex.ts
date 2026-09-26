@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../util/errors';
 import type { CortexPage, GetCortexPageResponse } from './types';
 
 const cortexKeys = {
@@ -101,7 +102,7 @@ const useCortexMutation = <TVariables>(
       return queryClient.invalidateQueries({ queryKey: cortexKeys.pages });
     },
     onError: (error) => {
-      toasts.addError(error, { title: errorTitle });
+      toasts.addError(getFormattedError(error), { title: errorTitle });
     },
   });
 };
