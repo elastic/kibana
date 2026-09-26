@@ -79,7 +79,7 @@ describe('chain_runner', () => {
     });
 
     it('rejects any datasource function nested inside another datasource regardless of type', () => {
-      expect(() => processExpression('.worldbank(.static(42))')).toThrow(
+      expect(() => processExpression('.es(.static(42))')).toThrow(
         /Cannot use datasource function static\(\) as an argument to another datasource function/
       );
     });
