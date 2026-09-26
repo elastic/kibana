@@ -827,7 +827,6 @@ describe('aiIndexAutomationsSkill', () => {
         'data.set',
         'console',
         'context-engine.createKi',
-        'context-engine.verifyKi',
       ];
 
       for (const reference of templates()) {

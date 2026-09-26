@@ -26,7 +26,7 @@ version: "1"
 #      prose-only constraint) leaves the `esql` key out entirely — never an empty list, which the
 #      verifiers fail; without the key they skip it.
 #
-# Leave the shape alone: the verify/gate/create sequence is what keeps a KI carrying broken ES|QL
+# Leave the shape alone: the `verifiers` on create_ki are what keep a KI carrying broken ES|QL
 # out of the index.
 name: Targeted KI writer
 description: >
@@ -84,35 +84,30 @@ steps:
   - name: loop_kis
     type: foreach
     foreach: "{{ consts.kis | json }}"
-    # One KI that fails verification must not stop the others from being written.
+    # One KI whose write fails must not stop the others from being written.
     iteration-on-failure:
       continue: true
     steps:
       # `foreach.item.ki` is the whole document; passed typed so nothing is stringified.
-      - name: verify_ki
-        type: context-engine.verifyKi
+      # `ki_id` comes from the const, so a re-run replaces the KI on an index destination, and
+      # appends a newer revision of it on a data stream, rather than writing a second KI.
+      - name: create_ki
+        type: context-engine.createKi
         with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "{{ foreach.item.ki_id }}"
+          ki: "${{ foreach.item.ki }}"
           verifiers:
             - esql-valid-syntax
             - esql-valid-runtime
-          ki: "${{ foreach.item.ki }}"
 
       - name: check_verification
         type: if
-        condition: "steps.verify_ki.output.passed : true"
+        condition: "steps.create_ki.output.verification.passed : false"
         steps:
-          # `ki_id` comes from the const, so a re-run replaces the KI on an index destination, and
-          # appends a newer revision of it on a data stream, rather than writing a second KI.
-          - name: create_ki
-            type: context-engine.createKi
-            with:
-              ai_index_id: "{{ consts.ai_index_id }}"
-              ki_id: "{{ foreach.item.ki_id }}"
-              ki: "${{ foreach.item.ki }}"
-        else:
           - name: log_verification_failure
             type: console
             with:
               message: |
                 KI verification failed for "{{ foreach.item.ki_id }}".
-                Results: {{ steps.verify_ki.output.results | json }}
+                Results: {{ steps.create_ki.output.verification.results | json }}

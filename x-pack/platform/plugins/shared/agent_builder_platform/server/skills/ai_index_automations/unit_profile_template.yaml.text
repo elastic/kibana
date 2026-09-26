@@ -270,7 +270,7 @@ steps:
                       required: ["question_type", "esql_template", "esql_example", "returns"]
                 required: ["summary", "notable_values", "when_to_use", "access_patterns"]
 
-          # Built once so verify_ki and create_ki see exactly the same document.
+          # Built once, then handed to create_ki to verify and write.
           - name: assemble_ki
             type: data.set
             with:
@@ -328,35 +328,30 @@ steps:
                   unit_key: "{{ consts.unit_key }}"
                   unit: "{{ steps.unit_context.output.unit }}"
 
-          - name: verify_ki
-            type: context-engine.verifyKi
+          # `ki_id` is derived from the unit, so a re-run replaces that unit's profile rather
+          # than writing a second KI. On a data-stream destination the same id appends a newer
+          # revision instead.
+          - name: create_ki
+            type: context-engine.createKi
             with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ steps.unit_context.output.ki_id }}"
+              ki: "${{ steps.assemble_ki.output.ki }}"
               verifiers:
                 - esql-valid-syntax
                 - esql-valid-runtime
-              ki: "${{ steps.assemble_ki.output.ki }}"
 
           - name: check_verification
             type: if
-            condition: "steps.verify_ki.output.passed : true"
+            condition: "steps.create_ki.output.verification.passed : false"
             steps:
-              # `ki_id` is derived from the unit, so a re-run replaces that unit's profile rather
-              # than writing a second KI. On a data-stream destination the same id appends a newer
-              # revision instead.
-              - name: create_ki
-                type: context-engine.createKi
-                with:
-                  ai_index_id: "{{ consts.ai_index_id }}"
-                  ki_id: "{{ steps.unit_context.output.ki_id }}"
-                  ki: "${{ steps.assemble_ki.output.ki }}"
-            else:
               - name: log_verification_failure
                 type: console
                 with:
                   message: |
                     KI verification failed for {{ consts.unit_key }}
                     "{{ steps.unit_context.output.unit }}".
-                    Results: {{ steps.verify_ki.output.results | json }}
+                    Results: {{ steps.create_ki.output.verification.results | json }}
 
       # Advance after every page. A non-empty page moves the cursor to its highest key, which is
       # strictly above the previous cursor because discovery sorts ascending on a unique keyword.
