@@ -14,7 +14,12 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
+import {
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+} from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
@@ -105,6 +110,7 @@ export const runCortexOptimize = async ({
   assistantMessage,
   esClient,
   spaceId,
+  interactionId,
   signal,
   analytics,
   conversationId,
@@ -119,6 +125,7 @@ export const runCortexOptimize = async ({
   assistantMessage: string;
   esClient: ElasticsearchClient;
   spaceId: string;
+  interactionId: string;
   signal?: AbortSignal;
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
@@ -157,10 +164,24 @@ export const runCortexOptimize = async ({
   }
 
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  const inferenceClient = inference.getClient({ request });
+  const inferenceClient = inference.getClient({
+    request,
+    bindTo: {
+      connectorId,
+      metadata: {
+        connectorTelemetry: {
+          pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+          aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+          productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+          productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+          interactionId,
+        },
+      },
+    },
+  });
   await optimizeCortex({
     store,
-    proposeEdits: createLlmProposeCortexEdits({ inferenceClient, connectorId }),
+    proposeEdits: createLlmProposeCortexEdits({ inferenceClient }),
     userMessage,
     assistantMessage,
     telemetry: createCortexTelemetry({
