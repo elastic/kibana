@@ -11,7 +11,7 @@ import { filter } from 'rxjs';
 import { errors } from '@elastic/elasticsearch';
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import type { NodesVersionCompatibility } from './version_check/nodes_version_compatibility';
 
 /**
  * Validates the output of the ES Compatibility Check and waits for a valid connection.
