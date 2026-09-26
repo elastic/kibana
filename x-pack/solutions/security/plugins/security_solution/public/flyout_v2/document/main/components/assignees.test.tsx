@@ -59,6 +59,13 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+// What the next click on the mocked Apply panel applies. Mutable so a test can issue several
+// different Applies; reset in `beforeEach`.
+const mockAssigneesToApply: { add: string[]; remove: string[] } = {
+  add: ['user-id-3'],
+  remove: [],
+};
+
 jest.mock('../../../../common/components/assignees/assignees_apply_panel', () => ({
   AssigneesApplyPanel: ({
     onApply,
@@ -68,7 +75,7 @@ jest.mock('../../../../common/components/assignees/assignees_apply_panel', () =>
     <button
       type="button"
       data-test-subj="mock-assignees-apply-panel"
-      onClick={() => onApply({ add: ['user-id-3'], remove: [] })}
+      onClick={() => onApply({ ...mockAssigneesToApply })}
     >
       {'Apply assignees'}
     </button>
@@ -132,6 +139,8 @@ describe('<Assignees />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAssigneesToApply.add = ['user-id-3'];
+    mockAssigneesToApply.remove = [];
     (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
@@ -199,6 +208,218 @@ describe('<Assignees />', () => {
       expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
     });
     expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+  });
+
+  describe('sync from the alert doc after an optimistic Apply', () => {
+    // Regression tests for the flaky Scout spec in
+    // x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/document_flyout.spec.ts
+    // (#285324). On Apply, `onSuccess` records the change and calls `onAlertUpdated`, which
+    // triggers a doc refetch. On serverless the alerts index refresh lag makes the first refetch
+    // return a doc that does not yet include the newly-assigned user; mirroring that doc into
+    // state clobbered the just-added avatar until a later refetch caught up. The component now
+    // overlays the changes it applied on the assignees the doc reports, and drops the overlay
+    // once the doc reflects them.
+
+    const setupWithMockUserProfiles = () => {
+      (useBulkGetUserProfiles as jest.Mock).mockImplementation(
+        ({ uids }: { uids: Set<string> | undefined }) => ({
+          isLoading: false,
+          data: mockUserProfiles.filter((user) => uids?.has(user.uid)),
+        })
+      );
+    };
+
+    it('preserves the optimistic avatar when a stale refetch returns the pre-Apply assignees', async () => {
+      setupWithMockUserProfiles();
+      const onAlertUpdated = jest.fn();
+
+      const { getByTestId, queryByTestId, rerender } = render(
+        <TestProviders>
+          <Assignees hit={createMockHit([])} onAlertUpdated={onAlertUpdated} />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+      fireEvent.click(getByTestId('mock-assignees-apply-panel'));
+
+      const onSuccess = setAlertAssigneesMock.mock.calls[0][2];
+      act(() => {
+        onSuccess();
+      });
+
+      await waitFor(() => {
+        expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+      });
+
+      // A doc refetch lands *before* the alerts index has refreshed, so it still reports the
+      // pre-Apply assignees — a fresh array reference with the same content. This used to
+      // clobber the optimistic `assignedUserIds` and hide the avatar.
+      rerender(
+        <TestProviders>
+          <Assignees hit={createMockHit([])} onAlertUpdated={onAlertUpdated} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+    });
+
+    it('preserves both Applies when a refetch only reports the first of the two', async () => {
+      setupWithMockUserProfiles();
+
+      const { getByTestId, queryByTestId, rerender } = render(
+        <TestProviders>
+          <Assignees hit={createMockHit([])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      mockAssigneesToApply.add = ['user-id-1'];
+      fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+      fireEvent.click(getByTestId('mock-assignees-apply-panel'));
+      act(() => {
+        setAlertAssigneesMock.mock.calls[0][2]();
+      });
+
+      mockAssigneesToApply.add = ['user-id-3'];
+      fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+      fireEvent.click(getByTestId('mock-assignees-apply-panel'));
+      act(() => {
+        setAlertAssigneesMock.mock.calls[1][2]();
+      });
+
+      await waitFor(() => {
+        expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+      });
+
+      // Both Applies landed inside one index-refresh window, so a refetch can report the
+      // intermediate state where only the first is searchable. That is indistinguishable from an
+      // external change, so the second Apply has to survive it on the strength of being pending.
+      rerender(
+        <TestProviders>
+          <Assignees hit={createMockHit(['user-id-1'])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+      expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+    });
+
+    it('does not carry an Apply over to another document rendered by the same instance', async () => {
+      setupWithMockUserProfiles();
+
+      const { getByTestId, queryByTestId, rerender } = render(
+        <TestProviders>
+          <Assignees hit={createMockHit([], { _id: 'event-1' })} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+      fireEvent.click(getByTestId('mock-assignees-apply-panel'));
+      act(() => {
+        setAlertAssigneesMock.mock.calls[0][2]();
+      });
+
+      await waitFor(() => {
+        expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+      });
+
+      // A different document with the same (empty) assignee list must not inherit the pending
+      // Apply, in the header or in the list handed to the apply panel.
+      rerender(
+        <TestProviders>
+          <Assignees hit={createMockHit([], { _id: 'event-2' })} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).not.toBeInTheDocument();
+    });
+
+    it('stops overlaying an Apply once the doc reflects it, so a later external removal shows', async () => {
+      setupWithMockUserProfiles();
+
+      const { getByTestId, queryByTestId, rerender } = render(
+        <TestProviders>
+          <Assignees hit={createMockHit([])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+      fireEvent.click(getByTestId('mock-assignees-apply-panel'));
+      act(() => {
+        setAlertAssigneesMock.mock.calls[0][2]();
+      });
+
+      await waitFor(() => {
+        expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+      });
+
+      // The index refreshes and the refetched doc now reports the Apply.
+      rerender(
+        <TestProviders>
+          <Assignees hit={createMockHit(['user-id-3'])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+      });
+
+      // Somebody else unassigns that same user. The Apply is no longer pending, so the doc wins.
+      rerender(
+        <TestProviders>
+          <Assignees hit={createMockHit([])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).not.toBeInTheDocument();
+      });
+    });
+
+    it('picks up an external assignee change on the next refetch', async () => {
+      setupWithMockUserProfiles();
+
+      const { getByTestId, queryByTestId, rerender } = render(
+        <TestProviders>
+          <Assignees hit={createMockHit(['user-id-1'])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+
+      // Somebody else assigns `user-id-2` to the same alert; a refetch brings the fresh doc.
+      rerender(
+        <TestProviders>
+          <Assignees hit={createMockHit(['user-id-1', 'user-id-2'])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user2'))).toBeInTheDocument();
+      });
+      expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+    });
+
+    it('reflects an external removal on the next refetch', async () => {
+      setupWithMockUserProfiles();
+
+      const { getByTestId, queryByTestId, rerender } = render(
+        <TestProviders>
+          <Assignees hit={createMockHit(['user-id-1'])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+
+      rerender(
+        <TestProviders>
+          <Assignees hit={createMockHit([])} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).not.toBeInTheDocument();
+      });
+    });
   });
 
   it('disables the add-assignees button for a remote alert', () => {

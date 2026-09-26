@@ -41,6 +41,45 @@ import {
   ASSIGNEES_TITLE_TEST_ID,
 } from './test_ids';
 
+/**
+ * Assignee changes that have been applied successfully but are not yet visible in the document the
+ * flyout refetches, scoped to the document they were applied to.
+ */
+interface PendingAssigneeChanges {
+  documentKey: string;
+  add: string[];
+  remove: string[];
+}
+
+type AssigneeChanges = Pick<PendingAssigneeChanges, 'add' | 'remove'>;
+
+const NO_PENDING_CHANGES: PendingAssigneeChanges = { documentKey: '', add: [], remove: [] };
+
+/**
+ * Folds a newly applied change into the changes still waiting to show up in the document, so that
+ * several Applies inside one index-refresh window are all preserved. A change that reverses a
+ * waiting one cancels it out rather than stacking on top of it.
+ */
+const mergePendingChanges = (
+  pending: PendingAssigneeChanges,
+  documentKey: string,
+  { add, remove }: AssigneeChanges
+): PendingAssigneeChanges => ({
+  documentKey,
+  add: [...pending.add.filter((uid) => !remove.includes(uid) && !add.includes(uid)), ...add],
+  remove: [
+    ...pending.remove.filter((uid) => !add.includes(uid) && !remove.includes(uid)),
+    ...remove,
+  ],
+});
+
+/** Overlays the changes still waiting to show up in the document on the assignees it reports. */
+const applyPendingChanges = (assigneeIds: string[], { add, remove }: AssigneeChanges): string[] => {
+  const remaining = assigneeIds.filter((uid) => !remove.includes(uid));
+
+  return [...remaining, ...add.filter((uid) => !remaining.includes(uid))];
+};
+
 const UpdateAssigneesButton: FC<{
   isDisabled: boolean;
   toolTipMessage: string;
@@ -79,11 +118,14 @@ export interface AssigneesProps {
  */
 export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: AssigneesProps) => {
   const eventId = useMemo(() => hit.raw._id ?? '', [hit]);
-  const isRemoteDocument = useMemo(
-    () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+  const indexName = useMemo(
+    () => hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '',
     [hit]
   );
-  const initialAssignedUserIds = useMemo(() => {
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
+  // `_id` alone is not unique across clusters, so the index takes part in the document's identity.
+  const documentKey = `${eventId}|${indexName}`;
+  const documentAssignedUserIds = useMemo(() => {
     const value = hit.flattened[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[] | string | null;
 
     if (Array.isArray(value)) {
@@ -92,7 +134,6 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
 
     return value ? [value] : [];
   }, [hit]);
-  const [assignedUserIds, setAssignedUserIds] = useState(initialAssignedUserIds);
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const upsellingMessage = useUpsellingMessage('alert_assignments');
@@ -100,15 +141,45 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
   const setAlertAssignees = useSetAlertAssignees();
   const { reportActionClicked, reportHeaderItemClicked } = useFlyoutTelemetry();
 
+  // A successful Apply refetches the document, but the alerts index is only searchable again after
+  // its next refresh, so a refetch can still report the pre-Apply assignees (see #285324: on
+  // serverless that lag made the just-added avatar disappear from the header). Mirroring the
+  // document into state and re-syncing it lets such a refetch roll the Apply back, so instead the
+  // changes we applied are overlaid on whatever the document reports, and dropped once it reflects
+  // them. Assignee changes made elsewhere therefore show up on the next refetch, and a refetch
+  // that has not caught up cannot undo ours. The overlay is scoped to `documentKey` so it can
+  // never leak onto another document rendered by this same component instance.
+  const [pendingChanges, setPendingChanges] = useState(NO_PENDING_CHANGES);
+  const activePendingChanges =
+    pendingChanges.documentKey === documentKey ? pendingChanges : NO_PENDING_CHANGES;
+
+  const assignedUserIds = useMemo(
+    () => applyPendingChanges(documentAssignedUserIds, activePendingChanges),
+    [documentAssignedUserIds, activePendingChanges]
+  );
+
+  useEffect(() => {
+    const { add, remove } = activePendingChanges;
+    if (add.length === 0 && remove.length === 0) {
+      return;
+    }
+
+    // Keep trusting the document once it reports every change we made, otherwise a later external
+    // change to one of those same users would be overlaid away by a stale Apply forever.
+    const isReflectedByDocument =
+      add.every((uid) => documentAssignedUserIds.includes(uid)) &&
+      remove.every((uid) => !documentAssignedUserIds.includes(uid));
+
+    if (isReflectedByDocument) {
+      setPendingChanges(NO_PENDING_CHANGES);
+    }
+  }, [activePendingChanges, documentAssignedUserIds]);
+
   const uids = useMemo(() => new Set(assignedUserIds), [assignedUserIds]);
   const { data: assignedUsers } = useBulkGetUserProfiles({ uids });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const searchInputId = useGeneratedHtmlId({ prefix: 'searchInput' });
-
-  useEffect(() => {
-    setAssignedUserIds(initialAssignedUserIds);
-  }, [initialAssignedUserIds]);
 
   const togglePopover = useCallback(() => {
     setIsPopoverOpen((value) => !value);
@@ -136,21 +207,20 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
       });
 
       const onSuccess = () => {
-        setAssignedUserIds((currentAssignedUserIds) => {
-          const remainingAssignees = currentAssignedUserIds.filter(
-            (uid) => !assignees.remove.includes(uid)
-          );
-          const newAssignees = assignees.add.filter((uid) => !remainingAssignees.includes(uid));
-
-          return [...remainingAssignees, ...newAssignees];
-        });
+        setPendingChanges((current) =>
+          mergePendingChanges(
+            current.documentKey === documentKey ? current : NO_PENDING_CHANGES,
+            documentKey,
+            assignees
+          )
+        );
 
         onAlertUpdated?.();
       };
 
       await setAlertAssignees(assignees, [eventId], onSuccess, noop);
     },
-    [eventId, onAlertUpdated, reportActionClicked, setAlertAssignees]
+    [documentKey, eventId, onAlertUpdated, reportActionClicked, setAlertAssignees]
   );
 
   const isUpdateDisabled = useMemo(
