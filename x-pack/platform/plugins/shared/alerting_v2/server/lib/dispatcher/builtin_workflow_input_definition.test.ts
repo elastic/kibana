@@ -16,15 +16,13 @@
  *    Schema lists that field. The snapshot does not catch type-only adds.
  */
 
+import { alertEventSeverity } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   builtinWorkflowInputDefinitions,
   type JsonSchema,
 } from '@kbn/workflows';
-import {
-  alertEpisodeStatus,
-  alertEventSeverity,
-} from '../../resources/datastreams/alert_events';
+import { alertEpisodeStatus } from '../../resources/datastreams/alert_events';
 import type {
   ActionPolicyWorkflowPayload,
   ActionPolicyWorkflowPayloadRule,
