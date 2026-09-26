@@ -25,6 +25,10 @@ import { Feedback } from '@kbn/ui-feedback';
 import { ChromeLayout } from '@kbn/ui-chrome-layout';
 ```
 
+## `@kbn/kbn-ui/portable_imports`
+
+ESLint's core `no-restricted-imports` under a separate name. `src/platform/kbn-ui/.eslintrc.js` configures it with the portability allowlist for kbn-ui packages. A separate rule name keeps the repo-wide `no-restricted-imports` config in effect for those files instead of replacing it.
+
 ## `@kbn/kbn-ui/prefer_kbn_ui_callout`
 
 Flags direct usage of `<EuiCallOut>` in favour of the semantic wrapper components from `@kbn/ui-callout`.

@@ -3164,42 +3164,6 @@ module.exports = {
       },
     },
 
-    /**
-     * kbn-ui dependency allowlist — packages under `src/platform/kbn-ui/**` must be
-     * portable outside Kibana (e.g. Cloud UI). They may only import from the
-     * baseline peer deps (`@elastic/eui`, `@emotion/*`, `react`, `react-dom`) plus
-     * the `@kbn/*` modules that are stubbed at packaging time. Packaging, tests,
-     * stories, and Storybook config are excluded because they reference
-     * Kibana-only tooling.
-     */
-    {
-      files: ['src/platform/kbn-ui/**/*.{ts,tsx}'],
-      excludedFiles: [
-        'src/platform/kbn-ui/**/*.test.*',
-        'src/platform/kbn-ui/**/*.stories.*',
-        'src/platform/kbn-ui/**/__stories__/**',
-        'src/platform/kbn-ui/**/__tests__/**',
-        'src/platform/kbn-ui/**/packaging/**',
-        'src/platform/kbn-ui/storybook-config/**',
-        'src/platform/kbn-ui/_tooling/**',
-      ],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: [
-              '@kbn/*',
-              '!@kbn/i18n',
-              '!@kbn/i18n-react',
-              '!@kbn/ui-chrome-layout',
-              '!@kbn/ui-app-menu',
-              '!@kbn/ui-favorite-button',
-              '!@kbn/ui-ai-components',
-            ],
-          },
-        ],
-      },
-    },
     {
       // Allow axios in files that already use it. New axios imports are blocked
       // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
