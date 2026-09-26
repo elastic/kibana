@@ -30,6 +30,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const config = getService('config');
   const retry = getService('retry');
+  const browser = getService('browser');
   const comboBox = getService('comboBox');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
@@ -47,26 +48,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('should show the case view page correctly', async () => {
-        if (await cases.common.isRedesignEnabled()) {
-          await testSubjects.existOrFail('appHeaderTitle');
-
-          await testSubjects.existOrFail('case-view-tab-title-activity');
-          await testSubjects.existOrFail('case-view-tab-title-attachments');
-          await testSubjects.existOrFail('description');
-
-          await testSubjects.existOrFail('case-view-activity');
-
-          await testSubjects.existOrFail('case-view-assignees-field-panel');
-          await testSubjects.existOrFail('sidebar-severity');
-          await testSubjects.existOrFail('case-view-participants-field-panel');
-          await testSubjects.existOrFail('case-tags');
-          await testSubjects.existOrFail('cases-categories');
-          await testSubjects.existOrFail('case-view-sidebar-connectors');
-          return;
-        }
-
-        await testSubjects.existOrFail('case-view-title');
-        await testSubjects.existOrFail('header-page-supplements');
+        await testSubjects.existOrFail('appHeaderTitle');
 
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-title-attachments');
@@ -74,13 +56,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('case-view-activity');
 
-        await testSubjects.existOrFail('case-view-assignees');
+        await testSubjects.existOrFail('case-view-assignees-field-panel');
         await testSubjects.existOrFail('sidebar-severity');
-        await testSubjects.existOrFail('case-view-user-list-reporter');
-        await testSubjects.existOrFail('case-view-user-list-participants');
-        await testSubjects.existOrFail('case-view-tag-list');
+        await testSubjects.existOrFail('case-view-participants-field-panel');
+        await testSubjects.existOrFail('case-tags');
         await testSubjects.existOrFail('cases-categories');
-        await testSubjects.existOrFail('sidebar-connectors');
+        await testSubjects.existOrFail('case-view-sidebar-connectors');
       });
     });
 
@@ -214,31 +195,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
-      beforeEach(async function () {
-        // The redesign consolidates the activity type filters into a single dropdown
-        // (`user-actions-filter-bar-type-button`) with popover options and plain count badges rather
-        // than the legacy inline toggle buttons with `euiNotificationBadge` "N active filters" labels
-        // these assertions read; the redesign filter bar has its own unit coverage.
-        if (await cases.common.isRedesignEnabled()) {
-          this.skip();
-        }
-      });
-
       it('filters by all by default', async () => {
-        const allBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
-        );
-
-        expect(await allBadge.getAttribute('aria-label')).equal('1 active filters');
+        const typeButton = await testSubjects.find('user-actions-filter-bar-type-button');
+        expect(await typeButton.getVisibleText()).to.contain('All');
       });
 
       it('filters by comment successfully', async () => {
-        const commentBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
-        );
-
-        expect(await commentBadge.getAttribute('aria-label')).equal('0 available filters');
-
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -248,18 +210,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.click('user-actions-filter-activity-button-comments');
+        await testSubjects.click('user-actions-filter-bar-type-button');
+        await testSubjects.click('user-actions-filter-bar-type-option-comments');
 
-        expect(await commentBadge.getAttribute('aria-label')).equal('1 active filters');
+        await header.waitUntilLoadingHasFinished();
+
+        const typeButton = await testSubjects.find('user-actions-filter-bar-type-button');
+        expect(await typeButton.getVisibleText()).to.contain('Comments');
       });
 
       it('filters by history successfully', async () => {
-        const historyBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
-        );
-
-        expect(await historyBadge.getAttribute('aria-label')).equal('1 available filters');
-
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
         await header.waitUntilLoadingHasFinished();
@@ -268,25 +228,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.click('user-actions-filter-activity-button-history');
+        await testSubjects.click('user-actions-filter-bar-type-button');
+        await testSubjects.click('user-actions-filter-bar-type-option-history');
 
-        expect(await historyBadge.getAttribute('aria-label')).equal('3 active filters');
+        await header.waitUntilLoadingHasFinished();
+
+        const typeButton = await testSubjects.find('user-actions-filter-bar-type-button');
+        expect(await typeButton.getVisibleText()).to.contain('History');
       });
 
       it('sorts by newest first successfully', async () => {
-        await testSubjects.click('user-actions-filter-activity-button-all');
-
-        const AllBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
-        );
-
-        expect(await AllBadge.getVisibleText()).equal('4');
-
-        const sortDesc = await find.byCssSelector(
-          '[data-test-subj="user-actions-sort-select"] [value="desc"]'
-        );
-
-        await sortDesc.click();
+        await testSubjects.click('user-actions-filter-bar-sort-button');
+        await testSubjects.click('user-actions-filter-bar-sort-option-desc');
 
         await header.waitUntilLoadingHasFinished();
 
@@ -503,13 +456,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ];
 
       before(async function () {
-        // The redesign only renders case-view custom fields when templates v2 (`templates.enabled`) is
-        // on, which defaults off; these assertions target the legacy sidebar custom-field editors.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        // showLegacyCustomFields requires the Cases app origin to be loaded first.
+        await cases.common.showLegacyCustomFields(owner);
         await cases.api.createConfigWithCustomFields({ customFields, owner });
         await cases.api.createCase({
           customFields: [
@@ -527,6 +476,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           owner,
         });
         await cases.casesTable.waitForCasesToBeListed();
+        // Pre-open the accordion so it is ready when the case view loads.
+        await cases.common.openLegacyCustomFieldsAccordion(owner);
         await cases.casesTable.goToFirstListedCase();
         await header.waitUntilLoadingHasFinished();
       });
@@ -536,15 +487,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('updates a custom field correctly', async () => {
-        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
-        expect(await textField.getVisibleText()).equal('this is a text field value');
+        // Section starts in view mode — use view-mode selectors to read initial values.
+        const textViewEl = await testSubjects.find(`text-custom-field-view-${customFields[0].key}`);
+        expect(await textViewEl.getVisibleText()).equal('this is a text field value');
 
-        const toggle = await testSubjects.find(
-          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        const toggleViewEl = await testSubjects.find(
+          `toggle-custom-field-view-${customFields[1].key}`
         );
-        expect(await toggle.getAttribute('aria-checked')).equal('true');
+        expect(await toggleViewEl.getAttribute('aria-label')).equal('On');
 
-        await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
+        // Enter section edit mode by clicking the text field row.
+        await testSubjects.click(`template-field-edit-${customFields[0].key}`);
 
         await retry.waitFor('custom field edit form to exist', async () => {
           return await testSubjects.exists(
@@ -558,24 +511,30 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await inputField.type(' edited!!');
 
-        await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
+        // Toggle the toggle field while in section edit mode.
+        await testSubjects.click(`case-toggle-custom-field-form-field-${customFields[1].key}`);
 
-        await header.waitUntilLoadingHasFinished();
-
-        await toggle.click();
-
-        await header.waitUntilLoadingHasFinished();
-
-        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
-
-        expect(await toggle.getAttribute('aria-checked')).equal('false');
-
-        // validate user action
-        const userActions = await find.allByCssSelector(
-          '[data-test-subj*="customFields-update-action"]'
+        // Save all pending changes. The save button lives in the pinned accordion header which can
+        // sit behind the sticky app header — scroll it into the viewport center first.
+        const saveBtn = await testSubjects.find('section-edit-save');
+        await browser.execute(
+          'arguments[0].scrollIntoView({behavior:"instant",block:"center"})',
+          saveBtn
         );
+        await saveBtn.click();
 
-        expect(userActions).length(2);
+        await header.waitUntilLoadingHasFinished();
+
+        // Back in view mode: verify the updated values.
+        const updatedText = await testSubjects.find(
+          `text-custom-field-view-${customFields[0].key}`
+        );
+        expect(await updatedText.getVisibleText()).equal('this is a text field value edited!!');
+
+        const updatedToggle = await testSubjects.find(
+          `toggle-custom-field-view-${customFields[1].key}`
+        );
+        expect(await updatedToggle.getAttribute('aria-label')).equal('Off');
       });
     });
   });
