@@ -166,25 +166,6 @@ export const groupTimelineRounds = <E extends AnyTimelineEvent>(
   return rounds;
 };
 
-/**
- * The timeline minus the events of the given rounds, as a filter over the timeline so stored
- * order — which grouping and compaction rely on — is preserved.
- */
-export const dropTimelineRounds = <E extends AnyTimelineEvent>(
-  timeline: E[],
-  roundIds: ReadonlySet<string>
-): E[] => {
-  if (roundIds.size === 0) {
-    return timeline;
-  }
-  const dropped = new Set<string>(
-    groupTimelineRounds(timeline)
-      .filter((round) => roundIds.has(round.id))
-      .flatMap((round) => round.events.map((event) => event.id))
-  );
-  return timeline.filter((event) => !dropped.has(event.id));
-};
-
 /** True when the round is paused on a prompt (on the folded timeline: its terminal is a pause). */
 export const isAwaitingPrompt = (round: TimelineRound<AnyTimelineEvent>): boolean =>
   pendingPromptRequest(round.events as ConversationEvent[]) !== undefined;

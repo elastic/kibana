@@ -100,6 +100,25 @@ describe('mergeRounds', () => {
   });
 });
 
+describe('mergeRounds — last call input tokens', () => {
+  it("keeps the resume's last call, else the previous round's", () => {
+    const previous = baseRound({
+      model_usage: { ...usage(1, 5, 5), last_call_input_tokens: 5 },
+    });
+
+    expect(
+      mergeRounds(
+        previous,
+        baseRound({ model_usage: { ...usage(1, 9, 5), last_call_input_tokens: 9 } })
+      ).model_usage.last_call_input_tokens
+    ).toBe(9);
+    expect(
+      mergeRounds(previous, baseRound({ model_usage: usage(1, 9, 5) })).model_usage
+        .last_call_input_tokens
+    ).toBe(5);
+  });
+});
+
 describe('applyResumeResolution', () => {
   it('answers a pending ask_user_question step from the answers map', () => {
     const previous = baseRound({

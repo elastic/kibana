@@ -6,12 +6,13 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { CompactionSummary, ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { applyStepUpdates, type RunStepUpdate } from './step_state';
 import {
   mergeToolRenderState,
   type AnswerOutcome,
+  type CompactionRequest,
   type CurrentRun,
   type ResearchOutcome,
   type RetryNotice,
@@ -28,6 +29,8 @@ const lastValue =
 export const StateAnnotation = Annotation.Root({
   // inputs
   cycleLimit: Annotation<number>({ reducer: lastValue<number>(), default: () => 10 }),
+  /** The round the run's steps are persisted under (the paused one on a resume). */
+  roundId: Annotation<string>({ reducer: lastValue<string>(), default: () => '' }),
   // internal state
   currentCycle: Annotation<number>({ reducer: lastValue<number>(), default: () => 0 }),
   // counter to keep track of the number of successive errors
@@ -63,6 +66,28 @@ export const StateAnnotation = Annotation.Root({
     reducer: (current, next) => [...current, ...next],
     default: () => [],
   }),
+  // context management
+  /** The conversation's compaction summary, seeded from the stored one and replaced on compaction. */
+  compactionSummary: Annotation<CompactionSummary | undefined>({
+    reducer: lastValue<CompactionSummary | undefined>(),
+    default: () => undefined,
+  }),
+  /** Usage of the last research call, the proactive context management trigger. */
+  lastCallUsage: Annotation<{ inputTokens: number } | undefined>({
+    reducer: lastValue<{ inputTokens: number } | undefined>(),
+    default: () => undefined,
+  }),
+  /** Cycle of the last compaction or substitution, for the cooldown. */
+  lastContextActionCycle: Annotation<number>({
+    reducer: lastValue<number>(),
+    default: () => Number.NEGATIVE_INFINITY,
+  }),
+  /** Successive context-length errors recovered from by a forced compaction. */
+  contextRetryCount: Annotation<number>({ reducer: lastValue<number>(), default: () => 0 }),
+  compactionRequest: Annotation<CompactionRequest | undefined>({
+    reducer: lastValue<CompactionRequest | undefined>(),
+    default: () => undefined,
+  }),
   // outputs
   interrupted: Annotation<boolean>({ reducer: lastValue<boolean>(), default: () => false }),
   prompts: Annotation<PromptRequest[]>({
@@ -80,9 +105,11 @@ export type StateUpdate = typeof StateAnnotation.Update;
 
 /** The view of the graph state the prompt layer renders the current run from. */
 export const toCurrentRun = (state: StateType): CurrentRun => ({
+  roundId: state.roundId,
   steps: state.steps,
   cycleLimit: state.cycleLimit,
   renderState: state.toolRenderState,
   pendingToolCallIds: state.pendingToolCallIds,
   retryNotices: state.retryNotices,
+  compactionSummary: state.compactionSummary,
 });

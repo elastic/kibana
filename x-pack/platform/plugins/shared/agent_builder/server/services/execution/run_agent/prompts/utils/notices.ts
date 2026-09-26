@@ -25,11 +25,6 @@ import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/
 import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { HandoverParams } from '../types';
 
-/** Number of most recent research cycles whose tool results are never compacted in-flight. */
-export const PRESERVED_RECENT_CYCLES = 2;
-
-export const IN_FLIGHT_TOKEN_THRESHOLD = 50_000;
-
 export const createCycleLimitSystemMessage = (cycle: number): BaseMessage => {
   return createUserMessage(`<system-notice>
 You action budget is almost expired for that round. You only have ${cycle} cycles (tool calls) left before the execution will be terminated.

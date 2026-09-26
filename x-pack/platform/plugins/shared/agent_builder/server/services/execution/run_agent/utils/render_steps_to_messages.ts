@@ -30,11 +30,8 @@ import {
   wrapToolResultContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
-import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { HandoverParams, PromptImageResolver } from '../prompts/types';
 import {
-  IN_FLIGHT_TOKEN_THRESHOLD,
-  PRESERVED_RECENT_CYCLES,
   createCycleLimitSystemMessage,
   formatHandover,
   formatRetryNotice,
@@ -42,12 +39,20 @@ import {
   formatSystemNotice,
 } from '../prompts/utils/notices';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
-import type { CurrentRun, ToolRenderStateMap } from '../transient_state';
+import type { CurrentRun } from '../transient_state';
+import { countNonTodosSteps } from '../step_state';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
-import { estimateMessagesTokens } from './estimate_conversation_tokens';
+import { toolCallKey } from './filestore_substitution';
 import type { ToolCallResultTransformer } from './tool_summarization';
 
 export type CurrentRunPhase = 'research' | 'answer';
+
+/** Tool calls whose results render as file references, and how to produce them. */
+export interface CurrentRunSubstitution {
+  /** `toolCallKey`s of the marked tool calls. */
+  marks: ReadonlySet<string>;
+  substitute: ToolCallResultTransformer;
+}
 
 /** Rendering options for the current run (as opposed to the run state itself, see `CurrentRun`). */
 export interface CurrentRunRenderOptions {
@@ -55,8 +60,12 @@ export interface CurrentRunRenderOptions {
   /** The research agent's handover notes; rendered in the answer phase only. */
   handover?: HandoverParams;
   imageResolver?: PromptImageResolver;
-  /** Enables the in-flight compaction fallback when the raw rendering exceeds the token threshold. */
-  resultTransformer?: ToolCallResultTransformer;
+  /**
+   * The steps to render (inclusive), all by default. Steps before `start` are covered by the
+   * compaction summary; ranges must follow cycle boundaries so tool call groups stay whole.
+   */
+  range?: { start: number; end?: number };
+  substitution?: CurrentRunSubstitution;
 }
 
 /** Internal: what the shared step helpers branch on. Not exported — see the two entry points below. */
@@ -65,11 +74,10 @@ interface HistoryRenderContext {
   resultTransformer?: ToolCallResultTransformer;
 }
 
-interface CurrentRenderContext extends Omit<CurrentRunRenderOptions, 'resultTransformer'> {
+interface CurrentRenderContext extends Omit<CurrentRunRenderOptions, 'range'> {
   type: 'current';
   run: CurrentRun;
-  /** Set on the compaction re-render only: older cycles' results go through this transformer. */
-  compactWith?: ToolCallResultTransformer;
+  range: { start: number; end: number };
 }
 
 type RenderContext = HistoryRenderContext | CurrentRenderContext;
@@ -119,36 +127,19 @@ export const groupToolCallSteps = (steps: ConversationRoundStep[]): ToolCallStep
 const joinReasoning = (steps: ReasoningStep[]): string =>
   steps.map((step) => step.reasoning).join('\n');
 
-/**
- * Only *executed* cycles count: a batch that is still pending (e.g. the unexecuted final group of a
- * structured run that hit its cycle budget) must not move the cutoff.
- */
-const compactionCutoffCycle = (
-  steps: ConversationRoundStep[],
-  renderState: ToolRenderStateMap,
-  pending: ReadonlySet<string>
-): number | undefined => {
-  const cycles = new Set<number>();
-  for (const step of steps) {
-    if (isToolCallStep(step) && !pending.has(step.tool_call_id)) {
-      const cycle = renderState[step.tool_call_id]?.cycle;
-      if (cycle !== undefined) {
-        cycles.add(cycle);
-      }
-    }
-  }
-  if (cycles.size <= PRESERVED_RECENT_CYCLES) {
-    return undefined;
-  }
-  return Math.max(...cycles) - PRESERVED_RECENT_CYCLES;
-};
-
 const rawToolContent = (call: ToolCallStep, { run }: CurrentRenderContext): string =>
   run.renderState[call.tool_call_id]?.content ?? JSON.stringify({ results: call.results });
 
+const isSubstituted = (call: ToolCallStep, context: RenderContext): boolean =>
+  context.type === 'current' &&
+  (context.substitution?.marks.has(
+    toolCallKey({ round_id: context.run.roundId, tool_call_id: call.tool_call_id })
+  ) ??
+    false);
+
 const renderToolResult = async (
   call: ToolCallStep,
-  { context, compactThisGroup }: { context: RenderContext; compactThisGroup: boolean }
+  { context }: { context: RenderContext }
 ): Promise<BaseMessage> => {
   if (context.type === 'history') {
     if (call.interrupted) {
@@ -172,19 +163,17 @@ const renderToolResult = async (
     });
   }
 
-  const raw = rawToolContent(call, context);
-  if (compactThisGroup && context.compactWith) {
-    // Runs the result transformer over an older cycle's tool results, mirroring how previous
-    // rounds are compacted. Filestore substitution is forced because the pressure comes from the
-    // in-flight round, not conversation history.
-    const transformed = await context.compactWith(call, { forceFilestoreSubstitution: true });
-    // Only use the transformed form when it's actually smaller. Re-serializing an unchanged result
-    // as JSON can otherwise add overhead and make the prompt larger than the raw rendering.
-    const compacted = JSON.stringify({ results: transformed });
-    const content = estimateTokens(compacted) < estimateTokens(raw) ? compacted : raw;
-    return createToolResultMessage({ content, toolCallId: call.tool_call_id });
+  if (context.substitution && isSubstituted(call, context)) {
+    const results = await context.substitution.substitute(call);
+    return createToolResultMessage({
+      content: JSON.stringify({ results }),
+      toolCallId: call.tool_call_id,
+    });
   }
-  return createToolResultMessage({ content: raw, toolCallId: call.tool_call_id });
+  return createToolResultMessage({
+    content: rawToolContent(call, context),
+    toolCallId: call.tool_call_id,
+  });
 };
 
 /**
@@ -270,11 +259,7 @@ const renderImageMessages = async (
 
 const renderToolCallGroup = async (
   calls: ToolCallStep[],
-  {
-    context,
-    reasoningSteps,
-    compactionCutoff,
-  }: { context: RenderContext; reasoningSteps: ReasoningStep[]; compactionCutoff?: number }
+  { context, reasoningSteps }: { context: RenderContext; reasoningSteps: ReasoningStep[] }
 ): Promise<BaseMessage[]> => {
   const current = context.type === 'current' ? context : undefined;
   const groupId = calls[0].tool_call_group_id;
@@ -302,18 +287,24 @@ const renderToolCallGroup = async (
   });
 
   const cycle = current?.run.renderState[calls[0].tool_call_id]?.cycle;
-  const compactThisGroup =
-    compactionCutoff !== undefined && cycle !== undefined && cycle <= compactionCutoff;
 
   const toolMessages: BaseMessage[] = [];
   for (const call of calls) {
-    toolMessages.push(await renderToolResult(call, { context, compactThisGroup }));
+    toolMessages.push(await renderToolResult(call, { context }));
   }
 
   const trailing: BaseMessage[] = [];
   if (current) {
-    if (!compactThisGroup && current.imageResolver) {
-      trailing.push(...(await renderImageMessages(calls, current.imageResolver)));
+    if (current.imageResolver) {
+      // Images of a marked call are only dropped when their own result was substituted.
+      const rendered = await Promise.all(
+        calls.map(async (call) =>
+          current.substitution && isSubstituted(call, current)
+            ? { ...call, results: await current.substitution.substitute(call) }
+            : call
+        )
+      );
+      trailing.push(...(await renderImageMessages(rendered, current.imageResolver)));
     }
     if (cycle !== undefined) {
       // Add system reminder about being close to the limit when only 5 cycles left.
@@ -351,14 +342,20 @@ const renderSteps = async (
 ): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
   const current = context.type === 'current' ? context : undefined;
+  const { start, end } = current?.range ?? { start: 0, end: steps.length - 1 };
   const groups = groupToolCallSteps(steps);
   const reasoningSteps = steps.filter(isReasoningStep);
   const pending = new Set(current?.run.pendingToolCallIds ?? []);
-  const compactionCutoff = current?.compactWith
-    ? compactionCutoffCycle(steps, current.run.renderState, pending)
-    : undefined;
 
+  // A retry notice sits after the steps that existed when the call failed; the ones placed within
+  // the covered steps are covered too, the ones after the last rendered step belong to what follows.
+  const hiddenCount = countNonTodosSteps(steps.slice(0, start));
+  const renderedCount = countNonTodosSteps(steps.slice(0, end + 1));
+  const isLastStep = end === steps.length - 1;
   const pushResearchRetries = (afterCount: number) => {
+    if (afterCount < hiddenCount || (afterCount === renderedCount && !isLastStep)) {
+      return;
+    }
     for (const notice of current?.run.retryNotices ?? []) {
       if (notice.phase === 'research' && notice.afterNonTodosStepCount === afterCount) {
         messages.push(...formatRetryNotice(notice.error));
@@ -369,8 +366,18 @@ const renderSteps = async (
   pushResearchRetries(0);
   let nonTodosCount = 0;
   let groupIndex = 0;
-  for (const step of steps) {
+  for (const [index, step] of steps.entries()) {
     if (isTodosStep(step)) {
+      continue;
+    }
+    if (index < start || index > end) {
+      if (isToolCallStep(step) && groups[groupIndex]?.[0] === step) {
+        groupIndex++;
+      }
+      nonTodosCount++;
+      if (index < start && nonTodosCount === hiddenCount) {
+        pushResearchRetries(hiddenCount);
+      }
       continue;
     }
     if (isBackgroundAgentCompleteStep(step)) {
@@ -389,9 +396,7 @@ const renderSteps = async (
         groupIndex++;
         const calls = group.filter((call) => !pending.has(call.tool_call_id));
         if (calls.length > 0) {
-          messages.push(
-            ...(await renderToolCallGroup(calls, { context, reasoningSteps, compactionCutoff }))
-          );
+          messages.push(...(await renderToolCallGroup(calls, { context, reasoningSteps })));
         }
       }
     } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
@@ -428,20 +433,15 @@ export const renderHistorySteps = async ({
   resultTransformer?: ToolCallResultTransformer;
 }): Promise<BaseMessage[]> => renderSteps(steps, { type: 'history', resultTransformer });
 
-/**
- * Renders the current run to LangChain messages, with the in-flight compaction fallback: renders
- * the raw form first and, when it exceeds the token threshold and a transformer is available,
- * re-renders with older cycles compacted.
- */
+/** Renders the current run (or the `range` of its steps) to LangChain messages. */
 export const renderCurrentRun = async ({
   run,
-  resultTransformer,
+  range,
   ...options
-}: { run: CurrentRun } & CurrentRunRenderOptions): Promise<BaseMessage[]> => {
-  const context: CurrentRenderContext = { type: 'current', run, ...options };
-  const raw = await renderSteps(run.steps, context);
-  if (!resultTransformer || estimateMessagesTokens(raw) <= IN_FLIGHT_TOKEN_THRESHOLD) {
-    return raw;
-  }
-  return renderSteps(run.steps, { ...context, compactWith: resultTransformer });
-};
+}: { run: CurrentRun } & CurrentRunRenderOptions): Promise<BaseMessage[]> =>
+  renderSteps(run.steps, {
+    type: 'current',
+    run,
+    range: { start: range?.start ?? 0, end: range?.end ?? run.steps.length - 1 },
+    ...options,
+  });

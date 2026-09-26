@@ -1515,5 +1515,96 @@ describe('conversations utils', () => {
         aborted_by: abortReason,
       });
     });
+
+    describe('compaction summary', () => {
+      const compactionSummary = {
+        summarized_up_to: { tool_call_id: 'call-1' },
+        summarized_round_count: 0,
+        covered_round_ids: [],
+        created_at: T0,
+        token_count: 10,
+        structured_data: {
+          discussion_summary: 's',
+          user_intent: 'i',
+          key_topics: [],
+          entities: [],
+          outcomes_and_decisions: [],
+          unanswered_questions: [],
+          agent_actions: [],
+          tool_calls_summary: [],
+        },
+      };
+      const storedState: NonNullable<ConversationWithOperation['state']> = { subagents: {} };
+
+      it('fresh round: persists the summary of a compaction that ran before the interruption, keeping the rest of the state', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          conversation: { ...freshConversation(), state: storedState },
+          error: new Error('boom'),
+          interrupted: interruptedData({ compaction_summary: compactionSummary }),
+        });
+
+        const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+        expect(call.state).toEqual({ ...storedState, compaction_summary: compactionSummary });
+      });
+
+      it('resume: persists the summary with the appended execution', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          conversation: pausedConversation(),
+          input: { prompts: {} },
+          error: new Error('boom'),
+          interrupted: interruptedData({ compaction_summary: compactionSummary }),
+        });
+
+        const [call] = conversationClient.appendEvents.mock.calls[0];
+        expect(call.state).toEqual({ compaction_summary: compactionSummary });
+      });
+
+      it('leaves the state untouched when the summary is the stored one', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          conversation: {
+            ...freshConversation(),
+            state: { ...storedState, compaction_summary: compactionSummary },
+          },
+          error: new Error('boom'),
+          interrupted: interruptedData({ compaction_summary: { ...compactionSummary } }),
+        });
+
+        const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+        expect(call).not.toHaveProperty('state');
+      });
+
+      it('uses the completed conversation state when the success write failed', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+        const round = {
+          ...createRound({ id: 'r1', status: ConversationRoundStatus.completed }),
+          started_at: T0,
+        };
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          error: new Error('write failed'),
+          completed: {
+            round,
+            conversation_state: { compaction_summary: compactionSummary },
+          },
+        });
+
+        const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+        expect(call.state).toEqual({ compaction_summary: compactionSummary });
+      });
+    });
   });
 });

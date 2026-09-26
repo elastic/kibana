@@ -19,7 +19,6 @@ import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
 import type { PromptImageResolver } from '../prompts/types';
-import { PRESERVED_RECENT_CYCLES } from '../prompts/utils/notices';
 import type { CurrentRun, RetryNotice, ToolRenderStateMap } from '../transient_state';
 import {
   groupToolCallSteps,
@@ -27,6 +26,7 @@ import {
   renderHistorySteps,
   type CurrentRunRenderOptions,
 } from './render_steps_to_messages';
+import { toolCallKey } from './filestore_substitution';
 import type { ToolCallResultTransformer } from './tool_summarization';
 
 const other = (id: string, data: object = { id }): ToolResult => ({
@@ -81,7 +81,7 @@ const current = (
   }: CurrentOverrides = {}
 ) =>
   renderCurrentRun({
-    run: { steps, renderState, cycleLimit, pendingToolCallIds, retryNotices },
+    run: { roundId: 'r', steps, renderState, cycleLimit, pendingToolCallIds, retryNotices },
     phase,
     ...options,
   });
@@ -372,70 +372,140 @@ describe('renderCurrentRun', () => {
     ]);
   });
 
-  describe('in-flight compaction', () => {
-    const compacting: ToolCallResultTransformer = async () => [other('compacted')];
-    const compactedContent = JSON.stringify({ results: [other('compacted')] });
-    // 4 x 60k chars is well over the in-flight token threshold, so the fallback kicks in.
-    const bigSteps = (count: number) =>
-      Array.from({ length: count }, (_, i) =>
-        call(`c${i}`, { results: [other(`c${i}`, { payload: 'x'.repeat(60_000) })] })
-      );
-    const bigRender = (count: number): ToolRenderStateMap =>
-      Object.assign(
-        {},
-        ...Array.from({ length: count }, (_, i) =>
-          rendered(`c${i}`, {
-            cycle: i + 1,
-            content: JSON.stringify({
-              results: [other(`c${i}`, { payload: 'x'.repeat(60_000) })],
-            }),
-          })
-        )
+  describe('range', () => {
+    const error = createAgentExecutionError('bad', AgentExecutionErrorCode.emptyResponse, {});
+    const steps: ConversationRoundStep[] = [
+      call('c1'),
+      call('c2', { tool_call_group_id: 'g2' }),
+      call('c3', { tool_call_group_id: 'g3' }),
+    ];
+    const renderState = {
+      ...rendered('c1'),
+      ...rendered('c2', { cycle: 2 }),
+      ...rendered('c3', { cycle: 3 }),
+    };
+    const renderedIds = (messages: Awaited<ReturnType<typeof current>>) =>
+      messages.flatMap((m) =>
+        m.getType() === 'ai' ? (m as AIMessage).tool_calls?.map((c) => c.id) ?? [] : []
       );
 
-    it('returns the raw rendering under the token threshold', async () => {
-      const messages = await current([call('a')], rendered('a'), { resultTransformer: compacting });
-      expect((messages[1] as ToolMessage).content).toContain('"id":"a"');
+    it('renders only the steps from the range start', async () => {
+      const messages = await current(steps, renderState, { range: { start: 1 } });
+      expect(renderedIds(messages)).toEqual(['c2', 'c3']);
     });
 
-    it('compacts cycles older than the preserved ones when over the threshold', async () => {
-      const messages = await current(bigSteps(4), bigRender(4), { resultTransformer: compacting });
-      const toolContents = messages
-        .filter((m) => m.getType() === 'tool')
-        .map((m) => m.content as string);
-      const compactedCount = 4 - PRESERVED_RECENT_CYCLES;
-      expect(toolContents.map((c) => c === wrapToolResultContent(compactedContent))).toEqual(
-        Array.from({ length: 4 }, (_, i) => i < compactedCount)
-      );
+    it('renders only the steps up to the range end', async () => {
+      const messages = await current(steps, renderState, { range: { start: 0, end: 1 } });
+      expect(renderedIds(messages)).toEqual(['c1', 'c2']);
     });
 
-    it('does not count pending calls toward the compaction cutoff', async () => {
-      const steps = [...bigSteps(4), call('final', { results: [] })];
-      const messages = await current(
-        steps,
-        { ...bigRender(4), ...rendered('final', { cycle: 5, content: undefined }) },
-        { pendingToolCallIds: ['final'], resultTransformer: compacting }
-      );
-      const compacted = messages.filter(
-        (m) => m.getType() === 'tool' && m.content === wrapToolResultContent(compactedContent)
-      );
-      expect(compacted).toHaveLength(4 - PRESERVED_RECENT_CYCLES);
-    });
-
-    it('keeps the raw content when the compacted form is not smaller', async () => {
-      const growing: ToolCallResultTransformer = async () => [
-        other('big', { payload: 'y'.repeat(100_000) }),
+    it('drops retry notices within the hidden steps and keeps the one at the range start', async () => {
+      const retryNotices: RetryNotice[] = [
+        { phase: 'research', afterNonTodosStepCount: 0, error },
+        { phase: 'research', afterNonTodosStepCount: 1, error },
+        { phase: 'research', afterNonTodosStepCount: 3, error },
       ];
-      const messages = await current(bigSteps(4), bigRender(4), { resultTransformer: growing });
-      const toolContents = messages
-        .filter((m) => m.getType() === 'tool')
-        .map((m) => m.content as string);
-      expect(toolContents.every((c) => c.includes('xxx') && !c.includes('yyy'))).toBe(true);
+      const messages = await current(steps, renderState, { range: { start: 1 }, retryNotices });
+      expect(types(messages)).toEqual(['ai', 'human', 'ai', 'tool', 'ai', 'tool', 'ai', 'human']);
     });
 
-    it('never compacts without a transformer', async () => {
-      const messages = await current(bigSteps(4), bigRender(4));
-      expect(messages.every((m) => !(m.content as string).includes('compacted'))).toBe(true);
+    it('leaves the retry notice after the range end to the steps that follow', async () => {
+      const retryNotices: RetryNotice[] = [{ phase: 'research', afterNonTodosStepCount: 2, error }];
+      const head = await current(steps, renderState, { range: { start: 0, end: 1 }, retryNotices });
+      const tail = await current(steps, renderState, { range: { start: 2 }, retryNotices });
+      expect(types(head)).toEqual(['ai', 'tool', 'ai', 'tool']);
+      expect(types(tail)).toEqual(['ai', 'human', 'ai', 'tool']);
+    });
+
+    it('keeps the cycle-limit notice keyed on the run cycle of the rendered groups', async () => {
+      const messages = await current(steps, renderState, { range: { start: 2 }, cycleLimit: 8 });
+      expect(types(messages)).toEqual(['ai', 'tool', 'human']);
+    });
+  });
+
+  describe('substitution', () => {
+    const substitute: ToolCallResultTransformer = async (toolCall) => [
+      {
+        tool_result_id: `r-${toolCall.tool_call_id}`,
+        type: ToolResultType.fileReference,
+        data: { filepath: `/f/${toolCall.tool_call_id}`, comment: 'stored' },
+      },
+    ];
+
+    it('renders marked calls through the substitute and others from the render state', async () => {
+      const messages = await current(
+        [call('a', { tool_call_group_id: 'g' }), call('b', { tool_call_group_id: 'g' })],
+        { ...rendered('a'), ...rendered('b') },
+        {
+          substitution: {
+            marks: new Set([toolCallKey({ round_id: 'r', tool_call_id: 'a' })]),
+            substitute,
+          },
+        }
+      );
+      const [, toolA, toolB] = messages as [AIMessage, ToolMessage, ToolMessage];
+      expect(toolA.content).toBe(
+        wrapToolResultContent(JSON.stringify({ results: await substitute(call('a')) }))
+      );
+      expect(toolB.content).toBe(wrapToolResultContent(JSON.stringify({ results: [other('b')] })));
+    });
+
+    it('does not inject the images of substituted calls', async () => {
+      const imageResolver: PromptImageResolver = jest.fn(async () => ({
+        base64: 'AAA',
+        mimeType: 'image/png',
+      }));
+      const results: ToolResult[] = [
+        {
+          tool_result_id: 'i1',
+          type: ToolResultType.image,
+          data: { attachment_id: 'ok', mime_type: 'image/png', name: 'pic', description: '' },
+        },
+      ];
+      const messages = await current([call('c1', { results })], rendered('c1'), {
+        imageResolver,
+        substitution: {
+          marks: new Set([toolCallKey({ round_id: 'r', tool_call_id: 'c1' })]),
+          substitute,
+        },
+      });
+      expect(types(messages)).toEqual(['ai', 'tool']);
+      expect(imageResolver).not.toHaveBeenCalled();
+    });
+
+    it('injects the images of a marked call that were left inline', async () => {
+      const imageResolver: PromptImageResolver = jest.fn(async () => ({
+        base64: 'AAA',
+        mimeType: 'image/png',
+      }));
+      const image: ToolResult = {
+        tool_result_id: 'i1',
+        type: ToolResultType.image,
+        data: { attachment_id: 'ok', mime_type: 'image/png', name: 'pic', description: '' },
+      };
+      const keepImages: ToolCallResultTransformer = async (toolCall) =>
+        toolCall.results.map((result) =>
+          result.type === ToolResultType.image
+            ? result
+            : {
+                tool_result_id: result.tool_result_id,
+                type: ToolResultType.fileReference,
+                data: { filepath: `/f/${result.tool_result_id}`, comment: 'stored' },
+              }
+        );
+      const messages = await current(
+        [call('c1', { results: [other('c1'), image] })],
+        rendered('c1'),
+        {
+          imageResolver,
+          substitution: {
+            marks: new Set([toolCallKey({ round_id: 'r', tool_call_id: 'c1' })]),
+            substitute: keepImages,
+          },
+        }
+      );
+      expect(types(messages)).toEqual(['ai', 'tool', 'human']);
+      expect(imageResolver).toHaveBeenCalledWith({ attachmentId: 'ok' });
     });
   });
 });

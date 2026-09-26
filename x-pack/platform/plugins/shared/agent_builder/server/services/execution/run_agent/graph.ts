@@ -31,10 +31,20 @@ import {
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import type { ResolvedConfiguration } from './types';
-import { convertError, isRecoverableError } from './utils/errors';
+import { convertError, isContextLengthError, isRecoverableError } from './utils/errors';
+import {
+  createContextManagementNodes,
+  type ContextManagementDeps,
+} from './utils/context_management';
 import type { PromptFactory } from './prompts';
 import { getRandomThinkingMessage } from './i18n';
-import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL, BROWSER_TOOL_PREFIX } from './constants';
+import {
+  steps,
+  tags,
+  BACKGROUND_CHECK_CYCLE_INTERVAL,
+  BROWSER_TOOL_PREFIX,
+  MAX_CONTEXT_RETRY_COUNT,
+} from './constants';
 import type { BackgroundExecutionService } from './background_execution_service';
 import type { StateType, StateUpdate } from './state';
 import { StateAnnotation, toCurrentRun } from './state';
@@ -65,6 +75,7 @@ export const createAgentGraph = ({
   roundId,
   sessionId,
   cacheControl,
+  contextManagement,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -85,7 +96,19 @@ export const createAgentGraph = ({
   /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
+  contextManagement: Omit<
+    ContextManagementDeps,
+    'conversation' | 'chatModel' | 'cacheControl' | 'events'
+  >;
 }) => {
+  const contextManagementNodes = createContextManagementNodes({
+    ...contextManagement,
+    conversation: processedConversation,
+    chatModel,
+    cacheControl,
+    events,
+  });
+
   const init = async (): Promise<StateUpdate> => {
     return {};
   };
@@ -145,10 +168,16 @@ export const createAgentGraph = ({
       const currentCycle = state.currentCycle + 1;
       const turn = processResearchResponse(response, { cycle: currentCycle, toolManager });
 
+      const inputTokens = response.usage_metadata?.input_tokens;
+      const usageUpdate: StateUpdate = {
+        contextRetryCount: 0,
+        lastCallUsage: inputTokens !== undefined ? { inputTokens } : undefined,
+      };
+
       if (turn.outcome.type === 'retry_error') {
         // Successful inference calls can still produce recoverable errors,
         // which must count toward the retry limit.
-        return { ...retryUpdate(turn.outcome.error), currentCycle };
+        return { ...retryUpdate(turn.outcome.error), ...usageUpdate, currentCycle };
       }
 
       return {
@@ -158,9 +187,19 @@ export const createAgentGraph = ({
         pendingToolCallIds: turn.pendingToolCallIds,
         currentCycle,
         errorCount: 0,
+        ...usageUpdate,
       };
     } catch (error) {
       const executionError = convertError(error);
+      if (isContextLengthError(executionError)) {
+        if (state.contextRetryCount >= MAX_CONTEXT_RETRY_COUNT) {
+          throw executionError;
+        }
+        return {
+          researchOutcome: { type: 'context_length_error', error: executionError },
+          contextRetryCount: state.contextRetryCount + 1,
+        };
+      }
       if (isRecoverableError(executionError)) {
         return retryUpdate(executionError);
       } else {
@@ -182,6 +221,8 @@ export const createAgentGraph = ({
         // max error count reached, stop execution by throwing
         throw outcome.error;
       }
+    } else if (outcome.type === 'context_length_error') {
+      return steps.contextManagement;
     } else if (outcome.type === 'tool_calls') {
       const maxCycleReached = state.currentCycle > state.cycleLimit;
       if (maxCycleReached) {
@@ -342,17 +383,27 @@ export const createAgentGraph = ({
     throw invalidState(`[finalize] expected handover outcome, got ${outcome?.type} instead.`);
   };
 
+  const contextManagementEdge = async (state: StateType) =>
+    state.compactionRequest ? steps.compactContext : steps.researchAgent;
+
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graphBuilder = new StateGraph(StateAnnotation)
     .addNode(steps.init, init)
     .addNode(steps.checkBackgroundWork, checkBackgroundWork)
+    .addNode(steps.contextManagement, contextManagementNodes.contextManagement)
+    .addNode(steps.compactContext, contextManagementNodes.compactContext)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
     .addNode(steps.finalize, finalize)
     .addEdge(_START_, steps.init)
     .addEdge(steps.init, steps.checkBackgroundWork)
-    .addEdge(steps.checkBackgroundWork, steps.researchAgent)
+    .addEdge(steps.checkBackgroundWork, steps.contextManagement)
+    .addConditionalEdges(steps.contextManagement, contextManagementEdge, {
+      [steps.compactContext]: steps.compactContext,
+      [steps.researchAgent]: steps.researchAgent,
+    })
+    .addEdge(steps.compactContext, steps.researchAgent)
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
       [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
@@ -366,6 +417,7 @@ export const createAgentGraph = ({
       .addNode(steps.answerAgent, answerAgentStructured)
       .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
         [steps.researchAgent]: steps.researchAgent,
+        [steps.contextManagement]: steps.contextManagement,
         [steps.executeTool]: steps.executeTool,
         [steps.prepareToAnswer]: steps.prepareToAnswer,
       })
@@ -377,6 +429,7 @@ export const createAgentGraph = ({
   } else {
     graphBuilder.addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
+      [steps.contextManagement]: steps.contextManagement,
       [steps.executeTool]: steps.executeTool,
       [steps.finalize]: steps.finalize,
     });

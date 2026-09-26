@@ -18,7 +18,9 @@ import type { RunTracker } from '../run_tracker';
 
 export const getModelUsage = (
   stats: ModelProviderStats,
-  mainConnectorId: string
+  mainConnectorId: string,
+  /** Input tokens of the agent's last research call, from the graph state. */
+  lastCallInputTokens?: number
 ): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
@@ -43,6 +45,7 @@ export const getModelUsage = (
     output_tokens: outputTokens,
     ...(hasCachedInputTokens ? { cached_input_tokens: cachedInputTokens } : {}),
     ...(modelFromResponse ? { model: modelFromResponse } : {}),
+    ...(lastCallInputTokens !== undefined ? { last_call_input_tokens: lastCallInputTokens } : {}),
   };
 };
 
@@ -83,7 +86,11 @@ export const buildInterruptedRound = ({
   return {
     steps,
     summary: {
-      model_usage: getModelUsage(modelProvider.getUsageStats(), mainConnectorId),
+      model_usage: getModelUsage(
+        modelProvider.getUsageStats(),
+        mainConnectorId,
+        state.lastCallUsage?.inputTokens
+      ),
       time_to_last_token: endTime.getTime() - startTime.getTime(),
       ...(traceId ? { trace_id: traceId } : {}),
       ...(configurationOverrides ? { configuration_overrides: configurationOverrides } : {}),

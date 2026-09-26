@@ -6,7 +6,6 @@
  */
 
 import type {
-  CompactionSummary,
   ConversationRoundAuthor,
   ConverseInput,
   RoundInput,
@@ -35,14 +34,12 @@ import { groupTimelineRounds, groupTimelineEntries, isTimelineRound } from './co
 export interface ProcessedConversation {
   /**
    * The agent-context timeline: the previous rounds' events in order, with each `user_message`
-   * payload processed. Compaction drops the events of summarized rounds.
+   * payload processed. Never trimmed: what a compaction summary covers is hidden at render time.
    */
   timeline: ProcessedTimelineEvent[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
   attachmentStateManager: AttachmentStateManager;
-  /** Compaction summary covering older rounds that were replaced by this summary */
-  compactionSummary?: CompactionSummary;
   /** Persistent sub-agent roster */
   subagentRosterFallback?: Record<string, SubagentEntry>;
   /**
