@@ -25,6 +25,7 @@ import type {
   FetchContext,
   HasParentApi,
   PublishesDataViews,
+  PublishesWritableDataViews,
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesDataLoading,
@@ -34,9 +35,10 @@ import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/in
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
+import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
@@ -45,11 +47,13 @@ import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { columnsToColumnsMeta } from '../utils/columns_to_columns_meta';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesDataViews &
+  Partial<Pick<PublishesWritableDataViews, 'setDataViews'>> &
   PublishesTitle &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
@@ -127,6 +131,24 @@ const getRelevantESQLVariables = (
   return [];
 };
 
+const getEsqlSourceCacheIdentity = ({
+  esql,
+  esqlVariables,
+  projectRouting,
+  timeRange,
+}: {
+  esql: string;
+  esqlVariables?: ESQLControlVariable[];
+  projectRouting?: string;
+  timeRange?: { from: string; to: string };
+}): string =>
+  JSON.stringify({
+    esql,
+    esqlVariables: esqlVariables?.map(({ key, value, type }) => ({ key, value, type })),
+    projectRouting: projectRouting ?? null,
+    timeRange: timeRange ? { from: timeRange.from, to: timeRange.to } : null,
+  });
+
 export function initializeFetch({
   api,
   stateManager,
@@ -136,6 +158,7 @@ export function initializeFetch({
   setDataLoading,
   setSearchError,
   setApproximationApplied,
+  esqlSource$,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
@@ -145,9 +168,11 @@ export function initializeFetch({
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setSearchError: (error: Error | undefined) => void;
   setApproximationApplied: (value: boolean | undefined) => void;
+  esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
+  let cachedEsqlSource: { identity: string; source: EsqlSource } | undefined;
 
   const observables = [fetch$(api), api.savedSearch$, api.dataViews$, refreshTrigger$] as const;
 
@@ -210,29 +235,55 @@ export function initializeFetch({
           if (
             esqlMode &&
             searchSourceQuery &&
+            isOfAggregateQueryType(searchSourceQuery) &&
             (!fetchContext.query || isOfQueryType(fetchContext.query))
           ) {
+            const timeRange = getTimeRangeFromFetchContext(fetchContext);
+            const esqlVariables = getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables);
+            const identity = getEsqlSourceCacheIdentity({
+              esql: searchSourceQuery.esql,
+              esqlVariables,
+              projectRouting: fetchContext.projectRouting,
+              timeRange,
+            });
+            if (!cachedEsqlSource || cachedEsqlSource.identity !== identity) {
+              const { esqlSource, dataView: resolvedDataView } = await resolveEsqlSource({
+                esql: searchSourceQuery.esql,
+                services: discoverServices,
+                projectRoutingFallback: fetchContext.projectRouting,
+                timeRange,
+                esqlVariables,
+                previousSourceId: cachedEsqlSource?.source.id ?? esqlSource$?.getValue()?.id,
+              });
+              cachedEsqlSource = {
+                identity,
+                source: esqlSource,
+              };
+              esqlSource$?.next(esqlSource);
+              if (resolvedDataView && resolvedDataView.id !== dataView.id) {
+                api.setDataViews?.([resolvedDataView]);
+              }
+            }
+            const embeddableEsqlSource = cachedEsqlSource.source;
             // Request ES|QL data
             const result = await fetchEsql({
               query: searchSourceQuery,
-              timeRange: getTimeRangeFromFetchContext(fetchContext),
+              timeRange,
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
-              dataView,
+              timeFieldName: embeddableEsqlSource.timeFieldName,
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,
               expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
-              esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
+              esqlVariables,
               projectRouting: fetchContext.projectRouting,
               esqlApproximation: fetchContext.isApproximate,
             });
             return {
-              columnsMeta: result.esqlQueryColumns
-                ? getTextBasedColumnsMeta(result.esqlQueryColumns)
-                : undefined,
+              columnsMeta: columnsToColumnsMeta(embeddableEsqlSource.getColumns()),
               rows: result.records,
               hitCount: result.records.length,
               approximationApplied: result.approximationApplied,

@@ -28,6 +28,7 @@ export const esqlLocatorGetLocation = async ({
     dataViewsService: dataViews,
     query: `FROM ${indexName}`,
     http,
+    options: { skipFetchFields: true },
   });
   const esql = getInitialESQLQuery(dataView);
 

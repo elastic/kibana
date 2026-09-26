@@ -8,6 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   internalStateActions,
   type InternalStateDispatch,
@@ -29,6 +30,7 @@ import {
   isDataSourceType,
 } from '../../../../../common/data_sources';
 import { sendLoadingMsg, sendResetMsg } from '../../hooks/use_saved_search_messages';
+import { resolveEsqlSource } from '../../data_fetching/resolve_esql_source';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
@@ -85,6 +87,25 @@ export const buildStateSubscribe =
       if (!isEsqlModePrev) {
         dataState.reset();
       }
+    }
+
+    if (isEsqlMode && queryChanged && isOfAggregateQueryType(nextState.query)) {
+      const tabId = getCurrentTab().id;
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const previousSource = currentDataSource$.getValue();
+      const { dataView } = await resolveEsqlSource({
+        esql: nextState.query.esql,
+        services,
+        esqlVariables: getCurrentTab().esqlVariables,
+        timeRange: services.data.query.timefilter.timefilter.getTime(),
+        previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+      });
+      dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView,
+        })
+      );
     }
 
     const { sampleSize, sort, dataSource, esqlApproximation } = prevState;
@@ -153,7 +174,10 @@ export const buildStateSubscribe =
       // reset() uses getInitialFetchStatus() for the new language. After refresh,
       // skipInitialFetch is gone and empty ES|QL is no longer the current query,
       // so reset() can flip UNINITIALIZED → LOADING without starting a fetch.
-      if (dataState.data$.main$.getValue().fetchStatus !== FetchStatus.UNINITIALIZED) {
+      // Re-read after await resolveEsqlSource: do not overwrite COMPLETE/ERROR
+      // that landed while the source was resolving.
+      const currentStatus = dataState.data$.main$.getValue().fetchStatus;
+      if (currentStatus === FetchStatus.LOADING) {
         sendResetMsg(dataState.data$, FetchStatus.UNINITIALIZED);
       }
       return;

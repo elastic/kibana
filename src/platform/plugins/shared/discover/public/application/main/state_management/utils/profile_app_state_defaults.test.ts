@@ -8,6 +8,8 @@
  */
 
 import { fieldList } from '@kbn/data-views-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../context_awareness/toolkit';
@@ -23,6 +25,8 @@ const emptyDataView = buildDataViewMock({
   name: 'emptyDataView',
   fields: fieldList(),
 });
+const dataViewSource = new DataViewSource(dataViewWithTimefieldMock);
+const emptyDataViewSource = new DataViewSource(emptyDataView);
 const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
 const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
   scopedEbtManager: scopedEbtManagerMock,
@@ -52,7 +56,7 @@ describe('getProfileAppStateDefaults', () => {
       const appStateWithBreakdownField = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults(['breakdownField']),
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataViewSource,
       }).getPreFetchState();
       expect(appStateWithBreakdownField).toEqual({
         breakdownField: 'extension',
@@ -61,17 +65,31 @@ describe('getProfileAppStateDefaults', () => {
       const appStateWithoutBreakdownField = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults(['breakdownField']),
-        dataView: emptyDataView,
+        dataSource: emptyDataViewSource,
       }).getPreFetchState();
 
       expect(appStateWithoutBreakdownField).toBeUndefined();
+    });
+
+    it('should apply breakdownField from ES|QL source columns', () => {
+      const appState = getProfileAppStateDefaults({
+        scopedProfilesManager,
+        profileAppStateDefaults: createProfileAppStateDefaults(['breakdownField']),
+        dataSource: createMockEsqlSource([
+          { name: 'extension', type: 'string', source: 'esql-result' },
+        ]),
+      }).getPreFetchState();
+
+      expect(appState).toEqual({
+        breakdownField: 'extension',
+      });
     });
 
     it('should return expected hideChart', () => {
       const appStateWithHideChart = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults(['hideChart']),
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataViewSource,
       }).getPreFetchState();
 
       expect(appStateWithHideChart).toEqual({
@@ -81,7 +99,7 @@ describe('getProfileAppStateDefaults', () => {
       const appStateWithoutHideChart = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults('none'),
-        dataView: emptyDataView,
+        dataSource: emptyDataViewSource,
       }).getPreFetchState();
 
       expect(appStateWithoutHideChart).toBeUndefined();
@@ -91,7 +109,7 @@ describe('getProfileAppStateDefaults', () => {
       let appState = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults(['hideTable']),
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataViewSource,
       }).getPreFetchState();
       expect(appState).toEqual({
         hideTable: false,
@@ -99,7 +117,7 @@ describe('getProfileAppStateDefaults', () => {
       appState = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults('none'),
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataViewSource,
       }).getPreFetchState();
       expect(appState).toEqual(undefined);
     });
@@ -110,10 +128,9 @@ describe('getProfileAppStateDefaults', () => {
       const appStateFromDataView = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults(['columns']),
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataViewSource,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
-        esqlQueryColumns: undefined,
       });
 
       expect(appStateFromDataView).toEqual({
@@ -130,16 +147,17 @@ describe('getProfileAppStateDefaults', () => {
         },
       });
 
+      const esqlSource = createMockEsqlSource([
+        { name: 'foo', type: 'string', source: 'esql-result' },
+        { name: 'bar', type: 'string', source: 'esql-result' },
+      ]);
       const appStateFromEsqlColumns = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults(['columns']),
-        dataView: emptyDataView,
+        dataSource: esqlSource,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
-        esqlQueryColumns: [
-          { id: '1', name: 'foo', meta: { type: 'string' } },
-          { id: '2', name: 'bar', meta: { type: 'string' } },
-        ],
+        dataSource: esqlSource,
       });
       expect(appStateFromEsqlColumns).toEqual({
         columns: ['foo', 'bar'],
@@ -153,14 +171,25 @@ describe('getProfileAppStateDefaults', () => {
       });
     });
 
+    it('should not apply profile columns when ES|QL schema is empty', () => {
+      const appState = getProfileAppStateDefaults({
+        scopedProfilesManager,
+        profileAppStateDefaults: createProfileAppStateDefaults(['columns']),
+        dataSource: createMockEsqlSource([]),
+      }).getPostFetchState({
+        defaultColumns: ['bytes'],
+      });
+
+      expect(appState).toBeUndefined();
+    });
+
     it('should dedup configured default columns the profile already provides', () => {
       const appState = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults(['columns']),
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataViewSource,
       }).getPostFetchState({
         defaultColumns: ['bad_column', 'message', 'bytes'],
-        esqlQueryColumns: undefined,
       });
 
       // `message` is configured and also a profile default, so it appears once, in the profile's
@@ -184,10 +213,9 @@ describe('getProfileAppStateDefaults', () => {
       const appState = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults(['rowHeight']),
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataViewSource,
       }).getPostFetchState({
         defaultColumns: [],
-        esqlQueryColumns: undefined,
       });
       expect(appState).toEqual({
         rowHeight: 3,
@@ -211,10 +239,9 @@ describe('getProfileAppStateDefaults', () => {
       const appState = getProfileAppStateDefaults({
         scopedProfilesManager: scopedProfilesManagerWithSummary,
         profileAppStateDefaults: createProfileAppStateDefaults(['columns']),
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataViewSource,
       }).getPostFetchState({
         defaultColumns: [],
-        esqlQueryColumns: undefined,
       });
 
       expect(appState).toEqual({
@@ -233,10 +260,9 @@ describe('getProfileAppStateDefaults', () => {
       const appState = getProfileAppStateDefaults({
         scopedProfilesManager,
         profileAppStateDefaults: createProfileAppStateDefaults('none'),
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataViewSource,
       }).getPostFetchState({
         defaultColumns: [],
-        esqlQueryColumns: undefined,
       });
       expect(appState).toBeUndefined();
     });

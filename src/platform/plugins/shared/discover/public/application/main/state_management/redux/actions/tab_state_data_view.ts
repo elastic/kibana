@@ -15,6 +15,8 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
+import { DataViewSource, isSameDataset } from '@kbn/data-source';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -43,14 +45,30 @@ export const setDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > =
   ({ tabId, dataView }) =>
-  (dispatch, _, { runtimeStateManager }) => {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+  (dispatch, _, { runtimeStateManager, services }) => {
+    const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
+    const currentSource = currentDataSource$.getValue();
+    const nextSource =
+      services.dataSourceService.fromDataView(dataView) ??
+      (dataView.type !== ESQL_TYPE ? new DataViewSource(dataView) : undefined);
 
-    if (dataView.id !== currentDataView$.getValue()?.id) {
+    if (!isSameDataset(currentSource, nextSource)) {
       dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
     currentDataView$.next(dataView);
+
+    const existingSource = currentDataSource$.getValue();
+    if (existingSource?.kind === 'index-pattern' && existingSource.getDataView() === dataView) {
+      return;
+    }
+
+    if (nextSource) {
+      currentDataSource$.next(nextSource);
+    }
   };
 
 /**

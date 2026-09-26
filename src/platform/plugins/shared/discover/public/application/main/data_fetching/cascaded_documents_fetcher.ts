@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BehaviorSubject } from 'rxjs';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
@@ -15,10 +16,11 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
+import type { DataSource, EsqlSource } from '@kbn/data-source';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
+import { columnsToColumnsMeta } from '../../../utils/columns_to_columns_meta';
 
 export interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
   nodeId: string;
@@ -41,7 +43,8 @@ export class CascadedDocumentsFetcher {
   constructor(
     private readonly services: DiscoverServices,
     private readonly scopedProfilesManager: ScopedProfilesManager,
-    private readonly stateManager: CascadedDocumentsStateManager
+    private readonly stateManager: CascadedDocumentsStateManager,
+    private readonly currentDataSource$: BehaviorSubject<DataSource | undefined>
   ) {}
 
   getRequestAdapter(): RequestAdapter {
@@ -89,10 +92,16 @@ export class CascadedDocumentsFetcher {
         return [];
       }
 
-      const { esqlQueryColumns, records: fetchedRecords } = await fetchEsql({
+      const currentEsqlSource = this.currentDataSource$.getValue();
+
+      if (currentEsqlSource?.kind !== 'esql') {
+        return [];
+      }
+
+      const { records: fetchedRecords } = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
-        dataView,
+        timeFieldName: (currentEsqlSource as EsqlSource).timeFieldName,
         data: this.services.data,
         expressions: this.services.expressions,
         abortSignal: abortController.signal,
@@ -114,7 +123,7 @@ export class CascadedDocumentsFetcher {
       records = fetchedRecords;
       this.stateManager.setCascadedDocuments(nodeId, records);
 
-      const columnsMeta = esqlQueryColumns ? getTextBasedColumnsMeta(esqlQueryColumns) : {};
+      const columnsMeta = columnsToColumnsMeta((currentEsqlSource as EsqlSource).getColumns());
       const previousColumnsMeta = this.stateManager.getColumnsMeta();
       if (!isEqual(previousColumnsMeta, columnsMeta)) {
         this.stateManager.setColumnsMeta(columnsMeta);

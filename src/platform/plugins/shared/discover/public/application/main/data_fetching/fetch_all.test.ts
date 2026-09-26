@@ -8,6 +8,7 @@
  */
 
 import { FetchStatus } from '../../types';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import type { Subject } from 'rxjs';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
@@ -126,11 +127,13 @@ describe('test fetchAll', () => {
       {
         fetchStatus: FetchStatus.LOADING,
         query: { query: '', language: 'kuery' },
+        dataSource: expect.any(Object),
       },
       {
         fetchStatus: FetchStatus.COMPLETE,
         interceptedWarnings: [],
         result: documents,
+        dataSource: expect.any(Object),
         query: { query: '', language: 'kuery' },
       },
     ]);
@@ -252,10 +255,7 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockfetchEsql.mockResolvedValue({
-      records: documents,
-      esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
-    });
+    mockfetchEsql.mockResolvedValue({ records: documents });
     const query = { esql: 'from foo' };
     deps.internalState.dispatch(
       internalStateActions.updateAppState({
@@ -263,17 +263,26 @@ describe('test fetchAll', () => {
         appState: { query },
       })
     );
-    fetchAll(deps);
+    const mockEsqlSource = createMockEsqlSource();
+    fetchAll({
+      ...deps,
+      esqlTimeFieldName: '@timestamp',
+      esqlSource: mockEsqlSource,
+    });
     await waitForNextTick();
 
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, query },
+      {
+        fetchStatus: FetchStatus.LOADING,
+        query,
+        dataSource: expect.objectContaining({ id: 'mock-esql-source' }),
+      },
       {
         fetchStatus: FetchStatus.PARTIAL,
         interceptedWarnings: [],
         result: documents,
-        esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+        dataSource: expect.objectContaining({ id: 'mock-esql-source' }),
         query,
       },
     ]);

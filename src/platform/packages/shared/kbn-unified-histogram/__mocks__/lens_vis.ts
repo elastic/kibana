@@ -81,7 +81,10 @@ export const getLensVisMock = async ({
   table?: Datatable;
   externalVisContext?: UnifiedHistogramVisContext;
   getModifiedVisAttributes?: Parameters<LensVisService['update']>[0]['getModifiedVisAttributes'];
-  onLensSuggestionsApiCall?: (preferredChartType: ChartType | undefined) => void;
+  onLensSuggestionsApiCall?: (
+    preferredChartType: ChartType | undefined,
+    preferredVisAttributes: unknown
+  ) => void;
 }): Promise<{
   lensService: LensVisService;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -94,7 +97,8 @@ export const getLensVisMock = async ({
       ? (...params) => {
           const context = params[0];
           const preferredChartType = params[3];
-          onLensSuggestionsApiCall?.(preferredChartType);
+          const preferredVisAttributes = params[4];
+          onLensSuggestionsApiCall?.(preferredChartType, preferredVisAttributes);
           if ('query' in context && context.query === query) {
             return allSuggestions;
           }

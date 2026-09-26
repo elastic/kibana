@@ -35,7 +35,10 @@ export const getEsqlDatatableFromDocuments = ({
     };
   }
 
-  const esqlQueryColumns = documentsValue.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const esqlQueryColumns =
+    documentsValue.dataSource?.kind === 'esql'
+      ? [...documentsValue.dataSource.resultColumns]
+      : EMPTY_ESQL_COLUMNS;
   return {
     table: {
       type: 'datatable',

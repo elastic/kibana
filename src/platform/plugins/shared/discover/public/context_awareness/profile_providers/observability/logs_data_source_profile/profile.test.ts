@@ -10,6 +10,8 @@
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { EsqlSource } from '@kbn/data-source';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
@@ -23,6 +25,12 @@ import { RESOLUTION_MATCH } from './__mocks__/logs_data_source_resolution_match'
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 
 const mockServices = createProfileProviderSharedServicesMock();
+
+const makeDatatableColumn = (name: string, type: string): DatatableColumn => ({
+  id: name,
+  name,
+  meta: { type: type as DatatableColumn['meta']['type'] },
+});
 
 describe('logsDataSourceProfileProvider', () => {
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(mockServices);
@@ -154,6 +162,10 @@ describe('logsDataSourceProfileProvider', () => {
   });
 
   describe('getRowIndicator', () => {
+    beforeEach(() => {
+      EsqlSource.clearCache();
+    });
+
     it('should return the correct color for a given log level', () => {
       const row = buildDataTableRecord({ fields: { 'log.level': 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
@@ -194,6 +206,44 @@ describe('logsDataSourceProfileProvider', () => {
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithoutLogLevel,
+      });
+
+      expect(getRowIndicator).toBeUndefined();
+    });
+
+    it('should set the color indicator handler when the data source has a log level column', async () => {
+      const dataSource = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [makeDatatableColumn('log.level', 'string')],
+        timeFieldName: '@timestamp',
+      });
+      const getRowIndicatorProvider =
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        });
+      const getRowIndicator = getRowIndicatorProvider?.({
+        dataView: dataViewWithoutLogLevel,
+        dataSource,
+      });
+
+      expect(getRowIndicator).toBeDefined();
+    });
+
+    it('should not set the color indicator handler when the data source has no log level column', async () => {
+      const dataSource = await EsqlSource.create({
+        query: 'FROM logs-* | STATS count = COUNT(*)',
+        resultColumns: [makeDatatableColumn('count', 'number')],
+        timeFieldName: '@timestamp',
+      });
+      const getRowIndicatorProvider =
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        });
+      const getRowIndicator = getRowIndicatorProvider?.({
+        dataView: dataViewWithoutLogLevel,
+        dataSource,
       });
 
       expect(getRowIndicator).toBeUndefined();

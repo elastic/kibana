@@ -11,8 +11,10 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
+import { DataViewSource } from '@kbn/data-source';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
 import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
+import { getTracesBreakdownField } from './get_traces_breakdown_field';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
@@ -37,7 +39,8 @@ function TraceMetricsGrid({
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) {
-  const { query, dataView, columns, isESQLQuery } = fetchParams;
+  const { query, dataSource, columns, isESQLQuery } = fetchParams;
+  const dataView = dataSource instanceof DataViewSource ? dataSource.getDataView() : undefined;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
   });
@@ -61,8 +64,14 @@ function TraceMetricsGrid({
   }, [esqlQuery.metadataFields, filters]);
 
   const breakdownDataViewField = useMemo(
-    () => (breakdownField && dataView ? dataView.getFieldByName(breakdownField) : undefined),
-    [breakdownField, dataView]
+    () =>
+      getTracesBreakdownField({
+        breakdownField,
+        isESQLQuery,
+        columns,
+        dataView,
+      }),
+    [breakdownField, isESQLQuery, columns, dataView]
   );
 
   const handleBreakdownFieldChange = useCallback(
@@ -75,20 +84,20 @@ function TraceMetricsGrid({
   const toolbar = useMemo(
     () => ({
       toggleActions: renderToggleActions(),
-      leftSide: dataView ? (
+      leftSide: (
         <UnifiedBreakdownFieldSelector
-          dataView={dataView}
+          dataSource={dataSource}
           breakdown={{ field: breakdownDataViewField }}
           onBreakdownFieldChange={handleBreakdownFieldChange}
           esqlColumns={isESQLQuery ? columns : undefined}
           recommendedFields={TRACES_BREAKDOWN_RECOMMENDED_FIELDS}
           fieldsMetadata={services.fieldsMetadata}
         />
-      ) : undefined,
+      ),
     }),
     [
       renderToggleActions,
-      dataView,
+      dataSource,
       breakdownDataViewField,
       handleBreakdownFieldChange,
       columns,
@@ -97,7 +106,9 @@ function TraceMetricsGrid({
     ]
   );
 
-  const indexPattern = dataView?.getIndexPattern();
+  const indexPattern =
+    dataView?.getIndexPattern() ??
+    (esqlQuery.indices.length > 0 ? esqlQuery.indices.join(',') : undefined);
 
   if (!indexPattern) {
     return undefined;
@@ -122,7 +133,7 @@ function TraceMetricsGrid({
           discoverFetch$,
           actions,
           profileId,
-          breakdownField: breakdownDataViewField?.name,
+          breakdownField: breakdownDataViewField?.name ?? breakdownField,
         }}
       >
         <EuiPanel

@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import { InitialTabStateService } from '../plugin_imports/initial_tab_state_service';
+import { DataSourceService } from '@kbn/data-source';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -248,6 +249,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
         if (path.startsWith('/internal/esql/get_timefield')) {
           return Promise.resolve({ timeField: '@timestamp' });
         }
+        if (path.startsWith('/internal/esql/source_info')) {
+          return Promise.resolve({ columns: [] });
+        }
         return Promise.resolve('');
       }),
     },
@@ -291,6 +295,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     savedSearch: savedSearchPluginMock.createStartContract(),
     dataViews: dataPlugin.dataViews,
+    dataSourceService: new DataSourceService(dataPlugin.dataViews),
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {
       EmbeddableComponent: jest.fn(() => null),

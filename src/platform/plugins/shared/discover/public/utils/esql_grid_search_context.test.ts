@@ -11,6 +11,7 @@ import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDatatableFromTextBasedGrid } from './build_datatable_from_text_based_grid';
 import { getGridRequestId } from './get_grid_request_id';
 import { getEsqlDatatableFromDocuments } from './get_esql_datatable_from_documents';
@@ -73,7 +74,7 @@ describe('getEsqlDatatableFromDocuments', () => {
       documentsValue: {
         fetchStatus: FetchStatus.COMPLETE,
         result,
-        esqlQueryColumns: columns,
+        dataSource: createMockEsqlSource([], columns),
       },
     });
 

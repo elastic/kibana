@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DataViewSource } from '@kbn/data-source';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -15,85 +16,74 @@ import type { UnifiedHistogramFetchParamsExternal } from '../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ESQLVariableType } from '@kbn/esql-types';
 
+const processParams = async (params: UnifiedHistogramFetchParamsExternal) => {
+  const { fetchParams } = await processFetchParams({
+    params,
+    services: unifiedHistogramServicesMock,
+    initialBreakdownField: undefined,
+  });
+  return fetchParams;
+};
+
 describe('processFetchParams', () => {
+  const dataSource = new DataViewSource(dataViewWithTimefieldMock);
+
   const commonParams: UnifiedHistogramFetchParamsExternal = {
-    dataView: dataViewWithTimefieldMock,
+    dataSource,
     requestAdapter: undefined,
     searchSessionId: undefined,
   };
-
-  const services = unifiedHistogramServicesMock;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('assigns filters and esqlVariables to empty arrays if not provided', () => {
-    const result = processFetchParams({
-      params: commonParams,
-      services,
-      initialBreakdownField: undefined,
-    });
+  it('assigns filters and esqlVariables to empty arrays if not provided', async () => {
+    const result = await processParams(commonParams);
     expect(result.filters).toEqual([]);
     expect(result.esqlVariables).toEqual([]);
   });
 
-  it('assigns lastReloadRequestTime to current timestamp', () => {
+  it('assigns lastReloadRequestTime to current timestamp', async () => {
     const before = Date.now();
-    const result = processFetchParams({
-      params: commonParams,
-      services,
-      initialBreakdownField: undefined,
-    });
+    const result = await processParams(commonParams);
     const after = Date.now();
     expect(result.lastReloadRequestTime).toBeGreaterThanOrEqual(before);
     expect(result.lastReloadRequestTime).toBeLessThanOrEqual(after);
   });
 
-  it('assigns isTimeBased based on dataView', () => {
+  it('assigns isTimeBased based on dataSource', async () => {
+    expect((await processParams(commonParams)).isTimeBased).toBe(true);
     expect(
-      processFetchParams({
-        params: commonParams,
-        services,
-        initialBreakdownField: undefined,
-      }).isTimeBased
-    ).toBe(true);
-    expect(
-      processFetchParams({
-        params: {
+      (
+        await processParams({
           ...commonParams,
-          dataView: dataViewMock,
-        },
-        services,
-        initialBreakdownField: undefined,
-      }).isTimeBased
+          dataSource: new DataViewSource(dataViewMock),
+        })
+      ).isTimeBased
     ).toBe(false);
   });
 
-  it('assigns isESQLQuery based on query type', () => {
+  it('assigns isESQLQuery based on query type', async () => {
     expect(
-      processFetchParams({
-        params: {
+      (
+        await processParams({
           ...commonParams,
           query: { query: 'foo', language: 'kuery' },
-        },
-        services,
-        initialBreakdownField: undefined,
-      }).isESQLQuery
+        })
+      ).isESQLQuery
     ).toBe(false);
     expect(
-      processFetchParams({
-        params: {
+      (
+        await processParams({
           ...commonParams,
           query: { esql: 'from logs' },
-        },
-        services,
-        initialBreakdownField: undefined,
-      }).isESQLQuery
+        })
+      ).isESQLQuery
     ).toBe(true);
   });
 
-  it('assigns columnsMap from columns', () => {
+  it('assigns columnsMap from columns', async () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,
       columns: [
@@ -101,119 +91,91 @@ describe('processFetchParams', () => {
         { id: 'b', name: 'colB' },
       ] as any,
     };
-    const result = processFetchParams({
-      params,
-      services,
-      initialBreakdownField: undefined,
-    });
+    const result = await processParams(params);
     expect(result.columnsMap).toEqual({
       a: { id: 'a', name: 'colA' },
       b: { id: 'b', name: 'colB' },
     });
   });
 
-  it('assigns breakdown using initialBreakdownField if not in params', () => {
-    const result = processFetchParams({
+  it('assigns breakdown using initialBreakdownField if not in params', async () => {
+    const { fetchParams: result } = await processFetchParams({
       params: commonParams,
-      services,
+      services: unifiedHistogramServicesMock,
       initialBreakdownField: 'extension',
     });
     expect(result.breakdown?.field?.name).toEqual('extension');
   });
 
-  it('assigns breakdown using params.breakdownField if present', () => {
+  it('assigns breakdown using params.breakdownField if present', async () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,
       breakdownField: 'bytes',
     };
-    const result = processFetchParams({
+    const { fetchParams: result } = await processFetchParams({
       params,
-      services,
+      services: unifiedHistogramServicesMock,
       initialBreakdownField: 'extension',
     });
     expect(result.breakdown?.field?.name).toEqual('bytes');
   });
 
-  it('returns undefined breakdown if not time based', () => {
+  it('returns undefined breakdown if not time based', async () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,
-      dataView: dataViewMock,
+      dataSource: new DataViewSource(dataViewMock),
       breakdownField: 'extension',
     };
-    const result = processFetchParams({
-      params,
-      services,
-      initialBreakdownField: 'extension',
-    });
+    const result = await processParams(params);
     expect(result.breakdown).toBeUndefined();
   });
 
-  it('returns correct breakdown for ESQL query with matching column', () => {
+  it('returns correct breakdown for ESQL query with matching column', async () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,
       columns: [{ id: '1', name: 'foo' }] as any,
       query: { esql: 'from logs' },
       breakdownField: 'foo',
     };
-    const result = processFetchParams({
-      params,
-      services,
-      initialBreakdownField: undefined,
-    });
+    const result = await processParams(params);
     expect(result.breakdown?.field?.name).toBe('foo');
   });
 
-  it('returns undefined breakdown for ESQL query with transformational command', () => {
+  it('returns undefined breakdown for ESQL query with transformational command', async () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,
       columns: [{ id: '1', name: 'foo' }] as any,
       query: { esql: 'from logs | stats count(*)' },
       breakdownField: 'foo',
     };
-    const result = processFetchParams({
-      params,
-      services,
-      initialBreakdownField: undefined,
-    });
+    const result = await processParams(params);
     expect(result.breakdown).toBeUndefined();
   });
 
-  it('omits breakdownField from returned params', () => {
+  it('omits breakdownField from returned params', async () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,
       breakdownField: 'extension',
     };
-    const result = processFetchParams({
-      params,
-      services,
-      initialBreakdownField: undefined,
-    });
+    const result = await processParams(params);
     expect((result as any).breakdownField).toBeUndefined();
   });
 
-  it('assigns timeInterval to default if not provided', () => {
-    const result = processFetchParams({
-      params: commonParams,
-      services,
-      initialBreakdownField: undefined,
-    });
+  it('assigns timeInterval to default if not provided', async () => {
+    const result = await processParams(commonParams);
     expect(result.timeInterval).toBe('auto');
   });
 
-  it('assigns timeInterval from params if provided', () => {
+  it('assigns timeInterval from params if provided', async () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,
       timeInterval: '1h',
     };
-    const result = processFetchParams({
-      params,
-      services,
-      initialBreakdownField: undefined,
-    });
+    const result = await processParams(params);
     expect(result.timeInterval).toBe('1h');
   });
 
-  it('assigns other params correctly', () => {
+  it('assigns other params correctly', async () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,
       relativeTimeRange: { from: 'now-15m', to: 'now' },
@@ -233,11 +195,7 @@ describe('processFetchParams', () => {
       ],
       table: {} as any,
     };
-    const result = processFetchParams({
-      params,
-      services,
-      initialBreakdownField: undefined,
-    });
+    const result = await processParams(params);
     expect(result.timeRange).toEqual(params.timeRange);
     expect(result.relativeTimeRange).toEqual(params.relativeTimeRange);
     expect(result.query).toEqual(params.query);
@@ -248,6 +206,6 @@ describe('processFetchParams', () => {
     expect(result.abortController).toEqual(params.abortController);
     expect(result.esqlVariables).toEqual(params.esqlVariables);
     expect(result.table).toEqual(params.table);
-    expect(result.dataView).toEqual(params.dataView);
+    expect(result.dataSource).toBe(params.dataSource);
   });
 });

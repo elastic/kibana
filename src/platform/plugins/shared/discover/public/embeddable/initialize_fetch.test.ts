@@ -13,11 +13,20 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 
 import { discoverServiceMock } from '../__mocks__/services';
 import { initializeFetch } from './initialize_fetch';
 import { getMockedSearchApi } from './__mocks__/get_mocked_api';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../context_awareness';
+import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
+import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
+
+jest.mock('../application/main/data_fetching/fetch_esql');
+jest.mock('../application/main/data_fetching/resolve_esql_source');
+
+const mockFetchEsql = fetchEsql as jest.MockedFunction<typeof fetchEsql>;
+const mockResolveEsqlSource = resolveEsqlSource as jest.MockedFunction<typeof resolveEsqlSource>;
 
 describe('initialize fetch', () => {
   const searchSource = createSearchSourceMock({ index: dataViewMock });
@@ -154,5 +163,123 @@ describe('initialize fetch', () => {
     expect(signal).toBeDefined();
     cleanupFetch?.();
     expect(signal?.aborted).toBe(true);
+  });
+});
+
+const createMockEsqlSourceForFetch = (columnNames: string[]): EsqlSource => {
+  const columns = columnNames.map((name) => ({
+    name,
+    type: 'string' as const,
+    esType: 'keyword',
+    source: 'index' as const,
+  }));
+  const source = {
+    kind: 'esql' as const,
+    id: `esql-mock-${columnNames.join('-')}`,
+    query: 'FROM logs-*',
+    title: 'logs-*',
+    timeFieldName: '@timestamp',
+    getColumns: () => columns,
+    getColumn: (name: string) => columns.find((column) => column.name === name),
+  };
+  return source as unknown as EsqlSource;
+};
+
+describe('initialize fetch ES|QL', () => {
+  const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  const setup = () => {
+    const searchSource = createSearchSourceMock({
+      index: dataViewMock,
+      query: { esql: 'FROM logs-* | LIMIT 10' },
+    });
+    const savedSearch = {
+      id: 'esql-id',
+      title: 'esql saved search',
+      sort: [] as Array<[string, string]>,
+      searchSource,
+      viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+      managed: false,
+    };
+    const mocked = getMockedSearchApi({ searchSource, savedSearch });
+    const esqlSource$ = new BehaviorSubject<EsqlSource | undefined>(undefined);
+    const refreshTrigger$ = new BehaviorSubject<void>(undefined);
+
+    mockResolveEsqlSource.mockResolvedValue({
+      esqlSource: createMockEsqlSourceForFetch(['message']),
+      dataView: dataViewMock,
+    });
+    mockFetchEsql.mockResolvedValue({
+      records: [{ id: '1', raw: {}, flattened: {} }],
+      esqlColumns: [],
+      interceptedWarnings: [],
+      esqlHeaderWarning: undefined,
+      approximationApplied: false,
+    } as Awaited<ReturnType<typeof fetchEsql>>);
+
+    initializeFetch({
+      api: mocked.api,
+      stateManager: mocked.stateManager,
+      discoverServices: discoverServiceMock,
+      scopedProfilesManager: discoverServiceMock.profilesManager.createScopedProfilesManager({
+        scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      }),
+      refreshTrigger$,
+      ...mocked.setters,
+      setApproximationApplied: jest.fn(),
+      esqlSource$,
+    });
+
+    return { mocked, esqlSource$, refreshTrigger$, savedSearch, searchSource };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('resolves EsqlSource and publishes columnsMeta from LIMIT 0 columns', async () => {
+    const { mocked, esqlSource$ } = setup();
+    await waitOneTick();
+    await waitOneTick();
+
+    expect(mockResolveEsqlSource).toHaveBeenCalledTimes(1);
+    expect(mockFetchEsql).toHaveBeenCalledTimes(1);
+    expect(mocked.stateManager.columnsMeta.getValue()).toEqual({
+      message: { type: 'string', esType: 'keyword', isComputedColumn: false },
+    });
+    expect(
+      esqlSource$
+        .getValue()
+        ?.getColumns()
+        .map((column) => column.name)
+    ).toEqual(['message']);
+  });
+
+  it('does not re-resolve EsqlSource when the query identity is unchanged', async () => {
+    const { mocked, savedSearch } = setup();
+    await waitOneTick();
+    await waitOneTick();
+    expect(mockResolveEsqlSource).toHaveBeenCalledTimes(1);
+
+    mocked.api.savedSearch$.next(savedSearch);
+    await waitOneTick();
+    await waitOneTick();
+
+    expect(mockResolveEsqlSource).toHaveBeenCalledTimes(1);
+    expect(mockFetchEsql).toHaveBeenCalledTimes(2);
+  });
+
+  it('re-resolves EsqlSource when the time range changes', async () => {
+    const { mocked } = setup();
+    await waitOneTick();
+    await waitOneTick();
+    expect(mockResolveEsqlSource).toHaveBeenCalledTimes(1);
+
+    mocked.api.timeRange$.next({ from: 'now-1h', to: 'now' });
+    await waitOneTick();
+    await waitOneTick();
+
+    expect(mockResolveEsqlSource).toHaveBeenCalledTimes(2);
   });
 });

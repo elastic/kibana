@@ -1069,7 +1069,7 @@ describe('Unified data table cell rendering', () => {
     expect(fieldsCreateSpy).toHaveBeenCalledWith({
       aggregatable: false,
       esTypes: ['long'],
-      isComputedColumn: true,
+      isComputedColumn: false,
       isNull: false,
       name: 'var0',
       searchable: true,
@@ -1102,7 +1102,7 @@ describe('Unified data table cell rendering', () => {
     expect(fieldsCreateSpy).toHaveBeenCalledWith({
       aggregatable: false,
       esTypes: ['keyword'],
-      isComputedColumn: true,
+      isComputedColumn: false,
       isNull: false,
       name: 'bytes',
       searchable: true,

@@ -22,8 +22,7 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -45,7 +44,7 @@ export interface FetchEsqlParams {
   inputQuery?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  dataView: DataView;
+  timeFieldName?: string;
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
@@ -66,7 +65,7 @@ export function fetchEsql({
   inputQuery,
   filters,
   timeRange,
-  dataView,
+  timeFieldName,
   abortSignal,
   inspectorAdapters,
   data,
@@ -78,15 +77,17 @@ export function fetchEsql({
   esqlApproximation,
   inspectorConfig,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
-  const props = getTextBasedQueryStateToAstProps({
-    query,
-    inputQuery,
-    filters,
-    timeRange,
-    dataView,
-    data,
-    inspectorConfig,
-  });
+  const props = {
+    ...getTextBasedQueryStateToAstProps({
+      query,
+      inputQuery,
+      filters,
+      timeRange,
+      timeFieldName,
+      data,
+      inspectorConfig,
+    }),
+  };
   return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
       if (ast) {
@@ -105,7 +106,7 @@ export function fetchEsql({
         });
         const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
-        let esqlQueryColumns: Datatable['columns'] | undefined;
+        let finalColumns: DatatableColumn[] = [];
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
         let approximationApplied: boolean | undefined;
@@ -115,10 +116,10 @@ export function fetchEsql({
             error = response.error.message;
           } else {
             const table = response as Datatable;
+            finalColumns = table.columns ?? [];
             const rows = table?.rows ?? [];
             approximationApplied = table.meta?.approximationApplied;
             const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
-            esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
             let inlineHighlights: ESQLColumnsWithHighlights | undefined;
             if (isOfAggregateQueryType(query)) {
@@ -156,8 +157,8 @@ export function fetchEsql({
             }
             return {
               records: finalData || [],
+              esqlColumns: finalColumns,
               interceptedWarnings,
-              esqlQueryColumns,
               esqlHeaderWarning,
               approximationApplied,
             };
@@ -166,8 +167,8 @@ export function fetchEsql({
       }
       return {
         records: [],
+        esqlColumns: [],
         interceptedWarnings: [],
-        esqlQueryColumns: [],
         esqlHeaderWarning: undefined,
         approximationApplied: undefined,
       };
@@ -181,7 +182,7 @@ export function getTextBasedQueryStateToAstProps({
   inputQuery,
   filters,
   timeRange,
-  dataView,
+  timeFieldName,
   data,
   inspectorConfig,
 }: {
@@ -189,7 +190,7 @@ export function getTextBasedQueryStateToAstProps({
   inputQuery?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  dataView: DataView;
+  timeFieldName?: string;
   data: DataPublicPluginStart;
   inspectorConfig?: {
     title: string;
@@ -200,7 +201,7 @@ export function getTextBasedQueryStateToAstProps({
     filters,
     query,
     time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
-    timeFieldName: dataView.timeFieldName,
+    timeFieldName,
     inputQuery,
     titleForInspector:
       inspectorConfig?.title ??

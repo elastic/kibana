@@ -13,7 +13,7 @@ import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { getEsqlDataView } from '@kbn/discover-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
@@ -36,6 +36,7 @@ import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
+import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
 
 export interface InitializeSingleTabsParams {
   customizationService: ConnectedCustomizationService;
@@ -66,8 +67,10 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       extra: { services, runtimeStateManager, urlStateStorage, searchSessionManager },
     }
   ) {
-    const { currentDataView$, dataStateContainer$, customizationService$, scopedEbtManager$ } =
-      selectTabRuntimeState(runtimeStateManager, tabId);
+    const { dataStateContainer$, customizationService$, scopedEbtManager$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
 
     /**
      * New tab initialization with the restored data if available
@@ -184,14 +187,19 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      */
 
     let dataView: DataView;
+    let esqlSource: EsqlSource | undefined;
 
-    if (isOfAggregateQueryType(initialQuery) && !isEmptyEsqlQuery(initialQuery)) {
-      // Regardless of what was requested, we always use ad hoc data views for ES|QL
-      dataView = await getEsqlDataView(
-        initialQuery,
-        persistedTabDataView ?? currentDataView$.getValue(),
-        services
-      );
+    if (isOfAggregateQueryType(initialQuery) && initialQuery.esql.trim() !== '') {
+      const initialTimeRange =
+        urlGlobalState?.time ??
+        tabInitialGlobalState?.timeRange ??
+        services.data.query.timefilter.timefilter.getTime();
+      ({ esqlSource, dataView } = await resolveEsqlSource({
+        esql: initialQuery.esql,
+        services,
+        esqlVariables: esqlControls ? extractEsqlVariables(esqlControls) : undefined,
+        timeRange: initialTimeRange,
+      }));
     } else {
       // Load the requested data view if one exists, or a fallback otherwise.
       // For empty ES|QL, updateTabs stores the previous tab's view on
@@ -212,12 +220,12 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     dispatch(setDataView({ tabId, dataView }));
 
-    if (!dataView.isPersisted()) {
+    if (!isEsqlMode && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
     }
 
     const initialGlobalState: TabStateGlobalState = {
-      ...(persistedTab?.timeRestore && dataView.isTimeBased()
+      ...(persistedTab?.timeRestore && (esqlSource?.isTimeBased() ?? dataView.isTimeBased())
         ? pick(persistedTab, 'timeRange', 'refreshInterval')
         : undefined),
       ...tabInitialGlobalState,
