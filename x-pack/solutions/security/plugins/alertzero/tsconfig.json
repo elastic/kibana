@@ -9,6 +9,7 @@
     "@kbn/agentic-investigations-common",
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/datemath",
     "@kbn/logging",
     "@kbn/features-plugin",
     "@kbn/kibana-react-plugin",
@@ -32,6 +33,7 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-genai-utils",
     "@kbn/core-spaces-common",
     "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks",
@@ -51,12 +53,16 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/proposals-common",
     "@kbn/proposals-plugin",
+    "@kbn/security-mitre-attack-server",
+    "@kbn/security-mitre-attack-common",
+    "@kbn/inference-plugin",
+    "@kbn/management-settings-ids",
     "@kbn/context-engine-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/workflows-execution-engine",
     "@kbn/actions-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/ui-callout",
+    "@kbn/ui-callout"
   ]
 }

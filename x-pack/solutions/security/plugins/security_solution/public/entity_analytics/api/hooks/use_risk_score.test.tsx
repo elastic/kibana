@@ -204,4 +204,43 @@ describe.each([EntityType.host, EntityType.user])('useRiskScore entityType: %s',
       });
     });
   });
+
+  test('forwards executionContext to useSearchStrategy', () => {
+    mockRiskEngineStatus('ENABLED');
+    const executionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:explore-hosts_page',
+        id: 'hosts_risk_score',
+      },
+    };
+
+    renderHook(() => useRiskScore({ riskEntity, executionContext }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({ executionContext })
+    );
+  });
+
+  test('forwards executionContext to useRiskEngineStatus', () => {
+    mockRiskEngineStatus('ENABLED');
+    const executionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:explore-hosts_page',
+        id: 'hosts_risk_score',
+      },
+    };
+
+    renderHook(() => useRiskScore({ riskEntity, executionContext }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseRiskEngineStatus).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ executionContext })
+    );
+  });
 });

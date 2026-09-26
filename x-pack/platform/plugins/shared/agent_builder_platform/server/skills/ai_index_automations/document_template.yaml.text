@@ -180,7 +180,7 @@ steps:
             required:
               ["display_name", "summary", "topics", "answers_questions", "when_to_use", "access_patterns"]
 
-      # Built once so verify_ki and create_ki see exactly the same document.
+      # Built once, then handed to create_ki to verify and write.
       - name: assemble_ki
         type: data.set
         with:
@@ -238,33 +238,28 @@ steps:
               esql: "${{ steps.summarize_document.output.content.access_patterns | map: 'esql_example' | default: nil }}"
               topics: "${{ steps.summarize_document.output.content.topics }}"
 
-      - name: verify_ki
-        type: context-engine.verifyKi
+      # `ki_id` pairs the index with the source document id, so a re-run replaces that
+      # document's KI rather than appending a second copy, and two indices holding the same
+      # document id do not collide. On a data-stream destination a re-run appends a new revision
+      # instead.
+      - name: create_ki
+        type: context-engine.createKi
         with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "{{ consts.source_index }}-{{ steps.document_context.output.doc_id }}"
+          ki: "${{ steps.assemble_ki.output.ki }}"
           verifiers:
             - esql-valid-syntax
             - esql-valid-runtime
-          ki: "${{ steps.assemble_ki.output.ki }}"
 
       - name: check_verification
         type: if
-        condition: "steps.verify_ki.output.passed : true"
+        condition: "steps.create_ki.output.verification.passed : false"
         steps:
-          # `ki_id` pairs the index with the source document id, so a re-run replaces that
-          # document's KI on an index destination (a data stream appends a newer revision of it)
-          # rather than writing a second KI, and two indices holding the same document id do not
-          # collide.
-          - name: create_ki
-            type: context-engine.createKi
-            with:
-              ai_index_id: "{{ consts.ai_index_id }}"
-              ki_id: "{{ consts.source_index }}-{{ steps.document_context.output.doc_id }}"
-              ki: "${{ steps.assemble_ki.output.ki }}"
-        else:
           - name: log_verification_failure
             type: console
             with:
               message: |
                 KI verification failed for document
                 {{ steps.document_context.output.doc_id }}.
-                Results: {{ steps.verify_ki.output.results | json }}
+                Results: {{ steps.create_ki.output.verification.results | json }}

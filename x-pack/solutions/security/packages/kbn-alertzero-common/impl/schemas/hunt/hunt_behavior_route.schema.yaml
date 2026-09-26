@@ -1,0 +1,296 @@
+openapi: 3.0.0
+info:
+  title: Run AlertZero Hunt Tier 2 behavioral corroboration API endpoint
+  version: '1'
+paths:
+  /internal/alertzero/hunt/hunt_behavior:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: HuntBehavior
+      description: >-
+        Runs Tier 2's LLM-backed behavioral extraction against a threat report's
+        text. Requires the inference plugin (503 when absent) and a GenAI
+        connector (400 when none is configured).
+      summary: Run Tier 2 behavioral corroboration
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              additionalProperties: false
+              properties:
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 200000
+                report_id:
+                  type: string
+                  minLength: 1
+                  maxLength: 512
+                llm_confidence_threshold:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                iocs:
+                  type: array
+                  maxItems: 100
+                  items:
+                    $ref: '#/components/schemas/HuntBehaviorIoc'
+                article_context:
+                  $ref: '#/components/schemas/HuntBehaviorArticleContext'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, behaviors, indexed_behaviors, next_step, has_hit]
+                properties:
+                  status:
+                    $ref: '#/components/schemas/HuntBehaviorStatus'
+                  report_id:
+                    type: string
+                  behaviors:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - technique_id
+                        - evidence_quote
+                        - llm_confidence
+                        - confidence
+                        - technique_name
+                        - reference
+                        - tactic_ids
+                        - proposed_esql_rule
+                        - rule_name
+                        - severity
+                        - risk_score
+                      properties:
+                        technique_id:
+                          type: string
+                        evidence_quote:
+                          type: string
+                        llm_confidence:
+                          type: number
+                        confidence:
+                          type: number
+                        technique_name:
+                          type: string
+                        reference:
+                          type: string
+                        tactic_ids:
+                          type: array
+                          items:
+                            type: string
+                        parent_technique_id:
+                          type: string
+                        proposed_esql_rule:
+                          type: string
+                        rule_name:
+                          type: string
+                        severity:
+                          type: string
+                          enum: [critical, high, medium, low]
+                        risk_score:
+                          type: number
+                        execution:
+                          type: object
+                          required: [executed, row_count, hit]
+                          properties:
+                            executed:
+                              type: boolean
+                              description: >-
+                                True when dry-run passed and an execute call
+                                was attempted.
+                            row_count:
+                              type: integer
+                              minimum: 0
+                              description: >-
+                                Rows remaining after the required-index filter.
+                            hit:
+                              type: boolean
+                              description: >-
+                                True when at least one required-index row was
+                                returned.
+                            inconclusive_reason:
+                              $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteReason'
+                              description: >-
+                                Why this behavior's result is not a reliable
+                                statement about the environment. Absent means it
+                                is: with `executed: true` the query ran and its
+                                rows were classified, and with `executed: false`
+                                execution was never requested. Present means
+                                `hit: false` records that nothing was learned,
+                                not that nothing is there.
+                        affected_hosts:
+                          type: array
+                          description: >-
+                            Distinct host.name values from required-index rows,
+                            capped at 20.
+                          items:
+                            type: string
+                        affected_users:
+                          type: array
+                          description: >-
+                            Distinct user.name values from required-index rows,
+                            capped at 20.
+                          items:
+                            type: string
+                        affected_hosts_truncated:
+                          type: boolean
+                          description: >-
+                            True when more than 20 distinct hosts were seen.
+                        affected_users_truncated:
+                          type: boolean
+                          description: >-
+                            True when more than 20 distinct users were seen.
+                        hits:
+                          type: array
+                          maxItems: 50
+                          description: >-
+                            Required-index execute rows as Discover refs
+                            (`id` + `index` + optional `timestamp`). Empty when
+                            METADATA `_id`/`_index` were not projected (e.g.
+                            aggregating pipelines). Same shape as Tier 1
+                            `hits[]`. Consumed by the SSE mapper into
+                            `events[]` / `alerts[]`.
+                          items:
+                            $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatHit'
+                  indexed_behaviors:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - technique_id
+                        - description
+                        - llm_confidence
+                        - confidence
+                      properties:
+                        id:
+                          type: string
+                        technique_id:
+                          type: string
+                        description:
+                          type: string
+                        telemetry_targets:
+                          type: array
+                          items:
+                            type: string
+                        llm_confidence:
+                          type: number
+                        confidence:
+                          type: number
+                  incomplete:
+                    type: array
+                    description: >-
+                      Every technique Tier 2 was asked about but could not corroborate,
+                      each with why: an id absent from the ATT&CK catalog, a quote that
+                      is not in the report, a query that could not be generated,
+                      published or executed, or a technique the per-run generation
+                      budget never reached. Absent or empty means nothing went wrong
+                      that Tier 2 could name — not that the environment was searched:
+                      a proposed behavior whose query was never executed queried
+                      nothing, and that is reported per behavior in `execution`, not
+                      here. A caller reading a run with no hits as a statement about
+                      the environment has to check both: no entries here, and
+                      `execution.executed` true on at least one behavior.
+                    items:
+                      $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteness'
+                  message:
+                    type: string
+                  next_step:
+                    type: string
+                  has_hit:
+                    type: boolean
+                    description: >-
+                      True when any behavior's execute path found at least one
+                      row in a required index. Independent of Tier 1.
+        '400':
+          description: No GenAI connector configured
+        '503':
+          description: The inference plugin is not available in this deployment
+components:
+  schemas:
+    HuntBehaviorStatus:
+      type: string
+      enum: [no_behaviors_found, no_behaviors_validated, behaviors_proposed]
+
+    HuntBehaviorIoc:
+      type: object
+      required: [type, value]
+      properties:
+        type:
+          type: string
+          minLength: 1
+          maxLength: 64
+        value:
+          type: string
+          minLength: 1
+          maxLength: 2048
+
+    HuntBehaviorArticleContext:
+      type: object
+      description: >-
+        Tier 1 context steering. Best-effort hints from Tier 1's environment hit
+        surface; missing or empty falls back to text-only extraction.
+      properties:
+        matched_indices:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+            maxLength: 512
+        affected_hosts:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+            maxLength: 512
+        affected_users:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+            maxLength: 512
+        sample_events:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+            maxLength: 2048
+        time_range:
+          type: object
+          required: [from, to]
+          properties:
+            from:
+              type: string
+              minLength: 1
+              maxLength: 64
+            to:
+              type: string
+              minLength: 1
+              maxLength: 64
+        proposed_atomic_rules:
+          type: array
+          maxItems: 50
+          items:
+            type: object
+            required: [rule_name, ioc_type, ioc_value]
+            properties:
+              rule_name:
+                type: string
+                maxLength: 512
+              ioc_type:
+                type: string
+                maxLength: 64
+              ioc_value:
+                type: string
+                maxLength: 2048

@@ -153,8 +153,8 @@ describe('aiIndexAutomationsSkill', () => {
       // it, and the `consts` block that is the whole of the adaptation.
       expect(reference.content).toContain('consts:');
       expect(reference.content).toContain('ai_index_id');
-      expect(reference.content).toContain('context-engine.verifyKi');
       expect(reference.content).toContain('context-engine.createKi');
+      expect(reference.content).toContain('verifiers:');
       expect(reference.content).toContain('esql-valid-runtime');
     }
   });
