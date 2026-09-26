@@ -83,7 +83,7 @@ describe('ThemeService', () => {
 
       it('reflects the color mode on the root background', async () => {
         themeService.setup({ injectedMetadata });
-        expect(document.documentElement.style.backgroundColor).toEqual('rgb(246, 249, 252)'); // borealis light page background
+        expect(document.documentElement.style.backgroundColor).toEqual('rgb(236, 241, 249)'); // borealis light page background
       });
 
       it('does not call onSystemThemeChange', async () => {
