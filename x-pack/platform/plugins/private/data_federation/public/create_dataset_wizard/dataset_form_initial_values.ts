@@ -53,6 +53,8 @@ export const emptyDatasetFormValues = (): CreateDatasetFormValues => ({
   settings: emptyCreateDatasetSettingsFormValues(),
   ui: {
     formatWasAutoDetected: false,
+    additionalCommonSettingsIsOpen: true,
+    additionalAdvancedSettingsIsOpen: false,
   },
   mappings: {
     ...emptyMappingEditorValue,
@@ -129,6 +131,8 @@ export const dataSetToFormValues = (data: DataSetWithName): CreateDatasetFormVal
   settings: settingsToFormValues(data.settings),
   ui: {
     formatWasAutoDetected: false,
+    additionalCommonSettingsIsOpen: true,
+    additionalAdvancedSettingsIsOpen: false,
   },
   mappings: mappingsToEditorValue(data.mappings),
 });

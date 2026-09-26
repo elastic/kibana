@@ -42,7 +42,11 @@ const renderSettings = () => {
         data_source: '',
         resource: '',
         settings: emptyCreateDatasetSettingsFormValues(),
-        ui: { formatWasAutoDetected: false },
+        ui: {
+          formatWasAutoDetected: false,
+          additionalCommonSettingsIsOpen: true,
+          additionalAdvancedSettingsIsOpen: false,
+        },
       },
     });
 
@@ -276,7 +280,11 @@ const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
         data_source: '',
         resource: '',
         settings: { ...emptyCreateDatasetSettingsFormValues(), format },
-        ui: { formatWasAutoDetected: false },
+        ui: {
+          formatWasAutoDetected: false,
+          additionalCommonSettingsIsOpen: true,
+          additionalAdvancedSettingsIsOpen: false,
+        },
       },
     });
 
@@ -465,7 +473,11 @@ describe('CreateDatasetAdditionalSettings', () => {
           data_source: '',
           resource: '',
           settings: emptyCreateDatasetSettingsFormValues(),
-          ui: { formatWasAutoDetected: false },
+          ui: {
+            formatWasAutoDetected: false,
+            additionalCommonSettingsIsOpen: true,
+            additionalAdvancedSettingsIsOpen: false,
+          },
         },
       });
 

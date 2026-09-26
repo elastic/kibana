@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -200,6 +200,52 @@ describe('CreateDatasetWizardPage', () => {
       expect(loadDataSets).toHaveBeenCalledTimes(1);
       expect(history.location.pathname).toBe(DATASETS_PATH);
     });
+  });
+
+  it('persists common/advanced accordion show/hide state across wizard navigation', async () => {
+    const { getByTestId, findByTestId } = renderWizard();
+
+    // Complete required dataset step fields so we can reach Additional settings
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), {
+      target: { value: 'logs-dataset' },
+    });
+    fireEvent.change(getByTestId('createDatasetResource'), {
+      target: { value: 's3://bucket/*' },
+    });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    const commonAccordion = getByTestId('createDatasetWizardCommonSettings');
+    const advancedAccordion = getByTestId('createDatasetWizardAdvancedSettings');
+
+    // Defaults: common open, advanced closed
+    expect(commonAccordion).toHaveClass('euiAccordion-isOpen');
+    expect(advancedAccordion).not.toHaveClass('euiAccordion-isOpen');
+
+    // Toggle to: common closed, advanced open
+    fireEvent.click(within(commonAccordion).getByRole('button', { expanded: true }));
+    fireEvent.click(within(advancedAccordion).getByRole('button', { expanded: false }));
+
+    expect(commonAccordion).not.toHaveClass('euiAccordion-isOpen');
+    expect(advancedAccordion).toHaveClass('euiAccordion-isOpen');
+
+    // Navigate away and back
+    await clickBack(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    // State should persist
+    expect(getByTestId('createDatasetWizardCommonSettings')).not.toHaveClass('euiAccordion-isOpen');
+    expect(getByTestId('createDatasetWizardAdvancedSettings')).toHaveClass('euiAccordion-isOpen');
   });
 
   it('auto-selects format from resource extension', async () => {

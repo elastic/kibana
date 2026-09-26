@@ -19,6 +19,11 @@ describe('dataset_form_initial_values', () => {
     expect(values.description).toBe('');
     expect(values.data_source).toBe('');
     expect(values.resource).toBe('');
+    expect(values.ui).toEqual({
+      formatWasAutoDetected: false,
+      additionalCommonSettingsIsOpen: true,
+      additionalAdvancedSettingsIsOpen: false,
+    });
     expect(values.settings.format).toBe('');
     expect(values.settings.error_mode).toBe('');
     expect(values.settings.partition_detection).toBe('');

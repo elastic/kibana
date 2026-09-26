@@ -147,6 +147,17 @@ export function CreateDatasetAdditionalSettings({
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
+  const { field: commonAccordionField } = useController({
+    name: 'ui.additionalCommonSettingsIsOpen',
+    control,
+  });
+  const { field: advancedAccordionField } = useController({
+    name: 'ui.additionalAdvancedSettingsIsOpen',
+    control,
+  });
+  const commonAccordionIsOpen = Boolean(commonAccordionField.value);
+  const advancedAccordionIsOpen = Boolean(advancedAccordionField.value);
+
   const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
   const FormatCommonSettingsComponent = format
     ? FORMAT_COMMON_SETTING_COMPONENTS[format]
@@ -172,7 +183,9 @@ export function CreateDatasetAdditionalSettings({
               <h4>{createDatasetWizardStrings.commonSettingsSectionTitle}</h4>
             </EuiTitle>
           }
-          initialIsOpen={true}
+          initialIsOpen={commonAccordionIsOpen}
+          forceState={commonAccordionIsOpen ? 'open' : 'closed'}
+          onToggle={(nextIsOpen) => commonAccordionField.onChange(nextIsOpen)}
           paddingSize="m"
         >
           <SharedCommonSettings control={control} />
@@ -205,7 +218,9 @@ export function CreateDatasetAdditionalSettings({
               <h4>{createDatasetWizardStrings.advancedSettingsSectionTitle}</h4>
             </EuiTitle>
           }
-          initialIsOpen={false}
+          initialIsOpen={advancedAccordionIsOpen}
+          forceState={advancedAccordionIsOpen ? 'open' : 'closed'}
+          onToggle={(nextIsOpen) => advancedAccordionField.onChange(nextIsOpen)}
           paddingSize="m"
         >
           {FormatAdvancedSettingsComponent ? (

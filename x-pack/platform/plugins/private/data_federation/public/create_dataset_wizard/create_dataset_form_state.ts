@@ -70,6 +70,8 @@ export interface CreateDatasetFormValues {
   /** UI-only state (never sent to the API). */
   ui: {
     formatWasAutoDetected: boolean;
+    additionalCommonSettingsIsOpen: boolean;
+    additionalAdvancedSettingsIsOpen: boolean;
   };
   mappings: MappingEditorValue;
 }
