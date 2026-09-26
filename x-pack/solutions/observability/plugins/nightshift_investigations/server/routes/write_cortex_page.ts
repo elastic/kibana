@@ -46,7 +46,10 @@ export const createCortexPageRoute = createNightshiftInvestigationsServerRoute({
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 
     const { entity_type: entityType, ...page } = params.body;
-    const created = await getCortexPageStore(request).create({ entityType, ...page });
+    const store = getCortexPageStore(request);
+    // Folds legacy non-canonical ids into the canonical page so the create-only write sees them.
+    await store.pruneDuplicates();
+    const created = await store.create({ entityType, ...page });
     if (!created) {
       throw conflict(`Cortex page ${toCortexKiId(entityType, page.slug)} already exists`);
     }
@@ -70,6 +73,9 @@ export const updateCortexPageRoute = createNightshiftInvestigationsServerRoute({
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 
     const { entity_type: entityType, ...page } = params.body;
-    return { page: await getCortexPageStore(request).upsert({ entityType, ...page }) };
+    const store = getCortexPageStore(request);
+    // A legacy page must be folded into its canonical id first, or the edit would fork it.
+    await store.pruneDuplicates();
+    return { page: await store.upsert({ entityType, ...page }) };
   },
 });

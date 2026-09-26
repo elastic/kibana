@@ -14,6 +14,7 @@ import type { CortexPage, GetCortexPageResponse } from './types';
 const cortexKeys = {
   availability: ['cortex', 'availability'] as const,
   pages: ['cortex', 'pages'] as const,
+  anyPage: ['cortex', 'page'] as const,
   page: (id: string) => ['cortex', 'page', id] as const,
 };
 
@@ -99,7 +100,11 @@ const useCortexMutation = <TVariables>(
     mutationFn: (variables) => write(client!, variables),
     onSuccess: ({ page }) => {
       queryClient.setQueryData(cortexKeys.page(page.id), { page });
-      return queryClient.invalidateQueries({ queryKey: cortexKeys.pages });
+      // A write can fold a legacy page id into the canonical one, so every cached page may be stale.
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: cortexKeys.pages }),
+        queryClient.invalidateQueries({ queryKey: cortexKeys.anyPage }),
+      ]);
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: errorTitle });
