@@ -44,6 +44,7 @@ import {
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
+import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -389,6 +390,17 @@ const ChartItem = React.memo(
       dimensions,
       metricItem.dimensionFields
     );
+
+    const exemplars = useFetchExemplars({
+      fetchParams,
+      services,
+      metricItem,
+      whereStatements,
+      originalSource: userSource,
+      profileId,
+    });
+    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
+    void exemplars;
 
     const esqlQuery = useMemo(() => {
       const fieldType = firstNonNullable(metricItem.fieldTypes);

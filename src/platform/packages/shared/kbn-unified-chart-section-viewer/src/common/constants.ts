@@ -84,6 +84,17 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
   [FEATURE_FLAGS.IS_HEATMAPS_ENABLED]: false,
 };
 
+// OTel exemplars live in a parallel `exemplars-*` stream with the same dataset and namespace.
+export const METRICS_INDEX_PREFIX = 'metrics-';
+export const EXEMPLARS_INDEX_PREFIX = 'exemplars-';
+// Only `exemplars-*.otel-*` has a backing template; any other derived name results in an error.
+export const EXEMPLARS_OTEL_DATASET_MARKER = '.otel';
+// Shared exemplar document fields (elasticsearch#159849).
+export const EXEMPLARS_METRIC_NAME_FIELD = 'metric_name';
+export const EXEMPLARS_VALUE_FIELD = 'value';
+// Temp cap, remove when fixing observability-dev#6205.
+export const EXEMPLARS_MAX_ROWS = 500;
+
 // Metrics grid sort options
 export const METRICS_SORT_BY = {
   alphabetically: 'alphabetically',
