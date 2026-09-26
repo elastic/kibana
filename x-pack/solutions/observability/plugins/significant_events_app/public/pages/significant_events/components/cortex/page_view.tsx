@@ -34,10 +34,11 @@ const contentWithoutDuplicateTitle = (title: string, content: string): string =>
 
 interface CortexPageViewProps {
   pageId: string;
+  canEdit: boolean;
   onArchived: () => void;
 }
 
-export function CortexPageView({ pageId, onArchived }: CortexPageViewProps) {
+export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewProps) {
   const { data, isLoading, isError } = useCortexPage(pageId);
   const page = data?.page;
   const [isEditing, setIsEditing] = useState(false);
@@ -85,20 +86,22 @@ export function CortexPageView({ pageId, onArchived }: CortexPageViewProps) {
             <h2>{page.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="pencil"
-            onClick={() => setIsEditing(true)}
-            data-test-subj="nightshiftCortexPageEdit"
-          >
-            <FormattedMessage
-              id="xpack.significantEventsApp.cortex.pageEditButton"
-              defaultMessage="Edit"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {page.status !== 'archived' && (
+        {canEdit && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              iconType="pencil"
+              onClick={() => setIsEditing(true)}
+              data-test-subj="nightshiftCortexPageEdit"
+            >
+              <FormattedMessage
+                id="xpack.significantEventsApp.cortex.pageEditButton"
+                defaultMessage="Edit"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {canEdit && page.status !== 'archived' && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"

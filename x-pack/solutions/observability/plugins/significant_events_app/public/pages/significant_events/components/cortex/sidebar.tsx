@@ -43,7 +43,8 @@ interface CortexSidebarProps {
   onStatusFilterChange: (value: CortexStatusFilter) => void;
   selection: CortexSidebarSelection;
   onSelect: (selection: CortexSidebarSelection) => void;
-  onCreatePage: () => void;
+  /** Omitted for users who cannot write Cortex pages. */
+  onCreatePage?: () => void;
 }
 
 const NEW_PAGE_LABEL = i18n.translate('xpack.significantEventsApp.cortex.newPageButtonLabel', {
@@ -120,17 +121,19 @@ export function CortexSidebar({
               data-test-subj="nightshiftCortexSearch"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={NEW_PAGE_LABEL} disableScreenReaderOutput>
-              <EuiButtonIcon
-                display="base"
-                iconType="plus"
-                onClick={onCreatePage}
-                aria-label={NEW_PAGE_LABEL}
-                data-test-subj="nightshiftCortexNewPage"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
+          {onCreatePage && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={NEW_PAGE_LABEL} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  display="base"
+                  iconType="plus"
+                  onClick={onCreatePage}
+                  aria-label={NEW_PAGE_LABEL}
+                  data-test-subj="nightshiftCortexNewPage"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

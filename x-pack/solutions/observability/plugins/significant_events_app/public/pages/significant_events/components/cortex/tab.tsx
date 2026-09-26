@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { CortexActivity } from './activity';
 import { CortexCreatePageModal } from './create_page_modal';
 import { CortexHome } from './home';
@@ -26,6 +27,15 @@ import type { CortexStatusFilter } from './types';
 
 export function CortexTab() {
   const { euiTheme } = useEuiTheme();
+  const {
+    core: {
+      application: {
+        capabilities: { agentBuilder },
+      },
+    },
+  } = useKibana();
+  // Cortex write routes require `agentBuilder:write`, which ships with this UI capability.
+  const canWrite = agentBuilder?.write === true;
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<CortexStatusFilter>('all');
   const [selection, setSelection] = useState<CortexSidebarSelection>({ kind: 'home' });
@@ -97,7 +107,7 @@ export function CortexTab() {
             onStatusFilterChange={setStatusFilter}
             selection={selection}
             onSelect={setSelection}
-            onCreatePage={() => setIsCreatingPage(true)}
+            onCreatePage={canWrite ? () => setIsCreatingPage(true) : undefined}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -137,6 +147,7 @@ export function CortexTab() {
               <CortexPageView
                 key={selection.id}
                 pageId={selection.id}
+                canEdit={canWrite}
                 onArchived={() => setSelection({ kind: 'home' })}
               />
             )}

@@ -33,7 +33,7 @@ const page: CortexPage = {
 
 const setup = ({ existing, enabled = true }: { existing?: CortexPage; enabled?: boolean } = {}) => {
   const store = {
-    get: jest.fn().mockResolvedValue(existing),
+    create: jest.fn().mockResolvedValue(existing ? undefined : page),
     upsert: jest.fn().mockResolvedValue(page),
   };
   const context = {
@@ -62,8 +62,7 @@ describe('createCortexPageRoute', () => {
   it('writes a new page', async () => {
     const { store, context } = setup();
     await expect(create(context)).resolves.toEqual({ page });
-    expect(store.get).toHaveBeenCalledWith('cortex_service_checkout');
-    expect(store.upsert).toHaveBeenCalledWith({
+    expect(store.create).toHaveBeenCalledWith({
       entityType: 'service',
       slug: 'checkout',
       title: 'Checkout',
@@ -74,10 +73,10 @@ describe('createCortexPageRoute', () => {
 });
 
 describe('updateCortexPageRoute', () => {
-  it('overwrites the page without an existence check', async () => {
+  it('overwrites the page without a create-only write', async () => {
     const { store, context } = setup({ existing: page });
     await expect(update(context)).resolves.toEqual({ page });
-    expect(store.get).not.toHaveBeenCalled();
+    expect(store.create).not.toHaveBeenCalled();
     expect(store.upsert).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'service' }));
   });
 });

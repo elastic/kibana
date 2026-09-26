@@ -36,21 +36,25 @@ interface CortexKiSource {
   };
 }
 
+interface CortexPageWrite {
+  entityType: CortexEntityType;
+  slug: string;
+  title: string;
+  description?: string;
+  content: string;
+  status: CortexPageStatus;
+  corroborations?: number;
+}
+
 export interface CortexPageStore {
   list: (options?: { status?: CortexPageStatus; entityType?: CortexEntityType }) => Promise<{
     pages: CortexPageSummary[];
     stats: CortexStats;
   }>;
   get: (id: string) => Promise<CortexPage | undefined>;
-  upsert: (page: {
-    entityType: CortexEntityType;
-    slug: string;
-    title: string;
-    description?: string;
-    content: string;
-    status: CortexPageStatus;
-    corroborations?: number;
-  }) => Promise<CortexPage>;
+  upsert: (page: CortexPageWrite) => Promise<CortexPage>;
+  /** Writes a new page atomically; resolves undefined when the page already exists. */
+  create: (page: CortexPageWrite) => Promise<CortexPage | undefined>;
   corroborate: (id: string) => Promise<CortexPage | undefined>;
   archive: (id: string) => Promise<CortexPage | undefined>;
   pruneDuplicates: () => Promise<number>;
@@ -97,6 +101,11 @@ export const slugFromCortexId = (id: string, entityType: CortexEntityType): stri
 
 export const canonicalCortexId = (entityType: CortexEntityType, idOrSlug: string): string =>
   toCortexKiId(entityType, slugFromCortexId(idOrSlug, entityType));
+
+const getStatusCode = (error: unknown): number | undefined =>
+  typeof error === 'object' && error !== null && 'statusCode' in error
+    ? (error as { statusCode?: number }).statusCode
+    : undefined;
 
 const isEntityType = (value: string | undefined): value is CortexEntityType =>
   value !== undefined && (CORTEX_ENTITY_TYPES as readonly string[]).includes(value);
@@ -274,15 +283,43 @@ export const createCortexPageStore = ({
       }
       return { id: toPageId(response._id), source: response._source };
     } catch (error) {
-      const statusCode =
-        typeof error === 'object' && error !== null && 'statusCode' in error
-          ? (error as { statusCode?: number }).statusCode
-          : undefined;
-      if (statusCode === 404) {
+      if (getStatusCode(error) === 404) {
         return undefined;
       }
       throw error;
     }
+  };
+
+  const buildDocument = (
+    { entityType, slug, title, description, content, status }: CortexPageWrite,
+    corroborations: number
+  ): { id: string; document: CortexKiSource } => {
+    const canonicalSlug = canonicalizeSlug(entityType, slug);
+    return {
+      id: toCortexKiId(entityType, canonicalSlug),
+      document: {
+        '@timestamp': new Date().toISOString(),
+        type: entityType,
+        title,
+        ...(description !== undefined ? { description } : {}),
+        content,
+        tags: [CORTEX_TAG, entityType],
+        attributes: {
+          status,
+          corroborations,
+          slug: canonicalSlug,
+          space_id: spaceId,
+        },
+      },
+    };
+  };
+
+  const toWrittenPage = (id: string, document: CortexKiSource): CortexPage => {
+    const page = toPage(id, document);
+    if (!page) {
+      throw new Error(`Failed to normalize Cortex page ${id}`);
+    }
+    return page;
   };
 
   return {
@@ -321,27 +358,13 @@ export const createCortexPageStore = ({
       return undefined;
     },
 
-    async upsert({ entityType, slug, title, description, content, status, corroborations }) {
-      const canonicalSlug = canonicalizeSlug(entityType, slug);
-      const id = toCortexKiId(entityType, canonicalSlug);
+    async upsert(page) {
+      const id = toCortexKiId(page.entityType, page.slug);
       const existing = await getSource(id);
-      const nextCorroborations =
-        corroborations ?? toCorroborations(existing?.source.attributes?.corroborations);
-      const now = new Date().toISOString();
-      const document: CortexKiSource = {
-        '@timestamp': now,
-        type: entityType,
-        title,
-        ...(description !== undefined ? { description } : {}),
-        content,
-        tags: [CORTEX_TAG, entityType],
-        attributes: {
-          status,
-          corroborations: nextCorroborations,
-          slug: canonicalSlug,
-          space_id: spaceId,
-        },
-      };
+      const { document } = buildDocument(
+        page,
+        page.corroborations ?? toCorroborations(existing?.source.attributes?.corroborations)
+      );
 
       await esClient.index(
         {
@@ -354,12 +377,30 @@ export const createCortexPageStore = ({
       );
 
       logger.debug(`Upserted Cortex page ${id}`);
+      return toWrittenPage(id, document);
+    },
 
-      const page = toPage(id, document);
-      if (!page) {
-        throw new Error(`Failed to normalize Cortex page ${id}`);
+    async create(page) {
+      const { id, document } = buildDocument(page, page.corroborations ?? 0);
+      try {
+        await esClient.create(
+          {
+            index: destValue,
+            id: toStoredId(id),
+            document,
+            refresh: 'wait_for',
+          },
+          { signal }
+        );
+      } catch (error) {
+        if (getStatusCode(error) === 409) {
+          return undefined;
+        }
+        throw error;
       }
-      return page;
+
+      logger.debug(`Created Cortex page ${id}`);
+      return toWrittenPage(id, document);
     },
 
     async corroborate(id) {

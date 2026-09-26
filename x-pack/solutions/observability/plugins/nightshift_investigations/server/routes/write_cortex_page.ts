@@ -46,12 +46,11 @@ export const createCortexPageRoute = createNightshiftInvestigationsServerRoute({
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 
     const { entity_type: entityType, ...page } = params.body;
-    const store = getCortexPageStore(request);
-    const id = toCortexKiId(entityType, page.slug);
-    if (await store.get(id)) {
-      throw conflict(`Cortex page ${id} already exists`);
+    const created = await getCortexPageStore(request).create({ entityType, ...page });
+    if (!created) {
+      throw conflict(`Cortex page ${toCortexKiId(entityType, page.slug)} already exists`);
     }
-    return { page: await store.upsert({ entityType, ...page }) };
+    return { page: created };
   },
 });
 
