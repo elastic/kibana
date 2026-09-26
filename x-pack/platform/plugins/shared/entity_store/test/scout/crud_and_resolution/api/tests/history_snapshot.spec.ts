@@ -15,12 +15,13 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   forceLogExtraction,
   normalizeKeywordList,
   setupLogsTestDataStream,
+  stopEntityTypes,
+  startEntityTypes,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 
@@ -28,7 +29,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -38,17 +39,10 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: { historySnapshot: { frequency: '24h' } },
-    });
-    expect(installResponse.statusCode).toBe(201);
+    await clearInstalledEntityStoreDocuments(esClient);
+    // Snapshot frequency is irrelevant here; this test uses FORCE_HISTORY_SNAPSHOT directly.
+    const startResponse = await startEntityTypes(apiClient, defaultHeaders, ['host']);
+    expect(startResponse.statusCode).toBe(200);
 
     await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
@@ -57,14 +51,12 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
-    await teardownLogsTestDataStream(esClient);
+    try {
+      const stopResponse = await stopEntityTypes(apiClient, defaultHeaders, ['host']);
+      expect(stopResponse.statusCode).toBe(200);
+    } finally {
+      await teardownLogsTestDataStream(esClient);
+    }
   });
 
   apiTest(

@@ -8,22 +8,41 @@
 import type { EsClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { API_VERSIONS, RESOLUTION_RULE_IDS } from '../../../../common';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
 
 import {
   ENTITY_STORE_ROUTES,
+  INTERNAL_HEADERS,
+  PUBLIC_HEADERS,
   HISTORY_INDEX_PATTERN,
   LATEST_ALIAS,
   LATEST_INDEX,
   UPDATES_INDEX,
   ENTRA_SOURCE_INDEX,
 } from './constants';
+import {
+  LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+  LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+} from '../../../../server/domain/saved_objects';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
+type KbnClientFixture = ApiWorkerFixtures['kbnClient'];
+type SamlAuthFixture = ApiWorkerFixtures['samlAuth'];
 type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
+
+const DEFAULT_LOG_EXTRACTION_CONFIG = {
+  docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+  maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+  maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+  additionalIndexPatterns: [] as string[],
+};
 /**
  * Normalizes values that may be stored as a single keyword or as keyword[] after
  * log extraction (e.g. `entity.relationships.*` bags).
@@ -56,7 +75,35 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
   await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
 
   await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
-  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream(
+    { name: QUERY_TRANSLATION_TEST_INDEX },
+    { ignore: [404] }
+  );
+};
+
+/**
+ * Clears installed entity documents while keeping indices and aliases intact.
+ * This is used by suites that install once and isolate test files via document wipes.
+ */
+export const clearInstalledEntityStoreDocuments = async (esClient: EsClient) => {
+  await esClient.deleteByQuery({
+    index: LATEST_ALIAS,
+    conflicts: 'proceed',
+    refresh: true,
+    query: { match_all: {} },
+    ignore_unavailable: true,
+  });
+
+  const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
+  const historyIndices = resolved.indices.map((i) => i.name);
+  if (historyIndices.length > 0) {
+    // History snapshots use timestamped concrete indices; deleting them entirely is
+    // simpler and safe because no stable write alias points to old snapshot indices.
+    await esClient.indices.delete(
+      { index: historyIndices, ignore_unavailable: true },
+      { ignore: [404] }
+    );
+  }
 };
 
 /**
@@ -117,9 +164,11 @@ export const setupLogsTestDataStream = async (esClient: EsClient) => {
 };
 
 export const teardownLogsTestDataStream = async (esClient: EsClient) => {
-  await esClient.indices
-    .deleteIndexTemplate({ name: 'entity-store-test-logs-override' })
-    .catch(() => {});
+  await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }, { ignore: [404] });
+  await esClient.indices.deleteIndexTemplate(
+    { name: 'entity-store-test-logs-override' },
+    { ignore: [404] }
+  );
 };
 
 /** Sets up a plain (non-logs-*) data stream for query translation tests with ECS field mappings. */
@@ -131,13 +180,138 @@ export const setupQueryTranslationTestDataStream = async (esClient: EsClient) =>
     composed_of: ['ecs@mappings'],
     priority: 500,
   });
-  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream(
+    { name: QUERY_TRANSLATION_TEST_INDEX },
+    { ignore: [404] }
+  );
 };
 
 export const teardownQueryTranslationTestDataStream = async (esClient: EsClient) => {
+  await esClient.indices.deleteDataStream(
+    { name: QUERY_TRANSLATION_TEST_INDEX },
+    { ignore: [404] }
+  );
   await esClient.indices
     .deleteIndexTemplate({ name: 'entity-store-query-translation-test' })
     .catch(() => {});
+};
+
+export const installEntityStoreSuite = async ({
+  apiClient,
+  samlAuth,
+}: {
+  apiClient: ApiClientFixture;
+  samlAuth: SamlAuthFixture;
+}) => {
+  const credentials = await samlAuth.asInteractiveUser('admin');
+  const defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
+  const internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
+
+  const installResponse = await installAllEntityTypes(apiClient, defaultHeaders);
+  expect([200, 201]).toContain(installResponse.statusCode);
+
+  // Always normalize mutable extraction config so each suite starts from the same baseline,
+  // including the already-installed (200) path that preserves previous settings.
+  await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
+
+  const enableEmailRuleResponse = await apiClient.put(
+    ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+    { headers: defaultHeaders, responseType: 'json' }
+  );
+  expect(enableEmailRuleResponse.statusCode).toBe(200);
+
+  const stopResponse = await stopAllEntityTypes(apiClient, defaultHeaders);
+  expect(stopResponse.statusCode).toBe(200);
+
+  const initMaintainersResponse = await apiClient.post(
+    ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+    {
+      headers: internalHeaders,
+      responseType: 'json',
+      body: {},
+    }
+  );
+  expect(initMaintainersResponse.statusCode).toBe(200);
+
+  const startAutomatedResolutionMaintainerResponse = await apiClient.post(
+    ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('automated-resolution'),
+    {
+      headers: internalHeaders,
+      responseType: 'json',
+      body: {},
+    }
+  );
+  expect(startAutomatedResolutionMaintainerResponse.statusCode).toBe(200);
+};
+
+export const uninstallEntityStoreSuite = async ({
+  apiClient,
+  esClient,
+  samlAuth,
+}: {
+  apiClient: ApiClientFixture;
+  esClient: EsClient;
+  samlAuth: SamlAuthFixture;
+}) => {
+  const credentials = await samlAuth.asInteractiveUser('admin');
+  const defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
+
+  const uninstallResponse = await uninstallAllEntityTypes(apiClient, defaultHeaders);
+  expect(uninstallResponse.statusCode).toBe(200);
+  await clearEntityStoreIndices(esClient);
+};
+
+export const updateLogExtractionConfig = async ({
+  apiClient,
+  headers,
+  logExtraction,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  logExtraction: Record<string, unknown>;
+}) => {
+  const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+    headers,
+    responseType: 'json',
+    body: { logExtraction },
+  });
+  expect(response.statusCode).toBe(200);
+  return response;
+};
+
+export const resetLogExtractionConfig = async ({
+  apiClient,
+  headers,
+  overrides = {},
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  overrides?: Record<string, unknown>;
+}) =>
+  await updateLogExtractionConfig({
+    apiClient,
+    headers,
+    logExtraction: { ...DEFAULT_LOG_EXTRACTION_CONFIG, ...overrides },
+  });
+
+export const uninstallEntityStoreSuiteWithKbnClient = async ({
+  esClient,
+  kbnClient,
+}: {
+  esClient: EsClient;
+  kbnClient: KbnClientFixture;
+}) => {
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: ENTITY_STORE_ROUTES.public.UNINSTALL,
+      headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+      body: {},
+      ignoreErrors: [404],
+    });
+  } finally {
+    await clearEntityStoreIndices(esClient);
+  }
 };
 
 export const searchDocById = async (esClient: EsClient, id: string) => {

@@ -7,14 +7,8 @@
 
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '@kbn/scout';
+import { ENTITY_STORE_TAGS } from '../../../common/fixtures/constants';
 import {
-  PUBLIC_HEADERS,
-  ENTITY_STORE_ROUTES,
-  ENTITY_STORE_TAGS,
-} from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import {
-  clearEntityStoreIndices,
   ingestDoc,
   QUERY_TRANSLATION_TEST_INDEX,
   setupQueryTranslationTestDataStream,
@@ -27,41 +21,14 @@ import {
 } from '../fixtures/user_ts_extraction_cases';
 
 apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
-  let defaultHeaders: Record<string, string>;
-
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, esClient, kbnClient }) => {
-    const credentials = await samlAuth.asInteractiveUser('admin');
-    defaultHeaders = {
-      ...credentials.cookieHeader,
-      ...PUBLIC_HEADERS,
-    };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    // Install first so the data stream exists; then load the archive.
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
-
+  apiTest.beforeAll(async ({ esArchiver, esClient }) => {
     await setupQueryTranslationTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
       'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/query_translation_source'
     );
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+  apiTest.afterAll(async ({ esClient }) => {
     await teardownQueryTranslationTestDataStream(esClient);
   });
 

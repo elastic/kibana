@@ -14,7 +14,6 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   ENTITY_CONFIDENCE,
   USER_ENTITY_NAMESPACE,
@@ -27,21 +26,22 @@ import {
   expectedUserEntities,
 } from '../../../common/fixtures/entity_extraction_expected';
 import {
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   forceLogExtraction,
   ingestDoc,
   normalizeKeywordList,
+  resetLogExtractionConfig,
   searchDocById,
   setupLogsTestDataStream,
   teardownLogsTestDataStream,
+  updateLogExtractionConfig,
 } from '../../../common/fixtures/helpers';
-import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../../server/domain/saved_objects';
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, kbnClient, esArchiver }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -51,11 +51,6 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    // enable feature flag
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
 
     // Pre-create the `security-solution-default` data view. In API-only test
     // environments the Security Solution sourcerer (which normally creates it
@@ -77,13 +72,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
     expect(dataViewResponse.statusCode).toBe(200);
 
-    // Install the entity store
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
+    await clearInstalledEntityStoreDocuments(esClient);
 
     await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
@@ -92,13 +81,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+    await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
     await teardownLogsTestDataStream(esClient);
   });
 
@@ -1147,12 +1130,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const TOTAL_DOCS = 6; // > MAX_LOGS_PER_PAGE so a second outer iteration is required
 
       // Shrink the log-slice window to force multiple outer loop iterations within one run.
-      const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      await updateLogExtractionConfig({
+        apiClient,
         headers: defaultHeaders,
-        responseType: 'json',
-        body: { logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE } },
+        logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE },
       });
-      expect(updateResponse.statusCode).toBe(200);
 
       try {
         // Ingest TOTAL_DOCS host documents all sharing @timestamp = fromDateISO.
@@ -1182,11 +1164,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         }
       } finally {
         // Restore default so subsequent tests are not affected.
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
-        });
+        await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
       }
     }
   );
