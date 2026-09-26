@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/storybook'
   - '@kbn/i18n-react'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod
