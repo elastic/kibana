@@ -121,15 +121,40 @@ export const datasetSchema = schema.object({
           { maxSize: 3 }
         )
       ),
-      max_field_size: schema.maybe(schema.number({ min: 0 })),
+      max_field_size: schema.maybe(
+        schema.number({
+          min: 0,
+          validate: (value) => {
+            if (Number.isInteger(value)) return;
+            return 'Must be an integer.';
+          },
+        })
+      ),
       multi_value_syntax: schema.maybe(
         schema.oneOf([schema.literal('none'), schema.literal('brackets')])
       ),
       region: optionalString,
-      schema_sample_size: schema.maybe(schema.number({ min: 1 })),
+      schema_sample_size: schema.maybe(
+        schema.number({
+          min: 1,
+          validate: (value) => {
+            if (Number.isInteger(value)) return;
+            return 'Must be an integer.';
+          },
+        })
+      ),
       segment_size: optionalString,
       split_probe_window: optionalString,
       target_split_size: optionalString,
+      max_split_probes: schema.maybe(
+        schema.number({
+          min: 0,
+          validate: (value) => {
+            if (Number.isInteger(value)) return;
+            return 'Must be an integer.';
+          },
+        })
+      ),
     })
   ),
 });

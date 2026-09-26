@@ -33,7 +33,6 @@ const allSettingsForFormat = (
   encoding: 'UTF-16',
   quote: "'",
   escape: '/',
-  comment: '#',
   column_prefix: 'field',
   trim_spaces: true,
   multi_value_syntax: 'brackets',

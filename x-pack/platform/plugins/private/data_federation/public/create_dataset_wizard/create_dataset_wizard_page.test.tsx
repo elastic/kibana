@@ -467,7 +467,16 @@ describe('CreateDatasetWizardPage', () => {
       description: '',
       settings: {
         format: 'csv',
+        // passthrough-only additional settings should be preserved unchanged on edit
+        target_split_size: '512mb',
+        split_probe_window: '64mb',
         max_split_probes: 17,
+        schema_sample_size: 100,
+        segment_size: '256mb',
+        comment: '#',
+        multi_value_syntax: 'brackets',
+        max_field_size: 2048,
+        region: 'us-east-1',
       },
     };
 
@@ -519,7 +528,17 @@ describe('CreateDatasetWizardPage', () => {
       expect(add).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'logs-dataset',
-          settings: expect.objectContaining({ max_split_probes: 17 }),
+          settings: expect.objectContaining({
+            target_split_size: '512mb',
+            split_probe_window: '64mb',
+            max_split_probes: 17,
+            schema_sample_size: 100,
+            segment_size: '256mb',
+            comment: '#',
+            multi_value_syntax: 'brackets',
+            max_field_size: 2048,
+            region: 'us-east-1',
+          }),
         })
       );
       expect(remove).not.toHaveBeenCalled();
