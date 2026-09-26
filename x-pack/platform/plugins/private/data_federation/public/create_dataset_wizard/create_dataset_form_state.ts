@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { MappingEditorValue } from '../components/mapping_editor';

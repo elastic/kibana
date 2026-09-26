@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import type {
   DataSetWithName,
   DatasetSettings,
   DatasetSettingsFile,
   DatasetMappings,
 } from '../../common/dataset_types';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { MappingEditorValue } from '../components/mapping_editor';
 import { emptyMappingEditorValue } from '../components/mapping_editor';
 import {

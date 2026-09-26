@@ -20,8 +20,8 @@ export const buildDatasetPayload = (values: CreateDatasetFormValues): DataSetWit
     Object.keys(unmanagedSettings).length > 0
       ? { ...appliedSettings, ...unmanagedSettings }
       : Object.keys(appliedSettings).length > 0
-        ? appliedSettings
-        : undefined;
+      ? appliedSettings
+      : undefined;
   const mappings = buildDatasetMappings(values.mappings);
 
   return {
