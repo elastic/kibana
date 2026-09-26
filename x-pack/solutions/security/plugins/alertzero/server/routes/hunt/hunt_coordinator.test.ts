@@ -28,6 +28,7 @@ const coordinatorResult: HuntCoordinatorResult = {
   report_id: 'report-1',
   run_id: 'run-1',
   technologies: ['aws_iam'],
+  index_patterns: ['logs-aws.cloudtrail-*'],
   tier1: {
     tier: 1,
     ...emptyHuntForThreatResult('no_environment_hits', [], [], { from: 'now-7d', to: 'now' }, ''),

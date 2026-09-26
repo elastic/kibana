@@ -93,6 +93,14 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .describe(
         'Technologies whose indices the hunt ran against. Empty when the scope was blocked.'
       ),
+    /**
+     * Index patterns the hunt ran against: the resolved required patterns. Populated whether the scope came from a pinned or environment-resolved technology or from discovered datasets; empty when the scope was blocked or resolution failed.
+     */
+    index_patterns: z
+      .array(z.string())
+      .describe(
+        'Index patterns the hunt ran against: the resolved required patterns. Populated whether the scope came from a pinned or environment-resolved technology or from discovered datasets; empty when the scope was blocked or resolution failed.'
+      ),
     tier1: HuntForThreatResult.merge(
       z.object({
         tier: z.number().int(),
