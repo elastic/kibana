@@ -6,10 +6,10 @@
  */
 
 // Re-export from common so the server and browser share a single implementation.
-export type { IamPolicyDocument } from '../../common/iam_policy_document';
+export type { IamPolicyDocument } from '../../common/providers/aws/iam_policy_document';
 export {
   ALL_INTEGRATIONS_SID,
   getIntegrationSid,
   buildIamPolicyDocument,
   formatIamPolicyDocument,
-} from '../../common/iam_policy_document';
+} from '../../common/providers/aws/iam_policy_document';

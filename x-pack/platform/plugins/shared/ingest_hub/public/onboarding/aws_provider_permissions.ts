@@ -6,11 +6,11 @@
  */
 
 // Re-export from common so the server and browser share a single implementation.
-export type { ProviderPermissions } from '../../common/aws_provider_permissions';
+export type { ProviderPermissions } from '../../common/providers/aws/aws_provider_permissions';
 export {
   AWS_METRICS_PACKAGE_ACTIONS,
   AWS_S3_INPUT_ACTIONS,
   AWS_CLOUDWATCH_INPUT_ACTIONS,
   AWS_S3_INVENTORY_METRICS_ACTIONS,
   AWS_SERVICE_PROVIDER_PERMISSIONS,
-} from '../../common/aws_provider_permissions';
+} from '../../common/providers/aws/aws_provider_permissions';

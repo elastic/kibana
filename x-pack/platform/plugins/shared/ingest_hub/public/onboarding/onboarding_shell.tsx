@@ -22,7 +22,10 @@ import {
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
+import {
+  AWS_ONBOARDING_TITLE,
+  AWS_ONBOARDING_DESCRIPTION,
+} from '../../common/providers/aws/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';

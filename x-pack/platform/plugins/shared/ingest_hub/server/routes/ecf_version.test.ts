@@ -7,8 +7,8 @@
 
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
-import { ECF_LATEST_VERSION_API_PATH } from '../../common/ecf_version_api';
-import { ECF_FALLBACK_TEMPLATE_VERSION } from '../../common/ecf_template_version';
+import { ECF_LATEST_VERSION_API_PATH } from '../../common/providers/aws/ecf_version_api';
+import { ECF_FALLBACK_TEMPLATE_VERSION } from '../../common/providers/aws/ecf_template_version';
 import { registerEcfVersionRoute } from './ecf_version';
 
 jest.mock('../services/ecf_version', () => ({

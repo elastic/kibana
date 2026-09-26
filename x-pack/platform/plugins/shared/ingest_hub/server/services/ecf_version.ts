@@ -11,8 +11,8 @@ import type { Logger } from '@kbn/core/server';
 import {
   ECF_FALLBACK_TEMPLATE_VERSION,
   parseEcfTemplateVersion,
-} from '../../common/ecf_template_version';
-import type { GetEcfLatestVersionResponse } from '../../common/ecf_version_api';
+} from '../../common/providers/aws/ecf_template_version';
+import type { GetEcfLatestVersionResponse } from '../../common/providers/aws/ecf_version_api';
 
 // Fetch the OTel template to resolve the version; all three ECF templates share the same
 // SemanticVersion value under `Metadata.AWS::ServerlessRepo::Application`.
