@@ -62,7 +62,11 @@ const completeOutput = {
     entities: { seen: 1 },
     events: { seen: 3, cap: 50, truncated: false },
   },
-  payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+  payload: {
+    verdict: 'inconclusive',
+    summary_markdown: 'A summary',
+    rationale_markdown: 'entity_store: hits; raw_events: hits',
+  },
   checks: [],
   claims: {},
 };
@@ -243,6 +247,15 @@ describe('sample FP/TP analysis workflow', () => {
     it('rejects an output without a payload', () => {
       const { payload, ...withoutPayload } = completeOutput;
       expect(validate(withoutPayload)).toBe(false);
+    });
+
+    it('rejects an output without rationale_markdown', () => {
+      expect(
+        validate({
+          ...completeOutput,
+          payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+        })
+      ).toBe(false);
     });
 
     it('rejects a summary longer than 8000 characters', () => {

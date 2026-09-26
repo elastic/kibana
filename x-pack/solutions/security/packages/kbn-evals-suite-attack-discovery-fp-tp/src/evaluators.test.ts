@@ -21,7 +21,11 @@ const completed: FpTpTaskOutput = {
   executionId: 'exec-1',
   executionStatus: ExecutionStatus.COMPLETED,
   outcome: 'false_positive',
-  payload: { verdict: 'false_positive', summary_markdown: 'A summary' },
+  payload: {
+    verdict: 'false_positive',
+    summary_markdown: 'A summary',
+    rationale_markdown: 'entity_store: hits; raw_events: hits\n- alert_linkage: supports',
+  },
   attackDiscoveryIdEcho: 'ad-1',
   seededIds: { attackDiscoveryId: 'ad-1', alertIds: [], entityIds: [], eventIds: [] },
   seededEvidence: { alerts: [], entities: [], events: [] },
@@ -110,7 +114,41 @@ describe('PayloadConformance', () => {
         payload: {
           verdict: 'inconclusive',
           summary_markdown: 'A summary',
-          rationale_markdown: 'x'.repeat(50001),
+          rationale_markdown: `entity_store: hits; raw_events: hits\n${'x'.repeat(50001)}`,
+        },
+      },
+    ],
+    [
+      'a missing rationale',
+      { payload: { verdict: 'inconclusive', summary_markdown: 'A summary' } },
+    ],
+    [
+      'an empty rationale',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: ' ',
+        },
+      },
+    ],
+    [
+      'a rationale missing the evidence-gate source-status line',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: '- alert_linkage: supports',
+        },
+      },
+    ],
+    [
+      'a rationale whose source-status line has an invalid status word',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: unknown; raw_events: hits',
         },
       },
     ],

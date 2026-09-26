@@ -47,3 +47,13 @@ export type FpTpOutcome = (typeof FP_TP_OUTCOMES)[number];
 export const SUMMARY_MARKDOWN_MAX_LENGTH = 8000;
 
 export const RATIONALE_MARKDOWN_MAX_LENGTH = 50000;
+
+/**
+ * The mandatory evidence-gate source-status line the prompt requires as the first line of
+ * `rationale_markdown`, e.g. "entity_store: hits; raw_events: empty". Anchored to match
+ * only that first line (checked with `.split('\\n')[0]`) so a close paraphrase (missing a
+ * status, wrong separator, extra prose on the same line) fails the check instead of passing
+ * on a lenient partial match.
+ */
+export const SOURCE_STATUS_LINE_PATTERN =
+  /^entity_store: (?:hits|empty|failed); raw_events: (?:hits|empty|failed)$/;
