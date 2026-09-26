@@ -34,23 +34,55 @@ interface SourceStatusGroups {
  * Cross-checks the source-status line's claimed status against what the run's own
  * coverage says it actually retrieved, so a rationale cannot claim `hits` for a source
  * whose query returned nothing (or claim `empty`/`failed` for a source that did return
- * hits). `PayloadConformance` previously validated only the line's syntax -- see the
+ * hits). It also distinguishes a genuine query failure (`coverage.*.failed`) from a
+ * successful zero-hit query: both produce `seen = 0`, but only the former may be
+ * claimed as `failed` in the line -- a claim of `failed` against a query that actually
+ * ran and legitimately found nothing is also a mismatch, and so is a claim of `empty`
+ * against a query that errored. `PayloadConformance` previously validated only the
+ * line's syntax and could not tell an outage from an empty source -- see the
  * `entity_store: hits` / zero-hits mismatch this closes.
  */
 const sourceStatusMismatches = (
   { entityStore, rawEvents }: SourceStatusGroups,
   coverage: FpTpCoverage | undefined
 ): string[] => {
-  const checks: ReadonlyArray<{ label: string; claimed: string; seen: number | undefined }> = [
-    { label: 'entity_store', claimed: entityStore, seen: coverage?.entities?.seen },
-    { label: 'raw_events', claimed: rawEvents, seen: coverage?.events?.seen },
+  const checks: ReadonlyArray<{
+    label: string;
+    claimed: string;
+    seen: number | undefined;
+    failed: boolean | undefined;
+  }> = [
+    {
+      label: 'entity_store',
+      claimed: entityStore,
+      seen: coverage?.entities?.seen,
+      failed: coverage?.entities?.failed,
+    },
+    {
+      label: 'raw_events',
+      claimed: rawEvents,
+      seen: coverage?.events?.seen,
+      failed: coverage?.events?.failed,
+    },
   ];
-  return checks.flatMap(({ label, claimed, seen }) => {
+  return checks.flatMap(({ label, claimed, seen, failed }) => {
     if (claimed === 'hits' && !seen) {
       return [`source-status line claims ${label} hits but coverage reports ${seen ?? 'no'} seen`];
     }
-    if ((claimed === 'empty' || claimed === 'failed') && seen) {
-      return [`source-status line claims ${label} ${claimed} but coverage reports ${seen} seen`];
+    if (claimed === 'empty') {
+      if (failed) {
+        return [`source-status line claims ${label} empty but the query actually failed`];
+      }
+      if (seen) {
+        return [`source-status line claims ${label} empty but coverage reports ${seen} seen`];
+      }
+    }
+    if (claimed === 'failed') {
+      if (!failed) {
+        return seen
+          ? [`source-status line claims ${label} failed but coverage reports ${seen} seen`]
+          : [`source-status line claims ${label} failed but the query did not fail (0 hits)`];
+      }
     }
     return [];
   });
