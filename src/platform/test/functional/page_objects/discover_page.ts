@@ -1244,8 +1244,7 @@ export class DiscoverPageObject extends FtrService {
   private resetRequestCount = -1;
 
   public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {
-    await this.retry.tryWithRetries(
-      `expect the request to match count ${requestCount}`,
+    await this.retry.try(
       async () => {
         if (requestCount === this.resetRequestCount) {
           await this.browser.execute(async () => {
@@ -1271,7 +1270,7 @@ export class DiscoverPageObject extends FtrService {
           expect(count).to.be(requestCount);
         }
       },
-      { retryCount: 5, retryDelay: 500 }
+      { description: `expect the request to match count ${requestCount}`, retryDelay: 500 }
     );
   }
 

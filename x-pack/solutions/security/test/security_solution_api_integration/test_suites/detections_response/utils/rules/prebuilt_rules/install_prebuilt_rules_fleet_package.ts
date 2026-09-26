@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { BulkInstallPackageInfo, BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
+import type {
+  BulkInstallPackageInfo,
+  BulkInstallPackagesResponse,
+  IBulkInstallPackageHTTPError,
+} from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { Client } from '@elastic/elasticsearch';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
@@ -13,9 +17,7 @@ import type SuperTest from 'supertest';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
 import { refreshSavedObjectIndices } from '../../refresh_index';
-
-const MAX_RETRIES = 2;
-const TOTAL_TIMEOUT = 6 * 60000; // 6 mins, applies to all attempts (1 + MAX_RETRIES)
+import { isTransientFleetStatus, retryFleetRequest } from './retry_fleet_request';
 
 /**
  * Installs the `security_detection_engine` package via fleet API. This will
@@ -40,66 +42,70 @@ export const installPrebuiltRulesFleetPackage = async ({
 }): Promise<InstallPackageResponse | BulkInstallPackagesResponse> => {
   if (version) {
     // Install a specific version
-    const response = await retryService.tryWithRetries<InstallPackageResponse>(
-      installPrebuiltRulesFleetPackage.name,
-      async () => {
-        const testResponse = await supertest
+    const { body } = await retryFleetRequest(
+      retryService,
+      () =>
+        supertest
           .post(epmRouteService.getInstallPath('security_detection_engine', version))
           .set('kbn-xsrf', 'true')
           .send({
             force: overrideExistingPackage,
-          })
-          .expect(200);
-        expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
-        expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
-
-        return testResponse.body;
-      },
-      {
-        retryCount: MAX_RETRIES,
-        timeout: TOTAL_TIMEOUT,
-      }
+          }),
+      { description: installPrebuiltRulesFleetPackage.name }
     );
+    const response = body as InstallPackageResponse;
+
+    expect(response.items).toBeDefined();
+    expect(response.items.length).toBeGreaterThan(0);
 
     await refreshSavedObjectIndices(es);
 
     return response;
   } else {
     // Install the latest version
-    const response = await retryService.tryWithRetries<BulkInstallPackagesResponse>(
-      installPrebuiltRulesFleetPackage.name,
-      async () => {
-        const testResponse = await supertest
+    const { body } = await retryFleetRequest(
+      retryService,
+      () =>
+        supertest
           .post(epmRouteService.getBulkInstallPath())
           .query({ prerelease: true })
           .set('kbn-xsrf', 'true')
           .send({
             packages: ['security_detection_engine'],
             force: overrideExistingPackage,
-          })
-          .expect(200);
-
-        const body = testResponse.body as BulkInstallPackagesResponse;
-
-        // First and only item in the response should be the security_detection_engine package
-        expect(body.items[0]).toBeDefined();
-        expect((body.items[0] as BulkInstallPackageInfo).result.assets).toBeDefined();
-        // Endpoint call should have installed at least 1 security-rule asset
-        expect((body.items[0] as BulkInstallPackageInfo).result.assets?.length).toBeGreaterThan(0);
-
-        return body;
-      },
+          }),
       {
-        retryCount: MAX_RETRIES,
-        timeout: TOTAL_TIMEOUT,
+        description: installPrebuiltRulesFleetPackage.name,
+        // Bulk install reports per-package failures within a 200 response
+        isTransient: ({ status, body: bulkBody }) =>
+          isTransientFleetStatus(status) ||
+          isTransientBulkInstallError(bulkBody as BulkInstallPackagesResponse),
+        isSuccess: ({ status, body: bulkBody }) =>
+          status === 200 && !hasBulkInstallError(bulkBody as BulkInstallPackagesResponse),
       }
     );
+    const response = body as BulkInstallPackagesResponse;
+
+    // First and only item in the response should be the security_detection_engine package
+    expect(response.items[0]).toBeDefined();
+    expect((response.items[0] as BulkInstallPackageInfo).result.assets).toBeDefined();
+    // Endpoint call should have installed at least 1 security-rule asset
+    expect((response.items[0] as BulkInstallPackageInfo).result.assets?.length).toBeGreaterThan(0);
 
     await refreshSavedObjectIndices(es);
 
     return response;
   }
 };
+
+const getBulkInstallErrors = ({ items = [] }: BulkInstallPackagesResponse) =>
+  items.filter((item): item is IBulkInstallPackageHTTPError => 'statusCode' in item);
+
+const hasBulkInstallError = (response: BulkInstallPackagesResponse): boolean =>
+  getBulkInstallErrors(response).length > 0;
+
+const isTransientBulkInstallError = (response: BulkInstallPackagesResponse): boolean =>
+  getBulkInstallErrors(response).some(({ statusCode }) => isTransientFleetStatus(statusCode));
 
 /**
  * Returns the `--xpack.securitySolution.prebuiltRulesPackageVersion=8.3.1` setting

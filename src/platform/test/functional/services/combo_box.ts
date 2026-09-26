@@ -31,29 +31,27 @@ export class ComboBoxService extends FtrService {
    * @param comboBoxSelector data-test-subj selector
    * @param value option text
    * @param options optional configuration
-   * @param options.maxRetries maximum number of retry attempts (default: 0)
+   * @param options.timeout optional timeout for retrying the selection
    */
 
   public async set(
     comboBoxSelector: string,
     value: string,
-    options: { retryCount?: number } = {}
+    options: { timeout?: number } = {}
   ): Promise<void> {
-    const { retryCount = 0 } = options;
-    this.log.debug(
-      `comboBox.set, comboBoxSelector: ${comboBoxSelector}, retryCount: ${retryCount}`
-    );
-    if (retryCount < 1) {
+    const { timeout } = options;
+    this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}, timeout: ${timeout}`);
+    if (timeout === undefined) {
       const comboBox = await this.testSubjects.find(comboBoxSelector);
       await this.setElement(comboBox, value);
     } else {
-      await this.retry.tryWithRetries(
-        `comboBox.set, comboBoxSelector: ${comboBoxSelector}`,
+      await this.retry.tryForTime(
+        timeout,
         async () => {
           const comboBox = await this.testSubjects.find(comboBoxSelector);
           await this.setElement(comboBox, value);
         },
-        { retryCount, retryDelay: 1000 }
+        { description: `comboBox.set, comboBoxSelector: ${comboBoxSelector}`, retryDelay: 1000 }
       );
     }
   }
@@ -350,8 +348,8 @@ export class ComboBoxService extends FtrService {
     this.log.debug('comboBox.closeOptionsList');
 
     // wait for potential other animations to finish (e.g. due to closing on selection)
-    const isOptionListClosed = await this.retry.tryWithRetries(
-      'wait for possible ongoing closing of the combobox listbox',
+    const isOptionListClosed = await this.retry.tryForTime(
+      5000,
       async () => {
         const isOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
           timeout: 50,
@@ -360,9 +358,8 @@ export class ComboBoxService extends FtrService {
         return !isOpen;
       },
       {
-        timeout: 5000,
+        description: 'wait for possible ongoing closing of the combobox listbox',
         initialDelay: 500,
-        retryCount: 3,
       }
     );
 

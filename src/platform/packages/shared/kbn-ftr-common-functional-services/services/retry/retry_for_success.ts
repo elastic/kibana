@@ -46,11 +46,10 @@ interface Options<T> {
   accept?: (v: T) => boolean;
   description?: string;
   retryDelay?: number;
-  retryCount?: number;
   initialDelay?: number;
 }
 
-export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
+export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>): Promise<T> {
   const {
     description,
     timeout,
@@ -59,8 +58,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     onFailureBlock,
     onFailure = defaultOnFailure(methodName),
     accept = returnTrue,
-    retryDelay = 502,
-    retryCount,
+    retryDelay = 100,
     initialDelay,
   } = options;
 
@@ -71,21 +69,9 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   const start = Date.now();
   const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];
   let lastError;
-  let attemptCounter = 0;
   const addText = (str: string | undefined) => (str ? ` waiting for '${str}'` : '');
-  const attemptMsg = (counter: number) => ` - Attempt #: ${counter}`;
 
   while (true) {
-    // Aborting if no retry attempts are left (opt-in)
-    if (retryCount && ++attemptCounter > retryCount) {
-      onFailure(
-        lastError,
-        // optionally extend error message with description
-        `reached the limit of attempts${addText(description)}: ${
-          attemptCounter - 1
-        } out of ${retryCount}`
-      );
-    }
     // Aborting if timeout is reached
     if (Date.now() - start > timeout) {
       onFailure(lastError, `reached timeout ${timeout} ms${addText(description)}`);
@@ -97,12 +83,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     // Run opt-in onFailureBlock before the next attempt
     if (lastError && onFailureBlock) {
       const before = await runAttempt(onFailureBlock);
-      if ('error' in before)
-        log.debug(
-          `--- onRetryBlock error: ${before.error.message}${
-            retryCount ? attemptMsg(attemptCounter) : ''
-          }`
-        );
+      if ('error' in before) log.debug(`--- onRetryBlock error: ${before.error.message}`);
     }
 
     const attempt = await runAttempt(block);
@@ -113,17 +94,8 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
 
     if ('error' in attempt) {
       if (lastError && lastError.message === attempt.error.message)
-        log.debug(
-          `--- ${methodName} failed again with the same message...${
-            retryCount ? attemptMsg(attemptCounter) : ''
-          }`
-        );
-      else
-        log.debug(
-          `--- ${methodName} error: ${attempt.error.message}${
-            retryCount ? attemptMsg(attemptCounter) : ''
-          }`
-        );
+        log.debug(`--- ${methodName} failed again with the same message...`);
+      else log.debug(`--- ${methodName} error: ${attempt.error.message}`);
 
       lastError = attempt.error;
     }

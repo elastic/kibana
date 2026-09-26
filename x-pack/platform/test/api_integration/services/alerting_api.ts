@@ -11,10 +11,9 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { type Client } from '@elastic/elasticsearch';
-import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
+import type { RetryOptions } from '@kbn/ftr-common-functional-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-const RETRY_COUNT = 10;
 const RETRY_DELAY = 1000;
 
 export function AlertingApiProvider({ getService }: FtrProviderContext) {
@@ -27,16 +26,15 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       indexName,
       docCountTarget,
       filters,
-      retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY },
+      retryOptions = { retryDelay: RETRY_DELAY },
     }: {
       esClient: Client;
       indexName: string;
       docCountTarget: number;
       filters?: QueryDslQueryContainer[];
-      retryOptions?: TryWithRetriesOptions;
+      retryOptions?: RetryOptions;
     }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-      return await retry.tryWithRetries(
-        `Alerting API - waitForDocumentInIndex, retryOptions: ${JSON.stringify(retryOptions)}`,
+      return await retry.try(
         async () => {
           const response = await esClient.search<T>({
             index: indexName,
@@ -61,7 +59,12 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
           logger.debug(`Returned document: ${JSON.stringify(response.hits.hits[0])}`);
           return response;
         },
-        retryOptions
+        {
+          ...retryOptions,
+          description: `Alerting API - waitForDocumentInIndex, retryOptions: ${JSON.stringify(
+            retryOptions
+          )}`,
+        }
       );
     },
   };
