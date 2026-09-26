@@ -3943,6 +3943,9 @@ pnpm-workspace.yaml @elastic/kibana-operations
 
 /knip.jsonc @elastic/kibana-security
 
+# Heap profile label experiment (no kibana.jsonc — manual entry)
+/experiments/heap_profile_label_otel/ @elastic/kibana-core
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####

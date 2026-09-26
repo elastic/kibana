@@ -15,6 +15,7 @@ import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 import { Config } from '../../lib';
 import { ExtractNodeBuilds } from './extract_node_builds_task';
+import { SERVERLESS_NODE_24_VERSION, SERVERLESS_NODE_26_PC_VERSION } from './node_download_info';
 
 jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
@@ -33,13 +34,18 @@ expect.addSnapshotSerializer({
   test: (value) =>
     typeof value === 'string' &&
     (value.includes(nodeVersion) ||
-      Boolean(value.match(/(glibc-217|pointer-compression)/)) ||
+      value.includes(SERVERLESS_NODE_24_VERSION) ||
+      value.includes(SERVERLESS_NODE_26_PC_VERSION) ||
+      Boolean(value.match(/(glibc-217|pointer-compression|node-26-pointer-compression)/)) ||
       value.startsWith(REPO_ROOT)),
   print: (value) =>
     typeof value === 'string'
       ? value
           .replaceAll(nodeVersion, '<node version>')
+          .replaceAll(SERVERLESS_NODE_24_VERSION, '<node version>')
+          .replaceAll(SERVERLESS_NODE_26_PC_VERSION, '<node version>')
           .replace('<node version>/glibc-217', '<node version>/<node variant>')
+          .replace('<node version>/node-26-pointer-compression', '<node version>/<node variant>')
           .replace('<node version>/pointer-compression', '<node version>/<node variant>')
           .replace('<node version>/default', '<node version>/<node variant>')
           .replace(REPO_ROOT, '<absolute path>')

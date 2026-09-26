@@ -72,7 +72,7 @@ async function setup(actualShaSums?: Record<string, string>) {
     )
   );
 
-  getNodeDownloadInfo.mockImplementation((_: Config, platform: Platform) => {
+  getNodeDownloadInfo.mockImplementation((cfg: Config, platform: Platform) => {
     return [
       {
         downloadPath: `${platform.getName()}:${
@@ -81,6 +81,8 @@ async function setup(actualShaSums?: Record<string, string>) {
         downloadName: `${platform.getName()}:${
           platform.getVariant() || 'default'
         }:${platform.getNodeArch()}:downloadName`,
+        version: cfg.getNodeVersion(),
+        variant: platform.getVariant() || 'default',
       },
     ];
   });
@@ -112,42 +114,42 @@ it('checks shasums for each downloaded node build', async () => {
         Array [
           <ToolingLog>,
           "<node version>",
-          undefined,
+          "default",
         ],
         Array [
           <ToolingLog>,
           "<node version>",
-          undefined,
+          "default",
         ],
         Array [
           <ToolingLog>,
           "<node version>",
-          undefined,
+          "default",
         ],
         Array [
           <ToolingLog>,
           "<node version>",
-          undefined,
+          "default",
         ],
         Array [
           <ToolingLog>,
           "<node version>",
-          undefined,
+          "default",
         ],
         Array [
           <ToolingLog>,
           "<node version>",
-          undefined,
+          "default",
         ],
         Array [
           <ToolingLog>,
           "<node version>",
-          undefined,
+          "serverless",
         ],
         Array [
           <ToolingLog>,
           "<node version>",
-          undefined,
+          "serverless",
         ],
       ],
       "results": Array [
@@ -341,6 +343,8 @@ it('checks shasums for each downloaded node build', async () => {
             Object {
               "downloadName": "linux:default:linux-x64:downloadName",
               "downloadPath": "linux:default:linux-x64:downloadPath",
+              "variant": "default",
+              "version": "<node version>",
             },
           ],
         },
@@ -350,6 +354,8 @@ it('checks shasums for each downloaded node build', async () => {
             Object {
               "downloadName": "linux:default:linux-arm64:downloadName",
               "downloadPath": "linux:default:linux-arm64:downloadPath",
+              "variant": "default",
+              "version": "<node version>",
             },
           ],
         },
@@ -359,6 +365,8 @@ it('checks shasums for each downloaded node build', async () => {
             Object {
               "downloadName": "darwin:default:darwin-x64:downloadName",
               "downloadPath": "darwin:default:darwin-x64:downloadPath",
+              "variant": "default",
+              "version": "<node version>",
             },
           ],
         },
@@ -368,6 +376,8 @@ it('checks shasums for each downloaded node build', async () => {
             Object {
               "downloadName": "darwin:default:darwin-arm64:downloadName",
               "downloadPath": "darwin:default:darwin-arm64:downloadPath",
+              "variant": "default",
+              "version": "<node version>",
             },
           ],
         },
@@ -377,6 +387,8 @@ it('checks shasums for each downloaded node build', async () => {
             Object {
               "downloadName": "win32:default:win32-x64:downloadName",
               "downloadPath": "win32:default:win32-x64:downloadPath",
+              "variant": "default",
+              "version": "<node version>",
             },
           ],
         },
@@ -386,6 +398,8 @@ it('checks shasums for each downloaded node build', async () => {
             Object {
               "downloadName": "win32:default:win32-arm64:downloadName",
               "downloadPath": "win32:default:win32-arm64:downloadPath",
+              "variant": "default",
+              "version": "<node version>",
             },
           ],
         },
@@ -395,6 +409,8 @@ it('checks shasums for each downloaded node build', async () => {
             Object {
               "downloadName": "linux:serverless:linux-x64:downloadName",
               "downloadPath": "linux:serverless:linux-x64:downloadPath",
+              "variant": "serverless",
+              "version": "<node version>",
             },
           ],
         },
@@ -404,6 +420,8 @@ it('checks shasums for each downloaded node build', async () => {
             Object {
               "downloadName": "linux:serverless:linux-arm64:downloadName",
               "downloadPath": "linux:serverless:linux-arm64:downloadPath",
+              "variant": "serverless",
+              "version": "<node version>",
             },
           ],
         },

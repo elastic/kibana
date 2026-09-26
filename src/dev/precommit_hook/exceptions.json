@@ -445,8 +445,10 @@
     "x-pack/platform/test/monitoring_api_integration/fixtures/packages/logstash-2.2.2-preview1.zip": "'logstash-2.2.2-preview1.zip' should be snake_case"
   },
   "@elastic/workchat-eng": {
-    "x-pack/platform/plugins/shared/data_sources/server/sources/jira-cloud": "'jira-cloud' should be snake_case",
-    "src/platform/packages/shared/deeplinks/agent_builder": "'agent_builder' should be kebab-case"
+    "src/platform/packages/shared/deeplinks/agent_builder": "'agent_builder' should be kebab-case",
+    "x-pack/platform/plugins/shared/agent_builder_platform/server/skills/elastic-skills": "'elastic-skills' should be snake_case",
+    "x-pack/platform/plugins/shared/agent_builder_platform/server/skills/elastic-skills/kibana-context-engine": "'kibana-context-engine' should be snake_case",
+    "x-pack/platform/plugins/shared/data_sources/server/sources/jira-cloud": "'jira-cloud' should be snake_case"
   },
   "@elastic/workflows-eng": {
     "src/platform/plugins/shared/workflows_execution_engine/server/step/on_failure/fallback-step": "'fallback-step' should be snake_case",
