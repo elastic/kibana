@@ -8,7 +8,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -21,8 +21,6 @@ import {
 } from '@kbn/resizable-layout';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import type { ApprovalLabels } from './resume_execution_button';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
@@ -37,8 +35,10 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
+import { resolveSelectedStepExecution } from '../model/resolve_selected_step_execution';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
+import { useWaitingStepResume } from '../model/use_waiting_step_resume';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
 const DefaultSidebarWidth = 300;
@@ -133,67 +133,14 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const { childExecutions, isLoading: isLoadingChildExecutions } =
       useChildWorkflowExecutions(workflowExecution);
 
-    // Step execution row id for the active waitForInput pause (polling uses includeInput: false)
-    const waitingStepExecutionId = useMemo(() => {
-      if (!workflowExecution || workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
-        return undefined;
-      }
-      return workflowExecution.stepExecutions?.find(
-        (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
-      )?.id;
-    }, [workflowExecution]);
-
-    // Fetch the paused step's full data (with input) independently of the selected step
-    // waitForInput stores its `with` config as stepExecution.input on pause entry
-    // consistent with every other step types
-    const { data: pausedStepFullData } = useStepExecution(
-      executionId,
+    const {
       waitingStepExecutionId,
-      ExecutionStatus.WAITING_FOR_INPUT
-    );
-
-    const prevWaitingStepExecutionIdRef = useRef<string | undefined>();
-    useEffect(() => {
-      const previousWaitingStepExecutionId = prevWaitingStepExecutionIdRef.current;
-      if (previousWaitingStepExecutionId && !waitingStepExecutionId) {
-        // Execution left WAITING_FOR_INPUT — nudge full step I/O fetches so output
-        // appears without a manual page refresh (same lazy-load path as waitForInput).
-        void queryClient.invalidateQueries({ queryKey: ['stepExecution', executionId] });
-      }
-      prevWaitingStepExecutionIdRef.current = waitingStepExecutionId;
-    }, [waitingStepExecutionId, executionId, queryClient]);
-
-    const { resumeMessage, resumeSchema, approvalLabels } = useMemo<{
-      resumeMessage: string | undefined;
-      resumeSchema: JsonModelSchemaType | undefined;
-      approvalLabels: ApprovalLabels | undefined;
-    }>(() => {
-      if (!waitingStepExecutionId) {
-        return {
-          resumeMessage: undefined,
-          resumeSchema: undefined,
-          approvalLabels: undefined,
-        };
-      }
-
-      const stepInput = pausedStepFullData?.input as
-        | {
-            message?: string;
-            schema?: JsonModelSchemaType;
-            approveLabel?: string;
-            rejectLabel?: string;
-          }
-        | undefined;
-      const labels =
-        typeof stepInput?.approveLabel === 'string' && typeof stepInput?.rejectLabel === 'string'
-          ? { approveLabel: stepInput.approveLabel, rejectLabel: stepInput.rejectLabel }
-          : undefined;
-      return {
-        resumeMessage: stepInput?.message,
-        resumeSchema: stepInput?.schema,
-        approvalLabels: labels,
-      };
-    }, [pausedStepFullData, waitingStepExecutionId]);
+      resumeMessage,
+      resumeSchema,
+      approvalLabels,
+      hasResumeError,
+      retryResume,
+    } = useWaitingStepResume(executionId, workflowExecution);
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
@@ -225,57 +172,27 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       };
     }, [dispatch]);
 
-    // Find the lightweight step from the polled execution (has status/duration but no I/O).
-    // If not found in root steps, check child workflow execution steps.
     const {
       lightweightStep,
-      stepExecutionId: resolvedExecutionId,
+      resolvedExecutionId,
+      childWorkflowExecution: selectedStepChildExecution,
       parentWorkflowExecution,
-    } = useMemo(() => {
-      if (!selectedStepExecutionId || isPseudoStep) {
-        return {
-          lightweightStep: undefined,
-          stepExecutionId: executionId,
-          parentWorkflowExecution: undefined,
-        };
-      }
-
-      const parentStep = workflowExecution?.stepExecutions?.find(
-        (step) => step.id === selectedStepExecutionId
-      );
-      if (parentStep) {
-        return {
-          lightweightStep: parentStep,
-          stepExecutionId: executionId,
-          parentWorkflowExecution: undefined,
-        };
-      }
-
-      for (const childWorkflowExecution of childExecutions.values()) {
-        const childStep = childWorkflowExecution.stepExecutions.find(
-          (step) => step.id === selectedStepExecutionId
-        );
-        if (childStep) {
-          return {
-            lightweightStep: childStep,
-            stepExecutionId: childWorkflowExecution.executionId,
-            parentWorkflowExecution: childWorkflowExecution,
-          };
-        }
-      }
-
-      return {
-        lightweightStep: undefined,
-        stepExecutionId: executionId,
-        parentWorkflowExecution: undefined,
-      };
-    }, [
-      workflowExecution?.stepExecutions,
-      selectedStepExecutionId,
-      isPseudoStep,
-      executionId,
-      childExecutions,
-    ]);
+    } = useMemo(
+      () =>
+        resolveSelectedStepExecution({
+          selectedStepExecutionId: isPseudoStep ? undefined : selectedStepExecutionId,
+          parentExecutionId: executionId,
+          parentStepExecutions: workflowExecution?.stepExecutions,
+          childExecutions,
+        }),
+      [
+        selectedStepExecutionId,
+        isPseudoStep,
+        executionId,
+        workflowExecution?.stepExecutions,
+        childExecutions,
+      ]
+    );
 
     // Lazy-load full step data (with input/output) for real steps
     const { data: fullStepData, isLoading: isLoadingStepData } = useStepExecution(
@@ -283,11 +200,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
       lightweightStep?.status
     );
-
-    const selectedStepChildExecution = useMemo(() => {
-      if (!selectedStepExecutionId || isPseudoStep) return undefined;
-      return childExecutions.get(selectedStepExecutionId);
-    }, [selectedStepExecutionId, isPseudoStep, childExecutions]);
 
     const selectedStepExecution = useMemo<WorkflowStepExecutionDto | undefined>(() => {
       if (!selectedStepExecutionId) {
@@ -352,6 +264,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
               waitingStepExecutionId={waitingStepExecutionId}
+              hasResumeError={hasResumeError}
+              onRetryResume={retryResume}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />

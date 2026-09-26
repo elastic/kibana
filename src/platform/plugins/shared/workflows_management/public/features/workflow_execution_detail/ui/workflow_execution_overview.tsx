@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto, WorkflowTokenUsage } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
+import { ResumeUnavailableCallout } from './resume_unavailable_callout';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
@@ -34,6 +35,8 @@ interface WorkflowExecutionOverviewProps {
   approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
   waitingStepExecutionId?: string;
+  hasResumeError?: boolean;
+  onRetryResume?: () => void;
 }
 
 const formatExecutionDate = (date: string) => {
@@ -68,6 +71,8 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     approvalLabels,
     shouldAutoResume = false,
     waitingStepExecutionId,
+    hasResumeError = false,
+    onRetryResume,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -207,6 +212,12 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
               </EuiFlexGroup>
             </div>
           </EuiFlexItem>
+
+          {hasResumeError && onRetryResume && (
+            <EuiFlexItem grow={false}>
+              <ResumeUnavailableCallout onRetry={onRetryResume} />
+            </EuiFlexItem>
+          )}
 
           {showResumeUI && executionId && (
             <EuiFlexItem grow={false}>

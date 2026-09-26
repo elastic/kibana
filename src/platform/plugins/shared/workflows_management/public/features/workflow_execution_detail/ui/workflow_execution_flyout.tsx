@@ -48,6 +48,9 @@ import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
 import { AiStepSection } from './ai_step_section';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { ForeachIterationsSection } from './foreach_iterations_section';
+import { NestedWorkflowExecutionLinks } from './nested_workflow_execution_links';
+import { ResumeExecutionButton } from './resume_execution_button';
+import { ResumeUnavailableCallout } from './resume_unavailable_callout';
 import { StepDataValueCell } from './step_data_value_cell';
 import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
@@ -65,6 +68,7 @@ import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/u
 import { selectStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { JSONCodeEditorCommonMemoized } from '../../../shared/ui/execution_data_viewer/json_editor_common';
@@ -82,8 +86,10 @@ import { getFailedStepPosition } from '../lib/get_failed_step_position';
 import { getRunMode } from '../lib/get_run_mode';
 import { isTokenUsageTableField } from '../lib/is_token_usage_table_field';
 import { normalizeStepAi } from '../lib/normalize_step_ai';
+import { resolveSelectedStepExecution } from '../model/resolve_selected_step_execution';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
+import { useWaitingStepResume } from '../model/use_waiting_step_resume';
 
 export interface WorkflowExecutionFlyoutProps {
   executionId: string;
@@ -465,6 +471,39 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const autoExpandedForExecutionIdRef = useRef<string | null>(null);
 
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
+    const { shouldAutoResume } = useWorkflowUrlState();
+    const {
+      waitingStepExecutionId,
+      waitingStepStartedAt,
+      resumeMessage,
+      resumeSchema,
+      approvalLabels,
+      hasResumeError,
+      retryResume,
+    } = useWaitingStepResume(executionId, workflowExecution);
+    const [isResumeSubmitting, setIsResumeSubmitting] = useState(false);
+    const [isResumeSubmitted, setIsResumeSubmitted] = useState(false);
+    const resumeSubmitState = useMemo(
+      () => ({
+        isSubmitting: isResumeSubmitting,
+        isSubmitted: isResumeSubmitted,
+        setSubmitting: setIsResumeSubmitting,
+        setSubmitted: setIsResumeSubmitted,
+      }),
+      [isResumeSubmitting, isResumeSubmitted]
+    );
+
+    useEffect(() => {
+      setSelectedStepExecutionId(null);
+      setIsResumeSubmitting(false);
+      setIsResumeSubmitted(false);
+    }, [executionId]);
+
+    useEffect(() => {
+      setIsResumeSubmitting(false);
+      setIsResumeSubmitted(false);
+    }, [waitingStepExecutionId]);
+
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
     const stepExecutionsUnavailable = areStepExecutionsUnavailable({
       stepExecutionsTotal,
@@ -567,10 +606,8 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       [application, workflowExecution?.workflowId]
     );
 
-    const selectedLightStep = useMemo(
-      () => workflowExecution?.stepExecutions.find((s) => s.id === selectedStepExecutionId) ?? null,
-      [workflowExecution?.stepExecutions, selectedStepExecutionId]
-    );
+    const { childExecutions, isLoading: isLoadingChildExecutions } =
+      useChildWorkflowExecutions(workflowExecution);
 
     const isPseudoStep =
       selectedStepExecutionId === '__overview' ||
@@ -638,13 +675,33 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       return buildOverviewStepExecutionFromContext(workflowExecution).input;
     }, [selectedStepExecutionId, workflowExecution]);
 
+    const {
+      lightweightStep: selectedLightStep,
+      resolvedExecutionId,
+      childWorkflowExecution,
+      parentWorkflowExecution,
+    } = useMemo(
+      () =>
+        resolveSelectedStepExecution({
+          selectedStepExecutionId: isPseudoStep ? undefined : selectedStepExecutionId,
+          parentExecutionId: executionId,
+          parentStepExecutions: workflowExecution?.stepExecutions,
+          childExecutions,
+        }),
+      [
+        isPseudoStep,
+        selectedStepExecutionId,
+        executionId,
+        workflowExecution?.stepExecutions,
+        childExecutions,
+      ]
+    );
+
     const { data: fullStepExecution, isLoading: isLoadingStepData } = useStepExecution(
-      executionId,
+      resolvedExecutionId,
       isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
       selectedLightStep?.status
     );
-    const { childExecutions, isLoading: isLoadingChildExecutions } =
-      useChildWorkflowExecutions(workflowExecution);
 
     const startedAt = useMemo(
       () => (workflowExecution?.startedAt ? new Date(workflowExecution.startedAt) : null),
@@ -664,7 +721,19 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const executedByValue = workflowExecution?.executedBy?.trim() || '';
     const executedByDisplay = executedByValue || '-';
 
-    const activeStepExecution = fullStepExecution ?? pseudoStepExecution;
+    const activeStepExecution = useMemo(() => {
+      if (isPseudoStep) {
+        return pseudoStepExecution;
+      }
+      if (selectedLightStep && fullStepExecution) {
+        return {
+          ...selectedLightStep,
+          input: fullStepExecution.input,
+          output: fullStepExecution.output,
+        };
+      }
+      return selectedLightStep ?? fullStepExecution ?? pseudoStepExecution;
+    }, [isPseudoStep, pseudoStepExecution, selectedLightStep, fullStepExecution]);
     const stepName = selectedLightStep?.stepId ?? activeStepExecution?.stepId ?? '';
 
     const activeStepType = selectedLightStep?.stepType ?? activeStepExecution?.stepType;
@@ -832,6 +901,20 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   minWidth: 0,
                 }}
               >
+                {!isPseudoStep && (childWorkflowExecution || parentWorkflowExecution) && (
+                  <div
+                    css={{
+                      paddingTop: euiTheme.size.m,
+                      paddingBottom: euiTheme.size.m,
+                    }}
+                  >
+                    <NestedWorkflowExecutionLinks
+                      stepExecution={activeStepExecution ?? selectedLightStep}
+                      childWorkflowExecution={childWorkflowExecution}
+                      parentWorkflowExecution={parentWorkflowExecution}
+                    />
+                  </div>
+                )}
                 {isLoadingStepData && !isPseudoStep ? (
                   <EuiFlexGroup justifyContent="center">
                     <EuiFlexItem grow={false}>
@@ -910,6 +993,31 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     {!isPseudoStep && stepAiWithModel && (
                       <AiStepSection ai={stepAiWithModel} connectorName={aiConnectorName} />
                     )}
+                    {!isPseudoStep &&
+                      selectedStepExecutionId === waitingStepExecutionId &&
+                      waitingStepExecutionId && (
+                        <div
+                          css={{
+                            paddingTop: euiTheme.size.m,
+                            paddingBottom: euiTheme.size.m,
+                          }}
+                        >
+                          <ResumeExecutionButton
+                            executionId={executionId}
+                            workflowId={workflowExecution?.workflowId}
+                            stepStartedAt={
+                              selectedLightStep?.startedAt ??
+                              activeStepExecution?.startedAt ??
+                              waitingStepStartedAt
+                            }
+                            resumeMessage={resumeMessage}
+                            resumeSchema={resumeSchema}
+                            approvalLabels={approvalLabels}
+                            waitingStepExecutionId={selectedStepExecutionId}
+                            submitState={resumeSubmitState}
+                          />
+                        </div>
+                      )}
                     <StepDataSection
                       key={`input-${selectedStepExecutionId}`}
                       label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
@@ -1282,6 +1390,21 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                 ) : (
                   <EuiLoadingSpinner size="m" />
                 )}
+
+                {waitingStepExecutionId && workflowExecution && (
+                  <ResumeExecutionButton
+                    executionId={executionId}
+                    workflowId={workflowExecution.workflowId}
+                    stepStartedAt={waitingStepStartedAt}
+                    resumeMessage={resumeMessage}
+                    resumeSchema={resumeSchema}
+                    approvalLabels={approvalLabels}
+                    autoOpen={shouldAutoResume}
+                    waitingStepExecutionId={waitingStepExecutionId}
+                    submitState={resumeSubmitState}
+                  />
+                )}
+                {hasResumeError && <ResumeUnavailableCallout onRetry={retryResume} />}
               </div>
             </EuiFlyoutHeader>
 
