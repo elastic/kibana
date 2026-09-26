@@ -10,6 +10,7 @@ import { EuiSuperSelect, EuiText, EuiTextColor, type EuiSuperSelectOption } from
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import type { DatasetFormatFormValue } from '../create_dataset_form_state';
+import { DescribedOptionDisplay } from './described_option_display';
 
 export const SUPPORTED_DATASET_FORMATS = ['csv', 'tsv', 'ndjson', 'parquet'] as const;
 export type SupportedDatasetFormat = (typeof SUPPORTED_DATASET_FORMATS)[number];
@@ -22,16 +23,7 @@ const formatOptionDisplay = ({
   title: string;
   description: string;
   testSubj: string;
-}) => (
-  <div data-test-subj={testSubj}>
-    <EuiText size="s">
-      <strong>{title}</strong>
-    </EuiText>
-    <EuiText size="s" color="subdued">
-      {description}
-    </EuiText>
-  </div>
-);
+}) => <DescribedOptionDisplay title={title} description={description} testSubj={testSubj} />;
 
 const formatOptionSelectedDisplay = ({
   title,

@@ -10,29 +10,42 @@ import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eu
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import type { DatasetErrorModeFormValue } from '../create_dataset_form_state';
+import { DescribedOptionDisplay } from './described_option_display';
 
 type ErrorModeOption = EuiComboBoxOptionOption<DatasetErrorModeFormValue> & {
   value: DatasetErrorModeFormValue;
+  description: string;
+  'data-test-subj': string;
+};
+
+const renderErrorModeOption = (option: EuiComboBoxOptionOption<DatasetErrorModeFormValue>) => {
+  const opt = option as ErrorModeOption;
+  return (
+    <DescribedOptionDisplay title={opt.label} description={opt.description} />
+  );
 };
 
 const ERROR_MODE_OPTIONS: ErrorModeOption[] = [
   {
     value: 'fail_fast',
     label: createDatasetWizardStrings.settingsErrorModeFailFast,
-    toolTipContent: createDatasetWizardStrings.settingsErrorModeFailFastDescription,
+    description: createDatasetWizardStrings.settingsErrorModeFailFastDescription,
     append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
+    'data-test-subj': 'createDatasetSettingsErrorModeOption-fail_fast',
   },
   {
     value: 'skip_row',
     label: createDatasetWizardStrings.settingsErrorModeSkipRow,
-    toolTipContent: createDatasetWizardStrings.settingsErrorModeSkipRowDescription,
+    description: createDatasetWizardStrings.settingsErrorModeSkipRowDescription,
+    'data-test-subj': 'createDatasetSettingsErrorModeOption-skip_row',
   },
   {
     value: 'null_field',
     label: createDatasetWizardStrings.settingsErrorModeNullField,
-    toolTipContent: createDatasetWizardStrings.settingsErrorModeNullFieldDescription,
+    description: createDatasetWizardStrings.settingsErrorModeNullFieldDescription,
+    'data-test-subj': 'createDatasetSettingsErrorModeOption-null_field',
   },
-] as const;
+];
 
 export function ErrorModeSelect({
   value,
@@ -53,6 +66,8 @@ export function ErrorModeSelect({
       aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
       singleSelection={{ asPlainText: true }}
       isClearable
+      rowHeight="auto"
+      renderOption={renderErrorModeOption}
       selectedOptions={
         selectedOption
           ? [

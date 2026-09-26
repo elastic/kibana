@@ -370,6 +370,28 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
   });
 
+  it('shows a description for each error mode option', async () => {
+    const { getByTestId } = renderAdditionalSettings();
+    const combo = getByTestId('createDatasetSettingsErrorMode');
+    await act(async () => {
+      fireEvent.click(combo.querySelector('input') ?? combo);
+    });
+
+    const failFast = getByTestId('createDatasetSettingsErrorModeOption-fail_fast');
+    expect(failFast).toHaveTextContent(
+      createDatasetWizardStrings.settingsErrorModeFailFastDescription
+    );
+    expect(
+      within(failFast).getAllByText(createDatasetWizardStrings.defaultBadgeLabel)
+    ).toHaveLength(1);
+    expect(getByTestId('createDatasetSettingsErrorModeOption-skip_row')).toHaveTextContent(
+      createDatasetWizardStrings.settingsErrorModeSkipRowDescription
+    );
+    expect(getByTestId('createDatasetSettingsErrorModeOption-null_field')).toHaveTextContent(
+      createDatasetWizardStrings.settingsErrorModeNullFieldDescription
+    );
+  });
+
   it('shows an error message when max error ratio is out of range', () => {
     const { getByTestId, getByText } = renderAdditionalSettings();
 

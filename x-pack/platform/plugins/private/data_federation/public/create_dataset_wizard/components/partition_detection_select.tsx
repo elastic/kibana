@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  type EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -22,6 +15,7 @@ import type {
   CreateDatasetFormValues,
   DatasetPartitionDetectionFormValue,
 } from '../create_dataset_form_state';
+import { DescribedOptionDisplay } from './described_option_display';
 
 type Option = EuiComboBoxOptionOption<string> & {
   value: DatasetPartitionDetectionFormValue;
@@ -32,22 +26,7 @@ type Option = EuiComboBoxOptionOption<string> & {
 const renderPartitionDetectionOption = (option: EuiComboBoxOptionOption<string>) => {
   const opt = option as Option;
   return (
-    <div title={opt.description}>
-      <EuiFlexGroup
-        responsive={false}
-        gutterSize="s"
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem grow={true}>
-          <EuiText size="s">{opt.label}</EuiText>
-        </EuiFlexItem>
-        {opt.append ? <EuiFlexItem grow={false}>{opt.append}</EuiFlexItem> : null}
-      </EuiFlexGroup>
-      <EuiText size="xs" color="subdued">
-        {opt.description}
-      </EuiText>
-    </div>
+    <DescribedOptionDisplay title={opt.label} description={opt.description} />
   );
 };
 
@@ -101,6 +80,7 @@ export function PartitionDetectionSelect({
       aria-label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
       singleSelection={{ asPlainText: true }}
       isClearable
+      rowHeight="auto"
       selectedOptions={
         selectedOption
           ? [
