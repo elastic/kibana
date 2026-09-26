@@ -33,6 +33,8 @@ export function LayerConfiguration({
   closeFlyout,
   editorContainer,
   onTextBasedQueryStateChange,
+  isESQLResultsAccordionOpen,
+  onESQLResultsAccordionToggle,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -73,6 +75,8 @@ export function LayerConfiguration({
     closeFlyout,
     editorContainer,
     onTextBasedQueryStateChange,
+    isESQLResultsAccordionOpen,
+    onESQLResultsAccordionToggle,
   };
   return (
     <div

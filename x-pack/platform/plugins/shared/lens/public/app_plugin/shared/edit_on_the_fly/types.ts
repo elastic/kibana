@@ -125,6 +125,8 @@ export interface LayerConfigurationProps {
   editorContainer?: HTMLElement;
   /** Callback to report text-based query state changes */
   onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
+  isESQLResultsAccordionOpen?: boolean;
+  onESQLResultsAccordionToggle?: (isOpen: boolean) => void;
 }
 
 export interface LayerTabsProps {

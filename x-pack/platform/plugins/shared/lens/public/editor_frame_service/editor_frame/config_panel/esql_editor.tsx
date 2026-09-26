@@ -57,6 +57,8 @@ export type ESQLEditorProps = Simplify<
     | 'dataLoading$'
     | 'parentApi'
     | 'onTextBasedQueryStateChange'
+    | 'isESQLResultsAccordionOpen'
+    | 'onESQLResultsAccordionToggle'
   >
 >;
 
@@ -84,6 +86,8 @@ export function ESQLEditor({
   setCurrentAttributes,
   updateSuggestion,
   onTextBasedQueryStateChange,
+  isESQLResultsAccordionOpen: isESQLResultsAccordionOpenProp,
+  onESQLResultsAccordionToggle,
 }: ESQLEditorProps) {
   // recomputed every render but only read by the useRef/useState initializers
   // below — do not hoist into a memo, later renders intentionally ignore it
@@ -100,12 +104,17 @@ export function ESQLEditor({
 
   const [errors, setErrors] = useState<Error[]>([]);
   const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(initialQuery);
-  const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
-  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
-  const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
-  const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const esqlEditorContext = useESQLEditorContext();
+  const lastPreviewRef = esqlEditorContext?.lastPreviewRef;
+  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(
+    () => lastPreviewRef?.current
+  );
+  const [isPreviewLoading, setIsPreviewLoading] = useState(() => !lastPreviewRef?.current);
+  const [internalResultsAccordionOpen, setInternalResultsAccordionOpen] = useState(false);
+  const isESQLResultsAccordionOpen = isESQLResultsAccordionOpenProp ?? internalResultsAccordionOpen;
+  const onESQLResultsToggle = onESQLResultsAccordionToggle ?? setInternalResultsAccordionOpen;
   const [isInitialized, setIsInitialized] = useState(false);
 
   const currentAttributes = useCurrentAttributes({
@@ -149,41 +158,55 @@ export function ESQLEditor({
     }
   }, [isDataLoading, layerId]);
 
+  const applyDataGridAttrs = useCallback(
+    (attrs: ESQLDataGridAttrs) => {
+      if (lastPreviewRef) {
+        lastPreviewRef.current = attrs;
+      }
+      setDataGridAttrs(attrs);
+    },
+    [lastPreviewRef]
+  );
+
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
       setErrors([]);
-      const attrs = await getSuggestions(
-        q,
-        data,
-        http,
-        uiSettings,
-        datasourceMap,
-        visualizationMap,
-        adHocDataViews,
-        setErrors,
-        abortController,
-        setDataGridAttrs,
-        esqlVariables,
-        shouldUpdateAttrs,
-        currentAttributesRef.current,
-        isApproximate
-      );
-      // An aborted run (e.g. the user clicked "Cancel", or a re-render tore
-      // down the request) produced no result. Bail out *without* recording the
-      // query as submitted: `onTextLangQuerySubmit` skips queries equal to
-      // `prevQuery.current`, so marking an aborted run here would silently
-      // drop every future resubmission of the same query text.
-      if (abortController?.signal.aborted) {
+      setIsPreviewLoading(true);
+      try {
+        const attrs = await getSuggestions(
+          q,
+          data,
+          http,
+          uiSettings,
+          datasourceMap,
+          visualizationMap,
+          adHocDataViews,
+          setErrors,
+          abortController,
+          applyDataGridAttrs,
+          esqlVariables,
+          shouldUpdateAttrs,
+          currentAttributesRef.current,
+          isApproximate
+        );
+        // An aborted run (e.g. the user clicked "Cancel", or a re-render tore
+        // down the request) produced no result. Bail out *without* recording the
+        // query as submitted: `onTextLangQuerySubmit` skips queries equal to
+        // `prevQuery.current`, so marking an aborted run here would silently
+        // drop every future resubmission of the same query text.
+        if (abortController?.signal.aborted) {
+          return;
+        }
+        if (attrs) {
+          setCurrentAttributes?.(attrs);
+          updateSuggestion?.(attrs);
+        }
+        prevQuery.current = q;
+        setSubmittedQuery(q);
+      } finally {
+        setIsPreviewLoading(false);
         setIsVisualizationLoading(false);
-        return;
       }
-      if (attrs) {
-        setCurrentAttributes?.(attrs);
-        updateSuggestion?.(attrs);
-      }
-      prevQuery.current = q;
-      setSubmittedQuery(q);
-      setIsVisualizationLoading(false);
     },
     [
       uiSettings,
@@ -194,6 +217,7 @@ export function ESQLEditor({
       adHocDataViews,
       esqlVariables,
       isApproximate,
+      applyDataGridAttrs,
       setCurrentAttributes,
       updateSuggestion,
     ]
@@ -235,6 +259,8 @@ export function ESQLEditor({
 
     const abortController = new AbortController();
 
+    setIsPreviewLoading(true);
+
     getSuggestions(
       lastSubmittedQuery,
       data,
@@ -245,14 +271,21 @@ export function ESQLEditor({
       adHocDataViews,
       undefined,
       abortController,
-      setDataGridAttrs,
+      applyDataGridAttrs,
       esqlVariables,
       false,
       currentAttributesRef.current,
       isApproximate
-    ).catch(() => {
-      // The chart itself will surface query errors via its own error handling path
-    });
+    )
+      .catch(() => {
+        // The chart itself will surface query errors via its own error handling path
+      })
+      .finally(() => {
+        // A newer run already owns the loading state when this one was aborted
+        if (!abortController.signal.aborted) {
+          setIsPreviewLoading(false);
+        }
+      });
 
     return () => {
       abortController.abort();
@@ -267,6 +300,7 @@ export function ESQLEditor({
     datasourceMap,
     visualizationMap,
     adHocDataViews,
+    applyDataGridAttrs,
   ]);
 
   if (!isOfAggregateQueryType(query)) {
@@ -293,24 +327,16 @@ export function ESQLEditor({
         attributes={attributes}
         parentApi={parentApi}
       />
-      {dataGridAttrs ? (
-        <ESQLDataGridAccordion
-          dataGridAttrs={dataGridAttrs}
-          isAccordionOpen={isESQLResultsAccordionOpen}
-          isTableView={visualization.activeId !== 'lnsDatatable'}
-          isApproximate={isApproximate}
-          setIsAccordionOpen={setIsESQLResultsAccordionOpen}
-          query={query}
-          onAccordionToggleCb={(status) => {
-            if (status && isSuggestionsAccordionOpen) {
-              setIsSuggestionsAccordionOpen(!status);
-            }
-            if (status && isLayerAccordionOpen) {
-              setIsLayerAccordionOpen(!status);
-            }
-          }}
-        />
-      ) : null}
+      <ESQLDataGridAccordion
+        dataGridAttrs={dataGridAttrs}
+        isLoading={isPreviewLoading}
+        hasQueryError={errors.length > 0}
+        isAccordionOpen={isESQLResultsAccordionOpen}
+        isTableView={visualization.activeId !== 'lnsDatatable'}
+        isApproximate={isApproximate}
+        onToggle={onESQLResultsToggle}
+        query={query}
+      />
     </>
   );
 

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { act, waitFor } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
@@ -18,6 +19,8 @@ import {
 } from '../../../mocks';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 import { ESQLEditor, type ESQLEditorProps } from './esql_editor';
+import { ESQLEditorContext } from './esql_editor_context';
+import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 
 // Capture the submit callback that `ESQLEditor` wires into the language
@@ -60,8 +63,14 @@ jest.mock('@kbn/presentation-publishing', () => ({
 
 const getSuggestionsMock = getSuggestions as jest.MockedFunction<typeof getSuggestions>;
 
+const mockESQLDataGrid = jest.fn(() => null);
+jest.mock('@kbn/esql-datagrid/public', () => ({
+  ESQLDataGrid: () => mockESQLDataGrid(),
+}));
+
 describe('ESQLEditor', () => {
   const coreStart = coreMock.createStart();
+  const lastPreviewRef: { current: ESQLDataGridAttrs | undefined } = { current: undefined };
 
   const attributes = {
     title: '',
@@ -76,7 +85,7 @@ describe('ESQLEditor', () => {
     },
   } as unknown as TypedLensSerializedState['attributes'];
 
-  const renderEditor = () => {
+  const renderEditor = (overrides: Partial<ESQLEditorProps> = {}) => {
     const props = {
       data: mockDataPlugin(),
       http: coreStart.http,
@@ -94,22 +103,29 @@ describe('ESQLEditor', () => {
       setCurrentAttributes: jest.fn(),
       updateSuggestion: jest.fn(),
       onTextBasedQueryStateChange: jest.fn(),
+      ...overrides,
     } as unknown as ESQLEditorProps;
 
     return renderWithReduxStore(
-      <EditorFrameServiceProvider
-        visualizationMap={mockVisualizationMap()}
-        datasourceMap={mockDatasourceMap()}
+      <ESQLEditorContext.Provider
+        value={{ editorHeightRef: { current: undefined }, lastPreviewRef }}
       >
-        <ESQLEditor {...props} />
-      </EditorFrameServiceProvider>
+        <EditorFrameServiceProvider
+          visualizationMap={mockVisualizationMap()}
+          datasourceMap={mockDatasourceMap()}
+        >
+          <ESQLEditor {...props} />
+        </EditorFrameServiceProvider>
+      </ESQLEditorContext.Provider>
     );
   };
 
   beforeEach(() => {
     capturedOnSubmit = undefined;
+    lastPreviewRef.current = undefined;
     getSuggestionsMock.mockClear();
     getSuggestionsMock.mockResolvedValue(undefined);
+    mockESQLDataGrid.mockClear();
   });
 
   it('runs the same query again after the previous run was aborted', async () => {
@@ -146,5 +162,183 @@ describe('ESQLEditor', () => {
     // Same text again: deduplicated, no new run.
     await act(() => capturedOnSubmit!(query, new AbortController()));
     expect(getSuggestionsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps last ES|QL preview rows after the editor remounts', async () => {
+    const preview = {
+      rows: [{ a: 1 }, { a: 2 }, { a: 3 }],
+      columns: [],
+      dataView: {},
+    } as unknown as ESQLDataGridAttrs;
+
+    getSuggestionsMock.mockImplementation(async (...args: unknown[]) => {
+      const setDataGridAttrs = args[9] as ((attrs: ESQLDataGridAttrs) => void) | undefined;
+      setDataGridAttrs?.(preview);
+      return undefined;
+    });
+
+    const { unmount } = renderEditor();
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+    expect(screen.getByTestId('ESQLQueryResults')).toHaveTextContent('3');
+    unmount();
+
+    getSuggestionsMock.mockClear();
+    getSuggestionsMock.mockReturnValue(new Promise(() => {}));
+    renderEditor();
+    const results = screen.getByTestId('ESQLQueryResults');
+    expect(results).toHaveTextContent('3');
+    expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(getSuggestionsMock).not.toHaveBeenCalled();
+
+    // While a refresh is in flight EuiAccordion swaps the row count for its spinner
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+    act(() => {
+      void capturedOnSubmit!(
+        { esql: 'FROM index1 | STATS minB = MIN(bytes)' },
+        new AbortController()
+      );
+    });
+    await waitFor(() => expect(within(results).getByRole('progressbar')).toBeInTheDocument());
+    expect(results).not.toHaveTextContent('3');
+  });
+
+  it('keeps the grid rendered and shows a refreshing bar while a refresh is in flight', async () => {
+    const preview = {
+      rows: [{ a: 1 }, { a: 2 }, { a: 3 }],
+      columns: [],
+      dataView: {},
+    } as unknown as ESQLDataGridAttrs;
+
+    getSuggestionsMock.mockImplementationOnce(async (...args: unknown[]) => {
+      const setDataGridAttrs = args[9] as ((attrs: ESQLDataGridAttrs) => void) | undefined;
+      setDataGridAttrs?.(preview);
+      return undefined;
+    });
+
+    renderEditor({ isESQLResultsAccordionOpen: true, onESQLResultsAccordionToggle: jest.fn() });
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+    const results = screen.getByTestId('ESQLQueryResults');
+    expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
+
+    mockESQLDataGrid.mockClear();
+    getSuggestionsMock.mockReturnValue(new Promise(() => {}));
+    act(() => {
+      void capturedOnSubmit!(
+        { esql: 'FROM index1 | STATS minB = MIN(bytes)' },
+        new AbortController()
+      );
+    });
+
+    await waitFor(() =>
+      expect(within(results).getByTestId('ESQLQueryResultsRefreshing')).toBeInTheDocument()
+    );
+    expect(mockESQLDataGrid).toHaveBeenCalled();
+  });
+
+  it('stops showing the loading spinner when a refresh fails with cached rows', async () => {
+    const preview = {
+      rows: [{ a: 1 }, { a: 2 }, { a: 3 }],
+      columns: [],
+      dataView: {},
+    } as unknown as ESQLDataGridAttrs;
+
+    getSuggestionsMock.mockImplementationOnce(async (...args: unknown[]) => {
+      const setDataGridAttrs = args[9] as ((attrs: ESQLDataGridAttrs) => void) | undefined;
+      setDataGridAttrs?.(preview);
+      return undefined;
+    });
+
+    renderEditor();
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+    expect(screen.getByTestId('ESQLQueryResults')).toHaveTextContent('3');
+
+    // getSuggestions swallows query errors and resolves without new attrs
+    getSuggestionsMock.mockResolvedValue(undefined);
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS broken(' }, new AbortController())
+    );
+
+    const results = screen.getByTestId('ESQLQueryResults');
+    expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(results).toHaveTextContent('3');
+  });
+
+  it('shows an empty message in the open results accordion when the first preview fails', async () => {
+    renderEditor();
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+
+    const results = screen.getByTestId('ESQLQueryResults');
+    await userEvent.click(within(results).getByRole('button', { name: /ES\|QL Query Results/i }));
+    // Still loading: EuiAccordion's own loading message owns the content area
+    expect(within(results).queryByTestId('ESQLQueryResultsEmpty')).not.toBeInTheDocument();
+
+    getSuggestionsMock.mockImplementationOnce(async (...args: unknown[]) => {
+      const setErrors = args[7] as ((errors: Error[]) => void) | undefined;
+      setErrors?.([new Error('Unknown index [index1]')]);
+      return undefined;
+    });
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+
+    expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(within(results).getByTestId('ESQLQueryResultsEmpty')).toBeInTheDocument();
+    expect(within(results).getByTestId('ESQLQueryResultsErrorIcon')).toHaveAttribute(
+      'data-euiicon-type',
+      'error'
+    );
+  });
+
+  it('does not show the error icon when the first preview returns nothing without an error', async () => {
+    renderEditor();
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+
+    const results = screen.getByTestId('ESQLQueryResults');
+    expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(within(results).queryByTestId('ESQLQueryResultsErrorIcon')).not.toBeInTheDocument();
+  });
+
+  it('reports toggles to the parent without changing its own state when controlled', async () => {
+    const onESQLResultsAccordionToggle = jest.fn();
+    renderEditor({ isESQLResultsAccordionOpen: false, onESQLResultsAccordionToggle });
+    const button = screen.getByRole('button', { name: /ES\|QL Query Results/i });
+
+    await userEvent.click(button);
+
+    expect(onESQLResultsAccordionToggle).toHaveBeenCalledWith(true);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('reports closing to the parent when the parent has it open', async () => {
+    const onESQLResultsAccordionToggle = jest.fn();
+    renderEditor({ isESQLResultsAccordionOpen: true, onESQLResultsAccordionToggle });
+
+    await userEvent.click(screen.getByRole('button', { name: /ES\|QL Query Results/i }));
+
+    expect(onESQLResultsAccordionToggle).toHaveBeenCalledWith(false);
+  });
+
+  it('opens and closes the ES|QL results accordion on its own when no parent controls it', async () => {
+    renderEditor();
+    const button = screen.getByRole('button', { name: /ES\|QL Query Results/i });
+
+    await userEvent.click(button);
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+
+    await userEvent.click(button);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
   });
 });
