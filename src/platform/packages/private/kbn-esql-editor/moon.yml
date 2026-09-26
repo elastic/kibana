@@ -39,7 +39,6 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/index-editor'
   - '@kbn/react-hooks'
-  - '@kbn/calculate-width-from-char-count'
   - '@kbn/kql'
   - '@kbn/ebt-tools'
   - '@kbn/shared-ux-utility'
@@ -49,6 +48,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/cps'
   - '@kbn/es-types'
+  - '@kbn/ui-ai-components'
 tags:
   - shared-browser
   - package

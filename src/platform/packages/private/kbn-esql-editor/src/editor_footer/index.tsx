@@ -23,10 +23,9 @@ import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 import type { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import { HistoryAndStarredQueriesTabs } from './history_starred_queries';
-import { KeyboardShortcuts } from './keyboard_shortcuts';
-import { QueryWrapComponent } from './query_wrap_component';
 import { ESQLQueryStats } from './query_stats';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
+import { ESQLMenu } from '../editor_menu';
 
 interface EditorFooterProps {
   styles: {
@@ -51,6 +50,8 @@ interface EditorFooterProps {
   dataErrorsControl?: DataErrorsControl;
   starredQueriesService: EsqlStarredQueriesService | null;
   queryStats?: QueryStats;
+  hideQueryHistory?: boolean;
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
 }
 
 const openDocumentationLabel = i18n.translate('esqlEditor.query.documentationAriaLabel', {
@@ -77,6 +78,8 @@ export const EditorFooter = memo(function EditorFooter({
   dataErrorsControl,
   starredQueriesService,
   queryStats,
+  hideQueryHistory,
+  onESQLDocsFlyoutVisibilityChanged,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
@@ -142,8 +145,11 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-              <KeyboardShortcuts />
-              <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />
+              <ESQLMenu
+                hideHistory={hideQueryHistory}
+                onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+                onPrettifyQuery={onPrettifyQuery}
+              />
               {displayDocumentationAsFlyout && (
                 <>
                   <EuiToolTip

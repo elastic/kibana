@@ -209,41 +209,31 @@ describe('Custom Editor Commands', () => {
     // Registered as actions so the keybindings stay scoped to this editor instead of firing while
     // another editor on the page has focus.
     it('registers scoped actions rather than page-wide commands', () => {
-      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn());
+      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn());
 
-      expect(mockEditor.addAction).toHaveBeenCalledTimes(4);
+      expect(mockEditor.addAction).toHaveBeenCalledTimes(3);
       expect(mockEditor.addCommand).not.toHaveBeenCalled();
     });
 
     it('returns a disposable per registered action', () => {
-      const disposables = addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn());
+      const disposables = addEditorKeyBindings(mockEditor, jest.fn(), jest.fn());
 
-      expect(disposables).toHaveLength(4);
+      expect(disposables).toHaveLength(3);
       disposables.forEach((disposable) => expect(typeof disposable.dispose).toBe('function'));
     });
 
     it('registers the generate-from-comment action only when the callback is supplied', () => {
-      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn(), jest.fn());
+      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn());
 
-      expect(mockEditor.addAction).toHaveBeenCalledTimes(5);
+      expect(mockEditor.addAction).toHaveBeenCalledTimes(4);
       // eslint-disable-next-line no-bitwise
       expect(findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyJ)).toBeDefined();
-    });
-
-    it('calls toggleVisor on CMD+K', () => {
-      const mockToggleVisor = jest.fn();
-      addEditorKeyBindings(mockEditor, jest.fn(), mockToggleVisor, jest.fn());
-
-      // eslint-disable-next-line no-bitwise
-      findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK).run();
-
-      expect(mockToggleVisor).toHaveBeenCalledTimes(1);
     });
 
     it('calls onQuerySubmit on CMD+Enter when query is non-empty', () => {
       const mockOnQuerySubmit = jest.fn();
       (mockEditor.getValue as jest.Mock).mockReturnValue('FROM logs');
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, jest.fn(), jest.fn());
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, jest.fn());
 
       // eslint-disable-next-line no-bitwise
       findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter).run();
@@ -254,7 +244,7 @@ describe('Custom Editor Commands', () => {
     it('does not call onQuerySubmit on CMD+Enter when query is empty', () => {
       const mockOnQuerySubmit = jest.fn();
       (mockEditor.getValue as jest.Mock).mockReturnValue('   ');
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, jest.fn(), jest.fn());
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, jest.fn());
 
       // eslint-disable-next-line no-bitwise
       findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter).run();
@@ -264,7 +254,7 @@ describe('Custom Editor Commands', () => {
 
     it('calls onPrettifyQuery on CMD+I', () => {
       const mockOnPrettifyQuery = jest.fn();
-      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), mockOnPrettifyQuery);
+      addEditorKeyBindings(mockEditor, jest.fn(), mockOnPrettifyQuery);
 
       // eslint-disable-next-line no-bitwise
       findAction(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI).run();

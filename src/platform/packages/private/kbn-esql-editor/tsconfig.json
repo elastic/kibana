@@ -35,7 +35,6 @@
     "@kbn/licensing-types",
     "@kbn/index-editor",
     "@kbn/react-hooks",
-    "@kbn/calculate-width-from-char-count",
     "@kbn/kql",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
@@ -44,7 +43,8 @@
     "@kbn/esql-resource-browser",
     "@kbn/data-views-plugin",
     "@kbn/cps",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/ui-ai-components"
   ],
   "exclude": [
     "target/**/*",

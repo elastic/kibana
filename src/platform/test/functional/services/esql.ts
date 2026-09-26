@@ -196,10 +196,10 @@ export class ESQLService extends FtrService {
 
   public async isQuickSearchVisorVisible() {
     const visorContainer = await this.testSubjects.find('ESQLEditor-quick-search-visor');
-    const visorWrapper = await visorContainer.findByCssSelector(':scope > div');
-    const opacity = await visorWrapper.getComputedStyle('opacity');
-
-    return opacity === '1';
+    return await this.browser.execute(
+      'return !arguments[0].hasAttribute("inert");',
+      visorContainer._webElement
+    );
   }
 
   public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
@@ -304,32 +304,9 @@ export class ESQLService extends FtrService {
   }
 
   public async toggleQuickSearchVisor(open: boolean) {
-    await this.testSubjects.click('ESQLEditor-toggle-quick-search-visor');
+    await this.testSubjects.click('esql-menu-button');
     await this.retry.try(async () => {
       expect(await this.isQuickSearchVisorVisible()).to.be(open);
-    });
-  }
-
-  public async toggleDatasourceDropdown(open: boolean) {
-    if (open) {
-      await this.retry.try(async () => {
-        try {
-          await this.testSubjects.click('visorSourcesDropdownButton');
-        } catch (error) {
-          if (error instanceof Error && error.message.includes('ElementClickInterceptedError')) {
-            // Monaco suggestions can overlap the visor datasource button; dismiss and retry.
-            await this.browser.pressKeys(Key.ESCAPE);
-          }
-          throw error;
-        }
-      });
-    } else {
-      await this.browser.pressKeys(Key.ESCAPE);
-    }
-
-    await this.retry.try(async () => {
-      const exists = await this.testSubjects.exists('esqlEditor-visor-datasourcesList-switcher');
-      expect(exists).to.be(open);
     });
   }
 }
