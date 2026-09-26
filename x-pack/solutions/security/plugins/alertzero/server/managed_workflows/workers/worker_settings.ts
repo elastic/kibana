@@ -5,24 +5,34 @@
  * 2.0.
  */
 
-import {
+import type {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-  applyMissingWorkerSettingDefaults,
+} from '@kbn/alertzero-common';
+import {
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   formatWorkerSettingsIssues,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
-  projectStoredAutonomyLevel,
+  migrateStoredTemplateValues,
   type WorkerSettings,
+  type WorkerSettingsMigration,
 } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 import type { WorkerSettingsRegistration } from './types';
+
+/**
+ * Idempotent renames of fields every Worker stores. Each step runs before the per-worker chain and
+ * must return the same object when the old key is absent. Adding one requires the parser below to
+ * accept the new key in the same change. See
+ * `kbn-alertzero-common/impl/worker_settings/README.md`.
+ */
+export const SHARED_FIELD_MIGRATIONS: readonly WorkerSettingsMigration[] = [];
 
 type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
@@ -32,15 +42,6 @@ type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
 
-const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
-  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: 1,
-};
-
 /**
  * Template values mirror the settings API: shared fields flat (with the legacy `autonomyLevel`
  * key the YAML templates read), Worker-specific fields nested under `extras`.
@@ -49,7 +50,7 @@ const toTemplateValues = (
   workerId: RegisteredWorkerId,
   settings: WorkerSettings
 ): ManagedWorkflowTemplateValues => ({
-  settingsVersion: WORKER_SETTINGS_VERSIONS[workerId],
+  settingsVersion: getWorkerSettingsDeclaration(workerId).settingsVersion,
   autonomyLevel: settings.autonomy,
   ...(settings.scheduleInterval === undefined
     ? {}
@@ -57,20 +58,24 @@ const toTemplateValues = (
   ...(settings.extras === undefined ? {} : { extras: settings.extras }),
 });
 
+const migrateStoredValues = (
+  workerId: RegisteredWorkerId,
+  raw: ManagedWorkflowTemplateValues
+): ManagedWorkflowTemplateValues =>
+  migrateStoredTemplateValues(getWorkerSettingsDeclaration(workerId), raw, SHARED_FIELD_MIGRATIONS);
+
 /**
- * Reads persisted template values. Missing schedule and extras keys are filled from the current
- * defaults first; a present value is left as stored, so an out-of-range value still fails here
- * and the Worker projects as unavailable. Autonomy is projected when the Worker no longer offers
- * the stored level.
+ * Reads persisted template values through the settings migration, then validates them. A present
+ * invalid value still throws, and the Worker projects as unavailable.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
-  stored: Record<string, unknown>
+  raw: Record<string, unknown>
 ): WorkerSettings => {
-  const raw = applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), stored);
-  const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
-  if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
+  const currentVersion = getWorkerSettingsDeclaration(workerId).settingsVersion;
+  const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } =
+    migrateStoredValues(workerId, raw);
+  if (settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
     );
@@ -86,7 +91,7 @@ const parseWorkerValues = (
 
   const candidate = {
     workerId,
-    autonomy: projectStoredAutonomyLevel(getWorkerSettingsDeclaration(workerId), autonomyLevel),
+    autonomy: autonomyLevel,
     ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
     ...(extras === undefined ? {} : { extras }),
   };
@@ -105,8 +110,7 @@ export const createWorkerSettingsRegistration = (
   workerId: RegisteredWorkerId
 ): WorkerSettingsRegistration => ({
   createDefaultValues: () => toTemplateValues(workerId, createDefaultWorkerSettings(workerId)),
-  withMissingDefaults: (raw) =>
-    applyMissingWorkerSettingDefaults(getWorkerSettingsDeclaration(workerId), raw),
+  migrateStoredValues: (raw) => migrateStoredValues(workerId, raw),
   applyPatch: (raw, patch) => {
     const next = applyWorkerSettingsWrite(parseWorkerValues(workerId, raw), patch);
     const result = getCompleteWorkerSettingsSchema(workerId).safeParse(next);

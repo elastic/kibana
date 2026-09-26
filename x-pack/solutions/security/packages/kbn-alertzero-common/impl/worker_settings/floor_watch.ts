@@ -14,11 +14,13 @@ import type { WorkerSettingsDeclaration } from './types';
 
 export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  settingsVersion: 1,
   allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
 };
 
 export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  settingsVersion: 1,
   // Two levels rather than the shared three: this Worker has exactly one gate — the
   // forensics handoff a true-positive or inconclusive verdict proposes — so it needs
   // one level that gates it and one that does not. `assisted` sits between those and

@@ -12,6 +12,11 @@ export interface WorkerSettingsRegistration {
   /** Template values for a fresh per-space install. */
   createDefaultValues(): ManagedWorkflowTemplateValues;
   /**
+   * Runs the worker's settings migration. Returns the same object when the stored values already
+   * match the current declaration. Present invalid values are left for validation to reject.
+   */
+  migrateStoredValues(values: ManagedWorkflowTemplateValues): ManagedWorkflowTemplateValues;
+  /**
    * Composes the patched settings and validates them against the Worker's complete schema.
    * `invalid` carries the issues, each naming its field.
    */
@@ -20,14 +25,8 @@ export interface WorkerSettingsRegistration {
     patch: WorkerSettingsWrite
   ): { values: ManagedWorkflowTemplateValues } | { invalid: string };
   /**
-   * Copies declaration defaults onto schedule and extras keys the document does not have yet.
-   * Returns the same object when nothing is missing. A present value is never replaced.
-   */
-  withMissingDefaults(values: ManagedWorkflowTemplateValues): ManagedWorkflowTemplateValues;
-  /**
-   * Parses persisted template values into complete settings. Missing schedule and extras keys are
-   * filled from the declaration defaults first. Throws when a present value does not match the
-   * current shape.
+   * Parses persisted template values into complete settings. The migration runs first. A present
+   * invalid value, or any other shape that still fails the current schema, throws.
    */
   toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }

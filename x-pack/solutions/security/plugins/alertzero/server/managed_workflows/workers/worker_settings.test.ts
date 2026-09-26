@@ -88,7 +88,7 @@ describe('createWorkerSettingsRegistration', () => {
     it('fills a missing schedule interval from the declaration default', () => {
       const stored = { settingsVersion: 1, autonomyLevel: 'manual' };
 
-      expect(registration.withMissingDefaults(stored)).toEqual({
+      expect(registration.migrateStoredValues(stored)).toEqual({
         ...stored,
         scheduleInterval: '24h',
       });
@@ -127,6 +127,15 @@ describe('createWorkerSettingsRegistration', () => {
           scheduleInterval: '24h',
         })
       ).toThrow(/settings are invalid: autonomy/);
+    });
+
+    it('rewrites a stored level this Worker no longer offers so the document can be saved', () => {
+      const stored = { settingsVersion: 1, autonomyLevel: 'assisted', scheduleInterval: '24h' };
+
+      expect(registration.migrateStoredValues(stored)).toEqual({
+        ...stored,
+        autonomyLevel: 'manual',
+      });
     });
 
     it('reads a stored level this Worker no longer offers as the closest one it does', () => {
@@ -237,7 +246,7 @@ describe('createWorkerSettingsRegistration', () => {
         scheduleInterval: '2h',
       };
 
-      expect(registration.withMissingDefaults(stored)).toEqual({
+      expect(registration.migrateStoredValues(stored)).toEqual({
         ...stored,
         extras: defaultExtras,
       });
@@ -257,7 +266,7 @@ describe('createWorkerSettingsRegistration', () => {
         scheduleInterval: '2h',
       };
 
-      expect(registration.withMissingDefaults(stored)).toEqual({
+      expect(registration.migrateStoredValues(stored)).toEqual({
         ...stored,
         extras: defaultExtras,
       });
@@ -275,7 +284,7 @@ describe('createWorkerSettingsRegistration', () => {
         extras: { analysisWindowDays: 21 },
       };
 
-      expect(registration.withMissingDefaults(stored)).toEqual({
+      expect(registration.migrateStoredValues(stored)).toEqual({
         ...storedDefaults,
         extras: { ...defaultExtras, analysisWindowDays: 21 },
       });
@@ -288,7 +297,13 @@ describe('createWorkerSettingsRegistration', () => {
     });
 
     it('leaves a complete extras object untouched', () => {
-      expect(registration.withMissingDefaults(storedDefaults)).toBe(storedDefaults);
+      expect(registration.migrateStoredValues(storedDefaults)).toBe(storedDefaults);
+    });
+
+    it('rewrites a stored supervised level to assisted so the document can be saved', () => {
+      expect(
+        registration.migrateStoredValues({ ...storedDefaults, autonomyLevel: 'supervised' })
+      ).toEqual({ ...storedDefaults, autonomyLevel: 'assisted' });
     });
 
     it('reads a stored supervised level as assisted, the closest level it still offers', () => {
@@ -315,7 +330,7 @@ describe('createWorkerSettingsRegistration', () => {
     it('fills every extras key when the stored object is empty', () => {
       const stored = { ...storedDefaults, extras: {} };
 
-      expect(registration.withMissingDefaults(stored)).toEqual(storedDefaults);
+      expect(registration.migrateStoredValues(stored)).toEqual(storedDefaults);
       expect(registration.toSettings(stored)).toEqual({
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'manual',
@@ -455,14 +470,15 @@ describe('createWorkerSettingsRegistration', () => {
       expect(projected).not.toHaveProperty('extras');
     });
 
-    it.each(UNSCHEDULED_WORKER_IDS)('%s rejects a stored schedule interval by name', (workerId) => {
-      expect(() =>
-        createWorkerSettingsRegistration(workerId).toSettings({
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-          scheduleInterval: '30m',
-        })
-      ).toThrow(/scheduleInterval/);
+    it.each(UNSCHEDULED_WORKER_IDS)('%s drops a stored schedule interval', (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+      const stored = { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '30m' };
+
+      expect(registration.migrateStoredValues(stored)).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+      });
+      expect(registration.toSettings(stored)).not.toHaveProperty('scheduleInterval');
     });
 
     it.each(UNSCHEDULED_WORKER_IDS)('%s rejects an interval patch, naming it', (workerId) => {

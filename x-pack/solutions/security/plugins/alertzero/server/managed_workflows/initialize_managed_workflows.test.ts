@@ -122,7 +122,7 @@ describe('initializeManagedWorkflows', () => {
 
       await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-      // Listed once while applying missing defaults, which skips a state with no template values.
+      // Listed once for the settings migration, which skips a state with no template values.
       expect(client.listInstalledWorkflowStates).toHaveBeenCalledTimes(1);
       expect(client.install).not.toHaveBeenCalledWith(
         RULE_TUNING_ID,
