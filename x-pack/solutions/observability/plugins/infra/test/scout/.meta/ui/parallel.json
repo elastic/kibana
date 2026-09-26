@@ -1,5 +1,5 @@
 {
-  "sha1": "2ded519fcf96516b378055cd2ecc31bd7ba77b3b",
+  "sha1": "800df1b3ddeac38b0d4fa8c4328a66df7fc7a18c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -816,8 +816,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 130,
-        "column": 9
+        "line": 133,
+        "column": 10
       }
     },
     {
@@ -832,8 +832,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 193,
-        "column": 38
+        "line": 197,
+        "column": 19
       }
     },
     {
@@ -848,8 +848,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 196,
-        "column": 38
+        "line": 200,
+        "column": 19
       }
     },
     {
@@ -864,8 +864,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 219,
-        "column": 15
+        "line": 222,
+        "column": 13
       }
     },
     {
@@ -880,8 +880,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 253,
-        "column": 22
+        "line": 257,
+        "column": 20
       }
     },
     {

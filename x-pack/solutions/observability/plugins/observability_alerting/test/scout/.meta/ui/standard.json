@@ -1,5 +1,5 @@
 {
-  "sha1": "950606d7274b6393eca250e97732783b0a4b4955",
+  "sha1": "cb0a8ab6cc1783e8a0acf518cd294bc7673fd8ea",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -77,8 +77,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 231,
-        "column": 25
+        "line": 279,
+        "column": 26
+      }
+    },
+    {
+      "id": "7f75bff6a1b2961-8ee577e2b4802e2",
+      "title": "Observability Alerting - privilege-based page access user with logs read privilege and only classic index access sees no error toasts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
+        "line": 295,
+        "column": 77
       }
     },
     {
@@ -90,7 +103,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 217,
+        "line": 278,
         "column": 24
       }
     },
@@ -103,7 +116,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 224,
+        "line": 290,
         "column": 24
       }
     },

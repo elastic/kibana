@@ -150,18 +150,7 @@ describe('describeAiIndexAggregations', () => {
     expect(result).toEqual({ kiTypeCounts: [], tagCounts: [] });
   });
 
-  it('returns empty counts when the caller lacks read on the backing indices', async () => {
-    search.mockRejectedValue(esResponseError(403, 'security_exception'));
-
-    const result = await describeAiIndexAggregations({
-      ...params,
-      fields: [field('type', true)],
-    });
-
-    expect(result).toEqual({ kiTypeCounts: [], tagCounts: [] });
-  });
-
-  it('rethrows other Elasticsearch errors', async () => {
+  it('rethrows Elasticsearch errors', async () => {
     search.mockRejectedValue(esResponseError(500, 'search_phase_execution_exception'));
 
     await expect(

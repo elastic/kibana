@@ -25,11 +25,22 @@ interface Props {
   body: string;
   onClose: () => void;
   type?: EuiFlyoutProps['type'];
+  session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
 }
 
-export const EntityNotFoundFlyout = ({ title, body, onClose, type = 'push' }: Props) => (
+export const EntityNotFoundFlyout = ({
+  title,
+  body,
+  onClose,
+  type = 'push',
+  session,
+  ownFocus,
+}: Props) => (
   <EuiFlyout
     type={type}
+    session={session}
+    ownFocus={ownFocus}
     size="s"
     onClose={onClose}
     aria-labelledby={FLYOUT_TITLE_ID}

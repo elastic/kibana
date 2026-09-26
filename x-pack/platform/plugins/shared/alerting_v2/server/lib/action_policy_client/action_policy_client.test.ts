@@ -1674,7 +1674,7 @@ describe('ActionPolicyClient', () => {
     };
 
     it('creates a new API key, updates only auth and updatedBy fields, and invalidates the old key', async () => {
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValue({
         id: 'policy-id-update-key-1',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         references: [],
@@ -1682,8 +1682,9 @@ describe('ActionPolicyClient', () => {
         attributes: existingAttributes,
       });
 
-      await client.updateActionPolicyApiKey({ id: 'policy-id-update-key-1' });
+      const result = await client.updateActionPolicyApiKey({ id: 'policy-id-update-key-1' });
 
+      expect(result).toMatchObject({ id: 'policy-id-update-key-1', name: 'existing-policy' });
       expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: existing-policy');
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -1710,7 +1711,7 @@ describe('ActionPolicyClient', () => {
     });
 
     it('trims stored policy names when granting a replacement API key', async () => {
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValue({
         id: 'policy-id-update-key-trim',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         references: [],
@@ -1724,7 +1725,7 @@ describe('ActionPolicyClient', () => {
     });
 
     it('does not invalidate old API key when createdByUser is true', async () => {
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValue({
         id: 'policy-id-update-key-user',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         references: [],
@@ -3040,7 +3041,7 @@ describe('ActionPolicyClient', () => {
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
-    it('returns catch_all APs for policies with no matcher, along with the space-scoped total', async () => {
+    it('returns catch_all APs for policies with no matcher, and flags truncation', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse(
           [{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }],
@@ -3053,7 +3054,6 @@ describe('ActionPolicyClient', () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('catch_all');
       expect(result.items[0].action_policy.id).toBe('ap-catchall');
-      expect(result.total).toBe(150);
       expect(result.evaluated_count).toBe(1);
       expect(result.is_truncated).toBe(true);
     });
@@ -3081,7 +3081,6 @@ describe('ActionPolicyClient', () => {
 
       expect(result.items).toHaveLength(evaluatedCount);
       expect(result).toMatchObject({
-        total,
         evaluated_count: evaluatedCount,
         is_truncated: isTruncated,
       });

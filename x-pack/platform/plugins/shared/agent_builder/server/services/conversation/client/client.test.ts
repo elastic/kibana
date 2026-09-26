@@ -1097,6 +1097,32 @@ describe('ConversationClient', () => {
   // Reads-by-id go through `esClient.get` (no space filter), so cross-space isolation is enforced
   // in application code inside `getDocument`. These tests lock in that guarantee, which used to
   // come for free from the DSL `createSpaceDslFilter`.
+  describe('getAuthor', () => {
+    const createClientForUser = (user: { id?: string; username: string }) =>
+      createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { ...user, isAdmin: false },
+      });
+
+    it('prefers the origin author over the client user', () => {
+      const originAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
+
+      expect(client.getAuthor(originAuthor)).toEqual(originAuthor);
+    });
+
+    it('attributes the round to the client user', () => {
+      expect(client.getAuthor()).toEqual({ id: 'user-1', username: 'test-user' });
+    });
+
+    it('assigns no author when the user has no profile id', () => {
+      expect(createClientForUser({ username: 'test-user' }).getAuthor()).toBeUndefined();
+    });
+  });
+
   describe('space isolation for reads-by-id', () => {
     const createClientInSpace = (space: string) =>
       createClient({
@@ -3092,6 +3118,46 @@ describe('ConversationClient', () => {
       ]);
       expect(indexed.conversation_rounds).toHaveLength(1);
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('appends to a legacy conversation by deriving its timeline first, promoting the document', async () => {
+      // A pre-events-native document: rounds only, no schema_version, no stored events.
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+        })
+      );
+
+      await client.appendEvents({
+        id: 'conversation-1',
+        events: [
+          {
+            id: '9c2e0f11-0000-4000-8000-000000000001',
+            type: TimelineEventType.userMessage,
+            created_at: '2026-09-22T10:00:00.000Z',
+            actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+            data: { message: 'Pool limit is now 200' },
+          },
+        ],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string }>;
+          conversation_rounds: Array<{ id: string }>;
+        };
+      };
+      // The round's derived events survive, the appended message lands after them, and the
+      // document is now events-native.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+        '9c2e0f11-0000-4000-8000-000000000001',
+      ]);
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(indexed.conversation_rounds).toHaveLength(1);
     });
 
     it('round-trips attachment_refs through the stored events projection', async () => {

@@ -1,5 +1,5 @@
 {
-  "sha1": "611e3a5158a077d009d276b48943d750516019dd",
+  "sha1": "09390f72a79f07483d924ccfa15f671502541086",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -44,6 +44,34 @@
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
         "line": 337,
         "column": 11
+      }
+    },
+    {
+      "id": "bf49e6d67d9de6a-1fa71fd1e9b5e47",
+      "title": "Onboarding Authenticate and Deploy step — AWS identity federation flag OFF offers only access keys as an authentication method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_disabled.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "f15e544ef42c485-d507e5e70302bb3",
+      "title": "Onboarding Authenticate and Deploy step — AWS identity federation flag ON offers identity federation as an authentication method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_enabled.spec.ts",
+        "line": 39,
+        "column": 7
       }
     },
     {

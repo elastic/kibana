@@ -8,7 +8,7 @@
 import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { first } from 'lodash';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryFields, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { escapeQuotes } from '@kbn/es-query';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
@@ -18,8 +18,8 @@ import type { SnapshotCustomMetricInput } from '../../../../../../common/http_ap
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 import { useSnapshot } from '../../hooks/use_snaphot';
+import { useInventoryRequestSchema } from '../../hooks/use_inventory_request_schema';
 import { createInventoryMetricFormatter } from '../../lib/create_inventory_metric_formatter';
-import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 import { getSnapshotMetricTranslations } from '../../../../../../common/inventory_models/intl_strings';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { createFormatterForMetric } from '../../../metrics_explorer/components/helpers/create_formatter_for_metric';
@@ -37,7 +37,8 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
   const { customMetrics, preferredSchema } = useWaffleOptionsContext();
-  const requestSchema = getInventoryRequestSchema(nodeType, preferredSchema);
+  const requestSchema = useInventoryRequestSchema(nodeType, preferredSchema);
+  const { id: nodeIdField } = findInventoryFields(nodeType, requestSchema);
 
   const requestMetrics = model.metrics
     .getWaffleMapTooltipMetrics({
@@ -52,7 +53,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   >;
 
   const { nodes, loading } = useSnapshot({
-    kuery: `"${model.fields.id}": "${escapeQuotes(node.id)}"`,
+    kuery: `"${nodeIdField}": "${escapeQuotes(node.id)}"`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,

@@ -7,8 +7,14 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { CortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import type { CortexPageStore } from './page_store';
+
+const createTelemetry = (): jest.Mocked<CortexTelemetry> => ({
+  reportHydrated: jest.fn(),
+  reportEditsApplied: jest.fn(),
+});
 
 describe('materializeCortex', () => {
   it('writes README, INDEX, and each page into the sandbox workspace', async () => {
@@ -47,7 +53,8 @@ describe('materializeCortex', () => {
       writeFiles: jest.fn().mockResolvedValue([]),
     } as unknown as SandboxSession;
 
-    await materializeCortex({ session, store, logger: loggerMock.create() });
+    const telemetry = createTelemetry();
+    await materializeCortex({ session, store, telemetry, logger: loggerMock.create() });
 
     expect(store.pruneDuplicates).toHaveBeenCalled();
     expect(session.mkdirs).toHaveBeenCalledWith(
@@ -112,9 +119,15 @@ describe('materializeCortex', () => {
       writeFiles: jest.fn().mockResolvedValue([]),
     } as unknown as SandboxSession;
 
-    await materializeCortex({ session, store, logger: loggerMock.create() });
+    const telemetry = createTelemetry();
+    await materializeCortex({ session, store, telemetry, logger: loggerMock.create() });
 
     expect(store.get).not.toHaveBeenCalledWith('cortex_service_legacy');
+
+    // Archived pages never reach the sandbox, so they must not inflate the hydrate counts either.
+    expect(telemetry.reportHydrated).toHaveBeenCalledWith([
+      expect.objectContaining({ id: 'cortex_service_checkout' }),
+    ]);
 
     const [pageFiles] = (session.writeFiles as jest.Mock).mock.calls[0];
     const paths = pageFiles.map((file: { path: string }) => file.path);

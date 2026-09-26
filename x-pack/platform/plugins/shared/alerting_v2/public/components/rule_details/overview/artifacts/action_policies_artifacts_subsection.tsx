@@ -5,178 +5,92 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiStat,
-  EuiText,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiPanel, EuiSpacer, type EuiFlyoutProps } from '@elastic/eui';
+import { useActionPolicyConnectorTypes } from '@kbn/alerting-v2-rule-form';
 import { useAlertingLocators } from '../../../../application/locator_context';
-import { useLinkedActionPolicies } from './use_linked_action_policies';
+import { ActionPolicyDetailsFlyoutContainer } from '../../../action_policy/details_flyout/action_policy_details_flyout_container';
 import type { RuleSummarySectionProps } from '../../../rule/types';
+import {
+  ActionPoliciesArtifactsBody,
+  ActionPoliciesSubsectionHeader,
+  LINKED_ACTION_POLICIES_VISIBLE_LIMIT,
+} from './action_policies_artifacts_body';
+import { useLinkedActionPolicies } from './use_linked_action_policies';
 
-const openLinkLabel = i18n.translate(
-  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.openLink',
-  { defaultMessage: 'Open notification policies' }
-);
+export { LINKED_ACTION_POLICIES_VISIBLE_LIMIT };
 
-const ActionPoliciesSubsectionHeader = ({ openHref }: { openHref: string }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
-    <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="reporter" size="m" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.title', {
-                defaultMessage: 'Notification policies',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-      <EuiText size="xs">
-        <EuiLink
-          color="text"
-          href={openHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          external={false}
-          style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}
-          data-test-subj="ruleActionPoliciesArtifactsOpenLink"
-        >
-          {openLinkLabel}
-        </EuiLink>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+type ActionPoliciesArtifactsSubsectionProps = RuleSummarySectionProps & {
+  /** `inherit` when this card is already inside a managed flyout. */
+  flyoutSession?: EuiFlyoutProps['session'];
+  /** Hide the card title when a parent heading already names this section. */
+  showTitle?: boolean;
+};
 
-export const ActionPoliciesArtifactsSubsection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
+export const ActionPoliciesArtifactsSubsection: React.FC<
+  ActionPoliciesArtifactsSubsectionProps
+> = ({ rule, flyoutSession = 'start', showTitle = true }) => {
   const { actionPolicyLocators } = useAlertingLocators();
-  const {
-    totalCount,
-    catchAllCount,
-    matchingCriteriaCount,
-    evaluatedCount,
-    isCountTruncated,
-    isLoading,
-    isError,
-  } = useLinkedActionPolicies(rule.metadata.tags ?? []);
+  const ruleTags = rule.metadata.tags ?? [];
+  const { items, evaluatedCount, isMatchTruncated, isLoading, isError } =
+    useLinkedActionPolicies(ruleTags);
+  const [isListExpanded, setIsListExpanded] = useState(false);
+  // Connector icons are only rendered for rows on screen. Hidden matches stay
+  // out of mgetWorkflows until the operator expands the list.
+  const visibleItems = useMemo(() => {
+    if (isLoading || isError) {
+      return [];
+    }
+    return isListExpanded ? items : items.slice(0, LINKED_ACTION_POLICIES_VISIBLE_LIMIT);
+  }, [isError, isListExpanded, isLoading, items]);
+  const visiblePolicies = useMemo(
+    () => visibleItems.map((item) => item.action_policy),
+    [visibleItems]
+  );
+  const { connectorTypesByPolicy } = useActionPolicyConnectorTypes(visiblePolicies);
+  const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
 
-  const openNotificationPoliciesHref = actionPolicyLocators.useUrl({ page: 'list' });
+  const handleExpandList = useCallback(() => {
+    setIsListExpanded(true);
+  }, []);
 
-  const statTitle = isCountTruncated ? `${totalCount}+` : totalCount;
+  const openActionPoliciesHref = actionPolicyLocators.useUrl({ page: 'list' });
 
-  const summaryText =
-    totalCount > 0
-      ? i18n.translate('xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.summary', {
-          defaultMessage:
-            '{matchingCriteriaCount, plural, one {# is matching criteria} other {# are matching criteria}} and {catchAllCount, plural, one {# is catch-all} other {# are catch-all}}',
-          values: { matchingCriteriaCount, catchAllCount },
-        })
-      : null;
-
-  const truncatedCountHint = isCountTruncated
-    ? i18n.translate(
-        'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.truncatedCountHint',
-        {
-          defaultMessage:
-            'Only {evaluatedCount, plural, one {# action policy was} other {# action policies were}} evaluated, so this count may be low.',
-          values: { evaluatedCount },
-        }
-      )
-    : null;
-
-  const shouldShowCounts = isLoading || !isError;
+  const handleCloseFlyout = useCallback(() => {
+    setPolicyToViewId(null);
+  }, []);
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleActionPoliciesArtifactsSection">
-      <ActionPoliciesSubsectionHeader openHref={openNotificationPoliciesHref} />
-      <EuiSpacer size="m" />
+    <>
+      <EuiPanel
+        hasBorder
+        paddingSize="m"
+        css={{ minWidth: 0 }}
+        data-test-subj="ruleActionPoliciesArtifactsSection"
+      >
+        <ActionPoliciesSubsectionHeader openHref={openActionPoliciesHref} showTitle={showTitle} />
+        <EuiSpacer size="m" />
+        <ActionPoliciesArtifactsBody
+          items={items}
+          evaluatedCount={evaluatedCount}
+          isMatchTruncated={isMatchTruncated}
+          isLoading={isLoading}
+          isError={isError}
+          isExpanded={isListExpanded}
+          onExpand={handleExpandList}
+          ruleTags={ruleTags}
+          connectorTypesByPolicy={connectorTypesByPolicy}
+          onOpen={setPolicyToViewId}
+        />
+      </EuiPanel>
 
-      {shouldShowCounts ? (
-        <>
-          <EuiStat
-            title={statTitle}
-            description={i18n.translate(
-              'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.statDescription',
-              { defaultMessage: 'Notification policies' }
-            )}
-            titleSize="l"
-            textAlign="left"
-            reverse
-            isLoading={isLoading}
-            data-test-subj="ruleActionPoliciesArtifactsStat"
-          />
-
-          {summaryText ? (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued" data-test-subj="ruleActionPoliciesArtifactsSummary">
-                {summaryText}
-              </EuiText>
-            </>
-          ) : null}
-
-          {truncatedCountHint ? (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText
-                size="s"
-                color="subdued"
-                data-test-subj="ruleActionPoliciesArtifactsTruncatedHint"
-              >
-                {truncatedCountHint}
-              </EuiText>
-            </>
-          ) : null}
-        </>
+      {policyToViewId ? (
+        <ActionPolicyDetailsFlyoutContainer
+          policyId={policyToViewId}
+          onClose={handleCloseFlyout}
+          session={flyoutSession}
+        />
       ) : null}
-
-      {!isLoading && isError ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiEmptyPrompt
-            color="danger"
-            icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
-            titleSize="xs"
-            paddingSize="m"
-            data-test-subj="ruleActionPoliciesArtifactsError"
-            title={
-              <h4>
-                {i18n.translate(
-                  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.errorTitle',
-                  {
-                    defaultMessage: 'Could not load notification policies',
-                  }
-                )}
-              </h4>
-            }
-            body={
-              <EuiText size="s">
-                {i18n.translate(
-                  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.errorBody',
-                  {
-                    defaultMessage: 'Try refreshing the page.',
-                  }
-                )}
-              </EuiText>
-            }
-          />
-        </>
-      ) : null}
-    </EuiPanel>
+    </>
   );
 };

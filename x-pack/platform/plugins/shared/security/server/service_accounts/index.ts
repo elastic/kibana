@@ -25,9 +25,19 @@ export type {
   ServiceAccountsServiceStart,
 } from './types';
 export { buildAssumableBy } from './assumable_by';
-export { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
+export { buildRoleAssignments } from './role_assignments';
 export { EsServiceAccounts } from './es_service_accounts';
+export {
+  ES_SERVICE_ACCOUNT_MAX_ROLES,
+  ES_SERVICE_ACCOUNT_ROLE_LIMITS,
+  ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
+} from './es_role_limits';
 export { UiamServiceAccounts } from './uiam_service_accounts';
+export {
+  UIAM_SERVICE_ACCOUNT_MAX_ROLES,
+  UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
+  UIAM_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
+} from './uiam_role_limits';
 export { ServiceAccountFakeRequests } from './fake_requests';
 export type {
   CreateServiceAccountFakeRequestParams,
