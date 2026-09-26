@@ -38,6 +38,7 @@
     "@kbn/code-editor",
     "@kbn/logging-mocks",
     "@kbn/triggers-actions-ui-plugin",
+    "@kbn/esql-utils",
     "@kbn/agent-builder-plugin",
     "@kbn/files-plugin",
     "@kbn/cloud-plugin",

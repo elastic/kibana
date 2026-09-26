@@ -881,7 +881,29 @@ const xyLayerUnionNoESQL = z
     description: 'XY chart layer types for DSL queries',
   });
 
-const xyLayerUnionESQL = xyDataLayerSchemaESQL.meta({
+/**
+ * Manual-only annotation layer for ES|QL charts.
+ * Unlike {@link annotationLayerByValueSchema}, this variant has no `data_source` field because
+ * manual point/range annotations have statically-defined timestamps and require no data view.
+ */
+const annotationLayerManualOnlySchema = z
+  .object({
+    ...ignoringGlobalFiltersSchema.shape,
+    type: z.literal('annotations'),
+    events: z
+      .array(z.union([annotationManualEvent, annotationManualRange]))
+      .min(1)
+      .max(100)
+      .meta({ description: 'Manual annotation events' }),
+  })
+  .strict()
+  .meta({
+    id: 'visXyAnnotationLayerManualOnly',
+    title: 'Annotation Layer (Manual, ES|QL)',
+    description: 'Manual-only annotation layer for ES|QL charts with no data source required',
+  });
+
+const xyLayerUnionESQL = z.union([xyDataLayerSchemaESQL, annotationLayerManualOnlySchema]).meta({
   id: 'visXyLayersESQL',
   description: 'XY chart layer types for ES|QL queries',
 });
@@ -944,6 +966,7 @@ export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLin
 export type AnnotationLayerType = z.output<typeof annotationLayerSchema>;
 export type AnnotationLayerByRefType = z.output<typeof annotationByRefLayerSchema>;
 export type AnnotationLayerByValueType = z.output<typeof annotationLayerByValueSchema>;
+export type AnnotationLayerManualOnlyType = z.output<typeof annotationLayerManualOnlySchema>;
 /**
  * Reference line layers are not support but included to keep existing logic
  */

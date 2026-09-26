@@ -9,6 +9,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { agentBuilderTracesSkill } from './agent_builder_traces/agent_builder_traces_skill';
+import { changePointDetectionSkill } from './change_point_detection_skill';
 import { graphCreationSkill } from './graph_creation_skill';
 import { skillManagementSkill } from './skill_management';
 import { connectorAuthoringSkill } from './connector_authoring';
@@ -28,6 +29,7 @@ export const registerSkills = (
   agentBuilder.skills.register(graphCreationSkill);
   agentBuilder.skills.register(skillManagementSkill);
   agentBuilder.skills.register(agentBuilderTracesSkill);
+  agentBuilder.skills.register(changePointDetectionSkill);
   agentBuilder.skills.register(connectorAuthoringSkill({ getActionsStart }));
   agentBuilder.skills.register(connectorDiscoverySkill({ getActionsStart }));
   agentBuilder.skills.register(kiRetrievalSkill);
