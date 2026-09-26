@@ -37520,7 +37520,6 @@
     "xpack.osquery.configUploader.exampleConfigLinkLabel": "構成の例",
     "xpack.osquery.configUploader.initialPromptTextLabel": "osquery構成ファイルを選択するか、ドラッグします",
     "xpack.osquery.configUploader.unsupportedFileTypeText": "ファイルタイプ{fileType}はサポートされていません。{supportedFileTypes}構成ファイルをアップロードしてください。",
-    "xpack.osquery.createScheduledQuery.agentPolicyAgentsCountText": "{count, plural, one {# agent} other {# 個のエージェント}}が登録されました",
     "xpack.osquery.deletePack.confirmationModal.body": "このパックを削除しようとしています。実行しますか？",
     "xpack.osquery.deletePack.confirmationModal.cancelButtonLabel": "キャンセル",
     "xpack.osquery.deletePack.confirmationModal.confirmButtonLabel": "確認",

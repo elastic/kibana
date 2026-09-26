@@ -45,16 +45,30 @@ jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       notifications: { toasts: { addDanger: mockAddDanger } },
+      application: {
+        getUrlForApp: jest.fn(
+          (appId: string, opts: { path: string }) => `/app/${appId}${opts.path}`
+        ),
+      },
     },
   }),
 }));
 
+const mockUseAgentPolicies = jest.fn();
+
 jest.mock('../../agent_policies', () => ({
-  useAgentPolicies: () => ({
-    data: {
-      agentPoliciesById: {},
-    },
-  }),
+  useAgentPolicies: () => mockUseAgentPolicies(),
+}));
+
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  pagePathGetters: {
+    // Mirrors Fleet pagePathGetters: path segment is `/policies/${id}` (not `/fleet/policies/...`).
+    policy_details: ({ policyId }: { policyId: string }) => ['', `/policies/${policyId}`],
+  },
+}));
+
+jest.mock('@kbn/fleet-plugin/common', () => ({
+  PLUGIN_ID: 'fleet',
 }));
 
 jest.mock('../use_create_pack', () => ({
@@ -94,6 +108,11 @@ describe('PackForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     sessionStorage.clear();
+    mockUseAgentPolicies.mockReturnValue({
+      data: { agentPoliciesById: {} },
+      isFetching: false,
+      isError: false,
+    });
   });
 
   it('should target the Packs list for cancel button navigation in edit mode', async () => {
@@ -516,6 +535,82 @@ describe('PackForm', () => {
       // Just confirm the payload reached updateAsync — savedObjectId is only
       // referenced in the local variable so eslint doesn't flag it.
       expect(savedObjectId).toBe('saved-object-id-b5');
+    });
+
+    it('includes selected policy_ids in the create mutate payload', async () => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: {
+          agentPoliciesById: {
+            // agents: 0 so save skips the agent-count confirmation modal
+            'policy-1': { name: 'Alpha Policy', agents: 0, id: 'policy-1', description: '' },
+            'policy-2': { name: 'Beta Policy', agents: 0, id: 'policy-2', description: '' },
+          },
+        },
+        isFetching: false,
+        isError: false,
+      });
+
+      const { getByTestId, getByRole, container } = renderWithContext(
+        <PackForm editMode={false} />
+      );
+
+      const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
+      fireEvent.change(nameInput, { target: { value: 'policy-pack-create' } });
+
+      fireEvent.click(getByRole('checkbox', { name: 'Select policy Alpha Policy' }));
+
+      fireEvent.click(getByTestId('save-pack-button'));
+
+      await waitFor(() => expect(mockCreateAsync).toHaveBeenCalled());
+
+      const submitted = mockCreateAsync.mock.calls[0][0];
+      expect(submitted.policy_ids).toEqual(['policy-1']);
+      expect(submitted).toHaveProperty('schedule_type');
+    });
+
+    it('includes selected policy_ids in the edit mutate payload', async () => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: {
+          agentPoliciesById: {
+            // agents: 0 so save skips the agent-count confirmation modal
+            'policy-1': { name: 'Alpha Policy', agents: 0, id: 'policy-1', description: '' },
+            'policy-2': { name: 'Beta Policy', agents: 0, id: 'policy-2', description: '' },
+          },
+        },
+        isFetching: false,
+        isError: false,
+      });
+
+      const defaultValue = {
+        id: 'pack-policy-edit',
+        saved_object_id: 'saved-policy-edit',
+        name: 'policy-pack-edit',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'interval' as const,
+        interval: 3600,
+      };
+
+      const { getByTestId, getByRole } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} />
+      );
+
+      fireEvent.click(getByRole('checkbox', { name: 'Select policy Beta Policy' }));
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      expect(submitted.policy_ids).toEqual(['policy-2']);
+      expect(submitted.schedule_type).toBe('interval');
+      expect(submitted.interval).toBe(3600);
     });
   });
 

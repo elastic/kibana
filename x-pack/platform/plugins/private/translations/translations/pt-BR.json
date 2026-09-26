@@ -37505,7 +37505,6 @@
     "xpack.osquery.configUploader.exampleConfigLinkLabel": "Exemplo de configuração",
     "xpack.osquery.configUploader.initialPromptTextLabel": "Selecione ou arraste e solte o arquivo de configuração do osquery",
     "xpack.osquery.configUploader.unsupportedFileTypeText": "O tipo de arquivo {fileType} não é compatível. Faça upload do arquivo de configuração {supportedFileTypes}",
-    "xpack.osquery.createScheduledQuery.agentPolicyAgentsCountText": "{count, plural, one {# agent} other {# agentes}} inscritos",
     "xpack.osquery.deletePack.confirmationModal.body": "Você está prestes a excluir este pacote. Tem certeza de que deseja fazer isso?",
     "xpack.osquery.deletePack.confirmationModal.cancelButtonLabel": "Cancelar",
     "xpack.osquery.deletePack.confirmationModal.confirmButtonLabel": "Confirmar",

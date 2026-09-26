@@ -37529,7 +37529,6 @@
     "xpack.osquery.configUploader.exampleConfigLinkLabel": "示例配置",
     "xpack.osquery.configUploader.initialPromptTextLabel": "选择或拖放 osquery 配置文件",
     "xpack.osquery.configUploader.unsupportedFileTypeText": "文件类型 {fileType} 不受支持，请上传 {supportedFileTypes} 配置文件",
-    "xpack.osquery.createScheduledQuery.agentPolicyAgentsCountText": "{count, plural, one {# agent} other {# 个智能体}}已注册",
     "xpack.osquery.deletePack.confirmationModal.body": "您即将删除此包。是否确定要执行此操作？",
     "xpack.osquery.deletePack.confirmationModal.cancelButtonLabel": "取消",
     "xpack.osquery.deletePack.confirmationModal.confirmButtonLabel": "确认",
