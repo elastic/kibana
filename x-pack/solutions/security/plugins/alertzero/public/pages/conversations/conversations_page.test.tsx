@@ -250,11 +250,14 @@ const renderPage = (
 
   // The sections discard their accumulated pages through the query client on
   // collapse, so the page needs a real one even with the hooks stubbed.
-  const page = (
+  // A fresh element each time: React bails out of a root update when the element
+  // is the same reference, so a poll-style mock change would never re-render.
+  const queryClient = new QueryClient();
+  const page = () => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={{ ...core, agentBuilder }}>
-          <QueryClientProvider client={new QueryClient()}>
+          <QueryClientProvider client={queryClient}>
             <Router history={history}>
               <ConversationsPage />
             </Router>
@@ -263,9 +266,9 @@ const renderPage = (
       </EuiProvider>
     </I18nProvider>
   );
-  const rendered = render(page);
+  const rendered = render(page());
 
-  return { core, agentBuilder, closeFlyout, history, rerender: () => rendered.rerender(page) };
+  return { core, agentBuilder, closeFlyout, history, rerender: () => rendered.rerender(page()) };
 };
 
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
