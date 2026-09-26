@@ -11,19 +11,27 @@ import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   Background,
+  ConnectionLineType,
   ReactFlow,
   ReactFlowProvider,
   SelectionMode,
   type CoordinateExtent,
   type Edge,
   type EdgeTypes,
+  type FinalConnectionState,
+  type HandleType,
+  type IsValidConnection,
   type Node,
   type NodeMouseHandler,
   type NodeSelectionChange,
   type NodeTypes,
+  type OnConnect,
+  type OnConnectEnd,
+  type OnConnectStart,
   type OnEdgesChange,
   type OnNodeDrag,
   type OnNodesChange,
+  type OnReconnect,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
@@ -71,6 +79,50 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
     background: ${euiTheme.colors.borderBaseProminent};
     border-color: ${euiTheme.colors.borderBaseProminent};
   }
+
+  // Configured unit nodes: a plus while hovering a handle you can drag from,
+  // and a blue ring around every handle that can receive the line.
+  .react-flow__handle.streamsConnectionHandle {
+    width: 16px;
+    height: 16px;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseProminent};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${euiTheme.colors.textParagraph};
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .react-flow__handle.streamsConnectionHandle.connectablestart.connectionindicator:hover::after {
+    content: '+';
+  }
+
+  .react-flow__handle.streamsConnectionHandle.streamsConnectionTarget,
+  .react-flow__handle.streamsConnectionHandle.valid {
+    z-index: 1;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+    box-shadow: 0 0 0 ${euiTheme.size.xs} ${euiTheme.colors.backgroundLightPrimary};
+  }
+
+  .react-flow__handle.streamsConnectionHandle.valid {
+    box-shadow: 0 0 0 ${euiTheme.size.s} ${euiTheme.colors.backgroundLightPrimary};
+  }
+
+  .react-flow__handle.streamsConnectionHandle.valid::after {
+    content: none;
+  }
+
+  // Unit connections can be pulled off a node. The grab cursor covers the line,
+  // and the invisible updater circles sit on the line just outside each handle.
+  .react-flow__edge.streamsUnitConnection {
+    cursor: grab;
+  }
+  .react-flow__edge.streamsUnitConnection.updating {
+    cursor: grabbing;
+  }
 `;
 
 /**
@@ -111,6 +163,24 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   edgeTypes?: EdgeTypes;
   onNodesChange?: OnNodesChange<NodeType>;
   onEdgesChange?: OnEdgesChange<EdgeType>;
+  onConnect?: OnConnect;
+  onConnectStart?: OnConnectStart;
+  onConnectEnd?: OnConnectEnd;
+  onReconnect?: OnReconnect<EdgeType>;
+  onReconnectEnd?: (
+    event: MouseEvent | TouchEvent,
+    edge: EdgeType,
+    handleType: HandleType,
+    connectionState: FinalConnectionState
+  ) => void;
+  isValidConnection?: IsValidConnection<EdgeType>;
+  connectionLineType?: ConnectionLineType;
+  connectionLineStyle?: React.CSSProperties;
+  /** How close a dragged line must be to a handle before it snaps. */
+  connectionRadius?: number;
+  /** How close a pointer must be to an edge end to pull that line off. */
+  reconnectRadius?: number;
+  edgesReconnectable?: boolean;
   onNodeClick?: NodeMouseHandler<NodeType>;
   onNodeContextMenu?: NodeMouseHandler<NodeType>;
   onNodeDragStart?: OnNodeDrag<NodeType>;
@@ -148,6 +218,17 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   edgeTypes = canvasEdgeTypes,
   onNodesChange,
   onEdgesChange,
+  onConnect,
+  onConnectStart,
+  onConnectEnd,
+  onReconnect,
+  onReconnectEnd,
+  isValidConnection,
+  connectionLineType = ConnectionLineType.SmoothStep,
+  connectionLineStyle,
+  connectionRadius = 24,
+  reconnectRadius = 36,
+  edgesReconnectable = false,
   onNodeClick,
   onNodeContextMenu,
   onNodeDragStart,
@@ -215,6 +296,17 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onConnectStart={onConnectStart}
+          onConnectEnd={onConnectEnd}
+          onReconnect={onReconnect}
+          onReconnectEnd={onReconnectEnd}
+          isValidConnection={isValidConnection}
+          connectionLineType={connectionLineType}
+          connectionLineStyle={connectionLineStyle}
+          connectionRadius={connectionRadius}
+          reconnectRadius={reconnectRadius}
+          edgesReconnectable={edgesReconnectable}
           onEdgeClick={noop}
           onNodeClick={onNodeClick}
           onNodeContextMenu={onNodeContextMenu}

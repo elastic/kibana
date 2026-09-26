@@ -19,6 +19,11 @@ import {
   setup,
 } from 'xstate';
 import {
+  createDestinationsMachineImplementations,
+  destinationsStateMachine,
+} from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
+import { getUnitDestinations } from '../../../../streams_layout/destinations/destination_models';
+import {
   createSourcesMachineImplementations,
   sourcesStateMachine,
 } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
@@ -54,6 +59,7 @@ export const canvasStateMachine = setup({
   actors: {
     initializeUrl: getPlaceholderFor(createUrlInitializerActor),
     sourcesMachine: getPlaceholderFor(createSourcesMachineActor),
+    destinationsMachine: getPlaceholderFor(createDestinationsMachineActor),
     loadUnitDefinition: getPlaceholderFor(createLoadUnitDefinitionActor),
     validateUnitDefinition: getPlaceholderFor(createValidateUnitDefinitionActor),
     persistUnitDefinition: getPlaceholderFor(createPersistUnitDefinitionActor),
@@ -79,11 +85,32 @@ export const canvasStateMachine = setup({
         return {};
       }
       const nextUnit = event.unitDefinition;
+      if ('destinationId' in event) {
+        return {
+          nextUnit,
+          savingUnit: nextUnit,
+          savingComponentId: event.destinationId,
+          savingComponentKind: 'destination' as const,
+          savingComponentIntent: event.intent,
+          error: undefined,
+        };
+      }
+      if ('sourceId' in event) {
+        return {
+          nextUnit,
+          savingUnit: nextUnit,
+          savingComponentId: event.sourceId,
+          savingComponentKind: 'source' as const,
+          savingComponentIntent: event.intent,
+          error: undefined,
+        };
+      }
       return {
         nextUnit,
         savingUnit: nextUnit,
-        savingSourceId: event.sourceId,
-        savingSourceIntent: event.intent,
+        savingComponentId: undefined,
+        savingComponentKind: undefined,
+        savingComponentIntent: 'connect' as const,
         error: undefined,
       };
     }),
@@ -97,8 +124,9 @@ export const canvasStateMachine = setup({
     ),
     prepareUnitSave: assign({
       savingUnit: ({ context }) => context.nextUnit,
-      savingSourceId: undefined,
-      savingSourceIntent: undefined,
+      savingComponentId: undefined,
+      savingComponentKind: undefined,
+      savingComponentIntent: undefined,
       error: undefined,
     }),
     storeLoadedUnitDefinition: assign(({ context, event }) =>
@@ -107,8 +135,9 @@ export const canvasStateMachine = setup({
             unit: event.output,
             nextUnit: event.output,
             savingUnit: undefined,
-            savingSourceId: undefined,
-            savingSourceIntent: undefined,
+            savingComponentId: undefined,
+            savingComponentKind: undefined,
+            savingComponentIntent: undefined,
             error: undefined,
           }
         : context
@@ -122,8 +151,9 @@ export const canvasStateMachine = setup({
         unit: event.output.unitDefinition,
         nextUnit: hasSubsequentChanges ? context.nextUnit : event.output.unitDefinition,
         savingUnit: undefined,
-        savingSourceId: undefined,
-        savingSourceIntent: undefined,
+        savingComponentId: undefined,
+        savingComponentKind: undefined,
+        savingComponentIntent: undefined,
         error: undefined,
       };
     }),
@@ -135,8 +165,8 @@ export const canvasStateMachine = setup({
           ? getFormattedError(event.error)
           : undefined,
     }),
-    rollbackFailedSourceSave: assign(({ context }) =>
-      context.savingSourceId
+    rollbackFailedComponentSave: assign(({ context }) =>
+      context.savingComponentId || context.savingComponentIntent === 'connect'
         ? {
             nextUnit: context.unit,
             savingUnit: undefined,
@@ -144,53 +174,122 @@ export const canvasStateMachine = setup({
         : {}
     ),
     notifyUnitFailure: getPlaceholderFor(createNotifyUnitFailureAction),
-    syncLoadedUnitDefinition: sendTo(
+    syncLoadedUnitToSources: sendTo(
       ({ context }) => context.sourcesRef,
       ({ event }) => {
         if (event.type !== 'xstate.done.actor.loadUnitDefinition') {
           throw new Error('Expected a loaded unit definition');
         }
-        return { type: 'unit.loaded', unitDefinition: event.output };
+        return { type: 'unit.loaded' as const, unitDefinition: event.output };
       }
     ),
-    syncSavedUnitDefinition: sendTo(
+    syncLoadedUnitToDestinations: sendTo(
+      ({ context }) => context.destinationsRef,
+      ({ event }) => {
+        if (event.type !== 'xstate.done.actor.loadUnitDefinition') {
+          throw new Error('Expected a loaded unit definition');
+        }
+        return { type: 'unit.loaded' as const, unitDefinition: event.output };
+      }
+    ),
+    syncStagedUnitToSources: sendTo(
       ({ context }) => context.sourcesRef,
+      ({ event }) => {
+        if (event.type !== 'unit.stage') {
+          throw new Error('Expected a staged unit definition');
+        }
+        return { type: 'unit.loaded' as const, unitDefinition: event.unitDefinition };
+      }
+    ),
+    syncStagedUnitToDestinations: sendTo(
+      ({ context }) => context.destinationsRef,
+      ({ event }) => {
+        if (event.type !== 'unit.stage') {
+          throw new Error('Expected a staged unit definition');
+        }
+        return { type: 'unit.loaded' as const, unitDefinition: event.unitDefinition };
+      }
+    ),
+    syncSavedUnitToOriginator: sendTo(
+      ({ context }) =>
+        context.savingComponentKind === 'destination'
+          ? context.destinationsRef
+          : context.sourcesRef,
       ({ context, event }) => {
         if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
           throw new Error('Expected a persisted unit definition');
         }
-        return event.output.sourceId
+        if (!context.savingComponentId) {
+          return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
+        }
+        return context.savingComponentKind === 'destination'
           ? {
-              type: 'unit.persisted',
-              sourceId: event.output.sourceId,
+              type: 'unit.persisted' as const,
+              destinationId: context.savingComponentId,
               unitDefinition: event.output.unitDefinition,
             }
-          : { type: 'unit.loaded', unitDefinition: context.nextUnit };
+          : {
+              type: 'unit.persisted' as const,
+              sourceId: context.savingComponentId,
+              unitDefinition: event.output.unitDefinition,
+            };
       }
     ),
-    syncSourceSaveFailure: sendTo(
-      ({ context }) => context.sourcesRef,
-      ({ context, event }) => {
-        if (!context.savingSourceId || !context.savingSourceIntent) {
-          throw new Error('Expected a source mutation to be saving');
+    syncSavedUnitToPeer: sendTo(
+      ({ context }) =>
+        context.savingComponentKind === 'destination'
+          ? context.sourcesRef
+          : context.destinationsRef,
+      ({ event }) => {
+        if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
+          throw new Error('Expected a persisted unit definition');
         }
-        return {
-          type: 'unit.persistenceFailed',
-          sourceId: context.savingSourceId,
-          unitDefinition: context.unit,
-          message:
-            event.type === 'xstate.error.actor.validateUnitDefinition' ||
-            event.type === 'xstate.error.actor.persistUnitDefinition'
-              ? getFormattedError(event.error).message
-              : 'Unable to save the source.',
-          intent: context.savingSourceIntent,
-        };
+        return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
+      }
+    ),
+    syncComponentSaveFailure: sendTo(
+      ({ context }) =>
+        context.savingComponentKind === 'destination'
+          ? context.destinationsRef
+          : context.sourcesRef,
+      ({ context, event }) => {
+        const intent = context.savingComponentIntent;
+        if (
+          !context.savingComponentId ||
+          (intent !== 'create' && intent !== 'delete') ||
+          !context.savingComponentKind
+        ) {
+          throw new Error('Expected a unit component mutation to be saving');
+        }
+        const message =
+          event.type === 'xstate.error.actor.validateUnitDefinition' ||
+          event.type === 'xstate.error.actor.persistUnitDefinition'
+            ? getFormattedError(event.error).message
+            : i18n.translate('xpack.streams.streamDetailCanvas.unitSaveFailedErrorMessage', {
+                defaultMessage: 'Unable to save the streams configuration.',
+              });
+        return context.savingComponentKind === 'destination'
+          ? {
+              type: 'unit.persistenceFailed' as const,
+              destinationId: context.savingComponentId,
+              unitDefinition: context.unit,
+              message,
+              intent,
+            }
+          : {
+              type: 'unit.persistenceFailed' as const,
+              sourceId: context.savingComponentId,
+              unitDefinition: context.unit,
+              message,
+              intent,
+            };
       }
     ),
   },
   guards: {
     hasUnsavedUnitChanges: ({ context }) => context.unit !== context.nextUnit,
-    isSavingSourceChange: ({ context }) => context.savingSourceId !== undefined,
+    isSavingComponentChange: ({ context }) => context.savingComponentId !== undefined,
+    isSavingConnection: ({ context }) => context.savingComponentIntent === 'connect',
   },
 }).createMachine({
   id: 'canvasMachine',
@@ -221,7 +320,7 @@ export const canvasStateMachine = setup({
           actions: 'storeNodePositions',
         },
         'unit.stage': {
-          actions: 'storeNextUnit',
+          actions: ['storeNextUnit', 'syncStagedUnitToSources', 'syncStagedUnitToDestinations'],
         },
         'flyout.open': {
           actions: [
@@ -278,7 +377,11 @@ export const canvasStateMachine = setup({
                 src: 'loadUnitDefinition',
                 onDone: {
                   target: 'ready',
-                  actions: ['storeLoadedUnitDefinition', 'syncLoadedUnitDefinition'],
+                  actions: [
+                    'storeLoadedUnitDefinition',
+                    'syncLoadedUnitToSources',
+                    'syncLoadedUnitToDestinations',
+                  ],
                 },
                 onError: {
                   target: 'loadFailed',
@@ -311,7 +414,11 @@ export const canvasStateMachine = setup({
                 src: 'loadUnitDefinition',
                 onDone: {
                   target: 'ready',
-                  actions: ['storeLoadedUnitDefinition', 'syncLoadedUnitDefinition'],
+                  actions: [
+                    'storeLoadedUnitDefinition',
+                    'syncLoadedUnitToSources',
+                    'syncLoadedUnitToDestinations',
+                  ],
                 },
                 onError: {
                   target: 'reloadFailed',
@@ -345,12 +452,21 @@ export const canvasStateMachine = setup({
                 },
                 onError: [
                   {
-                    guard: 'isSavingSourceChange',
+                    guard: 'isSavingComponentChange',
                     target: 'saveFailed',
                     actions: [
                       'storeUnitFailure',
-                      'syncSourceSaveFailure',
-                      'rollbackFailedSourceSave',
+                      'syncComponentSaveFailure',
+                      'rollbackFailedComponentSave',
+                      'notifyUnitFailure',
+                    ],
+                  },
+                  {
+                    guard: 'isSavingConnection',
+                    target: 'saveFailed',
+                    actions: [
+                      'storeUnitFailure',
+                      'rollbackFailedComponentSave',
                       'notifyUnitFailure',
                     ],
                   },
@@ -372,22 +488,35 @@ export const canvasStateMachine = setup({
               invoke: {
                 id: 'persistUnitDefinition',
                 src: 'persistUnitDefinition',
-                input: ({ context }) => ({
-                  unitDefinition: context.savingUnit ?? context.nextUnit,
-                  sourceId: context.savingSourceId,
-                }),
+                input: ({ context }) => context.savingUnit ?? context.nextUnit,
                 onDone: {
                   target: 'ready',
-                  actions: ['storePersistedUnitDefinition', 'syncSavedUnitDefinition'],
+                  // Sync while savingComponentId is still set. storePersistedUnitDefinition
+                  // clears it, and a later sync would tell the source or destination
+                  // machine the unit merely reloaded, leaving its create flow on "saving".
+                  actions: [
+                    'syncSavedUnitToOriginator',
+                    'syncSavedUnitToPeer',
+                    'storePersistedUnitDefinition',
+                  ],
                 },
                 onError: [
                   {
-                    guard: 'isSavingSourceChange',
+                    guard: 'isSavingComponentChange',
                     target: 'saveFailed',
                     actions: [
                       'storeUnitFailure',
-                      'syncSourceSaveFailure',
-                      'rollbackFailedSourceSave',
+                      'syncComponentSaveFailure',
+                      'rollbackFailedComponentSave',
+                      'notifyUnitFailure',
+                    ],
+                  },
+                  {
+                    guard: 'isSavingConnection',
+                    target: 'saveFailed',
+                    actions: [
+                      'storeUnitFailure',
+                      'rollbackFailedComponentSave',
                       'notifyUnitFailure',
                     ],
                   },
@@ -424,8 +553,9 @@ export const canvasStateMachine = setup({
       unit: unitDefinition,
       nextUnit: unitDefinition,
       savingUnit: undefined,
-      savingSourceId: undefined,
-      savingSourceIntent: undefined,
+      savingComponentId: undefined,
+      savingComponentKind: undefined,
+      savingComponentIntent: undefined,
       // Kept in the Canvas parent so API-backed coordinates can be loaded and
       // persisted alongside the unit without changing the graph components.
       nodePositions: {},
@@ -434,6 +564,13 @@ export const canvasStateMachine = setup({
         input: {
           unitDefinition,
           metadataBySourceId: {},
+          includeUnconfiguredNodeOnCreate: true,
+          parentRef: self,
+        },
+      }),
+      destinationsRef: spawn('destinationsMachine', {
+        input: {
+          unitDefinition,
           includeUnconfiguredNodeOnCreate: true,
           parentRef: self,
         },
@@ -459,6 +596,7 @@ export function createCanvasMachineImplementations({
         apiKeyGenerationDeps,
         loadSourceEnvironment,
       }),
+      destinationsMachine: createDestinationsMachineActor({ core }),
       loadUnitDefinition: createLoadUnitDefinitionActor({ loadUnitDefinition }),
       validateUnitDefinition: createValidateUnitDefinitionActor({ validateUnitDefinition }),
       persistUnitDefinition: createPersistUnitDefinitionActor({ persistUnitDefinition }),
@@ -484,6 +622,14 @@ function createSourcesMachineActor({
   );
 }
 
+function createDestinationsMachineActor({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
+  return destinationsStateMachine.provide(
+    createDestinationsMachineImplementations({
+      toasts: core.notifications.toasts,
+    })
+  );
+}
+
 function createLoadUnitDefinitionActor({
   loadUnitDefinition,
 }: {
@@ -498,6 +644,14 @@ async function validateCanvasUnitDefinition(unitDefinition: Unit): Promise<void>
     throw new Error(
       i18n.translate('xpack.streams.streamDetailCanvas.duplicateSourceIdsErrorMessage', {
         defaultMessage: 'Source IDs must be unique.',
+      })
+    );
+  }
+  const destinationIds = getUnitDestinations(unitDefinition).map(({ id }) => id);
+  if (new Set(destinationIds).size !== destinationIds.length) {
+    throw new Error(
+      i18n.translate('xpack.streams.streamDetailCanvas.duplicateDestinationIdsErrorMessage', {
+        defaultMessage: 'Destination IDs must be unique.',
       })
     );
   }
@@ -516,23 +670,30 @@ function createPersistUnitDefinitionActor({
 }: {
   persistUnitDefinition: UnitRepository['persist'];
 }) {
-  return fromPromise(async ({ input }: { input: { unitDefinition: Unit; sourceId?: string } }) => ({
-    unitDefinition: await persistUnitDefinition(input.unitDefinition),
-    sourceId: input.sourceId,
+  return fromPromise(async ({ input }: { input: Unit }) => ({
+    unitDefinition: await persistUnitDefinition(input),
   }));
 }
 
 function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
-  return ({ event }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+  return ({ context, event }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
     if (
       event.type === 'xstate.error.actor.loadUnitDefinition' ||
       event.type === 'xstate.error.actor.validateUnitDefinition' ||
       event.type === 'xstate.error.actor.persistUnitDefinition'
     ) {
       core.notifications.toasts.addError(getFormattedError(event.error), {
-        title: i18n.translate('xpack.streams.streamDetailCanvas.sourcesConfigurationErrorMessage', {
-          defaultMessage: 'Unable to update the sources configuration',
-        }),
+        title:
+          context.savingComponentKind === 'destination'
+            ? i18n.translate(
+                'xpack.streams.streamDetailCanvas.destinationsConfigurationErrorMessage',
+                {
+                  defaultMessage: 'Unable to update the destinations configuration',
+                }
+              )
+            : i18n.translate('xpack.streams.streamDetailCanvas.sourcesConfigurationErrorMessage', {
+                defaultMessage: 'Unable to update the sources configuration',
+              }),
       });
     }
   };

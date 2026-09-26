@@ -16,7 +16,8 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Position, type NodeProps } from '@xyflow/react';
+import { ConnectionHandle } from './connection_handle';
 import type { SourceNode as SourceNodeType } from '../types';
 import { SOURCE_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
@@ -103,7 +104,11 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
           </>
         )}
       </EuiPanel>
-      <Handle type="source" position={Position.Right} isConnectable={false} />
+      <ConnectionHandle
+        type="source"
+        position={Position.Right}
+        isConnectable={Boolean(data.sourceId)}
+      />
     </>
   );
 }
