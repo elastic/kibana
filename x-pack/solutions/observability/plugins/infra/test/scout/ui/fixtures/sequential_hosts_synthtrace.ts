@@ -29,6 +29,10 @@ import { generateHostData } from './synthtrace/host_data';
 import { generateLogsDataForHostsOrContainers } from './synthtrace/logs_data_for_hosts_or_containers';
 import { generateSemconvHostData } from './synthtrace/semconv_host_data';
 
+// `getSynthtraceClient` caches one instance per client name per worker process, so whichever
+// call runs first decides whether the Fleet package was installed. Suites that need the real
+// (TSDS) `metrics-system.*` templates must therefore call `installSystemPackageTemplates` before
+// any other helper here.
 const skipFleetForFixedDates = { skipInstallation: true as const };
 
 export interface SequentialSynthtraceWorkerDeps {
@@ -140,6 +144,23 @@ export const cleanNonTsdsSystemTemplate = async (
     );
     throw error;
   }
+};
+
+/**
+ * Initializes the infra synthtrace client with the Fleet `system` package installed, giving
+ * `metrics-system.*` its real (TSDS) index templates. Sequential suites that take their
+ * timestamps from `resolveDateSlots` must call this before creating the reference data stream,
+ * so the writable window they read is the one their data will be indexed against.
+ */
+export const installSystemPackageTemplates = async (
+  deps: SequentialSynthtraceWorkerDeps
+): Promise<void> => {
+  await getSynthtraceClient('infraEsClient', {
+    esClient: deps.esClient,
+    kbnUrl: deps.kbnUrl.get(),
+    log: deps.log,
+    config: deps.config,
+  });
 };
 
 const indexInfra = async (

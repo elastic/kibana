@@ -10,30 +10,39 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import { HOST1_NAME, HOSTS, EXTENDED_TIMEOUT } from '../../fixtures/constants';
 import {
+  ensureReferenceDataStream,
+  resolveDateSlots,
+  type DateSlot,
+} from '../../fixtures/date_slots';
+import {
   cleanHostsFlyoutSynthtraceData,
-  cleanNonTsdsSystemTemplate,
-  ensureNonTsdsSystemTemplate,
   ingestHostsFlyoutSynthtraceData,
+  installSystemPackageTemplates,
 } from '../../fixtures/sequential_hosts_synthtrace';
 
-const HOSTS_FLYOUT_DATA_FROM = '2024-04-04T18:20:00.000Z';
-const HOSTS_FLYOUT_DATA_TO = '2024-04-04T18:21:00.000Z';
+let hostsSlot: DateSlot;
 
 test.describe(
   'Hosts Page - Flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, kbnUrl, log, config, kbnClient }) => {
-      log.info('Sequential suite: installing non-TSDS shadow template for metrics-system.*');
-      await ensureNonTsdsSystemTemplate(esClient, log);
+      // Must precede every other synthtrace helper so the cached infra client is the one that
+      // installed the Fleet `system` package (see `installSystemPackageTemplates`).
+      log.info('Sequential suite: installing Fleet system package templates for metrics-system.*');
+      await installSystemPackageTemplates({ esClient, kbnUrl, log, config });
 
       log.info('Sequential suite: resetting existing synthtrace data before ingest');
       await cleanHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
 
+      log.info('Sequential suite: resolving the writable TSDS window for metrics-system.*');
+      await ensureReferenceDataStream(esClient);
+      hostsSlot = (await resolveDateSlots(esClient)).hosts;
+
       log.info('Sequential suite: ingesting ECS hosts + logs + APM services for flyout tests');
       await ingestHostsFlyoutSynthtraceData(
         { esClient, kbnUrl, log, config },
-        { from: HOSTS_FLYOUT_DATA_FROM, to: HOSTS_FLYOUT_DATA_TO }
+        { from: hostsSlot.from, to: hostsSlot.to }
       );
 
       log.info('Sequential suite: waiting for hosts metrics to be searchable before navigating');
@@ -45,8 +54,8 @@ test.describe(
                 method: 'POST',
                 path: '/api/metrics/infra/host',
                 body: {
-                  from: HOSTS_FLYOUT_DATA_FROM,
-                  to: HOSTS_FLYOUT_DATA_TO,
+                  from: hostsSlot.from,
+                  to: hostsSlot.to,
                   metrics: ['cpuV2', 'diskSpaceUsage', 'memory', 'memoryFree', 'normalizedLoad1m'],
                   limit: 100,
                   schema: 'ecs',
@@ -68,8 +77,8 @@ test.describe(
       test.setTimeout(120_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
-        from: HOSTS_FLYOUT_DATA_FROM,
-        to: HOSTS_FLYOUT_DATA_TO,
+        from: hostsSlot.from,
+        to: hostsSlot.to,
         hostNames: HOSTS.map(({ hostName }) => hostName),
         preferredSchema: 'ecs',
       });
@@ -79,21 +88,18 @@ test.describe(
     test.afterAll(async ({ esClient, kbnUrl, log, config }) => {
       log.info('Sequential suite: cleaning synthtrace data for flyout tests');
       await cleanHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
-      log.info('Sequential suite: removing non-TSDS shadow template for metrics-system.*');
-      await cleanNonTsdsSystemTemplate(esClient, log);
     });
 
-    test('opens the host flyout with overview KPIs', async ({
+    test('opens the host flyout and switches to the metadata tab', async ({
       pageObjects: { hostsPage, assetDetailsPage },
     }) => {
       await hostsPage.openHostFlyout(HOST1_NAME);
 
-      await expect(assetDetailsPage.hostOverviewTab.kpiGrid).toBeVisible({
-        timeout: EXTENDED_TIMEOUT,
-      });
-      await expect(
-        assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('cpuUsage')
-      ).not.toBeVisible();
+      await expect(assetDetailsPage.metadataTab.tab).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await assetDetailsPage.metadataTab.clickTab();
+
+      await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
+      await expect(assetDetailsPage.metadataTab.table).toBeVisible();
     });
 
     test('Open as page and return', async ({
@@ -111,7 +117,7 @@ test.describe(
       await test.step('verify date range is preserved', async () => {
         const datePicker = page.getByTestId('superDatePickerstartDatePopoverButton');
         await expect(datePicker).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-        await expect(datePicker).toContainText('Apr 4, 2024');
+        await expect(datePicker).toContainText(hostsSlot.shortDate);
       });
 
       await test.step('return to hosts view', async () => {

@@ -5,8 +5,8 @@
   ],
   "tests": [
     {
-      "id": "f4c048e25988cb5-93d4b0ec1a07451",
-      "title": "Hosts Page - Flyout opens the host flyout with overview KPIs",
+      "id": "f4c048e25988cb5-3925511ae6afce2",
+      "title": "Hosts Page - Flyout opens the host flyout and switches to the metadata tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 80,
-        "column": 16
+        "line": 88,
+        "column": 51
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 82,
-        "column": 16
+        "line": 91,
+        "column": 7
       }
     },
     {

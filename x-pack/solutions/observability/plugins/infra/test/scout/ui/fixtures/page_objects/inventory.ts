@@ -29,9 +29,6 @@ export class InventoryPage {
   public readonly schemaHelpText: Locator;
   public readonly schemaSelectorInvalidToken: Locator;
 
-  public readonly k8sTourText: Locator;
-  public readonly k8sTourDismissButton: Locator;
-
   public readonly mapViewButton: Locator;
   public readonly waffleMap: Locator;
   public readonly toggleTimelineButton: Locator;
@@ -93,9 +90,6 @@ export class InventoryPage {
     this.schemaSelect = this.page.getByTestId('infraSchemaSelect');
     this.schemaHelpText = this.page.getByText(/available in another schema/);
     this.schemaSelectorInvalidToken = this.page.getByTestId('infraSchemaSelectorInvalidToken');
-
-    this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
-    this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
 
     this.mapViewButton = this.page.getByRole('button', { name: 'Map view' });
     this.waffleMap = this.page.getByTestId('waffleMap');
@@ -230,10 +224,6 @@ export class InventoryPage {
 
   public async switchToMapView() {
     await this.mapViewButton.click();
-  }
-
-  public async dismissK8sTour() {
-    await this.k8sTourDismissButton.click();
   }
 
   public async addDismissK8sTourInitScript() {
