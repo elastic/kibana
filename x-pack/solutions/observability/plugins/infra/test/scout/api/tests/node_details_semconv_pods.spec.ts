@@ -133,7 +133,8 @@ apiTest.describe(
       const networkTx = lastNonZeroSeries(network, 'tx');
       expect(networkRx).toBeDefined();
       expect(networkTx).toBeDefined();
-      expect(networkRx).toBeCloseTo(SEMCONV_NETWORK_BYTES_PER_SEC, 2);
+      // podNetworkTraffic RX ends with invert-posonly so the chart draws receive below zero.
+      expect(networkRx).toBeCloseTo(-SEMCONV_NETWORK_BYTES_PER_SEC, 2);
       expect(networkTx).toBeCloseTo(SEMCONV_NETWORK_BYTES_PER_SEC, 2);
 
       const overviewRx = metrics
