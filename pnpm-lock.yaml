@@ -316,8 +316,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
@@ -4358,8 +4356,8 @@ importers:
         specifier: 2.4.2
         version: 2.4.2
       chrome-remote-interface:
-        specifier: 0.33.3
-        version: 0.33.3
+        specifier: 0.34.0
+        version: 0.34.0
       classnames:
         specifier: 2.5.1
         version: 2.5.1
@@ -4788,13 +4786,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -6075,8 +6073,8 @@ importers:
         specifier: 2.1.3
         version: 2.1.3
       '@types/chrome-remote-interface':
-        specifier: 0.31.14
-        version: 0.31.14
+        specifier: 0.34.0
+        version: 0.34.0
       '@types/chromedriver':
         specifier: 81.0.5
         version: 81.0.5
@@ -15016,8 +15014,8 @@ packages:
   '@types/chroma-js@2.1.3':
     resolution: {integrity: sha512-1xGPhoSGY1CPmXLCBcjVZSQinFjL26vlR8ZqprsBWiFyED4JacJJ9zHhh5aaUXqbY9B37mKQ73nlydVAXmr1+g==}
 
-  '@types/chrome-remote-interface@0.31.14':
-    resolution: {integrity: sha512-H9hTcLu1y+Ms6GDPXXeGhgxaOSD69yEo674vjJw5EeW1tTwYo8fEkf7A9nWlnO6ArJsS7c41iZeX6mRDQ1LhEw==}
+  '@types/chrome-remote-interface@0.34.0':
+    resolution: {integrity: sha512-4q8pMUvasrAkB7bejGWw5igboAvBz7vJRZq+295yFONGoeN7X/hfq8Mq4vTxUQKnENbR9tqksP8RZsLxlRtsWQ==}
 
   '@types/chromedriver@81.0.5':
     resolution: {integrity: sha512-VwV+WTTFHYZotBn57QQ8gd4TE7CGJ15KPM+xJJrKbiQQSccTY7zVXuConSBlyWrO+AFpVxuzmluK3xvzxGmkCw==}
@@ -17018,8 +17016,8 @@ packages:
     engines: {node: '>=12.13.0'}
     hasBin: true
 
-  chrome-remote-interface@0.33.3:
-    resolution: {integrity: sha512-zNnn0prUL86Teru6UCAZ1yU1XeXljHl3gj7OrfPcarEfU62OUU4IujDPdTDW3dAWwRqN3ZMG/Chhkh2gPL/wiw==}
+  chrome-remote-interface@0.34.0:
+    resolution: {integrity: sha512-rTTcTZ3zemx8I+nvBii7d8BAF0Ms8LLEroypfvwwZOwSpyNGLE28nStXyCA6VwGp2YSQfmCrQH21F/E+oBFvMw==}
     hasBin: true
 
   chrome-trace-event@1.0.4:
@@ -18158,6 +18156,9 @@ packages:
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
 
+  devtools-protocol@0.0.1173815:
+    resolution: {integrity: sha512-CmsjkudmgCMeae8FSJB4GV8COZwOk6dJKyE9HS2F/ih/sA8uTdbPKHg5F7DsrOYLEET/QKK00LJCU4YoyG+uHg==}
+
   devtools-protocol@0.0.1653615:
     resolution: {integrity: sha512-pGVkY3T/qXxAp2nFPodwYqOevk6ncNMSmvL8QfRCx5ZWGd6Vor7AFNmyaA8Zs6uJyP1QAfjuLandCgvSix1BNA==}
 
@@ -18166,9 +18167,6 @@ packages:
 
   devtools-protocol@0.0.1680125:
     resolution: {integrity: sha512-rVARKAvOFJCFkvgX01VLvYqKIvt+cRCqvUxIhB2oAqVGPalxk3w3sb5TUGDagpow/EFblBpm/Zl/29QA2dd+jA==}
-
-  devtools-protocol@0.0.927104:
-    resolution: {integrity: sha512-5jfffjSuTOv0Lz53wTNNTcCUV8rv7d82AhYcapj28bC2B5tDxEZzVb7k51cNxZP2KHw24QE+sW7ZuSeD9NfMpA==}
 
   dezalgo@1.0.4:
     resolution: {integrity: sha512-rXSP0bf+5n0Qonsb+SVVfNfIsimO4HEtmnIpPHY8Q1UCzKlQrDMfdobr8nJOOsRgWCyMRqeSBQzmWUMq7zvVig==}
@@ -23562,12 +23560,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -31375,7 +31377,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -32500,9 +32502,9 @@ snapshots:
 
   '@types/chroma-js@2.1.3': {}
 
-  '@types/chrome-remote-interface@0.31.14':
+  '@types/chrome-remote-interface@0.34.0':
     dependencies:
-      devtools-protocol: 0.0.927104
+      devtools-protocol: 0.0.1173815
 
   '@types/chromedriver@81.0.5':
     dependencies:
@@ -34747,7 +34749,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  chrome-remote-interface@0.33.3:
+  chrome-remote-interface@0.34.0:
     dependencies:
       commander: 2.11.0
       ws: 7.5.13
@@ -35987,13 +35989,13 @@ snapshots:
     dependencies:
       dequal: 2.0.3
 
+  devtools-protocol@0.0.1173815: {}
+
   devtools-protocol@0.0.1653615: {}
 
   devtools-protocol@0.0.1663043: {}
 
   devtools-protocol@0.0.1680125: {}
-
-  devtools-protocol@0.0.927104: {}
 
   dezalgo@1.0.4:
     dependencies:
@@ -42740,17 +42742,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
