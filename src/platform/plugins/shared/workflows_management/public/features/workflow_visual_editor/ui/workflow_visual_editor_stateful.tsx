@@ -39,6 +39,7 @@ import {
   type WorkflowGraphInsertionContext,
 } from '@kbn/workflows-ui';
 import { StepConfigPanel } from './step_config_panel';
+import { TriggerConfigPanel } from './trigger_config_panel';
 import { useCreationAgentChat } from './use_creation_agent_chat';
 import { WorkflowCreationPanel } from './workflow_creation_panel';
 import { type FlyoutTarget, WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
@@ -74,9 +75,11 @@ import {
   deleteStepByName,
   deleteTrigger,
   getStepFragment,
+  getTriggerFragment,
   insertStepAtPath,
   type MutationResult,
   replaceStepFragment,
+  replaceTriggerFragment,
   setStepFallback,
   uniqueStepName,
 } from '../lib/yaml_mutations';
@@ -109,7 +112,7 @@ const TRIGGER_LABEL: Record<string, string> = {
   scheduled: 'Scheduled',
 };
 
-/** Floating-panel inset from the canvas edges (top, right, bottom). */
+/** Floating read-only flyout inset from the canvas edges (top, right, bottom). */
 const PANEL_MARGIN = 16;
 const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth';
 const DEFAULT_CONFIG_PANEL_WIDTH = 560;
@@ -136,6 +139,19 @@ type PanelState =
       readonly mode: 'edit';
       readonly stepName: string;
       readonly stepType: string;
+      readonly fragment: string;
+    }
+  | {
+      readonly mode: 'edit-trigger';
+      readonly triggerIndex: number;
+      readonly triggerType: string;
+      readonly triggerLabel: string;
+      readonly fragment: string;
+    }
+  | {
+      readonly mode: 'insert-trigger';
+      readonly triggerType: string;
+      readonly triggerLabel: string;
       readonly fragment: string;
     };
 
@@ -263,6 +279,11 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const workflow = definition ?? lastValidRef.current;
 
+  const disabledTriggerIds = useMemo(() => {
+    const hasManual = workflow?.triggers?.some((t) => t.type === 'manual');
+    return hasManual ? (['manual'] as const) : undefined;
+  }, [workflow?.triggers]);
+
   const transformed = useMemo(() => transformWorkflowToGraph(workflow), [workflow]);
 
   const stepsByName = useMemo(() => collectStepsByName(workflow), [workflow]);
@@ -305,12 +326,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [dispatch, notifications.toasts]
   );
 
-  const closeSurfaces = useCallback(() => {
-    setInsertion(null);
-    setPanel(null);
-    setPendingInsert(null);
-  }, []);
-
   /** Inserts a step fragment per the insertion context and flashes the new node. */
   const insertFragment = useCallback(
     (context: WorkflowGraphInsertionContext, fragment: string, newName: string | undefined) => {
@@ -352,22 +367,20 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [editorYaml, connectors]
   );
 
-  const handleAddDirectly = useCallback(
-    (action: ActionOptionData) => {
-      if (!insertion) return;
-      const { fragment, name } = defaultFragmentFor(action);
-      insertFragment(insertion.context, fragment, name);
-      closeSurfaces();
-    },
-    [insertion, defaultFragmentFor, insertFragment, closeSurfaces]
-  );
-
-  /** Selecting an action opens the config panel; triggers insert immediately (no panel). */
+  /** Selecting an action opens the config panel; triggers open the trigger panel. */
   const handleInsertAction = useCallback(
     (action: ActionOptionData) => {
       if (!insertion) return;
       if (insertion.context.mode === 'trigger') {
-        handleAddDirectly(action);
+        const fragment = triggerFragmentFor(action.id);
+        setPanel({
+          mode: 'insert-trigger',
+          triggerType: action.id,
+          triggerLabel: TRIGGER_LABEL[action.id] ?? action.label,
+          fragment,
+        });
+        setInsertion(null);
+        setPendingInsert(null);
         return;
       }
       const pendingContext = toPendingContext(insertion.context);
@@ -389,19 +402,27 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       });
       setInsertion(null);
     },
-    [insertion, handleAddDirectly, defaultFragmentFor]
+    [insertion, defaultFragmentFor]
   );
 
   const handlePanelSave = useCallback(
     (fragment: string) => {
       if (!panel) return;
-      const parsedName = parseDocument(fragment).get('name');
-      const newName = typeof parsedName === 'string' ? parsedName : undefined;
       setPendingInsert(null);
       if (panel.mode === 'insert') {
+        const parsedName = parseDocument(fragment).get('name');
+        const newName = typeof parsedName === 'string' ? parsedName : undefined;
         insertFragment(panel.context, fragment, newName);
-      } else if (applyMutation(replaceStepFragment(editorYaml, panel.stepName, fragment))) {
-        if (newName && newName !== panel.stepName) setSelectedStep(newName);
+      } else if (panel.mode === 'edit') {
+        const parsedName = parseDocument(fragment).get('name');
+        const newName = typeof parsedName === 'string' ? parsedName : undefined;
+        if (applyMutation(replaceStepFragment(editorYaml, panel.stepName, fragment))) {
+          if (newName && newName !== panel.stepName) setSelectedStep(newName);
+        }
+      } else if (panel.mode === 'insert-trigger') {
+        applyMutation(appendTrigger(editorYaml, fragment));
+      } else if (panel.mode === 'edit-trigger') {
+        applyMutation(replaceTriggerFragment(editorYaml, panel.triggerIndex, fragment));
       }
       setPanel(null);
     },
@@ -414,49 +435,10 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     setSelectedStep(null);
   }, [setSelectedStep]);
 
-  const handleRevealErrorPort = useCallback(() => {
-    if (!panel || panel.mode !== 'edit') return;
-    // Existing canvas flash — reveals the owning node (error port lives on it).
-    setFlashNodeId(panel.stepName);
-  }, [panel]);
-
-  const handleViewFallbackOnCanvas = useCallback(
-    (stepName: string) => {
-      setSelectedStep(stepName);
-      setFlashNodeId(stepName);
-    },
-    [setSelectedStep]
-  );
-
-  const handleConfigPanelResizeStart = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      const handle = event.currentTarget;
-      handle.setPointerCapture(event.pointerId);
-      const startX = event.clientX;
-      const startWidth = panelWidth;
-      const onMove = (ev: PointerEvent) => {
-        const delta = startX - ev.clientX;
-        const maxWidth = window.innerWidth * 0.5;
-        const next = Math.min(maxWidth, Math.max(MIN_CONFIG_PANEL_WIDTH, startWidth + delta));
-        setStoredPanelWidth(next);
-      };
-      const onUp = (ev: PointerEvent) => {
-        handle.releasePointerCapture(ev.pointerId);
-        handle.removeEventListener('pointermove', onMove);
-        handle.removeEventListener('pointerup', onUp);
-        handle.removeEventListener('pointercancel', onUp);
-      };
-      handle.addEventListener('pointermove', onMove);
-      handle.addEventListener('pointerup', onUp);
-      handle.addEventListener('pointercancel', onUp);
-    },
-    [panelWidth, setStoredPanelWidth]
-  );
-
   const panelIsFallbackStep = useMemo(() => {
     if (!panel) return false;
     if (panel.mode === 'insert') return panel.context.mode === 'error';
+    if (panel.mode !== 'edit') return false;
     const ref = Object.values(transformed.nodeRefs).find(
       (r) => r.kind === 'step' && r.stepName === panel.stepName
     );
@@ -479,7 +461,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       setPendingInsert(null);
       setPanel((current) => {
         // Don't clobber an in-progress insert panel; skip no-op re-opens.
-        if (current?.mode === 'insert') return current;
+        if (current?.mode === 'insert' || current?.mode === 'insert-trigger') return current;
         if (current?.mode === 'edit' && current.stepName === stepName) return current;
         return { mode: 'edit', stepName, stepType, fragment };
       });
@@ -487,22 +469,61 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [stepsByName, editorYaml]
   );
 
+  const openTriggerEditPanel = useCallback(
+    (triggerIndex: number) => {
+      const trigger = workflow?.triggers?.[triggerIndex];
+      const fragment =
+        getTriggerFragment(editorYaml, triggerIndex) ??
+        (trigger ? stringifyYaml(trigger, { lineWidth: 0 }) : undefined);
+      if (!fragment || !trigger) return;
+      const triggerType = trigger.type;
+      const triggerLabel = TRIGGER_LABEL[triggerType] ?? triggerType;
+      setInsertion(null);
+      setPendingInsert(null);
+      setPanel((current) => {
+        if (current?.mode === 'insert' || current?.mode === 'insert-trigger') return current;
+        if (
+          current?.mode === 'edit-trigger' &&
+          current.triggerIndex === triggerIndex &&
+          current.fragment === fragment
+        ) {
+          return current;
+        }
+        return { mode: 'edit-trigger', triggerIndex, triggerType, triggerLabel, fragment };
+      });
+    },
+    [workflow, editorYaml]
+  );
+
   // Single source of truth: canvas/URL selection drives the edit config panel.
   // Only re-run when the selected node changes — not when openEditPanel's
   // identity churns with editorYaml (that was resetting the panel mid-edit).
   const openEditPanelRef = useRef(openEditPanel);
   openEditPanelRef.current = openEditPanel;
+  const openTriggerEditPanelRef = useRef(openTriggerEditPanel);
+  openTriggerEditPanelRef.current = openTriggerEditPanel;
   const stepNameOfRef = useRef(stepNameOf);
   stepNameOfRef.current = stepNameOf;
+  const nodeRefsRef = useRef(transformed.nodeRefs);
+  nodeRefsRef.current = transformed.nodeRefs;
   useEffect(() => {
     if (!canEdit) return;
     if (!selectedStepId) {
-      setPanel((current) => (current?.mode === 'edit' ? null : current));
+      setPanel((current) =>
+        current?.mode === 'edit' || current?.mode === 'edit-trigger' ? null : current
+      );
+      return;
+    }
+    const ref = nodeRefsRef.current[selectedStepId];
+    if (ref?.kind === 'trigger') {
+      openTriggerEditPanelRef.current(ref.triggerIndex);
       return;
     }
     const stepName = stepNameOfRef.current(selectedStepId);
     if (!stepName) {
-      setPanel((current) => (current?.mode === 'edit' ? null : current));
+      setPanel((current) =>
+        current?.mode === 'edit' || current?.mode === 'edit-trigger' ? null : current
+      );
       return;
     }
     openEditPanelRef.current(stepName);
@@ -533,6 +554,13 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         if (!applyMutation(result)) return;
         if (selectedStepId === nodeId) setSelectedStep(null);
         if (panel?.mode === 'edit' && ref.kind === 'step' && panel.stepName === ref.stepName) {
+          setPanel(null);
+        }
+        if (
+          panel?.mode === 'edit-trigger' &&
+          ref.kind === 'trigger' &&
+          panel.triggerIndex === ref.triggerIndex
+        ) {
           setPanel(null);
         }
         const title =
@@ -586,9 +614,10 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     if (!selectedStepId) return null;
     const ref = transformed.nodeRefs[selectedStepId];
     if (!ref) return null;
+    // Edit mode opens config panels for steps and triggers instead of the
+    // read-only YAML flyout.
+    if (canEdit) return null;
     if (ref.kind === 'step') {
-      // Edit mode opens the config panel for steps instead of the read-only flyout.
-      if (canEdit) return null;
       return {
         kind: 'step',
         stepName: ref.stepName,
@@ -666,9 +695,14 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const handleCreationPickTrigger = useCallback(
     (triggerType: 'manual' | 'alert' | 'scheduled') => {
-      insertFragment({ mode: 'trigger' }, triggerFragmentFor(triggerType), undefined);
+      setPanel({
+        mode: 'insert-trigger',
+        triggerType,
+        triggerLabel: TRIGGER_LABEL[triggerType] ?? triggerType,
+        fragment: triggerFragmentFor(triggerType),
+      });
     },
-    [insertFragment]
+    []
   );
 
   const handleCreationPickAction = useCallback((anchor: DOMRect) => {
@@ -773,73 +807,59 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         <ActionsMenuPopover
           isOpen
           closePopover={closeInsertion}
-          insertionContext={{ mode: insertion.context.mode }}
+          insertionContext={
+            insertion.context.mode === 'trigger'
+              ? { mode: 'trigger', disabledTriggerIds }
+              : { mode: insertion.context.mode }
+          }
+          disabledTriggerIds={disabledTriggerIds}
           onActionSelected={handleInsertAction}
         />
       )}
-      {panel && (
-        <div
-          css={[
-            {
-              position: 'absolute',
-              top: PANEL_MARGIN,
-              right: PANEL_MARGIN,
-              bottom: PANEL_MARGIN,
-              width: panelWidth,
-              zIndex: euiTheme.levels.flyout,
-              border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-              borderRadius: euiTheme.border.radius.small,
-              background: euiTheme.colors.backgroundBasePlain,
-              overflow: 'hidden',
-            },
-            floatingShadow,
-          ]}
-          data-test-subj="workflowStepConfigPanelContainer"
-        >
-          <div
-            role="separator"
-            aria-orientation="vertical"
-            aria-label={i18n.translate('workflows.visualEditor.resizeConfigPanel', {
-              defaultMessage: 'Resize configuration panel',
-            })}
-            data-test-subj="workflowStepConfigPanelResizeHandle"
-            onPointerDown={handleConfigPanelResizeStart}
-            css={{
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              left: 0,
-              width: 6,
-              cursor: 'ew-resize',
-              zIndex: 2,
-              touchAction: 'none',
-            }}
-          />
-          <StepConfigPanel
-            key={
-              panel.mode === 'edit'
-                ? `edit:${panel.stepName}`
-                : `insert:${panel.stepType}:${panel.actionLabel}`
-            }
-            mode={panel.mode}
-            stepType={panel.stepType}
-            actionLabel={panel.mode === 'insert' ? panel.actionLabel : undefined}
-            initialFragment={panel.fragment}
-            connectors={connectors}
-            workflowDefinition={workflow}
-            onCancel={handlePanelCancel}
-            onSave={handlePanelSave}
-            isFallbackStep={panelIsFallbackStep}
-            onRevealErrorPort={
-              panel.mode === 'edit' && !panelIsFallbackStep ? handleRevealErrorPort : undefined
-            }
-            onViewFallbackOnCanvas={
-              panel.mode === 'edit' && !panelIsFallbackStep
-                ? handleViewFallbackOnCanvas
-                : undefined
-            }
-          />
-        </div>
+      {panel && (panel.mode === 'edit' || panel.mode === 'insert') && (
+        <StepConfigPanel
+          key={
+            panel.mode === 'edit'
+              ? `edit:${panel.stepName}`
+              : `insert:${panel.stepType}:${panel.actionLabel}`
+          }
+          mode={panel.mode}
+          stepType={panel.stepType}
+          actionLabel={panel.mode === 'insert' ? panel.actionLabel : undefined}
+          initialFragment={panel.fragment}
+          connectors={connectors}
+          workflowDefinition={workflow}
+          onCancel={handlePanelCancel}
+          onSave={handlePanelSave}
+          isFallbackStep={panelIsFallbackStep}
+          size={panelWidth}
+          minWidth={MIN_CONFIG_PANEL_WIDTH}
+          maxWidth={
+            typeof window !== 'undefined' ? window.innerWidth * 0.5 : DEFAULT_CONFIG_PANEL_WIDTH
+          }
+          onResize={(width) => setStoredPanelWidth(width)}
+        />
+      )}
+      {panel && (panel.mode === 'edit-trigger' || panel.mode === 'insert-trigger') && (
+        <TriggerConfigPanel
+          key={
+            panel.mode === 'edit-trigger'
+              ? `edit-trigger:${panel.triggerIndex}`
+              : `insert-trigger:${panel.triggerType}`
+          }
+          triggerType={panel.triggerType}
+          triggerLabel={panel.triggerLabel}
+          initialFragment={panel.fragment}
+          workflowYaml={editorYaml}
+          onCancel={handlePanelCancel}
+          onSave={handlePanelSave}
+          size={panelWidth}
+          minWidth={MIN_CONFIG_PANEL_WIDTH}
+          maxWidth={
+            typeof window !== 'undefined' ? window.innerWidth * 0.5 : DEFAULT_CONFIG_PANEL_WIDTH
+          }
+          onResize={(width) => setStoredPanelWidth(width)}
+        />
       )}
       {flyoutTarget && !panel && (
         <EuiFocusTrap returnFocus>
@@ -853,9 +873,9 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
             css={[
               {
                 position: 'absolute',
-                top: 8,
-                right: 8,
-                bottom: 8,
+                top: PANEL_MARGIN,
+                right: PANEL_MARGIN,
+                bottom: PANEL_MARGIN,
                 width: 420,
                 zIndex: euiTheme.levels.flyout,
                 borderRadius: euiTheme.border.radius.small,

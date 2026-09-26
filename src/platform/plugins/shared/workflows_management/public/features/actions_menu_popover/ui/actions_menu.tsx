@@ -28,7 +28,7 @@ import { getOptionActionId, renderActionOption } from './actions_menu_option';
 import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
 import { useKibana } from '../../../hooks/use_kibana';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
-import { filterOptionsForInsertionContext } from '../lib/filter_options_for_insertion_context';
+import { filterOptionsForInsertionContext, omitDisabledTriggers } from '../lib/filter_options_for_insertion_context';
 import {
   getActionMatchRank,
   isActionSearchMatch,
@@ -86,6 +86,11 @@ export interface ActionsMenuProps {
   onClose?: () => void;
   insertionContext?: ActionsMenuInsertionContext;
   /**
+   * Trigger option ids to hide (e.g. `manual` when a Manual trigger already exists).
+   * Applied in every presentation so a second Manual cannot be added from Actions.
+   */
+  disabledTriggerIds?: readonly string[];
+  /**
    * `full` — dual-pane centered menu.
    * `compact` — single-column anchored presentation of the same catalog.
    */
@@ -142,6 +147,7 @@ export function ActionsMenu({
   onJumpToStep,
   onClose,
   insertionContext,
+  disabledTriggerIds,
   presentation = 'full',
   rootTitle,
 }: ActionsMenuProps) {
@@ -155,8 +161,8 @@ export function ActionsMenu({
   const pendingListFocusRef = useRef<PendingListFocus | null>(null);
   const keyboardIndexRef = useRef<number | null>(null);
   const allOptions = useMemo(
-    () => getActionOptions(euiTheme, workflowsExtensions),
-    [euiTheme, workflowsExtensions]
+    () => omitDisabledTriggers(getActionOptions(euiTheme, workflowsExtensions), disabledTriggerIds),
+    [euiTheme, workflowsExtensions, disabledTriggerIds]
   );
   const defaultOptions = useMemo(
     () => filterOptionsForInsertionContext(allOptions, insertionContext),

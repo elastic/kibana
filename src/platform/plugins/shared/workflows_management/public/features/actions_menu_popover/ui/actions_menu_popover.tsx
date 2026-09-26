@@ -31,6 +31,7 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   onCommandSelected,
   onJumpToStep,
   insertionContext,
+  disabledTriggerIds,
   presentation,
   rootTitle,
   onClose,
@@ -58,6 +59,7 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
         onCommandSelected={onCommandSelected}
         onJumpToStep={onJumpToStep}
         insertionContext={insertionContext}
+        disabledTriggerIds={disabledTriggerIds}
         presentation={presentation}
         rootTitle={rootTitle}
         onClose={onClose ?? closePopover}

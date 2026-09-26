@@ -29,6 +29,10 @@ export interface ReferenceCapableBind {
   readonly isOpen: boolean;
   readonly teachingPlaceholder: string;
   readonly atButton: React.ReactElement;
+  /** Expand control for the field-editor sub-flyout; omitted when `onExpand` is unset. */
+  readonly expandButton: React.ReactElement | null;
+  /** @ and expand controls for `EuiFieldText` / similar `append` slots. */
+  readonly appendControls: React.ReactElement;
   /** Report a text edit; opens the picker when `@` or `{{` was typed at the caret. */
   readonly reportChange: (next: string, caret: number) => void;
   readonly togglePicker: () => void;
@@ -45,12 +49,18 @@ export function ReferenceCapableField({
   catalog,
   value,
   onChange,
+  onExpand,
+  fillHeight = false,
   children,
   'data-test-subj': dataTestSubj = 'workflowStepConfigDataReference',
 }: {
   readonly catalog: DataReferenceCatalog;
   readonly value: string;
   readonly onChange: (next: string) => void;
+  /** When set, shows an always-visible expand control that opens the field editor. */
+  readonly onExpand?: () => void;
+  /** Stretch the anchor to fill the parent (expanded field-editor pane). */
+  readonly fillHeight?: boolean;
   readonly children: (bind: ReferenceCapableBind) => React.ReactElement;
   readonly 'data-test-subj'?: string;
 }) {
@@ -167,11 +177,37 @@ export function ReferenceCapableField({
     </EuiToolTip>
   );
 
+  const expandLabel = i18n.translate('workflows.stepConfigPanel.openExpandedEditor', {
+    defaultMessage: 'Open expanded editor',
+  });
+  const expandButton = onExpand ? (
+    <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="fullScreen"
+        color="text"
+        size="xs"
+        title={expandLabel}
+        aria-label={expandLabel}
+        onClick={onExpand}
+        data-test-subj={`${dataTestSubj}Expand`}
+      />
+    </EuiToolTip>
+  ) : null;
+
+  const appendControls = (
+    <span css={{ display: 'inline-flex', alignItems: 'center', gap: 0 }}>
+      {atButton}
+      {expandButton}
+    </span>
+  );
+
   const bind: ReferenceCapableBind = {
     value,
     isOpen,
     teachingPlaceholder,
     atButton,
+    expandButton,
+    appendControls,
     reportChange,
     togglePicker,
     closePicker,
@@ -189,6 +225,7 @@ export function ReferenceCapableField({
       isOpen={isOpen}
       onClose={closePicker}
       onInsert={handleInsert}
+      fillHeight={fillHeight}
       input={children(bind)}
     />
   );

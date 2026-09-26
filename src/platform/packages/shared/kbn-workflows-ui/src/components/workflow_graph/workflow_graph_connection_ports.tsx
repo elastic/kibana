@@ -52,7 +52,7 @@ export const BRANCH_TRUE_LEFT = IF_PORT_TRUE;
 /** @deprecated Prefer ERROR_PORT_ALONG. */
 export const ERROR_PORT_LEFT = ERROR_PORT_ALONG;
 
-/** Shared spring used by ports and trailing node actions. */
+/** Shared spring used by port pin expand-on-hover. */
 export const PORT_SPRING_EASE = 'cubic-bezier(.34,1.56,.64,1)';
 export const PORT_SPRING_MS = '180ms';
 
@@ -240,8 +240,6 @@ function PortButton({
             zIndex: 5,
             opacity: revealed ? 1 : 0,
             pointerEvents: revealed ? ('auto' as const) : ('none' as const),
-            [euiCanAnimate]: { transition: 'opacity 150ms ease' },
-            '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             '&:focus-within': { opacity: 1, pointerEvents: 'auto' },
           },
         ],

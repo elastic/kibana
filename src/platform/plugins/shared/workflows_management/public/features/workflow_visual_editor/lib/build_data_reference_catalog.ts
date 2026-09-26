@@ -15,43 +15,123 @@ import {
   WorkflowExecutionContextSchema,
 } from '@kbn/workflows';
 import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
-import { getWorkflowContextSchema, type WorkflowContextRegistry } from '@kbn/workflows-yaml';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import {
+  extractNormalizedInputsFromYaml,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
+import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
+import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
+import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import {
+  getAllDocumentOrderSteps,
   getDocumentOrderPredecessors,
   type PrecedingStepRef,
 } from './get_document_order_predecessors';
 
-/** Registry with no extensions — enough for trigger/consts/event catalog shapes. */
-const EMPTY_CONTEXT_REGISTRY: WorkflowContextRegistry = {
-  getStepOutput: () => undefined,
-  getConnector: () => undefined,
-  getTriggerDefinition: () => undefined,
-};
-
-export type DataReferenceGroupId = 'event' | 'steps' | 'consts' | 'context';
+export type DataReferenceGroupId = 'triggers' | 'steps' | 'context';
 
 export interface DataReferenceItem {
   /** Liquid path without braces, e.g. `steps.a.output.status`. */
   readonly path: string;
+  /**
+   * Primary label. Entities use the trigger/step name; leaves use the
+   * reference path (shown in code font).
+   */
+  readonly label: string;
+  /**
+   * Second line — only when it adds information the first line lacks:
+   * distinct step action type, or a constant's value. Never a path echo.
+   */
+  readonly subtitle?: string;
   /** Display type badge (`string`, `number`, `object`, …). */
   readonly typeLabel: string;
   /** When true, row drills into `children` instead of inserting. */
   readonly drillable: boolean;
+  /**
+   * Named trigger/step entity — chip icon, not insertable or draggable.
+   * Nested objects are drillable leaves (`isEntity` unset).
+   */
+  readonly isEntity?: boolean;
+  /** Step/trigger type for the entity chip (`StepIcon`). */
+  readonly iconStepType?: string;
   readonly children?: readonly DataReferenceItem[];
+  /** Search-result origin, e.g. `Trigger · Alert` / `Step · first`. */
+  readonly originLabel: string;
+  /** Plain-language note (schema-less step outputs) — tooltip only, not a row line. */
+  readonly note?: string;
 }
 
 export interface DataReferenceGroup {
   readonly id: DataReferenceGroupId;
   readonly title: string;
-  readonly scopeNote?: string;
+  /** Keyboard-accessible info-icon tooltip on the group header. */
+  readonly description: string;
   readonly items: readonly DataReferenceItem[];
+  /** Shown when `items` is empty (Steps on the first step). */
+  readonly emptyMessage?: string;
 }
 
 export interface DataReferenceCatalog {
   readonly groups: readonly DataReferenceGroup[];
 }
+
+export const isDataReferenceEntity = (item: DataReferenceItem): boolean => Boolean(item.isEntity);
+
+/** Leaves and opaque objects insert; entities and intermediate objects drill only. */
+export const isDataReferenceInsertable = (item: DataReferenceItem): boolean =>
+  !item.isEntity && !(item.drillable && Boolean(item.children?.length));
+
+/** Rows that expand/collapse in the field-editor accordion tree. */
+export const isDataReferenceExpandable = (item: DataReferenceItem): boolean =>
+  Boolean(item.children?.length);
+
+/**
+ * Drag payload for the field editor. Only insertable leaves get a grip —
+ * trigger/step entities and expandable object parents (e.g. `workflow`) are
+ * navigation/toggle only.
+ */
+export const isDataReferenceDraggable = (item: DataReferenceItem): boolean =>
+  isDataReferenceInsertable(item);
+
+const TRIGGER_LABEL: Record<string, string> = {
+  manual: 'Manual',
+  alert: 'Alert',
+  scheduled: 'Scheduled',
+};
+
+const triggerLabelFor = (type: string): string => TRIGGER_LABEL[type] ?? type;
+
+/** Lowercase alphanumerics only — used to decide if a step type adds a second line. */
+const normalizeLabelKey = (value: string): string =>
+  value.toLowerCase().replace(/[^a-z0-9]+/g, '');
+
+/**
+ * Show the action type under the step name only when it isn't already implied
+ * by the name (`if_step` / "If" → hide; `SendHashtoVT` / "Scan File Hash" → show).
+ */
+const stepTypeSubtitleFor = (stepName: string, typeLabel: string): string | undefined => {
+  const nameKey = normalizeLabelKey(stepName);
+  const typeKey = normalizeLabelKey(typeLabel);
+  if (!typeKey || nameKey === typeKey) return undefined;
+  // Type is a short category token already present in the instance name.
+  if (nameKey.includes(typeKey) || typeKey.includes(nameKey)) return undefined;
+  return typeLabel;
+};
+
+const resolveStepTypeLabel = (
+  stepType: string,
+  connectors: readonly ConnectorContractUnion[]
+): string => {
+  const builtIn = getBuiltInStepDefinition(stepType);
+  if (builtIn?.label) return builtIn.label;
+  const connector = connectors.find((c) => c.type === stepType) as
+    | (ConnectorContractUnion & { summary?: string | null; displayName?: string })
+    | undefined;
+  return connector?.summary || connector?.displayName || stepType;
+};
 
 const isOpaqueSchema = (schema: z.ZodType): boolean => {
   const inner = unwrapSchema(schema);
@@ -76,29 +156,69 @@ const resolveOutputSchema = (
   return z.unknown();
 };
 
-const schemaToItems = (schema: z.ZodType, pathPrefix: string): DataReferenceItem[] => {
+const formatConstValue = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+};
+
+/** Leaf / nested object row — primary label is the reference path; no path echo. */
+const pathLeafItem = ({
+  path,
+  typeLabel,
+  originLabel,
+  drillable = false,
+  children,
+  subtitle,
+  note,
+}: {
+  path: string;
+  typeLabel: string;
+  originLabel: string;
+  drillable?: boolean;
+  children?: readonly DataReferenceItem[];
+  subtitle?: string;
+  note?: string;
+}): DataReferenceItem => ({
+  path,
+  label: path,
+  typeLabel,
+  drillable,
+  originLabel,
+  ...(subtitle !== undefined ? { subtitle } : {}),
+  ...(note !== undefined ? { note } : {}),
+  ...(children !== undefined ? { children } : {}),
+});
+
+const schemaToItems = (
+  schema: z.ZodType,
+  pathPrefix: string,
+  originLabel: string
+): DataReferenceItem[] => {
   if (isOpaqueSchema(schema)) {
     return [
-      {
+      pathLeafItem({
         path: pathPrefix,
         typeLabel: 'object',
-        drillable: false,
-      },
+        originLabel,
+      }),
     ];
   }
 
   const extracted = extractSchemaPropertyPaths(schema, { includeMetadata: true });
   if (extracted.length === 0) {
     return [
-      {
+      pathLeafItem({
         path: pathPrefix,
         typeLabel: 'object',
-        drillable: false,
-      },
+        originLabel,
+      }),
     ];
   }
 
-  // Build a tree from flat dotted paths under pathPrefix.
   type Mutable = {
     path: string;
     typeLabel: string;
@@ -131,159 +251,340 @@ const schemaToItems = (schema: z.ZodType, pathPrefix: string): DataReferenceItem
   const toItems = (map: Map<string, Mutable>): DataReferenceItem[] =>
     Array.from(map.values()).map((node) => {
       const kids = toItems(node.children);
-      return {
+      return pathLeafItem({
         path: node.path,
         typeLabel: kids.length > 0 ? 'object' : node.typeLabel,
+        originLabel,
         drillable: kids.length > 0,
         ...(kids.length > 0 ? { children: kids } : {}),
-      };
+      });
     });
 
   return toItems(rootChildren);
 };
 
-const buildStepItems = (
+const buildManualInputsSchema = (definition: WorkflowYaml): z.ZodType => {
+  const inputs = extractNormalizedInputsFromYaml(definition);
+  const normalized = normalizeFieldsToJsonSchema(inputs);
+  return buildFieldsZodValidator(normalized);
+};
+
+/** Per-trigger event schema — derived only from this workflow's configured trigger. */
+const buildEventSchemaForTrigger = (
+  trigger: { type?: string },
+  manualInputsSchema: z.ZodType
+): z.ZodType => {
+  const type = trigger.type ?? '';
+  if (type === 'alert') {
+    return AlertEventSchema;
+  }
+  if (isManualTrigger(trigger)) {
+    if (
+      manualInputsSchema instanceof z.ZodObject &&
+      Object.keys(manualInputsSchema.shape).length > 0
+    ) {
+      return BaseEventSchema.extend({ inputs: manualInputsSchema });
+    }
+    return BaseEventSchema;
+  }
+  return BaseEventSchema;
+};
+
+const buildTriggerGroup = (definition: WorkflowYaml): DataReferenceGroup => {
+  const triggers = definition.triggers ?? [];
+  const manualInputsSchema = buildManualInputsSchema(definition);
+  const plural = triggers.length > 1;
+
+  const title = plural
+    ? i18n.translate('workflows.dataReferencePicker.triggersPlural', {
+        defaultMessage: 'Triggers',
+      })
+    : i18n.translate('workflows.dataReferencePicker.triggerEvent', {
+        defaultMessage: 'Trigger event',
+      });
+
+  const description = plural
+    ? i18n.translate('workflows.dataReferencePicker.triggersPluralDescription', {
+        defaultMessage:
+          "Data from this workflow's triggers. Each trigger exposes different fields — values from one are undefined on runs started by another.",
+      })
+    : i18n.translate('workflows.dataReferencePicker.triggerEventDescription', {
+        defaultMessage: "Data from this workflow's trigger.",
+      });
+
+  if (triggers.length === 0) {
+    return { id: 'triggers', title, description, items: [] };
+  }
+
+  if (!plural) {
+    const trigger = triggers[0];
+    const type = trigger.type ?? 'manual';
+    const originLabel = i18n.translate('workflows.dataReferencePicker.originTrigger', {
+      defaultMessage: 'Trigger · {name}',
+      values: { name: triggerLabelFor(type) },
+    });
+    const schema = buildEventSchemaForTrigger(trigger, manualInputsSchema);
+    return {
+      id: 'triggers',
+      title,
+      description,
+      items: schemaToItems(unwrapSchema(schema) as z.ZodType, 'event', originLabel),
+    };
+  }
+
+  const items: DataReferenceItem[] = triggers.map((trigger, index) => {
+    const type = trigger.type ?? 'manual';
+    const name = triggerLabelFor(type);
+    const originLabel = i18n.translate('workflows.dataReferencePicker.originTrigger', {
+      defaultMessage: 'Trigger · {name}',
+      values: { name },
+    });
+    const schema = buildEventSchemaForTrigger(trigger, manualInputsSchema);
+    const children = schemaToItems(unwrapSchema(schema) as z.ZodType, 'event', originLabel);
+    // Distinct path key when two triggers share a type (not a Liquid path).
+    const entityPath = `__trigger_${index}_${type}`;
+    return {
+      path: entityPath,
+      label: name,
+      typeLabel: 'object',
+      drillable: true,
+      isEntity: true,
+      iconStepType: `trigger_${type}`,
+      originLabel,
+      children,
+    };
+  });
+
+  return {
+    id: 'triggers',
+    title,
+    description,
+    items,
+  };
+};
+
+const buildStepEntities = (
   predecessors: readonly PrecedingStepRef[],
   connectors: readonly ConnectorContractUnion[]
 ): DataReferenceItem[] => {
-  const items: DataReferenceItem[] = [];
-  for (const step of predecessors) {
+  const opaqueNote = i18n.translate('workflows.dataReferencePicker.opaqueStepOutputNote', {
+    defaultMessage:
+      'This action does not declare output fields yet. Insert the whole output object.',
+  });
+
+  return predecessors.map((step) => {
     const outputPath = `steps.${step.name}.output`;
+    const typeLabel = resolveStepTypeLabel(step.type, connectors);
+    const originLabel = i18n.translate('workflows.dataReferencePicker.originStep', {
+      defaultMessage: 'Step · {name}',
+      values: { name: step.name },
+    });
     const outputSchema = resolveOutputSchema(step.type, connectors);
+
+    let children: DataReferenceItem[];
     if (isOpaqueSchema(outputSchema)) {
       // TODO(catalog): output schemas — opaque insertable object until catalog fills shapes.
-      items.push({ path: outputPath, typeLabel: 'object', drillable: false });
-      continue;
-    }
-    const children = schemaToItems(outputSchema, outputPath);
-    if (children.length === 1 && children[0].path === outputPath && !children[0].drillable) {
-      items.push(children[0]);
+      children = [
+        pathLeafItem({
+          path: outputPath,
+          typeLabel: 'object',
+          originLabel,
+          note: opaqueNote,
+        }),
+      ];
     } else {
-      items.push({
-        path: outputPath,
-        typeLabel: 'object',
-        drillable: true,
-        children,
-      });
+      children = schemaToItems(outputSchema, outputPath, originLabel);
+      if (
+        children.length === 1 &&
+        children[0].path === outputPath &&
+        !children[0].drillable
+      ) {
+        children = [{ ...children[0], note: opaqueNote }];
+      }
     }
-  }
-  return items;
+
+    const typeSubtitle = stepTypeSubtitleFor(step.name, typeLabel);
+    return {
+      path: outputPath,
+      label: step.name,
+      ...(typeSubtitle !== undefined ? { subtitle: typeSubtitle } : {}),
+      typeLabel: 'object',
+      drillable: true,
+      isEntity: true,
+      iconStepType: step.type,
+      originLabel,
+      children,
+    };
+  });
 };
 
-const buildContextItems = (): DataReferenceItem[] => {
-  const workflowItems = schemaToItems(WorkflowDataContextSchema, 'workflow');
-  const executionItems = schemaToItems(WorkflowExecutionContextSchema, 'execution');
-  return [
-    {
+const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceGroup => {
+  const originContext = i18n.translate('workflows.dataReferencePicker.originContext', {
+    defaultMessage: 'Workflow context',
+  });
+  const items: DataReferenceItem[] = [];
+
+  for (const [key, value] of Object.entries(definition?.consts ?? {})) {
+    items.push(
+      pathLeafItem({
+        path: `consts.${key}`,
+        typeLabel: typeof value,
+        originLabel: originContext,
+        subtitle: formatConstValue(value),
+      })
+    );
+  }
+
+  const workflowChildren = schemaToItems(WorkflowDataContextSchema, 'workflow', originContext);
+  items.push(
+    pathLeafItem({
       path: 'workflow',
       typeLabel: 'object',
-      drillable: true,
-      children: workflowItems,
-    },
-    {
+      originLabel: originContext,
+      drillable: workflowChildren.length > 0,
+      ...(workflowChildren.length > 0 ? { children: workflowChildren } : {}),
+    })
+  );
+
+  const executionChildren = schemaToItems(
+    WorkflowExecutionContextSchema,
+    'execution',
+    originContext
+  );
+  items.push(
+    pathLeafItem({
       path: 'execution',
       typeLabel: 'object',
-      drillable: true,
-      children: executionItems,
-    },
-    { path: 'kibanaUrl', typeLabel: 'string', drillable: false },
-    { path: 'now', typeLabel: 'date', drillable: false },
-  ];
+      originLabel: originContext,
+      drillable: executionChildren.length > 0,
+      ...(executionChildren.length > 0 ? { children: executionChildren } : {}),
+    })
+  );
+
+  items.push(
+    pathLeafItem({
+      path: 'kibanaUrl',
+      typeLabel: 'string',
+      originLabel: originContext,
+    }),
+    pathLeafItem({
+      path: 'now',
+      typeLabel: 'date',
+      originLabel: originContext,
+    })
+  );
+
+  return {
+    id: 'context',
+    title: i18n.translate('workflows.dataReferencePicker.workflowContext', {
+      defaultMessage: 'Workflow context',
+    }),
+    description: i18n.translate('workflows.dataReferencePicker.workflowContextDescription', {
+      defaultMessage:
+        "This workflow's constants, plus execution metadata and Kibana URLs available at run time.",
+    }),
+    items,
+  };
 };
 
 /**
- * Builds the on-demand data-reference catalog for the step config panel.
+ * Builds the on-demand data-reference catalog for the step config panel and
+ * field-editor tree. Every entry resolves from the edited workflow document.
+ *
+ * `stepsScope`:
+ * - `predecessors` (default) — only steps before `currentStepName`
+ * - `allSteps` — every step (for workflow outputs evaluated after the run)
  */
 export const buildDataReferenceCatalog = ({
   definition,
   currentStepName,
   connectors,
+  stepsScope = 'predecessors',
 }: {
   definition: WorkflowYaml | undefined;
   currentStepName: string;
   connectors: readonly ConnectorContractUnion[];
+  readonly stepsScope?: 'predecessors' | 'allSteps';
 }): DataReferenceCatalog => {
   const groups: DataReferenceGroup[] = [];
 
   if (definition) {
-    // Catalog only needs trigger/consts/event shapes — no registered step outputs.
-    const contextSchema = getWorkflowContextSchema(EMPTY_CONTEXT_REGISTRY, definition);
-    const eventField = (contextSchema as z.ZodObject<z.ZodRawShape>).shape?.event as
-      | z.ZodType
-      | undefined;
-    if (eventField) {
-      const eventItems = schemaToItems(unwrapSchema(eventField) as z.ZodType, 'event');
-      if (eventItems.length > 0) {
-        groups.push({
-          id: 'event',
-          title: i18n.translate('workflows.dataReferencePicker.triggerEvent', {
-            defaultMessage: 'Trigger event',
-          }),
-          scopeNote: i18n.translate('workflows.dataReferencePicker.triggerScope', {
-            defaultMessage: "From this workflow's trigger",
-          }),
-          items: eventItems,
-        });
-      }
-    }
-
-    const predecessors = getDocumentOrderPredecessors(definition.steps, currentStepName);
-    const stepItems = buildStepItems(predecessors, connectors);
-    if (stepItems.length > 0) {
-      groups.push({
-        id: 'steps',
-        title: i18n.translate('workflows.dataReferencePicker.steps', {
-          defaultMessage: 'Steps',
-        }),
-        scopeNote: i18n.translate('workflows.dataReferencePicker.stepsScope', {
-          defaultMessage: 'only steps that run before this one',
-        }),
-        items: stepItems,
-      });
-    }
-
-    const constKeys = Object.keys(definition.consts ?? {});
-    if (constKeys.length > 0) {
-      groups.push({
-        id: 'consts',
-        title: i18n.translate('workflows.dataReferencePicker.constants', {
-          defaultMessage: 'Constants',
-        }),
-        items: constKeys.map((key) => ({
-          path: `consts.${key}`,
-          typeLabel: typeof (definition.consts as Record<string, unknown>)?.[key],
-          drillable: false,
-        })),
-      });
-    }
+    groups.push(buildTriggerGroup(definition));
+  } else {
+    groups.push({
+      id: 'triggers',
+      title: i18n.translate('workflows.dataReferencePicker.triggerEvent', {
+        defaultMessage: 'Trigger event',
+      }),
+      description: i18n.translate('workflows.dataReferencePicker.triggerEventDescription', {
+        defaultMessage: "Data from this workflow's trigger.",
+      }),
+      items: [],
+    });
   }
 
+  const stepRefs =
+    definition == null
+      ? []
+      : stepsScope === 'allSteps'
+        ? getAllDocumentOrderSteps(definition.steps)
+        : getDocumentOrderPredecessors(definition.steps, currentStepName);
+
   groups.push({
-    id: 'context',
-    title: i18n.translate('workflows.dataReferencePicker.workflowContext', {
-      defaultMessage: 'Workflow context',
+    id: 'steps',
+    title: i18n.translate('workflows.dataReferencePicker.steps', {
+      defaultMessage: 'Steps',
     }),
-    items: buildContextItems(),
+    description:
+      stepsScope === 'allSteps'
+        ? i18n.translate('workflows.dataReferencePicker.stepsAllDescription', {
+            defaultMessage:
+              'Output from any step in this workflow — outputs are evaluated after the run finishes.',
+          })
+        : i18n.translate('workflows.dataReferencePicker.stepsDescription', {
+            defaultMessage:
+              "Output from steps in this workflow that run before the one you're editing.",
+          }),
+    items: buildStepEntities(stepRefs, connectors),
+    emptyMessage:
+      stepsScope === 'allSteps'
+        ? i18n.translate('workflows.dataReferencePicker.stepsAllEmpty', {
+            defaultMessage: 'No steps in this workflow yet.',
+          })
+        : i18n.translate('workflows.dataReferencePicker.stepsEmpty', {
+            defaultMessage: 'No earlier steps — this is the first step in the workflow.',
+          }),
   });
+
+  groups.push(buildContextGroup(definition));
 
   return { groups };
 };
 
-/** Flatten leaf (insertable) rows for global search. */
+/** Flatten insertable leaves for global search (any depth, including undrilled entities). */
 export const flattenDataReferenceLeaves = (
-  items: readonly DataReferenceItem[]
+  catalogOrItems: DataReferenceCatalog | readonly DataReferenceItem[]
 ): DataReferenceItem[] => {
   const leaves: DataReferenceItem[] = [];
   const walk = (list: readonly DataReferenceItem[]) => {
     for (const item of list) {
-      if (item.drillable && item.children?.length) {
+      if (item.children?.length && (item.isEntity || item.drillable)) {
         walk(item.children);
-      } else {
+        continue;
+      }
+      if (isDataReferenceInsertable(item)) {
         leaves.push(item);
       }
     }
   };
-  walk(items);
+
+  if (Array.isArray(catalogOrItems)) {
+    walk(catalogOrItems);
+  } else {
+    for (const group of catalogOrItems.groups) {
+      walk(group.items);
+    }
+  }
   return leaves;
 };
 

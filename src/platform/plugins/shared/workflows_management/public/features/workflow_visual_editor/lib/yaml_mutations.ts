@@ -235,6 +235,42 @@ export const deleteTrigger = (yaml: string, triggerIndex: number): MutationResul
   return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
 };
 
+/** Extracts a trigger's YAML fragment (a mapping, comments included). */
+export const getTriggerFragment = (yaml: string, triggerIndex: number): string | undefined => {
+  const doc = parseDocument(yaml);
+  const triggers = isMap(doc.contents) ? doc.contents.get('triggers') : undefined;
+  if (!isSeq(triggers) || triggerIndex < 0 || triggerIndex >= triggers.items.length) {
+    return undefined;
+  }
+  const item = triggers.items[triggerIndex];
+  if (!isMap(item)) return undefined;
+  const fragment = new Document();
+  fragment.contents = item.clone() as Node;
+  return fragment.toString({ indent: detectIndent(yaml), lineWidth: 0 });
+};
+
+/**
+ * Replaces the trigger at `triggerIndex` with the parsed fragment. Comments and
+ * unknown keys inside the fragment are carried over verbatim.
+ */
+export const replaceTriggerFragment = (
+  yaml: string,
+  triggerIndex: number,
+  triggerFragment: string
+): MutationResult => {
+  const { doc, error } = parse(yaml);
+  if (error) return fail(yaml, error);
+  const triggers = isMap(doc.contents) ? doc.contents.get('triggers') : undefined;
+  if (!isSeq(triggers) || triggerIndex < 0 || triggerIndex >= triggers.items.length) {
+    return fail(yaml, `Trigger #${triggerIndex} not found`);
+  }
+  const { node, error: fragmentError } = parseStepFragment(triggerFragment);
+  if (!node) return fail(yaml, fragmentError ?? 'Invalid trigger');
+
+  triggers.items[triggerIndex] = node;
+  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
+};
+
 /**
  * Sets `on-failure.fallback` on `stepName` to contain the given step, keeping
  * any sibling `on-failure` keys (retry / continue) intact.

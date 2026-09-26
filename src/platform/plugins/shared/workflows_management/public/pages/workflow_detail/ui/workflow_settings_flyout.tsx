@@ -30,15 +30,30 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
+import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getAllConnectorsWithDynamic } from '../../../../common/schema';
 import { updateWorkflowYamlFields } from '../../../../common/lib/yaml/update_workflow_yaml_fields';
 import { useWorkflowFiltersOptions } from '../../../entities/workflows/model/use_workflow_stats';
 import {
+  selectConnectors,
   selectEditorWorkflowDefinition,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setYamlString } from '../../../entities/workflows/store/workflow_detail/slice';
+import { findStepsReferencingPath } from '../../../shared/ui/schema_property_builder';
+import { WorkflowConstantsEditor } from './workflow_constants_editor';
+import { WorkflowOutputsEditor } from './workflow_outputs_editor';
+import {
+  constantsToYamlRecord,
+  outputsToJsonSchema,
+  parseConstsToFields,
+  parseOutputsToFields,
+  writeRootYamlMapping,
+  type ConstantField,
+  type OutputField,
+} from './workflow_settings_fields_model';
 
 export interface WorkflowSettingsFlyoutProps {
   readonly isOpen: boolean;
@@ -46,11 +61,6 @@ export interface WorkflowSettingsFlyoutProps {
   readonly readOnly?: boolean;
 }
 
-/**
- * Tab chrome: General (live) and Constants (coming soon until a real editor lands).
- *
- * TODO(constants): replace the coming-soon stub with a real editor.
- */
 const SETTINGS_TABS = [
   {
     id: 'general' as const,
@@ -62,6 +72,12 @@ const SETTINGS_TABS = [
     id: 'constants' as const,
     label: i18n.translate('workflows.workflowSettingsFlyout.tab.constants', {
       defaultMessage: 'Constants',
+    }),
+  },
+  {
+    id: 'outputs' as const,
+    label: i18n.translate('workflows.workflowSettingsFlyout.tab.outputs', {
+      defaultMessage: 'Outputs',
     }),
   },
 ] as const;
@@ -77,11 +93,19 @@ export const WorkflowSettingsFlyout = ({
   const dispatch = useDispatch();
   const yamlString = useSelector(selectYamlString) ?? '';
   const definition = useSelector(selectEditorWorkflowDefinition);
+  const loadedConnectors = useSelector(selectConnectors);
+  // Same unwrap as the visual editor — store holds ConnectorsResponse, not an array.
+  const connectors = useMemo(
+    () => getAllConnectorsWithDynamic(loadedConnectors?.connectorTypes),
+    [loadedConnectors?.connectorTypes]
+  );
 
   const [selectedTabId, setSelectedTabId] = useState<SettingsTabId>('general');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [tagOptions, setTagOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [constantFields, setConstantFields] = useState<ConstantField[]>([]);
+  const [outputFields, setOutputFields] = useState<OutputField[]>([]);
 
   const { data: tagFilterData } = useWorkflowFiltersOptions(['tags']);
   const tagSuggestions = useMemo(
@@ -106,6 +130,23 @@ export const WorkflowSettingsFlyout = ({
       return;
     }
     setSelectedTabId('general');
+    // Hydrate consts/outputs only when the flyout opens — not on every YAML
+    // write-through (that remounted accordion cards). Prefer the live YAML
+    // document so we don't depend on a stale parsed definition.
+    try {
+      const doc = parseDocument(yamlString);
+      const js = doc.toJS() as Record<string, unknown> | null;
+      setConstantFields(parseConstsToFields(js?.consts ?? definition?.consts));
+      setOutputFields(parseOutputsToFields(js?.outputs ?? definition?.outputs));
+    } catch {
+      setConstantFields(parseConstsToFields(definition?.consts));
+      setOutputFields(parseOutputsToFields(definition?.outputs));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- open-once hydrate
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
     setName(typeof definition?.name === 'string' ? definition.name : '');
     setDescription(typeof definition?.description === 'string' ? definition.description : '');
     const tags = Array.isArray(definition?.tags) ? definition.tags : [];
@@ -139,7 +180,6 @@ export const WorkflowSettingsFlyout = ({
   const handleNameBlur = useCallback(() => {
     const next = name.trim();
     if (!next) {
-      // Required key — revert local draft to the document value.
       setName(typeof definition?.name === 'string' ? definition.name : '');
       return;
     }
@@ -190,6 +230,42 @@ export const WorkflowSettingsFlyout = ({
     [applyYamlPatch, tagOptions]
   );
 
+  const handleConstantsChange = useCallback(
+    (next: readonly ConstantField[]) => {
+      setConstantFields([...next]);
+      if (readOnly) return;
+      const record = constantsToYamlRecord(next);
+      const nextYaml = writeRootYamlMapping(yamlString, 'consts', record);
+      if (nextYaml !== yamlString) {
+        dispatch(setYamlString(nextYaml));
+      }
+    },
+    [dispatch, readOnly, yamlString]
+  );
+
+  const handleOutputsChange = useCallback(
+    (next: readonly OutputField[]) => {
+      setOutputFields([...next]);
+      if (readOnly) return;
+      const schema = outputsToJsonSchema(next);
+      const nextYaml = writeRootYamlMapping(yamlString, 'outputs', schema);
+      if (nextYaml !== yamlString) {
+        dispatch(setYamlString(nextYaml));
+      }
+    },
+    [dispatch, readOnly, yamlString]
+  );
+
+  const findConstRefs = useCallback(
+    (constName: string) => findStepsReferencingPath(yamlString, 'consts', constName),
+    [yamlString]
+  );
+
+  const findOutputRefs = useCallback(
+    (outputName: string) => findStepsReferencingPath(yamlString, 'outputs', outputName),
+    [yamlString]
+  );
+
   if (!isOpen) {
     return null;
   }
@@ -198,19 +274,20 @@ export const WorkflowSettingsFlyout = ({
     <EuiFlyout
       onClose={onClose}
       size="s"
-      ownFocus
       data-test-subj="workflowSettingsFlyout"
       aria-labelledby={titleId}
     >
       <EuiFlyoutHeader
         hasBorder
-        css={{
-          // Flyout padding targets `[class*='euiFlyoutHeader-hasBorder']`;
-          // bump specificity so tabs sit flush on the header border.
-          '&&': { paddingBottom: 0 },
-        }}
+        css={({ euiTheme }) => ({
+          '&&': {
+            paddingTop: euiTheme.size.base,
+            paddingInline: euiTheme.size.base,
+            paddingBottom: 0,
+          },
+        })}
       >
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2 id={titleId}>
             <FormattedMessage
               id="workflows.workflowSettingsFlyout.title"
@@ -219,7 +296,7 @@ export const WorkflowSettingsFlyout = ({
           </h2>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiTabs bottomBorder={false}>
+        <EuiTabs size="m" bottomBorder={false} css={{ marginBottom: 0, paddingBottom: 0 }}>
           {SETTINGS_TABS.map((tab) => (
             <EuiTab
               key={tab.id}
@@ -233,7 +310,13 @@ export const WorkflowSettingsFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        css={({ euiTheme }) => ({
+          '.euiFlyoutBody__overflowContent': {
+            padding: euiTheme.size.base,
+          },
+        })}
+      >
         {selectedTabId === 'general' ? (
           <>
             <EuiFormRow
@@ -307,16 +390,36 @@ export const WorkflowSettingsFlyout = ({
                 data-test-subj="workflowSettingsTagsInput"
               />
             </EuiFormRow>
+
+            <EuiSpacer size="l" />
+
+            <EuiText size="s" color="subdued" data-test-subj="workflowSettingsInputsHint">
+              <FormattedMessage
+                id="workflows.workflowSettingsFlyout.inputsOnManualHint"
+                defaultMessage="Run inputs are defined on the Manual trigger on the canvas — not here."
+              />
+            </EuiText>
           </>
         ) : null}
 
         {selectedTabId === 'constants' ? (
-          <EuiText size="s" color="subdued" data-test-subj="workflowSettingsConstantsPlaceholder">
-            <FormattedMessage
-              id="workflows.workflowSettingsFlyout.comingSoon"
-              defaultMessage="Coming soon."
-            />
-          </EuiText>
+          <WorkflowConstantsEditor
+            fields={constantFields}
+            onChange={handleConstantsChange}
+            findReferencingSteps={findConstRefs}
+            readOnly={readOnly}
+          />
+        ) : null}
+
+        {selectedTabId === 'outputs' ? (
+          <WorkflowOutputsEditor
+            fields={outputFields}
+            onChange={handleOutputsChange}
+            workflowDefinition={definition}
+            connectors={connectors}
+            findReferencingSteps={findOutputRefs}
+            readOnly={readOnly}
+          />
         ) : null}
       </EuiFlyoutBody>
 

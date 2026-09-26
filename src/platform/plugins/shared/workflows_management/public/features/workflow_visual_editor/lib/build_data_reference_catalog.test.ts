@@ -12,6 +12,10 @@ import {
   buildDataReferenceCatalog,
   flattenDataReferenceLeaves,
   formatDataReferenceToken,
+  isDataReferenceDraggable,
+  isDataReferenceEntity,
+  isDataReferenceExpandable,
+  isDataReferenceInsertable,
 } from './build_data_reference_catalog';
 import { getDocumentOrderPredecessors } from './get_document_order_predecessors';
 
@@ -55,13 +59,15 @@ describe('buildDataReferenceCatalog', () => {
     ],
   } as unknown as WorkflowYaml;
 
-  it('scopes steps to document-order predecessors only', () => {
+  it('scopes steps to document-order predecessors; empty on the first step', () => {
     const early = buildDataReferenceCatalog({
       definition,
       currentStepName: 'first',
       connectors: [],
     });
-    expect(early.groups.find((g) => g.id === 'steps')).toBeUndefined();
+    const earlySteps = early.groups.find((g) => g.id === 'steps');
+    expect(earlySteps?.items).toEqual([]);
+    expect(earlySteps?.emptyMessage).toMatch(/No earlier steps/);
 
     const late = buildDataReferenceCatalog({
       definition,
@@ -69,40 +75,145 @@ describe('buildDataReferenceCatalog', () => {
       connectors: [],
     });
     const stepsGroup = late.groups.find((g) => g.id === 'steps');
-    expect(stepsGroup?.items.map((i) => i.path)).toEqual(['steps.first.output']);
-    // Untyped / opaque outputs are a single non-drillable object row.
+    expect(stepsGroup?.items).toHaveLength(1);
     expect(stepsGroup?.items[0]).toMatchObject({
+      path: 'steps.first.output',
+      label: 'first',
+      isEntity: true,
+      drillable: true,
+    });
+    expect(isDataReferenceInsertable(stepsGroup!.items[0])).toBe(false);
+    expect(isDataReferenceExpandable(stepsGroup!.items[0])).toBe(true);
+    expect(isDataReferenceDraggable(stepsGroup!.items[0])).toBe(false);
+    // Untyped / opaque outputs: one insertable object leaf under the entity.
+    expect(stepsGroup?.items[0].children?.[0]).toMatchObject({
       path: 'steps.first.output',
       typeLabel: 'object',
       drillable: false,
+      note: expect.stringMatching(/does not declare output fields/),
     });
+    expect(isDataReferenceDraggable(stepsGroup!.items[0].children![0])).toBe(true);
+    expect(isDataReferenceInsertable(stepsGroup!.items[0].children![0])).toBe(true);
   });
 
-  it('includes consts, workflow context, and trigger event', () => {
+  it('includes every step when stepsScope is allSteps', () => {
+    const catalog = buildDataReferenceCatalog({
+      definition,
+      currentStepName: 'first',
+      connectors: [],
+      stepsScope: 'allSteps',
+    });
+    const stepsGroup = catalog.groups.find((g) => g.id === 'steps');
+    expect(stepsGroup?.items.map((i) => i.label)).toEqual(['first', 'second']);
+    expect(stepsGroup?.description).toMatch(/evaluated after the run finishes/);
+  });
+
+  it('merges consts into workflow context and drops a standalone constants group', () => {
     const catalog = buildDataReferenceCatalog({
       definition,
       currentStepName: 'second',
       connectors: [],
     });
-    expect(catalog.groups.map((g) => g.id)).toEqual(
-      expect.arrayContaining(['event', 'steps', 'consts', 'context'])
-    );
-    const consts = catalog.groups.find((g) => g.id === 'consts');
-    expect(consts?.items.map((i) => i.path)).toEqual(['consts.region']);
+    expect(catalog.groups.map((g) => g.id)).toEqual(['triggers', 'steps', 'context']);
+    expect(catalog.groups.find((g) => g.id === 'consts')).toBeUndefined();
+
+    const context = catalog.groups.find((g) => g.id === 'context');
+    const region = context?.items.find((i) => i.path === 'consts.region');
+    expect(region).toMatchObject({
+      label: 'consts.region',
+      subtitle: 'us-east-1',
+      typeLabel: 'string',
+    });
+    expect(context?.items.find((i) => i.path === 'kibanaUrl')).toMatchObject({
+      label: 'kibanaUrl',
+      typeLabel: 'string',
+    });
+    expect(context?.items.find((i) => i.path === 'kibanaUrl')?.subtitle).toBeUndefined();
+
+    const workflow = context?.items.find((i) => i.path === 'workflow');
+    expect(workflow?.drillable).toBe(true);
+    expect(isDataReferenceInsertable(workflow!)).toBe(false);
+    expect(isDataReferenceDraggable(workflow!)).toBe(false);
+    const workflowId = workflow?.children?.find((c) => c.path === 'workflow.id');
+    expect(isDataReferenceDraggable(workflowId!)).toBe(true);
+  });
+
+  it('skips the trigger entity row when there is only one trigger', () => {
+    const catalog = buildDataReferenceCatalog({
+      definition,
+      currentStepName: 'second',
+      connectors: [],
+    });
+    const triggers = catalog.groups.find((g) => g.id === 'triggers');
+    expect(triggers?.title).toBe('Trigger event');
+    expect(triggers?.items.every((i) => !isDataReferenceEntity(i))).toBe(true);
+    expect(triggers?.items.some((i) => i.path.startsWith('event'))).toBe(true);
+  });
+
+  it('uses entity rows per trigger when multiple are configured', () => {
+    const multi = {
+      ...definition,
+      triggers: [{ type: 'manual' }, { type: 'alert' }],
+    } as unknown as WorkflowYaml;
+    const catalog = buildDataReferenceCatalog({
+      definition: multi,
+      currentStepName: 'second',
+      connectors: [],
+    });
+    const triggers = catalog.groups.find((g) => g.id === 'triggers');
+    expect(triggers?.title).toBe('Triggers');
+    expect(triggers?.description).toMatch(/Each trigger exposes different fields/);
+    expect(triggers?.items).toHaveLength(2);
+    expect(triggers?.items.every(isDataReferenceEntity)).toBe(true);
+    expect(triggers?.items.map((i) => i.label)).toEqual(['Manual', 'Alert']);
+    // Trigger blurbs belong in the group (i) tooltip — not on each row.
+    expect(triggers?.items.every((i) => i.subtitle === undefined)).toBe(true);
+  });
+
+  it('shows a step action-type subtitle only when it differs from the step name', () => {
+    const mixed = {
+      ...definition,
+      steps: [
+        { name: 'if_step', type: 'if' },
+        { name: 'SendHashtoVT', type: '.virustotal' },
+        { name: 'after', type: 'console', with: { message: 'y' } },
+      ],
+    } as unknown as WorkflowYaml;
+    const catalog = buildDataReferenceCatalog({
+      definition: mixed,
+      currentStepName: 'after',
+      connectors: [
+        {
+          type: '.virustotal',
+          hasConnectorId: false,
+          paramsSchema: {},
+          outputSchema: {},
+          summary: 'Scan File Hash',
+          displayName: 'Scan File Hash',
+        } as never,
+      ],
+    });
+    const steps = catalog.groups.find((g) => g.id === 'steps')?.items ?? [];
+    const ifStep = steps.find((i) => i.label === 'if_step');
+    const hashStep = steps.find((i) => i.label === 'SendHashtoVT');
+    expect(ifStep?.subtitle).toBeUndefined();
+    expect(hashStep?.subtitle).toBe('Scan File Hash');
   });
 
   it('formats Liquid tokens with single spaces', () => {
     expect(formatDataReferenceToken('steps.a.output')).toBe('{{ steps.a.output }}');
   });
 
-  it('flattens leaves for search across groups', () => {
+  it('flattens leaves for search across groups including undrilled entities', () => {
     const catalog = buildDataReferenceCatalog({
       definition,
       currentStepName: 'second',
       connectors: [],
     });
-    const leaves = flattenDataReferenceLeaves(catalog.groups.flatMap((g) => g.items));
+    const leaves = flattenDataReferenceLeaves(catalog);
     expect(leaves.some((l) => l.path === 'consts.region')).toBe(true);
     expect(leaves.some((l) => l.path === 'steps.first.output')).toBe(true);
+    expect(leaves.every((l) => l.originLabel)).toBe(true);
+    expect(leaves.every(isDataReferenceInsertable)).toBe(true);
   });
 });

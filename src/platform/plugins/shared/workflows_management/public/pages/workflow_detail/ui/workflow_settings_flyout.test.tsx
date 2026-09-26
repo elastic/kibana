@@ -13,6 +13,7 @@ import { WorkflowSettingsFlyout } from './workflow_settings_flyout';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  setConnectors,
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -58,6 +59,13 @@ describe('WorkflowSettingsFlyout', () => {
       })
     );
     store.dispatch(setYamlString(yaml));
+    // Real store shape — ConnectorsResponse, not an array. Outputs tab must unwrap it.
+    store.dispatch(
+      setConnectors({
+        connectorTypes: {},
+        totalConnectors: 0,
+      })
+    );
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <TestWrapper store={store}>{children}</TestWrapper>
@@ -75,6 +83,7 @@ describe('WorkflowSettingsFlyout', () => {
     expect(screen.getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('workflowSettingsTab-general')).toBeInTheDocument();
     expect(screen.getByTestId('workflowSettingsTab-constants')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowSettingsTab-outputs')).toBeInTheDocument();
     expect(screen.queryByTestId('workflowSettingsTab-sharing')).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowSettingsTab-serviceAccount')).not.toBeInTheDocument();
 
@@ -106,12 +115,31 @@ describe('WorkflowSettingsFlyout', () => {
     expect(selectYamlString(store.getState())).not.toContain('description');
   });
 
-  it('shows Coming soon on the Constants tab', () => {
+  it('shows the Manual-trigger inputs hint on General', () => {
     renderFlyout();
+    expect(screen.getByTestId('workflowSettingsInputsHint')).toBeInTheDocument();
+  });
+
+  it('loads existing constants on the Constants tab and can add another', () => {
+    const { store } = renderFlyout();
 
     fireEvent.click(screen.getByTestId('workflowSettingsTab-constants'));
-    expect(screen.getByTestId('workflowSettingsConstantsPlaceholder')).toHaveTextContent(
-      'Coming soon.'
-    );
+    expect(screen.getByTestId('workflowSettingsConstAdd')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('region')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('us-east-1')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('workflowSettingsConstAdd'));
+    fireEvent.click(screen.getByTestId('workflowSettingsFlyoutDone'));
+    expect(selectYamlString(store.getState())).toContain('region');
+  });
+
+  it('shows the outputs empty state when none are defined', () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByTestId('workflowSettingsTab-outputs'));
+    expect(screen.getByTestId('workflowSettingsOutputEmpty')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowSettingsOutputAdd'));
+    expect(screen.queryByTestId('workflowSettingsOutputEmpty')).not.toBeInTheDocument();
+    expect(screen.getByTestId(/workflowSettingsOutputValue-/)).toBeInTheDocument();
   });
 });

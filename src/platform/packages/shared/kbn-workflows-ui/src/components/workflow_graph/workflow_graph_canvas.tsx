@@ -657,9 +657,9 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   );
 
   // Single-pass bounding-box over the stable layout output (`nodes`, not
-  // `decoratedNodes`) so that selection changes never invalidate the extent
-  // or reset-viewport callbacks.  `Math.min/max(...arr.map(...))` is avoided:
-  // spreading large arrays as call args can raise RangeError on very big graphs.
+  // `decoratedNodes`) so that selection changes never invalidate fit/reset
+  // viewport callbacks. `Math.min/max(...arr.map(...))` is avoided: spreading
+  // large arrays as call args can raise RangeError on very big graphs.
   const graphBounds = useMemo((): GraphBounds => {
     return (
       boundsFromNodes(nodes) ?? {
@@ -672,16 +672,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       }
     );
   }, [nodes]);
-
-  // Restrict panning to the graph's bounding box plus a comfortable margin
-  // so the user can't scroll far off into empty space.
-  const translateExtent = useMemo<[[number, number], [number, number]]>(() => {
-    const PAD = 400;
-    return [
-      [graphBounds.minX - PAD, graphBounds.minY - PAD],
-      [graphBounds.maxX + PAD, graphBounds.maxY + PAD],
-    ];
-  }, [graphBounds]);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
@@ -784,14 +774,14 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   // Perform the one-time initial centering, but only once React Flow has
   // measured the canvas. Centering during the 0-dimension window computes a
   // wrong transform that pins a small graph to the top of the view until the
-  // first pan re-clamps it against `translateExtent`. Waiting for measured
-  // dimensions (and node measurement) also handles nodes that arrive after the
-  // canvas mounts. The ref keeps this to a single centering for the component's
-  // lifetime, so later resizes never yank the viewport away from the user.
+  // first pan. Waiting for measured dimensions (and node measurement) also
+  // handles nodes that arrive after the canvas mounts. The ref keeps this to a
+  // single centering for the component's lifetime, so later resizes never yank
+  // the viewport away from the user.
   //
   // Empty → first structure (creation-panel trigger/step): wait two animation
-  // frames so dagre positions + translateExtent commit, then animate into the
-  // home frame — same cadence as a direction change.
+  // frames so dagre positions commit, then animate into the home frame — same
+  // cadence as a direction change.
   useEffect(() => {
     if (hasCenteredInitialViewRef.current || !instanceReady) {
       return;
@@ -1028,7 +1018,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               zoomOnScroll={false}
               zoomOnPinch={showNavChrome}
               zoomOnDoubleClick={false}
-              translateExtent={translateExtent}
               minZoom={0.1}
             >
               {showBackground && (

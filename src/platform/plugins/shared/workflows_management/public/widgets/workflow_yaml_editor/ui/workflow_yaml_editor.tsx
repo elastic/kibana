@@ -899,6 +899,11 @@ export const WorkflowYAMLEditor = ({
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={handleCommandSelected}
         onJumpToStep={handleJumpToStep}
+        disabledTriggerIds={
+          workflowDefinition?.triggers?.some((t) => t.type === 'manual')
+            ? (['manual'] as const)
+            : undefined
+        }
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions — anchored to the focused

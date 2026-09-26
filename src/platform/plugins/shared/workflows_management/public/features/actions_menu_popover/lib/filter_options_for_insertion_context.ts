@@ -13,11 +13,24 @@ import { isActionGroup } from '../types';
 const TRIGGERS_GROUP_ID = 'triggers';
 const FLOW_CONTROL_GROUP_ID = 'flowControl';
 
+/** Remove trigger leaves whose ids are in `disabledTriggerIds` (e.g. Manual once one exists). */
+export const omitDisabledTriggers = (
+  options: ActionOptionData[],
+  disabledTriggerIds: readonly string[] | undefined
+): ActionOptionData[] => {
+  if (!disabledTriggerIds?.length) return options;
+  const disabled = new Set(disabledTriggerIds);
+  return options.map((opt) => {
+    if (opt.id !== TRIGGERS_GROUP_ID || !isActionGroup(opt)) return opt;
+    return { ...opt, options: opt.options.filter((leaf) => !disabled.has(leaf.id)) };
+  });
+};
+
 /**
  * Filters the shared Actions catalog for an insertion context.
  * One function for the full menu and the compact popover — never fork lists.
  *
- * - `trigger`: only the Triggers group's leaves
+ * - `trigger`: only the Triggers group's leaves; hides `disabledTriggerIds`
  * - `step`: hide Triggers
  * - `error`: hide Triggers and Flow control (same as canvas error-port eligibility)
  */
@@ -28,7 +41,8 @@ export const filterOptionsForInsertionContext = (
   if (!context) return options;
 
   if (context.mode === 'trigger') {
-    const triggers = options.find((o) => o.id === TRIGGERS_GROUP_ID);
+    const withDisabledOmitted = omitDisabledTriggers(options, context.disabledTriggerIds);
+    const triggers = withDisabledOmitted.find((o) => o.id === TRIGGERS_GROUP_ID);
     return triggers && isActionGroup(triggers) ? triggers.options : [];
   }
 

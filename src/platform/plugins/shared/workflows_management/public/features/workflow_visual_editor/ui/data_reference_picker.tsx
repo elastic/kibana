@@ -8,23 +8,20 @@
  */
 
 import {
-  EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconTip,
   EuiPopover,
   EuiText,
-  EuiToolTip,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiToolTipRef } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldIcon } from '@kbn/react-field';
 import type {
   DataReferenceCatalog,
   DataReferenceGroup,
@@ -34,15 +31,15 @@ import type {
 import {
   flattenDataReferenceLeaves,
   formatDataReferenceToken,
+  isDataReferenceInsertable,
 } from '../lib/build_data_reference_catalog';
+import { DataReferenceItemRowContent } from './data_reference_item_row';
 
 const PICKER_MAX_HEIGHT = 400;
 /** Fixed floating-layer width — must not match the panel field width. */
 const PICKER_WIDTH = 340;
 /** Root browse view: show this many rows per group before "Show all". */
 const ROOT_GROUP_ROW_CAP = 5;
-/** EUI 119 removed tooltip delay — recreate a 1s dwell for truncated paths. */
-const PATH_TOOLTIP_DELAY_MS = 1000;
 
 type NavigableEntry =
   | { readonly kind: 'item'; readonly item: DataReferenceItem }
@@ -53,70 +50,6 @@ type NavigableEntry =
       readonly total: number;
     };
 
-/**
- * Ellipsized path label — full path tip only when truncated, after a 1s hover dwell.
- */
-function DataReferencePathLabel({ path }: { readonly path: string }) {
-  const { euiTheme } = useEuiTheme();
-  const textRef = useRef<HTMLSpanElement>(null);
-  const tipRef = useRef<EuiToolTipRef>(null);
-  const delayRef = useRef<number | undefined>(undefined);
-  const [tipContent, setTipContent] = useState<string | undefined>(undefined);
-
-  const clearDelay = useCallback(() => {
-    if (delayRef.current !== undefined) {
-      window.clearTimeout(delayRef.current);
-      delayRef.current = undefined;
-    }
-  }, []);
-
-  useEffect(() => () => clearDelay(), [clearDelay]);
-
-  useEffect(() => {
-    if (tipContent) tipRef.current?.showToolTip();
-  }, [tipContent]);
-
-  return (
-    <EuiToolTip
-      ref={tipRef}
-      content={tipContent}
-      position="top"
-      display="block"
-      disableScreenReaderOutput
-      anchorProps={{
-        style: { minWidth: 0, flex: '0 1 auto' },
-        onMouseEnter: () => {
-          const el = textRef.current;
-          if (!el || el.scrollWidth <= el.clientWidth) return;
-          clearDelay();
-          delayRef.current = window.setTimeout(() => {
-            setTipContent(path);
-          }, PATH_TOOLTIP_DELAY_MS);
-        },
-        onMouseLeave: () => {
-          clearDelay();
-          setTipContent(undefined);
-          tipRef.current?.hideToolTip();
-        },
-      }}
-    >
-      <span
-        ref={textRef}
-        css={{
-          display: 'block',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          fontFamily: euiTheme.font.familyCode,
-          fontSize: euiTheme.size.m,
-        }}
-      >
-        {path}
-      </span>
-    </EuiToolTip>
-  );
-}
-
 export interface DataReferencePickerProps {
   readonly catalog: DataReferenceCatalog;
   readonly isOpen: boolean;
@@ -124,6 +57,11 @@ export interface DataReferencePickerProps {
   readonly onInsert: (token: string) => void;
   /** Anchor field — picker floats under it; does not resize to match field width. */
   readonly input: React.ReactElement;
+  /**
+   * Stretch the anchor to fill its parent height (field-editor pane). Inline
+   * form fields leave this unset so the popover sizes to the control.
+   */
+  readonly fillHeight?: boolean;
   readonly 'data-test-subj'?: string;
 }
 
@@ -137,6 +75,7 @@ export function DataReferencePicker({
   onClose,
   onInsert,
   input,
+  fillHeight = false,
   'data-test-subj': dataTestSubj = 'workflowDataReferencePicker',
 }: DataReferencePickerProps) {
   const { euiTheme } = useEuiTheme();
@@ -174,7 +113,6 @@ export function DataReferencePicker({
       if (scrollTarget instanceof Element && !scrollTarget.contains(inputEl)) return;
       onClose();
     };
-    // Delay matches EuiInputPopover — avoid closing on the open-time layout scroll.
     const timeoutId = window.setTimeout(() => {
       window.addEventListener('scroll', closePopoverOnScroll, {
         passive: true,
@@ -192,9 +130,13 @@ export function DataReferencePicker({
   const visibleRows = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (query) {
-      const leaves = flattenDataReferenceLeaves(
-        catalog.groups.flatMap((g) => g.items)
-      ).filter((item) => item.path.toLowerCase().includes(query));
+      const leaves = flattenDataReferenceLeaves(catalog).filter(
+        (item) =>
+          item.path.toLowerCase().includes(query) ||
+          item.label.toLowerCase().includes(query) ||
+          item.subtitle?.toLowerCase().includes(query) ||
+          item.originLabel.toLowerCase().includes(query)
+      );
       return { mode: 'search' as const, items: leaves, groups: [] as DataReferenceGroup[] };
     }
     if (drilledItem?.children) {
@@ -204,8 +146,8 @@ export function DataReferencePicker({
         groups: [] as DataReferenceGroup[],
       };
     }
-    return { mode: 'browse' as const, items: [] as DataReferenceItem[], groups: catalog.groups };
-  }, [catalog.groups, drilledItem, search]);
+    return { mode: 'browse' as const, items: [] as DataReferenceItem[], groups: catalog.groups.filter((g) => g.items.length > 0) };
+  }, [catalog, drilledItem, search]);
 
   const flatNavigable = useMemo((): readonly NavigableEntry[] => {
     if (visibleRows.mode !== 'browse') {
@@ -253,6 +195,7 @@ export function DataReferencePicker({
         setSearch('');
         return;
       }
+      if (!isDataReferenceInsertable(item)) return;
       onInsert(formatDataReferenceToken(item.path));
       onClose();
     },
@@ -298,7 +241,6 @@ export function DataReferencePicker({
         activateEntry(flatNavigable[highlightIndex]);
       }
       if (event.key === 'Backspace' && !search && drillStack.length > 0) {
-        // Only when search is empty — back navigates out of a drill.
         const target = event.target as HTMLInputElement;
         if (target.selectionStart === 0 && target.selectionEnd === 0) {
           event.preventDefault();
@@ -306,32 +248,34 @@ export function DataReferencePicker({
         }
       }
     },
-    [
-      activateEntry,
-      drillStack.length,
-      flatNavigable,
-      highlightIndex,
-      onClose,
-      search,
-    ]
+    [activateEntry, drillStack.length, flatNavigable, highlightIndex, onClose, search]
   );
 
-  const title =
-    drilledItem && !search
-      ? drilledItem.path
-      : i18n.translate('workflows.dataReferencePicker.insertData', {
-          defaultMessage: 'Insert data',
-        });
+  const navigateBreadcrumb = useCallback((depth: number) => {
+    // depth 0 = root ("Insert data"); depth N = keep first N stack entries.
+    setDrillStack((stack) => stack.slice(0, depth));
+    setSearch('');
+  }, []);
 
-  const renderItemRow = (item: DataReferenceItem, index: number) => {
+  const renderItemRow = (item: DataReferenceItem, index: number, showOrigin: boolean) => {
     const isHighlighted = index === highlightIndex;
+    const insertable = isDataReferenceInsertable(item);
     return (
       <button
-        key={item.path}
+        key={`${item.path}-${item.label}-${index}`}
         type="button"
         data-test-subj={`workflowDataReferenceRow-${item.path}`}
+        draggable={insertable}
         onMouseEnter={() => setHighlightIndex(index)}
         onClick={() => insertItem(item)}
+        onDragStart={
+          insertable
+            ? (e) => {
+                e.dataTransfer.setData('text/plain', formatDataReferenceToken(item.path));
+                e.dataTransfer.effectAllowed = 'copy';
+              }
+            : undefined
+        }
         css={{
           display: 'flex',
           alignItems: 'center',
@@ -341,24 +285,11 @@ export function DataReferencePicker({
           padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
           border: 'none',
           background: isHighlighted ? euiTheme.colors.backgroundBaseHighlighted : 'transparent',
-          cursor: 'pointer',
+          cursor: insertable ? 'grab' : 'pointer',
           minWidth: 0,
         }}
       >
-        <FieldIcon type={item.typeLabel} size="s" shape="square" />
-        <DataReferencePathLabel path={item.path} />
-        <EuiBadge color="hollow" css={{ flexShrink: 0 }}>
-          {item.typeLabel}
-        </EuiBadge>
-        {item.drillable ? (
-          <EuiIcon
-            type="chevronSingleRight"
-            size="s"
-            color="subdued"
-            aria-hidden={true}
-            css={{ marginLeft: 'auto', flexShrink: 0 }}
-          />
-        ) : null}
+        <DataReferenceItemRowContent item={item} showOrigin={showOrigin} />
       </button>
     );
   };
@@ -404,14 +335,21 @@ export function DataReferencePicker({
     display: 'inline-block' as const,
     padding: `0 ${euiTheme.size.xs}`,
     borderRadius: euiTheme.border.radius.small,
-    border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+    border: `${euiTheme.border.width.thin} solid ${transparentize(
+      euiTheme.colors.textParagraph,
+      0.2
+    )}`,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     fontFamily: euiTheme.font.familyCode,
     fontSize: 'inherit',
     fontWeight: euiTheme.font.weight.medium,
   };
 
-  return (
+  const insertDataLabel = i18n.translate('workflows.dataReferencePicker.insertData', {
+    defaultMessage: 'Insert data',
+  });
+
+  const popover = (
     <EuiPopover
       isOpen={isOpen}
       closePopover={onClose}
@@ -420,7 +358,18 @@ export function DataReferencePicker({
           ref={(el) => {
             inputElRef.current = el;
           }}
-          css={{ width: '100%' }}
+          css={{
+            width: '100%',
+            ...(fillHeight
+              ? {
+                  flex: '1 1 auto',
+                  height: '100%',
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                }
+              : {}),
+          }}
         >
           {input}
         </div>
@@ -443,9 +392,6 @@ export function DataReferencePicker({
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          // EUI floating panels draw the border on ::after at z-index 0. Sticky
-          // group headers (z-index 1) otherwise cover it and leave gaps in the
-          // side border — keep the border above flush content.
           '&::after': {
             zIndex: 2,
           },
@@ -466,7 +412,7 @@ export function DataReferencePicker({
           gutterSize="s"
           alignItems="center"
           responsive={false}
-          css={{ padding: euiTheme.size.s, paddingBottom: 0 }}
+          css={{ padding: euiTheme.size.s, paddingBottom: 0, flexWrap: 'wrap' }}
         >
           {drillStack.length > 0 && !search ? (
             <EuiFlexItem grow={false}>
@@ -481,21 +427,50 @@ export function DataReferencePicker({
               />
             </EuiFlexItem>
           ) : null}
-          <EuiFlexItem>
-            <EuiText
-              size="xs"
-              css={
-                drilledItem && !search
-                  ? {
-                      fontFamily: euiTheme.font.familyCode,
-                      fontWeight: euiTheme.font.weight.bold,
-                      fontSize: 12,
-                    }
-                  : { fontWeight: euiTheme.font.weight.bold, fontSize: 12 }
-              }
-            >
-              {title}
-            </EuiText>
+          <EuiFlexItem grow>
+            {drillStack.length > 0 && !search ? (
+              <EuiFlexGroup
+                gutterSize="xs"
+                alignItems="center"
+                responsive={false}
+                wrap
+                data-test-subj="workflowDataReferenceBreadcrumb"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="both"
+                    onClick={() => navigateBreadcrumb(0)}
+                    css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}
+                  >
+                    {insertDataLabel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                {drillStack.map((segment, i) => (
+                  <React.Fragment key={`${segment.path}-${i}`}>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        ›
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        flush="both"
+                        onClick={() => navigateBreadcrumb(i + 1)}
+                        css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}
+                      >
+                        {segment.label}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </React.Fragment>
+                ))}
+              </EuiFlexGroup>
+            ) : (
+              <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}>
+                {insertDataLabel}
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -536,7 +511,7 @@ export function DataReferencePicker({
                     ? group.items.slice(0, ROOT_GROUP_ROW_CAP)
                     : group.items;
                   const nodes = visibleItems.map((item) => {
-                    const row = renderItemRow(item, index);
+                    const row = renderItemRow(item, index, false);
                     index += 1;
                     return row;
                   });
@@ -567,17 +542,19 @@ export function DataReferencePicker({
                           background: euiTheme.colors.backgroundBaseSubdued,
                         }}
                       >
-                        <EuiText size="xs" color="subdued" css={{ fontWeight: euiTheme.font.weight.medium }}>
+                        <EuiText
+                          size="xs"
+                          color="subdued"
+                          css={{ fontWeight: euiTheme.font.weight.medium }}
+                        >
                           {group.title}
                         </EuiText>
-                        {group.scopeNote ? (
-                          <EuiIconTip
-                            type="info"
-                            color="subdued"
-                            position="top"
-                            content={group.scopeNote}
-                          />
-                        ) : null}
+                        <EuiIconTip
+                          type="info"
+                          color="subdued"
+                          position="top"
+                          content={group.description}
+                        />
                       </div>
                       {nodes}
                       {expander}
@@ -585,8 +562,10 @@ export function DataReferencePicker({
                   );
                 });
               })()
-            : visibleRows.items.map((item, i) => renderItemRow(item, i))}
-          {flatNavigable.length === 0 ? (
+            : visibleRows.items.map((item, i) =>
+                renderItemRow(item, i, visibleRows.mode === 'search')
+              )}
+          {flatNavigable.length === 0 && visibleRows.mode === 'search' ? (
             <EuiText
               size="s"
               color="subdued"
@@ -602,18 +581,49 @@ export function DataReferencePicker({
         <EuiText
           size="xs"
           color="subdued"
-          css={{ padding: euiTheme.size.s }}
+          css={{
+            padding: euiTheme.size.s,
+            '& kbd': footerKeyCss,
+          }}
         >
           <FormattedMessage
             id="workflows.dataReferencePicker.footer"
             defaultMessage="Type {at} or {braces} in any field to open this"
             values={{
-              at: <kbd css={footerKeyCss}>@</kbd>,
-              braces: <kbd css={footerKeyCss}>{'{{'}</kbd>,
+              at: <kbd>@</kbd>,
+              braces: <kbd>{'{{'}</kbd>,
             }}
           />
         </EuiText>
       </div>
     </EuiPopover>
+  );
+
+  if (!fillHeight) {
+    return popover;
+  }
+
+  // Stretch the popover anchor through EUI's display:block root without
+  // overwriting EuiPopover's css prop (which would drop base styles).
+  return (
+    <div
+      css={{
+        flex: '1 1 auto',
+        alignSelf: 'stretch',
+        minHeight: 0,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        '& > .euiPopover': {
+          flex: '1 1 auto',
+          minHeight: 0,
+          height: '100%',
+          display: 'flex !important',
+          flexDirection: 'column',
+        },
+      }}
+    >
+      {popover}
+    </div>
   );
 }

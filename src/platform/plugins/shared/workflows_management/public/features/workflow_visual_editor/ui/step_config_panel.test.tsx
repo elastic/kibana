@@ -12,7 +12,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { StepConfigPanel } from './step_config_panel';
+import { StepConfigPanel, resetStepConfigPanelSessionStateForTests } from './step_config_panel';
 
 jest.mock('@kbn/code-editor', () => {
   const MockReact = jest.requireActual('react');
@@ -91,6 +91,12 @@ jest.mock('@kbn/monaco', () => ({ XJSON_LANG_ID: 'xjson', YAML_LANG_ID: 'yaml' }
 jest.mock('@kbn/workflows-ui', () => ({
   WORKFLOWS_MONACO_EDITOR_THEME: 'theme',
   ensureWorkflowGraphEuiIcons: jest.fn(),
+  resolveNodeChipStyle: () => ({
+    background: 'bg',
+    border: 'border',
+    iconColor: 'icon',
+    isBrand: false,
+  }),
   stepSupportsErrorHandling: (stepType: string | undefined) =>
     Boolean(
       stepType &&
@@ -160,7 +166,19 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof StepConfigPa
   return { onSave, onCancel };
 };
 
+const expandSettingsAccordion = () => {
+  const accordion = screen.getByTestId('workflowStepConfigPanelAccordion-settings');
+  const trigger = accordion.querySelector('button');
+  if (!trigger) {
+    throw new Error('Settings accordion trigger not found');
+  }
+  fireEvent.click(trigger);
+};
+
 describe('StepConfigPanel', () => {
+  beforeEach(() => {
+    resetStepConfigPanelSessionStateForTests();
+  });
   it('renders instance name as title without a catalog · type subtitle', () => {
     renderPanel();
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('notify');
@@ -183,9 +201,12 @@ describe('StepConfigPanel', () => {
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
     expect(screen.getByTestId('workflowStepConfigField-with.query')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigRemoveOptional-with.query')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
+    const settingsAccordion = screen.getByTestId('workflowStepConfigPanelAccordion-settings');
+    expect(settingsAccordion).not.toHaveClass('euiAccordion-isOpen');
+    expandSettingsAccordion();
+    expect(settingsAccordion).toHaveClass('euiAccordion-isOpen');
     expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-parameters'));
+    expect(screen.getByTestId('workflowStepConfigPanelAccordion-inputs')).toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigConfiguration')).not.toBeInTheDocument();
     // Casing-only labels skip the YAML-key hint.
     expect(screen.queryByTestId('workflowStepConfigFieldKey-with.message')).not.toBeInTheDocument();
@@ -400,10 +421,10 @@ with:
       initialFragment:
         'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n  query:\n    q: "1"\n',
     });
-    // Valued query auto-reveals; Settings holds error handling.
+    // Valued query auto-reveals; Settings accordion holds error handling when opened.
     expect(screen.getByTestId('workflowStepConfigField-with.query')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPrimaryFields')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
+    expandSettingsAccordion();
     expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
   });
 
@@ -416,7 +437,7 @@ with:
     });
     expect(screen.queryByTestId('workflowStepConfigConfiguration')).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigAddOptionalField')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
+    expandSettingsAccordion();
     expect(screen.queryByTestId('workflowStepConfigErrorHandlingSection')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelSettings')).toBeInTheDocument();
   });
@@ -424,12 +445,10 @@ with:
   it('writes retry and continue through on-failure and clears keys when toggled off', () => {
     renderPanel({
       initialFragment: 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n',
-      onRevealErrorPort: jest.fn(),
     });
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
+    expandSettingsAccordion();
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorRetry'));
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorContinue'));
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-parameters'));
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
     const yaml = (screen.getByTestId('workflowStepConfigPanelYaml') as HTMLTextAreaElement).value;
     expect(yaml).toContain('on-failure:');
@@ -438,18 +457,16 @@ with:
     expect(yaml).toContain('continue: true');
 
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-form'));
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
+    // Page-session remembers Settings stayed open across the YAML round-trip.
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorRetry'));
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorContinue'));
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-parameters'));
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
     const cleared = (screen.getByTestId('workflowStepConfigPanelYaml') as HTMLTextAreaElement)
       .value;
     expect(cleared).not.toContain('on-failure');
   });
 
-  it('hides Error handling for fallback steps and shows canvas discovery when eligible', () => {
-    const onRevealErrorPort = jest.fn();
+  it('hides Error handling for fallback steps', () => {
     const { unmount } = render(
       <I18nProvider>
         <StepConfigPanel
@@ -460,23 +477,19 @@ with:
           onSave={jest.fn()}
           onCancel={jest.fn()}
           isFallbackStep
-          onRevealErrorPort={onRevealErrorPort}
         />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
+    expandSettingsAccordion();
     expect(screen.queryByTestId('workflowStepConfigErrorHandlingSection')).not.toBeInTheDocument();
     unmount();
 
     renderPanel({
       initialFragment: 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n',
-      onRevealErrorPort,
     });
-    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
-    expect(screen.getByTestId('workflowStepConfigErrorShowMe')).toBeInTheDocument();
-    expect(screen.queryByTestId('workflowStepConfigErrorAddFallback')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('workflowStepConfigErrorShowMe'));
-    expect(onRevealErrorPort).toHaveBeenCalled();
+    expandSettingsAccordion();
+    expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowStepConfigErrorFallback')).not.toBeInTheDocument();
   });
 
   it('round-trips Form → YAML preserving comments, unknown keys and Liquid', () => {
@@ -570,19 +583,21 @@ with:
     expect(label).not.toBeNull();
   });
 
-  it('Escape cancels and the YAML view edits flow back to the form', () => {
+  it('closes from the header and the YAML view edits flow back to the form', () => {
     const { onCancel } = renderPanel();
     expect(screen.getByTestId('workflowStepConfigPanelTabs')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigPanelAccordion-inputs')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
-    expect(screen.queryByTestId('workflowStepConfigPanelTabs')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowStepConfigPanelAccordion-inputs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigPanelTabs')).toBeInTheDocument();
     fireEvent.change(screen.getByTestId('workflowStepConfigPanelYaml'), {
       target: { value: 'name: renamed\ntype: slack\nconnector-id: abc\nwith:\n  message: yo\n' },
     });
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-form'));
-    expect(screen.getByTestId('workflowStepConfigPanelTabs')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigPanelAccordion-inputs')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('renamed');
     expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue('yo');
-    fireEvent.keyDown(screen.getByTestId('workflowStepConfigPanel'), { key: 'Escape' });
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
     expect(onCancel).toHaveBeenCalled();
   });
 
@@ -626,15 +641,27 @@ with:
     );
 
     // Body + Headers are code fields in Required; each gets an @ control.
-    const body = screen.getByTestId('workflowStepConfigField-with.body');
-    const headers = screen.getByTestId('workflowStepConfigField-with.headers');
-    expect(body.querySelector('[data-test-subj="workflowStepConfigDataReference"]')).not.toBeNull();
-    expect(headers.querySelector('[data-test-subj="workflowStepConfigDataReference"]')).not.toBeNull();
+    const bodyRow = screen
+      .getByTestId('workflowStepConfigField-with.body')
+      .closest('.euiFormRow') as HTMLElement;
+    const headersRow = screen
+      .getByTestId('workflowStepConfigField-with.headers')
+      .closest('.euiFormRow') as HTMLElement;
+    expect(
+      within(bodyRow).getByTestId('workflowStepConfigDataReference')
+    ).toBeInTheDocument();
+    expect(
+      within(headersRow).getByTestId('workflowStepConfigDataReference')
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
-    const query = screen.getByTestId('workflowStepConfigField-with.query');
-    expect(query.querySelector('[data-test-subj="workflowStepConfigDataReference"]')).not.toBeNull();
+    const queryRow = screen
+      .getByTestId('workflowStepConfigField-with.query')
+      .closest('.euiFormRow') as HTMLElement;
+    expect(
+      within(queryRow).getByTestId('workflowStepConfigDataReference')
+    ).toBeInTheDocument();
 
     // Select (method) has no affordance.
     const method = screen.getByTestId('workflowStepConfigField-with.method');
@@ -753,6 +780,10 @@ with:
     const query = screen.getByTestId('workflowStepConfigField-with.query');
     expect(query).toHaveAttribute('data-language', 'esql');
     expect(query.querySelector('[data-test-subj="workflowStepConfigDataReference"]')).not.toBeNull();
+    // TODO(slice7): ES|QL stays specialized — no expanded field editor.
+    expect(
+      query.querySelector('[data-test-subj="workflowStepConfigDataReferenceExpand"]')
+    ).toBeNull();
 
     const editor = within(query).getByTestId('mocked-code-editor') as HTMLTextAreaElement;
     fireEvent.change(editor, {
@@ -768,5 +799,118 @@ with:
     const saved = onSave.mock.calls[0][0] as string;
     expect(saved).toContain('{{ steps.prev.output }}');
     expect(saved).not.toMatch(/Must be valid JSON/);
+  });
+
+  it('opens the field-editor sub-flyout from ⤢ and writes through live', () => {
+    const { onSave } = renderPanel();
+
+    const messageRow = screen
+      .getByTestId('workflowStepConfigField-with.message')
+      .closest('.euiFormRow');
+    expect(messageRow).not.toBeNull();
+    fireEvent.click(
+      within(messageRow as HTMLElement).getByTestId('workflowStepConfigDataReferenceExpand')
+    );
+
+    expect(screen.getByTestId('workflowFieldEditorSubFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowFieldEditorSubFlyoutTitle')).toHaveTextContent('Message');
+    expect(screen.getByTestId('workflowDataReferenceCatalogTree')).toBeInTheDocument();
+
+    const textarea = screen.getByTestId(
+      'workflowFieldEditorSubFlyoutTextarea'
+    ) as HTMLTextAreaElement;
+    expect(textarea).toHaveValue('Hi {{ inputs.user }}');
+    fireEvent.change(textarea, {
+      target: { value: 'Hello {{ consts.name }}', selectionStart: 22, selectionEnd: 22 },
+    });
+
+    // Live write-through into the step working state (inline field stays in sync).
+    expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue(
+      'Hello {{ consts.name }}'
+    );
+
+    // Jest's EUI test-env flyout stub invokes onClose() without a reason meta,
+    // which FieldEditorSubFlyout treats as Back (keeps edits, closes child only).
+    fireEvent.click(within(screen.getByTestId('workflowFieldEditorSubFlyout')).getByTestId('euiFlyoutCloseButton'));
+    expect(screen.queryByTestId('workflowFieldEditorSubFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue(
+      'Hello {{ consts.name }}'
+    );
+
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
+    expect(onSave).toHaveBeenCalled();
+    expect(onSave.mock.calls[0][0]).toContain('Hello {{ consts.name }}');
+  });
+
+  it('shows expand on templatable text/code fields and keeps it off booleans/selects', () => {
+    renderPanel();
+    const messageRow = screen
+      .getByTestId('workflowStepConfigField-with.message')
+      .closest('.euiFormRow') as HTMLElement;
+    expect(
+      within(messageRow).getByTestId('workflowStepConfigDataReferenceExpand')
+    ).toBeInTheDocument();
+
+    // connector-id is a required text field — also expandable
+    const connectorRow = screen
+      .getByTestId('workflowStepConfigField-connector-id')
+      .closest('.euiFormRow') as HTMLElement;
+    expect(
+      within(connectorRow).getByTestId('workflowStepConfigDataReferenceExpand')
+    ).toBeInTheDocument();
+  });
+
+  it('renders JSON code Inputs as a single-line field with collapsed display; expand keeps formatting', () => {
+    const requestConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'kibana.request',
+        hasConnectorId: false,
+        paramsSchema: z.object({
+          method: z.enum(['GET', 'POST']),
+          path: z.string(),
+          body: z.record(z.string(), z.unknown()),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'HTTP Request',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    const { onSave } = renderPanel({
+      stepType: 'kibana.request',
+      connectors: requestConnectors,
+      initialFragment: `name: req
+type: kibana.request
+with:
+  method: GET
+  path: /api/foo
+  body:
+    fields: null
+    id: none
+`,
+    });
+
+    const body = screen.getByTestId('workflowStepConfigField-with.body') as HTMLInputElement;
+    expect(body.tagName).toBe('INPUT');
+    // Pretty JSON collapsed to a single line for display.
+    expect(body.value).toBe('{ "fields": null, "id": "none" }');
+    expect(body.value).not.toMatch(/\n/);
+
+    fireEvent.click(
+      within(body.closest('.euiFormRow') as HTMLElement).getByTestId(
+        'workflowStepConfigDataReferenceExpand'
+      )
+    );
+    // Expand shows the stored (pretty) value, not the collapsed display string.
+    expect(screen.getByTestId('workflowFieldEditorSubFlyoutTextarea')).toHaveValue(
+      '{\n  "fields": null,\n  "id": "none"\n}'
+    );
+
+    fireEvent.click(
+      within(screen.getByTestId('workflowFieldEditorSubFlyout')).getByTestId('euiFlyoutCloseButton')
+    );
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
+    const saved = onSave.mock.calls[0][0] as string;
+    // Document keeps structured YAML — display collapse must not flatten the source.
+    expect(saved).toMatch(/body:\n\s+fields: null\n\s+id: none/);
   });
 });

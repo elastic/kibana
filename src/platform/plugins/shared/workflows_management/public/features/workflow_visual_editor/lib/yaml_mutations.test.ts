@@ -16,9 +16,11 @@ import {
   deleteTrigger,
   duplicateStep,
   getStepFragment,
+  getTriggerFragment,
   insertStepAtIndex,
   insertStepAtPath,
   replaceStepFragment,
+  replaceTriggerFragment,
   setStepFallback,
   uniqueStepName,
 } from './yaml_mutations';
@@ -128,6 +130,21 @@ steps:
     it('drops the triggers key when the last trigger is removed', () => {
       const r = deleteTrigger(BASE, 0);
       expect(parse(r.yaml).triggers).toBeUndefined();
+    });
+
+    it('extracts and replaces a trigger fragment by index', () => {
+      const fragment = getTriggerFragment(BASE, 0);
+      expect(fragment).toContain('type: manual');
+      const replaced = replaceTriggerFragment(
+        BASE,
+        0,
+        'type: manual\ninputs:\n  - name: env\n    type: string\n'
+      );
+      expect(replaced.success).toBe(true);
+      expect(parse(replaced.yaml).triggers[0]).toEqual({
+        type: 'manual',
+        inputs: [{ name: 'env', type: 'string' }],
+      });
     });
   });
 

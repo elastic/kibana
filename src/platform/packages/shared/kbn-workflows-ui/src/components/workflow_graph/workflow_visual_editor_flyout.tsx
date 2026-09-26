@@ -204,7 +204,12 @@ export function WorkflowVisualEditorFlyout({
               {chip.useAiGradient && iconType === 'sparkles' ? (
                 <AiIcon iconType="sparkles" size="m" aria-hidden />
               ) : renderStepIcon ? (
-                renderStepIcon({ stepType: iconStepType, isTrigger, size: 'm' })
+                renderStepIcon({
+                  stepType: iconStepType,
+                  isTrigger,
+                  size: 'm',
+                  color: chip.iconColor,
+                })
               ) : (
                 <TypeIcon type={iconStepType} kind={isTrigger ? 'trigger' : 'step'} size="m" />
               )}

@@ -114,7 +114,7 @@ export function isActionOption(option: ActionOptionData): option is ActionOption
  * `step` hides the Triggers group; `error` hides Triggers and Flow control.
  */
 export type ActionsMenuInsertionContext =
-  | { readonly mode: 'trigger' }
+  | { readonly mode: 'trigger'; readonly disabledTriggerIds?: readonly string[] }
   | { readonly mode: 'step' }
   | { readonly mode: 'error' };
 

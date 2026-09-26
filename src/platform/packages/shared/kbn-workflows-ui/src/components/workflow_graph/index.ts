@@ -32,6 +32,7 @@ export {
   type WorkflowVisualEditorFlyoutProps,
   type WorkflowVisualEditorFlyoutTarget,
 } from './workflow_visual_editor_flyout';
+export { resolveNodeChipStyle, type NodeChipStyle } from './resolve_node_chip_style';
 export { aiIconTileCss } from './ai_icon_tile';
 export { stepSupportsErrorHandling } from './step_supports_error_handling';
 // Side-effect: sync-warm EUI icons used by accordion arrows / node menus.

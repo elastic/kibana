@@ -44,7 +44,6 @@ import {
   errorHandleStyle,
 } from './port_geometry';
 import { WorkflowGraphConnectionPorts } from './workflow_graph_connection_ports';
-import { PORT_SPRING_EASE, PORT_SPRING_MS } from './workflow_graph_connection_ports';
 import { INSERT_FLASH_MS } from './use_insert_layout_animation';
 import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 
@@ -78,15 +77,15 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
 /** Matches Run button spacing (`EuiButtonIcon size="s"`). */
 const ACTION_BUTTON_GAP = 4;
 
-/** Node kind drives the destructive menu label and which actions apply. */
-type NodeKind = 'trigger' | 'step' | 'fallback';
-
 const insertFlash = (color: string) =>
   keyframes({
     '0%': { boxShadow: `0 0 0 0 ${color}` },
     '40%': { boxShadow: `0 0 0 6px ${color}` },
     '100%': { boxShadow: `0 0 0 0 transparent` },
   });
+
+/** Node kind drives the destructive menu label and which actions apply. */
+type NodeKind = 'trigger' | 'step' | 'fallback';
 
 /**
  * Extract the configured `retry.max-attempts` for a step, looking at both
@@ -987,10 +986,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               overflow: 'hidden',
               opacity: trailingReveal ? 1 : 0,
               pointerEvents: trailingReveal ? 'auto' : 'none',
-              [euiCanAnimate]: {
-                transition: `opacity ${PORT_SPRING_MS} ${PORT_SPRING_EASE}`,
-              },
-              '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             }}
             data-test-subj="workflowGraphNodeTrailingActions"
           >

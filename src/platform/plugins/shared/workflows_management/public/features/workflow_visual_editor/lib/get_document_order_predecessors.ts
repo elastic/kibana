@@ -72,3 +72,25 @@ export const getDocumentOrderPredecessors = (
   visit(steps);
   return predecessors;
 };
+
+/**
+ * Every step in document order (depth-first). Used when the picker must scope
+ * to the whole workflow (e.g. workflow output values evaluated after the run).
+ */
+export const getAllDocumentOrderSteps = (
+  steps: ReadonlyArray<unknown> | undefined
+): readonly PrecedingStepRef[] => {
+  if (!steps) return [];
+  const all: PrecedingStepRef[] = [];
+
+  const visit = (list: ReadonlyArray<unknown>): void => {
+    for (const item of list) {
+      if (!isStepLike(item)) continue;
+      all.push({ name: item.name, type: item.type });
+      visitChildLists(item, visit);
+    }
+  };
+
+  visit(steps);
+  return all;
+};
