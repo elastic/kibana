@@ -6,12 +6,11 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { createOptimizeModel } from '../lib/create_optimize_model';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { materializeCortex } from './materialize';
@@ -76,9 +75,9 @@ export const runCortexOptimize = async ({
   esClient,
   spaceId,
   signal,
-  getInference,
-  getSearchInferenceEndpoints,
+  getAgentBuilder,
   logger,
+  connectorId: requestedConnectorId,
 }: {
   request: KibanaRequest;
   agentId?: string;
@@ -87,44 +86,33 @@ export const runCortexOptimize = async ({
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
-  getInference: () => InferenceServerStart | undefined;
-  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   logger: Logger;
+  connectorId?: string;
 }): Promise<void> => {
-  /**
-   * Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
-   * hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
-   * caller is refused rather than trusted because the optimize workflow has a manual trigger.
-   */
+  // Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
+  // hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
+  // caller is refused rather than trusted — the optimize workflow has a manual trigger, so it can
+  // be run without an agent id.
   if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
-    logger.debug(
-      'Cortex optimizer skipped — round was not produced by the Nightshift investigator'
-    );
+    logger.info('Cortex optimizer skipped — round was not produced by the Nightshift investigator');
     return;
   }
 
-  const inference = getInference();
-  const searchInferenceEndpoints = getSearchInferenceEndpoints();
-  if (!inference || !searchInferenceEndpoints) {
-    logger.debug('Cortex optimizer skipped — inference or connectors unavailable');
-    return;
-  }
-
-  const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-    SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-    request
-  );
-  const connectorId = endpoints[0]?.connectorId;
-  if (!connectorId) {
-    logger.debug('Cortex optimizer skipped — no investigation inference connector');
+  const model = await createOptimizeModel({
+    request,
+    connectorId: requestedConnectorId,
+    agentBuilder: getAgentBuilder(),
+    logger,
+  });
+  if (!model) {
     return;
   }
 
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  const inferenceClient = inference.getClient({ request });
   await optimizeCortex({
     store,
-    proposeEdits: createLlmProposeCortexEdits({ inferenceClient, connectorId }),
+    proposeEdits: createLlmProposeCortexEdits({ inferenceClient: model.inferenceClient }),
     userMessage,
     assistantMessage,
     logger,

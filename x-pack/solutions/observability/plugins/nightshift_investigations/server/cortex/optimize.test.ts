@@ -11,6 +11,7 @@ import type { CortexPageStore } from './page_store';
 
 describe('applyCortexEdits', () => {
   it('upserts, corroborates, and archives proposed pages', async () => {
+    const logger = loggerMock.create();
     const store: CortexPageStore = {
       list: jest.fn().mockResolvedValue({
         pages: [],
@@ -25,7 +26,7 @@ describe('applyCortexEdits', () => {
 
     await applyCortexEdits({
       store,
-      logger: loggerMock.create(),
+      logger,
       edits: [
         {
           action: 'upsert',
@@ -59,6 +60,9 @@ describe('applyCortexEdits', () => {
     );
     expect(store.corroborate).toHaveBeenCalledWith('cortex_service_checkout');
     expect(store.archive).toHaveBeenCalledWith('cortex_topic_old-note');
+    expect(logger.info.mock.calls.flat().join('\n')).not.toMatch(
+      /checkout|old-note|cortex_service/i
+    );
   });
 
   it('rewrites prefixed slugs onto the existing page', async () => {

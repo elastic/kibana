@@ -11,37 +11,82 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
+import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
-/** Caps beforeAgent so a stuck sandbox allocate cannot stall the investigation. */
-const HYDRATE_TIMEOUT_MS = 20_000;
+/** Caps a stuck write so it cannot stall the rest of the parallel hydrate. */
+const HYDRATE_TIMEOUT_MS = 45_000;
 
 export const cortexHydrateStepDefinition = ({
   getSandboxStart,
   logger,
+  isEnabled,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   logger: Logger;
+  isEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.cortexHydrate',
     label: 'Hydrate Nightshift Cortex into Sandbox',
     category: StepCategory.Ai,
     description:
-      'Writes the current Cortex wiki into /workspace/cortex for the given conversation. ' +
-      'Uses the raw sandbox client so workspace restore still runs on the first tool call.',
-    inputSchema: z.object({
-      conversation_id: z
-        .string()
-        .min(1)
-        .max(1024)
-        .describe('Conversation id that namespaces the sandbox.'),
-    }),
+      'Writes the current Cortex wiki into /workspace/cortex for the sandbox obtained ' +
+      'earlier in this workflow. Does not allocate; accepts its sandbox_id or a legacy conversation_id.',
+    inputSchema: z
+      .object({
+        sandbox_id: z
+          .string()
+          .min(1)
+          .max(1024)
+          .optional()
+          .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
+        conversation_id: z
+          .string()
+          .min(1)
+          .max(1024)
+          .optional()
+          .describe('Legacy unscoped conversation id. Scoped using the workflow Space.'),
+      })
+      .refine(
+        ({ sandbox_id: sandboxId, conversation_id: conversationId }) => {
+          return sandboxId !== undefined || conversationId !== undefined;
+        },
+        { message: 'Either sandbox_id or conversation_id is required.' }
+      ),
     outputSchema: z.object({
-      conversation_id: z.string().describe('Conversation id that was hydrated.'),
+      sandbox_id: z.string().describe('Sandbox that was hydrated.'),
+      conversation_id: z.string().describe('Unscoped conversation id for legacy consumers.'),
+      skipped: z.boolean().optional(),
+      notification: z
+        .string()
+        .describe(
+          'Always empty. Cortex writes the full wiki every turn, so it does not list pages in the system update.'
+        ),
     }),
     handler: async (context) => {
-      const { conversation_id: conversationId } = context.input;
+      const { sandbox_id: providedSandboxId, conversation_id: conversationId } = context.input;
+      const { spaceId } = context.contextManager.getContext().workflow;
+      const sandboxId =
+        providedSandboxId ??
+        (conversationId !== undefined ? scopeConversationId(spaceId, conversationId) : undefined);
+      if (sandboxId === undefined) {
+        throw new Error('Either sandbox_id or conversation_id is required.');
+      }
+      const resolvedConversationId = conversationId ?? unscopeConversationId(spaceId, sandboxId);
+
+      if (isEnabled && !isEnabled()) {
+        context.logger.info(`Skipped Cortex hydrate for sandbox ${sandboxId} (flag off)`);
+        return {
+          output: {
+            sandbox_id: sandboxId,
+            conversation_id: resolvedConversationId,
+            skipped: true,
+            notification: '',
+          },
+        };
+      }
+
       const sandboxStart = getSandboxStart();
 
       if (!sandboxStart) {
@@ -51,10 +96,12 @@ export const cortexHydrateStepDefinition = ({
         );
       }
 
-      // The hook runs this workflow in the caller's space, which is the same space the sandbox
-      // tools resolve from the request, so both address the same workspace.
-      const { spaceId } = context.contextManager.getContext().workflow;
-      const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
+      const session = sandboxStart.getSessionForSpace(
+        spaceId,
+        unscopeConversationId(spaceId, sandboxId)
+      );
+
+      context.logger.info(`Hydrating Cortex into sandbox ${sandboxId} (space ${spaceId})`);
 
       await withTimeout(
         (signal) =>
@@ -69,6 +116,12 @@ export const cortexHydrateStepDefinition = ({
         `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
       );
 
-      return { output: { conversation_id: conversationId } };
+      return {
+        output: {
+          sandbox_id: sandboxId,
+          conversation_id: resolvedConversationId,
+          notification: '',
+        },
+      };
     },
   });

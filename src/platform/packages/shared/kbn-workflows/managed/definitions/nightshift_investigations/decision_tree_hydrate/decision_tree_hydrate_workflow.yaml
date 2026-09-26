@@ -21,6 +21,9 @@ triggers:
         conversation_id:
           type: string
           description: Conversation id that namespaces the sandbox. Absent for standalone runs.
+        agent_id:
+          type: string
+          description: Agent id forwarded by the beforeAgent hook. Unused by this workflow.
       additionalProperties: false
 
 steps:

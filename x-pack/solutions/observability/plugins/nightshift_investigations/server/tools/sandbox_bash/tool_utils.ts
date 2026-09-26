@@ -28,6 +28,16 @@ export const getConversationId = (context: {
 export const scopeConversationId = (spaceId: string, conversationId: string): string =>
   `${spaceId}__${conversationId}`;
 
+/**
+ * Inverse of {@link scopeConversationId}. `getSessionForSpace(spaceId, sessionId)`
+ * scopes internally, so workflow steps that receive `<space>__<conversation>`
+ * must pass the unscoped conversation id.
+ */
+export const unscopeConversationId = (spaceId: string, sandboxId: string): string => {
+  const prefix = `${spaceId}__`;
+  return sandboxId.startsWith(prefix) ? sandboxId.slice(prefix.length) : sandboxId;
+};
+
 export const getScopedConversationId = (
   context: { runContext: { stack: unknown[] }; request: KibanaRequest },
   getSpaceId: (request: KibanaRequest) => string

@@ -29,6 +29,7 @@
     "@kbn/significant-events-schema",
     "@kbn/nightshift-shared",
     "@kbn/agent-builder-server",
+    "@kbn/agent-builder-genai-utils",
     "@kbn/i18n",
     "@kbn/core-saved-objects-server",
     "@kbn/es-query",
@@ -45,5 +46,8 @@
     "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/es-errors",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/occ",
   ]
 }

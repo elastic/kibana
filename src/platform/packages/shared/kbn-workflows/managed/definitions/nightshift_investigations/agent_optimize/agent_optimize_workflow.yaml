@@ -1,0 +1,101 @@
+version: '1'
+name: Nightshift Agent Optimize
+description: >
+  Post-round workflow that reuses the conversation sandbox, then runs Cortex and
+  Semantic Memory optimize in parallel. Both writers receive the same sandbox_id
+  obtain produced so they address the workspace hydrate and the bash tools used.
+  Authorization to execute this managed workflow permits its defined Memory operations;
+  the step derives storage tenancy from the trusted current-Space execution context.
+enabled: true
+tags:
+  - observability
+  - nightshift
+  - investigation
+  - cortex
+  - semantic-memory
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        prompt:
+          type: string
+          description: The user message that started this round.
+        response:
+          type: string
+          description: The assistant's final response for this round.
+        conversation_id:
+          type: string
+          description: Conversation id for the completed round, when present.
+        round_id:
+          type: string
+          description: Id of the completed conversation round.
+        agent_id:
+          type: string
+          description: Supported agent policy selector; never a storage or Space boundary.
+        connector_id:
+          type: string
+          description: Inference connector the triggering agent used for this round.
+        workflow_context:
+          type: object
+          description: Persisted non-model workflow state for the completed round.
+          properties:
+            nightshift.semantic_memory.recall:
+              type: object
+              properties:
+                version:
+                  type: number
+                data:
+                  type: object
+                  properties:
+                    recalled_ids:
+                      type: array
+                      items:
+                        type: string
+        tool_calls:
+          type: array
+          description: Tool calls from the completed round. Unused by this workflow.
+          items:
+            type: object
+            additionalProperties: true
+      additionalProperties: false
+
+steps:
+  - name: obtain_sandbox
+    type: nightshift.obtainSandbox
+    if: '${{ inputs.conversation_id != null }}'
+    timeout: 45s
+    with:
+      conversation_id: '{{ inputs.conversation_id }}'
+      # Optimize still extracts from the transcript when sandbox-api is down.
+      required: false
+  - name: optimize_workspaces
+    type: parallel
+    mode: settled
+    timeout: 120s
+    branch-timeout: 120s
+    branches:
+      - name: cortex
+        steps:
+          - name: optimize_cortex
+            type: nightshift.cortexOptimize
+            with:
+              prompt: '{{ inputs.prompt }}'
+              response: '{{ inputs.response }}'
+              agent_id: '{{ inputs.agent_id }}'
+              connector_id: '{{ inputs.connector_id }}'
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+      - name: memory
+        steps:
+          - name: optimize_memory
+            type: nightshift.memoryOptimize
+            with:
+              prompt: '{{ inputs.prompt }}'
+              response: '{{ inputs.response }}'
+              agent_id: '{{ inputs.agent_id }}'
+              connector_id: '{{ inputs.connector_id }}'
+              conversation_id: '{{ inputs.conversation_id }}'
+              round_id: '{{ inputs.round_id }}'
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              # Preserve the array for the step's bounded Zod schema.
+              recalled_ids: '${{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.recalled_ids }}'

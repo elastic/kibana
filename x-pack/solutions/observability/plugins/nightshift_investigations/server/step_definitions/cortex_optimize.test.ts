@@ -18,10 +18,20 @@ describe('cortexOptimizeStepDefinition', () => {
   const request = { headers: {} };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
   const getFakeRequest = jest.fn().mockReturnValue(request);
-  const getInference = jest.fn();
-  const getSearchInferenceEndpoints = jest.fn();
+  const getAgentBuilder = jest.fn();
 
-  const createContext = (input: { prompt: string; response: string; agent_id?: string }) =>
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getScopedEsClient.mockReturnValue(esClient);
+    getFakeRequest.mockReturnValue(request);
+  });
+
+  const createContext = (input: {
+    prompt: string;
+    response: string;
+    agent_id?: string;
+    connector_id?: string;
+  }) =>
     ({
       input,
       rawInput: input,
@@ -40,8 +50,7 @@ describe('cortexOptimizeStepDefinition', () => {
 
   it('optimizes with the request-scoped ES client', async () => {
     const definition = cortexOptimizeStepDefinition({
-      getInference,
-      getSearchInferenceEndpoints,
+      getAgentBuilder,
       logger: loggerMock.create(),
     });
 
@@ -49,22 +58,60 @@ describe('cortexOptimizeStepDefinition', () => {
       createContext({
         prompt: 'why is checkout slow?',
         response: 'Redis evictions.',
-        agent_id: 'nightshift.investigation',
+        agent_id: 'significant-events.investigation',
       })
     );
 
     expect(runCortexOptimize).toHaveBeenCalledWith({
       request,
-      agentId: 'nightshift.investigation',
+      agentId: 'significant-events.investigation',
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
       esClient,
       spaceId: 'default',
       signal: expect.any(AbortSignal),
       logger: expect.anything(),
-      getInference,
-      getSearchInferenceEndpoints,
+      getAgentBuilder,
+      connectorId: undefined,
     });
     expect(result).toEqual({ output: { status: 'ok' } });
+  });
+
+  it('forwards the Agent Builder connector id from the round', async () => {
+    const definition = cortexOptimizeStepDefinition({
+      getAgentBuilder,
+      logger: loggerMock.create(),
+    });
+
+    await definition.handler(
+      createContext({
+        prompt: 'why is checkout slow?',
+        response: 'Redis evictions.',
+        agent_id: 'significant-events.deductive-investigation',
+        connector_id: 'anthropic-sonnet',
+      })
+    );
+
+    expect(runCortexOptimize).toHaveBeenCalledWith(
+      expect.objectContaining({ connectorId: 'anthropic-sonnet' })
+    );
+  });
+
+  it('skips when the cortex flag is off', async () => {
+    const definition = cortexOptimizeStepDefinition({
+      getAgentBuilder,
+      logger: loggerMock.create(),
+      isEnabled: () => false,
+    });
+
+    const result = await definition.handler(
+      createContext({
+        prompt: 'why is checkout slow?',
+        response: 'Redis evictions.',
+      })
+    );
+
+    expect(runCortexOptimize).not.toHaveBeenCalled();
+    expect(result).toEqual({ output: { status: 'ok', skipped: true } });
   });
 });

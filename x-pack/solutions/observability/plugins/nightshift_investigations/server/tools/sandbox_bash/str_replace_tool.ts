@@ -50,7 +50,7 @@ export const createSandboxStrReplaceTool = ({
   id: SANDBOX_STR_REPLACE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Replace an exact string in a sandbox file. old_str must appear exactly once; include enough surrounding context to make it unique. Use sandbox_view_file first to confirm line numbers and exact content.',
+    'Replace an exact string in a sandbox file. old_str must appear exactly once; include enough surrounding context to make it unique. Use nightshift_sandbox_view_file first to confirm line numbers and exact content.',
   tags: ['sandbox', 'file'],
   schema: strReplaceSchema,
   annotations: {
@@ -119,7 +119,7 @@ export const createSandboxStrReplaceTool = ({
               data: {
                 message: `File too large (${Math.floor(
                   stat.size / 1024 / 1024
-                )} MB) to edit with str_replace.`,
+                )} MB) to edit with nightshift_sandbox_str_replace.`,
               },
             },
           ],
