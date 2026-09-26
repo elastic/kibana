@@ -9,6 +9,7 @@ import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
 import type { CanvasStateServiceDeps } from './types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
+import type { Unit } from '../../../../../services/unit_repository';
 
 const CanvasStateContext = createActorContext(canvasStateMachine);
 
@@ -90,6 +91,9 @@ export const useCanvasEvents = () => {
       },
       saveUnit: () => {
         service.send({ type: 'unit.save' });
+      },
+      stageUnit: (unitDefinition: Unit) => {
+        service.send({ type: 'unit.stage', unitDefinition });
       },
     }),
     [service]

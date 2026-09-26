@@ -21,8 +21,12 @@ import {
   EuiTabs,
   EuiTab,
   EuiSpacer,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
   useGeneratedHtmlId,
-  type EuiFlyoutMenuCustomAction,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import {
@@ -32,12 +36,10 @@ import {
 import { useKibana } from '../../hooks/use_kibana';
 import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../stream_badges';
 import { useDataSetQuality } from '../../hooks/use_data_set_quality';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { StreamAttachments } from './stream_attachments';
 import { StreamQuality } from './stream_quality';
 import { StreamRetention } from './stream_retention';
 import { ViewInDiscoverButton } from './discover_button';
-import { useTimeRange } from '../../hooks/use_time_range';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { StreamProcessing } from './stream_processing';
@@ -158,14 +160,14 @@ const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => Rea
 
 function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProps) {
   const { loading, definition } = useStreamFlyoutDetail();
-  const { push } = useStreamsAppRouter();
-  const { rangeFrom, rangeTo } = useTimeRange();
   const { flyoutTab } = useCanvasUrlRef();
   const { selectTab } = useCanvasEvents();
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
   const selectedTab = isStreamFlyoutTabId(flyoutTab) ? flyoutTab : DEFAULT_TAB;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isHeaderMenuOpen, setHeaderMenuOpen] = useState(false);
   const headerId = useGeneratedHtmlId();
+  const headerMenuId = useGeneratedHtmlId({ prefix: 'canvasFlyoutHeaderMenu' });
   const abortController = useAbortController();
   const {
     core: {
@@ -177,6 +179,21 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
       },
     },
   } = useKibana();
+
+  const hasProcessingEnabled = useMemo(
+    () =>
+      definition &&
+      Streams.ingest.all.GetResponse.is(definition) &&
+      'processors' in definition.stream.ingest.processing &&
+      definition.stream.ingest.processing.processors.length > 0,
+    [definition]
+  );
+
+  const [showProcessing, setShowProcessing] = useState(hasProcessingEnabled);
+
+  // showProcessing is nullish to start, but then we can either toggle it on or off
+  // once data has been loaded.
+  const isProcessingEnabled = showProcessing ?? hasProcessingEnabled;
 
   const canDeleteStream =
     definition &&
@@ -197,7 +214,7 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
 
   const renderTabs = useMemo(
     () =>
-      TABS.map(({ id, label }) => (
+      TABS.filter(({ id }) => id !== 'processing' || isProcessingEnabled).map(({ id, label }) => (
         <EuiTab
           isSelected={id === selectedTab}
           key={id}
@@ -207,7 +224,7 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
           {label}
         </EuiTab>
       )),
-    [selectTab, selectedTab]
+    [selectTab, selectedTab, isProcessingEnabled]
   );
 
   const page = useMemo(
@@ -268,34 +285,88 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
     );
   }
 
-  const customActions: EuiFlyoutMenuCustomAction[] = [];
+  const customActions = [];
 
   if (definition) {
-    customActions.push({
-      iconType: 'share',
-      'aria-label': i18n.translate('xpack.streams.flyout.tab.goToLink', {
-        defaultMessage: 'Go to Stream Details',
-      }),
-      onClick: () => {
-        push('/{key}', {
-          path: { key: name },
-          query: { rangeFrom, rangeTo },
-        });
-      },
-    });
+    customActions.push(
+      <EuiContextMenuItem
+        data-test-subj="canvasFlyoutStreamMenu-processingToggle"
+        key="processing-toggle"
+        disabled={hasProcessingEnabled}
+        icon={isProcessingEnabled ? 'minus' : 'plus'}
+        onClick={() => {
+          const showing = !isProcessingEnabled;
+          setShowProcessing(showing);
+          if (showing) {
+            selectTab('processing');
+          } else {
+            selectTab('overview');
+          }
+        }}
+      >
+        {i18n.translate('xpack.streams.flyout.tab.toggleProcessing', {
+          defaultMessage: `{processing, select,
+            true {Remove processing}
+            other {Add processing}
+          }`,
+          values: {
+            processing: isProcessingEnabled,
+          },
+        })}
+      </EuiContextMenuItem>
+    );
   }
 
   if (canDeleteStream) {
-    customActions.push({
-      iconType: 'trash',
-      'aria-label': i18n.translate('xpack.streams.flyout.tab.deleteStreamLink', {
-        defaultMessage: 'Delete Stream',
-      }),
-      onClick: () => {
-        setShowDeleteModal(true);
-      },
-    });
+    customActions.push(
+      <EuiContextMenuItem
+        data-test-subj="canvasFlyoutStreamMenu-deleteStream"
+        key="delete-stream"
+        icon="trash"
+        color="danger"
+        onClick={() => {
+          setShowDeleteModal(true);
+        }}
+      >
+        {i18n.translate('xpack.streams.flyout.tab.deleteStreamLink', {
+          defaultMessage: 'Delete Stream',
+        })}
+      </EuiContextMenuItem>
+    );
   }
+
+  const menuLabel = i18n.translate('xpack.streams.flyout.tab.headerMenuLabel', {
+    defaultMessage: 'Stream Menu',
+  });
+
+  const headerMenu = customActions.length ? (
+    <EuiFlexItem grow={false}>
+      <EuiPopover
+        aria-labelledby={headerId}
+        id={headerMenuId}
+        button={
+          <EuiToolTip position="left" content={menuLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="canvasFlyoutStreamMenu-button"
+              aria-label={menuLabel}
+              size="s"
+              iconType="ellipsis"
+              iconSize="m"
+              onClick={() => {
+                setHeaderMenuOpen(!isHeaderMenuOpen);
+              }}
+            />
+          </EuiToolTip>
+        }
+        isOpen={isHeaderMenuOpen}
+        closePopover={() => setHeaderMenuOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
+      >
+        <EuiContextMenuPanel items={customActions} />
+      </EuiPopover>
+    </EuiFlexItem>
+  ) : null;
 
   return (
     <EuiFlyout
@@ -305,10 +376,9 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
       onClose={onClose}
       data-test-subj="streamsCanvasFlyout"
       paddingSize="none"
-      flyoutMenuProps={{
-        customActions,
-        titleId: headerId,
-      }}
+      closeButtonPosition="inside"
+      flyoutMenuDisplayMode="always"
+      flyoutMenuProps={{}}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup
@@ -338,7 +408,12 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {discoverButton}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs">
+              {headerMenu}
+              {discoverButton}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiTabs

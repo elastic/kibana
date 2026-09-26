@@ -274,5 +274,28 @@ test.describe(
       await expect(flyout).toBeVisible();
       await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
     });
+
+    test("flyout doesn't show processing tab unless enabled", async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM));
+
+      const flyout = page.testSubj.locator('streamsCanvasFlyout');
+      await expect(flyout).toBeVisible();
+
+      const processingTab = flyout.getByTestId('streamsCanvasFlyoutTab-processing');
+      await expect(processingTab).toBeHidden();
+
+      await page.testSubj.click('canvasFlyoutStreamMenu-button');
+      const processingToggle = page.testSubj.locator('canvasFlyoutStreamMenu-processingToggle');
+      await expect(processingToggle).toHaveText('Add processing');
+
+      await page.testSubj.click('canvasFlyoutStreamMenu-processingToggle');
+      await expect(processingTab).toBeVisible();
+      await expect(processingToggle).toHaveText('Remove processing');
+      await page.testSubj.click('canvasFlyoutStreamMenu-processingToggle');
+      await expect(processingTab).toBeHidden();
+    });
   }
 );
