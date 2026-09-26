@@ -98,6 +98,34 @@ describe('TanStackTableGrid', () => {
     expect(defaultProps.onTogglePinned).toHaveBeenCalledWith('fieldA');
   });
 
+  it('renders pinned fields in the sticky pinned section and unpins them', async () => {
+    const onTogglePinned = jest.fn();
+    const rows = [buildFieldRow('pinnedField', 'pinnedValue', true), ...mockRows];
+    render(<TanStackTableGrid {...defaultProps} rows={rows} onTogglePinned={onTogglePinned} />);
+
+    const pinnedSection = screen.getByTestId('unifiedDocViewerPinnedFields');
+    expect(within(pinnedSection).getByText('pinnedField')).toBeInTheDocument();
+    expect(within(pinnedSection).queryByText('fieldA')).not.toBeInTheDocument();
+    // Pinned rows are not part of the virtualized rows.
+    expect(
+      screen
+        .getAllByRole('row')
+        .filter((row) => row.hasAttribute('data-index'))
+        .map((row) => row.textContent)
+    ).toEqual([expect.stringContaining('fieldA'), expect.stringContaining('fieldB')]);
+
+    await userEvent.click(
+      within(pinnedSection).getByTestId('unifiedDocViewer_pinControlButton_pinnedField')
+    );
+    expect(onTogglePinned).toHaveBeenCalledTimes(1);
+    expect(onTogglePinned).toHaveBeenCalledWith('pinnedField');
+  });
+
+  it('does not render the pinned section without pinned fields', () => {
+    render(<TanStackTableGrid {...defaultProps} />);
+    expect(screen.queryByTestId('unifiedDocViewerPinnedFields')).not.toBeInTheDocument();
+  });
+
   it('does not render pin controls if hidePinColumn is true', () => {
     const { container } = render(<TanStackTableGrid {...defaultProps} hidePinColumn />);
     expect(
