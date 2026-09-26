@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CortexActivity } from './activity';
+import { CortexCreatePageModal } from './create_page_modal';
 import { CortexHome } from './home';
 import { CortexPageView } from './page_view';
 import { CortexSidebar, type CortexSidebarSelection } from './sidebar';
@@ -28,6 +29,7 @@ export function CortexTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<CortexStatusFilter>('all');
   const [selection, setSelection] = useState<CortexSidebarSelection>({ kind: 'home' });
+  const [isCreatingPage, setIsCreatingPage] = useState(false);
   const { data, isLoading, isError } = useCortexPages();
 
   if (isLoading) {
@@ -95,6 +97,7 @@ export function CortexTab() {
             onStatusFilterChange={setStatusFilter}
             selection={selection}
             onSelect={setSelection}
+            onCreatePage={() => setIsCreatingPage(true)}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -130,10 +133,25 @@ export function CortexTab() {
                 onSelectPage={(id) => setSelection({ kind: 'page', id })}
               />
             )}
-            {selection.kind === 'page' && <CortexPageView pageId={selection.id} />}
+            {selection.kind === 'page' && (
+              <CortexPageView
+                key={selection.id}
+                pageId={selection.id}
+                onArchived={() => setSelection({ kind: 'home' })}
+              />
+            )}
           </div>
         </EuiPanel>
       </EuiFlexItem>
+      {isCreatingPage && (
+        <CortexCreatePageModal
+          onClose={() => setIsCreatingPage(false)}
+          onCreated={(id) => {
+            setIsCreatingPage(false);
+            setSelection({ kind: 'page', id });
+          }}
+        />
+      )}
     </EuiFlexGroup>
   );
 }
