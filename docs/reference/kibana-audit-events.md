@@ -314,7 +314,9 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 ## Audit schema [xpack-security-ecs-audit-schema]
 
-Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Common Schema (ECS)](ecs://reference/index.md)) specification.
+Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://reference/index.md) specification.
+
+{applies_to}`serverless: preview` In {{serverless-full}}, {{kib}} audit logs delivered through [audit trail log delivery](docs-content://deploy-manage/monitor/log-delivery/audit-trail.md) use OpenTelemetry field names. Refer to [Serverless OpenTelemetry field names](#serverless-otel-field-names).
 
 ### Base fields
 
@@ -385,3 +387,38 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 | **Field** | **Description** |
 | --- | --- |
 | `trace.id` | Unique identifier allowing events of the same transaction from {{kib}} and {{es}} to be correlated. |
+
+### Serverless OpenTelemetry field names [serverless-otel-field-names]
+
+```{applies_to}
+serverless: preview
+```
+
+In {{serverless-full}}, {{kib}} audit logs are delivered through [audit trail log delivery](docs-content://deploy-manage/monitor/log-delivery/audit-trail.md) and use the following OpenTelemetry field names instead of the ECS fields in the [audit schema](#xpack-security-ecs-audit-schema). This mapping is specific to {{serverless-full}}. On self-managed and {{ech}} deployments, the `otel` appender ships the ECS audit schema fields unchanged.
+
+| **Audit schema field** | **OpenTelemetry field** |
+| --- | --- |
+| `trace.id` | `http.request.id` |
+| `kibana.space_id` | `kibana.space.id` |
+| `kibana.session_id` | `kibana.session.id` |
+| `kibana.authentication_type` | `authentication.type` |
+| `kibana.authentication_realm` | `user.domain` |
+| `http.request.headers.x-forwarded-for` | `network.forwarded_ip` |
+| `client.ip` | `source.address` and `source.ip` |
+| `url.scheme`, `url.domain`, and `url.path` | Omitted. `url.original` is added when all three are non-empty strings. |
+| `url.port` | Omitted |
+| `url.query` | Omitted |
+| `kibana.authentication_provider` | Omitted |
+| `kibana.lookup_realm` | Omitted |
+
+`url.original` is written when `url.scheme`, `url.domain`, and `url.path` are all non-empty strings. The value is `scheme://domain/path`, as in `https://www.elastic.co/search`. `url.scheme`, `url.domain`, `url.path`, `url.port`, and `url.query` are removed from the log record.
+
+`http.request.method` uses uppercase values, such as `GET`, `POST`, `PUT`, and `DELETE`.
+
+`user.id` is the user's login name, the same value as `user.name`. When the event has no login name, the log record omits `user.id`.
+
+`user.domain` is the name of the {{es}} realm that authenticated the user. It is present on successful `user_login` events and on events logged for authenticated requests. Events that do not carry the realm, such as `user_logout` and `session_cleanup`, omit it even when `user.name` is set.
+
+When the event has no `event.type`, the log record sets `event.type` to `["access"]`. When the event has no `log.type`, the log record sets `log.type` to `audit`.
+
+The log resource includes only `service.name`, set to `serverless-kibana`, and `service.type`, set to `kibana`, so detected attributes such as `host.name` stay off the resource. `project.id` is written on each log record rather than on the resource. `service.version` is removed from the log record.
