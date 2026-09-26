@@ -1109,15 +1109,12 @@ x-pack/platform/packages/shared/kbn-inference-tracing @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-ingest-pipeline-json-editor @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-ink @elastic/streams-program-team
-x-pack/platform/packages/shared/kbn-investigation-output @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-mcp-client @elastic/workchat-eng
 x-pack/platform/packages/shared/kbn-nightshift-ai @elastic/nightshift-sre-agent-team
-x-pack/platform/packages/shared/kbn-nightshift-decision-trees @elastic/nightshift-investigations-team
-x-pack/platform/packages/shared/kbn-nightshift-shared @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-proposals-common @elastic/security-solution
 x-pack/platform/packages/shared/kbn-proposals-ui @elastic/security-solution
@@ -1279,7 +1276,6 @@ x-pack/platform/plugins/shared/maintenance_windows @elastic/response-ops
 x-pack/platform/plugins/shared/maps @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/ml @elastic/search-ml-ux
 x-pack/platform/plugins/shared/ml/evals @elastic/search-ml-ux
-x-pack/platform/plugins/shared/nightshift_sources @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/notification_center @elastic/search-ml-ux
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team
@@ -1355,6 +1351,9 @@ x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigation
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-evals-suite-significant-events @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/packages/kbn-investigation-output @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/packages/kbn-nightshift-decision-trees @elastic/nightshift-investigations-team
+x-pack/solutions/observability/packages/kbn-nightshift-shared @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-ux-management-team
@@ -1372,6 +1371,7 @@ x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/nightshift @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/nightshift_sources @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_agent_builder @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/nightshift-context-and-research-team
@@ -1990,6 +1990,9 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/test/common/utils/ @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/significant_events/ @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.significant_events.feature_flag.* @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.significant_events.feature_flag.* @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/test/ensemble @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional/page_objects/alert_controls.ts @elastic/nightshift-sre-agent-team
 /x-pack/platform/test/serverless/functional/page_objects/svl_custom_roles_page.ts @elastic/nightshift-sre-agent-team
@@ -2070,11 +2073,6 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 
 # Streams
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/nightshift-sre-agent-team  @elastic/streams-ui
-/x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events @elastic/nightshift-sre-agent-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.feature_flag.index.ts @elastic/nightshift-sre-agent-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.significant_events.feature_flag.serverless.config.ts @elastic/nightshift-sre-agent-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.index.ts @elastic/nightshift-sre-agent-team
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.stateful.config.ts @elastic/nightshift-sre-agent-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/nightshift-sre-agent-team @elastic/streams-ui
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/nightshift-sre-agent-team @elastic/streams-ui
 /x-pack/platform/test/api_integration/apis/streams @elastic/nightshift-sre-agent-team @elastic/streams-ui
