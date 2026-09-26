@@ -12,15 +12,23 @@ import {
   CORTEX_ENTITY_TYPES,
   type CortexEditAction,
   type CortexEntityType,
-  type CortexPageStatus,
   type CortexPageSummary,
 } from '../../common/cortex';
 import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import type { CortexPageStore } from './page_store';
-import { canonicalizeSlug, slugFromCortexId, toCortexKiId } from './page_store';
+import {
+  canonicalizeSlug,
+  slugFromCortexId,
+  statusAfterCorroboration,
+  toCortexKiId,
+} from './page_store';
 
 const MAX_TRANSCRIPT_CHARS = 12_000;
+const MAX_TOOL_CALLS_CHARS = 12_000;
+const MAX_TOOL_CALL_PARAMS_CHARS = 1_000;
+const MAX_TOOL_CALL_PARAM_ARRAY_ITEMS = 20;
 const MAX_PROPOSALS = 8;
 
 export interface CortexEditProposal {
@@ -30,7 +38,6 @@ export interface CortexEditProposal {
   title: string;
   description?: string;
   content?: string;
-  status?: Exclude<CortexPageStatus, 'archived'>;
 }
 
 export type ProposeCortexEdits = (input: {
@@ -93,9 +100,6 @@ const normalizeProposal = (value: unknown): CortexEditProposal | undefined => {
     return undefined;
   }
 
-  const status =
-    record.status === 'established' || record.status === 'tentative' ? record.status : undefined;
-
   return {
     action: record.action,
     entity_type: record.entity_type,
@@ -105,8 +109,38 @@ const normalizeProposal = (value: unknown): CortexEditProposal | undefined => {
       ? { description: record.description.slice(0, 2048) }
       : {}),
     ...(typeof record.content === 'string' ? { content: record.content.slice(0, 65536) } : {}),
-    ...(status !== undefined ? { status } : {}),
   };
+};
+
+// Params can carry multi-megabyte values (e.g. file contents), so long strings and arrays are cut
+// while serializing rather than after.
+const boundToolCallParam = (_key: string, value: unknown): unknown => {
+  if (typeof value === 'string') {
+    return value.slice(0, MAX_TOOL_CALL_PARAMS_CHARS);
+  }
+  if (Array.isArray(value)) {
+    return value.slice(0, MAX_TOOL_CALL_PARAM_ARRAY_ITEMS);
+  }
+  return value;
+};
+
+/** Renders tool calls as one line each, dropping the tail once the transcript budget is spent. */
+export const renderToolCalls = (toolCalls: InvestigationToolCall[]): string => {
+  const lines: string[] = [];
+  let used = 0;
+  for (const { tool_id: toolId, params } of toolCalls) {
+    const line = `- ${toolId ?? 'unknown'} ${JSON.stringify(params ?? {}, boundToolCallParam).slice(
+      0,
+      MAX_TOOL_CALL_PARAMS_CHARS
+    )}`;
+    if (used + line.length > MAX_TOOL_CALLS_CHARS) {
+      lines.push(`- (${toolCalls.length - lines.length} more tool calls omitted)`);
+      break;
+    }
+    lines.push(line);
+    used += line.length + 1;
+  }
+  return lines.length === 0 ? '(none)' : lines.join('\n');
 };
 
 export const createLlmProposeCortexEdits = ({
@@ -135,8 +169,27 @@ export const createLlmProposeCortexEdits = ({
       connectorId,
       system: `You maintain a team-wide wiki called Cortex. After an investigation, propose a small set of durable page edits.
 
+The wiki is read before every future task — investigations, alert triage, questions — so capture facts that help any of them understand the system faster, not only facts that would solve this exact investigation again.
+
+What each entity type holds (use these markdown sections; skip ones that would be empty):
+- integration — one page per connector, data source, or external system the investigator reads from (an Elasticsearch cluster, a cross-cluster search remote, Kubernetes, GitHub, …). This includes the telemetry cluster the investigator queries: its index patterns, field conventions and quirks, and query pitfalls belong on its integration page, not on a service page. Sections: ## Overview, ## Access, ## Capabilities, ## Common pitfalls.
+- service — one page per logical or deployable service: what it does, what it depends on, where its logs, metrics, and traces live, and how it fails. Sections: ## Overview, ## Dependencies, ## Telemetry, ## Failure modes.
+- alert — one page per alert rule. Sections: ## Symptom, ## Likely causes, ## First-look checks.
+- runbook — a symptom-triggered playbook; many alerts can share one. Sections: ## Trigger, ## Investigation steps, ## Resolution.
+- query — a reusable ES|QL or DSL query. Sections: ## Purpose, ## Query (fenced code block), ## Notes.
+- dashboard — a canonical dashboard. Sections: ## URL, ## What it shows.
+- postmortem — one page per incident mechanism; a later firing of the same mechanism corroborates it. Sections: ## Incident summary, ## Root cause, ## Detection signals, ## Remediation.
+- topic — cross-cutting concepts that fit no other type. Sections: ## Overview, ## Established facts, ## Open questions.
+- glossary — a one-paragraph definition of a term or acronym.
+
+Services and integrations:
+- When the transcript establishes a durable fact about a service or an integration — what it does, what it depends on, which indices or fields hold its telemetry, how to query it, how it fails — record it on that service or integration page, not only inside a postmortem, alert, or topic. Create the page when the catalog has none.
+- The tool calls show what the investigator ran, with parameters but without results. Use them to learn which services, indices, and integrations were queried and how. Treat a fact as established only when the assistant's answer confirms it.
+
 Rules:
 - Only propose facts that the transcript actually established. No speculation.
+- Never include credentials, tokens, API keys, or personal data.
+- Keep single-run details — timestamps, alert ids, counts, uptime values — out of page content. Distil them into reusable claims.
 - Prefer corroborating an existing page over creating a near-duplicate.
 - New pages use action "upsert" with markdown content. Keep content short and reusable.
 - Use "corroborate" when the investigation confirms an existing page without changing it.
@@ -161,7 +214,6 @@ Rules:
                 title: { type: 'string' },
                 description: { type: 'string' },
                 content: { type: 'string' },
-                status: { type: 'string', enum: ['established', 'tentative'] },
               },
               required: ['action', 'entity_type', 'slug', 'title'],
             },
@@ -194,6 +246,9 @@ export const applyCortexEdits = async ({
 }): Promise<void> => {
   const { pages } = await store.list();
   const applied: AppliedCortexEdit[] = [];
+  // A run confirms a page at most once, and never one it created: promotion needs a confirmation
+  // from a later run.
+  const touchedIds = new Set<string>();
   // Pages are mutated one at a time, so a failure part way through leaves the earlier edits
   // persisted. Reporting from `finally` keeps the counts honest for those partial runs.
   try {
@@ -208,8 +263,12 @@ export const applyCortexEdits = async ({
       }
       const id = toCortexKiId(edit.entity_type, slug);
       if (edit.action === 'corroborate') {
+        if (touchedIds.has(id)) {
+          continue;
+        }
         const updated = await store.corroborate(id);
         if (updated) {
+          touchedIds.add(id);
           applied.push({ action: 'corroborate', entityType: edit.entity_type });
           logger.info(`Corroborated Cortex page ${id}`);
         }
@@ -226,19 +285,27 @@ export const applyCortexEdits = async ({
       }
 
       const existing = await store.get(id);
+      // Rewriting a live page means this run re-established it, so it counts as a corroboration.
+      // New pages start tentative, and rewriting an archived page revives it as tentative, so a
+      // single run can never publish a fact as established. A page already touched this run keeps
+      // its status, so a page revived earlier in the run is not promoted on its old count.
+      const alreadyTouched = touchedIds.has(id);
+      const confirms = existing !== undefined && existing.status !== 'archived' && !alreadyTouched;
+      const corroborations = confirms ? existing.corroborations + 1 : existing?.corroborations;
+      touchedIds.add(id);
+      const status = !existing
+        ? 'tentative'
+        : alreadyTouched
+        ? existing.status
+        : statusAfterCorroboration(existing.status, corroborations ?? 0);
       await store.upsert({
         entityType: edit.entity_type,
         slug,
         title: edit.title,
         description: edit.description ?? existing?.description,
         content: edit.content ?? existing?.content ?? '',
-        // Same rule as corroborate: rewriting an archived page revives it as tentative, so a
-        // proposal cannot promote a retired fact straight back to established.
-        status:
-          existing?.status === 'archived'
-            ? 'tentative'
-            : edit.status ?? existing?.status ?? 'tentative',
-        corroborations: existing?.corroborations,
+        status,
+        corroborations,
       });
       applied.push({ action: 'upsert', entityType: edit.entity_type });
       logger.info(`Upserted Cortex page ${id}`);
@@ -253,6 +320,7 @@ export const optimizeCortex = async ({
   proposeEdits,
   userMessage,
   assistantMessage,
+  toolCalls,
   telemetry,
   logger,
 }: {
@@ -260,6 +328,7 @@ export const optimizeCortex = async ({
   proposeEdits: ProposeCortexEdits;
   userMessage: string;
   assistantMessage: string;
+  toolCalls: InvestigationToolCall[];
   telemetry: CortexTelemetry;
   logger: Logger;
 }): Promise<void> => {
@@ -272,6 +341,9 @@ export const optimizeCortex = async ({
   const transcript = [
     '## User',
     userMessage.slice(0, MAX_TRANSCRIPT_CHARS),
+    '',
+    '## Tool calls (parameters only)',
+    renderToolCalls(toolCalls),
     '',
     '## Assistant',
     assistantMessage.slice(0, MAX_TRANSCRIPT_CHARS),

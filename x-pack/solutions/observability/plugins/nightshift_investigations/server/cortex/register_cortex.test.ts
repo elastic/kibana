@@ -104,12 +104,19 @@ describe('runCortexOptimize', () => {
     },
   });
 
-  const run = (agentId?: string) =>
+  const toolCalls = [
+    { tool_id: 'nightshift.sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
+    { tool_id: 'nightshift.sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
+    { tool_id: 'nightshift.sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
+  ];
+
+  const run = (agentId?: string, calls = toolCalls) =>
     runCortexOptimize({
       request,
       agentId,
       userMessage: 'why?',
       assistantMessage: 'redis',
+      toolCalls: calls,
       esClient,
       spaceId: 'default',
       analytics: coreMock.createSetup().analytics,
@@ -124,7 +131,15 @@ describe('runCortexOptimize', () => {
 
   it('runs for the Nightshift investigation agent', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
-    expect(optimizeCortex).toHaveBeenCalled();
+    expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
+  });
+
+  // A reply that made almost no tool calls answered from what the wiki already said, or was a
+  // smoke test. Neither should mint pages.
+  it('skips a round with fewer than three tool calls', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, toolCalls.slice(0, 2));
+    expect(optimizeCortex).not.toHaveBeenCalled();
+    expect(getInference).not.toHaveBeenCalled();
   });
 
   it('skips another agent', async () => {

@@ -10,6 +10,7 @@ import {
   CORTEX_AI_INDEX_DEST,
   CORTEX_ENTITY_TYPES,
   CORTEX_PAGE_STATUSES,
+  CORTEX_PROMOTION_CORROBORATIONS,
   type CortexEntityType,
   type CortexPage,
   type CortexPageStatus,
@@ -114,6 +115,23 @@ const toCorroborations = (value: number | string | undefined): number => {
   }
   return 0;
 };
+
+/** Status a page moves to when a run confirms it and its count reaches `corroborations`. */
+export const statusAfterCorroboration = (
+  status: CortexPageStatus,
+  corroborations: number
+): CortexPageStatus => {
+  // Corroborating a retired fact brings it back, but only as tentative: one mention should not
+  // restore something to established that the optimizer deliberately archived.
+  if (status === 'archived') {
+    return 'tentative';
+  }
+  if (status === 'tentative' && corroborations >= CORTEX_PROMOTION_CORROBORATIONS) {
+    return 'established';
+  }
+  return status;
+};
+
 const toSummary = (id: string, source: CortexKiSource): CortexPageSummary | undefined => {
   if (!isEntityType(source.type) || source.title === undefined || source.title.length === 0) {
     return undefined;
@@ -371,16 +389,15 @@ export const createCortexPageStore = ({
       if (!page) {
         return undefined;
       }
+      const corroborations = page.corroborations + 1;
       return this.upsert({
         entityType: page.entity_type,
         slug: page.slug,
         title: page.title,
         description: page.description,
         content: page.content,
-        // Corroborating a retired fact brings it back, but only as tentative: one mention should
-        // not restore something to established that the optimizer deliberately archived.
-        status: page.status === 'archived' ? 'tentative' : page.status,
-        corroborations: page.corroborations + 1,
+        status: statusAfterCorroboration(page.status, corroborations),
+        corroborations,
       });
     },
 

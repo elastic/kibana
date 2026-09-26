@@ -11,7 +11,9 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runCortexOptimize } from '../cortex/register_cortex';
+import { toolCallsSchema } from './tool_calls_schema';
 import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
@@ -60,6 +62,9 @@ export const cortexOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Id of the completed round. Recorded on the edit telemetry events.'),
+      tool_calls: toolCallsSchema.describe(
+        'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
+      ),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
@@ -72,6 +77,7 @@ export const cortexOptimizeStepDefinition = ({
             agentId: context.input.agent_id,
             userMessage: context.input.prompt,
             assistantMessage: context.input.response,
+            toolCalls: (context.input.tool_calls ?? []) as InvestigationToolCall[],
             esClient: context.contextManager.getScopedEsClient(),
             spaceId: context.contextManager.getContext().workflow.spaceId,
             signal,
