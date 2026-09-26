@@ -760,6 +760,7 @@ src/platform/packages/shared/kbn-profiling-utils @elastic/obs-presentation-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/streams-ui
+src/platform/packages/shared/kbn-schema-string-helpers @elastic/kibana-security @elastic/kibana-core
 src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-docker-servers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-es-server @elastic/kibana-operations @elastic/appex-qa
