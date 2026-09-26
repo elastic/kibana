@@ -16,6 +16,7 @@ import type { DataSourcesClient } from '../data_sources_client';
 import type { DatasetsClient } from '../datasets_client';
 import type { DataSource, S3DataSourceWithSecrets } from '../../common/datasource_types';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
+import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
 import type { DataFederationKibanaServices } from '../types';
 
 const createToastsMock = (): ToastsStart =>
@@ -237,6 +238,49 @@ describe('CreateDataSourceFlyout', () => {
     expect(banner).toHaveTextContent('Could not save the data source');
     expect(banner).toHaveTextContent('validation_exception: something went wrong');
     expect(await findByTestId('createDataSourceFlyoutFooter')).toContainElement(banner);
+  });
+
+  it('creates an S3 data source with anonymous auth when no settings fields are registered', async () => {
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: createClientMock(),
+      datasetsClient: createDatasetsClientMock(),
+      toasts: createToastsMock(),
+      docLinks: createDocLinksMock(),
+      featureFlags: {},
+    };
+    const onSave = jest.fn().mockResolvedValue(null);
+
+    const { getByTestId, findByText } = render(
+      <EuiProvider>
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={onSave}
+            existingDataSourceNames={[]}
+          />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.change(getByTestId('createDataSourceFlyoutName'), {
+      target: { value: 'public-bucket' },
+    });
+    fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+    fireEvent.click(await findByText(authenticationStrings.anonymousLabel));
+    fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
+
+    const saved = onSave.mock.calls[0][0] as S3DataSourceWithSecrets;
+    expect(saved).toEqual(
+      expect.objectContaining({
+        type: 's3',
+        name: 'public-bucket',
+        settings: { auth: 'anonymous' },
+      })
+    );
   });
 
   describe('form submitter', () => {
