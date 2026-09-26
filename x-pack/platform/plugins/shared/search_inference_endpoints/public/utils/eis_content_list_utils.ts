@@ -16,6 +16,8 @@ import type {
 import {
   DEFAULT_EIS_DISPLAY_OPTIONS,
   filterGroupedModels,
+  getModelEOLDate,
+  getModelReleaseDate,
   getProviderOptions,
   MODEL_TYPE_FILTERS,
   type EisDisplayOptions,
@@ -32,6 +34,15 @@ export const EIS_CATEGORY_FILTER_ID = 'category';
 
 /** Sort field for the model name; matches the `Column.Name` id. */
 export const EIS_NAME_SORT_FIELD = 'title';
+
+/** Sort field for the type column. */
+export const EIS_TYPE_SORT_FIELD = 'categories';
+
+/** Sort field for the released column. */
+export const EIS_RELEASED_SORT_FIELD = 'released';
+
+/** Sort field for the end of life column. */
+export const EIS_END_OF_LIFE_SORT_FIELD = 'endOfLife';
 
 /** The grouped model travels on the item so cells and cards never re-derive it. */
 export type EisContentListItem = ContentListItem & {
@@ -67,10 +78,35 @@ const getIncludeExclude = (value: ActiveFilters[string]): Required<IncludeExclud
 };
 
 const sortModels = (models: GroupedModel[], sort: FindItemsParams['sort']): GroupedModel[] => {
+  const direction = sort?.direction === 'desc' ? -1 : 1;
+
   if (sort?.field === EIS_PROVIDER_FILTER_ID) {
-    const direction = sort.direction === 'desc' ? -1 : 1;
     // Stable sort over name-ordered input, so equal creators stay alphabetical.
     return [...models].sort((a, b) => a.modelCreator.localeCompare(b.modelCreator) * direction);
+  }
+
+  if (sort?.field === EIS_TYPE_SORT_FIELD) {
+    return [...models].sort(
+      (a, b) => a.categories.join(', ').localeCompare(b.categories.join(', ')) * direction
+    );
+  }
+
+  if (sort?.field === EIS_RELEASED_SORT_FIELD || sort?.field === EIS_END_OF_LIFE_SORT_FIELD) {
+    const readDate = sort.field === EIS_RELEASED_SORT_FIELD ? getModelReleaseDate : getModelEOLDate;
+    return [...models].sort((a, b) => {
+      const aDate = readDate(a.modelMetadata);
+      const bDate = readDate(b.modelMetadata);
+      if (!aDate && !bDate) {
+        return 0;
+      }
+      if (!aDate) {
+        return 1;
+      }
+      if (!bDate) {
+        return -1;
+      }
+      return (aDate.valueOf() - bDate.valueOf()) * direction;
+    });
   }
 
   // `filterGroupedModels` already sorts by name ascending.
@@ -85,9 +121,10 @@ const sortModels = (models: GroupedModel[], sort: FindItemsParams['sort']): Grou
 export const createEisFindItems =
   (
     models: GroupedModel[],
-    displayOptions: EisDisplayOptions = DEFAULT_EIS_DISPLAY_OPTIONS
+    displayOptions: EisDisplayOptions = DEFAULT_EIS_DISPLAY_OPTIONS,
+    paginate = true
   ): FindItemsFn =>
-  async ({ searchQuery, filters, sort }) => {
+  async ({ searchQuery, filters, sort, page }) => {
     const providerFilter = getIncludeExclude(filters[EIS_PROVIDER_FILTER_ID]);
     const categoryFilter = getIncludeExclude(filters[EIS_CATEGORY_FILTER_ID]);
     const selectedTaskTypes = new Set(categoryFilter.include as TaskTypeCategory[]);
@@ -106,7 +143,10 @@ export const createEisFindItems =
       sort
     );
 
-    return { items: matched.map(toContentListItem), total: matched.length };
+    const start = page.index * page.size;
+    const pageModels = paginate ? matched.slice(start, start + page.size) : matched;
+
+    return { items: pageModels.map(toContentListItem), total: matched.length };
   };
 
 /**
