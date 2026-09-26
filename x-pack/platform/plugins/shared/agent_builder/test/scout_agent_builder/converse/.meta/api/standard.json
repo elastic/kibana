@@ -1,5 +1,5 @@
 {
-  "sha1": "30ae8993a15459b4a20085c25160a6a575606b5a",
+  "sha1": "dce3d2a08b3467e9f34da62232865f6cc09a6985",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -160,8 +160,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 136,
+        "line": 137,
         "column": 8
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-646bebf93f1b464",
+      "title": "Agent Builder — chat API converse (/api/chat) trigger_mode: never still validates execution-only options, even though they are unused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 242,
+        "column": 13
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-c34d6cb565fa2b6",
+      "title": "Agent Builder — chat API converse (/api/chat) trigger_mode: never persists an attachment-only message, and rejects an invalid one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 280,
+        "column": 17
       }
     },
     {
@@ -176,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 248,
-        "column": 13
+        "line": 324,
+        "column": 30
       }
     },
     {
@@ -192,8 +224,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 286,
-        "column": 23
+        "line": 356,
+        "column": 19
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-9be67d9f1b2a81d",
+      "title": "Agent Builder — chat API converse (/api/chat) a user message on the streaming route reports the conversation and stops",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 389,
+        "column": 13
       }
     },
     {
@@ -208,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 318,
-        "column": 28
+        "line": 416,
+        "column": 25
       }
     },
     {
@@ -224,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 376,
-        "column": 14
+        "line": 474,
+        "column": 22
       }
     },
     {
@@ -480,7 +528,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 196,
+        "line": 197,
         "column": 29
       }
     },
@@ -496,7 +544,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 291,
+        "line": 292,
         "column": 22
       }
     },
@@ -512,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 327,
-        "column": 31
+        "line": 328,
+        "column": 48
       }
     },
     {
@@ -528,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 366,
-        "column": 18
+        "line": 369,
+        "column": 15
       }
     },
     {
@@ -544,8 +592,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 430,
-        "column": 20
+        "line": 432,
+        "column": 13
       }
     },
     {
@@ -560,8 +608,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 494,
-        "column": 29
+        "line": 497,
+        "column": 25
       }
     },
     {
@@ -576,8 +624,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 552,
-        "column": 31
+        "line": 556,
+        "column": 17
       }
     },
     {
@@ -592,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 591,
-        "column": 9
+        "line": 595,
+        "column": 16
       }
     },
     {

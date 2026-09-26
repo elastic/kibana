@@ -25,6 +25,7 @@ import {
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
   MAX_AI_INDEX_QUERY_PARAMS,
   MAX_AI_INDEX_SOURCES,
+  MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
@@ -138,6 +139,7 @@ describe('ai indices routes', () => {
   let esDeleteDataStream: jest.Mock;
   let esDeleteIndex: jest.Mock;
   let esInternalSearch: jest.Mock;
+  let esDeleteView: jest.Mock;
   let spacesStart: ReturnType<typeof spacesMock.createStart>;
   let improvementsClients: unknown[];
   let improvementsSpaceIds: string[];
@@ -168,6 +170,7 @@ describe('ai indices routes', () => {
             },
             asInternalUser: {
               search: esInternalSearch,
+              esql: { deleteView: esDeleteView },
             },
           },
         },
@@ -201,6 +204,7 @@ describe('ai indices routes', () => {
       data_streams: [],
     });
     esInternalSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    esDeleteView = jest.fn().mockResolvedValue({ acknowledged: true });
     spacesStart = spacesMock.createStart();
     aiIndexService = {
       create: jest.fn(),
@@ -1179,6 +1183,42 @@ describe('ai indices routes', () => {
 
       expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+    });
+
+    it('deletes the retrieval view with the AI index', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(esDeleteView).toHaveBeenCalledWith(
+        { name: 'v-ai-index-customer_support' },
+        { ignore: [404] }
+      );
+    });
+
+    it('returns a partial-failure error when the view deletion fails', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+      esDeleteView.mockRejectedValue(new Error('security_exception'));
+
+      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
+          errors: [expect.stringContaining('security_exception')],
+        },
+      });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: expect.objectContaining({
+            message: expect.stringContaining('security_exception'),
+          }),
+        })
+      );
     });
 
     it('returns 409 when the AI index is managed and does not delete related resources', async () => {
@@ -2464,6 +2504,51 @@ describe('ai indices routes', () => {
 
     it('rejects an empty id', () => {
       expect(() => validateParams({ aiIndexId: '' })).toThrow();
+    });
+  });
+
+  describe('create body validation', () => {
+    const validateBody = (body: unknown) => {
+      const { validate } = getRoute('POST', AI_INDEX_PATH);
+      if (validate === false || !validate.request?.body) {
+        throw new Error('Expected a body schema');
+      }
+      return validate.request.body.validate(body);
+    };
+    const body = (overrides: { id?: string; value?: string } = {}) => ({
+      id: overrides.id ?? 'customer_support',
+      dest: { type: 'index', value: overrides.value ?? 'ai-index-idx-mine' },
+      automations: [],
+      sources: [],
+    });
+
+    const validValues = ['ai-index-idx-mine', 'ai-index-idx-a.b+c'];
+    validValues.forEach((value) => {
+      it(`accepts dest value ${value}`, () => {
+        expect(() => validateBody(body({ value }))).not.toThrow();
+      });
+    });
+
+    const invalidValues = [
+      'ai-index-idx-mine\n| EVAL leaked = 1',
+      'ai-index-idx-Mine',
+      'ai-index-idx-a b',
+      'ai-index-idx-a"b',
+      'ai-index-idx-a*',
+      'ai-index-idx-a,ai-index-idx-b',
+    ];
+    invalidValues.forEach((value) => {
+      it(`rejects dest value ${JSON.stringify(value)}`, () => {
+        expect(() => validateBody(body({ value }))).toThrow(/lowercase letters, numbers, hyphens/);
+      });
+    });
+
+    it('accepts an id at the maximum length', () => {
+      expect(() => validateBody(body({ id: 'a'.repeat(MAX_AI_INDEX_ID_LENGTH) }))).not.toThrow();
+    });
+
+    it('rejects an id over the maximum length', () => {
+      expect(() => validateBody(body({ id: 'a'.repeat(MAX_AI_INDEX_ID_LENGTH + 1) }))).toThrow();
     });
   });
 });

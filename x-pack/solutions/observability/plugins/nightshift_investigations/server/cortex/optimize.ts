@@ -8,11 +8,14 @@
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-common';
 import {
+  CORTEX_EDIT_ACTIONS,
   CORTEX_ENTITY_TYPES,
+  type CortexEditAction,
   type CortexEntityType,
   type CortexPageStatus,
   type CortexPageSummary,
 } from '../../common/cortex';
+import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { CortexPageStore } from './page_store';
 import { canonicalizeSlug, slugFromCortexId, toCortexKiId } from './page_store';
@@ -21,7 +24,7 @@ const MAX_TRANSCRIPT_CHARS = 12_000;
 const MAX_PROPOSALS = 8;
 
 export interface CortexEditProposal {
-  action: 'upsert' | 'corroborate' | 'archive';
+  action: CortexEditAction;
   entity_type: CortexEntityType;
   slug: string;
   title: string;
@@ -38,8 +41,8 @@ export type ProposeCortexEdits = (input: {
 const isEntityType = (value: unknown): value is CortexEntityType =>
   typeof value === 'string' && (CORTEX_ENTITY_TYPES as readonly string[]).includes(value);
 
-const isAction = (value: unknown): value is CortexEditProposal['action'] =>
-  value === 'upsert' || value === 'corroborate' || value === 'archive';
+const isAction = (value: unknown): value is CortexEditAction =>
+  typeof value === 'string' && (CORTEX_EDIT_ACTIONS as readonly string[]).includes(value);
 
 const normalizeSlug = (value: string): string =>
   value
@@ -137,6 +140,8 @@ Rules:
 - Prefer corroborating an existing page over creating a near-duplicate.
 - New pages use action "upsert" with markdown content. Keep content short and reusable.
 - Use "corroborate" when the investigation confirms an existing page without changing it.
+- A slug names a recurring condition, never one occurrence of it. Never put a date, region, cloud, availability zone, cluster, node, or host in a slug — those belong in the page content. "constructor-plan-failed-capacity" is a slug; "constructor-plan-failed-capacity-aws-us-east-1-2026-09-22" is not.
+- When this investigation is another instance of a condition the catalog already documents, "corroborate" that page — and "upsert" the same slug when there is genuinely new detail to fold in. Never open a second page for the same mechanism because the date, region, or cluster differs.
 - Use "archive" only when the transcript shows a page is wrong or obsolete.
 - entity_type must be one of: ${CORTEX_ENTITY_TYPES.join(', ')}.
 - slug is a short kebab-case identifier. Reuse an existing page's slug exactly. Never prefix slug with "cortex", the entity type, or a document id.
@@ -150,7 +155,7 @@ Rules:
             items: {
               type: 'object',
               properties: {
-                action: { type: 'string', enum: ['upsert', 'corroborate', 'archive'] },
+                action: { type: 'string', enum: [...CORTEX_EDIT_ACTIONS] },
                 entity_type: { type: 'string', enum: [...CORTEX_ENTITY_TYPES] },
                 slug: { type: 'string' },
                 title: { type: 'string' },
@@ -179,54 +184,67 @@ Rules:
 export const applyCortexEdits = async ({
   store,
   edits,
+  telemetry,
   logger,
 }: {
   store: CortexPageStore;
   edits: CortexEditProposal[];
+  telemetry: CortexTelemetry;
   logger: Logger;
 }): Promise<void> => {
   const { pages } = await store.list();
-  for (const edit of edits) {
-    const slug = resolveSlug(edit, pages);
-    // The reinforcement agent validates every write to its own pages against the Mermaid node
-    // contract or the learning length budget. A free-form wiki edit would bypass those guardrails.
-    if (isReinforcementOwnedSlug(slug)) {
-      logger.debug(`Skipped Cortex edit targeting reinforcement-owned page ${slug}`);
-      continue;
-    }
-    const id = toCortexKiId(edit.entity_type, slug);
-    if (edit.action === 'corroborate') {
-      const updated = await store.corroborate(id);
-      if (updated) {
-        logger.info(`Corroborated Cortex page ${id}`);
+  const applied: AppliedCortexEdit[] = [];
+  // Pages are mutated one at a time, so a failure part way through leaves the earlier edits
+  // persisted. Reporting from `finally` keeps the counts honest for those partial runs.
+  try {
+    for (const edit of edits) {
+      const slug = resolveSlug(edit, pages);
+      // The reinforcement agent validates every write to its own pages against the Mermaid node
+      // contract or the learning length budget. A free-form wiki edit would bypass those
+      // guardrails.
+      if (isReinforcementOwnedSlug(slug)) {
+        logger.debug(`Skipped Cortex edit targeting reinforcement-owned page ${slug}`);
+        continue;
       }
-      continue;
-    }
-
-    if (edit.action === 'archive') {
-      const updated = await store.archive(id);
-      if (updated) {
-        logger.info(`Archived Cortex page ${id}`);
+      const id = toCortexKiId(edit.entity_type, slug);
+      if (edit.action === 'corroborate') {
+        const updated = await store.corroborate(id);
+        if (updated) {
+          applied.push({ action: 'corroborate', entityType: edit.entity_type });
+          logger.info(`Corroborated Cortex page ${id}`);
+        }
+        continue;
       }
-      continue;
-    }
 
-    const existing = await store.get(id);
-    await store.upsert({
-      entityType: edit.entity_type,
-      slug,
-      title: edit.title,
-      description: edit.description ?? existing?.description,
-      content: edit.content ?? existing?.content ?? '',
-      // Same rule as corroborate: rewriting an archived page revives it as tentative, so a
-      // proposal cannot promote a retired fact straight back to established.
-      status:
-        existing?.status === 'archived'
-          ? 'tentative'
-          : edit.status ?? existing?.status ?? 'tentative',
-      corroborations: existing?.corroborations,
-    });
-    logger.info(`Upserted Cortex page ${id}`);
+      if (edit.action === 'archive') {
+        const updated = await store.archive(id);
+        if (updated) {
+          applied.push({ action: 'archive', entityType: edit.entity_type });
+          logger.info(`Archived Cortex page ${id}`);
+        }
+        continue;
+      }
+
+      const existing = await store.get(id);
+      await store.upsert({
+        entityType: edit.entity_type,
+        slug,
+        title: edit.title,
+        description: edit.description ?? existing?.description,
+        content: edit.content ?? existing?.content ?? '',
+        // Same rule as corroborate: rewriting an archived page revives it as tentative, so a
+        // proposal cannot promote a retired fact straight back to established.
+        status:
+          existing?.status === 'archived'
+            ? 'tentative'
+            : edit.status ?? existing?.status ?? 'tentative',
+        corroborations: existing?.corroborations,
+      });
+      applied.push({ action: 'upsert', entityType: edit.entity_type });
+      logger.info(`Upserted Cortex page ${id}`);
+    }
+  } finally {
+    telemetry.reportEditsApplied(applied);
   }
 };
 
@@ -235,12 +253,14 @@ export const optimizeCortex = async ({
   proposeEdits,
   userMessage,
   assistantMessage,
+  telemetry,
   logger,
 }: {
   store: CortexPageStore;
   proposeEdits: ProposeCortexEdits;
   userMessage: string;
   assistantMessage: string;
+  telemetry: CortexTelemetry;
   logger: Logger;
 }): Promise<void> => {
   await store.pruneDuplicates();
@@ -263,5 +283,5 @@ export const optimizeCortex = async ({
     return;
   }
 
-  await applyCortexEdits({ store, edits, logger });
+  await applyCortexEdits({ store, edits, telemetry, logger });
 };

@@ -28,7 +28,7 @@ All three groups live in the header's collapsible region, so they animate away w
 
 ### Scroll behavior
 
-When the user scrolls the flyout body, the header automatically collapses to a compact row showing only the title: it drops to an `xs` heading on a single ellipsized line, with the full text available as a hover tooltip when it is a plain string. The description, meta blocks, badges, and info blocks slide away to give the body the recovered space. The title row, the tab bar, and the divider stay pinned in both states.
+When the user scrolls the flyout body, the header automatically collapses to a compact row showing only the title and its icon: the title drops to an `xs` heading on a single ellipsized line, with the full text available as a hover tooltip when it is a plain string. The description, meta blocks, badges, and info blocks slide away to give the body the recovered space. The title row, the tab bar, and the divider stay pinned in both states.
 
 Scrolling back to the top restores the full header. The collapse reverses with the same animation, and `prefers-reduced-motion` turns it into an instant swap.
 
@@ -52,21 +52,23 @@ These notes cover `use_header_collapse.ts` and `header.tsx` for contributors.
 
 ### Clip, not remove
 
-The collapsible region uses the CSS grid trick: a wrapper set to `grid-template-rows: 0fr / 1fr` clips its inner div (which has `min-block-size: 0`) without removing it from the DOM. The content is always present — only its visual box collapses to zero height, and the region becomes `aria-hidden`. A consequence: `element.scrollHeight` (the natural, unclipped height) reads the same value in both states, while `getBoundingClientRect().height` tracks the animated visual height.
+The collapsible region uses a CSS grid trick (`grid-template-rows: 0fr / 1fr`) to clip its content without removing it from the DOM. The content is always there, but its visual height animates to zero and it becomes `aria-hidden`. Because of this, `element.scrollHeight` (the natural, unclipped height) stays the same even when collapsed, while `getBoundingClientRect().height` tracks the animated visual height.
 
 ### Wheel forwarding
 
-Wheel events over the non-scrollable header would otherwise scroll the page behind the flyout. The hook's `headerRef` callback installs a single non-passive `wheel` listener on the nearest `.euiFlyoutHeader` ancestor (covering its padding). The listener calls `event.preventDefault()` and delegates to the scroll container. That is the entire path — no scroll logic lives in the header component itself. There is no duplication: both the normal scroll path and the forwarded wheel path converge on the same scroll container and trigger the same RAF-throttled `evaluate()` callback.
+The header is not scrollable, so `wheel` events over it would normally scroll the page behind the flyout. To prevent this, the hook's `headerRef` callback adds a single non-passive `wheel` listener to the `EuiFlyoutHeader` element. Listening on this outer element ensures the header's padding is covered.
+
+Because `EuiFlyoutHeader` does not forward a ref, the callback finds it via `closest()` using the Kibana-owned `FLYOUT_HEADER_CLASS_NAME` class applied in `header.tsx`. We deliberately avoid EUI's internal `euiFlyoutHeader` class. The listener calls `event.preventDefault()` and forwards the scroll to the body scroll container. The header component itself contains no scroll logic. Instead, both normal scrolling and forwarded wheel events hit the same scroll container and use the same RAF-throttled `evaluate()` callback.
 
 `WheelEvent.deltaY` is a bare number whose unit comes from `deltaMode`, and `scrollBy` only accepts pixels, so Firefox's line-mode and page-mode deltas are normalized before being forwarded.
 
 ### No oscillation
 
-Collapse needs `scrollTop >= 16px` and expansion needs `scrollTop <= 4px`. The gap is a hysteresis band that keeps the header from flickering when a scroll settles on the boundary.
+Collapse triggers at `scrollTop >= 16px` and expansion triggers at `scrollTop <= 4px`. The gap is a hysteresis band that prevents the header from flickering when a scroll settles on the boundary.
 
-The overflow guard is checked only on the transition _into_ the collapsed state. Its collapse budget is a conservative upper bound on all the space that can return to the body: the collapsible region's natural height plus the full expanded title-row and post-region spacer heights. Including the title and spacer matters for wrapped titles and headers without tabs, because those elements also become shorter in compact mode — and it is what lets a header with an empty collapsible region collapse at all. The body must overflow by more than that budget plus the 4px expansion threshold. A zero budget means nothing has been measured yet, so the header stays expanded.
+The overflow guard is only checked when transitioning _into_ the collapsed state. The collapse budget is a conservative estimate of the space that will be returned to the body when the header collapses: the collapsible region's natural height plus the height of the expanded title row and spacer. The body must overflow by more than this budget plus the 4px expansion threshold.
 
-Once collapsed, the expand decision is driven solely by scroll position. This asymmetry is deliberate: collapsing the header grows the body's client height, which shrinks `scrollHeight − clientHeight` — so re-testing the guard after collapsing would conclude the collapse was invalid, immediately expand, restore the original geometry, and re-collapse in a tight loop.
+Once collapsed, the decision to expand is based purely on the scroll position. This is because collapsing the header increases the body's height and shrinks its scrollable area. If we re-checked the guard after collapsing, it would see the smaller scroll area, think it can't collapse, and immediately expand again, causing an endless loop.
 
 ### ResizeObserver roles
 
