@@ -118,10 +118,10 @@ describe('RelationshipNode', () => {
     const mockEuiTheme = {
       colors: {
         danger: '#FF0000',
-        backgroundBasePrimary: '#0000FF',
-        borderStrongPrimary: '#0000DD',
-        textInverse: '#FFFFFF',
-        textPrimary: '#000000',
+        backgroundLightDanger: '#FFE5E5',
+        backgroundBasePlain: '#FFFFFF',
+        borderBasePlain: '#D3DAE6',
+        textHeading: '#1A1C21',
         textParagraph: '#DDDDDD',
         backgroundLightText: '#a1b2c3',
         backgroundFilledText: '#333333',
@@ -141,18 +141,18 @@ describe('RelationshipNode', () => {
     it('should return label colors for primary color', () => {
       const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundBasePrimary,
-        borderColor: mockEuiTheme.colors.borderStrongPrimary,
-        textColor: mockEuiTheme.colors.textPrimary,
+        backgroundColor: mockEuiTheme.colors.backgroundBasePlain,
+        borderColor: mockEuiTheme.colors.borderBasePlain,
+        textColor: mockEuiTheme.colors.textHeading,
       });
     });
 
     it('should return danger colors for label nodes with danger color', () => {
       const colors = getLabelColors('danger', mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.danger,
+        backgroundColor: mockEuiTheme.colors.backgroundLightDanger,
         borderColor: mockEuiTheme.colors.danger,
-        textColor: mockEuiTheme.colors.textInverse,
+        textColor: mockEuiTheme.colors.danger,
       });
     });
   });

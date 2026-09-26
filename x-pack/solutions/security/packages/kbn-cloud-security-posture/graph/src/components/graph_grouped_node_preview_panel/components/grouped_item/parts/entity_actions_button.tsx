@@ -18,6 +18,7 @@ import { PopoverListItem } from '../../../../popovers/primitives/popover_list_it
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
+  GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID,
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
 import {
@@ -185,6 +186,7 @@ export const EntityActionsButton = ({
       panelPaddingSize="none"
       anchorPosition="rightCenter"
       data-test-subj={GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID}
+      panelProps={{ 'data-test-subj': GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID }}
     >
       <EuiListGroup bordered={false}>
         {items.map((popoverItem, index) => {

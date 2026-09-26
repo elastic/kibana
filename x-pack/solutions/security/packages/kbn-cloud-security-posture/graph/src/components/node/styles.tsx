@@ -27,23 +27,43 @@ import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
 
 /**
- * The total height of an entity node including the shape and details below, in pixels.
- * Required to calculate total node's height in layout_graph.ts
+ * The total height Dagre reserves per entity node in the layout, set to the
+ * fully-expanded card height (header + all metadata rows visible + hover actions).
+ * Pre-reserving this space prevents nodes from overlapping their neighbours.
+ *
+ * Calculation (worst-case: grouped node, 5 metadata rows):
+ *   60px (header) + 1px (metadata border-top) + 5 × 56px (rows) = 341px → 360px (snapped to GRID_SIZE×2=20).
+ *
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const ENTITY_NODE_TOTAL_HEIGHT = 200;
+export const ENTITY_NODE_TOTAL_HEIGHT = 360;
 
 /**
- * The width of a node in the graph, in pixels.
+ * The width of an entity card node in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_WIDTH = 100;
+export const NODE_WIDTH = 300;
 
 /**
- * The height of a node in the graph, in pixels.
+ * The visual height of the entity card node body (header + metadata rows).
+ * Used to anchor the node's Y position in the Dagre layout:
+ *   entity_node_top = dagreNode.y − NODE_HEIGHT / 2
+ * so the card's visual centre aligns with the Dagre Y, which is where
+ * relationship/event nodes are placed by the layout algorithm.
+ * Approximate actual rendered height ranges from ~196 px (single entity, 2 metadata rows)
+ * to ~223 px (grouped entity with multiple criticality levels). With justify-content: center
+ * on NodeShapeContainer, any card from ~196–223 px is centred so its visual midpoint lands
+ * at exactly NODE_HEIGHT / 2 = 120 px — matching the handle and connector node positions.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_HEIGHT = 100;
+export const NODE_HEIGHT = 240;
+
+/**
+ * The height of the entity card's fixed header row (icon | name+tag | risk badge), in pixels.
+ * Used for all visual 60px elements: header, stacked card decoration, expand button centering.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_CARD_HEADER_HEIGHT = 60;
 
 /**
  * The width of a node label in the graph, in pixels.
@@ -191,16 +211,16 @@ export const getLabelColors = (
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   if (color === 'danger') {
     return {
-      backgroundColor: euiTheme.colors.danger,
+      backgroundColor: euiTheme.colors.backgroundLightDanger,
       borderColor: euiTheme.colors.danger,
-      textColor: euiTheme.colors.textInverse,
+      textColor: euiTheme.colors.danger,
     };
   }
 
   return {
-    backgroundColor: euiTheme.colors.backgroundBasePrimary,
-    borderColor: euiTheme.colors.borderStrongPrimary,
-    textColor: euiTheme.colors.textPrimary,
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    borderColor: euiTheme.colors.borderBasePlain,
+    textColor: euiTheme.colors.textHeading,
   };
 };
 

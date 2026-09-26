@@ -59,5 +59,7 @@ export const testSubjectIds = {
   GROUPED_ITEM_TITLE_TEST_ID_TEXT: 'GraphGroupedNodePreviewPanelGroupedItemTitleText',
   GROUPED_ITEM_ACTOR_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemActor',
   GROUPED_ITEM_TARGET_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemTarget',
+  GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID:
+    'GraphGroupedNodePreviewPanelGroupedItemActionsPopoverPanel',
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID: 'previewSectionCloseButton',
 };

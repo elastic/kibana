@@ -51,7 +51,11 @@ import {
 } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
-import type { NodeViewModel } from '../types';
+import type {
+  ItemExpandPopoverListItemProps,
+  SeparatorExpandPopoverListItemProps,
+} from '../popovers/primitives/list_graph_popover';
+import type { NodeProps, NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
@@ -535,6 +539,47 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+
+    // Converts a raw expand-popover itemsFn into the minimal NodeToolbarItem shape:
+    // filters out separators and maps iconType + label + onClick + disabled + testSubject.
+    // testSubject is forwarded so FTR tests can locate toolbar buttons by the same IDs
+    // they previously used to find popover items.
+    // Stable via useCallback (no deps) — the returned function reads item properties at call time.
+    const toToolbarItemsFn = useCallback(
+      (
+          itemsFn: (
+            node: NodeProps
+          ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>
+        ) =>
+        (node: NodeProps) =>
+          (itemsFn(node) ?? []).flatMap((item) =>
+            item.type === 'item'
+              ? [
+                  {
+                    iconType: item.iconType,
+                    label: item.label,
+                    onClick: item.onClick,
+                    disabled: item.disabled,
+                    testSubject: item.testSubject,
+                  },
+                ]
+              : []
+          ),
+      []
+    );
+
+    const { itemsFn: nodeItemsFn } = nodeExpandPopover;
+    // Stable when nodeItemsFn is stable (useCallback([scopeId, onOpenEventPreview, euidApi])).
+    const nodeToolbarItemsFn = useMemo(
+      () => (nodeItemsFn ? toToolbarItemsFn(nodeItemsFn) : undefined),
+      [nodeItemsFn, toToolbarItemsFn]
+    );
+
+    const { itemsFn: labelItemsFn } = labelExpandPopover;
+    const labelToolbarItemsFn = useMemo(
+      () => (labelItemsFn ? toToolbarItemsFn(labelItemsFn) : undefined),
+      [labelItemsFn, toToolbarItemsFn]
+    );
     const isPopoverOpen = [
       nodeExpandPopover,
       labelExpandPopover,
@@ -642,6 +687,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ...node,
               ...(isOrigin && { isOrigin }),
               expandButtonClick: nodeExpandButtonClickHandler,
+              toolbarItemsFn: nodeToolbarItemsFn,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
@@ -664,6 +710,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
               isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
+              toolbarItemsFn: labelToolbarItemsFn,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
               eventClickHandler: createEventClickHandler(analysis, text),
@@ -681,6 +728,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           return { ...node };
         }) ?? []
       );
+      // Callbacks (expandButtonClick, ipClickHandler, etc.) are excluded from deps intentionally —
+      // they are stable or recreated from memoized state and do not affect layout or node keys.
+      // nodeToolbarItemsFn and labelToolbarItemsFn are stable (memoized above) and therefore also
+      // excluded. searchFilters IS included: when a filter is toggled the node list recomputes so
+      // that toolbarItemsFn(props) — called without its own useMemo inside the node component —
+      // reads the updated filter-active state and reflects the correct "Show" ↔ "Hide" label.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       data?.nodes,
@@ -688,6 +741,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       originAlertIdsSet,
       originEntityIdsSet,
       relationshipNodeSources,
+      searchFilters,
     ]);
 
     const searchFilterCounter = useMemo(() => {
