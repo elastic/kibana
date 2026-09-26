@@ -29,7 +29,10 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-doc-links-browser'
   - '@kbn/ui-callout'
+  - '@kbn/es-ui-shared-plugin'
   - '@kbn/storybook'
+  - '@kbn/i18n-react'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

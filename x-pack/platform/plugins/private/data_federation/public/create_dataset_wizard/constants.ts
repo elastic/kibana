@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { CreateDatasetFlyoutProps, CreateDatasetFormValues } from './create_dataset_flyout';
-export { CreateDatasetFlyout } from './create_dataset_flyout';
+/** Logical mapping field name the dataset API reads to enable time filtering. */
+export const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';

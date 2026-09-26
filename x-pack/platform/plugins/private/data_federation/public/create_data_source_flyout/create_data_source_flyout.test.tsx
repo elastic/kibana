@@ -16,6 +16,7 @@ import type { DataSourcesClient } from '../data_sources_client';
 import type { DatasetsClient } from '../datasets_client';
 import type { DataSource, S3DataSourceWithSecrets } from '../../common/datasource_types';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
+import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
 import type { DataFederationKibanaServices } from '../types';
 
 const createToastsMock = (): ToastsStart =>
@@ -121,7 +122,6 @@ describe('CreateDataSourceFlyout', () => {
       name: 'ds',
       description: '',
       settings: {
-        region: '',
         endpoint: '',
         access_key: '',
         secret_key: '',
@@ -318,6 +318,52 @@ describe('CreateDataSourceFlyout', () => {
         sts_endpoint: 'https://sts.eu-west-1.amazonaws.com',
         sts_region: 'eu-west-1',
         auth: 'federated_identity',
+      })
+    );
+  });
+
+  it('creates an S3 data source with anonymous auth when no settings fields are registered', async () => {
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: createClientMock(),
+      datasetsClient: createDatasetsClientMock(),
+      toasts: createToastsMock(),
+      docLinks: createDocLinksMock(),
+      featureFlags: {},
+    };
+    const onSave = jest.fn().mockResolvedValue(null);
+
+    const { getByTestId, findByText } = render(
+      <EuiProvider>
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={onSave}
+            existingDataSourceNames={[]}
+          />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.change(getByTestId('createDataSourceFlyoutName'), {
+      target: { value: 'public-bucket' },
+    });
+    fireEvent.change(getByTestId('createDataSourceFlyoutS3Region'), {
+      target: { value: 'us-east-1' },
+    });
+    fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+    fireEvent.click(await findByText(authenticationStrings.anonymousLabel));
+    fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
+
+    const saved = onSave.mock.calls[0][0] as S3DataSourceWithSecrets;
+    expect(saved).toEqual(
+      expect.objectContaining({
+        type: 's3',
+        name: 'public-bucket',
+        settings: { auth: 'anonymous', region: 'us-east-1' },
       })
     );
   });

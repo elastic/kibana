@@ -27,15 +27,16 @@ export class DataFederationPage {
   readonly createDataSourceFlyoutSaveError;
   readonly editDataSourceFlyout;
 
-  readonly createDataSetFlyout;
-  readonly createDataSetFlyoutCancel;
-  readonly createDataSetFlyoutDataSource;
-  readonly createDataSetFlyoutName;
-  readonly createDataSetFlyoutResource;
-  readonly createDataSetFlyoutSettingsFormat;
-  readonly createDataSetFlyoutSubmit;
-  readonly createDataSetFlyoutSaveError;
-  readonly editDataSetFlyout;
+  readonly createDatasetWizard;
+  readonly createDatasetWizardAdvancedStep;
+  readonly createDatasetWizardMappingStep;
+  readonly createDatasetWizardReviewStep;
+  readonly wizardNextButton;
+
+  readonly createDataSetDataSource;
+  readonly createDataSetName;
+  readonly createDataSetResource;
+  readonly createDataSetSettingsFormat;
 
   constructor(private readonly page: ScoutPage) {
     this.pageTitle = page.testSubj.locator('appHeaderTitle');
@@ -63,17 +64,15 @@ export class DataFederationPage {
     this.createDataSourceFlyoutSaveError = page.testSubj.locator('createDataSourceFlyoutSaveError');
     this.editDataSourceFlyout = page.testSubj.locator('editDataSourceFlyout');
 
-    this.createDataSetFlyout = page.testSubj.locator('createDatasetFlyout');
-    this.createDataSetFlyoutCancel = page.testSubj.locator('createDatasetFlyoutCancel');
-    this.createDataSetFlyoutDataSource = page.testSubj.locator('createDatasetFlyoutDataSource');
-    this.createDataSetFlyoutName = page.testSubj.locator('createDatasetFlyoutName');
-    this.createDataSetFlyoutResource = page.testSubj.locator('createDatasetFlyoutResource');
-    this.createDataSetFlyoutSettingsFormat = page.testSubj.locator(
-      'createDatasetFlyoutSettingsFormat'
-    );
-    this.createDataSetFlyoutSubmit = page.testSubj.locator('createDatasetFlyoutSubmit');
-    this.createDataSetFlyoutSaveError = page.testSubj.locator('createDatasetFlyoutSaveError');
-    this.editDataSetFlyout = page.testSubj.locator('editDatasetFlyout');
+    this.createDatasetWizard = page.testSubj.locator('createDatasetWizard');
+    this.createDatasetWizardAdvancedStep = page.testSubj.locator('createDatasetWizardAdvancedStep');
+    this.createDatasetWizardMappingStep = page.testSubj.locator('createDatasetWizardMappingStep');
+    this.createDatasetWizardReviewStep = page.testSubj.locator('createDatasetWizardReviewStep');
+    this.wizardNextButton = page.testSubj.locator('nextButton');
+    this.createDataSetDataSource = page.testSubj.locator('createDatasetDataSource');
+    this.createDataSetName = page.testSubj.locator('createDatasetName');
+    this.createDataSetResource = page.testSubj.locator('createDatasetResource');
+    this.createDataSetSettingsFormat = page.testSubj.locator('createDatasetSettingsFormat');
   }
 
   async goto(): Promise<void> {
@@ -163,15 +162,22 @@ export class DataFederationPage {
     format: string;
   }): Promise<void> {
     await this.createDataSetButton.click();
-    await this.createDataSetFlyout.waitFor({ state: 'visible' });
+    await this.createDatasetWizard.waitFor({ state: 'visible' });
 
-    await this.createDataSetFlyoutDataSource.selectOption({ value: dataSourceName });
-    await this.createDataSetFlyoutName.fill(name);
-    await this.createDataSetFlyoutResource.fill(resource);
-    await this.createDataSetFlyoutSettingsFormat.selectOption({ value: format });
+    await this.createDataSetDataSource.click();
+    await this.page.testSubj.locator(`createDatasetDataSource-${dataSourceName}`).click();
+    await this.createDataSetName.fill(name);
+    await this.createDataSetResource.fill(resource);
+    await this.createDataSetSettingsFormat.selectOption({ value: format });
 
-    await this.createDataSetFlyoutSubmit.click();
-    await this.createDataSetFlyout.waitFor({ state: 'hidden' });
+    await this.wizardNextButton.click();
+    await this.createDatasetWizardAdvancedStep.waitFor({ state: 'visible' });
+    await this.wizardNextButton.click();
+    await this.createDatasetWizardMappingStep.waitFor({ state: 'visible' });
+    await this.wizardNextButton.click();
+    await this.createDatasetWizardReviewStep.waitFor({ state: 'visible' });
+    await this.wizardNextButton.click();
+    await this.createDatasetWizard.waitFor({ state: 'hidden' });
   }
 
   async editDataSetResource({
@@ -183,12 +189,17 @@ export class DataFederationPage {
   }): Promise<void> {
     const row = this.getDataSetRow(dataSetName);
     await row.locator('[data-test-subj="dataSetsSetsEditButton"]').click();
-    await this.editDataSetFlyout.waitFor({ state: 'visible' });
+    await this.createDatasetWizard.waitFor({ state: 'visible' });
 
-    await this.createDataSetFlyoutResource.fill(resource);
-    await this.createDataSetFlyoutSubmit.click();
-
-    await this.editDataSetFlyout.waitFor({ state: 'hidden' });
+    await this.createDataSetResource.fill(resource);
+    await this.wizardNextButton.click();
+    await this.createDatasetWizardAdvancedStep.waitFor({ state: 'visible' });
+    await this.wizardNextButton.click();
+    await this.createDatasetWizardMappingStep.waitFor({ state: 'visible' });
+    await this.wizardNextButton.click();
+    await this.createDatasetWizardReviewStep.waitFor({ state: 'visible' });
+    await this.wizardNextButton.click();
+    await this.createDatasetWizard.waitFor({ state: 'hidden' });
   }
 
   async deleteDataSet(dataSetName: string): Promise<void> {
