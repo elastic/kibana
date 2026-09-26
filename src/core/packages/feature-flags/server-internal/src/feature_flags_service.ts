@@ -68,6 +68,34 @@ export interface FeatureFlagsSetupDeps {
 }
 
 /**
+ * Start contract used inside core. One-shot evaluation stays available for the HTTP
+ * request-handler context. Plugin start contracts only receive {@link FeatureFlagsStart}.
+ * @internal
+ */
+export interface InternalFeatureFlagsStart extends FeatureFlagsStart {
+  /**
+   * Evaluates a boolean flag for the current request-handler context.
+   * @param flagName The flag ID to evaluate
+   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
+   */
+  getBooleanValue(flagName: string, fallbackValue: boolean): Promise<boolean>;
+
+  /**
+   * Evaluates a string flag for the current request-handler context.
+   * @param flagName The flag ID to evaluate
+   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
+   */
+  getStringValue<Value extends string>(flagName: string, fallbackValue: Value): Promise<Value>;
+
+  /**
+   * Evaluates a number flag for the current request-handler context.
+   * @param flagName The flag ID to evaluate
+   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
+   */
+  getNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Promise<Value>;
+}
+
+/**
  * The server-side Feature Flags Service
  * @internal
  */
@@ -127,7 +155,7 @@ export class FeatureFlagsService {
   /**
    * Start lifecycle method
    */
-  public start(): FeatureFlagsStart {
+  public start(): InternalFeatureFlagsStart {
     const featureFlagsChanged$ = new Subject<string[]>();
     this.featureFlagsClient.addHandler(ServerProviderEvents.ConfigurationChanged, (event) => {
       if (event?.flagsChanged) {
