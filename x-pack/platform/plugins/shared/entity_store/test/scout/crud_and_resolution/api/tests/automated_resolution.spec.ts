@@ -23,7 +23,13 @@ import {
   seedUserEntity,
   waitForResolution,
   assertNotResolved,
+  assertSidRuleWatermarked,
   triggerMaintainerRun,
+  ingestDoc,
+  forceLogExtraction,
+  normalizeKeywordList,
+  setupLogsTestDataStream,
+  teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 
 apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_TAGS }, () => {
@@ -500,6 +506,114 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     }
   );
 
+  apiTest(
+    'Windows SID bridge links several local entities on different hosts to Active Directory',
+    async ({ apiClient, esClient }) => {
+      const sid = 'S-1-5-21-111-222-333-1104';
+      const localA = 'user:jane@host-a@local';
+      const localB = 'user:jane@host-b@local';
+      const adEntity = 'user:jane@active_directory';
+
+      await seedUserEntity(esClient, {
+        entityId: localA,
+        namespace: 'local',
+        email: 'test-local-a@sid.example',
+        userId: sid,
+        userName: 'jane',
+      });
+      await seedUserEntity(esClient, {
+        entityId: localB,
+        namespace: 'local',
+        email: 'test-local-b@sid.example',
+        userId: sid,
+        userName: 'jane',
+      });
+      await seedUserEntity(esClient, {
+        entityId: adEntity,
+        namespace: 'active_directory',
+        email: 'test-ad@sid.example',
+        userId: sid,
+        userName: 'jane',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(3);
+      expect(groupResponse.body.target.entity.id).toBe(adEntity);
+      const aliasIds = groupResponse.body.aliases.map(
+        (a: { entity: { id: string } }) => a.entity.id
+      );
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([localA, localB]));
+    }
+  );
+
+  apiTest(
+    'Windows SID bridge links two local entities sharing a domain SID before the Active Directory user arrives',
+    async ({ apiClient, esClient }) => {
+      const sid = 'S-1-5-21-111-222-333-1105';
+      const localA = 'user:jane-pre-ad@host-a@local';
+      const localB = 'user:jane-pre-ad@host-b@local';
+      const adEntity = 'user:jane-pre-ad@active_directory';
+
+      await seedUserEntity(esClient, {
+        entityId: localA,
+        namespace: 'local',
+        email: 'test-pre-ad-a@sid.example',
+        userId: sid,
+        userName: 'jane-pre-ad',
+      });
+      await seedUserEntity(esClient, {
+        entityId: localB,
+        namespace: 'local',
+        email: 'test-pre-ad-b@sid.example',
+        userId: sid,
+        userName: 'jane-pre-ad',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localB, localA);
+
+      const localGroup = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${localA}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(localGroup.statusCode).toBe(200);
+      expect(localGroup.body.group_size).toBe(2);
+      expect(localGroup.body.target.entity.id).toBe(localA);
+      expect(localGroup.body.aliases).toHaveLength(1);
+      expect(localGroup.body.aliases[0].entity.id).toBe(localB);
+
+      await seedUserEntity(esClient, {
+        entityId: adEntity,
+        namespace: 'active_directory',
+        email: 'test-pre-ad-ad@sid.example',
+        userId: sid,
+        userName: 'jane-pre-ad',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+
+      const adGroup = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(adGroup.statusCode).toBe(200);
+      expect(adGroup.body.group_size).toBe(3);
+      expect(adGroup.body.target.entity.id).toBe(adEntity);
+      const aliasIds = adGroup.body.aliases.map((a: { entity: { id: string } }) => a.entity.id);
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([localA, localB]));
+    }
+  );
+
   apiTest('Entra GUID bridge links Defender to Entra ID', async ({ apiClient, esClient }) => {
     const guid = 'aa534e49-edfd-4541-8256-8bbf34f122b4';
     const defenderEntity = 'test12-defender';
@@ -523,7 +637,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   });
 
   apiTest(
-    'CrowdStrike SID bridge links CrowdStrike to Active Directory',
+    'CrowdStrike SID bridge does not link leftover crowdstrike-namespace entities when left at the default (disabled)',
     async ({ apiClient, esClient }) => {
       const sid = 'S-1-5-21-444-555-666-2002';
       const csEntity = 'test13-crowdstrike';
@@ -542,33 +656,123 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         userId: sid,
       });
 
-      await triggerMaintainerRun(apiClient, internalHeaders);
-      await waitForResolution(esClient, csEntity, adEntity);
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertNotResolved(esClient, csEntity);
     }
   );
 
   apiTest(
-    'UPN cross-field bridge links microsoft_365 user.id to entra_id user.name',
+    'CrowdStrike SID bridge links leftover crowdstrike-namespace entities to Active Directory when enabled',
     async ({ apiClient, esClient }) => {
-      const upn = 'admin@tenant.onmicrosoft.com';
-      const m365Entity = 'test14-m365';
-      const entraEntity = 'test14-entra';
+      const enable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(
+          RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE
+        ),
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(enable.statusCode).toBe(200);
+
+      try {
+        const sid = 'S-1-5-21-444-555-666-2003';
+        const csEntity = 'test13-crowdstrike-enabled';
+        const adEntity = 'test13-ad-enabled';
+
+        await seedUserEntity(esClient, {
+          entityId: csEntity,
+          namespace: 'crowdstrike',
+          email: 'test13-cs-enabled@sid.example',
+          userId: sid,
+        });
+        await seedUserEntity(esClient, {
+          entityId: adEntity,
+          namespace: 'active_directory',
+          email: 'test13-ad-enabled@sid.example',
+          userId: sid,
+        });
+
+        await triggerMaintainerRun(apiClient, internalHeaders);
+        await waitForResolution(esClient, csEntity, adEntity);
+      } finally {
+        const disable = await apiClient.put(
+          ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(
+            RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE
+          ),
+          { headers: defaultHeaders, responseType: 'json' }
+        );
+        expect(disable.statusCode).toBe(200);
+      }
+    }
+  );
+
+  apiTest(
+    'UPN cross-field bridge does not link when left at the default (disabled)',
+    async ({ apiClient, esClient }) => {
+      const upn = 'admin-disabled@tenant.onmicrosoft.com';
+      const m365Entity = 'test14-m365-disabled';
+      const entraEntity = 'test14-entra-disabled';
 
       await seedUserEntity(esClient, {
         entityId: m365Entity,
         namespace: 'microsoft_365',
-        email: 'test14-m365@upn.example',
+        email: 'test14-m365-disabled@upn.example',
         userId: upn,
       });
       await seedUserEntity(esClient, {
         entityId: entraEntity,
         namespace: 'entra_id',
-        email: 'test14-entra@upn.example',
+        email: 'test14-entra-disabled@upn.example',
         userName: upn,
       });
 
-      await triggerMaintainerRun(apiClient, internalHeaders);
-      await waitForResolution(esClient, m365Entity, entraEntity);
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertNotResolved(esClient, m365Entity);
+    }
+  );
+
+  apiTest(
+    'UPN cross-field bridge links microsoft_365 user.id to entra_id user.name when enabled',
+    async ({ apiClient, esClient }) => {
+      const enable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(
+          RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE
+        ),
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(enable.statusCode).toBe(200);
+
+      try {
+        const upn = 'admin@tenant.onmicrosoft.com';
+        const m365Entity = 'test14-m365';
+        const entraEntity = 'test14-entra';
+
+        await seedUserEntity(esClient, {
+          entityId: m365Entity,
+          namespace: 'microsoft_365',
+          email: 'test14-m365@upn.example',
+          userId: upn,
+        });
+        await seedUserEntity(esClient, {
+          entityId: entraEntity,
+          namespace: 'entra_id',
+          email: 'test14-entra@upn.example',
+          userName: upn,
+        });
+
+        await triggerMaintainerRun(apiClient, internalHeaders);
+        await waitForResolution(esClient, m365Entity, entraEntity);
+      } finally {
+        const disable = await apiClient.put(
+          ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(
+            RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE
+          ),
+          { headers: defaultHeaders, responseType: 'json' }
+        );
+        expect(disable.statusCode).toBe(200);
+      }
     }
   );
 
@@ -593,9 +797,145 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
       sync: true,
     });
+    await assertSidRuleWatermarked(apiClient, internalHeaders, esClient);
     await assertNotResolved(esClient, windowsEntity);
+  });
+
+  apiTest('Well-known SIDs on local entities are not bridged', async ({ apiClient, esClient }) => {
+    const sid = 'S-1-5-18';
+    const localEntity = 'user:system@host-wk@local';
+    const adEntity = 'test15b-ad-system';
+
+    await seedUserEntity(esClient, {
+      entityId: localEntity,
+      namespace: 'local',
+      email: 'test15b-local@sid.example',
+      userId: sid,
+      userName: 'system',
+    });
+    await seedUserEntity(esClient, {
+      entityId: adEntity,
+      namespace: 'active_directory',
+      email: 'test15b-ad@sid.example',
+      userId: sid,
+    });
+
+    await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+      sync: true,
+    });
+    await assertSidRuleWatermarked(apiClient, internalHeaders, esClient);
+    await assertNotResolved(esClient, localEntity);
     await assertNotResolved(esClient, adEntity);
   });
+
+  apiTest(
+    'Linux UID values on local entities do not enter the SID match',
+    async ({ apiClient, esClient }) => {
+      const uid = '1000';
+      const localA = 'user:linuxuser@host-linux-a@local';
+      const localB = 'user:linuxuser@host-linux-b@local';
+
+      await seedUserEntity(esClient, {
+        entityId: localA,
+        namespace: 'local',
+        email: 'test-linux-a@uid.example',
+        userId: uid,
+        userName: 'linuxuser',
+      });
+      await seedUserEntity(esClient, {
+        entityId: localB,
+        namespace: 'local',
+        email: 'test-linux-b@uid.example',
+        userId: uid,
+        userName: 'linuxuser',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertSidRuleWatermarked(apiClient, internalHeaders, esClient);
+      await assertNotResolved(esClient, localB);
+    }
+  );
+
+  apiTest(
+    'SID bridge links a local entity created by extraction to Active Directory',
+    async ({ apiClient, esClient }) => {
+      // Own stream/template so teardown cannot clobber history_snapshot's shared
+      // logs-entity-store-tests-default if this config ever runs with workers > 1.
+      const sidExtractionLogs = {
+        index: 'logs-entity-store-tests-sid-extraction',
+        template: 'entity-store-test-logs-override-sid-extraction',
+        indexPattern: 'logs-entity-store-tests-sid-extraction',
+      };
+      await setupLogsTestDataStream(esClient, sidExtractionLogs);
+      try {
+        const sid = 'S-1-5-21-111-222-333-1104';
+        const userName = 'sidjane';
+        const hostId = 'sidhosta';
+        const localEntity = `user:${userName}@${hostId}@local`;
+        const adEntity = `user:${userName}@active_directory`;
+        const timestamp = new Date().toISOString();
+
+        await ingestDoc(
+          esClient,
+          {
+            '@timestamp': timestamp,
+            event: { kind: 'event', category: ['authentication'], module: 'system' },
+            user: { name: userName, id: sid },
+            host: { id: hostId, name: 'sid-workstation' },
+          },
+          sidExtractionLogs.index
+        );
+
+        const fromDateISO = new Date(Date.now() - 60_000).toISOString();
+        const toDateISO = new Date(Date.now() + 60_000).toISOString();
+        const extraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'user',
+          fromDateISO,
+          toDateISO
+        );
+        expect(extraction.statusCode).toBe(200);
+
+        let extractedSource:
+          | { entity?: { namespace?: string }; user?: { id?: unknown } }
+          | undefined;
+
+        await expect
+          .poll(
+            async () => {
+              const response = await esClient.search({
+                index: LATEST_ALIAS,
+                query: { term: { 'entity.id': localEntity } },
+                size: 1,
+              });
+              extractedSource = response.hits.hits[0]?._source as typeof extractedSource;
+              return extractedSource;
+            },
+            { timeout: 30_000, intervals: [200] }
+          )
+          .toBeDefined();
+
+        expect(extractedSource?.entity?.namespace).toBe('local');
+        expect(normalizeKeywordList(extractedSource?.user?.id)).toStrictEqual([sid]);
+
+        await seedUserEntity(esClient, {
+          entityId: adEntity,
+          namespace: 'active_directory',
+          email: `${userName}@corp.example`,
+          userId: sid,
+          userName,
+        });
+
+        await triggerMaintainerRun(apiClient, internalHeaders);
+        await waitForResolution(esClient, localEntity, adEntity);
+      } finally {
+        await teardownLogsTestDataStream(esClient, sidExtractionLogs);
+      }
+    }
+  );
 
   apiTest('Disabling the email rule stops it producing links', async ({ apiClient, esClient }) => {
     const disable = await apiClient.put(

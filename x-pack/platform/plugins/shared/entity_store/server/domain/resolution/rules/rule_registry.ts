@@ -30,10 +30,12 @@ export const WINDOWS_NON_PERSON_SID_EXCLUSION =
 export const ENTRA_GUID_INCLUSION = '[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}';
 
 /**
- * NT-authority SID prefix. CrowdStrike `user.id` is polymorphic; only this
- * shape is safe to bridge to AD.
+ * Account-domain / machine SID (`S-1-5-21-…`). Well-known authorities
+ * (SYSTEM, DWM, NT SERVICE, Anonymous, …) are the same string on every host
+ * and are not one account. Residual: non-sysprepped clones share a machine
+ * SID, so local Administrator (`S-1-5-21-<machine>-500`) can still merge.
  */
-export const NT_AUTHORITY_SID_INCLUSION = 'S-1-5-.*';
+export const ACCOUNT_DOMAIN_SID_INCLUSION = 'S-1-5-21-.*';
 
 /**
  * Cheap UPN shape: at least one character, `@`, at least one character.
@@ -48,6 +50,12 @@ export type EsqlMatchSpec = {
   lowercase: boolean;
   inclusionPattern?: string;
   exclusionPattern?: string;
+  /**
+   * When true (the default), decline a group that has more unresolved entities
+   * than distinct unresolved namespaces. Set false only when the match value
+   * identifies one account, so same-namespace duplicates are identifier drift.
+   */
+  declineSameNamespaceDuplicates?: boolean;
 } & (
   | { field: string; fieldByNamespace?: never }
   | { field?: never; fieldByNamespace: Readonly<Record<string, string>> }
@@ -82,13 +90,15 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     id: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
     kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
     description:
-      'Links Windows and system account-management (IAM) entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.',
+      'Links user entities that share the same SID (`user.id`) to Active Directory, including several `local` Windows or CrowdStrike endpoint users on different hosts. Windows domain accounts seen on several hosts are linked even before the Active Directory user is ingested; the AD user becomes the target once it arrives. A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. Needs Windows or CrowdStrike endpoint events (which create `local` user entities) and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.',
     defaultEnabled: true,
     matcher: {
       field: 'user.id',
-      namespaces: ['system', 'windows', 'active_directory'],
+      namespaces: ['local', 'system', 'windows', 'active_directory'],
       lowercase: false,
+      inclusionPattern: ACCOUNT_DOMAIN_SID_INCLUSION,
       exclusionPattern: WINDOWS_NON_PERSON_SID_EXCLUSION,
+      declineSameNamespaceDuplicates: false,
     },
   },
   {
@@ -108,21 +118,23 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     id: RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
     kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
     description:
-      'Links CrowdStrike user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). Needs CrowdStrike FDR IAM events and Active Directory entity analytics. Disable if CrowdStrike SID coverage is noisy in your tenant.',
-    defaultEnabled: true,
+      'Links leftover CrowdStrike-namespace user entities to Active Directory by SID (`user.id`). A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. CrowdStrike FDR events now create `local` entities, which the Windows SID bridge covers. Disabled by default because the crowdstrike namespace no longer receives entities; enable if leftover CrowdStrike-namespace users should still link.',
+    defaultEnabled: false,
     matcher: {
       field: 'user.id',
       namespaces: ['crowdstrike', 'active_directory'],
       lowercase: false,
-      inclusionPattern: NT_AUTHORITY_SID_INCLUSION,
+      inclusionPattern: ACCOUNT_DOMAIN_SID_INCLUSION,
+      exclusionPattern: WINDOWS_NON_PERSON_SID_EXCLUSION,
+      declineSameNamespaceDuplicates: false,
     },
   },
   {
     id: RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE,
     kind: RESOLUTION_RULE_KINDS.CROSS_FIELD,
     description:
-      'Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit user-lifecycle events and Entra entity analytics. Covers admins who perform AAD user operations; disable if that population should stay separate.',
-    defaultEnabled: true,
+      'Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit events that create user entities (`event.kind: asset`) and Entra entity analytics. Disabled by default because those events currently do not create entities; enable if your environment emits them as asset events.',
+    defaultEnabled: false,
     matcher: {
       fieldByNamespace: {
         microsoft_365: 'user.id',

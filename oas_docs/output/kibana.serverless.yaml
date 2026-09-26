@@ -74258,7 +74258,7 @@ paths:
                         id: email_exact_match
                         kind: same_field
                         managed: true
-                      - description: Links Windows and system account-management (IAM) entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.
+                      - description: Links user entities that share the same SID (`user.id`) to Active Directory, including several `local` Windows or CrowdStrike endpoint users on different hosts. Windows domain accounts seen on several hosts are linked even before the Active Directory user is ingested; the AD user becomes the target once it arrives. A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. Needs Windows or CrowdStrike endpoint events (which create `local` user entities) and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.
                         enabled: true
                         id: windows_sid_bridge
                         kind: same_field
@@ -74268,13 +74268,13 @@ paths:
                         id: entra_guid_bridge
                         kind: same_field
                         managed: true
-                      - description: Links CrowdStrike user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). Needs CrowdStrike FDR IAM events and Active Directory entity analytics. Disable if CrowdStrike SID coverage is noisy in your tenant.
-                        enabled: true
+                      - description: Links leftover CrowdStrike-namespace user entities to Active Directory by SID (`user.id`). A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. CrowdStrike FDR events now create `local` entities, which the Windows SID bridge covers. Disabled by default because the crowdstrike namespace no longer receives entities; enable if leftover CrowdStrike-namespace users should still link.
+                        enabled: false
                         id: crowdstrike_sid_bridge
                         kind: same_field
                         managed: true
-                      - description: Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit user-lifecycle events and Entra entity analytics. Covers admins who perform AAD user operations; disable if that population should stay separate.
-                        enabled: true
+                      - description: 'Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit events that create user entities (`event.kind: asset`) and Entra entity analytics. Disabled by default because those events currently do not create entities; enable if your environment emits them as asset events.'
+                        enabled: false
                         id: upn_cross_field_bridge
                         kind: cross_field
                         managed: true
