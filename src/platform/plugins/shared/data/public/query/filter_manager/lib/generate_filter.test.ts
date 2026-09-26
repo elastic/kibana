@@ -17,7 +17,15 @@ import type {
   RangeFilter,
   PhraseFilter,
 } from '@kbn/es-query';
-import { isExistsFilter, buildExistsFilter, isPhraseFilter, isRangeFilter } from '@kbn/es-query';
+import type { CombinedFilter } from '@kbn/es-query';
+import {
+  isExistsFilter,
+  buildExistsFilter,
+  isPhraseFilter,
+  isRangeFilter,
+  isCombinedFilter,
+  BooleanRelation,
+} from '@kbn/es-query';
 
 const INDEX_NAME = 'my-index';
 const MOCKED_INDEX = { id: INDEX_NAME } as unknown as DataViewBase;
@@ -301,5 +309,160 @@ describe('Generate filters', () => {
     ) as RangeFilter[];
 
     expect(filter).toHaveProperty('meta.negate', true);
+  });
+  describe('with multiValueRelation', () => {
+    const ANOTHER_PHRASE = 'another-value';
+    const OPTIONS = { multiValueRelation: BooleanRelation.AND };
+
+    it('should combine multiple values into a single filter', () => {
+      const filters = generateFilters(
+        mockFilterManager,
+        FIELD,
+        [PHRASE_VALUE, ANOTHER_PHRASE],
+        '+',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+
+      expect(filters).toHaveLength(1);
+      expect(isCombinedFilter(filters[0])).toBeTruthy();
+
+      const { meta } = filters[0] as CombinedFilter;
+      expect(meta.relation).toBe(BooleanRelation.AND);
+      expect(meta.key).toBe(FIELD.name);
+      expect(meta.index).toBe(INDEX_NAME);
+      expect(meta.negate).toBeFalsy();
+      expect(meta.params).toHaveLength(2);
+      expect(meta.params.every(isPhraseFilter)).toBeTruthy();
+      expect(meta.params.map((subFilter) => subFilter.query?.match_phrase)).toEqual([
+        { [FIELD.name]: PHRASE_VALUE },
+        { [FIELD.name]: ANOTHER_PHRASE },
+      ]);
+    });
+
+    it('should negate the sub filters rather than the combined filter, to keep the query identical to separate filters', () => {
+      const filters = generateFilters(
+        mockFilterManager,
+        FIELD,
+        [PHRASE_VALUE, ANOTHER_PHRASE],
+        '-',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+
+      const { meta } = filters[0] as CombinedFilter;
+      expect(meta.negate).toBeFalsy();
+      expect(meta.params.map((subFilter) => subFilter.meta.negate)).toEqual([true, true]);
+    });
+
+    it('should not combine a single value', () => {
+      const filters = generateFilters(
+        mockFilterManager,
+        FIELD,
+        PHRASE_VALUE,
+        '+',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+
+      expect(filters).toHaveLength(1);
+      expect(isCombinedFilter(filters[0])).toBeFalsy();
+      expect(isPhraseFilter(filters[0])).toBeTruthy();
+    });
+
+    it('should not combine values of an exists filter', () => {
+      const filters = generateFilters(
+        mockFilterManager,
+        EXISTS_FIELD_NAME,
+        [FIELD.name, 'another-field'],
+        '+',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+
+      expect(filters).toHaveLength(2);
+      expect(filters.every(isExistsFilter)).toBeTruthy();
+    });
+
+    it('should combine duplicated values only once', () => {
+      const filters = generateFilters(
+        mockFilterManager,
+        FIELD,
+        [PHRASE_VALUE, ANOTHER_PHRASE, PHRASE_VALUE],
+        '+',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+
+      expect((filters[0] as CombinedFilter).meta.params).toHaveLength(2);
+    });
+
+    it('should toggle an existing combined filter instead of adding a duplicate', () => {
+      const [filter] = generateFilters(
+        mockFilterManager,
+        FIELD,
+        [PHRASE_VALUE, ANOTHER_PHRASE],
+        '+',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+      filter.meta.disabled = true;
+      filtersArray.push(filter);
+
+      const filters = generateFilters(
+        mockFilterManager,
+        FIELD,
+        [PHRASE_VALUE, ANOTHER_PHRASE],
+        '-',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toBe(filter);
+      expect(filter.meta.disabled).toBe(false);
+      expect(
+        (filter as CombinedFilter).meta.params.map((subFilter) => subFilter.meta.negate)
+      ).toEqual([true, true]);
+    });
+
+    it('should not reuse a combined filter that holds different values', () => {
+      const [filter] = generateFilters(
+        mockFilterManager,
+        FIELD,
+        [PHRASE_VALUE, ANOTHER_PHRASE],
+        '+',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+      filtersArray.push(filter);
+
+      const filters = generateFilters(
+        mockFilterManager,
+        FIELD,
+        [PHRASE_VALUE, 'a-third-value'],
+        '+',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+
+      expect(filters[0]).not.toBe(filter);
+    });
+
+    it('should combine date values into a single filter of range sub filters', () => {
+      const DATE_FIELD = { ...FIELD, type: 'date' } as DataViewFieldBase;
+      const filters = generateFilters(
+        mockFilterManager,
+        DATE_FIELD,
+        ['2022-08-01', '2022-08-02'],
+        '+',
+        MOCKED_INDEX,
+        OPTIONS
+      );
+
+      const { meta } = filters[0] as CombinedFilter;
+      expect(meta.params).toHaveLength(2);
+      expect(meta.params.every(isRangeFilter)).toBeTruthy();
+    });
   });
 });
