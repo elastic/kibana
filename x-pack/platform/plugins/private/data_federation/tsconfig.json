@@ -25,7 +25,8 @@
     "@kbn/ui-callout",
     "@kbn/es-ui-shared-plugin",
     "@kbn/storybook",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/utility-types"
   ],
   "exclude": [
     "target/**/*",
