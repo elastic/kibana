@@ -11,10 +11,12 @@
     "**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/config-mocks",
     "@kbn/config-schema",
     "@kbn/core-base-server-internal",
     "@kbn/core-base-server-mocks",
     "@kbn/logging",
+    "@kbn/core-logging-server",
     "@kbn/core-logging-server-internal",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-base-server-mocks",
