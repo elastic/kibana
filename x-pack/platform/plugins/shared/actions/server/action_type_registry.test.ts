@@ -96,7 +96,7 @@ describe('actionTypeRegistry', () => {
         ])
       );
       expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
-        'Connector: My connector type',
+        'Connector: my-connector-type',
         'gold'
       );
     });
@@ -166,7 +166,7 @@ describe('actionTypeRegistry', () => {
         })
       );
       expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
-        'Connector: My connector type',
+        'Connector: my-connector-type',
         'gold'
       );
     });
@@ -1051,31 +1051,24 @@ describe('actionTypeRegistry', () => {
 
 describe('spec versions', () => {
   const specVersions = {
-    getActiveVersion: () => '1.1.0',
-    getActiveSpec: jest.fn(),
+    getLatestVersions: () => ({ '1': '1.1' }),
+    getLatestVersion: (major?: number) => (major === undefined || major === 1 ? '1.1' : undefined),
     getSpec: jest.fn(),
     hasVersion: () => true,
+    resolveRequest: jest.fn(),
   };
 
-  test('getActiveSpecVersion returns the active version of a versioned type and undefined otherwise', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register(getConnectorType({ id: 'versioned', specVersions }));
-    actionTypeRegistry.register(getConnectorType({ id: 'classic' }));
-
-    expect(actionTypeRegistry.getActiveSpecVersion('versioned')).toBe('1.1.0');
-    expect(actionTypeRegistry.getActiveSpecVersion('classic')).toBeUndefined();
-    expect(actionTypeRegistry.getActiveSpecVersion('missing')).toBeUndefined();
-  });
-
-  test('list exposes the active version as specVersion on versioned types only', () => {
+  test('list exposes specVersion and specVersions on versioned types only', () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register(getConnectorType({ id: 'versioned', specVersions }));
     actionTypeRegistry.register(getConnectorType({ id: 'classic' }));
 
     const byId = Object.fromEntries(actionTypeRegistry.list().map((type) => [type.id, type]));
-    expect(byId.versioned.specVersion).toBe('1.1.0');
+    expect(byId.versioned.specVersion).toBe('1.1');
+    expect(byId.versioned.specVersions).toEqual({ '1': '1.1' });
     expect(byId.classic).not.toHaveProperty('specVersion');
+    expect(byId.classic).not.toHaveProperty('specVersions');
   });
 
   test('register keeps accessor properties live while still cloning data properties', () => {

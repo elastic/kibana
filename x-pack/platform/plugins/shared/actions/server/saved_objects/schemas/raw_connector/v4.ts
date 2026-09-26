@@ -7,17 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 import { rawConnectorSchema as rawConnectorSchemaV3 } from './v3';
+import {
+  SPEC_VERSION_MAX_LENGTH,
+  validateExactSpecVersion,
+} from '../../../catalog/spec_version_format';
 
-export const SPEC_VERSION_MAX_LENGTH = 32;
-const SPEC_VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
-
-export const validateSpecVersion = (value: string): string | undefined =>
-  SPEC_VERSION_PATTERN.test(value) ? undefined : 'spec version must use the MAJOR.MINOR.PATCH form';
+export { SPEC_VERSION_MAX_LENGTH };
+export const validateSpecVersion = validateExactSpecVersion;
 
 export const rawConnectorSchema = rawConnectorSchemaV3.extends({
   // Spec version the connector instance was created from. Absent on classic connectors and on
   // spec connectors created before pinning existed.
   specVersion: schema.maybe(
-    schema.string({ maxLength: SPEC_VERSION_MAX_LENGTH, validate: validateSpecVersion })
+    schema.string({ maxLength: SPEC_VERSION_MAX_LENGTH, validate: validateExactSpecVersion })
   ),
 });

@@ -18,6 +18,14 @@ describe('config validation', () => {
     jest.resetAllMocks();
   });
 
+  test('catalog defaults', () => {
+    const config = configSchema.validate({});
+    expect(config.catalog.enabled).toBe(false);
+    expect(config.catalog.url).toBe('https://workflows.elastic.co/connectors/v1');
+    expect(config.catalog.localBundlePath).toBeUndefined();
+    expect(config.catalog.refreshInterval.asMilliseconds()).toBe(5 * 60 * 1000);
+  });
+
   test('action defaults', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
@@ -38,6 +46,11 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
+          "refreshInterval": "PT5M",
+          "url": "https://workflows.elastic.co/connectors/v1",
         },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
@@ -93,6 +106,11 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
+          "refreshInterval": "PT5M",
+          "url": "https://workflows.elastic.co/connectors/v1",
         },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
@@ -257,6 +275,11 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
+          "refreshInterval": "PT5M",
+          "url": "https://workflows.elastic.co/connectors/v1",
         },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
@@ -448,6 +471,11 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
+          "refreshInterval": "PT5M",
+          "url": "https://workflows.elastic.co/connectors/v1",
         },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [

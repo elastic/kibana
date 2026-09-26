@@ -159,6 +159,39 @@ describe('listTypesRoute', () => {
     });
   });
 
+  it('maps specVersion and specVersions onto the list types response', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    listTypesRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce([
+      createMockConnectorType({
+        id: '.abuseipdb',
+        name: 'AbuseIPDB',
+        source: 'spec',
+        specVersion: '1.1',
+        specVersions: { '1': '1.1', '2': '2.0' },
+      }),
+    ]);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [
+        expect.objectContaining({
+          id: '.abuseipdb',
+          spec_version: '1.1',
+          spec_versions: { '1': '1.1', '2': '2.0' },
+        }),
+      ],
+    });
+  });
+
   it('passes feature_id if provided as query parameter', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

@@ -144,7 +144,7 @@ describe('isLicenseValidForActionType', () => {
     });
     license.next(goldLicense);
     licenseState.isLicenseValidForActionType(fooActionType, { notifyUsage: true });
-    expect(mockNotifyUsage).toHaveBeenCalledWith('Connector: Foo');
+    expect(mockNotifyUsage).toHaveBeenCalledWith('Connector: foo');
   });
 });
 
@@ -212,7 +212,7 @@ describe('ensureLicenseForActionType()', () => {
     });
     license.next(goldLicense);
     licenseState.ensureLicenseForActionType(fooActionType);
-    expect(mockNotifyUsage).toHaveBeenCalledWith('Connector: Foo');
+    expect(mockNotifyUsage).toHaveBeenCalledWith('Connector: foo');
   });
 });
 

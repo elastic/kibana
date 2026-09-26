@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "sha256:30043ec6efaafff20e1b6bda5e32f186b4929ef1c698873289fed692f27c473f",
+  "sequence": 1,
+  "typeMetadata": {
+    ".abuseipdb": {
+      "displayName": "AbuseIPDB (Declarative PoC)",
+      "description": "IP reputation checking with optional verbose reports and abuse reporting",
+      "icon": {
+        "path": "connectors/abuseipdb/icons/sha256:c2ed2c5ebe15e0b513f760b11b0bdd149236d298f06612f468368901ce19e012.svg",
+        "contentHash": "sha256:c2ed2c5ebe15e0b513f760b11b0bdd149236d298f06612f468368901ce19e012"
+      },
+      "minimumLicense": "gold",
+      "isTechnicalPreview": true,
+      "supportedFeatureIds": [
+        "workflows",
+        "agentBuilder"
+      ]
+    },
+    ".okta": {
+      "displayName": "Okta (Declarative PoC)",
+      "description": "Read-only Okta users and System Log actions from a catalog-loaded YAML definition",
+      "icon": {
+        "path": "connectors/okta/icons/sha256:61285080a6b979ac58e3a9f3c07ed506ee9075db01bd088bfdeaa1a57bdb9f84.svg",
+        "contentHash": "sha256:61285080a6b979ac58e3a9f3c07ed506ee9075db01bd088bfdeaa1a57bdb9f84"
+      },
+      "minimumLicense": "enterprise",
+      "isTechnicalPreview": true,
+      "supportedFeatureIds": [
+        "workflows",
+        "agentBuilder"
+      ]
+    }
+  },
+  "connectors": [
+    {
+      "id": ".abuseipdb",
+      "version": "1.1",
+      "definitionUrl": "connectors/abuseipdb/1.1.yaml",
+      "contentHash": "sha256:f2c60e5f86ec65a448753ac1866cfa4cd091d7314f3802bcf89e05928fc80a32"
+    },
+    {
+      "id": ".abuseipdb",
+      "version": "1.0",
+      "definitionUrl": "connectors/abuseipdb/1.0.yaml",
+      "contentHash": "sha256:e288d9d15b22bb4608ed190453501ed6ae70a87ade485a366ab44a3066819afa"
+    },
+    {
+      "id": ".okta",
+      "version": "1.0",
+      "definitionUrl": "connectors/okta/1.0.yaml",
+      "contentHash": "sha256:5a16bac56b8af0a8824da43b53b877649f44e4c93c450de7f6742d4e44810453"
+    }
+  ]
+}

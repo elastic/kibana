@@ -93,6 +93,11 @@ describe('custom_host_settings', () => {
         maxBodyBytes: new ByteSizeValue(1024 * 1024),
         maxEmitted: 25,
       },
+      catalog: {
+        enabled: false,
+        url: 'https://workflows.elastic.co/connectors/v1',
+        refreshInterval: moment.duration(5, 'minutes'),
+      },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

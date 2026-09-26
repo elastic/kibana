@@ -134,9 +134,20 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
-import type { CatalogSpecProvider } from './catalog_spec_provider';
-
-export type { CatalogSpecProvider, CatalogActionType } from './catalog_spec_provider';
+import { assertCatalogUrlAllowed } from './catalog/catalog_config';
+import {
+  CATALOG_LOAD_TIMEOUT_MS,
+  CATALOG_PUBLIC_KEYS,
+  DeclarativeCatalogService,
+  LocalBundleSource,
+  RemoteCatalogSource,
+  SpecVersionLoader,
+  createVersionedConnectorType,
+  registerCatalogRefreshTask,
+  scheduleCatalogRefreshTask,
+  withCatalogTimeout,
+} from './catalog';
+import type { VersionedTypeFactory } from './catalog';
 
 export interface PluginSetupContract {
   registerType<
@@ -188,8 +199,6 @@ export interface PluginSetupContract {
    * Throws if an emitter is already registered (exactly one emitter is supported).
    */
   registerConnectorEventEmitter(emitter: ConnectorEventEmitter): void;
-
-  registerSpecProvider(provider: CatalogSpecProvider): void;
 }
 
 export interface PluginStartContract {
@@ -314,8 +323,9 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
-  private specProvider?: CatalogSpecProvider;
-  private setupApi?: PluginSetupContract;
+  private catalogService?: DeclarativeCatalogService;
+  private readonly isDev: boolean;
+  private readonly kibanaVersion: string;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -327,6 +337,8 @@ export class ActionsPlugin
     this.telemetryLogger = initContext.logger.get('usage');
     this.inMemoryConnectors = [];
     this.inMemoryMetrics = new InMemoryMetrics(initContext.logger.get('in_memory_metrics'));
+    this.isDev = initContext.env.mode.dev;
+    this.kibanaVersion = initContext.env.packageInfo.version;
   }
 
   public setup(
@@ -604,11 +616,8 @@ export class ActionsPlugin
         }
         this.connectorEventEmitter = emitter;
       },
-      registerSpecProvider: (provider: CatalogSpecProvider) => {
-        this.specProvider = provider;
-      },
     };
-    this.setupApi = setupApi;
+    this.maybeSetupCatalog(setupApi, plugins);
     return setupApi;
   }
 
@@ -633,7 +642,7 @@ export class ActionsPlugin
       includedHiddenTypes,
     });
 
-    await this.registerCatalogSpecs(core);
+    await this.startCatalog(core, plugins);
 
     this.throwIfSystemActionsInConfig();
 
@@ -1221,28 +1230,74 @@ export class ActionsPlugin
     return true;
   };
 
-  private async registerCatalogSpecs(core: CoreStart): Promise<void> {
-    const { specProvider, setupApi, actionTypeRegistry } = this;
-    if (!specProvider || !setupApi || !actionTypeRegistry) {
+  private maybeSetupCatalog(setupApi: PluginSetupContract, plugins: ActionsPluginsSetup): void {
+    const catalog = this.actionsConfig.catalog;
+    if (!catalog?.enabled) {
       return;
     }
-
-    const actionTypes = await specProvider.load({
-      esClient: core.elasticsearch.client.asInternalUser,
-      savedObjectsRepository: core.savedObjects.createInternalRepository([
-        ACTION_SAVED_OBJECT_TYPE,
-      ]),
-    });
-    for (const actionType of actionTypes) {
-      if (actionTypeRegistry.has(actionType.id)) {
-        continue;
-      }
-      ensureSufficientLicense(actionType);
-      actionTypeRegistry.register(actionType);
+    assertCatalogUrlAllowed(catalog.url, this.isDev);
+    const loader = new SpecVersionLoader({ logger: this.logger });
+    const buildType: VersionedTypeFactory = ({ id, versions, metadata }) =>
+      createVersionedConnectorType({
+        id,
+        versions,
+        metadata,
+        actions: setupApi,
+        logger: this.logger,
+        loadVersion: loader.load,
+      });
+    const source = catalog.localBundlePath
+      ? new LocalBundleSource({ root: catalog.localBundlePath })
+      : new RemoteCatalogSource({
+          registryUrl: catalog.url,
+          kibanaVersion: this.kibanaVersion,
+        });
+    if (catalog.localBundlePath) {
+      this.logger.info(`Connector catalog using local bundle at ${catalog.localBundlePath}`);
     }
+    this.catalogService = new DeclarativeCatalogService({
+      source,
+      publicKeys: CATALOG_PUBLIC_KEYS,
+      refreshIntervalMs: catalog.refreshInterval.asMilliseconds(),
+      logger: this.logger,
+      buildType,
+      onStorageReady: (storage) => loader.setStorage(storage),
+    });
+    registerCatalogRefreshTask(plugins.taskManager, () => this.catalogService);
+  }
+
+  private async startCatalog(core: CoreStart, plugins: ActionsPluginsStart): Promise<void> {
+    const catalog = this.actionsConfig.catalog;
+    if (!catalog?.enabled || !this.catalogService) {
+      return;
+    }
+    await withCatalogTimeout(
+      this.catalogService.loadAtBoot({
+        registerType: (actionType) => {
+          if (this.actionTypeRegistry!.has(actionType.id)) {
+            return;
+          }
+          ensureSufficientLicense(actionType);
+          this.actionTypeRegistry!.register(actionType);
+        },
+        isTypeRegistered: (id) => this.actionTypeRegistry!.has(id),
+        updateFeatureUsageTier: (actionType) =>
+          this.actionTypeRegistry!.updateFeatureUsageTier(actionType as ActionType),
+        esClient: core.elasticsearch.client.asInternalUser,
+        savedObjectsRepository: core.savedObjects.createInternalRepository([
+          ACTION_SAVED_OBJECT_TYPE,
+        ]),
+      }),
+      CATALOG_LOAD_TIMEOUT_MS,
+      () => {
+        this.logger.warn('Connector catalog load timed out; starting with in-tree types only');
+      }
+    );
+    await scheduleCatalogRefreshTask(plugins.taskManager, catalog.refreshInterval, this.logger);
   }
 
   public stop() {
+    this.catalogService?.stop();
     if (this.licenseState) {
       this.licenseState.clean();
     }

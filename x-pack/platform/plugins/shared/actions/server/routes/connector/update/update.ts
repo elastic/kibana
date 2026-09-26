@@ -57,13 +57,23 @@ export const updateConnectorRoute = (
         try {
           const actionsClient = (await context.actions).getActionsClient();
           const { id }: UpdateConnectorParamsV1 = req.params;
-          const { name, config, secrets }: UpdateConnectorBodyV1 = req.body;
+          const {
+            name,
+            config,
+            secrets,
+            spec_version: specVersion,
+          }: UpdateConnectorBodyV1 = req.body;
 
           return res.ok({
             body: transformConnectorResponseV1(
               await actionsClient.update({
                 id,
-                action: { name, config, secrets },
+                action: {
+                  name,
+                  config,
+                  secrets,
+                  ...(specVersion !== undefined ? { specVersion } : {}),
+                },
               })
             ),
           });

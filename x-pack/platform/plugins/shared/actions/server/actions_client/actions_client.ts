@@ -35,7 +35,6 @@ import { getAuthStatus } from '../application/connector/methods/get_auth_status'
 import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
 import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
-import { upgrade } from '../application/connector/methods/upgrade';
 import { rotateInboundIngress } from '../application/connector/methods/rotate_inbound_ingress';
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
@@ -93,7 +92,6 @@ import {
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
 import type { ListTypesParams } from '../application/connector/methods/list_types/types';
 import type { ConnectorUpdateParams } from '../application/connector/methods/update/types';
-import type { ConnectorUpgradeParams } from '../application/connector/methods/upgrade/types';
 import type { ConnectorCreateParams } from '../application/connector/methods/create/types';
 import { isPreconfigured } from '../lib/is_preconfigured';
 import { isSystemAction } from '../lib/is_system_action';
@@ -241,16 +239,6 @@ export class ActionsClient {
     action,
   }: Pick<ConnectorUpdateParams, 'id' | 'action'>): Promise<Connector> {
     return update({ context: this.context, id, action });
-  }
-
-  /**
-   * Move a spec connector to the catalog-active spec version.
-   */
-  public async upgrade({
-    id,
-    specVersion,
-  }: Pick<ConnectorUpgradeParams, 'id' | 'specVersion'>): Promise<Connector> {
-    return upgrade({ context: this.context, id, specVersion });
   }
 
   /**

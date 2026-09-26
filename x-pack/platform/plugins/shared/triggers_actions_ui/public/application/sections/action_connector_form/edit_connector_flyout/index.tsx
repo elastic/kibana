@@ -32,6 +32,7 @@ import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_a
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
+  ActionConnectorWithoutId,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
 } from '../../../../types';
@@ -228,6 +229,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
   const [isEdit, setIsEdit] = useState<boolean>(true);
   const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [targetSpecVersion, setTargetSpecVersion] = useState<string | undefined>();
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
@@ -244,7 +246,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     docLinks,
     uiSettings,
     // Edit and test always render the spec version the connector is pinned to.
-    specVersion: connector.specVersion,
+    specVersion: targetSpecVersion ?? connector.specVersion,
   });
 
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
@@ -360,6 +362,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
+        specVersion: connector.specVersion,
       };
 
       const updatedConnector = await updateConnector(validConnector);
@@ -388,6 +391,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     submit,
     preSubmitValidator,
     connector.id,
+    connector.specVersion,
     updateConnector,
     onFormModifiedChange,
   ]);
@@ -434,7 +438,16 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
                 <SpecVersionCallout
                   connector={connector}
                   canUpgrade={canSave && !isFormModified}
+                  currentValues={{
+                    name: connector.name,
+                    config: (connector as ActionConnectorWithoutId).config,
+                    secrets: (connector as ActionConnectorWithoutId).secrets,
+                  }}
                   onConnectorUpdated={onConnectorUpdated}
+                  onValidationFailure={(target) => {
+                    setTargetSpecVersion(target);
+                    setShowFormErrors(true);
+                  }}
                 />
               )}
 

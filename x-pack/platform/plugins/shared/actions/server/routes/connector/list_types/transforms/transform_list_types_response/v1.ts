@@ -31,6 +31,7 @@ export const transformListTypesResponse = (
       subActions,
       icon,
       specVersion,
+      specVersions,
     }) => ({
       id,
       name,
@@ -50,6 +51,7 @@ export const transformListTypesResponse = (
       ...(subActions ? { sub_actions: subActions } : {}),
       ...(icon !== undefined ? { icon } : {}),
       ...(specVersion !== undefined ? { spec_version: specVersion } : {}),
+      ...(specVersions !== undefined ? { spec_versions: specVersions } : {}),
     })
   );
 };

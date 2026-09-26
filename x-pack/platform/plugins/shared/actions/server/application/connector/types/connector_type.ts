@@ -29,4 +29,5 @@ export interface ConnectorType {
   subActions?: ConnectorTypeSchemaType['subActions'];
   icon?: ConnectorTypeSchemaType['icon'];
   specVersion?: ConnectorTypeSchemaType['specVersion'];
+  specVersions?: Record<string, string>;
 }

@@ -48,4 +48,8 @@ export { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor
 export { OAuthAuthorizationService } from './oauth_authorization_service';
 export type { OAuthConfig } from './oauth_authorization_service';
 export { LeasePool } from './lease_pool';
-export { ensureSpecVersionLoaded, resolveSpecVersionForCreate } from './spec_version';
+export {
+  ensureSpecVersionLoaded,
+  resolveSpecVersionForCreate,
+  resolveSpecVersionForUpdate,
+} from './spec_version';

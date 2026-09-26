@@ -37,12 +37,37 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import type { ConnectorSpec } from '@kbn/connector-specs';
-import type { CatalogActionType } from './catalog_spec_provider';
-import { createConnectorTypeFromSpec } from './lib';
 import { getConnectorType } from './fixtures';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { LeasePool } from './lib';
+import { DeclarativeCatalogService } from './catalog/catalog_service';
+import { withCatalogTimeout } from './catalog/with_timeout';
+import { CATALOG_REFRESH_TASK_TYPE } from './catalog/catalog_refresh_task';
+
+jest.mock('./catalog/catalog_service', () => ({
+  DeclarativeCatalogService: jest.fn().mockImplementation(() => ({
+    loadAtBoot: jest.fn().mockResolvedValue(undefined),
+    stop: jest.fn(),
+    refreshFromRegistry: jest.fn().mockResolvedValue(undefined),
+  })),
+}));
+
+jest.mock('./catalog/with_timeout', () => {
+  const actual = jest.requireActual('./catalog/with_timeout');
+  return {
+    ...actual,
+    withCatalogTimeout: jest.fn(actual.withCatalogTimeout),
+  };
+});
+
+const registeredTaskTypes = (taskManager: unknown): string[] => {
+  const register = (
+    taskManager as {
+      registerTaskDefinitions?: { mock?: { calls: Array<[Record<string, unknown>]> } };
+    }
+  ).registerTaskDefinitions;
+  return register?.mock?.calls.flatMap((call) => Object.keys(call[0])) ?? [];
+};
 
 function getConfig(overrides = {}) {
   return {
@@ -82,6 +107,11 @@ function getConfig(overrides = {}) {
       maxBodyBytes: new ByteSizeValue(1024 * 1024),
       maxEmitted: 25,
     },
+    catalog: {
+      enabled: false,
+      url: 'https://workflows.elastic.co/connectors/v1',
+      refreshInterval: moment.duration(5, 'minutes'),
+    },
     ...overrides,
   };
 }
@@ -118,6 +148,7 @@ describe('Actions Plugin', () => {
     let pluginsSetup: jest.Mocked<ActionsPluginsSetup>;
 
     beforeEach(() => {
+      (DeclarativeCatalogService as jest.Mock).mockClear();
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
@@ -144,6 +175,11 @@ describe('Actions Plugin', () => {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
+        },
+        catalog: {
+          enabled: false,
+          url: 'https://workflows.elastic.co/connectors/v1',
+          refreshInterval: moment.duration(5, 'minutes'),
         },
       });
       plugin = new ActionsPlugin(context);
@@ -203,6 +239,64 @@ describe('Actions Plugin', () => {
       expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
         /only one emitter is supported/
       );
+    });
+
+    describe('catalog', () => {
+      const catalogConfig = {
+        enabled: true,
+        url: 'https://workflows.elastic.co/connectors/v1',
+        refreshInterval: moment.duration(5, 'minutes'),
+      };
+
+      it('does not register the catalog refresh task when catalog is disabled', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        expect(registeredTaskTypes(pluginsSetup.taskManager)).not.toContain(
+          CATALOG_REFRESH_TASK_TYPE
+        );
+        expect(DeclarativeCatalogService).not.toHaveBeenCalled();
+      });
+
+      it('registers the catalog refresh task when catalog is enabled', async () => {
+        context = coreMock.createPluginInitializerContext({
+          ...context.config.get(),
+          catalog: catalogConfig,
+        } as ActionsConfig);
+        plugin = new ActionsPlugin(context);
+        await plugin.setup(coreSetup, pluginsSetup);
+        expect(registeredTaskTypes(pluginsSetup.taskManager)).toContain(CATALOG_REFRESH_TASK_TYPE);
+        expect(DeclarativeCatalogService).toHaveBeenCalled();
+      });
+
+      it('constructs the catalog service when localBundlePath is set', async () => {
+        context = coreMock.createPluginInitializerContext({
+          ...context.config.get(),
+          catalog: {
+            ...catalogConfig,
+            localBundlePath: '/tmp/connector-catalog',
+          },
+        } as ActionsConfig);
+        plugin = new ActionsPlugin(context);
+        await plugin.setup(coreSetup, pluginsSetup);
+        expect(DeclarativeCatalogService).toHaveBeenCalled();
+        expect(context.logger.get().info).toHaveBeenCalledWith(
+          'Connector catalog using local bundle at /tmp/connector-catalog'
+        );
+      });
+
+      it('throws at setup when catalog.url is http outside development', async () => {
+        context = coreMock.createPluginInitializerContext({
+          ...context.config.get(),
+          catalog: {
+            ...catalogConfig,
+            url: 'http://127.0.0.1:8089',
+          },
+        } as ActionsConfig);
+        context.env.mode.dev = false;
+        plugin = new ActionsPlugin(context);
+        expect(() => plugin.setup(coreSetup, pluginsSetup)).toThrow(
+          'xpack.actions.catalog.url must use https outside of development mode'
+        );
+      });
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
@@ -546,6 +640,8 @@ describe('Actions Plugin', () => {
     let pluginsStart: jest.Mocked<ActionsPluginsStart>;
 
     beforeEach(() => {
+      (DeclarativeCatalogService as jest.Mock).mockClear();
+      (withCatalogTimeout as jest.Mock).mockClear();
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
@@ -580,6 +676,11 @@ describe('Actions Plugin', () => {
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
         },
+        catalog: {
+          enabled: false,
+          url: 'https://workflows.elastic.co/connectors/v1',
+          refreshInterval: moment.duration(5, 'minutes'),
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -601,77 +702,80 @@ describe('Actions Plugin', () => {
       };
     });
 
-    const catalogSpec = (overrides: Partial<ConnectorSpec['metadata']> = {}): ConnectorSpec =>
-      ({
-        metadata: {
-          id: '.abuseipdb',
-          displayName: 'AbuseIPDB (Declarative PoC)',
-          minimumLicense: 'gold',
-          supportedFeatureIds: ['workflows'],
-          ...overrides,
-        },
-        schema: z.object({}),
-        auth: { types: ['none'] },
-        actions: {
-          checkIp: {
-            scope: 'read',
-            input: z.object({ ipAddress: z.string() }),
-            handler: jest.fn(),
+    describe('catalog', () => {
+      const catalogConfig = {
+        enabled: true,
+        url: 'https://workflows.elastic.co/connectors/v1',
+        refreshInterval: moment.duration(5, 'minutes'),
+      };
+
+      const setupEnabledCatalog = () => {
+        context = coreMock.createPluginInitializerContext({
+          ...context.config.get(),
+          catalog: catalogConfig,
+        } as ActionsConfig);
+        plugin = new ActionsPlugin(context);
+        return plugin.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: {
+            ...pluginsSetup.encryptedSavedObjects,
+            canEncrypt: true,
           },
-        },
-        test: { handler: jest.fn(), enabled: false },
-      } as ConnectorSpec);
+        });
+      };
 
-    it('does not return the start contract until the spec provider load and register complete', async () => {
-      const pluginSetup = await plugin.setup(coreSetup, {
-        ...pluginsSetup,
-        encryptedSavedObjects: {
-          ...pluginsSetup.encryptedSavedObjects,
-          canEncrypt: true,
-        },
+      it('does not load or schedule the catalog when it is disabled', async () => {
+        await plugin.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: {
+            ...pluginsSetup.encryptedSavedObjects,
+            canEncrypt: true,
+          },
+        });
+        await plugin.start(coreStart, pluginsStart);
+
+        expect(DeclarativeCatalogService).not.toHaveBeenCalled();
+        expect(pluginsStart.taskManager.ensureScheduled).not.toHaveBeenCalledWith(
+          expect.objectContaining({ taskType: CATALOG_REFRESH_TASK_TYPE })
+        );
       });
 
-      let resolveLoad: (types: CatalogActionType[]) => void = () => {};
-      const load = jest.fn(
-        () =>
-          new Promise<CatalogActionType[]>((resolve) => {
-            resolveLoad = resolve;
-          })
-      );
-      pluginSetup.registerSpecProvider({ load });
+      it('awaits loadAtBoot and schedules the refresh task when catalog is enabled', async () => {
+        const loadAtBoot = jest.fn().mockResolvedValue(undefined);
+        (DeclarativeCatalogService as jest.Mock).mockImplementationOnce(() => ({
+          loadAtBoot,
+          stop: jest.fn(),
+        }));
+        await setupEnabledCatalog();
+        await plugin.start(coreStart, pluginsStart);
 
-      let startResolved = false;
-      const startPromise = plugin.start(coreStart, pluginsStart).then((contract) => {
-        startResolved = true;
-        return contract;
+        expect(loadAtBoot).toHaveBeenCalledWith({
+          registerType: expect.any(Function),
+          isTypeRegistered: expect.any(Function),
+          updateFeatureUsageTier: expect.any(Function),
+          esClient: coreStart.elasticsearch.client.asInternalUser,
+          savedObjectsRepository: expect.anything(),
+        });
+        expect(pluginsStart.taskManager.ensureScheduled).toHaveBeenCalledWith(
+          expect.objectContaining({ taskType: CATALOG_REFRESH_TASK_TYPE })
+        );
       });
 
-      await Promise.resolve();
-      expect(load).toHaveBeenCalledWith({
-        esClient: coreStart.elasticsearch.client.asInternalUser,
-        savedObjectsRepository: expect.anything(),
+      it('returns the start contract and logs when catalog load times out', async () => {
+        const loadAtBoot = jest.fn(() => new Promise<void>(() => {}));
+        (DeclarativeCatalogService as jest.Mock).mockImplementationOnce(() => ({
+          loadAtBoot,
+          stop: jest.fn(),
+        }));
+        (withCatalogTimeout as jest.Mock).mockImplementationOnce(
+          async (_promise: Promise<unknown>, _ms: number, onTimeout: () => void) => onTimeout()
+        );
+        await setupEnabledCatalog();
+        await expect(plugin.start(coreStart, pluginsStart)).resolves.toBeDefined();
+        expect(context.logger.get().warn).toHaveBeenCalledWith(
+          'Connector catalog load timed out; starting with in-tree types only'
+        );
       });
-      expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith(['action']);
-      expect(startResolved).toBe(false);
-
-      resolveLoad([createConnectorTypeFromSpec(catalogSpec(), pluginSetup)]);
-      const pluginStart = await startPromise;
-      expect(startResolved).toBe(true);
-      expect(pluginStart.getAllTypes()).toContain('.abuseipdb');
-    });
-
-    it('still returns a start contract when the spec provider is empty', async () => {
-      const pluginSetup = await plugin.setup(coreSetup, {
-        ...pluginsSetup,
-        encryptedSavedObjects: {
-          ...pluginsSetup.encryptedSavedObjects,
-          canEncrypt: true,
-        },
-      });
-      pluginSetup.registerSpecProvider({ load: jest.fn().mockResolvedValue([]) });
-
-      const pluginStart = await plugin.start(coreStart, pluginsStart);
-      expect(pluginStart.getAllTypes()).not.toContain('.abuseipdb');
     });
 
     it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
@@ -1134,7 +1238,7 @@ describe('Actions Plugin', () => {
 
         pluginStart.isActionTypeEnabled('my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
-          'Connector: My connector type'
+          'Connector: my-connector-type'
         );
       });
     });
@@ -1221,7 +1325,7 @@ describe('Actions Plugin', () => {
 
         pluginStart.isActionExecutable('123', 'my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
-          'Connector: My connector type'
+          'Connector: my-connector-type'
         );
       });
     });

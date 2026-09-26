@@ -27,6 +27,7 @@ describe('updateActionConnector', () => {
       name: 'My test',
       config: {},
       secrets: {},
+      spec_version: '1.0',
       id,
     };
     http.put.mockResolvedValueOnce(apiResponse);
@@ -37,16 +38,19 @@ describe('updateActionConnector', () => {
       config: {},
       secrets: {},
       isMissingSecrets: false,
+      specVersion: '1.0',
     });
-    const resolvedValue = { ...connector, id };
-
     const result = await updateActionConnector({ http, connector, id });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toMatchObject({
+      id,
+      name: 'My test',
+      specVersion: '1.0',
+    });
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/actions/connector/12%2F3",
         Object {
-          "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
+          "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"spec_version\\":\\"1.0\\"}",
         },
       ]
     `);

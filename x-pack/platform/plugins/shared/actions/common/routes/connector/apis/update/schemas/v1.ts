@@ -26,6 +26,18 @@ export const updateConnectorBodySchema = schema.object(
     secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
       defaultValue: {},
     }),
+    spec_version: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: 16,
+        validate: (value) =>
+          /^\d+(\.\d+)?$/.test(value) ? undefined : 'spec version must be N or N.M',
+        meta: {
+          description:
+            'Spec version to pin. Omitted: newest accepted minor of the current major. Exact N.M may change major.',
+        },
+      })
+    ),
   },
   { meta: { id: 'update_connector' } }
 );

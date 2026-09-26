@@ -27,19 +27,22 @@ describe('Raw Connector Schema v4', () => {
   });
 
   test('validates a pinned spec version', () => {
-    const pinned = { ...action, specVersion: '1.0.0' };
+    const pinned = { ...action, specVersion: '1.0' };
     expect(rawConnectorSchema.validate(pinned)).toEqual(pinned);
   });
 
-  test('rejects a spec version that is not MAJOR.MINOR.PATCH', () => {
+  test('rejects a spec version that is not MAJOR.MINOR', () => {
+    expect(() => rawConnectorSchema.validate({ ...action, specVersion: '1.0.0' })).toThrow(
+      /MAJOR\.MINOR/
+    );
     expect(() => rawConnectorSchema.validate({ ...action, specVersion: 'latest' })).toThrow(
-      /MAJOR\.MINOR\.PATCH/
+      /MAJOR\.MINOR/
     );
   });
 
-  test('rejects a spec version longer than 32 characters', () => {
+  test('rejects a spec version longer than 16 characters', () => {
     expect(() =>
-      rawConnectorSchema.validate({ ...action, specVersion: `1.0.${'0'.repeat(40)}` })
+      rawConnectorSchema.validate({ ...action, specVersion: `1.${'0'.repeat(20)}` })
     ).toThrow(/maximum length/);
   });
 });

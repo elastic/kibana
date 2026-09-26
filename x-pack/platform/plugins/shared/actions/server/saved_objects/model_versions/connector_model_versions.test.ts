@@ -199,9 +199,9 @@ describe('Connector Model Versions', () => {
         secrets: '{}',
       };
       expect(create.validate(base)).toEqual(base);
-      expect(create.validate({ ...base, specVersion: '1.0.0' })).toEqual({
+      expect(create.validate({ ...base, specVersion: '1.0' })).toEqual({
         ...base,
-        specVersion: '1.0.0',
+        specVersion: '1.0',
       });
     });
   });

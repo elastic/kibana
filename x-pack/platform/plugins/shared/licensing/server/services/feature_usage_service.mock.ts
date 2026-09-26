@@ -16,6 +16,7 @@ import type {
 const createSetupMock = (): jest.Mocked<FeatureUsageServiceSetup> => {
   const mock = {
     register: jest.fn(),
+    updateLicenseType: jest.fn(),
   };
 
   return mock;

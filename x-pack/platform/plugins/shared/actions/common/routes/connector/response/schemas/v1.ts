@@ -52,7 +52,7 @@ export const connectorResponseSchema = schema.object(
     ),
     spec_version: schema.maybe(
       schema.string({
-        maxLength: 32,
+        maxLength: 16,
         meta: {
           description: 'Spec version the connector is pinned to. Omitted for classic connectors.',
         },
@@ -188,10 +188,17 @@ export const connectorTypeResponseSchema = schema.object(
     ),
     spec_version: schema.maybe(
       schema.string({
-        maxLength: 32,
+        maxLength: 16,
         meta: {
           description:
-            'Catalog-active spec version of a versioned spec connector type. New connectors pin to it.',
+            'Accepted latest spec version of the newest major. New connectors pin to major 1 unless spec_version is sent.',
+        },
+      })
+    ),
+    spec_versions: schema.maybe(
+      schema.recordOf(schema.string({ maxLength: 8 }), schema.string({ maxLength: 16 }), {
+        meta: {
+          description: 'Accepted latest spec version per major.',
         },
       })
     ),
@@ -363,7 +370,7 @@ export const getConnectorSpecResponseBodySchema = schema.object({
   }),
   spec_version: schema.maybe(
     schema.string({
-      maxLength: 32,
+      maxLength: 16,
       meta: {
         description: 'Spec version that produced this response. Omitted for unversioned types.',
       },

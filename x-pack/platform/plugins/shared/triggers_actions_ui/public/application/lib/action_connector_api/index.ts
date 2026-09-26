@@ -12,7 +12,6 @@ export { createActionConnector } from './create';
 export { deleteActions } from './delete';
 export { executeAction } from './execute';
 export { updateActionConnector } from './update';
-export { upgradeActionConnector } from './upgrade';
 export { rotateInboundIngress } from './rotate_inbound_ingress';
 export { checkConnectorIdAvailability } from './check_connector_id';
 export { getSkippedPreconfiguredConnectorIds } from './get_skipped_preconfigured_connector_ids';

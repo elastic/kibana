@@ -25,7 +25,6 @@ jest.mock('./connector/delete', () => ({ deleteConnectorRoute: jest.fn() }));
 jest.mock('./connector/get', () => ({ getConnectorRoute: jest.fn() }));
 jest.mock('./connector/get_all', () => ({ getAllConnectorsRoute: jest.fn() }));
 jest.mock('./connector/update', () => ({ updateConnectorRoute: jest.fn() }));
-jest.mock('./connector/upgrade', () => ({ upgradeConnectorRoute: jest.fn() }));
 jest.mock('./connector/list_types', () => ({ listTypesRoute: jest.fn() }));
 jest.mock('./connector/execute', () => ({ executeConnectorRoute: jest.fn() }));
 jest.mock('./get_global_execution_logs', () => ({ getGlobalExecutionLogRoute: jest.fn() }));

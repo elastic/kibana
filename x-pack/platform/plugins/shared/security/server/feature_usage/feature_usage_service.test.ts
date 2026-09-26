@@ -9,7 +9,7 @@ import { SecurityFeatureUsageService } from './feature_usage_service';
 
 describe('#setup', () => {
   it('registers all known security features', () => {
-    const featureUsage = { register: jest.fn() };
+    const featureUsage = { register: jest.fn(), updateLicenseType: jest.fn() };
     const securityFeatureUsage = new SecurityFeatureUsageService();
     securityFeatureUsage.setup({ featureUsage });
     expect(featureUsage.register).toHaveBeenCalledTimes(3);

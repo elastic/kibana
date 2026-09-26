@@ -245,18 +245,19 @@ describe('getConnectorSpecAsJsonSchema', () => {
   });
 
   describe('spec versions', () => {
-    const versioned = (spec: ConnectorSpec, active: string) => ({
+    const versioned = (spec: ConnectorSpec, latest: string) => ({
       connectorSpec: spec,
       specVersions: {
-        getActiveVersion: () => active,
-        getActiveSpec: () => spec,
-        getSpec: jest.fn(async (version?: string) => {
-          if (version === undefined || version === active || version === '1.0.0') {
+        getLatestVersions: () => ({ '1': latest }),
+        getLatestVersion: () => latest,
+        getSpec: jest.fn(async (version: string) => {
+          if (version === latest || version === '1.0') {
             return spec;
           }
           throw new Error(`definition:${spec.metadata.id}@${version} not found`);
         }),
         hasVersion: () => true,
+        resolveRequest: jest.fn(),
       },
     });
 
@@ -270,8 +271,8 @@ describe('getConnectorSpecAsJsonSchema', () => {
         },
       } as unknown as ActionsClientContext);
 
-    test('serves the active version and echoes it when no version is requested', async () => {
-      const type = versioned(stubAbuseipdb, '1.1.0');
+    test('serves the newest-major latest and echoes it when no version is requested', async () => {
+      const type = versioned(stubAbuseipdb, '1.1');
 
       const result = await getConnectorSpecAsJsonSchema({
         context: createVersionedContext(type),
@@ -279,35 +280,35 @@ describe('getConnectorSpecAsJsonSchema', () => {
         configurationUtilities,
       });
 
-      expect(type.specVersions.getSpec).toHaveBeenCalledWith(undefined);
-      expect(result.specVersion).toBe('1.1.0');
+      expect(type.specVersions.getSpec).toHaveBeenCalledWith('1.1');
+      expect(result.specVersion).toBe('1.1');
     });
 
-    test('serves the requested version', async () => {
-      const type = versioned(stubAbuseipdb, '1.1.0');
+    test('serves the requested exact version', async () => {
+      const type = versioned(stubAbuseipdb, '1.1');
 
       const result = await getConnectorSpecAsJsonSchema({
         context: createVersionedContext(type),
         id: '.abuseipdb',
         configurationUtilities,
-        specVersion: '1.0.0',
+        specVersion: '1.0',
       });
 
-      expect(type.specVersions.getSpec).toHaveBeenCalledWith('1.0.0');
-      expect(result.specVersion).toBe('1.0.0');
+      expect(type.specVersions.getSpec).toHaveBeenCalledWith('1.0');
+      expect(result.specVersion).toBe('1.0');
     });
 
     test('returns 404 for a version the type cannot obtain', async () => {
       await expect(
         getConnectorSpecAsJsonSchema({
-          context: createVersionedContext(versioned(stubAbuseipdb, '1.1.0')),
+          context: createVersionedContext(versioned(stubAbuseipdb, '1.1')),
           id: '.abuseipdb',
           configurationUtilities,
-          specVersion: '9.9.9',
+          specVersion: '9.9',
         })
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
-        message: expect.stringContaining('"9.9.9"'),
+        message: expect.stringContaining('"9.9"'),
       });
     });
 
@@ -316,7 +317,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
         context: createContext(),
         id: '.abuseipdb',
         configurationUtilities,
-        specVersion: '1.0.0',
+        specVersion: '1.0',
       });
 
       expect(result).not.toHaveProperty('specVersion');

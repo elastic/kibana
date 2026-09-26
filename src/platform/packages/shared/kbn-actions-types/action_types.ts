@@ -41,8 +41,10 @@ export interface ActionType {
   subActions?: string[];
   /** Spec metadata icon: EUI icon name or data/HTTP URL. */
   icon?: string;
-  /** Catalog-active spec version of a versioned spec type; omitted for classic connectors. */
+  /** Accepted latest spec version of the newest major; omitted for classic connectors. */
   specVersion?: string;
+  /** Accepted latest spec version per major; omitted for classic connectors. */
+  specVersions?: Record<string, string>;
 }
 
 export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';

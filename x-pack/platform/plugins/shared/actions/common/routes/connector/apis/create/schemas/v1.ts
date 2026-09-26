@@ -42,10 +42,12 @@ export const createConnectorRequestBodySchema = schema.object(
     spec_version: schema.maybe(
       schema.string({
         minLength: 1,
-        maxLength: 32,
+        maxLength: 16,
+        validate: (value) =>
+          /^\d+(\.\d+)?$/.test(value) ? undefined : 'spec version must be N or N.M',
         meta: {
           description:
-            'Spec version to pin the connector to. Only for spec-sourced connector types. Omitted: the catalog-active version at create time.',
+            'Spec version to pin. Omitted: newest accepted 1.y. "N" selects the newest accepted N.y. Exact N.M pins that version.',
         },
       })
     ),

@@ -252,6 +252,16 @@ export class ActionTypeRegistry {
     }
   }
 
+  public updateFeatureUsageTier(actionType: ActionType): void {
+    if (actionType.minimumLicenseRequired === 'basic') {
+      return;
+    }
+    this.licensing.featureUsage.updateLicenseType(
+      getActionTypeFeatureUsageName(actionType),
+      actionType.minimumLicenseRequired
+    );
+  }
+
   /**
    * Returns an action type, throws if not registered
    */
@@ -314,17 +324,13 @@ export class ActionTypeRegistry {
             : {}),
           ...(typeof specIcon === 'string' ? { icon: specIcon } : {}),
           ...(actionType.specVersions
-            ? { specVersion: actionType.specVersions.getActiveVersion() }
+            ? {
+                specVersion: actionType.specVersions.getLatestVersion(),
+                specVersions: actionType.specVersions.getLatestVersions(),
+              }
             : {}),
         };
       });
-  }
-
-  /**
-   * Returns the catalog-active spec version of a versioned spec type; undefined for classic types.
-   */
-  public getActiveSpecVersion(id: string): string | undefined {
-    return this.actionTypes.get(id)?.specVersions?.getActiveVersion();
   }
 
   /**

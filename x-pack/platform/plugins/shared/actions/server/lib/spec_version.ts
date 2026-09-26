@@ -7,13 +7,22 @@
 
 import Boom from '@hapi/boom';
 import type { ActionType } from '../types';
+import { SpecVersionRequestError } from './errors/spec_version_request_error';
+import { majorOf } from '../catalog/spec_version_format';
 
-const errorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
+const notStoredMessage = (actionTypeId: string, requested: string): string =>
+  `Spec version "${requested}" of connector type "${actionTypeId}" is not stored in this cluster; retry after the next catalog reload or check that it exists`;
+
+const toBadRequest = (error: unknown, actionTypeId: string, requested: string): never => {
+  if (error instanceof SpecVersionRequestError) {
+    throw Boom.badRequest(error.message);
+  }
+  throw Boom.badRequest(notStoredMessage(actionTypeId, requested));
+};
 
 /**
- * Resolves the spec version a new connector is pinned to: the requested version when given,
- * otherwise the catalog-active version. Classic types resolve to undefined.
+ * Resolves the spec version a new connector is pinned to. Omitted requests pin to the newest
+ * accepted 1.y. Classic types resolve to undefined.
  */
 export const resolveSpecVersionForCreate = async (
   actionType: Pick<ActionType, 'id' | 'specVersions'>,
@@ -28,19 +37,37 @@ export const resolveSpecVersionForCreate = async (
     }
     return undefined;
   }
-  if (requestedVersion === undefined) {
-    return specVersions.getActiveVersion();
-  }
   try {
-    await specVersions.getSpec(requestedVersion);
+    return await specVersions.resolveRequest(requestedVersion);
   } catch (error) {
-    throw Boom.badRequest(
-      `Spec version "${requestedVersion}" of connector type "${
-        actionType.id
-      }" is not available: ${errorMessage(error)}`
-    );
+    return toBadRequest(error, actionType.id, requestedVersion ?? '1');
   }
-  return requestedVersion;
+};
+
+/**
+ * Resolves the spec version an update writes. Omitted requests stay on the current major's
+ * newest accepted minor. An exact or major request may move to any stored version.
+ */
+export const resolveSpecVersionForUpdate = async (
+  actionType: Pick<ActionType, 'id' | 'specVersions'>,
+  requestedVersion: string | undefined,
+  currentPin: string | undefined
+): Promise<string | undefined> => {
+  const { specVersions } = actionType;
+  if (!specVersions) {
+    if (requestedVersion !== undefined) {
+      throw Boom.badRequest(
+        `Connector type "${actionType.id}" does not support spec versions; omit spec_version.`
+      );
+    }
+    return undefined;
+  }
+  const currentMajor = majorOf(currentPin ?? '1.0');
+  try {
+    return await specVersions.resolveRequest(requestedVersion, currentMajor);
+  } catch (error) {
+    return toBadRequest(error, actionType.id, requestedVersion ?? String(currentMajor));
+  }
 };
 
 /**
@@ -62,7 +89,9 @@ export const ensureSpecVersionLoaded = async (
     throw new Error(
       `Connector "${connectorId}" of type "${
         actionType.id
-      }" is pinned to spec version "${specVersion}", which is not available: ${errorMessage(error)}`
+      }" is pinned to spec version "${specVersion}", which is not available: ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
   }
 };

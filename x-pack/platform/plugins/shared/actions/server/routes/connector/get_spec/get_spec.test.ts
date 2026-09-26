@@ -341,7 +341,7 @@ describe('getConnectorSpecRoute', () => {
       },
       schema: {},
       isTestable: true,
-      specVersion: '1.0.0',
+      specVersion: '1.0',
     } as never);
 
     getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
@@ -355,7 +355,7 @@ describe('getConnectorSpecRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      { params: { id: '.abuseipdb' }, query: { spec_version: '1.0.0' } },
+      { params: { id: '.abuseipdb' }, query: { spec_version: '1.0' } },
       ['ok', 'notFound']
     );
 
@@ -364,10 +364,10 @@ describe('getConnectorSpecRoute', () => {
     expect(actionsClient.getConnectorSpec).toHaveBeenCalledWith({
       id: '.abuseipdb',
       configurationUtilities: actionsConfigUtils,
-      specVersion: '1.0.0',
+      specVersion: '1.0',
     });
     expect(result).toEqual({
-      body: expect.objectContaining({ spec_version: '1.0.0', is_testable: true }),
+      body: expect.objectContaining({ spec_version: '1.0', is_testable: true }),
     });
   });
 });

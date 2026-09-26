@@ -22,10 +22,11 @@ export const getConnectorSpecQuerySchema = schema.object({
   spec_version: schema.maybe(
     schema.string({
       minLength: 1,
-      maxLength: 32,
+      maxLength: 16,
+      validate: (value) =>
+        /^\d+\.\d+$/.test(value) ? undefined : 'spec version must use the MAJOR.MINOR form',
       meta: {
-        description:
-          'Spec version to serve. Omitted: the catalog-active version. Edit and test flows pass the connector pin.',
+        description: 'Exact spec version to serve. Omitted: accepted latest of the newest major.',
       },
     })
   ),

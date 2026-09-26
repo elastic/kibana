@@ -38,6 +38,25 @@ describe('FeatureUsageService', () => {
         );
       });
     });
+
+    describe('#updateLicenseType', () => {
+      it('updates the license type of a registered feature', () => {
+        const setup = service.setup();
+        setup.register('foo', 'gold');
+        setup.updateLicenseType('foo', 'basic');
+        const start = service.start();
+        expect(start.getLastUsages()).toEqual([
+          { id: 'foo', lastUsed: null, licenseType: 'basic' },
+        ]);
+      });
+
+      it('throws when the feature is not registered', () => {
+        const setup = service.setup();
+        expect(() => setup.updateLicenseType('missing', 'gold')).toThrow(
+          `Feature 'missing' is not registered.`
+        );
+      });
+    });
   });
 
   describe('#start', () => {

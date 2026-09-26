@@ -16,6 +16,7 @@ import { PreconfiguredActionDisabledModificationError } from '../../../../lib/er
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import {
   ensureSpecVersionLoaded,
+  resolveSpecVersionForUpdate,
   validateConfig,
   validateConnector,
   validateSecrets,
@@ -83,7 +84,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
   const { actionTypeId, authMode, specVersion } = attributes;
-  const { name, config, secrets } = action;
+  const { name, config, secrets, specVersion: requestedSpecVersion } = action;
 
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
@@ -119,15 +120,19 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
-  // The pin is an identity fact of the connector: the request body cannot change it.
-  await ensureSpecVersionLoaded(actionType, specVersion, id);
+  const targetSpecVersion = await resolveSpecVersionForUpdate(
+    actionType,
+    requestedSpecVersion,
+    specVersion
+  );
+  await ensureSpecVersionLoaded(actionType, targetSpecVersion, id);
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
-    specVersion,
+    specVersion: targetSpecVersion,
   });
   const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
     configurationUtilities,
-    specVersion,
+    specVersion: targetSpecVersion,
   });
   if (actionType.validate?.connector) {
     validateConnector(actionType, { config, secrets });
@@ -210,7 +215,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           isMissingSecrets: false,
           config: configWithIngress,
           secrets: validatedActionTypeSecrets,
-          ...(specVersion !== undefined ? { specVersion } : {}),
+          ...(targetSpecVersion !== undefined ? { specVersion: targetSpecVersion } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
         },
         omitBy(

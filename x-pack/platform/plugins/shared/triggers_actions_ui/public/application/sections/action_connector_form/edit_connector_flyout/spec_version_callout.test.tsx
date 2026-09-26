@@ -12,31 +12,37 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionConnector } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { loadActionTypes, upgradeActionConnector } from '../../../lib/action_connector_api';
+import { loadActionTypes, updateActionConnector } from '../../../lib/action_connector_api';
 import { SpecVersionCallout } from './spec_version_callout';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
-  upgradeActionConnector: jest.fn(),
+  updateActionConnector: jest.fn(),
 }));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const loadActionTypesMock = loadActionTypes as jest.Mock;
-const upgradeMock = upgradeActionConnector as jest.Mock;
+const updateMock = updateActionConnector as jest.Mock;
 
 const connector = {
   id: 'c1',
   actionTypeId: '.abuseipdb',
   name: 'Pinned',
-  config: {},
-  secrets: {},
+  config: { baseUrl: 'http://example.test' },
+  secrets: { Key: 'k' },
   isPreconfigured: false,
   isDeprecated: false,
   isSystemAction: false,
   isConnectorTypeDeprecated: false,
-  specVersion: '1.0.0',
+  specVersion: '1.0',
 } as unknown as ActionConnector;
+
+const currentValues = {
+  name: connector.name,
+  config: { baseUrl: 'http://example.test' },
+  secrets: { Key: 'k' },
+};
 
 const renderCallout = (props: Partial<React.ComponentProps<typeof SpecVersionCallout>> = {}) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -46,7 +52,9 @@ const renderCallout = (props: Partial<React.ComponentProps<typeof SpecVersionCal
         <SpecVersionCallout
           connector={connector}
           canUpgrade
+          currentValues={currentValues}
           onConnectorUpdated={jest.fn()}
+          onValidationFailure={jest.fn()}
           {...props}
         />
       </QueryClientProvider>
@@ -64,61 +72,69 @@ describe('SpecVersionCallout', () => {
     useKibanaMock().services.notifications.toasts.addError = addError;
   });
 
-  it('renders nothing when the connector runs on the active version', async () => {
-    loadActionTypesMock.mockResolvedValue([{ id: '.abuseipdb', specVersion: '1.0.0' }]);
-
+  it('renders nothing when the connector runs on the latest version', async () => {
+    loadActionTypesMock.mockResolvedValue([
+      { id: '.abuseipdb', specVersion: '1.0', specVersions: { '1': '1.0' } },
+    ]);
     renderCallout();
-
     await waitFor(() => expect(loadActionTypesMock).toHaveBeenCalled());
     expect(screen.queryByTestId('connector-spec-version-callout')).not.toBeInTheDocument();
   });
 
-  it('offers the upgrade when the catalog-active version differs and reloads the connector', async () => {
-    loadActionTypesMock.mockResolvedValue([{ id: '.abuseipdb', specVersion: '1.1.0' }]);
-    upgradeMock.mockResolvedValue({ ...connector, specVersion: '1.1.0' });
+  it('shows same-major copy and PUTs spec_version', async () => {
+    loadActionTypesMock.mockResolvedValue([
+      { id: '.abuseipdb', specVersion: '1.1', specVersions: { '1': '1.1' } },
+    ]);
+    updateMock.mockResolvedValue({ ...connector, specVersion: '1.1' });
     const onConnectorUpdated = jest.fn();
-
     renderCallout({ onConnectorUpdated });
-
     expect(await screen.findByTestId('connector-spec-version-callout')).toHaveTextContent(
-      'spec version 1.0.0'
+      'A newer connector version is available'
     );
+    expect(screen.getByTestId('connector-spec-version-upgrade')).toHaveTextContent('Update to 1.1');
     await userEvent.click(screen.getByTestId('connector-spec-version-upgrade'));
-
     await waitFor(() =>
-      expect(upgradeMock).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'c1', specVersion: '1.1.0' })
+      expect(updateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'c1',
+          connector: expect.objectContaining({ specVersion: '1.1' }),
+        })
       )
     );
-    expect(onConnectorUpdated).toHaveBeenCalledWith(
-      expect.objectContaining({ specVersion: '1.1.0' })
-    );
-    expect(addSuccess).toHaveBeenCalled();
+    expect(onConnectorUpdated).toHaveBeenCalled();
   });
 
-  it('disables the upgrade while the form has unsaved changes', async () => {
-    loadActionTypesMock.mockResolvedValue([{ id: '.abuseipdb', specVersion: '1.1.0' }]);
+  it('shows new-major copy', async () => {
+    loadActionTypesMock.mockResolvedValue([
+      { id: '.abuseipdb', specVersion: '2.0', specVersions: { '1': '1.1', '2': '2.0' } },
+    ]);
+    renderCallout();
+    expect(await screen.findByTestId('connector-spec-version-callout')).toHaveTextContent(
+      'Version 2 available, configuration may need changes'
+    );
+  });
 
+  it('disables the button while the form has unsaved changes', async () => {
+    loadActionTypesMock.mockResolvedValue([
+      { id: '.abuseipdb', specVersion: '1.1', specVersions: { '1': '1.1' } },
+    ]);
     renderCallout({ canUpgrade: false });
-
     expect(await screen.findByTestId('connector-spec-version-upgrade')).toBeDisabled();
   });
 
-  it('shows an error toast when the upgrade is rejected', async () => {
-    loadActionTypesMock.mockResolvedValue([{ id: '.abuseipdb', specVersion: '1.1.0' }]);
-    upgradeMock.mockRejectedValue(
-      Object.assign(new Error('Bad Request'), { body: { message: 'config does not validate' } })
+  it('calls onValidationFailure on a 400', async () => {
+    loadActionTypesMock.mockResolvedValue([
+      { id: '.abuseipdb', specVersion: '1.1', specVersions: { '1': '1.1' } },
+    ]);
+    const onValidationFailure = jest.fn();
+    updateMock.mockRejectedValue(
+      Object.assign(new Error('Bad Request'), {
+        body: { message: 'config does not validate', statusCode: 400 },
+      })
     );
-
-    renderCallout();
-
+    renderCallout({ onValidationFailure });
     await userEvent.click(await screen.findByTestId('connector-spec-version-upgrade'));
-
-    await waitFor(() =>
-      expect(addError).toHaveBeenCalledWith(
-        expect.any(Error),
-        expect.objectContaining({ toastMessage: 'config does not validate' })
-      )
-    );
+    await waitFor(() => expect(onValidationFailure).toHaveBeenCalledWith('1.1'));
+    expect(addError).toHaveBeenCalled();
   });
 });

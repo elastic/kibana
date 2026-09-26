@@ -155,7 +155,12 @@ describe('setupSavedObjects - encrypted action type', () => {
       expect.objectContaining({
         type: 'action',
         attributesToEncrypt: new Set(['secrets', 'apiKey', 'uiamApiKey']),
-        attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
+        attributesToIncludeInAAD: new Set([
+          'actionTypeId',
+          'isMissingSecrets',
+          'config',
+          'specVersion',
+        ]),
       })
     );
   });

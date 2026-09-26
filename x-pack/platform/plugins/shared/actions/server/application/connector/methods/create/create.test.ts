@@ -29,6 +29,7 @@ import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.
 import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
 import { securityServiceMock } from '@kbn/core/server/mocks';
 import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
+import { SpecVersionRequestError } from '../../../../lib/errors/spec_version_request_error';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -1452,15 +1453,41 @@ describe('create()', () => {
 
   describe('spec version pin', () => {
     const specVersions = {
-      getActiveVersion: jest.fn().mockReturnValue('1.1.0'),
-      getActiveSpec: jest.fn(),
-      getSpec: jest.fn(async (version?: string) => {
-        if (version === undefined || version === '1.1.0' || version === '1.0.0') {
+      getLatestVersions: jest.fn().mockReturnValue({ '1': '1.1', '2': '2.0' }),
+      getLatestVersion: jest.fn((major?: number) => {
+        if (major === undefined) {
+          return '2.0';
+        }
+        return major === 1 ? '1.1' : major === 2 ? '2.0' : undefined;
+      }),
+      getSpec: jest.fn(async (version: string) => {
+        if (version === '1.0' || version === '1.1' || version === '2.0') {
           return {};
         }
-        throw new Error(`definition:.abuseipdb@${version} not found`);
+        throw new SpecVersionRequestError({
+          reason: 'not_stored',
+          actionTypeId: '.abuseipdb',
+          requested: version,
+          message: `Spec version "${version}" of connector type ".abuseipdb" is not stored in this cluster; retry after the next catalog reload or check that it exists`,
+        });
       }),
-      hasVersion: jest.fn(),
+      hasVersion: jest.fn(
+        (version: string) => version === '1.0' || version === '1.1' || version === '2.0'
+      ),
+      resolveRequest: jest.fn(async (requested?: string) => {
+        if (requested === undefined || requested === '1') {
+          return '1.1';
+        }
+        if (requested === '1.0' || requested === '1.1' || requested === '2.0') {
+          return requested;
+        }
+        throw new SpecVersionRequestError({
+          reason: 'not_stored',
+          actionTypeId: '.abuseipdb',
+          requested,
+          message: `Spec version "${requested}" of connector type ".abuseipdb" is not stored in this cluster; retry after the next catalog reload or check that it exists`,
+        });
+      }),
     };
     const configSchema = { parse: jest.fn((value: unknown) => value) };
     const savedObjectCreateResult = (specVersion: string) => ({
@@ -1477,7 +1504,7 @@ describe('create()', () => {
     });
 
     beforeEach(() => {
-      specVersions.getActiveVersion.mockClear();
+      specVersions.resolveRequest.mockClear();
       specVersions.getSpec.mockClear();
       configSchema.parse.mockClear();
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(
@@ -1497,24 +1524,25 @@ describe('create()', () => {
       );
     });
 
-    test('pins the active version when no spec version is requested and returns it', async () => {
-      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult('1.1.0'));
+    test('pins the newest accepted 1.y when no spec version is requested even if a 2.x exists', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult('1.1'));
 
       const result = await create({
         context: mockContext,
         action: { name: 'my name', actionTypeId: '.abuseipdb', config: {}, secrets: {} },
       });
 
+      expect(specVersions.resolveRequest).toHaveBeenCalledWith(undefined);
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'action',
-        expect.objectContaining({ specVersion: '1.1.0' }),
+        expect.objectContaining({ specVersion: '1.1' }),
         { id: 'mock-saved-object-id' }
       );
-      expect(result.specVersion).toBe('1.1.0');
+      expect(result.specVersion).toBe('1.1');
     });
 
     test('pins the requested version after loading it and validates against it', async () => {
-      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult('1.0.0'));
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult('1.0'));
       const actionType = (actionTypeRegistry.get as jest.Mock)();
 
       await create({
@@ -1524,18 +1552,18 @@ describe('create()', () => {
           actionTypeId: '.abuseipdb',
           config: { baseUrl: 'http://127.0.0.1:8090' },
           secrets: {},
-          specVersion: '1.0.0',
+          specVersion: '1.0',
         },
       });
 
-      expect(specVersions.getSpec).toHaveBeenCalledWith('1.0.0');
+      expect(specVersions.resolveRequest).toHaveBeenCalledWith('1.0');
       expect(actionType.validate.config.customValidator).toHaveBeenCalledWith(
         { baseUrl: 'http://127.0.0.1:8090' },
-        expect.objectContaining({ specVersion: '1.0.0' })
+        expect.objectContaining({ specVersion: '1.0' })
       );
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'action',
-        expect.objectContaining({ specVersion: '1.0.0' }),
+        expect.objectContaining({ specVersion: '1.0' }),
         { id: 'mock-saved-object-id' }
       );
     });
@@ -1549,12 +1577,12 @@ describe('create()', () => {
             actionTypeId: '.abuseipdb',
             config: {},
             secrets: {},
-            specVersion: '9.9.9',
+            specVersion: '9.9',
           },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: expect.stringContaining('"9.9.9"'),
+        message: expect.stringContaining('"9.9"'),
       });
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
@@ -1578,7 +1606,7 @@ describe('create()', () => {
             actionTypeId: 'my-connector-type',
             config: {},
             secrets: {},
-            specVersion: '1.0.0',
+            specVersion: '1.0',
           },
         })
       ).rejects.toThrow('does not support spec versions');

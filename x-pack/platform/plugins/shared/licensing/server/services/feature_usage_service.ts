@@ -14,6 +14,11 @@ export interface FeatureUsageServiceSetup {
    * Register a feature to be able to notify of it's usages using the {@link FeatureUsageServiceStart | service start contract}.
    */
   register(featureId: string, licenseType: LicenseType): void;
+  /**
+   * Update the license tier of an already registered feature. Throws when the
+   * feature was never registered.
+   */
+  updateLicenseType(featureId: string, licenseType: LicenseType): void;
 }
 
 export interface LastFeatureUsage {
@@ -58,6 +63,13 @@ export class FeatureUsageService {
             licenseType,
           });
         }
+      },
+      updateLicenseType: (featureId, licenseType) => {
+        const registered = this.lastUsages.get(featureId);
+        if (!registered) {
+          throw new Error(`Feature '${featureId}' is not registered.`);
+        }
+        registered.licenseType = licenseType;
       },
     };
   }

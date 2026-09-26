@@ -10,6 +10,7 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import type { ActionType } from '../../../../types';
+import { SpecVersionRequestError } from '../../../../lib/errors/spec_version_request_error';
 import type { GetConnectorSpecParams } from './types';
 
 const resolveSpec = async (
@@ -19,19 +20,25 @@ const resolveSpec = async (
 ): Promise<{ spec: ConnectorSpec; servedVersion?: string }> => {
   const { specVersions } = actionType ?? {};
   if (!specVersions) {
-    // Unversioned spec type: the version parameter has nothing to select and is ignored.
     const spec = actionType?.connectorSpec;
     if (!spec) {
       throw Boom.notFound(`Spec for connector type "${id}" not found.`);
     }
     return { spec };
   }
+  const version = specVersion ?? specVersions.getLatestVersion();
+  if (version === undefined) {
+    throw Boom.notFound(`Spec for connector type "${id}" not found.`);
+  }
   try {
-    const spec = await specVersions.getSpec(specVersion);
-    return { spec, servedVersion: specVersion ?? specVersions.getActiveVersion() };
+    const spec = await specVersions.getSpec(version);
+    return { spec, servedVersion: version };
   } catch (error) {
+    if (error instanceof SpecVersionRequestError && error.reason !== 'not_stored') {
+      throw Boom.badRequest(error.message);
+    }
     throw Boom.notFound(
-      `Spec version "${specVersion}" for connector type "${id}" not found: ${
+      `Spec version "${version}" for connector type "${id}" not found: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

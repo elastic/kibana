@@ -22,7 +22,7 @@ const createActionTypeRegistryMock = () => {
     getActionKibanaPrivileges: jest.fn(),
     hasSubFeature: jest.fn(),
     isDeprecated: jest.fn(),
-    getActiveSpecVersion: jest.fn(),
+    updateFeatureUsageTier: jest.fn(),
   };
   return mocked;
 };

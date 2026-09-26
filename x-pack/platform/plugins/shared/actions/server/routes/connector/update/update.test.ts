@@ -94,6 +94,52 @@ describe('updateConnectorRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('forwards spec_version from the request body', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateConnectorRoute(router, licenseState);
+
+    const [, handler] = router.put.mock.calls[0];
+
+    const updateResult = createMockConnector({
+      id: '1',
+      actionTypeId: '.abuseipdb',
+      name: 'My name',
+      config: { foo: true },
+      specVersion: '1.1',
+    });
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(updateResult);
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+        body: {
+          name: 'My name',
+          config: { foo: true },
+          secrets: { key: 'i8oh34yf9783y39' },
+          spec_version: '1.1',
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.update).toHaveBeenCalledWith({
+      id: '1',
+      action: {
+        name: 'My name',
+        config: { foo: true },
+        secrets: { key: 'i8oh34yf9783y39' },
+        specVersion: '1.1',
+      },
+    });
+  });
+
   it('ensures the license allows deleting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

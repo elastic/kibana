@@ -152,13 +152,14 @@ export interface ValidatorServices {
  * version behind a single registry id.
  */
 export interface SpecVersionsContract {
-  getActiveVersion(): string;
-  /** Materialized spec of the active version. Always loaded. */
-  getActiveSpec(): ConnectorSpec;
-  /** Resolves a spec version, lazily loading it when needed. Rejects when the version cannot be obtained. */
-  getSpec(version?: string): Promise<ConnectorSpec>;
+  getLatestVersions(): Record<string, string>;
+  getLatestVersion(major?: number): string | undefined;
   hasVersion(version: string): boolean;
+  getSpec(version: string): Promise<ConnectorSpec>;
+  resolveRequest(request: string | undefined, currentMajor?: number): Promise<string>;
 }
+
+export type { SpecVersionRequestError } from './lib/errors/spec_version_request_error';
 
 export interface ActionValidationService {
   isHostnameAllowed(hostname: string): boolean;
