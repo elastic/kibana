@@ -31,7 +31,10 @@ const ownerConversations = () =>
 const run = ({
   attachments,
   conversations = ownerConversations(),
-  readImpact = jest.fn().mockRejectedValue(new ImpactNotFoundError('conv-1')),
+  readImpact = jest
+    .fn()
+    .mockResolvedValue(impact)
+    .mockRejectedValueOnce(new ImpactNotFoundError('conv-1')),
   writeImpact = jest.fn().mockResolvedValue(impact),
   revertImpact = jest.fn().mockResolvedValue(undefined),
 }: {
@@ -117,38 +120,37 @@ describe('attachImpactToInvestigation', () => {
     });
   });
 
-  it('recreates a soft-deleted attachment instead of updating the tombstone', async () => {
+  it('leaves a soft-deleted attachment in place and still returns the impact', async () => {
     const create = jest
       .fn()
-      .mockRejectedValueOnce(createAttachmentAlreadyExistsError({ attachmentId: 'impact-1' }))
-      .mockResolvedValueOnce({ id: 'impact-1' });
-    const deleteAttachment = jest.fn().mockResolvedValue(undefined);
+      .mockRejectedValueOnce(createAttachmentAlreadyExistsError({ attachmentId: 'impact-1' }));
+    const deleteAttachment = jest.fn();
+    const update = jest.fn();
+    const revertImpact = jest.fn().mockResolvedValue(undefined);
     const attachments = {
       create,
       get: jest.fn().mockResolvedValue({ id: 'impact-1', active: false }),
       delete: deleteAttachment,
-      update: jest.fn(),
+      update,
     };
 
-    await run({ attachments: attachments as unknown as AttachmentPublicClient });
-
-    expect(deleteAttachment).toHaveBeenCalledWith({
-      conversationId: 'conv-1',
-      attachmentId: 'impact-1',
-      permanent: true,
+    const result = await run({
+      attachments: attachments as unknown as AttachmentPublicClient,
+      revertImpact,
     });
-    expect(attachments.update).not.toHaveBeenCalled();
-    expect(create).toHaveBeenCalledTimes(2);
-    expect(deleteAttachment.mock.invocationCallOrder[0]).toBeLessThan(
-      create.mock.invocationCallOrder[1]
-    );
+
+    expect(deleteAttachment).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(revertImpact).not.toHaveBeenCalled();
+    expect(result).toEqual(impact);
   });
 
   it('reverts the index write when the attachment cannot be put on the conversation', async () => {
     const previous: Impact = { ...impact, entities: [{ id: 'user-1' }] };
     const writeImpact = jest.fn().mockResolvedValue(impact);
     const revertImpact = jest.fn().mockResolvedValue(undefined);
-    const readImpact = jest.fn().mockResolvedValue(previous);
+    const readImpact = jest.fn().mockResolvedValueOnce(previous).mockResolvedValue(impact);
 
     await expect(
       run({
@@ -162,5 +164,83 @@ describe('attachImpactToInvestigation', () => {
     ).rejects.toThrow('conversation write failed');
 
     expect(revertImpact).toHaveBeenCalledWith({ written: impact, previous });
+  });
+
+  it('stamps the impact document read after a concurrent merge', async () => {
+    const merged: Impact = {
+      ...impact,
+      entities: [{ id: 'host-1' }, { id: 'user-2' }],
+    };
+    const writeImpact = jest.fn().mockResolvedValue(impact);
+    const readImpact = jest
+      .fn()
+      .mockResolvedValue(merged)
+      .mockRejectedValueOnce(new ImpactNotFoundError('conv-1'));
+    const revertImpact = jest.fn().mockResolvedValue(undefined);
+    const update = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const attachments = {
+      create: jest
+        .fn()
+        .mockRejectedValue(createAttachmentAlreadyExistsError({ attachmentId: 'impact-1' })),
+      get: jest.fn().mockResolvedValue({ id: 'impact-1', active: true }),
+      delete: jest.fn(),
+      update,
+    };
+
+    const result = await run({
+      attachments: attachments as unknown as AttachmentPublicClient,
+      readImpact,
+      writeImpact,
+      revertImpact,
+    });
+
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      attachmentId: 'impact-1',
+      data: merged,
+    });
+    expect(result).toEqual(merged);
+    expect(revertImpact).not.toHaveBeenCalled();
+  });
+
+  it('stamps again when a concurrent merge lands during the attachment update', async () => {
+    const merged: Impact = {
+      ...impact,
+      entities: [{ id: 'host-1' }, { id: 'user-2' }],
+    };
+    const writeImpact = jest.fn().mockResolvedValue(impact);
+    const readImpact = jest
+      .fn()
+      .mockResolvedValue(merged)
+      .mockRejectedValueOnce(new ImpactNotFoundError('conv-1'))
+      .mockResolvedValueOnce(impact);
+    const update = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const attachments = {
+      create: jest
+        .fn()
+        .mockRejectedValue(createAttachmentAlreadyExistsError({ attachmentId: 'impact-1' })),
+      get: jest.fn().mockResolvedValue({ id: 'impact-1', active: true }),
+      delete: jest.fn(),
+      update,
+    };
+
+    const result = await run({
+      attachments: attachments as unknown as AttachmentPublicClient,
+      readImpact,
+      writeImpact,
+    });
+
+    expect(update).toHaveBeenNthCalledWith(1, {
+      conversationId: 'conv-1',
+      attachmentId: 'impact-1',
+      data: impact,
+    });
+    expect(update).toHaveBeenLastCalledWith({
+      conversationId: 'conv-1',
+      attachmentId: 'impact-1',
+      data: merged,
+    });
+    expect(result).toEqual(merged);
   });
 });

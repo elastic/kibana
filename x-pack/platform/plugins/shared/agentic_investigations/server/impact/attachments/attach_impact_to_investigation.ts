@@ -15,6 +15,17 @@ import { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
 import type { Impact } from '../../../common/impact/impact';
 import { ImpactNotFoundError } from '../services/errors';
 
+/** Two stamps can race; retry while a fresher document appears. */
+const MAX_STAMP_ATTEMPTS = 3;
+
+const sameImpact = (left: Impact, right: Impact): boolean =>
+  left.id === right.id &&
+  left.spaceId === right.spaceId &&
+  left.conversationId === right.conversationId &&
+  left.createdAt === right.createdAt &&
+  JSON.stringify(left.createdBy ?? null) === JSON.stringify(right.createdBy ?? null) &&
+  JSON.stringify(left.entities) === JSON.stringify(right.entities);
+
 /**
  * Confirms the caller can write this conversation before any impact index write.
  * `update_access_control` is Agent Builder's owner-only permission, and a missing
@@ -66,15 +77,9 @@ const putImpactAttachment = async (
     return;
   }
 
-  // create treats a soft-deleted record as a duplicate, and update refuses it.
-  // The public client has no restore, so drop the tombstone and create again.
+  // The user removed this attachment. Leave the tombstone: permanent delete is
+  // rejected once a round has read it, and recreating it would undo that removal.
   if (existing.active === false) {
-    await client.delete({
-      conversationId: impact.conversationId,
-      attachmentId: impact.id,
-      permanent: true,
-    });
-    await create();
     return;
   }
 
@@ -86,9 +91,32 @@ const putImpactAttachment = async (
 };
 
 /**
+ * Stamps the impact document as it is now. A concurrent attach can merge more
+ * entities and update the attachment first; writing this call's older snapshot
+ * back would hide that merge.
+ */
+const stampCurrentImpact = async (
+  client: AttachmentPublicClient,
+  readImpact: () => Promise<Impact>
+): Promise<Impact> => {
+  let current = await readImpact();
+  for (let attempt = 0; attempt < MAX_STAMP_ATTEMPTS; attempt++) {
+    await putImpactAttachment(client, current);
+    const after = await readImpact();
+    if (sameImpact(current, after)) {
+      return after;
+    }
+    current = after;
+  }
+  await putImpactAttachment(client, current);
+  return current;
+};
+
+/**
  * Writes impact only after the caller is allowed to update the conversation,
- * then puts the by-reference attachment. A failed attachment write reverts the
- * index write so a later read cannot see entities the conversation does not carry.
+ * then puts the by-reference attachment from a fresh read. A failed attachment
+ * write reverts the index write so a later read cannot see entities the
+ * conversation does not carry.
  */
 export const attachImpactToInvestigation = async ({
   conversations,
@@ -116,12 +144,11 @@ export const attachImpactToInvestigation = async ({
     }
   }
 
-  const impact = await writeImpact();
+  const written = await writeImpact();
   try {
-    await putImpactAttachment(attachments, impact);
+    return await stampCurrentImpact(attachments, readImpact);
   } catch (error) {
-    await revertImpact({ written: impact, previous }).catch(() => undefined);
+    await revertImpact({ written, previous }).catch(() => undefined);
     throw error;
   }
-  return impact;
 };
