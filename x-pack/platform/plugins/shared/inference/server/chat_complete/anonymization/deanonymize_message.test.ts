@@ -13,6 +13,7 @@ import type {
   AnonymizationRule,
   AssistantMessage,
   ChatCompletionChunkEvent,
+  ChatCompletionEvent,
   ChatCompletionMessageEvent,
   UserMessage,
 } from '@kbn/inference-common';
@@ -23,9 +24,30 @@ import { anonymizeMessages } from './anonymize_messages';
 import { RegexWorkerService } from './regex_worker_service';
 import type { AnonymizationWorkerConfig } from '../../config';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+
 const testConfig = {
   enabled: false,
 } as AnonymizationWorkerConfig;
+
+/** Concatenates the `content` of every chunk-type event, in order, mirroring how a streaming client rebuilds the response. */
+function concatenateChunkContent(events: ChatCompletionEvent[]): string {
+  return events
+    .filter(
+      (event): event is ChatCompletionChunkEvent =>
+        event.type === ChatCompletionEventType.ChatCompletionChunk
+    )
+    .map((event) => event.content)
+    .join('');
+}
+
+function lastChunkEvent(events: ChatCompletionEvent[]): ChatCompletionChunkEvent {
+  const chunks = events.filter(
+    (event): event is ChatCompletionChunkEvent =>
+      event.type === ChatCompletionEventType.ChatCompletionChunk
+  );
+  return chunks[chunks.length - 1];
+}
+
 describe('deanonymizeMessage', () => {
   let logger: MockedLogger;
   let regexWorker: RegexWorkerService;
@@ -34,6 +56,7 @@ describe('deanonymizeMessage', () => {
     logger = loggerMock.create();
     regexWorker = new RegexWorkerService(testConfig, logger);
   });
+
   it('passes through all events unchanged when there are no anonymizations', async () => {
     const events = [chunkEvent('chunk'), tokensEvent(), messageEvent('message')];
 
@@ -49,7 +72,7 @@ describe('deanonymizeMessage', () => {
     expect(result).toEqual(events);
   });
 
-  it('filters out original chunk events and emits deanonymized chunk + message', async () => {
+  it('streams incrementally deanonymized chunks and a final message, instead of collapsing into one chunk', async () => {
     const value = 'Bob';
     const mask = createMask('PER', value);
 
@@ -74,43 +97,94 @@ describe('deanonymizeMessage', () => {
       replacementsId: 'replacements-123',
     } as AnonymizationOutput;
 
-    const chunks = [chunkEvent(`Hi, I am`), chunkEvent(`${mask}.`)];
+    // Chunk content must genuinely sum to the message content, as it does in real streaming.
+    const chunks = [chunkEvent(`Hi, I am `), chunkEvent(`${mask}.`)];
     const msg = messageEvent(`Hi, I am ${mask}.`);
 
     const result = await lastValueFrom(
       from([...chunks, msg]).pipe(deanonymizeMessage(anonymizationOutput), toArray())
     );
 
-    // Should emit a new chunk + message, original chunks must be filtered out
-    expect(result).toHaveLength(2);
+    // Real chunk events must survive (not be filtered out and replaced by a single one).
+    const chunkEvents = result.filter(
+      (event): event is ChatCompletionChunkEvent =>
+        event.type === ChatCompletionEventType.ChatCompletionChunk
+    );
+    expect(chunkEvents.length).toBeGreaterThan(1);
 
-    const [deanonymizedChunk, deanonymizedMessage] = result as [
-      ChatCompletionChunkEvent,
-      ChatCompletionMessageEvent
-    ];
+    const messageOut = result[result.length - 1] as ChatCompletionMessageEvent;
+    expect(messageOut.type).toBe(ChatCompletionEventType.ChatCompletionMessage);
 
-    expect(deanonymizedChunk.type).toBe(ChatCompletionEventType.ChatCompletionChunk);
-    expect(deanonymizedMessage.type).toBe(ChatCompletionEventType.ChatCompletionMessage);
+    // Reconstructed content (as a streaming client would build it) must be fully deanonymized.
+    const reconstructed = concatenateChunkContent(result);
+    expect(reconstructed).toBe(`Hi, I am ${value}.`);
+    expect(reconstructed).not.toContain(mask);
+    expect(messageOut.content).toBe(`Hi, I am ${value}.`);
+    expect(messageOut.content).not.toContain(mask);
 
-    // Content should be deanonymized
-    expect(deanonymizedChunk.content).toBe(`Hi, I am ${value}.`);
-    expect(deanonymizedMessage.content).toBe(`Hi, I am ${value}.`);
-    expect(deanonymizedChunk.metadata?.anonymization?.replacementsId).toBe('replacements-123');
-    expect(deanonymizedMessage.metadata?.anonymization?.replacementsId).toBe('replacements-123');
+    // Metadata must be present on every chunk and on the message.
+    for (const event of [...chunkEvents, messageOut]) {
+      expect(event.metadata?.anonymization?.replacementsId).toBe('replacements-123');
+    }
 
-    // Original mask must be gone
-    expect(deanonymizedChunk.content).not.toContain(mask);
-    expect(deanonymizedMessage.content).not.toContain(mask);
-
-    // deanonymized_output mask should also be gone
-    const outputMsg = deanonymizedChunk.deanonymized_output?.message as AssistantMessage;
+    // Downstream consumers (observability_ai_assistant's emitWithConcatenatedMessage) read
+    // deanonymized_input/deanonymized_output off the *last* chunk event, not the message event.
+    const lastChunk = lastChunkEvent(result);
+    const outputMsg = lastChunk.deanonymized_output?.message as AssistantMessage;
     expect(outputMsg.content).toBe(`Hi, I am ${value}.`);
     expect(outputMsg.content).not.toContain(mask);
-
-    // The deanonymized_input should include the original user message restored
-    expect((deanonymizedMessage.deanonymized_input?.[0].message as UserMessage).content).toBe(
+    expect((lastChunk.deanonymized_input?.[0].message as UserMessage).content).toBe(
       `Hi, I am ${value}.`
     );
+    expect((messageOut.deanonymized_input?.[0].message as UserMessage).content).toBe(
+      `Hi, I am ${value}.`
+    );
+  });
+
+  it('holds back a mask split across chunk boundaries until it is complete', async () => {
+    const value = 'jorge@gmail.com';
+    const mask = createMask('EMAIL', value);
+
+    const anonymization: Anonymization = {
+      entity: { class_name: 'EMAIL', value, mask },
+      rule: { type: 'RegExp' },
+    } as Anonymization;
+
+    const anonymizationOutput: AnonymizationOutput = {
+      messages: [],
+      anonymizations: [anonymization],
+    } as AnonymizationOutput;
+
+    const fullContent = `Your email is ${mask}.`;
+    // Split into realistic tokenizer-sized fragments, several of which land mid-mask,
+    // including one boundary that leaves only a single dangling character of the mask
+    // ("E") — the exact case that used to permanently break alignment before
+    // MIN_HOLDBACK_LENGTH was fixed to 1.
+    const chunks = [
+      'Your email is ',
+      mask.slice(0, 1),
+      mask.slice(1, 9),
+      mask.slice(9, 20),
+      mask.slice(20),
+      '.',
+    ].map((fragment) => chunkEvent(fragment));
+    const msg = messageEvent(fullContent);
+
+    const result = await lastValueFrom(
+      from([...chunks, msg]).pipe(deanonymizeMessage(anonymizationOutput), toArray())
+    );
+
+    // None of the individual chunk contents should ever contain the raw (unresolved) mask.
+    const chunkEvents = result.filter(
+      (event): event is ChatCompletionChunkEvent =>
+        event.type === ChatCompletionEventType.ChatCompletionChunk
+    );
+    for (const chunk of chunkEvents) {
+      expect(chunk.content).not.toContain('EMAIL_');
+    }
+
+    const reconstructed = concatenateChunkContent(result);
+    expect(reconstructed).toBe(`Your email is ${value}.`);
   });
 
   it('maps deanonymizations correctly for multiple input messages', async () => {
@@ -157,20 +231,20 @@ describe('deanonymizeMessage', () => {
       anonymizations,
     } as AnonymizationOutput;
 
-    const chunk: ChatCompletionChunkEvent = chunkEvent(
-      `Reply concerning ${mask1} and ${mask2} and ${mask3}`
-    );
+    const content = `Reply concerning ${mask1} and ${mask2} and ${mask3}`;
+    const chunk: ChatCompletionChunkEvent = chunkEvent(content);
+    const msg = messageEvent(content);
 
-    const msg = messageEvent(`Reply concerning ${mask1} and ${mask2} and ${mask3}`);
-
-    const [chunkOut, msgOut] = await lastValueFrom(
+    const result = await lastValueFrom(
       from([chunk, msg]).pipe(deanonymizeMessage(anonymizationOutput), toArray())
     );
 
-    // Expect deanonymized_input to have three entries with correct mappings
-    expect(chunkOut.deanonymized_input).toHaveLength(3);
+    const lastChunk = lastChunkEvent(result);
 
-    const [firstInputItem, secondInputItem, thirdInputItem] = chunkOut.deanonymized_input!;
+    // Expect deanonymized_input to have three entries with correct mappings
+    expect(lastChunk.deanonymized_input).toHaveLength(3);
+
+    const [firstInputItem, secondInputItem, thirdInputItem] = lastChunk.deanonymized_input!;
 
     // First user message
     expect((firstInputItem.message as UserMessage).content).toBe(`I am ${val1}.`);
@@ -199,16 +273,19 @@ describe('deanonymizeMessage', () => {
       mask: mask3,
     });
 
-    // Verify deanonymized output (chunk content)
-    expect(chunkOut.content).toBe(`Reply concerning ${val1} and ${val2} and ${val3}`);
+    // Verify deanonymized output, reconstructed from the incremental chunk stream
+    const reconstructed = concatenateChunkContent(result);
+    expect(reconstructed).toBe(`Reply concerning ${val1} and ${val2} and ${val3}`);
 
-    // Deanonymized output should include all three deanonymizations on both events
+    // Deanonymized output should include all three deanonymizations, on both the last chunk
+    // and the message event.
     const expectedEntities = [mask1, mask2, mask3];
+    const messageOut = result[result.length - 1] as ChatCompletionMessageEvent;
 
-    const chunkEntities = chunkOut.deanonymized_output?.deanonymizations.map((d) => d.entity.mask);
+    const chunkEntities = lastChunk.deanonymized_output?.deanonymizations.map((d) => d.entity.mask);
     expect(chunkEntities).toEqual(expect.arrayContaining(expectedEntities));
 
-    expect(msgOut.deanonymized_output?.deanonymizations.map((d) => d.entity.mask)).toEqual(
+    expect(messageOut.deanonymized_output?.deanonymizations.map((d) => d.entity.mask)).toEqual(
       expect.arrayContaining(expectedEntities)
     );
   });
@@ -238,20 +315,21 @@ describe('deanonymizeMessage', () => {
     const maskedUserContent = (maskedMsgs[0] as UserMessage).content as string;
 
     // Simulate stream events produced by the model
-    const [maskedChunkEvent, maskedMessageEvent] = [
-      chunkEvent(maskedUserContent),
-      messageEvent(maskedUserContent),
-    ];
+    const maskedChunkEvent = chunkEvent(maskedUserContent);
+    const maskedMessageEvent = messageEvent(maskedUserContent);
 
-    const [deanonymizedChunkEvent, deanonymizedMessageEvent] = await lastValueFrom(
+    const result = await lastValueFrom(
       from([maskedChunkEvent, maskedMessageEvent]).pipe(
         deanonymizeMessage({ messages: maskedMsgs, anonymizations }),
         toArray()
       )
     );
 
-    expect(deanonymizedChunkEvent.content).toBe(originalContent);
-    expect(deanonymizedMessageEvent.content).toBe(originalContent);
+    const messageOut = result[result.length - 1] as ChatCompletionMessageEvent;
+    const reconstructed = concatenateChunkContent(result);
+
+    expect(reconstructed).toBe(originalContent);
+    expect(messageOut.content).toBe(originalContent);
 
     // Calculate exact positions in original content for each entity
     const urlStart = originalContent.indexOf('sub.domain.co.uk');
@@ -265,7 +343,7 @@ describe('deanonymizeMessage', () => {
       },
     ];
 
-    expect(deanonymizedMessageEvent.deanonymized_output?.deanonymizations).toEqual(
+    expect(messageOut.deanonymized_output?.deanonymizations).toEqual(
       expect.arrayContaining(expectedDeanonymizations)
     );
   });
@@ -295,13 +373,16 @@ describe('deanonymizeMessage', () => {
     const chunk = chunkEvent(originalUserMsg.content as string);
     const msg = messageEvent(originalUserMsg.content as string);
 
-    const [chunkOut, msgOut] = await lastValueFrom(
+    const result = await lastValueFrom(
       from([chunk, msg]).pipe(deanonymizeMessage(anonymizationOutput), toArray())
     );
 
     const expectedContent = `${name} is from ${city}`;
-    expect(chunkOut.content).toBe(expectedContent);
-    expect(msgOut.content).toBe(expectedContent);
+    const reconstructed = concatenateChunkContent(result);
+    const messageOut = result[result.length - 1] as ChatCompletionMessageEvent;
+
+    expect(reconstructed).toBe(expectedContent);
+    expect(messageOut.content).toBe(expectedContent);
 
     // Offsets
     const nameStart = 0;
@@ -309,7 +390,7 @@ describe('deanonymizeMessage', () => {
     const cityStart = expectedContent.indexOf(city);
     const cityEnd = cityStart + city.length;
 
-    const deanonymizations = msgOut.deanonymized_output!.deanonymizations;
+    const deanonymizations = messageOut.deanonymized_output!.deanonymizations;
     expect(deanonymizations).toEqual(
       expect.arrayContaining([
         { start: nameStart, end: nameEnd, entity: anonymizations[0].entity },
@@ -338,18 +419,21 @@ describe('deanonymizeMessage', () => {
       anonymizations,
     } as AnonymizationOutput;
 
-    const [chunkOut, msgOut] = await lastValueFrom(
+    const result = await lastValueFrom(
       from([chunkEvent(maskedContent), messageEvent(maskedContent)]).pipe(
         deanonymizeMessage(anonymizationOutput),
         toArray()
       )
     );
 
-    expect(chunkOut.content).toBe(expectedContent);
-    expect(msgOut.content).toBe(expectedContent);
+    const reconstructed = concatenateChunkContent(result);
+    const messageOut = result[result.length - 1] as ChatCompletionMessageEvent;
 
-    const outputDeanonymizations = msgOut.deanonymized_output?.deanonymizations ?? [];
-    const inputDeanonymizations = msgOut.deanonymized_input?.[0].deanonymizations ?? [];
+    expect(reconstructed).toBe(expectedContent);
+    expect(messageOut.content).toBe(expectedContent);
+
+    const outputDeanonymizations = messageOut.deanonymized_output?.deanonymizations ?? [];
+    const inputDeanonymizations = messageOut.deanonymized_input?.[0].deanonymizations ?? [];
 
     for (const deanonymization of [...outputDeanonymizations, ...inputDeanonymizations]) {
       expect(deanonymization.start).toBeGreaterThanOrEqual(0);

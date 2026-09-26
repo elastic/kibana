@@ -48,68 +48,82 @@ function deanonymizeStructure(
   return value;
 }
 
+/**
+ * Scans `content` for every known mask (from `anonymizations`) and replaces each
+ * occurrence with its original value, returning the rebuilt string plus the
+ * final-string offset ranges of every replacement made.
+ *
+ * Shared by `deanonymize()` (full-message deanonymization) and the streaming
+ * hold-buffer (`deanonymize_stream_buffer.ts`), which deanonymizes safe prefixes
+ * of a streamed response incrementally using the same mask-matching logic.
+ */
+export function replaceAnonymizedText(
+  content: string,
+  anonymizations: Anonymization[]
+): { output: string; deanonymizations: Deanonymization[] } {
+  // Multiple anonymization entries can point at the same mask.
+  // Scan each unique mask once so we don't duplicate matches/ranges.
+  const entitiesByMask = new Map<string, Anonymization['entity']>();
+  for (const { entity } of anonymizations) {
+    if (!entitiesByMask.has(entity.mask)) {
+      entitiesByMask.set(entity.mask, entity);
+    }
+  }
+
+  const matches: DeanonymizeMaskMatch[] = [];
+  // Collect mask occurrences from the original (immutable) content.
+  // We compute ranges from rebuilt output later, so they are final-string offsets.
+  for (const [mask, entity] of entitiesByMask) {
+    let index = content.indexOf(mask);
+    while (index !== -1) {
+      matches.push({ start: index, mask, entity });
+      index = content.indexOf(mask, index + mask.length);
+    }
+  }
+
+  // Sort left-to-right for cursor-based reconstruction.
+  matches.sort((a, b) => {
+    if (a.start !== b.start) {
+      return a.start - b.start;
+    }
+    // Resolve same-start overlaps by preferring the longer mask
+    return b.mask.length - a.mask.length;
+  });
+
+  const deanonymizations: Deanonymization[] = [];
+  let cursor = 0;
+  let output = '';
+
+  // Rebuild content in one pass from left to right.
+  // This avoids offset drift caused by mutating and re-indexing the same string.
+  for (const match of matches) {
+    // Ignore overlaps that were made stale by a previous (earlier/longer) match.
+    if (match.start < cursor) {
+      continue;
+    }
+
+    // Copy unchanged span, append replacement, and capture final-output range.
+    output += content.slice(cursor, match.start);
+    const start = output.length;
+    output += match.entity.value;
+    const end = output.length;
+    deanonymizations.push({ start, end, entity: match.entity });
+    cursor = match.start + match.mask.length;
+  }
+
+  output += content.slice(cursor);
+
+  return {
+    deanonymizations,
+    output,
+  };
+}
+
 export function deanonymize<TMessage extends Message>(
   message: TMessage,
   anonymizations: Anonymization[]
 ): { message: TMessage; deanonymizations: Deanonymization[] } {
-  function replace(content: string) {
-    // Multiple anonymization entries can point at the same mask.
-    // Scan each unique mask once so we don't duplicate matches/ranges.
-    const entitiesByMask = new Map<string, Anonymization['entity']>();
-    for (const { entity } of anonymizations) {
-      if (!entitiesByMask.has(entity.mask)) {
-        entitiesByMask.set(entity.mask, entity);
-      }
-    }
-
-    const matches: DeanonymizeMaskMatch[] = [];
-    // Collect mask occurrences from the original (immutable) content.
-    // We compute ranges from rebuilt output later, so they are final-string offsets.
-    for (const [mask, entity] of entitiesByMask) {
-      let index = content.indexOf(mask);
-      while (index !== -1) {
-        matches.push({ start: index, mask, entity });
-        index = content.indexOf(mask, index + mask.length);
-      }
-    }
-
-    // Sort left-to-right for cursor-based reconstruction.
-    matches.sort((a, b) => {
-      if (a.start !== b.start) {
-        return a.start - b.start;
-      }
-      // Resolve same-start overlaps by preferring the longer mask
-      return b.mask.length - a.mask.length;
-    });
-
-    const deanonymizations: Deanonymization[] = [];
-    let cursor = 0;
-    let output = '';
-
-    // Rebuild content in one pass from left to right.
-    // This avoids offset drift caused by mutating and re-indexing the same string.
-    for (const match of matches) {
-      // Ignore overlaps that were made stale by a previous (earlier/longer) match.
-      if (match.start < cursor) {
-        continue;
-      }
-
-      // Copy unchanged span, append replacement, and capture final-output range.
-      output += content.slice(cursor, match.start);
-      const start = output.length;
-      output += match.entity.value;
-      const end = output.length;
-      deanonymizations.push({ start, end, entity: match.entity });
-      cursor = match.start + match.mask.length;
-    }
-
-    output += content.slice(cursor);
-
-    return {
-      deanonymizations,
-      output,
-    };
-  }
+  const replace = (content: string) => replaceAnonymizedText(content, anonymizations);
 
   const anonymized = getAnonymizableMessageParts(message);
   const allDeanonymizations: Deanonymization[] = [];
