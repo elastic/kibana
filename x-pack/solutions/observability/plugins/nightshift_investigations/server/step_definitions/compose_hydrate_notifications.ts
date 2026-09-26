@@ -33,8 +33,11 @@ export const composeHydrateNotificationsStepDefinition = () =>
         .optional()
         .describe('Model-only <system_update> block. Absent when nothing was new.'),
       workflow_context: z.object({
-        semantic_memory: z.object({
-          recalled_ids: z.array(z.string()).max(100),
+        'nightshift.semantic_memory.recall': z.object({
+          version: z.literal(1),
+          data: z.object({
+            recalled_ids: z.array(z.string()).max(100),
+          }),
         }),
       }),
     }),
@@ -46,8 +49,11 @@ export const composeHydrateNotificationsStepDefinition = () =>
         output: {
           ...(modelContext ? { model_context: modelContext } : {}),
           workflow_context: {
-            semantic_memory: {
-              recalled_ids: context.input.recalled_ids,
+            'nightshift.semantic_memory.recall': {
+              version: 1 as const,
+              data: {
+                recalled_ids: context.input.recalled_ids,
+              },
             },
           },
         },
