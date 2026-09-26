@@ -129,6 +129,14 @@ const parsePositiveWholeNumber = (value: string): number | undefined => {
   return parsed;
 };
 
+export const validatePartitionPath = (
+  value: string,
+  formValues: CreateDatasetFormValues
+): true | string => {
+  if (formValues.settings.partition_detection !== 'template') return true;
+  return value?.trim() ? true : createDatasetWizardStrings.settingsPartitionPathRequired;
+};
+
 export const validateMaxErrors = (value: string): true | string => {
   if (!value?.trim()) return true;
   if (parsePositiveWholeNumber(value) === undefined) {
@@ -194,7 +202,9 @@ export const buildDatasetSettingsFromFormValues = (
   }
   if (settings.partition_detection) applied.partition_detection = settings.partition_detection;
   if (settings.schema_resolution) applied.schema_resolution = settings.schema_resolution;
-  if (settings.partition_path) applied.partition_path = settings.partition_path;
+  if (settings.partition_detection === 'template' && settings.partition_path) {
+    applied.partition_path = settings.partition_path;
+  }
   const hivePartitioning = parseBooleanFormValue(settings.hive_partitioning);
   if (hivePartitioning !== undefined) applied.hive_partitioning = hivePartitioning;
 

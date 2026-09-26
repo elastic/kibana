@@ -151,7 +151,7 @@ describe('CreateDatasetWizardPage', () => {
     expect(queryByTestId('createDatasetSettingsFormat')).toBeNull();
     expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsFileExclusions')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetSettingsPartitionPath')).toBeNull();
     const partitionDetectionCombo = getByTestId('createDatasetSettingsPartitionDetection');
     fireEvent.click(partitionDetectionCombo.querySelector('input') ?? partitionDetectionCombo);
     fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-hive'));

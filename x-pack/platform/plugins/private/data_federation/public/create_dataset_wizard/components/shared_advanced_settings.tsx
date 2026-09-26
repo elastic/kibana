@@ -8,10 +8,14 @@
 import React from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import { DEFAULT_FILE_EXCLUSIONS, type CreateDatasetFormValues } from '../create_dataset_form_state';
+import {
+  DEFAULT_FILE_EXCLUSIONS,
+  validatePartitionPath,
+  type CreateDatasetFormValues,
+} from '../create_dataset_form_state';
 import { ErrorModeSelect } from './error_mode_select';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { FileExclusionsSelect } from './file_exclusions_select';
@@ -31,9 +35,11 @@ const fileExclusionsDefaultValueLabel = `[${DEFAULT_FILE_EXCLUSIONS.map((pattern
 const fileExclusionsDefaultHelp = helpTextDefault(fileExclusionsDefaultValueLabel);
 
 export function SharedAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: partitionPathField } = useController({
+  const partitionDetection = useWatch({ control, name: 'settings.partition_detection' });
+  const { field: partitionPathField, fieldState: partitionPathState } = useController({
     name: 'settings.partition_path',
     control,
+    rules: { validate: validatePartitionPath },
   });
   const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
 
@@ -64,25 +70,30 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
         <PartitionDetectionSelect control={control} />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsPartitionPathLabel}
-            infoText={createDatasetWizardStrings.settingsPartitionPathDescription}
-          />
-        }
-        helpText={createDatasetWizardStrings.settingsPartitionPathHelp}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsPartitionPath"
+      {partitionDetection === 'template' ? (
+        <EuiFormRow
+          label={
+            <FormRowLabelWithInfo
+              label={createDatasetWizardStrings.settingsPartitionPathLabel}
+              infoText={createDatasetWizardStrings.settingsPartitionPathDescription}
+            />
+          }
+          helpText={createDatasetWizardStrings.settingsPartitionPathHelp}
           fullWidth
-          value={partitionPathField.value}
-          onChange={(e) => partitionPathField.onChange(e.target.value)}
-          name={partitionPathField.name}
-          inputRef={partitionPathField.ref}
-        />
-      </EuiFormRow>
+          isInvalid={Boolean(partitionPathState.error)}
+          error={partitionPathState.error?.message}
+        >
+          <EuiFieldText
+            data-test-subj="createDatasetSettingsPartitionPath"
+            fullWidth
+            isInvalid={Boolean(partitionPathState.error)}
+            value={partitionPathField.value}
+            onChange={(e) => partitionPathField.onChange(e.target.value)}
+            name={partitionPathField.name}
+            inputRef={partitionPathField.ref}
+          />
+        </EuiFormRow>
+      ) : null}
 
       <EuiFormRow
         label={

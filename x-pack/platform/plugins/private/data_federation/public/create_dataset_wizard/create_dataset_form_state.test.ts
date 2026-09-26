@@ -6,15 +6,43 @@
  */
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
+import { emptyDatasetFormValues } from './dataset_form_initial_values';
 import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
   validateMaxErrors,
+  validatePartitionPath,
 } from './create_dataset_form_state';
 
 const empty = () => emptyCreateDatasetSettingsFormValues();
 
 describe('create_dataset_form_state', () => {
+  describe('validatePartitionPath', () => {
+    const formWith = (partitionDetection: '' | 'hive' | 'template', partitionPath = '') => {
+      const values = emptyDatasetFormValues();
+      values.settings.partition_detection = partitionDetection;
+      values.settings.partition_path = partitionPath;
+      return values;
+    };
+
+    it('requires a non-empty path when partition detection is template', () => {
+      expect(validatePartitionPath('', formWith('template'))).toBe(
+        createDatasetWizardStrings.settingsPartitionPathRequired
+      );
+      expect(validatePartitionPath('   ', formWith('template'))).toBe(
+        createDatasetWizardStrings.settingsPartitionPathRequired
+      );
+      expect(validatePartitionPath('/year={year}/', formWith('template', '/year={year}/'))).toBe(
+        true
+      );
+    });
+
+    it('allows an empty path when partition detection is not template', () => {
+      expect(validatePartitionPath('', formWith(''))).toBe(true);
+      expect(validatePartitionPath('', formWith('hive'))).toBe(true);
+    });
+  });
+
   describe('validateMaxErrors', () => {
     it('accepts an empty value and positive whole numbers', () => {
       expect(validateMaxErrors('')).toBe(true);
@@ -76,10 +104,21 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ schema_resolution: 'union_by_name' });
     });
 
-    it('maps partition_path under any format', () => {
+    it('maps partition_path only when partition detection is template', () => {
       expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), partition_path: '/year={year}/' })
-      ).toEqual({ partition_path: '/year={year}/' });
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          partition_detection: 'template',
+          partition_path: '/year={year}/',
+        })
+      ).toEqual({ partition_detection: 'template', partition_path: '/year={year}/' });
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          partition_detection: 'hive',
+          partition_path: '/year={year}/',
+        })
+      ).toEqual({ partition_detection: 'hive' });
     });
 
     it('omits file_exclusions when empty and includes custom values', () => {

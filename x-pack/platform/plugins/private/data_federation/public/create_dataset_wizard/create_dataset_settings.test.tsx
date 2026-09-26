@@ -130,6 +130,7 @@ describe('CreateDatasetSettings', () => {
     });
 
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'template' });
+    expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
   });
 
   it('shows schema_resolution and hive_partitioning', () => {
@@ -268,7 +269,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsFileExclusions')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsPartitionDetection')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetSettingsPartitionPath')).toBeNull();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrors')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsMaxErrorRatio')).toBeInTheDocument();
@@ -368,6 +369,74 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetSettingsDatetimeFormat')).toBeInTheDocument();
     expect(queryByTestId('createDatasetNdjsonAdvancedSettings')).toBeNull();
     expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
+  });
+
+  it('shows partition path only when partition detection is template', async () => {
+    const { getByTestId, queryByTestId } = renderAdditionalSettings();
+    const combo = getByTestId('createDatasetSettingsPartitionDetection');
+
+    expect(queryByTestId('createDatasetSettingsPartitionPath')).toBeNull();
+
+    await act(async () => {
+      fireEvent.click(combo.querySelector('input') ?? combo);
+    });
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-template'));
+    });
+
+    expect(getByTestId('createDatasetSettingsPartitionPath')).toBeInTheDocument();
+  });
+
+  it('shows a required error when partition path is empty and template is selected', async () => {
+    const Wrapper = () => {
+      const methods = useForm<CreateDatasetFormValues>({
+        defaultValues: {
+          name: '',
+          description: '',
+          data_source: '',
+          resource: '',
+          settings: emptyCreateDatasetSettingsFormValues(),
+          ui: { formatWasAutoDetected: false },
+        },
+      });
+
+      return (
+        <EuiProvider>
+          <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+            <FormProvider {...methods}>
+              <button
+                type="button"
+                data-test-subj="validateSettings"
+                onClick={() => methods.trigger('settings.partition_path')}
+              >
+                Validate
+              </button>
+              <CreateDatasetAdditionalSettings control={methods.control} />
+            </FormProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      );
+    };
+
+    const { getByTestId, findByText } = render(<Wrapper />);
+    const combo = getByTestId('createDatasetSettingsPartitionDetection');
+    await act(async () => {
+      fireEvent.click(combo.querySelector('input') ?? combo);
+    });
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-template'));
+    });
+    await act(async () => {
+      fireEvent.click(getByTestId('validateSettings'));
+    });
+
+    expect(
+      await findByText(createDatasetWizardStrings.settingsPartitionPathRequired)
+    ).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsPartitionPath')).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
   });
 
   it('shows a description for each error mode option', async () => {

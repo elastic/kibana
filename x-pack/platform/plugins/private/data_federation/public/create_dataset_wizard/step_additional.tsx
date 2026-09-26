@@ -21,13 +21,15 @@ export function StepAdditional() {
 
   useEffect(() => {
     updateContent({
-      // No required fields in this step today, but we still need a boolean
-      // so wizard navigation isn't blocked by "missing content" semantics.
+      // isValid stays true so unset optional fields do not block the step.
+      // validate enforces fields that are required only in some conditions.
       isValid: true,
       validate: async () => {
-        // Block navigation when any advanced setting is invalid.
-        // max_error_ratio is one of the key settings that must be in range.
-        return await trigger(['settings.max_errors', 'settings.max_error_ratio']);
+        return await trigger([
+          'settings.partition_path',
+          'settings.max_errors',
+          'settings.max_error_ratio',
+        ]);
       },
       getData: () => getValues().settings,
     });

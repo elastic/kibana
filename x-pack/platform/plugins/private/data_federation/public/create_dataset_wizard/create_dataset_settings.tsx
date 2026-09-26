@@ -27,6 +27,7 @@ import {
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
   validateDelimiter,
+  validatePartitionPath,
 } from './create_dataset_form_state';
 import { CsvTsvAdvancedSettings } from './components/csv_tsv_advanced_settings';
 import { CsvTsvCommonSettings } from './components/csv_tsv_common_settings';
@@ -251,13 +252,15 @@ function RemainingUniversalSettings({
   control: Control<CreateDatasetFormValues>;
   partitionDetection?: React.ReactNode;
 }) {
+  const partitionDetectionValue = useWatch({ control, name: 'settings.partition_detection' });
   const { field: schemaResolutionField } = useController({
     name: 'settings.schema_resolution',
     control,
   });
-  const { field: partitionPathField } = useController({
+  const { field: partitionPathField, fieldState: partitionPathState } = useController({
     name: 'settings.partition_path',
     control,
+    rules: { validate: validatePartitionPath },
   });
   const { field: hivePartitioningField } = useController({
     name: 'settings.hive_partitioning',
@@ -285,20 +288,25 @@ function RemainingUniversalSettings({
         />
       </EuiFormRow>
       {partitionDetection}
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsPartitionPathLabel}
-        helpText={createDatasetWizardStrings.settingsPartitionPathHelp}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsPartitionPath"
+      {partitionDetectionValue === 'template' ? (
+        <EuiFormRow
+          label={createDatasetWizardStrings.settingsPartitionPathLabel}
+          helpText={createDatasetWizardStrings.settingsPartitionPathHelp}
           fullWidth
-          value={partitionPathField.value}
-          onChange={(e) => partitionPathField.onChange(e.target.value)}
-          name={partitionPathField.name}
-          inputRef={partitionPathField.ref}
-        />
-      </EuiFormRow>
+          isInvalid={Boolean(partitionPathState.error)}
+          error={partitionPathState.error?.message}
+        >
+          <EuiFieldText
+            data-test-subj="createDatasetSettingsPartitionPath"
+            fullWidth
+            isInvalid={Boolean(partitionPathState.error)}
+            value={partitionPathField.value}
+            onChange={(e) => partitionPathField.onChange(e.target.value)}
+            name={partitionPathField.name}
+            inputRef={partitionPathField.ref}
+          />
+        </EuiFormRow>
+      ) : null}
       <EuiFormRow label={createDatasetWizardStrings.settingsHivePartitioningLabel} fullWidth>
         <EuiSelect
           options={HIVE_PARTITIONING_OPTIONS}

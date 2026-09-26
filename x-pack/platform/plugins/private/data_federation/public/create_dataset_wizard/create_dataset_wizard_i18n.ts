@@ -632,6 +632,13 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsPartitionPathRequired: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsPartitionPathRequired',
+    {
+      defaultMessage: 'Partition path is required.',
+    }
+  ),
+
   settingsHivePartitioningLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsHivePartitioningLabel',
     {
