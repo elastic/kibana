@@ -1,5 +1,5 @@
 {
-  "sha1": "6e55a404a1fd6cbb2123d301e2ac196ddb30b214",
+  "sha1": "630c2fcab8765a26ff9d3ba001e9af55a6b2f169",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -137,6 +137,84 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/date_nanos_mixed.spec.ts",
         "line": 28,
         "column": 23
+      }
+    },
+    {
+      "id": "99b156606a173cd-ef103b49efde01e",
+      "title": "Discover app - accessibility has no automated a11y violations on the main page or after starting a new search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 31,
+        "column": 23
+      }
+    },
+    {
+      "id": "99b156606a173cd-5ea7b01d898f8d2",
+      "title": "Discover app - accessibility has no automated a11y violations in the save flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 37,
+        "column": 29
+      }
+    },
+    {
+      "id": "99b156606a173cd-a5581524b2a9e0c",
+      "title": "Discover app - accessibility has no automated a11y violations in the top nav overlays",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "99b156606a173cd-02f828082c25579",
+      "title": "Discover app - accessibility has no automated a11y violations in the histogram interval selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 112,
+        "column": 47
+      }
+    },
+    {
+      "id": "99b156606a173cd-d2b7927e9ba6fff",
+      "title": "Discover app - accessibility has no automated a11y violations in the field statistics view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 120,
+        "column": 11
+      }
+    },
+    {
+      "id": "99b156606a173cd-056864d6f4b48e8",
+      "title": "Discover app - accessibility has no automated a11y violations in the field editor opened from the sidebar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_accessibility.spec.ts",
+        "line": 126,
+        "column": 13
       }
     },
     {
@@ -333,6 +411,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/discover_session_multiple_data_views.spec.ts",
         "line": 53,
         "column": 15
+      }
+    },
+    {
+      "id": "7fd98054e985fc1-7e7d8909d81f43b",
+      "title": "Discover embeddable - doc viewer share direct link shares a panel document as a Discover deep link that restores the document and its context",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embeddable/doc_viewer_share_direct_link.spec.ts",
+        "line": 32,
+        "column": 46
       }
     },
     {
@@ -669,8 +760,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
-        "line": 59,
-        "column": 20
+        "line": 63,
+        "column": 18
       }
     },
     {
@@ -689,7 +780,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
-        "line": 88,
+        "line": 92,
         "column": 25
       }
     },
@@ -709,8 +800,48 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
-        "line": 107,
+        "line": 111,
         "column": 11
+      }
+    },
+    {
+      "id": "e63dc63a751efba-4b6cb42aaa57ae0",
+      "title": "histogram recovers the histogram after an empty time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
+        "line": 122,
+        "column": 5
+      }
+    },
+    {
+      "id": "e63dc63a751efba-97566dbbe775245",
+      "title": "histogram keeps a narrowed histogram time range after save and reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram.spec.ts",
+        "line": 145,
+        "column": 25
       }
     },
     {
@@ -1026,6 +1157,19 @@
       }
     },
     {
+      "id": "afc4eaebb20dbf9-b29513722402475",
+      "title": "Discover saved queries - accessibility has no automated a11y violations across the saved query lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/saved_queries_accessibility.spec.ts",
+        "line": 51,
+        "column": 5
+      }
+    },
+    {
       "id": "13f370e4ae504b7-d0060d150395e69",
       "title": "Discover app - saved searches should customize time range on dashboards",
       "expectedStatus": "passed",
@@ -1074,8 +1218,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
-        "line": 66,
-        "column": 32
+        "line": 72,
+        "column": 26
       }
     },
     {
@@ -1087,8 +1231,34 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
-        "line": 66,
-        "column": 32
+        "line": 72,
+        "column": 26
+      }
+    },
+    {
+      "id": "3fe9adfc7cac7c0-ed244ad16472599",
+      "title": "Discover shared links - doc viewer carries the ES|QL control and its selection onto a shared document link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
+        "line": 113,
+        "column": 22
+      }
+    },
+    {
+      "id": "3fe9adfc7cac7c0-0e1f94044cc8e43",
+      "title": "Discover shared links - doc viewer shares a nested group-by document as a flat Discover deep link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
+        "line": 148,
+        "column": 43
       }
     },
     {

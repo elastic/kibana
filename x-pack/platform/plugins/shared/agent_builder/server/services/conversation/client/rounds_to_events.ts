@@ -9,6 +9,7 @@ import type {
   Conversation,
   ConversationRound,
   ConversationRoundAuthor,
+  ConversationRoundOrigin,
   ConversationRoundStep,
   EventActor,
   ExecutionInterruption,
@@ -26,9 +27,11 @@ import {
   TimelineEventType,
   TimelineTriggerType,
   executionTerminatedEventId,
+  isZeroModelUsage,
   parseExecutionId,
   resumeExecutionId,
   roundStepEventId,
+  roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents/prompts';
 
@@ -65,15 +68,31 @@ type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'autho
 
 type ConversationForRoundEvents = Pick<Conversation, 'agent_id' | 'user'>;
 
+/**
+ * Builds a `user_message` event. The caller owns the id: round-derived when a round will run,
+ * a plain uuid for a message appended on its own, which `isRoundDerivedEventId` must not match.
+ */
 export const userMessageEvent = (
-  round: RoundStart,
+  {
+    id,
+    createdAt,
+    input,
+    author,
+    origin,
+  }: {
+    id: string;
+    createdAt: string;
+    input: RoundInput;
+    author?: ConversationRoundAuthor;
+    origin?: ConversationRoundOrigin;
+  },
   conversation: ConversationForRoundEvents
 ): TimelineEvent => ({
-  id: `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
+  id,
   type: TimelineEventType.userMessage,
-  created_at: round.started_at,
-  actor: userMessageActor(conversation, round),
-  data: round.input,
+  created_at: createdAt,
+  actor: userMessageActor(conversation, { author, origin }),
+  data: input,
 });
 
 export const executionStartedEvent = (
@@ -96,7 +115,16 @@ export const roundStartEvents = (
   round: RoundStart,
   conversation: ConversationForRoundEvents
 ): TimelineEvent[] => [
-  userMessageEvent(round, conversation),
+  userMessageEvent(
+    {
+      id: roundUserMessageEventId(round.id),
+      createdAt: round.started_at,
+      input: round.input,
+      author: round.author,
+      origin: round.origin,
+    },
+    conversation
+  ),
   executionStartedEvent(round, conversation),
 ];
 
@@ -155,11 +183,13 @@ export const roundToEvents = (
   round: ConversationRound,
   conversation: ConversationForRoundEvents
 ): TimelineEvent[] => {
-  const terminated = roundTerminatedEvent(round, conversation);
+  const terminal = hasInterruption(round)
+    ? roundInterruptedTerminalEvent(round, conversation)
+    : roundTerminatedEvent(round, conversation);
   return [
     ...roundStartEvents(round, conversation),
     ...roundStepEvents(round, conversation),
-    ...(terminated ? [terminated] : []),
+    ...(terminal ? [terminal] : []),
   ];
 };
 
@@ -432,6 +462,46 @@ export const interruptedExecutionToEvents = ({
     trigger_event_id: triggerEventId,
     data: { step, sequence },
   }));
+  return [
+    started,
+    ...stepEvents,
+    interruptedTerminalEvent({
+      roundId,
+      executionIndex,
+      startedAt,
+      triggerEventId,
+      summary,
+      interruption,
+      conversation,
+    }),
+  ];
+};
+
+/**
+ * The terminal event of an interrupted execution: `execution_failed` carrying the error, or
+ * `execution_aborted` carrying `aborted_by` when known. `created_at` is `startedAt + time_to_last_token`.
+ */
+export const interruptedTerminalEvent = ({
+  roundId,
+  executionIndex,
+  startedAt,
+  triggerEventId,
+  summary,
+  interruption,
+  conversation,
+}: {
+  roundId: string;
+  executionIndex: number;
+  startedAt: string;
+  triggerEventId: string;
+  summary: ExecutionPartialRunSummary;
+  interruption: ExecutionInterruption;
+  conversation: ConversationForRoundEvents;
+}): TimelineEvent => {
+  const executionId =
+    executionIndex === 0
+      ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`
+      : resumeExecutionId(roundId, executionIndex);
   const endedAt = new Date(
     new Date(startedAt).getTime() + summary.time_to_last_token
   ).toISOString();
@@ -442,23 +512,56 @@ export const interruptedExecutionToEvents = ({
     execution_id: executionId,
     trigger_event_id: triggerEventId,
   };
-  const terminal: TimelineEvent =
-    interruption.type === 'failed'
-      ? {
-          ...base,
-          type: TimelineEventType.executionFailed,
-          data: { ...summary, error: interruption.error },
-        }
-      : {
-          ...base,
-          type: TimelineEventType.executionAborted,
-          data: {
-            ...summary,
-            ...(interruption.aborted_by ? { aborted_by: interruption.aborted_by } : {}),
-          },
-        };
-  return [started, ...stepEvents, terminal];
+  return interruption.type === 'failed'
+    ? {
+        ...base,
+        type: TimelineEventType.executionFailed,
+        data: { ...summary, error: interruption.error },
+      }
+    : {
+        ...base,
+        type: TimelineEventType.executionAborted,
+        data: {
+          ...summary,
+          ...(interruption.aborted_by ? { aborted_by: interruption.aborted_by } : {}),
+        },
+      };
 };
+
+/**
+ * The terminal of a round with an `interruption`. Defaults are reversed so that rounds → events →
+ * rounds is an identity: a `ZERO_MODEL_USAGE` is omitted (the fold restores it), a `0`
+ * `time_to_first_token` is omitted (the fold reads `?? 0`).
+ */
+const roundInterruptedTerminalEvent = (
+  round: ConversationRound & { interruption: ExecutionInterruption },
+  conversation: ConversationForRoundEvents
+): TimelineEvent => {
+  const ids = roundDerivedEventIds(round.id);
+  const summary: ExecutionPartialRunSummary = {
+    time_to_last_token: round.time_to_last_token,
+    ...(round.time_to_first_token !== 0 ? { time_to_first_token: round.time_to_first_token } : {}),
+    ...(isZeroModelUsage(round.model_usage) ? {} : { model_usage: round.model_usage }),
+    ...(round.trace_id ? { trace_id: round.trace_id } : {}),
+    ...(round.configuration_overrides
+      ? { configuration_overrides: round.configuration_overrides }
+      : {}),
+  };
+  return interruptedTerminalEvent({
+    roundId: round.id,
+    executionIndex: 0,
+    startedAt: round.started_at,
+    triggerEventId: ids.userMessage,
+    summary,
+    interruption: round.interruption,
+    conversation,
+  });
+};
+
+const hasInterruption = (
+  round: ConversationRound
+): round is ConversationRound & { interruption: ExecutionInterruption } =>
+  round.interruption !== undefined;
 
 /**
  * Index of the round's most recent execution that has an `execution_terminated`, or -1. This is

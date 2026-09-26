@@ -55,7 +55,7 @@ export const EPISODE_SEVERITY_BADGE_COLORS: Record<
 };
 
 /** Heatmap cell fill colors aligned with `EuiBadge` fill backgrounds for each severity. */
-export const getEpisodeSeverityHeatmapColor = (
+export const getEpisodeSeverityColor = (
   euiTheme: EuiThemeComputed,
   severity: EpisodeSeverity
 ): string => {

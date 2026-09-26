@@ -19,11 +19,13 @@ export type SignificantEventsAppTab =
   | 'detections'
   | 'significant_events'
   | 'cortex'
+  | 'decision_trees'
+  // Kept for locator compatibility; resolves to the standalone Settings page.
   | 'settings';
 
 /**
- * Mirrors the query params of the `/{tab}` route one-to-one so every state of the
- * Significant Events app is addressable through the locator.
+ * Builds locations for management tabs and the standalone Settings page.
+ * Query parameters apply only to management tabs on the `/{tab}` route.
  */
 export interface SignificantEventsAppLocatorParams extends SerializableRecord {
   tab?: SignificantEventsAppTab;
@@ -50,6 +52,14 @@ export class SignificantEventsAppLocatorDefinition
     tab = 'streams',
     ...query
   }: SignificantEventsAppLocatorParams) => {
+    if (tab === 'settings') {
+      return {
+        app: SIGNIFICANT_EVENTS_APP_ID,
+        path: `/${tab}`,
+        state: {},
+      };
+    }
+
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(query)) {
       if (value == null) {

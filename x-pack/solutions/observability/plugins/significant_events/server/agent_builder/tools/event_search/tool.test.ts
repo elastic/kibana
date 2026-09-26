@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { searchEventsToolHandler } from './handler';
@@ -30,7 +30,7 @@ describe('event_search tool', () => {
   it('uses expected tool id', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -41,7 +41,7 @@ describe('event_search tool', () => {
   it('validates bounded filters and normalizes query', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -102,7 +102,7 @@ describe('event_search tool', () => {
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -157,7 +157,7 @@ describe('event_search tool', () => {
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });

@@ -225,7 +225,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/packages/shared/esql/kbn-esql-language/scripts/**/*',
   'src/platform/kbn-ui/_tooling/**/*',
 ];
 
@@ -3081,6 +3081,30 @@ module.exports = {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
           'error',
           { alternativeFixtures: ['esClient'] },
+        ],
+      },
+    },
+    {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          {
+            alternativeFixtures: [
+              'esClient',
+              'detectionsApi',
+              'discoveriesApi',
+              'endpointExceptionsApi',
+              'endpointManagementApi',
+              'entityAnalyticsApi',
+              'exceptionsApi',
+              'listsApi',
+              'osqueryApi',
+              'timelinesApi',
+            ],
+          },
         ],
       },
     },

@@ -8,11 +8,11 @@
 import { z } from '@kbn/zod';
 
 import {
-  SERVICE_ACCOUNT_MAX_ROLES,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
 } from './constants';
+import type { ServiceAccountRoleLimits } from './constants';
 
 export const serviceAccountIdSchema = z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
 
@@ -29,28 +29,35 @@ export const serviceAccountNameSchema = z
     'must begin with a letter or digit and may contain only letters, digits, hyphens and underscores'
   );
 
-export const serviceAccountRoleNameSchema = z
-  .string()
-  .min(1)
-  .max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
-
 /**
- * The role list an account is created with, whether the caller named it or Kibana derived it. One
- * schema for both, so that nothing Kibana writes falls outside what it is willing to read back.
- */
-export const serviceAccountRolesSchema = z
-  .array(serviceAccountRoleNameSchema)
-  .min(1)
-  .max(SERVICE_ACCOUNT_MAX_ROLES);
-
-/**
- * Parameters for creating a service account. Validated in two places: the route body, and again
- * inside each backend, since callers of the server contract never pass through the route.
+ * The role list an account is created with, held to one backend's `limits`. What Kibana reads
+ * back from a backend is bounded by that backend's own limits too, but validated separately,
+ * since accounts can be written there without Kibana.
  *
- * An omitted `roles` asks Kibana to derive them. An empty `roles` asks for none, which is a
- * different question, so it is refused rather than guessed at.
+ * Duplicate roles are dropped first, keeping first occurrences in order, so that the limit counts
+ * distinct roles on every entry point. Both backends count duplicates against their own cap before
+ * dropping them, so without this a list within the limit could still be refused.
  */
-export const createServiceAccountParamsSchema = z.object({
-  name: serviceAccountNameSchema,
-  roles: serviceAccountRolesSchema.optional(),
-});
+export const getServiceAccountRolesSchema = ({
+  maxRoles,
+  maxRoleNameLength,
+}: ServiceAccountRoleLimits) =>
+  z.preprocess(
+    // Only touches what is already an array: anything else is left for the schema to describe.
+    (roles) => (Array.isArray(roles) ? Array.from(new Set(roles)) : roles),
+    z.array(z.string().min(1).max(maxRoleNameLength)).min(1).max(maxRoles)
+  );
+
+/**
+ * Parameters for creating a service account, with roles held to `limits`. Validated in two
+ * places: the route body, and again inside the backend, since callers of the server contract never
+ * pass through the route. Both use the backend's own limits.
+ *
+ * `roles` is required and non-empty. There is no "derive them from the creator" default: see
+ * `CreateServiceAccountParams` in `@kbn/core-security-common`.
+ */
+export const getCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
+  z.object({
+    name: serviceAccountNameSchema,
+    roles: getServiceAccountRolesSchema(limits),
+  });

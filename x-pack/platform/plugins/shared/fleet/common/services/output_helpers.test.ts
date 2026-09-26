@@ -70,10 +70,24 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     expect(res).toEqual([outputType.Elasticsearch]);
   });
 
-  it('should return only elasticsearch for an agentless agent policy', () => {
+  it('should return only elasticsearch for an agentless agent policy without otel inputs', () => {
     const res = getAllowedOutputTypesForAgentPolicy({ supports_agentless: true } as any);
 
     expect(res).toEqual([outputType.Elasticsearch]);
+  });
+
+  it('should return elasticsearch and otlp for an agentless agent policy with only otel inputs', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      supports_agentless: true,
+      package_policies: [
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toEqual([outputType.Elasticsearch, outputType.Otlp]);
   });
 
   it('should return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES when all package policies have only OTel inputs', () => {
@@ -234,7 +248,7 @@ describe('getAllowedOutputTypesForPackagePolicy', () => {
     expect(res).toContain(outputType.RemoteElasticsearch);
   });
 
-  it('should return only elasticsearch for a package policy with agentless support', () => {
+  it('should return only elasticsearch for an agentless package policy without otel inputs', () => {
     const res = getAllowedOutputTypesForPackagePolicy({
       supports_agentless: true,
       inputs: [],
@@ -264,13 +278,13 @@ describe('getAllowedOutputTypesForPackagePolicy', () => {
     expect(res).toEqual(OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT);
   });
 
-  it('should return AGENTLESS_ALLOWED_OUTPUT_TYPES (not OTel list) when agentless even with OTel input', () => {
+  it('should return elasticsearch and otlp for an agentless package policy with only otel inputs', () => {
     const res = getAllowedOutputTypesForPackagePolicy({
       supports_agentless: true,
       inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, streams: [], enabled: true }],
     } as any);
 
-    expect(res).toEqual([outputType.Elasticsearch]);
+    expect(res).toEqual([outputType.Elasticsearch, outputType.Otlp]);
   });
 
   it('should return all available output types when inputs field is missing (safe default)', () => {

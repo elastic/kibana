@@ -46,6 +46,7 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventClient: () => eventClient,
+        getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: {},
@@ -55,6 +56,7 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       eventClient,
       rulesClient,
       candidateRuleIds: ['rule-1'],
+      alertEventsClient: undefined,
     });
     expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
   });
@@ -108,7 +110,7 @@ describe('GET /internal/significant_events/events', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({ findLatestByCurrentStatePaginated }),
+        getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
       server: {},
     } as never);
@@ -146,7 +148,7 @@ describe('GET /internal/significant_events/events', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => ({ findLatestByCurrentStatePaginated }),
+        getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
       }),
       server: {},
     } as never);
@@ -161,6 +163,45 @@ describe('GET /internal/significant_events/events', () => {
       search: 'noise',
       page: 2,
       perPage: 10,
+    });
+  });
+
+  it('passes through the RuleEventsClient-shaped result unchanged when getEventSearchClient() resolves the flag-on (RuleEventsClient) path', async () => {
+    const event = {
+      '@timestamp': '2026-01-03T00:00:00.000Z',
+      created_at: '2026-01-01T00:00:00.000Z',
+      event_uuid: 'group-hash-1',
+      event_id: 'event-1',
+      status: 'open' as const,
+      stream_names: ['logs.test'],
+      title: 'Test event',
+      summary: 'Test summary',
+      severity: '40-medium' as const,
+      confidence: 0.8,
+    };
+    const findLatestByCurrentStatePaginated = jest.fn().mockResolvedValue({
+      hits: [event],
+      page: 1,
+      perPage: 25,
+      total: 1,
+    });
+
+    const response = await eventsSearchRoute.handler({
+      params: { query: {} },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
+      }),
+      server: {},
+    } as never);
+
+    expect(findLatestByCurrentStatePaginated).toHaveBeenCalled();
+    expect(response).toEqual({
+      hits: [event],
+      page: 1,
+      perPage: 25,
+      total: 1,
     });
   });
 });

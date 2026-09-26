@@ -9,11 +9,11 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import {
-  bulkGetRulesParamsSchema,
+  bulkByIdsSchema,
   bulkGetRulesResponseSchema,
   errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
-import type { BulkGetRulesParams } from '@kbn/alerting-v2-schemas';
+import type { BulkByIdsParams } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
@@ -39,7 +39,7 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      body: bulkGetRulesParamsSchema,
+      body: bulkByIdsSchema,
     },
     response: {
       200: {
@@ -62,14 +62,14 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, BulkGetRulesParams>,
+    private readonly request: KibanaRequest<unknown, unknown, BulkByIdsParams>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const rules = await this.rulesClient.getRules(this.request.body.ids);
-    return this.ctx.response.ok({ body: { rules } });
+    const items = await this.rulesClient.getRules(this.request.body.ids);
+    return this.ctx.response.ok({ body: { items } });
   }
 }

@@ -6,6 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { EventClient } from '../../../lib/significant_events/events';
 import { eventsWriteHandler, type EventsWriteInput } from '../event_write/handler';
 import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
@@ -26,9 +28,13 @@ export type EventCreateInput = Pick<
 export async function createEventToolHandler({
   eventClient,
   eventInput,
+  alertEventsClient,
+  logger,
 }: {
   eventClient: EventClient;
   eventInput: EventCreateInput;
+  alertEventsClient?: AlertEventsClientApi;
+  logger?: Logger;
 }): Promise<{ event_uuid: string; acknowledged: true }> {
   const result = await eventsWriteHandler({
     eventClient,
@@ -37,6 +43,8 @@ export async function createEventToolHandler({
       event_id: uuidv4(),
       status: eventInput.status ?? 'open',
     },
+    alertEventsClient,
+    logger,
   });
   if (!result.written) {
     throw createBulkWriteOutcomeUnknownError(

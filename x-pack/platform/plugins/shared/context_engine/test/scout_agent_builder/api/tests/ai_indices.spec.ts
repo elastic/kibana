@@ -25,6 +25,7 @@ const TRACES_INDEX = 'traces-agent_builder.otel-default';
 const DEST = {
   dataStream: 'ai-index-ds-scout-test',
   index: 'ai-index-idx-scout-test',
+  alias: 'ai-index-idx-scout-alias',
   last: 'ai-index-ds-scout-last-dest',
   shared: 'ai-index-ds-scout-shared-dest',
   crossSpace: 'ai-index-ds-scout-cross-space-dest',
@@ -43,7 +44,7 @@ const AI_INDEX = {
   sharedA: 'scout_shared_dest_a',
   sharedB: 'scout_shared_dest_b',
   crossSpace: 'scout_cross_space_shared_dest',
-  pattern: 'scout_pattern_dest_ai_index',
+  rejectedDest: 'scout_rejected_dest_ai_index',
   traceIndexDataStream: 'scout_traces_index_ds',
   traceIndexWildcard: 'scout_traces_index_wildcard',
   traceIndexComma: 'scout_traces_index_comma',
@@ -54,6 +55,7 @@ const AI_INDEX = {
   traceRejectTrailingComma: 'scout_traces_reject_trailing_comma',
   traceRejectMissingAgent: 'scout_traces_reject_missing_agent',
   traceRejectPut: 'scout_traces_reject_put',
+  sourceRejectPut: 'scout_sources_reject_put',
 };
 
 const DATA_STREAMS = [
@@ -85,8 +87,7 @@ const emptyAiIndex = (destValue: string, traces: AiIndexTrace[] = []) => ({
   traces,
 });
 
-// Failing: See https://github.com/elastic/kibana/issues/291053
-apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.classic }, () => {
+apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 
@@ -98,6 +99,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
       await esClient.indices.createDataStream({ name }, { ignore: [400] });
     }
     await esClient.indices.create({ index: DEST.index }, { ignore: [400] });
+    await esClient.indices.putAlias({ index: DEST.index, name: DEST.alias });
   });
 
   apiTest.afterAll(async ({ apiClient, esClient, apiServices }) => {
@@ -217,7 +219,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
         responseType: 'json',
         body: {
           ...aiIndexBody,
-          dest: dataStreamDest('ai-index-ds-does-not-exist*'),
+          dest: dataStreamDest('ai-index-ds-does-not-exist'),
         },
       });
 
@@ -227,7 +229,7 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
   );
 
   apiTest('creates and reads an index AI index', async ({ apiClient }) => {
-    const dest = { type: 'index', value: `${DEST.index}*` };
+    const dest = { type: 'index', value: DEST.index };
     const path = aiIndexPath(AI_INDEX.index);
 
     const createResponse = await apiClient.put(path, {
@@ -246,11 +248,11 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
     expect(getResponse.body).toMatchObject({ id: AI_INDEX.index, dest });
   });
 
-  apiTest('rejects a system index as an index dest', async ({ apiClient }) => {
+  apiTest('rejects an index dest outside the ai-index-idx- prefix', async ({ apiClient }) => {
     const response = await apiClient.put(aiIndexPath(AI_INDEX.lifecycle), {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
-      body: { ...aiIndexBody, dest: { type: 'index', value: '.kibana*' } },
+      body: { ...aiIndexBody, dest: { type: 'index', value: '.kibana' } },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -266,6 +268,30 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
     });
 
     expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('rejects an empty ES|QL source', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.lifecycle), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: { ...aiIndexBody, sources: [{ type: 'esql', value: '' }] },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain(
+      'value has length [0] but it must have a minimum length of [1]'
+    );
+  });
+
+  apiTest('rejects a syntactically invalid ES|QL source', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.lifecycle), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: { ...aiIndexBody, sources: [{ type: 'esql', value: 'FROM logs | WHERE' }] },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toMatch(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /);
   });
 
   apiTest('rejects an id with disallowed characters', async ({ apiClient }) => {
@@ -442,29 +468,38 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
     }
   );
 
-  apiTest(
-    'does not delete an index-pattern dest when deleting knowledge indicators',
-    async ({ apiClient }) => {
-      const path = aiIndexPath(AI_INDEX.pattern);
-      const createResponse = await apiClient.put(path, {
-        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-        body: emptyAiIndex('ai-index-ds-scout-pattern*'),
-      });
-      expect(createResponse).toHaveStatusCode(201);
+  apiTest('rejects a wildcard dest', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.rejectedDest), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: emptyAiIndex('ai-index-ds-scout-pattern*'),
+    });
 
-      const deleteResponse = await apiClient.delete(`${path}?delete_knowledge_indicators=true`, {
-        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-      });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain('Must use only lowercase letters');
+  });
 
-      expect(deleteResponse).toHaveStatusCode(200);
-      expect(deleteResponse.body).toStrictEqual({
-        acknowledged: true,
-        errors: [expect.stringContaining('index pattern')],
-      });
-    }
-  );
+  apiTest('rejects a comma-separated dest', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.rejectedDest), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: emptyAiIndex(`${DEST.dataStream},${DEST.shared}`),
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain('Must use only lowercase letters');
+  });
+
+  apiTest('rejects an alias dest', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.rejectedDest), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: { ...aiIndexBody, dest: { type: 'index', value: DEST.alias } },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain(`'${DEST.alias}' is an alias`);
+  });
 
   apiTest(
     'accepts an index trace pointing at an existing data stream and returns a FROM query',
@@ -737,6 +772,52 @@ apiTest.describe.skip('context engine AI indices API', { tag: tags.stateful.clas
           expect(response.body.traces).toStrictEqual([
             { type: 'index', value: DEST.traces, query: `FROM ${DEST.traces}` },
           ]);
+        }
+      );
+    }
+  );
+
+  apiTest(
+    'rejects an invalid ES|QL source on PUT without modifying the stored AI index',
+    async ({ apiClient }) => {
+      const id = AI_INDEX.sourceRejectPut;
+      const path = aiIndexPath(id);
+      const sources = [{ type: 'esql', value: `FROM ${DEST.dataStream}` }];
+
+      await apiTest.step('creates an AI index with a valid ES|QL source', async () => {
+        const response = await apiClient.post(COLLECTION, {
+          headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+          body: { id, ...emptyAiIndex(DEST.dataStream), sources },
+        });
+
+        expect(response).toHaveStatusCode(201);
+      });
+
+      await apiTest.step('rejects a PUT with a syntactically invalid ES|QL source', async () => {
+        const response = await apiClient.put(path, {
+          headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+          body: {
+            ...emptyAiIndex(DEST.dataStream),
+            sources: [{ type: 'esql', value: 'FROM logs | WHERE' }],
+          },
+        });
+
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.message).toMatch(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /);
+      });
+
+      await apiTest.step(
+        'leaves the original sources unchanged after the rejected PUT',
+        async () => {
+          const response = await apiClient.get(path, {
+            headers: { ...viewerApiCredentials.apiKeyHeader, ...API_HEADERS },
+            responseType: 'json',
+          });
+
+          expect(response).toHaveStatusCode(200);
+          expect(response.body.sources).toStrictEqual(sources);
         }
       );
     }

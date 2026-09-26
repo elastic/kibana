@@ -60,6 +60,7 @@ import { createConfig } from './config';
 import type { ThreatIntelRuntime } from './threat_intel/wiring';
 import {
   createThreatIntelRuntime,
+  isThreatIntelSupplyEnabled,
   setupThreatIntel,
   startThreatIntel,
 } from './threat_intel/wiring';
@@ -235,6 +236,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   /** Cross-lifecycle state for the threat-intel supply pipeline. */
   private threatIntelRuntime: ThreatIntelRuntime = createThreatIntelRuntime();
+  /**
+   * Captured in setup from the optional alertzero plugin's soft-enable switch.
+   * Threat-intel supply (routes, tasks, managed workflows) gates on this.
+   */
+  private threatIntelSupplyEnabled = false;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -845,6 +851,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
         isServerless: this.isServerless,
+        stackVersion: this.pluginContext.env.packageInfo.version,
       });
 
       this.trialCompanionMilestoneService.setup({
@@ -870,8 +877,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 
+    this.threatIntelSupplyEnabled = isThreatIntelSupplyEnabled(plugins.alertzero);
     setupThreatIntel({
-      experimentalFeatures,
+      alertZeroEnabled: this.threatIntelSupplyEnabled,
       plugins,
       core,
       logger: this.logger,
@@ -927,7 +935,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     // workflow installer awaits it. The installer is fire-and-forget: startup
     // must not block on install or ready().
     startThreatIntel({
-      experimentalFeatures: this.config.experimentalFeatures,
+      alertZeroEnabled: this.threatIntelSupplyEnabled,
       plugins,
       core,
       logger: this.logger,
@@ -938,7 +946,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       void installSecurityManagedWorkflowsAndMarkReady({
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
-        threatIntelSupplyEnabled: this.config.experimentalFeatures.threatIntelSupplyEnabled,
+        threatIntelSupplyEnabled: this.threatIntelSupplyEnabled,
         bootstrapReady: this.threatIntelRuntime.bootstrapReady,
         core,
       });

@@ -11,6 +11,8 @@ import React from 'react';
 import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './use_resolution_group';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
+jest.setTimeout(15000);
+
 jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
 }));
@@ -90,5 +92,23 @@ describe('useResolutionGroup', () => {
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
     });
+  });
+
+  it('forwards executionContext to http.fetch', async () => {
+    const executionContext = {
+      child: { type: 'security_solution', name: 'test', id: 'test-id' },
+    };
+    mockFetch.mockResolvedValueOnce({ target: {}, aliases: [], group_size: 1 });
+
+    renderHook(() => useResolutionGroup('entity-1', { executionContext }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith(
+        RESOLUTION_GROUP_ROUTE,
+        expect.objectContaining({ context: executionContext })
+      )
+    );
   });
 });

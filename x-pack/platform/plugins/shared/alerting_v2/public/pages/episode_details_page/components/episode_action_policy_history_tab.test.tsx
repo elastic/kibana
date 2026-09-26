@@ -115,11 +115,12 @@ const buildItem = (
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   total_rule_count: 1,
-  outcome: 'dispatched',
+  outcome: 'success',
   episode_count: 3,
   episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
+  error: null,
   ...overrides,
 });
 
@@ -129,7 +130,7 @@ const mockFetchResult = (
       items: PolicyExecutionHistoryItem[];
       page: number;
       perPage: number;
-      totalEvents: number;
+      total: number;
       searchMatches: null;
     };
     isFetching: boolean;
@@ -137,7 +138,7 @@ const mockFetchResult = (
   }> = {}
 ) => {
   mockUseFetchExecutionHistory.mockReturnValue({
-    data: { items: [], page: 1, perPage: 10, totalEvents: 0, searchMatches: null },
+    data: { items: [], page: 1, perPage: 10, total: 0, searchMatches: null },
     isFetching: false,
     isError: false,
     refetch: mockRefetch,
@@ -164,7 +165,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
+      outcomes: undefined,
       episodeIds: [EPISODE_ID],
     });
   });
@@ -176,9 +177,9 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
+      outcomes: undefined,
       episodeIds: [EPISODE_ID],
-      startDate: '2026-01-01T00:00:00.000Z',
+      from: '2026-01-01T00:00:00.000Z',
     });
   });
 
@@ -195,19 +196,16 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     mockFetchResult();
     renderTab();
 
-    await userEvent.selectOptions(
-      screen.getByTestId('executionHistoryOutcomeFilter'),
-      'dispatched'
-    );
+    await userEvent.selectOptions(screen.getByTestId('executionHistoryOutcomeFilter'), 'success');
 
     expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith(
-      expect.objectContaining({ outcome: ['dispatched'], episodeIds: [EPISODE_ID] })
+      expect.objectContaining({ outcomes: ['success'], episodeIds: [EPISODE_ID] })
     );
   });
 
   it('renders rows without the Episodes, Action groups, and Rules columns', () => {
     mockFetchResult({
-      data: { items: [buildItem()], page: 1, perPage: 10, totalEvents: 1, searchMatches: null },
+      data: { items: [buildItem()], page: 1, perPage: 10, total: 1, searchMatches: null },
     });
     renderTab();
 
@@ -239,7 +237,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
 
   it('opens the policy flyout when the policy link is clicked and closes it on dismiss', async () => {
     mockFetchResult({
-      data: { items: [buildItem()], page: 1, perPage: 10, totalEvents: 1, searchMatches: null },
+      data: { items: [buildItem()], page: 1, perPage: 10, total: 1, searchMatches: null },
     });
     renderTab();
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "202c30b87f123f6341d2493c909bbc48f1012006",
+  "sha1": "6faaff774dd19bb7720227747de552ce02d0989d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -76,7 +76,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
-        "line": 73,
+        "line": 72,
         "column": 91
       }
     },
@@ -89,7 +89,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
-        "line": 98,
+        "line": 97,
         "column": 16
       }
     },
@@ -102,7 +102,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
-        "line": 119,
+        "line": 118,
         "column": 16
       }
     },
