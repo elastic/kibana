@@ -11,7 +11,8 @@ xpack.alertzero.enabled: true
 ```
 
 - **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
-- **`xpack.alertzero.ui.useMockData`** — optional presentation-source toggle (default `false`). Set to `true` to serve the mock Investigation catalog from `@kbn/alertzero-common` instead of real data — useful for demos and UI work without a live stack. Worker settings and Watch grouping are live either way.
+
+AlertZero reads live data only. To work on the UI without waiting for Workers to produce proposals, seed the queue with `scripts/seed_proposal_attachments.sh`, which writes real proposal documents and Agent Builder conversations into your local stack.
 
 Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space.
 
@@ -53,7 +54,7 @@ Real data is served by default. Keep these in mind when running AlertZero in sha
 
 Skills are only projected from real data. At startup, AlertZero provisions the required Agent Builder agent in every space that has an installed watch before `ready()` runs reconciliation, so skills resolve correctly in non-default spaces on first request.
 
-`GET /internal/alertzero/skills` returns a per-space `WatchSkill[]` projected from live workflow definitions:
+There is no skills route. Skills ride along on each Worker returned by `GET /internal/alertzero/workers`, projected per space from live workflow definitions:
 
 - Each `ai.agent` step in a workflow's YAML contributes the skills it can invoke. The projection walks all step branches (if/else, cases, parallel branches) so nested agent steps are found.
 - If the step has a `configuration_overrides.skill_ids` list those IDs are used, even when the step's agent-id cannot be resolved from Agent Builder. Otherwise the agent's own `configuration.skill_ids` are used, plus any `baseConfiguration.skill_ids` from its type.
@@ -124,6 +125,7 @@ Managed Worker definitions:
 - `system-security-hunt-continuous-threat-hunt`
 - `system-security-detection-rule-tuning`
 - `system-security-detection-rule-creation`
+- `system-security-forensics-endpoint-analysis`
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
 
@@ -211,7 +213,7 @@ Tests to update:
 `enabled` sits beside `settings`; `autonomy` and `scheduleInterval` are the shared fields inside it. Anything else lives under `settings.extras`, owned by the Worker's Watch team and closed per Worker. A PATCH is the editable subset of the read body plus the revision GET returned:
 
 ```json
-{ "enabled": true, "settingsRevision": 3, "settings": { "autonomy": "manual", "scheduleInterval": "2h", "extras": { "analysisWindowDays": 14 } } }
+{ "enabled": true, "settingsRevision": 3, "settings": { "autonomy": "manual", "scheduleInterval": "2h", "extras": { "analysisWindowDays": 7, "fpCountThreshold": 10, "fpRateThresholdPct": 50 } } }
 ```
 
 Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras` is whole-object: omitted keeps the stored object; supplied must be the complete valid object for that Worker and replaces it. No deep merge, no special `null`. Unknown keys, another Worker's fields, a replacement missing a required field, or an autonomy level the Worker does not allow are rejected with a 400 naming the field.
@@ -233,11 +235,11 @@ AlertZero is not live. Declarations, schemas and template values may change with
 
 | Area | Where to land |
 |------|----------------|
-| Shared types, fixtures, OpenAPI | `@kbn/alertzero-common` |
+| Shared types and OpenAPI | `@kbn/alertzero-common` |
 | Managed Worker YAML, renderers, and template value types | `kbn-workflows/managed/definitions/alertzero` |
 | Worker settings defaults, validation, patches, and API projection | `plugins/alertzero/server/managed_workflows/workers` |
 | Investigation / Proposal conversation projection | Agent Builder / Conversations (optional dep) |
-| Live Watch projection (non-mock) | Workflows Management via `workflowsExtensions` |
+| Live Watch projection | Workflows Management via `workflowsExtensions` |
 | Skills projection | `server/services/utils/skills_projection_service.ts` + `server/services/watches/project_watch.ts` |
 | Brief / in-app pages | `plugins/alertzero/public` |
 | Solution nav nodes | `security_solution_ess` / `security_solution_serverless` navigation trees |
@@ -270,11 +272,11 @@ node scripts/jest x-pack/solutions/security/packages/kbn-alertzero-common
 
 ### Page-load budget
 
-Keep `pageLoadAssetSize.alertzero` lean — prefer a thin plugin entry over raising the optimizer limit. Keep the app UI behind `import('./application')` in `public/plugin.ts`. The shared package (`@kbn/alertzero-common`) must use an **explicit export allow-list** in `index.ts` — never `export *` for schemas/samples. Star re-exports defeat optimizer tree-shaking and can pull Zod + mock catalogs into the page-load bundle even when the plugin only imports a few constants.
+Keep `pageLoadAssetSize.alertzero` lean — prefer a thin plugin entry over raising the optimizer limit. Keep the app UI behind `import('./application')` in `public/plugin.ts`. The shared package (`@kbn/alertzero-common`) must use an **explicit export allow-list** in `index.ts` — never `export *` for schemas. Star re-exports defeat optimizer tree-shaking and can pull Zod into the page-load bundle even when the plugin only imports a few constants.
 
 Measure with:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --filter alertzero --dist --no-cache --no-examples
-# inspect …/alertzero/target/public/metrics.json → "page load bundle size"
+node scripts/build_kibana_platform_plugins.js --dist --no-cache
+# inspect target/public/bundles/metrics.json → "page load bundle size" for alertzero
 ```

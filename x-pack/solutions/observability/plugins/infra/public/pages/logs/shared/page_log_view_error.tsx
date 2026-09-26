@@ -20,12 +20,13 @@ import { LogsPageTemplate } from './page_template';
 
 export const LogViewErrorPage: React.FC<{
   errors: Error[];
+  header?: React.ReactNode;
   onRetry?: () => void;
-}> = ({ errors, onRetry }) => {
+}> = ({ errors, header, onRetry }) => {
   const settingsLinkProps = useLinkProps({ app: 'logs', pathname: '/settings' });
 
   return (
-    <LogsPageTemplate isEmptyState={true}>
+    <LogsPageTemplate header={header} isEmptyState={true}>
       <EuiEmptyPrompt
         iconType="warning"
         iconColor="danger"

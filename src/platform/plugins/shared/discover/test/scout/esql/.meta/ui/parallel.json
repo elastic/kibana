@@ -1,5 +1,5 @@
 {
-  "sha1": "964b7fdb11f8609a02ce34c1919a72d34be6c891",
+  "sha1": "dd08dbbc271be04261eb54e2a60f4b67f82a9c05",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -898,6 +898,84 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/lookup_index_editor_save_without_close.spec.ts",
         "line": 35,
         "column": 42
+      }
+    },
+    {
+      "id": "7559256b7de2725-d9df4ccfd2ab919",
+      "title": "Discover ES|QL visualization persistence renders an ES|QL histogram and updates it for a new time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
+        "line": 26,
+        "column": 66
+      }
+    },
+    {
+      "id": "7559256b7de2725-4a53b8e635ec851",
+      "title": "Discover ES|QL visualization persistence persists a Line histogram and reverts a shape change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
+        "line": 42,
+        "column": 22
+      }
+    },
+    {
+      "id": "7559256b7de2725-b5ef1007684a89a",
+      "title": "Discover ES|QL visualization persistence changes an ES|QL histogram to a breakdown and a Lens suggestion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
+        "line": 71,
+        "column": 6
+      }
+    },
+    {
+      "id": "7559256b7de2725-5b86a1c0a252ef1",
+      "title": "Discover ES|QL visualization persistence retains compatible visualization changes and reverts incompatible query changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
+        "line": 90,
+        "column": 24
+      }
+    },
+    {
+      "id": "7559256b7de2725-20af93919242847",
+      "title": "Discover ES|QL visualization persistence saves an invalidated histogram as a Lens suggestion and restores it after a query revert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
+        "line": 113,
+        "column": 22
+      }
+    },
+    {
+      "id": "7559256b7de2725-6ecf58a65a18325",
+      "title": "Discover ES|QL visualization persistence persists a Lens flyout shape and closes the flyout on revert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
+        "line": 136,
+        "column": 22
       }
     },
     {

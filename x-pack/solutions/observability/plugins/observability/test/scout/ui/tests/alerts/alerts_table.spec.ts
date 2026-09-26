@@ -29,7 +29,7 @@ test.describe(
       await browserAuth.loginAsViewer();
       await pageObjects.alertsTablePage.goto();
       // Start every scenario from the full, unfiltered set of alerts.
-      await pageObjects.alertControls.clearControlSelections(ALERT_STATUS_CONTROL_ID);
+      await pageObjects.controls.clearSelections(ALERT_STATUS_CONTROL_ID);
       await pageObjects.alertsTablePage.waitForTableToLoad();
     });
 

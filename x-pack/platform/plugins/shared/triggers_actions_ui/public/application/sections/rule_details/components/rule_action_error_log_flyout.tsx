@@ -20,6 +20,7 @@ import {
   EuiHorizontalRule,
   useEuiTheme,
   EuiFocusTrap,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { RuleErrorLogWithApi } from './rule_error_log';
@@ -48,6 +49,8 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
 
   const isFlyoutPush = useIsWithinBreakpoints(['xl']);
 
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'ruleActionErrorLogFlyoutTitle' });
+
   const logFromDifferentSpace = useMemo(
     () => Boolean(activeSpaceId && !spaceIds?.includes(activeSpaceId)),
     [activeSpaceId, spaceIds]
@@ -59,14 +62,14 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
       onClose={onClose}
       size={isFlyoutPush ? 'm' : 'l'}
       data-test-subj="ruleActionErrorLogFlyout"
-      aria-label="ruleActionErrorLogFlyout"
+      aria-labelledby={flyoutTitleId}
       closeButtonProps={{
         autoFocus: true,
       }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.actionErrors"
               defaultMessage="Errored Actions"

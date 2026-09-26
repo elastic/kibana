@@ -3,18 +3,18 @@ pageLoadAssetSize:
   advancedSettings: 1981
   agentBuilder: 644
   agentBuilderDashboards: 3743
-  agentBuilderPlatform: 21685
+  agentBuilderPlatform: 23882
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
-  agenticInvestigations: 13459
+  agenticInvestigations: 15406
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 10276
+  alertzero: 18893
   apm: 35746
-  apmShared: 1896
+  apmShared: 2226
   apmSourcesAccess: 1174
   automaticImport: 13257
   banners: 1425
@@ -53,9 +53,8 @@ pageLoadAssetSize:
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7461
-  developerToolbar: 1951
   devTools: 4281
-  discover: 18086
+  discover: 19917
   discoverEnhanced: 1359
   discoveries: 31528
   discoverShared: 1070
@@ -66,7 +65,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
   entityStore: 2252
-  esql: 306
+  esql: 341
   esqlDataGrid: 215
   esqlViews: 1205
   esUiShared: 2284
@@ -89,7 +88,7 @@ pageLoadAssetSize:
   files: 3954
   filesManagement: 940
   fileUpload: 480
-  fleet: 7307
+  fleet: 8071
   genAiSettings: 1795
   globalSearch: 5447
   globalSearchBar: 21704
@@ -107,12 +106,11 @@ pageLoadAssetSize:
   ingestHub: 8059
   ingestPipelines: 534
   inputControlVis: 3213
-  inspectComponent: 1141
   inspector: 586
   interactiveSetup: 32694
   intercepts: 14374
   kibanaOverview: 1863
-  kibanaReact: 1225
+  kibanaReact: 1618
   kibanaUsageCollection: 529
   kibanaUtils: 2884
   kql: 337
@@ -125,19 +123,19 @@ pageLoadAssetSize:
   logsDataAccess: 576
   logsShared: 2042
   logstash: 11772
-  maintenanceWindows: 3754
+  maintenanceWindows: 4338
   management: 10296
   maps: 1201
   mapsEms: 3256
   metricsDataAccess: 1947
   mitreAttack: 2022
   ml: 950
-  mockIdpPlugin: 3990
   monitoring: 22416
   navigation: 332
   newsfeed: 10708
   nightshift: 2362
   nightshiftInvestigations: 9405
+  nightshiftSources: 3928
   noDataPage: 630
   notificationCenter: 600
   observability: 4071
@@ -155,6 +153,7 @@ pageLoadAssetSize:
   productDocBase: 4218
   productIntercept: 4738
   profiling: 12944
+  proposals: 13459
   queryActivity: 1149
   reindexService: 1964
   remoteClusters: 5794
@@ -193,7 +192,7 @@ pageLoadAssetSize:
   share: 379
   shared-core: 311749
   shared-misc: 155260
-  shared-packages: 5010040
+  shared-packages: 5513030
   shared-plugins: 13536562
   shared-solution-packages: 347767
   significantEvents: 3679
@@ -205,7 +204,7 @@ pageLoadAssetSize:
   stackConnectors: 63548
   streams: 4563
   streamsApp: 55882
-  synthetics: 18443
+  synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738
   timelines: 1409

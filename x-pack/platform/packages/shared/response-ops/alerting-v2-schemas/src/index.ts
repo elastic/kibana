@@ -9,8 +9,8 @@ export * from './rule_data_schema';
 export * from './rule_attachment_schema';
 export * from './error_response_schema';
 export * from './constants';
-export { durationSchema, tagsResponseSchema, tagsSchema } from './common';
-export type { TagsResponse } from './common';
+export { actorSchema, durationSchema, tagsResponseSchema, tagsSchema } from './common';
+export type { Actor, TagsResponse } from './common';
 export {
   validateDuration,
   validateMaxDuration,
@@ -29,8 +29,8 @@ export * from './bulk_operation_schema';
 export * from './policy_execution_history_schema';
 export * from './rule_execution_history_schema';
 export * from './rule_change_history_schema';
+export * from './rule_event_fields_schema';
 export * from './match_action_policies_schema';
-export * from './matcher_data_fields_schema';
 export * from './severity';
 export * from './create_alert_event_data_schema';
 export * from './rule_template_schema';

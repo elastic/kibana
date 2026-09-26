@@ -27,6 +27,13 @@ interface Props {
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
+  /**
+   * Absolute window for the waterfall fetch. When omitted, resolved from rangeFrom/rangeTo
+   * via useTimeRange. Hosts with a frozen snapshot (e.g. transaction detail flyout) should
+   * pass these so relative rangeFrom/rangeTo still drive locator links without drifting `now`.
+   */
+  start?: string;
+  end?: string;
   isOpen: boolean;
   onClose: () => void;
   contextSpanIds?: string[];
@@ -62,6 +69,8 @@ export function TraceWaterfallFlyout({
   traceId,
   rangeFrom,
   rangeTo,
+  start: startOverride,
+  end: endOverride,
   isOpen,
   onClose,
   contextSpanIds,
@@ -73,7 +82,9 @@ export function TraceWaterfallFlyout({
   const apmPluginContext = useApmPluginContext();
   const core = deps?.core ?? apmPluginContext.core;
   const share = deps?.share ?? apmPluginContext.share;
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { start: resolvedStart, end: resolvedEnd } = useTimeRange({ rangeFrom, rangeTo });
+  const start = startOverride ?? resolvedStart;
+  const end = endOverride ?? resolvedEnd;
   const { dataView, apmIndices } = useAdHocApmDataView();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [selectedDocIndex, setSelectedDocIndex] = useState<string | undefined>(undefined);

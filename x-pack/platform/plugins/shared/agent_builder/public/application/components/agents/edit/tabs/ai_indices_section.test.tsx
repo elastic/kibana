@@ -34,6 +34,11 @@ jest.mock('../../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => ({
 }));
 
 const AGENT_ID = 'my-agent';
+const LONG_ID =
+  'sales-outreach-emails-call-notes-and-meeting-summaries-for-every-account-owned-by-field-sales';
+const LONG_DESCRIPTION =
+  'Outreach emails, call notes and meeting summaries for every account owned by the field sales ' +
+  'organisation, refreshed nightly and enriched with opportunity stage, renewal date and owner.';
 
 let mockIsContextEngineEnabled = true;
 let mockAgentAiIndices: Array<{ id: string; is_default: boolean }> = [];
@@ -241,6 +246,44 @@ describe('AiIndicesSection', () => {
       await openList();
 
       expect(screen.getAllByText('Ready').length).toBe(2);
+    });
+
+    // A description rendered beside the name squeezes it out of the row once it grows long enough,
+    // so both must live in the same stacked block.
+    it('keeps the name readable next to a long description', async () => {
+      mockAvailableAiIndices = [
+        { id: 'sales-outreach', description: LONG_DESCRIPTION, managed: false },
+      ];
+
+      renderSection();
+      await openList();
+
+      const option = within(optionFor('sales-outreach'));
+      expect(option.getByTestId('agentBuilderAiIndexOptionName-sales-outreach')).toHaveTextContent(
+        'sales-outreach'
+      );
+      expect(
+        option.getByTestId('agentBuilderAiIndexOptionDescription-sales-outreach')
+      ).toHaveTextContent(LONG_DESCRIPTION);
+    });
+
+    // Rows size to their content and the list is capped at 200px, so without a clamp one verbose
+    // index fills the dropdown. jsdom drops `-webkit-line-clamp`; the wrapper is the only proxy.
+    it('clamps a long name and description so one option cannot fill the dropdown', async () => {
+      mockAvailableAiIndices = [{ id: LONG_ID, description: LONG_DESCRIPTION, managed: false }];
+
+      renderSection();
+      await openList();
+
+      const option = within(optionFor(LONG_ID));
+      const name = option.getByTestId(`agentBuilderAiIndexOptionName-${LONG_ID}`);
+      const description = option.getByTestId(`agentBuilderAiIndexOptionDescription-${LONG_ID}`);
+
+      expect(name).toHaveClass('euiTextBlockTruncate');
+      expect(description).toHaveClass('euiTextBlockTruncate');
+      // What the clamp hides stays reachable on hover.
+      expect(name).toHaveAttribute('title', LONG_ID);
+      expect(description).toHaveAttribute('title', LONG_DESCRIPTION);
     });
 
     it('is disabled when the user cannot edit the agent', () => {

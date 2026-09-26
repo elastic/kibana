@@ -21,27 +21,31 @@ export const ALERTZERO_WATCH_URL_TEMPLATE = `${ALERTZERO_WATCHES_URL}/{watchId}`
 export const buildWatchUrl = (watchId: string) =>
   `${ALERTZERO_WATCHES_URL}/${encodeURIComponent(watchId)}`;
 
-/** Global worker / skill catalogs — shared across watches. */
+/** Global worker catalog — shared across watches. */
 export const ALERTZERO_WORKERS_URL = `${ALERTZERO_INTERNAL_URL}/workers` as const;
-export const ALERTZERO_SKILLS_URL = `${ALERTZERO_INTERNAL_URL}/skills` as const;
 
 export const ALERTZERO_WORKER_URL_TEMPLATE = `${ALERTZERO_WORKERS_URL}/{workerId}` as const;
-export const ALERTZERO_SKILL_URL_TEMPLATE = `${ALERTZERO_SKILLS_URL}/{skillId}` as const;
 
 export const buildWorkerUrl = (workerId: string) =>
   `${ALERTZERO_WORKERS_URL}/${encodeURIComponent(workerId)}`;
 
-export const buildSkillUrl = (skillId: string) =>
-  `${ALERTZERO_SKILLS_URL}/${encodeURIComponent(skillId)}`;
+/** Pending proposals for a single action category. */
+export const ALERTZERO_PROPOSALS_CATEGORY_URL =
+  `${ALERTZERO_INTERNAL_URL}/proposals/category/{category}` as const;
 
-/** Proposals grouped by category — AlertZero landing page. */
-export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
+/** Proposals decided in the last 72 h (any non-pending status, including expired). */
+export const ALERTZERO_PROPOSALS_CLOSED_URL = `${ALERTZERO_INTERNAL_URL}/proposals/closed` as const;
 
 /** Action catalog — category-scoped discovery of installed action workflows. */
 export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
+export const ALERTZERO_INVESTIGATIONS_COUNT_URL =
+  `${ALERTZERO_INTERNAL_URL}/investigations/count` as const;
 
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
+
+/** Agent Builder builtin tool that appends a revision to a proposal chain — see elastic/security-team#19289. */
+export const ALERTZERO_PROPOSALS_REVISE_TOOL_ID = 'security.alertzero.proposals.revise' as const;
 
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
@@ -54,15 +58,15 @@ export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
 export const SYSTEM_SECURITY_WATCH_HUNT_ID = 'system-security-watch-hunt' as const;
-export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
+export const SYSTEM_SECURITY_WATCH_FORENSICS_ID = 'system-security-watch-forensics' as const;
 export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
 
 export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
 ] as const;
 
 /**
@@ -81,6 +85,8 @@ export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as con
  */
 export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
 
+export const WATCH_AUTONOMY_MANUAL = ['manual'] as const;
+
 /**
  * Presentation metadata for the managed watch catalog.
  *
@@ -88,9 +94,9 @@ export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
  * trip — the app's deep links and the solution navigation tree — build their
  * entries from this list rather than from `list_watches`.
  *
- * Deliberately free of schema and sample imports: both consumers are page-load critical, and pulling
- * `WATCHES_SEED` in would drag Zod and the mock samples into that bundle. Live placeholders and
- * `WATCHES_SEED` both take name, colour and lifecycle from here so the two cannot drift.
+ * Deliberately free of schema imports: both consumers are page-load critical, and pulling a schema
+ * in would drag Zod into that bundle. Live placeholders take name and colour from here.
+ * `color` is an EUI token key (`euiColorVisN` or `textAssistance`), resolved at render.
  *
  * Custom (unmanaged) watches are absent by construction — they are discoverable only at runtime.
  */
@@ -99,59 +105,58 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     deepLinkId: SecurityPageName.alertZeroWatchFloor,
     name: 'Triage Watch',
-    color: '#16b3a6',
+    color: 'euiColorVis0',
   },
   {
     id: SYSTEM_SECURITY_WATCH_OFFICER_ID,
     deepLinkId: SecurityPageName.alertZeroWatchOfficer,
     name: 'Watch Officer',
-    color: '#3b82f6',
+    color: 'euiColorVis1',
   },
   {
     id: SYSTEM_SECURITY_WATCH_HUNT_ID,
     deepLinkId: SecurityPageName.alertZeroWatchHunt,
     name: 'Hunt Watch',
-    color: '#f59e0b',
-    isBeta: true,
-  },
-  {
-    id: SYSTEM_SECURITY_WATCH_DEEP_ID,
-    deepLinkId: SecurityPageName.alertZeroWatchDeep,
-    name: 'Forensics Watch',
-    color: '#8b5cf6',
-    isBeta: true,
+    color: 'euiColorVis8',
   },
   {
     id: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     deepLinkId: SecurityPageName.alertZeroWatchDetection,
     name: 'Detection Watch',
-    color: '#ec4899',
-    isBeta: true,
+    color: 'textAssistance',
+  },
+  {
+    id: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    deepLinkId: SecurityPageName.alertZeroWatchForensics,
+    name: 'Forensics Watch',
+    color: 'euiColorVis4',
   },
 ] as const;
-
-export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
 
 export const WATCH_TAG = 'watch' as const;
 export const WATCH_FLOOR_TAG = 'watch-floor' as const;
 export const WATCH_OFFICER_TAG = 'watch-officer' as const;
 export const WATCH_HUNT_TAG = 'watch-hunt' as const;
-export const WATCH_DEEP_TAG = 'watch-deep' as const;
+export const WATCH_FORENSICS_TAG = 'watch-forensics' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
 
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
   WATCH_OFFICER_TAG,
   WATCH_HUNT_TAG,
-  WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
+  WATCH_FORENSICS_TAG,
 ] as const;
+
+export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
 
 /** Managed Worker workflow ids — tagged Watch members. Hunt CTH is the externally settled id. */
 export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
   'system-security-floor-alert-triage' as const;
 export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
+export const SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID =
+  'system-security-forensics-endpoint-analysis' as const;
 export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
@@ -165,6 +170,7 @@ export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 ] as const;
 
 /**
@@ -202,6 +208,12 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     watchTag: WATCH_DETECTION_TAG,
   },
+  {
+    id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+    name: 'Endpoint Analysis',
+    watchId: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    watchTag: WATCH_FORENSICS_TAG,
+  },
 ] as const;
 
 export type SystemSecurityWorkerCatalogEntry = (typeof SYSTEM_SECURITY_WORKER_CATALOG)[number];
@@ -237,8 +249,8 @@ export const ALERTZERO_REASONING_INFERENCE_FEATURE_ID = 'alertzero_reasoning' as
 /** Multi-step work over tools and iteration, where cost multiplies by the round count. */
 export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as const;
 
+/** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
-export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
 export const TEMPLATE_ID_ESCALATION = 'escalation' as const;
 
 export const API_VERSIONS = {

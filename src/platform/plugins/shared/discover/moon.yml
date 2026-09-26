@@ -172,6 +172,7 @@ dependsOn:
   - '@kbn/as-code-discover-schema'
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
+  - '@kbn/esql-browser'
 tags:
   - plugin
   - prod

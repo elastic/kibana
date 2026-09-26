@@ -11,6 +11,7 @@ import './use_workflow_change_history_preview_validation.test_mocks';
 
 import { act, renderHook, type RenderHookResult, waitFor } from '@testing-library/react';
 import type { MutableRefObject } from 'react';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   applyValidationHighlightsToEditor,
   applyWorkflowYamlValidationToEditor,
@@ -32,6 +33,7 @@ import {
   setPreviewValidationMockModelYaml,
 } from './use_workflow_change_history_preview_validation_test_harness';
 import { waitForPreviewYamlSchemaMarkers } from './wait_for_yaml_schema_markers_after_update';
+import { createMockWorkflowContextRegistry } from '../../../common/lib/create_workflow_context_registry.mock';
 import { useAvailableConnectors } from '../../entities/connectors/model/use_available_connectors';
 import { navigateToErrorPosition } from '../../widgets/workflow_yaml_editor/lib/utils';
 import type { WorkflowYamlValidationContext } from '../validate_workflow_yaml/lib/collect_full_workflow_yaml_validation_results';
@@ -39,8 +41,9 @@ import {
   getWorkflowYamlValidationContextError,
   useWorkflowYamlValidationContextRef,
 } from '../validate_workflow_yaml/lib/use_workflow_yaml_validation_context';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 import { useWorkflowJsonSchema } from '../validate_workflow_yaml/model/use_workflow_json_schema';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 const mockApplyValidation = applyWorkflowYamlValidationToEditor as jest.Mock;
 const mockApplyHighlights = applyValidationHighlightsToEditor as jest.Mock;
@@ -60,6 +63,7 @@ const stableWorkflowJsonSchema = { type: 'object' };
 const stableConnectorsData = { connectorTypes: {} };
 const createValidationContextRef = (): MutableRefObject<WorkflowYamlValidationContext> => ({
   current: {
+    registry: emptyRegistry,
     connectorTypes: { status: 'ready', value: {} },
     connectorsManagementUrl: 'http://test/connectors',
     workflows: { workflows: {}, totalWorkflows: 0 },

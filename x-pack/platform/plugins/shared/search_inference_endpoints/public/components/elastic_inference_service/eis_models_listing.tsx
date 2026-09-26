@@ -20,7 +20,7 @@ import { useDisplayOptionsTour } from '../../hooks/use_display_options_tour';
 import { DisplayOptions } from './display_options';
 import { EisCardGrid } from './eis_card_grid';
 import { EisNoModelsPrompt } from './eis_no_models_prompt';
-import { ModelFamilyFilterPart, TaskTypeFilterPart } from './eis_model_filters';
+import { ModelTypeFilterPart, ModelFamilyFilterPart } from './eis_model_filters';
 import { EisTable } from './eis_table';
 
 export type EisViewMode = 'card' | 'table';
@@ -71,8 +71,8 @@ export const EisModelsListing = ({
         <EuiFlexItem>
           <ContentListToolbar>
             <ContentListToolbar.Filters>
+              <ModelTypeFilterPart />
               <ModelFamilyFilterPart />
-              <TaskTypeFilterPart />
             </ContentListToolbar.Filters>
           </ContentListToolbar>
         </EuiFlexItem>

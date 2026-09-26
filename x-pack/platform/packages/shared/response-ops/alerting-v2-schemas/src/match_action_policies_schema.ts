@@ -31,9 +31,9 @@ export const matchActionPoliciesBodySchema = z
 export type MatchActionPoliciesBody = z.infer<typeof matchActionPoliciesBodySchema>;
 
 export const matchedActionPolicyCategorySchema = z
-  .enum(['catch-all', 'tags'])
+  .enum(['catch_all', 'tags'])
   .describe(
-    "The reason this policy applies to the rule. `catch-all` means the policy has neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule has at least one tag listed in the policy's `matcher.tags`."
+    "The reason this policy applies to the rule. `catch_all` means the policy has neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule has at least one tag listed in the policy's `matcher.tags`."
   );
 
 export type MatchedActionPolicyCategory = z.infer<typeof matchedActionPolicyCategorySchema>;

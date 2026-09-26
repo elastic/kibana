@@ -1,0 +1,752 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { loggerMock } from '@kbn/logging-mocks';
+import type { Logger } from '@kbn/core/server';
+import type { Streams } from '@kbn/streams-schema';
+import type { Feature, QueryLink, StreamQuery } from '@kbn/significant-events-schema';
+import { BulkCreateRulesError, type IRulesManagementClient } from './rules/rules_management_client';
+import type { IndicatorReader } from './indicator_reader';
+import type { IndicatorWriter } from './indicator_writer';
+import { QueryRuleOrchestrator } from './query_rule_orchestrator';
+
+const STREAM = 'logs.test';
+const definition = { name: STREAM } as Streams.all.Definition;
+
+const makeQuery = (
+  overrides: Partial<StreamQuery> & { id?: string; severity_score?: number } = {}
+): StreamQuery => ({
+  id: overrides.id ?? 'q1',
+  type: 'match',
+  title: overrides.title ?? 'Test query',
+  description: 'desc',
+  esql: { query: overrides.esql?.query ?? 'FROM logs | WHERE body.text:"error"' },
+  severity_score: overrides.severity_score ?? 30,
+  ...overrides,
+});
+
+const makeLink = (
+  overrides: Partial<StreamQuery> & { id?: string; ruleBacked?: boolean } = {}
+): QueryLink => ({
+  query: makeQuery(overrides),
+  stream_name: STREAM,
+  rule_backed: overrides.ruleBacked ?? false,
+  rule_id: `rule-${overrides.id ?? 'q1'}`,
+});
+
+function createOrchestrator({
+  currentLinks = [] as QueryLink[],
+}: {
+  currentLinks?: QueryLink[];
+} = {}) {
+  const rulesManagementClient = {
+    createRule: jest.fn().mockResolvedValue(undefined),
+    bulkCreateRules: jest
+      .fn()
+      .mockImplementation((rules: Array<{ id: string }>) =>
+        Promise.resolve({ createdIds: rules.map(({ id }) => id) })
+      ),
+    updateRule: jest.fn().mockResolvedValue(undefined),
+    bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<IRulesManagementClient>;
+
+  const writer = {
+    bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+  } as unknown as jest.Mocked<IndicatorWriter>;
+
+  const reader = {
+    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ [STREAM]: currentLinks }),
+  } as unknown as jest.Mocked<IndicatorReader>;
+
+  const logger = loggerMock.create();
+  const orchestrator = new QueryRuleOrchestrator(
+    rulesManagementClient,
+    logger,
+    true,
+    writer,
+    reader
+  );
+
+  return { orchestrator, rulesManagementClient, writer, reader, logger };
+}
+
+describe('QueryRuleOrchestrator', () => {
+  describe('syncQueries', () => {
+    it('creates rules for new high-severity MATCH queries', async () => {
+      const { orchestrator, rulesManagementClient } = createOrchestrator();
+      const newQuery = makeQuery({
+        id: 'new-high',
+        severity_score: 80,
+        esql: { query: 'FROM logs | WHERE body.text:"critical"' },
+      });
+
+      await orchestrator.syncQueries(definition, [newQuery]);
+
+      expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips compensation when bulk create rejects before returning any created ids', async () => {
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
+      const createError = new Error('bulk create failed');
+      rulesManagementClient.bulkCreateRules.mockRejectedValueOnce(createError);
+      const newQuery = makeQuery({
+        id: 'new-high',
+        severity_score: 80,
+        esql: { query: 'FROM logs | WHERE body.text:"critical"' },
+      });
+
+      await expect(orchestrator.syncQueries(definition, [newQuery])).rejects.toBe(createError);
+
+      expect(rulesManagementClient.bulkDeleteRules).not.toHaveBeenCalled();
+      expect(writer.bulk).not.toHaveBeenCalled();
+    });
+
+    it('compensates only actually created ids when a later chunk fails', async () => {
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
+      const createError = new Error('chunk 2 failed');
+      let callCount = 0;
+      rulesManagementClient.bulkCreateRules.mockImplementation(async (rules) => {
+        callCount += 1;
+        if (callCount === 3) {
+          throw createError;
+        }
+        return { createdIds: rules.map(({ id }) => id) };
+      });
+
+      const queries = Array.from({ length: 201 }, (_, index) =>
+        makeQuery({
+          id: `q-${index}`,
+          severity_score: 80,
+          esql: { query: `FROM logs | WHERE body.text:"error-${index}"` },
+        })
+      );
+
+      await expect(orchestrator.syncQueries(definition, queries)).rejects.toBe(createError);
+
+      const createdChunks = rulesManagementClient.bulkCreateRules.mock.calls
+        .slice(0, 2)
+        .map(([rules]) => rules.map(({ id }) => id));
+      const deletedChunks = rulesManagementClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+      expect(deletedChunks.map((ids) => ids.length)).toEqual([100, 51]);
+      expect(deletedChunks.flat()).toEqual(createdChunks.flat());
+      expect(writer.bulk).not.toHaveBeenCalled();
+    });
+
+    it('compensates and logs same-batch partial results', async () => {
+      const { orchestrator, rulesManagementClient, writer, logger } = createOrchestrator();
+      const createError = new Error('one item failed');
+      rulesManagementClient.bulkCreateRules.mockRejectedValueOnce(
+        new BulkCreateRulesError(createError, ['rule-created'], ['rule-conflict'], ['rule-failed'])
+      );
+
+      await expect(
+        orchestrator.syncQueries(definition, [
+          makeQuery({
+            id: 'new-high',
+            severity_score: 80,
+            esql: { query: 'FROM logs | WHERE body.text:"critical"' },
+          }),
+        ])
+      ).rejects.toBe(createError);
+
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-created']);
+      expect(writer.bulk).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Created IDs: ["rule-created"]. Conflict IDs: ["rule-conflict"]. Failed IDs: ["rule-failed"]. Error: one item failed'
+        )
+      );
+    });
+
+    it('chunks created-rule compensation when storage fails', async () => {
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
+      const storageError = new Error('storage failed');
+      writer.bulk.mockRejectedValueOnce(storageError);
+      const queries = Array.from({ length: 201 }, (_, index) =>
+        makeQuery({
+          id: `q-${index}`,
+          severity_score: 80,
+          esql: { query: `FROM logs | WHERE body.text:"error-${index}"` },
+        })
+      );
+
+      await expect(orchestrator.syncQueries(definition, queries)).rejects.toBe(storageError);
+
+      const createdIds = rulesManagementClient.bulkCreateRules.mock.calls.flatMap(([rules]) =>
+        rules.map(({ id }) => id)
+      );
+      const deletedChunks = rulesManagementClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+      expect(deletedChunks.map((ids) => ids.length)).toEqual([100, 51, 50]);
+      expect(deletedChunks.flat()).toEqual(createdIds);
+    });
+
+    it('keeps the old rule when storage fails during an ESQL replacement', async () => {
+      const existing = makeLink({
+        id: 'replace-me',
+        severity_score: 80,
+        ruleBacked: true,
+        esql: { query: 'FROM logs | WHERE body.text:"old"' },
+      });
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: [existing],
+      });
+      const storageError = new Error('storage failed');
+      writer.bulk.mockRejectedValueOnce(storageError);
+      const replacement = makeQuery({
+        id: 'replace-me',
+        severity_score: 80,
+        esql: { query: 'FROM logs | WHERE body.text:"new"' },
+      });
+
+      await expect(
+        orchestrator.syncQueries(definition, [replacement], { currentLinks: [existing] })
+      ).rejects.toBe(storageError);
+
+      const [{ id: createdId }] = rulesManagementClient.bulkCreateRules.mock.calls[0][0];
+      expect(createdId).not.toBe(existing.rule_id);
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledTimes(1);
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith([createdId]);
+      expect(rulesManagementClient.bulkDeleteRules).not.toHaveBeenCalledWith([existing.rule_id]);
+    });
+
+    it('commits an ESQL replacement before removing its old rule', async () => {
+      const existing = makeLink({
+        id: 'replace-me',
+        severity_score: 80,
+        ruleBacked: true,
+        esql: { query: 'FROM logs | WHERE body.text:"old"' },
+      });
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: [existing],
+      });
+      const deleteError = new Error('old rule deletion failed');
+      rulesManagementClient.bulkDeleteRules.mockRejectedValueOnce(deleteError);
+      const replacement = makeQuery({
+        id: 'replace-me',
+        severity_score: 80,
+        esql: { query: 'FROM logs | WHERE body.text:"new"' },
+      });
+
+      await expect(
+        orchestrator.syncQueries(definition, [replacement], { currentLinks: [existing] })
+      ).rejects.toBeInstanceOf(AggregateError);
+
+      const [{ id: createdId }] = rulesManagementClient.bulkCreateRules.mock.calls[0][0];
+      const storedOperations = (writer.bulk as jest.Mock).mock.calls[0][1];
+      expect(storedOperations[0].index.query.rule_id).toBe(createdId);
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledTimes(1);
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith([existing.rule_id]);
+      expect(writer.bulk.mock.invocationCallOrder[0]).toBeLessThan(
+        rulesManagementClient.bulkDeleteRules.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not promote existing unbacked low-severity MATCH queries when syncing a new high-severity query', async () => {
+      const existingLow = makeLink({
+        id: 'low-sev',
+        severity_score: 25,
+        esql: { query: 'FROM logs | WHERE body.text:"startup"' },
+        ruleBacked: false,
+      });
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: [existingLow],
+      });
+      const newHigh = makeQuery({
+        id: 'high-sev',
+        title: 'OOM errors',
+        severity_score: 80,
+        esql: { query: 'FROM logs | WHERE body.text:"oom"' },
+      });
+
+      await orchestrator.syncQueries(definition, [existingLow.query, newHigh], {
+        currentLinks: [existingLow],
+      });
+
+      expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
+      expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: expect.any(String),
+          definition: expect.objectContaining({ name: 'OOM errors (match count)' }),
+        }),
+      ]);
+
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const lowSevOp = bulkOps.find(
+        (op: { index?: { query?: { id?: string } } }) => op.index?.query?.id === 'low-sev'
+      );
+      expect(lowSevOp?.index?.query?.rule_backed).toBe(false);
+    });
+
+    it('promotes existing unbacked queries only via promoteQueries', async () => {
+      const existingLow = makeLink({
+        id: 'low-sev',
+        severity_score: 25,
+        ruleBacked: false,
+      });
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: [existingLow],
+      });
+
+      await orchestrator.promoteQueries(definition, ['low-sev']);
+
+      expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      expect(bulkOps[0].index.query.rule_backed).toBe(true);
+    });
+
+    it('chunks compensation when a later promotion chunk fails', async () => {
+      const links = Array.from({ length: 201 }, (_, index) =>
+        makeLink({
+          id: `promote-${index}`,
+          severity_score: 80,
+          esql: { query: `FROM logs | WHERE body.text:"error-${index}"` },
+          ruleBacked: false,
+        })
+      );
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: links,
+      });
+      const createError = new Error('promotion chunk failed');
+      let callCount = 0;
+      rulesManagementClient.bulkCreateRules.mockImplementation(async (rules) => {
+        callCount += 1;
+        if (callCount === 3) {
+          throw createError;
+        }
+        return { createdIds: rules.map(({ id }) => id) };
+      });
+
+      await expect(
+        orchestrator.promoteQueries(
+          definition,
+          links.map(({ query }) => query.id)
+        )
+      ).rejects.toBe(createError);
+
+      const createdChunks = rulesManagementClient.bulkCreateRules.mock.calls
+        .slice(0, 2)
+        .map(([rules]) => rules.map(({ id }) => id));
+      const deletedChunks = rulesManagementClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+      expect(deletedChunks.map((ids) => ids.length)).toEqual([100, 51]);
+      expect(deletedChunks.flat()).toEqual(createdChunks.flat());
+      expect(writer.bulk).not.toHaveBeenCalled();
+    });
+
+    it('stores unsupported MATCH queries as unbacked instead of failing install', async () => {
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
+      const unsupported = makeQuery({
+        id: 'keep-before-where',
+        severity_score: 90,
+        esql: { query: 'FROM logs-* | KEEP message | WHERE level == "error"' },
+      });
+
+      await orchestrator.syncQueries(definition, [unsupported]);
+
+      expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      expect(bulkOps[0].index.query.rule_backed).toBe(false);
+      expect(bulkOps[0].index.query.id).toBe('keep-before-where');
+    });
+
+    it('demotes a previously backed query that becomes unsupported MATCH', async () => {
+      const existing = makeLink({
+        id: 'was-backed',
+        severity_score: 90,
+        ruleBacked: true,
+        esql: { query: 'FROM logs-* | WHERE level == "error"' },
+      });
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: [existing],
+      });
+      const next = makeQuery({
+        id: 'was-backed',
+        severity_score: 90,
+        esql: { query: 'FROM logs-* | KEEP message | WHERE level == "error"' },
+      });
+
+      await orchestrator.syncQueries(definition, [next], { currentLinks: [existing] });
+
+      expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-was-backed']);
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      expect(bulkOps[0].index.query.rule_backed).toBe(false);
+    });
+
+    it('skips unsupported MATCH shapes during promoteQueries', async () => {
+      const unsupported = makeLink({
+        id: 'bad-match',
+        severity_score: 90,
+        ruleBacked: false,
+        esql: { query: 'FROM logs-* | EVAL x = 1 | WHERE level == "error"' },
+      });
+      const { orchestrator, rulesManagementClient } = createOrchestrator({
+        currentLinks: [unsupported],
+      });
+
+      const result = await orchestrator.promoteQueries(definition, ['bad-match']);
+
+      // Counted apart from STATS: the user's remedy is to rewrite the query.
+      expect(result).toEqual({ promoted: 0, skipped_stats: 0, skipped_ineligible: 1 });
+      expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
+    });
+
+    it('counts skipped STATS queries under their own reason', async () => {
+      const stats = makeLink({
+        id: 'stats-ki',
+        type: 'stats',
+        ruleBacked: false,
+        esql: {
+          query:
+            'FROM logs | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+        },
+      });
+      const { orchestrator, rulesManagementClient } = createOrchestrator({
+        currentLinks: [stats],
+      });
+
+      const result = await orchestrator.promoteQueries(definition, ['stats-ki']);
+
+      expect(result).toEqual({ promoted: 0, skipped_stats: 1, skipped_ineligible: 0 });
+      expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('upsertQuery', () => {
+    it('preserves existing features when the incoming query omits them (durability toggle)', async () => {
+      const existing = makeLink({ id: 'q1', features: [{ id: 'feat-1' }] });
+      const { orchestrator, writer } = createOrchestrator({ currentLinks: [existing] });
+
+      await orchestrator.upsertQuery(
+        definition,
+        makeQuery({ id: 'q1', expires_at: '2030-01-01T00:00:00.000Z' })
+      );
+
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const op = bulkOps.find(
+        (o: { index?: { query?: { id?: string } } }) => o.index?.query?.id === 'q1'
+      );
+      expect(op?.index?.query?.features).toEqual([{ id: 'feat-1' }]);
+    });
+
+    it('lets incoming features override the stored ones', async () => {
+      const existing = makeLink({ id: 'q1', features: [{ id: 'feat-1' }] });
+      const { orchestrator, writer } = createOrchestrator({ currentLinks: [existing] });
+
+      await orchestrator.upsertQuery(
+        definition,
+        makeQuery({ id: 'q1', features: [{ id: 'feat-2' }] })
+      );
+
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const op = bulkOps.find(
+        (o: { index?: { query?: { id?: string } } }) => o.index?.query?.id === 'q1'
+      );
+      expect(op?.index?.query?.features).toEqual([{ id: 'feat-2' }]);
+    });
+  });
+
+  describe('demoteQueries', () => {
+    it('reads with includeExpired so an already-expired query stays demotable', async () => {
+      const expiredBacked = makeLink({ id: 'expired-1', ruleBacked: true });
+      const { orchestrator, reader, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: [expiredBacked],
+      });
+
+      const result = await orchestrator.demoteQueries(definition, ['expired-1']);
+
+      expect(reader.getStreamToQueryLinksMap).toHaveBeenCalledWith(
+        [STREAM],
+        expect.objectContaining({ includeExpired: true })
+      );
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-expired-1']);
+      expect(writer.bulk).toHaveBeenCalled();
+      expect(result.demoted).toBe(1);
+    });
+  });
+
+  describe('reconcileStream', () => {
+    function makeReconcileLink(overrides: Partial<QueryLink> = {}): QueryLink {
+      return {
+        stream_name: STREAM,
+        rule_backed: true,
+        rule_id: 'rule-1',
+        expires_at: '2020-01-01T00:00:00.000Z',
+        query: {
+          id: 'q-1',
+          title: 'Error query',
+          description: 'desc',
+          type: 'match',
+          esql: { query: 'FROM logs-*' },
+          features: [{ id: 'feat-1' }],
+        },
+        ...overrides,
+      };
+    }
+
+    function makeFeature(id: string): Feature {
+      return {
+        id,
+        stream_name: STREAM,
+        type: 'entity',
+        description: '',
+        properties: {},
+        confidence: 100,
+      } as unknown as Feature;
+    }
+
+    function makeReconcileReader({
+      links = [] as QueryLink[],
+      features = [] as Feature[],
+    }: { links?: QueryLink[]; features?: Feature[] } = {}) {
+      return {
+        getQueryLinks: jest.fn().mockResolvedValue(links),
+        getFeatures: jest.fn().mockResolvedValue({ hits: features }),
+      } as unknown as jest.Mocked<IndicatorReader>;
+    }
+
+    function makeReconcileRulesClient(): jest.Mocked<IRulesManagementClient> {
+      return {
+        createRule: jest.fn().mockResolvedValue(undefined),
+        bulkCreateRules: jest
+          .fn()
+          .mockImplementation((rules: Array<{ id: string }>) =>
+            Promise.resolve({ createdIds: rules.map(({ id }) => id) })
+          ),
+        updateRule: jest.fn().mockResolvedValue(undefined),
+        bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+        findExistingRuleIds: jest.fn().mockResolvedValue([]),
+        findOwnedRuleIds: jest.fn().mockResolvedValue([]),
+        findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+      };
+    }
+
+    function makeReconcileOrchestrator({
+      rulesClient = makeReconcileRulesClient(),
+      writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>,
+      reader = makeReconcileReader(),
+      isEnabled = true,
+      logger = loggerMock.create(),
+    }: {
+      rulesClient?: jest.Mocked<IRulesManagementClient>;
+      writer?: jest.Mocked<IndicatorWriter>;
+      reader?: jest.Mocked<IndicatorReader>;
+      isEnabled?: boolean;
+      logger?: Logger;
+    } = {}) {
+      return new QueryRuleOrchestrator(rulesClient, logger, isEnabled, writer, reader);
+    }
+
+    it('returns zeroed summary when significant events is disabled', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, isEnabled: false });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      expect(summary).toEqual({ tombstoned: 0, orphanRulesDeleted: 0 });
+      expect(rulesClient.findOwnedRuleIds).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when there are no links, rules, or features', async () => {
+      const summary = await makeReconcileOrchestrator().reconcileStream(definition);
+      expect(summary).toEqual({ tombstoned: 0, orphanRulesDeleted: 0 });
+    });
+
+    it('tombstones an ungrounded rule-backed query and uninstalls its rule', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>;
+      rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
+      const link = makeReconcileLink();
+      const reader = makeReconcileReader({ links: [link], features: [] }); // feat-1 gone
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-1']);
+      expect(writer.bulk).toHaveBeenCalledWith(
+        STREAM,
+        expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
+      );
+      expect(summary.tombstoned).toBe(1);
+    });
+
+    it('leaves grounded rule-backed queries untouched', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>;
+      rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
+      const link = makeReconcileLink({ expires_at: '2099-01-01T00:00:00.000Z' });
+      const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      expect(writer.bulk).not.toHaveBeenCalled();
+      expect(rulesClient.bulkDeleteRules).not.toHaveBeenCalled();
+      expect(summary.tombstoned).toBe(0);
+    });
+
+    it('tombstones an expired, featureless, otherwise-grounded query and uninstalls its rule', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>;
+      rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
+      const link = makeReconcileLink({
+        expires_at: '2020-01-01T00:00:00.000Z',
+        query: { ...makeReconcileLink().query, features: [] },
+      });
+      const reader = makeReconcileReader({ links: [link], features: [] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-1']);
+      expect(writer.bulk).toHaveBeenCalledWith(
+        STREAM,
+        expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
+      );
+      expect(summary.tombstoned).toBe(1);
+    });
+
+    it('leaves durable queries (null expires_at) untouched even when features are gone', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>;
+      rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
+      const link = makeReconcileLink({ expires_at: undefined });
+      const reader = makeReconcileReader({ links: [link], features: [] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      expect(writer.bulk).not.toHaveBeenCalled();
+      expect(summary.tombstoned).toBe(0);
+    });
+
+    it('requests query links with includeExpired so expired links stay visible to reconciliation', async () => {
+      const reader = makeReconcileReader();
+      const orchestrator = makeReconcileOrchestrator({ reader });
+
+      await orchestrator.reconcileStream(definition);
+
+      expect(reader.getQueryLinks).toHaveBeenCalledWith(
+        [STREAM],
+        expect.objectContaining({ includeExpired: true })
+      );
+    });
+
+    it('tombstones an ungrounded unbacked query with no alerting rule', async () => {
+      const writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>;
+      const link = makeReconcileLink({
+        rule_backed: false,
+        rule_id: undefined,
+        query: { ...makeReconcileLink().query, features: [{ id: 'feat-gone' }] },
+      });
+      const reader = makeReconcileReader({ links: [link], features: [] });
+      const orchestrator = makeReconcileOrchestrator({ writer, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      expect(writer.bulk).toHaveBeenCalledWith(
+        STREAM,
+        expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
+      );
+      expect(summary.tombstoned).toBe(1);
+    });
+
+    it('deletes an orphan rule with no backing KI query', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      rulesClient.findOwnedRuleIds.mockResolvedValue(['orphan-rule']);
+      const reader = makeReconcileReader({ links: [] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(['orphan-rule']);
+      expect(summary.orphanRulesDeleted).toBe(1);
+    });
+
+    it('chunks orphan rule deletion at the Alerting bulk limit', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const orphanIds = Array.from({ length: 201 }, (_, index) => `orphan-rule-${index}`);
+      rulesClient.findOwnedRuleIds.mockResolvedValue(orphanIds);
+      const reader = makeReconcileReader({ links: [] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      const chunks = rulesClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
+      expect(chunks.map((ids) => ids.length)).toEqual([100, 51, 50]);
+      expect(chunks.flat()).toEqual(orphanIds);
+      expect(summary.orphanRulesDeleted).toBe(201);
+    });
+
+    it('tombstones a rule-backed query whose rule was deleted out of band (seam)', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>;
+      // The rule for 'rule-1' no longer exists in the alerting framework.
+      rulesClient.findOwnedRuleIds.mockResolvedValue([]);
+      const link = makeReconcileLink({ expires_at: undefined }); // durable, so grounding never applies
+      const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      // No live rule to enumerate as an orphan; the seam tombstones the query instead.
+      expect(writer.bulk).toHaveBeenCalledWith(
+        STREAM,
+        expect.arrayContaining([{ delete: { type: 'query', id: 'q-1' } }])
+      );
+      expect(summary.tombstoned).toBe(1);
+      expect(summary.orphanRulesDeleted).toBe(0);
+    });
+
+    it('does not tombstone via the seam when the rule is still live', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>;
+      rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
+      const link = makeReconcileLink({ expires_at: undefined });
+      const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      expect(writer.bulk).not.toHaveBeenCalled();
+      expect(summary.tombstoned).toBe(0);
+    });
+
+    it('counts a query only once when it is both ungrounded and seam-eligible', async () => {
+      const rulesClient = makeReconcileRulesClient();
+      const writer = {
+        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as jest.Mocked<IndicatorWriter>;
+      // Expired (ground-truth candidate) and its rule isn't owned (seam candidate too).
+      rulesClient.findOwnedRuleIds.mockResolvedValue([]);
+      const link = makeReconcileLink({ expires_at: '2020-01-01T00:00:00.000Z' });
+      const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
+      const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
+
+      const summary = await orchestrator.reconcileStream(definition);
+
+      expect(writer.bulk).toHaveBeenCalledTimes(1);
+      expect(writer.bulk).toHaveBeenCalledWith(STREAM, [{ delete: { type: 'query', id: 'q-1' } }]);
+      expect(summary.tombstoned).toBe(1);
+    });
+  });
+});

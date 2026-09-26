@@ -12,6 +12,12 @@ import { mockServices } from '../common/services/__mocks__/services.mock';
 import type { Services } from '../common/services';
 import { createNavigationTree } from './navigation_tree';
 
+const containsLink = (nodes: NavigationTreeDefinition['body'], link: string): boolean =>
+  nodes.some(
+    (node) =>
+      node.link === link || (node.children !== undefined && containsLink(node.children, link))
+  );
+
 describe('createNavigationTree', () => {
   const createServices = (options?: { agentBuilderNavAtTop?: boolean }): Services => ({
     ...mockServices,
@@ -72,5 +78,13 @@ describe('createNavigationTree', () => {
 
     expect(agentBuilderIndex).toBe(0);
     expect(contextEngineIndex).toBe(1);
+  });
+
+  it('includes service accounts in Admin and Settings', async () => {
+    const { footer = [] } = (await createNavigationTree(
+      createServices()
+    )) as NavigationTreeDefinition;
+
+    expect(containsLink(footer, 'management:service_accounts')).toBe(true);
   });
 });

@@ -29,7 +29,7 @@ const discoverSessionControlWidthSchema = z
     description: 'Minimum width of the control panel.',
   });
 
-export const discoverSessionControlPanelSchema = z
+export const discoverSessionApiControlPanelSchema = z
   .object({
     id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
     type: z.literal(ESQL_CONTROL),
@@ -53,8 +53,8 @@ export const discoverSessionControlPanelSchema = z
       'queries using the `?variable_name` syntax.',
   });
 
-export const discoverSessionControlPanelsSchema = z
-  .array(discoverSessionControlPanelSchema)
+export const discoverSessionApiControlPanelsSchema = z
+  .array(discoverSessionApiControlPanelSchema)
   .max(MAX_DISCOVER_SESSION_CONTROL_PANELS)
   .refine(
     (panels) => new Set(panels.map((p) => p.id)).size === panels.length,
