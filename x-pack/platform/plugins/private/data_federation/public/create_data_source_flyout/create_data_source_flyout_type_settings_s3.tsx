@@ -21,6 +21,59 @@ import {
 
 const ROLE_ARN_PLACEHOLDER = 'arn:aws:iam::112233445566:role/elastic-data-federation';
 
+export function CreateDataSourceFlyoutTypeSettingsS3Region({
+  control,
+  unregister,
+  isRequired,
+}: {
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
+  isRequired: boolean;
+}) {
+  const { field: regionField, fieldState: regionState } = useController({
+    name: 'settings.region',
+    control,
+    rules: isRequired
+      ? {
+          validate: (value?: string) =>
+            value?.trim()
+              ? true
+              : i18n.translate('xpack.dataFederation.createFlyout.s3.fields.regionRequired', {
+                  defaultMessage: 'Region is required.',
+                }),
+        }
+      : undefined,
+  });
+
+  useEffect(() => {
+    return () => {
+      unregister('settings.region');
+    };
+  }, [unregister]);
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.region', {
+        defaultMessage: 'Region',
+      })}
+      fullWidth
+      isInvalid={Boolean(regionState.error)}
+      error={regionState.error?.message}
+    >
+      <EuiFieldText
+        data-test-subj="createDataSourceFlyoutS3Region"
+        fullWidth
+        autoComplete="off"
+        isInvalid={Boolean(regionState.error)}
+        value={regionField.value}
+        onChange={(e) => regionField.onChange(e.target.value)}
+        name={regionField.name}
+        inputRef={regionField.ref}
+      />
+    </EuiFormRow>
+  );
+}
+
 export function CreateDataSourceFlyoutTypeSettingsS3({
   control,
   unregister,

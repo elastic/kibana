@@ -8,44 +8,39 @@
 import { z } from '@kbn/zod';
 
 import { allOrAnyString } from './common';
-import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH, MAX_QUERY_LENGTH } from './limits';
+import { MAX_KEYWORD_LENGTH } from './limits';
 
-const kqlQuerySchema = z
-  .string()
-  .max(MAX_QUERY_LENGTH)
-  .describe('the KQL query to filter the documents with.');
+const kqlQuerySchema = z.string().describe('the KQL query to filter the documents with.');
 
 const filterMetaSchema = z
   .object({
-    alias: z.string().max(MAX_KEYWORD_LENGTH).nullable().optional(),
+    alias: z.string().nullable().optional(),
     disabled: z.boolean().optional(),
     negate: z.boolean().optional(),
     // controlledBy is there to identify who owns the filter
-    controlledBy: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+    controlledBy: z.string().optional(),
     // allows grouping of filters
-    group: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+    group: z.string().optional(),
     // index and type are optional only because when you create a new filter, there are no defaults
-    index: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+    index: z.string().optional(),
     isMultiIndex: z.boolean().optional(),
-    type: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-    key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-    field: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+    type: z.string().optional(),
+    key: z.string().optional(),
+    field: z.string().optional(),
     params: z.any().optional(),
-    value: z.string().max(MAX_QUERY_LENGTH).optional(),
+    value: z.string().optional(),
   })
   .meta({ id: 'SLOFilterMeta', description: 'Defines properties for a filter' });
 
-const filtersSchema = z
-  .array(
-    z
-      .object({
-        meta: filterMetaSchema,
-        query: z.record(z.string(), z.any()),
-        $state: z.any().optional(),
-      })
-      .meta({ id: 'SLOFilter', description: 'Defines properties for a filter' })
-  )
-  .max(MAX_ARRAY_LENGTH);
+const filtersSchema = z.array(
+  z
+    .object({
+      meta: filterMetaSchema,
+      query: z.record(z.string(), z.any()),
+      $state: z.any().optional(),
+    })
+    .meta({ id: 'SLOFilter', description: 'Defines properties for a filter' })
+);
 
 const kqlWithFiltersSchema = z
   .object({
@@ -56,30 +51,23 @@ const kqlWithFiltersSchema = z
 
 const querySchema = z.union([kqlQuerySchema, kqlWithFiltersSchema]);
 
-const indexSchema = z
-  .string()
-  .max(MAX_KEYWORD_LENGTH)
-  .describe('The index or index pattern to use');
+const indexSchema = z.string().describe('The index or index pattern to use');
 
 const dataViewIdSchema = z
   .string()
-  .max(MAX_KEYWORD_LENGTH)
   .describe(
     'The kibana data view id to use, primarily used to include data view runtime mappings. ' +
       'Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.'
   );
 
-const timestampFieldSchema = z
-  .string()
-  .max(MAX_KEYWORD_LENGTH)
-  .describe('The timestamp field used in the source indice.');
+const timestampFieldSchema = z.string().describe('The timestamp field used in the source indice.');
 
 const apmIndicatorBaseParams = z.object({
   environment: allOrAnyString.describe('The APM service environment or "*"'),
   service: allOrAnyString.describe('The APM service name'),
   transactionType: allOrAnyString.describe('The APM transaction type or "*"'),
   transactionName: allOrAnyString.describe('The APM transaction name or "*"'),
-  index: z.string().max(MAX_KEYWORD_LENGTH).describe('The index used by APM metrics'),
+  index: z.string().describe('The index used by APM metrics'),
   filter: querySchema.describe('KQL query used for filtering the data').optional(),
   dataViewId: dataViewIdSchema.optional(),
 });
@@ -138,14 +126,11 @@ const timesliceMetricComparator = z
   .enum(['GT', 'GTE', 'LT', 'LTE'])
   .describe('The comparator to use to compare the equation to the threshold.');
 
-const metricNameSchema = z
-  .string()
-  .max(MAX_KEYWORD_LENGTH)
-  .describe('The name of the metric. Only valid options are A-Z');
+const metricNameSchema = z.string().describe('The name of the metric. Only valid options are A-Z');
 
 const metricFilterSchema = querySchema.describe('The filter to apply to the metric.');
 
-const metricFieldSchema = z.string().max(MAX_KEYWORD_LENGTH).describe('The field of the metric.');
+const metricFieldSchema = z.string().describe('The field of the metric.');
 
 const timesliceMetricBasicMetricWithField = z
   .object({
@@ -189,9 +174,8 @@ const timesliceMetricMetricDef = z.union([
 const timesliceMetricDef = z.object({
   metrics: z
     .array(timesliceMetricMetricDef)
-    .max(MAX_ARRAY_LENGTH)
     .describe('List of metrics with their name, aggregation type, and field.'),
-  equation: z.string().max(MAX_KEYWORD_LENGTH).describe('The equation to calculate the metric.'),
+  equation: z.string().describe('The equation to calculate the metric.'),
   threshold: z
     .number()
     .describe('The threshold used to determine if the metric is a good slice or not.'),
@@ -227,16 +211,15 @@ const metricCustomDocCountMetric = z.object({
 const metricCustomBasicMetric = z.object({
   name: metricNameSchema,
   aggregation: z.literal('sum').describe('The aggregation type of the metric.'),
-  field: z.string().max(MAX_KEYWORD_LENGTH).describe('The field of the metric.'),
+  field: z.string().describe('The field of the metric.'),
   filter: metricFilterSchema.optional(),
 });
 
 const metricCustomMetricDef = z.object({
   metrics: z
     .array(z.union([metricCustomBasicMetric, metricCustomDocCountMetric]))
-    .max(MAX_ARRAY_LENGTH)
     .describe('List of metrics with their name, aggregation type, and field.'),
-  equation: z.string().max(MAX_KEYWORD_LENGTH).describe('The equation to calculate the metric.'),
+  equation: z.string().describe('The equation to calculate the metric.'),
 });
 const metricCustomIndicatorTypeSchema = z.literal('sli.metric.custom');
 const metricCustomIndicatorSchema = z
@@ -262,7 +245,7 @@ const metricCustomIndicatorSchema = z
 
 const rangeHistogramMetricType = z.literal('range');
 const rangeBasedHistogramMetricDef = z.object({
-  field: z.string().max(MAX_KEYWORD_LENGTH).describe('The field use to aggregate the good events.'),
+  field: z.string().describe('The field use to aggregate the good events.'),
   aggregation: rangeHistogramMetricType.describe('The type of aggregation to use.'),
   from: z
     .number()
@@ -273,7 +256,7 @@ const rangeBasedHistogramMetricDef = z.object({
 
 const valueCountHistogramMetricType = z.literal('value_count');
 const valueCountBasedHistogramMetricDef = z.object({
-  field: z.string().max(MAX_KEYWORD_LENGTH).describe('The field use to aggregate the good events.'),
+  field: z.string().describe('The field use to aggregate the good events.'),
   aggregation: valueCountHistogramMetricType.describe('The type of aggregation to use.'),
   filter: querySchema.describe('The filter for events.').optional(),
 });
@@ -313,19 +296,14 @@ const syntheticsAvailabilityIndicatorSchema = z
     type: syntheticsAvailabilityIndicatorTypeSchema.describe('The type of indicator.'),
     params: z
       .object({
-        monitorIds: z
-          .array(syntheticsParamSchema)
-          .max(MAX_ARRAY_LENGTH)
-          .describe('The monitors to create the SLO from'),
+        monitorIds: z.array(syntheticsParamSchema).describe('The monitors to create the SLO from'),
         index: indexSchema,
         tags: z
           .array(syntheticsParamSchema)
-          .max(MAX_ARRAY_LENGTH)
           .describe('The tags to filter the monitors by')
           .optional(),
         projects: z
           .array(syntheticsParamSchema)
-          .max(MAX_ARRAY_LENGTH)
           .describe('The projects to filter the monitors by')
           .optional(),
         filter: querySchema.describe('the KQL query to filter the documents with.').optional(),

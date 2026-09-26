@@ -10,7 +10,6 @@ import { z } from '@kbn/zod';
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
-import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH } from './limits';
 import { timeWindowSchema } from './time_window';
 import {
   MAX_PROJECT_ROUTINGS_LENGTH,
@@ -77,7 +76,6 @@ const settingsSchema = z
       ),
     syncField: z
       .string()
-      .max(MAX_KEYWORD_LENGTH)
       .describe(
         'The date field that is used to identify new documents in the source. ' +
           'It is strongly recommended to use a field that contains the ingest timestamp. ' +
@@ -105,10 +103,7 @@ const groupBySchema = allOrAnyStringOrArray.meta({
 
 const optionalSettingsSchema = settingsSchema.partial();
 
-const tagsSchema = z
-  .array(z.string().max(MAX_KEYWORD_LENGTH))
-  .max(MAX_ARRAY_LENGTH)
-  .describe('List of tags');
+const tagsSchema = z.array(z.string()).describe('List of tags');
 
 // id cannot contain special characters and spaces
 const sloIdSchema = z
@@ -140,19 +135,13 @@ const baseSloSchema = z.object({
 
 const dashboardsWithIdSchema = z.object({
   dashboards: z
-    .array(
-      z.object({ id: z.string().max(MAX_KEYWORD_LENGTH).describe('Dashboard saved-object id') })
-    )
-    .max(MAX_ARRAY_LENGTH)
+    .array(z.object({ id: z.string().describe('Dashboard saved-object id') }))
     .describe('Array of dashboard references')
     .optional(),
 });
 const dashboardsWithRefIdSchema = z.object({
   dashboards: z
-    .array(
-      z.object({ refId: z.string().max(MAX_KEYWORD_LENGTH).describe('Dashboard reference id') })
-    )
-    .max(MAX_ARRAY_LENGTH)
+    .array(z.object({ refId: z.string().describe('Dashboard reference id') }))
     .describe('Array of dashboard references')
     .optional(),
 });

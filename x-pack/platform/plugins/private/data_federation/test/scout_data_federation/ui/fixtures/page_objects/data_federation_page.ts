@@ -20,6 +20,7 @@ export class DataFederationPage {
   readonly createDataSourceFlyoutCancel;
   readonly createDataSourceFlyoutName;
   readonly createDataSourceFlyoutDescription;
+  readonly createDataSourceFlyoutS3Region;
   readonly createDataSourceFlyoutS3AccessKey;
   readonly createDataSourceFlyoutS3SecretKey;
   readonly createDataSourceFlyoutSubmit;
@@ -52,6 +53,7 @@ export class DataFederationPage {
     this.createDataSourceFlyoutDescription = page.testSubj.locator(
       'createDataSourceFlyoutDescription'
     );
+    this.createDataSourceFlyoutS3Region = page.testSubj.locator('createDataSourceFlyoutS3Region');
     this.createDataSourceFlyoutS3AccessKey = page.testSubj.locator(
       'createDataSourceFlyoutS3AccessKey'
     );
@@ -101,11 +103,13 @@ export class DataFederationPage {
   async createS3DataSource({
     name,
     description,
+    region,
     accessKey,
     secretKey,
   }: {
     name: string;
     description: string;
+    region: string;
     accessKey: string;
     secretKey: string;
   }): Promise<void> {
@@ -114,6 +118,7 @@ export class DataFederationPage {
 
     await this.createDataSourceFlyoutName.fill(name);
     await this.createDataSourceFlyoutDescription.fill(description);
+    await this.createDataSourceFlyoutS3Region.fill(region);
     await this.createDataSourceFlyoutS3AccessKey.fill(accessKey);
     await this.createDataSourceFlyoutS3SecretKey.fill(secretKey);
 

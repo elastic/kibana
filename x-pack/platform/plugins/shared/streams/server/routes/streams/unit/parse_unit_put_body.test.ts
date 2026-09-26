@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { streamsUnitIdentifierSchema, streamsUnitUpsertRequestSchema } from '@kbn/streams-schema';
+import type { StreamsUnit } from '@kbn/streams-schema';
+import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
 import { makeZodValidationObject } from '@kbn/server-route-repository';
 import { z } from '@kbn/zod/v4';
-import { parseUnitPutBody } from './parse_unit_put_body';
+import { assertUnitPutEnvelope, parseUnitPutBody } from './parse_unit_put_body';
 
 const unit = {
   sources: [
@@ -117,13 +118,61 @@ describe('parseUnitPutBody', () => {
     ).toThrow(/Invalid Streams unit YAML/);
   });
 
-  it('rejects a YAML document that is not a unit', () => {
-    expect(() =>
+  it('does not schema-validate a YAML document', () => {
+    expect(
       parseUnitPutBody({
         body: Buffer.from('unit: not-a-unit-document\n'),
         contentType: 'application/yaml',
       })
-    ).toThrow(/Invalid Streams unit YAML/);
+    ).toEqual({ unit: { unit: 'not-a-unit-document' } });
+  });
+
+  it('does not schema-validate the JSON unit document', () => {
+    const unitDocument = {
+      sources: [{ id: '_default_', type: 'not-a-real-type' }],
+      unexpected: true,
+    };
+
+    expect(
+      parseUnitPutBody({
+        body: Buffer.from(JSON.stringify({ unit: unitDocument, ui_metadata: { extra: 1 } })),
+        contentType: 'application/json',
+      })
+    ).toEqual({
+      unit: unitDocument,
+      ui_metadata: { extra: 1 },
+    });
+  });
+
+  it('decodes invalid envelope fields without checking them', () => {
+    expect(
+      parseUnitPutBody({
+        body: Buffer.from(JSON.stringify({ unit, ui_metadata: null, secrets: { es_api_key: 1 } })),
+        contentType: 'application/json',
+      })
+    ).toEqual({
+      unit,
+      ui_metadata: null,
+      secrets: { es_api_key: 1 },
+    });
+  });
+
+  it('rejects ui_metadata that is not an object', () => {
+    const parsed = parseUnitPutBody({
+      body: Buffer.from(JSON.stringify({ unit, ui_metadata: null })),
+      contentType: 'application/json',
+    });
+
+    expect(() => assertUnitPutEnvelope(parsed)).toThrow(/ui_metadata/);
+  });
+
+  it('rejects secrets that are not a string map', () => {
+    const parsed = parseUnitPutBody({
+      body: Buffer.from(JSON.stringify({ unit, secrets: { es_api_key: 1 } })),
+      contentType: 'application/json',
+    });
+
+    expect(() => assertUnitPutEnvelope(parsed)).toThrow(/secrets/);
   });
 
   it('rejects invalid JSON', () => {
@@ -144,7 +193,7 @@ describe('parseUnitPutBody', () => {
     ).toThrow('Request body is required.');
   });
 
-  it('accepts a YAML document that omits destinations and pipelines (Kibana defaults)', () => {
+  it('keeps a YAML document that omits destinations and pipelines', () => {
     expect(
       parseUnitPutBody({
         body: Buffer.from(
@@ -160,19 +209,18 @@ describe('parseUnitPutBody', () => {
           supported_telemetry: ['logs'],
         },
       ],
-      destinations: [],
-      pipelines: [],
     });
   });
 
-  it('keeps a raw Buffer through Kibana route body validation', () => {
+  it('does not schema-validate the PUT body in route params', () => {
     const { body } = makeZodValidationObject(
       z.object({
         path: z.object({ id: streamsUnitIdentifierSchema }),
-        body: z.union([streamsUnitUpsertRequestSchema, z.instanceof(Buffer)]),
+        body: z.custom<StreamsUnit.UpsertRequest | Buffer>(() => true),
       })
     );
 
     expect(body.parse(Buffer.from(yaml))).toBeInstanceOf(Buffer);
+    expect(body.parse({ unit: { not: 'a unit' } })).toEqual({ unit: { not: 'a unit' } });
   });
 });

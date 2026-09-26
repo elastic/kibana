@@ -39,7 +39,6 @@ const createDeps = () => {
       request: httpServerMock.createKibanaRequest(),
       logger: loggingSystemMock.createLogger(),
       inference: inferenceMock.createStartContract(),
-      conversationService: {} as Parameters<typeof resolveServices>[0]['conversationService'],
       agentService,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       savedObjects: savedObjectsServiceMock.createStartContract(),
