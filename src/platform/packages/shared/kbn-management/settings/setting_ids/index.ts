@@ -85,6 +85,9 @@ export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
 
+// Data federation settings
+export const DATA_FEDERATION_ENABLED_SETTING_ID = 'dataFederation:enabled';
+
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
 export const AUTOCOMPLETE_VALUE_SUGGESTION_METHOD_ID = 'autocomplete:valueSuggestionMethod';

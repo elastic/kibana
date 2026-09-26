@@ -29,6 +29,10 @@ xpack.spaces.maxSpaces: 1
 ## Content Connectors in stack management
 xpack.contentConnectors.enabled: false
 
+## ES|QL Data Federation is not offered here, and the dataFederation:enabled
+## advanced setting is not allowlisted for this project type
+xpack.dataFederation.enabled: false
+
 ## Disable Kibana Product Intercept
 xpack.product_intercept.enabled: false
 

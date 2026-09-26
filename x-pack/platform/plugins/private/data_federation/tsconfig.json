@@ -22,6 +22,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/app-header",
     "@kbn/core-doc-links-browser",
+    "@kbn/core-ui-settings-server",
+    "@kbn/management-settings-ids",
     "@kbn/ui-callout",
     "@kbn/storybook",
   ],

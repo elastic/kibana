@@ -110,3 +110,6 @@ xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+## ES|QL Data Federation in stack management
+xpack.dataFederation.enabled: true
