@@ -28,6 +28,7 @@ import {
 const MAX_TRANSCRIPT_CHARS = 12_000;
 const MAX_TOOL_CALLS_CHARS = 12_000;
 const MAX_TOOL_CALL_PARAMS_CHARS = 1_000;
+const MAX_TOOL_CALL_PARAM_ARRAY_ITEMS = 20;
 const MAX_PROPOSALS = 8;
 
 export interface CortexEditProposal {
@@ -111,12 +112,24 @@ const normalizeProposal = (value: unknown): CortexEditProposal | undefined => {
   };
 };
 
+// Params can carry multi-megabyte values (e.g. file contents), so long strings and arrays are cut
+// while serializing rather than after.
+const boundToolCallParam = (_key: string, value: unknown): unknown => {
+  if (typeof value === 'string') {
+    return value.slice(0, MAX_TOOL_CALL_PARAMS_CHARS);
+  }
+  if (Array.isArray(value)) {
+    return value.slice(0, MAX_TOOL_CALL_PARAM_ARRAY_ITEMS);
+  }
+  return value;
+};
+
 /** Renders tool calls as one line each, dropping the tail once the transcript budget is spent. */
 export const renderToolCalls = (toolCalls: InvestigationToolCall[]): string => {
   const lines: string[] = [];
   let used = 0;
   for (const { tool_id: toolId, params } of toolCalls) {
-    const line = `- ${toolId ?? 'unknown'} ${JSON.stringify(params ?? {}).slice(
+    const line = `- ${toolId ?? 'unknown'} ${JSON.stringify(params ?? {}, boundToolCallParam).slice(
       0,
       MAX_TOOL_CALL_PARAMS_CHARS
     )}`;
@@ -274,20 +287,24 @@ export const applyCortexEdits = async ({
       const existing = await store.get(id);
       // Rewriting a live page means this run re-established it, so it counts as a corroboration.
       // New pages start tentative, and rewriting an archived page revives it as tentative, so a
-      // single run can never publish a fact as established.
-      const confirms =
-        existing !== undefined && existing.status !== 'archived' && !touchedIds.has(id);
+      // single run can never publish a fact as established. A page already touched this run keeps
+      // its status, so a page revived earlier in the run is not promoted on its old count.
+      const alreadyTouched = touchedIds.has(id);
+      const confirms = existing !== undefined && existing.status !== 'archived' && !alreadyTouched;
       const corroborations = confirms ? existing.corroborations + 1 : existing?.corroborations;
       touchedIds.add(id);
+      const status = !existing
+        ? 'tentative'
+        : alreadyTouched
+        ? existing.status
+        : statusAfterCorroboration(existing.status, corroborations ?? 0);
       await store.upsert({
         entityType: edit.entity_type,
         slug,
         title: edit.title,
         description: edit.description ?? existing?.description,
         content: edit.content ?? existing?.content ?? '',
-        status: existing
-          ? statusAfterCorroboration(existing.status, corroborations ?? 0)
-          : 'tentative',
+        status,
         corroborations,
       });
       applied.push({ action: 'upsert', entityType: edit.entity_type });
