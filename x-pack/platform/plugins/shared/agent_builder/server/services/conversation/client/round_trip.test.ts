@@ -59,6 +59,16 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
   it('preserves a maximal completed round (steps, structured output, attachments, trace_id, state, overrides)', () => {
     const steps: ConversationRoundStep[] = [
       {
+        type: ConversationRoundStepType.preExecutionWorkflow,
+        model_context: '  <system_update>\nexact model context\n</system_update>  ',
+        workflow_context: {
+          'nightshift.semantic_memory.recall': {
+            version: 1,
+            data: { recalled_ids: ['memory-1', ' memory-2 '] },
+          },
+        },
+      },
+      {
         type: ConversationRoundStepType.toolCall,
         tool_call_id: 'tc-1',
         tool_id: 'platform.core.execute_esql',

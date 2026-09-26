@@ -220,32 +220,42 @@ describe('prepareMessages', () => {
     expect(result[2].content).toBe('how are you?');
   });
 
-  it('uses the pending round input (with its author) when an awaiting-prompt round is promoted to next input', async () => {
-    const pendingStartedAt = '2026-06-30T12:34:56.000Z';
+  it('orders user input, workflow model context, then relevant-skills notice', async () => {
     const previousRounds = [
       createRound({
-        id: 'round-1',
-        status: ConversationRoundStatus.awaitingPrompt,
-        input: makeRoundInput('original user request', [], {
-          author: { id: 'u1', username: 'alice' },
-        }),
-        started_at: pendingStartedAt,
+        input: makeRoundInput('user-authored task'),
+        steps: [
+          {
+            type: ConversationRoundStepType.preExecutionWorkflow,
+            model_context: '<system_update>workflow context</system_update>',
+            workflow_context: {
+              'nightshift.semantic_memory.recall': {
+                version: 1,
+                data: { recalled_ids: ['never-render-this'] },
+              },
+            },
+          },
+          {
+            type: ConversationRoundStepType.relevantSkills,
+            skills: [{ id: 's1', name: 'skill', path: '/s1', description: 'd' }],
+            source: 'implicit',
+          },
+        ],
       }),
     ];
 
     const result = await prepareMessages({
       conversation: createConversation({
         previousRounds,
-        nextInput: makeRoundInput('prompt answer', [], {
-          author: { id: 'u2', username: 'bob' },
-        }),
+        nextInput: makeRoundInput('next question'),
       }),
     });
 
-    expect(result).toHaveLength(1);
-    expect(result[0].content).toBe(
-      `[User: alice — Sent: ${formatDate(pendingStartedAt)}]\n\noriginal user request`
-    );
+    expect(result[0].content).toContain('user-authored task');
+    expect(result[1].name).toBe('pre_execution_workflow_context');
+    expect(result[1].content).toBe('<system_update>workflow context</system_update>');
+    expect(result[2].content).toContain('relevant_skills');
+    expect(JSON.stringify(result)).not.toContain('never-render-this');
   });
 
   it('places the next-input date prefix above attachment XML', async () => {

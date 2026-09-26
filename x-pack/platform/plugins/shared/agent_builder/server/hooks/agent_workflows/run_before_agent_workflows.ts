@@ -13,6 +13,13 @@ import type {
 import {
   createWorkflowAbortedError,
   createWorkflowExecutionError,
+  MODEL_CONTEXT_MAX_LENGTH,
+  WORKFLOW_CONTEXT_MAX_BYTES,
+  WORKFLOW_CONTEXT_MAX_DEPTH,
+  WORKFLOW_CONTEXT_MAX_NAMESPACES,
+  WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH,
+  type WorkflowContext,
+  type WorkflowContextEnvelope,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
@@ -58,12 +65,77 @@ function isBeforeAgentWorkflowOutput(value: unknown): value is BeforeAgentWorkfl
   return typeof value === 'object' && value !== null;
 }
 
+const normalizeModelContext = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const normalized = value.trim();
+  return normalized ? normalized.slice(0, MODEL_CONTEXT_MAX_LENGTH) : undefined;
+};
+
+const isJsonValueWithinDepth = (value: unknown, depth: number): boolean => {
+  if (value === null || ['string', 'number', 'boolean'].includes(typeof value)) {
+    return typeof value !== 'number' || Number.isFinite(value);
+  }
+  if (depth >= WORKFLOW_CONTEXT_MAX_DEPTH || typeof value !== 'object') {
+    return false;
+  }
+  if (Array.isArray(value)) {
+    return value.every((item) => isJsonValueWithinDepth(item, depth + 1));
+  }
+  return Object.values(value).every((item) => isJsonValueWithinDepth(item, depth + 1));
+};
+
+const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const entries = Object.entries(value).slice(0, WORKFLOW_CONTEXT_MAX_NAMESPACES);
+  const context: WorkflowContext = {};
+  for (const [namespace, rawEnvelope] of entries) {
+    if (
+      namespace.length === 0 ||
+      namespace.length > WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH ||
+      typeof rawEnvelope !== 'object' ||
+      rawEnvelope === null ||
+      Array.isArray(rawEnvelope)
+    ) {
+      return undefined;
+    }
+    const envelope = rawEnvelope as Partial<WorkflowContextEnvelope>;
+    if (
+      !Number.isSafeInteger(envelope.version) ||
+      (envelope.version ?? 0) <= 0 ||
+      typeof envelope.data !== 'object' ||
+      envelope.data === null ||
+      Array.isArray(envelope.data) ||
+      !isJsonValueWithinDepth(envelope.data, 0)
+    ) {
+      return undefined;
+    }
+    context[namespace] = {
+      version: envelope.version,
+      data: envelope.data,
+    } as WorkflowContextEnvelope;
+  }
+
+  return Buffer.byteLength(JSON.stringify(context), 'utf8') <= WORKFLOW_CONTEXT_MAX_BYTES
+    ? context
+    : undefined;
+};
+
+const mergeWorkflowContexts = (
+  previous: WorkflowContext | undefined,
+  next: WorkflowContext
+): WorkflowContext | undefined => normalizeWorkflowContext({ ...previous, ...next });
+
 /**
  * Runs the agent's configured before-agent workflows in sequence, updating the
- * round input when a workflow returns `new_prompt`. Throws on workflow failure
- * or when a workflow aborts the agent.
+ * round input when a workflow returns `new_prompt` and accumulating workflow context. Throws
+ * on workflow failure or when a workflow aborts the agent.
  *
- * @returns Updated nextInput when any workflow returned `new_prompt`, otherwise undefined
+ * @returns Updated input and/or accumulated workflow context, otherwise undefined
  */
 export async function runBeforeAgentWorkflows({
   context,
@@ -87,6 +159,8 @@ export async function runBeforeAgentWorkflows({
 
   const spaceId = getCurrentSpaceId({ request: context.request, spaces });
   let currentNextInput = context.nextInput;
+  let preExecutionWorkflow = context.preExecutionWorkflow;
+  let nextInputChanged = false;
 
   for (const workflowId of workflowIds) {
     const result = await executeWorkflow({
@@ -94,6 +168,7 @@ export async function runBeforeAgentWorkflows({
       workflowParams: {
         prompt: currentNextInput.message ?? '',
         ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
+        ...(context.agentId ? { agent_id: context.agentId } : {}),
       },
       request: context.request,
       spaceId,
@@ -126,6 +201,33 @@ export async function runBeforeAgentWorkflows({
 
     if (output.new_prompt) {
       currentNextInput = { ...currentNextInput, message: output.new_prompt };
+      nextInputChanged = true;
+    }
+
+    const modelContext = normalizeModelContext(output.model_context);
+    if (modelContext) {
+      const combinedModelContext = [preExecutionWorkflow?.model_context, modelContext]
+        .filter((fragment): fragment is string => Boolean(fragment))
+        .join('\n\n')
+        .slice(0, MODEL_CONTEXT_MAX_LENGTH);
+      preExecutionWorkflow = {
+        ...preExecutionWorkflow,
+        model_context: combinedModelContext,
+      };
+    }
+
+    const workflowContext = normalizeWorkflowContext(output.workflow_context);
+    if (workflowContext) {
+      const mergedWorkflowContext = mergeWorkflowContexts(
+        preExecutionWorkflow?.workflow_context,
+        workflowContext
+      );
+      if (mergedWorkflowContext) {
+        preExecutionWorkflow = {
+          ...preExecutionWorkflow,
+          workflow_context: mergedWorkflowContext,
+        };
+      }
     }
 
     if (output.abort || output.abort_message) {
@@ -137,8 +239,11 @@ export async function runBeforeAgentWorkflows({
     }
   }
 
-  if (currentNextInput !== context.nextInput) {
-    return { nextInput: currentNextInput };
+  if (nextInputChanged || preExecutionWorkflow !== context.preExecutionWorkflow) {
+    return {
+      ...(nextInputChanged ? { nextInput: currentNextInput } : {}),
+      ...(preExecutionWorkflow ? { preExecutionWorkflow } : {}),
+    };
   }
 }
 

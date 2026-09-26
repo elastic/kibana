@@ -55,6 +55,17 @@ const reasoning = (
   ...refs,
 });
 
+const workflowContextStep = (): ConversationRoundStep => ({
+  type: ConversationRoundStepType.preExecutionWorkflow,
+  model_context: '  <system_update>\nexact workflow context\n</system_update>  ',
+  workflow_context: {
+    'nightshift.semantic_memory.recall': {
+      version: 1,
+      data: { recalled_ids: ['never-render-this'] },
+    },
+  },
+});
+
 const rendered = (id: string, extra: Partial<ToolRenderStateMap[string]> = {}) => ({
   [id]: {
     toolName: 'my_tool',
@@ -225,6 +236,34 @@ describe('renderHistorySteps', () => {
     const messages = await renderHistorySteps({ steps });
     expect(types(messages)).toEqual(['human', 'human', 'human']);
   });
+
+  it('renders workflow model context before relevant skills and never renders workflow state', async () => {
+    const messages = await renderHistorySteps({
+      steps: [
+        workflowContextStep(),
+        {
+          type: ConversationRoundStepType.relevantSkills,
+          skills: [{ id: 's1', name: 'skill', path: '/s1', description: 'd' }],
+          source: 'implicit',
+        },
+      ],
+    });
+
+    expect(messages).toHaveLength(2);
+    expect(messages[0]).toBeInstanceOf(HumanMessage);
+    expect(messages[0].name).toBe('pre_execution_workflow_context');
+    expect(messages[0].content).toBe(
+      '  <system_update>\nexact workflow context\n</system_update>  '
+    );
+    expect(JSON.stringify(messages)).not.toContain('never-render-this');
+  });
+
+  it('replays persisted workflow model context byte-for-byte', async () => {
+    const first = await renderHistorySteps({ steps: [workflowContextStep()] });
+    const replay = await renderHistorySteps({ steps: [workflowContextStep()] });
+
+    expect(replay[0].toDict()).toEqual(first[0].toDict());
+  });
 });
 
 describe('renderCurrentRun', () => {
@@ -346,6 +385,14 @@ describe('renderCurrentRun', () => {
     const answer = await current([skills], {}, { phase: 'answer' });
     expect(research).toHaveLength(1);
     expect(answer).toHaveLength(0);
+  });
+
+  it('renders workflow model context in both research and answer phases', async () => {
+    const research = await current([workflowContextStep()], {});
+    const answer = await current([workflowContextStep()], {}, { phase: 'answer' });
+
+    expect(research[0].toDict()).toEqual(answer[0].toDict());
+    expect(research[0].name).toBe('pre_execution_workflow_context');
   });
 
   it('injects resolved images after the group and a notice for failed ones', async () => {

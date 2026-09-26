@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import { AgentBuilderErrorCode, WORKFLOW_CONTEXT_MAX_BYTES } from '@kbn/agent-builder-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
@@ -34,7 +34,7 @@ describe('runBeforeAgentWorkflows', () => {
   const request = httpServerMock.createKibanaRequest();
   const logger = loggingSystemMock.createLogger();
 
-  const createContext = (overrides: { conversationId?: string } = {}) => ({
+  const createContext = (overrides: { conversationId?: string; agentId?: string } = {}) => ({
     request,
     nextInput: { message: 'hello', attachments: [] },
     agentId: 'agent-1',
@@ -189,6 +189,150 @@ describe('runBeforeAgentWorkflows', () => {
     });
   });
 
+  it('accumulates model_context without replacing the user message', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices, resolveAgentConfiguration } = createDeps();
+    resolveAgentConfiguration.mockResolvedValue({ workflow_ids: ['wf-1', 'wf-2'] });
+    executeWorkflowMock
+      .mockResolvedValueOnce({
+        success: true,
+        execution: {
+          execution_id: 'exec-context-1',
+          status: ExecutionStatus.COMPLETED,
+          workflow_id: 'wf-1',
+          started_at: '2026-01-01T00:00:00.000Z',
+          output: { model_context: 'first context' },
+        },
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        execution: {
+          execution_id: 'exec-context-2',
+          status: ExecutionStatus.COMPLETED,
+          workflow_id: 'wf-2',
+          started_at: '2026-01-01T00:00:00.000Z',
+          output: { model_context: '  second context  ' },
+        },
+      });
+
+    await expect(
+      runBeforeAgentWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      })
+    ).resolves.toEqual({
+      preExecutionWorkflow: {
+        model_context: 'first context\n\nsecond context',
+      },
+    });
+  });
+
+  it('ignores a malformed non-string model_context', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-malformed-context',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: { model_context: 123 },
+      },
+    });
+
+    await expect(
+      runBeforeAgentWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('ignores malformed or oversized workflow context envelopes', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-workflow-context',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: {
+          workflow_context: {
+            invalid: { version: 0, data: { value: 'x'.repeat(WORKFLOW_CONTEXT_MAX_BYTES) } },
+          },
+        },
+      },
+    });
+
+    await expect(
+      runBeforeAgentWorkflows({ context, workflowApi, getInternalServices, logger })
+    ).resolves.toBeUndefined();
+  });
+
+  it('shallow-merges independent namespaces and replaces repeated namespaces', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices, resolveAgentConfiguration } = createDeps();
+    resolveAgentConfiguration.mockResolvedValue({ workflow_ids: ['wf-1', 'wf-2'] });
+    executeWorkflowMock
+      .mockResolvedValueOnce({
+        success: true,
+        execution: {
+          execution_id: 'exec-memory-1',
+          status: ExecutionStatus.COMPLETED,
+          workflow_id: 'wf-1',
+          started_at: '2026-01-01T00:00:00.000Z',
+          output: {
+            workflow_context: {
+              'nightshift.semantic_memory.recall': {
+                version: 1,
+                data: { recalled_ids: ['memory-a'] },
+              },
+              'other.context': { version: 1, data: { value: 'preserved' } },
+            },
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        execution: {
+          execution_id: 'exec-memory-2',
+          status: ExecutionStatus.COMPLETED,
+          workflow_id: 'wf-2',
+          started_at: '2026-01-01T00:00:00.000Z',
+          output: {
+            workflow_context: {
+              'nightshift.semantic_memory.recall': {
+                version: 2,
+                data: { recalled_ids: ['memory-b'] },
+              },
+            },
+          },
+        },
+      });
+
+    const result = await runBeforeAgentWorkflows({
+      context,
+      workflowApi,
+      getInternalServices,
+      logger,
+    });
+
+    expect(result?.preExecutionWorkflow?.workflow_context).toEqual({
+      'nightshift.semantic_memory.recall': {
+        version: 2,
+        data: { recalled_ids: ['memory-b'] },
+      },
+      'other.context': { version: 1, data: { value: 'preserved' } },
+    });
+  });
+
   it('throws workflowAborted when output requests abort', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices } = createDeps();
@@ -265,7 +409,7 @@ describe('runBeforeAgentWorkflows', () => {
     );
   });
 
-  it('forwards conversation_id to beforeAgent workflows', async () => {
+  it('forwards conversation_id and agent_id to beforeAgent workflows', async () => {
     const context = createContext({ conversationId: 'conv-42' });
     const { workflowApi, getInternalServices } = createDeps();
     executeWorkflowMock.mockResolvedValue({
@@ -292,6 +436,38 @@ describe('runBeforeAgentWorkflows', () => {
         workflowParams: {
           prompt: 'hello',
           conversation_id: 'conv-42',
+          agent_id: 'agent-1',
+        },
+      })
+    );
+  });
+
+  it('omits agent_id when it is unavailable', async () => {
+    const context = createContext({ agentId: undefined });
+    const { workflowApi, getInternalServices, uiSettingsClient } = createDeps();
+    uiSettingsClient.get.mockImplementation(async (key: string) => {
+      if (key === AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS) {
+        return ['wf-1'];
+      }
+      return true;
+    });
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-no-agent',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: {},
+      },
+    });
+
+    await runBeforeAgentWorkflows({ context, workflowApi, getInternalServices, logger });
+
+    expect(executeWorkflowMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowParams: {
+          prompt: 'hello',
         },
       })
     );

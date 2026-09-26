@@ -9,6 +9,7 @@ import { Overwrite, type Command } from '@langchain/langgraph';
 import type {
   BrowserApiToolMetadata,
   CompactionStep,
+  PreExecutionWorkflowStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
 import {
@@ -16,6 +17,7 @@ import {
   ChatEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  HookLifecycle,
   ToolOrigin,
   createAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
@@ -102,6 +104,7 @@ const createImageResolverMock = createImageResolver as jest.MockedFn<typeof crea
 describe('runDefaultAgentMode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    createPreExecutionStepsMock.mockReturnValue([]);
   });
 
   it('adds static and dynamic tools to the toolManager', async () => {
@@ -234,6 +237,83 @@ describe('runDefaultAgentMode', () => {
     );
 
     expect(context.toolManager.setMaxToolResultTokens).toHaveBeenCalledWith(20_000);
+  });
+
+  it('seeds workflow context as a step while keeping the user-authored input clean', async () => {
+    const context = createAgentHandlerContextMock();
+    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      connector: { name: 'test-connector', connectorId: 'current-connector' },
+      chatModel: {},
+    } as any);
+    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+    context.toolManager.getDynamicToolIds.mockReturnValue([]);
+    getPendingTurnMock.mockReturnValue(undefined);
+    selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+    prepareConversationMock.mockResolvedValue({
+      timeline: [],
+      nextInput: { message: 'user task', attachments: [] },
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: context.attachmentStateManager,
+    } as any);
+    extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+    createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    const preExecutionWorkflow = {
+      model_context: '<system_update>hydrated context</system_update>',
+      workflow_context: {
+        'nightshift.semantic_memory.recall': {
+          version: 1,
+          data: { recalled_ids: ['memory-1', 'memory-2'] },
+        },
+      },
+    };
+    const preExecutionWorkflowStep: PreExecutionWorkflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      ...preExecutionWorkflow,
+    };
+    createPreExecutionStepsMock.mockReturnValue([preExecutionWorkflowStep]);
+    (context.hooks.run as jest.Mock).mockImplementation(
+      async (lifecycle: HookLifecycle, hookContext: any) =>
+        lifecycle === HookLifecycle.beforeAgent
+          ? {
+              ...hookContext,
+              preExecutionWorkflow,
+            }
+          : hookContext
+    );
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'user task' },
+        agentConfiguration: { tools: [] } as any,
+      },
+      context
+    );
+
+    expect(createPromptFactoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        processedConversation: expect.objectContaining({
+          nextInput: { message: 'user task', attachments: [] },
+        }),
+      })
+    );
+    expect(createPreExecutionStepsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ preExecutionWorkflow })
+    );
+    const command = createAgentGraphMock.mock.results[0].value.streamEvents.mock.calls[0][0];
+    expect(command.update.steps).toEqual(new Overwrite([preExecutionWorkflowStep]));
+    const roundStarted = (context.events.emit as jest.Mock).mock.calls
+      .map(([event]) => event)
+      .find((event) => event.type === ChatEventType.roundStarted);
+    expect(roundStarted.data.input).toEqual({
+      message: 'user task',
+      attachments: [],
+      attachment_refs: undefined,
+    });
+    expect(context.hooks.run).toHaveBeenCalledWith(
+      HookLifecycle.afterExecution,
+      expect.objectContaining({ connectorId: 'current-connector' })
+    );
   });
 
   describe('plugin skill id filtering', () => {
@@ -614,15 +694,19 @@ describe('runDefaultAgentMode', () => {
       results: [],
       progression: [],
     };
+    const initialWorkflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: '<system_update>initial context</system_update>',
+    } as const;
 
-    it('resumes at executeTool when the pending turn has a paused tool call', async () => {
+    it('resumes with the initial workflow step without rerunning beforeAgent hooks', async () => {
       const { context, streamEvents } = setup();
       const conversation = createEmptyConversation({
         rounds: [
           createRound({
             id: 'round-1',
             status: ConversationRoundStatus.awaitingPrompt,
-            steps: [pausedCall],
+            steps: [initialWorkflowStep, pausedCall],
             pending_prompts: [
               { id: 'p1', type: AgentPromptType.confirmation, title: 't', message: 'm' },
             ],
@@ -660,6 +744,7 @@ describe('runDefaultAgentMode', () => {
       const command = initialCommand(streamEvents);
       expect(command.goto).toEqual([nodeNames.executeTool]);
       expect(command.update).toMatchObject({
+        steps: new Overwrite([initialWorkflowStep, pausedCall]),
         pendingToolCallIds: ['call-1'],
         currentCycle: 3,
         researchOutcome: {
@@ -668,6 +753,13 @@ describe('runDefaultAgentMode', () => {
         },
         toolRenderState: { 'call-1': { toolName: 'my_tool', kind: 'server' } },
       });
+      expect(createPreExecutionStepsMock).toHaveBeenCalledWith(
+        expect.not.objectContaining({ preExecutionWorkflow: expect.anything() })
+      );
+      expect(context.hooks.run).not.toHaveBeenCalledWith(
+        HookLifecycle.beforeAgent,
+        expect.anything()
+      );
       expect(context.attachmentStateManager.clearAccessTracking).not.toHaveBeenCalled();
     });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { JsonObject } from '@kbn/utility-types';
 import type { UserIdAndName } from '../base/users';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
@@ -32,6 +33,22 @@ import type { MetadataFieldValue } from '../templates';
 /**
  * Represents the input that initiated a conversation round.
  */
+export const MODEL_CONTEXT_MAX_LENGTH = 100_000;
+export const WORKFLOW_CONTEXT_MAX_NAMESPACES = 16;
+export const WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH = 256;
+export const WORKFLOW_CONTEXT_MAX_BYTES = 64 * 1024;
+export const WORKFLOW_CONTEXT_MAX_DEPTH = 8;
+
+export interface WorkflowContextEnvelope {
+  /** Schema version owned by the namespace producer and consumer. */
+  version: number;
+  /** Opaque JSON interpreted only by workflows that understand the namespace. */
+  data: JsonObject;
+}
+
+/** Immutable round-local contexts passed from pre-execution to post-execution workflows. */
+export type WorkflowContext = Record<string, WorkflowContextEnvelope>;
+
 export interface RoundInput {
   /**
    * A text message from the user.
@@ -95,6 +112,7 @@ export enum ConversationRoundStepType {
   updateTodos = 'update_todos',
   askUserQuestion = 'ask_user_question',
   relevantSkills = 'relevant_skills',
+  preExecutionWorkflow = 'pre_execution_workflow',
   subagentRosterUpdated = 'subagent_roster_updated',
 }
 
@@ -312,6 +330,31 @@ export const isRelevantSkillsStep = (step: ConversationRoundStep): step is Relev
   return step.type === ConversationRoundStepType.relevantSkills;
 };
 
+export interface PreExecutionWorkflowStepData {
+  /** Pre-rendered context from before-agent workflows, rendered to the model after the user message. */
+  model_context?: string;
+  /** State forwarded to after-execution workflows. Never rendered to the model. */
+  workflow_context?: WorkflowContext;
+}
+
+export type PreExecutionWorkflowStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.preExecutionWorkflow,
+  PreExecutionWorkflowStepData
+>;
+
+export const createPreExecutionWorkflowStep = (
+  data: PreExecutionWorkflowStepData
+): PreExecutionWorkflowStep => ({
+  type: ConversationRoundStepType.preExecutionWorkflow,
+  ...data,
+});
+
+export const isPreExecutionWorkflowStep = (
+  step: ConversationRoundStep
+): step is PreExecutionWorkflowStep => {
+  return step.type === ConversationRoundStepType.preExecutionWorkflow;
+};
+
 /**
  * Returns the (single) todos step from a list of steps, if present.
  * A round only ever has at most one todos step, which is updated in place.
@@ -341,6 +384,7 @@ export type ConversationRoundStep =
   | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
+  | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep;
 
 /**

@@ -155,13 +155,36 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('workflow params', () => {
-    it('passes prompt, response, round_id, agent_id, conversation_id, and tool_calls', async () => {
+    it('passes prompt, response, ids, connector_id, workflow_context, and tool_calls', async () => {
       const { workflowApi, getInternalServices } = createDeps();
+      const workflowContext = {
+        'nightshift.semantic_memory.recall': {
+          version: 1,
+          data: { recalled_ids: ['memory-1', 'memory-2'] },
+        },
+      };
       const round = makeRound({
         input: { message: 'my question' },
+        steps: [
+          {
+            type: ConversationRoundStepType.preExecutionWorkflow,
+            workflow_context: workflowContext,
+          },
+        ],
         response: { message: 'my answer' },
+        model_usage: {
+          connector_id: 'stale-folded-connector',
+          llm_calls: 1,
+          input_tokens: 10,
+          output_tokens: 5,
+        },
       });
-      const context = createContext({ round, agentId: 'ag-1', conversationId: 'cv-1' });
+      const context = createContext({
+        round,
+        agentId: 'ag-1',
+        conversationId: 'cv-1',
+        connectorId: ' current-connector ',
+      });
 
       await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
@@ -174,21 +197,36 @@ describe('runAfterExecutionWorkflows', () => {
             round_id: 'round-1',
             agent_id: 'ag-1',
             conversation_id: 'cv-1',
+            connector_id: 'current-connector',
+            workflow_context: workflowContext,
             tool_calls: [],
           }),
         })
       );
     });
 
-    it('omits agent_id and conversation_id when undefined', async () => {
+    it('omits agent_id, conversation_id, and connector_id when undefined or blank', async () => {
       const { workflowApi, getInternalServices } = createDeps();
-      const context = createContext({ agentId: undefined, conversationId: undefined });
+      const context = createContext({
+        agentId: undefined,
+        conversationId: undefined,
+        round: makeRound({
+          model_usage: {
+            connector_id: '  ',
+            llm_calls: 1,
+            input_tokens: 10,
+            output_tokens: 5,
+          },
+        }),
+      });
 
       await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
       const params = executeWorkflowMock.mock.calls[0][0].workflowParams as Record<string, unknown>;
       expect(params).not.toHaveProperty('agent_id');
       expect(params).not.toHaveProperty('conversation_id');
+      expect(params).not.toHaveProperty('connector_id');
+      expect(params).not.toHaveProperty('workflow_context');
     });
 
     it('extracts tool_calls from round steps', async () => {
