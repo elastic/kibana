@@ -28,9 +28,12 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
-const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessVectordb.nav.performance', {
-  defaultMessage: 'Performance',
-});
+const MONITOR_PERFORMANCE_TITLE = i18n.translate(
+  'xpack.serverlessVectordb.nav.monitorPerformance',
+  {
+    defaultMessage: 'Monitor performance',
+  }
+);
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessVectordb.nav.mngt.alertsAndInsights',
   {
@@ -164,7 +167,11 @@ export function createNavigationTree({
               {
                 id: 'cloudLinkDeployment',
                 cloudLink: 'deployment',
-                title: PERFORMANCE_TITLE,
+                title: MONITOR_PERFORMANCE_TITLE,
+              },
+              {
+                id: 'cloudLinkSearchPower',
+                cloudLink: 'searchPower',
               },
               {
                 cloudLink: 'userAndRoles',
