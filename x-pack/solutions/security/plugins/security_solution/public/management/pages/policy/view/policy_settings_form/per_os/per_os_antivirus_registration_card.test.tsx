@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -17,7 +18,10 @@ import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
 import type { PerOsAntivirusRegistrationCardProps } from './per_os_antivirus_registration_card';
 import { PerOsAntivirusRegistrationCard } from './per_os_antivirus_registration_card';
-import { selectOsControlOption } from './select_os_control_option.test.helpers';
+import {
+  openOsControlAndScrollPage,
+  selectOsControlOption,
+} from './select_os_control_option.test.helpers';
 
 jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 describe('PerOsAntivirusRegistrationCard', () => {
@@ -159,6 +163,14 @@ describe('PerOsAntivirusRegistrationCard', () => {
 
     const disabledOption = await renderResult.findByRole('option', { name: /^Disabled$/ });
     expect(disabledOption.querySelector('[color="danger"]')).toBeInTheDocument();
+  });
+
+  it('closes the mode options list when the page scrolls', async () => {
+    render();
+
+    await openOsControlAndScrollPage(renderResult, testSubj.windows.modeSelect);
+
+    await waitForElementToBeRemoved(() => renderResult.queryByRole('listbox'));
   });
 
   it('selecting a mode updates windows.antivirus_registration.mode and leaves mac and linux byte-identical', async () => {

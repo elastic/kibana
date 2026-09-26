@@ -25,7 +25,10 @@ import { PerOsSettingCard } from './per_os_setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { OsRow } from './os_row';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
-import { buildOsControlSelectOptions } from './os_control_select_options';
+import {
+  buildOsControlSelectOptions,
+  OS_CONTROL_SELECT_POPOVER_PROPS,
+} from './os_control_select_options';
 import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';
 
 const CARD_TITLE = i18n.translate(
@@ -166,6 +169,7 @@ export const PerOsAntivirusRegistrationCard = memo<PerOsAntivirusRegistrationCar
                 onChange={handleModeChange}
                 disabled={!isEditMode}
                 fullWidth={true}
+                popoverProps={OS_CONTROL_SELECT_POPOVER_PROPS}
                 data-test-subj={getTestId('windows-mode')}
                 aria-label={ANTIVIRUS_REGISTRATION_MODE_SELECT_ARIA_LABEL}
               />

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -13,7 +14,10 @@ import { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/t
 import { OS_CONTROL_WIDTH } from './os_control_layout';
 import type { PerOsDeviceControlAccessLevelSelectProps } from './per_os_device_control_access_level_select';
 import { PerOsDeviceControlAccessLevelSelect } from './per_os_device_control_access_level_select';
-import { selectOsControlOption } from './select_os_control_option.test.helpers';
+import {
+  openOsControlAndScrollPage,
+  selectOsControlOption,
+} from './select_os_control_option.test.helpers';
 
 jest.setTimeout(15_000); // Costly: each case drives several popover cycles
 describe('PerOsDeviceControlAccessLevelSelect', () => {
@@ -92,6 +96,14 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
 
     expect(props.onAccessLevelChange).toHaveBeenCalledTimes(1);
     expect(props.onAccessLevelChange).toHaveBeenCalledWith(DeviceControlAccessLevel.read_only);
+  });
+
+  it('closes the options list when the page scrolls', async () => {
+    render();
+
+    await openOsControlAndScrollPage(renderResult, testSubj);
+
+    await waitForElementToBeRemoved(() => renderResult.queryByRole('listbox'));
   });
 
   it('renders disabled when disabled is true', () => {
