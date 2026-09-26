@@ -229,8 +229,12 @@ const DEV_PATTERNS = [
   'src/platform/kbn-ui/_tooling/**/*',
 ];
 
-/** Restricted imports with suggested alternatives */
-const RESTRICTED_IMPORTS = [
+/**
+ * Security-related restricted imports. These are enforced by the dedicated
+ * `@kbn/eslint/security_imports_restriction` rule so that local
+ * `no-restricted-imports` overrides cannot silently drop them.
+ */
+const SECURITY_RESTRICTED_IMPORTS = [
   {
     name: 'lodash',
     importNames: ['set', 'setWith', 'template'],
@@ -289,6 +293,15 @@ const RESTRICTED_IMPORTS = [
     name: 'lodash/fp/template',
     message: 'lodash.template is unsafe, and not compatible with our content security policy.',
   },
+  {
+    name: 'axios',
+    message:
+      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
+  },
+];
+
+/** Restricted imports with suggested alternatives */
+const RESTRICTED_IMPORTS = [
   {
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
@@ -427,11 +440,6 @@ const RESTRICTED_IMPORTS = [
   {
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
-  },
-  {
-    name: 'axios',
-    message:
-      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
   },
 ];
 
@@ -1046,6 +1054,7 @@ module.exports = {
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
           'warn',
           {
@@ -3202,22 +3211,24 @@ module.exports = {
     },
     {
       // Allow axios in files that already use it. New axios imports are blocked
-      // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
-      // as consumers migrate to the native `fetch` API. Placed last so it wins
-      // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
-      // security_solution block). The trade-off: the allowlisted files that
-      // overlap with that block lose their `*legacy*` pattern check; verified
-      // that none of them currently import any path matching `*legacy*`. The
-      // workflows_management overlap is gone, and this comment can be dropped
-      // entirely once the remaining security_solution consumers migrate. The
-      // js-yaml freeze is handled separately via
-      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
-      // so it does not interact with this override.
+      // globally by SECURITY_RESTRICTED_IMPORTS; this allowlist should only ever
+      // shrink as consumers migrate to the native `fetch` API.
+      // The `no-restricted-imports` entry preserves this block's historical
+      // behavior: it is placed last, so the allowlisted files that overlap with
+      // an earlier override (e.g. the security_solution block) lose that
+      // override's `*legacy*` pattern check; verified that none of them
+      // currently import any path matching `*legacy*`. The workflows_management
+      // overlap is gone, and this entry can be dropped entirely once the
+      // remaining security_solution consumers migrate. The js-yaml freeze is
+      // handled separately via @kbn/eslint/module_migration in
+      // packages/kbn-eslint-config/.eslintrc.js so it does not interact with
+      // this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
-        'no-restricted-imports': [
+        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/security_imports_restriction': [
           'error',
-          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
+          ...SECURITY_RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
       },
     },
