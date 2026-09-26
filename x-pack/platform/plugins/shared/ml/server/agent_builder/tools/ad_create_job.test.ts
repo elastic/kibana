@@ -145,6 +145,184 @@ describe('adCreateJobTool', () => {
       });
     });
 
+    it('operation=estimate_memory maps detector fields to overall cardinality and extra influencers to max-bucket cardinality', async () => {
+      const ml = createMlMock();
+      const search = jest
+        .fn()
+        .mockImplementation(async (request: { aggs?: { card?: unknown } }) => {
+          if (request.aggs?.card && !('buckets' in (request.aggs ?? {}))) {
+            return { aggregations: { card: { value: 42 } } };
+          }
+          return { aggregations: { max_bucket_card: { value: 7 } } };
+        });
+      const analysisConfig = {
+        bucket_span: '15m',
+        detectors: [
+          {
+            function: 'rare',
+            by_field_name: 'user.name',
+            over_field_name: 'host.name',
+            partition_field_name: 'event.dataset',
+          },
+        ],
+        influencers: ['host.name', 'source.ip', 'mlcategory'],
+      };
+      const datafeedQuery = { term: { 'event.category': 'network' } };
+      const duration = { start: 1_700_000_000_000, end: 1_700_003_600_000 };
+
+      await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: analysisConfig,
+            data_description: { time_field: '@timestamp' },
+          },
+          datafeed_config: { indices: ['logs-*'], query: datafeedQuery },
+          duration,
+        },
+        createContext(ml, search)
+      );
+
+      const overallFields = search.mock.calls
+        .filter(([request]) => request.aggs?.card && !request.aggs?.buckets)
+        .map(([request]) => request.aggs.card.cardinality.field);
+      expect(overallFields).toEqual(['user.name', 'host.name', 'event.dataset']);
+
+      const maxBucketFields = search.mock.calls
+        .filter(([request]) => request.aggs?.max_bucket_card)
+        .map(([request]) => request.aggs.buckets.aggs.card.cardinality.field);
+      expect(maxBucketFields).toEqual(['source.ip']);
+
+      const scopedQuery = {
+        bool: {
+          must: [
+            datafeedQuery,
+            {
+              range: {
+                '@timestamp': {
+                  gte: duration.start,
+                  lte: duration.end,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
+        },
+      };
+      for (const [request] of search.mock.calls) {
+        expect(request.query).toEqual(scopedQuery);
+      }
+
+      expect(ml.estimateModelMemory).toHaveBeenCalledWith({
+        body: {
+          analysis_config: analysisConfig,
+          overall_cardinality: {
+            'user.name': 42,
+            'host.name': 42,
+            'event.dataset': 42,
+          },
+          max_bucket_cardinality: { 'source.ip': 7 },
+        },
+      });
+    });
+
+    it('operation=estimate_memory skips cardinality lookups for mlcategory-only fields', async () => {
+      const ml = createMlMock();
+      const search = jest.fn();
+
+      await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: {
+              detectors: [{ function: 'count', by_field_name: 'mlcategory' }],
+              influencers: ['mlcategory'],
+            },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext(ml, search)
+      );
+
+      expect(search).not.toHaveBeenCalled();
+      expect(ml.estimateModelMemory).toHaveBeenCalledWith({
+        body: {
+          analysis_config: {
+            detectors: [{ function: 'count', by_field_name: 'mlcategory' }],
+            influencers: ['mlcategory'],
+          },
+        },
+      });
+    });
+
+    it('operation=estimate_memory requires a duration before scanning max-bucket cardinality', async () => {
+      const ml = createMlMock();
+      const search = jest.fn();
+      const result = await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: {
+              bucket_span: '15m',
+              detectors: [{ function: 'count' }],
+              influencers: ['host.name'],
+            },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext(ml, search)
+      );
+
+      expect(search).not.toHaveBeenCalled();
+      expect(ml.estimateModelMemory).not.toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toMatch('duration');
+    });
+
+    it('operation=estimate_memory caps the max-bucket histogram to 1000 buckets', async () => {
+      const ml = createMlMock();
+      const search = jest.fn().mockResolvedValue({
+        aggregations: { max_bucket_card: { value: 3 } },
+      });
+      const bucketMs = 15 * 60 * 1000;
+      const end = 2_000 * bucketMs;
+      const start = 0;
+
+      await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: {
+              bucket_span: '15m',
+              detectors: [{ function: 'count' }],
+              influencers: ['host.name'],
+            },
+            data_description: { time_field: '@timestamp' },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+          duration: { start, end },
+        },
+        createContext(ml, search)
+      );
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                gte: end - 1000 * bucketMs,
+                lte: end,
+                format: 'epoch_millis',
+              },
+            },
+          },
+        })
+      );
+    });
+
     it('operation=estimate_memory returns an error when cardinality lookup fails', async () => {
       const ml = createMlMock();
       const search = jest.fn().mockRejectedValue(new Error('index_not_found_exception'));
@@ -216,7 +394,7 @@ describe('adCreateJobTool', () => {
         createContext()
       );
 
-      expect(previewDatafeed).toHaveBeenCalled();
+      expect(previewDatafeed).toHaveBeenCalledTimes(1);
       const standardResult = result as {
         results: Array<{ type: string; data: Record<string, unknown> }>;
       };

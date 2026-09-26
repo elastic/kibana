@@ -227,15 +227,16 @@ function InlineMlChart<
   const onSaveToDashboard = useCallback<SaveModalDashboardProps['onSave']>(
     async ({ dashboardId, newTitle, newDescription }) => {
       setIsSaveModalOpen(false);
+      // Only historical attachments supplied a time_range. Realtime charts omit
+      // it so the saved panel follows the dashboard's global picker.
+      const persistPreviewTimeRange = data.time_range !== undefined;
       await embeddable.getStateTransfer().navigateToWithEmbeddablePackages('dashboards', {
         state: [
           {
             type: embeddableType,
             serializedState: {
               ...serializedState,
-              // Pin the preview range so historical/batch charts keep their
-              // analysis window after save (including picker changes).
-              time_range: effectiveTimeRange,
+              ...(persistPreviewTimeRange ? { time_range: effectiveTimeRange } : {}),
               title: newTitle,
               description: newDescription,
             },
@@ -244,7 +245,7 @@ function InlineMlChart<
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
     },
-    [embeddable, embeddableType, effectiveTimeRange, serializedState]
+    [data.time_range, embeddable, embeddableType, effectiveTimeRange, serializedState]
   );
 
   const viewInHref = useMemo(() => {

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
+import { parseInterval } from '@kbn/ml-parse-interval';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
 import type { MlLicense } from '../../../common/license';
@@ -17,7 +20,7 @@ import type { MlFeatures } from '../../../common/constants/app';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { validateJob } from '../../models/job_validation/job_validation';
-import { validateDatafeedPreview } from '../../models/job_validation/validate_datafeed_preview';
+import { previewDatafeedForValidation } from '../../models/job_validation/validate_datafeed_preview';
 import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
 import { getMessages } from '../../../common/constants/messages';
 import type { BuildMlClientFn, BuildDataRecognizerFn } from '../ml_client_factory';
@@ -55,7 +58,7 @@ const schema = z.object({
     })
     .optional()
     .describe(
-      'Time range in epoch ms. Providing it skips the internal time-range lookup in validate_full and scopes the datafeed preview.'
+      'Time range in epoch ms. Scopes estimate_memory cardinality lookups to the explored or batch window, skips the internal time-range lookup in validate_full, and scopes the datafeed preview.'
     ),
   estimator_params: z
     .record(z.string(), z.unknown())
@@ -156,15 +159,15 @@ export const createAdCreateJobTool = (
             ? (analysisConfigObj.detectors as Array<Record<string, unknown>>)
             : [];
 
-          // Collect split fields that require cardinality estimates
-          const partitionByFields = new Set<string>();
-          const overFields = new Set<string>();
-          for (const det of detectors) {
-            if (typeof det.partition_field_name === 'string')
-              partitionByFields.add(det.partition_field_name);
-            if (typeof det.by_field_name === 'string') partitionByFields.add(det.by_field_name);
-            if (typeof det.over_field_name === 'string') overFields.add(det.over_field_name);
-          }
+          // `_estimate_model_memory` wants overall cardinality for by/over/partition
+          // fields, and max-bucket cardinality only for influencers that are not
+          // already covered by those detector fields. `mlcategory` is produced by
+          // categorization and has no cardinality in the source data.
+          const overallCardinalityFields = collectOverallCardinalityFields(detectors);
+          const influencerCardinalityFields = collectInfluencerCardinalityFields(
+            analysisConfigObj.influencers,
+            overallCardinalityFields
+          );
 
           // Auto-fetch cardinality from source indices when split fields are present
           // and cardinality was not explicitly provided by the caller
@@ -175,19 +178,30 @@ export const createAdCreateJobTool = (
             | Record<string, number>
             | undefined;
 
+          const datafeedConfigObj = datafeedConfig as Record<string, unknown> | undefined;
           const indices =
-            datafeedConfig && Array.isArray((datafeedConfig as Record<string, unknown>).indices)
-              ? ((datafeedConfig as Record<string, unknown>).indices as string[])
+            datafeedConfigObj && Array.isArray(datafeedConfigObj.indices)
+              ? (datafeedConfigObj.indices as string[])
               : undefined;
+          const datafeedQuery = getDatafeedQuery(datafeedConfigObj);
+          const dataDesc = jobConfigObj.data_description as Record<string, unknown> | undefined;
+          const timeField =
+            typeof dataDesc?.time_field === 'string' ? dataDesc.time_field : '@timestamp';
+          const bucketSpan =
+            typeof analysisConfigObj.bucket_span === 'string'
+              ? analysisConfigObj.bucket_span
+              : '15m';
+          const cardinalityQuery = buildCardinalityQuery(datafeedQuery, timeField, duration);
 
           if (indices && indices.length > 0) {
-            if (partitionByFields.size > 0 && !resolvedOverallCardinality) {
+            if (overallCardinalityFields.size > 0 && !resolvedOverallCardinality) {
               resolvedOverallCardinality = {};
-              for (const field of partitionByFields) {
+              for (const field of overallCardinalityFields) {
                 try {
                   const result = await esClient.asCurrentUser.search({
                     index: indices,
                     size: 0,
+                    ...(cardinalityQuery ? { query: cardinalityQuery } : {}),
                     aggs: { card: { cardinality: { field } } },
                   });
                   const cardinality = (result.aggregations?.card as { value?: number } | undefined)
@@ -215,21 +229,30 @@ export const createAdCreateJobTool = (
               }
             }
 
-            if (overFields.size > 0 && !resolvedMaxBucketCardinality) {
+            if (influencerCardinalityFields.size > 0 && !resolvedMaxBucketCardinality) {
+              if (duration?.start === undefined && duration?.end === undefined) {
+                return {
+                  results: [
+                    createErrorResult(
+                      'Cannot estimate memory: duration {start, end} is required so max-bucket cardinality stays inside the explored or batch time range.'
+                    ),
+                  ],
+                };
+              }
               resolvedMaxBucketCardinality = {};
-              const dataDesc = jobConfigObj.data_description as Record<string, unknown> | undefined;
-              const timeField =
-                typeof dataDesc?.time_field === 'string' ? dataDesc.time_field : '@timestamp';
-              const bucketSpan =
-                typeof analysisConfigObj.bucket_span === 'string'
-                  ? analysisConfigObj.bucket_span
-                  : '15m';
+              const histogramQuery = buildCardinalityQuery(
+                datafeedQuery,
+                timeField,
+                duration,
+                bucketSpan
+              );
 
-              for (const field of overFields) {
+              for (const field of influencerCardinalityFields) {
                 try {
                   const result = await esClient.asCurrentUser.search({
                     index: indices,
                     size: 0,
+                    ...(histogramQuery ? { query: histogramQuery } : {}),
                     aggs: {
                       buckets: {
                         date_histogram: { field: timeField, fixed_interval: bucketSpan },
@@ -410,46 +433,34 @@ export const createAdCreateJobTool = (
           }
 
           const combinedJob = { ...jobConfig, datafeed_config: datafeedConfig };
-          const { valid, error } = await validateDatafeedPreview(
+          const preview = await previewDatafeedForValidation(
             mlClient,
             combinedJob as any,
             duration?.start,
             duration?.end
           );
 
-          if (!valid) {
+          if (!preview.valid) {
             return {
               results: [
                 {
                   type: ToolResultType.other,
-                  data: { valid: false, documentsFound: false, error },
+                  data: { valid: false, documentsFound: false, error: preview.error },
                 },
               ],
             };
           }
 
-          // Also fetch a small sample of actual documents for field verification.
-          let documents: unknown[] = [];
-          try {
-            const preview = (await mlClient.previewDatafeed(
-              {
-                job_config: jobConfig as any,
-                datafeed_config: datafeedConfig as any,
-                ...(duration?.start !== undefined ? { start: duration.start } : {}),
-                ...(duration?.end !== undefined ? { end: duration.end } : {}),
-              },
-              { maxRetries: 0 }
-            )) as unknown;
-            documents = getPreviewSampleDocuments(preview).slice(0, 20);
-          } catch {
-            // ignore — valid/documentsFound is the authoritative result
-          }
-
+          const documents = preview.documents.slice(0, 20);
           return {
             results: [
               {
                 type: ToolResultType.other,
-                data: { valid, documentsFound: documents?.length > 0, sample_documents: documents },
+                data: {
+                  valid: true,
+                  documentsFound: documents.length > 0,
+                  sample_documents: documents,
+                },
               },
             ],
           };
@@ -545,20 +556,101 @@ export const createAdCreateJobTool = (
   },
 });
 
+const isCardinalityField = (field: unknown): field is string =>
+  typeof field === 'string' && field.length > 0 && field !== MLCATEGORY;
+
+/** Detector split fields that `_estimate_model_memory` reads from `overall_cardinality`. */
+const collectOverallCardinalityFields = (
+  detectors: Array<Record<string, unknown>>
+): Set<string> => {
+  const fields = new Set<string>();
+  for (const detector of detectors) {
+    for (const fieldName of [
+      detector.by_field_name,
+      detector.over_field_name,
+      detector.partition_field_name,
+    ]) {
+      if (isCardinalityField(fieldName)) {
+        fields.add(fieldName);
+      }
+    }
+  }
+  return fields;
+};
+
 /**
- * `validateDatafeedPreview` documents `previewDatafeed` as `{ body: unknown[] }`
- * while the generated client type is `TDocument[]`. Accept both so Phase 1
- * still receives sample documents for field inspection.
+ * Influencer fields that still need `max_bucket_cardinality`. Fields already
+ * sent as overall cardinality are omitted, matching the job wizard estimator.
  */
-const getPreviewSampleDocuments = (preview: unknown): unknown[] => {
-  if (Array.isArray(preview)) {
-    return preview;
+const collectInfluencerCardinalityFields = (
+  influencers: unknown,
+  overallCardinalityFields: ReadonlySet<string>
+): Set<string> => {
+  const influencerList = Array.isArray(influencers)
+    ? influencers
+    : influencers === undefined
+    ? []
+    : [influencers];
+  const fields = new Set<string>();
+  for (const influencer of influencerList) {
+    if (isCardinalityField(influencer) && !overallCardinalityFields.has(influencer)) {
+      fields.add(influencer);
+    }
   }
-  if (preview === null || typeof preview !== 'object' || !('body' in preview)) {
-    return [];
+  return fields;
+};
+
+/** Datafeed query DSL, when present, so cardinality is measured on the filtered source. */
+const getDatafeedQuery = (
+  datafeedConfig: Record<string, unknown> | undefined
+): estypes.QueryDslQueryContainer | undefined => {
+  const query = datafeedConfig?.query;
+  if (query === null || typeof query !== 'object' || Array.isArray(query)) {
+    return undefined;
   }
-  const { body } = preview;
-  return Array.isArray(body) ? body : [];
+  return query as estypes.QueryDslQueryContainer;
+};
+
+/** Matches the job-wizard estimator: a date histogram must stay under this many buckets. */
+const MAX_CARDINALITY_HISTOGRAM_BUCKETS = 1000;
+
+/**
+ * Combines the datafeed query with the explored/batch time range.
+ * When `bucketSpan` is set, the start is pulled forward so the date histogram
+ * cannot exceed {@link MAX_CARDINALITY_HISTOGRAM_BUCKETS}.
+ */
+const buildCardinalityQuery = (
+  datafeedQuery: estypes.QueryDslQueryContainer | undefined,
+  timeField: string,
+  duration: { start?: number; end?: number } | undefined,
+  bucketSpan?: string
+): estypes.QueryDslQueryContainer | undefined => {
+  if (duration?.start === undefined && duration?.end === undefined) {
+    return datafeedQuery;
+  }
+
+  let start = duration.start;
+  const end = duration.end;
+  if (bucketSpan !== undefined && end !== undefined) {
+    const interval = parseInterval(bucketSpan);
+    if (interval !== null) {
+      const earliestAllowed = end - MAX_CARDINALITY_HISTOGRAM_BUCKETS * interval.asMilliseconds();
+      start = start === undefined ? earliestAllowed : Math.max(start, earliestAllowed);
+    }
+  }
+
+  const bounds: estypes.QueryDslRangeQuery = { format: 'epoch_millis' };
+  if (start !== undefined) {
+    bounds.gte = start;
+  }
+  if (end !== undefined) {
+    bounds.lte = end;
+  }
+  const rangeQuery: estypes.QueryDslQueryContainer = { range: { [timeField]: bounds } };
+  if (!datafeedQuery) {
+    return rangeQuery;
+  }
+  return { bool: { must: [datafeedQuery, rangeQuery] } };
 };
 
 /**

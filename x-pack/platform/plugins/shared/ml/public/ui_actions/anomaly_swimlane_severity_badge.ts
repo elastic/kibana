@@ -40,7 +40,7 @@ export class AnomalySwimlaneSeverityBadge
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (!isSwimlaneWithSeverity(embeddable)) return false;
+    if (!isSwimlaneWithSeverity(embeddable) || !hasEditCapabilities(embeddable)) return false;
     const threshold = embeddable.severityThreshold.value;
     return typeof threshold === 'number' && threshold > 0;
   }

@@ -4,7 +4,7 @@ Single skill covering all anomaly detection work. Use the **Mode Selector** belo
 
 ## Platform
 
-- Read path: `ml.query_anomalies` (internal user) against `.ml-anomalies-*`, `.ml-config`, `.ml-notifications-*`, `.ml-annotations-*`
+- Read path: `ml.query_anomalies` (internal user) against `.ml-anomalies` (results materialized view), `.ml-anomalies-*` (model plot / forecast / snapshot / categories / memory stats, and automatic fallback when the view is missing), `.ml-config`, `.ml-notifications-*`, `.ml-annotations-*`. Copy templates that use `FROM .ml-anomalies`; the tool probes the cluster and rewrites to `FROM .ml-anomalies-*` on older Elasticsearch.
 - Source-data ES|QL only: `platform.core.execute_esql` (current user) for RCA evidence / ingest latency against datafeed indices
 - ES|QL query templates are in the referenced content files (`esql-read-queries`, `esql-metadata-queries`, `esql-score-queries`)
 - ML API write/state operations: `ml.ad_get_job_info`, `ml.ad_create_job`, `ml.ad_manage_job_state`, `ml.ad_update_job_config`
@@ -41,11 +41,11 @@ ml.query_anomalies
 # With placeholders — bind every ?name in params
 ml.query_anomalies
   query: |
-    FROM .ml-anomalies-*
+    FROM .ml-anomalies
     | WHERE result_type == "record"
       AND job_id LIKE ?job_id_pattern
-      AND record_score >= ?min_score
-    | SORT record_score DESC
+      AND score >= ?min_score
+    | SORT score DESC
     | LIMIT 50
   params:
     job_id_pattern: "*"
@@ -67,29 +67,30 @@ When a question spans modes: **Investigate → Explain → Troubleshoot**. Don't
 
 ## Score Quick Reference
 
-- `record_score` bands: **>75** critical · **50–75** warning · **25–50** minor · **<25** informational
-- `multi_bucket_impact ≥ 3` → sustained shift (not a transient spike)
-- `initial_record_score >> record_score` → renormalization (model saw worse anomalies later)
+- `score` bands (all result types on `.ml-anomalies`): **>75** critical · **50–75** warning · **25–50** minor · **<25** informational
+- `initial_score >> score` → renormalization (model saw worse anomalies later)
 - `actual << typical` with `count`/`low_count`/`low_mean` → absence/outage, not just low value
 - Low scores across many jobs > one high score — composite cross-job signal often beats single-detector severity
 
-> Full score definitions, renormalization mechanics, and `anomaly_score_explanation` components: see `score-reference` referenced content.
+> Full score definitions and renormalization mechanics: see `score-reference` referenced content.
 
 ## Core concepts
 
-Treat `.ml-anomalies-*` as three layers, accessed via `result_type`:
+Treat `.ml-anomalies` as three layers, accessed via `result_type`:
 
-- **`bucket`** — bucket-level unusualness per `bucket_span`. `anomaly_score` is the aggregate across all detectors.
-- **`record`** — finest-grained rows with `actual` vs `typical`, `probability`, `record_score`, and flattened `anomaly_score_explanation.*` fields (never select the parent object in ES|QL).
-- **`influencer`** — entity contributions ranked within a bucket (`influencer_score`).
+- **`bucket`** — bucket-level unusualness per `bucket_span`. `score` is the aggregate across all detectors.
+- **`record`** — finest-grained rows with `actual` vs `typical`, `score`, `initial_score`, detector `function` / `field_name`, and flattened entity fields (`by_field_*`, `over_field_*`, `partition_field_*`).
+- **`influencer`** — entity contributions ranked within a bucket (`score`).
 
 Read scores this way:
 
-- `anomaly_score` / `record_score` = **current normalized** values (move as the model sees new extremes).
-- `initial_anomaly_score` / `initial_record_score` = **immutable snapshots** from detection time.
-- Compare `actual` to `typical`; use `probability` for raw likelihood.
-- Map entities via `partition_field_value` / `by_field_value` / `over_field_value`.
-- Read `multi_bucket_impact` (-5 to +5) to separate single-bucket spikes from sustained trends.
+- `score` = **current normalized** value for the result (bucket aggregate, record, or influencer). Moves as the model sees new extremes.
+- `initial_score` = **immutable snapshot** of `score` from detection time.
+- Raw per-type fields (`record_score`, `anomaly_score`, `influencer_score`, `initial_record_score`, …) exist on `.ml-anomalies-*` only; use `score` / `initial_score` in all ES|QL templates.
+- Compare `actual` to `typical`.
+- Map entities via `partition_field_value` / `by_field_value` / `over_field_value` / `influencer_field_value`.
+- Filter anomaly time ranges on `timestamp` (the bucket time). Do not filter historical results on `` `event.ingested` `` — that is when the result document was written.
+- **`causes` is not supported** on the materialized view. Do not query `probability`, `multi_bucket_impact`, or `anomaly_score_explanation.*` via ES|QL.
 
 ---
 
@@ -125,9 +126,8 @@ See `esql-read-queries` and `esql-metadata-queries` referenced content for all E
 
 1. **Multi-job entities are prime suspects; single-job entities are usually victims.** Use `min_job_count=2`.
 2. **Earliest anomaly timestamp wins** — sort `ad_rca_correlation` by timestamp; first-appearing entity = origin.
-3. **`multi_bucket_impact ≥ 3` = sustained behavioral shift**, weight higher than transient spikes.
-4. **Never close an RCA without `ad_rca_source_evidence`** — raw source documents are ground truth.
-5. **Use low `min_score` (25 or lower) for influencer queries** — high thresholds miss correlated entities.
+3. **Never close an RCA without `ad_rca_source_evidence`** — raw source documents are ground truth.
+4. **Use low `min_score` (25 or lower) for influencer queries** — high thresholds miss correlated entities.
 
 ---
 
@@ -137,36 +137,27 @@ See `esql-read-queries` and `esql-metadata-queries` referenced content for all E
 
 ### Score types
 
-| Field                  | Scope           | Meaning                                                                 |
-| ---------------------- | --------------- | ----------------------------------------------------------------------- |
-| `record_score`         | Single record   | Normalized severity after renormalization.                              |
-| `initial_record_score` | Single record   | Score at detection time. Gap vs `record_score` = renormalization drift. |
-| `anomaly_score`        | Bucket          | Aggregate severity across all detectors in a bucket.                    |
-| `influencer_score`     | Entity × bucket | How anomalous a specific entity is in that bucket.                      |
+On `.ml-anomalies` the per-result-type score columns are unified:
 
-### `anomaly_score_explanation` components
-
-These live under `anomaly_score_explanation.*` in ES|QL. **Do not** `KEEP anomaly_score_explanation` (unknown column — object fields are not addressable). Use backtick-quoted paths from `ad_query_anomaly_records`.
-
-| Component (ES|QL column)                                    | Effect  | What it means                                                |
-| ----------------------------------------------------------- | ------- | ------------------------------------------------------------ |
-| `anomaly_score_explanation.anomaly_length`                  | ↑ score | More consecutive anomalous buckets                           |
-| `anomaly_score_explanation.single_bucket_impact`            | ↑ score | Lower probability → higher impact                            |
-| `anomaly_score_explanation.multi_bucket_impact`             | ↑ score | Sustained pattern contribution                               |
-| `anomaly_score_explanation.high_variance_penalty`           | ↓ score | Noisy data → wide bounds → anomaly less surprising           |
-| `anomaly_score_explanation.anomaly_type`                    | —       | `spike` or `dip`                                             |
-| `anomaly_score_explanation.lower_confidence_bound` / `.upper_confidence_bound` | — | 95% confidence interval bounds                    |
+| Field (`.ml-anomalies` view) | Raw field (`.ml-anomalies-*`)  | Scope           | Meaning                                                                 |
+| ---------------------------- | ------------------------------ | --------------- | ----------------------------------------------------------------------- |
+| `score`                      | `record_score`                 | Single record   | Normalized severity after renormalization.                              |
+| `initial_score`              | `initial_record_score`         | Single record   | Score at detection time. Gap vs `score` = renormalization drift.        |
+| `score`                      | `anomaly_score`                | Bucket          | Aggregate severity across all detectors in a bucket.                    |
+| `score`                      | `influencer_score`             | Entity × bucket | How anomalous a specific entity is in that bucket.                      |
 
 ### Why a score looks wrong
 
-- **Unexpectedly low:** `high_variance_penalty`, renormalization, <3 weeks training for weekly seasonality, `bucket_span` too large, wrong detector function (`mean` vs `high_mean`), `incomplete_bucket_penalty`, suppression by `custom_rules`.
+- **Unexpectedly low:** renormalization, <3 weeks training for weekly seasonality, `bucket_span` too large, wrong detector function (`mean` vs `high_mean`), suppression by `custom_rules`.
 - **Unexpectedly high:** insufficient history (early training over-flags), high-cardinality split (too few points per entity), `use_null: true` on a sparse field.
+
+ES|QL against `.ml-anomalies` does not include `anomaly_score_explanation.*`, `probability`, or `multi_bucket_impact`. Explain scores from `actual` vs `typical`, `initial_*` vs current scores, `function` / `function_description`, and `ad_get_model_plot` (on `.ml-anomalies-*`).
 
 ### Tool chain
 
 | Purpose                | Tool                         | `query` value: read file → copy section                             |
 | ---------------------- | ---------------------------- | ------------------------------------------------------------------- |
-| Records + explanation  | `ml.query_anomalies` | `esql-read-queries` → `ad_query_anomaly_records` (exact `job_id_pattern`) |
+| Records                | `ml.query_anomalies` | `esql-read-queries` → `ad_query_anomaly_records` (exact `job_id_pattern`) |
 | Renormalization drift  | `ml.query_anomalies` | `esql-read-queries` → `ad_rca_score_reassessment`                   |
 | Model bounds (visual)  | `ml.query_anomalies` | `esql-score-queries` → `ad_get_model_plot`                          |
 | Forecast overlap       | `ml.query_anomalies` | `esql-score-queries` → `ad_get_forecast_results`                    |
@@ -180,21 +171,20 @@ These live under `anomaly_score_explanation.*` in ES|QL. **Do not** `KEEP anomal
 1. `ml.ad_get_job_info` (`operation=get_jobs`) — ≥3 weeks data for weekly seasonality?
 2. `ml.query_anomalies` (`ad_ts_model_memory_health`) — `memory_status` healthy?
 3. `ml.query_anomalies` (`ad_ts_delayed_data_annotations`) — no incomplete buckets?
-4. `ml.query_anomalies` (`ad_query_anomaly_records`) — compare `record_score` vs `initial_record_score`.
+4. `ml.query_anomalies` (`ad_query_anomaly_records`) — compare `score` vs `initial_score`.
 5. `ml.ad_get_job_info` (`operation=get_jobs`) — `bucket_span`, detector function, `custom_rules`, `use_null`.
-6. `ml.query_anomalies` (`ad_get_model_plot`) — wide bounds → `high_variance_penalty`.
+6. `ml.query_anomalies` (`ad_get_model_plot`) — wide model bounds mean the spike was less surprising.
 7. `ml.query_anomalies` (`ad_rca_score_reassessment`) — renormalization drift across history.
-8. Explain `anomaly_score_explanation.*` factors from the record query (flattened ES|QL columns only).
+8. Explain using `actual` vs `typical`, `initial_score` vs `score`, detector `function`, and model-plot bounds.
 
 See `esql-score-queries` referenced content for model_plot, forecast, and score reassessment templates.
 
 ### Rules
 
-1. **Always show both `initial_record_score` and `record_score`** — the gap is the renormalization story.
+1. **Always show both `initial_score` and `score`** — the gap is the renormalization story.
 2. **Explain renormalization before diagnosing config** — score drift is the most common "score dropped" cause and needs no config change.
 3. **`actual << typical` with `count`/`low_count` is an absence anomaly** — distinguish outages from value spikes.
-4. **`high_variance_penalty` and `incomplete_bucket_penalty` explain most "low score" surprises** without remediation.
-5. **Weekly seasonality needs ≥3 weeks of training data** — flag young jobs as the cause.
+4. **Weekly seasonality needs ≥3 weeks of training data** — flag young jobs as the cause.
 
 ---
 
@@ -369,7 +359,7 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
 #### Phase 3 — Validate spec and confirm batch run
 
 1. **Validate** — `ml.ad_create_job` (`operation=validate_full`). Fix errors and re-validate (max 3 attempts). Add `"groups": ["ml-agent-scratch"]` to the batch job config before validation so the job is tagged as a scratch job and can be cleaned up later.
-2. **Estimate memory** — `ml.ad_create_job` (`operation=estimate_memory`). Report in plain terms (e.g. "this job will use about 50 MB").
+2. **Estimate memory** — `ml.ad_create_job` (`operation=estimate_memory`) with `duration` set to the explored or batch window in epoch ms. Report in plain terms (e.g. "this job will use about 50 MB").
 3. **Pre-run summary** — before showing any config, state in plain language:
    - Time range to be analysed (e.g. "the last 90 days of data")
    - Approximate record count
@@ -409,6 +399,16 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
 2. **Update the dashboard** — regenerate the inline dashboard (from Phase 4) replacing the batch job IDs with the new realtime job IDs. Keep the same three-panel layout but omit `time_range` on each panel so they track the live time range.
 3. **Offer batch job cleanup** — the batch/historical jobs created during this session are now superseded. Ask the user to confirm before deleting them, naming each job ID explicitly. This is a destructive action — do not delete without explicit approval. If approved, `ml.ad_manage_job_state` (`stop_datafeed`) → `ml.ad_manage_job_state` (`close_job`) → `ml.ad_manage_job_state` (`delete_job`) for each batch job. Batch jobs are tagged `ml-agent-scratch` (set in Phase 3) so no special flags are needed for deletion.
 4. **Offer alerting** — ask: *"Would you like to set up alerting rules so you're notified when anomaly scores exceed a threshold on the new jobs?"*
+
+   **If yes**, present two options and ask which they want:
+
+   - **Anomaly detection alert** — checks job results for anomalies matching defined conditions (score threshold, result type) and fires when found. Rule type: `xpack.ml.anomaly_detection_alert`.
+   - **Anomaly detection jobs health** — monitors operational status (datafeed stopped, memory limit errors) and fires on issues. Rule type: `xpack.ml.anomaly_detection_jobs_health`.
+
+   Once the user chooses, load the rule management skill via `filestore.read` (path: `skills/platform/alerting/rule-management/SKILL.md`) and delegate rule creation to it. Pass the following context:
+   - The realtime job ID(s) created in step 1 above
+   - The chosen rule type (`xpack.ml.anomaly_detection_alert` or `xpack.ml.anomaly_detection_jobs_health`)
+   - For anomaly detection alert: default severity threshold of 75 (ask user if they want to adjust), result type `bucket`
 5. Set expectation: *"The model will keep learning your data's normal patterns over the coming weeks and will become more accurate over time."*
 
 **If no:**
@@ -459,7 +459,7 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 2. **Never use ML jargon with users.** Translate `bucket_span` → detection frequency, `query_delay` → data latency, `by_field_name` → "split by entity". Users decide the business goal; you decide the config.
 3. **Never ask the user about job structure.** "One job per metric or one combined job?", "partition vs. population?", "split by service or by host?" are architecture decisions — make them based on Phase 1 data and the user's stated goal. State the choice and the reason; don't make it a question.
 4. **Always run batch before realtime.** Historical analysis lets the user validate the configuration before committing to a live job.
-5. **Never delete batch jobs without explicit user confirmation.** Name every job ID in the confirmation prompt. Batch jobs must carry the `ml-agent-scratch` group (set in Phase 3) — only scratch jobs may be deleted; never pass `allow_non_scratch: true`.
+5. **Never delete batch jobs without explicit user confirmation.** Name every job ID in the confirmation prompt. Batch jobs must carry the `ml-agent-scratch` group (set in Phase 3). The delete tool rejects every job that is not in that group.
 6. **Plain-language summary before dashboard.** Raw charts without context confuse non-ML users; state the key finding in one sentence first.
 7. **Handle the no-anomaly path explicitly.** Zero results is not the same as success — explain it and offer adjustments.
 8. **Create job before datafeed.** Datafeed references job by ID.
@@ -480,7 +480,8 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 
 | Index                 | Relevant content                                                                                                              |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `.ml-anomalies-*`     | `record`, `bucket`, `influencer`, `model_plot`, `model_forecast`, `model_snapshot`, `category_definition`, `model_size_stats` |
+| `.ml-anomalies`       | Materialized view of anomaly results (`record`, `bucket`, `influencer`) — **use this for ES|QL result queries**. `ml.query_anomalies` falls back to `.ml-anomalies-*` if the view is missing. See `esql-read-queries` for the allowed field list. `causes` is not supported. |
+| `.ml-anomalies-*`     | Underlying result indices for `model_plot`, `model_forecast`, `model_snapshot`, `category_definition`, `model_size_stats`     |
 | `.ml-config`          | job/datafeed documents (visible even for never-run jobs)                                                                      |
 | `.ml-annotations-*`   | delayed data (`event == "delayed_data"`); time fields are `timestamp` / `end_timestamp` (not `@timestamp`)                   |
 | `.ml-notifications-*` | job messages (`level`: info/warning/error)                                                                                    |
@@ -507,7 +508,7 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 2. **`ml.ad_get_job_info` with `validate_permissions` first** on empty results — privileges are the most common false-negative cause.
 3. **Score bands are absolute thresholds**: `>75` critical, `50–75` warning, `25–50` minor, `<25` informational.
 4. **Multi-job entities are prime suspects.** Use `min_job_count=2` in `ad_rca_multi_job_entities`.
-5. **Show `initial_record_score` alongside `record_score`** — the gap tells the renormalization story.
+5. **Show `initial_score` alongside `score`** — the gap tells the renormalization story.
 6. **Fix memory before `query_delay`.** `hard_limit` invalidates downstream diagnostics.
 7. **Stop datafeed → close job → update config → open job → start datafeed** for any config change to memory or query delay.
 8. **Confirm RCAs with `ad_rca_source_evidence`.** Raw source documents are ground truth.

@@ -75,12 +75,6 @@ const schema = z.object({
     .string()
     .optional()
     .describe('End time for start_datafeed (ISO 8601). Omit for open-ended.'),
-  allow_non_scratch: z
-    .boolean()
-    .optional()
-    .describe(
-      'For delete_job: allow deleting a job not in the ml-agent-scratch group. Default false.'
-    ),
   delete_user_annotations: z
     .boolean()
     .optional()
@@ -125,7 +119,6 @@ export const createAdManageJobStateTool = (
       snapshot_id: snapshotId,
       start,
       end,
-      allow_non_scratch: allowNonScratch,
       delete_user_annotations: deleteUserAnnotations = true,
       max_wait_seconds: maxWaitSeconds = 120,
       datafeed_start_ms: datafeedStartMs,
@@ -220,28 +213,35 @@ export const createAdManageJobStateTool = (
         }
 
         case 'delete_job': {
-          // "Scratch" jobs are temporary batch jobs created for the user to initially preview/confirm configurations with historical data
-          // before creating a permanent job, real time job
-          // So in specific operations, we only want agent to only be able to delete these temporary "scratch" jobs
-          const jobApi = mlClient ?? ml;
-          if (!allowNonScratch) {
-            const jobInfo = await jobApi.getJobs({ job_id: jobId });
-            const job = jobInfo.jobs?.[0];
-            const groups: string[] = Array.isArray(job?.groups) ? job.groups : [];
-            if (!groups.includes(SCRATCH_GROUP)) {
-              return {
-                results: [
-                  createErrorResult(
-                    `Job "${jobId}" is not in the "${SCRATCH_GROUP}" group. Only scratch jobs may be deleted. Pass allow_non_scratch: true to override.`
-                  ),
-                ],
-              };
-            }
+          await hasMlCapabilities(['canDeleteJob']);
+
+          // Scratch jobs are temporary batch jobs the agent creates so the user can
+          // preview a configuration. Deletion is limited to that group, and it must
+          // go through the space-scoped client so another Space's job cannot be removed.
+          if (!mlClient) {
+            return {
+              results: [
+                createErrorResult('Cannot delete job: space-scoped ML client is unavailable.'),
+              ],
+            };
+          }
+          const jobApi = mlClient;
+          const jobInfo = await jobApi.getJobs({ job_id: jobId });
+          const job = jobInfo.jobs?.[0];
+          const groups: string[] = Array.isArray(job?.groups) ? job.groups : [];
+          if (!groups.includes(SCRATCH_GROUP)) {
+            return {
+              results: [
+                createErrorResult(
+                  `Job "${jobId}" is not in the "${SCRATCH_GROUP}" group. Only scratch jobs may be deleted.`
+                ),
+              ],
+            };
           }
 
           // Stop datafeed (ignore 404 — may already be stopped or never created)
           try {
-            await jobApi.stopDatafeed({ datafeed_id: datafeedId, body: { force: true } as any });
+            await jobApi.stopDatafeed({ datafeed_id: datafeedId, force: true });
           } catch {
             // datafeed not running or does not exist — proceed
           }
@@ -263,9 +263,18 @@ export const createAdManageJobStateTool = (
 
         case 'await_batch_completion': {
           await hasMlCapabilities(['canGetJobs']);
+          if (!mlClient) {
+            return {
+              results: [
+                createErrorResult(
+                  'Cannot wait for batch completion: space-scoped ML client is unavailable.'
+                ),
+              ],
+            };
+          }
           const waitSeconds = clampWaitSeconds(maxWaitSeconds);
           const deadlineMs = Date.now() + waitSeconds * 1000;
-          const statsApi = mlClient ?? ml;
+          const statsApi = mlClient;
 
           while (true) {
             const [datafeedStats, jobStats] = await Promise.all([

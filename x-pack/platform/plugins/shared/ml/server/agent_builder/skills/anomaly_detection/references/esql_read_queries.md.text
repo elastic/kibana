@@ -6,28 +6,47 @@ Section titles (e.g. `ad_query_anomaly_records`) are labels for the query exampl
 
 For **source-data** examples (`ad_rca_source_evidence`, `ad_search_log_category_examples`) use `platform.core.execute_esql` instead.
 
+**Anomaly results source:** `FROM .ml-anomalies` (materialized view of `record` / `bucket` / `influencer`). Always copy these templates as written. `ml.query_anomalies` probes whether the view exists on the connected Elasticsearch cluster and, on older versions that do not have it, rewrites to `FROM .ml-anomalies-*`. Do not write the wildcard yourself for these result types.
+
+**Time fields:** Filter anomaly time ranges on `timestamp` (the bucket time of the anomaly). Do not filter historical results on `` `event.ingested` `` — that is when the result document was written, so a batch job run today would miss the analysis window. Never use `@timestamp`. Filter `is_interim == false` when you want finalized results only.
+
+**`causes` is not supported** on the materialized view. Use flattened entity fields (`by_field_*`, `over_field_*`, `partition_field_*`, `influencer_field_*`) plus `actual` / `typical` instead.
+
+### Fields available on `.ml-anomalies`
+
+The view unifies the per-result-type score columns into two columns. Use `score` / `initial_score` for all result types; do not use `record_score`, `anomaly_score`, `influencer_score`, `initial_record_score`, `initial_anomaly_score`, or `initial_influencer_score` — those do not exist on the view.
+
+| Use | Fields |
+| --- | --- |
+| Filter | `job_id` (keyword), `result_type` (`bucket` \| `record` \| `influencer`), `timestamp` (date — use this for time ranges), `is_interim` (boolean). `` `event.ingested` `` is result-document ingest time, not the anomaly time. |
+| Aggregate | `timestamp`, `score`, `initial_score` (all double except `timestamp`) |
+| Result columns | All of the above, plus `bucket_span` (long), `function`, `function_description`, `field_name`, `by_field_name`, `by_field_value`, `over_field_name`, `over_field_value`, `partition_field_name`, `partition_field_value`, `influencer_field_name`, `influencer_field_value`, `detector_index`, `actual`, `typical`, `event_count`, `processing_time_ms` |
+
+Do not `KEEP`, filter, or aggregate fields that are not listed (`causes`, `probability`, `multi_bucket_impact`, `anomaly_score_explanation.*`, and others). Those are unknown columns on the materialized view.
+
+**On older Elasticsearch clusters** (without the view), `ml.query_anomalies` falls back to `FROM .ml-anomalies-*` and automatically injects `EVAL score = COALESCE(record_score, anomaly_score, influencer_score), initial_score = COALESCE(initial_record_score, ...)` so the same templates work unchanged.
+
 ---
 
 ## ad_query_anomaly_records
 
 Search anomaly records by score threshold and time range. Use `job_id_pattern='*'` for cross-job search or an exact job ID for single-job drill-down.
 
-**ES|QL note:** Never select `anomaly_score_explanation` as a whole column — it is an object and is not addressable in ES|QL. Always use the flattened subfields below (backtick-quoted).
-
 **Parameters:** `job_id_pattern` (string, LIKE wildcards), `min_score` (number), `start_time` (ISO 8601), `end_time` (ISO 8601)
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "record"
   AND job_id LIKE ?job_id_pattern
-  AND record_score >= ?min_score
+  AND score >= ?min_score
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
-| SORT record_score DESC
+| SORT score DESC
 | LIMIT 50
-| KEEP job_id, timestamp, record_score, function, field_name, actual, typical,
+| KEEP job_id, timestamp, is_interim, score, initial_score,
+       function, function_description, field_name, actual, typical, detector_index, bucket_span,
        by_field_name, by_field_value, over_field_name, over_field_value,
-       partition_field_name, partition_field_value, anomaly_score_explanation.*
+       partition_field_name, partition_field_value
 ```
 
 ---
@@ -39,17 +58,17 @@ Time-series summary of anomaly severity across jobs. Use for cross-job swimlanes
 **Parameters:** `job_id_pattern`, `min_score`, `start_time`, `end_time`
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "bucket"
   AND job_id LIKE ?job_id_pattern
-  AND anomaly_score >= ?min_score
+  AND score >= ?min_score
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
-| STATS max_score = MAX(anomaly_score),
+| STATS max_score = MAX(score),
         job_count = COUNT_DISTINCT(job_id),
         jobs = VALUES(job_id),
-        composite_score = SUM(anomaly_score),
-        avg_score = AVG(anomaly_score)
+        composite_score = SUM(score),
+        avg_score = AVG(score)
   BY timestamp
 | SORT timestamp
 ```
@@ -63,16 +82,16 @@ Find the most unusual entities across all or selected jobs. When `job_count > 1`
 **Parameters:** `job_id_pattern`, `min_score`, `start_time`, `end_time`
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "influencer"
   AND job_id LIKE ?job_id_pattern
-  AND influencer_score >= ?min_score
+  AND score >= ?min_score
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
-| STATS total_score = SUM(influencer_score),
+| STATS total_score = SUM(score),
         job_count = COUNT_DISTINCT(job_id),
         jobs = VALUES(job_id),
-        max_score = MAX(influencer_score)
+        max_score = MAX(score)
   BY influencer_field_name, influencer_field_value
 | SORT total_score DESC
 | LIMIT 30
@@ -87,9 +106,9 @@ Measure how widespread an issue is by counting distinct partitions/entities affe
 **Parameters:** `anomalous_value` (string), `min_score`, `start_time`, `end_time`
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "record"
-  AND record_score >= ?min_score
+  AND score >= ?min_score
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
   AND (by_field_value == ?anomalous_value
@@ -98,7 +117,7 @@ FROM .ml-anomalies-*
 | STATS affected_partitions = COUNT_DISTINCT(partition_field_value),
         affected_jobs = COUNT_DISTINCT(job_id),
         total_anomalies = COUNT(*),
-        max_score = MAX(record_score),
+        max_score = MAX(score),
         time_span_hours = DATE_DIFF("hour", MIN(timestamp), MAX(timestamp))
   BY by_field_value
 | SORT affected_partitions DESC
@@ -113,16 +132,17 @@ Find temporally correlated anomalies across different jobs. Sort by timestamp to
 **Parameters:** `job_id_pattern`, `min_score`, `start_time`, `end_time`
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "record"
   AND job_id LIKE ?job_id_pattern
-  AND record_score >= ?min_score
+  AND score >= ?min_score
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
 | SORT timestamp ASC
-| KEEP job_id, timestamp, record_score, function, field_name,
+| KEEP job_id, timestamp, score, initial_score,
+       function, function_description, field_name, actual, typical, detector_index,
        by_field_name, by_field_value, partition_field_name, partition_field_value,
-       over_field_name, over_field_value, multi_bucket_impact
+       over_field_name, over_field_value
 | LIMIT 100
 ```
 
@@ -135,15 +155,15 @@ Starting from a specific entity value, find all other jobs where that entity app
 **Parameters:** `entity_value` (string), `min_score`, `start_time`, `end_time`
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "record"
-  AND record_score >= ?min_score
+  AND score >= ?min_score
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
   AND (partition_field_value == ?entity_value
        OR by_field_value == ?entity_value
        OR over_field_value == ?entity_value)
-| STATS max_score = MAX(record_score),
+| STATS max_score = MAX(score),
         anomaly_count = COUNT(*),
         functions = VALUES(function),
         fields = VALUES(field_name),
@@ -162,15 +182,15 @@ For a specific incident time window, show exactly which detectors fired across a
 **Parameters:** `job_id_pattern`, `min_score`, `start_time`, `end_time`
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "record"
   AND job_id LIKE ?job_id_pattern
-  AND record_score >= ?min_score
+  AND score >= ?min_score
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
 | STATS count = COUNT(*),
-        max_score = MAX(record_score),
-        avg_score = AVG(record_score)
+        max_score = MAX(score),
+        avg_score = AVG(score)
   BY job_id, function, field_name, detector_index
 | SORT max_score DESC
 ```
@@ -184,7 +204,7 @@ Build a complete anomaly dossier for a suspect entity across all jobs.
 **Parameters:** `entity_value` (string), `start_time`, `end_time`
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "record"
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
@@ -193,9 +213,10 @@ FROM .ml-anomalies-*
        OR partition_field_value == ?entity_value)
 | SORT timestamp ASC
 | LIMIT 100
-| KEEP job_id, timestamp, record_score, function, field_name,
+| KEEP job_id, timestamp, score, initial_score,
+       function, function_description, field_name, actual, typical, detector_index,
        by_field_name, by_field_value, over_field_name, over_field_value,
-       partition_field_name, partition_field_value, actual, typical, multi_bucket_impact
+       partition_field_name, partition_field_value
 ```
 
 ---
@@ -207,14 +228,14 @@ Find entities that are anomalous in multiple jobs simultaneously — the stronge
 **Parameters:** `min_score`, `min_job_count` (number, use 2 for root cause candidates), `start_time`, `end_time`
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "record"
-  AND record_score >= ?min_score
+  AND score >= ?min_score
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
 | STATS job_count = COUNT_DISTINCT(job_id),
         jobs = VALUES(job_id),
-        max_score = MAX(record_score),
+        max_score = MAX(score),
         total_records = COUNT(*),
         functions = VALUES(function),
         fields = VALUES(field_name)
