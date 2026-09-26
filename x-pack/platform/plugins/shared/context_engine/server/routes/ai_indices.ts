@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type {
   ElasticsearchClient,
   IRouter,
@@ -24,31 +23,9 @@ import type { DeleteWorkflowsApi } from '../types';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
-  DEFAULT_AI_INDEX_QUERY_LIMIT,
-  DEFAULT_FEEDBACK_ANALYSIS_INTERVAL,
-  DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM,
-  MAX_AI_INDEX_AUTOMATION_LENGTH,
-  MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIBE_FIELDS,
-  MAX_AI_INDEX_DESCRIPTION_LENGTH,
-  MAX_AI_INDEX_DEST_VALUE_LENGTH,
-  MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
-  MAX_AI_INDEX_ID_LENGTH,
-  MAX_AI_INDEX_QUERY_LENGTH,
   MAX_AI_INDEX_QUERY_LIMIT,
-  MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH,
-  MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
-  MAX_AI_INDEX_QUERY_PARAMS,
-  MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-  MAX_AI_INDEX_SOURCES,
-  MAX_AI_INDEX_TRACES,
-  MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
-  MAX_AI_INDEX_TRACE_VALUE_LENGTH,
   MAX_AI_INDICES,
-  MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
-  MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
-  MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
-  MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
@@ -56,10 +33,6 @@ import {
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
   AI_INDEX_QUERY_PATH,
-  DEFAULT_KI_PAGE_SIZE,
-  MAX_KI_PAGE_SIZE,
-  MAX_KI_TYPE_FILTER_LENGTH,
-  MAX_INDEX_NAME_BYTES,
 } from '../../common/constants';
 import type {
   CreateAiIndexResponse,
@@ -70,20 +43,8 @@ import type {
   PutAiIndexResponse,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
-import type { ImprovementAction } from '../../common/http_api/improvement_actions';
-import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import type { GetKiResponse, ListKisResponse } from '../../common/http_api/knowledge_indicators';
-import { MAX_KI_ID_LENGTH } from '../../common/step_types/ki';
 import { apiPrivileges } from '../../common/features';
-import {
-  validateAbsoluteSignalWindow,
-  validateAiIndexDestValue,
-  validateAiIndexId,
-  validateAiIndexQueryLimit,
-  validateFeedbackAnalysisInterval,
-  validateRelativeSignalWindow,
-  validateSignalWindowCoversInterval,
-} from '../../common/validation';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
@@ -112,13 +73,31 @@ import type { ImprovementsServiceApi } from '../improvements/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
-import { validateSignalFilter } from '../ai_indices/signal_filter';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { validateEsqlSources } from '../ai_indices/validate_esql_sources';
 import { validateTraces } from '../ai_indices/validate_traces';
 import { formatErrorMessage } from '../utils/format_es_error';
 import { resolveSpaceId } from '../utils/resolve_space_id';
 import { AiIndexAuditAction, aiIndexAuditEvent } from '../audit/audit_events';
+import {
+  aiIndexHttpItemResponseSchema,
+  aiIndexIdParamsSchema,
+  createAiIndexBodySchema,
+  createAiIndexResponseSchema,
+  deleteAiIndexQuerySchema,
+  deleteAiIndexResponseSchema,
+  describeAiIndexResponseSchema,
+  errorResponseSchema,
+  feedbackAnalysisSchema,
+  getKiQuerySchema,
+  kiIdParamsSchema,
+  listAiIndexResponseSchema,
+  listKisQuerySchema,
+  putAiIndexBodySchema,
+  queryAiIndicesBodySchema,
+  queryAiIndicesResponseSchema,
+  updateAiIndexResponseSchema,
+} from './schemas/ai_indices_schema';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
@@ -136,297 +115,18 @@ const DELETE_SECURITY: RouteSecurity = {
   },
 };
 
+const CONTEXT_ENGINE_DISABLED_NOTE =
+  'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).';
+
+const CONTEXT_ENGINE_DOCS_NOTE =
+  '**For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**';
+
+const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
+
 const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.delete.every(
     (privilege) => request.authzResult?.[privilege] === true
   );
-
-const aiIndexIdSchema = schema.string({
-  minLength: 1,
-  maxLength: MAX_AI_INDEX_ID_LENGTH,
-  validate: validateAiIndexId,
-  meta: { description: 'The unique identifier of the AI Index.' },
-});
-
-const aiIndexIdParamsSchema = schema.object({
-  aiIndexId: aiIndexIdSchema,
-});
-
-const signalTimeRangeSchema = schema.oneOf(
-  [
-    schema.object({
-      type: schema.literal('relative'),
-      from: schema.string({
-        maxLength: MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
-        validate: validateRelativeSignalWindow,
-        meta: { description: 'Date math relative to now, for example `now-30d`.' },
-      }),
-    }),
-    schema.object({
-      type: schema.literal('absolute'),
-      from: schema.string({
-        maxLength: MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
-        validate: validateAbsoluteSignalWindow,
-        meta: { description: 'ISO 8601 date to analyze signals since.' },
-      }),
-    }),
-  ],
-  {
-    defaultValue: {
-      type: 'relative' as const,
-      from: DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM,
-    },
-    meta: { description: 'Which signals the analysis reads. A read filter only.' },
-  }
-);
-
-// Derived from the taxonomy rather than re-listed, so a new action cannot be
-// added to the vocabulary and silently stay unconfigurable here.
-const improvementActionSchema = schema.oneOf(
-  IMPROVEMENT_ACTIONS.map((action) => schema.literal(action)) as [Type<ImprovementAction>]
-);
-
-const feedbackAnalysisSchema = schema.object(
-  {
-    enabled: schema.boolean({
-      meta: {
-        description:
-          'Desired state of the recurring analysis. The scheduler stays authoritative for whether it is actually running.',
-      },
-    }),
-    agent_id: schema.maybe(
-      schema.string({
-        maxLength: MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
-        meta: {
-          description: 'Agent Builder agent id that runs this index’s feedback-loop analysis.',
-        },
-      })
-    ),
-    schedule: schema.object(
-      {
-        interval: schema.string({
-          maxLength: MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
-          validate: validateFeedbackAnalysisInterval,
-          meta: {
-            description: `How often to analyze, for example \`1h\` or \`24h\`. At least ${MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES} minutes.`,
-          },
-        }),
-      },
-      { defaultValue: { interval: DEFAULT_FEEDBACK_ANALYSIS_INTERVAL } }
-    ),
-    signal_time_range: signalTimeRangeSchema,
-    signal_filter: schema.maybe(
-      schema.string({
-        maxLength: MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
-        validate: validateSignalFilter,
-        meta: {
-          description:
-            'KQL narrowing which signals this index analyzes, for example `tags: query_error`.',
-        },
-      })
-    ),
-    allowed_actions: schema.arrayOf(improvementActionSchema, {
-      defaultValue: [...IMPROVEMENT_ACTIONS],
-      maxSize: IMPROVEMENT_ACTIONS.length,
-      meta: {
-        description: 'Improvement actions the analysis may propose. An empty list is observe-only.',
-      },
-    }),
-  },
-  {
-    validate: ({ schedule, signal_time_range: signalTimeRange }) =>
-      validateSignalWindowCoversInterval(schedule.interval, signalTimeRange),
-  }
-);
-const kiIdParamsSchema = schema.object({
-  aiIndexId: aiIndexIdSchema,
-  kiId: schema.string({
-    minLength: 1,
-    maxLength: MAX_KI_ID_LENGTH,
-    meta: { description: 'The document id of the Knowledge Indicator.' },
-  }),
-});
-
-const aiIndexTraceSchema = schema.oneOf([
-  schema.object({
-    type: schema.literal('elastic_agent'),
-    value: schema.string({
-      minLength: 1,
-      maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
-      meta: { description: 'The Agent Builder agent id.' },
-    }),
-  }),
-  schema.object({
-    type: schema.literal('index'),
-    value: schema.string({
-      minLength: 1,
-      maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
-      validate: (value) => {
-        if (value.split(',').length > MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS) {
-          return `value must contain at most ${MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS} comma-separated expressions`;
-        }
-      },
-      meta: { description: 'An index or data stream name or pattern to read traces from.' },
-    }),
-  }),
-  schema.object({
-    type: schema.literal('esql'),
-    value: schema.string({
-      minLength: 1,
-      maxLength: MAX_AI_INDEX_TRACE_VALUE_LENGTH,
-      meta: { description: 'An ES|QL query to select traces.' },
-    }),
-  }),
-]);
-
-const aiIndexPropertiesSchema = {
-  description: schema.maybe(
-    schema.string({
-      maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
-      meta: { description: 'Human-readable description of the AI Index.' },
-    })
-  ),
-  feedback_analysis: schema.maybe(feedbackAnalysisSchema),
-  dest: schema.object({
-    type: schema.oneOf([schema.literal('data_stream'), schema.literal('index')], {
-      meta: {
-        description:
-          'The type of the backing store. `data_stream` for a data stream, or `index` for an index.',
-      },
-    }),
-    value: schema.string({
-      minLength: 1,
-      maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
-      validate: validateAiIndexDestValue,
-      meta: {
-        description:
-          'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI index id. System indices are not allowed.',
-      },
-    }),
-  }),
-  automations: schema.arrayOf(
-    schema.object({
-      type: schema.literal('workflow'),
-      value: schema.string({ minLength: 1, maxLength: MAX_AI_INDEX_AUTOMATION_LENGTH }),
-    }),
-    {
-      maxSize: MAX_AI_INDEX_AUTOMATIONS,
-      defaultValue: [],
-      meta: {
-        description:
-          'Automations associated with the AI Index. Defaults to an empty array when omitted.',
-      },
-    }
-  ),
-  sources: schema.arrayOf(
-    schema.oneOf([
-      schema.object({
-        type: schema.literal('esql'),
-        value: schema.string({
-          minLength: 1,
-          maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-          meta: {
-            description:
-              'The source value; an ES|QL query when `type` is `esql`. Must be valid ES|QL.',
-          },
-        }),
-      }),
-      schema.object({
-        type: schema.literal('connector'),
-        value: schema.string({
-          minLength: 1,
-          maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-          meta: { description: 'The source value; a connector id when `type` is `connector`.' },
-        }),
-      }),
-    ]),
-    {
-      maxSize: MAX_AI_INDEX_SOURCES,
-      defaultValue: [],
-      meta: {
-        description:
-          'Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.',
-      },
-    }
-  ),
-  traces: schema.arrayOf(aiIndexTraceSchema, {
-    maxSize: MAX_AI_INDEX_TRACES,
-    defaultValue: [],
-    meta: {
-      description:
-        'Trace sources linked to this AI index. A write replaces the whole array. Defaults to an empty array when omitted.',
-    },
-  }),
-};
-
-const createAiIndexBodySchema = schema.object({
-  id: aiIndexIdSchema,
-  ...aiIndexPropertiesSchema,
-});
-const putAiIndexBodySchema = schema.object({
-  ...aiIndexPropertiesSchema,
-});
-
-const listKisQuerySchema = schema.object({
-  size: schema.number({
-    min: 0,
-    max: MAX_KI_PAGE_SIZE,
-    defaultValue: DEFAULT_KI_PAGE_SIZE,
-  }),
-  type: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: MAX_KI_TYPE_FILTER_LENGTH,
-      meta: { description: 'When set, return only KIs of this type.' },
-    })
-  ),
-});
-
-const getKiQuerySchema = schema.object({
-  index: schema.string({
-    minLength: 1,
-    maxLength: MAX_INDEX_NAME_BYTES,
-    meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
-  }),
-});
-
-const queryAiIndicesBodySchema = schema.object({
-  query: schema.string({
-    minLength: 1,
-    maxLength: MAX_AI_INDEX_QUERY_LENGTH,
-    meta: {
-      description:
-        'The ES|QL query to run. Its FROM decides which Elasticsearch indices are read (normally `ai-index-*`); the server adds the space filter and a row limit.',
-    },
-  }),
-  params: schema.maybe(
-    schema.recordOf(
-      schema.string({ minLength: 1, maxLength: MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH }),
-      schema.oneOf([
-        schema.string({ maxLength: MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH }),
-        schema.number(),
-        schema.boolean(),
-      ]),
-      {
-        validate: (params) =>
-          Object.keys(params).length > MAX_AI_INDEX_QUERY_PARAMS
-            ? `must not have more than ${MAX_AI_INDEX_QUERY_PARAMS} entries`
-            : undefined,
-        meta: { description: 'Values for `?name` placeholders in the query.' },
-      }
-    )
-  ),
-  limit: schema.maybe(
-    schema.number({
-      min: 1,
-      max: MAX_AI_INDEX_QUERY_LIMIT,
-      validate: validateAiIndexQueryLimit,
-      meta: {
-        description: `Maximum rows to return. Defaults to ${DEFAULT_AI_INDEX_QUERY_LIMIT}; a trailing \`LIMIT\` in the query is capped to this value.`,
-      },
-    })
-  ),
-});
 
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
   if (
@@ -461,22 +161,6 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
     body: { message: formatErrorMessage(error) },
   });
 };
-
-const deleteAiIndexQuerySchema = schema.object({
-  delete_knowledge_indicators: schema.boolean({
-    defaultValue: false,
-    meta: {
-      description:
-        'When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI index still uses the same dest. Defaults to false.',
-    },
-  }),
-  delete_automations: schema.boolean({
-    defaultValue: false,
-    meta: {
-      description: 'When true, also delete the attached workflow automations. Defaults to false.',
-    },
-  }),
-});
 
 /** Current-user reads: ES 4xx (bad ES|QL, missing privilege) is caller's error. */
 const handleReadError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
@@ -539,11 +223,14 @@ export const registerAiIndexRoutes = ({
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create an AI Index',
-      description:
-        'Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same id already exists.',
+      description: [
+        'Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -553,6 +240,33 @@ export const registerAiIndexRoutes = ({
           request: {
             body: createAiIndexBodySchema,
           },
+          response: {
+            201: {
+              body: createAiIndexResponseSchema,
+              description: 'The AI Index was created.',
+            },
+            400: {
+              body: errorResponseSchema,
+              description:
+                'The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
+            409: {
+              body: errorResponseSchema,
+              description: 'An AI Index with the same ID already exists, or the write conflicted.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_create.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
@@ -592,10 +306,14 @@ export const registerAiIndexRoutes = ({
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create or update an AI Index',
-      description: 'Creates or updates an AI Index record attached to a data stream or index.',
+      description: [
+        'Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -606,6 +324,37 @@ export const registerAiIndexRoutes = ({
             params: aiIndexIdParamsSchema,
             body: putAiIndexBodySchema,
           },
+          response: {
+            200: {
+              body: updateAiIndexResponseSchema,
+              description: 'The AI Index was updated.',
+            },
+            201: {
+              body: createAiIndexResponseSchema,
+              description: 'The AI Index was created.',
+            },
+            400: {
+              body: errorResponseSchema,
+              description:
+                'The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
+            409: {
+              body: errorResponseSchema,
+              description: 'The AI Index is managed and immutable, or the write conflicted.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_put.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
@@ -649,10 +398,14 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Get an AI Index',
-      description: 'Fetches an AI Index by id.',
+      description: [
+        'Fetches an AI Index by ID from the current space, including the ES|QL query derived from each trace.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -662,6 +415,20 @@ export const registerAiIndexRoutes = ({
           request: {
             params: aiIndexIdParamsSchema,
           },
+          response: {
+            200: {
+              body: aiIndexHttpItemResponseSchema,
+              description: 'The requested AI Index.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description:
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_get.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
@@ -688,16 +455,40 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'List AI Indices',
-      description: `Lists the AI Indices registered in the current space that the caller can read. An AI Index is left out when the caller cannot read its backing index. An empty AI Index is still listed. Up to ${MAX_AI_INDICES} entries. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way.`,
+      description: [
+        `Lists up to ${MAX_AI_INDICES} AI Indices in the current space that the caller can read. The response omits an AI Index when the caller cannot read its backing index. Empty AI Indices are still included. A caller with no read privilege on any index gets a 403 response.`,
+        'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
       {
         version: AI_INDEX_API_VERSION,
-        validate: false,
+        validate: {
+          response: {
+            200: {
+              body: listAiIndexResponseSchema,
+              description: 'The AI Indices available to the caller in the current space.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'The caller has no read privilege on any index, so Elasticsearch rejected the request.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_list.yaml'),
+        },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
@@ -719,10 +510,16 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Query AI Indices',
-      description: `Runs an ES|QL query as the current user, with a space filter and a row limit (at most ${MAX_AI_INDEX_QUERY_LIMIT}) applied server-side. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); nothing in the request body can change it or replace the space filter. The query decides which indices it reads; Elasticsearch index privileges bound what it can reach.`,
+      description: [
+        `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows.`,
+        'The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.',
+        'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -732,6 +529,27 @@ export const registerAiIndexRoutes = ({
           request: {
             body: queryAiIndicesBodySchema,
           },
+          response: {
+            200: {
+              body: queryAiIndicesResponseSchema,
+              description: 'The columns and rows returned by the ES|QL query.',
+            },
+            400: {
+              body: errorResponseSchema,
+              description: 'The ES|QL query was invalid, or its response exceeded the size limit.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description: 'Elasticsearch rejected the read; the caller lacks index privileges.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_query.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
@@ -755,10 +573,16 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Describe an AI Index',
-      description: `Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach: a caller who cannot read the backing indices gets a 403. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way.`,
+      description: [
+        `Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to ${MAX_AI_INDEX_DESCRIBE_FIELDS} fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.`,
+        'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.',
+        'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -768,6 +592,29 @@ export const registerAiIndexRoutes = ({
           request: {
             params: aiIndexIdParamsSchema,
           },
+          response: {
+            200: {
+              body: describeAiIndexResponseSchema,
+              description: 'A free-form text context block describing the AI Index.',
+            },
+            400: {
+              body: errorResponseSchema,
+              description: 'The description response exceeded the size limit.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'The caller cannot read the backing indices. Describing an AI Index requires the `read` and `view_index_metadata` index privileges on them.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description:
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_describe.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
@@ -920,14 +767,16 @@ export const registerAiIndexRoutes = ({
       security: DELETE_SECURITY,
       access: 'public',
       summary: 'Delete an AI Index',
-      description:
-        'Deletes an AI Index by id. The backing data stream/index (and therefore its Knowledge ' +
-        'Indicators) and the attached workflow automations are left untouched unless the ' +
-        '`delete_knowledge_indicators`/`delete_automations` query parameters are set to true. ' +
-        'The dest is not deleted when another AI Index still uses it.',
+      description: [
+        'Deletes an AI Index by ID.',
+        'By default, the API preserves the backing data stream or index, its Knowledge Indicators, and attached workflow automations. Set `delete_knowledge_indicators` to `true` to delete the backing data stream or index and its Knowledge Indicators. Set `delete_automations` to `true` to delete the attached workflow automations.',
+        'The API does not delete the backing data stream or index when another AI Index uses the same destination.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -938,6 +787,25 @@ export const registerAiIndexRoutes = ({
             params: aiIndexIdParamsSchema,
             query: deleteAiIndexQuerySchema,
           },
+          response: {
+            200: {
+              body: deleteAiIndexResponseSchema,
+              description:
+                'The AI Index entry was deleted. `errors` lists any best-effort cleanup failures.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description:
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
+            },
+            409: {
+              body: errorResponseSchema,
+              description: 'The AI Index is managed and cannot be deleted.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_delete.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {

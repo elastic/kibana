@@ -89,6 +89,15 @@ tags:
       description: Connector documentation
       url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
+  - name: context engine
+    description: |
+      Use the Context Engine APIs to manage AI Indices, query them with ES|QL, and describe them for an agent. An AI Index attaches a name, sources, traces, and automations to a single data stream or index.
+
+      In each space, these APIs return a 404 until the `contextEngine:enabled` advanced setting is turned on for that space.
+    externalDocs:
+      description: Context Engine documentation
+      url: https://www.elastic.co/docs/explore-analyze/ai-features/context-engine
+    x-displayName: Context Engine
   - name: Dashboards
     description: |
       > This documentation is temporarily hosted at a separate location.
@@ -22061,6 +22070,2128 @@ paths:
       tags:
         - cases
       x-state: Technical preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/context_engine/ai_index:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Lists up to 100 AI Indices in the current space that the caller can read. The response omits an AI Index when the caller cannot read its backing index. Empty AI Indices are still included. A caller with no read privilege on any index gets a 403 response.
+
+        The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+      operationId: get-context-engine-ai-index
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listAiIndicesResponseExample:
+                  description: Example response listing the AI Indices the caller can read
+                  summary: AI Indices the caller can read
+                  value:
+                    ai_indices:
+                      - automations: []
+                        date_created: '2026-09-22T12:00:00.000Z'
+                        date_modified: '2026-09-22T12:00:00.000Z'
+                        description: Knowledge about customer support cases.
+                        dest:
+                          type: data_stream
+                          value: ai-index-ds-customer-support
+                        id: customer_support
+                        managed: false
+                        sources:
+                          - type: esql
+                            value: FROM support-cases | LIMIT 100
+                        traces: []
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  ai_indices:
+                    description: The AI Indices available to the caller in the current space.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        automations:
+                          description: Automations associated with the AI Index.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              type:
+                                enum:
+                                  - workflow
+                                type: string
+                              value:
+                                description: The workflow ID.
+                                type: string
+                            required:
+                              - type
+                              - value
+                          type: array
+                        date_created:
+                          description: ISO 8601 timestamp of when the AI Index was created.
+                          type: string
+                        date_modified:
+                          description: ISO 8601 timestamp of when the AI Index was last modified.
+                          type: string
+                        description:
+                          description: Human-readable description of the AI Index.
+                          type: string
+                        dest:
+                          additionalProperties: false
+                          description: The data stream or index that backs the AI Index.
+                          type: object
+                          properties:
+                            type:
+                              description: The type of the backing store.
+                              enum:
+                                - data_stream
+                                - index
+                              type: string
+                            value:
+                              description: The data stream or index the AI Index is attached to.
+                              type: string
+                          required:
+                            - type
+                            - value
+                        feedback_analysis:
+                          additionalProperties: false
+                          description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
+                          type: object
+                          properties:
+                            agent_id:
+                              description: Agent Builder agent ID that runs the analysis.
+                              type: string
+                            allowed_actions:
+                              description: Improvement actions the analysis may propose.
+                              items:
+                                description: Add, edit, or remove a Knowledge Indicator (`*_ki`), a workflow automation (`*_workflow`), or a source (`*_source`).
+                                enum:
+                                  - add_ki
+                                  - edit_ki
+                                  - remove_ki
+                                  - add_workflow
+                                  - edit_workflow
+                                  - remove_workflow
+                                  - add_source
+                                  - edit_source
+                                  - remove_source
+                                type: string
+                              type: array
+                            enabled:
+                              description: Whether the recurring feedback analysis is desired to run.
+                              type: boolean
+                            schedule:
+                              additionalProperties: false
+                              description: When the analysis runs.
+                              type: object
+                              properties:
+                                interval:
+                                  description: How often to analyze, for example `1h`.
+                                  type: string
+                              required:
+                                - interval
+                            signal_filter:
+                              description: KQL narrowing which signals the analysis reads.
+                              type: string
+                            signal_time_range:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    from:
+                                      description: Date math relative to now, for example `now-30d`.
+                                      type: string
+                                    type:
+                                      enum:
+                                        - relative
+                                      type: string
+                                  required:
+                                    - type
+                                    - from
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    from:
+                                      description: ISO 8601 date to analyze signals since.
+                                      type: string
+                                    type:
+                                      enum:
+                                        - absolute
+                                      type: string
+                                  required:
+                                    - type
+                                    - from
+                          required:
+                            - enabled
+                        id:
+                          description: The unique identifier of the AI Index.
+                          type: string
+                        managed:
+                          description: Whether the AI Index is managed by a plugin and therefore immutable.
+                          type: boolean
+                        sources:
+                          description: Additional sources that provide context for the AI Index.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              type:
+                                description: '`esql` for an ES|QL query, or `connector` for a data connector.'
+                                enum:
+                                  - esql
+                                  - connector
+                                type: string
+                              value:
+                                description: An ES|QL query for `esql`, or a connector ID for `connector`.
+                                type: string
+                            required:
+                              - type
+                              - value
+                          type: array
+                        traces:
+                          description: Trace sources linked to this AI Index, each with its derived ES|QL query.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                description: The ES|QL query derived from this trace source at read time.
+                                type: string
+                              type:
+                                description: '`elastic_agent` for an Agent Builder agent, `index` for an index or data stream name or pattern, or `esql` for an ES|QL query.'
+                                enum:
+                                  - elastic_agent
+                                  - index
+                                  - esql
+                                type: string
+                              value:
+                                description: The trace source value.
+                                type: string
+                            required:
+                              - type
+                              - value
+                              - query
+                          type: array
+                      required:
+                        - id
+                        - managed
+                        - date_created
+                        - date_modified
+                        - dest
+                        - automations
+                        - sources
+                        - traces
+                    type: array
+                required:
+                  - ai_indices
+          description: The AI Indices available to the caller in the current space.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  description: The caller has no read privilege on any index
+                  summary: No index read privileges
+                  value:
+                    error: Forbidden
+                    message: |-
+                      security_exception
+                      	Root causes:
+                      		security_exception: action [indices:data/read/msearch] is unauthorized for user [jdoe] with effective roles [support_reader], this action is granted by the index privileges [read,all]
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The caller has no read privilege on any index, so Elasticsearch rejected the request.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
+      summary: List AI Indices
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/context_engine/ai_index
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+      operationId: post-context-engine-ai-index
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createAiIndexRequestExample:
+                description: Example request to create an AI Index attached to a data stream
+                summary: Create an AI Index
+                value:
+                  automations:
+                    - type: workflow
+                      value: 8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f
+                  description: Knowledge about customer support cases.
+                  dest:
+                    type: data_stream
+                    value: ai-index-ds-customer-support
+                  id: customer_support
+                  sources:
+                    - type: esql
+                      value: FROM support-cases | LIMIT 100
+                  traces:
+                    - type: elastic_agent
+                      value: elastic-ai-agent
+                    - type: index
+                      value: traces-support
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                automations:
+                  default: []
+                  description: Automations associated with the AI Index. Defaults to an empty array when omitted.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      type:
+                        enum:
+                          - workflow
+                        type: string
+                      value:
+                        description: The workflow ID.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                    required:
+                      - type
+                      - value
+                  maxItems: 100
+                  type: array
+                description:
+                  description: Human-readable description of the AI Index.
+                  maxLength: 2048
+                  type: string
+                dest:
+                  additionalProperties: false
+                  description: The data stream or index that backs the AI Index.
+                  type: object
+                  properties:
+                    type:
+                      description: The type of the backing store. `data_stream` for a data stream, or `index` for an index.
+                      enum:
+                        - data_stream
+                        - index
+                      type: string
+                    value:
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index ID. System indices are not allowed.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                  required:
+                    - type
+                    - value
+                feedback_analysis:
+                  additionalProperties: false
+                  description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
+                  type: object
+                  properties:
+                    agent_id:
+                      description: Agent Builder agent ID that runs this index’s feedback-loop analysis.
+                      maxLength: 256
+                      type: string
+                    allowed_actions:
+                      default:
+                        - add_ki
+                        - edit_ki
+                        - remove_ki
+                        - add_workflow
+                        - edit_workflow
+                        - remove_workflow
+                        - add_source
+                        - edit_source
+                        - remove_source
+                      description: Improvement actions the analysis may propose. An empty list is observe-only.
+                      items:
+                        description: Add, edit, or remove a Knowledge Indicator (`*_ki`), a workflow automation (`*_workflow`), or a source (`*_source`).
+                        enum:
+                          - add_ki
+                          - edit_ki
+                          - remove_ki
+                          - add_workflow
+                          - edit_workflow
+                          - remove_workflow
+                          - add_source
+                          - edit_source
+                          - remove_source
+                        type: string
+                      maxItems: 9
+                      type: array
+                    enabled:
+                      description: Desired state of the recurring analysis. The scheduler stays authoritative for whether it is actually running.
+                      type: boolean
+                    schedule:
+                      additionalProperties: false
+                      default:
+                        interval: 24h
+                      description: When the analysis runs.
+                      type: object
+                      properties:
+                        interval:
+                          description: How often to analyze, for example `1h` or `24h`. At least 15 minutes.
+                          maxLength: 16
+                          type: string
+                      required:
+                        - interval
+                    signal_filter:
+                      description: 'KQL narrowing which signals this index analyzes, for example `tags: query_error`.'
+                      maxLength: 4096
+                      type: string
+                    signal_time_range:
+                      anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            from:
+                              description: Date math relative to now, for example `now-30d`.
+                              maxLength: 64
+                              type: string
+                            type:
+                              enum:
+                                - relative
+                              type: string
+                          required:
+                            - type
+                            - from
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            from:
+                              description: ISO 8601 date to analyze signals since.
+                              maxLength: 64
+                              type: string
+                            type:
+                              enum:
+                                - absolute
+                              type: string
+                          required:
+                            - type
+                            - from
+                      default:
+                        from: now-30d
+                        type: relative
+                      description: Which signals the analysis reads. A read filter only.
+                  required:
+                    - enabled
+                id:
+                  description: The unique identifier of the AI Index.
+                  maxLength: 244
+                  minLength: 1
+                  type: string
+                sources:
+                  default: []
+                  description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - esql
+                            type: string
+                          value:
+                            description: The source value; an ES|QL query when `type` is `esql`. Must be valid ES|QL.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - connector
+                            type: string
+                          value:
+                            description: The source value; a connector ID when `type` is `connector`.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 100
+                  type: array
+                traces:
+                  default: []
+                  description: Trace sources linked to this AI Index. A write replaces the whole array. Defaults to an empty array when omitted.
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - elastic_agent
+                            type: string
+                          value:
+                            description: The Agent Builder agent ID.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - index
+                            type: string
+                          value:
+                            description: An index or data stream name or pattern to read traces from.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - esql
+                            type: string
+                          value:
+                            description: An ES|QL query to select traces.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 100
+                  type: array
+              required:
+                - id
+                - dest
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createAiIndexResponseExample:
+                  description: Example response after the AI Index is created
+                  summary: AI Index created
+                  value:
+                    status: created
+              schema:
+                additionalProperties: false
+                description: Confirms that the AI Index was created.
+                type: object
+                properties:
+                  status:
+                    enum:
+                      - created
+                    type: string
+                required:
+                  - status
+          description: The AI Index was created.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidDestExample:
+                  description: The dest value does not follow the naming convention
+                  summary: Invalid dest
+                  value:
+                    error: Bad Request
+                    message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenTraceExample:
+                  description: The caller lacks Elasticsearch index privileges to look up an index trace
+                  summary: Index trace lookup denied
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [indices:admin/resolve/index] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [traces-support], this action is granted by the index privileges [view_index_metadata,manage,read,all]'
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
+        '409':
+          content:
+            application/json:
+              examples:
+                alreadyExistsExample:
+                  description: An AI Index with the same ID already exists
+                  summary: AI Index already exists
+                  value:
+                    error: Conflict
+                    message: AI index 'customer_support' already exists
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: An AI Index with the same ID already exists, or the write conflicted.
+      summary: Create an AI Index
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "id": "customer_support",
+                "description": "Knowledge about customer support cases.",
+                "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
+                "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+                "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+                "traces": [
+                  { "type": "elastic_agent", "value": "elastic-ai-agent" },
+                  { "type": "index", "value": "traces-support" }
+                ]
+              }'
+        - lang: Console
+          source: |
+            POST kbn:/api/context_engine/ai_index
+            {
+              "id": "customer_support",
+              "description": "Knowledge about customer support cases.",
+              "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
+              "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+              "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+              "traces": [
+                { "type": "elastic_agent", "value": "elastic-ai-agent" },
+                { "type": "index", "value": "traces-support" }
+              ]
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/context_engine/ai_index/_query:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/_query</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most 1000 rows.
+
+        The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.
+
+        The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+      operationId: post-context-engine-ai-index-query
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              queryAiIndicesRequestExample:
+                description: Example ES|QL query with a named parameter and a row limit
+                summary: Query with a parameter and a limit
+                value:
+                  limit: 10
+                  params:
+                    type: faq
+                  query: FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                limit:
+                  description: Maximum rows to return. Defaults to 100; a trailing `LIMIT` in the query is capped to this value.
+                  maximum: 1000
+                  minimum: 1
+                  type: number
+                params:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 4096
+                        type: string
+                      - type: number
+                      - type: boolean
+                  description: Values for `?name` placeholders in the query.
+                  type: object
+                query:
+                  description: The ES|QL query to run. Its FROM decides which Elasticsearch indices are read (normally `ai-index-*`); the server adds the space filter and a row limit.
+                  maxLength: 10000
+                  minLength: 1
+                  type: string
+              required:
+                - query
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                queryAiIndicesResponseExample:
+                  description: Example response with column metadata and matching rows. `flattened` columns such as `attributes` are returned as objects.
+                  summary: Columns and rows
+                  value:
+                    columns:
+                      - name: title
+                        type: text
+                      - name: type
+                        type: keyword
+                      - name: attributes
+                        type: flattened
+                    values:
+                      - - How to reset a password
+                        - faq
+                        - source: zendesk
+                      - - Billing cycle explained
+                        - faq
+                        - source: zendesk
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  columns:
+                    description: Column metadata for the returned rows.
+                    items:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        name:
+                          description: Column name.
+                          type: string
+                        type:
+                          description: Column ES|QL type.
+                          type: string
+                      required:
+                        - name
+                        - type
+                    type: array
+                  values:
+                    description: Row values, aligned positionally with `columns`, as Elasticsearch returns them. A multi-valued field is an array; `_source` and `flattened` columns are objects.
+                    items:
+                      items:
+                        nullable: true
+                      type: array
+                    type: array
+                required:
+                  - columns
+                  - values
+          description: The columns and rows returned by the ES|QL query.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidQueryExample:
+                  description: The ES|QL query references a column that does not exist
+                  summary: Unknown column
+                  value:
+                    error: Bad Request
+                    message: |-
+                      verification_exception
+                      	Root causes:
+                      		verification_exception: Found 1 problem
+                      line 1:46: Unknown column [titel], did you mean [title]?
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The ES|QL query was invalid, or its response exceeded the size limit.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  description: The caller lacks Elasticsearch index privileges
+                  summary: Missing index privileges
+                  value:
+                    error: Forbidden
+                    message: |-
+                      security_exception
+                      	Root causes:
+                      		security_exception: action [indices:data/read/esql] is unauthorized for user [jdoe] with effective roles [support_reader], this action is granted by the index privileges [read_cross_cluster,read,all]
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch rejected the read; the caller lacks index privileges.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
+      summary: Query AI Indices
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/_query" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10",
+                "params": { "type": "faq" },
+                "limit": 10
+              }'
+        - lang: Console
+          source: |
+            POST kbn:/api/context_engine/ai_index/_query
+            {
+              "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10",
+              "params": { "type": "faq" },
+              "limit": 10
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/context_engine/ai_index/{aiIndexId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Deletes an AI Index by ID.
+
+        By default, the API preserves the backing data stream or index, its Knowledge Indicators, and attached workflow automations. Set `delete_knowledge_indicators` to `true` to delete the backing data stream or index and its Knowledge Indicators. Set `delete_automations` to `true` to delete the attached workflow automations.
+
+        The API does not delete the backing data stream or index when another AI Index uses the same destination.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): workflowsManagement:delete.
+      operationId: delete-context-engine-ai-index-aiindexid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 244
+            minLength: 1
+            type: string
+        - description: When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI Index still uses the same dest. Defaults to false.
+          in: query
+          name: delete_knowledge_indicators
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: When true, also delete the attached workflow automations. Defaults to false.
+          in: query
+          name: delete_automations
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteAiIndexPartialFailureExample:
+                  description: The entry was deleted but a best-effort cleanup step failed
+                  summary: Deleted with a cleanup error
+                  value:
+                    acknowledged: true
+                    errors:
+                      - 'Failed to delete automations: Workflows management is unavailable.'
+                deleteAiIndexResponseExample:
+                  description: Example response after the AI Index entry is deleted
+                  summary: AI Index deleted
+                  value:
+                    acknowledged: true
+                    errors: []
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  acknowledged:
+                    description: Whether the AI Index entry was deleted.
+                    type: boolean
+                  errors:
+                    description: Best-effort cleanup errors after the entry was deleted, if any.
+                    items:
+                      type: string
+                    type: array
+                required:
+                  - acknowledged
+                  - errors
+          description: The AI Index entry was deleted. `errors` lists any best-effort cleanup failures.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+                notFoundExample:
+                  description: No AI Index with the given ID exists in the current space
+                  summary: AI Index not found
+                  value:
+                    error: Not Found
+                    message: AI index 'customer_support' not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.
+        '409':
+          content:
+            application/json:
+              examples:
+                managedExample:
+                  description: The AI Index is managed by a plugin and cannot be deleted
+                  summary: Managed AI Index
+                  value:
+                    error: Conflict
+                    message: AI index 'customer_support' is managed and cannot be modified via the API
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The AI Index is managed and cannot be deleted.
+      summary: Delete an AI Index
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn:/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Fetches an AI Index by ID from the current space, including the ES|QL query derived from each trace.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+      operationId: get-context-engine-ai-index-aiindexid
+      parameters:
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 244
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAiIndexResponseExample:
+                  description: Example response returning an AI Index by ID
+                  summary: An AI Index
+                  value:
+                    automations:
+                      - type: workflow
+                        value: 8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f
+                    date_created: '2026-09-22T12:00:00.000Z'
+                    date_modified: '2026-09-22T12:00:00.000Z'
+                    description: Knowledge about customer support cases.
+                    dest:
+                      type: data_stream
+                      value: ai-index-ds-customer-support
+                    id: customer_support
+                    managed: false
+                    sources:
+                      - type: esql
+                        value: FROM support-cases | LIMIT 100
+                    traces:
+                      - query: |-
+                          FROM traces-agent_builder.otel-default
+                          | WHERE attributes.gen_ai.agent.id IN ("elastic-ai-agent")
+                        type: elastic_agent
+                        value: elastic-ai-agent
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  automations:
+                    description: Automations associated with the AI Index.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        type:
+                          enum:
+                            - workflow
+                          type: string
+                        value:
+                          description: The workflow ID.
+                          type: string
+                      required:
+                        - type
+                        - value
+                    type: array
+                  date_created:
+                    description: ISO 8601 timestamp of when the AI Index was created.
+                    type: string
+                  date_modified:
+                    description: ISO 8601 timestamp of when the AI Index was last modified.
+                    type: string
+                  description:
+                    description: Human-readable description of the AI Index.
+                    type: string
+                  dest:
+                    additionalProperties: false
+                    description: The data stream or index that backs the AI Index.
+                    type: object
+                    properties:
+                      type:
+                        description: The type of the backing store.
+                        enum:
+                          - data_stream
+                          - index
+                        type: string
+                      value:
+                        description: The data stream or index the AI Index is attached to.
+                        type: string
+                    required:
+                      - type
+                      - value
+                  feedback_analysis:
+                    additionalProperties: false
+                    description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
+                    type: object
+                    properties:
+                      agent_id:
+                        description: Agent Builder agent ID that runs the analysis.
+                        type: string
+                      allowed_actions:
+                        description: Improvement actions the analysis may propose.
+                        items:
+                          description: Add, edit, or remove a Knowledge Indicator (`*_ki`), a workflow automation (`*_workflow`), or a source (`*_source`).
+                          enum:
+                            - add_ki
+                            - edit_ki
+                            - remove_ki
+                            - add_workflow
+                            - edit_workflow
+                            - remove_workflow
+                            - add_source
+                            - edit_source
+                            - remove_source
+                          type: string
+                        type: array
+                      enabled:
+                        description: Whether the recurring feedback analysis is desired to run.
+                        type: boolean
+                      schedule:
+                        additionalProperties: false
+                        description: When the analysis runs.
+                        type: object
+                        properties:
+                          interval:
+                            description: How often to analyze, for example `1h`.
+                            type: string
+                        required:
+                          - interval
+                      signal_filter:
+                        description: KQL narrowing which signals the analysis reads.
+                        type: string
+                      signal_time_range:
+                        anyOf:
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              from:
+                                description: Date math relative to now, for example `now-30d`.
+                                type: string
+                              type:
+                                enum:
+                                  - relative
+                                type: string
+                            required:
+                              - type
+                              - from
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              from:
+                                description: ISO 8601 date to analyze signals since.
+                                type: string
+                              type:
+                                enum:
+                                  - absolute
+                                type: string
+                            required:
+                              - type
+                              - from
+                    required:
+                      - enabled
+                  id:
+                    description: The unique identifier of the AI Index.
+                    type: string
+                  managed:
+                    description: Whether the AI Index is managed by a plugin and therefore immutable.
+                    type: boolean
+                  sources:
+                    description: Additional sources that provide context for the AI Index.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        type:
+                          description: '`esql` for an ES|QL query, or `connector` for a data connector.'
+                          enum:
+                            - esql
+                            - connector
+                          type: string
+                        value:
+                          description: An ES|QL query for `esql`, or a connector ID for `connector`.
+                          type: string
+                      required:
+                        - type
+                        - value
+                    type: array
+                  traces:
+                    description: Trace sources linked to this AI Index, each with its derived ES|QL query.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          description: The ES|QL query derived from this trace source at read time.
+                          type: string
+                        type:
+                          description: '`elastic_agent` for an Agent Builder agent, `index` for an index or data stream name or pattern, or `esql` for an ES|QL query.'
+                          enum:
+                            - elastic_agent
+                            - index
+                            - esql
+                          type: string
+                        value:
+                          description: The trace source value.
+                          type: string
+                      required:
+                        - type
+                        - value
+                        - query
+                    type: array
+                required:
+                  - id
+                  - managed
+                  - date_created
+                  - date_modified
+                  - dest
+                  - automations
+                  - sources
+                  - traces
+          description: The requested AI Index.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+                notFoundExample:
+                  description: No AI Index with the given ID exists in the current space
+                  summary: AI Index not found
+                  value:
+                    error: Not Found
+                    message: AI index 'customer_support' not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.
+      summary: Get an AI Index
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/context_engine/ai_index/customer_support
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+      operationId: put-context-engine-ai-index-aiindexid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 244
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putAiIndexRequestExample:
+                description: Example request to create or fully replace an AI Index
+                summary: Create or replace an AI Index
+                value:
+                  automations:
+                    - type: workflow
+                      value: 8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f
+                  description: Knowledge about customer support cases.
+                  dest:
+                    type: data_stream
+                    value: ai-index-ds-customer-support
+                  sources:
+                    - type: esql
+                      value: FROM support-cases | LIMIT 100
+                  traces:
+                    - type: index
+                      value: traces-support
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                automations:
+                  default: []
+                  description: Automations associated with the AI Index. Defaults to an empty array when omitted.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      type:
+                        enum:
+                          - workflow
+                        type: string
+                      value:
+                        description: The workflow ID.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                    required:
+                      - type
+                      - value
+                  maxItems: 100
+                  type: array
+                description:
+                  description: Human-readable description of the AI Index.
+                  maxLength: 2048
+                  type: string
+                dest:
+                  additionalProperties: false
+                  description: The data stream or index that backs the AI Index.
+                  type: object
+                  properties:
+                    type:
+                      description: The type of the backing store. `data_stream` for a data stream, or `index` for an index.
+                      enum:
+                        - data_stream
+                        - index
+                      type: string
+                    value:
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index ID. System indices are not allowed.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                  required:
+                    - type
+                    - value
+                feedback_analysis:
+                  additionalProperties: false
+                  description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
+                  type: object
+                  properties:
+                    agent_id:
+                      description: Agent Builder agent ID that runs this index’s feedback-loop analysis.
+                      maxLength: 256
+                      type: string
+                    allowed_actions:
+                      default:
+                        - add_ki
+                        - edit_ki
+                        - remove_ki
+                        - add_workflow
+                        - edit_workflow
+                        - remove_workflow
+                        - add_source
+                        - edit_source
+                        - remove_source
+                      description: Improvement actions the analysis may propose. An empty list is observe-only.
+                      items:
+                        description: Add, edit, or remove a Knowledge Indicator (`*_ki`), a workflow automation (`*_workflow`), or a source (`*_source`).
+                        enum:
+                          - add_ki
+                          - edit_ki
+                          - remove_ki
+                          - add_workflow
+                          - edit_workflow
+                          - remove_workflow
+                          - add_source
+                          - edit_source
+                          - remove_source
+                        type: string
+                      maxItems: 9
+                      type: array
+                    enabled:
+                      description: Desired state of the recurring analysis. The scheduler stays authoritative for whether it is actually running.
+                      type: boolean
+                    schedule:
+                      additionalProperties: false
+                      default:
+                        interval: 24h
+                      description: When the analysis runs.
+                      type: object
+                      properties:
+                        interval:
+                          description: How often to analyze, for example `1h` or `24h`. At least 15 minutes.
+                          maxLength: 16
+                          type: string
+                      required:
+                        - interval
+                    signal_filter:
+                      description: 'KQL narrowing which signals this index analyzes, for example `tags: query_error`.'
+                      maxLength: 4096
+                      type: string
+                    signal_time_range:
+                      anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            from:
+                              description: Date math relative to now, for example `now-30d`.
+                              maxLength: 64
+                              type: string
+                            type:
+                              enum:
+                                - relative
+                              type: string
+                          required:
+                            - type
+                            - from
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            from:
+                              description: ISO 8601 date to analyze signals since.
+                              maxLength: 64
+                              type: string
+                            type:
+                              enum:
+                                - absolute
+                              type: string
+                          required:
+                            - type
+                            - from
+                      default:
+                        from: now-30d
+                        type: relative
+                      description: Which signals the analysis reads. A read filter only.
+                  required:
+                    - enabled
+                sources:
+                  default: []
+                  description: Additional sources that provide context for the AI Index. Defaults to an empty array when omitted.
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - esql
+                            type: string
+                          value:
+                            description: The source value; an ES|QL query when `type` is `esql`. Must be valid ES|QL.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - connector
+                            type: string
+                          value:
+                            description: The source value; a connector ID when `type` is `connector`.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 100
+                  type: array
+                traces:
+                  default: []
+                  description: Trace sources linked to this AI Index. A write replaces the whole array. Defaults to an empty array when omitted.
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - elastic_agent
+                            type: string
+                          value:
+                            description: The Agent Builder agent ID.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - index
+                            type: string
+                          value:
+                            description: An index or data stream name or pattern to read traces from.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - esql
+                            type: string
+                          value:
+                            description: An ES|QL query to select traces.
+                            maxLength: 10240
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 100
+                  type: array
+              required:
+                - dest
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putAiIndexUpdatedExample:
+                  description: Example response after an existing AI Index is replaced
+                  summary: AI Index updated
+                  value:
+                    status: updated
+              schema:
+                additionalProperties: false
+                description: Confirms that the AI Index was updated.
+                type: object
+                properties:
+                  status:
+                    enum:
+                      - updated
+                    type: string
+                required:
+                  - status
+          description: The AI Index was updated.
+        '201':
+          content:
+            application/json:
+              examples:
+                putAiIndexCreatedExample:
+                  description: Example response after a new AI Index is created
+                  summary: AI Index created
+                  value:
+                    status: created
+              schema:
+                additionalProperties: false
+                description: Confirms that the AI Index was created.
+                type: object
+                properties:
+                  status:
+                    enum:
+                      - created
+                    type: string
+                required:
+                  - status
+          description: The AI Index was created.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidDestExample:
+                  description: The dest value does not follow the naming convention
+                  summary: Invalid dest
+                  value:
+                    error: Bad Request
+                    message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenTraceExample:
+                  description: The caller lacks Elasticsearch index privileges to look up an index trace
+                  summary: Index trace lookup denied
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [indices:admin/resolve/index] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [traces-support], this action is granted by the index privileges [view_index_metadata,manage,read,all]'
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
+        '409':
+          content:
+            application/json:
+              examples:
+                managedExample:
+                  description: The AI Index is managed by a plugin and cannot be replaced
+                  summary: Managed AI Index
+                  value:
+                    error: Conflict
+                    message: AI index 'customer_support' is managed and cannot be modified via the API
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The AI Index is managed and immutable, or the write conflicted.
+      summary: Create or update an AI Index
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "description": "Knowledge about customer support cases.",
+                "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
+                "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+                "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+                "traces": [{ "type": "index", "value": "traces-support" }]
+              }'
+        - lang: Console
+          source: |
+            PUT kbn:/api/context_engine/ai_index/customer_support
+            {
+              "description": "Knowledge about customer support cases.",
+              "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
+              "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+              "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+              "traces": [{ "type": "index", "value": "traces-support" }]
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/context_engine/ai_index/{aiIndexId}/_describe:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}/_describe</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to 500 fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.
+
+        The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.
+
+        The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+      operationId: get-context-engine-ai-index-aiindexid-describe
+      parameters:
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 244
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                describeAiIndexResponseExample:
+                  description: Example response with a context block for an agent
+                  summary: Context block for an agent
+                  value:
+                    response: |-
+                      AI index: customer_support
+                      Knowledge about customer support cases.
+                      Query with ES|QL against: ai-index-ds-customer-support
+
+                      Fields
+                      @timestamp: date, searchable, aggregatable
+                      content: text, searchable
+                      content.semantic: semantic_text, searchable
+                      description: text, searchable
+                      description.semantic: semantic_text, searchable
+                      tags: keyword, searchable, aggregatable
+                      title: text, searchable
+                      title.semantic: semantic_text, searchable
+                      type: keyword, searchable, aggregatable
+
+                      Semantic fields
+                      content.semantic
+                      description.semantic
+                      title.semantic
+
+                      Knowledge item types
+                      "faq": 12
+                      "runbook": 4
+
+                      Tags
+                      "billing": 7
+                      "password": 5
+
+                      Example queries (adapt field names for non-canonical indices)
+
+                      Full text search, lexical and semantic fused together (?query)
+                      FROM ai-index-ds-customer-support METADATA _id, _index, _score
+                      | FORK
+                          ( WHERE MATCH(title, ?query) OR MATCH(description, ?query) OR MATCH(content, ?query) | SORT _score DESC | LIMIT 20 )
+                          ( WHERE MATCH(title.semantic, ?query) OR MATCH(description.semantic, ?query) OR MATCH(content.semantic, ?query) | SORT _score DESC | LIMIT 20 )
+                      | FUSE
+                      | SORT _score DESC, _id ASC
+                      | KEEP title, description, content, type, tags
+                      | LIMIT 5
+
+                      Filter by knowledge item type and tag (?type, ?tag; tags is multi-valued, so MATCH)
+                      FROM ai-index-ds-customer-support
+                      | WHERE type == ?type AND MATCH(tags, ?tag)
+                      | KEEP title, description, content, type, tags
+                      | LIMIT 20
+
+                      Count by type
+                      FROM ai-index-ds-customer-support
+                      | STATS count = COUNT(*) BY type
+                      | SORT count DESC
+                      | LIMIT 20
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  response:
+                    description: Free-form text context block describing the AI Index for an agent.
+                    type: string
+                required:
+                  - response
+          description: A free-form text context block describing the AI Index.
+        '400':
+          content:
+            application/json:
+              examples:
+                tooLargeExample:
+                  description: The field metadata for the backing indices exceeded the size limit
+                  summary: Response too large
+                  value:
+                    error: Bad Request
+                    message: Field metadata for the AI index exceeded the maximum allowed size of 20MB. Point the AI index at fewer or smaller indices.
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The description response exceeded the size limit.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  description: The caller can read the backing indices but cannot read their mappings
+                  summary: Missing view_index_metadata privilege
+                  value:
+                    error: Forbidden
+                    message: |-
+                      security_exception
+                      	Root causes:
+                      		security_exception: action [indices:admin/mappings/get] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [ai-index-ds-customer-support], this action is granted by the index privileges [view_index_metadata,manage,all]
+                    statusCode: 403
+                notReadableExample:
+                  description: The caller cannot read the backing indices of the AI Index
+                  summary: Backing indices not readable
+                  value:
+                    error: Forbidden
+                    message: AI index 'customer_support' is not readable. Reading it needs the Elasticsearch 'read' and 'view_index_metadata' privileges on its backing indices.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: The caller cannot read the backing indices. Describing an AI Index requires the `read` and `view_index_metadata` index privileges on them.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+                notFoundExample:
+                  description: No AI Index with the given ID exists in the current space
+                  summary: AI Index not found
+                  value:
+                    error: Not Found
+                    message: AI index 'customer_support' not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.
+      summary: Describe an AI Index
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/context_engine/ai_index/customer_support/_describe
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name

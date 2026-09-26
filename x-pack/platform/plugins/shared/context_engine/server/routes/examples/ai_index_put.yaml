@@ -1,0 +1,109 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putAiIndexRequestExample:
+          summary: "Create or replace an AI Index"
+          description: "Example request to create or fully replace an AI Index"
+          value:
+            description: Knowledge about customer support cases.
+            dest:
+              type: data_stream
+              value: ai-index-ds-customer-support
+            automations:
+              - type: workflow
+                value: 8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f
+            sources:
+              - type: esql
+                value: FROM support-cases | LIMIT 100
+            traces:
+              - type: index
+                value: traces-support
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          putAiIndexUpdatedExample:
+            summary: "AI Index updated"
+            description: "Example response after an existing AI Index is replaced"
+            value:
+              status: updated
+  201:
+    content:
+      application/json:
+        examples:
+          putAiIndexCreatedExample:
+            summary: "AI Index created"
+            description: "Example response after a new AI Index is created"
+            value:
+              status: created
+  400:
+    content:
+      application/json:
+        examples:
+          invalidDestExample:
+            summary: "Invalid dest"
+            description: "The dest value does not follow the naming convention"
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
+  403:
+    content:
+      application/json:
+        examples:
+          forbiddenTraceExample:
+            summary: "Index trace lookup denied"
+            description: "The caller lacks Elasticsearch index privileges to look up an index trace"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "security_exception: action [indices:admin/resolve/index] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [traces-support], this action is granted by the index privileges [view_index_metadata,manage,read,all]"
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+  409:
+    content:
+      application/json:
+        examples:
+          managedExample:
+            summary: "Managed AI Index"
+            description: "The AI Index is managed by a plugin and cannot be replaced"
+            value:
+              statusCode: 409
+              error: Conflict
+              message: "AI index 'customer_support' is managed and cannot be modified via the API"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X PUT "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "description": "Knowledge about customer support cases.",
+          "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
+          "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+          "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+          "traces": [{ "type": "index", "value": "traces-support" }]
+        }'
+  - lang: Console
+    source: |
+      PUT kbn:/api/context_engine/ai_index/customer_support
+      {
+        "description": "Knowledge about customer support cases.",
+        "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
+        "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+        "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+        "traces": [{ "type": "index", "value": "traces-support" }]
+      }
