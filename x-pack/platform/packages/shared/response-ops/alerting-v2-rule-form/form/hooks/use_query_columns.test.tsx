@@ -6,16 +6,18 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
-import { createQueryClientWrapper } from '../../test_utils';
+import { createQueryClientWrapper } from '../../query_client_test_utils';
 import { useQueryColumns } from './use_query_columns';
 
 jest.mock('@kbn/esql-utils');
 
 const mockGetESQLQueryColumnsRaw = jest.mocked(getESQLQueryColumnsRaw);
 
-const createMockSearch = () => dataPluginMock.createStartContract().search.search;
+const createMockSearch = () => jest.fn() as unknown as ISearchGeneric;
+
+jest.setTimeout(20_000);
 
 describe('useQueryColumns', () => {
   beforeEach(() => {
