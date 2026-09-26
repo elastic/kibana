@@ -24,6 +24,30 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 /** Only exported for tests */
 export const MISSING_CONFIG_STORAGE_KEY = `core.warnings.publicBaseUrlMissingDismissed`;
 
+const LOOPBACK_HOSTNAMES = new Set([
+  'localhost',
+  '::1',
+  '[::1]',
+  'ip6-localhost',
+  'ip6-loopback',
+  'localhost6',
+  'localhost.localdomain',
+  'localhost6.localdomain6',
+]);
+
+/**
+ * `location.hostname` serializes IPv6 hosts with brackets, and loopback is reachable under
+ * several `/etc/hosts` aliases besides `localhost`, so an equality check misses most of them.
+ */
+const isLoopbackHostname = (hostname: string) => {
+  const normalized = hostname.toLowerCase();
+  return (
+    LOOPBACK_HOSTNAMES.has(normalized) ||
+    normalized.endsWith('.localhost') ||
+    normalized.startsWith('127.')
+  );
+};
+
 interface Deps {
   docLinks: DocLinksStart;
   http: InternalHttpStart;
@@ -46,7 +70,7 @@ export const setupPublicBaseUrlConfigWarning = ({
   location = window.location,
   ...renderContextDeps
 }: Deps) => {
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  if (isLoopbackHostname(location.hostname)) {
     return;
   }
 
