@@ -23,9 +23,9 @@ it('resolves credentials from the environment and preserves other preconfigured 
   process.env = {
     ...originalEnv,
     SANDBOX_API_KEY: 'sandbox-key',
-    SANDBOX_CLIENT_CERT: 'certificate',
-    SANDBOX_CLIENT_KEY: 'private-key',
-    SANDBOX_CA_CERT: '',
+    SANDBOX_CLIENT_CERT_PATH: '/certs/tls.crt',
+    SANDBOX_CLIENT_KEY_PATH: '/certs/tls.key',
+    SANDBOX_CA_CERT_PATH: '',
     NIGHTSHIFT_TRACING_EXPORTERS: JSON.stringify(exporters),
     NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://telemetry.example.com',
     NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
@@ -56,6 +56,11 @@ it('resolves credentials from the environment and preserves other preconfigured 
       },
     });
     expect(config.xpack.sandbox.api_key).toBe('sandbox-key');
+    expect(config.xpack.sandbox.ssl).toEqual({
+      certificate: '/certs/tls.crt',
+      key: '/certs/tls.key',
+      certificate_authorities: '',
+    });
     expect(config.xpack.nightshift_investigations.sandbox).toEqual({
       telemetry_connector_id: 'nightshift-evals-telemetry',
       telemetry_readable_indices: 'remote:logs-*',
