@@ -31,6 +31,7 @@ export class EventsService {
   );
 
   private readonly streamEnded$ = new Subject<string>();
+  private readonly streamStarted$ = new Subject<string>();
 
   private readonly activeConversationState$ = new BehaviorSubject<ActiveConversation | null>(null);
   public readonly activeConversation$ = this.activeConversationState$.asObservable();
@@ -67,6 +68,20 @@ export class EventsService {
       filter((id) => id === conversationId),
       map(() => undefined)
     );
+  }
+
+  /**
+   * Signals that a client to server stream has begun for this conversation. Global (unlike
+   * `notifyStreamEnded`) because a run can start before its stream exists, so the listener
+   * must hear starts for conversations it has not seen yet.
+   */
+  notifyStreamStarted(conversationId: string) {
+    this.streamStarted$.next(conversationId);
+  }
+
+  /** Fires each time any conversation's stream begins, carrying the conversation id. */
+  getStreamStarted$(): Observable<string> {
+    return this.streamStarted$.asObservable();
   }
 
   setActiveConversation(activeConversation: ActiveConversation | null) {

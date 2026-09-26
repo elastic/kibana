@@ -93,6 +93,7 @@ const messageOf = (events: TimelineDisplayEvent[]): string | undefined => {
 const makeFakeSource = () => {
   const subjects = new Map<string, Subject<ChatEvent>>();
   const runEndings = new Map<string, Subject<void>>();
+  const runStarts = new Subject<string>();
   const getSubject = (id: string): Subject<ChatEvent> => {
     if (!subjects.has(id)) subjects.set(id, new Subject());
     return subjects.get(id)!;
@@ -105,10 +106,12 @@ const makeFakeSource = () => {
     // BrowserChatEvent = ChatEvent, structurally identical
     getChatEvents$: (conversationId) => getSubject(conversationId).asObservable() as any,
     getStreamEnded$: (conversationId) => getStreamEndings(conversationId).asObservable(),
+    getStreamStarted$: () => runStarts.asObservable(),
   };
+  const startRun = (id: string) => runStarts.next(id);
   // What `propagateEvents`' `finalize` does in production: the run terminated, however it ended.
   const endRun = (id: string) => getStreamEndings(id).next();
-  return { source, getSubject, endRun };
+  return { source, getSubject, startRun, endRun };
 };
 
 describe('ConversationStreamService', () => {
@@ -256,6 +259,47 @@ describe('ConversationStreamService', () => {
     let state: TimelineDisplayEvent[] | undefined;
     service.getActiveStream$('A').subscribe((next) => (state = next));
     expect(messageOf(state ?? [])).toBe('second half');
+  });
+
+  it('the start signal retains a stream that has no subscriber and no cursor yet', () => {
+    // The gap this closes: a run begins before anything subscribes and before `execution_started`
+    // sets the cursor. Without the start signal the stream would be reclaimed immediately.
+    const { source, getSubject, startRun } = makeFakeSource();
+    // The constructor wires the start listener; we assert its side effect, not the instance.
+    new ConversationStreamService(source);
+
+    startRun('A');
+
+    // The service ensured the stream and marked it running, so the source is subscribed and held.
+    expect(getSubject('A').observed).toBe(true);
+  });
+
+  it('releases a start-retained stream once the run ends with nothing to keep', () => {
+    const { source, getSubject, startRun, endRun } = makeFakeSource();
+    // The constructor wires the start listener; we assert its side effect, not the instance.
+    new ConversationStreamService(source);
+
+    startRun('A');
+    expect(getSubject('A').observed).toBe(true);
+
+    // No subscriber, no cursor - once running clears, the stream is reclaimed.
+    endRun('A');
+    expect(getSubject('A').observed).toBe(false);
+  });
+
+  it('keeps a running stream alive when the only subscriber leaves before the cursor is set', () => {
+    const { source, getSubject, startRun, endRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    startRun('A');
+    const sub = service.getActiveStream$('A').subscribe(() => {});
+
+    // Subscriber leaves before any `execution_started`, so there is no cursor - only running holds it.
+    sub.unsubscribe();
+    expect(getSubject('A').observed).toBe(true);
+
+    endRun('A');
+    expect(getSubject('A').observed).toBe(false);
   });
 
   it('sealed live events (terminal present) survive streamEnded', () => {

@@ -12,18 +12,27 @@ import type { LiveEventsState, TimelineDisplayEvent } from './sse_to_events';
 import { emptyLiveEventsState, sseToEvents, upsertEvent } from './sse_to_events';
 import type { EventsService } from './events_service';
 
-export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getStreamEnded$'>;
+export type ChatEventSource = Pick<
+  EventsService,
+  'getChatEvents$' | 'getStreamEnded$' | 'getStreamStarted$'
+>;
 
 interface ConversationStream {
   conversationId: string;
   state$: BehaviorSubject<LiveEventsState>;
   sub: Subscription;
+  running: boolean;
 }
 
 export class ConversationStreamService {
   private readonly streams = new Map<string, ConversationStream>();
 
-  constructor(private readonly source: ChatEventSource) {}
+  constructor(private readonly source: ChatEventSource) {
+    // An execution can begin before anything subscribes to its stream - ensure we don't remove the stream too early (e.g. when user navigates away).
+    this.source.getStreamStarted$().subscribe((conversationId) => {
+      this.ensure(conversationId).running = true;
+    });
+  }
 
   private ensure(conversationId: string): ConversationStream {
     return this.streams.get(conversationId) ?? this.createStream(conversationId);
@@ -34,7 +43,7 @@ export class ConversationStreamService {
     const sub = this.source
       .getChatEvents$(conversationId)
       .subscribe((event) => state$.next(sseToEvents(state$.getValue(), event)));
-    const stream: ConversationStream = { conversationId, state$, sub };
+    const stream: ConversationStream = { conversationId, state$, sub, running: false };
     this.streams.set(conversationId, stream);
 
     sub.add(
@@ -43,12 +52,13 @@ export class ConversationStreamService {
     return stream;
   }
 
-  private onStreamEnded({ conversationId, state$ }: ConversationStream) {
+  private onStreamEnded(stream: ConversationStream) {
+    stream.running = false;
     // A run that never reached its terminal event leaves a half-written answer behind; drop it.
-    if (state$.getValue().cursor) {
-      state$.next(emptyLiveEventsState());
+    if (stream.state$.getValue().cursor) {
+      stream.state$.next(emptyLiveEventsState());
     }
-    this.maybeTeardown(conversationId);
+    this.maybeTeardown(stream.conversationId);
   }
 
   private maybeTeardown(conversationId: string) {
@@ -56,7 +66,8 @@ export class ConversationStreamService {
     if (!stream) {
       return;
     }
-    const canReclaim = !stream.state$.observed && !stream.state$.getValue().cursor;
+    const canReclaim =
+      !stream.state$.observed && !stream.state$.getValue().cursor && !stream.running;
     if (!canReclaim) {
       return;
     }

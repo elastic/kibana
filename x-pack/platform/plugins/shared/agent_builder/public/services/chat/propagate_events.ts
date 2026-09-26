@@ -13,8 +13,9 @@ import type { EventsService } from '../events';
 /**
  * Forwards each event in the converse() stream to the public events service, tagged with
  * the conversation id so per-conversation subscribers (`getChatEvents$`) can filter to
- * just their conversation. Also reports the end of the run - `finalize` covers all three
- * ways it can end: completed, errored, or aborted (unsubscribed).
+ * just their conversation. Also reports the run's lifecycle: `subscribe` fires the start
+ * exactly once when the run begins, and `finalize` fires the end once however it ends -
+ * completed, errored, or aborted (unsubscribed). The pair keeps retention balanced.
  */
 export function propagateEvents({
   eventsService,
@@ -24,8 +25,13 @@ export function propagateEvents({
   conversationId: string;
 }): OperatorFunction<ChatEvent, ChatEvent> {
   return pipe(
-    tap((event) => {
-      eventsService.propagateChatEvent(conversationId, event);
+    tap({
+      subscribe: () => {
+        eventsService.notifyStreamStarted(conversationId);
+      },
+      next: (event) => {
+        eventsService.propagateChatEvent(conversationId, event);
+      },
     }),
     finalize(() => {
       eventsService.notifyStreamEnded(conversationId);
