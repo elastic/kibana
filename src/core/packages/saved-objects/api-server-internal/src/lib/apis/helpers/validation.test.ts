@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { type SavedObjectSanitizedDoc } from '@kbn/core-saved-objects-server';
@@ -91,6 +92,77 @@ describe('Saved Objects type validation helper', () => {
       );
       const data = createMockObject(typeC, { attributes: { foo: 'hi', count: 1 } });
       expect(() => helper.validateObjectForCreate(typeC, data)).toThrow(validationError);
+    });
+  });
+
+  describe('validateObjectForUpdate', () => {
+    const createSchema = schema.object({ foo: schema.string(), count: schema.number() });
+    const typeWithUpdate = 'type-with-update';
+    const typeWithoutUpdate = 'type-without-update';
+
+    beforeEach(() => {
+      registerType(typeWithUpdate, {
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              create: createSchema,
+              update: createSchema.extends({}, { unknowns: 'ignore' }),
+            },
+          },
+        },
+      });
+      registerType(typeWithoutUpdate, {
+        modelVersions: {
+          1: { changes: [], schemas: { create: createSchema } },
+        },
+      });
+      helper = new ValidationHelper({
+        logger,
+        registry: typeRegistry,
+        kibanaVersion: defaultVersion,
+      });
+    });
+
+    it('does nothing when the type has no update schema', () => {
+      const data = createMockObject(typeWithoutUpdate, {
+        typeMigrationVersion: modelVirtualVersion,
+        attributes: { foo: 1, unknown: true },
+      });
+      expect(() => helper.validateObjectForUpdate(typeWithoutUpdate, data)).not.toThrow();
+    });
+
+    it('does nothing for unregistered types', () => {
+      const data = createMockObject('unknown-type', { attributes: { foo: 1 } });
+      expect(() => helper.validateObjectForUpdate('unknown-type', data)).not.toThrow();
+    });
+
+    it('accepts valid objects with unknown fields', () => {
+      const data = createMockObject(typeWithUpdate, {
+        typeMigrationVersion: modelVirtualVersion,
+        attributes: { foo: 'hi', count: 1, legacyFlag: true },
+      });
+      expect(() => helper.validateObjectForUpdate(typeWithUpdate, data)).not.toThrow();
+    });
+
+    it('rejects objects with invalid known fields', () => {
+      const data = createMockObject(typeWithUpdate, {
+        typeMigrationVersion: modelVirtualVersion,
+        attributes: { foo: 'hi', count: 'lots' },
+      });
+      expect(() => helper.validateObjectForUpdate(typeWithUpdate, data)).toThrowError(
+        /\[attributes.count\]: expected value of type \[number\]/
+      );
+    });
+
+    it('rejects objects missing required fields', () => {
+      const data = createMockObject(typeWithUpdate, {
+        typeMigrationVersion: modelVirtualVersion,
+        attributes: { foo: 'hi' },
+      });
+      expect(() => helper.validateObjectForUpdate(typeWithUpdate, data)).toThrowError(
+        /\[attributes.count\]/
+      );
     });
   });
 });

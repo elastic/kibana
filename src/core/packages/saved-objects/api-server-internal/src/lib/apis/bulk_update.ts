@@ -89,6 +89,7 @@ export const performBulkUpdate = async <T>(
     encryption: encryptionHelper,
     migration: migrationHelper,
     user: userHelper,
+    validation: validationHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const { migrationVersionCompatibility } = options;
@@ -346,6 +347,16 @@ export const performBulkUpdate = async <T>(
             references: documentToSave.references,
           }),
         });
+
+        try {
+          validationHelper.validateObjectForUpdate(
+            type,
+            migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
+          );
+        } catch (error) {
+          return left({ id, type, error: errorContent(error) });
+        }
+
         const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
           migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
         );
