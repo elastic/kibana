@@ -127,26 +127,14 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
     return lines;
   }
 
-  const dropped = tier2.dropped_unknown_ids ?? [];
-  const droppedLine =
-    dropped.length > 0
-      ? `- ${plural(
-          dropped.length,
-          'proposed technique id was',
-          'proposed technique ids were'
-        )} dropped as unknown to the ATT&CK catalog: ${codeList(dropped)}.`
-      : undefined;
-
   if (tier2.status === 'no_behaviors_found') {
     lines.push('Tier 2 read the report text and derived no behaviors to hunt.');
-    if (droppedLine) lines.push(droppedLine);
     return lines;
   }
   if (tier2.status === 'no_behaviors_validated') {
     lines.push(
       'Tier 2 derived behaviors from the report text, but none survived ATT&CK catalog validation.'
     );
-    if (droppedLine) lines.push(droppedLine);
     return lines;
   }
 
@@ -169,15 +157,6 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
       `- ${plural(rest, 'further behavior')} ${
         rest === 1 ? 'is' : 'are'
       } recorded on the attached findings.`
-    );
-  }
-  if (droppedLine) lines.push(droppedLine);
-  const uncorroborated = tier2.uncorroborated_technique_ids ?? [];
-  if (uncorroborated.length > 0) {
-    lines.push(
-      `- ${plural(uncorroborated.length, 'behavior')} exceeded the Tier 2 generation budget and ${
-        uncorroborated.length === 1 ? 'was' : 'were'
-      } never searched: ${codeList(uncorroborated)}.`
     );
   }
   return lines;
@@ -282,6 +261,29 @@ const describeSearch = (result: HuntCoordinatorCoreResult, ctx: HuntNarrativeCon
       ? `- **ATT&CK techniques (${techniques.length}):** ${codeList(techniques)}`
       : '- **ATT&CK techniques:** none'
   );
+  return lines;
+};
+
+/**
+ * The coverage gaps the coordinator recorded (main's `completeness` model): a
+ * zero-hit run is only a statement about the environment when every requested
+ * search ran, so the narrative says plainly what this run could not look at.
+ */
+const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
+  if (result.completeness === 'complete') return [];
+  const gaps = [...(result.tier1.incomplete ?? []), ...(result.tier2?.incomplete ?? [])];
+  const seen = new Set<string>();
+  const lines: string[] = [
+    result.completeness === 'incomplete_retryable'
+      ? '**Coverage: incomplete, retryable.** Part of the search did not run for a transient reason, so the report stays eligible for a later sweep and this run is not a statement that the environment is clean.'
+      : '**Coverage: incomplete.** Part of the search cannot run in this space, and repeating the run would not change that; the report is retired, but this run is not a statement that the environment is clean.',
+  ];
+  for (const gap of gaps) {
+    const key = `${gap.reason}:${gap.detail}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    lines.push(`- ${gap.reason.replace(/_/g, ' ')}: ${gap.detail}`);
+  }
   return lines;
 };
 
@@ -392,7 +394,8 @@ export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => 
     tier2Part = 'Tier 2 skipped';
   }
   const outcome = result.has_confirmed_hit ? 'confirmed hit' : 'no confirmed hits';
-  return `${outcome}: ${tier1Part}; ${tier2Part}`;
+  const coverage = result.completeness === 'complete' ? '' : '; coverage incomplete';
+  return `${outcome}: ${tier1Part}; ${tier2Part}${coverage}`;
 };
 
 /**
@@ -412,6 +415,7 @@ export const buildHuntNarrative = (
   const terminal =
     result.status === 'blocked' || result.tier2_skipped_reason === 'report_not_found';
   if (!terminal) {
+    blocks.push(describeCoverage(result).join('\n'));
     blocks.push(describeSearch(result, ctx).join('\n'));
     blocks.push(describeTier1(result.tier1, result.has_confirmed_hit).join('\n'));
     blocks.push(describeTier2(result).join('\n'));

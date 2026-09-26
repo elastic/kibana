@@ -26,10 +26,12 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 // schema-valid and reaches the index, but has no series identity. Deriving its subject in
 // TypeScript throws, which would fail the whole tick and drop every other episode in the batch.
 /**
- * Row cap of `getDispatchableAlertEventsQuery`. Kept in sync by a unit test —
- * ES|QL will not accept a bound parameter in a LIMIT clause.
+ * Row cap applied as `LIMIT` to every dispatcher ES|QL query. ES|QL silently
+ * truncates to 1 000 rows when a query has no LIMIT, and 10 000 is its maximum.
+ * The `esql` builder inlines numbers as literals, which LIMIT requires: ES|QL
+ * does not accept a bound parameter there.
  */
-export const EPISODE_QUERY_LIMIT = 10_000;
+export const ESQL_QUERY_ROW_LIMIT = 10_000;
 
 /**
  * Keys-only episode scan over `.rule-events` ⨝ `.alert-actions`.
@@ -71,7 +73,7 @@ export const getDispatchableAlertEventsQuery = ({
       | KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, severity
       | RENAME last_episode_status AS episode_status
       | SORT last_event_timestamp asc
-      | LIMIT 10000`.toRequest();
+      | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
 };
 
 const PAIR_SEPARATOR = '::';
@@ -96,9 +98,13 @@ const PER_LITERAL_OVERHEAD_BYTES = 6;
 
 // Exported for unit-testing chunk boundaries. An oversized single literal gets its own chunk;
 // at ≤150-byte keys (UUID/hash) this is unreachable in practice.
+//
+// The byte budget alone fits ~14 000 UUIDs per chunk, more than ESQL_QUERY_ROW_LIMIT rows. Capping
+// the literal count at ESQL_QUERY_ROW_LIMIT keeps one-row-per-literal queries from truncating.
 export const chunkInClauseLiterals = (
   literals: readonly string[],
-  budgetBytes: number = ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES
+  budgetBytes: number = ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES,
+  maxLiteralsPerChunk: number = ESQL_QUERY_ROW_LIMIT
 ): string[][] => {
   if (literals.length === 0) return [];
 
@@ -108,7 +114,8 @@ export const chunkInClauseLiterals = (
 
   for (const literal of literals) {
     const cost = literal.length + PER_LITERAL_OVERHEAD_BYTES;
-    if (current.length > 0 && currentSize + cost > budgetBytes) {
+    const isFull = current.length >= maxLiteralsPerChunk || currentSize + cost > budgetBytes;
+    if (current.length > 0 && isFull) {
       chunks.push(current);
       current = [];
       currentSize = 0;
@@ -253,7 +260,8 @@ export const getAlertEpisodeSuppressionsQueries = (
             last_deactivate_action == "deactivate", true,
             false
           )
-        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id`.toRequest();
+        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id
+        | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
     }
   );
 };
@@ -271,7 +279,7 @@ export const getLastNotifiedTimestampsQueries = (
       | WHERE ${whereClause}
       | STATS last_notified = MAX(@timestamp), episode_status = LAST(episode_status, @timestamp) BY action_group_id
       | KEEP action_group_id, last_notified, episode_status
-      `.toRequest();
+      | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };
 
@@ -308,6 +316,7 @@ export const getEpisodeDataQueries = (
         | EVAL episode_id = episode.id, data_json = JSON_EXTRACT(_source, "$.data")
         | DROP _source
         | STATS data_json = LAST(data_json, @timestamp) BY episode_id
-        | KEEP episode_id, data_json`.toRequest();
+        | KEEP episode_id, data_json
+        | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };

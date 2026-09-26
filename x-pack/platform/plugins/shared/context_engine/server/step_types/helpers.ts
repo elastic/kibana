@@ -128,6 +128,7 @@ export const appendKiRevision = async ({
   kiId,
   source,
   changes,
+  refresh,
   abortSignal,
 }: {
   esClient: ElasticsearchClient;
@@ -135,6 +136,7 @@ export const appendKiRevision = async ({
   kiId: string;
   source: StoredKi;
   changes: KiRevisionChanges;
+  refresh: boolean;
   abortSignal: AbortSignal;
 }): Promise<void> => {
   await esClient.index(
@@ -146,7 +148,7 @@ export const appendKiRevision = async ({
         id: source.id ?? kiId,
       },
       op_type: 'create',
-      refresh: 'wait_for',
+      ...(refresh && { refresh: 'wait_for' as const }),
     },
     { signal: abortSignal }
   );
@@ -162,9 +164,10 @@ const KI_WRITE_SUCCESS_VERB: Record<KiWriteAction, string> = {
  * Runs a KI write step body, reporting the outcome (success, failure, or
  * aborted) to EBT and the logs. The body receives a callback to record the
  * AI index's managed state once resolved, and returns the step output whose
- * `id` is the KI id.
+ * `id` is the KI id. An output without `id` means the body skipped the write
+ * and reports nothing.
  */
-export const withKiWriteTelemetry = async <Output extends { id: string }>({
+export const withKiWriteTelemetry = async <Output extends { id?: string }>({
   action,
   aiIndexId,
   analyticsService,
@@ -182,6 +185,10 @@ export const withKiWriteTelemetry = async <Output extends { id: string }>({
     const result = await run((resolvedManaged) => {
       managed = resolvedManaged;
     });
+    if (result.output.id === undefined) {
+      logger.debug(`KI ${action} skipped in AI index '${aiIndexId}'`);
+      return result;
+    }
     analyticsService.reportKiWrite({ action, aiIndexId, managed, outcome: 'success' });
     logger.debug(
       `KI '${result.output.id}' ${KI_WRITE_SUCCESS_VERB[action]} AI index '${aiIndexId}'`

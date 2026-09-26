@@ -6,13 +6,19 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AffectedAsset, HuntForThreatResult, HuntIoc } from '@kbn/alertzero-common';
+import type {
+  AffectedAsset,
+  HuntForThreatResult,
+  HuntIncompleteness,
+  HuntIoc,
+} from '@kbn/alertzero-common';
 import { assertHuntWindow } from '../common/assert_hunt_window';
 import { buildMatchesRequired } from '../common/matches_required';
 import { summarizeHit } from '../common/summarize_hit';
 import {
   ALERT_TECHNIQUE_ID_FIELDS,
   attributeHits,
+  CASE_INSENSITIVE_IOC_TYPES,
   HASH_ALGO_BY_LENGTH,
   hashFieldsForAlgo,
   IOC_FIELDS_BY_TYPE,
@@ -21,8 +27,18 @@ import {
 } from './attribute_hits';
 import type { HuntForThreatParams, HuntForThreatServiceResult } from './types';
 
-const termClause = (field: string, value: string): Record<string, unknown> => ({
-  term: { [field]: value },
+/**
+ * Folding the report's value is not enough on its own for a case-insensitive IOC
+ * type: the document may be the side carrying the mixed case, and `term` on a
+ * `keyword` field compares bytes. So the clause itself matches case-insensitively
+ * and `normalizeIocValue` folds both sides during attribution.
+ */
+const termClause = (
+  field: string,
+  value: string,
+  caseInsensitive = false
+): Record<string, unknown> => ({
+  term: { [field]: caseInsensitive ? { value, case_insensitive: true } : value },
 });
 
 /**
@@ -44,8 +60,9 @@ const buildIocShould = (iocs: HuntIoc[]): Array<Record<string, unknown>> => {
       if (algo) clauses.push(...hashFieldsForAlgo(algo).map((field) => termClause(field, digest)));
       continue;
     }
+    const caseInsensitive = CASE_INSENSITIVE_IOC_TYPES.has(type);
     for (const field of IOC_FIELDS_BY_TYPE[type] ?? []) {
-      clauses.push(termClause(field, value));
+      clauses.push(termClause(field, value, caseInsensitive));
     }
   }
   return clauses;
@@ -109,6 +126,37 @@ const sourceFieldsFor = (iocs: HuntIoc[]): string[] => {
     for (const field of IOC_FIELDS_BY_TYPE[type] ?? []) fields.add(field);
   }
   return [...fields];
+};
+
+interface ShardCoverage {
+  timed_out?: boolean;
+  _shards?: { total: number; failed: number; successful: number };
+}
+
+/**
+ * Coverage gaps in one request. A 200 response can have lost whole shards or run
+ * out of time, and `hits.total` only counts what the shards that answered saw, so
+ * a partial search does not look like a failure — it looks like a smaller, quieter
+ * environment, which is the worse of the two ways to be wrong here.
+ */
+const shardCoverageGaps = (label: string, response: ShardCoverage): HuntIncompleteness[] => {
+  const gaps: HuntIncompleteness[] = [];
+  if (response.timed_out === true) {
+    gaps.push({
+      reason: 'search_partial',
+      detail: `The ${label} timed out, so it counted only the shards that answered in time.`,
+    });
+  }
+  const shards = response._shards;
+  if (shards && shards.failed > 0) {
+    gaps.push({
+      reason: 'search_partial',
+      detail:
+        `${shards.failed} of ${shards.total} shards failed on the ${label}, so its counts are ` +
+        `a floor rather than a total.`,
+    });
+  }
+  return gaps;
 };
 
 export const emptyHuntForThreatResult = (
@@ -211,7 +259,7 @@ export const huntForThreat = async (
 ): Promise<HuntForThreatServiceResult> => {
   const {
     scope,
-    iocs = [],
+    iocs: rawIocs = [],
     techniques: rawTechniques = [],
     time_range,
     size,
@@ -220,7 +268,26 @@ export const huntForThreat = async (
   // Alerts store ATT&CK ids as `T1078.004` on keyword fields, and the `terms`
   // clause is case-sensitive, so a caller's `t1078.004` would never match
   // although hit attribution compares case-insensitively.
-  const techniques = rawTechniques.map((technique) => technique.trim().toUpperCase());
+  //
+  // A value that normalises to nothing is then dropped rather than searched for. Both
+  // filters bound the request only by length, so a blank entry survives them, and a
+  // clause built from it — `terms: { '…technique.id': [''] }` — matches nothing while
+  // still counting towards the no-searchable-terms guard below. The guard therefore
+  // does not fire, and the run reports `no_environment_hits`: searched and clean, for a
+  // hunt that searched for nothing. Dropping them here also keeps `resolved_iocs` and
+  // `resolved_techniques` honest about what was actually looked for.
+  // Both are normalised before the emptiness test rather than tested on a trimmed copy and
+  // then searched raw: a padded `" example.com "` would otherwise pass the filter and be
+  // searched verbatim, and a keyword `term` on a padded value matches no document holding
+  // `example.com`. That is the same clean-report-for-an-impossible-match this filter exists
+  // to prevent, so the value that survives here is the value that gets searched, attributed
+  // against, and echoed back in `resolved_iocs`.
+  const techniques = rawTechniques
+    .map((technique) => technique.trim().toUpperCase())
+    .filter((technique) => technique.length > 0);
+  const iocs = rawIocs
+    .map((ioc) => ({ ...ioc, value: ioc.value.trim() }))
+    .filter(({ value }) => value.length > 0);
 
   const from = time_range?.from ?? scope.window.from;
   const to = time_range?.to ?? scope.window.to;
@@ -348,14 +415,31 @@ export const huntForThreat = async (
   // bar is unreachable by definition instead.
   const requiredMatches =
     scope.required.length === 0
-      ? { count: 0 }
+      ? undefined
       : await esClient.count({
           index: scope.required,
           ignore_unavailable: true,
           allow_no_indices: true,
           query: huntQuery,
         });
-  const hasConfirmedHit = requiredMatches.count > 0;
+  const hasConfirmedHit = (requiredMatches?.count ?? 0) > 0;
+
+  const incomplete = [
+    ...shardCoverageGaps('scope search', response),
+    ...(requiredMatches ? shardCoverageGaps('required-index count', requiredMatches) : []),
+  ];
+  // `ignore_unavailable` stops one missing optional pattern from failing the whole
+  // search, but it applies to the required patterns too: one that resolved at scope
+  // time and was deleted before the count returns zero shards and therefore zero
+  // matches, which is indistinguishable from a searched-and-clean required index.
+  if (requiredMatches && requiredMatches._shards?.total === 0) {
+    incomplete.push({
+      reason: 'index_unavailable',
+      detail:
+        `No index backed the required patterns (${scope.required.join(', ')}) when the hit bar ` +
+        `was counted, so the hunt never searched the indices that can confirm a hit.`,
+    });
+  }
 
   return {
     status: total === 0 ? 'no_environment_hits' : 'environment_hits_found',
@@ -374,6 +458,7 @@ export const huntForThreat = async (
     hits,
     affected_assets: { hosts, users, services },
     per_index: perIndex,
+    ...(incomplete.length > 0 ? { incomplete } : {}),
     ...(sampleEventSummaries.length > 0 ? { sample_event_summaries: sampleEventSummaries } : {}),
   };
 };

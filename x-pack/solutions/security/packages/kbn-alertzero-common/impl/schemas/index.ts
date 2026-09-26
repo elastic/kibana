@@ -50,9 +50,12 @@ export {
 } from './workers/update_worker_route.gen';
 export {
   AffectedAsset,
+  HuntCompleteness,
   HuntForThreatHit,
   HuntForThreatResult,
   HuntForThreatStatus,
+  HuntIncompleteness,
+  HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
   HuntTechnology,

@@ -13,8 +13,8 @@ import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
 
 const logger = loggingSystemMock.createLogger();
 
-const searchBodyOf = (esClient: ElasticsearchClient) =>
-  (esClient.search as jest.Mock).mock.calls[0][0];
+const searchBodyOf = (esClient: ElasticsearchClient, page = 0) =>
+  (esClient.search as jest.Mock).mock.calls[page][0];
 
 /** Builds a minimal, fully-typed SearchResponse from just the hit ids the test cares about. */
 const searchResponseOf = (ids: string[], total?: number): SearchResponse<unknown, unknown> => ({
@@ -26,6 +26,20 @@ const searchResponseOf = (ids: string[], total?: number): SearchResponse<unknown
     total: { value: total ?? ids.length, relation: 'eq' },
   },
 });
+
+/**
+ * Serves `pool` in rank order across pages, honouring both `size` and the id
+ * exclusion the way Elasticsearch does, so a test that pages really pages.
+ */
+const servePool = (pool: string[]) => async (request: unknown) => {
+  const { size, query } = request as {
+    size: number;
+    query: { bool: { must_not?: Array<{ ids: { values: string[] } }> } };
+  };
+  const excluded = new Set(query.bool.must_not?.[0]?.ids.values ?? []);
+  const remaining = pool.filter((id) => !excluded.has(id));
+  return searchResponseOf(remaining.slice(0, size), remaining.length);
+};
 
 describe('buildCandidateQuery', () => {
   it('returns empty ids when no reports exist', async () => {
@@ -47,6 +61,70 @@ describe('buildCandidateQuery', () => {
         spaceId: 'default',
       })
     ).rejects.toThrow('index_not_found_exception');
+  });
+
+  describe('a partial answer is not an empty pool', () => {
+    it('refuses to select from a timed-out search', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        ...searchResponseOf(['rpt-1']),
+        timed_out: true,
+      });
+
+      await expect(
+        buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'default' })
+      ).rejects.toThrow('timed out');
+    });
+
+    it('refuses to select when shards failed, rather than reading a shrunken pool', async () => {
+      // The hit page *is* the eligible pool here, so a lost shard removes reports with
+      // no sign that it did: the paging loop reads the short page as a spent pool.
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        ...searchResponseOf(['rpt-1']),
+        _shards: { total: 5, successful: 4, skipped: 0, failed: 1 },
+      });
+
+      await expect(
+        buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'default' })
+      ).rejects.toThrow('1 of 5 shards failed');
+    });
+
+    it('refuses a named-id lookup on a partial answer instead of reporting not_found', async () => {
+      // `not_found` is a statement about the report; a failed shard is a statement about
+      // the cluster, and the caller cannot tell them apart from the result alone.
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        ...searchResponseOf([]),
+        _shards: { total: 3, successful: 2, skipped: 0, failed: 1 },
+      });
+
+      await expect(
+        buildCandidateQuery(esClient, logger, {
+          trigger: 'manual',
+          spaceId: 'default',
+          report_ids: ['rpt-1'],
+        })
+      ).rejects.toThrow('shards failed');
+    });
+
+    it('checks every page, not only the first', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const pool = Array.from({ length: 200 }, (_, i) => `rpt-${i}`);
+      const serve = servePool(pool);
+      esClient.search
+        .mockImplementationOnce(serve)
+        .mockResolvedValue({ ...searchResponseOf([]), timed_out: true });
+
+      await expect(
+        buildCandidateQuery(
+          esClient,
+          logger,
+          { trigger: 'scheduled', spaceId: 'default', limit: 100 },
+          async () => new Set(pool.map(buildHuntInvestigationConversationId))
+        )
+      ).rejects.toThrow('timed out');
+    });
   });
 
   it('does not ignore a missing reports index, so an outage cannot read as an empty pool', async () => {
@@ -256,6 +334,108 @@ describe('buildCandidateQuery', () => {
           }
         )
       ).rejects.toThrow('proposals index unavailable');
+    });
+  });
+
+  describe('paging past parked reports', () => {
+    // The guard runs after the search, so a run of top-ranked reports with open
+    // Proposals used to consume the whole first page and return nothing. Every
+    // later sweep read the same page and returned nothing again, which put eligible
+    // reports behind that run permanently out of reach.
+    const parkedIds = (count: number) => Array.from({ length: count }, (_, i) => `rpt-parked-${i}`);
+    const readOpenProposals = (parked: string[]) => async () =>
+      new Set(parked.map((id) => buildHuntInvestigationConversationId(id)));
+
+    it('selects reports ranked behind a full page of open Proposals', async () => {
+      const parked = parkedIds(30);
+      const free = Array.from({ length: 10 }, (_, i) => `rpt-free-${i}`);
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockImplementation(servePool([...parked, ...free]));
+
+      const result = await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        readOpenProposals(parked)
+      );
+
+      expect(result.ids).toEqual(free);
+    });
+
+    it('excludes the examined prefix by id rather than paging with `from`', async () => {
+      // `corroborated_rank_score` and `rank_score` have no writer yet, so reports tie
+      // at `missing: 0` and the sort is unstable between requests. `from` would let a
+      // report come back twice or be stepped over; excluding by id cannot.
+      const parked = parkedIds(30);
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockImplementation(servePool([...parked, 'rpt-free']));
+
+      await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        readOpenProposals(parked)
+      );
+
+      const secondPage = searchBodyOf(esClient, 1);
+      expect(secondPage.query.bool.must_not).toEqual([{ ids: { values: parked } }]);
+      expect(secondPage.from).toBeUndefined();
+    });
+
+    it('stops at the page cap and says so rather than reporting a quiet empty page', async () => {
+      const cappedLogger = loggingSystemMock.createLogger();
+      const parked = parkedIds(500);
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockImplementation(servePool(parked));
+
+      const result = await buildCandidateQuery(
+        esClient,
+        cappedLogger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        readOpenProposals(parked)
+      );
+
+      expect(esClient.search).toHaveBeenCalledTimes(5);
+      expect(result.ids).toEqual([]);
+      expect(result.truncated).toBe(true);
+      expect(cappedLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('stopped after 5 pages having examined 150 reports')
+      );
+    });
+
+    it('does not report truncated when every report in the pool was examined', async () => {
+      // Everything really does carry an open Proposal, so there is nothing further to
+      // reach and the caller should not be told to come back for more.
+      const quietLogger = loggingSystemMock.createLogger();
+      const parked = parkedIds(40);
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockImplementation(servePool(parked));
+
+      const result = await buildCandidateQuery(
+        esClient,
+        quietLogger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        readOpenProposals(parked)
+      );
+
+      expect(result.skipped).toHaveLength(40);
+      expect(result.truncated).toBe(false);
+      expect(quietLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not page a manually named request, whose page already holds every named id', async () => {
+      const parked = parkedIds(2);
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockImplementation(servePool(parked));
+
+      await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'manual', report_ids: parked, spaceId: 'default', limit: 10 },
+        readOpenProposals(parked)
+      );
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -76,6 +76,7 @@ const result = (overrides: Partial<HuntCoordinatorCoreResult> = {}): HuntCoordin
   message: 'Tier 1: no_environment_hits.',
   next_step: 'n/a',
   has_confirmed_hit: false,
+  completeness: 'complete',
   completed_successfully: true,
   ...overrides,
 });
@@ -266,27 +267,6 @@ describe('buildHuntNarrative', () => {
 
     expect(narrative).toContain(
       'Tier 2 behavior hunting failed before it could finish. Tier 1: environment_hits_found. Tier 2 failed: connector timeout'
-    );
-  });
-
-  it('reports dropped and uncorroborated technique ids as bullets', () => {
-    const narrative = buildHuntNarrative(
-      result({
-        tier1: hitTier1(),
-        tier2: tier2([behavior()], {
-          dropped_unknown_ids: ['T1685.002'],
-          uncorroborated_technique_ids: ['T1530'],
-        }),
-        has_confirmed_hit: true,
-      }),
-      ctx
-    );
-
-    expect(narrative).toContain(
-      '- 1 proposed technique id was dropped as unknown to the ATT&CK catalog: `T1685.002`.'
-    );
-    expect(narrative).toContain(
-      '- 1 behavior exceeded the Tier 2 generation budget and was never searched: `T1530`.'
     );
   });
 

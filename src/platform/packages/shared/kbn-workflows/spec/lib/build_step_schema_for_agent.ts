@@ -12,7 +12,7 @@ import { CONNECTOR_ID_MAX_LENGTH } from '../../common/constants';
 import { getShape } from '../../common/utils/zod/get_shape';
 import { getZodSchemaType } from '../../common/utils/zod/get_zod_schema_type';
 import type { ConnectorContractUnion } from '../../types/v1';
-import { StepWithIfConditionSchema, TimeoutPropSchema } from '../schema';
+import { DynamicTimeoutPropSchema, StepWithIfConditionSchema } from '../schema';
 import type { BaseStepDefinition } from '../step_definition_types';
 import { StepCategory } from '../step_definition_types';
 
@@ -36,7 +36,7 @@ export function buildConnectorStepSchema(connector: ConnectorContractUnion): z.Z
       : z.literal(connector.type),
     with: connector.paramsSchema,
     ...StepWithIfConditionSchema.shape,
-    ...TimeoutPropSchema.shape,
+    ...DynamicTimeoutPropSchema.shape,
   };
 
   if (connector.hasConnectorId === 'required') {
@@ -90,7 +90,7 @@ export function buildBuiltInStepSchema(step: BaseStepDefinition): z.ZodType {
     Object.assign(props, StepWithIfConditionSchema.shape);
   }
   if (step.category !== StepCategory.FlowControl) {
-    Object.assign(props, TimeoutPropSchema.shape);
+    Object.assign(props, DynamicTimeoutPropSchema.shape);
   }
 
   return z.object(props);

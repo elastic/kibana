@@ -11,19 +11,32 @@ import { HuntIocType } from '@kbn/alertzero-common';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { buildHuntSpaceFilterTerms } from './space_filter';
 
-/**
- * What a hunt needs from a threat report: the IOCs and techniques Tier 1
- * searches for, the text Tier 2 reads, and the descriptive fields the
- * Investigation narratives cite (title, source, publication time, severity).
- */
+/** What a hunt needs from a threat report: the IOCs and techniques Tier 1 searches for and the text Tier 2 reads. */
 export interface ReportHuntContext {
   iocs: HuntIoc[];
   techniques: string[];
   text?: string;
+  /** Descriptive fields the Investigation narratives cite; absent when the report does not carry them. */
   title?: string;
   source_name?: string;
   published_at?: string;
   severity?: string;
+  /**
+   * What the bounds below dropped, so the run can report the part of the report it
+   * never looked at. Silently hunting a prefix is the failure mode: an IOC past the
+   * limit reads exactly like an IOC that was searched and found nothing, and the
+   * caller retires the report as hunted on that basis.
+   */
+  truncated?: {
+    /**
+     * `dropped` counts IOCs lost to the count bound, `oversized` those lost to the
+     * value-length bound. Both are coverage the run did not have; they are separated only
+     * so it can say which happened, since neither is fixed by hunting the report again.
+     */
+    iocs?: { kept: number; dropped: number; oversized?: number };
+    techniques?: { kept: number; dropped: number };
+    text?: { kept: number; dropped: number };
+  };
 }
 
 interface StoredReportSource {
@@ -37,13 +50,6 @@ interface StoredReportSource {
   };
 }
 
-const MAX_REPORT_LABEL_CHARS = 512;
-
-const asLabel = (value: unknown): string | undefined =>
-  typeof value === 'string' && value.length > 0
-    ? value.slice(0, MAX_REPORT_LABEL_CHARS)
-    : undefined;
-
 /** Matches the OpenAPI `text` maxLength on hunt_behavior / hunt_coordinator. */
 export const MAX_HUNT_REPORT_TEXT_CHARS = 200_000;
 /** Matches the OpenAPI `iocs` maxItems and `HuntIoc.value` maxLength. */
@@ -53,11 +59,27 @@ const MAX_HUNT_IOC_VALUE_CHARS = 2048;
 export const MAX_HUNT_REPORT_TECHNIQUES = 100;
 const MAX_HUNT_TECHNIQUE_CHARS = 32;
 
-const isHuntIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc =>
+/**
+ * A stored IOC of a kind Tier 1 can map to an ECS field, carrying something to search for.
+ * The value-length bound is deliberately not part of this test: a supported IOC whose value
+ * is too long is coverage the run loses and has to report, whereas a kind Tier 1 cannot map
+ * is dropped by design and is not a gap. Folding both into one predicate is what let an
+ * overlength value disappear from the truncation count.
+ */
+const isSearchableIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc =>
   typeof ioc.value === 'string' &&
-  ioc.value.length > 0 &&
-  ioc.value.length <= MAX_HUNT_IOC_VALUE_CHARS &&
+  ioc.value.trim().length > 0 &&
   HuntIocType.safeParse(ioc.type).success;
+
+const isWithinIocValueBound = ({ value }: HuntIoc): boolean =>
+  value.length <= MAX_HUNT_IOC_VALUE_CHARS;
+
+const MAX_REPORT_LABEL_CHARS = 512;
+
+const asLabel = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0
+    ? value.slice(0, MAX_REPORT_LABEL_CHARS)
+    : undefined;
 
 const isHuntTechnique = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= MAX_HUNT_TECHNIQUE_CHARS;
@@ -107,10 +129,43 @@ export const loadReportHuntContext = async ({
   if (!source) return null;
 
   const rawText = source.content?.body_text;
-  const text =
-    typeof rawText === 'string' && rawText.length > 0
-      ? rawText.slice(0, MAX_HUNT_REPORT_TEXT_CHARS)
-      : undefined;
+  const hasText = typeof rawText === 'string' && rawText.length > 0;
+  const text = hasText ? rawText.slice(0, MAX_HUNT_REPORT_TEXT_CHARS) : undefined;
+
+  // Counted before the bounds are applied, and only over values that survived
+  // validation: an IOC kind Tier 1 cannot map is dropped by design and is not lost
+  // coverage, whereas one pushed past a limit is — by either limit, the count or the
+  // value length. An overlength technique id is malformed rather than lost, since a real
+  // ATT&CK id is a third of the bound, so those stay uncounted.
+  const searchableIocs = (source.extracted?.iocs ?? []).filter(isSearchableIoc);
+  const mappableIocs = searchableIocs.filter(isWithinIocValueBound);
+  const oversizedIocs = searchableIocs.length - mappableIocs.length;
+  const validTechniques = (source.extracted?.ttps?.techniques ?? []).filter(isHuntTechnique);
+
+  const keptIocs = Math.min(mappableIocs.length, MAX_HUNT_REPORT_IOCS);
+  const truncated = {
+    ...((mappableIocs.length > keptIocs || oversizedIocs > 0) && {
+      iocs: {
+        kept: keptIocs,
+        dropped: mappableIocs.length - keptIocs,
+        ...(oversizedIocs > 0 && { oversized: oversizedIocs }),
+      },
+    }),
+    ...(validTechniques.length > MAX_HUNT_REPORT_TECHNIQUES && {
+      techniques: {
+        kept: MAX_HUNT_REPORT_TECHNIQUES,
+        dropped: validTechniques.length - MAX_HUNT_REPORT_TECHNIQUES,
+      },
+    }),
+    ...(hasText &&
+      rawText.length > MAX_HUNT_REPORT_TEXT_CHARS && {
+        text: {
+          kept: MAX_HUNT_REPORT_TEXT_CHARS,
+          dropped: rawText.length - MAX_HUNT_REPORT_TEXT_CHARS,
+        },
+      }),
+  };
+
   const title = asLabel(source.content?.title);
   const sourceName = asLabel(source.source?.name);
   const publishedAt = asLabel(source['@timestamp']);
@@ -120,13 +175,9 @@ export const loadReportHuntContext = async ({
     ...(sourceName !== undefined ? { source_name: sourceName } : {}),
     ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),
     ...(severity !== undefined ? { severity } : {}),
-    iocs: (source.extracted?.iocs ?? [])
-      .filter(isHuntIoc)
-      .slice(0, MAX_HUNT_REPORT_IOCS)
-      .map(({ type, value }) => ({ type, value })),
-    techniques: (source.extracted?.ttps?.techniques ?? [])
-      .filter(isHuntTechnique)
-      .slice(0, MAX_HUNT_REPORT_TECHNIQUES),
+    iocs: mappableIocs.slice(0, MAX_HUNT_REPORT_IOCS).map(({ type, value }) => ({ type, value })),
+    techniques: validTechniques.slice(0, MAX_HUNT_REPORT_TECHNIQUES),
     ...(text !== undefined ? { text } : {}),
+    ...(Object.keys(truncated).length > 0 ? { truncated } : {}),
   };
 };

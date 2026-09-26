@@ -53,6 +53,123 @@ describe('huntForThreat', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
+  describe('a value that normalises to nothing', () => {
+    it.each([
+      ['a whitespace-only technique', { techniques: [' '] }],
+      ['a whitespace-only IOC value', { iocs: [{ type: 'ip' as const, value: '  ' }] }],
+      [
+        'a blank entry alongside no other searchable input',
+        { iocs: [{ type: 'domain' as const, value: '' }], techniques: ['\t'] },
+      ],
+    ])(
+      'reports no_searchable_terms for %s rather than a clean environment',
+      async (_label, input) => {
+        const esClient = buildEsClient(emptySearchResponse);
+
+        const result = await huntForThreat(esClient, { scope, ...input });
+
+        // A clause built from a blank value matches nothing but still counts towards the
+        // guard, so without dropping it the run reads as searched-and-clean.
+        expect(result.status).toBe('no_searchable_terms');
+        expect(esClient.search).not.toHaveBeenCalled();
+      }
+    );
+
+    it('drops the blank entry and still searches the real one', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, {
+        scope,
+        iocs: [
+          { type: 'ip', value: ' ' },
+          { type: 'ip', value: '10.0.0.1' },
+        ],
+        techniques: [' ', 't1078.004'],
+      });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      const serialized = JSON.stringify(searchBody.query.bool.should);
+      expect(serialized).toContain('10.0.0.1');
+      expect(serialized).toContain('T1078.004');
+      expect(serialized).not.toContain('" "');
+      expect(serialized).not.toContain('""');
+    });
+
+    it('searches a padded value trimmed, not verbatim', async () => {
+      // Testing the trimmed length and then searching the raw value is the whole bug: a
+      // keyword `term` on `" example.com "` matches no document holding `example.com`, so
+      // the run reports clean for a search that could not have matched.
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, { scope, iocs: [{ type: 'domain', value: ' example.com ' }] });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      expect(searchBody.query.bool.should).toEqual(
+        expect.arrayContaining([
+          { term: { 'dns.question.name': { value: 'example.com', case_insensitive: true } } },
+        ])
+      );
+      expect(JSON.stringify(searchBody.query)).not.toContain(' example.com ');
+    });
+
+    it('attributes a hit to the padded IOC once the value is trimmed', async () => {
+      const esClient = buildEsClient(
+        {
+          hits: {
+            total: { value: 1 },
+            hits: [
+              {
+                _index: 'logs-aws.cloudtrail-default',
+                _id: 'abc',
+                _source: {
+                  '@timestamp': '2026-09-01T00:00:00.000Z',
+                  dns: { question: { name: 'example.com' } },
+                },
+              },
+            ],
+          },
+          aggregations: {
+            per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
+            affected_hosts: { buckets: [] },
+            affected_users: { buckets: [] },
+          },
+        },
+        1
+      );
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'domain', value: ' example.com ' }],
+      });
+
+      // Attribution compares against the same value the query used, so trimming at the
+      // source keeps a found hit explainable.
+      expect(result.hits[0].matched).toEqual({
+        ioc: { type: 'domain', value: 'example.com' },
+        field: 'dns.question.name',
+      });
+      expect(result.has_confirmed_hit).toBe(true);
+    });
+
+    it('echoes only what it actually searched for', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [
+          { type: 'ip', value: ' ' },
+          { type: 'ip', value: '10.0.0.1' },
+        ],
+        techniques: [' ', 't1078.004'],
+      });
+
+      expect(result.resolved_iocs).toEqual([{ type: 'ip', value: '10.0.0.1' }]);
+      expect(result.resolved_techniques).toEqual(['T1078.004']);
+      expect(result.searched_iocs).toBe(1);
+      expect(result.searched_techniques).toBe(1);
+    });
+  });
+
   it.each([
     ['the scope window', undefined, scope.window],
     [
@@ -470,6 +587,73 @@ describe('huntForThreat', () => {
     });
   });
 
+  describe('domain IOC casing', () => {
+    it('matches a domain case-insensitively, since DNS names are', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, { scope, iocs: [{ type: 'domain', value: 'Example.COM' }] });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      // Folding the report's value would not be enough: the document is just as
+      // likely to be the side carrying the mixed case.
+      expect(searchBody.query.bool.should).toEqual(
+        expect.arrayContaining([
+          { term: { 'dns.question.name': { value: 'Example.COM', case_insensitive: true } } },
+        ])
+      );
+    });
+
+    it('leaves a case-sensitive type on a plain term clause', async () => {
+      const esClient = buildEsClient(emptySearchResponse);
+
+      await huntForThreat(esClient, { scope, iocs: [{ type: 'ip', value: '10.0.0.1' }] });
+
+      const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      expect(searchBody.query.bool.should).toEqual(
+        expect.arrayContaining([{ term: { 'source.ip': '10.0.0.1' } }])
+      );
+      expect(JSON.stringify(searchBody.query)).not.toContain('case_insensitive');
+    });
+
+    it('still attributes the hit when the report and the document disagree on case', async () => {
+      const esClient = buildEsClient(
+        {
+          hits: {
+            total: { value: 1 },
+            hits: [
+              {
+                _index: 'logs-aws.cloudtrail-default',
+                _id: 'abc',
+                _source: {
+                  '@timestamp': '2026-09-01T00:00:00.000Z',
+                  dns: { question: { name: 'example.com' } },
+                },
+              },
+            ],
+          },
+          aggregations: {
+            per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
+            affected_hosts: { buckets: [] },
+            affected_users: { buckets: [] },
+          },
+        },
+        1
+      );
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'domain', value: 'Example.COM' }],
+      });
+
+      // A hit the search found but attribution cannot explain is worse than either
+      // behaviour alone, so both sides fold.
+      expect(result.hits[0].matched).toEqual({
+        ioc: { type: 'domain', value: 'Example.COM' },
+        field: 'dns.question.name',
+      });
+    });
+  });
+
   describe('the _source projection', () => {
     it.each([
       ['ip', '10.0.0.1', ['related.ip', 'kubernetes.audit.sourceIPs']],
@@ -530,6 +714,108 @@ describe('huntForThreat', () => {
           time_range: { from: 'now-30d', to: 'now' },
         })
       ).resolves.toEqual(expect.objectContaining({ status: 'no_environment_hits' }));
+    });
+  });
+  describe('coverage gaps', () => {
+    /**
+     * `search` and `count` both report shard trouble, and neither one failing is an
+     * exception the caller would see: the response just describes a smaller
+     * environment than the one that was asked about.
+     */
+    const buildPartialEsClient = (
+      searchOverrides: Record<string, unknown>,
+      countOverrides: Record<string, unknown> = {}
+    ): ElasticsearchClient =>
+      ({
+        search: jest.fn().mockResolvedValue({ ...emptySearchResponse, ...searchOverrides }),
+        count: jest.fn().mockResolvedValue({ count: 0, ...countOverrides }),
+      } as unknown as ElasticsearchClient);
+
+    it('reports a timed-out scope search as a retryable gap instead of a quiet environment', async () => {
+      const esClient = buildPartialEsClient({ timed_out: true });
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      expect(result.status).toBe('no_environment_hits');
+      expect(result.incomplete).toEqual([expect.objectContaining({ reason: 'search_partial' })]);
+    });
+
+    it('reports failed shards on the scope search as a retryable gap', async () => {
+      const esClient = buildPartialEsClient({
+        _shards: { total: 10, successful: 7, failed: 3, skipped: 0 },
+      });
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      expect(result.incomplete).toEqual([
+        expect.objectContaining({
+          reason: 'search_partial',
+          detail: expect.stringContaining('3 of 10'),
+        }),
+      ]);
+    });
+
+    it('reports failed shards on the required-index count, which sets the hit bar', async () => {
+      const esClient = buildPartialEsClient(
+        { hits: { total: { value: 4 }, hits: [] } },
+        { count: 0, _shards: { total: 5, successful: 4, failed: 1, skipped: 0 } }
+      );
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      // A floor of zero is not the same as a searched-and-clean required index.
+      expect(result.has_confirmed_hit).toBe(false);
+      expect(result.incomplete).toEqual([
+        expect.objectContaining({
+          reason: 'search_partial',
+          detail: expect.stringContaining('required-index count'),
+        }),
+      ]);
+    });
+
+    it('reports a required pattern that no longer resolves as index_unavailable', async () => {
+      // `ignore_unavailable` keeps the count from throwing, so a required index deleted
+      // after scope resolution answers zero matches from zero shards.
+      const esClient = buildPartialEsClient(
+        {},
+        { count: 0, _shards: { total: 0, successful: 0, failed: 0, skipped: 0 } }
+      );
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      expect(result.has_confirmed_hit).toBe(false);
+      expect(result.incomplete).toEqual([
+        expect.objectContaining({
+          reason: 'index_unavailable',
+          detail: expect.stringContaining('logs-aws.*'),
+        }),
+      ]);
+    });
+
+    it('omits `incomplete` entirely when every shard answered', async () => {
+      const esClient = buildPartialEsClient({
+        timed_out: false,
+        _shards: { total: 10, successful: 10, failed: 0, skipped: 0 },
+      });
+
+      const result = await huntForThreat(esClient, {
+        scope,
+        iocs: [{ type: 'ip', value: '10.0.0.1' }],
+      });
+
+      expect(result.incomplete).toBeUndefined();
     });
   });
 });

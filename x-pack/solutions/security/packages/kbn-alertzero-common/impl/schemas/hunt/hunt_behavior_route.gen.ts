@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntForThreatHit } from '../components/hunt.gen';
+import { HuntIncompleteReason, HuntForThreatHit, HuntIncompleteness } from '../components/hunt.gen';
 
 export const HuntBehaviorStatus = lazySchema(() =>
   z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed'])
@@ -114,6 +114,12 @@ export const HuntBehaviorResponse = lazySchema(() =>
              * True when at least one required-index row was returned.
              */
             hit: z.boolean().describe('True when at least one required-index row was returned.'),
+            /**
+             * Why this behavior's result is not a reliable statement about the environment. Absent means it is: with `executed: true` the query ran and its rows were classified, and with `executed: false` execution was never requested. Present means `hit: false` records that nothing was learned, not that nothing is there.
+             */
+            inconclusive_reason: HuntIncompleteReason.optional().describe(
+              "Why this behavior's result is not a reliable statement about the environment. Absent means it is: with `executed: true` the query ran and its rows were classified, and with `executed: false` execution was never requested. Present means `hit: false` records that nothing was learned, not that nothing is there."
+            ),
           })
           .optional(),
         /**
@@ -166,15 +172,14 @@ export const HuntBehaviorResponse = lazySchema(() =>
         confidence: z.number(),
       })
     ),
-    dropped_unknown_ids: z.array(z.string()).optional(),
     /**
-     * Catalog-valid techniques that were not corroborated because the report exceeded the per-run generation budget. They still appear in `behaviors`, carrying a non-executable placeholder and no execution. Present only on a partial run, so a caller can tell a report that was fully hunted from one that was not.
+     * Every technique Tier 2 was asked about but could not corroborate, each with why: an id absent from the ATT&CK catalog, a quote that is not in the report, a query that could not be generated, published or executed, or a technique the per-run generation budget never reached. Absent or empty means nothing went wrong that Tier 2 could name — not that the environment was searched: a proposed behavior whose query was never executed queried nothing, and that is reported per behavior in `execution`, not here. A caller reading a run with no hits as a statement about the environment has to check both: no entries here, and `execution.executed` true on at least one behavior.
      */
-    uncorroborated_technique_ids: z
-      .array(z.string())
+    incomplete: z
+      .array(HuntIncompleteness)
       .optional()
       .describe(
-        'Catalog-valid techniques that were not corroborated because the report exceeded the per-run generation budget. They still appear in `behaviors`, carrying a non-executable placeholder and no execution. Present only on a partial run, so a caller can tell a report that was fully hunted from one that was not.'
+        'Every technique Tier 2 was asked about but could not corroborate, each with why: an id absent from the ATT&CK catalog, a quote that is not in the report, a query that could not be generated, published or executed, or a technique the per-run generation budget never reached. Absent or empty means nothing went wrong that Tier 2 could name — not that the environment was searched: a proposed behavior whose query was never executed queried nothing, and that is reported per behavior in `execution`, not here. A caller reading a run with no hits as a statement about the environment has to check both: no entries here, and `execution.executed` true on at least one behavior.'
       ),
     message: z.string().optional(),
     next_step: z.string(),
