@@ -15,6 +15,7 @@ import {
 } from './constants';
 import {
   MAX_EMBEDDED_RULES_PER_ITEM,
+  dispatchFailureReasonSchema,
   listPolicyExecutionHistoryRequestSchema,
   listPolicyExecutionHistoryResponseSchema,
   policyExecutionHistoryItemSchema,
@@ -478,6 +479,18 @@ describe('policy_execution_history_schema', () => {
       };
       expect(policyExecutionHistoryItemSchema.parse(item)).toEqual(item);
     });
+
+    it.each(dispatchFailureReasonSchema.options)(
+      'accepts the %s failure reason',
+      (failureReason) => {
+        const item = {
+          ...validItem,
+          outcome: 'dispatch_failed' as const,
+          failure_reason: failureReason,
+        };
+        expect(policyExecutionHistoryItemSchema.parse(item)).toEqual(item);
+      }
+    );
 
     it('requires error.stack_trace when error is present', () => {
       const item = { ...validItem, error: { message: 'boom' } };

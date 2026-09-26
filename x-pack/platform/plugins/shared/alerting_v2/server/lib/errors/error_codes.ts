@@ -329,6 +329,11 @@ export const ALERTING_LOG_CODES = {
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
   /**
+   * The cluster license does not allow action policies. Alert actions are still
+   * recorded, but no workflow is scheduled until the license is upgraded.
+   */
+  DISPATCH_LICENSE_NOT_SUPPORTED: 'DISPATCH_LICENSE_NOT_SUPPORTED',
+  /**
    * A dispatch group failed for a reason not covered by a more specific code
    * (outer catch of the per-group dispatch loop). Sibling groups still run.
    */

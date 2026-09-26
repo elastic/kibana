@@ -20,6 +20,8 @@ import type { ActionPolicySavedObjectServiceContract } from '../services/action_
 import { createActionPolicySavedObjectService } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
+import type { LicenseServiceContract } from '../services/license_service/license_service';
+import { createMockLicenseService } from '../services/license_service/license_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { MaintenanceWindowServiceContract } from '../services/maintenance_window_service/maintenance_window_service';
 import { createMaintenanceWindowServiceMock } from '../services/maintenance_window_service/maintenance_window_service.mock';
@@ -45,7 +47,7 @@ import {
   createEpisodeDataResponse,
   createLastNotifiedTimestampsResponse,
 } from './fixtures/dispatcher';
-import { createAlertEpisode } from './fixtures/test_utils';
+import { createAlertEpisode, createAlertEpisodeSuppression } from './fixtures/test_utils';
 import { EpisodeScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
@@ -125,6 +127,7 @@ function buildDispatcherService(deps: {
   workflowsManagement: WorkflowsServerPluginSetup['management'];
   maintenanceWindowService: MaintenanceWindowServiceContract;
   eventLogService: EventLogServiceContract;
+  licenseService?: LicenseServiceContract;
 }): DispatcherService {
   const pipeline = new DispatcherPipeline([
     new FetchEpisodesStep(deps.queryService),
@@ -137,7 +140,7 @@ function buildDispatcherService(deps: {
     new EvaluateMatchersStep(),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService),
-    new DispatchStep(deps.workflowsManagement),
+    new DispatchStep(deps.workflowsManagement, deps.licenseService ?? createMockLicenseService()),
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
@@ -157,6 +160,7 @@ describe('DispatcherService', () => {
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
   let mockMwService: jest.Mocked<MaintenanceWindowServiceContract>;
   let mockEventLogService: EventLogServiceContract;
+  let mockLicenseService: ReturnType<typeof createMockLicenseService>;
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
@@ -175,6 +179,7 @@ describe('DispatcherService', () => {
     mockWfm = createMockWorkflowsManagement();
     mockMwService = createMaintenanceWindowServiceMock();
     ({ eventLogService: mockEventLogService } = createEventLogService());
+    mockLicenseService = createMockLicenseService();
 
     dispatcherService = buildDispatcherService({
       queryService,
@@ -184,6 +189,7 @@ describe('DispatcherService', () => {
       workflowsManagement: mockWfm,
       maintenanceWindowService: mockMwService,
       eventLogService: mockEventLogService,
+      licenseService: mockLicenseService,
     });
   });
 
@@ -417,6 +423,83 @@ describe('DispatcherService', () => {
           }),
         ])
       );
+    });
+
+    it('records alert actions but schedules no workflow when the license does not support action policies', async () => {
+      mockLicenseService.getActionPoliciesLicenseState.mockResolvedValue({
+        isValid: false,
+        type: 'basic',
+        status: 'active',
+      });
+      const logEventSpy = jest.spyOn(mockEventLogService, 'logEvent');
+
+      const secondEpisode = {
+        rule_id: 'rule-2',
+        group_hash: 'hash-2',
+        episode_id: 'episode-2',
+      };
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(
+          createDispatchableAlertEventsResponse([
+            createAlertEpisode(),
+            createAlertEpisode({
+              ...secondEpisode,
+              last_event_timestamp: '2026-01-22T07:15:00.000Z',
+            }),
+          ])
+        )
+        .mockResolvedValueOnce(
+          createAlertEpisodeSuppressionsResponse([
+            createAlertEpisodeSuppression({ should_suppress: true }),
+            createAlertEpisodeSuppression(secondEpisode),
+          ])
+        )
+        .mockResolvedValueOnce(
+          createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
+        )
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: '1', status: 201 } },
+          { create: { _id: '2', status: 201 } },
+          { create: { _id: '3', status: 201 } },
+        ],
+        errors: false,
+      } as BulkResponse);
+
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+      const result = await dispatcherService.run({ eventWatermark, taskId: 'task-1' });
+
+      expect(mockWfm.getWorkflowsByIds).not.toHaveBeenCalled();
+      expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+      const docs = (operations ?? []).filter((_, index) => index % 2 === 1);
+      expect(docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ group_hash: 'hash-1', action_type: 'suppress' }),
+          expect.objectContaining({ group_hash: 'hash-2', action_type: 'fire' }),
+          expect.objectContaining({ group_hash: 'hash-2', action_type: 'notified' }),
+        ])
+      );
+      expect(docs).toHaveLength(3);
+
+      expect(logEventSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'dispatch_failed', outcome: 'failure' },
+          kibana: expect.objectContaining({
+            alerting_v2: {
+              dispatcher: expect.objectContaining({
+                failure_reason: 'license_not_supported',
+                workflow_ids: ['workflow-test-id'],
+                episode_ids: ['episode-2'],
+              }),
+            },
+          }),
+        })
+      );
+      expect(result.nextWatermark.getTime()).toBeGreaterThan(eventWatermark.getTime());
     });
 
     it('handles empty alert episode responses', async () => {
