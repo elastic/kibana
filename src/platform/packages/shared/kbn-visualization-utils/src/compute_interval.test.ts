@@ -20,6 +20,66 @@ describe('computeInterval', () => {
     return calculateBounds(timeRange);
   };
 
+  it('should return 15 second just above 1 minute timerange', () => {
+    expect(
+      computeInterval(
+        {
+          from: '2023-08-15T10:00:00.000Z',
+          to: '2023-08-15T10:01:01.000Z',
+        },
+        dataMock
+      )
+    ).toEqual('15 second');
+  });
+
+  it('should return 1 second for 1 minute timerange', () => {
+    expect(
+      computeInterval(
+        {
+          from: '2023-08-15T10:00:00.000Z',
+          to: '2023-08-15T10:01:00.000Z',
+        },
+        dataMock
+      )
+    ).toEqual('1 second');
+  });
+
+  it('should return 1 second for 1 second timerange', () => {
+    expect(
+      computeInterval(
+        {
+          from: '2023-08-15T10:00:00.000Z',
+          to: '2023-08-15T10:00:01.000Z',
+        },
+        dataMock
+      )
+    ).toEqual('1 second');
+  });
+
+  it('should return correct interval for 15 minutes timerange', () => {
+    expect(
+      computeInterval(
+        {
+          from: '2023-08-15T10:00:00.000Z',
+          to: '2023-08-15T10:15:00.000Z',
+        },
+        dataMock
+      )
+    ).toEqual('15 second');
+  });
+
+  it('should return correct interval for 1 hour timerange', () => {
+    expect(
+      computeInterval(
+        {
+          from: '2023-08-15T10:00:00.000Z',
+          to: '2023-08-15T11:00:00.000Z',
+        },
+        dataMock
+      )
+    ).toEqual('30 second');
+  });
+
   it('should return correct interval for 24 hours timerange', () => {
     expect(
       computeInterval(
@@ -29,7 +89,7 @@ describe('computeInterval', () => {
         },
         dataMock
       )
-    ).toEqual('30 minute');
+    ).toEqual('5 minute');
   });
 
   it('should return correct interval for 7 days timerange', () => {
@@ -41,7 +101,7 @@ describe('computeInterval', () => {
         },
         dataMock
       )
-    ).toEqual('3 hour');
+    ).toEqual('1 hour');
   });
 
   it('should return correct interval for 1 month timerange', () => {
@@ -53,7 +113,7 @@ describe('computeInterval', () => {
         },
         dataMock
       )
-    ).toEqual('12 hour');
+    ).toEqual('3 hour');
   });
 
   it('should return correct interval for 1 year timerange', () => {
@@ -65,6 +125,6 @@ describe('computeInterval', () => {
         },
         dataMock
       )
-    ).toEqual('1 week');
+    ).toEqual('24 hour');
   });
 });

@@ -11,18 +11,14 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 
 // follows the same logic with vega auto_date function
-const barTarget = 50; // same as vega
+const barTarget = 200;
+const ONE_MINUTE_MS = 60_000;
+
 const roundInterval = (interval: number) => {
   {
     switch (true) {
-      case interval <= 500: // <= 0.5s
-        return '100 millisecond';
-      case interval <= 5000: // <= 5s
-        return '1 second';
-      case interval <= 7500: // <= 7.5s
-        return '5 second';
-      case interval <= 15000: // <= 15s
-        return '10 second';
+      case interval <= 15000: // <= 15s (floor)
+        return '15 second';
       case interval <= 45000: // <= 45s
         return '30 second';
       case interval <= 180000: // <= 3m
@@ -55,6 +51,11 @@ export const computeInterval = (timeRange: TimeRange, data: DataPublicPluginStar
   const bounds = data.query.timefilter.timefilter.calculateBounds(timeRange!);
   const min = bounds.min!.valueOf();
   const max = bounds.max!.valueOf();
-  const interval = (max - min) / barTarget;
+  const rangeMs = max - min;
+  // Keep a 15s floor for typical ranges; last ≤1m would otherwise be only a few 15s bars.
+  if (rangeMs <= ONE_MINUTE_MS) {
+    return '1 second';
+  }
+  const interval = rangeMs / barTarget;
   return roundInterval(interval);
 };

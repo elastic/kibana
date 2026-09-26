@@ -818,7 +818,7 @@ describe('LensVisService attributes', () => {
   it('should use the correct histogram query when no suggestion passed', async () => {
     const histogramQuery = {
       esql: `from logstash-* | limit 10
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)`,
     };
     const lensVis = await getLensVisMock({
       filters,
