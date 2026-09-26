@@ -18,6 +18,7 @@
  */
 
 import { createHash } from 'crypto';
+import dateMath from '@kbn/datemath';
 import {
   huntIocSchema,
   type SignificantSecurityEventAttachmentData,
@@ -53,6 +54,55 @@ const MAX_ENTITIES = 50;
 const MAX_HIT_REFS = 50;
 const MAX_EVIDENCE = 50;
 const MAX_TIMELINE = 50;
+/**
+ * Schema caps the mapper must hold the coordinator's output to. Tier 1 aggregates
+ * up to 500 `per_index` buckets and echoes up to 100 request IOCs; the SSE schema
+ * accepts 20 and 50. Copying either through unsliced fails `ai.attachment.add`.
+ */
+const MAX_PER_INDEX = 20;
+const MAX_RESOLVED_IOCS = 50;
+const MAX_INDICATORS = 50;
+
+/**
+ * The SSE schema requires `.datetime()` (ISO 8601, UTC `Z`) on every timestamp,
+ * while the coordinator echoes whatever it was given: the caller's window may be
+ * date math (`now-24h`, which `assertHuntWindow` accepts on purpose) and a Tier 1
+ * hit's `timestamp` is the raw `_source['@timestamp']` string, which can carry an
+ * offset or be an epoch string. Normalize to ISO here so a valid coordinator
+ * result never produces an SSE the schema rejects. Returns `undefined` for a
+ * value that is neither valid date math nor a parseable date.
+ */
+const toIsoDatetime = (value: string | undefined, forceNow: Date): string | undefined => {
+  if (!value) return undefined;
+  // `_source['@timestamp']` under an `epoch_millis` / `epoch_second` date format is a
+  // digit string, which moment (and so datemath) does not parse.
+  if (/^\d{10}$|^\d{13}$/.test(value)) {
+    const epoch = value.length === 13 ? Number(value) : Number(value) * 1000;
+    return new Date(epoch).toISOString();
+  }
+  const parsed = dateMath.parse(value, { forceNow });
+  if (!parsed?.isValid()) return undefined;
+  return parsed.toISOString();
+};
+
+/**
+ * `time_range` is a required datetime pair on the schema, so an unparseable bound
+ * cannot be dropped the way an optional hit timestamp can. Both bounds resolve
+ * against one `now`, matching `assertHuntWindow`.
+ */
+const toIsoTimeRange = (
+  range: { from: string; to: string },
+  forceNow: Date
+): { from: string; to: string } => {
+  const from = toIsoDatetime(range.from, forceNow);
+  const to = toIsoDatetime(range.to, forceNow);
+  if (!from || !to) {
+    throw new Error(
+      `sse_mapper: hunt time_range is not a parseable date or date math (from "${range.from}", to "${range.to}")`
+    );
+  }
+  return { from, to };
+};
 
 /**
  * Subject-stable SSE attachment id: `sse-{sha256(space|reportId[|technique])}`.
@@ -89,19 +139,13 @@ const buildSecurityKnowledgeIndicators = (
   onlyTechniqueId?: string
 ): SseSecurityKnowledgeIndicator[] => {
   const { tier1, tier2 } = result;
-  const indicators: SseSecurityKnowledgeIndicator[] = [
-    ...result.technologies.map(
-      (technology): SseSecurityKnowledgeIndicator => ({ type: 'technology', value: technology })
-    ),
-    ...tier1.resolved_iocs.map(
-      (ioc): SseSecurityKnowledgeIndicator => ({
-        type: 'ioc',
-        value: ioc.value,
-        ioc: { type: ioc.type, value: ioc.value },
-      })
-    ),
-  ];
+  const indicators: SseSecurityKnowledgeIndicator[] = result.technologies.map(
+    (technology): SseSecurityKnowledgeIndicator => ({ type: 'technology', value: technology })
+  );
 
+  // Techniques go before the IOC echo: each SSE is 1:1 with a Proposal, so its
+  // technique indicator must survive the cap, while the IOCs (up to 100 from the
+  // request, schema cap 50 for the whole array) take whatever room is left.
   if (tier2) {
     for (const behavior of tier2.behaviors) {
       if (onlyTechniqueId && behavior.technique_id !== onlyTechniqueId) continue;
@@ -114,7 +158,16 @@ const buildSecurityKnowledgeIndicators = (
     }
   }
 
-  return indicators;
+  for (const ioc of tier1.resolved_iocs) {
+    if (indicators.length >= MAX_INDICATORS) break;
+    indicators.push({
+      type: 'ioc',
+      value: ioc.value,
+      ioc: { type: ioc.type, value: ioc.value },
+    });
+  }
+
+  return indicators.slice(0, MAX_INDICATORS);
 };
 
 const pushUniqueEntity = (
@@ -192,9 +245,13 @@ const isAlertsIndex = (index: string): boolean => {
   return bare.startsWith('.');
 };
 
-const hitTimestamp = (hit: HuntCoordinatorResult['tier1']['hits'][number]): string | undefined => {
-  return typeof hit.timestamp === 'string' ? hit.timestamp : undefined;
-};
+/**
+ * A hit's `timestamp` is the raw indexed `@timestamp` string, so it may carry an
+ * offset (`+02:00`) or be an epoch string; the schema requires ISO `Z`. An
+ * unparseable value is dropped rather than failing the whole attachment.
+ */
+const hitTimestamp = (hit: { timestamp?: string }, forceNow: Date): string | undefined =>
+  toIsoDatetime(hit.timestamp, forceNow);
 
 const toEventMatched = (
   matched: HuntCoordinatorResult['tier1']['hits'][number]['matched']
@@ -220,6 +277,7 @@ const toEventMatched = (
  */
 const splitHits = (
   result: HuntCoordinatorResult,
+  forceNow: Date,
   onlyTechniqueId?: string
 ): { events: SseEventRef[]; alerts: SseAlertRef[] } => {
   const events: SseEventRef[] = [];
@@ -233,7 +291,7 @@ const splitHits = (
     ) {
       continue;
     }
-    const timestamp = hitTimestamp(hit);
+    const timestamp = hitTimestamp(hit, forceNow);
     const matched = toEventMatched(hit.matched);
     if (isAlertsIndex(hit.index)) {
       alerts.push({
@@ -257,11 +315,13 @@ const mergeTierHitRefs = ({
   events: tier1Events,
   alerts: tier1Alerts,
   result,
+  forceNow,
   onlyTechniqueId,
 }: {
   events: SseEventRef[];
   alerts: SseAlertRef[];
   result: HuntCoordinatorResult;
+  forceNow: Date;
   onlyTechniqueId?: string;
 }): { events: SseEventRef[]; alerts: SseAlertRef[]; tier1RefCount: number } => {
   const events = [...tier1Events];
@@ -281,19 +341,20 @@ const mergeTierHitRefs = ({
       const key = `${ref.index}|${ref.id}`;
       if (seen.has(key)) continue;
       seen.add(key);
+      const timestamp = hitTimestamp(ref, forceNow);
       if (isAlertsIndex(ref.index)) {
         if (alerts.length >= MAX_HIT_REFS) continue;
         alerts.push({
           alert_id: ref.id,
           index: ref.index,
-          ...(ref.timestamp ? { timestamp: ref.timestamp } : {}),
+          ...(timestamp ? { timestamp } : {}),
         });
       } else {
         if (events.length >= MAX_HIT_REFS) continue;
         events.push({
           event_id: ref.id,
           source_index: ref.index,
-          ...(ref.timestamp ? { timestamp: ref.timestamp } : {}),
+          ...(timestamp ? { timestamp } : {}),
           matched: {
             technique_id: behavior.technique_id,
             field: '_id',
@@ -378,9 +439,11 @@ const buildHuntResult = (
   {
     onlyTechniqueId,
     tier1RefCount,
+    forceNow,
   }: {
     onlyTechniqueId?: string;
     tier1RefCount: number;
+    forceNow: Date;
   }
 ): SseHuntResult => {
   const { tier1, tier2 } = result;
@@ -390,10 +453,22 @@ const buildHuntResult = (
     tier1RefCount,
   });
 
+  // Required indices set the hit bar, so when the bucket list overflows the
+  // schema cap they are the rows to keep; optional-index buckets fill the rest.
+  // `sort` is stable, so Tier 1's doc-count order survives within each group.
+  const perIndex = [...tier1.per_index]
+    .sort((a, b) => Number(b.required) - Number(a.required))
+    .slice(0, MAX_PER_INDEX)
+    .map((entry) => ({
+      index: entry.index,
+      hit_count: entry.hit_count,
+      required: entry.required,
+    }));
+
   return {
     has_confirmed_hit,
     hit_sources,
-    time_range: tier1.time_range,
+    time_range: toIsoTimeRange(tier1.time_range, forceNow),
     tier1: {
       status: tier1.status,
       counts: {
@@ -402,12 +477,10 @@ const buildHuntResult = (
         affected_hosts: tier1.counts.affected_hosts,
         affected_users: tier1.counts.affected_users,
       },
-      per_index: tier1.per_index.map((entry) => ({
-        index: entry.index,
-        hit_count: entry.hit_count,
-        required: entry.required,
-      })),
-      resolved_iocs: tier1.resolved_iocs.map((ioc) => ({ type: ioc.type, value: ioc.value })),
+      per_index: perIndex,
+      resolved_iocs: tier1.resolved_iocs
+        .slice(0, MAX_RESOLVED_IOCS)
+        .map((ioc) => ({ type: ioc.type, value: ioc.value })),
     },
     tier2: tier2
       ? {
@@ -532,15 +605,19 @@ const buildEntry = ({
   spaceId: string;
   techniqueId?: string;
 }): SseEntry => {
+  // One clock for every timestamp on this entry, matching `assertHuntWindow`.
+  const forceNow = new Date();
   const { events, alerts, tier1RefCount } = mergeTierHitRefs({
-    ...splitHits(result, techniqueId),
+    ...splitHits(result, forceNow, techniqueId),
     result,
+    forceNow,
     onlyTechniqueId: techniqueId,
   });
   const { entities, truncated, originalCount } = buildEntities(result, techniqueId);
   const huntResult = buildHuntResult(result, {
     onlyTechniqueId: techniqueId,
     tier1RefCount,
+    forceNow,
   });
   const behavior = techniqueId
     ? result.tier2?.behaviors.find((b) => b.technique_id === techniqueId)

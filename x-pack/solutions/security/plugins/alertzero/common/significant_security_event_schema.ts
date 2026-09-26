@@ -39,16 +39,24 @@ export const huntIocSchema = z.object({
   value: z.string().min(1).max(2048),
 });
 
+/**
+ * Every timestamp is an ISO 8601 instant. `.datetime()` alone leaves the string unbounded,
+ * and these arrive through attachment input, so cap them before the format check runs.
+ */
+const isoDatetimeSchema = z.string().max(64).datetime();
+
 const alertRefSchema = z.object({
-  alert_id: z.string().min(1).max(512),
+  // Trimmed before the bound: a whitespace-only id renders a blank chip and builds a
+  // redirect for an empty document id.
+  alert_id: z.string().trim().min(1).max(512),
   index: z.string().min(1).max(256),
   // Datetime-validated like the event/timeline timestamps: this value becomes the alert
   // redirect's absolute time range, and a non-date string keeps the alert from loading.
-  timestamp: z.string().datetime().optional(),
+  timestamp: isoDatetimeSchema.optional(),
 });
 
 const eventRefSchema = z.object({
-  event_id: z.string().min(1).max(512),
+  event_id: z.string().trim().min(1).max(512),
   source_index: z
     .string()
     .min(1)
@@ -57,7 +65,7 @@ const eventRefSchema = z.object({
     .describe(
       "Concrete backing index from the hit's _index (for data streams, the .ds-... name), not the data stream or alias name"
     ),
-  timestamp: z.string().datetime().optional(),
+  timestamp: isoDatetimeSchema.optional(),
   matched: z
     .object({
       ioc: huntIocSchema.optional(),
@@ -93,7 +101,7 @@ const securityKnowledgeIndicatorSchema = z
   });
 
 const timelineEntrySchema = z.object({
-  at: z.string().datetime(),
+  at: isoDatetimeSchema,
   what: z.string().min(1).max(2000),
 });
 
@@ -131,6 +139,14 @@ const huntResultTier1Schema = z.object({
   resolved_iocs: z.array(huntIocSchema).max(50),
 });
 
+/**
+ * `per_index` is a (possibly truncated) breakdown of the same search that produced
+ * `total_hits`, so its sum can never exceed the total. A payload where it does would render
+ * a small "Total hits" stat beside a larger per-index distribution.
+ */
+const perIndexSumWithinTotal = (tier1: z.infer<typeof huntResultTier1Schema>): boolean =>
+  tier1.per_index.reduce((sum, entry) => sum + entry.hit_count, 0) <= tier1.counts.total_hits;
+
 const huntResultBehaviorExecutionSchema = z.object({
   /** Dry-run passed and an execute call was attempted. */
   executed: z.boolean(),
@@ -155,10 +171,18 @@ const huntResultTier2BehaviorSchema = z.object({
   affected_users_truncated: z.boolean().optional(),
 });
 
-const huntResultTier2Schema = z.object({
-  status: z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed']),
-  behaviors: z.array(huntResultTier2BehaviorSchema).max(20),
-});
+const huntResultTier2Schema = z
+  .object({
+    status: z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed']),
+    behaviors: z.array(huntResultTier2BehaviorSchema).max(20),
+  })
+  // Tier 2 sets `behaviors_proposed` exactly when at least one behavior validated, so a
+  // status that disagrees with the list is a producer bug: the card would show
+  // "no behaviors" above behavior rows, or "proposed" above an empty table.
+  .refine((tier2) => (tier2.status === 'behaviors_proposed') === tier2.behaviors.length > 0, {
+    message: 'tier2.status and tier2.behaviors disagree on whether behaviors were proposed',
+    path: ['status'],
+  });
 
 const tierHasExecutionHit = (tier2: z.infer<typeof huntResultTier2Schema> | undefined): boolean =>
   tier2?.behaviors.some((behavior) => behavior.execution?.hit === true) ?? false;
@@ -172,10 +196,17 @@ export const huntResultSchema = z
      * IOC hit from a Tier 2 executed env hit (or both).
      */
     hit_sources: z.array(z.enum(['tier1', 'tier2'])).max(2),
-    time_range: z.object({
-      from: z.string().datetime(),
-      to: z.string().datetime(),
-    }),
+    time_range: z
+      .object({
+        from: isoDatetimeSchema,
+        to: isoDatetimeSchema,
+      })
+      // `to` is exclusive (matching `assertHuntWindow`), so an equal pair is an empty window
+      // and a reversed one is impossible; neither is a range the hunt could have searched.
+      .refine((range) => Date.parse(range.from) < Date.parse(range.to), {
+        message: 'time_range.from must be before time_range.to',
+        path: ['from'],
+      }),
     tier1: huntResultTier1Schema,
     tier2: huntResultTier2Schema.optional(),
   })
@@ -190,6 +221,10 @@ export const huntResultSchema = z
       path: ['tier1', 'status'],
     }
   )
+  .refine((result) => perIndexSumWithinTotal(result.tier1), {
+    message: 'sum of tier1.per_index[].hit_count cannot exceed tier1.counts.total_hits',
+    path: ['tier1', 'per_index'],
+  })
   // Confirmed hit requires Tier 1 environment hits and/or a Tier 2 executed required-index hit.
   .refine(
     (result) =>
@@ -276,7 +311,9 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
   source_watch: z.string().min(1).max(256),
   capability: z.string().min(1).max(256),
   run_id: z.string().min(1).max(256),
-  report_id: z.string().min(1).max(256),
+  // Trimmed like `title`: a whitespace-only id passes `min(1)` but renders blank provenance
+  // and builds a threat-report lookup for an empty id.
+  report_id: z.string().trim().min(1).max(256),
   security_knowledge_indicators: z.array(securityKnowledgeIndicatorSchema).max(50),
   entities: z.array(entityRefSchema).max(50),
   alerts: z.array(alertRefSchema).max(50).optional(),
