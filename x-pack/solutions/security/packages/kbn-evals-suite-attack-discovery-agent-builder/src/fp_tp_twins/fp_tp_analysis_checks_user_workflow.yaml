@@ -1,0 +1,271 @@
+version: '1'
+name: Attack Discovery FP/TP analysis (checks / corroboration)
+description: >
+  Same gather steps as fp_tp_analysis_user_workflow.yaml. The agent uses
+  named corroboration checks (entity role, process parent, network
+  destination, alert linkage) instead of a twin-specific prompt. Paste
+  separately so both can be run against the same seeded discovery.
+enabled: true
+tags:
+  - security
+  - attack-discovery
+  - eval
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        attack_discovery_id:
+          type: string
+          maxLength: 512
+          description: >
+            Elasticsearch _id of the authored Attack Discovery. Defaults to
+            the encoded-powershell twin id.
+      additionalProperties: false
+outputs:
+  - name: classification
+    type: string
+  - name: confidence_score
+    type: string
+  - name: summary
+    type: string
+  - name: checks
+    type: string
+  - name: corroborating_evidence
+    type: string
+  - name: cited_entity_ids
+    type: string
+  - name: cited_event_ids
+    type: string
+consts:
+  default_attack_id: ad-fp-tp-encoded-powershell-attack
+steps:
+  - name: get_attack
+    type: elasticsearch.search
+    with:
+      index: .adhoc.alerts-security.attack.discovery.alerts-default
+      size: 1
+      query:
+        ids:
+          values:
+            - '{{ inputs.attack_discovery_id | default: consts.default_attack_id }}'
+
+  - name: get_alerts
+    type: elasticsearch.search
+    with:
+      index: .alerts-security.alerts-default
+      size: 20
+      query:
+        ids:
+          values: "${{ steps.get_attack.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
+
+  - name: get_entities
+    type: elasticsearch.search
+    with:
+      index: entities-latest-default
+      size: 20
+      query:
+        bool:
+          should:
+            - term:
+                host.id: '{{ steps.get_alerts.output.hits.hits[0]._source.host.id }}'
+            - term:
+                user.name: '{{ steps.get_alerts.output.hits.hits[0]._source.user.name }}'
+            - term:
+                entity.id: "{{ steps.get_alerts.output.hits.hits[0]._source.host.id | prepend: 'host:' }}"
+
+  - name: get_events
+    type: elasticsearch.search
+    with:
+      index: logs-endpoint.events.*
+      size: 50
+      query:
+        bool:
+          filter:
+            - term:
+                host.id: '{{ steps.get_alerts.output.hits.hits[0]._source.host.id }}'
+            - range:
+                '@timestamp':
+                  gte: '{{ steps.get_attack.output.hits.hits[0]._source["@timestamp"] }}||-2h'
+                  lte: '{{ steps.get_attack.output.hits.hits[0]._source["@timestamp"] }}||+2h'
+
+  - name: classify_chain
+    type: ai.agent
+    agent-id: alertzero-thin-agent
+    timeout: '10m'
+    create-conversation: true
+    with:
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        skill_ids: []
+      message: >
+        You evaluate ONE persisted Attack Discovery: the generated narrative
+        and the correlation between its alerts, against the evidence bundled
+        below. You do not query further. You do not change alert lifecycle.
+
+        Judge the correlation and whether the world around the alerts
+        supports the attack story. You are not scoring individual detection
+        alerts as TP/FP.
+
+        Prefer inconclusive over a confident answer when evidence is mixed,
+        missing, or only thematic (same technique, same time window, no
+        concrete link). Absence of extra telemetry is not a false_positive.
+        Only an affirmative contradiction in the bundled evidence can support
+        false_positive.
+
+        Run every check. Each check is exactly one entry: status
+        completed | skipped | failed, and when completed a result
+        supports | contradicts | neutral.
+
+        1. alert_linkage — from detection alerts only. Do consecutive
+        stages share a user, host, IP, or process, and is there a
+        concrete bridge (shared process tree, session, event.id)?
+        Shared identifiers without a bridge are neutral. Theme or
+        timing alone is not supports.
+
+        2. entity_role — from entity-store records. A management or
+        infrastructure role (mdm, sccm, jump box, shared egress host)
+        that explains the activity as contradicts. An employee
+        workstation or similarly attack-plausible role is supports.
+        No matching entity documents: skipped, source_unavailable.
+
+        3. process_parent — from raw events. A management or software-
+        distribution parent that explains encoded PowerShell or similar
+        is contradicts. An office or user-app parent spawning the
+        suspicious child is supports. No process events: skipped,
+        source_unavailable.
+
+        4. network_destination — from raw events. A Microsoft or other
+        vendor management destination that matches the parent/role is
+        contradicts. A non-vendor C2-like destination is supports.
+        No network events: skipped, source_unavailable.
+
+        Classification, first match. World checks means entity_role,
+        process_parent, and network_destination. Cite only entity.id
+        and event _id values present in the bundled hits. For every
+        such id, add corroborating_evidence with source, result, and
+        that id.
+
+        1. inconclusive when any of these hold: world checks mix
+        supports and contradicts; every world check is skipped or
+        neutral; entity store or raw events are empty so you cannot
+        corroborate or refute; only alert_linkage supports; cited
+        ids are empty or not in the bundled hits.
+
+        2. false_positive: at least one world check completed with
+        contradicts, none of those three is supports, and you named
+        the contradicting entity.id or event _id.
+
+        3. true_positive: at least one world check is supports, none
+        of those three is contradicts, and you cited the ids you
+        used. alert_linkage at supports helps but is not enough by
+        itself (alerts can look linked in both a real attack and a
+        lookalike). true_positive means the alerts plus the world
+        warrant investigation as one unit, not "confirmed
+        compromise".
+
+        Attack Discovery:
+        {{ steps.get_attack.output.hits.hits[0]._source | json }}
+
+        Detection alerts:
+        {{ steps.get_alerts.output.hits.hits | json }}
+
+        Entity store:
+        {{ steps.get_entities.output.hits.hits | json }}
+
+        Raw events:
+        {{ steps.get_events.output.hits.hits | json }}
+      schema:
+        type: object
+        properties:
+          classification:
+            type: string
+            enum:
+              - true_positive
+              - false_positive
+              - inconclusive
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+          summary:
+            type: string
+          checks:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  enum:
+                    - alert_linkage
+                    - entity_role
+                    - process_parent
+                    - network_destination
+                status:
+                  type: string
+                  enum:
+                    - completed
+                    - skipped
+                    - failed
+                result:
+                  type: string
+                  enum:
+                    - supports
+                    - contradicts
+                    - neutral
+                details:
+                  type: string
+              required:
+                - name
+                - status
+                - details
+          corroborating_evidence:
+            type: array
+            items:
+              type: object
+              properties:
+                description:
+                  type: string
+                source:
+                  type: string
+                result:
+                  type: string
+                  enum:
+                    - supports
+                    - contradicts
+                    - neutral
+                id:
+                  type: string
+              required:
+                - description
+                - source
+                - result
+          cited_entity_ids:
+            type: array
+            items:
+              type: string
+          cited_event_ids:
+            type: array
+            items:
+              type: string
+        required:
+          - classification
+          - confidence_score
+          - summary
+          - checks
+          - corroborating_evidence
+          - cited_entity_ids
+          - cited_event_ids
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      classification: '{{ steps.classify_chain.output.structured_output.classification }}'
+      confidence_score: '{{ steps.classify_chain.output.structured_output.confidence_score }}'
+      summary: '{{ steps.classify_chain.output.structured_output.summary }}'
+      checks: '{{ steps.classify_chain.output.structured_output.checks | json }}'
+      corroborating_evidence: '{{ steps.classify_chain.output.structured_output.corroborating_evidence | json }}'
+      cited_entity_ids: '{{ steps.classify_chain.output.structured_output.cited_entity_ids | json }}'
+      cited_event_ids: '{{ steps.classify_chain.output.structured_output.cited_event_ids | json }}'

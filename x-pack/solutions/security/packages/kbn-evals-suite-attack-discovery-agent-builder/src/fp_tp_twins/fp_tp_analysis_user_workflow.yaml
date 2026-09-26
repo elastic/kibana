@@ -1,0 +1,172 @@
+version: "1"
+name: Attack Discovery FP/TP analysis (eval twin)
+description: >
+  Local validation workflow for the encoded-powershell FP/TP twin. Loads one
+  authored Attack Discovery, its detection alerts, entity-store records, and
+  raw events, then classifies the chain. Not a managed AlertZero workflow.
+enabled: true
+tags:
+  - security
+  - attack-discovery
+  - eval
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        attack_discovery_id:
+          type: string
+          maxLength: 512
+          description: >
+            Elasticsearch _id of the authored Attack Discovery. Defaults to
+            the encoded-powershell twin id.
+      additionalProperties: false
+# Declared as strings: the editor type-checks workflow.output against YAML
+# scalars, so number/array templates always fail at design time. Runtime
+# values are still readable JSON for gold comparison.
+outputs:
+  - name: classification
+    type: string
+  - name: confidence_score
+    type: string
+  - name: rationale
+    type: string
+  - name: cited_entity_ids
+    type: string
+  - name: cited_event_ids
+    type: string
+consts:
+  default_attack_id: ad-fp-tp-encoded-powershell-attack
+steps:
+  - name: get_attack
+    type: elasticsearch.search
+    with:
+      # Pinned to the seed space. `{{ workflow.spaceId }}` is looked up as a
+      # literal index name in the editor and always fails to match.
+      index: .adhoc.alerts-security.attack.discovery.alerts-default
+      size: 1
+      query:
+        ids:
+          values:
+            - "{{ inputs.attack_discovery_id | default: consts.default_attack_id }}"
+
+  - name: get_alerts
+    type: elasticsearch.search
+    with:
+      index: .alerts-security.alerts-default
+      size: 20
+      query:
+        ids:
+          values: "${{ steps.get_attack.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
+
+  - name: get_entities
+    type: elasticsearch.search
+    with:
+      # Public Entity Store v2 alias. `.entities.v2.latest.default` is only a
+      # prefix; the concrete index is `.entities.v2.latest.default-00001`.
+      index: entities-latest-default
+      size: 20
+      query:
+        bool:
+          should:
+            - term:
+                host.id: "{{ steps.get_alerts.output.hits.hits[0]._source.host.id }}"
+            - term:
+                user.name: "{{ steps.get_alerts.output.hits.hits[0]._source.user.name }}"
+            - term:
+                entity.id: "{{ steps.get_alerts.output.hits.hits[0]._source.host.id | prepend: 'host:' }}"
+
+  - name: get_events
+    type: elasticsearch.search
+    with:
+      index: logs-endpoint.events.*
+      size: 50
+      query:
+        bool:
+          filter:
+            - term:
+                host.id: "{{ steps.get_alerts.output.hits.hits[0]._source.host.id }}"
+            - range:
+                "@timestamp":
+                  gte: '{{ steps.get_attack.output.hits.hits[0]._source["@timestamp"] }}||-2h'
+                  lte: '{{ steps.get_attack.output.hits.hits[0]._source["@timestamp"] }}||+2h'
+
+  - name: classify_chain
+    type: ai.agent
+    agent-id: alertzero-thin-agent
+    timeout: "10m"
+    create-conversation: true
+    with:
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        skill_ids: []
+      message: >
+        Classify this Attack Discovery as true_positive, false_positive, or
+        inconclusive. Prefer recall over precision when unsure.
+
+        The discovery markdown is an authored hypothesis. Do not trust it
+        alone. Use entity-store records and raw events. A host whose
+        entity.sub_type is a management role (for example mdm_management),
+        or a process parent that is management software (for example
+        ccmexec.exe) with a Microsoft management destination, is a
+        false_positive. An employee workstation whose process tree is
+        WINWORD spawning encoded PowerShell to a non-Microsoft C2 domain
+        is a true_positive.
+
+        Cite entity.id and raw-event _id values you actually used.
+
+        Attack Discovery:
+        {{ steps.get_attack.output.hits.hits[0]._source | json }}
+
+        Detection alerts:
+        {{ steps.get_alerts.output.hits.hits | json }}
+
+        Entity store:
+        {{ steps.get_entities.output.hits.hits | json }}
+
+        Raw events:
+        {{ steps.get_events.output.hits.hits | json }}
+      schema:
+        type: object
+        properties:
+          classification:
+            type: string
+            enum:
+              - true_positive
+              - false_positive
+              - inconclusive
+            description: Classification of the attack chain
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+            description: Confidence from 0.0–1.0
+          rationale:
+            type: string
+            description: Why this classification, naming the strongest evidence
+          cited_entity_ids:
+            type: array
+            items:
+              type: string
+            description: entity.id values from the entity store that informed the verdict
+          cited_event_ids:
+            type: array
+            items:
+              type: string
+            description: Raw-event _id values that informed the verdict
+        required:
+          - classification
+          - confidence_score
+          - rationale
+          - cited_entity_ids
+          - cited_event_ids
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      classification: "{{ steps.classify_chain.output.structured_output.classification }}"
+      confidence_score: "{{ steps.classify_chain.output.structured_output.confidence_score }}"
+      rationale: "{{ steps.classify_chain.output.structured_output.rationale }}"
+      cited_entity_ids: "{{ steps.classify_chain.output.structured_output.cited_entity_ids | json }}"
+      cited_event_ids: "{{ steps.classify_chain.output.structured_output.cited_event_ids | json }}"
