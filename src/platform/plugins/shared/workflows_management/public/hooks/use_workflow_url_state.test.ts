@@ -9,11 +9,13 @@
 
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useHistory } from 'react-router-dom';
 import { useWorkflowUrlState } from './use_workflow_url_state';
 import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_editor_preferences';
 
-const createWrapper = (initialEntries: string[] = ['/']) => {
+type InitialEntries = React.ComponentProps<typeof MemoryRouter>['initialEntries'];
+
+const createWrapper = (initialEntries: InitialEntries = ['/']) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(MemoryRouter, { initialEntries }, children);
   return Wrapper;
@@ -378,6 +380,225 @@ describe('useWorkflowUrlState', () => {
       });
 
       expect(result.current.graphDirection).toBe('TB');
+    });
+  });
+  describe('browser history', () => {
+    const renderWithHistory = (initialEntries: InitialEntries) =>
+      renderHook(() => ({ urlState: useWorkflowUrlState(), history: useHistory() }), {
+        wrapper: createWrapper(initialEntries),
+      });
+
+    it('pushes an entry per explicit step selection so Back returns to the previous step', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-b');
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('step-b');
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('step-a');
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBeUndefined();
+    });
+
+    it('pushes an entry when the step selection is cleared', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1&stepExecutionId=step-a']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution(null);
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBeUndefined();
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('step-a');
+    });
+
+    it('pushes an entry when an execution is selected', () => {
+      const { result } = renderWithHistory(['/?tab=executions']);
+
+      act(() => {
+        result.current.urlState.setSelectedExecution('exec-1');
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+    });
+
+    it('replaces the entry when a graph step is selected so Back leaves the page', () => {
+      const { result } = renderWithHistory(['/?view=graph']);
+
+      act(() => {
+        result.current.urlState.setSelectedStep('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStep('step-b');
+      });
+
+      expect(result.current.urlState.selectedStepId).toBe('step-b');
+      expect(result.current.history.length).toBe(1);
+    });
+
+    it('drops every entry a run added when a filter change closes it after step selections', () => {
+      const { result } = renderWithHistory(['/?tab=executions']);
+
+      act(() => {
+        result.current.urlState.setSelectedExecution('exec-1');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-b');
+      });
+      act(() => {
+        result.current.urlState.setSelectedExecution(null, { replace: true });
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+      // The entry before the run, then the closed state: no run entry left, none ahead.
+      expect(result.current.history.length).toBe(2);
+
+      act(() => {
+        result.current.history.goForward();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+      expect(result.current.urlState.selectedStepExecutionId).toBeUndefined();
+    });
+
+    it('drops the step entries of a deep-linked run when it is closed with replace', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedExecution(null, { replace: true });
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+    });
+
+    it('keeps other history state on entries it pushes', () => {
+      const { result } = renderWithHistory([
+        { pathname: '/', search: '?tab=executions', state: { fromList: true } },
+      ]);
+
+      act(() => {
+        result.current.urlState.setSelectedExecution('exec-1');
+      });
+
+      expect(result.current.history.location.state).toEqual(
+        expect.objectContaining({ fromList: true })
+      );
+    });
+
+    // Iteration and case-branch ids embed author-controlled step names and case matches.
+    it.each([
+      ['a foreach iteration of a step named with &', 'foreach-iteration:loop&x:0'],
+      ['a switch case matching R&D', 'enter-case-branch:case_R&D:0:completed'],
+      ['#', 'foreach-iteration:a#b:0'],
+      ['%', 'foreach-iteration:100%:0'],
+      ['+', 'foreach-iteration:a+b:0'],
+      ['=', 'foreach-iteration:k=v:0'],
+      ['a space', 'foreach-iteration:with space:0'],
+    ])('keeps the step selection intact for %s, including after a reload', (_label, id) => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution(id);
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe(id);
+      const params = new URLSearchParams(result.current.history.location.search);
+      expect(params.get('stepExecutionId')).toBe(id);
+      expect([...params.keys()].sort()).toEqual(['executionId', 'stepExecutionId']);
+
+      // A reload or a shared link starts from the written URL alone.
+      const { result: reloaded } = renderWithHistory([result.current.history.location.search]);
+      expect(reloaded.current.urlState.selectedStepExecutionId).toBe(id);
+    });
+
+    it('replaces the entry when a selection is normalised with replace', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('trigger', { replace: true });
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('trigger');
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('trigger');
+    });
+
+    it('replaces the entry when clearing replayExecutionId so Back does not restore it', () => {
+      const { result } = renderWithHistory(['/?replayExecutionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.clearReplayExecutionId();
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.replayExecutionId).toBeUndefined();
+    });
+
+    it('replaces the entry when clearing the resume param so Back does not restore it', () => {
+      const { result } = renderWithHistory(['/?resume=true']);
+
+      act(() => {
+        result.current.urlState.clearResumeParam();
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.shouldAutoResume).toBe(false);
+    });
+
+    it('replaces the entry when the editor view changes', () => {
+      const { result } = renderWithHistory(['/?view=yaml']);
+
+      act(() => {
+        result.current.urlState.setEditorView('graph');
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.history.length).toBe(1);
     });
   });
 });

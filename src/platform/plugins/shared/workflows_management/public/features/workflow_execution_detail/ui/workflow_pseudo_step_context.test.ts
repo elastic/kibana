@@ -13,6 +13,7 @@ import {
   buildOverviewStepExecutionFromContext,
   buildTriggerContextFromExecution,
   buildTriggerStepExecutionFromContext,
+  isOverviewContextField,
 } from './workflow_pseudo_step_context';
 
 describe('buildTriggerContextFromExecution', () => {
@@ -434,5 +435,25 @@ describe('buildOverviewStepExecutionFromContext', () => {
     });
     const input = overview.input as Record<string, unknown>;
     expect((input.workflow as Record<string, unknown>).version).toBe(2);
+  });
+});
+
+describe('isOverviewContextField', () => {
+  it.each(['workflow.name', 'execution.id', 'consts.target_index', 'kibanaUrl', 'now'])(
+    'treats %s as a workflow context path',
+    (field) => {
+      expect(isOverviewContextField(field)).toBe(true);
+    }
+  );
+
+  it.each(['trace.traceId', 'trace.entryTransactionId', 'executionError.message', 'skipReason'])(
+    'treats display-only %s as not a context path',
+    (field) => {
+      expect(isOverviewContextField(field)).toBe(false);
+    }
+  );
+
+  it('matches the top-level key only, not a prefix of it', () => {
+    expect(isOverviewContextField('traceSettings.enabled')).toBe(true);
   });
 });

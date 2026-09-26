@@ -107,10 +107,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   useEffect(() => {
     if (!canReadWorkflowExecution) {
       if (activeTab === 'executions') {
-        setUrlTab('workflow');
+        setUrlTab('workflow', { replace: true });
       }
       if (selectedExecutionId) {
-        setSelectedExecution(null);
+        setSelectedExecution(null, { replace: true });
       }
     }
   }, [canReadWorkflowExecution, activeTab, selectedExecutionId, setUrlTab, setSelectedExecution]);
@@ -214,10 +214,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Both handlers also close the list, which is local state rather than URL state. They must
+  // replace, or Back restores the execution while the list stays shut.
   const onOpenExecutionList = useCallback(() => {
     if (isExecutionListOpen || selectedExecutionId) {
       setIsExecutionListOpen(false);
-      setSelectedExecution(null);
+      setSelectedExecution(null, { replace: true });
       return;
     }
     setIsExecutionListOpen(true);
@@ -225,7 +227,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   const onCloseExecutionList = useCallback(() => {
     setIsExecutionListOpen(false);
-    setSelectedExecution(null);
+    setSelectedExecution(null, { replace: true });
   }, [setSelectedExecution]);
 
   const onCloseExecutionDetail = useCallback(() => {
