@@ -14,33 +14,24 @@ import {
 import React, { Fragment } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ServiceMapNode } from '../../../../../common/service_map';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
 } from '../../../../../common/es_fields/apm';
-import { isEdge, type ServiceMapSelection } from './utils';
+import type { ContentsProps } from './popover_content';
 import { isGroupedNodeData, type GroupedConnectionInfo } from '../../../../../common/service_map';
-
-export interface ExternalsListContentsProps {
-  selection: ServiceMapSelection;
-}
 
 const externalResourcesListCss = css`
   max-height: 360px;
   overflow: auto;
 `;
 
-export function ExternalsListContents({ selection }: ExternalsListContentsProps) {
-  if (isEdge(selection)) {
+export function ExternalsListContents({ selection }: ContentsProps) {
+  if (!isGroupedNodeData(selection.data)) {
     return null;
   }
-  const node = selection as ServiceMapNode;
-  if (!isGroupedNodeData(node.data)) {
-    return null;
-  }
-  const groupedConnections = node.data.groupedConnections;
+  const groupedConnections = selection.data.groupedConnections;
   return (
     <EuiFlexItem>
       <section

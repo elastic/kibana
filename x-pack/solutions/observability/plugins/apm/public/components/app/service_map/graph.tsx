@@ -93,6 +93,8 @@ import { SERVICE_FLYOUT_SOURCE_SERVICE_MAP } from '../../shared/service_flyout/c
 import type { ServiceFlyoutOptions } from '../../shared/service_flyout/types';
 import { useServiceMapFlyoutProps } from './use_service_map_flyout_props';
 import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
+import { RequestFlyout } from '../../shared/request_flyout';
+import { useServiceMapEdgeFlyoutProps } from './use_service_map_edge_flyout_props';
 
 type ServiceMapServiceNode = Node<ServiceNodeData>;
 
@@ -212,9 +214,10 @@ function GraphInner({
     start,
     end,
   });
-  const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
+  const [selectedEdgeForFlyout, setSelectedEdgeForFlyout] = useState<ServiceMapEdgeType | null>(
     null
   );
+  const edgeFlyoutConnection = useServiceMapEdgeFlyoutProps({ selectedEdgeForFlyout });
   const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
   const mapRegionRef = useRef<HTMLDivElement | null>(null);
 
@@ -287,8 +290,8 @@ function GraphInner({
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
   selectedNodeIdRef.current = selectedNodeId;
-  const selectedEdgeForPopoverRef = useRef<string | null>(null);
-  selectedEdgeForPopoverRef.current = selectedEdgeForPopover?.id ?? null;
+  const selectedEdgeForFlyoutRef = useRef<string | null>(null);
+  selectedEdgeForFlyoutRef.current = selectedEdgeForFlyout?.id ?? null;
   const selectedServiceNodeForFlyoutRef = useRef<ServiceMapServiceNode | null>(null);
   selectedServiceNodeForFlyoutRef.current = selectedServiceNodeForFlyout;
 
@@ -393,8 +396,8 @@ function GraphInner({
     setNodes(nodesWithContextHighlight);
 
     const highlightedEdges = applyEdgeHighlighting(edgesAfterFilters, {
-      selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
-      selectedEdgeId: selectedEdgeForPopoverRef.current,
+      selectedNodeId: selectedEdgeForFlyoutRef.current ? null : selectedNodeIdRef.current,
+      selectedEdgeId: selectedEdgeForFlyoutRef.current,
     });
 
     const edgesWithContextHighlight =
@@ -442,7 +445,7 @@ function GraphInner({
       );
       setSelectedNodeForPopover(newSelectedId && !isServiceNode(node) ? node : null);
       setSelectedServiceNodeForFlyout(newSelectedId && isServiceNode(node) ? node : null);
-      setSelectedEdgeForPopover(null);
+      setSelectedEdgeForFlyout(null);
     },
     [setEdges, applyEdgeHighlighting]
   );
@@ -451,8 +454,8 @@ function GraphInner({
       setSelectedNodeId(null);
       setSelectedNodeForPopover(null);
       setSelectedServiceNodeForFlyout(null);
-      const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
-      setSelectedEdgeForPopover(newSelectedEdge);
+      const newSelectedEdge = selectedEdgeForFlyout?.id === edge.id ? null : edge;
+      setSelectedEdgeForFlyout(newSelectedEdge);
       setEdges((currentEdges) =>
         applyEdgeHighlighting(currentEdges, {
           selectedNodeId: null,
@@ -460,16 +463,18 @@ function GraphInner({
         })
       );
     },
-    [selectedEdgeForPopover, setEdges, applyEdgeHighlighting]
+    [selectedEdgeForFlyout, setEdges, applyEdgeHighlighting]
   );
 
   const handlePaneClick = useCallback(() => {
+    // Pane clicks don't close the service flyout or the edge flyout — both survive map interaction.
     if (selectedServiceNodeForFlyoutRef.current) return;
+    if (selectedEdgeForFlyoutRef.current) return;
 
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
     setSelectedServiceNodeForFlyout(null);
-    setSelectedEdgeForPopover(null);
+    setSelectedEdgeForFlyout(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -483,7 +488,7 @@ function GraphInner({
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
     setSelectedServiceNodeForFlyout(null);
-    setSelectedEdgeForPopover(null);
+    setSelectedEdgeForFlyout(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -500,6 +505,17 @@ function GraphInner({
       handlePopoverClose();
     }
   }, [nodesAfterFilters, selectedNodeId, handlePopoverClose]);
+
+  // Close the edge flyout when the edge's source or target node is filtered out —
+  // a docked flyout pointing at a hidden edge is worse than a popover that simply vanished.
+  useEffect(() => {
+    if (!selectedEdgeForFlyout) return;
+    const { source, target } = selectedEdgeForFlyout;
+    const isHidden = nodesAfterFilters.some(
+      (n) => (n.id === source || n.id === target) && n.hidden
+    );
+    if (isHidden) handlePopoverClose();
+  }, [nodesAfterFilters, selectedEdgeForFlyout, handlePopoverClose]);
 
   useEffect(() => {
     // Find-in-page (and its Cmd/Ctrl+K shortcut) only exists in the standalone view; when
@@ -540,10 +556,11 @@ function GraphInner({
   }, [isEmbedded]);
 
   const handleDragStart = useCallback(() => {
-    if (selectedNodeForPopover || selectedEdgeForPopover) {
+    // Only close the node popover on drag — the edge flyout and service flyout both survive panning.
+    if (selectedNodeForPopover) {
       handlePopoverClose();
     }
-  }, [selectedNodeForPopover, selectedEdgeForPopover, handlePopoverClose]);
+  }, [selectedNodeForPopover, handlePopoverClose]);
 
   // Handle node selection from keyboard navigation
   const handleKeyboardNodeSelect = useCallback(
@@ -552,7 +569,7 @@ function GraphInner({
         setSelectedNodeId(node.id);
         setSelectedNodeForPopover(!isServiceNode(node) ? node : null);
         setSelectedServiceNodeForFlyout(isServiceNode(node) ? node : null);
-        setSelectedEdgeForPopover(null);
+        setSelectedEdgeForFlyout(null);
         setEdges((currentEdges) =>
           applyEdgeHighlighting(currentEdges, {
             selectedNodeId: node.id,
@@ -573,7 +590,7 @@ function GraphInner({
         setSelectedNodeId(null);
         setSelectedNodeForPopover(null);
         setSelectedServiceNodeForFlyout(null);
-        setSelectedEdgeForPopover(edge);
+        setSelectedEdgeForFlyout(edge);
         setEdges((currentEdges) =>
           applyEdgeHighlighting(currentEdges, {
             selectedNodeId: null,
@@ -593,7 +610,7 @@ function GraphInner({
     edges,
     selectedNodeId,
     selectedNodeForPopover,
-    selectedEdgeForPopover,
+    selectedEdgeForFlyout,
     onNodeSelect: handleKeyboardNodeSelect,
     onEdgeSelect: handleKeyboardEdgeSelect,
     onPopoverClose: handlePopoverClose,
@@ -708,7 +725,7 @@ function GraphInner({
       'This is an interactive service map showing application services and their dependencies. ' +
       'Use Tab to navigate between service nodes. Use Arrow keys to move between adjacent nodes. ' +
       'Press Enter or Space to select a node and view its details including connections. ' +
-      'Press Escape to close the details popover. ' +
+      'Press Escape to close the details panel. ' +
       'When focus is in the map region or on the page background (no text field focused), press Command K or Control K to open find in page and focus the search field. ' +
       'The options panel and zoom controls in the top left allow you to filter, change layout, zoom in, zoom out, and fit the view.',
   });
@@ -946,7 +963,6 @@ function GraphInner({
           </ReactFlow>
           <MapPopover
             selectedNode={selectedNodeForPopover}
-            selectedEdge={selectedEdgeForPopover}
             focusedServiceName={serviceName}
             environment={environment}
             kuery={kuery}
@@ -965,6 +981,17 @@ function GraphInner({
               deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
               filters={flyoutProps.filters}
               telemetry={{ client: telemetry, source: flyoutSource }}
+              onClose={handlePopoverClose}
+            />
+          )}
+          {edgeFlyoutConnection && (
+            <RequestFlyout
+              key={selectedEdgeForFlyout?.id}
+              deps={{ core, share, lens, dataViews }}
+              connection={edgeFlyoutConnection}
+              initialEnvironment={environment}
+              initialRangeFrom={rangeFrom ?? start}
+              initialRangeTo={rangeTo ?? end}
               onClose={handlePopoverClose}
             />
           )}

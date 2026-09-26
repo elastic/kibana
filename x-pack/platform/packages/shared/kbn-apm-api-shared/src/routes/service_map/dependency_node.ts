@@ -6,7 +6,7 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { NodeStats } from '@kbn/apm-types';
-import { environmentSchema } from '@kbn/apm-types';
+import { environmentSchema, latencyAggregationTypeSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, offsetSchema } from '../../default_api_types';
 
@@ -25,6 +25,7 @@ export const serviceMapDependencyNodeRoute = defineRoute<ServiceMapServiceDepend
             dependencies: z.union([z.string(), z.array(z.string())]),
           })
           .merge(z.object({ sourceServiceName: z.string() }).partial())
+          .merge(z.object({ latencyAggregationType: latencyAggregationTypeSchema }).partial())
           .merge(environmentSchema)
           .merge(rangeSchema)
           .merge(offsetSchema),
