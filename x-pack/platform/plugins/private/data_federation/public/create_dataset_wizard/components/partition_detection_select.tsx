@@ -25,9 +25,7 @@ type Option = EuiComboBoxOptionOption<string> & {
 
 const renderPartitionDetectionOption = (option: EuiComboBoxOptionOption<string>) => {
   const opt = option as Option;
-  return (
-    <DescribedOptionDisplay title={opt.label} description={opt.description} />
-  );
+  return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
 };
 
 const PARTITION_DETECTION_OPTIONS: Option[] = [

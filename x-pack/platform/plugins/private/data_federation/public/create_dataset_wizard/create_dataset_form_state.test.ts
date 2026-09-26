@@ -94,7 +94,9 @@ describe('create_dataset_form_state', () => {
 
     it('rejects values longer than two characters', () => {
       expect(validateEscapeCharacter('abc')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
-      expect(validateEscapeCharacter('\\abc')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
+      expect(validateEscapeCharacter('\\abc')).toBe(
+        createDatasetWizardStrings.settingsEscapeInvalid
+      );
     });
   });
 
