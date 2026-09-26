@@ -1098,7 +1098,7 @@ export const createDatasetWizardStrings = {
   ),
   settingsMaxErrorsDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.maxErrors.description',
-    { defaultMessage: 'placeholder' }
+    { defaultMessage: 'Maximum number of row errors before failing.' }
   ),
   settingsMaxErrorRatioDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.maxErrorRatio.description',
