@@ -10,13 +10,12 @@
 import type { SyntheticEvent } from 'react';
 import React from 'react';
 
-import type { EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonColor, EuiButtonPropsForButton } from '@elastic/eui';
 import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';
