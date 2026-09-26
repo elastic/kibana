@@ -6,11 +6,14 @@
  */
 
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+import { findRulesRequestSchema, MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { ALERT_EPISODES_LIST_PAGE_SIZE, RULES_RESOLUTION_BATCH_SIZE } from '../constants';
+import { ALERT_EPISODES_LIST_PAGE_SIZE } from '../constants';
 import { fetchRulesByIds } from './fetch_rules_by_ids';
 
 const mockHttp = httpServiceMock.createStartContract();
+const getFindRulesRequests = () =>
+  mockHttp.get.mock.calls.map((call) => findRulesRequestSchema.parse(call.at(1)?.query));
 
 describe('fetchRulesByIds', () => {
   beforeEach(() => {
@@ -19,7 +22,7 @@ describe('fetchRulesByIds', () => {
       items: [],
       total: 0,
       page: 1,
-      per_page: RULES_RESOLUTION_BATCH_SIZE,
+      per_page: ALERT_EPISODES_LIST_PAGE_SIZE,
     });
   });
 
@@ -28,54 +31,42 @@ describe('fetchRulesByIds', () => {
     expect(mockHttp.get).not.toHaveBeenCalled();
   });
 
-  it('fetches rules with a KQL id filter in a single request', async () => {
+  it('fetches rules with a KQL id filter and a per-page size matching the batch', async () => {
     await fetchRulesByIds({ http: mockHttp, ids: ['rule-a', 'rule-b'] });
 
     expect(mockHttp.get).toHaveBeenCalledTimes(1);
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: '(id: "rule-a" OR id: "rule-b")',
-        per_page: RULES_RESOLUTION_BATCH_SIZE,
+        per_page: 2,
         page: 1,
       },
     });
   });
 
-  it('splits ids into requests of at most RULES_RESOLUTION_BATCH_SIZE', async () => {
+  it('splits ids so every KQL filter stays within the API length limit', async () => {
     const ids = Array.from(
-      { length: RULES_RESOLUTION_BATCH_SIZE + 1 },
-      (_, index) => `rule-${index}`
+      { length: 100 },
+      (_, index) => `rule-${index}-${'x'.repeat(20 + (index % 5) * 20)}`
     );
 
     await fetchRulesByIds({ http: mockHttp, ids });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(2);
-    expect(mockHttp.get).toHaveBeenLastCalledWith(ALERTING_V2_RULE_API_PATH, {
-      query: {
-        filter: `id: "rule-${RULES_RESOLUTION_BATCH_SIZE}"`,
-        per_page: RULES_RESOLUTION_BATCH_SIZE,
-        page: 1,
-      },
-    });
+    expect(mockHttp.get.mock.calls.length).toBeGreaterThan(1);
+    for (const request of getFindRulesRequests()) {
+      expect(request.filter?.length).toBeLessThanOrEqual(MAX_KQL_LENGTH);
+    }
   });
 
-  it('merges the items returned by every batch', async () => {
-    const ids = Array.from(
-      { length: RULES_RESOLUTION_BATCH_SIZE + 1 },
-      (_, index) => `rule-${index}`
-    );
+  it('merges the rules returned by every filter-length batch', async () => {
+    const ids = Array.from({ length: 100 }, (_, index) => `rule-${index}-${'x'.repeat(50)}`);
     mockHttp.get
-      .mockResolvedValueOnce({ items: [{ id: 'rule-0' }], total: 1, page: 1, per_page: 100 })
-      .mockResolvedValueOnce({
-        items: [{ id: `rule-${RULES_RESOLUTION_BATCH_SIZE}` }],
-        total: 1,
-        page: 1,
-        per_page: 100,
-      });
+      .mockResolvedValueOnce({ items: [{ id: ids[0] }], total: 1, page: 1, per_page: 1 })
+      .mockResolvedValueOnce({ items: [{ id: ids[99] }], total: 1, page: 1, per_page: 1 });
 
     await expect(fetchRulesByIds({ http: mockHttp, ids })).resolves.toEqual([
-      { id: 'rule-0' },
-      { id: `rule-${RULES_RESOLUTION_BATCH_SIZE}` },
+      { id: ids[0] },
+      { id: ids[99] },
     ]);
   });
 
@@ -87,14 +78,13 @@ describe('fetchRulesByIds', () => {
 
     await fetchRulesByIds({ http: mockHttp, ids });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(
-      ALERT_EPISODES_LIST_PAGE_SIZE / RULES_RESOLUTION_BATCH_SIZE
+    const requests = getFindRulesRequests();
+    expect(requests.reduce((total, request) => total + (request.per_page ?? 0), 0)).toBe(
+      ALERT_EPISODES_LIST_PAGE_SIZE
     );
-    expect(mockHttp.get).not.toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
-      query: expect.objectContaining({
-        filter: expect.stringContaining(`rule-${ALERT_EPISODES_LIST_PAGE_SIZE}"`),
-      }),
-    });
+    for (const request of requests) {
+      expect(request.filter).not.toContain(`id: "rule-${ALERT_EPISODES_LIST_PAGE_SIZE}"`);
+    }
   });
 
   it('returns only the rules resolved by the v2 API', async () => {
