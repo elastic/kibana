@@ -92,6 +92,12 @@ export class WorkflowValidationService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<z.ZodType> {
+    // Registered step definitions are latched into a module-level cache on the
+    // first call to `getAllConnectorsInternal()`. Async step loaders that resolve
+    // after that first call are permanently excluded. Wait for all pending loaders
+    // to settle so the cache is never frozen around a partial registry.
+    await this.deps.workflowsExtensions?.isReady();
+
     return getWorkflowZodSchemaFromConnectors(
       await this.resolveConnectors(spaceId, request),
       toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions())
