@@ -366,7 +366,9 @@ describe('CreateDatasetAdditionalSettings', () => {
     ).toBeInTheDocument();
     // `Trim spaces` defaults to false, represented by an empty selection (placeholder shown).
     expect(
-      within(trimSpacesField).getByPlaceholderText(createDatasetWizardStrings.settingsTrimSpacesPlaceholder)
+      within(trimSpacesField).getByPlaceholderText(
+        createDatasetWizardStrings.settingsTrimSpacesPlaceholder
+      )
     ).toBeInTheDocument();
     const quoteField = getByTestId('createDatasetSettingsQuote') as HTMLInputElement;
     expect(quoteField).toHaveValue('');

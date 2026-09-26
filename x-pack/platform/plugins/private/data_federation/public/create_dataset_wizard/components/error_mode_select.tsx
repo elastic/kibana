@@ -20,9 +20,7 @@ type ErrorModeOption = EuiComboBoxOptionOption<DatasetErrorModeFormValue> & {
 
 const renderErrorModeOption = (option: EuiComboBoxOptionOption<DatasetErrorModeFormValue>) => {
   const opt = option as ErrorModeOption;
-  return (
-    <DescribedOptionDisplay title={opt.label} description={opt.description} />
-  );
+  return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
 };
 
 const ERROR_MODE_OPTIONS: ErrorModeOption[] = [
