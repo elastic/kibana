@@ -34,7 +34,7 @@ spaceTest.describe(
       await browserAuth.loginWithCustomRole(LOOKUP_INDEX_EDITOR_ROLE);
       await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.discover.codeEditor.waitCodeEditorReady('ESQLEditor');
+      await pageObjects.esqlEditor.waitReady();
     });
 
     spaceTest.afterEach(async ({ esClient, scoutSpace }) => {
@@ -51,7 +51,8 @@ spaceTest.describe(
     spaceTest(
       'creates a lookup index by manually adding fields and rows',
       async ({ pageObjects, esClient, scoutSpace }) => {
-        const { discover, lookupIndexEditor } = pageObjects;
+        const { esqlEditor } = pageObjects;
+        const { lookupIndexEditor } = esqlEditor;
         const indexName = getIndexName(scoutSpace.id);
 
         const setRowValues = async (rowIndex: number, rowNumber: number) => {
@@ -65,7 +66,6 @@ spaceTest.describe(
         };
 
         await lookupIndexEditor.openFromSuggestion(
-          discover.codeEditor,
           'from logstash-* | LOOKUP JOIN ',
           'Create lookup index'
         );
@@ -109,9 +109,7 @@ spaceTest.describe(
         await lookupIndexEditor.saveChangesAndClose();
 
         // Query should be updated appending the new index name
-        await expect(discover.codeEditor.getCodeEditorContent()).toContainText(
-          `| LOOKUP JOIN ${indexName}`
-        );
+        await expect(esqlEditor.content).toContainText(`| LOOKUP JOIN ${indexName}`);
 
         // Verify the index is created correctly and contains all the data
         await expect(async () => {

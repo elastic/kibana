@@ -33,7 +33,7 @@ spaceTest.describe(
       // can misfire and click the button, scheduling a deferred re-fetch that lands in
       // the test's count window and inflates it from 2 to 3.
       await pageObjects.discover.goto({ queryMode: 'esql' });
-      await pageObjects.discover.codeEditor.waitCodeEditorReady('ESQLEditor');
+      await pageObjects.esqlEditor.waitReady();
       // Activate the histogram: the first explicit submit loads the chart (Lens) so
       // subsequent submits fire both docs + chart requests. Without it every test
       // here counts 1 instead of 2.
@@ -93,9 +93,7 @@ spaceTest.describe(
       async ({ pageObjects, network }) => {
         // The debounce auto-submit only fires the docs request, so drain it outside the
         // count window; the chart only fires on the explicit submit counted below.
-        await pageObjects.discover.codeEditor.setCodeEditorValue(
-          'from logstash-* | where bytes > 1000 '
-        );
+        await pageObjects.esqlEditor.setQuery('from logstash-* | where bytes > 1000 ');
         await pageObjects.discover.waitUntilSearchingHasFinished();
         const count = await network.trackMatchingRequests(
           REQUEST_COUNT_OPTIONS,

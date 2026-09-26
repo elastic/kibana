@@ -169,7 +169,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
   });
 
   spaceTest('should detect time field change in ES|QL query correctly', async ({ pageObjects }) => {
-    const { datePicker, discover, unifiedTabs } = pageObjects;
+    const { datePicker, discover, unifiedTabs, esqlEditor } = pageObjects;
 
     await spaceTest.step('tab 0: start in ES|QL mode with the default logstash query', async () => {
       await discover.selectTextBaseLang();
@@ -186,7 +186,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
       await unifiedTabs.createNewTab();
       await expect(discover.getUninitializedPrompt()).toBeVisible();
 
-      await discover.codeEditor.setCodeEditorValue(QUERY_WITH_TIME_FIELD);
+      await esqlEditor.setQuery(QUERY_WITH_TIME_FIELD);
       await datePicker.setAbsoluteRange(FLIGHTS_TIME_RANGE_DISPLAY);
       await discover.submitQueryAndWait();
       await expectCurrentEsqlTabState(pageObjects, {

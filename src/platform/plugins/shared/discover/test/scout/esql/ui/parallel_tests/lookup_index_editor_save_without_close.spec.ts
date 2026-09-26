@@ -29,7 +29,7 @@ spaceTest.describe(
       await browserAuth.loginWithCustomRole(LOOKUP_INDEX_EDITOR_ROLE);
       await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.discover.codeEditor.waitCodeEditorReady('ESQLEditor');
+      await pageObjects.esqlEditor.waitReady();
     });
 
     spaceTest.afterEach(async ({ esClient, scoutSpace }) => {
@@ -46,11 +46,11 @@ spaceTest.describe(
     spaceTest(
       'saves lookup index content without closing the flyout',
       async ({ pageObjects, esClient, scoutSpace }) => {
-        const { discover, lookupIndexEditor } = pageObjects;
+        const { esqlEditor } = pageObjects;
+        const { lookupIndexEditor } = esqlEditor;
         const indexName = getIndexName(scoutSpace.id);
 
         await lookupIndexEditor.openFromSuggestion(
-          discover.codeEditor,
           `from logstash-* | LOOKUP JOIN ${indexName}`,
           `Create lookup index "${indexName}"`
         );

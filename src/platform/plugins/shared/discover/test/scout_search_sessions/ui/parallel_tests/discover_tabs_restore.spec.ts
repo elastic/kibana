@@ -107,7 +107,7 @@ spaceTest.describe(
         await spaceTest.step('store a named ES|QL background search', async () => {
           await pageObjects.discover.goto({ queryMode: 'esql' });
           await pageObjects.discover.waitUntilTabIsLoaded();
-          await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+          await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
           await pageObjects.backgroundSearch.sendToBackground();
 
           await pageObjects.discover.clickAppMenuItem(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
@@ -149,7 +149,7 @@ spaceTest.describe(
         await spaceTest.step('store a background search', async () => {
           await pageObjects.discover.goto({ queryMode: 'esql' });
           await pageObjects.discover.waitUntilTabIsLoaded();
-          await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+          await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
           await pageObjects.backgroundSearch.sendToBackground();
         });
 
@@ -157,7 +157,7 @@ spaceTest.describe(
           await pageObjects.unifiedTabs.createNewTab();
           await pageObjects.discover.selectTextBaseLang();
           await pageObjects.discover.waitUntilTabIsLoaded();
-          await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+          await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
           await pageObjects.discover.submitQuery();
           await pageObjects.discover.waitUntilSearchingHasFinished();
         });

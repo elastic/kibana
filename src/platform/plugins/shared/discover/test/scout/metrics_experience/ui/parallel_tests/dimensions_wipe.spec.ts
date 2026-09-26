@@ -35,12 +35,12 @@ spaceTest.describe(
     spaceTest(
       'drops a selected dimension when switching to a stream that does not emit it, and keeps the chart rendered',
       async ({ pageObjects, page }) => {
-        const { discover, metricsExperience } = pageObjects;
+        const { discover, metricsExperience, esqlEditor } = pageObjects;
         const { ONLY_IN_A } = testData.METRICS_DIMENSION_FIELDS;
 
         // TODO: Move to Discover PO (issue: https://github.com/elastic/kibana/issues/265472)
         const submitEsqlQuery = async (query: string) => {
-          await discover.codeEditor.setCodeEditorValue(query);
+          await esqlEditor.setQuery(query);
           await page.testSubj.click('querySubmitButton');
           await discover.waitUntilSearchingHasFinished();
         };
@@ -82,11 +82,11 @@ spaceTest.describe(
     spaceTest(
       'preserves the breakdown when the dimension is shared across streams',
       async ({ pageObjects, page }) => {
-        const { discover, metricsExperience } = pageObjects;
+        const { discover, metricsExperience, esqlEditor } = pageObjects;
         const { DEFAULT_BREAKDOWN } = testData.METRICS_DIMENSION_FIELDS;
 
         const submitEsqlQuery = async (query: string) => {
-          await discover.codeEditor.setCodeEditorValue(query);
+          await esqlEditor.setQuery(query);
           await page.testSubj.click('querySubmitButton');
           await discover.waitUntilSearchingHasFinished();
         };
