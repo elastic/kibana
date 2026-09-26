@@ -9,10 +9,9 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
   const goToUptimeRoot = async () => {
     // Check if are already on overview uptime page, we don't need to repeat the step
@@ -30,12 +29,6 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
   };
 
   return {
-    async refreshApp() {
-      await browser.refresh();
-      await PageObjects.common.sleep(1000);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    },
-
     async goToUptime() {
       await goToUptimeRoot();
     },
@@ -46,25 +39,11 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
       await testSubjects.existOrFail('uptimeSettingsPage', { timeout: 10000 });
     },
 
-    checkIfOnMonitorPage: async (monitorId: string) => {
-      const monitorPage = await testSubjects.exists('uptimeMonitorPage', { timeout: 1000 });
-      if (monitorId && monitorPage) {
-        const thisMonitorPage =
-          (await testSubjects.getVisibleText('monitor-page-title')) === monitorId;
-        return monitorPage && thisMonitorPage;
-      } else {
-        return monitorPage;
-      }
-    },
-
     goToMonitor: async (monitorId: string) => {
       // only go to monitor page if not already there
       if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
         return retry.try(async () => {
           await testSubjects.click(`monitor-page-link-${monitorId}`);
-        });
-        await testSubjects.existOrFail('uptimeMonitorPage', {
-          timeout: 30000,
         });
       }
     },
@@ -79,19 +58,6 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
         });
       }
       return true;
-    },
-
-    async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
-      await PageObjects.timePicker.setAbsoluteRange(dateStart, dateEnd);
-      await this.goToMonitor(monitorId);
-    },
-
-    async isOnDetailsPage() {
-      return await testSubjects.exists('uptimeMonitorPage', { timeout: 0 });
-    },
-
-    async goToHomeViaBreadCrumb() {
-      await testSubjects.click('breadcrumb first');
     },
   };
 }
