@@ -11,6 +11,7 @@ import type {
   DatasetSettingsFile,
   DatasetMappings,
 } from '../../common/dataset_types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { MappingEditorValue } from '../components/mapping_editor';
 import { emptyMappingEditorValue } from '../components/mapping_editor';
 import {
@@ -45,6 +46,23 @@ const mappingsToEditorValue = (mappings: DatasetMappings | undefined): MappingEd
 const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
 const TIMESTAMP_FIELD_ID = '__timestamp__';
 
+const getUnmanagedDatasetSettings = (
+  settings: DataSetWithName['settings'] | undefined
+): SerializableRecord => {
+  if (!settings) return {};
+
+  // Preserve settings keys we don't manage in the UI so edits don't drop them.
+  // Managed keys are the form's settings keys (everything in `emptyCreateDatasetSettingsFormValues()`).
+  const managedKeys = new Set(Object.keys(emptyCreateDatasetSettingsFormValues()));
+  const unmanaged: SerializableRecord = {};
+  for (const [key, value] of Object.entries(settings as unknown as SerializableRecord)) {
+    if (!managedKeys.has(key) && value !== undefined) {
+      unmanaged[key] = value;
+    }
+  }
+  return unmanaged;
+};
+
 export const emptyDatasetFormValues = (): CreateDatasetFormValues => ({
   name: '',
   description: '',
@@ -55,6 +73,7 @@ export const emptyDatasetFormValues = (): CreateDatasetFormValues => ({
     formatWasAutoDetected: false,
     additionalCommonSettingsIsOpen: true,
     additionalAdvancedSettingsIsOpen: false,
+    unmanagedSettings: {},
   },
   mappings: {
     ...emptyMappingEditorValue,
@@ -133,6 +152,7 @@ export const dataSetToFormValues = (data: DataSetWithName): CreateDatasetFormVal
     formatWasAutoDetected: false,
     additionalCommonSettingsIsOpen: true,
     additionalAdvancedSettingsIsOpen: false,
+    unmanagedSettings: getUnmanagedDatasetSettings(data.settings),
   },
   mappings: mappingsToEditorValue(data.mappings),
 });

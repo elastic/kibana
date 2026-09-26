@@ -23,6 +23,7 @@ describe('dataset_form_initial_values', () => {
       formatWasAutoDetected: false,
       additionalCommonSettingsIsOpen: true,
       additionalAdvancedSettingsIsOpen: false,
+      unmanagedSettings: {},
     });
     expect(values.settings.format).toBe('');
     expect(values.settings.error_mode).toBe('');

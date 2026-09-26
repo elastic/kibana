@@ -14,7 +14,14 @@ import {
 
 export const buildDatasetPayload = (values: CreateDatasetFormValues): DataSetWithName => {
   const description = values.description?.trim();
-  const settings = buildDatasetSettingsFromFormValues(values.settings);
+  const unmanagedSettings = values.ui.unmanagedSettings ?? {};
+  const appliedSettings = buildDatasetSettingsFromFormValues(values.settings) ?? {};
+  const settings =
+    Object.keys(unmanagedSettings).length > 0
+      ? { ...appliedSettings, ...unmanagedSettings }
+      : Object.keys(appliedSettings).length > 0
+        ? appliedSettings
+        : undefined;
   const mappings = buildDatasetMappings(values.mappings);
 
   return {

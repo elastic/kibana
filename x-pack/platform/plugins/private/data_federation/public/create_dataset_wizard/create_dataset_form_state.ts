@@ -6,6 +6,7 @@
  */
 
 import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import type { MappingEditorValue } from '../components/mapping_editor';
@@ -72,6 +73,11 @@ export interface CreateDatasetFormValues {
     formatWasAutoDetected: boolean;
     additionalCommonSettingsIsOpen: boolean;
     additionalAdvancedSettingsIsOpen: boolean;
+    /**
+     * Passthrough-only dataset settings not managed by the wizard UI.
+     * Used to preserve API-supported settings on edit, and included in review/request output.
+     */
+    unmanagedSettings: SerializableRecord;
   };
   mappings: MappingEditorValue;
 }
