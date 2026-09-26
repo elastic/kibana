@@ -51,21 +51,21 @@ function processCommand(
 }
 
 /**
- * Analyzes the provided ES|QL query and returns a summary of new columns,
- * renamed columns, and metadata columns introduced by the commands in the query.
- * @param query The ES|QL query string to analyze.
- * @returns An object containing sets of new columns, renamed column pairs, metadata columns, aggregates, and grouping.
+ * Summarizes commands from an already parsed ES|QL query.
+ * @param commands Parsed commands to summarize.
+ * @param query The ES|QL query string those commands came from.
  */
-export function getQuerySummary(query: string): ESQLCommandSummary {
-  const { root } = Parser.parse(query);
-
+export function getQuerySummaryFromCommands(
+  commands: readonly ESQLAstCommand[],
+  query: string
+): ESQLCommandSummary {
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
   const allMetadataColumns = new Set<string>();
   const allAggregates = new Set<FieldSummary>();
   const allGroupings = new Set<FieldSummary>();
 
-  for (const command of root.commands) {
+  for (const command of commands) {
     processCommand(command, query, {
       newColumns: allNewColumns,
       renamedColumnsPairs: allRenamedColumnsPairs,
@@ -81,6 +81,35 @@ export function getQuerySummary(query: string): ESQLCommandSummary {
     metadataColumns: allMetadataColumns,
     aggregates: allAggregates,
     grouping: allGroupings,
+  };
+}
+
+/**
+ * Analyzes the provided ES|QL query and returns a summary of new columns,
+ * renamed columns, and metadata columns introduced by the commands in the query.
+ * @param query The ES|QL query string to analyze.
+ * @returns An object containing sets of new columns, renamed column pairs, metadata columns, aggregates, and grouping.
+ */
+export function getQuerySummary(query: string): ESQLCommandSummary {
+  const { root } = Parser.parse(query);
+  return getQuerySummaryFromCommands(root.commands, query);
+}
+
+/**
+ * Resolves a column to its index field when a DSL filter is valid.
+ * A column is filterable when the query did not introduce it, or when a RENAME,
+ * bare EVAL, or `STATS BY alias = field` maps it back to a source field.
+ */
+export function resolveSourceField(
+  fieldName: string,
+  summary: ESQLCommandSummary,
+  renameMap: ReadonlyMap<string, string> | null
+): { isSourceFieldFilterable: boolean; sourceField: string } {
+  const isSourceFieldFilterable =
+    !summary.newColumns.has(fieldName) || (renameMap?.has(fieldName) ?? false);
+  return {
+    isSourceFieldFilterable,
+    sourceField: renameMap?.get(fieldName) ?? fieldName,
   };
 }
 

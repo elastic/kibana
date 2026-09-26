@@ -103,6 +103,14 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   return getIndexPatternsFromESQLQuery(esql).indexPattern;
 }
 
+/** Splits a comma-separated ES|QL index pattern into source names. */
+export function splitIndexPatternSources(indexPattern: string): string[] {
+  return indexPattern
+    .split(',')
+    .map((source) => source.trim())
+    .filter(Boolean);
+}
+
 /**
  * @param esql - The ES|QL query string to parse
  * @param supportedSourceCommands - Source command set to match, defaults to FROM and TS

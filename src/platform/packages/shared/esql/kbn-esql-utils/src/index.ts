@@ -53,6 +53,7 @@ export {
 export {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
+  splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
@@ -100,7 +101,7 @@ export {
   getFieldParamDefinition,
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
-export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
+export { isComputedColumn, getQuerySummary, resolveSourceField } from './utils/get_query_summary';
 export {
   createEsqlViewsManagementClient,
   EsqlViewsClientError,
@@ -113,6 +114,7 @@ export {
   type ESQLHighlightTags,
 } from './utils/get_columns_with_highlights';
 export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
+export { resolveViewColumnToIndexField } from './utils/resolve_view_column_to_index_field';
 export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
 export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
 export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';
