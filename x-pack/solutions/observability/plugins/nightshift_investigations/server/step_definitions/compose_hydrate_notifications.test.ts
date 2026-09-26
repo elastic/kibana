@@ -80,7 +80,9 @@ describe('composeHydrateNotificationsStepDefinition', () => {
   it('always returns round workflow context and adds model context only for notifications', async () => {
     await expect(run(['', ''], ['memory_a'])).resolves.toEqual({
       output: {
-        workflow_context: { semantic_memory: { recalled_ids: ['memory_a'] } },
+        workflow_context: {
+          'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory_a'] } },
+        },
       },
     });
     const wrapped = await run(
@@ -90,7 +92,7 @@ describe('composeHydrateNotificationsStepDefinition', () => {
     expect(wrapped.output?.model_context).toContain('<system_update>');
     expect(wrapped.output?.model_context?.startsWith('<system_update>\n')).toBe(true);
     expect(wrapped.output?.workflow_context).toEqual({
-      semantic_memory: { recalled_ids: ['memory_a'] },
+      'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory_a'] } },
     });
   });
 });

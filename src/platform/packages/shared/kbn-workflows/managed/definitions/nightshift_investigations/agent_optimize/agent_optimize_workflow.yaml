@@ -40,13 +40,18 @@ triggers:
           type: object
           description: Persisted non-model workflow state for the completed round.
           properties:
-            semantic_memory:
+            nightshift.semantic_memory.recall:
               type: object
               properties:
-                recalled_ids:
-                  type: array
-                  items:
-                    type: string
+                version:
+                  type: number
+                data:
+                  type: object
+                  properties:
+                    recalled_ids:
+                      type: array
+                      items:
+                        type: string
         tool_calls:
           type: array
           description: Tool calls from the completed round. Unused by this workflow.
@@ -93,4 +98,4 @@ steps:
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
               # Preserve the array for the step's bounded Zod schema.
-              recalled_ids: '${{ inputs.workflow_context.semantic_memory.recalled_ids }}'
+              recalled_ids: '${{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.recalled_ids }}'
