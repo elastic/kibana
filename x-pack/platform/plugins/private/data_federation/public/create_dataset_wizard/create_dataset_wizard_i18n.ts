@@ -453,7 +453,7 @@ export const createDatasetWizardStrings = {
   settingsMaxErrorsInvalid: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsMaxErrorsInvalid',
     {
-      defaultMessage: 'Must be a non-negative integer.',
+      defaultMessage: 'Must be a positive whole number or empty.',
     }
   ),
 

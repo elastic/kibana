@@ -121,10 +121,19 @@ const parseBooleanFormValue = (value: DatasetBooleanFormValue): boolean | undefi
   return undefined;
 };
 
+const parsePositiveWholeNumber = (value: string): number | undefined => {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  const parsed = Number(trimmed);
+  if (!Number.isInteger(parsed) || parsed < 1) return undefined;
+  return parsed;
+};
+
 export const validateMaxErrors = (value: string): true | string => {
   if (!value?.trim()) return true;
-  const parsed = parseNonNegativeInteger(value);
-  if (parsed === undefined) return createDatasetWizardStrings.settingsMaxErrorsInvalid;
+  if (parsePositiveWholeNumber(value) === undefined) {
+    return createDatasetWizardStrings.settingsMaxErrorsInvalid;
+  }
   return true;
 };
 
@@ -190,7 +199,7 @@ export const buildDatasetSettingsFromFormValues = (
   if (hivePartitioning !== undefined) applied.hive_partitioning = hivePartitioning;
 
   if (settings.error_mode) applied.error_mode = settings.error_mode;
-  const maxErrors = parseNonNegativeInteger(settings.max_errors);
+  const maxErrors = parsePositiveWholeNumber(settings.max_errors);
   if (maxErrors !== undefined) applied.max_errors = maxErrors;
   const maxErrorRatio = parseRatio(settings.max_error_ratio);
   if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;

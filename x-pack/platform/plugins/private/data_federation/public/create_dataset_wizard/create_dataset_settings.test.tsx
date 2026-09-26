@@ -392,6 +392,17 @@ describe('CreateDatasetAdditionalSettings', () => {
     );
   });
 
+  it('shows an error message when max errors is not a positive whole number', () => {
+    const { getByTestId, getByText } = renderAdditionalSettings();
+
+    fireEvent.change(getByTestId('createDatasetSettingsMaxErrors'), {
+      target: { value: '1.5' },
+    });
+
+    expect(getByTestId('createDatasetSettingsMaxErrors')).toHaveAttribute('aria-invalid', 'true');
+    expect(getByText(createDatasetWizardStrings.settingsMaxErrorsInvalid)).toBeInTheDocument();
+  });
+
   it('shows an error message when max error ratio is out of range', () => {
     const { getByTestId, getByText } = renderAdditionalSettings();
 

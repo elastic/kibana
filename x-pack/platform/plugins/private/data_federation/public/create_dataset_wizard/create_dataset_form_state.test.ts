@@ -5,14 +5,31 @@
  * 2.0.
  */
 
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
+  validateMaxErrors,
 } from './create_dataset_form_state';
 
 const empty = () => emptyCreateDatasetSettingsFormValues();
 
 describe('create_dataset_form_state', () => {
+  describe('validateMaxErrors', () => {
+    it('accepts an empty value and positive whole numbers', () => {
+      expect(validateMaxErrors('')).toBe(true);
+      expect(validateMaxErrors('1')).toBe(true);
+      expect(validateMaxErrors('10')).toBe(true);
+    });
+
+    it('rejects values that are not positive whole numbers', () => {
+      expect(validateMaxErrors('0')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
+      expect(validateMaxErrors('-1')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
+      expect(validateMaxErrors('1.5')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
+      expect(validateMaxErrors('abc')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
+    });
+  });
+
   describe('emptyCreateDatasetSettingsFormValues', () => {
     it('returns empty-string defaults for all fields', () => {
       expect(empty()).toEqual({
@@ -116,10 +133,13 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ format: 'csv' });
     });
 
-    it('includes max_errors of 0 (valid non-negative)', () => {
+    it('omits max_errors when it is not a positive whole number', () => {
       expect(
         buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', max_errors: '0' })
-      ).toEqual({ format: 'csv', max_errors: 0 });
+      ).toEqual({ format: 'csv' });
+      expect(
+        buildDatasetSettingsFromFormValues({ ...empty(), format: 'csv', max_errors: '1.5' })
+      ).toEqual({ format: 'csv' });
     });
 
     it('includes max_error_ratio as a float', () => {

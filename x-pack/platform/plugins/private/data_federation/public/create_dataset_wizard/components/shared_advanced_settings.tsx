@@ -6,20 +6,17 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import {
-  DEFAULT_FILE_EXCLUSIONS,
-  validateMaxErrors,
-  type CreateDatasetFormValues,
-} from '../create_dataset_form_state';
+import { DEFAULT_FILE_EXCLUSIONS, type CreateDatasetFormValues } from '../create_dataset_form_state';
 import { ErrorModeSelect } from './error_mode_select';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { FileExclusionsSelect } from './file_exclusions_select';
 import { MaxErrorRatioField } from './max_error_ratio_field';
+import { MaxErrorsField } from './max_errors_field';
 import { PartitionDetectionSelect } from './partition_detection_select';
 
 const helpTextDefault = (valueLabel: string) => (
@@ -39,11 +36,6 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
     control,
   });
   const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
-  const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
-    name: 'settings.max_errors',
-    control,
-    rules: { validate: validateMaxErrors },
-  });
 
   return (
     <div data-test-subj="createDatasetSharedAdvancedSettings">
@@ -109,31 +101,7 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsMaxErrorsLabel}
-            infoText={createDatasetWizardStrings.settingsMaxErrorsDescription}
-          />
-        }
-        helpText={helpTextDefault(createDatasetWizardStrings.unbounded)}
-        fullWidth
-        isInvalid={Boolean(maxErrorsState.error)}
-        error={maxErrorsState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsMaxErrors"
-          fullWidth
-          min={0}
-          step={1}
-          placeholder={createDatasetWizardStrings.settingsMaxErrorsPlaceholder}
-          isInvalid={Boolean(maxErrorsState.error)}
-          value={maxErrorsField.value}
-          onChange={(e) => maxErrorsField.onChange(e.target.value)}
-          name={maxErrorsField.name}
-          inputRef={maxErrorsField.ref}
-        />
-      </EuiFormRow>
+      <MaxErrorsField control={control} />
 
       <MaxErrorRatioField control={control} />
     </div>
