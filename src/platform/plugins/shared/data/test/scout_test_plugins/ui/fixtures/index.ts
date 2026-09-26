@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer } from '@kbn/core/server';
-import type { IndexPatternsTestPluginSetup, IndexPatternsTestPluginStart } from './plugin';
-import { IndexPatternsTestPlugin } from './plugin';
+import { spaceTest as baseSpaceTest } from '@kbn/scout';
+import { SessionObserver } from './session_observer';
 
-export const plugin: PluginInitializer<
-  IndexPatternsTestPluginSetup,
-  IndexPatternsTestPluginStart
-> = async () => new IndexPatternsTestPlugin();
+export { SessionObserver };
+
+export const spaceTest = baseSpaceTest.extend<{ sessionObserver: SessionObserver }>({
+  sessionObserver: async ({ page }, use) => {
+    await use(new SessionObserver(page));
+  },
+});
