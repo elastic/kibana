@@ -255,6 +255,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skills,
     toolProvider,
     agentConfiguration,
+    aiIndexCatalog: resolvedConfiguration.aiIndexCatalog,
     aiIndicesEnabled: experimentalFeatures.aiIndices,
     attachmentsService: attachments,
     request,

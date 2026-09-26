@@ -21,6 +21,7 @@ let services: ReturnType<typeof coreMock.createStart>;
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
@@ -153,6 +154,7 @@ describe('DescriptionPanel', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [],

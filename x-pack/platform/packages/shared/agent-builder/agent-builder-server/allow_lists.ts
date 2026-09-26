@@ -118,6 +118,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
   ...Object.values(contextEngineAiIndexTools),
+  `${internalNamespaces.platformContextEngine}.remember`,
+  `${internalNamespaces.platformContextEngine}.forget`,
 
   // Nightshift – Sandbox
   'nightshift_sandbox_bash',
