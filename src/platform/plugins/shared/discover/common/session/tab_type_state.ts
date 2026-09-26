@@ -9,25 +9,12 @@
 
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
-import type {
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiTab,
-  DiscoverSessionApiTabTypeState,
-} from '@kbn/as-code-discover-schema';
-import {
-  fromStoredMetricsTabTypeState,
-  toStoredMetricsTabTypeState,
-} from '../embeddable/transform_utils';
-import { isDiscoverSessionEsqlTab } from '../embeddable';
+import type { DiscoverSessionApiTabTypeState } from '@kbn/as-code-discover-schema';
 
 type StoredTabTypeState = DiscoverSessionTabAttributes['tabTypeState'];
-type TabWithoutTypeState =
-  | Omit<DiscoverSessionApiClassicTab, 'type'>
-  | Omit<DiscoverSessionApiEsqlTab, 'type'>;
 
 /** Converts API tab settings to saved state; default tabs have no type-specific state. */
-export const fromApiTabTypeState = (
+export const toStoredTabTypeState = (
   apiTabTypeState: DiscoverSessionApiTabTypeState
 ): StoredTabTypeState => {
   switch (apiTabTypeState.type) {
@@ -35,26 +22,33 @@ export const fromApiTabTypeState = (
       // Default tabs have no tabTypeState in the saved object.
       return undefined;
     case DiscoverTabType.Metrics:
-      return toStoredMetricsTabTypeState(apiTabTypeState);
+      return {
+        type: DiscoverTabType.Metrics,
+        dimensions: apiTabTypeState.dimensions,
+        searchTerm: apiTabTypeState.search_term,
+        counterAggregation: apiTabTypeState.counter_aggregation,
+        gaugeAggregation: apiTabTypeState.gauge_aggregation,
+        histogramPercentile: apiTabTypeState.histogram_percentile,
+      };
   }
 };
 
-/** Adds saved tab settings to the API tab, rejecting Metrics settings on a non-ES|QL tab. */
-export const toApiTabTypeState = (
-  apiTab: TabWithoutTypeState,
+/** Converts saved tab settings to declarative fields without deciding where they can be used. */
+export const fromStoredTabTypeState = (
   tabTypeState: StoredTabTypeState
-): DiscoverSessionApiTab => {
+): DiscoverSessionApiTabTypeState => {
   switch (tabTypeState?.type) {
     case undefined:
       // The API always includes a type, using default when the saved object has no tabTypeState.
-      return { ...apiTab, type: DiscoverTabType.Default };
+      return { type: DiscoverTabType.Default };
     case DiscoverTabType.Metrics:
-      if (!isDiscoverSessionEsqlTab(apiTab)) {
-        throw new Error(
-          `Metrics tab "${apiTab.label}" with ID "${apiTab.id}" requires an ES|QL data source.`
-        );
-      }
-
-      return { ...apiTab, ...fromStoredMetricsTabTypeState(tabTypeState) };
+      return {
+        type: DiscoverTabType.Metrics,
+        dimensions: tabTypeState.dimensions,
+        search_term: tabTypeState.searchTerm,
+        counter_aggregation: tabTypeState.counterAggregation,
+        gauge_aggregation: tabTypeState.gaugeAggregation,
+        histogram_percentile: tabTypeState.histogramPercentile,
+      };
   }
 };
