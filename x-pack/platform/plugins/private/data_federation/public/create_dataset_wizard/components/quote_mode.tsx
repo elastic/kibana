@@ -11,30 +11,56 @@ import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eu
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import type { DatasetModeFormValue } from '../create_dataset_form_state';
 
-type QuoteModeOption = EuiComboBoxOptionOption<string> & { value: DatasetModeFormValue };
+type QuoteModeOption = EuiComboBoxOptionOption<string> & {
+  value: DatasetModeFormValue;
+  'data-test-subj': string;
+};
 
 const OPTIONS: QuoteModeOption[] = [
   {
     value: 'quoted',
     label: createDatasetWizardStrings.settingsModeQuoted,
-    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
+    'data-test-subj': 'createDatasetSettingsModeOption-quoted',
   },
-  { value: 'escaped', label: createDatasetWizardStrings.settingsModeEscaped },
-  { value: 'plain', label: createDatasetWizardStrings.settingsModePlain },
+  {
+    value: 'escaped',
+    label: createDatasetWizardStrings.settingsModeEscaped,
+    'data-test-subj': 'createDatasetSettingsModeOption-escaped',
+  },
+  {
+    value: 'plain',
+    label: createDatasetWizardStrings.settingsModePlain,
+    'data-test-subj': 'createDatasetSettingsModeOption-plain',
+  },
 ];
 
 export function QuoteMode({
   value,
   onChange,
   onBlur,
+  defaultValue,
 }: {
   value: DatasetModeFormValue;
   onChange: (next: DatasetModeFormValue) => void;
   onBlur: () => void;
+  /** Format-specific default: quoted for CSV, plain for TSV. */
+  defaultValue?: DatasetModeFormValue;
 }) {
+  const options = useMemo(
+    (): QuoteModeOption[] =>
+      OPTIONS.map((option) => ({
+        ...option,
+        append:
+          defaultValue && option.value === defaultValue ? (
+            <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>
+          ) : undefined,
+      })),
+    [defaultValue]
+  );
+
   const selectedOptions = useMemo(() => {
     if (!value) return [];
-    const option = OPTIONS.find((o) => o.value === value);
+    const option = options.find((o) => o.value === value);
     return option
       ? ([
           {
@@ -43,12 +69,12 @@ export function QuoteMode({
           },
         ] as QuoteModeOption[])
       : ([{ value, label: value } as QuoteModeOption] as QuoteModeOption[]);
-  }, [value]);
+  }, [options, value]);
 
   return (
     <EuiComboBox
       placeholder={createDatasetWizardStrings.settingsModePlaceholder}
-      options={OPTIONS}
+      options={options}
       data-test-subj="createDatasetSettingsMode"
       fullWidth
       aria-label={createDatasetWizardStrings.settingsModeLabel}

@@ -386,11 +386,20 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
           defaultValue={format === 'tsv' ? '\t' : ','}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetWizardStrings.settingsModeLabel} fullWidth>
+      <EuiFormRow
+        label={createDatasetWizardStrings.settingsModeLabel}
+        helpText={helpTextDefault(
+          format === 'tsv'
+            ? createDatasetWizardStrings.settingsModePlain
+            : createDatasetWizardStrings.settingsModeQuoted
+        )}
+        fullWidth
+      >
         <QuoteMode
           value={modeField.value}
           onChange={(next) => modeField.onChange(next)}
           onBlur={modeField.onBlur}
+          defaultValue={format === 'tsv' ? 'plain' : 'quoted'}
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsHeaderRowLabel} fullWidth>

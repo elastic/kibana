@@ -76,12 +76,18 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsQuoteModeDescription}
           />
         }
+        helpText={helpTextDefault(
+          format === 'tsv'
+            ? createDatasetWizardStrings.settingsModePlain
+            : createDatasetWizardStrings.settingsModeQuoted
+        )}
         fullWidth
       >
         <QuoteMode
           value={modeField.value}
           onChange={(next) => modeField.onChange(next)}
           onBlur={modeField.onBlur}
+          defaultValue={format === 'tsv' ? 'plain' : 'quoted'}
         />
       </EuiFormRow>
       <EuiFormRow

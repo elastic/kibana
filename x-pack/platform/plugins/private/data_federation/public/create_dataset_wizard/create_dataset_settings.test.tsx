@@ -164,6 +164,24 @@ describe('CreateDatasetSettings', () => {
       expect(commaOption).toHaveTextContent(createDatasetWizardStrings.defaultBadgeLabel);
     });
 
+    it('marks quoted as the default quote mode', async () => {
+      const { getByTestId } = renderSettings();
+
+      await selectFormat(getByTestId, 'csv');
+      await openComboBox(getByTestId, 'createDatasetSettingsMode');
+
+      expect(
+        within(getByTestId('createDatasetSettingsModeOption-quoted')).getByText(
+          createDatasetWizardStrings.defaultBadgeLabel
+        )
+      ).toBeInTheDocument();
+      expect(
+        within(getByTestId('createDatasetSettingsModeOption-plain')).queryByText(
+          createDatasetWizardStrings.defaultBadgeLabel
+        )
+      ).toBeNull();
+    });
+
     it('shows delimiter, mode, and header_row at the top level (core)', async () => {
       const { getByTestId } = renderSettings();
 
@@ -200,6 +218,24 @@ describe('CreateDatasetSettings', () => {
       const tabOption = tabLabel.closest('button') ?? tabLabel.parentElement;
       expect(tabOption).not.toBeNull();
       expect(tabOption).toHaveTextContent(createDatasetWizardStrings.defaultBadgeLabel);
+    });
+
+    it('marks plain as the default quote mode', async () => {
+      const { getByTestId } = renderSettings();
+
+      await selectFormat(getByTestId, 'tsv');
+      await openComboBox(getByTestId, 'createDatasetSettingsMode');
+
+      expect(
+        within(getByTestId('createDatasetSettingsModeOption-plain')).getByText(
+          createDatasetWizardStrings.defaultBadgeLabel
+        )
+      ).toBeInTheDocument();
+      expect(
+        within(getByTestId('createDatasetSettingsModeOption-quoted')).queryByText(
+          createDatasetWizardStrings.defaultBadgeLabel
+        )
+      ).toBeNull();
     });
   });
 
