@@ -220,6 +220,31 @@ describe('createCortexPageStore', () => {
     expect(page?.status).toBe('tentative');
   });
 
+  it('promotes a tentative page to established once a later run corroborates it', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _id: 'cortex_service_checkout',
+        _source: {
+          ...source,
+          attributes: { ...source.attributes, status: 'tentative', corroborations: 0 },
+        },
+      }),
+      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
+    };
+
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    const page = await store.corroborate('cortex_service_checkout');
+
+    expect(page?.status).toBe('established');
+    expect(page?.corroborations).toBe(1);
+  });
+
   it('prunes prefixed duplicate ids onto the canonical document', async () => {
     const prefixed = {
       ...source,

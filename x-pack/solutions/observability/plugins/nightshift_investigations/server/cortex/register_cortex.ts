@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
@@ -61,6 +62,9 @@ export const registerCortexAiIndex = (
     traces: [],
   });
 };
+
+/** Rounds with fewer tool calls rarely establish anything durable, e.g. chat replies or smoke tests. */
+const MIN_OPTIMIZE_TOOL_CALLS = 3;
 
 /** gRPC status the sandbox session rethrows when its pod refuses or drops the connection. */
 const GRPC_UNAVAILABLE = 14;
@@ -108,6 +112,7 @@ export const runCortexOptimize = async ({
   agentId,
   userMessage,
   assistantMessage,
+  toolCalls,
   esClient,
   spaceId,
   interactionId,
@@ -123,6 +128,7 @@ export const runCortexOptimize = async ({
   agentId?: string;
   userMessage: string;
   assistantMessage: string;
+  toolCalls: InvestigationToolCall[];
   esClient: ElasticsearchClient;
   spaceId: string;
   interactionId: string;
@@ -142,6 +148,13 @@ export const runCortexOptimize = async ({
   if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
     logger.debug(
       'Cortex optimizer skipped — round was not produced by the Nightshift investigator'
+    );
+    return;
+  }
+
+  if (toolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
+    logger.debug(
+      `Cortex optimizer skipped — round made ${toolCalls.length} tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
     );
     return;
   }
@@ -184,6 +197,7 @@ export const runCortexOptimize = async ({
     proposeEdits: createLlmProposeCortexEdits({ inferenceClient }),
     userMessage,
     assistantMessage,
+    toolCalls,
     telemetry: createCortexTelemetry({
       analytics,
       conversationId,
