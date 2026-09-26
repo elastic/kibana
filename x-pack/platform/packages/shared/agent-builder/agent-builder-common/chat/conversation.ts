@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { JsonObject } from '@kbn/utility-types';
 import type { UserIdAndName } from '../base/users';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
@@ -33,14 +34,20 @@ import type { MetadataFieldValue } from '../templates';
  * Represents the input that initiated a conversation round.
  */
 export const MODEL_CONTEXT_MAX_LENGTH = 100_000;
-export const WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT = 100;
-export const WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH = 2_000;
+export const WORKFLOW_CONTEXT_MAX_NAMESPACES = 16;
+export const WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH = 256;
+export const WORKFLOW_CONTEXT_MAX_BYTES = 64 * 1024;
+export const WORKFLOW_CONTEXT_MAX_DEPTH = 8;
 
-export interface WorkflowContext {
-  semantic_memory: {
-    recalled_ids: string[];
-  };
+export interface WorkflowContextEnvelope {
+  /** Schema version owned by the namespace producer and consumer. */
+  version: number;
+  /** Opaque JSON interpreted only by workflows that understand the namespace. */
+  data: JsonObject;
 }
+
+/** Immutable round-local contexts passed from pre-execution to post-execution workflows. */
+export type WorkflowContext = Record<string, WorkflowContextEnvelope>;
 
 export interface RoundInput {
   /**

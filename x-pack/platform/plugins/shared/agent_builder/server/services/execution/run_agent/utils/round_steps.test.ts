@@ -28,11 +28,19 @@ describe('createPreExecutionSteps', () => {
 
   it.each([
     [{ model_context: 'model context' }],
-    [{ workflow_context: { semantic_memory: { recalled_ids: ['memory-1'] } } }],
+    [
+      {
+        workflow_context: {
+          'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory-1'] } },
+        },
+      },
+    ],
     [
       {
         model_context: 'model context',
-        workflow_context: { semantic_memory: { recalled_ids: ['memory-1'] } },
+        workflow_context: {
+          'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory-1'] } },
+        },
       },
     ],
   ])('creates a workflow step when context data is present', (preExecutionWorkflow) => {

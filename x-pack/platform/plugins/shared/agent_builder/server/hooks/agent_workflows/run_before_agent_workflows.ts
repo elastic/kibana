@@ -14,9 +14,12 @@ import {
   createWorkflowAbortedError,
   createWorkflowExecutionError,
   MODEL_CONTEXT_MAX_LENGTH,
-  WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH,
-  WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT,
+  WORKFLOW_CONTEXT_MAX_BYTES,
+  WORKFLOW_CONTEXT_MAX_DEPTH,
+  WORKFLOW_CONTEXT_MAX_NAMESPACES,
+  WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH,
   type WorkflowContext,
+  type WorkflowContextEnvelope,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
@@ -70,53 +73,62 @@ const normalizeModelContext = (value: unknown): string | undefined => {
   return normalized ? normalized.slice(0, MODEL_CONTEXT_MAX_LENGTH) : undefined;
 };
 
+const isJsonValueWithinDepth = (value: unknown, depth: number): boolean => {
+  if (value === null || ['string', 'number', 'boolean'].includes(typeof value)) {
+    return typeof value !== 'number' || Number.isFinite(value);
+  }
+  if (depth >= WORKFLOW_CONTEXT_MAX_DEPTH || typeof value !== 'object') {
+    return false;
+  }
+  if (Array.isArray(value)) {
+    return value.every((item) => isJsonValueWithinDepth(item, depth + 1));
+  }
+  return Object.values(value).every((item) => isJsonValueWithinDepth(item, depth + 1));
+};
+
 const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined => {
-  if (typeof value !== 'object' || value === null || !('semantic_memory' in value)) {
-    return undefined;
-  }
-  const semanticMemory = value.semantic_memory;
-  if (
-    typeof semanticMemory !== 'object' ||
-    semanticMemory === null ||
-    !('recalled_ids' in semanticMemory) ||
-    !Array.isArray(semanticMemory.recalled_ids)
-  ) {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return undefined;
   }
 
-  const recalledIds: string[] = [];
-  const inputCount = Math.min(
-    semanticMemory.recalled_ids.length,
-    WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT
-  );
-  for (let index = 0; index < inputCount; index++) {
-    const id = semanticMemory.recalled_ids[index];
-    if (typeof id === 'string') {
-      recalledIds.push(id.slice(0, WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH));
+  const entries = Object.entries(value).slice(0, WORKFLOW_CONTEXT_MAX_NAMESPACES);
+  const context: WorkflowContext = {};
+  for (const [namespace, rawEnvelope] of entries) {
+    if (
+      namespace.length === 0 ||
+      namespace.length > WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH ||
+      typeof rawEnvelope !== 'object' ||
+      rawEnvelope === null ||
+      Array.isArray(rawEnvelope)
+    ) {
+      return undefined;
     }
+    const envelope = rawEnvelope as Partial<WorkflowContextEnvelope>;
+    if (
+      !Number.isSafeInteger(envelope.version) ||
+      (envelope.version ?? 0) <= 0 ||
+      typeof envelope.data !== 'object' ||
+      envelope.data === null ||
+      Array.isArray(envelope.data) ||
+      !isJsonValueWithinDepth(envelope.data, 0)
+    ) {
+      return undefined;
+    }
+    context[namespace] = {
+      version: envelope.version,
+      data: envelope.data,
+    } as WorkflowContextEnvelope;
   }
 
-  return {
-    semantic_memory: {
-      recalled_ids: recalledIds,
-    },
-  };
+  return Buffer.byteLength(JSON.stringify(context), 'utf8') <= WORKFLOW_CONTEXT_MAX_BYTES
+    ? context
+    : undefined;
 };
 
 const mergeWorkflowContexts = (
   previous: WorkflowContext | undefined,
   next: WorkflowContext
-): WorkflowContext => {
-  const recalledIds = [
-    ...(previous?.semantic_memory.recalled_ids ?? []),
-    ...next.semantic_memory.recalled_ids,
-  ];
-  return {
-    semantic_memory: {
-      recalled_ids: [...new Set(recalledIds)].slice(0, WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT),
-    },
-  };
-};
+): WorkflowContext | undefined => normalizeWorkflowContext({ ...previous, ...next });
 
 /**
  * Runs the agent's configured before-agent workflows in sequence, updating the
@@ -206,13 +218,16 @@ export async function runBeforeAgentWorkflows({
 
     const workflowContext = normalizeWorkflowContext(output.workflow_context);
     if (workflowContext) {
-      preExecutionWorkflow = {
-        ...preExecutionWorkflow,
-        workflow_context: mergeWorkflowContexts(
-          preExecutionWorkflow?.workflow_context,
-          workflowContext
-        ),
-      };
+      const mergedWorkflowContext = mergeWorkflowContexts(
+        preExecutionWorkflow?.workflow_context,
+        workflowContext
+      );
+      if (mergedWorkflowContext) {
+        preExecutionWorkflow = {
+          ...preExecutionWorkflow,
+          workflow_context: mergedWorkflowContext,
+        };
+      }
     }
 
     if (output.abort || output.abort_message) {

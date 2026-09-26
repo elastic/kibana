@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  AgentBuilderErrorCode,
-  WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH,
-  WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT,
-} from '@kbn/agent-builder-common';
+import { AgentBuilderErrorCode, WORKFLOW_CONTEXT_MAX_BYTES } from '@kbn/agent-builder-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
@@ -257,23 +253,9 @@ describe('runBeforeAgentWorkflows', () => {
     ).resolves.toBeUndefined();
   });
 
-  it('persists only bounded string recalled ids from workflow_context', async () => {
+  it('ignores malformed or oversized workflow context envelopes', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices } = createDeps();
-    const oversizedRecalledIds: Array<string | number> = [
-      'memory-1',
-      42,
-      'x'.repeat(WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH + 1),
-      ...Array.from(
-        { length: WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT },
-        (_, index) => `memory-${index + 2}`
-      ),
-    ];
-    Object.defineProperty(oversizedRecalledIds, WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT, {
-      get: () => {
-        throw new Error('normalization read beyond the bounded input window');
-      },
-    });
     executeWorkflowMock.mockResolvedValue({
       success: true,
       execution: {
@@ -283,32 +265,18 @@ describe('runBeforeAgentWorkflows', () => {
         started_at: '2026-01-01T00:00:00.000Z',
         output: {
           workflow_context: {
-            semantic_memory: {
-              recalled_ids: oversizedRecalledIds,
-            },
+            invalid: { version: 0, data: { value: 'x'.repeat(WORKFLOW_CONTEXT_MAX_BYTES) } },
           },
         },
       },
     });
 
-    const result = await runBeforeAgentWorkflows({
-      context,
-      workflowApi,
-      getInternalServices,
-      logger,
-    });
-
-    const recalledIds =
-      result?.preExecutionWorkflow?.workflow_context?.semantic_memory?.recalled_ids;
-    expect(recalledIds).toHaveLength(WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT - 1);
-    expect(recalledIds?.[0]).toBe('memory-1');
-    expect(recalledIds?.[1]).toHaveLength(WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH);
-    expect(recalledIds?.every((id) => id.length <= WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH)).toBe(
-      true
-    );
+    await expect(
+      runBeforeAgentWorkflows({ context, workflowApi, getInternalServices, logger })
+    ).resolves.toBeUndefined();
   });
 
-  it('accumulates and deduplicates recalled ids across configured workflows', async () => {
+  it('shallow-merges independent namespaces and replaces repeated namespaces', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices, resolveAgentConfiguration } = createDeps();
     resolveAgentConfiguration.mockResolvedValue({ workflow_ids: ['wf-1', 'wf-2'] });
@@ -322,7 +290,11 @@ describe('runBeforeAgentWorkflows', () => {
           started_at: '2026-01-01T00:00:00.000Z',
           output: {
             workflow_context: {
-              semantic_memory: { recalled_ids: ['memory-a', 'memory-shared'] },
+              'nightshift.semantic_memory.recall': {
+                version: 1,
+                data: { recalled_ids: ['memory-a'] },
+              },
+              'other.context': { version: 1, data: { value: 'preserved' } },
             },
           },
         },
@@ -336,7 +308,10 @@ describe('runBeforeAgentWorkflows', () => {
           started_at: '2026-01-01T00:00:00.000Z',
           output: {
             workflow_context: {
-              semantic_memory: { recalled_ids: ['memory-shared', 'memory-b'] },
+              'nightshift.semantic_memory.recall': {
+                version: 2,
+                data: { recalled_ids: ['memory-b'] },
+              },
             },
           },
         },
@@ -349,11 +324,13 @@ describe('runBeforeAgentWorkflows', () => {
       logger,
     });
 
-    expect(result?.preExecutionWorkflow?.workflow_context?.semantic_memory.recalled_ids).toEqual([
-      'memory-a',
-      'memory-shared',
-      'memory-b',
-    ]);
+    expect(result?.preExecutionWorkflow?.workflow_context).toEqual({
+      'nightshift.semantic_memory.recall': {
+        version: 2,
+        data: { recalled_ids: ['memory-b'] },
+      },
+      'other.context': { version: 1, data: { value: 'preserved' } },
+    });
   });
 
   it('throws workflowAborted when output requests abort', async () => {

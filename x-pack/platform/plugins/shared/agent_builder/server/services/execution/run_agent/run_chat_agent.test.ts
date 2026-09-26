@@ -261,7 +261,10 @@ describe('runDefaultAgentMode', () => {
     const preExecutionWorkflow = {
       model_context: '<system_update>hydrated context</system_update>',
       workflow_context: {
-        semantic_memory: { recalled_ids: ['memory-1', 'memory-2'] },
+        'nightshift.semantic_memory.recall': {
+          version: 1,
+          data: { recalled_ids: ['memory-1', 'memory-2'] },
+        },
       },
     };
     const preExecutionWorkflowStep: PreExecutionWorkflowStep = {
@@ -696,19 +699,8 @@ describe('runDefaultAgentMode', () => {
       model_context: '<system_update>initial context</system_update>',
     } as const;
 
-    it('resumes with only the initial workflow step even when hooks return new context', async () => {
+    it('resumes with the initial workflow step without rerunning beforeAgent hooks', async () => {
       const { context, streamEvents } = setup();
-      (context.hooks.run as jest.Mock).mockImplementation(
-        async (lifecycle: HookLifecycle, hookContext: object) =>
-          lifecycle === HookLifecycle.beforeAgent
-            ? {
-                ...hookContext,
-                preExecutionWorkflow: {
-                  model_context: '<system_update>resume context</system_update>',
-                },
-              }
-            : hookContext
-      );
       const conversation = createEmptyConversation({
         rounds: [
           createRound({
@@ -763,6 +755,10 @@ describe('runDefaultAgentMode', () => {
       });
       expect(createPreExecutionStepsMock).toHaveBeenCalledWith(
         expect.not.objectContaining({ preExecutionWorkflow: expect.anything() })
+      );
+      expect(context.hooks.run).not.toHaveBeenCalledWith(
+        HookLifecycle.beforeAgent,
+        expect.anything()
       );
       expect(context.attachmentStateManager.clearAccessTracking).not.toHaveBeenCalled();
     });

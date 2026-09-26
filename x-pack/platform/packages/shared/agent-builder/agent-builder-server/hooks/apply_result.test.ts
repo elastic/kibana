@@ -46,7 +46,9 @@ describe('apply_result', () => {
     it('returns new context with pre-execution workflow data when provided', () => {
       const preExecutionWorkflow = {
         model_context: 'model context',
-        workflow_context: { semantic_memory: { recalled_ids: ['memory-1'] } },
+        workflow_context: {
+          'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory-1'] } },
+        },
       };
       const result = applyBeforeAgentResult(baseContext, { preExecutionWorkflow });
 

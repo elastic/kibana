@@ -158,7 +158,10 @@ describe('runAfterExecutionWorkflows', () => {
     it('passes prompt, response, ids, connector_id, workflow_context, and tool_calls', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const workflowContext = {
-        semantic_memory: { recalled_ids: ['memory-1', 'memory-2'] },
+        'nightshift.semantic_memory.recall': {
+          version: 1,
+          data: { recalled_ids: ['memory-1', 'memory-2'] },
+        },
       };
       const round = makeRound({
         input: { message: 'my question' },

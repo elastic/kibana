@@ -220,15 +220,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // recorded from here on is made by tools during the round.
   const chatInputChanges = context.attachmentStateManager.drainChanges();
 
-  const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
-    request,
-    abortSignal,
-    nextInput: processedConversation.nextInput,
-    agentId,
-    conversationId: conversation?.id,
-  });
-  processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
-  const preExecutionWorkflow = beforeHookResult.preExecutionWorkflow;
+  let preExecutionWorkflow: PreExecutionWorkflowStepData | undefined;
+  if (!pendingTurn) {
+    const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
+      request,
+      abortSignal,
+      nextInput: processedConversation.nextInput,
+      agentId,
+      conversationId: conversation?.id,
+    });
+    processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+    preExecutionWorkflow = beforeHookResult.preExecutionWorkflow;
+  }
 
   const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
     relevantSkillsEnabled && !pendingTurn

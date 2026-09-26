@@ -106,7 +106,12 @@ describe('applyResumeResolution', () => {
     const workflowStep: PreExecutionWorkflowStep = {
       type: ConversationRoundStepType.preExecutionWorkflow,
       model_context: '<system_update>original context</system_update>',
-      workflow_context: { semantic_memory: { recalled_ids: ['memory-original'] } },
+      workflow_context: {
+        'nightshift.semantic_memory.recall': {
+          version: 1,
+          data: { recalled_ids: ['memory-original'] },
+        },
+      },
     };
     const previous = baseRound({
       status: ConversationRoundStatus.awaitingPrompt,

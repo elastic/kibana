@@ -102,7 +102,9 @@ describe('buildRoundInterruptedEvent', () => {
     const workflowStep: PreExecutionWorkflowStep = {
       type: ConversationRoundStepType.preExecutionWorkflow,
       model_context: '<system_update>workflow context</system_update>',
-      workflow_context: { semantic_memory: { recalled_ids: ['memory-1'] } },
+      workflow_context: {
+        'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['memory-1'] } },
+      },
     };
     tracker.seed({ steps: [workflowStep] });
 

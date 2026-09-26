@@ -58,7 +58,12 @@ const reasoning = (
 const workflowContextStep = (): ConversationRoundStep => ({
   type: ConversationRoundStepType.preExecutionWorkflow,
   model_context: '  <system_update>\nexact workflow context\n</system_update>  ',
-  workflow_context: { semantic_memory: { recalled_ids: ['never-render-this'] } },
+  workflow_context: {
+    'nightshift.semantic_memory.recall': {
+      version: 1,
+      data: { recalled_ids: ['never-render-this'] },
+    },
+  },
 });
 
 const rendered = (id: string, extra: Partial<ToolRenderStateMap[string]> = {}) => ({

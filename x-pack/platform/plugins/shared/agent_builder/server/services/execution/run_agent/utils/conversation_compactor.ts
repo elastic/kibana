@@ -88,7 +88,9 @@ export interface CompactedConversation {
 
 type Round = TimelineRound<ProcessedTimelineEvent>;
 
-const withoutPreExecutionWorkflowSteps = (
+// Pre-execution model context is transient round input and must not become durable summary content.
+// The step's non-model workflow context is forwarded independently to post-execution workflows.
+const withoutPreExecutionContextForSummary = (
   events: ProcessedTimelineEvent[]
 ): ProcessedTimelineEvent[] =>
   events.filter(
@@ -375,7 +377,7 @@ const summarizeOlderRounds = async ({
 
   try {
     const summarizerTokenCounts = await estimatePerRoundTokens(
-      withoutPreExecutionWorkflowSteps(rawRounds.flatMap((round) => round.events)),
+      withoutPreExecutionContextForSummary(rawRounds.flatMap((round) => round.events)),
       resultTransformer
     );
     const summarizerTokensByRoundId = new Map(
@@ -473,7 +475,7 @@ const generateLlmSummary = async ({
         ...conversation,
         // Workflow model context is replayed verbatim with uncompacted rounds, but must not be
         // folded into the persisted summary after those original messages are removed.
-        timeline: withoutPreExecutionWorkflowSteps(chunk.flatMap((round) => round.events)),
+        timeline: withoutPreExecutionContextForSummary(chunk.flatMap((round) => round.events)),
       },
       compactionSummary: prior,
       resultTransformer,

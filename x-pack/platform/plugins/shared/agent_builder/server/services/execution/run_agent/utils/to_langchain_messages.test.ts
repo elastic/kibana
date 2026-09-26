@@ -228,7 +228,12 @@ describe('prepareMessages', () => {
           {
             type: ConversationRoundStepType.preExecutionWorkflow,
             model_context: '<system_update>workflow context</system_update>',
-            workflow_context: { semantic_memory: { recalled_ids: ['never-render-this'] } },
+            workflow_context: {
+              'nightshift.semantic_memory.recall': {
+                version: 1,
+                data: { recalled_ids: ['never-render-this'] },
+              },
+            },
           },
           {
             type: ConversationRoundStepType.relevantSkills,

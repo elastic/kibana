@@ -62,7 +62,10 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
         type: ConversationRoundStepType.preExecutionWorkflow,
         model_context: '  <system_update>\nexact model context\n</system_update>  ',
         workflow_context: {
-          semantic_memory: { recalled_ids: ['memory-1', ' memory-2 '] },
+          'nightshift.semantic_memory.recall': {
+            version: 1,
+            data: { recalled_ids: ['memory-1', ' memory-2 '] },
+          },
         },
       },
       {
