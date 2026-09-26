@@ -29,6 +29,14 @@ const FILTER_FIELDS = [
   'dataSources',
 ] as const satisfies ReadonlyArray<keyof EntityFilters>;
 
+const FILTER_ES_FIELDS: Record<keyof EntityFilters, string> = {
+  entityTypes: 'entity.EngineMetadata.Type',
+  riskLevels: 'entity.risk.calculated_level',
+  assetCriticality: 'asset.criticality',
+  watchlists: 'entity.attributes.watchlists',
+  dataSources: 'entity.source',
+};
+
 const VALID_ENTITY_TYPES = new Set<string>(getEntityAnalyticsEntityTypes());
 const VALID_RISK_LEVELS = new Set<string>(SEVERITY_UI_SORT_ORDER);
 const VALID_CRITICALITY = new Set<string>(ValidCriticalityLevels);
@@ -37,6 +45,29 @@ const parseArray = (params: URLSearchParams, key: keyof EntityFilters): string[]
   const val = params.get(key);
   return val ? val.split(',').filter(Boolean) : [];
 };
+
+export const EMPTY_ENTITY_FILTERS: EntityFilters = {
+  entityTypes: [],
+  riskLevels: [],
+  assetCriticality: [],
+  watchlists: [],
+  dataSources: [],
+};
+
+export interface EntityFilterTerm {
+  terms: Record<string, string[]>;
+}
+
+export const getEntityFilterTerms = (filters: EntityFilters): EntityFilterTerm[] =>
+  FILTER_FIELDS.filter((key) => filters[key].length).map((key) => ({
+    terms: { [FILTER_ES_FIELDS[key]]: filters[key] as string[] },
+  }));
+
+export const getEntityFilterESQL = (filters: EntityFilters): string[] =>
+  FILTER_FIELDS.filter((key) => filters[key].length).map((key) => {
+    const quoted = (filters[key] as string[]).map((v) => `"${v}"`).join(', ');
+    return `| WHERE ${FILTER_ES_FIELDS[key]} IN (${quoted})`;
+  });
 
 interface EntityFiltersResult {
   entityFilters: EntityFilters;
