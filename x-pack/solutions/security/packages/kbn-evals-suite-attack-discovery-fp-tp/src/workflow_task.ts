@@ -34,13 +34,29 @@ export interface FpTpPayload {
   rationale_markdown?: string;
 }
 
+/** What one source's query returned for a run, as the analysis reports it. */
+export interface FpTpSourceCoverage {
+  /** Documents the query returned. Zero when the query failed. */
+  seen?: number;
+  total?: number;
+  cap?: number;
+  truncated?: boolean;
+}
+
+/** Per-source query coverage the analysis reports alongside the payload. */
+export interface FpTpCoverage {
+  alerts?: FpTpSourceCoverage;
+  entities?: FpTpSourceCoverage;
+  events?: FpTpSourceCoverage;
+}
+
 /** The analysis's execution output. Only `payload` is graded for now. */
 export interface FpTpAnalysisOutput {
   attack_discovery_id?: string;
   investigation_id?: string;
   workflow_id?: string;
   workflow_version?: number;
-  coverage?: Record<string, unknown>;
+  coverage?: FpTpCoverage;
   payload?: FpTpPayload;
   checks?: unknown[];
   claims?: Record<string, unknown>;
