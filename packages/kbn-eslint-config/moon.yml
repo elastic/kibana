@@ -24,6 +24,7 @@ tags:
   - private
 fileGroups:
   src:
+    - feature_flag_snapshot_allowlist.js
     - javascript.js
     - jest.js
     - react.js
