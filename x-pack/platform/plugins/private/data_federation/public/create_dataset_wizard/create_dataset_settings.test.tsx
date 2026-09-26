@@ -346,7 +346,20 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetCsvTsvAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSharedAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsErrorMode')).toBeInTheDocument();
-    expect(getByTestId('createDatasetSettingsTrimSpaces')).toBeInTheDocument();
+    const trimSpacesField = getByTestId('createDatasetSettingsTrimSpaces');
+    expect(trimSpacesField).toBeInTheDocument();
+    const trimSpacesRow = trimSpacesField.closest('.euiFormRow');
+    expect(trimSpacesRow).not.toBeNull();
+    expect(
+      within(trimSpacesRow as HTMLElement).getByText(createDatasetWizardStrings.falseLabel)
+    ).toBeInTheDocument();
+    expect(
+      within(trimSpacesRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
+    ).toBeInTheDocument();
+    // `Trim spaces` defaults to false, represented by an empty selection (placeholder shown).
+    expect(
+      within(trimSpacesField).getByPlaceholderText(createDatasetWizardStrings.settingsTrimSpacesPlaceholder)
+    ).toBeInTheDocument();
     const quoteField = getByTestId('createDatasetSettingsQuote') as HTMLInputElement;
     expect(quoteField).toHaveValue('');
     expect(quoteField).toHaveAttribute(

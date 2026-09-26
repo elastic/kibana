@@ -122,10 +122,10 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         label={
           <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsTrimSpacesLabel}
-            infoText={createDatasetWizardStrings.settingsTrimSpacesDescription}
+            infoText={createDatasetWizardStrings.settingsTrimSpacesHelp}
           />
         }
-        helpText={createDatasetWizardStrings.settingsTrimSpacesHelp}
+        helpText={helpTextDefault(createDatasetWizardStrings.falseLabel)}
         fullWidth
       >
         <TrimSpaces
