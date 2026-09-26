@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
@@ -18,6 +18,7 @@ import {
   validateEscapeCharacter,
   validateQuoteCharacter,
   type CreateDatasetFormValues,
+  type DatasetFormatFormValue,
 } from '../create_dataset_form_state';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { TrimSpaces } from './trim_spaces';
@@ -29,6 +30,11 @@ const helpTextDefault = (valueLabel: string) => (
 );
 
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
+  const isCsv = format === 'csv';
+  const quoteDefaultLabel = isCsv ? DEFAULT_CSV_QUOTE : createDatasetWizardStrings.noneLabel;
+  const escapeDefaultLabel = isCsv ? DEFAULT_CSV_ESCAPE : createDatasetWizardStrings.noneLabel;
+
   const { field: quoteField, fieldState: quoteState } = useController({
     name: 'settings.quote',
     control,
@@ -51,7 +57,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
             infoText={createDatasetWizardStrings.settingsQuoteCharacterDescription}
           />
         }
-        helpText={helpTextDefault(DEFAULT_CSV_QUOTE)}
+        helpText={helpTextDefault(quoteDefaultLabel)}
         fullWidth
         isInvalid={Boolean(quoteState.error)}
         error={quoteState.error?.message}
@@ -75,7 +81,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
             infoText={createDatasetWizardStrings.settingsEscapeHelp}
           />
         }
-        helpText={helpTextDefault(DEFAULT_CSV_ESCAPE)}
+        helpText={helpTextDefault(escapeDefaultLabel)}
         fullWidth
         isInvalid={Boolean(escapeState.error)}
         error={escapeState.error?.message}

@@ -397,6 +397,26 @@ describe('CreateDatasetAdditionalSettings', () => {
     expect(getByTestId('createDatasetCsvTsvAdvancedSettings')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsNullValue')).toBeInTheDocument();
     expect(getByTestId('createDatasetSettingsSkipRows')).toBeInTheDocument();
+
+    const quoteField = getByTestId('createDatasetSettingsQuote') as HTMLInputElement;
+    const quoteRow = quoteField.closest('.euiFormRow');
+    expect(quoteRow).not.toBeNull();
+    expect(
+      within(quoteRow as HTMLElement).getByText(createDatasetWizardStrings.noneLabel)
+    ).toBeInTheDocument();
+    expect(
+      within(quoteRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
+    ).toBeInTheDocument();
+
+    const escapeField = getByTestId('createDatasetSettingsEscape') as HTMLInputElement;
+    const escapeRow = escapeField.closest('.euiFormRow');
+    expect(escapeRow).not.toBeNull();
+    expect(
+      within(escapeRow as HTMLElement).getByText(createDatasetWizardStrings.noneLabel)
+    ).toBeInTheDocument();
+    expect(
+      within(escapeRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
+    ).toBeInTheDocument();
   });
 
   it('shows ndjson common settings and no ndjson advanced settings when ndjson is selected', () => {

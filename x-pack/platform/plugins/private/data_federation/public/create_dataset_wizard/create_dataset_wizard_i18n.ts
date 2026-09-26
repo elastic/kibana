@@ -77,6 +77,9 @@ export const createDatasetWizardStrings = {
   byDefaultSuffix: i18n.translate('xpack.dataFederation.createDatasetWizard.byDefaultSuffix', {
     defaultMessage: 'by default.',
   }),
+  noneLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.noneLabel', {
+    defaultMessage: 'none',
+  }),
   unbounded: i18n.translate('xpack.dataFederation.createDatasetWizard.unbounded', {
     defaultMessage: 'unbounded',
   }),
