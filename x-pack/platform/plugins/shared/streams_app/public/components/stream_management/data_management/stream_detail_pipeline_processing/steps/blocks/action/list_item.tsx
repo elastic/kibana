@@ -74,6 +74,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
 
   const stepDescription = getStepDescription(step);
   const actionDisplayName = step.action.toUpperCase();
+  const condition = typeof step.if === 'string' && step.if.trim().length > 0 ? step.if : undefined;
 
   const handleTitleClick = () => {
     stepRef.send({ type: 'step.edit' });
@@ -199,9 +200,38 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
+            {(condition || processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
+                  {condition && (
+                    <EuiFlexItem>
+                      <EuiToolTip
+                        content={
+                          <span
+                            css={css`
+                              font-family: ${euiTheme.font.familyCode};
+                              overflow-wrap: anywhere;
+                              white-space: pre-wrap;
+                            `}
+                          >
+                            {condition}
+                          </span>
+                        }
+                      >
+                        <EuiBadge
+                          tabIndex={0}
+                          color="hollow"
+                          iconType="filter"
+                          data-test-subj="streamsAppProcessorConditionBadge"
+                        >
+                          {i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.processorConditionBadge',
+                            { defaultMessage: 'Condition' }
+                          )}
+                        </EuiBadge>
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
                   {processorMetrics && (
                     <EuiFlexItem>
                       <ProcessorMetricBadges {...processorMetrics} />

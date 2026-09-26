@@ -74,7 +74,9 @@ const getHiddenNativeProcessorOptions = (step: ProcessorFormState): Record<strin
   const hiddenOptions: Record<string, unknown> = {};
   const stepRecord = step as unknown as Record<string, unknown>;
 
-  if ('if' in stepRecord) {
+  // A string `if` is owned by the form (see ProcessorConditionEditor). Script objects
+  // (`{ source, lang, params }`) cannot be edited in the form, so they are carried through untouched.
+  if ('if' in stepRecord && stepRecord.if !== undefined && typeof stepRecord.if !== 'string') {
     hiddenOptions.if = stepRecord.if;
   }
 

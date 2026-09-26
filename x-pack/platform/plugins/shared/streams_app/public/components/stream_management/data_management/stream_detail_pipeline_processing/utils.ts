@@ -414,7 +414,20 @@ export const convertFormStateToProcessor = (
 ): {
   processorDefinition: ProcessorFormState;
 } => {
-  return { processorDefinition: formState };
+  if (typeof formState.if !== 'string') {
+    return { processorDefinition: formState };
+  }
+
+  // An empty condition text box means "always run": keep the step free of a dangling `if`.
+  const processorDefinition = { ...formState };
+  const condition = formState.if.trim();
+  if (condition.length > 0) {
+    processorDefinition.if = condition;
+  } else {
+    delete processorDefinition.if;
+  }
+
+  return { processorDefinition };
 };
 
 const createProcessorGuardByType =
