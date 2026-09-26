@@ -144,7 +144,7 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Task timeout | `xpack.alerting_v2.rules.run.timeout`, defaults to `DEFAULT_RULE_EXECUTION_TIMEOUT` (`5m`) | [`task_definition.ts`](task_definition.ts) |
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
-| Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default `10000`, ceiling tied to `alerts.max` | [`config.ts`](../../config.ts) |
+| Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default and ceiling `10000` (tied to `alerts.max`). Caps new grouped events per execution (episodes for stateful rules, signal events for signal rules). Already-active groups pass through but count toward the limit. | [`config.ts`](../../config.ts) |
 | Max JSON query rows | Internal `NON_STREAMING_MAX_ROWS` (`1000`), declared as the JSON format's `maxRows`; applied as `LIMIT min(alerts.max, maxRows)` | [`json_format.ts`](../services/query_service/formats/json_format.ts) |
 | ES\|QL response format | `alertingV2.esqlResponseFormat` feature flag; allowed values are the names in the format registry (`json`, `arrow`), falls back to `json` | [`registry.ts`](../services/query_service/formats/registry.ts) |
 
@@ -152,9 +152,9 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 
 `ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. The LIMIT is `alerts.max`, further capped by the active format's `maxRows` when it declares one — `alerts.max` on the Arrow path and `min(alerts.max, NON_STREAMING_MAX_ROWS)` on the JSON path, so a transport choice cannot silently change the product-level alerts cap. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
 
-`CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run.
+`CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The cap applies to all grouped rule types: it limits new episodes for `kind: 'alert'` rules and new signal events for `kind: 'signal'` rules. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run.
 
-The cap only ever drops groups that have **no existing episode** — groups that were already active at the start of the run always pass, even past the cap. To do this, `FetchActiveGroupsStep` fetches the rule's active groups up front for every episode-tracked (`kind: 'alert'`) rule and threads them onto `state.activeGroups` so both `CreateAlertEventsStep` (for the cap) and `ClassifyAbsentGroupsStep` reuse the result instead of re-querying.
+For `kind: 'alert'` rules, `FetchActiveGroupsStep` fetches the rule's active groups up front and threads them onto `state.activeGroups`; as already-active groups are encountered in the batch, their hashes are added to the set. This means the capacity for **new** groups is `maxGroupsPerExecution − active_groups_encountered`, not the full cap. `ClassifyAbsentGroupsStep` reuses the same pre-fetched result instead of re-querying.
 
 The `alertingV2.esqlResponseFormat` feature flag selects how `QueryService.executeQueryStream` fetches results. `json` (the fallback) runs the single-shot JSON query, materializes the whole response in memory, then yields it in `JSON_STREAM_BATCH_SIZE` (`100`) row slices so downstream steps never copy the full result set at once; `arrow` streams self-contained Arrow record batches.
 
