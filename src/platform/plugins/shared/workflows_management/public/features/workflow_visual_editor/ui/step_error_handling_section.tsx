@@ -318,7 +318,6 @@ export function StepErrorHandlingSection({
           })}
         </EuiText>
       </div>
-
     </div>
   );
 }

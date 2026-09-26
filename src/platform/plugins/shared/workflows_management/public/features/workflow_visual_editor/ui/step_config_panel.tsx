@@ -94,8 +94,6 @@ export interface StepConfigPanelProps {
   readonly minWidth?: number;
   readonly maxWidth?: number;
   readonly onResize?: (width: number) => void;
-  /** Called whenever the in-flight YAML fragment changes (every form edit). */
-  readonly onFragmentChange?: (fragment: string) => void;
 }
 
 const DEFAULT_FLYOUT_SIZE = 560;
@@ -215,7 +213,6 @@ export function StepConfigPanel({
   minWidth = DEFAULT_FLYOUT_MIN_WIDTH,
   maxWidth,
   onResize,
-  onFragmentChange,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -263,10 +260,6 @@ export function StepConfigPanel({
     setNameError(undefined);
     setExpandedField(null);
   }, [initialFragment]);
-
-  useEffect(() => {
-    onFragmentChange?.(fragment);
-  }, [fragment, onFragmentChange]);
 
   const schema = useMemo(() => getStepFormSchema(stepType, connectors), [stepType, connectors]);
   // Name is edited in the header only — never as a form body field.
@@ -832,7 +825,6 @@ export function StepConfigPanel({
                     onChange={handleFieldChange}
                     onDraftErrorChange={handleDraftErrorChange}
                     onExpandField={handleExpandField}
-                    expandedFieldId={expandedField ? fieldId(expandedField) : undefined}
                   />
                 ) : (
                   <EuiText
@@ -956,7 +948,6 @@ function StepForm({
   onChange,
   onDraftErrorChange,
   onExpandField,
-  expandedFieldId,
 }: {
   fields: readonly StepFormField[];
   /** False when no connector/built-in schema was resolved for this step type. */
@@ -967,7 +958,6 @@ function StepForm({
   onChange: (field: StepFormField, value: unknown) => void;
   onDraftErrorChange: (id: string, error: string | undefined) => void;
   onExpandField: (field: StepFormField) => void;
-  expandedFieldId?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const inputsAccordionId = useGeneratedHtmlId({ prefix: 'workflowStepConfigInputs' });
@@ -1060,7 +1050,6 @@ function StepForm({
       onChange={(value) => onChange(field, value)}
       onDraftErrorChange={(error) => onDraftErrorChange(fieldId(field), error)}
       onExpand={() => onExpandField(field)}
-      isExpanded={expandedFieldId === fieldId(field)}
     />
   );
 
@@ -1221,7 +1210,6 @@ function StepFieldRow({
   onChange,
   onDraftErrorChange,
   onExpand,
-  isExpanded = false,
 }: {
   field: StepFormField;
   value: unknown;
@@ -1232,7 +1220,6 @@ function StepFieldRow({
   onChange: (value: unknown) => void;
   onDraftErrorChange: (error: string | undefined) => void;
   onExpand: () => void;
-  isExpanded?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const switchId = useGeneratedHtmlId({ prefix: `workflowStepConfigSwitch-${fieldId(field)}` });
@@ -1418,7 +1405,7 @@ function StepFieldRow({
               onChange={onChange}
               onExpand={onExpand}
             >
-              {({ value: textValue, teachingPlaceholder, appendControls, expandButton, reportChange, attachInputRef, isOpen }) => (
+              {({ value: textValue, teachingPlaceholder, appendControls, reportChange, attachInputRef, isOpen }) => (
                 <EuiFieldText
                   compressed
                   fullWidth
@@ -1431,7 +1418,7 @@ function StepFieldRow({
                     reportChange(next, e.target.selectionStart ?? next.length);
                   }}
                   onBlur={accuseIfInvalid}
-                  append={[isExpanded ? expandButton : appendControls, exprToggleButton]}
+                  append={[appendControls, exprToggleButton]}
                   data-test-subj={testSubj}
                   aria-expanded={isOpen}
                 />
@@ -1536,7 +1523,7 @@ function StepFieldRow({
               onChange={onChange}
               onExpand={onExpand}
             >
-              {({ value: textValue, teachingPlaceholder, appendControls, expandButton, reportChange, attachInputRef, isOpen }) => (
+              {({ value: textValue, teachingPlaceholder, appendControls, reportChange, attachInputRef, isOpen }) => (
                 <EuiFieldText
                   compressed
                   fullWidth
@@ -1549,7 +1536,7 @@ function StepFieldRow({
                     reportChange(next, e.target.selectionStart ?? next.length);
                   }}
                   onBlur={accuseIfInvalid}
-                  append={[isExpanded ? expandButton : appendControls, numExprToggle]}
+                  append={[appendControls, numExprToggle]}
                   data-test-subj={testSubj}
                   aria-expanded={isOpen}
                 />
@@ -1612,7 +1599,6 @@ function StepFieldRow({
             onDraftErrorChange={setDraftError}
             // TODO(slice7): ES|QL keeps its specialized editor — no expand here.
             onExpand={field.language === 'esql' ? undefined : onExpand}
-            isExpanded={isExpanded}
           />
         </StepValidatedFormRow>
       );
@@ -1758,7 +1744,6 @@ function StepFieldRow({
               value: textValue,
               teachingPlaceholder,
               appendControls,
-              expandButton,
               reportChange,
               attachInputRef,
               isOpen,
@@ -1776,7 +1761,7 @@ function StepFieldRow({
                   reportChange(next, caret);
                 }}
                 onBlur={accuseIfInvalid}
-                append={isExpanded ? expandButton : appendControls}
+                append={appendControls}
                 data-test-subj={testSubj}
                 aria-expanded={isOpen}
               />
@@ -1803,7 +1788,6 @@ function CodeField({
   onBlur,
   onDraftErrorChange,
   onExpand,
-  isExpanded = false,
 }: {
   field: StepFormField;
   value: unknown;
@@ -1814,7 +1798,6 @@ function CodeField({
   onBlur: () => void;
   onDraftErrorChange: (error: string | undefined) => void;
   onExpand?: () => void;
-  isExpanded?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const isJson = field.language === 'json';
@@ -1896,7 +1879,7 @@ function CodeField({
         onChange={applyDraft}
         onExpand={onExpand}
       >
-        {({ teachingPlaceholder, appendControls, expandButton, reportChange, registerSelection }) => (
+        {({ teachingPlaceholder, appendControls, reportChange, registerSelection }) => (
           <div
             ref={shellRef}
             onBlur={onBlur}
@@ -1925,7 +1908,7 @@ function CodeField({
                 zIndex: 2,
               }}
             >
-              {isExpanded ? expandButton : appendControls}
+              {appendControls}
             </div>
             <CodeEditor
               languageId={monacoLanguageFor(field)}
@@ -2017,7 +2000,6 @@ function CodeField({
       {({
         teachingPlaceholder,
         appendControls,
-        expandButton,
         reportChange,
         attachInputRef,
         isOpen,
@@ -2035,7 +2017,7 @@ function CodeField({
             reportChange(next, caret);
           }}
           onBlur={onBlur}
-          append={isExpanded ? expandButton : appendControls}
+          append={appendControls}
           data-test-subj={testSubj}
           data-language={field.language}
           aria-expanded={isOpen}

@@ -128,7 +128,7 @@ const TRIGGER_LABEL: Record<string, string> = {
   scheduled: 'Scheduled',
 };
 
-/** Floating-panel inset from the canvas edges (top, right, bottom). */
+/** Floating read-only flyout inset from the canvas edges (top, right, bottom). */
 const PANEL_MARGIN = 16;
 const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth';
 const DEFAULT_CONFIG_PANEL_WIDTH = 560;
@@ -435,7 +435,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [dispatch, notifications.toasts]
   );
 
-  /** Inserts a step fragment per the name-addressed insertion context and flashes the new node. */
+  /** Inserts a step fragment per the insertion context and flashes the new node. */
   const insertFragment = useCallback(
     (context: WorkflowGraphInsertionContext, fragment: string, newName: string | undefined) => {
       let result: MutationResult;
@@ -558,10 +558,11 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     if (!panel) return false;
     if (panel.mode === 'insert') return panel.context.mode === 'fallback';
     if (panel.mode !== 'edit') return false;
-    const nodeId = nodeIdForStepName(panel.stepName);
-    const node = nodeId ? transformed.nodes.find((n) => n.id === nodeId) : undefined;
-    return Boolean(node?.data && (node.data as { fallbackOf?: string }).fallbackOf);
-  }, [panel, transformed.nodeRefs, transformed.nodes, nodeIdForStepName]);
+    const ref = Object.values(transformed.nodeRefs).find(
+      (r) => r.kind === 'step' && r.stepName === panel.stepName
+    );
+    return Boolean(ref && ref.kind === 'step' && ref.fallbackOf);
+  }, [panel, transformed.nodeRefs]);
 
   const openEditPanel = useCallback(
     (stepName: string) => {
@@ -837,34 +838,30 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [editorRef]);
 
-  const handleCreationPickTrigger = useCallback((triggerType: 'manual' | 'alert' | 'scheduled') => {
-    setPanel({
-      mode: 'insert-trigger',
-      triggerType,
-      triggerLabel: TRIGGER_LABEL[triggerType] ?? triggerType,
-      fragment: triggerFragmentFor(triggerType),
+  const handleCreationPickTrigger = useCallback(
+    (triggerType: 'manual' | 'alert' | 'scheduled') => {
+      setPanel({
+        mode: 'insert-trigger',
+        triggerType,
+        triggerLabel: TRIGGER_LABEL[triggerType] ?? triggerType,
+        fragment: triggerFragmentFor(triggerType),
+      });
+    },
+    []
+  );
+
+  const handleCreationPickAction = useCallback((anchor: DOMRect) => {
+    const context = { mode: 'step' as const, index: 0 };
+    setInsertion({
+      context,
+      anchor: {
+        left: anchor.left,
+        top: anchor.top,
+        width: anchor.width,
+        height: anchor.height,
+      },
     });
   }, []);
-
-  const handleCreationPickAction = useCallback(
-    (anchor: DOMRect) => {
-      const insertionCtx: WorkflowGraphInsertionContext = { mode: 'prepend-step' };
-      const pendingCtx = toPendingContext(insertionCtx, nodeIdForStepName) ?? {
-        mode: 'step' as const,
-      };
-      setInsertion({
-        context: insertionCtx,
-        anchor: {
-          left: anchor.left,
-          top: anchor.top,
-          width: anchor.width,
-          height: anchor.height,
-        },
-      });
-      setPendingInsert({ phase: 'choosing', context: pendingCtx });
-    },
-    [nodeIdForStepName]
-  );
 
   const handleBrowseTemplates = useCallback(() => {
     void application.navigateToApp(PLUGIN_ID, { deepLinkId: 'library' });
@@ -984,7 +981,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
             typeof window !== 'undefined' ? window.innerWidth * 0.5 : DEFAULT_CONFIG_PANEL_WIDTH
           }
           onResize={(width) => setStoredPanelWidth(width)}
-          onFragmentChange={setLiveFragment}
         />
       )}
       {panel && (panel.mode === 'edit-trigger' || panel.mode === 'insert-trigger') && (

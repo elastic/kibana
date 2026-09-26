@@ -43,6 +43,14 @@ describe('filterOptionsForInsertionContext', () => {
     expect(result[0].id).toBe('manual');
   });
 
+  it('hides disabled trigger ids in trigger mode', () => {
+    const result = filterOptionsForInsertionContext(options, {
+      mode: 'trigger',
+      disabledTriggerIds: ['manual'],
+    });
+    expect(result).toEqual([]);
+  });
+
   it('hides triggers for step mode but keeps flow control', () => {
     const result = filterOptionsForInsertionContext(options, { mode: 'step' });
     expect(result.map((o) => o.id)).toEqual(['elasticsearch', 'flowControl']);

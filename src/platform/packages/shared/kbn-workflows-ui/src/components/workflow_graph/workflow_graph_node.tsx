@@ -82,15 +82,15 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
 /** Matches Run button spacing (`EuiButtonIcon size="s"`). */
 const ACTION_BUTTON_GAP = 4;
 
-/** Node kind drives the destructive menu label and which actions apply. */
-type NodeKind = 'trigger' | 'step' | 'fallback';
-
 const insertFlash = (color: string) =>
   keyframes({
     '0%': { boxShadow: `0 0 0 0 ${color}` },
     '40%': { boxShadow: `0 0 0 6px ${color}` },
     '100%': { boxShadow: `0 0 0 0 transparent` },
   });
+
+/** Node kind drives the destructive menu label and which actions apply. */
+type NodeKind = 'trigger' | 'step' | 'fallback';
 
 /**
  * Extract the configured `retry.max-attempts` for a step, looking at both
