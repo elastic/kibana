@@ -7,6 +7,18 @@
 
 import moment from 'moment';
 import { buildActionResultsQuery } from './query.action_results.dsl';
+
+// The agent-carried space only speaks for documents Kibana never stamped, so the
+// fallback pairs its term with the absence of the trusted top-level field.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
+
+const collectShouldClauses = (clauses: unknown[]): unknown[] =>
+  clauses.flatMap((clause) => (clause as { bool?: { should?: unknown[] } })?.bool?.should ?? []);
 import {
   Direction,
   type ActionResultsRequestOptions,
@@ -645,18 +657,27 @@ describe('buildActionResultsQuery', () => {
     const getAggFilterMust = (result: any) =>
       result.aggs.aggs.aggs.responses_by_action_id.filter.bool.must;
 
-    it('scopes the aggregation by space_id', () => {
-      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
-      expect(JSON.stringify(getAggFilterMust(result))).toContain('space_id');
-    });
-
     it('scopes the aggregation to default space OR missing space_id when spaceId is "default"', () => {
-      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'default' });
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'default',
+        matchActionDataSpaceId: true,
+      });
       const defaultClause = {
         bool: {
           should: [
             { term: { space_id: 'default' } },
-            { bool: { must_not: { exists: { field: 'space_id' } } } },
+            // A response carrying action_data.space_id belongs to a known space, so
+            // the missing-field allowance must not treat it as unstamped.
+            {
+              bool: {
+                must_not: [
+                  { exists: { field: 'space_id' } },
+                  { exists: { field: 'action_data.space_id' } },
+                ],
+              },
+            },
+            actionDataFallback('default'),
           ],
         },
       };
@@ -665,8 +686,69 @@ describe('buildActionResultsQuery', () => {
     });
 
     it('scopes the aggregation to the space exactly in a named space', () => {
-      const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+        matchActionDataSpaceId: true,
+      });
+      // Id-bound read: also matches the agent-carried action_data.space_id.
+      expect(getAggFilterMust(result)).toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
+        },
+      });
+    });
+
+    it('uses a strict default-space term in aggregations when matchMissingSpaceId is false', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'default',
+        matchMissingSpaceId: false,
+        matchActionDataSpaceId: true,
+      });
+
+      // The action_data fallback is orthogonal to matchMissingSpaceId: it is a
+      // present, exact-valued term, so it survives while the missing-field
+      // allowance is dropped.
+      expect(getAggFilterMust(result)).toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'default' } }, actionDataFallback('default')],
+        },
+      });
+      // The dropped allowance is the one that admits unstamped documents outright;
+      // the fallback's own `must_not` is paired with a required action_data term.
+      expect(collectShouldClauses(getAggFilterMust(result))).not.toContainEqual({
+        bool: { must_not: { exists: { field: 'space_id' } } },
+      });
+    });
+
+    it('omits action_data.space_id from aggregations when matchActionDataSpaceId is omitted', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+      });
+
       expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(getAggFilterMust(result)).not.toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
+        },
+      });
+    });
+
+    it('omits action_data.space_id from aggregations when matchActionDataSpaceId is false', () => {
+      const result = buildActionResultsQuery({
+        ...baseOptions,
+        spaceId: 'my-space',
+        matchActionDataSpaceId: false,
+      });
+
+      expect(getAggFilterMust(result)).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(getAggFilterMust(result)).not.toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
+        },
+      });
     });
   });
 });

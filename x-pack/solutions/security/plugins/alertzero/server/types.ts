@@ -19,13 +19,14 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
-/**
- * Soft-enable contract. Always returned from `setup()` so optional consumers
- * (e.g. security_solution threat-intel supply) can gate on `enabled` without
- * reading `xpack.alertzero` config themselves.
- */
 export interface AlertZeroPluginSetup {
-  enabled: boolean;
+  /**
+   * `false` when the `xpack.alertzero.enabled` kill switch is off, in which case AlertZero
+   * registered nothing — including its `securitySolution:enableAlertZero` advanced setting.
+   * Serverless checks this before allowlisting that setting: allowlisting an unregistered key
+   * fails startup in dev (`UiSettingsService#validateAllowlist`).
+   */
+  isEnabled: boolean;
 }
 export type AlertZeroPluginStart = Record<string, never>;
 
