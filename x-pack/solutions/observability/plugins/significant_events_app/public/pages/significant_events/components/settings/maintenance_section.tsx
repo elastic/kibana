@@ -17,7 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
+import {
+  MAINTENANCE_FEATURE_FLAG_ACTOR,
+  type SignificantEventsMaintenanceStatus,
+} from '@kbn/significant-events-plugin/common';
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
@@ -37,6 +40,7 @@ const SECTION_DESCRIPTION = i18n.translate(
 
 function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus }) {
   const { updatedBy, lastSummary } = status;
+  const pausedByFeatureFlag = updatedBy === MAINTENANCE_FEATURE_FLAG_ACTOR;
   const workflowsDisabled = lastSummary?.workflowsDisabled ?? 0;
   const rulesDisabled = lastSummary?.rulesDisabled ?? 0;
   const failureCount = lastSummary?.partialFailures.length ?? 0;
@@ -52,7 +56,15 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
         defaultMessage: 'Significant Events activity is paused',
       })}
     >
-      {updatedBy && (
+      {pausedByFeatureFlag && (
+        <p>
+          <FormattedMessage
+            id="xpack.significantEventsApp.settings.maintenance.pausedByFeatureFlag"
+            defaultMessage="Paused automatically because Nightshift was turned off. Activity stays paused until you resume it. The alerting rules backing knowledge indicator queries were left running."
+          />
+        </p>
+      )}
+      {updatedBy && !pausedByFeatureFlag && (
         <p>
           <FormattedMessage
             id="xpack.significantEventsApp.settings.maintenance.pausedBy"

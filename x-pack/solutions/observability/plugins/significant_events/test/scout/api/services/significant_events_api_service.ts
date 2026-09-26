@@ -19,6 +19,7 @@ export interface SignificantEventsTestApiService {
   }>;
   enableSignificantEvents: () => Promise<void>;
   disableSignificantEvents: () => Promise<void>;
+  resumeSignificantEvents: () => Promise<void>;
 }
 
 export function getSignificantEventsTestApiService({
@@ -62,6 +63,22 @@ export function getSignificantEventsTestApiService({
         'significantEventsTestApi.disableSignificantEvents',
         async () => {
           await setAvailability(false);
+        }
+      );
+    },
+
+    // Turning the flag off pauses Significant Events deployment-wide and turning it back on does
+    // not resume, so suites that flip the flag resume here to leave the deployment running.
+    async resumeSignificantEvents() {
+      await measurePerformanceAsync(
+        log,
+        'significantEventsTestApi.resumeSignificantEvents',
+        async () => {
+          await kbnClient.request({
+            method: 'POST',
+            path: '/internal/significant_events/maintenance/_resume',
+            headers: COMMON_API_HEADERS,
+          });
         }
       );
     },

@@ -17,6 +17,7 @@ import type { SignificantEventsServer } from '../../types';
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import type { GetScopedClients } from '../../routes/types';
+import type { MaintenanceAccess } from './maintenance_access';
 import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from './managed_workflow_targets';
 
 /**
@@ -77,18 +78,42 @@ export const createFeatureSettingsController = ({
   server: SignificantEventsServer;
   getScopedClients: GetScopedClients;
 }) => {
-  const getGlobalClient = async (request: KibanaRequest): Promise<IUiSettingsClient> => {
-    const { globalUiSettingsClient } = await getScopedClients({ request });
-    return globalUiSettingsClient;
-  };
-
-  const getSpaceClient = async (
-    request: KibanaRequest,
-    spaceId: SpaceId
-  ): Promise<IUiSettingsClient> => {
-    const spaceRequest = requestForSpace(request, spaceId);
-    const soClient = server.core.savedObjects.getScopedClient(spaceRequest);
-    return server.core.uiSettings.asScopedToClient(soClient);
+  /** Global and per-space uiSettings clients acting as the caller or as the system. */
+  const getUiSettingsClients = ({
+    request,
+    access,
+  }: {
+    request: KibanaRequest;
+    access: MaintenanceAccess;
+  }): {
+    global: () => Promise<IUiSettingsClient>;
+    space: (spaceId: SpaceId) => Promise<IUiSettingsClient>;
+  } => {
+    switch (access) {
+      case 'user':
+        return {
+          global: async () => (await getScopedClients({ request })).globalUiSettingsClient,
+          space: async (spaceId) =>
+            server.core.uiSettings.asScopedToClient(
+              server.core.savedObjects.getScopedClient(requestForSpace(request, spaceId))
+            ),
+        };
+      case 'system':
+        return {
+          global: async () =>
+            server.core.uiSettings.globalAsScopedToClient(
+              server.core.savedObjects.getUnsafeInternalClient()
+            ),
+          space: async (spaceId) =>
+            server.core.uiSettings.asScopedToClient(
+              server.core.savedObjects.getUnsafeInternalClient().asScopedToNamespace(spaceId)
+            ),
+        };
+      default: {
+        const unhandledAccess: never = access;
+        throw new Error(`Unhandled maintenance access: ${unhandledAccess}`);
+      }
+    }
   };
 
   /**
@@ -98,15 +123,18 @@ export const createFeatureSettingsController = ({
    */
   const pauseFeatureSettings = async ({
     request,
+    access,
     spaceIds,
     previous,
     failures,
   }: {
     request: KibanaRequest;
+    access: MaintenanceAccess;
     spaceIds: SpaceId[];
     previous: PausedFeatureSettings | undefined;
     failures: SignificantEventsMaintenanceFailure[];
   }): Promise<PausedFeatureSettings> => {
+    const uiSettingsClients = getUiSettingsClients({ request, access });
     const next: PausedFeatureSettings = {
       continuousOnboardingWasEnabled: previous?.continuousOnboardingWasEnabled ?? false,
       scheduledDiscoveryEnabledSpaceIds: [
@@ -115,7 +143,7 @@ export const createFeatureSettingsController = ({
     };
 
     try {
-      const globalClient = await getGlobalClient(request);
+      const globalClient = await uiSettingsClients.global();
       let continuousEnabled = false;
       try {
         continuousEnabled = Boolean(
@@ -154,7 +182,7 @@ export const createFeatureSettingsController = ({
 
     for (const spaceId of spaceIds) {
       try {
-        const spaceClient = await getSpaceClient(request, spaceId);
+        const spaceClient = await uiSettingsClients.space(spaceId);
         let scheduledEnabled = false;
         try {
           scheduledEnabled = Boolean(
@@ -212,10 +240,11 @@ export const createFeatureSettingsController = ({
     if (!pausedSettings) {
       return;
     }
+    const uiSettingsClients = getUiSettingsClients({ request, access: 'user' });
 
     if (pausedSettings.continuousOnboardingWasEnabled) {
       try {
-        const globalClient = await getGlobalClient(request);
+        const globalClient = await uiSettingsClients.global();
         await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, true);
       } catch (error) {
         failures.push({
@@ -227,7 +256,7 @@ export const createFeatureSettingsController = ({
 
     for (const spaceId of pausedSettings.scheduledDiscoveryEnabledSpaceIds) {
       try {
-        const spaceClient = await getSpaceClient(request, spaceId);
+        const spaceClient = await uiSettingsClients.space(spaceId);
         await spaceClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
           true
@@ -273,8 +302,10 @@ export const createFeatureSettingsController = ({
     spaceIds: SpaceId[];
     failures: SignificantEventsMaintenanceFailure[];
   }): Promise<void> => {
+    // Re-assert runs without a user request (e.g. after a feature-flag flip).
+    const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
     try {
-      const globalClient = await getGlobalClient(request);
+      const globalClient = await uiSettingsClients.global();
       await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
     } catch (error) {
       failures.push({
@@ -285,7 +316,7 @@ export const createFeatureSettingsController = ({
 
     for (const spaceId of spaceIds) {
       try {
-        const spaceClient = await getSpaceClient(request, spaceId);
+        const spaceClient = await uiSettingsClients.space(spaceId);
         await spaceClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
           false
