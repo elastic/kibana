@@ -245,7 +245,7 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         'Whether the report should stay eligible for a later run. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.'
       ),
     /**
-     * Populated when Tier 1 confirmed a hit: one entry per confirmed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
+     * Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per proposed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
      */
     sse: z
       .array(
@@ -256,7 +256,7 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       )
       .optional()
       .describe(
-        'Populated when Tier 1 confirmed a hit: one entry per confirmed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
+        'Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per proposed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
       ),
   })
 );
