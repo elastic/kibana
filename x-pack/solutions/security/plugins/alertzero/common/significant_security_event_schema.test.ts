@@ -131,7 +131,12 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     const contradictions = [
       { status: 'no_environment_hits' as const, total: 4, confirmed: false, sources: [] as const },
       { status: 'no_searchable_terms' as const, total: 4, confirmed: false, sources: [] as const },
-      { status: 'environment_hits_found' as const, total: 0, confirmed: false, sources: [] as const },
+      {
+        status: 'environment_hits_found' as const,
+        total: 0,
+        confirmed: false,
+        sources: [] as const,
+      },
       // Confirmed a hit while Tier 1 reports it could not search anything and Tier 2 did not hit.
       {
         status: 'no_searchable_terms' as const,
@@ -394,6 +399,94 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       });
 
       expect(result.success).toBe(true);
+    });
+  });
+
+  describe('hunt_result relational refinements', () => {
+    const confirmedTier1 = {
+      has_confirmed_hit: true,
+      hit_sources: ['tier1'],
+      time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+      tier1: {
+        status: 'environment_hits_found',
+        counts: { total_hits: 3, returned_hits: 3, affected_hosts: 0, affected_users: 0 },
+        per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true }],
+        resolved_iocs: [],
+      },
+    };
+
+    const parses = (huntResult: unknown): boolean =>
+      significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        hunt_result: huntResult,
+      }).success;
+
+    it('accepts the consistent baseline', () => {
+      expect(parses(confirmedTier1)).toBe(true);
+    });
+    it.each([
+      [
+        'a reversed time_range',
+        { time_range: { from: '2026-01-02T00:00:00.000Z', to: '2026-01-01T00:00:00.000Z' } },
+      ],
+      [
+        'an equal time_range (to is exclusive)',
+        { time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-01T00:00:00.000Z' } },
+      ],
+      [
+        'per_index hit counts that sum past total_hits',
+        {
+          tier1: {
+            ...confirmedTier1.tier1,
+            per_index: [
+              { index: 'logs-a', hit_count: 100, required: true },
+              { index: 'logs-b', hit_count: 100, required: false },
+            ],
+          },
+        },
+      ],
+      [
+        'tier2 behaviors_proposed with no behaviors',
+        { tier2: { status: 'behaviors_proposed', behaviors: [] } },
+      ],
+      [
+        'tier2 no_behaviors_found with behavior rows',
+        {
+          tier2: {
+            status: 'no_behaviors_found',
+            behaviors: [
+              { technique_id: 'T1021', tactic_ids: ['TA0008'], confidence: 0.8, rule_name: 'r' },
+            ],
+          },
+        },
+      ],
+    ])('rejects %s', (_label, override) => {
+      expect(parses({ ...confirmedTier1, ...override })).toBe(false);
+    });
+
+    it.each([
+      ['a whitespace-only report_id', { report_id: '   ' }],
+      ['a whitespace-only alert_id', { alerts: [{ alert_id: '  ', index: '.alerts-x' }] }],
+      ['a whitespace-only event_id', { events: [{ event_id: '  ', source_index: 'logs-a' }] }],
+      [
+        'an over-long alert timestamp',
+        {
+          alerts: [
+            {
+              alert_id: 'a',
+              index: '.alerts-x',
+              timestamp: `2026-01-01T00:00:00.${'0'.repeat(80)}Z`,
+            },
+          ],
+        },
+      ],
+    ])('rejects %s', (_label, override) => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        ...override,
+      });
+
+      expect(result.success).toBe(false);
     });
   });
 });

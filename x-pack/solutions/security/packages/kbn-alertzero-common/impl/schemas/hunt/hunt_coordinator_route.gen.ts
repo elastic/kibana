@@ -263,7 +263,7 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         'The full hunt results narrative the hunt child writes to the Investigation: what was hunted, where and when, what each tier found, and why a tier did not run. Deterministic markdown derived from the structured fields, self-sufficient because the SSE attachment may not render everywhere.'
       ),
     /**
-     * Populated when Tier 1 confirmed a hit: one entry per confirmed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
+     * Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per proposed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
      */
     sse: z
       .array(
@@ -274,7 +274,7 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       )
       .optional()
       .describe(
-        'Populated when Tier 1 confirmed a hit: one entry per confirmed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
+        'Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per proposed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
       ),
   })
 );
