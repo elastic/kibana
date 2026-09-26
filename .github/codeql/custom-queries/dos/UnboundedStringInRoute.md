@@ -1,4 +1,4 @@
-# Unbounded string in schema validation
+# Unbounded string in route request validation
 
 ## Overview
 
@@ -15,9 +15,11 @@ An attacker could exploit unbounded string validation by sending extremely large
 The query targets:
 
 - `schema.string()` calls missing the `maxLength` option in the first argument
-- `z.string()` calls without a `.max()` in the method chain
+- `z.string()` calls without a `.max()` in the method chain (or a length-bounded format such as `.uuid()` / `.datetime()`)
 
-It uses a shared exclusion list (defined in `KibanaDoSExclusions.qll`) to skip files whose schemas are known to never validate HTTP request payloads, such as saved-object attribute schemas, plugin configuration, UI settings definitions, content-management layer schemas, and similar structural/data-at-rest categories. See that file for the full set of excluded path patterns.
+A string is only reported when data flow shows it reaches a route's **request** validation — the `body`, `query`, `params`, or `path` fields of a `validate` block (including the versioned router's `validate: { request: ... }`), route-factory configs such as `@kbn/server-route-repository`'s `createServerRoute`, and the `buildRouteValidationWithZod` wrapper. Reachability follows schema construction through `schema.object`/`z.object`, arrays, `oneOf`/`union`, Zod modifier chains, object spread, and `.extends`/`.extend`/`.merge` composition, including across files.
+
+Schemas that validate route **responses**, saved-object attributes, plugin configuration, UI settings, content-management/embeddable layers, telemetry, and other data-at-rest categories are not reported, because they do not reach a request-validation sink. A shared exclusion list (defined in `KibanaDoSExclusions.qll`) additionally skips browser (`public/`) code.
 
 ## Recommendation
 
@@ -25,16 +27,23 @@ Always specify a maximum length constraint when using string schemas to validate
 
 ### Choosing a max length
 
-Consider these common categories:
+Prefer the built-in semantic string helpers in `@kbn/config-schema` and `@kbn/zod`:
 
-| Use case | Suggested max length |
-|----------|---------------------|
-| Identifiers (IDs, keys, slugs) | 100-256 |
-| Names, titles | 256-512 |
-| Descriptions, comments | 1,000-10,000 |
-| Search queries, filters | 256-1,024 |
-| Free-text body content | 10,000-100,000 |
-| URLs | 2,048-4,096 |
+| Helper | Minimum length | Maximum length |
+| --- | ---: | ---: |
+| `savedObjectId` | 1 | 512 |
+| `savedObjectType` | 1 | 256 |
+| `savedObjectVersion` | 1 | 256 |
+| `spaceId` | 1 | 512 |
+| `displayName` | 1 | 1,024 |
+| `description` | 0 | 10,000 |
+| `searchFilter` | 0 | 10,000 |
+| `aggregation` | 0 | 100,000 |
+| `querySortField` | 0 | 256 |
+
+For example, use `schema.savedObjectId()` or Zod's `savedObjectId()`.
+Helpers accept explicit overrides when an existing route requires a different
+bound. Use a raw bounded string for fields without a matching semantic helper.
 
 ### Route as a simple proxy to Elasticsearch API
 
@@ -138,16 +147,26 @@ const goodSchema = z.object({
 
 ## False positives and suppression
 
-This query intentionally casts a wide net — it flags all unbounded `schema.string()` and `z.string()` calls except those in file paths that are clearly non-payload contexts. Some findings will be in schemas that validate route **responses**, saved-object attributes in shared files, or other non-request-payload contexts. These are expected false positives.
+Because reporting is scoped to strings that reach a route's request validation, false positives are rare — response schemas and other data-at-rest schemas are not flagged. Conversely, a request schema assembled through deep cross-file composition may occasionally be missed rather than mis-reported.
 
-To suppress a legitimate false positive, add a `codeql[...]` comment on the line above the flagged call:
+For legitimately unbounded strings, replace string suppression comments with an
+explicit escape hatch and a nonempty reason:
 
-```javascript
-// codeql[js/kibana/unbounded-string-in-schema] response schema — not user input
-schema.string()
+```typescript
+schema.unboundedString({ reason: 'Size is enforced upstream' });
+
+// Zod (also exported from @kbn/zod/v4)
+import { unboundedString } from '@kbn/zod';
+unboundedString({ reason: 'Size is enforced upstream' });
 ```
 
-The exclusion list in `KibanaDoSExclusions.qll` is maintained conservatively and may be updated as new non-payload schema patterns are identified. If you encounter a false positive that affects an entire file category (not a one-off), consider proposing an addition to the shared exclusion library rather than adding per-line suppressions.
+The query treats these library exports as intentional data-flow barriers, including
+aliased imports. Reporting helpers (`schema.savedObjectId.warn()` or
+`savedObjectId.warn()`) are also intentional barriers: they report maximum
+length violations without rejecting them during adoption. Unrelated functions
+with the same names do not suppress alerts.
+
+If a route-registration or schema-composition pattern is not recognized (causing either a false positive or a missed request schema), prefer extending the query's reachability model over scattering per-line suppressions.
 
 ## References
 

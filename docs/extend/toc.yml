@@ -25,6 +25,7 @@ toc:
       - file: http-service.md
       - file: logging-service.md
       - file: logging-config-changes.md
+      - file: bounded-string-schemas.md
       - file: saved-objects.md
         children:
           - file: saved-objects/structure.md
