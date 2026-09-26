@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HTTPFields } from '../../../../common/runtime_types';
+import type { HTTPFields, KerberosConfig, NtlmConfig } from '../../../../common/runtime_types';
 import {
   ConfigKey,
   HTTPMethod,
@@ -19,11 +19,24 @@ import { arrayFormatter, objectFormatter, omitDefaultFormatter } from './formatt
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 
+// Emit the nested auth block only when enabled so disabled monitors don't ship
+// empty auth config to Heartbeat.
+const kerberosFormatter: Formatter = (fields) => {
+  const value = fields[ConfigKey.KERBEROS] as KerberosConfig | undefined;
+  return value?.enabled ? value : null;
+};
+const ntlmFormatter: Formatter = (fields) => {
+  const value = fields[ConfigKey.NTLM] as NtlmConfig | undefined;
+  return value?.enabled ? value : null;
+};
+
 // These defaults match Heartbeat's own defaults, so omitting them leaves
 // monitor behavior unchanged (elastic/kibana#241818).
 export const httpFormatters: HTTPFormatMap = {
   ...tlsFormatters,
   ...commonFormatters,
+  [ConfigKey.KERBEROS]: kerberosFormatter,
+  [ConfigKey.NTLM]: ntlmFormatter,
   [ConfigKey.MAX_REDIRECTS]: omitDefaultFormatter('0'),
   [ConfigKey.REQUEST_METHOD_CHECK]: omitDefaultFormatter(HTTPMethod.GET),
   [ConfigKey.RESPONSE_BODY_INDEX]: omitDefaultFormatter(ResponseBodyIndexPolicy.ON_ERROR),

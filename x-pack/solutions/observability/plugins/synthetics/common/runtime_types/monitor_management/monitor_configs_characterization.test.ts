@@ -19,6 +19,8 @@ import {
   CodeEditorModeCodec,
   FormMonitorType,
   FormMonitorTypeCodec,
+  KerberosAuthType,
+  KerberosAuthTypeCodec,
   Mode,
   ModeCodec,
   MonitorTypeCodec,
@@ -98,6 +100,11 @@ const enumCases: EnumCase[] = [
     label: 'ModeCodec',
     codec: ModeCodec,
     values: Object.values(Mode),
+  },
+  {
+    label: 'KerberosAuthTypeCodec',
+    codec: KerberosAuthTypeCodec,
+    values: Object.values(KerberosAuthType),
   },
 ];
 

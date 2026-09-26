@@ -8,8 +8,11 @@
 export {
   CodeEditorModeCodec,
   FormMonitorTypeCodec,
+  KerberosAuthTypeCodec,
+  KerberosConfigCodec,
   ModeCodec,
   MonitorTypeCodec,
+  NtlmConfigCodec,
   RequestBodyCheckCodec,
   ResponseBodyIndexPolicyCodec,
   ResponseCheckJSONCodec,

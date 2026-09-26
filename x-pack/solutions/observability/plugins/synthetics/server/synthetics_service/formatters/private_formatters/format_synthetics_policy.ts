@@ -33,6 +33,59 @@ export interface ProcessorFields {
   kibanaUrl?: string;
 }
 
+const HTTP_AUTH_PACKAGE_KEYS = [ConfigKey.KERBEROS, ConfigKey.NTLM] as const;
+
+export const HTTP_AUTH_PACKAGE_UPGRADE_MESSAGE =
+  'Kerberos and NTLM authentication require the Synthetics integration version 1.12.0 or later. Upgrade the Synthetics package in Fleet and try again.';
+
+/**
+ * Enabled Kerberos/NTLM must map onto package vars. Older synthetics packages
+ * omit these keys; writing would silently drop auth and leave the monitor
+ * unauthenticated.
+ */
+export const assertHttpAuthPackageVarsAvailable = (
+  config: Partial<MonitorFields & ProcessorFields>,
+  vars: NewPackagePolicy['inputs'][number]['streams'][number]['vars'] | undefined
+) => {
+  for (const key of HTTP_AUTH_PACKAGE_KEYS) {
+    const auth = config[key];
+    if (auth && typeof auth === 'object' && 'enabled' in auth && auth.enabled && !vars?.[key]) {
+      throw new Error(HTTP_AUTH_PACKAGE_UPGRADE_MESSAGE);
+    }
+  }
+};
+
+/**
+ * Resolve `${params}` on each auth string field before JSON serialization so
+ * values with quotes/newlines stay valid JSON.
+ */
+export const resolveHttpAuthParams = (
+  config: Partial<MonitorFields & ProcessorFields>,
+  params: Record<string, string>
+): Partial<MonitorFields & ProcessorFields> => {
+  const next: Partial<MonitorFields & ProcessorFields> = { ...config };
+
+  const resolveAuthObject = <T extends Record<string, unknown>>(auth: T): T => {
+    const resolved = { ...auth };
+    for (const [field, fieldValue] of Object.entries(auth)) {
+      if (typeof fieldValue === 'string') {
+        (resolved as Record<string, unknown>)[field] = replaceStringWithParams(fieldValue, params);
+      }
+    }
+    return resolved;
+  };
+
+  const kerberos = next[ConfigKey.KERBEROS];
+  if (kerberos?.enabled) {
+    next[ConfigKey.KERBEROS] = resolveAuthObject(kerberos);
+  }
+  const ntlm = next[ConfigKey.NTLM];
+  if (ntlm?.enabled) {
+    next[ConfigKey.NTLM] = resolveAuthObject(ntlm);
+  }
+  return next;
+};
+
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
   monitorType: MonitorTypeEnum,
@@ -41,7 +94,8 @@ export const formatSyntheticsPolicy = (
   mws: MaintenanceWindow[],
   isLegacy?: boolean
 ) => {
-  const configKeys = Object.keys(config) as ConfigKey[];
+  const resolvedConfig = resolveHttpAuthParams(config, params);
+  const configKeys = Object.keys(resolvedConfig) as ConfigKey[];
 
   const formattedPolicy = cloneDeep(newPolicy);
 
@@ -86,15 +140,20 @@ export const formatSyntheticsPolicy = (
     }
   }
 
+  assertHttpAuthPackageVarsAvailable(resolvedConfig, dataStream?.vars);
+
   configKeys.forEach((key) => {
     const configItem = dataStream?.vars?.[key];
     if (configItem) {
       if (syntheticsPolicyFormatters[key]) {
-        configItem.value = syntheticsPolicyFormatters[key]?.(config, key);
+        configItem.value = syntheticsPolicyFormatters[key]?.(resolvedConfig, key);
       } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
         configItem.value = undefined;
       } else {
-        configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
+        configItem.value =
+          resolvedConfig[key] === undefined || resolvedConfig[key] === null
+            ? null
+            : resolvedConfig[key];
       }
       if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
         configItem.value = replaceStringWithParams(configItem.value, params);
@@ -110,7 +169,7 @@ export const formatSyntheticsPolicy = (
   // synthetics 1.10.0 added this var to the API input with the same name as
   // browser, so encode whenever the installed package exposes it.
   const encodingVar = dataStream?.vars?.['source.inline.encoding'];
-  if (encodingVar && config[ConfigKey.SOURCE_INLINE]) {
+  if (encodingVar && resolvedConfig[ConfigKey.SOURCE_INLINE]) {
     encodingVar.value = 'base64';
     const inlineScript = dataStream.vars?.[ConfigKey.SOURCE_INLINE];
     if (inlineScript && typeof inlineScript.value === 'string') {
@@ -120,12 +179,12 @@ export const formatSyntheticsPolicy = (
 
   const processorItem = dataStream?.vars?.processors;
   if (processorItem) {
-    processorItem.value = processorsFormatter(config as MonitorFields & ProcessorFields);
+    processorItem.value = processorsFormatter(resolvedConfig as MonitorFields & ProcessorFields);
   }
 
   const mwItem = dataStream?.vars?.[ConfigKey.MAINTENANCE_WINDOWS];
-  if (config[ConfigKey.MAINTENANCE_WINDOWS]?.length && mwItem) {
-    const maintenanceWindows = config[ConfigKey.MAINTENANCE_WINDOWS];
+  if (resolvedConfig[ConfigKey.MAINTENANCE_WINDOWS]?.length && mwItem) {
+    const maintenanceWindows = resolvedConfig[ConfigKey.MAINTENANCE_WINDOWS];
     const formattedVal = formatMWs(
       maintenanceWindows.map((window) => {
         if (typeof window === 'string') {
@@ -142,7 +201,7 @@ export const formatSyntheticsPolicy = (
   // TODO: remove this once we remove legacy support
   const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];
   if (throttling) {
-    throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
+    throttling.value = throttlingFormatter?.(resolvedConfig, ConfigKey.THROTTLING_CONFIG);
   }
 
   // Drop disabled inputs so we persist only the single active input. Disabled inputs never

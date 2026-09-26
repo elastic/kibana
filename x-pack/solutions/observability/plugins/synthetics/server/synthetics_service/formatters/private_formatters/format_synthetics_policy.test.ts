@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { ConfigKey, KerberosAuthType, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
@@ -320,6 +320,12 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'password',
                   value: '"changeme"',
                 },
+                kerberos: {
+                  type: 'text',
+                },
+                ntlm: {
+                  type: 'text',
+                },
                 proxy_url: {
                   type: 'text',
                   value: '"https://proxy.com"',
@@ -458,6 +464,93 @@ describe('formatSyntheticsPolicy', () => {
     expect(vars?.['response.include_headers'].value).toBe(true);
   });
 
+  it('base64-encodes enabled Kerberos/NTLM after resolving params and omits disabled auth', () => {
+    const ntlm = {
+      enabled: true,
+      username: 'ntlm-user',
+      password: '${ntlmPassword}',
+      domain: 'EXAMPLE',
+      workstation: 'WS1',
+    };
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      testNewPolicy,
+      MonitorTypeEnum.HTTP,
+      {
+        ...httpPolicy,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: false,
+          auth_type: KerberosAuthType.PASSWORD,
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '',
+          realm: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: ntlm,
+      },
+      { ...gParams, ntlmPassword: 's3c"ret\nline' },
+      []
+    );
+
+    const vars = formattedPolicy.inputs
+      .find((input) => input.type === 'synthetics/http')
+      ?.streams.find((stream) => stream.data_stream.dataset === 'http')?.vars;
+
+    expect(vars?.kerberos.value).toBeNull();
+    expect(JSON.parse(Buffer.from(vars?.ntlm.value as string, 'base64').toString('utf8'))).toEqual({
+      ...ntlm,
+      password: 's3c"ret\nline',
+    });
+  });
+
+  it('rejects enabled Kerberos when the installed package lacks the kerberos var', () => {
+    const policyWithoutAuthVars = {
+      ...testNewPolicy,
+      inputs: testNewPolicy.inputs.map((input) => {
+        if (input.type !== 'synthetics/http') return input;
+        return {
+          ...input,
+          streams: input.streams.map((stream) => {
+            if (stream.data_stream.dataset !== 'http') return stream;
+            const { kerberos, ntlm, ...vars } = stream.vars as Record<string, unknown>;
+            return { ...stream, vars };
+          }),
+        };
+      }),
+    };
+
+    expect(() =>
+      formatSyntheticsPolicy(
+        policyWithoutAuthVars as any,
+        MonitorTypeEnum.HTTP,
+        {
+          ...httpPolicy,
+          [ConfigKey.USERNAME]: '',
+          [ConfigKey.PASSWORD]: '',
+          [ConfigKey.KERBEROS]: {
+            enabled: true,
+            auth_type: KerberosAuthType.PASSWORD,
+            username: 'svc',
+            password: 'secret',
+            keytab: '',
+            config_path: '/etc/krb5.conf',
+            krb5_conf: '',
+            realm: 'CORP.LOCAL',
+            service_name: '',
+            enable_krb5_fast: false,
+          },
+        },
+        gParams,
+        []
+      )
+    ).toThrow(/Synthetics integration version 1\.12\.0/);
+  });
+
   // API monitors emit a companion `synthetics.api.network` document per request
   // via Heartbeat. Without enabling the `api.network` companion stream here,
   // Fleet generates an agent API key that lacks write privileges on
@@ -576,6 +669,9 @@ const testNewPolicy = {
             tags: { type: 'yaml' },
             username: { type: 'text' },
             password: { type: 'password' },
+            // synthetics package 1.12.0+ (elastic/integrations#21116)
+            kerberos: { type: 'text' },
+            ntlm: { type: 'text' },
             'response.include_headers': { type: 'bool' },
             'response.include_body': { type: 'text' },
             'check.request.method': { type: 'text' },
