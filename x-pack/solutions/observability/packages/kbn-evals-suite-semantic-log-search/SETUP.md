@@ -177,6 +177,140 @@ curl -s -u elastic:changeme "http://localhost:9220/_inference/_ccm"   # want {"e
 If `~/.elastic/eis-ccm-key.json` is missing, `node scripts/evals init` fetches it, with Vault
 access.
 
+## Storing scores on a cloud project, so a run can be shared
+
+Everything above keeps the scores on the local Scout stack, where only you can see them. To share a
+run, point the *storage* at a cloud project. The eval still executes against local Scout — only
+where the datasets, experiments and scores are written changes.
+
+Four things have to line up, and each one fails differently.
+
+### 1. The project needs `xpack.evals.enabled`
+
+It is off by default and is otherwise set only in Scout and FTR configs, so a stock project answers
+`404` on the evals API and the run fails with *"Evaluations plugin is not enabled on the target
+Kibana"*. For a serverless project the setting is baked into the image, so it means a redeploy:
+
+```yaml
+# config/serverless.oblt.yml  — PoC only, do not merge to main
+xpack.evals.enabled: true
+```
+
+Check before running, rather than 20 minutes into a run. `200` here means ready; `404` means the
+plugin is off:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -H "Authorization: ApiKey $KEY" -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
+  "$KBN_URL/internal/evals/datasets"
+```
+
+`x-elastic-internal-origin` is required: `/internal/*` is gated by `server.restrictInternalApis` on
+serverless. The browser and `KbnClient` send it automatically, so this only bites manual `curl`.
+
+### 2. A profile pointing at the project
+
+Create `x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.<name>.json` next to
+`config.json` (gitignored) with the project's Kibana and Elasticsearch URLs and an API key in
+`evaluationsKbn`, `evaluationsEs` and `tracingEs`.
+
+### 3. `--profile`, **not** `--export-profile`
+
+This is the trap. The two flags do different things and the failure is silent — the run succeeds and
+the scores land somewhere else:
+
+| Flag | Sets | Controls |
+|:---|:---|:---|
+| `--datasets-profile` / `--profile` | `EVAL_KBN_URL`, `EVAL_KBN_API_KEY` | **where datasets, experiments and scores are written** |
+| `--export-profile` | `TRACING_ES_URL`, `TRACING_ES_API_KEY`, `TRACING_EXPORTERS` | traces only |
+
+`--profile` sets both. The run log says which it used — check this line before letting it run:
+
+```
+info Profiles: datasets=cloud export=cloud
+```
+
+`datasets=config` means the scores are going to the local stack regardless of what you passed.
+
+### 4. An explicit connector id
+
+`evaluationConnectorId` in the profile config is **not read by the runner** — only
+`--evaluation-connector-id` and `$EVAL_CONNECTOR_ID` are. In a TTY the runner prompts; in a
+non-interactive shell it fails immediately with *"EVAL_CONNECTOR_ID is required"*.
+
+### The full command
+
+```bash
+node scripts/evals run \
+  --suite semantic-log-search --grep retrieval \
+  --profile cloud \
+  --evaluation-connector-id claude-sonnet-4-5-connector
+```
+
+Then read the scores back from the project, or open `<KBN_URL>/app/evals`:
+
+```bash
+curl -s -H "Authorization: ApiKey $KEY" -H 'Content-Type: application/json' \
+  "$ES_URL/.evaluation-scores*/_search" -d '{
+    "size": 0,
+    "aggs": { "arm": { "terms": { "field": "experiment_name", "size": 5 },
+      "aggs": { "ev": { "terms": { "field": "evaluator.name", "size": 20 },
+                "aggs": { "m": { "avg": { "field": "evaluator.score" } } } } } } }
+  }'
+```
+
+A complete retrieval run writes **264 score documents** (8 examples x 3 arms x 11 evaluators), one
+dataset and three experiments.
+
+**Caveat: the terminal arm-comparison table is wrong when storing remotely.** `logArmComparison`
+reads the Scout-local Elasticsearch rather than the configured evaluations store, so it renders
+whatever a previous local run left behind — or nothing. The stored scores are correct; the printed
+table is not. Trust `/app/evals` or the aggregation above.
+
+### Comparison links
+
+The UI takes `baseline` / `target`; the API takes `baseline_id` / `target_id`. Mixing them up
+produces "Missing experiment IDs". All arms of one run share an `execution_id`, so comparing arms
+needs `type=experiment` with per-arm `experiment_id`s:
+
+```
+<KBN_URL>/app/evals/compare?type=experiment&baseline=<keyword_id>&target=<semantic_id>
+```
+
+```bash
+# the per-arm experiment ids
+curl -s -H "Authorization: ApiKey $KEY" -H 'Content-Type: application/json' \
+  "$ES_URL/.evaluation-scores*/_search" -d '{
+    "size": 0,
+    "aggs": { "arm": { "terms": { "field": "experiment_name", "size": 10 },
+      "aggs": { "eid": { "terms": { "field": "experiment_id", "size": 3 } } } } }
+  }'
+```
+
+## Populating a cloud project with the corpus
+
+Only needed to drive the **tool** against the project (Agent Builder UI, manual `_execute` calls).
+The eval run above does *not* need it, because the tool executes against local Scout.
+
+`synthtrace` cannot guess cloud credentials — without `--apiKey` it probes `elastic:changeme` and
+fails with *"Failed to authenticate user"*:
+
+```bash
+node scripts/synthtrace sigevents \
+  --target="$ES_URL" \
+  --kibana="$KBN_URL" \
+  --apiKey="$KEY" \
+  --scenarioOpts="scenario=postgres_timeout,seed=42" \
+  --from=now-2h --to=now --clean
+```
+
+Count immediately afterwards and you may see `0` — the index has not refreshed yet, not a failed
+seed. `POST /logs-synth-default/_refresh` first. A full seed is ~2,600 documents.
+
+The corpus window is relative (`now-2h`), so it ages out: a corpus seeded more than two hours ago
+reads as empty and the run fails with *"No documents found"*. Re-seed rather than debug it.
+
 ## Understanding Results
 
 At the end of the run, you'll see a metrics table with one row group per arm.
@@ -646,6 +780,37 @@ EIS connectors need Cloud Connected Mode on Elasticsearch. Everything below appl
 only. Note the ordering trap: while CCM is off, the `eis-*` connectors do not appear in Kibana at
 all, so you cannot select one to escape Cause 1 until CCM is on. Enable CCM first, then switch
 connector.
+
+### "Invalid inference_id; '.anthropic-...-chat_completion' ... must start and end with alphanumeric"
+
+Every arm fails on connector creation, with a `400` from `POST /api/actions/connector`.
+
+`KIBANA_TESTING_AI_CONNECTORS` entries are created as **stack connectors** through the Actions API,
+and that path now rejects inference ids beginning with a dot. Every EIS default endpoint begins with
+a dot, so the whole cache is unusable this way — it is not specific to the connector you selected,
+and the error names whichever one is created first.
+
+The supported route for EIS is `KIBANA_TESTING_INFERENCE_ENDPOINTS`, whose `provider: 'elastic'`
+entries *bind* to a pre-provisioned endpoint instead of creating one. That only helps if the
+endpoints actually exist on the cluster: check with
+
+```bash
+curl -s -u elastic:changeme "http://localhost:9220/_inference/_all" |
+  python3 -c "import sys,json; print([e['inference_id'] for e in json.load(sys.stdin)['endpoints'] if e['service']=='elastic'])"
+```
+
+An empty list means no EIS endpoints are registered, and binding will block. The working fallback is
+the OpenRouter `.gen-ai` connector from `config/kibana.dev.yml`, which goes through the generic
+Actions path and has no inference id to validate:
+
+```bash
+unset KIBANA_TESTING_AI_CONNECTORS KIBANA_TESTING_INFERENCE_ENDPOINTS
+node scripts/evals run --suite semantic-log-search --grep retrieval \
+  --evaluation-connector-id claude-sonnet-4-5-connector
+```
+
+This contradicts the advice in Step 5 to prefer an `eis-*` id. Prefer EIS while it works; this is
+the escape hatch when it does not, and it needs a real OpenRouter key in `config/kibana.dev.yml`.
 
 ### "Evaluation connector id eis-... was not found, pick one from claude-sonnet-4-5-connector"
 
