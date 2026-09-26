@@ -502,7 +502,8 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
             onAssetCriticalityChange={calculateEntityRiskScore}
             isPreviewMode={isPreviewMode}
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
@@ -863,7 +864,8 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
             isPreviewMode={isPreviewMode}
             identityFields={documentEntityIdentifiers}
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
@@ -1156,6 +1158,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
