@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
+import { i18n } from '@kbn/i18n';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
@@ -46,6 +47,12 @@ import {
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
+import {
+  getUnrestorableMaskedParamKeys,
+  maskMonitorParams,
+  restoreMaskedMonitorParams,
+} from '../../../common/utils/mask_monitor_params';
+import { canRevealParameterValues } from '../../../common/utils/can_reveal_parameter_values';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -103,7 +110,38 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         return response.badRequest(getInvalidOriginError(monitor));
       }
 
-      let editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitor);
+      const submittedParams = toParamJson(monitor[ConfigKey.PARAMS]);
+      const previousParams = toParamJson(normalizedPreviousMonitor[ConfigKey.PARAMS]);
+      const capabilities = await server.coreStart?.capabilities?.resolveCapabilities(request, {
+        capabilityPath: 'uptime.*',
+      });
+      const shouldRestoreMaskedParams = !canRevealParameterValues({
+        canSave: Boolean(capabilities?.uptime?.save),
+        canReadParamValues: Boolean(capabilities?.uptime?.canReadParamValues),
+      });
+      const unrestorableParamKeys = shouldRestoreMaskedParams
+        ? getUnrestorableMaskedParamKeys({
+            previousParams,
+            submittedParams,
+          })
+        : [];
+      if (unrestorableParamKeys.length > 0) {
+        const message = getUnrestorableParamsMessage(unrestorableParamKeys);
+        return response.badRequest({ body: { message, attributes: { details: message } } });
+      }
+      // A submitted ******** is the masked placeholder, so keep the stored secret.
+      const monitorWithRestoredParams =
+        submittedParams === undefined || !shouldRestoreMaskedParams
+          ? monitor
+          : {
+              ...monitor,
+              [ConfigKey.PARAMS]: restoreMaskedMonitorParams({
+                previousParams,
+                submittedParams,
+              }),
+            };
+
+      let editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitorWithRestoredParams);
 
       editMonitorAPI.validateMonitorType(
         editedMonitor as MonitorFields,
@@ -131,7 +169,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       editedMonitor = await editMonitorAPI.normalizeMonitor(
         formattedConfig as CreateMonitorPayLoad,
-        monitor as CreateMonitorPayLoad,
+        monitorWithRestoredParams as CreateMonitorPayLoad,
         previousMonitor.attributes.locations,
         maintenanceWindows
       );
@@ -224,11 +262,18 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       editMonitorAPI.initDefaultAlerts(editedMonitorSavedObject.attributes.name);
 
       const warning = getBrowserTimeoutWarningForMonitor(monitorWithRevision, monitorId);
+      // Match GET semantics so authorized API clients can safely round-trip the response.
       const monitorResponse = mapSavedObjectToMonitor({
         internal: reqQuery.internal,
         monitor: {
           ...(editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>),
           created_at: previousMonitor.created_at,
+          attributes: {
+            ...editedMonitorSavedObject.attributes,
+            [ConfigKey.PARAMS]: shouldRestoreMaskedParams
+              ? maskMonitorParams(editedMonitorSavedObject.attributes[ConfigKey.PARAMS])
+              : editedMonitorSavedObject.attributes[ConfigKey.PARAMS],
+          },
         },
       });
       return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
@@ -405,6 +450,23 @@ export const validateLocationPermissions = async ({ server, request }: RouteCont
     canManagePrivateLocations,
     elasticManagedLocationsEnabled,
   };
+};
+
+const getUnrestorableParamsMessage = (keys: string[]) =>
+  i18n.translate('xpack.synthetics.editMonitor.unrestorableMaskedParams', {
+    defaultMessage:
+      'Enter a value for the following parameters. They have no stored value to keep: {keys}',
+    values: { keys: keys.join(', ') },
+  });
+
+const toParamJson = (params: unknown): string | undefined => {
+  if (typeof params === 'string') {
+    return params;
+  }
+  if (params == null) {
+    return undefined;
+  }
+  return JSON.stringify(params);
 };
 
 const getInvalidOriginError = (monitor: SyntheticsMonitor) => {

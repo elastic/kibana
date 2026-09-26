@@ -253,4 +253,265 @@ describe('editSyntheticsMonitorRoute', () => {
     expect(spacesArg).toEqual(expect.arrayContaining(['space-a', 'space-b']));
     expect(spacesArg).toHaveLength(2);
   });
+
+  it('restores masked parameter values before updating the monitor', async () => {
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
+    const forbidden = { status: 403 };
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
+
+    const { mergeSourceMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
+    const { routeContext } = getRouteContextMock();
+    routeContext.request = {
+      params: { monitorId },
+      query: {},
+      body: { [ConfigKey.PARAMS]: '{"password":"********"}' },
+    } as any;
+    routeContext.spaceId = 'default';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: {
+        id: monitorId,
+        type: 'synthetics-monitor-multi-space',
+        namespaces: ['default'],
+      },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.REVISION]: 3,
+          [ConfigKey.PARAMS]: '{"password":"changeme"}',
+          locations: [
+            { id: 'pl-1', label: 'PL 1', isServiceManaged: false, agentPolicyId: 'ap-1' },
+          ],
+        },
+      },
+    });
+
+    const result = await editSyntheticsMonitorRoute().handler(routeContext);
+
+    expect(result).toBe(forbidden);
+    expect(mergeSourceMonitor).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ [ConfigKey.PARAMS]: '{"password":"changeme"}' })
+    );
+  });
+
+  it('keeps a literal masked value submitted by a parameter reader', async () => {
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
+    const forbidden = { status: 403 };
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
+
+    const { mergeSourceMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
+    const { routeContext, serverMock } = getRouteContextMock();
+    serverMock.coreStart!.capabilities = {
+      resolveCapabilities: jest.fn().mockResolvedValue({
+        uptime: { save: true, canReadParamValues: true },
+      }),
+    } as any;
+    routeContext.request = {
+      params: { monitorId },
+      query: {},
+      body: { [ConfigKey.PARAMS]: '{"password":"********"}' },
+    } as any;
+    routeContext.spaceId = 'default';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: {
+        id: monitorId,
+        type: 'synthetics-monitor-multi-space',
+        namespaces: ['default'],
+      },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.REVISION]: 3,
+          [ConfigKey.PARAMS]: '{"password":"changeme"}',
+          locations: [],
+        },
+      },
+    });
+
+    await editSyntheticsMonitorRoute().handler(routeContext);
+
+    expect(mergeSourceMonitor).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ [ConfigKey.PARAMS]: '{"password":"********"}' })
+    );
+  });
+
+  it('rejects a masked parameter that has no stored value', async () => {
+    const { mergeSourceMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
+    mergeSourceMonitor.mockClear();
+    const { routeContext } = getRouteContextMock();
+    routeContext.response = {
+      ...routeContext.response,
+      badRequest: (value: unknown) => value,
+    };
+    routeContext.request = {
+      params: { monitorId },
+      query: {},
+      body: { [ConfigKey.PARAMS]: '{"token2":"********"}' },
+    } as any;
+    routeContext.spaceId = 'default';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: {
+        id: monitorId,
+        type: 'synthetics-monitor-multi-space',
+        namespaces: ['default'],
+      },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.REVISION]: 3,
+          [ConfigKey.PARAMS]: '{"token":"changeme"}',
+          locations: [],
+        },
+      },
+    });
+
+    const result = await editSyntheticsMonitorRoute().handler(routeContext);
+
+    expect(result.body.message).toContain('token2');
+    expect(mergeSourceMonitor).not.toHaveBeenCalled();
+  });
+
+  it('restores masked parameter objects submitted by the public API', async () => {
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
+    const forbidden = { status: 403 };
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
+
+    const { mergeSourceMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
+    const { routeContext } = getRouteContextMock();
+    routeContext.request = {
+      params: { monitorId },
+      query: {},
+      body: { [ConfigKey.PARAMS]: { password: '********' } },
+    } as any;
+    routeContext.spaceId = 'default';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: {
+        id: monitorId,
+        type: 'synthetics-monitor-multi-space',
+        namespaces: ['default'],
+      },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.REVISION]: 3,
+          [ConfigKey.PARAMS]: '{"password":"changeme"}',
+          locations: [
+            { id: 'pl-1', label: 'PL 1', isServiceManaged: false, agentPolicyId: 'ap-1' },
+          ],
+        },
+      },
+    });
+
+    await editSyntheticsMonitorRoute().handler(routeContext);
+
+    expect(mergeSourceMonitor).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ [ConfigKey.PARAMS]: '{"password":"changeme"}' })
+    );
+  });
+
+  it.each([
+    {
+      title: 'masks parameter values in the edit response for a caller without read permission',
+      canReadParamValues: false,
+      submittedParams: '{"password":"********"}',
+      expectedParams: '{"password":"********"}',
+    },
+    {
+      title: 'returns parameter values in the edit response for an authorized caller',
+      canReadParamValues: true,
+      submittedParams: '{"password":"changeme"}',
+      expectedParams: '{"password":"changeme"}',
+    },
+  ])('$title', async ({ canReadParamValues, submittedParams, expectedParams }) => {
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(null);
+
+    const { mapSavedObjectToMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
+    mapSavedObjectToMonitor.mockImplementation(
+      ({ monitor }: { monitor: { attributes: Record<string, unknown> } }) => monitor.attributes
+    );
+
+    const { routeContext, serverMock } = getRouteContextMock();
+    serverMock.coreStart!.capabilities = {
+      resolveCapabilities: jest.fn().mockResolvedValue({
+        uptime: { save: true, canReadParamValues },
+      }),
+    } as any;
+    routeContext.response = {
+      ok: (value: unknown) => value,
+      badRequest: (value: unknown) => value,
+      forbidden: (value: unknown) => value,
+      customError: (value: unknown) => value,
+    };
+    const savedObject = {
+      id: monitorId,
+      type: 'synthetics-monitor',
+      attributes: { name: 'my mon' },
+      references: [],
+    };
+    (serverMock.authSavedObjectsClient?.update as jest.Mock).mockResolvedValue(savedObject);
+    serverMock.authSavedObjectsClient!.delete = jest.fn().mockResolvedValue({});
+    serverMock.authSavedObjectsClient!.create = jest.fn().mockResolvedValue(savedObject);
+    routeContext.syntheticsMonitorClient.editMonitors = jest.fn().mockResolvedValue({
+      failedPolicyUpdates: [],
+      publicSyncErrors: [],
+    });
+    routeContext.request = {
+      params: { monitorId },
+      query: { internal: true },
+      body: {
+        [ConfigKey.MONITOR_TYPE]: 'http',
+        [ConfigKey.PARAMS]: submittedParams,
+      },
+    } as any;
+    routeContext.spaceId = 'default';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: {
+        id: monitorId,
+        type: 'synthetics-monitor',
+        namespaces: ['default'],
+      },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          name: 'my mon',
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.REVISION]: 3,
+          [ConfigKey.PARAMS]: '{"password":"changeme"}',
+          locations: [
+            { id: 'pl-1', label: 'PL 1', isServiceManaged: false, agentPolicyId: 'ap-1' },
+          ],
+        },
+      },
+    });
+
+    const result = await editSyntheticsMonitorRoute().handler(routeContext);
+
+    expect(result[ConfigKey.PARAMS]).toBe(expectedParams);
+    const writeCall =
+      (serverMock.authSavedObjectsClient?.create as jest.Mock).mock.calls[0] ??
+      (serverMock.authSavedObjectsClient?.update as jest.Mock).mock.calls[0];
+    const savedAttributes = writeCall[1].secrets ? writeCall[1] : writeCall[2];
+    const savedSecrets = JSON.parse(savedAttributes.secrets);
+    expect(savedSecrets[ConfigKey.PARAMS]).toBe('{"password":"changeme"}');
+  });
 });

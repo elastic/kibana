@@ -8,6 +8,8 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { Redirect, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
@@ -46,7 +48,7 @@ export const MonitorAddPage = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const { register, primaryActionItem } = useInspectMonitorHeader();
 
-  const { data: cloneMonitor, loading: cloneMonitorLoading } = useCloneMonitor();
+  const { data: cloneMonitor, loading: cloneMonitorLoading, paramsOmitted } = useCloneMonitor();
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -91,6 +93,17 @@ export const MonitorAddPage = () => {
                 : undefined
             }
           >
+            {paramsOmitted && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="warning"
+                  title={PARAMETERS_OMITTED_FROM_CLONE}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <DisabledCallout />
             <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
             <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
@@ -100,3 +113,11 @@ export const MonitorAddPage = () => {
     </InspectMonitorHeaderProvider>
   );
 };
+
+const PARAMETERS_OMITTED_FROM_CLONE = i18n.translate(
+  'xpack.synthetics.monitorAdd.cloneParamsOmitted',
+  {
+    defaultMessage:
+      'Parameter values were omitted because you do not have permission to read them.',
+  }
+);

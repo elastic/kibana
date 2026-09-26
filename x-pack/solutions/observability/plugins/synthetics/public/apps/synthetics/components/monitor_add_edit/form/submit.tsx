@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { MONITORS_ROUTE } from '../../../../../../common/constants';
 import { useEnablement } from '../../../hooks';
 import { RunTestButton } from './run_test_btn';
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
@@ -22,8 +23,6 @@ import type { SyntheticsMonitor } from '../types';
 import { ConfigKey, SourceType } from '../types';
 import { format } from './formatter';
 import { getAddMonitorCancelHref } from './cancel_href';
-
-import { MONITORS_ROUTE } from '../../../../../../common/constants';
 
 export const ActionBar = ({
   readOnly = false,
@@ -44,18 +43,21 @@ export const ActionBar = ({
 
   const [monitorsPendingDeletion, setMonitorsPendingDeletion] = useState<string[]>([]);
 
-  const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
+  const [submission, setSubmission] = useState<SyntheticsMonitor | undefined>(undefined);
 
-  const { status, loading, isEdit } = useMonitorSave({ monitorData });
+  const { status, loading, isEdit } = useMonitorSave({
+    submission,
+  });
 
   const canEditSynthetics = useCanEditSynthetics();
 
   const { isServiceAllowed } = useEnablement();
 
   const formSubmitter = (formData: Record<string, any>) => {
-    if (isValid) {
-      setMonitorData(format(formData, readOnly));
+    if (!isValid) {
+      return;
     }
+    setSubmission(format(formData, readOnly));
   };
 
   return status === FETCH_STATUS.SUCCESS ? (

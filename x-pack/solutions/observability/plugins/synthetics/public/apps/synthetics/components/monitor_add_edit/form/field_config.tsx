@@ -101,6 +101,7 @@ import { getDefaultFormFields } from './defaults';
 import { parsePemCertificateEntries } from './parse_pem_certificate_entries';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
+import { ParameterValuesEditor } from '../fields/parameter_values';
 
 export const API_PRIVATE_LOCATIONS_ONLY = i18n.translate(
   'xpack.synthetics.monitorConfig.locations.apiPrivateOnlyErrorMessage',
@@ -1138,19 +1139,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Parameters',
     }),
     controlled: true,
-    component: JSONEditor,
-    props: (): JSONCodeEditorProps => ({
-      id: 'syntheticsMonitorConfigParams',
-      height: '100px',
-      ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.paramsAria.label', {
-        defaultMessage: 'Monitor params code editor',
-      }),
+    component: ParameterValuesEditor,
+    props: () => ({
       readOnly,
     }),
     helpText: (
       <FormattedMessage
         id="xpack.synthetics.monitorConfig.params.helpText"
-        defaultMessage="Use JSON to define parameters that can be referenced in your script with {paramsValue}"
+        defaultMessage="Add key-value parameters that can be referenced in your script with {paramsValue}. Leave a hidden value unchanged to keep the stored secret."
         values={{
           paramsValue: <EuiCode>{'params.value'}</EuiCode>,
         }}
@@ -1212,8 +1208,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     validation: () => ({
       validate: {
-        validBodyJSON: (value: Record<string, string>) => {
-          if (Object.entries(value).some((check) => !check[0] || !check[1])) {
+        validBodyJSON: (value?: Record<string, string> | null) => {
+          if (value && Object.entries(value).some((check) => !check[0] || !check[1])) {
             return i18n.translate('xpack.synthetics.monitorConfig.metaFields.error', {
               defaultMessage:
                 'This meta fields is not valid. Make sure that both the field and value are defined.',

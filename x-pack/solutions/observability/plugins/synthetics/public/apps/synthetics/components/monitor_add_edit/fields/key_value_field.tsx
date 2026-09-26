@@ -7,6 +7,7 @@
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -79,38 +80,51 @@ export const KeyValuePairsField = ({
   const keyLabelId = useGeneratedHtmlId({ prefix: 'keyValuePairsKeyLabel' });
   const valueLabelId = useGeneratedHtmlId({ prefix: 'keyValuePairsValueLabel' });
 
+  useEffect(() => {
+    setPairs((prevPairs) => {
+      if (isEqual(prevPairs, defaultPairs)) {
+        return prevPairs;
+      }
+      // Parents drop rows that do not have a key yet. Keep those in-progress rows.
+      const committedPairs = prevPairs.filter(([key]) => key);
+      if (isEqual(committedPairs, defaultPairs)) {
+        return prevPairs;
+      }
+      return defaultPairs;
+    });
+  }, [defaultPairs]);
+
+  const updatePairs = useCallback(
+    (nextPairs: Pair[]) => {
+      setPairs(nextPairs);
+      onChange(nextPairs);
+    },
+    [onChange]
+  );
+
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, index: number, isKey: boolean) => {
       const targetValue = event.target.value;
-
-      setPairs((prevPairs) => {
-        const newPairs = [...prevPairs];
-        const [prevKey, prevValue] = prevPairs[index];
-        newPairs[index] = isKey ? [targetValue, prevValue] : [prevKey, targetValue];
-        return newPairs;
-      });
+      const newPairs = [...pairs];
+      const [prevKey, prevValue] = pairs[index];
+      newPairs[index] = isKey ? [targetValue, prevValue] : [prevKey, targetValue];
+      updatePairs(newPairs);
     },
-    [setPairs]
+    [pairs, updatePairs]
   );
 
   const handleAddPair = useCallback(() => {
-    setPairs((prevPairs) => [['', ''], ...prevPairs]);
-  }, [setPairs]);
+    updatePairs([['', ''], ...pairs]);
+  }, [pairs, updatePairs]);
 
   const handleDeletePair = useCallback(
     (index: number) => {
-      setPairs((prevPairs) => {
-        const newPairs = [...prevPairs];
-        newPairs.splice(index, 1);
-        return [...newPairs];
-      });
+      const newPairs = [...pairs];
+      newPairs.splice(index, 1);
+      updatePairs(newPairs);
     },
-    [setPairs]
+    [pairs, updatePairs]
   );
-
-  useEffect(() => {
-    onChange(pairs);
-  }, [onChange, pairs]);
 
   return (
     <div data-test-subj={dataTestSubj}>
