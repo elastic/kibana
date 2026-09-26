@@ -10,6 +10,7 @@ import { emptyDatasetFormValues } from './dataset_form_initial_values';
 import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
+  validateEscapeCharacter,
   validateMaxErrors,
   validatePartitionPath,
   validateSkipRows,
@@ -70,6 +71,30 @@ describe('create_dataset_form_state', () => {
       expect(validateMaxErrors('-1')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
       expect(validateMaxErrors('1.5')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
       expect(validateMaxErrors('abc')).toBe(createDatasetWizardStrings.settingsMaxErrorsInvalid);
+    });
+  });
+
+  describe('validateEscapeCharacter', () => {
+    it('accepts empty and a single character', () => {
+      expect(validateEscapeCharacter('')).toBe(true);
+      expect(validateEscapeCharacter('\\')).toBe(true);
+      expect(validateEscapeCharacter('/')).toBe(true);
+    });
+
+    it('accepts two characters when the first is a backslash', () => {
+      expect(validateEscapeCharacter('\\t')).toBe(true);
+      expect(validateEscapeCharacter('\\\\')).toBe(true);
+      expect(validateEscapeCharacter('\\n')).toBe(true);
+    });
+
+    it('rejects two characters when the first is not a backslash', () => {
+      expect(validateEscapeCharacter('ab')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
+      expect(validateEscapeCharacter('""')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
+    });
+
+    it('rejects values longer than two characters', () => {
+      expect(validateEscapeCharacter('abc')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
+      expect(validateEscapeCharacter('\\abc')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
     });
   });
 

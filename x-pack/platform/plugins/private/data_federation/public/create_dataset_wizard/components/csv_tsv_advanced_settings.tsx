@@ -90,7 +90,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           data-test-subj="createDatasetSettingsEscape"
           fullWidth
           placeholder={createDatasetWizardStrings.settingsEscapePlaceholder}
-          maxLength={1}
+          maxLength={2}
           isInvalid={Boolean(escapeState.error)}
           value={escapeField.value}
           onChange={(e) => escapeField.onChange(e.target.value)}

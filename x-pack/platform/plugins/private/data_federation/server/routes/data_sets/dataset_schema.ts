@@ -95,7 +95,17 @@ export const datasetSchema = schema.object({
       max_error_ratio: schema.maybe(schema.number({ min: 0, max: 1 })),
       // CSV/TSV advanced
       quote: schema.maybe(schema.string({ maxLength: 1, minLength: 1 })),
-      escape: schema.maybe(schema.string({ maxLength: 1, minLength: 1 })),
+      escape: schema.maybe(
+        schema.string({
+          maxLength: 2,
+          minLength: 1,
+          validate: (value) => {
+            if (value.length === 1) return;
+            if (value.length === 2 && value.startsWith('\\')) return;
+            return 'Must be a single character, or a backslash followed by a character.';
+          },
+        })
+      ),
       comment: optionalString,
       column_prefix: optionalString,
       trim_spaces: schema.maybe(schema.boolean()),

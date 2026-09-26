@@ -179,8 +179,14 @@ const validateSingleCharacter = (value: string, errorMessage: string): true | st
 export const validateQuoteCharacter = (value: string): true | string =>
   validateSingleCharacter(value, createDatasetWizardStrings.settingsQuoteInvalid);
 
-export const validateEscapeCharacter = (value: string): true | string =>
-  validateSingleCharacter(value, createDatasetWizardStrings.settingsEscapeInvalid);
+export const validateEscapeCharacter = (value: string): true | string => {
+  if (!value) return true;
+
+  if (value.length === 1) return true;
+  if (value.length === 2 && value.startsWith('\\')) return true;
+
+  return createDatasetWizardStrings.settingsEscapeInvalid;
+};
 
 /**
  * Maps form values to settings for the API payload.

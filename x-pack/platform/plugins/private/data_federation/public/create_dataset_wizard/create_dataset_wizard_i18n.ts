@@ -950,7 +950,7 @@ export const createDatasetWizardStrings = {
   settingsEscapeInvalid: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEscapeInvalid',
     {
-      defaultMessage: 'Must be a single character.',
+      defaultMessage: 'Must be a single character, or a backslash followed by a character.',
     }
   ),
 
