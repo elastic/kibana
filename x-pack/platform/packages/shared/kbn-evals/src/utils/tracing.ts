@@ -7,13 +7,14 @@
 
 import { createWithActiveSpan, type WithActiveSpanOptions } from '@kbn/tracing-utils';
 import { ROOT_CONTEXT, context, propagation, trace } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
 
 const EVALS_TRACER = trace.getTracer('@kbn/evals');
 const withActiveEvalsSpan = createWithActiveSpan({
   tracer: EVALS_TRACER,
 });
 
-export function withTaskSpan(name: string, opts: WithActiveSpanOptions, cb: () => any) {
+export function withTaskSpan(name: string, opts: WithActiveSpanOptions, cb: (span?: Span) => any) {
   const baggage = propagation.getBaggage(context.active());
   const parentContext = baggage ? propagation.setBaggage(ROOT_CONTEXT, baggage) : ROOT_CONTEXT;
 
@@ -38,7 +39,11 @@ export function withTaskSpan(name: string, opts: WithActiveSpanOptions, cb: () =
  * Use this wrapper when you want to include trace-based metrics with evaluations and use qualitative evaluators within the
  * context of a Phoenix task. This ensures the evaluator spans get new root context and have a different trace id than the evaluated example span.
  */
-export function withEvaluatorSpan(name: string, opts: WithActiveSpanOptions, cb: () => any) {
+export function withEvaluatorSpan(
+  name: string,
+  opts: WithActiveSpanOptions,
+  cb: (span?: Span) => any
+) {
   // Execute callback in the context with baggage
   const baggage = propagation.getBaggage(context.active());
   const parentContext = baggage ? propagation.setBaggage(ROOT_CONTEXT, baggage) : ROOT_CONTEXT;
