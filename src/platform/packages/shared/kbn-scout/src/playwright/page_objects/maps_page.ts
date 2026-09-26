@@ -219,7 +219,20 @@ export class MapsPage {
     await this.waitForMapPanAndZoom();
   }
 
-  async waitForMapPanAndZoom() {
+  async waitForMapPanAndZoom(origView?: { lat: number; lon: number; zoom: number }) {
+    if (origView) {
+      // Wait until the view has changed from origView (pan has started).
+      await expect
+        .poll(
+          async () => {
+            const currentView = await this.getView();
+            return JSON.stringify(currentView) !== JSON.stringify(origView);
+          },
+          { timeout: DEFAULT_MAP_LOADING_TIMEOUT, intervals: [500] }
+        )
+        .toBe(true);
+    }
+
     let prevView: { lat: number; lon: number; zoom: number } | undefined;
     await expect
       .poll(
@@ -243,6 +256,111 @@ export class MapsPage {
     const zoom = await this.page.testSubj.locator('zoomInput').inputValue();
     await this.closeSetViewPopover();
     return { lat: parseFloat(lat), lon: parseFloat(lon), zoom: parseFloat(zoom) };
+  }
+
+  async openMapWithId(id: string) {
+    await this.page.gotoApp(`maps/map/${id}`);
+    await this.waitForLayersToLoad();
+  }
+
+  /** Opens the inspector panel from the Maps top nav. */
+  private async openInspectorPanel() {
+    await this.appMenu.clickItem('openInspectorButton');
+    await this.page.testSubj.locator('inspectorPanel').waitFor({ state: 'visible' });
+  }
+
+  /** Closes the inspector panel. */
+  private async closeInspectorPanel() {
+    await this.page.testSubj.click('euiFlyoutCloseButton');
+    await this.page.testSubj.locator('inspectorPanel').waitFor({ state: 'hidden' });
+  }
+
+  /** Switches the inspector to its Requests view. */
+  private async openInspectorRequestsView() {
+    await this.page.testSubj.click('inspectorViewChooser');
+    await this.page.testSubj.click('inspectorViewChooserRequests');
+  }
+
+  /** Reads the first Monaco editor model's text content from the page context. */
+  private async getMonacoEditorContent(): Promise<string> {
+    return this.page.evaluate(() => {
+      const monaco = (window as any).MonacoEnvironment?.monaco;
+      const models = monaco?.editor?.getModels?.() ?? [];
+      return (models[0]?.getValue() ?? '') as string;
+    });
+  }
+
+  /**
+   * Opens the inspector, selects a request by name, reads its raw JSON response,
+   * closes the inspector, and returns the parsed response body.
+   */
+  async getResponse(requestName: string): Promise<{ rawResponse: any }> {
+    await this.openInspectorPanel();
+    await this.openInspectorRequestsView();
+
+    const comboBox = this.page.components.comboBox('inspectorRequestChooser');
+    await comboBox.setSelectedOptions([requestName]);
+
+    await this.page.testSubj.click('inspectorRequestDetailResponse');
+    await this.page.locator('.react-monaco-editor-container').waitFor({ state: 'visible' });
+
+    const responseBody = await this.getMonacoEditorContent();
+    await this.closeInspectorPanel();
+    return { rawResponse: JSON.parse(responseBody) };
+  }
+
+  /**
+   * Opens the inspector, reads the "Hits" value from the request statistics table,
+   * closes the inspector, and returns it as a string.
+   */
+  async getHits(): Promise<string> {
+    await this.openInspectorPanel();
+    await this.openInspectorRequestsView();
+    await this.page.testSubj.click('inspectorRequestDetailStatistics');
+
+    const inspectorPanel = this.page.testSubj.locator('inspectorPanel');
+    await inspectorPanel.locator('tbody').waitFor({ state: 'visible' });
+
+    const rows: string[][] = await inspectorPanel.locator('tbody tr').evaluateAll((trs) =>
+      trs.map((tr) =>
+        Array.from(tr.querySelectorAll('td')).map((td) => {
+          const content = td.querySelector('.euiTableCellContent');
+          return (content ?? td).textContent?.trim() ?? '';
+        })
+      )
+    );
+
+    const hitsRow = rows.find((row) => row[0] === 'Hits');
+    const hits = hitsRow?.[1] ?? '0';
+
+    await this.closeInspectorPanel();
+    return hits;
+  }
+
+  /** Opens the map settings panel and enables "Auto fit map to data bounds". */
+  async enableAutoFitToBounds() {
+    await this.appMenu.clickItem('openSettingsButton');
+    const autoFitSwitch = this.page.testSubj.locator('autoFitToDataBoundsSwitch');
+    await autoFitSwitch.waitFor({ state: 'visible' });
+    if ((await autoFitSwitch.getAttribute('aria-checked')) !== 'true') {
+      await autoFitSwitch.click();
+      await this.page.waitForFunction(
+        (subj) =>
+          document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
+          'true',
+        'autoFitToDataBoundsSwitch'
+      );
+    }
+    await this.page.testSubj.click('mapSettingSubmitButton');
+  }
+
+  /** Sets the KQL query in the search bar, submits it, and waits for layers to load. */
+  async setAndSubmitQuery(query: string) {
+    const input = this.page.testSubj.locator('queryInput');
+    await input.clear();
+    await input.pressSequentially(query);
+    await this.page.testSubj.click('querySubmitButton');
+    await this.waitForLayersToLoad();
   }
 
   /**
