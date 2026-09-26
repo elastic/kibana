@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { ActionPoliciesApi } from '../services/action_policies_api';
+import { invalidateMatchedActionPolicies } from './invalidate_matched_action_policies';
 import { actionPolicyKeys } from './query_key_factory';
 
 export const useDeleteActionPolicy = () => {
@@ -20,6 +21,7 @@ export const useDeleteActionPolicy = () => {
     mutationFn: (id) => actionPoliciesApi.deleteActionPolicy(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
+      invalidateMatchedActionPolicies(queryClient);
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.actionPolicy.deleteSuccess', {
           defaultMessage: 'Action policy deleted successfully',

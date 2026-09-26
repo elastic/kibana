@@ -145,7 +145,7 @@ const mockUseKibanaReturnValue = {
       },
     },
     featureFlags: {
-      getBooleanValue: jest.fn().mockReturnValue(false),
+      useBooleanValue: jest.fn().mockReturnValue(false),
     },
     lens: {
       EmbeddableComponent: () => null,
@@ -310,12 +310,12 @@ describe('AttackDiscovery', () => {
 
   describe('workflows insufficient privileges callout', () => {
     afterEach(() => {
-      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+      mockUseKibanaReturnValue.services.featureFlags.useBooleanValue.mockReturnValue(false);
       mockUseKibanaReturnValue.services.uiSettings.get.mockReturnValue(false);
     });
 
     it('renders the insufficient privileges callout when workflows are enabled but privileges are missing', async () => {
-      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
+      mockUseKibanaReturnValue.services.featureFlags.useBooleanValue.mockReturnValue(true);
       mockUseKibanaReturnValue.services.uiSettings.get.mockReturnValue(true);
 
       render(
@@ -334,7 +334,7 @@ describe('AttackDiscovery', () => {
     });
 
     it('does not render the insufficient privileges callout when workflows are disabled', () => {
-      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+      mockUseKibanaReturnValue.services.featureFlags.useBooleanValue.mockReturnValue(false);
 
       render(
         <TestProviders>

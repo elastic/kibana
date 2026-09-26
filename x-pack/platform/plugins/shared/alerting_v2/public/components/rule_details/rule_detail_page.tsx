@@ -260,7 +260,14 @@ export const RuleDetailPage: React.FunctionComponent = () => {
             }
           `}
         >
-          <EuiSplitPanel.Inner grow paddingSize="none" data-test-subj="ruleDetailOverviewColumn">
+          <EuiSplitPanel.Inner
+            grow
+            paddingSize="none"
+            data-test-subj="ruleDetailOverviewColumn"
+            css={css`
+              min-inline-size: 0;
+            `}
+          >
             <EuiPanel
               hasBorder={false}
               hasShadow={false}

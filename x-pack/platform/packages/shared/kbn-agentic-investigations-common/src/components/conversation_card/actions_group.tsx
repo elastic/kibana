@@ -28,6 +28,11 @@ export interface ConversationsActionsGroupProps {
   chatHref?: string;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
   canManageEscalations?: boolean;
+  /**
+   * When true the "Close investigation" action is shown. Should only be true when the
+   * caller supplies a real handler; without it the fallback modal does nothing.
+   */
+  canCloseInvestigation?: boolean;
 }
 
 /**
@@ -43,6 +48,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     onOpenChat,
     chatHref,
     canManageEscalations,
+    canCloseInvestigation,
   }) => {
     const { euiTheme } = useEuiTheme();
     const handleChatClick = useMemo(() => createCardLinkClickHandler(onOpenChat), [onOpenChat]);
@@ -82,6 +88,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
                 onClickAction={onClickAction}
                 onClickRecommendedAction={onClickRecommendedAction}
                 canManageEscalations={canManageEscalations}
+                canCloseInvestigation={canCloseInvestigation}
               />
             </EuiFlexItem>
           </>
