@@ -13,6 +13,7 @@ import { SUMMARIZE_HIT_SOURCE_FIELDS } from './common/summarize_hit';
 jest.mock('./common/resolve_index_scope', () => ({
   resolveHuntScope: jest.fn().mockResolvedValue({
     technologies: ['aws_iam'],
+    index_patterns: ['logs-aws.cloudtrail-*'],
     status: 'ok',
     required: ['logs-aws.cloudtrail-*'],
     optional: [],
@@ -191,6 +192,126 @@ describe('huntCoordinator', () => {
     expect(result.technologies).toEqual(['aws_iam']);
   });
 
+  it('reports the index patterns the scope resolved to', async () => {
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-6-patterns',
+      }
+    );
+    expect(result.index_patterns).toEqual(['logs-aws.cloudtrail-*']);
+  });
+
+  describe('what scope resolution is handed', () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+
+    beforeEach(() => {
+      mockScope.mockClear();
+    });
+
+    it('passes the report context and the model so datasets can be discovered for the report', async () => {
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        vendor: 'Fortinet',
+        product: 'FortiOS',
+      });
+      const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
+        report_id: 'rpt-1',
+        spaceId: 'hunt-a',
+        trigger: 'scheduled',
+        run_id: 'run-scope-report',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith({
+        esClient,
+        spaceId: 'hunt-a',
+        technology: undefined,
+        report: {
+          vendor: 'Fortinet',
+          product: 'FortiOS',
+          text: 'report body text',
+          iocs: [{ type: 'ip', value: '192.0.2.30' }],
+          techniques: ['T1078.004'],
+        },
+        model: mockModel,
+        logger,
+      });
+    });
+
+    it('hands over what the caller supplied when the caller overrode the report', async () => {
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        vendor: 'Fortinet',
+      });
+
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        report_id: 'rpt-1',
+        spaceId: 'hunt-a',
+        trigger: 'manual',
+        run_id: 'run-scope-caller-wins',
+        iocs: [{ type: 'domain', value: 'evil.example' }],
+        text: 'caller text',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({
+          report: {
+            vendor: 'Fortinet',
+            product: undefined,
+            text: 'caller text',
+            iocs: [{ type: 'domain', value: 'evil.example' }],
+            techniques: ['T1078.004'],
+          },
+          model: undefined,
+        })
+      );
+    });
+
+    it('passes no report on a bare call with neither a report id nor caller inputs', async () => {
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-scope-bare',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default', report: undefined })
+      );
+    });
+
+    it('still passes the caller inputs as the report context without a report id', async () => {
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        spaceId: 'default',
+        trigger: 'manual',
+        run_id: 'run-scope-adhoc',
+        techniques: ['T1566'],
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({
+          report: {
+            vendor: undefined,
+            product: undefined,
+            text: undefined,
+            iocs: [],
+            techniques: ['T1566'],
+          },
+        })
+      );
+    });
+  });
+
   it('echoes the caller-supplied run_id', async () => {
     const result = await huntCoordinator(
       { esClient, reportsEsClient: esClient },
@@ -214,6 +335,7 @@ describe('huntCoordinator', () => {
       mockT1.mockClear();
       mockScope.mockResolvedValueOnce({
         technologies: [],
+        index_patterns: [],
         status: 'blocked',
         required: ['logs-aws.*', 'logs-fortinet.*'],
         optional: [],
@@ -232,6 +354,17 @@ describe('huntCoordinator', () => {
       expect(result.status).toBe('blocked');
     });
 
+    it('reports no index patterns, since nothing was hunted', () => {
+      expect(result.index_patterns).toEqual([]);
+    });
+
+    it('keeps the static wording for a bare call, since nothing was matched against a report', () => {
+      expect(result.message).toContain(
+        'No required index resolved for any configured technology in space default'
+      );
+      expect(result.next_step).toContain('Install the integration whose indices this hunt needs');
+    });
+
     it('does not report the run as completed, so no hunt evidence is written', () => {
       expect(result.completed_successfully).toBe(false);
     });
@@ -248,6 +381,106 @@ describe('huntCoordinator', () => {
       const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
       expect(mockT1).not.toHaveBeenCalled();
     });
+  });
+
+  it('says neither a known technology nor a discovered dataset matched when a report was given and nothing was pinned', async () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    mockScope.mockResolvedValueOnce({
+      technologies: [],
+      index_patterns: [],
+      status: 'blocked',
+      required: ['logs-aws.*', 'logs-fortinet.*'],
+      optional: [],
+      missing: ['logs-aws.*', 'logs-fortinet.*'],
+      window: { from: 'now-24h', to: 'now' },
+      row_limit: 100,
+    });
+
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-7',
+        iocs: [{ type: 'ip', value: '203.0.113.10' }],
+      }
+    );
+
+    expect(result.status).toBe('blocked');
+    expect(result.message).toContain("No known technology's indices exist in space default");
+    expect(result.message).toContain('no discovered dataset matched the report');
+    expect(result.next_step).toContain("Install an integration for the report's vendor");
+    expect(result.next_step).toContain('pin a technology');
+  });
+
+  it('names the pinned technology when a pinned scope is blocked', async () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    mockScope.mockResolvedValueOnce({
+      technologies: ['fortigate'],
+      index_patterns: [],
+      status: 'blocked',
+      required: ['logs-fortinet.*'],
+      optional: [],
+      missing: ['logs-fortinet.*'],
+      window: { from: 'now-24h', to: 'now' },
+      row_limit: 100,
+    });
+
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-7-pinned',
+        technology: 'fortigate',
+      }
+    );
+
+    expect(result.status).toBe('blocked');
+    expect(result.message).toContain('No required index resolved for fortigate');
+    expect(result.next_step).toContain('pass a technology whose indices exist');
+  });
+
+  it('returns a blocked dynamic scope with no index patterns when discovery found nothing for the report', async () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    mockScope.mockResolvedValueOnce({
+      technologies: [],
+      index_patterns: [],
+      status: 'blocked',
+      required: [],
+      optional: [],
+      missing: [],
+      window: { from: 'now-24h', to: 'now' },
+      row_limit: 100,
+    });
+
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'hunt-a',
+        trigger: 'scheduled',
+        run_id: 'run-dynamic-blocked',
+        report_id: 'rpt-1',
+      }
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'blocked',
+        technologies: [],
+        index_patterns: [],
+        tier2_skipped_reason: 'scope_blocked',
+        message: expect.stringContaining('no discovered dataset matched the report'),
+        next_step: expect.stringContaining("Install an integration for the report's vendor"),
+        completed_successfully: false,
+      })
+    );
   });
 
   it('skips Tier 2 with configured_never and still completes', async () => {
@@ -460,6 +693,8 @@ describe('huntCoordinator', () => {
       expect(mockT1).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
+          technologies: [],
+          index_patterns: [],
           tier2_skipped_reason: 'report_not_found',
           has_confirmed_hit: false,
           completed_successfully: false,
@@ -817,6 +1052,31 @@ describe('huntCoordinator', () => {
       expect(tier2Params.article_context).not.toHaveProperty('matched_indices');
       expect(tier2Params.required_indices).toEqual(['logs-aws.cloudtrail-*']);
     });
+  });
+
+  it('returns no index patterns when scope resolution throws', async () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    mockScope.mockRejectedValueOnce(new Error('resolve failed'));
+
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-scope-threw',
+      }
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'tier1_only',
+        technologies: [],
+        index_patterns: [],
+        completed_successfully: false,
+      })
+    );
   });
 
   it('never writes feedback — completed_successfully is the caller signal', async () => {

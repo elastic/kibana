@@ -71,6 +71,13 @@ export interface HuntCoordinatorResult {
   run_id: string;
   /** Technologies whose indices the hunt actually ran against; empty when the scope was blocked. */
   technologies: HuntTechnology[];
+  /**
+   * Index patterns the hunt ran against: the scope's resolved required patterns, whether
+   * they came from a pinned or environment-resolved technology or from datasets discovered
+   * for the report. Empty when the scope was blocked, when resolution failed, or when the
+   * run stopped before a scope existed.
+   */
+  index_patterns: string[];
   tier1: HuntCoordinatorTier1;
   tier2?: HuntCoordinatorTier2;
   tier2_skipped_reason?: HuntCoordinatorTier2SkipReason;
@@ -357,6 +364,7 @@ export const huntCoordinator = async (
       report_id: reportId,
       run_id,
       technologies: [],
+      index_patterns: [],
       tier1: {
         tier: 1,
         ...emptyHuntForThreatResult(
@@ -440,10 +448,33 @@ export const huntCoordinator = async (
   };
 
   // Resolve the index scope from the environment: the named technology, or every
-  // technology whose required indices exist in this space.
+  // technology whose required indices exist in this space, or, failing that, the
+  // datasets present in the space that match what the report is about. The report
+  // context is only handed over when there is a report to match against, so a bare
+  // call with neither a report nor caller inputs resolves exactly as it always has.
+  const hasReportContext =
+    reportId !== undefined ||
+    callerText !== undefined ||
+    callerIocs !== undefined ||
+    callerTechniques !== undefined;
   let scope: HuntScope;
   try {
-    scope = await resolveHuntScope({ esClient, spaceId, technology });
+    scope = await resolveHuntScope({
+      esClient,
+      spaceId,
+      technology,
+      report: hasReportContext
+        ? {
+            vendor: reportContext?.vendor,
+            product: reportContext?.product,
+            text,
+            iocs,
+            techniques,
+          }
+        : undefined,
+      model,
+      logger,
+    });
   } catch (err) {
     logger.warn(`hunt_coordinator: scope resolution failed — ${(err as Error).message}`);
     // Return a degraded result rather than hard-failing.
@@ -462,6 +493,7 @@ export const huntCoordinator = async (
       report_id: reportId,
       run_id,
       technologies: [],
+      index_patterns: [],
       tier1: emptyTier1,
       tier2_skipped_reason: 'no_searchable_input',
       message: `Scope resolution failed: ${(err as Error).message}`,
@@ -480,15 +512,25 @@ export const huntCoordinator = async (
   // A blocked scope is a failed run, never a clean one: no required index exists,
   // so there is nothing to hunt and the caller must not write hunt evidence.
   if (indexScope.status === 'blocked') {
+    // With no pinned technology, none resolved, and a report to match against, the
+    // dynamic path also ran and matched nothing: the space holds neither a known
+    // technology's indices nor a dataset the report's vendor or product points at.
+    const nothingMatched =
+      technology === undefined && technologies.length === 0 && hasReportContext;
     const target = technology ?? 'any configured technology';
-    const message = `No required index resolved for ${target} in space ${spaceId} (missing: ${indexScope.missing.join(
-      ', '
-    )}).`;
+    const message = nothingMatched
+      ? `No known technology's indices exist in space ${spaceId} and no discovered dataset matched the report (missing: ${indexScope.missing.join(
+          ', '
+        )}).`
+      : `No required index resolved for ${target} in space ${spaceId} (missing: ${indexScope.missing.join(
+          ', '
+        )}).`;
     return {
       status: 'blocked',
       report_id: reportId,
       run_id,
       technologies,
+      index_patterns: scope.index_patterns,
       tier1: {
         tier: 1,
         ...emptyHuntForThreatResult(
@@ -501,8 +543,9 @@ export const huntCoordinator = async (
       },
       tier2_skipped_reason: 'scope_blocked',
       message,
-      next_step:
-        'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
+      next_step: nothingMatched
+        ? "Install an integration for the report's vendor so its data lands in this space, or pin a technology whose indices exist here."
+        : 'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
       has_confirmed_hit: false,
       // Nothing about this run says whether the environment is clean, and a later run
       // can differ: the report may be indexed, the scope may resolve, the index may
@@ -569,6 +612,7 @@ export const huntCoordinator = async (
       report_id: reportId,
       run_id,
       technologies,
+      index_patterns: scope.index_patterns,
       tier1,
       tier2_skipped_reason: reason,
       message,
@@ -615,6 +659,7 @@ export const huntCoordinator = async (
       report_id: reportId,
       run_id,
       technologies,
+      index_patterns: scope.index_patterns,
       tier1,
       tier2_skipped_reason: 'no_report_text',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no report text).`,
@@ -698,6 +743,7 @@ export const huntCoordinator = async (
     report_id: reportId,
     run_id,
     technologies,
+    index_patterns: scope.index_patterns,
     tier1,
     tier2,
     message:

@@ -314,6 +314,77 @@ describe('loadReportHuntContext', () => {
     expect(context?.techniques).toEqual(['T1078.004']);
   });
 
+  describe('the KEV-shaped vendor and product', () => {
+    const withVulnerability = (vulnerability: unknown) =>
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            extracted: { ...reportHit._source.extracted, vulnerability },
+          },
+        },
+      ]);
+
+    it('carries them when the report names them', async () => {
+      esClient.search.mockResolvedValue(
+        withVulnerability({ vendor: 'Fortinet', product: 'FortiOS' })
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.vendor).toBe('Fortinet');
+      expect(context?.product).toBe('FortiOS');
+    });
+
+    it('asks the index for them', async () => {
+      await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+      const source = (esClient.search as unknown as jest.Mock).mock.calls[0][0]._source;
+      expect(source).toEqual(
+        expect.arrayContaining([
+          'extracted.vulnerability.vendor',
+          'extracted.vulnerability.product',
+        ])
+      );
+    });
+
+    it('leaves them unset when the report has none', async () => {
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context).not.toHaveProperty('vendor');
+      expect(context).not.toHaveProperty('product');
+    });
+
+    it('ignores a value that is not a non-empty string', async () => {
+      esClient.search.mockResolvedValue(withVulnerability({ vendor: 42, product: '' }));
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context).not.toHaveProperty('vendor');
+      expect(context).not.toHaveProperty('product');
+    });
+
+    it('clamps an overlong label', async () => {
+      esClient.search.mockResolvedValue(
+        withVulnerability({ vendor: 'v'.repeat(300), product: 'p'.repeat(257) })
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.vendor).toHaveLength(256);
+      expect(context?.product).toHaveLength(256);
+    });
+  });
+
   it('scopes the lookup to the acting space', async () => {
     await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
     const query = (esClient.search as unknown as jest.Mock).mock.calls[0][0].query;

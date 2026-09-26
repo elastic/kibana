@@ -17,6 +17,14 @@ export interface ReportHuntContext {
   techniques: string[];
   text?: string;
   /**
+   * KEV-shaped vendor and product the report names, when the extraction found them.
+   * Scope resolution matches them against the datasets present in the space, so a report
+   * about a product no known technology covers can still find the indices that hold its
+   * telemetry. Only set when the stored value is a non-empty string.
+   */
+  vendor?: string;
+  product?: string;
+  /**
    * What the bounds below dropped, so the run can report the part of the report it
    * never looked at. Silently hunting a prefix is the failure mode: an IOC past the
    * limit reads exactly like an IOC that was searched and found nothing, and the
@@ -39,6 +47,7 @@ interface StoredReportSource {
   extracted?: {
     iocs?: Array<{ type?: string; value?: string }>;
     ttps?: { techniques?: string[] };
+    vulnerability?: { vendor?: string; product?: string };
   };
 }
 
@@ -50,6 +59,8 @@ const MAX_HUNT_IOC_VALUE_CHARS = 2048;
 /** Matches the OpenAPI `techniques` maxItems and item maxLength. */
 export const MAX_HUNT_REPORT_TECHNIQUES = 100;
 const MAX_HUNT_TECHNIQUE_CHARS = 32;
+/** A vendor or product name is a short label; anything longer is malformed extraction, not a name. */
+const MAX_HUNT_VENDOR_PRODUCT_CHARS = 256;
 
 /**
  * A stored IOC of a kind Tier 1 can map to an ECS field, carrying something to search for.
@@ -68,6 +79,12 @@ const isWithinIocValueBound = ({ value }: HuntIoc): boolean =>
 
 const isHuntTechnique = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= MAX_HUNT_TECHNIQUE_CHARS;
+
+/** A stored vendor or product label, or undefined when it is absent, blank, or not a string. */
+const readVendorProduct = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0
+    ? value.slice(0, MAX_HUNT_VENDOR_PRODUCT_CHARS)
+    : undefined;
 
 /**
  * Loads the hunt inputs for one report from `.kibana-threat-reports`, scoped to
@@ -100,7 +117,13 @@ export const loadReportHuntContext = async ({
         filter: [buildHuntSpaceFilterTerms(spaceId), { ids: { values: [reportId] } }],
       },
     },
-    _source: ['content.body_text', 'extracted.iocs', 'extracted.ttps.techniques'],
+    _source: [
+      'content.body_text',
+      'extracted.iocs',
+      'extracted.ttps.techniques',
+      'extracted.vulnerability.vendor',
+      'extracted.vulnerability.product',
+    ],
   });
   const source = response.hits.hits[0]?._source;
   if (!source) return null;
@@ -108,6 +131,8 @@ export const loadReportHuntContext = async ({
   const rawText = source.content?.body_text;
   const hasText = typeof rawText === 'string' && rawText.length > 0;
   const text = hasText ? rawText.slice(0, MAX_HUNT_REPORT_TEXT_CHARS) : undefined;
+  const vendor = readVendorProduct(source.extracted?.vulnerability?.vendor);
+  const product = readVendorProduct(source.extracted?.vulnerability?.product);
 
   // Counted before the bounds are applied, and only over values that survived
   // validation: an IOC kind Tier 1 cannot map is dropped by design and is not lost
@@ -147,6 +172,8 @@ export const loadReportHuntContext = async ({
     iocs: mappableIocs.slice(0, MAX_HUNT_REPORT_IOCS).map(({ type, value }) => ({ type, value })),
     techniques: validTechniques.slice(0, MAX_HUNT_REPORT_TECHNIQUES),
     ...(text !== undefined ? { text } : {}),
+    ...(vendor !== undefined ? { vendor } : {}),
+    ...(product !== undefined ? { product } : {}),
     ...(Object.keys(truncated).length > 0 ? { truncated } : {}),
   };
 };
