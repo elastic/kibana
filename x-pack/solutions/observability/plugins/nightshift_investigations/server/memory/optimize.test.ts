@@ -19,9 +19,8 @@ import {
   formatMemoryMergeSources,
   formatRecalled,
   isDuplicateExtraction,
-  MAX_FORMATTED_RECALLED_CHARS,
-  MAX_FORMATTED_MERGE_CHARS,
-  MAX_MERGE_TASK_CHARS,
+  MAX_MERGE_TASK_TOKENS,
+  OPTIMIZER_EVIDENCE_CHARACTER_HARD_LIMIT,
   optimizeMemory,
   unwrapUserTask,
 } from './optimize';
@@ -66,7 +65,6 @@ const createStore = (overrides: Partial<MemoryPageStore> = {}): MemoryPageStore 
     archive: jest.fn().mockResolvedValue({}),
     archiveVersioned: jest.fn().mockResolvedValue({}),
     delete: jest.fn(),
-    pruneDuplicates: jest.fn(),
     ...overrides,
   } as MemoryPageStore;
 };
@@ -88,10 +86,10 @@ describe('formatRecalled', () => {
     const second = page('memory_second', 'Second', 'SECOND_COMPLETE');
     const third = page('memory_third', 'Third', 'z'.repeat(65_000));
 
-    const formatted = formatRecalled([first, second, third]);
+    const formatted = formatRecalled([first, second, third], 1_000);
 
-    expect(formatted).toBe(formatRecalled([first, second, third]));
-    expect(formatted).toHaveLength(MAX_FORMATTED_RECALLED_CHARS);
+    expect(formatted).toBe(formatRecalled([first, second, third], 1_000));
+    expect(formatted.length).toBeLessThanOrEqual(4_000);
     expect(formatted).toContain('id=memory_first');
     expect(formatted).toContain('FIRST_COMPLETE');
     expect(formatted).toContain('id=memory_second');
@@ -108,7 +106,7 @@ describe('formatRecalled', () => {
 
     const formatted = formatRecalled([first, second]);
 
-    expect(formatted.length).toBeLessThanOrEqual(MAX_FORMATTED_RECALLED_CHARS);
+    expect(formatted.length).toBeLessThanOrEqual(OPTIMIZER_EVIDENCE_CHARACTER_HARD_LIMIT);
     expect(formatted).toContain('id=memory_huge-first');
     expect(formatted).toContain('id=memory_huge-second');
     expect(formatted).toContain('FIRST_CONTENT_VISIBLE');
@@ -137,20 +135,25 @@ describe('formatMemoryMergeSources', () => {
     expect(formatted).toContain('EXTRACT_FACT');
   });
 
-  it('uses a deterministic total cap while retaining every selected source id', () => {
+  it('uses a deterministic total cap and stops after truncating the final included source', () => {
     const first = page('memory_first');
     first.content = 'a'.repeat(20_000);
     const second = page('memory_second');
     second.content = 'b'.repeat(20_000);
     const third = page('memory_third', 'Third', 'must-not-appear');
 
-    const formatted = formatMemoryMergeSources({ sources: [first, second, third] });
+    const formatted = formatMemoryMergeSources({
+      sources: [first, second, third],
+      maxTokens: 6_000,
+    });
 
-    expect(formatted).toBe(formatMemoryMergeSources({ sources: [first, second, third] }));
-    expect(formatted.length).toBeLessThanOrEqual(MAX_FORMATTED_MERGE_CHARS);
+    expect(formatted).toBe(
+      formatMemoryMergeSources({ sources: [first, second, third], maxTokens: 6_000 })
+    );
+    expect(formatted.length).toBeLessThanOrEqual(24_000);
     expect(formatted).toContain('id=memory_first');
     expect(formatted).toContain('id=memory_second');
-    expect(formatted).toContain('id=memory_third');
+    expect(formatted).not.toContain('id=memory_third');
   });
 
   it('budgets a 65K task together with source and extract signal', async () => {
@@ -177,15 +180,15 @@ describe('formatMemoryMergeSources', () => {
     });
 
     const input = output.mock.calls[0][0].input as string;
-    expect(input).toHaveLength(MAX_FORMATTED_MERGE_CHARS);
+    expect(input.length).toBeLessThanOrEqual(OPTIMIZER_EVIDENCE_CHARACTER_HARD_LIMIT);
     expect(input).toContain('id=memory_first');
     expect(input).toContain('id=memory_second');
     expect(input).toContain('FIRST_SIGNAL');
     expect(input).toContain('SECOND_SIGNAL');
     expect(input).toContain('EXTRACT_SIGNAL');
     expect(input).toContain('TASK_SIGNAL');
-    expect(input).toContain(task.slice(0, MAX_MERGE_TASK_CHARS));
-    expect(input).not.toContain(task.slice(0, MAX_MERGE_TASK_CHARS + 1));
+    expect(input).toContain(task.slice(0, MAX_MERGE_TASK_TOKENS * 4));
+    expect(input).not.toContain(task.slice(0, MAX_MERGE_TASK_TOKENS * 4 + 1));
   });
 });
 

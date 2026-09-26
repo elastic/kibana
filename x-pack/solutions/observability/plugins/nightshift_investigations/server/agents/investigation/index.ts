@@ -59,6 +59,14 @@ const fillContextInstructions = ({
       includeDecisionTrees ? `\n${decisionTreesSection.trimEnd()}\n` : ''
     );
 
+interface InvestigationAgentTypeOptions {
+  sandboxEnabled: boolean;
+  cortexEnabled: boolean;
+  memoryEnabled?: boolean;
+  decisionTreesEnabled?: boolean;
+  telemetryConnectorId?: string;
+}
+
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
  * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
@@ -70,13 +78,7 @@ export const getInvestigationAgentType = ({
   memoryEnabled = false,
   decisionTreesEnabled = false,
   telemetryConnectorId,
-}: {
-  sandboxEnabled: boolean;
-  cortexEnabled: boolean;
-  memoryEnabled?: boolean;
-  decisionTreesEnabled?: boolean;
-  telemetryConnectorId?: string;
-}): AgentTypeDefinition => ({
+}: InvestigationAgentTypeOptions): AgentTypeDefinition => ({
   id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
   name: INVESTIGATION_AGENT_NAME,
   description: INVESTIGATION_AGENT_DESCRIPTION,
@@ -127,13 +129,7 @@ export const registerInvestigationAgentType = (
     memoryEnabled = false,
     decisionTreesEnabled = false,
     telemetryConnectorId,
-  }: {
-    sandboxEnabled: boolean;
-    cortexEnabled: boolean;
-    memoryEnabled?: boolean;
-    decisionTreesEnabled?: boolean;
-    telemetryConnectorId?: string;
-  }
+  }: InvestigationAgentTypeOptions
 ): void => {
   agentBuilder.agents.registerType(
     getInvestigationAgentType({

@@ -12,7 +12,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { runMemoryOptimize } from '../memory/register_memory';
-import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { withTimeout } from './with_timeout';
 
@@ -127,7 +126,7 @@ export const memoryOptimizeStepDefinition = ({
               esClient: await getMemoryEsClient(),
               spaceId,
               signal,
-              logger: teeWorkflowLogger(logger, context.logger),
+              logger,
               getAgentBuilder,
               connectorId: context.input.connector_id,
             }),

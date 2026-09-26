@@ -11,7 +11,6 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
-import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck sandbox allocate so it cannot stall hydrate or optimize. */
@@ -71,11 +70,10 @@ export const obtainSandboxStepDefinition = ({
       const { spaceId } = context.contextManager.getContext().workflow;
       const sandboxId = scopeConversationId(spaceId, conversationId);
       const sandboxStart = getSandboxStart();
-      const stepLogger = teeWorkflowLogger(logger, context.logger);
 
       if (!sandboxStart) {
         if (!required) {
-          stepLogger.info(`Sandbox is not configured — skipping allocate for ${sandboxId}`);
+          logger.info(`Sandbox is not configured — skipping allocate for ${sandboxId}`);
           return {
             output: { sandbox_id: sandboxId, conversation_id: conversationId, skipped: true },
           };
@@ -99,8 +97,8 @@ export const obtainSandboxStepDefinition = ({
         if (required) {
           throw error;
         }
-        stepLogger.info(`Sandbox unavailable — skipping allocate for ${sandboxId}`);
-        stepLogger.debug(
+        logger.info(`Sandbox unavailable — skipping allocate for ${sandboxId}`);
+        logger.debug(
           `Optional sandbox allocation failed: ${
             error instanceof Error ? error.message : String(error)
           }`
@@ -110,7 +108,7 @@ export const obtainSandboxStepDefinition = ({
         };
       }
 
-      stepLogger.info(`Obtained sandbox ${sandboxId}`);
+      logger.info(`Obtained sandbox ${sandboxId}`);
       return { output: { sandbox_id: sandboxId, conversation_id: conversationId } };
     },
   });

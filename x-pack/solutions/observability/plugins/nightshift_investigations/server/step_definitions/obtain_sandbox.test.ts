@@ -48,16 +48,18 @@ describe('obtainSandboxStepDefinition', () => {
   it('allocates the sandbox and returns the space-scoped sandbox_id', async () => {
     const sandboxStart = makeSandboxStart();
     const workflowLogger = loggerMock.create();
+    const pluginLogger = loggerMock.create();
     const definition = obtainSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
-      logger: loggerMock.create(),
+      logger: pluginLogger,
     });
 
     const result = await definition.handler(createContext('conv-1', 'default', {}, workflowLogger));
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
     expect(statFiles).toHaveBeenCalledWith(['/workspace']);
-    expect(workflowLogger.info).toHaveBeenCalledWith('Obtained sandbox default__conv-1');
+    expect(pluginLogger.info).toHaveBeenCalledWith('Obtained sandbox default__conv-1');
+    expect(workflowLogger.info).not.toHaveBeenCalled();
     expect(result).toEqual({
       output: { sandbox_id: 'default__conv-1', conversation_id: 'conv-1' },
     });

@@ -80,7 +80,6 @@ export interface MemoryPageStore {
     reason: MemoryArchiveReason
   ) => Promise<MemoryPage>;
   delete: (id: string) => Promise<void>;
-  pruneDuplicates: () => Promise<number>;
 }
 
 const normalizeSlugText = (slug: string): string =>
@@ -729,10 +728,6 @@ export const createMemoryPageStore = ({
           throw err;
         }
       }
-    },
-
-    async pruneDuplicates() {
-      return 0;
     },
   };
 };

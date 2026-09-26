@@ -11,7 +11,6 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
-import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -111,7 +110,7 @@ export const cortexHydrateStepDefinition = ({
             esClient: context.contextManager.getScopedEsClient(),
             spaceId,
             signal,
-            logger: teeWorkflowLogger(logger, context.logger),
+            logger,
           }),
         HYDRATE_TIMEOUT_MS,
         `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
