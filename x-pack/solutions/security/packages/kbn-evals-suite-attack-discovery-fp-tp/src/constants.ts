@@ -53,7 +53,9 @@ export const RATIONALE_MARKDOWN_MAX_LENGTH = 50000;
  * `rationale_markdown`, e.g. "entity_store: hits; raw_events: empty". Anchored to match
  * only that first line (checked with `.split('\\n')[0]`) so a close paraphrase (missing a
  * status, wrong separator, extra prose on the same line) fails the check instead of passing
- * on a lenient partial match.
+ * on a lenient partial match. Named groups let callers cross-check the claimed status
+ * against what the run actually retrieved (see `SOURCE_STATUS_HITS`/`SOURCE_STATUS_EMPTY`
+ * in evaluators.ts) instead of only validating the line's syntax.
  */
 export const SOURCE_STATUS_LINE_PATTERN =
-  /^entity_store: (?:hits|empty|failed); raw_events: (?:hits|empty|failed)$/;
+  /^entity_store: (?<entityStore>hits|empty|failed); raw_events: (?<rawEvents>hits|empty|failed)$/;

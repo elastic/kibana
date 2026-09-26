@@ -27,6 +27,7 @@ const completed: FpTpTaskOutput = {
     rationale_markdown: 'entity_store: hits; raw_events: hits\n- alert_linkage: supports',
   },
   attackDiscoveryIdEcho: 'ad-1',
+  raw: { coverage: { entities: { seen: 1 }, events: { seen: 1 } } },
   seededIds: { attackDiscoveryId: 'ad-1', alertIds: [], entityIds: [], eventIds: [] },
   seededEvidence: { alerts: [], entities: [], events: [] },
   agentConversationIds: [],
@@ -150,6 +151,28 @@ describe('PayloadConformance', () => {
           summary_markdown: 'A summary',
           rationale_markdown: 'entity_store: unknown; raw_events: hits',
         },
+      },
+    ],
+    [
+      'a rationale claiming hits for a source the run seeded no coverage for',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: hits; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 0 }, events: { seen: 1 } } },
+      },
+    ],
+    [
+      'a rationale claiming empty for a source the run actually retrieved hits from',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: empty; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 3 }, events: { seen: 1 } } },
       },
     ],
     ['a different attack id echo', { attackDiscoveryIdEcho: 'ad-2' }],

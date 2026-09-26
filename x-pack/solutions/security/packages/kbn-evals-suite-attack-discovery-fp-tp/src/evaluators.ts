@@ -15,7 +15,7 @@ import {
   SUMMARY_MARKDOWN_MAX_LENGTH,
   type FpTpOutcome,
 } from './constants';
-import type { FpTpTaskOutput } from './workflow_task';
+import type { FpTpCoverage, FpTpTaskOutput } from './workflow_task';
 
 interface ExpectedOutcome {
   outcome: FpTpOutcome;
@@ -24,6 +24,37 @@ interface ExpectedOutcome {
 const asOutput = (output: unknown): FpTpTaskOutput => output as FpTpTaskOutput;
 const expectedOutcome = (expected: unknown): FpTpOutcome | undefined =>
   (expected as ExpectedOutcome | undefined)?.outcome;
+
+interface SourceStatusGroups {
+  entityStore: string;
+  rawEvents: string;
+}
+
+/**
+ * Cross-checks the source-status line's claimed status against what the run's own
+ * coverage says it actually retrieved, so a rationale cannot claim `hits` for a source
+ * whose query returned nothing (or claim `empty`/`failed` for a source that did return
+ * hits). `PayloadConformance` previously validated only the line's syntax -- see the
+ * `entity_store: hits` / zero-hits mismatch this closes.
+ */
+const sourceStatusMismatches = (
+  { entityStore, rawEvents }: SourceStatusGroups,
+  coverage: FpTpCoverage | undefined
+): string[] => {
+  const checks: ReadonlyArray<{ label: string; claimed: string; seen: number | undefined }> = [
+    { label: 'entity_store', claimed: entityStore, seen: coverage?.entities?.seen },
+    { label: 'raw_events', claimed: rawEvents, seen: coverage?.events?.seen },
+  ];
+  return checks.flatMap(({ label, claimed, seen }) => {
+    if (claimed === 'hits' && !seen) {
+      return [`source-status line claims ${label} hits but coverage reports ${seen ?? 'no'} seen`];
+    }
+    if ((claimed === 'empty' || claimed === 'failed') && seen) {
+      return [`source-status line claims ${label} ${claimed} but coverage reports ${seen} seen`];
+    }
+    return [];
+  });
+};
 
 /**
  * Primary metric: does the run's outcome match the gold outcome? A `failed` gold also
@@ -99,8 +130,18 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
     problems.push('missing rationale_markdown');
   } else if (rationale.length > RATIONALE_MARKDOWN_MAX_LENGTH) {
     problems.push(`rationale_markdown longer than ${RATIONALE_MARKDOWN_MAX_LENGTH}`);
-  } else if (!SOURCE_STATUS_LINE_PATTERN.test(rationale.split('\n')[0])) {
-    problems.push('rationale_markdown missing the evidence-gate source-status line');
+  } else {
+    const sourceStatusMatch = SOURCE_STATUS_LINE_PATTERN.exec(rationale.split('\n')[0]);
+    if (!sourceStatusMatch?.groups) {
+      problems.push('rationale_markdown missing the evidence-gate source-status line');
+    } else {
+      problems.push(
+        ...sourceStatusMismatches(
+          sourceStatusMatch.groups as unknown as SourceStatusGroups,
+          output.raw?.coverage
+        )
+      );
+    }
   }
   if (attackDiscoveryIdEcho !== attackDiscoveryId) {
     problems.push(`attack_discovery_id "${attackDiscoveryIdEcho}" does not echo the input`);
