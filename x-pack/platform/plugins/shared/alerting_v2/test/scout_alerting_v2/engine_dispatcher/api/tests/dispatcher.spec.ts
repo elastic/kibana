@@ -986,6 +986,53 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
+    'does not carry an ack from a previous episode of the series over to the current episode',
+    async ({ apiServices }) => {
+      const baseTime = Date.now();
+      const eventTs = (sec: number) => relativeTime(sec, baseTime);
+      const actionTs = (sec: number) => relativeTime(sec, baseTime);
+
+      // Seed the ack first: the dispatcher only picks up episodes from `.rule-events`, so it can
+      // never evaluate episode-2 without the ack already in place.
+      await apiServices.alertingV2.alertActionsEvents.seed([
+        buildAlertAction({
+          ruleId: 'rule-006',
+          groupHash: 'rule-006-series-1',
+          episodeId: 'rule-006-series-1-episode-1',
+          actionType: 'ack',
+          lastSeriesEventTimestamp: eventTs(180),
+          timestamp: actionTs(120),
+        }),
+      ]);
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-006',
+          groupHash: 'rule-006-series-1',
+          episodeId: 'rule-006-series-1-episode-2',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: eventTs(60),
+        }),
+      ]);
+
+      const [fire] = await expectStableCount(apiServices, 1, {
+        ruleId: 'rule-006',
+        actionTypes: ['fire', 'suppress'],
+      });
+
+      expect(fire).toMatchObject({
+        rule_id: 'rule-006',
+        group_hash: 'rule-006-series-1',
+        last_series_event_timestamp: eventTs(60),
+        action_type: 'fire',
+        actor: 'system',
+        source: 'internal',
+      });
+    }
+  );
+
+  apiTest(
     'only dispatches episodes matching the KQL expression when the action policy has a matcher',
     async ({ apiServices }) => {
       // Switch to the matcher policy so np-1 doesn't match the same episodes.

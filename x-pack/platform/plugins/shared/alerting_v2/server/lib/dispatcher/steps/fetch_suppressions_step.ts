@@ -5,17 +5,24 @@
  * 2.0.
  */
 
+import type { EsqlRequest } from '@elastic/esql';
 import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { ESQL_QUERY_ROW_LIMIT, getAlertEpisodeSuppressionsQueries } from '../queries';
+import {
+  ESQL_QUERY_ROW_LIMIT,
+  getEpisodeSuppressionsQueries,
+  getSeriesSuppressionsQueries,
+} from '../queries';
 import { EpisodeScan, SuppressionIndex } from '../state';
 import type {
-  AlertEpisodeSuppression,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
+  EpisodeSuppressionRow,
+  SeriesSuppressionRow,
+  SuppressionRow,
 } from '../types';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
@@ -38,18 +45,14 @@ export class FetchSuppressionsStep implements DispatcherStep {
 
     const { signal } = state.input;
 
-    const queries = getAlertEpisodeSuppressionsQueries(scan.episodes);
-    const responses = await Promise.all(
-      queries.map((request) =>
-        this.queryService.executeQueryRows<AlertEpisodeSuppression>({
-          query: request.query,
-          abortSignal: signal,
-        })
-      )
-    );
+    const [episodeResponses, seriesResponses] = await Promise.all([
+      this.runQueries<EpisodeSuppressionRow>(getEpisodeSuppressionsQueries(scan.episodes), signal),
+      this.runQueries<SeriesSuppressionRow>(getSeriesSuppressionsQueries(scan.episodes), signal),
+    ]);
 
-    // Chunks are keyed by series but return one row per episode, so the literal
-    // cap cannot bound the row count; a full chunk may have dropped rows.
+    // Both queries return at most one row per chunk literal, so reaching the limit means that
+    // invariant broke and rows past it were dropped.
+    const responses = [...episodeResponses, ...seriesResponses];
     const truncatedChunks = responses.filter((rows) => rows.length >= ESQL_QUERY_ROW_LIMIT).length;
     if (truncatedChunks > 0) {
       logger.warn({
@@ -60,8 +63,19 @@ export class FetchSuppressionsStep implements DispatcherStep {
       });
     }
 
-    const suppressions = responses.flat();
+    const suppressions: SuppressionRow[] = [
+      ...episodeResponses.flat(),
+      ...seriesResponses.flat().map((row) => ({ ...row, episode_id: null })),
+    ];
 
     return { type: 'continue', data: { suppressions: SuppressionIndex.of(suppressions) } };
+  }
+
+  private runQueries<T>(requests: EsqlRequest[], abortSignal: AbortSignal): Promise<T[][]> {
+    return Promise.all(
+      requests.map((request) =>
+        this.queryService.executeQueryRows<T>({ query: request.query, abortSignal })
+      )
+    );
   }
 }

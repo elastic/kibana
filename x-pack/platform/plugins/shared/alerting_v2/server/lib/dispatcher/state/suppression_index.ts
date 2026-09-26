@@ -6,7 +6,7 @@
  */
 
 import { suppressionEpisodeKey, suppressionSeriesKey } from '../steps/utils/suppression_key';
-import type { AlertEpisode, AlertEpisodeSuppression } from '../types';
+import type { AlertEpisode, SuppressionRow } from '../types';
 
 /**
  * Suppression facts loaded from `.alert-actions` (FetchSuppressionsStep),
@@ -15,10 +15,10 @@ import type { AlertEpisode, AlertEpisodeSuppression } from '../types';
 export class SuppressionIndex {
   private static readonly EMPTY = new SuppressionIndex(new Map());
 
-  private constructor(private readonly byKey: ReadonlyMap<string, AlertEpisodeSuppression>) {}
+  private constructor(private readonly byKey: ReadonlyMap<string, SuppressionRow>) {}
 
-  public static of(suppressions: readonly AlertEpisodeSuppression[]): SuppressionIndex {
-    const byKey = new Map<string, AlertEpisodeSuppression>();
+  public static of(suppressions: readonly SuppressionRow[]): SuppressionIndex {
+    const byKey = new Map<string, SuppressionRow>();
     for (const suppression of suppressions) {
       const { episode_id: episodeId } = suppression;
       const key = episodeId
@@ -54,7 +54,7 @@ export class SuppressionIndex {
   }
 }
 
-function suppressionReason(suppression: AlertEpisodeSuppression): string {
+function suppressionReason(suppression: SuppressionRow): string {
   if (suppression.last_snooze_action === 'snooze') return 'snooze';
   if (suppression.last_ack_action === 'ack') return 'ack';
   if (suppression.last_deactivate_action === 'deactivate') return 'deactivate';
