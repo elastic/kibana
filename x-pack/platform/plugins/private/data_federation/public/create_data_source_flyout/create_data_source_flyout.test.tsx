@@ -347,6 +347,9 @@ describe('CreateDataSourceFlyout', () => {
     fireEvent.change(getByTestId('createDataSourceFlyoutName'), {
       target: { value: 'public-bucket' },
     });
+    fireEvent.change(getByTestId('createDataSourceFlyoutS3Region'), {
+      target: { value: 'us-east-1' },
+    });
     fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
     fireEvent.click(await findByText(authenticationStrings.anonymousLabel));
     fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
@@ -360,7 +363,7 @@ describe('CreateDataSourceFlyout', () => {
       expect.objectContaining({
         type: 's3',
         name: 'public-bucket',
-        settings: { auth: 'anonymous' },
+        settings: { auth: 'anonymous', region: 'us-east-1' },
       })
     );
   });

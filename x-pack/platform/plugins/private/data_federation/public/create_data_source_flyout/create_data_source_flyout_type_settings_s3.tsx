@@ -65,7 +65,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Region({
         fullWidth
         autoComplete="off"
         isInvalid={Boolean(regionState.error)}
-        value={regionField.value}
+        value={regionField.value ?? ''}
         onChange={(e) => regionField.onChange(e.target.value)}
         name={regionField.name}
         inputRef={regionField.ref}
@@ -103,7 +103,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
         data-test-subj="createDataSourceFlyoutS3Endpoint"
         fullWidth
         autoComplete="off"
-        value={endpointField.value}
+        value={endpointField.value ?? ''}
         onChange={(e) => endpointField.onChange(e.target.value)}
         name={endpointField.name}
         inputRef={endpointField.ref}
@@ -172,7 +172,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           fullWidth
           autoComplete="off"
           isInvalid={Boolean(accessKeyState.error)}
-          value={accessKeyField.value}
+          value={accessKeyField.value ?? ''}
           onChange={(e) => accessKeyField.onChange(e.target.value)}
           name={accessKeyField.name}
           inputRef={accessKeyField.ref}
@@ -192,7 +192,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           fullWidth
           autoComplete="off"
           isInvalid={Boolean(secretKeyState.error)}
-          value={secretKeyField.value}
+          value={secretKeyField.value ?? ''}
           onChange={(e) => secretKeyField.onChange(e.target.value)}
           name={secretKeyField.name}
           inputRef={secretKeyField.ref}
@@ -262,7 +262,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
           autoComplete="off"
           isInvalid={Boolean(roleArnState.error)}
           placeholder={ROLE_ARN_PLACEHOLDER}
-          value={roleArnField.value}
+          value={roleArnField.value ?? ''}
           onChange={(e) => roleArnField.onChange(e.target.value)}
           name={roleArnField.name}
           inputRef={roleArnField.ref}
