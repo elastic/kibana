@@ -19,6 +19,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
  */
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const es = getService('es');
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
@@ -96,8 +97,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // partial results via the async search ID. The secondary button becoming enabled signals
+        // SearchSessionState.Loading (after a 500ms delay), which is guaranteed to fire after the
+        // async search ID is available from ES (~200ms from wait_for_completion_timeout).
+        await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
         await testSubjects.existOrFail('queryCancelButton');
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
@@ -118,6 +121,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
 
         await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+        // Wait for the accordion content to render before reading it
+        await retry.waitFor(
+          'cluster details callout to render',
+          async () =>
+            (await testSubjects.getVisibleText('inspectorRequestClustersDetails')).length > 0
+        );
         const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
         expect(txt).to.contain('Results may be incomplete or empty.');
 
@@ -138,15 +147,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
         await timePicker.setDefaultAbsoluteRange();
+        // DELAY(10ms) here is evaluated once per matching remote row (not once per block/page —
+        // Case's lazy evaluator invokes each branch per-row), so its total wall-clock contribution
+        // scales with the remote row count and isn't a value we should tune to "just barely win a
+        // race" — see the state-based wait below instead of a larger constant here.
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
         await testSubjects.click('querySubmitButton');
 
-        // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // The secondary button becoming enabled signals SearchSessionState.Loading (after a 500ms
+        // delay) — a front-end readiness check confirming the client-side async search id is set.
+        await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
         await testSubjects.existOrFail('queryCancelButton');
+
+        // Confirm the ES|QL compute task is *still* running right before we cancel it. This must
+        // be the last check before the click, not an earlier one: DELAY()'s total wall-clock
+        // contribution scales with however many remote rows the engine happens to evaluate it for
+        // (not a documented contract), so an earlier "it started running" check says nothing about
+        // whether it's still running by the time we act — only a check immediately preceding the
+        // click does. This action is only present in the tasks list while a compute driver is
+        // actively executing (the `esql` action prefix is `indices:data/read/esql`; the
+        // compute/driver sub-task is `indices:data/read/esql/compute`, as also relied on by the
+        // `query_activity` plugin). If this never becomes true, the query finished before we could
+        // reach it — a real signal to increase the delay, not a flaky timing artifact to paper over.
+        await retry.waitFor('esql compute task to still be running', async () => {
+          const { nodes } = await es.tasks.list({ actions: 'indices:data/read/esql/compute*' });
+          return Object.values(nodes ?? {}).some(
+            (node) => Object.keys(node.tasks ?? {}).length > 0
+          );
+        });
+
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 
