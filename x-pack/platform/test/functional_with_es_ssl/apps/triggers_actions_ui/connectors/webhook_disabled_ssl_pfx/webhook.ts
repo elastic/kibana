@@ -11,7 +11,8 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const actions = getService('actions');
+  const pageObjects = getPageObjects(['common']);
 
   describe('webhook', () => {
     beforeEach(async () => {
@@ -19,8 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should not render the pfx tab for ssl auth', async () => {
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-      await testSubjects.click('.webhook-card');
+      await actions.common.openNewConnectorForm('webhook');
       await testSubjects.click('authSSL');
 
       const certTypeTabs = await find.allByCssSelector(
