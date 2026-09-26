@@ -386,9 +386,7 @@ describe('validateDestinations', () => {
   describe('structural checks — inputs.payload ref', () => {
     it('returns a warning diagnostic when the manual trigger declares no inputs at all', async () => {
       const workflowLookup = createMockWorkflowLookup(
-        new Map([
-          ['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_NO_PAYLOAD_REF }],
-        ])
+        new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_NO_PAYLOAD_REF }]])
       );
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {

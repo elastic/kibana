@@ -21,10 +21,7 @@ import {
   builtinWorkflowInputDefinitions,
   type JsonSchema,
 } from '@kbn/workflows';
-import {
-  alertEpisodeStatus,
-  alertEventSeverity,
-} from '../../resources/datastreams/alert_events';
+import { alertEpisodeStatus, alertEventSeverity } from '../../resources/datastreams/alert_events';
 import type {
   ActionPolicyWorkflowPayload,
   ActionPolicyWorkflowPayloadRule,

@@ -154,7 +154,8 @@
     "@kbn/content-list-common",
     "@kbn/core-ui-settings-server",
     "@kbn/licensing-plugin",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/workflows-yaml"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
