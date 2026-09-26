@@ -62,7 +62,7 @@ src/
 
 - `OutcomeAccuracy` (primary): the outcome matches the gold; a `failed` gold also needs an explicit `FAILED` execution, so a timeout or cancellation does not pass. The label is the predicted outcome, so the report reads as a confusion matrix.
 - `UnsafeClose`: 0 when the run predicts `false_positive` and the gold is anything else. A false positive closes the attack.
-- `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` ended `FAILED` (a timeout or cancellation does not count) and produced no payload.
+- `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a non-empty `rationale_markdown` of at most 50000 characters whose first line is the mandatory evidence-gate source-status line (`entity_store: hits|empty|failed; raw_events: hits|empty|failed`, cross-checked against the run's own coverage), and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` ended `FAILED` (a timeout or cancellation does not count) and produced no payload.
 - `trajectory`: the agent called no tools. N/A when traces are unavailable.
 - LLM criteria on the summary and rationale: cited ids exist in the seeded data, nothing is invented (the task output carries the seeded documents in `seededEvidence`), the discovery's and alerts' story is stated as fact only where the entities or raw events show it, the deciding checks are named, and an `inconclusive` verdict says what was missing or conflicting. N/A for failed runs.
 
@@ -90,6 +90,5 @@ Run with `--repetitions 5` or more. Each repetition is a separate run in the rep
 1. Set `FP_TP_WORKFLOW_SOURCE` in `src/constants.ts` to `managed`.
 2. Delete `src/sample_workflow/` and the install and delete calls around it in the spec.
 3. Add the claim-grounding evaluator.
-4. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
 
-Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
+The suite already runs weekly (`kbn-evals-weekly-attack-discovery-fp-tp` in `.buildkite/pipelines/evals/llm_evals.yml`) against the sample workflow, and can also be run on demand through the `evals:security-attack-discovery-fp-tp` PR label. Switching to the managed workflow does not require adding or changing that step — it just changes which workflow the existing schedule exercises.

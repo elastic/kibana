@@ -41,6 +41,8 @@ export interface FpTpSourceCoverage {
   total?: number;
   cap?: number;
   truncated?: boolean;
+  /** Whether the query itself errored, distinct from a successful zero-hit query. */
+  failed?: boolean;
 }
 
 /** Per-source query coverage the analysis reports alongside the payload. */

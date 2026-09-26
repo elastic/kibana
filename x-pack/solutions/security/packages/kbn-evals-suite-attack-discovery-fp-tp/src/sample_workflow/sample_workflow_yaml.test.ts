@@ -223,7 +223,10 @@ describe('sample FP/TP analysis workflow', () => {
 
   describe('the optional-source coverage', () => {
     const emit = stepIn('emit_result')?.with as {
-      coverage: { entities: { seen: string } };
+      coverage: {
+        entities: { seen: string; failed: string };
+        events: { seen: string; failed: string };
+      };
     };
 
     it('returns zero entities seen when the entity query failed', () => {
@@ -233,6 +236,30 @@ describe('sample FP/TP analysis workflow', () => {
           steps: { load_entities: { error: { message: 'boom' } } },
         })
       ).toBe(0);
+    });
+
+    it('reports entities.failed true when the entity query failed', () => {
+      expect(
+        evaluate(emit.coverage.entities.failed, {
+          steps: { source_status: { output: { entities_failed: true, events_failed: false } } },
+        })
+      ).toBe(true);
+    });
+
+    it('reports entities.failed false for a successful (possibly zero-hit) query', () => {
+      expect(
+        evaluate(emit.coverage.entities.failed, {
+          steps: { source_status: { output: { entities_failed: false, events_failed: false } } },
+        })
+      ).toBe(false);
+    });
+
+    it('reports events.failed true when the raw-events query failed', () => {
+      expect(
+        evaluate(emit.coverage.events.failed, {
+          steps: { source_status: { output: { entities_failed: false, events_failed: true } } },
+        })
+      ).toBe(true);
     });
   });
 

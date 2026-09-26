@@ -57,6 +57,8 @@ outputs:
           properties:
             seen:
               type: number
+            failed:
+              type: boolean
         events:
           type: object
           properties:
@@ -65,6 +67,8 @@ outputs:
             cap:
               type: number
             truncated:
+              type: boolean
+            failed:
               type: boolean
     payload:
       type: object
@@ -479,10 +483,12 @@ steps:
           total: '${{ steps.count_alerts.output.cited }}'
         entities:
           seen: '${{ steps.load_entities.output.hits.hits | default: consts.no_rows | size }}'
+          failed: '${{ steps.source_status.output.entities_failed }}'
         events:
           seen: '${{ steps.load_events.output.hits.hits | default: consts.no_rows | size }}'
           cap: 50
           truncated: '${{ steps.load_events.output.hits.total.value > 50 }}'
+          failed: '${{ steps.source_status.output.events_failed }}'
       payload:
         verdict: '${{ steps.analyze.output.structured_output.verdict }}'
         summary_markdown: '${{ steps.analyze.output.structured_output.summary_markdown }}'

@@ -175,11 +175,62 @@ describe('PayloadConformance', () => {
         raw: { coverage: { entities: { seen: 3 }, events: { seen: 1 } } },
       },
     ],
+    [
+      'a rationale claiming empty for a source whose query actually failed',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: empty; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 0, failed: true }, events: { seen: 1 } } },
+      },
+    ],
+    [
+      'a rationale claiming failed for a source that returned a successful zero-hit query',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: failed; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 0, failed: false }, events: { seen: 1 } } },
+      },
+    ],
+    [
+      'a rationale claiming failed for a source the run actually retrieved hits from',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: failed; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 3, failed: false }, events: { seen: 1 } } },
+      },
+    ],
     ['a different attack id echo', { attackDiscoveryIdEcho: 'ad-2' }],
     ['a conforming payload from a failed execution', { executionStatus: ExecutionStatus.FAILED }],
     ['no payload', { payload: undefined }],
   ])('returns 0 for %s', async (_, overrides) => {
     expect(await score(payloadConformance, { ...completed, ...overrides }, 'inconclusive')).toBe(0);
+  });
+
+  it('returns 1 for a rationale correctly claiming failed for a source whose query errored', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          payload: {
+            verdict: 'inconclusive',
+            summary_markdown: 'A summary',
+            rationale_markdown: 'entity_store: failed; raw_events: hits\n- alert_linkage: supports',
+          },
+          raw: { coverage: { entities: { seen: 0, failed: true }, events: { seen: 1 } } },
+        },
+        'inconclusive'
+      )
+    ).toBe(1);
   });
 
   it('returns 1 for a run that should fail and produced no payload', async () => {
