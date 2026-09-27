@@ -9,36 +9,47 @@
 
 import type { StackFrame } from '@kbn/workflows';
 
-/**
- * Returns one key per `parallel` branch the stack frames are nested in, outermost first.
- * Each key encodes the full scope path up to that branch, so the same branch index under
- * different enclosing loop iterations yields different keys.
- */
-export const getParallelBranchKeys = (stackFrames: readonly StackFrame[]): string[] => {
+/** A `parallel` branch in a scope stack: the fan-out instance and the branch within it. */
+export interface ParallelBranchScope {
+  /** Scope path up to the `parallel` node, so each loop iteration is a separate fan-out. */
+  fanOut: string;
+  branch: string;
+}
+
+/** Returns the `parallel` branches the stack frames are nested in, outermost first. */
+export const getParallelBranchScopes = (
+  stackFrames: readonly StackFrame[]
+): ParallelBranchScope[] => {
   const path: string[] = [];
-  const keys: string[] = [];
+  const branchScopes: ParallelBranchScope[] = [];
   for (const frame of stackFrames) {
     for (const scope of frame.nestedScopes) {
-      path.push(`${scope.nodeId}:${scope.scopeId ?? ''}`);
       if (scope.nodeType === 'enter-parallel') {
-        keys.push(path.join('/'));
+        branchScopes.push({
+          fanOut: [...path, scope.nodeId].join('/'),
+          branch: scope.scopeId ?? '',
+        });
       }
+      path.push(`${scope.nodeId}:${scope.scopeId ?? ''}`);
     }
   }
-  return keys;
+  return branchScopes;
 };
 
 /**
- * True unless the two branch lineages diverge, i.e. they sit in different branches of the
- * same `parallel` step. A lineage is compatible with its ancestors and descendants.
+ * True unless the two lineages sit in different branches of the same `parallel` fan-out.
+ * Branches of an unrelated (e.g. already joined) fan-out stay visible.
  */
 export const areParallelBranchesCompatible = (
-  left: readonly string[],
-  right: readonly string[]
+  left: readonly ParallelBranchScope[],
+  right: readonly ParallelBranchScope[]
 ): boolean => {
   const sharedDepth = Math.min(left.length, right.length);
   for (let depth = 0; depth < sharedDepth; depth++) {
-    if (left[depth] !== right[depth]) {
+    if (left[depth].fanOut !== right[depth].fanOut) {
+      return true;
+    }
+    if (left[depth].branch !== right[depth].branch) {
       return false;
     }
   }

@@ -506,20 +506,51 @@ describe('WorkflowExecutionState', () => {
         expect(underTest.getLatestStepExecution('mark')?.id).toBe('branch-1');
       });
 
-      it('treats the same branch index under different loop iterations as different branches', () => {
-        const iterationFrames = (iteration: number): StackFrame[] => [
+      it('keeps branches of an earlier, already joined fan-out visible', () => {
+        const otherFanOutFrames: StackFrame[] = [
+          {
+            stepId: 'fanOutB',
+            nestedScopes: [
+              { nodeId: 'enterParallel_fanOutB', nodeType: 'enter-parallel', scopeId: '0' },
+            ],
+          },
+        ];
+
+        expect(underTest.getLatestStepExecution('mark', otherFanOutFrames)?.id).toBe('branch-1');
+      });
+
+      it('scopes each loop iteration to its own fan-out', () => {
+        const iterationFrames = (iteration: number, branchIndex: number): StackFrame[] => [
           {
             stepId: 'loop',
             nestedScopes: [
               { nodeId: 'enterForeach_loop', nodeType: 'enter-foreach', scopeId: `${iteration}` },
             ],
           },
-          ...branchFrames(0),
+          ...branchFrames(branchIndex),
         ];
-        underTest.upsertStep({ id: 'iter-0', stepId: 'inner', scopeStack: iterationFrames(0) });
-        underTest.upsertStep({ id: 'iter-1', stepId: 'inner', scopeStack: iterationFrames(1) });
+        underTest.upsertStep({
+          id: 'iter-0-branch-0',
+          stepId: 'inner',
+          scopeStack: iterationFrames(0, 0),
+        });
+        underTest.upsertStep({
+          id: 'iter-1-branch-0',
+          stepId: 'inner',
+          scopeStack: iterationFrames(1, 0),
+        });
+        underTest.upsertStep({
+          id: 'iter-1-branch-1',
+          stepId: 'inner',
+          scopeStack: iterationFrames(1, 1),
+        });
 
-        expect(underTest.getLatestStepExecution('inner', iterationFrames(0))?.id).toBe('iter-0');
+        expect(underTest.getLatestStepExecution('inner', iterationFrames(1, 0))?.id).toBe(
+          'iter-1-branch-0'
+        );
+        expect(underTest.getLatestStepExecution('inner', iterationFrames(1, 2))?.id).toBe(
+          'iter-0-branch-0'
+        );
       });
     });
   });

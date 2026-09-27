@@ -397,6 +397,55 @@ steps:
     });
   });
 
+  describe('branch step reads a step from an earlier, already-joined parallel', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+    const items = ['A', 'B', 'C'];
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      const yaml = `
+consts:
+  items: '${JSON.stringify(items)}'
+steps:
+  - name: fanOutA
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 3 }
+    steps:
+      - name: mark
+        type: data.set
+        with:
+          value: 'mark-for-{{ foreach.item }}'
+  - name: fanOutB
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 3 }
+    steps:
+      - name: readPrevious
+        type: data.set
+        with:
+          got: '{{ steps.mark.output.value }}'
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      await driveToTerminal(workflowRunFixture);
+    });
+
+    it('completes the workflow', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('keeps the earlier fan-out output visible inside the later fan-out branches', () => {
+      const reads = stepExecutionsFor(workflowRunFixture, 'readPrevious').map(
+        (execution) => (execution.output as { got: string }).got
+      );
+      expect(reads).toHaveLength(items.length);
+      reads.forEach((got) => {
+        expect(got).toMatch(/^mark-for-[ABC]$/);
+      });
+    });
+  });
+
   describe('suspendable (poll) branches resume across ticks', () => {
     let workflowRunFixture: WorkflowRunFixture;
     const items = ['x', 'y'];

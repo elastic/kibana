@@ -893,7 +893,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         if (scopeInputStepIds === null) {
           fallbackToPredecessors();
         } else {
-          this.addLatestExecutionIdsForStepIds(neededIds, scopeInputStepIds);
+          this.addLatestExecutionIdsForStepIds(neededIds, scopeInputStepIds, stackFrames);
           // Re-pin the loop's source outputs while the loop scope is active.
           // Primary pinning happens unconditionally at loop entry
           // (pinLoopSource); this re-pin covers resume, where the loop is

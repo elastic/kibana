@@ -15,7 +15,7 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
-import { areParallelBranchesCompatible, getParallelBranchKeys } from './parallel_branch_scope';
+import { areParallelBranchesCompatible, getParallelBranchScopes } from './parallel_branch_scope';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
 
@@ -217,16 +217,16 @@ export class WorkflowExecutionState {
     stackFrames?: readonly StackFrame[]
   ): StepExecutionMetadata | undefined {
     const allExecutions = this.getStepExecutionsByStepId(stepId);
-    const readerBranchKeys = stackFrames ? getParallelBranchKeys(stackFrames) : [];
-    if (readerBranchKeys.length === 0) {
+    const readerBranchScopes = stackFrames ? getParallelBranchScopes(stackFrames) : [];
+    if (readerBranchScopes.length === 0) {
       return allExecutions.length ? allExecutions[allExecutions.length - 1] : undefined;
     }
     for (let index = allExecutions.length - 1; index >= 0; index--) {
       const execution = allExecutions[index];
       if (
         areParallelBranchesCompatible(
-          readerBranchKeys,
-          getParallelBranchKeys(execution.scopeStack ?? [])
+          readerBranchScopes,
+          getParallelBranchScopes(execution.scopeStack ?? [])
         )
       ) {
         return execution;
