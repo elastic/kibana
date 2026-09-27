@@ -202,6 +202,94 @@ describe.each([
     ).toMatchObject({ status: ExecutionStatus.FAILED });
   });
 
+  it.each([
+    'before cleanup',
+    'during step write',
+    'terminal during step write',
+    'terminal after last conflict',
+  ] as const)('cancels waiting steps when cancellation wins %s', async (when) => {
+    const { params, accounts } = setup();
+    const approval = {
+      id: 'approval-execution',
+      stepId: 'approval',
+      workflowRunId: 'child',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    } as EsWorkflowStepExecution;
+    const completed = {
+      ...approval,
+      id: 'completed-step',
+      status: ExecutionStatus.COMPLETED,
+    };
+    const failed = {
+      ...approval,
+      id: 'failed-step',
+      status: ExecutionStatus.FAILED,
+      error: { type: 'ConnectorError', message: 'Earlier failure' },
+    };
+    const steps = [approval, completed, failed];
+    const originalTerminalSteps = structuredClone([completed, failed]);
+    await params.workflowExecutionRepository.updateWorkflowExecution({
+      id: 'child',
+      stepExecutionIds: steps.map(({ id }) => id),
+    });
+    const cancel = async () =>
+      params.workflowExecutionRepository.updateWorkflowExecution({
+        id: 'child',
+        cancelRequested: true,
+        cancellationReason: 'Cancelled by the user',
+        ...(when.startsWith('terminal') ? { status: ExecutionStatus.CANCELLED } : {}),
+      });
+    const stepClient = createMockStepDataClient();
+    stepClient.getByIds.mockImplementation(async () =>
+      createMockGetExecutionsByIdsResponse(structuredClone(steps))
+    );
+    let firstWrite = true;
+    stepClient.bulk.mockImplementation(async ({ items }) => {
+      if (firstWrite && (when === 'during step write' || when === 'terminal during step write')) {
+        firstWrite = false;
+        await cancel();
+        // The stale failure write lands after cancellation has won.
+        approval.status = ExecutionStatus.CANCELLED;
+      }
+      for (const { document } of items) {
+        const step = steps.find(({ id }) => id === document.id);
+        if (!step) throw new Error(`Missing test step ${document.id}`);
+        Object.assign(step, document);
+      }
+      return { errors: false, items: [] };
+    });
+    if (when === 'terminal after last conflict') {
+      let conflicts = 0;
+      jest
+        .mocked(params.workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion)
+        .mockImplementation(async () => {
+          if (++conflicts === 3) await cancel();
+          return false;
+        });
+    }
+    if (when === 'before cleanup') {
+      jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+        await cancel();
+        throw new Error('Binding changed');
+      });
+    }
+
+    await expect(
+      execute({ ...params, stepExecutionRepository: new StepExecutionRepository(stepClient) })
+    ).rejects.toThrow('Binding changed');
+
+    expect(approval).toMatchObject({
+      status: ExecutionStatus.CANCELLED,
+      error: { type: 'WorkflowCancelled', message: 'Cancelled by the user' },
+      finishedAt: expect.any(String),
+    });
+    expect([completed, failed]).toEqual(originalTerminalSteps);
+    expect(
+      await params.workflowExecutionRepository.getWorkflowExecutionById('child', 'default')
+    ).toMatchObject({ status: ExecutionStatus.CANCELLED, error: null });
+    expect(params.workflowsExecutionEngine.triggerEvents.emitEvent).not.toHaveBeenCalled();
+  });
+
   it('emits a failure event using the original request when minting fails', async () => {
     const { params } = setup();
     await expect(execute(params)).rejects.toThrow('Binding changed');

@@ -79,6 +79,7 @@ export const createMockStepExecutionRepository = (): jest.Mocked<StepExecutionRe
   ({
     bulkUpsert: jest.fn().mockResolvedValue(undefined),
     markNonTerminalStepsFailed: jest.fn().mockResolvedValue(undefined),
+    getStepExecutionsByWorkflowExecution: jest.fn().mockResolvedValue([]),
   } as unknown as jest.Mocked<StepExecutionRepository>);
 
 export interface MockTelemetryClient {

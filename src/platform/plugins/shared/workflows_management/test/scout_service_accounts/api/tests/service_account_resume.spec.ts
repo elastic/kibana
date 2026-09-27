@@ -13,6 +13,7 @@ import { expect } from '@kbn/scout/api';
 import {
   authenticationStep,
   createServiceAccountSuite,
+  waitStep,
   workflowYaml,
 } from '../fixtures/service_account_suite';
 
@@ -32,6 +33,53 @@ apiTest.describe(
       await resume(apiClient, paused);
       expectAccount(await wait(apiClient, paused.executionId), accountId);
     });
+
+    apiTest(
+      'runs and resumes a bound workflow using API-key credentials',
+      async ({ apiClient, requestAuth }) => {
+        apiTest.setTimeout(120_000);
+        const { accountId, create, run, wait, resume, expectAccount } = getContext();
+        const commonHeaders = {
+          'kbn-xsrf': 'true',
+          'x-elastic-internal-origin': 'kibana',
+          'elastic-api-version': '2023-10-31',
+        };
+        const admin = await requestAuth.getApiKey('admin');
+        const executor = await requestAuth.getApiKeyForCustomRole({
+          elasticsearch: { cluster: [], indices: [] },
+          kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+        });
+        const executorHeaders = { ...commonHeaders, ...executor.apiKeyHeader };
+        const yaml = workflowYaml(
+          accountId,
+          authenticationStep.replace('name: authenticate', 'name: before_approval') +
+            waitStep +
+            authenticationStep
+        );
+        const id = await create(apiClient, yaml, { ...commonHeaders, ...admin.apiKeyHeader });
+        const executionId = await run(apiClient, id, executorHeaders);
+        const paused = await wait(apiClient, executionId, 'waiting_for_input', executorHeaders);
+        const approval = paused.stepExecutions?.find((step) => step.stepId === 'approval');
+        expect(approval?.id).toBeDefined();
+        expect(paused.effectiveIdentity).toStrictEqual({ type: 'service_account', id: accountId });
+        expect(
+          JSON.stringify(
+            paused.stepExecutions?.find((step) => step.stepId === 'before_approval')?.output
+          )
+        ).toContain(accountId);
+        await resume(
+          apiClient,
+          { id, yaml, executionId, stepExecutionId: approval?.id },
+          executorHeaders
+        );
+        const completed = await wait(apiClient, executionId, 'completed', executorHeaders);
+        expectAccount(completed, accountId);
+        expect(completed.executedBy).toBe(paused.executedBy);
+        expect(completed.stepExecutions?.find((step) => step.stepId === 'approval')?.status).toBe(
+          'completed'
+        );
+      }
+    );
 
     apiTest('fails resume after rebind without executing the next step', async ({ apiClient }) => {
       const { headers, accountId, otherAccountId, wait, pause, resume } = getContext();

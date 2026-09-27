@@ -1,5 +1,5 @@
 {
-  "sha1": "97c71e97580daf5d1dd8595a325c1d98a1eb9011",
+  "sha1": "efdb894a56cd6d66e504c141c57da70a952a538d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -196,8 +196,22 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
-        "line": 23,
+        "line": 24,
         "column": 42
+      }
+    },
+    {
+      "id": "de4adc7eaf2d461-9239e5951f0d821",
+      "title": "[NON-MKI] Workflow service accounts: resume runs and resumes a bound workflow using API-key credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 28,
+        "column": 13
       }
     },
     {
@@ -210,8 +224,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
-        "line": 27,
-        "column": 13
+        "line": 61,
+        "column": 24
       }
     },
     {
@@ -224,8 +238,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
-        "line": 39,
-        "column": 15
+        "line": 85,
+        "column": 55
       }
     },
     {
@@ -238,8 +252,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
-        "line": 39,
-        "column": 15
+        "line": 85,
+        "column": 55
       }
     },
     {

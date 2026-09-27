@@ -25,13 +25,46 @@ export const finalizeWorkflowIdentityFailure = async ({
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
 }): Promise<EsWorkflowExecution | null> => {
-  for (let attempt = 0; attempt < 3; attempt++) {
+  const cancelSteps = async (execution: EsWorkflowExecution): Promise<void> => {
+    const steps = await stepExecutionRepository.getStepExecutionsByWorkflowExecution(
+      execution.id,
+      execution.stepExecutionIds
+    );
+    const finishedAt = new Date().toISOString();
+    await stepExecutionRepository.bulkUpsert(
+      steps
+        .filter(
+          (step) =>
+            !isTerminalStatus(step.status) ||
+            // A stale identity-failure write may have landed after cancellation won.
+            (step.status === ExecutionStatus.FAILED && step.error?.type === error.type)
+        )
+        .map((step) => ({
+          id: step.id,
+          status: ExecutionStatus.CANCELLED,
+          error: {
+            type: 'WorkflowCancelled',
+            message: execution.cancellationReason ?? 'Workflow cancelled.',
+          },
+          finishedAt,
+        }))
+    );
+  };
+
+  // Read once more after the last conflict so a winning cancellation repairs stale step writes.
+  for (let attempt = 0; attempt <= 3; attempt++) {
     const current = await workflowExecutionRepository.getWorkflowExecutionWithVersion(
       workflowRunId,
       spaceId
     );
-    if (!current || isTerminalStatus(current.execution.status)) return null;
+    if (!current) return null;
     const { execution, seqNo, primaryTerm } = current;
+    if (isTerminalStatus(execution.status)) {
+      if (execution.status === ExecutionStatus.CANCELLED) await cancelSteps(execution);
+      return null;
+    }
+    if (execution.cancelRequested) await cancelSteps(execution);
+    if (attempt === 3) break;
     const terminalExecution: EsWorkflowExecution = {
       ...execution,
       status: execution.cancelRequested ? ExecutionStatus.CANCELLED : ExecutionStatus.FAILED,
@@ -40,16 +73,13 @@ export const finalizeWorkflowIdentityFailure = async ({
       context: { ...execution.context, serviceAccountFailureCleanupPending: true },
     };
     // Complete step cleanup before publishing the status that stops UI polling.
-    await stepExecutionRepository.markNonTerminalStepsFailed(
-      execution.id,
-      execution.cancelRequested
-        ? {
-            type: 'WorkflowCancelled',
-            message: execution.cancellationReason ?? 'Workflow cancelled.',
-          }
-        : error,
-      execution.stepExecutionIds
-    );
+    if (!execution.cancelRequested) {
+      await stepExecutionRepository.markNonTerminalStepsFailed(
+        execution.id,
+        error,
+        execution.stepExecutionIds
+      );
+    }
     const updated = await workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion(
       {
         id: execution.id,

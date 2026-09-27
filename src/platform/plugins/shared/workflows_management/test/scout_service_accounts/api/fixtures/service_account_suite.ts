@@ -68,10 +68,14 @@ export const createServiceAccountSuite = () => {
 
   const accountIds = new Set<string>();
 
-  const create = async (apiClient: ApiClientFixture, yaml: string): Promise<string> => {
+  const create = async (
+    apiClient: ApiClientFixture,
+    yaml: string,
+    requestHeaders = headers
+  ): Promise<string> => {
     const id = `cp2-${Date.now()}-${workflowIds.size}`;
     const response = await apiClient.post('api/workflows/workflow', {
-      headers,
+      headers: requestHeaders,
       body: { id, yaml },
       responseType: 'json',
     });
@@ -117,11 +121,12 @@ export const createServiceAccountSuite = () => {
   const wait = async (
     apiClient: ApiClientFixture,
     id: string,
-    status = 'completed'
+    status = 'completed',
+    requestHeaders = headers
   ): Promise<WorkflowExecutionDto> => {
     const get = async () => {
       const response = await apiClient.get(`api/workflows/executions/${id}?includeOutput=true`, {
-        headers,
+        headers: requestHeaders,
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -336,9 +341,13 @@ export const createServiceAccountSuite = () => {
     };
   };
 
-  const resume = async (apiClient: ApiClientFixture, paused: Awaited<ReturnType<typeof pause>>) => {
+  const resume = async (
+    apiClient: ApiClientFixture,
+    paused: Awaited<ReturnType<typeof pause>>,
+    requestHeaders = headers
+  ) => {
     const response = await apiClient.post(`api/workflows/executions/${paused.executionId}/resume`, {
-      headers,
+      headers: requestHeaders,
       body: { input: { approved: true }, stepExecutionId: paused.stepExecutionId },
       responseType: 'json',
     });
