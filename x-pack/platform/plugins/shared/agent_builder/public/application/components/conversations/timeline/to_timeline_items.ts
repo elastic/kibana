@@ -17,6 +17,7 @@ import type {
   ExecutionAccumulator,
   GroupedItem,
   UnresolvedAttachmentItem,
+  UnresolvedCustomEventItem,
   UserEntry,
 } from './types';
 import { accumulatorToItem, foldAttachmentRefs } from './timeline_item_utils';
@@ -38,7 +39,9 @@ export const groupTimelineEvents = (
   const resolvedToolCalls = resolvedToolCallIds(displayEvents);
   const resumeLinks = resumeToOriginalExecutionId(displayEvents, eventsById);
 
-  const ordered: Array<UserEntry | UnresolvedAttachmentItem | ExecutionAccumulator> = [];
+  const ordered: Array<
+    UserEntry | UnresolvedAttachmentItem | UnresolvedCustomEventItem | ExecutionAccumulator
+  > = [];
   const accMap = new Map<string, ExecutionAccumulator>();
   const seenAttachmentRefs = new Map<string, AttachmentVersionRef>();
 
@@ -65,7 +68,8 @@ export const groupTimelineEvents = (
 
   for (const event of events) {
     if (!isTimelineDisplayEvent(event)) {
-      // Custom event types are stored alongside the built-in ones; nothing draws them yet.
+      // Whether the type has a UI here is the resolve step's call.
+      ordered.push({ kind: 'customEvent', key: event.id, event });
       continue;
     }
     switch (event.type) {

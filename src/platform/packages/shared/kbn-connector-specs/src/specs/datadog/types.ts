@@ -32,6 +32,29 @@ export const DATADOG_SITES = [
 
 export type DatadogSite = (typeof DATADOG_SITES)[number];
 
+export const DatadogReceivedEventSchema = z.object({
+  body: z
+    .object({
+      message: z.unknown().optional(),
+      last_updated: z.unknown().optional(),
+      event_type: z.unknown().optional(),
+      title: z.unknown().optional(),
+      severity: z.unknown().optional(),
+      alert_type: z.unknown().optional(),
+      alert_query: z.unknown().optional(),
+      alert_transition: z.unknown().optional(),
+      date: z.unknown().optional(),
+      scopes: z.unknown().optional(),
+      org: z.unknown().optional(),
+      url: z.unknown().optional(),
+      tags: z.unknown().optional(),
+      id: z.unknown().optional(),
+      monitor_id: z.unknown().optional(),
+    })
+    .loose()
+    .describe('Datadog webhook JSON body.'),
+});
+
 /** Maps Datadog site parameter to the regional API base URL. */
 export const DATADOG_SITE_API_URLS: Record<DatadogSite, string> = {
   'datadoghq.com': 'https://api.datadoghq.com',

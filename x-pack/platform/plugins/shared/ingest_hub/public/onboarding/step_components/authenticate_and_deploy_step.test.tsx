@@ -20,7 +20,7 @@ jest.mock('./authenticate_and_deploy_step/use_deploy', () => ({
 }));
 
 jest.mock('./authenticate_and_deploy_step/deployment_method_card', () => ({
-  DeploymentMethodCard: () => null,
+  DeploymentMethodCard: jest.fn(() => null),
 }));
 
 jest.mock('./authenticate_and_deploy_step/managed_integrations_section', () => ({
@@ -54,6 +54,10 @@ jest.mock('./authenticate_and_deploy_step/package_inputs', () => ({
   buildIacIntegrations: jest.fn(),
 }));
 
+jest.mock('../use_aws_identity_federation_enabled', () => ({
+  useAwsIdentityFederationEnabled: jest.fn(),
+}));
+
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
@@ -63,6 +67,7 @@ import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useAwsIdentityFederationEnabled } from '../use_aws_identity_federation_enabled';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -75,6 +80,12 @@ const mockUseAgentBasedDeploy = useAgentBasedDeploy as jest.Mock;
 const MockAgentBasedSection = AgentBasedSection as unknown as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockBuildIacIntegrations = buildIacIntegrations as jest.Mock;
+const mockUseAwsIdentityFederationEnabled = useAwsIdentityFederationEnabled as jest.Mock;
+
+function getLastMiSectionProps(): { showIdentityFederation: boolean } {
+  const { calls } = MockManagedIntegrationsSection.mock;
+  return calls[calls.length - 1][0];
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -168,7 +179,7 @@ describe('AuthenticateAndDeployStep', () => {
     });
     mockUseOnboardingSO.mockReturnValue({
       createDeployment: jest.fn().mockResolvedValue(null),
-      updateDeployment: jest.fn().mockResolvedValue(undefined),
+      updateDeployment: jest.fn().mockResolvedValue(true),
       persistDeploymentId: jest.fn(),
     });
     mockUseAgentBasedDeploy.mockReturnValue({
@@ -189,6 +200,7 @@ describe('AuthenticateAndDeployStep', () => {
       jest.fn(),
     ]);
     mockBuildIacIntegrations.mockReturnValue([]);
+    mockUseAwsIdentityFederationEnabled.mockReturnValue(true);
     MockManagedIntegrationsSection.mockImplementation(
       ({ onDeploy, hasFailed }: { onDeploy: () => void; hasFailed: boolean }) => (
         <div>
@@ -693,7 +705,7 @@ describe('AuthenticateAndDeployStep', () => {
     it('reuses existing deploymentId and does not call createDeployment when SO already exists', async () => {
       // Simulates: user clicked Next (SO created, id persisted), navigated Back, clicked Next again.
       const mockCreate = jest.fn().mockResolvedValue('new-dep-id');
-      const mockUpdate = jest.fn().mockResolvedValue(undefined);
+      const mockUpdate = jest.fn().mockResolvedValue(true);
       const mockPersist = jest.fn();
       mockUseOnboardingSO.mockReturnValue({
         createDeployment: mockCreate,
@@ -724,6 +736,87 @@ describe('AuthenticateAndDeployStep', () => {
       // persistDeploymentId must not fire again (URL/context already set).
       expect(mockPersist).not.toHaveBeenCalled();
       expect(onContinue).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // Regression: isMethodLocked only checked policyIdsByInstance; removeDeployInstance moves IDs
+  // into pendingCleanupPolicyIds, so after the last instance is removed the lock would lift while
+  // orphaned policies still awaited cleanup. The user could then switch to agent-based, causing
+  // hasStaleMiPolicies to be gated out (!isAgentBased) and old MI policies to be left behind.
+  describe('deployment method lock', () => {
+    function getMockDeploymentMethodCard(): jest.Mock {
+      return jest.requireMock('./authenticate_and_deploy_step/deployment_method_card')
+        .DeploymentMethodCard;
+    }
+
+    it('remains locked when policyIdsByInstance is empty but pendingCleanupPolicyIds is not', () => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty'], dataFormat: 'json' },
+        awsServicesMap: awsServicesMapWithMI,
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          pendingCleanupPolicyIds: { 'inst-a': 'policy-123' },
+          onboardingDeploymentId: undefined,
+        },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+
+      renderStep();
+
+      const mock = getMockDeploymentMethodCard();
+      const lastCall = mock.mock.calls[mock.mock.calls.length - 1];
+      expect(lastCall[0].disabled).toBe(true);
+    });
+
+    it('is unlocked when both policyIdsByInstance and pendingCleanupPolicyIds are empty', () => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty'], dataFormat: 'json' },
+        awsServicesMap: awsServicesMapWithMI,
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          pendingCleanupPolicyIds: {},
+          onboardingDeploymentId: undefined,
+        },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+
+      renderStep();
+
+      const mock = getMockDeploymentMethodCard();
+      const lastCall = mock.mock.calls[mock.mock.calls.length - 1];
+      expect(lastCall[0].disabled).toBe(false);
+    });
+  });
+
+  describe('AWS identity federation feature flag', () => {
+    const miServiceWithoutFederation = { ...miService, identityFederationSupported: false };
+
+    it('offers identity federation when the flag is ON and the service supports it', () => {
+      mockUseAwsIdentityFederationEnabled.mockReturnValue(true);
+      renderStep();
+      expect(getLastMiSectionProps().showIdentityFederation).toBe(true);
+    });
+
+    it('hides identity federation when the flag is OFF even if the service supports it', () => {
+      mockUseAwsIdentityFederationEnabled.mockReturnValue(false);
+      renderStep();
+      expect(getLastMiSectionProps().showIdentityFederation).toBe(false);
+    });
+
+    it('hides identity federation when the flag is ON but the service does not support it', () => {
+      mockUseAwsIdentityFederationEnabled.mockReturnValue(true);
+      mockUseOnboardingFlow.mockReturnValue({
+        ...mockUseOnboardingFlow(),
+        awsServicesMap: new Map([['guardduty', miServiceWithoutFederation]]),
+      });
+      renderStep();
+      expect(getLastMiSectionProps().showIdentityFederation).toBe(false);
     });
   });
 });

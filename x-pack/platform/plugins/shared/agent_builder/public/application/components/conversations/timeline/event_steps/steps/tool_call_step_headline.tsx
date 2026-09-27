@@ -32,9 +32,14 @@ const toolBadgeToolLabel = i18n.translate(
 interface ToolCallStepHeadlineProps {
   step: ToolCallStepData;
   hasResults: boolean;
+  isAborted?: boolean;
 }
 
-export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({ step, hasResults }) => {
+export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
+  step,
+  hasResults,
+  isAborted = false,
+}) => {
   const { euiTheme } = useEuiTheme();
   const suffixFontSize = useEuiFontSize('s');
   const hasErrorResult = step.results.some(isErrorResult);
@@ -73,6 +78,11 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({ step
               <FormattedMessage
                 id="xpack.agentBuilder.eventSteps.steps.toolCall.ran"
                 defaultMessage="ran"
+              />
+            ) : isAborted ? (
+              <FormattedMessage
+                id="xpack.agentBuilder.eventSteps.steps.toolCall.stopped"
+                defaultMessage="stopped"
               />
             ) : (
               <FormattedMessage

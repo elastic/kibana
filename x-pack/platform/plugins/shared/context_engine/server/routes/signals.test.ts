@@ -8,7 +8,7 @@
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { registerSignalRoutes } from './signals';
-import { signalGroupsPath, signalsPath } from '../../common/constants';
+import { SIGNAL_GROUPS_PATH, SIGNALS_PATH } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 
 interface RegisteredRoute {
@@ -76,11 +76,11 @@ describe('signals routes', () => {
   });
 
   it('registers both routes as internal read routes', () => {
-    expect(getRoute(signalGroupsPath).config).toMatchObject({
+    expect(getRoute(SIGNAL_GROUPS_PATH).config).toMatchObject({
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
-    expect(getRoute(signalsPath).config).toMatchObject({
+    expect(getRoute(SIGNALS_PATH).config).toMatchObject({
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
@@ -89,8 +89,8 @@ describe('signals routes', () => {
   it('returns 404 on every route when the context engine is disabled', async () => {
     featureFlagEnabled = false;
 
-    await callRoute(signalGroupsPath, {});
-    await callRoute(signalsPath, { query: { tag: 'query_error', from: 0, size: 25 } });
+    await callRoute(SIGNAL_GROUPS_PATH, {});
+    await callRoute(SIGNALS_PATH, { query: { tag: 'query_error', from: 0, size: 25 } });
 
     expect(response.notFound).toHaveBeenCalledTimes(2);
     expect(search).not.toHaveBeenCalled();
@@ -99,8 +99,8 @@ describe('signals routes', () => {
   it('returns 404 on every route when the feedback loop is disabled', async () => {
     feedbackLoopEnabled = false;
 
-    await callRoute(signalGroupsPath, {});
-    await callRoute(signalsPath, { query: { tag: 'query_error', from: 0, size: 25 } });
+    await callRoute(SIGNAL_GROUPS_PATH, {});
+    await callRoute(SIGNALS_PATH, { query: { tag: 'query_error', from: 0, size: 25 } });
 
     expect(response.notFound).toHaveBeenCalledTimes(2);
     expect(search).not.toHaveBeenCalled();
@@ -111,7 +111,7 @@ describe('signals routes', () => {
       aggregations: { tags: { buckets: [{ key: 'query_error', doc_count: 5 }] } },
     });
 
-    await callRoute(signalGroupsPath, {});
+    await callRoute(SIGNAL_GROUPS_PATH, {});
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -128,7 +128,7 @@ describe('signals routes', () => {
     const signal = { signal_id: 'sig-1', tags: ['query_error'], data: {} };
     search.mockResolvedValue({ hits: { total: { value: 1 }, hits: [{ _source: signal }] } });
 
-    await callRoute(signalsPath, { query: { tag: 'query_error', from: 0, size: 25 } });
+    await callRoute(SIGNALS_PATH, { query: { tag: 'query_error', from: 0, size: 25 } });
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -140,7 +140,7 @@ describe('signals routes', () => {
   });
 
   it('bounds `from` so `from + size` cannot exceed the ES max result window', () => {
-    const { validate } = getRoute(signalsPath);
+    const { validate } = getRoute(SIGNALS_PATH);
     const querySchema = (validate as { request: { query: { validate: (v: unknown) => unknown } } })
       .request.query;
 

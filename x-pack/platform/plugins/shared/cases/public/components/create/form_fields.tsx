@@ -32,6 +32,8 @@ import { KibanaServices } from '../../common/lib/kibana';
 import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservablesToggle } from '../case_form_fields/observables_toggle';
+import { getInitialCreateCaseSettings } from './utils';
+import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -45,7 +47,8 @@ export interface CreateCaseFormFieldsProps {
 
 const transformTemplateCaseFieldsToCaseFormFields = (
   owner: string,
-  caseTemplateFields: CasesConfigurationUITemplate['caseFields']
+  caseTemplateFields: CasesConfigurationUITemplate['caseFields'],
+  configuration: CasesConfigurationUI
 ): CasePostRequest => {
   const caseFields = removeEmptyFields(caseTemplateFields ?? {});
   const transFormedCustomFields = caseFields?.customFields?.map((customField) => {
@@ -59,9 +62,18 @@ const transformTemplateCaseFieldsToCaseFormFields = (
     };
   });
 
+  const ownerSettings = getInitialCreateCaseSettings(owner, configuration);
+  const templateSettings = caseFields?.settings;
+
   return getInitialCaseValue({
     owner,
     ...caseFields,
+    settings: {
+      syncAlerts: templateSettings?.syncAlerts ?? ownerSettings.syncAlerts,
+      extractObservables: isObservablesExtractionBlocked(owner)
+        ? false
+        : templateSettings?.extractObservables ?? ownerSettings.extractObservables,
+    },
     customFields: transFormedCustomFields as CaseUI['customFields'],
   });
 };
@@ -70,7 +82,7 @@ const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ configuration, selectedOwner, connectors, isLoading, withSteps, draftStorageKey }) => {
-    const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
+    const { reset, updateFieldValues, isSubmitting, setFieldValue, getFields } = useFormContext();
 
     const caseOwner = selectedOwner || configuration.owner;
     const {
@@ -93,6 +105,37 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       setFieldValue('connectorId', configuration.connector.id);
     }, [configuration.connector.id, setFieldValue]);
 
+    /**
+     * Form defaultValue is fixed at mount. Re-apply the space default when configuration
+     * changes (load completes, or owner switches to an unconfigured owner whose lookup
+     * returns initialConfiguration with id: '' and extractObservables: false). Skip only
+     * while the field is dirty so a user or template choice is not overwritten.
+     * Also skip while configurations are still loading to avoid committing the provisional
+     * false fallback before the real space value arrives.
+     */
+    useEffect(() => {
+      if (isLoading) {
+        return;
+      }
+      const field = getFields().extractObservables;
+      if (field && !field.isPristine) {
+        return;
+      }
+      setFieldValue(
+        'extractObservables',
+        isObservablesExtractionBlocked(caseOwner)
+          ? false
+          : configuration.extractObservables ?? false
+      );
+    }, [
+      caseOwner,
+      configuration.extractObservables,
+      configuration.id,
+      getFields,
+      isLoading,
+      setFieldValue,
+    ]);
+
     const defaultTemplate = useMemo(
       () => ({
         key: DEFAULT_EMPTY_TEMPLATE_KEY,
@@ -100,22 +143,30 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         caseFields: getInitialCaseValue({
           owner: caseOwner,
           connector: configuration.connector,
+          settings: getInitialCreateCaseSettings(caseOwner, configuration),
         }),
       }),
-      [caseOwner, configuration.connector]
+      [caseOwner, configuration]
     );
 
     const onTemplateChange = useCallback(
       ({ caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
-        const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(caseOwner, caseFields);
+        const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(
+          caseOwner,
+          caseFields,
+          configuration
+        );
 
         reset({
           resetValues: true,
-          defaultValue: getInitialCaseValue({ owner: caseOwner }),
+          defaultValue: getInitialCaseValue({
+            owner: caseOwner,
+            settings: getInitialCreateCaseSettings(caseOwner, configuration),
+          }),
         });
         updateFieldValues(caseFormFields);
       },
-      [caseOwner, reset, updateFieldValues]
+      [caseOwner, configuration, reset, updateFieldValues]
     );
 
     const firstStep = useMemo(

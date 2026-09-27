@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildExecutionContext } from './execution_context';
+import { buildExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 describe('buildExecutionContext', () => {
   it('returns a child execution context tagged as security_solution', () => {
@@ -31,5 +31,20 @@ describe('buildExecutionContext', () => {
     expect(firstContext).not.toBe(secondContext);
     expect(firstContext.child).not.toBe(secondContext.child);
     expect(firstContext).toEqual(secondContext);
+  });
+});
+
+describe('EA_EXECUTION_CONTEXT_NAMES', () => {
+  it.each(Object.entries(EA_EXECUTION_CONTEXT_NAMES))(
+    'prefixes %s with entity_analytics:',
+    (_key, value) => {
+      expect(value).toMatch(/^entity_analytics:/);
+    }
+  );
+
+  it('RISK_SCORE_MANAGEMENT resolves to the exact expected string', () => {
+    expect(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORE_MANAGEMENT).toBe(
+      'entity_analytics:risk_score_management'
+    );
   });
 });
