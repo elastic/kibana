@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
+  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,11 +18,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getCortexEntityTypeLabel, getCortexStatusLabel } from './entity_type_labels';
-import { useCortexPage } from './use_cortex';
+import { CortexPageEditor } from './page_editor';
+import { useArchiveCortexPage, useCortexPage } from './use_cortex';
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -29,11 +34,17 @@ const contentWithoutDuplicateTitle = (title: string, content: string): string =>
 
 interface CortexPageViewProps {
   pageId: string;
+  canEdit: boolean;
+  onArchived: () => void;
 }
 
-export function CortexPageView({ pageId }: CortexPageViewProps) {
+export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewProps) {
   const { data, isLoading, isError } = useCortexPage(pageId);
   const page = data?.page;
+  const [isEditing, setIsEditing] = useState(false);
+  const [isConfirmingArchive, setIsConfirmingArchive] = useState(false);
+  const archiveTitleId = useGeneratedHtmlId();
+  const { mutate: archivePage, isLoading: isArchiving } = useArchiveCortexPage();
 
   if (isLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="nightshiftCortexPageLoading" />;
@@ -63,11 +74,50 @@ export function CortexPageView({ pageId }: CortexPageViewProps) {
     );
   }
 
+  if (isEditing) {
+    return <CortexPageEditor page={page} onDone={() => setIsEditing(false)} />;
+  }
+
   return (
     <div data-test-subj="nightshiftCortexPageView">
-      <EuiTitle size="s">
-        <h2>{page.title}</h2>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h2>{page.title}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {canEdit && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              iconType="pencil"
+              onClick={() => setIsEditing(true)}
+              data-test-subj="nightshiftCortexPageEdit"
+            >
+              <FormattedMessage
+                id="xpack.significantEventsApp.cortex.pageEditButton"
+                defaultMessage="Edit"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {canEdit && page.status !== 'archived' && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              iconType="trash"
+              color="danger"
+              onClick={() => setIsConfirmingArchive(true)}
+              data-test-subj="nightshiftCortexPageArchive"
+            >
+              <FormattedMessage
+                id="xpack.significantEventsApp.cortex.pageArchiveButton"
+                defaultMessage="Archive"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
         <EuiFlexItem grow={false}>
@@ -125,6 +175,36 @@ export function CortexPageView({ pageId }: CortexPageViewProps) {
             defaultMessage="This page has no content yet."
           />
         </EuiText>
+      )}
+      {isConfirmingArchive && (
+        <EuiConfirmModal
+          aria-labelledby={archiveTitleId}
+          titleProps={{ id: archiveTitleId }}
+          title={i18n.translate('xpack.significantEventsApp.cortex.archiveConfirmTitle', {
+            defaultMessage: 'Archive "{title}"?',
+            values: { title: page.title },
+          })}
+          onCancel={() => setIsConfirmingArchive(false)}
+          onConfirm={() => archivePage(page.id, { onSuccess: onArchived })}
+          isLoading={isArchiving}
+          cancelButtonText={i18n.translate(
+            'xpack.significantEventsApp.cortex.archiveConfirmCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.significantEventsApp.cortex.archiveConfirmButton',
+            { defaultMessage: 'Archive' }
+          )}
+          buttonColor="danger"
+          data-test-subj="nightshiftCortexArchiveConfirm"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.significantEventsApp.cortex.archiveConfirmDescription"
+              defaultMessage="Investigations will stop loading this page. You can restore it later by editing its status."
+            />
+          </p>
+        </EuiConfirmModal>
       )}
     </div>
   );
