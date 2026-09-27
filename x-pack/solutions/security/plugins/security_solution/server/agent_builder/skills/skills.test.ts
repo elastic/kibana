@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { readFileSync, readdirSync } from 'fs';
+import { join, relative } from 'path';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { createMockEndpointAppContext } from '../../endpoint/mocks';
@@ -40,6 +42,35 @@ const ALL_SKILLS = [
   automaticMigrationRulesInstallRulesSkill,
   elasticDefendPolicyManagementSkill,
 ];
+
+const SKILLS_DIR = __dirname;
+
+interface SkillIdDeclaration {
+  file: string;
+  id: string;
+}
+
+/**
+ * Collects the literal skill id declared as the first property of every
+ * `defineSkillType({...})` call in the skills tree. Files that build their id
+ * from a constant are not collected.
+ */
+const collectSkillIdDeclarations = (dir: string = SKILLS_DIR): SkillIdDeclaration[] => {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      return collectSkillIdDeclarations(path);
+    }
+
+    if (!entry.name.endsWith('.ts') || entry.name.endsWith('.test.ts')) {
+      return [];
+    }
+
+    const match = readFileSync(path, 'utf8').match(/defineSkillType\(\{\s*id:\s*'([^']+)'/);
+    return match ? [{ file: relative(SKILLS_DIR, path), id: match[1] }] : [];
+  });
+};
 
 describe('Security Skills', () => {
   describe('threat-hunting skill', () => {
@@ -494,6 +525,33 @@ describe('Security Skills', () => {
       for (const skill of ALL_SKILLS) {
         expect(skill.content).not.toContain('automatic-migration-rules-get-resources');
       }
+    });
+  });
+
+  describe('skill definition files', () => {
+    it('declares every skill id in exactly one file', () => {
+      const declarations = collectSkillIdDeclarations();
+
+      // A broken walk must not make this assertion vacuous.
+      expect(declarations.length).toBeGreaterThanOrEqual(10);
+
+      const filesById = declarations.reduce<Record<string, string[]>>((acc, { id, file }) => {
+        acc[id] = [...(acc[id] ?? []), file];
+        return acc;
+      }, {});
+
+      const duplicatedIds = Object.entries(filesById).filter(([, files]) => files.length > 1);
+      expect(duplicatedIds).toEqual([]);
+    });
+
+    it('keeps the registered alert-analysis skill on the id and path the alerts-rag eval matches', () => {
+      // Mirrors ALERTS_RAG_SKILL_NAME in
+      // packages/kbn-evals-suite-alerts-rag/src/evaluate_dataset.ts, which matches the
+      // `filestore.read` of this skill's SKILL.md in a live conversation trace.
+      expect(alertAnalysisSkill.id).toBe('alert-analysis');
+      expect(`${alertAnalysisSkill.basePath}/${alertAnalysisSkill.name}`).toBe(
+        'skills/security/alerts/alert-analysis'
+      );
     });
   });
 });
