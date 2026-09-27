@@ -466,50 +466,60 @@ describe('WorkflowAccessControlService', () => {
     expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledTimes(2);
   });
 
-  it('validates stored ACLs and hides only workflows the caller cannot read', async () => {
-    const client = core.elasticsearch.client.asInternalUser;
-    jest.mocked(client.openPointInTime).mockResolvedValue({
-      id: 'pit',
-      _shards: { total: 1, successful: 1, failed: 0 },
-    });
-    const grant = { type: 'user', id: 'owner', role: 'viewer', added_at: '2026-09-22' };
-    jest.mocked(client.search).mockResolvedValue({
-      took: 1,
-      timed_out: false,
-      _shards: { total: 1, successful: 1, failed: 0 },
-      hits: {
-        hits: [
-          { _index: 'workflows', _id: 'legacy', _source: {} },
-          {
-            _index: 'workflows',
-            _id: 'public',
-            _source: { access_control: { access_mode: 'public', entries: [] } },
-          },
-          { _index: 'workflows', _id: 'owned', _source: document },
-          {
-            _index: 'workflows',
-            _id: 'shared',
-            _source: { access_control: { access_mode: 'private', entries: [grant] } },
-          },
-          {
-            _index: 'workflows',
-            _id: 'hidden',
-            _source: { ...document, owner_id: 'another-owner' },
-          },
-        ],
-      },
-    });
+  it.each([
+    { workflowSpaceId: 'default', deletedAt: null },
+    { workflowSpaceId: '*', deletedAt: null },
+    { workflowSpaceId: '*', deletedAt: '2026-09-27T00:00:00.000Z' },
+  ])(
+    'filters execution access for space=$workflowSpaceId, deleted=$deletedAt',
+    async ({ workflowSpaceId, deletedAt }) => {
+      const client = core.elasticsearch.client.asInternalUser;
+      jest.mocked(client.openPointInTime).mockResolvedValue({
+        id: 'pit',
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+      const grant = { type: 'user', id: 'owner', role: 'viewer', added_at: '2026-09-22' };
+      jest.mocked(client.search).mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: {
+          hits: [
+            { _index: 'workflows', _id: 'legacy', _source: {} },
+            {
+              _index: 'workflows',
+              _id: 'public',
+              _source: { access_control: { access_mode: 'public', entries: [] } },
+            },
+            { _index: 'workflows', _id: 'owned', _source: document },
+            {
+              _index: 'workflows',
+              _id: 'shared',
+              _source: { access_control: { access_mode: 'private', entries: [grant] } },
+            },
+            {
+              _index: 'workflows',
+              _id: 'hidden',
+              _source: { ...document, owner_id: 'another-owner' },
+            },
+          ].map((hit) => ({
+            ...hit,
+            _source: { ...hit._source, spaceId: workflowSpaceId, deleted_at: deletedAt },
+          })),
+        },
+      });
 
-    await expect(service.executionFilter('default', request)).resolves.toEqual({
-      bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] },
-    });
-    expect(client.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _source: ['owner_id', 'access_control'],
-        query: { term: { spaceId: 'default' } },
-      })
-    );
-  });
+      await expect(service.executionFilter('default', request)).resolves.toEqual({
+        bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] },
+      });
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: ['owner_id', 'access_control'],
+          query: { terms: { spaceId: ['default', '*'] } },
+        })
+      );
+    }
+  );
 
   it.each([
     { timedOut: true, failedShards: 0 },

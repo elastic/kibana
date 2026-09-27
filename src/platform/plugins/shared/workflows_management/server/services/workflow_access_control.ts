@@ -31,6 +31,7 @@ import type {
   WorkflowPermissions,
 } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
@@ -177,7 +178,7 @@ export class WorkflowAccessControlService {
           _source: ['owner_id', 'access_control'],
           sort: ['_shard_doc'],
           ...(searchAfter ? { search_after: searchAfter } : {}),
-          query: { term: { spaceId } },
+          query: { terms: { spaceId: [spaceId, GLOBAL_WORKFLOW_SPACE_ID] } },
         });
         if (response.pit_id) pitId = response.pit_id;
         if (response.timed_out || response._shards.failed > 0) {
