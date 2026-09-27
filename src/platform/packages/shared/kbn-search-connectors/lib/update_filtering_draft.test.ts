@@ -58,7 +58,10 @@ describe('updateFilteringDraft lib function', () => {
     };
 
     mockClient.transport.request.mockImplementationOnce(() => ({ result: 'updated' }));
-    mockClient.transport.request.mockImplementationOnce(() => ({ filtering: [{ draft }] }));
+    mockClient.transport.request.mockImplementationOnce(() => ({
+      id: 'connectorId',
+      filtering: [{ draft }],
+    }));
 
     await expect(
       updateFilteringDraft(mockClient as unknown as ElasticsearchClient, 'connectorId', {

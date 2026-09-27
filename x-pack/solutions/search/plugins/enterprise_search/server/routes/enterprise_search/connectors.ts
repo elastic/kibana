@@ -733,6 +733,21 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { connectorId } = request.params;
       const connectorResult = await fetchConnectorById(client.asCurrentUser, connectorId);
 
+      if (!connectorResult) {
+        return createError({
+          errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
+            {
+              defaultMessage: 'Connector with id {connectorId} is not found.',
+              values: { connectorId },
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+
       return response.ok({
         body: {
           connector: connectorResult,
