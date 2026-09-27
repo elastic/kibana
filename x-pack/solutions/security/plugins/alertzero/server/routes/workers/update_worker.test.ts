@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID } from '@kbn/alertzero-common';
 import type { RouteDependencies } from '../register_routes';
+import { createRouteContextMock } from '../route_context.mock';
 import { registerUpdateWorkerRoute } from './update_worker';
 
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
@@ -35,7 +36,7 @@ describe('registerUpdateWorkerRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { workerId: TRIAGE },
         body: { enabled: true },

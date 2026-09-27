@@ -54,6 +54,30 @@ describe('ToolCallGroup', () => {
     expect(screen.getByText('2 tools running…')).toBeInTheDocument();
   });
 
+  it('shows "N tools stopped" instead of "running…" when the turn was stopped', () => {
+    renderWithProviders(
+      <ToolCallGroup
+        steps={[toolStep('c1', 'search', [otherResult('r1')]), toolStep('c2', 'read')]}
+        isAborted
+      />
+    );
+    expect(screen.getByText('2 tools stopped')).toBeInTheDocument();
+    expect(screen.queryByText('2 tools running…')).not.toBeInTheDocument();
+  });
+
+  it('still shows "N tools ran" in a stopped turn when every step completed', () => {
+    renderWithProviders(
+      <ToolCallGroup
+        steps={[
+          toolStep('c1', 'search', [otherResult('r1')]),
+          toolStep('c2', 'read', [otherResult('r2')]),
+        ]}
+        isAborted
+      />
+    );
+    expect(screen.getByText('2 tools ran')).toBeInTheDocument();
+  });
+
   it('expands to show each individual step, which opens its own flyout on click', async () => {
     const user = userEvent.setup();
     renderWithProviders(

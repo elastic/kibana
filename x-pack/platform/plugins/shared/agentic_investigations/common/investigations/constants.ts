@@ -15,3 +15,7 @@ export const INVESTIGATION_ASSIGN_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}/ass
 
 export const INVESTIGATIONS_UI_CAPABILITY_SHOW = 'showInvestigations' as const;
 export const INVESTIGATIONS_UI_CAPABILITY_MANAGE = 'manageInvestigations' as const;
+
+export const INVESTIGATION_STATUS_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}/status` as const;
+export const INVESTIGATION_CLOSE_PREVIEW_URL =
+  `${INVESTIGATIONS_INTERNAL_URL}/{id}/_close_preview` as const;

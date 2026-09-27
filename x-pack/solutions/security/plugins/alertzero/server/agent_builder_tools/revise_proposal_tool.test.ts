@@ -73,7 +73,8 @@ describe('reviseProposalTool', () => {
     expect(getLatestRevision).toHaveBeenCalledWith('proposal-1', 'default');
     expect(revise).toHaveBeenCalledWith(
       { id: 'proposal-1', comment: 'Tightened the match' },
-      'default'
+      'default',
+      requestMock
     );
   });
 
@@ -88,7 +89,11 @@ describe('reviseProposalTool', () => {
     });
 
     expect(getLatestRevision).toHaveBeenCalledWith('proposal-1', 'default');
-    expect(revise).toHaveBeenCalledWith({ id: 'proposal-2', impact: 'critical' }, 'default');
+    expect(revise).toHaveBeenCalledWith(
+      { id: 'proposal-2', impact: 'critical' },
+      'default',
+      requestMock
+    );
     expect(result.results[0].data).toMatchObject({
       proposalId: 'proposal-3',
       supersedes: 'proposal-2',
