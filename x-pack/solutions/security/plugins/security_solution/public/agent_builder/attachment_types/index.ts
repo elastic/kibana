@@ -24,6 +24,7 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
+import { createImpactAttachmentDefinition } from './impact';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -130,6 +131,23 @@ export const registerInvestigationIocsAttachment = ({
       createInvestigationIocsAttachmentDefinition()
     );
   });
+};
+
+/**
+ * Registers the `security.impact` attachment renderer (entity × verdict table summarising
+ * alert-analysis results for impacted hosts and users). The definition is registered
+ * synchronously so Agent Builder can resolve the type on first render; `ImpactInlineContent`
+ * stays behind `React.lazy` inside the definition so the table UI remains code-split.
+ */
+export const registerImpactAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  attachments.addAttachmentType(
+    SecurityAgentBuilderAttachments.impact,
+    createImpactAttachmentDefinition()
+  );
 };
 
 /**
