@@ -11,7 +11,7 @@ import React, {
   type HTMLAttributeAnchorTarget,
   useCallback,
 } from 'react';
-import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiLink, type EuiCardProps, type EuiLinkProps } from '@elastic/eui';
 import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { useGetAppUrl, useNavigateTo } from './navigation';
@@ -134,6 +134,13 @@ export const LinkButton = withLink(EuiButton);
  * `<LinkAnchor deepLinkId={SecurityPageName.hosts} />;`
  */
 export const LinkAnchor = withLink<EuiLinkProps>(EuiLink);
+
+/**
+ * Security Solutions internal link card, the whole card is the navigation target.
+ *
+ * `<LinkCard deepLinkId={SecurityPageName.hosts} title="Hosts" />;`
+ */
+export const LinkCard = withLink<EuiCardProps>(EuiCard);
 
 // Utils
 
