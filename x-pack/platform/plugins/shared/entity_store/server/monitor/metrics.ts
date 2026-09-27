@@ -135,7 +135,8 @@ export const entityStoreMetrics = {
   ),
 
   extractionLogsProcessed: histogram<ExtractionAttributes>(m('extraction.logs.processed'), {
-    description: 'Total raw log documents processed per task run across all sub-windows',
+    description:
+      'Total log documents processed per task run across all sub-windows. Raw, unless dual-process sampling (FF on) is active, in which case sampled/processed volume',
     unit: '{document}',
     valueType: ValueType.INT,
   }),
