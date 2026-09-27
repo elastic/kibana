@@ -394,6 +394,13 @@ tags:
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager
     x-displayName: Task manager
+  - name: Universal Profiling
+    description: |
+      Universal Profiling provides whole-system, always-on, continuous profiling with zero instrumentation. Use these APIs to check whether the Elasticsearch resources Universal Profiling depends on are set up, and to set them up. Universal Profiling is available on Elastic Cloud Hosted and self-managed deployments.
+    externalDocs:
+      description: Universal Profiling documentation
+      url: https://www.elastic.co/docs/solutions/observability/infra-and-hosts/universal-profiling
+    x-displayName: Universal Profiling
   - description: |
       The Kibana Upgrade Assistant API helps you prepare for the next major Elasticsearch release.
       > warn
@@ -64253,6 +64260,94 @@ paths:
       summary: Pin/unpin an event
       tags:
         - Security Timeline API
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/profiling/setup/es_resources:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/profiling/setup/es_resources</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Check if Universal Profiling has been set up and configured properly<br/><br/>[Required authorization] Route required privileges: profiling.
+      operationId: get-profiling-setup-es-resources
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                notSetUp:
+                  description: The Elasticsearch profiling plugin is enabled, but the required resources have not been created. Call `POST /api/profiling/setup/es_resources` to set them up.
+                  summary: Not set up yet
+                  value:
+                    has_data: false
+                    has_required_role: true
+                    has_setup: false
+                    pre_8_9_1_data: false
+                    profiling_enabled: true
+                profilingDisabled:
+                  description: The Universal Profiling plugin is disabled in the Elasticsearch cluster, so setup cannot complete until it is enabled.
+                  summary: Disabled in Elasticsearch
+                  value:
+                    has_data: false
+                    has_required_role: true
+                    has_setup: false
+                    pre_8_9_1_data: false
+                    profiling_enabled: false
+                setUpWithData:
+                  description: Universal Profiling is set up and profiling data has been ingested.
+                  summary: Set up and receiving data
+                  value:
+                    has_data: true
+                    has_required_role: true
+                    has_setup: true
+                    pre_8_9_1_data: false
+                    profiling_enabled: true
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_profiling_setup_status_response'
+          description: Indicates a successful call.
+        '403':
+          description: The user does not have the privileges required to read the Universal Profiling setup status.
+        '500':
+          description: An unexpected error occurred while checking the Universal Profiling setup status.
+      summary: Get Universal Profiling setup status
+      tags:
+        - Universal Profiling
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/profiling/setup/es_resources</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Set up Universal Profiling resources and configuration<br/><br/>[Required authorization] Route required privileges: profiling.
+      operationId: post-profiling-setup-es-resources
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      responses:
+        '202':
+          description: Setup was accepted. Enabling resource management in Elasticsearch is asynchronous and may not have completed by the time this response is sent.
+        '403':
+          description: The user does not have the privileges required to set up Universal Profiling.
+        '500':
+          description: An unexpected error occurred. Setup failed.
+      summary: Initialize Universal Profiling setup
+      tags:
+        - Universal Profiling
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -170160,6 +170255,32 @@ components:
         - data_source
         - metrics
       title: Pie Chart (library)
+      type: object
+    Kibana_HTTP_APIs_profiling_setup_status_response:
+      additionalProperties: false
+      properties:
+        has_data:
+          description: Whether Universal Profiling has ingested any data.
+          type: boolean
+        has_required_role:
+          description: Whether the current user has the privileges required to run Universal Profiling setup.
+          type: boolean
+        has_setup:
+          description: Whether every resource Universal Profiling requires has already been created.
+          type: boolean
+        pre_8_9_1_data:
+          description: Whether data ingested before version 8.9.1 is present. That data cannot be read by the current version.
+          type: boolean
+        profiling_enabled:
+          description: Whether the Universal Profiling plugin is enabled in the Elasticsearch cluster.
+          type: boolean
+      required:
+        - profiling_enabled
+        - has_setup
+        - has_data
+        - pre_8_9_1_data
+        - has_required_role
+      title: profiling_setup_status_response
       type: object
     Kibana_HTTP_APIs_QueryStreamUpsertRequest:
       additionalProperties: false

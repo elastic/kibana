@@ -14,11 +14,6 @@ export interface ProfilingCloudSetupOptions extends ProfilingSetupOptions {
   isCloudEnabled: boolean;
 }
 
-export interface CloudSetupStateType {
-  type: 'cloud';
-  setupState: CloudSetupState;
-}
-
 export interface CloudSetupState extends SetupState {
   cloud: {
     available: boolean;

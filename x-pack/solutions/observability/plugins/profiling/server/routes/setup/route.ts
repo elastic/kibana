@@ -14,8 +14,12 @@ import { handleRouteHandlerError } from '../../utils/handle_route_error_handler'
 import { getClient } from '../compat';
 import { getCloudSetupInstructions } from './get_cloud_setup_instructions';
 import { getSelfManagedInstructions } from './get_self_managed_instructions';
+import { setupStatusOASOperationObject } from './oas_examples';
+import { setupStatusResponseSchema } from './schemas';
 import { setupCloud } from './setup_cloud';
 import { setupSelfManaged } from './setup_self_managed';
+
+const SERVERLESS_ERROR_MESSAGE = 'Universal Profiling is not supported in serverless';
 
 export function registerSetupRoute({
   router,
@@ -23,6 +27,13 @@ export function registerSetupRoute({
   services: { createProfilingEsClient },
   dependencies,
 }: RouteRegisterParameters) {
+  // Universal Profiling setup is not supported on serverless. Skipping registration keeps these
+  // routes out of serverless builds and out of the serverless OAS docs, whose generation
+  // force-enables every plugin regardless of `xpack.profiling.enabled`.
+  if (dependencies.buildFlavor === 'serverless') {
+    return;
+  }
+
   const paths = getRoutePaths();
   router.get(
     {
@@ -36,12 +47,36 @@ export function registerSetupRoute({
         access: 'public',
         summary: 'Get Universal Profiling setup status',
         description: 'Check if Universal Profiling has been set up and configured properly',
-        tags: ['Universal Profiling'],
+        tags: ['oas-tag:Universal Profiling'],
+        oasOperationObject: () => setupStatusOASOperationObject,
       },
-      validate: false,
+      validate: {
+        request: {},
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+            body: setupStatusResponseSchema,
+          },
+          403: {
+            description:
+              'The user does not have the privileges required to read the Universal Profiling setup status.',
+          },
+          500: {
+            description:
+              'An unexpected error occurred while checking the Universal Profiling setup status.',
+          },
+        },
+      },
     },
     async (context, request, response) => {
       try {
+        // Fallback: these routes are not registered on serverless builds anyway.
+        if (dependencies.esCapabilities.serverless) {
+          return response.badRequest({
+            body: { message: SERVERLESS_ERROR_MESSAGE },
+          });
+        }
+
         const hasRequiredRole = dependencies.start.security
           ? await getHasSetupPrivileges({
               securityPluginStart: dependencies.start.security,
@@ -55,7 +90,6 @@ export function registerSetupRoute({
           esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
-          isServerless: dependencies.esCapabilities.serverless,
         });
 
         return response.ok({ body: { ...profilingStatus, has_required_role: hasRequiredRole } });
@@ -82,9 +116,24 @@ export function registerSetupRoute({
         access: 'public',
         summary: 'Initialize Universal Profiling setup',
         description: 'Set up Universal Profiling resources and configuration',
-        tags: ['Universal Profiling'],
+        tags: ['oas-tag:Universal Profiling'],
       },
-      validate: false,
+      validate: {
+        request: {},
+        response: {
+          202: {
+            description:
+              'Setup was accepted. Enabling resource management in Elasticsearch is asynchronous and may not have completed by the time this response is sent.',
+          },
+          403: {
+            description:
+              'The user does not have the privileges required to set up Universal Profiling.',
+          },
+          500: {
+            description: 'An unexpected error occurred. Setup failed.',
+          },
+        },
+      },
     },
     async (context, request, response) => {
       try {
@@ -107,9 +156,11 @@ export function registerSetupRoute({
           });
         }
 
-        // For now, we don't support serverless setup
+        // Fallback: these routes are not registered on serverless builds anyway.
         if (dependencies.esCapabilities.serverless) {
-          return response.badRequest({ body: { message: 'Serverless setup is not supported' } });
+          return response.badRequest({
+            body: { message: SERVERLESS_ERROR_MESSAGE },
+          });
         }
 
         const esClient = await getClient(context);
@@ -126,17 +177,15 @@ export function registerSetupRoute({
             dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
         };
 
-        const scopedESClient = core.elasticsearch.client;
-        const { type, setupState } =
-          await dependencies.start.profilingDataAccess.services.getSetupState({
-            esClient: scopedESClient,
-            soClient: core.savedObjects.client,
-            spaceId:
-              dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
-          });
+        const { services } = dependencies.start.profilingDataAccess;
+        const setupStateParams = {
+          esClient: core.elasticsearch.client,
+          soClient: core.savedObjects.client,
+          spaceId: commonSetupParams.spaceId,
+        };
 
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
-        if (isCloudEnabled && type === 'cloud') {
+        if (isCloudEnabled) {
           if (!dependencies.start.fleet) {
             const msg = `Elastic Fleet is required to set up Universal Profiling on Cloud`;
             logger.error(msg);
@@ -147,6 +196,7 @@ export function registerSetupRoute({
           }
           logger.debug('Setting up Universal Profiling on Cloud');
 
+          const setupState = await services.getCloudSetupState(setupStateParams);
           await setupCloud({
             setupState,
             setupParams: {
@@ -161,6 +211,7 @@ export function registerSetupRoute({
         } else {
           logger.debug('Setting up self-managed Universal Profiling');
 
+          const setupState = await services.getSelfManagedSetupState(setupStateParams);
           await setupSelfManaged({
             setupState,
             setupParams: commonSetupParams,
@@ -212,6 +263,13 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
+        // Fallback: these routes are not registered on serverless builds anyway.
+        if (dependencies.esCapabilities.serverless) {
+          return response.badRequest({
+            body: { message: SERVERLESS_ERROR_MESSAGE },
+          });
+        }
+
         const stackVersion = dependencies.stackVersion;
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
         if (isCloudEnabled) {

@@ -12,7 +12,7 @@ import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetStatusService } from './status';
 import type { ProfilingESClient } from '../../common/profiling_es_client';
 import { createFetchFunctions } from './functions';
-import { createSetupState } from './setup_state';
+import { createCloudSetupState, createSelfManagedSetupState } from './setup_state';
 import { createFetchESFunctions } from './functions/es_functions';
 
 export interface RegisterServicesParams {
@@ -28,7 +28,8 @@ export function registerServices(params: RegisterServicesParams) {
   return {
     fetchFlamechartData: createFetchFlamechart(params),
     getStatus: createGetStatusService(params),
-    getSetupState: createSetupState(params),
+    getCloudSetupState: createCloudSetupState(params),
+    getSelfManagedSetupState: createSelfManagedSetupState(params),
     // Legacy fetch functions api based on stacktraces
     fetchFunctions: createFetchFunctions(params),
     fetchESFunctions: createFetchESFunctions(params),

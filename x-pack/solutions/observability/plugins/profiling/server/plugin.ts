@@ -47,6 +47,7 @@ export class ProfilingPlugin
 
     const config = this.initializerContext.config.get();
     const stackVersion = this.initializerContext.env.packageInfo.version;
+    const buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
 
     const telemetryUsageCounter = deps.usageCollection?.createUsageCounter(
       PROFILING_SERVER_FEATURE_ID
@@ -73,6 +74,7 @@ export class ProfilingPlugin
             setup: deps,
             config,
             stackVersion,
+            buildFlavor,
             telemetryUsageCounter,
             esCapabilities,
           },
