@@ -150,6 +150,7 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertNotIn("**Any additional context", body)
         self.assertNotIn("**Server OS version:**", body)
         self.assertNotIn("**Elastic Endpoint version:**", body)
+        self.assertNotIn("**Feature flags:**", body)
         self.assertNotIn("**Describe the bug:**\n\n**Version", body)
 
     def test_optional_environment_headings_only_when_needed(self):
@@ -171,6 +172,23 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertIn("**Elastic Endpoint version:**", body)
         self.assertIn("8.16.0", body)
         self.assertNotIn("**Browser and Browser OS versions:**", body)
+        self.assertNotIn("**Feature flags:**", body)
+        self.assertNotIn("**Any additional information:**", body)
+
+    def test_feature_flags_heading_only_when_named(self):
+        finding = {
+            "current_behavior": "broken",
+            "expected_behavior": "works",
+            "steps_followed": ["click"],
+        }
+        config = {
+            "feature_flags": {
+                "securitySolution:entityStoreDisabled": True,
+            }
+        }
+        body = render_bug_body(finding, config)
+        self.assertIn("**Feature flags:**", body)
+        self.assertIn("securitySolution:entityStoreDisabled: on", body)
 
 
 class UploadEvidenceTest(unittest.TestCase):
@@ -416,21 +434,26 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("disable-model-invocation: true", self.text)
 
     def test_human_gate(self):
-        self.assertIn("only the findings a human names", self.text.lower().replace("'", ""))
-        # allow either phrasing:
-        self.assertTrue(
-            "do not file the report" in self.text.lower()
-            or "never file the whole report" in self.text.lower()
-        )
+        self.assertIn("create a bug", self.text.lower())
+        self.assertIn("do not offer to file anything on your own initiative", self.text.lower())
         self.assertNotIn("shall I file these", self.text)
+        self.assertNotIn("does not load during exploratory testing", self.text)
 
     def test_confirm_before_write(self):
         self.assertIn("explicit yes", self.text.lower())
         self.assertIn("file-bug.py", self.text)
+        self.assertIn("prepare a draft", self.text.lower())
 
     def test_duplicate_table(self):
         self.assertIn("reopen_comment", self.text)
         self.assertIn("elastic/kibana", self.text)
+
+    def test_quality_rules(self):
+        self.assertIn("templates/bug-report.md", self.text)
+        self.assertIn("Feature flags:", self.text)
+        self.assertIn("exact flag id", self.text.lower())
+        self.assertIn("recording", self.text.lower())
+        self.assertIn("snapshots", self.text.lower())
 
 
 if __name__ == "__main__":

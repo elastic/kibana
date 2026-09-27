@@ -1,31 +1,53 @@
 ---
 name: security-file-bug
 description: >
-  File a Kibana Security bug from an evidence pack after the human names the
-  target and confirms the draft. Use when the user says "file this finding",
-  "create a bug", "post this ticket", or "comment this on #N". Do not run at
-  the end of an exploratory session unless the human named findings.
+  Draft and file a Kibana Security Solution bug on elastic/kibana after the
+  human confirms the draft. Use when the user says "create a bug", "file a
+  ticket", "post this bug", "comment this on #N", or "file this finding".
+  Do not run unless someone asked to file a bug.
 disable-model-invocation: true
 ---
 
 # Security file-bug
 
-File **only the findings a human names**. Never file the whole report. Do not offer to file anything on your own initiative.
+Help produce a **good Security Solution bug report**, then write it to GitHub only after an **explicit yes**.
 
-Repo: `elastic/kibana`. Template: this skill's `templates/bug-report.md` (Security Solution baseline; not `.github/ISSUE_TEMPLATE/Bug_report.md`). Follow `.agents/skills/kbn-github` (explicit confirm, then `gh`). Omit **Server OS version**, **Browser and Browser OS versions**, and **Elastic Endpoint version** unless the pack has a value.
+Do not offer to file anything on your own initiative. Do not invent steps, expected behaviour, versions, or feature-flag names.
 
-`disable-model-invocation: true` — this skill does not load during exploratory testing. Entry points: the human names findings, or they say to follow this skill.
+Repo: `elastic/kibana`. Body template: this skill's `templates/bug-report.md` (not `.github/ISSUE_TEMPLATE/Bug_report.md`). Follow `.agents/skills/kbn-github` (explicit confirm, then `gh`).
+
+`disable-model-invocation: true` — run only when someone asks to file a bug or to comment on an existing ticket.
+
+## What a good ticket needs
+
+- Headings from `templates/bug-report.md`.
+- **Version** (stack). **Original install method** when known (`from source (dev)` for local/scout).
+- **Steps to reproduce**, **Current behaviour (with screenshots and recordings)**, **Expected behavior**.
+- **Feature flags:** when the behaviour is behind a flag, name the **exact flag id** and whether it is on or off. If you confirmed the feature is default/GA, write `No feature flag (default/GA)`. Never guess a flag name — ask. Omit the heading only when flags were not discussed and the pack has none.
+- Omit **Server OS version**, **Browser and Browser OS versions**, and **Elastic Endpoint version** unless the pack has a value.
+- Ask one question at a time for missing steps, expected, current behaviour, or version. Do not pad with `_unknown_` while a human can still answer.
 
 ## Inputs
 
-One evidence pack per loop:
+Any of these (one bug per loop):
 
-1. Exploratory finding (block from `findings-flow-*.md` / `report.md` + listed media + `config.json`)
-2. `.bug-fixer-session/reproduction-report.md` (+ evidence)
-3. Pasted description + optional local files
+1. Pasted description + optional local files
+2. Screen **recording** and/or **snapshots** (read them and draft the body)
+3. `.bug-fixer-session/reproduction-report.md` (+ evidence)
 4. Existing `#N` / URL meaning “attach this evidence there” (still search; still confirm)
+5. Exploratory-tester pack (`findings-flow-*.md` / `report.md` + media + `config.json`) when the human named that finding
 
-Missing steps / expected / actual: ask one question at a time. Do not invent.
+### Media
+
+Given a recording and stills:
+
+1. Watch them. Draft steps, current behaviour, and expected if the UI makes it obvious. Quote what was on screen; do not invent clicks you did not see.
+2. Put screenshot and recording paths under **Current behaviour (with screenshots and recordings):**. Attach the files on write.
+3. Use a visible route or UI area for `Team:*` inference.
+4. Ask for what media cannot provide: version, flag id, console/network, server OS, endpoint version, expected if unclear.
+5. If the video is unreadable or too long to trust, say so and ask for a still of the failure.
+
+If the input is already finding JSON + config, map it with `render-body`. If the input is media or prose, draft markdown that matches `templates/bug-report.md` (you may call `render-body` once you have JSON).
 
 ## Scripts
 
@@ -43,8 +65,6 @@ Every GitHub read for labels and every GitHub write goes through `scripts/file-b
 ## Flow
 
 ### 1. Collect
-
-Map the pack onto the bug template via:
 
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py render-body \
@@ -91,7 +111,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/secur
   --labels "bug,Team:…" --catalog catalog.json
 ```
 
-Always include `bug` on a new issue. Wait for an **explicit yes**. “File finding 2” is not that yes — it is permission to prepare a draft.
+Always include `bug` on a new issue. Wait for an **explicit yes**. “Create a bug”, “file this ticket”, or “file finding 2” is permission to **prepare a draft**, not to write.
 
 ### 4. Write (only after yes)
 

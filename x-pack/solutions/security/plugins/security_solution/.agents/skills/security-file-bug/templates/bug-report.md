@@ -1,8 +1,17 @@
-<!-- Omit Server OS version, Browser and Browser OS versions, and Elastic Endpoint version unless the pack has a value. Functional Area and Screenshots are not used. -->
+<!--
+Omit Server OS version, Browser and Browser OS versions, and Elastic Endpoint
+version unless the pack has a value.
+Include Feature flags with the exact flag id (and on/off) when the behaviour
+is behind a flag; write "No feature flag (default/GA)" only when that was
+confirmed. Omit Role/Flow/Level unless present.
+Functional Area and Screenshots headings are not used.
+-->
 
 **Describe the bug:**
 
 **Version:**
+
+**Feature flags:**
 
 **Server OS version:**
 

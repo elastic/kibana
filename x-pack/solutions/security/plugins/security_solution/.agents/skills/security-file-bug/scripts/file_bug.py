@@ -236,6 +236,7 @@ _CONSOLE_PREFIX = "Console:"
 _NETWORK_PREFIX = "Network:"
 _HEADING_DESCRIBE = "**Describe the bug:**"
 _HEADING_VERSION = "**Version:**"
+_HEADING_FEATURE_FLAGS = "**Feature flags:**"
 _HEADING_SERVER_OS = "**Server OS version:**"
 _HEADING_BROWSER = "**Browser and Browser OS versions:**"
 _HEADING_ENDPOINT = "**Elastic Endpoint version:**"
@@ -330,6 +331,49 @@ def _stack_version(config: dict, environment: dict) -> str:
     )
 
 
+def _feature_flags(finding: dict, config: dict, environment: dict) -> str | None:
+    raw = finding.get("feature_flags")
+    if raw is None:
+        raw = config.get("feature_flags")
+    if raw is None:
+        raw = environment.get("feature_flags")
+    if raw is None:
+        return _optional_text(
+            finding.get("feature_flag"),
+            config.get("feature_flag"),
+            environment.get("feature_flag"),
+        )
+    if isinstance(raw, dict):
+        lines: list[str] = []
+        for key, value in raw.items():
+            name = str(key).strip()
+            if not name:
+                continue
+            if value is True or str(value).strip().lower() in {"on", "enabled"}:
+                state = "on"
+            elif value is False or str(value).strip().lower() in {"off", "disabled"}:
+                state = "off"
+            else:
+                state = str(value).strip()
+            lines.append(f"{name}: {state}" if state else name)
+        return "\n".join(lines) or None
+    if isinstance(raw, list):
+        names = [str(item).strip() for item in raw if str(item).strip()]
+        return "\n".join(names) or None
+    text = str(raw).strip()
+    return text or None
+
+
+def _additional_information(finding: dict, evidence: list[str]) -> str | None:
+    lines: list[str] = []
+    for label, key in (("Role", "role"), ("Flow", "flow"), ("Level", "level")):
+        value = _optional_text(finding.get(key))
+        if value is not None:
+            lines.append(f"{label}: {value}")
+    lines.extend(_remaining_evidence(evidence))
+    return "\n".join(lines) if lines else None
+
+
 def _browser_and_os(environment: dict) -> str | None:
     browser = _optional_text(
         environment.get("browser_version"), environment.get("browser")
@@ -363,13 +407,11 @@ def _joined_or_unknown(values: list[str]) -> str:
 def render_bug_body(finding: dict, config: dict) -> str:
     environment = _environment(config)
     evidence = _evidence_lines(finding)
-    additional = [
-        f"Role: {_first_text(finding.get('role'))}",
-        f"Flow: {_first_text(finding.get('flow'))}",
-        f"Level: {_first_text(finding.get('level'))}",
-        *_remaining_evidence(evidence),
-    ]
     optional = (
+        (
+            _HEADING_FEATURE_FLAGS,
+            _feature_flags(finding, config, environment),
+        ),
         (
             _HEADING_SERVER_OS,
             _optional_text(
@@ -388,11 +430,20 @@ def render_bug_body(finding: dict, config: dict) -> str:
                 config.get("endpoint_version"),
             ),
         ),
+        (_HEADING_ADDITIONAL, _additional_information(finding, evidence)),
     )
+    optional_present = {
+        heading: value for heading, value in optional if value is not None
+    }
     sections: list[tuple[str, str]] = [
         (_HEADING_DESCRIBE, _describe_the_bug(finding)),
         (_HEADING_VERSION, _stack_version(config, environment)),
-        *[(heading, value) for heading, value in optional if value is not None],
+        *[(heading, optional_present[heading]) for heading in (
+            _HEADING_FEATURE_FLAGS,
+            _HEADING_SERVER_OS,
+            _HEADING_BROWSER,
+            _HEADING_ENDPOINT,
+        ) if heading in optional_present],
         (_HEADING_INSTALL, _install_method(environment)),
         (_HEADING_STEPS, _numbered_steps(finding)),
         (_HEADING_CURRENT, _current_behaviour(finding, evidence)),
@@ -405,8 +456,10 @@ def render_bug_body(finding: dict, config: dict) -> str:
             _HEADING_LOGS,
             _joined_or_unknown(_values_with_prefix(evidence, _NETWORK_PREFIX)),
         ),
-        (_HEADING_ADDITIONAL, "\n".join(additional)),
     ]
+    additional = optional_present.get(_HEADING_ADDITIONAL)
+    if additional is not None:
+        sections.append((_HEADING_ADDITIONAL, additional))
     return "\n\n".join(f"{heading}\n{body}" for heading, body in sections) + "\n"
 
 
