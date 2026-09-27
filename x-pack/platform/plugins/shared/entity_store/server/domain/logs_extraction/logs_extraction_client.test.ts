@@ -2638,7 +2638,7 @@ describe('LogsExtractionClient sampling wiring', () => {
     });
 
     mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
-    return client;
+    return { client, mockEngineDescriptorClient };
   }
 
   /** Queries sent as extraction (the probe has its own estimation SAMPLE and is excluded). */
@@ -2677,7 +2677,7 @@ describe('LogsExtractionClient sampling wiring', () => {
   });
 
   it('nonPriority above the default cap samples the extraction query', async () => {
-    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
     mockHighVolumeSequence();
 
     const result = await client.extractLogs('user');
@@ -2687,7 +2687,7 @@ describe('LogsExtractionClient sampling wiring', () => {
   });
 
   it('nonPriority below the default cap emits no SAMPLE stage', async () => {
-    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
     mockLowVolumeSequence();
 
     const result = await client.extractLogs('user');
@@ -2701,7 +2701,7 @@ describe('LogsExtractionClient sampling wiring', () => {
   it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
     '%s mode never samples, even far above the default cap',
     async (mode) => {
-      const client = createSamplingContext(mode);
+      const { client } = createSamplingContext(mode);
       mockHighVolumeSequence();
 
       const result = await client.extractLogs('user');
@@ -2715,7 +2715,7 @@ describe('LogsExtractionClient sampling wiring', () => {
   );
 
   it('a window projecting just above the 100K default samples', async () => {
-    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
     // 6000 sampled → 60K raw → projection 108K > 100K
     mockVolumeSequence(6000);
 
@@ -2726,7 +2726,7 @@ describe('LogsExtractionClient sampling wiring', () => {
   });
 
   it('a window projecting just below the 100K default does not sample', async () => {
-    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
     // 5000 sampled → 50K raw → projection 90K < 100K
     mockVolumeSequence(5000);
 
@@ -2740,7 +2740,7 @@ describe('LogsExtractionClient sampling wiring', () => {
   });
 
   it('a descriptor samplingRate override samples even below the default cap', async () => {
-    const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
     });
     mockLowVolumeSequence();
@@ -2752,7 +2752,7 @@ describe('LogsExtractionClient sampling wiring', () => {
   });
 
   it('a descriptor samplingRate override replaces the dynamic rate above the cap', async () => {
-    const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
     });
     mockHighVolumeSequence(); // dynamic rate would be ~0.11
@@ -2763,8 +2763,68 @@ describe('LogsExtractionClient sampling wiring', () => {
     expect(extractionQueries()[0]).toContain('| SAMPLE 0.5');
   });
 
+  describe('mid-slice resume', () => {
+    const resumeCheckpoint = '2025-01-15T11:50:00.000Z';
+    const resumeSliceEnd = '2025-01-15T11:55:00.000Z';
+
+    it('reuses the pinned sampling rate instead of recomputing an unsampled one', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionState: {
+          checkpointTimestamp: resumeCheckpoint,
+          paginationId: 'entity-cursor',
+          lastExecutionTimestamp: null,
+          sliceEndTimestamp: resumeSliceEnd,
+          sliceSamplingRate: 0.3,
+        },
+      });
+      // Resumed slice: extraction directly (no probe), 1 row < docsLimit → slice completes.
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      expect(extractionQueries()[0]).toContain('| SAMPLE 0.3');
+    });
+
+    it('clears the pinned sampling rate once the resumed slice completes', async () => {
+      const { client, mockEngineDescriptorClient } = createSamplingContext(
+        EXTRACTION_MODE.nonPriority,
+        {
+          nonPriorityLogExtractionState: {
+            checkpointTimestamp: resumeCheckpoint,
+            paginationId: 'entity-cursor',
+            lastExecutionTimestamp: null,
+            sliceEndTimestamp: resumeSliceEnd,
+            sliceSamplingRate: 0.3,
+          },
+        }
+      );
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      await client.extractLogs('user');
+
+      const stateUpdates = mockEngineDescriptorClient.update.mock.calls
+        .map(
+          ([, update]) =>
+            (update as { nonPriorityLogExtractionState?: unknown }).nonPriorityLogExtractionState
+        )
+        .filter(Boolean);
+      expect(stateUpdates[0]).toMatchObject({
+        paginationId: null,
+        sliceEndTimestamp: null,
+        sliceSamplingRate: null,
+      });
+    });
+  });
+
   it('a raised effective cap does not suppress sampling - the trigger stays pinned to the default', async () => {
-    const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { maxLogsPerWindow: 500_000 },
     });
     mockHighVolumeSequence(); // ~500K raw fits the raised cap, but projects far above the 100K default
@@ -2776,7 +2836,7 @@ describe('LogsExtractionClient sampling wiring', () => {
   });
 
   it('a lowered effective cap below the default does not trigger sampling - the cap just fires', async () => {
-    const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { maxLogsPerWindow: 20_000 },
     });
     // 5000 sampled → 50K raw → projection 90K, under the 100K default trigger but over the 20K cap
@@ -2792,7 +2852,7 @@ describe('LogsExtractionClient sampling wiring', () => {
   });
 
   it('the budget counts processed volume, so a sampled over-cap window does not fire the cap', async () => {
-    const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
     mockHighVolumeSequence();
 
     const result = await client.extractLogs('user');
@@ -2817,7 +2877,7 @@ describe('LogsExtractionClient sampling wiring', () => {
     });
 
     it('a sampled run records the applied rate and counts as sampled', async () => {
-      const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
       const { probabilityRecord, eligibleRunsAdd } = spySampleMetrics();
       mockHighVolumeSequence();
 
@@ -2838,7 +2898,7 @@ describe('LogsExtractionClient sampling wiring', () => {
     });
 
     it('an eligible unsampled run records no rate and counts as not sampled', async () => {
-      const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
       const { probabilityRecord, eligibleRunsAdd } = spySampleMetrics();
       mockLowVolumeSequence();
 
@@ -2850,7 +2910,7 @@ describe('LogsExtractionClient sampling wiring', () => {
     });
 
     it('a fixed override run records the override value', async () => {
-      const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
         nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
       });
       const { probabilityRecord } = spySampleMetrics();
@@ -2864,7 +2924,7 @@ describe('LogsExtractionClient sampling wiring', () => {
     it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
       '%s mode records neither metric at any volume',
       async (mode) => {
-        const client = createSamplingContext(mode);
+        const { client } = createSamplingContext(mode);
         const { probabilityRecord, eligibleRunsAdd } = spySampleMetrics();
         mockHighVolumeSequence();
 

@@ -76,6 +76,7 @@ const FRESH_ENGINE_LOG_EXTRACTION_STATE: EngineLogExtractionState = {
   paginationId: null,
   lastExecutionTimestamp: null,
   sliceEndTimestamp: null,
+  sliceSamplingRate: null,
 };
 
 interface LogsExtractionOptions {
@@ -729,10 +730,8 @@ export class LogsExtractionClient {
 
     // Mid-slice resume cursors from a prior interrupted run; consumed by the first outer
     // iteration only, which re-enters the interrupted slice with its exact persisted bounds.
-    const { resumeEntityPagination, resumeSliceEnd } = this.resolveMidSliceResume(
-      initialEngineState,
-      fromDateISO
-    );
+    const { resumeEntityPagination, resumeSliceEnd, resumeSamplingRate } =
+      this.resolveMidSliceResume(initialEngineState, fromDateISO);
 
     try {
       let lastLogsPages = false;
@@ -748,6 +747,7 @@ export class LogsExtractionClient {
         let entityPagination: PaginationParams | undefined;
         let bumpedCursorEnd: LogSlicePaginationParams | null = null;
         let sliceLogCount = 0;
+        const isResumingMidSlice = isFirstRunInThisCycle && resumeSliceEnd !== undefined;
 
         if (isFirstRunInThisCycle && resumeSliceEnd) {
           // Re-enter the interrupted slice with its exact persisted bounds, skipping the probe:
@@ -810,21 +810,26 @@ export class LogsExtractionClient {
           logsPageCursorEnd = bumpedCursorEnd;
           entityStoreMetrics.extractionLogsPerPageDropped.add(1, metricAttributes);
         } else {
-          // p = 1 is not passed on: no SAMPLE stage and raw accounting. A mid-slice resume has
-          // sliceLogCount 0, so the dynamic rate degenerates to 1; an override still applies.
-          const dynamicOrOverrideRate = samplingEligible
-            ? resolveSamplingRate(
-                {
-                  scannedLogs: processedLogsBefore + totalLogs,
-                  sliceLogCount,
-                  sliceStartISO: logsPageCursorStart?.timestampCursor ?? fromDateISO,
-                  sliceEndISO: logsPageCursorEnd.timestampCursor,
-                  windowEndISO,
-                },
-                samplingRateOverride
-              )
-            : 1;
-          const samplingRate = dynamicOrOverrideRate < 1 ? dynamicOrOverrideRate : undefined;
+          // p = 1 is not passed on: no SAMPLE stage and raw accounting.
+          let samplingRate: number | undefined;
+          if (isResumingMidSlice) {
+            // The probe is skipped on resume, leaving sliceLogCount at 0 - recomputing here would
+            // wrongly read that as "nothing left" and drop the sample. Reuse the rate pinned
+            // before the interruption instead.
+            samplingRate = resumeSamplingRate ?? undefined;
+          } else if (samplingEligible) {
+            const rate = resolveSamplingRate(
+              {
+                scannedLogs: processedLogsBefore + totalLogs,
+                sliceLogCount,
+                sliceStartISO: logsPageCursorStart?.timestampCursor ?? fromDateISO,
+                sliceEndISO: logsPageCursorEnd.timestampCursor,
+                windowEndISO,
+              },
+              samplingRateOverride
+            );
+            samplingRate = rate < 1 ? rate : undefined;
+          }
 
           // Only applied rates are recorded; unsampled slices record nothing so the histogram's
           // distribution reflects actual sampling, not a stream of 1.0s.
@@ -1091,6 +1096,9 @@ export class LogsExtractionClient {
           checkpointTimestamp: logsPageCursorStart?.timestampCursor ?? fromDateISO,
           paginationId: pagination.idCursor,
           sliceEndTimestamp: logsPageCursorEnd.timestampCursor,
+          // Pinned alongside the slice bounds so a resume reuses this exact rate instead of
+          // recomputing one from a probe-less (and therefore zeroed) volume estimate.
+          sliceSamplingRate: samplingRate ?? null,
         };
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
         onCheckpointPersisted?.(state.checkpointTimestamp!);
@@ -1101,8 +1109,10 @@ export class LogsExtractionClient {
   }
 
   /**
-   * After all entity pages for a slice: clear the entity cursor and pinned slice end, and
-   * advance the log-slice cursor to the slice end.
+   * After all entity pages for a slice: clear the entity cursor, pinned slice end, and pinned
+   * sampling rate, and advance the log-slice cursor to the slice end. Clearing the rate matters:
+   * left set, a later slice's resume check would misread it as belonging to a still-interrupted
+   * slice instead of one that already completed cleanly.
    */
   private advanceEngineStateAfterLogPageCompletes(
     state: EngineLogExtractionState,
@@ -1113,6 +1123,7 @@ export class LogsExtractionClient {
       checkpointTimestamp: logsPageCursorEnd.timestampCursor,
       paginationId: null,
       sliceEndTimestamp: null,
+      sliceSamplingRate: null,
     };
   }
 
@@ -1128,8 +1139,12 @@ export class LogsExtractionClient {
   ): {
     resumeEntityPagination?: PaginationParams;
     resumeSliceEnd?: LogSlicePaginationParams;
+    /** Sampling rate pinned for the interrupted slice, reused as-is. `null` means the slice was
+     * unsampled; `undefined` (no resume in progress) is handled by the caller checking
+     * `resumeSliceEnd` first. */
+    resumeSamplingRate?: number | null;
   } {
-    const { paginationId, sliceEndTimestamp } = initialEngineState;
+    const { paginationId, sliceEndTimestamp, sliceSamplingRate } = initialEngineState;
     if (!paginationId) {
       return {};
     }
@@ -1149,6 +1164,7 @@ export class LogsExtractionClient {
     return {
       resumeEntityPagination: { idCursor: paginationId },
       resumeSliceEnd: { timestampCursor: sliceEndTimestamp },
+      resumeSamplingRate: sliceSamplingRate,
     };
   }
 
