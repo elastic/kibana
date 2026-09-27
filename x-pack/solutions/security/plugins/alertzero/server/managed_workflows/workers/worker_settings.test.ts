@@ -16,7 +16,6 @@ import {
 } from '@kbn/alertzero-common';
 import { SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import { createWorkerSettingsRegistration } from './worker_settings';
-import type { RegisteredWorkerId } from '../worker_registry';
 
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
@@ -28,8 +27,8 @@ const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
   (id) => !SCHEDULED_WORKER_IDS.includes(id)
 );
 
-/** Workers that allow only manual autonomy, so any other level is rejected. */
-const MANUAL_ONLY_WORKER_IDS: string[] = [FORENSICS_WORKER_ID];
+/** Workers whose gate is all-or-nothing, so `assisted` means the same thing as `manual`. */
+const WORKERS_WITHOUT_ASSISTED: string[] = [FORENSICS_WORKER_ID];
 
 const expectInvalid = (
   applied: ReturnType<ReturnType<typeof createWorkerSettingsRegistration>['applyPatch']>
@@ -475,7 +474,7 @@ describe('createWorkerSettingsRegistration', () => {
       ).toContain('scheduleInterval');
     });
 
-    it.each(UNSCHEDULED_WORKER_IDS.filter((id) => !MANUAL_ONLY_WORKER_IDS.includes(id)))(
+    it.each(UNSCHEDULED_WORKER_IDS.filter((id) => !WORKERS_WITHOUT_ASSISTED.includes(id)))(
       '%s still accepts an autonomy patch',
       (workerId) => {
         const registration = createWorkerSettingsRegistration(workerId);
@@ -487,24 +486,28 @@ describe('createWorkerSettingsRegistration', () => {
     );
   });
 
-  describe('Workers that allow only manual autonomy', () => {
-    it.each(MANUAL_ONLY_WORKER_IDS)('%s rejects a higher level, naming the field', (workerId) => {
-      const registration = createWorkerSettingsRegistration(workerId as RegisteredWorkerId);
+  describe('Endpoint analysis autonomy', () => {
+    const registration = createWorkerSettingsRegistration(FORENSICS_WORKER_ID);
 
+    it('defaults to manual', () => {
+      expect(registration.createDefaultValues()).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+      });
+    });
+
+    it('accepts supervised', () => {
+      expect(
+        registration.applyPatch(registration.createDefaultValues(), { autonomy: 'supervised' })
+      ).toEqual({ values: { settingsVersion: 1, autonomyLevel: 'supervised' } });
+    });
+
+    it('rejects assisted, which would gate the same proposals as manual', () => {
       expect(
         expectInvalid(
           registration.applyPatch(registration.createDefaultValues(), { autonomy: 'assisted' })
         )
       ).toContain('autonomy');
-    });
-
-    it.each(MANUAL_ONLY_WORKER_IDS)('%s still defaults to manual', (workerId) => {
-      expect(
-        createWorkerSettingsRegistration(workerId as RegisteredWorkerId).createDefaultValues()
-      ).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-      });
     });
   });
 });

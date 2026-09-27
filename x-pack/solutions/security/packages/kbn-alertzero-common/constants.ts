@@ -92,8 +92,6 @@ export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as con
  */
 export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
 
-export const WATCH_AUTONOMY_MANUAL = ['manual'] as const;
-
 /**
  * Presentation metadata for the managed watch catalog.
  *
