@@ -24,7 +24,9 @@ interface EditDatafeedTabProps {
   datafeedQuery: string;
   datafeedQueryDelay: string;
   datafeedFrequency: string;
+  datafeedOriginalFrequency: string;
   datafeedScrollSize: number;
+  datafeedMaxConsecutiveExtractionFailures: number | '';
   datafeedProjectRouting: string | undefined;
   jobBucketSpan: string;
   setDatafeed: (datafeed: Record<string, string | number | undefined>) => void;
@@ -35,7 +37,9 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
   datafeedQuery,
   datafeedQueryDelay,
   datafeedFrequency,
+  datafeedOriginalFrequency,
   datafeedScrollSize,
+  datafeedMaxConsecutiveExtractionFailures,
   datafeedProjectRouting,
   jobBucketSpan,
   setDatafeed,
@@ -55,6 +59,19 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
     };
   }, [jobBucketSpan]);
 
+  const maxConsecutiveExtractionFailuresDefault = useMemo(() => {
+    // Mirror the frequency ES will actually use: the edited value if set, otherwise the
+    // datafeed's original frequency (which is preserved on save when the field is cleared),
+    // falling back to the computed default only when no frequency is configured at all.
+    const effectiveFrequency = datafeedFrequency || datafeedOriginalFrequency || defaults.frequency;
+    const frequencySeconds = parseInterval(effectiveFrequency)?.asSeconds();
+    if (!frequencySeconds) {
+      return 1;
+    }
+    const secondsInDay = 24 * 60 * 60;
+    return Math.max(1, Math.floor(secondsInDay / frequencySeconds));
+  }, [datafeedFrequency, datafeedOriginalFrequency, defaults.frequency]);
+
   const onQueryChange = (query: string) => {
     setDatafeed({ datafeedQuery: query });
   };
@@ -69,6 +86,12 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
 
   const onScrollSizeChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDatafeed({ datafeedScrollSize: +e.target.value });
+  };
+
+  const onMaxConsecutiveExtractionFailuresChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setDatafeed({
+      datafeedMaxConsecutiveExtractionFailures: e.target.value === '' ? '' : +e.target.value,
+    });
   };
 
   const cpsManager = cps?.cpsManager;
@@ -184,6 +207,27 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
             value={datafeedScrollSize}
             placeholder={String(defaults.scrollSize)}
             onChange={onScrollSizeChange}
+            disabled={datafeedRunning}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.datafeed.maxConsecutiveExtractionFailuresLabel"
+              defaultMessage="Maximum consecutive extraction failures"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.datafeed.maxConsecutiveExtractionFailuresHelpText"
+              defaultMessage="The number of consecutive real-time extraction failures after which the datafeed stops itself. By default this is the number of searches the datafeed runs in a day (based on its frequency), so a persistently failing datafeed stops after about a day. Set to -1 to retry indefinitely."
+            />
+          }
+        >
+          <EuiFieldNumber
+            value={datafeedMaxConsecutiveExtractionFailures}
+            placeholder={String(maxConsecutiveExtractionFailuresDefault)}
+            onChange={onMaxConsecutiveExtractionFailuresChange}
             disabled={datafeedRunning}
           />
         </EuiFormRow>
