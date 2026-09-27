@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "integration_tests/**/*", "../../../../../typings/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agentic-investigations-common",
@@ -57,6 +57,12 @@
     "@kbn/security-mitre-attack-common",
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/context-engine-plugin",
+    "@kbn/security-solution-plugin",
+    "@kbn/workflows-execution-engine",
+    "@kbn/actions-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/cloud-plugin",
     "@kbn/ui-callout"
   ]
 }

@@ -5,11 +5,16 @@ description: >
   returns a verdict. It returns a result and applies nothing: the review that calls
   it owns the verdict attachment and every lifecycle transition.
 
-  The analysis body — deterministic evidence gathering, the agent that reasons over
-  those facts, and the non-LLM check on what it asserted — is #19282, which is
-  blocked on the #19280 contract spike. What is settled and implemented here is the
-  shell: the two inputs, the analyst-facing payload, the failure semantics and the
-  authoritative-load half of idempotency.
+  The analysis body gathers the attack's title, summary, entity summary and
+  correlated alert ids from the loaded document's persisted
+  `kibana.alert.attack_discovery.*` fields (what the AD Worker actually writes;
+  kbn-attack-discovery-schedules-common field_names.ts), hands them to one
+  `ai.agent` call on its own
+  backing conversation (so the Investigation agent is never woken), and classifies
+  the correlation as false_positive, true_positive or inconclusive via structured
+  output. An agent call that fails after the workflow's retries degrades to
+  `inconclusive` rather than failing the run, so the review never records a
+  transport failure as a classification.
 enabled: true
 tags:
   - security
@@ -60,7 +65,7 @@ triggers:
 # schema and fails the run on a mismatch.
 #
 # JSON Schema form rather than the legacy `- name:` array: only this form carries
-# `maxLength`, which the legacy conversion silently drops.
+# `maxLength`, which the legacy conversion drops.
 outputs:
   properties:
     # Not an `enum` of the three, though that is where it belongs: the editor
@@ -75,8 +80,9 @@ outputs:
     #
     # Capped to the attachment's own `max(8000)`. Oversize would otherwise complete
     # the child and then fail `attach_verdict`, which continues on failure, letting
-    # `apply_verdict` close or escalate with no evidence attached. #19282 owns
-    # staying inside the cap; this makes exceeding it loud.
+    # `apply_verdict` close or escalate with no evidence attached. The agent schema
+    # applies the same bound upstream, so only a malformed agent answer can hit
+    # this; when it does, it is loud.
     summary_markdown:
       type: string
       maxLength: 8000
@@ -95,8 +101,8 @@ outputs:
   # Without these the review cannot tell a partial payload from a whole one, and
   # would pair a real verdict with its "analysis failed" summary.
   #
-  # No `additionalProperties: false`: #19282 adds richer execution output whose
-  # shape follows the #19280 spike.
+  # No `additionalProperties: false`: richer execution output may be added later
+  # without breaking the contract.
   required:
     - verdict
     - summary_markdown
@@ -107,6 +113,13 @@ consts:
     - false_positive
     - true_positive
     - inconclusive
+  # The degradation verdict `resolve_analysis` maps an absent structured output
+  # onto. Same value as the third entry above; spelled out because Liquid's
+  # `default:` needs a literal.
+  inconclusive: inconclusive
+  # Liquid has no array literal; `| default: consts.no_items` guards the
+  # document-sourced arrays in `prepare_evidence`. Same idiom as the review.
+  no_items: []
 steps:
   # Loaded rather than received, so a retry cannot reason over a copy that went
   # stale. `ids` works because a persisted discovery is indexed under its
@@ -117,7 +130,10 @@ steps:
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
-      index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      # The AD data_generator route (create_attack_discovery_alerts_route) persists
+      # under the `.alerts-security.attack.discovery.alerts-<space>` alias — NOT
+      # `.adhoc.…` (empty). Verified live: route response `index` field + counts.
+      index: .alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
       size: 1
       query:
         ids:
@@ -137,41 +153,120 @@ steps:
 
   # A required source, so no `on-failure`. A metadata READ and nothing else:
   # posting to this conversation, or running `ai.agent` against it, wakes the
-  # Investigation agent — so #19282's agent needs `create-conversation: true`
-  # against a separate backing conversation.
+  # Investigation agent — the analysis runs on its own backing conversation.
   - name: load_investigation
     type: ai.conversation.metadata.read
     with:
       conversation_id: "{{ inputs.investigation_id }}"
 
-  # PLACEHOLDER — #19282 replaces this with the analysis proper, once #19280
-  # settles the criteria. `inconclusive` because it asserts nothing about the
-  # attack, while still exercising the review's escalation gate.
-  - name: analyze
+  # The analysis body. Bounded evidence is pre-built first so the agent call needs
+  # no tool belt and no follow-up questions (the alert_analysis batching rationale,
+  # #292579): one prompt, one structured answer.
+  #
+  # Everything comes from the loaded document, never from `inputs`, so a retry
+  # cannot reason over a caller-supplied stale copy. Arrays default to empty rather
+  # than to the string "[]" — Liquid has no array literal.
+  - name: prepare_evidence
     type: data.set
     with:
-      verdict: inconclusive
-      # Says what did and did not happen, so `inconclusive` is not read as analysis
-      # that ran.
-      summary_markdown: >-
-        FP/TP analysis is not yet implemented
-        ([#19282](https://github.com/elastic/security-team/issues/19282)). The Attack
-        Discovery and the Investigation were both loaded successfully, so this
-        Investigation is ready for the analysis once it lands, but no evidence was
-        gathered and no classification was reached. Returned `inconclusive`, which
-        asserts nothing about the attack.
-      # No `rationale_markdown`: nothing to record, and the field is optional.
+      # Reads the fields the AD Worker actually persists (transformToBaseAlertDocument;
+      # kbn-attack-discovery-schedules-common/impl/fields/field_names.ts):
+      # kibana.alert.attack_discovery.{title,summary_markdown,details_markdown,
+      # entity_summary_markdown,alert_ids}. The flat `attack_title`/`attack_summary`/
+      # `related_entities` names nothing writes.
+      attack_title: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.title'] | default: '' }}"
+      attack_summary: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.summary_markdown'] | default: steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.details_markdown'] | default: '' | truncate: 8000, '' }}"
+      entity_summary_markdown: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.entity_summary_markdown'] | default: '' | truncate: 8000, '' }}"
+      alert_ids: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] | default: consts.no_items }}"
+      investigation_status: "{{ steps.load_investigation.output.status | default: 'unknown' }}"
 
-  # The contract boundary, and the step that outlives the placeholder: it checks
-  # what the analysis produced, so #19282 is held to the same payload.
+  # One tool-less agent call classifies the correlation. `connector-id-by-feature`
+  # routes to the AlertZero agentic connector; keep in sync with
+  # ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common (the
+  # rule_tuning_review pattern). `plugin-id`/`aggregate-by` are per-Worker cost
+  # attribution under the shared AlertZero parent.
   #
-  # Split in two because Liquid has no `not` and no parentheses, so the failure
-  # condition cannot be the inline negation of this. Comparisons bind tighter than
-  # `and`.
+  # Its own backing conversation (`create-conversation: true`, no
+  # `conversation_id`): against the Investigation's conversation it would wake the
+  # Investigation agent.
+  - name: analyze
+    type: ai.agent
+    connector-id-by-feature: alertzero_agentic
+    plugin-id: alertzero_attack_discovery_fp_tp
+    aggregate-by: alertzero_parent
+    timeout: "10m"
+    # An agent failure after the workflow's retries degrades to `inconclusive` in
+    # `resolve_analysis` rather than failing the run: the review can act on
+    # "inconclusive" and record why, but a failed child would leave the
+    # Investigation with no payload at all.
+    on-failure:
+      continue: true
+    create-conversation: true
+    with:
+      # The evidence is pre-built and bounded, so the tool belt is dead weight and
+      # prompt cost (same rationale as alert_analysis's batched agent calls).
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        skill_ids: []
+      message: |-
+        You are judging ONE Attack Discovery. Decide whether its correlation is
+        supported by the evidence, and answer ONLY through the structured output.
+
+        Attack title: {{ steps.prepare_evidence.output.attack_title }}
+        Attack summary: {{ steps.prepare_evidence.output.attack_summary }}
+        Correlated alert ids: {{ steps.prepare_evidence.output.alert_ids | join: ", " }}
+        Entity summary: {{ steps.prepare_evidence.output.entity_summary_markdown }}
+        Investigation status: {{ steps.prepare_evidence.output.investigation_status }}
+
+        Return false_positive when the evidence contradicts the correlation,
+        true_positive when the evidence supports it, and inconclusive when the
+        evidence is insufficient to decide — do not guess. Keep the summary under
+        8000 characters and, when you justify the verdict, the rationale under
+        50000.
+      schema:
+        type: object
+        properties:
+          verdict:
+            type: string
+            enum:
+              - false_positive
+              - true_positive
+              - inconclusive
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          summary_markdown:
+            type: string
+            maxLength: 8000
+          rationale_markdown:
+            type: string
+            maxLength: 50000
+        required:
+          - verdict
+          - summary_markdown
+
+  # The single place the agent result is interpreted. An absent structured output
+  # (the `on-failure: continue` path) IS `inconclusive`: the review cannot tell a
+  # degradation from a classification, and `inconclusive` asserts nothing about
+  # the attack. The same degradation substitutes an honest summary, so the
+  # attachment never renders an empty analyst-facing payload.
+  #
+  # Split from `check_payload` because Liquid has no `not` and no parentheses, so
+  # the failure condition cannot be the inline negation of the check.
+  - name: resolve_analysis
+    type: data.set
+    with:
+      verdict: "{{ steps.analyze.output.structured_output.verdict | default: consts.inconclusive }}"
+      summary_markdown: "{{ steps.analyze.output.structured_output.summary_markdown | default: 'FP/TP analysis could not reach a classification for this attack: the agent call did not return a usable verdict. Returned inconclusive, which asserts nothing about the attack.' }}"
+
+  # The contract boundary: it checks what the analysis produced, so the agent step
+  # is held to the same payload the review consumes.
   - name: check_payload
     type: data.set
     with:
-      payload_valid: "${{ consts.supported_verdicts contains steps.analyze.output.verdict and steps.analyze.output.summary_markdown != blank }}"
+      payload_valid: "${{ consts.supported_verdicts contains steps.resolve_analysis.output.verdict and steps.resolve_analysis.output.summary_markdown != blank }}"
 
   # An analysis with no usable classification has classified nothing. Emitting it
   # would instead send an unknown verdict through the review's switch, whose default
@@ -185,7 +280,7 @@ steps:
       message: >-
         FP/TP analysis produced no usable payload for Attack Discovery
         "{{ inputs.attack_discovery_id }}": verdict
-        "{{ steps.analyze.output.verdict }}" is not one of
+        "{{ steps.resolve_analysis.output.verdict }}" is not one of
         {{ consts.supported_verdicts | join: ", " }}, or the summary was empty.
         No classification was produced.
 
@@ -198,12 +293,12 @@ steps:
     type: workflow.output
     status: completed
     with:
-      verdict: "{{ steps.analyze.output.verdict }}"
-      summary_markdown: "{{ steps.analyze.output.summary_markdown }}"
+      verdict: "{{ steps.resolve_analysis.output.verdict }}"
+      summary_markdown: "{{ steps.resolve_analysis.output.summary_markdown }}"
       # `${{ }}`, not `{{ }}`: `{{ }}` stringifies undefined to `""`, and the
       # attachment null-checks the field, so an empty string would render an empty
       # `## Rationale` section.
-      rationale_markdown: "${{ steps.analyze.output.rationale_markdown }}"
+      rationale_markdown: "${{ steps.resolve_analysis.output.rationale_markdown }}"
       analysis_execution_id: "{{ execution.id }}"
       # From the document, not `inputs`.
       attack_discovery_id: "{{ steps.load_attack_discovery.output.hits.hits | map: '_id' | first }}"

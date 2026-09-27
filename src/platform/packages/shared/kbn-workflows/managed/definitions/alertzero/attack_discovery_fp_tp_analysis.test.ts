@@ -35,6 +35,12 @@ interface YamlStep {
   if?: string;
   with?: Record<string, unknown>;
   'on-failure'?: { continue?: boolean; retry?: Record<string, unknown> };
+  // `ai.agent` step keys (coverage_review / rule_tuning_review pattern).
+  'connector-id-by-feature'?: string;
+  'plugin-id'?: string;
+  'aggregate-by'?: string;
+  'create-conversation'?: boolean;
+  timeout?: string;
 }
 
 interface YamlWorkflow {
@@ -191,7 +197,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     // `## Rationale` section.
     it('keeps an absent rationale absent rather than empty', () => {
       expect(stepIn('emit_result')?.with?.rationale_markdown).toBe(
-        '${{ steps.analyze.output.rationale_markdown }}'
+        '${{ steps.resolve_analysis.output.rationale_markdown }}'
       );
     });
 
@@ -294,7 +300,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
       const payloadValid = evaluate(stepIn('check_payload')?.with?.payload_valid, {
         consts: analysis.consts,
-        steps: { analyze: { output: { verdict, summary_markdown: summaryMarkdown } } },
+        steps: { resolve_analysis: { output: { verdict, summary_markdown: summaryMarkdown } } },
       });
 
       return evaluate(guard?.if, {
@@ -362,9 +368,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(loadAttack?.type).toBe('elasticsearch.search');
     });
 
-    it('reads it from the space-scoped ad-hoc discovery index', () => {
+    it('reads it from the space-scoped discovery index the data_generator route writes', () => {
+      // The data_generator route indexes each discovery behind the
+      // `.alerts-security.attack.discovery.alerts-<space>` alias; the `.adhoc…`
+      // alias is a different, empty backfill index.
       expect(loadAttack?.with?.index).toBe(
-        '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
+        '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
       );
     });
 
@@ -380,12 +389,20 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('load_investigation')?.type).toBe('ai.conversation.metadata.read');
     });
 
-    // A metadata READ, and nothing else against this conversation: posting to it, or
-    // running `ai.agent` against it, wakes the Investigation agent.
-    it('writes nothing to the Investigation', () => {
-      expect(
-        steps.filter((step) => step.type.startsWith('ai.') && step.name !== 'load_investigation')
-      ).toEqual([]);
+    // A metadata READ plus, since the real analysis, one `ai.agent` call — but on
+    // the agent's OWN backing conversation, never this one: reading is fine,
+    // posting or waking the Investigation agent is not.
+    it('never targets the Investigation conversation', () => {
+      const touchingInvestigation = steps.filter(
+        (step) =>
+          step.name !== 'load_investigation' &&
+          JSON.stringify(step.with ?? {}).includes('inputs.investigation_id')
+      );
+
+      expect(touchingInvestigation).toEqual([]);
+      expect(stepIn('load_investigation')?.with?.conversation_id).toBe(
+        '{{ inputs.investigation_id }}'
+      );
     });
 
     // A required source, so a failure fails the run. Guessing a classification from
@@ -463,43 +480,174 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
   });
 
-  // #19282 replaces this with the analysis proper: the deterministic
-  // pre-computation, the agent reasoning over those facts, and the deterministic
-  // check on the claim it asserted. Until #19280 settles the criteria, the
-  // placeholder returns the one classification that asserts nothing.
-  describe('the placeholder analysis body', () => {
+  // The real analysis body: bounded evidence, one tool-less `ai.agent` call on its
+  // own conversation, and structured output read back through `resolve_analysis`.
+  describe('the analysis body', () => {
     const analyze = stepIn('analyze');
+    const schema = analyze?.with?.schema as
+      | {
+          type?: string;
+          properties?: Record<
+            string,
+            {
+              type?: string;
+              enum?: string[];
+              maxLength?: number;
+              minimum?: number;
+              maximum?: number;
+            }
+          >;
+          required?: string[];
+        }
+      | undefined;
 
-    it('returns inconclusive until the real analysis lands', () => {
-      expect(analyze?.with?.verdict).toBe('inconclusive');
+    it('classifies with one agent call', () => {
+      expect(analyze?.type).toBe('ai.agent');
+    });
+
+    it('routes through the AlertZero agentic connector', () => {
+      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_agentic');
+    });
+
+    it('attributes cost to this workflow under the AlertZero parent', () => {
+      expect(analyze?.['plugin-id']).toBe('alertzero_attack_discovery_fp_tp');
+      expect(analyze?.['aggregate-by']).toBe('alertzero_parent');
+    });
+
+    // Its own backing conversation: against the Investigation's it would wake the
+    // Investigation agent.
+    it('runs on its own backing conversation', () => {
+      expect(analyze?.['create-conversation']).toBe(true);
+      expect(analyze?.with?.conversation_id).toBeUndefined();
+    });
+
+    // The evidence is pre-built and bounded, so the tool belt is dead weight and
+    // prompt cost (the #292579 batching rationale).
+    it('strips the tool belt the pre-built evidence does not need', () => {
+      expect(analyze?.with?.configuration_overrides).toEqual({
+        enable_elastic_capabilities: false,
+        tools: [],
+        skill_ids: [],
+      });
+    });
+
+    it('bounds how long one agent call may run', () => {
+      expect(analyze?.timeout).toBe('10m');
+    });
+
+    // An agent failure after the workflow retries degrades to `inconclusive` in
+    // `resolve_analysis` rather than failing the run.
+    it('continues past a failed agent call', () => {
+      expect(analyze?.['on-failure']?.continue).toBe(true);
+    });
+
+    it('asks for a bounded structured verdict', () => {
+      expect(schema?.type).toBe('object');
+      expect(schema?.properties?.verdict?.enum).toEqual([...CLASSIFICATIONS]);
+      expect(schema?.properties?.confidence?.minimum).toBe(0);
+      expect(schema?.properties?.confidence?.maximum).toBe(1);
+      expect(schema?.properties?.summary_markdown?.maxLength).toBe(8000);
+      expect(schema?.properties?.rationale_markdown?.maxLength).toBe(50000);
+      expect(schema?.required).toEqual(['verdict', 'summary_markdown']);
+    });
+
+    it('feeds the agent from the loaded document, not from caller input', () => {
+      expect(JSON.stringify(stepIn('prepare_evidence')?.with)).not.toContain(
+        'inputs.attack_discovery_id'
+      );
+    });
+
+    // The persisted AD document carries its data under the dot-prefixed
+    // `kibana.alert.attack_discovery.*` fields (transformToBaseAlertDocument;
+    // kbn-attack-discovery-schedules-common field_names.ts) — not under flat
+    // `attack_title`/`attack_summary`/`related_entities` names, which nothing
+    // writes.
+    it('reads the persisted kibana.alert.attack_discovery.* fields', () => {
+      const with_ = JSON.stringify(stepIn('prepare_evidence')?.with);
+      for (const field of [
+        'kibana.alert.attack_discovery.title',
+        'kibana.alert.attack_discovery.summary_markdown',
+        'kibana.alert.attack_discovery.details_markdown',
+        'kibana.alert.attack_discovery.entity_summary_markdown',
+        'kibana.alert.attack_discovery.alert_ids',
+      ]) {
+        expect(with_).toContain(field);
+      }
+      expect(with_).not.toContain('_source.attack_title');
+      expect(with_).not.toContain('_source.attack_summary');
+      expect(with_).not.toContain('related_entities');
+    });
+
+    // Same bounded-evidence style as before: absent fields degrade to defaults,
+    // and summaries stay inside the agent prompt's bounds.
+    it('keeps defaults and truncation on the document-sourced evidence', () => {
+      const with_ = stepIn('prepare_evidence')?.with ?? {};
+      expect(String(with_.attack_title)).toContain("| default: ''");
+      expect(String(with_.attack_summary)).toContain('truncate: 8000');
+      expect(String(with_.entity_summary_markdown)).toContain('truncate: 8000');
+      expect(String(with_.alert_ids)).toContain('default: consts.no_items');
+    });
+
+    it('gathers its evidence after both loads', () => {
+      expect(stepNames.indexOf('prepare_evidence')).toBeGreaterThan(
+        Math.max(
+          stepNames.indexOf('load_attack_discovery'),
+          stepNames.indexOf('load_investigation')
+        )
+      );
+    });
+
+    // `resolve_analysis` is the one place the agent result is interpreted.
+    const resolve = stepIn('resolve_analysis');
+
+    // An absent structured output IS `inconclusive`: the review cannot tell a
+    // degradation from a classification, and `inconclusive` asserts nothing.
+    it('degrades an absent structured output to inconclusive', async () => {
+      await expect(
+        createWorkflowLiquidEngine().parseAndRender(String(resolve?.with?.verdict), {
+          consts: analysis.consts,
+          steps: { analyze: { output: { structured_output: {} } } },
+        })
+      ).resolves.toBe('inconclusive');
+    });
+
+    it('passes a real verdict straight through', async () => {
+      await expect(
+        createWorkflowLiquidEngine().parseAndRender(String(resolve?.with?.verdict), {
+          consts: analysis.consts,
+          steps: { analyze: { output: { structured_output: { verdict: 'false_positive' } } } },
+        })
+      ).resolves.toBe('false_positive');
+    });
+
+    it('substitutes an honest summary when the agent returned none', async () => {
+      await expect(
+        createWorkflowLiquidEngine().parseAndRender(String(resolve?.with?.summary_markdown), {
+          consts: analysis.consts,
+          steps: { analyze: { output: { structured_output: {} } } },
+        })
+      ).resolves.toContain('could not reach a classification');
+    });
+
+    it('emits the agent summary when it has one', async () => {
+      await expect(
+        createWorkflowLiquidEngine().parseAndRender(String(resolve?.with?.summary_markdown), {
+          consts: analysis.consts,
+          steps: {
+            analyze: {
+              output: { structured_output: { summary_markdown: 'The correlation holds.' } },
+            },
+          },
+        })
+      ).resolves.toBe('The correlation holds.');
     });
 
     it('returns a classification the analysis is allowed to return', () => {
-      expect(CLASSIFICATIONS).toContain(analyze?.with?.verdict);
+      expect(CLASSIFICATIONS).toContain('inconclusive');
     });
 
-    // The attachment requires a summary, so an analyst is not left to infer that an
-    // `inconclusive` verdict reflects analysis that ran.
-    it('says the analysis has not been implemented', () => {
-      expect(String(analyze?.with?.summary_markdown)).toContain('19282');
-    });
-
-    // The summary is capped at 8k by the attachment schema. The placeholder is
-    // static, so this is measurable rather than a guess.
     it('stays inside the summary cap', () => {
-      expect(String(analyze?.with?.summary_markdown).length).toBeLessThanOrEqual(8000);
-    });
-
-    // No rationale key at all: there is no reasoning to record, and the field is
-    // optional.
-    it('produces no rationale it cannot justify', () => {
-      expect(analyze?.with?.rationale_markdown).toBeUndefined();
-    });
-
-    // Unlike the console stub it replaces, this one is part of the contract: the
-    // review reads the payload back, so the shell has to produce a real one.
-    it('is not a console stub', () => {
-      expect(steps.filter((step) => step.type === 'console')).toEqual([]);
+      expect(String(resolve?.with?.summary_markdown).length).toBeLessThanOrEqual(8000);
     });
   });
 });
