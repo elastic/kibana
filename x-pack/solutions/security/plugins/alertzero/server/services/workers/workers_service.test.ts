@@ -419,6 +419,26 @@ describe('WorkersService', () => {
     expect(worker?.settingsRevision).toBeNull();
   });
 
+  it('refuses a settings save that would rewrite stored values it cannot carry', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    const document = harness.documents.get(`${TRIAGE}-${SPACE}`);
+    if (!document?.values) throw new Error('Expected an installed document with values');
+    // A key the Worker's projection does not carry. The save must not silently drop it.
+    document.values = { ...document.values, retiredField: true };
+
+    await expect(
+      service.update(
+        TRIAGE,
+        { settings: { autonomy: 'assisted' }, settingsRevision: document.version },
+        SPACE,
+        request
+      )
+    ).rejects.toThrow(/retiredField/);
+    expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.values).toHaveProperty('retiredField');
+  });
+
   it('lists a Worker whose stored settings no longer match the current shape as unavailable', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
