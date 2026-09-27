@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { extendToolingLog, SynthtraceClientsManager } from '@kbn/synthtrace';
 import { infra } from '@kbn/synthtrace-client';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { randomUUID } from 'crypto';
 import { Readable } from 'stream';
 import { getDefaultTimeBounds } from '../evaluators/esql_bind_params';
 
@@ -19,9 +20,12 @@ export const HOST_NAME = 'viz-eval-host';
 export function buildHostLoadEvents({
   now = Date.now(),
   count = HOST_LOAD_DOC_COUNT,
+  runId,
 }: {
   now?: number;
   count?: number;
+  /** Written to `agent.id` so cleanup can target exactly this run's documents. */
+  runId?: string;
 } = {}) {
   if (count < 1) {
     return [];
@@ -45,7 +49,10 @@ export function buildHostLoadEvents({
         .load()
         // Structural widening only: synthtrace types just the 1-minute average, and the
         // extra 5 / 15 averages are serialized as-is (asserted by seed_contract.test.ts).
-        .overrides({ 'system.load': systemLoad as { 1: number; cores: number } })
+        .overrides({
+          'system.load': systemLoad as { 1: number; cores: number },
+          ...(runId ? { 'agent.id': runId } : {}),
+        })
         .timestamp(startMs + stepMs * i)
     );
   });
@@ -74,6 +81,8 @@ export async function assertHostLoadMetricsReady(esClient: Client): Promise<void
 /** What the fixture owns, so cleanup never removes data it did not write. */
 export interface HostLoadFixture {
   createdDataStream: boolean;
+  /** Per-run `agent.id` on every seeded document. */
+  runId: string;
 }
 
 export async function seedHostLoadMetrics(
@@ -95,9 +104,12 @@ export async function seedHostLoadMetrics(
     refreshAfterIndex: true,
   }).getClients({ clients: ['infraEsClient'] });
 
-  const fixture: HostLoadFixture = { createdDataStream: !existed };
+  const fixture: HostLoadFixture = {
+    createdDataStream: !existed,
+    runId: `viz-eval-${randomUUID()}`,
+  };
   try {
-    await infraEsClient.index(Readable.from(buildHostLoadEvents()));
+    await infraEsClient.index(Readable.from(buildHostLoadEvents({ runId: fixture.runId })));
     await assertHostLoadMetricsReady(esClient);
   } catch (error) {
     // The caller never receives the fixture on failure, so undo a partial seed here.
@@ -111,7 +123,8 @@ export async function seedHostLoadMetrics(
 
 /**
  * Removes the data stream when the fixture created it; otherwise deletes only
- * the fixture's own documents so pre-existing Beats data is left untouched.
+ * the documents this run seeded, so pre-existing data (including earlier or
+ * concurrent runs) is left untouched.
  */
 export async function cleanHostLoadMetrics(
   esClient: Client,
@@ -125,7 +138,11 @@ export async function cleanHostLoadMetrics(
     }
     await esClient.deleteByQuery({
       index: HOST_METRICS_INDEX,
-      query: { term: { 'host.name': HOST_NAME } },
+      query: {
+        bool: {
+          filter: [{ term: { 'host.name': HOST_NAME } }, { term: { 'agent.id': fixture.runId } }],
+        },
+      },
       refresh: true,
     });
   } catch (error) {

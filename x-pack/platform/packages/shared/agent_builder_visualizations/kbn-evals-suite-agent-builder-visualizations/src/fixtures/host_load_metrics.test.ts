@@ -38,6 +38,15 @@ describe('buildHostLoadEvents', () => {
     }
   });
 
+  it('tags every document with the run id when given', () => {
+    const events = buildHostLoadEvents({ now, count: 2, runId: 'viz-eval-run' });
+
+    for (const event of events) {
+      const [doc] = event.serialize();
+      expect(doc['agent.id']).toBe('viz-eval-run');
+    }
+  });
+
   it('defaults to one document per auto-bucket', () => {
     expect(buildHostLoadEvents({ now })).toHaveLength(75);
   });
@@ -52,21 +61,31 @@ describe('cleanHostLoadMetrics', () => {
   it('deletes the data stream only when the fixture created it', async () => {
     const esClient = createEsClient();
 
-    await cleanHostLoadMetrics(esClient as never, { createdDataStream: true });
+    await cleanHostLoadMetrics(esClient as never, {
+      createdDataStream: true,
+      runId: 'viz-eval-run',
+    });
 
     expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({ name: HOST_METRICS_INDEX });
     expect(esClient.deleteByQuery).not.toHaveBeenCalled();
   });
 
-  it('removes only the fixture host documents from a pre-existing data stream', async () => {
+  it('removes only the documents this run seeded from a pre-existing data stream', async () => {
     const esClient = createEsClient();
 
-    await cleanHostLoadMetrics(esClient as never, { createdDataStream: false });
+    await cleanHostLoadMetrics(esClient as never, {
+      createdDataStream: false,
+      runId: 'viz-eval-run',
+    });
 
     expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
       index: HOST_METRICS_INDEX,
-      query: { term: { 'host.name': HOST_NAME } },
+      query: {
+        bool: {
+          filter: [{ term: { 'host.name': HOST_NAME } }, { term: { 'agent.id': 'viz-eval-run' } }],
+        },
+      },
       refresh: true,
     });
   });
@@ -77,7 +96,11 @@ describe('cleanHostLoadMetrics', () => {
     const log = { warning: jest.fn() };
 
     await expect(
-      cleanHostLoadMetrics(esClient as never, { createdDataStream: true }, log as never)
+      cleanHostLoadMetrics(
+        esClient as never,
+        { createdDataStream: true, runId: 'viz-eval-run' },
+        log as never
+      )
     ).resolves.toBeUndefined();
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
