@@ -123,7 +123,7 @@ describe('getAlertSummary()', () => {
       Array [
         Array [
           Object {
-            "_source": undefined,
+            "_source": false,
             "aggs": Object {
               "active_alerts_bucket": Object {
                 "date_histogram": Object {
