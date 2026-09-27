@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SchemaResolutionField } from './components/schema_resolution_field';
 
 export interface InferSchemaToggleProps {
   dynamicMode: boolean;
@@ -24,7 +25,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
   return (
     <>
       <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup gutterSize="m" responsive={false}>
+      <EuiFlexGroup gutterSize="m" responsive={false} alignItems="stretch">
         <EuiFlexItem>
           <EuiCheckableCard
             id="createDatasetWizardInferSchema"
@@ -47,6 +48,8 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
                   "Schema will be inferred at query time for any fields that haven't been mapped.",
               })}
             </EuiText>
+
+            <SchemaResolutionField isDisabled={!dynamicMode} />
           </EuiCheckableCard>
         </EuiFlexItem>
 

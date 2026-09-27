@@ -56,6 +56,12 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'When Define schema is selected, you must map at least one field.',
     }
   ),
+  configureSchemaResolutionOptional: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.configureSchemaResolutionOptional',
+    {
+      defaultMessage: 'Configure schema resolution (optional)',
+    }
+  ),
   commonSettingsSectionTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.commonSettingsSectionTitle',
     {
@@ -593,10 +599,17 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsSchemaResolutionInfo: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsSchemaResolutionInfo',
+    {
+      defaultMessage: 'by default.',
+    }
+  ),
+
   settingsSchemaResolutionPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsSchemaResolutionPlaceholder',
     {
-      defaultMessage: 'Default',
+      defaultMessage: 'Select schema resolution',
     }
   ),
 
@@ -606,6 +619,12 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'First file wins',
     }
   ),
+  settingsSchemaResolutionFirstFileWinsDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsSchemaResolutionFirstFileWinsDescription',
+    {
+      defaultMessage: 'Use the schema from the first matching file.',
+    }
+  ),
 
   settingsSchemaResolutionStrict: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsSchemaResolutionStrict',
@@ -613,11 +632,23 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Strict',
     }
   ),
+  settingsSchemaResolutionStrictDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsSchemaResolutionStrictDescription',
+    {
+      defaultMessage: 'Require an identical schema across all files.',
+    }
+  ),
 
   settingsSchemaResolutionUnionByName: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsSchemaResolutionUnionByName',
     {
       defaultMessage: 'Union by name',
+    }
+  ),
+  settingsSchemaResolutionUnionByNameDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsSchemaResolutionUnionByNameDescription',
+    {
+      defaultMessage: 'Merge columns by name across files.',
     }
   ),
 
