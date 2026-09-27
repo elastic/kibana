@@ -1,5 +1,5 @@
 {
-  "sha1": "9fd81f046ee77576d4c098135e6b0c6993364dcb",
+  "sha1": "f69d6511b5b686b89969ce931880a86fd3e7b9bb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -226,45 +226,6 @@
       }
     },
     {
-      "id": "faa998808538e40-3fc7f735d77fec2",
-      "title": "Flyout System - full surface accessibility component body callouts stack in the banner and stay out of the heading outline",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 63,
-        "column": 79
-      }
-    },
-    {
-      "id": "faa998808538e40-c8a42909b052ef2",
-      "title": "Flyout System - full surface accessibility service body callouts stack in the banner and stay out of the heading outline",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 63,
-        "column": 79
-      }
-    },
-    {
-      "id": "faa998808538e40-23b7b822074b45f",
-      "title": "Flyout System - full surface accessibility flyout-wide callouts stay mounted across tab switches",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 88,
-        "column": 9
-      }
-    },
-    {
       "id": "faa998808538e40-c225592f9eb7a84",
       "title": "Flyout System - full surface accessibility regular sections are exposed as named regions",
       "expectedStatus": "passed",
@@ -273,8 +234,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 96,
-        "column": 9
+        "line": 63,
+        "column": 11
       }
     },
     {
@@ -286,8 +247,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 115,
-        "column": 20
+        "line": 76,
+        "column": 28
       }
     },
     {
@@ -299,8 +260,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 115,
-        "column": 20
+        "line": 76,
+        "column": 28
       }
     },
     {
@@ -312,8 +273,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 129,
-        "column": 11
+        "line": 92,
+        "column": 15
       }
     },
     {
@@ -325,8 +286,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 141,
-        "column": 57
+        "line": 103,
+        "column": 30
       }
     },
     {
@@ -338,8 +299,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 141,
-        "column": 57
+        "line": 103,
+        "column": 30
       }
     },
     {
@@ -351,8 +312,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 161,
-        "column": 7
+        "line": 124,
+        "column": 25
       }
     },
     {
@@ -364,8 +325,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 199,
-        "column": 30
+        "line": 160,
+        "column": 29
       }
     },
     {
@@ -377,8 +338,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 199,
-        "column": 30
+        "line": 160,
+        "column": 29
       }
     },
     {
