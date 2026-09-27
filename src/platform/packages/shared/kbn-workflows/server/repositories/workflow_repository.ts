@@ -130,6 +130,27 @@ export class WorkflowRepository {
     return map.get(`${spaceId}:${workflowId}`) ?? false;
   }
 
+  /** Reads the enabled state from the translog after an execution becomes searchable. */
+  async isWorkflowEnabledRealtime(workflowId: string, spaceId: string): Promise<boolean> {
+    try {
+      const response = await this.options.esClient.get<{
+        enabled?: boolean;
+        spaceId?: string;
+        deleted_at?: string | null;
+      }>({
+        index: this.options.indexName,
+        id: workflowId,
+        _source_includes: ['enabled', 'spaceId', 'deleted_at'],
+        realtime: true,
+      });
+      const source = response._source;
+      return source?.spaceId === spaceId && source.enabled === true && !source.deleted_at;
+    } catch (error) {
+      if (error.statusCode === 404) return false;
+      throw error;
+    }
+  }
+
   /**
    * Bulk-check whether the given (workflowId, spaceId) pairs refer to enabled,
    * non-soft-deleted workflows. Runs a single `_search` fetching only the
