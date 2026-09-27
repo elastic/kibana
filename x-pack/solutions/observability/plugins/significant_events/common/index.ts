@@ -70,6 +70,7 @@ export type {
 } from './slack_app/types';
 
 export type {
+  SignificantEventsMaintenanceDeletedCounts,
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceSummary,
   SignificantEventsMaintenanceStatus,

@@ -13,14 +13,19 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SignificantEventsServer } from '../../types';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import {
+  SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { GetScopedClients } from '../../routes/types';
+import type { SignificantEventsServer } from '../../types';
+import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
+import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
+import { DISCOVERIES_DATA_STREAM } from '../significant_events/discoveries_data_stream';
+import { EVENTS_DATA_STREAM } from '../significant_events/events/data_stream';
 import { createSignificantEventsMaintenanceService } from './maintenance_service';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
@@ -115,14 +120,22 @@ interface BulkError {
 
 // Alerting v2 rules client stub. Records the ids each call received and returns
 // the configured per-id errors (empty = all succeeded).
-function makeV2RulesClient(options?: { disableErrors?: BulkError[]; enableErrors?: BulkError[] }) {
+function makeV2RulesClient(options?: {
+  disableErrors?: BulkError[];
+  enableErrors?: BulkError[];
+  deleteErrors?: BulkError[];
+}) {
   const bulkDisableRules = jest.fn(async (_params: { ids: string[] }) => ({
     errors: options?.disableErrors ?? [],
   }));
   const bulkEnableRules = jest.fn(async (_params: { ids: string[] }) => ({
     errors: options?.enableErrors ?? [],
   }));
-  return { bulkDisableRules, bulkEnableRules };
+  const bulkDeleteRules = jest.fn(async ({ ids }: { ids: string[] }) => ({
+    affected_count: ids.length - (options?.deleteErrors?.length ?? 0),
+    errors: options?.deleteErrors ?? [],
+  }));
+  return { bulkDisableRules, bulkEnableRules, bulkDeleteRules };
 }
 
 function makeUiSettingsClient(
@@ -160,6 +173,16 @@ function makeService(params?: {
   failContinuousSet?: boolean;
   /** Make the scheduled-discovery uiSettings `set` throw. */
   failScheduledSet?: boolean;
+  indicatorStreams?: string[];
+  ownedRuleStreams?: string[];
+  queryLinksByStream?: Record<string, Array<{ rule_backed: boolean; rule_id?: string }>>;
+  featureCountsByStream?: Record<string, number>;
+  ownedRuleIdsByStream?: Record<string, string[]>;
+  dataStreams?: Record<string, number>;
+  investigations?: {
+    deleted: number;
+    failures: Array<{ id: string; spaceId: string; error: string }>;
+  };
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -168,6 +191,59 @@ function makeService(params?: {
   const getRuleBackedQueryLinks = jest.fn(async () =>
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
   );
+  const getStreamNamesWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
+  const findStreamNamesWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
+  const getStreamToQueryLinksMap = jest.fn(async (streamNames: string[]) =>
+    Object.fromEntries(
+      streamNames.map((streamName) => [streamName, params?.queryLinksByStream?.[streamName] ?? []])
+    )
+  );
+  const getFeatures = jest.fn(async (streamNames: string | string[]) => ({
+    hits: (Array.isArray(streamNames) ? streamNames : [streamNames]).flatMap((streamName) =>
+      Array.from({ length: params?.featureCountsByStream?.[streamName] ?? 0 }, (_, index) => ({
+        id: `${streamName}-${index}`,
+      }))
+    ),
+  }));
+  const findOwnedRuleIds = jest.fn(
+    async (streamName: string) => params?.ownedRuleIdsByStream?.[streamName] ?? []
+  );
+
+  const streamDocuments = new Map<string, number>(
+    Object.entries(
+      params?.dataStreams ?? {
+        [DETECTIONS_DATA_STREAM]: 0,
+        [EVENTS_DATA_STREAM]: 0,
+        [KNOWLEDGE_INDICATORS_DATA_STREAM]: 0,
+      }
+    )
+  );
+  const indices = {
+    exists: jest.fn(async ({ index }: { index: string }) => streamDocuments.has(index)),
+    deleteDataStream: jest.fn(async ({ name }: { name: string }) => {
+      streamDocuments.delete(name);
+      return { acknowledged: true };
+    }),
+    createDataStream: jest.fn(async ({ name }: { name: string }) => {
+      streamDocuments.set(name, 0);
+      return { acknowledged: true };
+    }),
+  };
+  const esClient = {
+    indices,
+    count: jest.fn(async ({ index }: { index: string }) => ({
+      count: streamDocuments.get(index) ?? 0,
+    })),
+  };
+  const initializeClient = jest.fn(async (name: string) => {
+    if (!streamDocuments.has(name)) {
+      streamDocuments.set(name, 0);
+    }
+    return {};
+  });
+  const deleteAllInvestigations = params?.investigations
+    ? jest.fn(async () => params.investigations!)
+    : undefined;
 
   const globalUiSettingsClient = makeUiSettingsClient(
     {
@@ -196,11 +272,18 @@ function makeService(params?: {
   const server = {
     core: {
       savedObjects,
+      dataStreams: { initializeClient },
+      elasticsearch: {
+        client: {
+          asScoped: jest.fn(() => ({ asCurrentUser: esClient })),
+        },
+      },
       uiSettings: {
         asScopedToClient: jest.fn(() => spaceUiSettingsClient),
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
+    nightshiftInvestigations: deleteAllInvestigations ? { deleteAllInvestigations } : undefined,
     spaces: {
       spacesService: {
         createSpacesClient: jest.fn(() => ({
@@ -216,10 +299,18 @@ function makeService(params?: {
   } as unknown as SignificantEventsServer;
 
   const getScopedClients = jest.fn(async () => ({
-    getKnowledgeIndicatorClient: async () => ({ getRuleBackedQueryLinks }),
+    getKnowledgeIndicatorClient: async () => ({
+      getRuleBackedQueryLinks,
+      getStreamNamesWithKnowledgeIndicators,
+      findStreamNamesWithOwnedRules,
+      getStreamToQueryLinksMap,
+      getFeatures,
+      findOwnedRuleIds,
+    }),
     getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
     globalUiSettingsClient,
     uiSettingsClient: spaceUiSettingsClient,
+    scopedClusterClient: { asInternalUser: esClient },
   })) as unknown as GetScopedClients;
 
   const service = createSignificantEventsMaintenanceService({
@@ -234,6 +325,16 @@ function makeService(params?: {
     savedObjects,
     v2RulesClient,
     getRuleBackedQueryLinks,
+    getStreamNamesWithKnowledgeIndicators,
+    findStreamNamesWithOwnedRules,
+    getStreamToQueryLinksMap,
+    getFeatures,
+    findOwnedRuleIds,
+    initializeClient,
+    getScopedClients,
+    streamDocuments,
+    esClient,
+    deleteAllInvestigations,
     globalUiSettingsClient,
     spaceUiSettingsClient,
   };
@@ -605,6 +706,301 @@ describe('SignificantEventsMaintenanceService', () => {
         continuousOnboardingWasEnabled: true,
         scheduledDiscoveryEnabledSpaceIds: ['default'],
       });
+    });
+  });
+
+  describe('reset', () => {
+    it('deletes the snapshot, owned rules, investigations, and populated streams while healing registered streams', async () => {
+      const { api, cancelAllActiveWorkflowExecutions } = makeManagementApi();
+      const {
+        service,
+        soClient,
+        v2RulesClient,
+        esClient,
+        streamDocuments,
+        deleteAllInvestigations,
+      } = makeService({
+        management: api,
+        indicatorStreams: ['logs.web'],
+        ownedRuleStreams: ['logs.web', 'logs.orphan'],
+        queryLinksByStream: {
+          'logs.web': [{ rule_backed: true, rule_id: 'linked-rule' }, { rule_backed: false }],
+        },
+        featureCountsByStream: { 'logs.web': 2 },
+        ownedRuleIdsByStream: {
+          'logs.web': ['linked-rule', 'owned-rule'],
+          'logs.orphan': ['orphan-rule'],
+        },
+        dataStreams: {
+          [DETECTIONS_DATA_STREAM]: 3,
+          [EVENTS_DATA_STREAM]: 0,
+          [DISCOVERIES_DATA_STREAM]: 4,
+        },
+        investigations: { deleted: 2, failures: [] },
+      });
+
+      const summary = await service.reset({ request: REQUEST, updatedBy: 'marco' });
+
+      expect(summary).toEqual(
+        expect.objectContaining({
+          state: 'enabled',
+          executionsCancelled: 0,
+          workflowsDisabled: 0,
+          rulesDisabled: 0,
+          deleted: {
+            knowledgeIndicators: 2,
+            storedQueries: 2,
+            rules: 3,
+            investigations: 2,
+            dataStreams: 2,
+          },
+          partialFailures: [],
+        })
+      );
+      expect(v2RulesClient?.bulkDeleteRules).toHaveBeenCalledWith({
+        ids: ['linked-rule', 'owned-rule', 'orphan-rule'],
+      });
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
+        {
+          name: DETECTIONS_DATA_STREAM,
+        },
+        { ignore: [404] }
+      );
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
+        { name: DISCOVERIES_DATA_STREAM },
+        { ignore: [404] }
+      );
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalledWith({
+        name: EVENTS_DATA_STREAM,
+      });
+      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+        name: DETECTIONS_DATA_STREAM,
+      });
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalledWith({
+        name: KNOWLEDGE_INDICATORS_DATA_STREAM,
+      });
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalledWith({
+        name: DISCOVERIES_DATA_STREAM,
+      });
+      expect(streamDocuments.get(DETECTIONS_DATA_STREAM)).toBe(0);
+      expect(streamDocuments.get(EVENTS_DATA_STREAM)).toBe(0);
+      expect(streamDocuments.get(KNOWLEDGE_INDICATORS_DATA_STREAM)).toBe(0);
+      expect(streamDocuments.has(DISCOVERIES_DATA_STREAM)).toBe(false);
+      expect(cancelAllActiveWorkflowExecutions.mock.invocationCallOrder[0]).toBeLessThan(
+        deleteAllInvestigations!.mock.invocationCallOrder[0]
+      );
+      expect(soClient.create.mock.calls[0][1]).toEqual(
+        expect.objectContaining({ state: 'paused', updatedBy: 'marco' })
+      );
+      expect(soClient.create.mock.invocationCallOrder[0]).toBeLessThan(
+        esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
+      );
+      expect(soClient.create).toHaveBeenLastCalledWith(
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+        expect.objectContaining({
+          state: 'enabled',
+          updatedBy: 'marco',
+          disabledWorkflows: [],
+          disabledRuleIds: [],
+        }),
+        { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
+      );
+    });
+
+    it('initializes missing registered streams and reports a clean zero-count reset', async () => {
+      const { api } = makeManagementApi();
+      const { service, initializeClient, esClient, streamDocuments } = makeService({
+        management: api,
+        dataStreams: {},
+      });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(initializeClient.mock.calls.map(([name]) => name)).toEqual([
+        DETECTIONS_DATA_STREAM,
+        EVENTS_DATA_STREAM,
+        KNOWLEDGE_INDICATORS_DATA_STREAM,
+      ]);
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+      expect(summary.deleted?.dataStreams).toBe(0);
+      expect(summary.partialFailures).toEqual([]);
+      expect([...streamDocuments.keys()]).toEqual([
+        DETECTIONS_DATA_STREAM,
+        EVENTS_DATA_STREAM,
+        KNOWLEDGE_INDICATORS_DATA_STREAM,
+      ]);
+    });
+
+    it('restores non-settings workflows after a paused reset but leaves settings-backed workflows off', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, globalUiSettingsClient, spaceUiSettingsClient, soClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+        scheduledDiscoveryEnabled: true,
+      });
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.state).toBe('enabled');
+      expect(summary.workflowsDisabled).toBe(0);
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        { enabled: true },
+        expect.any(String),
+        REQUEST
+      );
+      expect(
+        updateWorkflow.mock.calls.some(
+          ([id, patch]) =>
+            id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID && patch.enabled === true
+        )
+      ).toBe(false);
+      expect(
+        updateWorkflow.mock.calls.some(
+          ([id, patch]) =>
+            id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID) &&
+            patch.enabled === true
+        )
+      ).toBe(false);
+      expect(
+        globalUiSettingsClient._store.get(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED)
+      ).toBe(false);
+      expect(
+        spaceUiSettingsClient._store.get(
+          OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+        )
+      ).toBe(false);
+      const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as Record<string, unknown>;
+      expect(lastWrite.pausedSettings).toBeUndefined();
+    });
+
+    it('keeps failed workflow re-enables as retry inventory for Resume', async () => {
+      const failEnableFor: { id?: string } = { id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID };
+      const { api, updateWorkflow } = makeManagementApi({ failEnableFor });
+      const { service, soClient } = makeService({ management: api });
+
+      const resetSummary = await service.reset({ request: REQUEST });
+      expect(resetSummary.state).toBe('enabled');
+      expect(resetSummary.workflowsDisabled).toBe(1);
+      expect(resetSummary.partialFailures).toContainEqual({
+        target: expect.stringContaining(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID),
+        error: expect.stringContaining('enable failed'),
+      });
+
+      failEnableFor.id = undefined;
+      updateWorkflow.mockClear();
+      const resumeSummary = await service.resume({ request: REQUEST });
+
+      expect(resumeSummary.workflowsDisabled).toBe(0);
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        { enabled: true },
+        expect.any(String),
+        REQUEST
+      );
+      const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: unknown[];
+      };
+      expect(lastWrite.disabledWorkflows).toEqual([]);
+    });
+
+    it('ignores missing rules while reporting other per-rule deletion failures', async () => {
+      const { api } = makeManagementApi();
+      const v2RulesClient = makeV2RulesClient({
+        deleteErrors: [
+          {
+            id: 'missing-rule',
+            error: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND, message: 'not found' },
+          },
+          {
+            id: 'failed-rule',
+            error: { code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'delete failed' },
+          },
+        ],
+      });
+      const { service } = makeService({
+        management: api,
+        v2RulesClient,
+        ownedRuleStreams: ['logs.rules'],
+        ownedRuleIdsByStream: {
+          'logs.rules': ['ok-rule', 'missing-rule', 'failed-rule'],
+        },
+      });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.deleted?.rules).toBe(1);
+      expect(summary.partialFailures).toContainEqual({
+        target: 'rule:failed-rule',
+        error: 'delete failed',
+      });
+      expect(summary.partialFailures).not.toContainEqual(
+        expect.objectContaining({ target: 'rule:missing-rule' })
+      );
+    });
+
+    it('is cleanly repeatable and reports zero deleted data streams on the second reset', async () => {
+      const { api } = makeManagementApi();
+      const { service } = makeService({
+        management: api,
+        dataStreams: {
+          [DETECTIONS_DATA_STREAM]: 1,
+          [EVENTS_DATA_STREAM]: 1,
+          [KNOWLEDGE_INDICATORS_DATA_STREAM]: 1,
+          [DISCOVERIES_DATA_STREAM]: 1,
+        },
+      });
+
+      expect((await service.reset({ request: REQUEST })).deleted?.dataStreams).toBe(4);
+      const second = await service.reset({ request: REQUEST });
+
+      expect(second.deleted).toEqual({
+        knowledgeIndicators: 0,
+        storedQueries: 0,
+        rules: 0,
+        investigations: 0,
+        dataStreams: 0,
+      });
+      expect(second.partialFailures).toEqual([]);
+    });
+
+    it('fails before destructive work when reset intent cannot be persisted', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({ management: api });
+      soClient.create.mockRejectedValueOnce(new Error('reset intent write failed'));
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow(
+        'reset intent write failed'
+      );
+
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
+    it('throws when the final maintenance state write fails after destructive side effects', async () => {
+      const { api } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({
+        management: api,
+        dataStreams: {
+          [DETECTIONS_DATA_STREAM]: 1,
+          [EVENTS_DATA_STREAM]: 0,
+          [KNOWLEDGE_INDICATORS_DATA_STREAM]: 0,
+        },
+      });
+      soClient.create
+        .mockResolvedValueOnce({} as never)
+        .mockRejectedValueOnce(new Error('reset state write failed'));
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow('reset state write failed');
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
+        {
+          name: DETECTIONS_DATA_STREAM,
+        },
+        { ignore: [404] }
+      );
     });
   });
 

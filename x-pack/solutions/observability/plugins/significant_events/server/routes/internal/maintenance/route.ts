@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
 import type {
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
@@ -108,6 +109,34 @@ const resumeRoute = createServerRoute({
   },
 });
 
+const resetRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/maintenance/_reset',
+  options: {
+    access: 'internal',
+    summary: 'Reset Significant Events activity and data',
+    description:
+      'Cancels Significant Events activity and permanently deletes generated data across every Kibana space. The operation is best-effort, irreversible, and idempotent.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    server,
+    getScopedClients,
+    maintenanceService,
+  }): Promise<SignificantEventsMaintenanceSummary> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
+    return maintenanceService.reset({ request, updatedBy });
+  },
+});
+
 const statusRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/maintenance/_status',
   options: {
@@ -139,5 +168,6 @@ export const internalMaintenanceRoutes = {
   ...bootstrapCleanupRoute,
   ...pauseRoute,
   ...resumeRoute,
+  ...resetRoute,
   ...statusRoute,
 };
