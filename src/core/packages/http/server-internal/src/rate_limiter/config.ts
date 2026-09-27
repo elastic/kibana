@@ -25,6 +25,14 @@ export const rateLimiterConfigSchema = schema.object({
       defaultValue: 'long',
     })
   ),
+  eluHistory: schema.conditional(
+    schema.siblingRef('enabled'),
+    false,
+    schema.never(),
+    schema.oneOf([schema.literal('interval'), schema.literal('time-weighted')], {
+      defaultValue: 'interval',
+    })
+  ),
 });
 
 export type RateLimiterConfig = TypeOf<typeof rateLimiterConfigSchema>;

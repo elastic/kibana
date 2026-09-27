@@ -24,7 +24,7 @@ import { OpsMetricsCollector } from './ops_metrics_collector';
 import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 import { registerEluHistoryRoute } from './routes/elu_history';
-import { exponentialMovingAverage } from './exponential_moving_average';
+import { createExponentialMovingAverage } from './exponential_moving_average';
 
 /**
  * The period of time for the average ELU calculation.
@@ -57,6 +57,11 @@ export class MetricsService
   private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
   private elu$ = new BehaviorSubject<EluMetrics>({
+    long: 0,
+    medium: 0,
+    short: 0,
+  });
+  private timeWeightedElu$ = new BehaviorSubject<EluMetrics>({
     long: 0,
     medium: 0,
     short: 0,
@@ -94,24 +99,32 @@ export class MetricsService
       this.refreshMetrics();
     }, collectionInterval);
 
-    this.metrics$
-      .pipe(
-        map((opsMetrics) => opsMetrics.process.event_loop_utilization.utilization),
-        (elu$) =>
-          zip(
-            elu$.pipe(exponentialMovingAverage(EluTerm.Short, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(EluTerm.Medium, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(EluTerm.Long, collectionInterval))
-          ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
-      )
-      .subscribe(this.elu$);
+    const rawElu$ = this.metrics$.pipe(
+      map((opsMetrics) => opsMetrics.process.event_loop_utilization.utilization)
+    );
+
+    const eluMetrics$ = (algorithm: 'ema' | 'time-weighted-ema') =>
+      rawElu$.pipe((elu$) =>
+        zip(
+          elu$.pipe(createExponentialMovingAverage(algorithm, EluTerm.Short, collectionInterval)),
+          elu$.pipe(createExponentialMovingAverage(algorithm, EluTerm.Medium, collectionInterval)),
+          elu$.pipe(createExponentialMovingAverage(algorithm, EluTerm.Long, collectionInterval))
+        ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
+      );
+
+    eluMetrics$('ema').subscribe(this.elu$);
+    eluMetrics$('time-weighted-ema').subscribe(this.timeWeightedElu$);
     this.registerEluHistoryMetrics();
-    registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value);
+    registerEluHistoryRoute(http.createRouter(''), () => ({
+      history: this.elu$.value,
+      historyTimeWeighted: this.timeWeightedElu$.value,
+    }));
 
     this.service = {
       collectionInterval,
       getOpsMetrics$: () => this.metrics$,
       getEluMetrics$: () => this.elu$,
+      getTimeWeightedEluMetrics$: () => this.timeWeightedElu$,
     };
 
     return this.service;
@@ -147,6 +160,12 @@ export class MetricsService
     apm.registerMetric('elu.history.short', () => this.elu$.value.short);
     apm.registerMetric('elu.history.medium', () => this.elu$.value.medium);
     apm.registerMetric('elu.history.long', () => this.elu$.value.long);
+    apm.registerMetric('elu.history.time_weighted.short', () => this.timeWeightedElu$.value.short);
+    apm.registerMetric(
+      'elu.history.time_weighted.medium',
+      () => this.timeWeightedElu$.value.medium
+    );
+    apm.registerMetric('elu.history.time_weighted.long', () => this.timeWeightedElu$.value.long);
 
     // Report the same metrics to OpenTelemetry
     const meter = metrics.getMeter('kibana.process');
@@ -159,11 +178,22 @@ export class MetricsService
         valueType: ValueType.DOUBLE,
       })
       .addCallback((result) => {
-        const { short, medium, long } = this.elu$.value;
-        // They categories defined by these attributes are subsets of each other, but since it's a gauge, we won't ever sum them.
-        result.observe(short, { 'nodejs.eventloop.history.window': 'short' });
-        result.observe(medium, { 'nodejs.eventloop.history.window': 'medium' });
-        result.observe(long, { 'nodejs.eventloop.history.window': 'long' });
+        const observe = (values: EluMetrics, smoothing: 'interval' | 'time-weighted') => {
+          result.observe(values.short, {
+            'nodejs.eventloop.history.window': 'short',
+            'nodejs.eventloop.history.smoothing': smoothing,
+          });
+          result.observe(values.medium, {
+            'nodejs.eventloop.history.window': 'medium',
+            'nodejs.eventloop.history.smoothing': smoothing,
+          });
+          result.observe(values.long, {
+            'nodejs.eventloop.history.window': 'long',
+            'nodejs.eventloop.history.smoothing': smoothing,
+          });
+        };
+        observe(this.elu$.value, 'interval');
+        observe(this.timeWeightedElu$.value, 'time-weighted');
       });
   }
 }

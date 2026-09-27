@@ -37,6 +37,7 @@ const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalMetricsServiceSetup> = lazyObject({
     collectionInterval: 30000,
     getEluMetrics$: jest.fn(),
+    getTimeWeightedEluMetrics$: jest.fn(),
     getOpsMetrics$: jest.fn().mockReturnValue(
       new BehaviorSubject({
         collected_at: new Date('2020-01-01 01:00:00'),

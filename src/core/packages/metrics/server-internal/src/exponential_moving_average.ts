@@ -7,36 +7,63 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type OperatorFunction, map } from 'rxjs';
+import { performance } from 'node:perf_hooks';
+import { map, type OperatorFunction, type TimestampProvider } from 'rxjs';
+
+/** @internal */
+export const eluHistoryAlgorithms = ['ema', 'time-weighted-ema'] as const;
+
+/** @internal */
+export type EluHistoryAlgorithm = (typeof eluHistoryAlgorithms)[number];
+
+const monotonicClock: TimestampProvider = {
+  now: () => performance.now(),
+};
 
 /**
- * An RxJS operator implementing the exponential moving average function.
+ * Exponential moving average with sample-count warm-up.
+ *
+ * Warm-up accumulates `(current × expectedInterval) / period` for the first `period / expectedInterval`
+ * samples, then switches to exponential smoothing. With `ema`, α is fixed from the collection interval;
+ * with `time-weighted-ema`, α is derived from the monotonic gap since the previous sample.
  *
  * @see https://en.wikipedia.org/wiki/Exponential_smoothing
- * @param period The period of time.
- * @param interval The interval between values.
- * @returns An operator emitting smoothed values.
- * @remarks
- * Uses **accumulating mean value** until the observation window is full (i.e., until enough samples have been received to cover the specified period),
- * then switches to exponential smoothing for subsequent values. The switch happens when the number of values emitted reaches `period / interval`.
- * This ensures the initial output isn't biased by insufficient data, and provides a smooth transition to exponential smoothing.
  */
-export function exponentialMovingAverage(
+export function createExponentialMovingAverage(
+  algorithm: EluHistoryAlgorithm,
   period: number,
-  interval: number
+  expectedInterval: number,
+  timestampProvider: TimestampProvider = monotonicClock
 ): OperatorFunction<number, number> {
-  const alpha = 1 - Math.exp(-interval / period);
+  const fixedAlpha = 1 - Math.exp(-expectedInterval / period);
+  const warmUpSampleCount = period / expectedInterval;
+  const useTimeWeightedAlpha = algorithm === 'time-weighted-ema';
 
   return (inner) => {
     let previous: number | undefined;
     let mean = 0;
+    let lastTimestamp: number | undefined;
 
     return inner.pipe(
       map((current, index) => {
-        if (index < period / interval) {
-          return (mean += (current * interval) / period); // accumulating mean value
+        let sampleGapMs = expectedInterval;
+
+        if (useTimeWeightedAlpha) {
+          const timestamp = timestampProvider.now();
+          sampleGapMs =
+            lastTimestamp == null ? expectedInterval : Math.max(timestamp - lastTimestamp, 0);
+          lastTimestamp = timestamp;
         }
-        return (previous = previous == null ? current : alpha * current + (1 - alpha) * previous); // smoothing
+
+        if (index < warmUpSampleCount) {
+          return (mean += (current * expectedInterval) / period);
+        }
+
+        const alpha = useTimeWeightedAlpha ? 1 - Math.exp(-sampleGapMs / period) : fixedAlpha;
+
+        // Intentionally seed the first post-warm-up step from `current`, not warm-up `mean`: startup
+        // ELU is often high but expected, and blending from the mean would treat it as sustained load.
+        return (previous = previous == null ? current : alpha * current + (1 - alpha) * previous);
       })
     );
   };

@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  EluTerm,
-  type MetricsServiceSetupDeps,
-  type InternalMetricsServiceStart,
-  type InternalMetricsServiceSetup,
-  MetricsService,
-} from './src/metrics_service';
-export { opsConfig, type OpsConfigType } from './src/ops_config';
-export {
-  eluHistoryAlgorithms,
-  type EluHistoryAlgorithm,
-  createExponentialMovingAverage,
-} from './src/exponential_moving_average';
+import { opsConfig } from './ops_config';
+
+describe('opsConfig', () => {
+  const { schema } = opsConfig;
+
+  it('validates with defaults', () => {
+    expect(schema.validate({})).toMatchObject({
+      interval: expect.anything(),
+      cGroupOverrides: {},
+    });
+  });
+});

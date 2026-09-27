@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'node:perf_hooks';
 import moment from 'moment';
 import { merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -42,7 +43,9 @@ describe('MetricsService', () => {
     mockOpsCollector.collect.mockResolvedValue(getBaseTestMetrics());
 
     const configService = configServiceMock.create({
-      atPath: { interval: moment.duration(testInterval) },
+      atPath: {
+        interval: moment.duration(testInterval),
+      },
     });
     const coreContext = mockCoreContext.create({ logger, configService });
     metricsService = new MetricsService(coreContext);
@@ -218,6 +221,48 @@ describe('MetricsService', () => {
           short: expect.closeTo(0.02, 2), // accumulating mean: (1 + 1 + 1) / (15 / 5) = 0.02
           medium: expect.closeTo(0.01, 2), // accumulating mean: (1 + 1 + 1) / (30 / 5) = 0.01
           long: expect.closeTo(0.005, 3), // accumulating mean: (1 + 1 + 1) / (60 / 5) = 0.005
+        }),
+      ]);
+    });
+
+    it('emits time-weighted ELU values on getTimeWeightedEluMetrics$', async () => {
+      let now = 1_000;
+      jest.spyOn(performance, 'now').mockImplementation(() => now);
+
+      mockOpsCollector.collect
+        .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0));
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
+      const { getTimeWeightedEluMetrics$ } = await metricsService.start();
+      const eluMetricsPromise = lastValueFrom(getTimeWeightedEluMetrics$().pipe(toArray()));
+
+      now += testInterval;
+      jest.advanceTimersByTime(testInterval);
+      await new Promise((resolve) => process.nextTick(resolve));
+
+      now += testInterval;
+      jest.advanceTimersByTime(testInterval);
+      await new Promise((resolve) => process.nextTick(resolve));
+      await metricsService.stop();
+
+      jest.spyOn(performance, 'now').mockRestore();
+
+      await expect(eluMetricsPromise).resolves.toEqual([
+        expect.objectContaining({
+          short: expect.closeTo(0.007, 3),
+          medium: expect.closeTo(0.003, 3),
+          long: expect.closeTo(0.002, 3),
+        }),
+        expect.objectContaining({
+          short: expect.closeTo(0.013, 3),
+          medium: expect.closeTo(0.007, 3),
+          long: expect.closeTo(0.003, 3),
+        }),
+        expect.objectContaining({
+          short: expect.closeTo(0.02, 2),
+          medium: expect.closeTo(0.01, 2),
+          long: expect.closeTo(0.005, 3),
         }),
       ]);
     });
