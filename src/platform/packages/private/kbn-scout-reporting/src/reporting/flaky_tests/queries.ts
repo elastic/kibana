@@ -13,6 +13,7 @@ import { ESQL_ROW_LIMIT, inList, quoteEsqlString } from './esql';
 import { buildExecutionModels } from './execution_model';
 import type {
   FlakyTestBranchStats,
+  FlakyTestError,
   FlakyTestPipelineStats,
   FlakyTestReportThresholds,
   FlakyTestSampleFailure,
@@ -543,6 +544,156 @@ export const fetchTargetStats = async (
   }
   for (const stats of byTest.values()) {
     stats.sort((a, b) => b.failedBuilds - a.failedBuilds || b.builds - a.builds);
+  }
+  return byTest;
+};
+
+/** Lines of the message that tell errors apart; Playwright names the locator on the second. */
+const ERROR_HEAD_LINES = 3;
+const ERROR_HEAD_CHARACTERS = 300;
+/** The representative message is bounded; the longest seen so far was 24k characters. */
+const ERROR_MESSAGE_CHARACTERS = 12_000;
+
+const UUID_PATTERN = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+/** Stops at a space or a line break, so a URL ending one line cannot swallow the next. */
+const URL_PATTERN = 'https?://[^ \\n]+';
+
+/**
+ * ES|QL for the normalised head of `event.error.message`: its first lines, with UUIDs, URLs and
+ * numbers replaced by placeholders so that messages differing only in an id or a count group
+ * together.
+ */
+const errorHeadExpression = (): string => {
+  const lines = Array.from({ length: ERROR_HEAD_LINES }, (_, index) =>
+    index === 0 ? 'MV_FIRST(lines)' : `COALESCE(MV_SLICE(lines, ${index}, ${index}), "")`
+  ).join(', "\\n", ');
+  return (
+    `REPLACE(REPLACE(REPLACE(LEFT(CONCAT(${lines}), ${ERROR_HEAD_CHARACTERS}),` +
+    ` "${UUID_PATTERN}", "ID"), "${URL_PATTERN}", "URL"), "[0-9]+", "N")`
+  );
+};
+
+/**
+ * The distinct errors of the given tests, per pipeline, across every pipeline and branch in the
+ * window. Failures are attempt-level `test-end` documents with a message, for every framework
+ * (Playwright attempts carry the error, its per-run outcome documents do not), so a Playwright
+ * run that failed twice before passing counts two failures. Grouped by pipeline in the query and
+ * folded per error afterwards; a build belongs to one pipeline, so the distinct build counts add
+ * up. The representative message is the newest failure's, cut to a bounded length as text cannot
+ * be aggregated whole.
+ */
+export const buildTestErrorsQuery = (
+  window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
+  frameworks: readonly TestFramework[],
+  testIds: readonly string[]
+): string =>
+  [
+    `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
+    `WHERE ${[
+      ...scopeClauses({ ...window, pipelines: [], branches: [] }),
+      'event.action == "test-end"',
+      `reporter.type IN (${inList(frameworks)})`,
+      'test.status IN ("failed", "timedOut")',
+      'event.error.message IS NOT NULL',
+      'TRIM(event.error.message) != ""',
+      `test.id IN (${inList(testIds)})`,
+    ].join(' AND ')}`,
+    'EVAL lines = SPLIT(event.error.message, "\\n"),' +
+      ` head = ${errorHeadExpression()},` +
+      ` message = LEFT(event.error.message, ${ERROR_MESSAGE_CHARACTERS})`,
+    'STATS failures = COUNT(*),' +
+      ' builds = COUNT_DISTINCT(buildkite.build.id),' +
+      ' branches = VALUES(buildkite.branch),' +
+      ' targets = VALUES(test_run.target.mode),' +
+      ' first_failed_at = MIN(@timestamp),' +
+      ' last_failed_at = MAX(@timestamp),' +
+      ' last_failed_build_url = LAST(buildkite.build.url, @timestamp),' +
+      ' last_failed_job_id = LAST(buildkite.job_id, @timestamp),' +
+      ' message = LAST(message, @timestamp)' +
+      ' BY test.id, head, buildkite.pipeline.slug',
+    'RENAME test.id AS test_id, buildkite.pipeline.slug AS pipeline',
+    `LIMIT ${ESQL_ROW_LIMIT}`,
+  ].join(' | ');
+
+interface TestErrorRow extends Record<string, unknown> {
+  test_id: string;
+  head: string | null;
+  pipeline: string | null;
+  failures: number;
+  builds: number;
+  branches: string | string[] | null;
+  targets: string | string[] | null;
+  first_failed_at: string;
+  last_failed_at: string;
+  last_failed_build_url: string | null;
+  last_failed_job_id: string | null;
+  message: string | null;
+}
+
+/** The per-pipeline rows of one error folded into one entry. */
+const foldErrorRows = (key: string, rows: readonly TestErrorRow[]): FlakyTestError => {
+  const newest = [...rows].sort((a, b) => b.last_failed_at.localeCompare(a.last_failed_at))[0];
+  const byPipeline = rows
+    .flatMap((row) => (row.pipeline ? [{ pipeline: row.pipeline, failures: row.failures }] : []))
+    .sort((a, b) => b.failures - a.failures || a.pipeline.localeCompare(b.pipeline));
+  return {
+    key,
+    message: newest.message ?? '',
+    failures: rows.reduce((sum, row) => sum + row.failures, 0),
+    builds: rows.reduce((sum, row) => sum + row.builds, 0),
+    byPipeline,
+    branches: [...new Set(rows.flatMap((row) => asArray(row.branches)))].sort(),
+    targets: [...new Set(rows.flatMap((row) => asArray(row.targets)))].sort(),
+    firstFailedAt: new Date(
+      rows.map((row) => row.first_failed_at).sort((a, b) => a.localeCompare(b))[0]
+    ),
+    lastFailedAt: new Date(newest.last_failed_at),
+    lastFailedBuildUrl: newest.last_failed_build_url || undefined,
+    lastFailedJobId: newest.last_failed_job_id || undefined,
+  };
+};
+
+/** Distinct errors keyed by test id, most failures first. */
+export const fetchTestErrors = async (
+  es: ESClient,
+  window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
+  tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
+): Promise<Map<string, FlakyTestError[]>> => {
+  if (tests.length === 0) {
+    return new Map();
+  }
+  const frameworks = [...new Set(tests.map((test) => test.framework))];
+  const records = await runEsql<TestErrorRow>(
+    es,
+    buildTestErrorsQuery(
+      window,
+      frameworks,
+      tests.map((test) => test.testId)
+    )
+  );
+  // A cut-off result would pass for complete failure totals, so this fails rather than publish it
+  if (records.length >= ESQL_ROW_LIMIT) {
+    throw new Error(
+      `Distinct errors query hit the ${ESQL_ROW_LIMIT} row limit; narrow the scope with --lookbackDays`
+    );
+  }
+
+  const rowsByTestAndKey = new Map<string, Map<string, TestErrorRow[]>>();
+  for (const record of records) {
+    if (record.head === null) continue;
+    const byKey = rowsByTestAndKey.get(record.test_id) ?? new Map<string, TestErrorRow[]>();
+    byKey.set(record.head, [...(byKey.get(record.head) ?? []), record]);
+    rowsByTestAndKey.set(record.test_id, byKey);
+  }
+
+  const byTest = new Map<string, FlakyTestError[]>();
+  for (const [testId, byKey] of rowsByTestAndKey) {
+    byTest.set(
+      testId,
+      [...byKey.entries()]
+        .map(([key, rows]) => foldErrorRows(key, rows))
+        .sort((a, b) => b.failures - a.failures || b.builds - a.builds)
+    );
   }
   return byTest;
 };

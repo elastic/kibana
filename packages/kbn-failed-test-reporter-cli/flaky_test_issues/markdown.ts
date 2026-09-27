@@ -10,6 +10,7 @@
 import type {
   FlakyTestBranchStats,
   FlakyTestEntry,
+  FlakyTestPipelineStats,
   FlakyTestReport,
   TestFramework,
 } from '@kbn/scout-reporting';
@@ -22,6 +23,14 @@ export const FRAMEWORK_LABELS: Record<TestFramework, { short: string; long: stri
   ftr: { short: 'FTR', long: 'FTR' },
   jest: { short: 'Jest', long: 'Jest' },
   cypress: { short: 'Cypress', long: 'Cypress' },
+};
+
+/** What a config runs, by its `test_run.config.category`; categories not listed here are not shown. */
+export const CATEGORY_LABELS: Record<string, string> = {
+  'ui-test': 'UI',
+  'api-test': 'API',
+  'unit-test': 'Unit',
+  'unit-integration-test': 'Unit integration',
 };
 
 export const KIBANA_BLOB_URL = 'https://github.com/elastic/kibana/blob/main';
@@ -59,7 +68,31 @@ export const formatPercent = (rate: number): string => {
   return percent === 0 && rate > 0 ? '<1%' : `${percent}%`;
 };
 
-/** `98 / 505 (19%)` */
+/**
+ * Where a Scout target ran, from its location and the architecture its mode starts with:
+ * `Local deployment` or `Local serverless simulation`, `ECH` (cloud stateful) or `MKI` (cloud
+ * serverless). The bare location when either is unknown.
+ */
+export const targetEnvironment = ({ mode, type }: { mode: string; type: string }): string => {
+  const arch = mode.split('-')[0];
+  if (type === 'local') {
+    if (arch === 'stateful') return 'Local deployment';
+    if (arch === 'serverless') return 'Local serverless simulation';
+  }
+  if (type === 'cloud') {
+    if (arch === 'stateful') return 'ECH';
+    if (arch === 'serverless') return 'MKI';
+  }
+  return type;
+};
+
+/** `98 / 505 (**19%**)`, the rate in bold so it stands out in a table. */
+export const formatFailedBuilds = ({
+  builds,
+  failedBuilds,
+  buildFailRate,
+}: Pick<FlakyTestBranchStats, 'builds' | 'failedBuilds' | 'buildFailRate'>): string =>
+  `${failedBuilds} / ${builds} (**${formatPercent(buildFailRate)}**)`;
 
 /** `2026-09-08 16:05 UTC` */
 export const formatDateTime = (date: Date): string =>
@@ -71,8 +104,11 @@ export const formatDay = (date: Date, withYear = false): string =>
     withYear ? ` ${date.getUTCFullYear()}` : ''
   }`;
 
-/** `3–10 Sep 2026`, `28 Aug – 4 Sep 2026` or `28 Dec 2025 – 4 Jan 2026`. */
+/** `3–10 Sep 2026`, `28 Aug – 4 Sep 2026`, `28 Dec 2025 – 4 Jan 2026`, or `7 Sep 2026` for one day. */
 export const formatDateRange = (from: Date, to: Date): string => {
+  if (from.toISOString().slice(0, 10) === to.toISOString().slice(0, 10)) {
+    return formatDay(to, true);
+  }
   if (from.getUTCFullYear() !== to.getUTCFullYear()) {
     return `${formatDay(from, true)} – ${formatDay(to, true)}`;
   }
@@ -182,26 +218,99 @@ export const testsTable = (
 
 const MAX_FAILURE_LINES = 12;
 const MAX_FAILURE_CHARACTERS = 1200;
+/**
+ * The collapsed full message is bounded too: GitHub caps an issue body at 65,536 characters, and
+ * four errors at this size leave the rest of the body more than half of it.
+ */
+const MAX_FULL_FAILURE_LINES = 300;
+const MAX_FULL_FAILURE_CHARACTERS = 8_000;
 
-/** A failure message safe to post publicly, cut to its first lines, fences neutralised. */
-export const formatFailureMessage = (message: string): string => {
+/** A failure message safe to post publicly: redacted, fences neutralised, cut to the given size. */
+const cutFailureMessage = (message: string, maxLines: number, maxCharacters: number): string => {
   const redacted = redactSensitiveGithubFailureText(message).replace(/```/g, '` ` `').trim();
   const lines = redacted.split('\n');
-  let text = lines.slice(0, MAX_FAILURE_LINES).join('\n');
-  if (text.length > MAX_FAILURE_CHARACTERS) {
-    text = text.slice(0, MAX_FAILURE_CHARACTERS);
+  let text = lines.slice(0, maxLines).join('\n');
+  if (text.length > maxCharacters) {
+    text = text.slice(0, maxCharacters);
   }
   return text.length < redacted.length ? `${text}\n…` : text;
 };
 
+/** The head of a failure message, what the issue shows inline. */
+export const formatFailureMessage = (message: string): string =>
+  cutFailureMessage(message, MAX_FAILURE_LINES, MAX_FAILURE_CHARACTERS);
+
+/** The whole failure message, for the collapsed section, within the issue body's limits. */
+export const formatFullFailureMessage = (message: string): string =>
+  cutFailureMessage(message, MAX_FULL_FAILURE_LINES, MAX_FULL_FAILURE_CHARACTERS);
+
 export const codeBlock = (text: string): string => `\`\`\`text\n${text}\n\`\`\``;
 
-/** `[#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441) · 2026-09-08 16:05 UTC` */
-export const formatBuildLink = (buildUrl: string | undefined, at: Date | undefined): string => {
+/** A `<details>` block, collapsed by default; blank lines keep the markdown inside rendering. */
+export const collapsed = (summary: string, body: string): string =>
+  `<details>\n<summary>${summary}</summary>\n\n${body}\n\n</details>`;
+
+/** A Buildkite build and, when known, the job within it that ran the test. */
+export interface BuildkiteRef {
+  buildUrl?: string;
+  jobId?: string;
+  /** Label of the step the job ran, e.g. `FTR Configs #21`. */
+  stepLabel?: string;
+}
+
+/** The job's tab of the build page, which opens its log and artifacts; the build page without a job. */
+export const buildkiteJobUrl = (buildUrl: string, jobId?: string): string =>
+  jobId && !buildUrl.includes('#') ? `${buildUrl}#${jobId}` : buildUrl;
+
+/**
+ * `[#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441#0199-abcd) · FTR Configs #3 · 2026-09-08 16:05 UTC`,
+ * with whichever parts are known.
+ */
+export const formatBuildLink = (
+  { buildUrl, jobId, stepLabel }: BuildkiteRef,
+  at: Date | undefined
+): string => {
   const number = buildUrl?.match(/\/builds\/(\d+)/)?.[1];
-  const link = buildUrl ? `[${number ? `#${number}` : 'build'}](${buildUrl})` : undefined;
+  const link = buildUrl
+    ? `[${number ? `#${number}` : 'build'}](${buildkiteJobUrl(buildUrl, jobId)})`
+    : undefined;
   const time = at ? formatDateTime(at) : undefined;
-  return [link, time].filter((part) => part !== undefined).join(' · ') || '-';
+  return [link, stepLabel, time].filter((part) => part !== undefined).join(' · ') || '-';
+};
+
+const MAX_BRANCH_NAMES = 4;
+
+/**
+ * Pull request builds record the head ref as `owner:branch`, or as `pull/<number>/head` on
+ * pipelines that check the merge ref out; no release branch looks like either.
+ */
+export const isPullRequestRef = (branch: string): boolean =>
+  branch.includes(':') || branch.startsWith('pull/');
+
+/**
+ * `` `main`, `8.19`, `9.4` ``, `57 PRs`, or `` `main`, 3 PRs `` for a mixed pipeline: the branches
+ * a pipeline failed on, `main` first then sorted, at most four named before `+N more`. Falls back
+ * to the count for reports written before the names were recorded.
+ */
+export const formatFailedBranches = ({
+  failedBranches,
+  failedBranchNames,
+}: Pick<FlakyTestPipelineStats, 'failedBranches' | 'failedBranchNames'>): string => {
+  if (!failedBranchNames) {
+    return String(failedBranches);
+  }
+  const branches = failedBranchNames
+    .filter((branch) => !isPullRequestRef(branch))
+    .sort((a, b) => Number(b === 'main') - Number(a === 'main') || a.localeCompare(b));
+  const pullRequests = failedBranchNames.length - branches.length;
+  const parts = branches.slice(0, MAX_BRANCH_NAMES).map(inlineCode);
+  if (branches.length > MAX_BRANCH_NAMES) {
+    parts.push(`+${branches.length - MAX_BRANCH_NAMES} more`);
+  }
+  if (pullRequests > 0) {
+    parts.push(plural(pullRequests, 'PR'));
+  }
+  return parts.join(', ') || String(failedBranches);
 };
 
 /** Newest sampled failure of a suite, across its tests. */

@@ -21,10 +21,12 @@ import {
   fetchFilePipelineStats,
   fetchSampleFailures,
   fetchTargetStats,
+  fetchTestErrors,
   fetchTestMetadata,
   fetchTestStats,
   fileStatsKey,
   buildTargetStatsQuery,
+  buildTestErrorsQuery,
   type FlakyTestQueryScope,
 } from './queries';
 
@@ -717,6 +719,113 @@ describe('fetchTargetStats', () => {
         buildFailRate: 0,
         lastFailedAt: undefined,
       },
+    ]);
+  });
+});
+
+describe('buildTestErrorsQuery', () => {
+  it('groups attempt failures with a message by test, normalised head and pipeline, across every pipeline and branch', () => {
+    const query = buildTestErrorsQuery(scope, ['jest', 'playwright'], ['j1', 'p1']);
+
+    expect(query).not.toContain('buildkite.pipeline.slug IN');
+    expect(query).toContain(
+      'event.action == "test-end" AND reporter.type IN ("jest", "playwright") AND ' +
+        'test.status IN ("failed", "timedOut") AND event.error.message IS NOT NULL AND TRIM(event.error.message) != "" AND test.id IN ("j1", "p1")'
+    );
+    // three lines, then ids, URLs and numbers normalised
+    expect(query).toContain(
+      'head = REPLACE(REPLACE(REPLACE(LEFT(CONCAT(MV_FIRST(lines), "\\n", COALESCE(MV_SLICE(lines, 1, 1), ""), "\\n", COALESCE(MV_SLICE(lines, 2, 2), "")), 300), ' +
+        '"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "ID"), "https?://[^ \\n]+", "URL"), "[0-9]+", "N")'
+    );
+    expect(query).toContain('message = LEFT(event.error.message, 12000)');
+    expect(query).toContain(
+      'message = LAST(message, @timestamp) BY test.id, head, buildkite.pipeline.slug'
+    );
+    expect(query).toContain('RENAME test.id AS test_id, buildkite.pipeline.slug AS pipeline');
+  });
+});
+
+describe('fetchTestErrors', () => {
+  const row = (overrides: Record<string, unknown>) => ({
+    test_id: 't1',
+    head: 'Error: boom N',
+    pipeline: 'kibana-on-merge',
+    failures: 1,
+    builds: 1,
+    branches: 'main',
+    targets: 'stateful-classic',
+    first_failed_at: '2026-09-02T00:00:00.000Z',
+    last_failed_at: '2026-09-02T00:00:00.000Z',
+    last_failed_build_url: 'https://b/1',
+    last_failed_job_id: 'job-1',
+    message: 'Error: boom 1',
+    ...overrides,
+  });
+
+  it('returns an empty map without a query when there are no tests', async () => {
+    const { client, esql } = mockEs([]);
+
+    expect(await fetchTestErrors(client, scope, [])).toEqual(new Map());
+    expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('fails when the result hits the row limit, as the cut-off rows would pass for complete totals', async () => {
+    const { client } = mockEs(
+      Array.from({ length: ESQL_ROW_LIMIT }, (_, i) => row({ head: `e${i}` }))
+    );
+
+    await expect(
+      fetchTestErrors(client, scope, [{ testId: 't1', framework: 'jest' }])
+    ).rejects.toThrow(`Distinct errors query hit the ${ESQL_ROW_LIMIT} row limit`);
+  });
+
+  it('folds the per-pipeline rows of an error, newest message and build first, most failures first', async () => {
+    const { client } = mockEs([
+      row({ pipeline: 'kibana-on-merge', failures: 3, builds: 3, branches: ['main', '9.5'] }),
+      row({
+        pipeline: 'kibana-pull-request',
+        failures: 5,
+        builds: 4,
+        branches: ['a:x', 'b:y'],
+        targets: ['stateful-classic', 'serverless-search'],
+        first_failed_at: '2026-09-01T00:00:00.000Z',
+        last_failed_at: '2026-09-06T00:00:00.000Z',
+        last_failed_build_url: 'https://b/9',
+        last_failed_job_id: 'job-9',
+        message: 'Error: boom 9',
+      }),
+      row({ head: 'TypeError: nope', failures: 1, builds: 1, message: 'TypeError: nope' }),
+      // a row without a head cannot be grouped
+      row({ head: null }),
+      row({ test_id: 't2', head: 'Other', message: 'Other', last_failed_build_url: null }),
+    ]);
+
+    const errors = await fetchTestErrors(client, scope, [
+      { testId: 't1', framework: 'jest' },
+      { testId: 't2', framework: 'ftr' },
+    ]);
+
+    expect(errors.get('t1')).toEqual([
+      {
+        key: 'Error: boom N',
+        message: 'Error: boom 9',
+        failures: 8,
+        builds: 7,
+        byPipeline: [
+          { pipeline: 'kibana-pull-request', failures: 5 },
+          { pipeline: 'kibana-on-merge', failures: 3 },
+        ],
+        branches: ['9.5', 'a:x', 'b:y', 'main'],
+        targets: ['serverless-search', 'stateful-classic'],
+        firstFailedAt: new Date('2026-09-01T00:00:00.000Z'),
+        lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+        lastFailedBuildUrl: 'https://b/9',
+        lastFailedJobId: 'job-9',
+      },
+      expect.objectContaining({ key: 'TypeError: nope', failures: 1 }),
+    ]);
+    expect(errors.get('t2')).toEqual([
+      expect.objectContaining({ key: 'Other', lastFailedBuildUrl: undefined }),
     ]);
   });
 });

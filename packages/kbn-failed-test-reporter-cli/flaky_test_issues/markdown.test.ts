@@ -11,6 +11,10 @@ import {
   branchesByFailedBuilds,
   formatBuildLink,
   formatDateRange,
+  formatFailedBranches,
+  formatFailedBuilds,
+  formatFullFailureMessage,
+  targetEnvironment,
   formatFailureMessage,
   formatBranchRates,
   formatPercent,
@@ -34,6 +38,7 @@ describe('formatDateRange', () => {
     expect(range('2026-09-03T10:00:00Z', '2026-09-10T10:00:00Z')).toBe('3–10 Sep 2026');
     expect(range('2026-08-28T10:00:00Z', '2026-09-04T10:00:00Z')).toBe('28 Aug – 4 Sep 2026');
     expect(range('2025-12-28T10:00:00Z', '2026-01-04T10:00:00Z')).toBe('28 Dec 2025 – 4 Jan 2026');
+    expect(range('2026-09-07T06:00:00Z', '2026-09-07T18:00:00Z')).toBe('7 Sep 2026');
   });
 });
 
@@ -129,22 +134,99 @@ describe('formatFailureMessage', () => {
   });
 });
 
-describe('formatBuildLink', () => {
-  it('links the build number and appends the time', () => {
+describe('targetEnvironment', () => {
+  it('names where the target ran from its location and architecture', () => {
+    expect(targetEnvironment({ mode: 'stateful-classic', type: 'local' })).toBe('Local deployment');
+    expect(targetEnvironment({ mode: 'serverless-search', type: 'local' })).toBe(
+      'Local serverless simulation'
+    );
+    expect(targetEnvironment({ mode: 'stateful-classic', type: 'cloud' })).toBe('ECH');
+    expect(targetEnvironment({ mode: 'serverless-security_complete', type: 'cloud' })).toBe('MKI');
+    // falls back to the location when either part is unknown
+    expect(targetEnvironment({ mode: 'stateful-classic', type: 'unknown' })).toBe('unknown');
+    expect(targetEnvironment({ mode: 'unknown', type: 'local' })).toBe('local');
+  });
+});
+
+describe('formatFullFailureMessage', () => {
+  it('keeps a long message whole, within the body limits', () => {
+    const long = Array.from({ length: 200 }, (_, i) => `line ${i}`).join('\n');
+    expect(formatFullFailureMessage(long)).toBe(long);
+    const tooLong = Array.from({ length: 400 }, (_, i) => `line ${i}`).join('\n');
+    expect(formatFullFailureMessage(tooLong).split('\n')).toHaveLength(301);
+    expect(formatFullFailureMessage(tooLong).endsWith('\n…')).toBe(true);
+  });
+});
+
+describe('formatFailedBuilds', () => {
+  it('bolds the rate', () => {
+    expect(formatFailedBuilds({ builds: 505, failedBuilds: 98, buildFailRate: 98 / 505 })).toBe(
+      '98 / 505 (**19%**)'
+    );
+    expect(formatFailedBuilds({ builds: 400, failedBuilds: 1, buildFailRate: 1 / 400 })).toBe(
+      '1 / 400 (**<1%**)'
+    );
+  });
+});
+
+describe('formatFailedBranches', () => {
+  it('names release branches with main first and collapses pull request heads', () => {
     expect(
-      formatBuildLink(
-        'https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199',
-        new Date('2026-09-09T06:12:00Z')
-      )
-    ).toBe(
-      '[#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199) · 2026-09-09 06:12 UTC'
+      formatFailedBranches({ failedBranches: 3, failedBranchNames: ['9.5', 'main', '8.19'] })
+    ).toBe('`main`, `8.19`, `9.5`');
+    expect(formatFailedBranches({ failedBranches: 2, failedBranchNames: ['a:one', 'b:two'] })).toBe(
+      '2 PRs'
     );
-    expect(formatBuildLink(undefined, new Date('2026-09-09T06:12:00Z'))).toBe(
-      '2026-09-09 06:12 UTC'
+    expect(formatFailedBranches({ failedBranches: 2, failedBranchNames: ['a:one', 'main'] })).toBe(
+      '`main`, 1 PR'
     );
-    expect(formatBuildLink('https://example.com/no-number', undefined)).toBe(
+  });
+
+  it('treats merge refs of pull requests as pull requests too', () => {
+    expect(
+      formatFailedBranches({ failedBranches: 2, failedBranchNames: ['pull/286809/head', 'main'] })
+    ).toBe('`main`, 1 PR');
+  });
+
+  it('names at most four branches', () => {
+    expect(
+      formatFailedBranches({
+        failedBranches: 6,
+        failedBranchNames: ['9.5', '9.4', '9.3', 'main', '8.19', '8.18'],
+      })
+    ).toBe('`main`, `8.18`, `8.19`, `9.3`, +2 more');
+  });
+
+  it('falls back to the count without names', () => {
+    expect(formatFailedBranches({ failedBranches: 7 })).toBe('7');
+    expect(formatFailedBranches({ failedBranches: 1, failedBranchNames: [] })).toBe('1');
+  });
+});
+
+describe('formatBuildLink', () => {
+  const buildUrl = 'https://buildkite.com/elastic/kibana-on-merge/builds/12345';
+
+  it('links the build number and appends the time', () => {
+    expect(formatBuildLink({ buildUrl }, new Date('2026-09-09T06:12:00Z'))).toBe(
+      `[#12345](${buildUrl}) · 2026-09-09 06:12 UTC`
+    );
+    expect(formatBuildLink({}, new Date('2026-09-09T06:12:00Z'))).toBe('2026-09-09 06:12 UTC');
+    expect(formatBuildLink({ buildUrl: 'https://example.com/no-number' }, undefined)).toBe(
       '[build](https://example.com/no-number)'
     );
-    expect(formatBuildLink(undefined, undefined)).toBe('-');
+    expect(formatBuildLink({}, undefined)).toBe('-');
+  });
+
+  it('points the link at the job and names its step when known', () => {
+    expect(
+      formatBuildLink(
+        { buildUrl, jobId: '0199-abcd', stepLabel: 'FTR Configs #3' },
+        new Date('2026-09-09T06:12:00Z')
+      )
+    ).toBe(`[#12345](${buildUrl}#0199-abcd) · FTR Configs #3 · 2026-09-09 06:12 UTC`);
+    // a URL that already points at a job is left alone
+    expect(formatBuildLink({ buildUrl: `${buildUrl}#0199`, jobId: 'other' }, undefined)).toBe(
+      `[#12345](${buildUrl}#0199)`
+    );
   });
 });

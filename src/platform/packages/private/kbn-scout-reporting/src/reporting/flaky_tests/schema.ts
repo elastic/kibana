@@ -38,6 +38,40 @@ export const FlakyTestSampleFailureSchema = z.object({
 });
 export type FlakyTestSampleFailure = z.infer<typeof FlakyTestSampleFailureSchema>;
 
+/** Failed attempts with one error on one pipeline. */
+export const FlakyTestErrorPipelineSchema = z.object({
+  pipeline: z.string(),
+  failures: z.int(),
+});
+
+/**
+ * One distinct error of a test over the window, across every pipeline and branch, not just the
+ * report scope. Errors are told apart by the first three lines of their message with ids, URLs
+ * and numbers normalised away, so a diff that differs only in a count is one error.
+ */
+export const FlakyTestErrorSchema = z.object({
+  /** The normalised head the failures were grouped on; lets a consumer merge errors across tests. */
+  key: z.string(),
+  /** The newest failure's message, in full. */
+  message: z.string(),
+  /** Failed attempts with this error. */
+  failures: z.int(),
+  /** Distinct builds those attempts ran in. */
+  builds: z.int(),
+  /** Most failures first. */
+  byPipeline: z.array(FlakyTestErrorPipelineSchema),
+  /** Distinct branches, sorted; pull request builds record the head ref as `owner:branch`. */
+  branches: z.array(z.string()),
+  /** Distinct target modes, sorted (`unknown` for frameworks without a Scout target). */
+  targets: z.array(z.string()),
+  firstFailedAt: z.coerce.date(),
+  lastFailedAt: z.coerce.date(),
+  /** The newest failure's build and Buildkite job; `<url>#<jobId>` opens the job's log. */
+  lastFailedBuildUrl: z.optional(z.string()),
+  lastFailedJobId: z.optional(z.string()),
+});
+export type FlakyTestError = z.infer<typeof FlakyTestErrorSchema>;
+
 /**
  * Most recent run of the test on one branch within the report window, regardless of result.
  * `status` is the framework's own verdict (`passed`, `failed`, `timedOut`, `skipped`, `todo`,
@@ -163,6 +197,11 @@ export const FlakyTestEntrySchema = z.object({
   /** Absent only if the test emitted no execution events in the window (should not happen). */
   latestRun: z.optional(FlakyTestLatestRunSchema),
   sampleFailures: z.array(FlakyTestSampleFailureSchema),
+  /**
+   * The test's distinct errors over the window, most failures first. Defaults so that reports
+   * written before the field existed still parse.
+   */
+  errors: z.array(FlakyTestErrorSchema).default([]),
 });
 export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;
 
