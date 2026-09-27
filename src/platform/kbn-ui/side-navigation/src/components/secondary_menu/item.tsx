@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiIcon, EuiTextTruncate, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -29,6 +29,7 @@ export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> 
   isNew?: boolean;
   onClick?: () => void;
   testSubjPrefix?: string;
+  truncation?: 'middle';
 }
 
 /**
@@ -47,6 +48,7 @@ export const SecondaryMenuItemComponent = ({
   isHighlighted,
   isNew = false,
   testSubjPrefix,
+  truncation,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -97,6 +99,15 @@ export const SecondaryMenuItemComponent = ({
     min-width: 0;
   `;
 
+  // Without a `width`, EuiTextTruncate measures its own box, so it has to fill the row. The
+  // wrapper is the flex item because EuiTextTruncate wraps itself in a tooltip anchor once it
+  // truncates, and a content-sized anchor would collapse the measured width to 0.
+  const truncatedLabelStyles = css`
+    flex: 1;
+    min-width: 0;
+    text-align: start;
+  `;
+
   const submenuIconStyles = css`
     flex-shrink: 0;
     margin-left: auto;
@@ -111,11 +122,20 @@ export const SecondaryMenuItemComponent = ({
     if (isNew) return <BetaBadge type="new" />;
   };
 
-  const content = (
-    <div css={labelAndBadgeStyles}>
+  const label =
+    truncation === 'middle' && typeof children === 'string' ? (
+      <div css={truncatedLabelStyles}>
+        <EuiTextTruncate text={children} truncation="middle" />
+      </div>
+    ) : (
       <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
         {children}
       </span>
+    );
+
+  const content = (
+    <div css={labelAndBadgeStyles}>
+      {label}
       {getBadge()}
       {hasSubmenu && (
         <EuiIcon
