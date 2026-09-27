@@ -86,7 +86,7 @@ module.exports = {
          * 1). they both use non-standard language APIs
          * 2). monaco-yaml exports it's src as is see, https://www.npmjs.com/package/monaco-yaml#does-it-work-without-a-bundler
          */
-        test: /(monaco-editor\/esm\/vs\/|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager).*(t|j)sx?$/,
+        test: /(monaco-editor|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager).*(t|j)sx?$/,
         use: {
           loader: 'babel-loader',
           options: {
@@ -95,6 +95,25 @@ module.exports = {
             presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
             plugins: [require.resolve('@babel/plugin-transform-numeric-separator')],
           },
+        },
+        parser: {
+          // monaco-editor's editorWorkerService.js references its default worker's bootstrap
+          // module via `esmModuleLocationBundler: () => new URL('.../editorWebWorkerMain.js',
+          // import.meta.url)`, the modern-bundler convention for locating a worker script
+          // relative to the current module. Webpack 5's Asset Modules feature statically finds
+          // *every* `new URL(request, import.meta.url)` in a module, regardless of whether the
+          // surrounding code is a lazy callback that's ever invoked, and — because it isn't
+          // paired with an adjacent `new Worker(...)` for webpack to recognize as its Worker
+          // convention instead — copies the referenced file byte-for-byte into the output as an
+          // opaque asset, without bundling it or rewriting its relative imports. The result is a
+          // broken, dangling copy of editorWebWorkerMain.js sitting in this bundle's flat output
+          // directory with unresolvable `import`s. It's harmless at runtime only because
+          // register_globals.ts's `MonacoEnvironment.getWorker` always answers Monaco's worker
+          // lookup first, so `esmModuleLocationBundler` is never actually called — but disabling
+          // Webpack's URL-to-asset conversion here is what stops the broken copy from being
+          // emitted in the first place. `new URL(...)` still evaluates fine as an ordinary
+          // runtime expression; it just no longer triggers asset extraction.
+          url: false,
         },
       },
       // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
@@ -123,6 +142,12 @@ module.exports = {
       '@elastic/eui/lib/components/provider/nested$':
         '@elastic/eui/optimize/es/components/provider/nested',
       '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
+      // Alias the bare specifier to the same lightweight API
+      // module `@kbn/monaco`'s own imports already resolve to, so webpack dedupes it
+      // instead of bundling the barrel a second time.
+      // This forces any `import 'monaco-editor'` from other dependecies
+      // to receive only the required API, retain our control over what is imported globally into Kibana
+      'monaco-editor$': 'monaco-editor/editor/editor.api.js',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4

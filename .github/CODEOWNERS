@@ -1699,15 +1699,15 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/apps/visualize/ @elastic/kibana-dashboards
 /src/platform/test/api_integration/apis/event_annotations @elastic/kibana-dashboards
 /x-pack/platform/test/serverless/functional/test_suites/visualizations/ @elastic/kibana-dashboards
-/src/platform/packages/shared/kbn-monaco/src/languages/console @elastic/kibana-management
+/src/platform/packages/shared/kbn-monaco/src/languages/definitions/console @elastic/kibana-management
 
 # ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-discover
 /src/platform/test/examples/esql_ux_example @elastic/kibana-discover
 /src/platform/test/functional/services/esql.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/index_editor.ts @elastic/kibana-discover
-/src/platform/packages/shared/kbn-monaco/src/languages/esql @elastic/kibana-discover
-/src/platform/packages/shared/kbn-monaco/src/languages/promql @elastic/kibana-discover
+/src/platform/packages/shared/kbn-monaco/src/languages/definitions/esql @elastic/kibana-discover
+/src/platform/packages/shared/kbn-monaco/src/languages/definitions/promql @elastic/kibana-discover
 x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 
 # Global Experience

@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { BehaviorSubject } from 'rxjs';
 
 import { monaco } from '../monaco_imports';
@@ -98,8 +97,16 @@ export class DiagnosticsAdapter {
       return;
     }
 
-    const worker = await this.worker(resource);
-    const errorMarkers = await worker.getSyntaxErrors(resource.toString());
+    let errorMarkers: MonacoEditorError[] | undefined;
+    try {
+      const worker = await this.worker(resource);
+      errorMarkers = await worker.getSyntaxErrors(resource.toString());
+    } catch (e) {
+      // Gracefully handle unexpected errors by disabling autocomplete
+      // eslint-disable-next-line no-console
+      console.error('Error providing completion items:', e);
+      errorMarkers = [];
+    }
 
     if (idx !== this.validateIdx) {
       return;
@@ -107,12 +114,14 @@ export class DiagnosticsAdapter {
 
     if (errorMarkers) {
       const model = monaco.editor.getModel(resource);
-      this.errors = {
-        ...this.errors,
-        [model!.id]: errorMarkers,
-      };
-      // Set the error markers and underline them with "Error" severity
-      monaco.editor.setModelMarkers(model!, this.langId, errorMarkers.map(toDiagnostics));
+      if (model !== null) {
+        this.errors = {
+          ...this.errors,
+          [model.id]: errorMarkers,
+        };
+        // Set the error markers and underline them with "Error" severity
+        monaco.editor.setModelMarkers(model, this.langId, errorMarkers.map(toDiagnostics));
+      }
     }
 
     const isValid = errorMarkers === undefined || errorMarkers.length === 0;

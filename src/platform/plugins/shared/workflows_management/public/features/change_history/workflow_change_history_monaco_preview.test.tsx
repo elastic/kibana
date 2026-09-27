@@ -93,44 +93,51 @@ let mockLineChanges: Array<{
   },
 ];
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    MarkerSeverity: { Error: 8 },
-    editor: {
-      createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
-      create: jest.fn(() => ({
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        getModel: jest.fn(() => mockYamlModel),
-        updateOptions: jest.fn(),
-        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
-      })),
-      createDiffEditor: jest.fn(() => ({
-        setModel: jest.fn(),
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        updateOptions: mockDiffUpdateOptions,
-        getLineChanges: jest.fn(() => mockLineChanges),
-        onDidUpdateDiff: jest.fn((listener: () => void) => {
-          onDidUpdateDiffCallbacks.push(listener);
-          return { dispose: jest.fn() };
-        }),
-        setPosition: mockSetPosition,
-        revealLineInCenter: mockRevealLineInCenter,
-        revealLinesInCenter: mockRevealLinesInCenter,
-        getOriginalEditor: jest.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
-        getModifiedEditor: jest.fn(() => ({
-          updateOptions: mockModifiedUpdateOptions,
-          revealLineInCenter: jest.fn(),
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    monaco: {
+      ...actual.monaco,
+      MarkerSeverity: { Error: 8 },
+      editor: {
+        ...actual.monaco.editor,
+        createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
+        create: jest.fn(() => ({
+          dispose: jest.fn(),
+          layout: jest.fn(),
           getModel: jest.fn(() => mockYamlModel),
+          updateOptions: jest.fn(),
           createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
         })),
-      })),
-      setModelMarkers: jest.fn(),
-      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
+        createDiffEditor: jest.fn(() => ({
+          setModel: jest.fn(),
+          dispose: jest.fn(),
+          layout: jest.fn(),
+          updateOptions: mockDiffUpdateOptions,
+          getLineChanges: jest.fn(() => mockLineChanges),
+          onDidUpdateDiff: jest.fn((listener: () => void) => {
+            onDidUpdateDiffCallbacks.push(listener);
+            return { dispose: jest.fn() };
+          }),
+          setPosition: mockSetPosition,
+          revealLineInCenter: mockRevealLineInCenter,
+          revealLinesInCenter: mockRevealLinesInCenter,
+          getOriginalEditor: jest.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
+          getModifiedEditor: jest.fn(() => ({
+            updateOptions: mockModifiedUpdateOptions,
+            revealLineInCenter: jest.fn(),
+            getModel: jest.fn(() => mockYamlModel),
+            createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+          })),
+        })),
+        setModelMarkers: jest.fn(),
+        onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
+      },
     },
-  },
-}));
+  };
+});
 
 const mockCreateEditor = monaco.editor.create as jest.Mock;
 const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;

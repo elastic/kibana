@@ -64,8 +64,7 @@ export class LensEditorApp extends LensApp {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
       waitForLensApp: () => this.waitForLensApp(),
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
-      getFormulaModelIndex: () => this.getFormulaModelIndex(),
-      getCodeEditorValue: (modelIndex: number) => this.codeEditor.getCodeEditorValue(modelIndex),
+      getFormulaText: () => this.getFormulaText(),
     });
     this.dragDrop = createLazyPageObject(LensDragDrop, page, {
       getFieldAttrName: (field: string) => this.getFieldAttrName(field),

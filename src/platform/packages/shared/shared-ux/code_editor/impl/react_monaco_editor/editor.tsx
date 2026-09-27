@@ -28,15 +28,19 @@
  */
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
-import { defaultThemesResolvers, initializeSupportedLanguages, monaco } from '@kbn/monaco';
+import {
+  defaultThemesResolvers,
+  initializeSupportedLanguages,
+  monaco,
+  HoverParticipantRegistry,
+} from '@kbn/monaco';
 import { EuiPortal, type EuiPortalProps, useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 if (process.env.NODE_ENV !== 'production') {
-  import(
-    'monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess'
-  );
+  // @ts-expect-error — internal Monaco module without type declarations
+  import('monaco-editor/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess.js');
 }
 
 export type EditorConstructionOptions = monacoEditor.editor.IStandaloneEditorConstructionOptions;
@@ -174,6 +178,9 @@ const normalizeEndOfLine = (value: string, eol: string): string => {
   return value.replace(ALL_LINE_ENDINGS, eol);
 };
 
+export const getEditorInputSurface = (editorDomNode: HTMLElement | null): HTMLElement | null =>
+  editorDomNode?.querySelector<HTMLElement>('textarea[aria-roledescription="editor"]') ?? null;
+
 // initialize supported languages
 initializeSupportedLanguages();
 
@@ -260,6 +267,11 @@ export function MonacoEditor({
         onChangeHandler(nextValue, event);
       }
     });
+
+    // Disable copy button for all hover participants
+    HoverParticipantRegistry.getAll().forEach((ctor) => {
+      ctor.prototype.hideCopyButton = true;
+    });
   };
 
   const handleEditorWillUnmount = () => {
@@ -344,7 +356,7 @@ export function MonacoEditor({
 
         const $editor = currentEditor.getDomNode();
         if ($editor) {
-          const textbox = $editor.querySelector('textarea[aria-roledescription="editor"]');
+          const textbox = getEditorInputSurface($editor);
           textbox?.setAttribute('aria-invalid', hasErrors ? 'true' : 'false');
         }
       });

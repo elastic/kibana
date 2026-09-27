@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import type { CodeEditorProps } from './code_editor';
 export type { CodeEditorProps } from './code_editor';
-export { monaco, BarePluginApi } from '@kbn/monaco';
+export { monaco, BarePluginApi, jsonDefaults } from '@kbn/monaco';
 export * from './react_monaco_editor/languages/supported';
 export {
   // editor themes

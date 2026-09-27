@@ -22,6 +22,8 @@
     "^@elastic/",
     "^@babel/plugin-",
     "^babel-plugin-",
+    // babel-jest is a transitive dependency of eslint-jest-plugin
+    "babel-jest",
     "^eslint-plugin-",
     "@eslint-community/eslint-plugin-eslint-comments",
     // @types/d3-color is used by @elastic/kibana-d3-color; knip can't trace this.
@@ -75,7 +77,9 @@
     // mongodb and mongodb-connection-string-url are loaded via dynamic import() in
     // @kbn/connector-specs (the MongoDB connector); knip can't trace dynamic imports.
     "mongodb",
-    "mongodb-connection-string-url"
+    "mongodb-connection-string-url",
+    // Declared in package.json but consumed by quite a number of packages as a transitive dependency.
+    "terser-webpack-plugin"
   ],
   "workspaces": {
     ".": {

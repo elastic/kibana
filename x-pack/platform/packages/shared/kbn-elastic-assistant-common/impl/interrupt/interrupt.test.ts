@@ -1,3 +1,8 @@
+/**
+ * @jest-environment node
+ */
+
+/* eslint-disable @kbn/eslint/require-license-header */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -17,11 +22,6 @@ import { typedInterrupt } from './interrupt';
 import type { SelectOptionInterruptResumeValue } from '../schemas';
 
 describe('typedInterrupt', () => {
-  beforeAll(() => {
-    // @ts-ignore
-    delete global.window;
-  });
-
   it('interrupt updates state', async () => {
     const checkpointer = new MemorySaver();
     const workflow = new StateGraph(MessagesAnnotation)

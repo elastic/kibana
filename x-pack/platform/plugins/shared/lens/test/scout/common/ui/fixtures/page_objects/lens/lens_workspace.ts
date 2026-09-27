@@ -17,8 +17,7 @@ interface LensWorkspaceDeps {
   closeDimensionEditorButton: Locator;
   waitForLensApp: () => Promise<void>;
   waitForVisualization: (chartTestSubj: string) => Promise<void>;
-  getFormulaModelIndex: () => Promise<number>;
-  getCodeEditorValue: (modelIndex: number) => Promise<string>;
+  getFormulaText: () => Promise<string>;
 }
 
 export interface LensEditorTimeRange {
@@ -588,9 +587,9 @@ export class LensWorkspace {
     await this.page.testSubj.click('lnsFormula-fullscreen');
   }
 
-  /** Returns the current formula Monaco model value (last registered model). */
+  /** Returns the current formula Monaco model value, resolved by the formula editor's own
+   * container rather than a global model index (see `LensApp.FORMULA_EDITOR_TEST_SUBJ`). */
   async getFormulaText(): Promise<string> {
-    const modelIndex = await this.deps.getFormulaModelIndex();
-    return this.deps.getCodeEditorValue(modelIndex);
+    return this.deps.getFormulaText();
   }
 }

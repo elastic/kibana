@@ -19,15 +19,20 @@ jest.mock('../../hooks/use_workflow', () => ({
   useWorkflow: (...args: unknown[]) => mockUseWorkflow(...args),
 }));
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    'data-test-subj': dataTestSubj,
-  }: {
-    value: string;
-    'data-test-subj'?: string;
-  }) => <pre data-test-subj={dataTestSubj}>{value}</pre>,
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    CodeEditor: ({
+      value,
+      'data-test-subj': dataTestSubj,
+    }: {
+      value: string;
+      'data-test-subj'?: string;
+    }) => <pre data-test-subj={dataTestSubj}>{value}</pre>,
+  };
+});
 
 const renderFlyout = (onClose = jest.fn()) => {
   const queryClient = new QueryClient({

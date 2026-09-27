@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         async () => await PageObjects.console.isAutocompleteVisible()
       );
 
-      // 4) Press Enter to accept the first suggestion (likely "term")
+      // 4) Accept the first suggestion (likely "term").
       await PageObjects.console.pressEnter();
 
       // 5) Now check the text in the editor
@@ -379,6 +379,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('autocompletes ESQL inside triple quotes query', async () => {
         await PageObjects.console.enterText(`POST _query\n`);
         await PageObjects.console.enterText(`{\n\t"query": """`);
+        await PageObjects.console.triggerSuggest();
         await PageObjects.console.sleepForDebouncePeriod();
         await retry.waitFor(
           'autocomplete to be visible',

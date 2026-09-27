@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { jsonDefaults } from '../monaco_imports';
+import { ID as XJSON_LANG_ID } from './definitions/xjson/constants';
+import { ID as PAINLESS_LANG_ID } from './definitions/painless/constants';
+import { CONSOLE_LANG_ID } from './definitions/console/constants';
+import { ID as YAML_LANG_ID } from './definitions/yaml/constants';
+
+export const DEFAULT_WORKER_ID = 'editorWorkerService' as const;
+
+const langSpecificWorkerIds = [
+  jsonDefaults.languageId as 'json',
+  XJSON_LANG_ID,
+  PAINLESS_LANG_ID,
+  YAML_LANG_ID,
+  CONSOLE_LANG_ID,
+] as const;
+
+// exported for use in webpack config to build workers
+export type LangSpecificWorkerIds = [typeof DEFAULT_WORKER_ID, ...typeof langSpecificWorkerIds];
+
+const isLangSpecificWorkerId = (
+  languageId: string
+): languageId is (typeof langSpecificWorkerIds)[number] =>
+  langSpecificWorkerIds.some((id) => id === languageId);
+
+const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
+
+export const getWorkerUrl = (languageId: string): string => {
+  if (!monacoBundleDir) {
+    throw new Error('Could not resolve Monaco bundle directory');
+  }
+
+  const workerId = isLangSpecificWorkerId(languageId) ? languageId : DEFAULT_WORKER_ID;
+  return `${monacoBundleDir}${workerId}.editor.worker.js`;
+};
+
+export const getWorker = (languageId: string): Worker => {
+  const workerUrl = getWorkerUrl(languageId);
+  return new Worker(workerUrl, { name: languageId, type: 'classic' });
+};

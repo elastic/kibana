@@ -24,6 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const monacoEditor = getService('monacoEditor');
 
   async function getAlertsByName(name: string) {
     const {
@@ -561,19 +562,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
-      await testSubjects.setValue('queryJsonEditor', '', {
-        clearWithKeyboard: true,
-      });
-      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
-      await queryJsonEditor.clearValue();
-      // Invalid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":""}}', {
-        clearWithKeyboard: true,
-      });
+      await monacoEditor.clearCodeEditorValue('queryJsonEditor');
+      await monacoEditor.simulateTyping('queryJsonEditor', '{"query":{"foo":""}}');
+
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
-      await testSubjects.setValue('queryJsonEditor', '');
 
       await testSubjects.click('rulePageFooterCancelButton');
 
@@ -661,15 +655,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
-      await testSubjects.setValue('queryJsonEditor', '', {
-        clearWithKeyboard: true,
-      });
-      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
-      await queryJsonEditor.clearValue();
-      // Valid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
-        clearWithKeyboard: true,
-      });
+      await monacoEditor.setCodeEditorValue('{"query":{"match_all":{}}}');
+
       await testSubjects.click('testQuery');
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');

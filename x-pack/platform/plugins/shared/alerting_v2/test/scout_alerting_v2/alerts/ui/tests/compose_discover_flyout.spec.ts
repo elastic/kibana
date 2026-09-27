@@ -460,13 +460,13 @@ test.describe(
       });
 
       await test.step('remove the tags block from the YAML buffer', async () => {
-        const yaml = await pageObjects.composeDiscover.getYamlEditorValue();
+        const yaml = await pageObjects.composeDiscover.getYamlText();
         expect(yaml).toContain('tags:');
         // `tags` is serialized last under `metadata` as a block sequence; drop the
         // `tags:` line and its indented `- item` lines. The next key is top-level.
         const withoutTags = yaml.replace(/\n[ \t]*tags:[^\n]*(\n[ \t]+-[^\n]*)*/, '');
         expect(withoutTags).not.toContain('tags:');
-        await pageObjects.composeDiscover.setYamlEditorValue(withoutTags);
+        await pageObjects.composeDiscover.setYamlText(withoutTags);
       });
 
       await test.step('save via YAML and verify the rule has no tags', async () => {

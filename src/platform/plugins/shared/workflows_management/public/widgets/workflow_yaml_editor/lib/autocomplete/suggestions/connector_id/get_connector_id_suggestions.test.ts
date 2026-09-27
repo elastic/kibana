@@ -109,9 +109,13 @@ describe('getConnectorIdSuggestions', () => {
     } as unknown as AutocompleteContext);
 
     expect(result.some((item) => item.insertText === 'public-slack')).toBe(true);
-    expect(result.some((item) => item.command?.arguments?.[0].connectorType === '.slack')).toBe(
-      true
-    );
+    expect(
+      result.some(
+        (item) =>
+          (item.command?.arguments?.[0] as unknown as { connectorType: string }).connectorType ===
+          '.slack'
+      )
+    ).toBe(true);
   });
 
   it('should suggest inbound webhook instances for a trigger connector-id', () => {

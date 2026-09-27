@@ -8,19 +8,24 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    editor: {
-      createModel: jest.fn(() => ({ dispose: jest.fn() })),
-      createDiffEditor: jest.fn(() => ({
-        setModel: jest.fn(),
-        updateOptions: jest.fn(),
-        getModifiedEditor: jest.fn(() => ({ layout: jest.fn() })),
-        dispose: jest.fn(),
-      })),
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+  return {
+    monaco: {
+      ...actual.monaco,
+      editor: {
+        ...actual.monaco.editor,
+        createModel: jest.fn(() => ({ dispose: jest.fn() })),
+        createDiffEditor: jest.fn(() => ({
+          setModel: jest.fn(),
+          updateOptions: jest.fn(),
+          getModifiedEditor: jest.fn(() => ({ layout: jest.fn() })),
+          dispose: jest.fn(),
+        })),
+      },
     },
-  },
-}));
+  };
+});
 
 jest.mock('@kbn/workflows-ui', () => {
   const actual = jest.requireActual('@kbn/workflows-ui');
