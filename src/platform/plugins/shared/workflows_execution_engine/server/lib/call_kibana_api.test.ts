@@ -360,16 +360,21 @@ describe('callKibanaApi', () => {
           'content-type': 'text/plain',
           'x-elastic-internal-origin': 'spoof',
           'x-kibana-event-chain-depth': '99',
+          'x-client-authentication': 'invented-secret',
+          'es-secondary-x-client-authentication': 'invented-secret',
           'x-custom-trace-id': 'trace-1',
         },
       }
     );
 
     const headers = lastFetchHeaders();
-    // Core owns these; forwarding them would make the self client throw, so they are stripped here.
+    // Core owns these, and forwarding them would make the self client throw, so they are stripped
+    // here.
     expect(headers.Authorization).toBeUndefined();
     expect(headers['content-type']).toBeUndefined();
     expect(headers['x-elastic-internal-origin']).toBeUndefined();
+    expect(headers['x-client-authentication']).toBeUndefined();
+    expect(headers['es-secondary-x-client-authentication']).toBeUndefined();
     // Engine-stamped, not caller-forgeable.
     expect(headers['x-kibana-event-chain-depth']).toBeUndefined();
     // Genuinely custom headers pass through untouched.

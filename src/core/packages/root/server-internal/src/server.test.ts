@@ -706,6 +706,7 @@ describe('self client UIAM attestation getter', () => {
       createCoreUiamService(sharedSecret).getElasticsearchClientAuthentication({
         credentialSource: 'inbound',
         credential: new HTTPAuthorizationHeader('Bearer', 'essu_outbound'),
+        relayedClientAuthentication: undefined,
         requestHeaders: {
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: minted ?? '',
         },

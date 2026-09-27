@@ -64,10 +64,16 @@ export interface ServiceAccountsBackend {
   createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest>;
 
   /**
-   * Replaces the credential of a service-account-bound fake request after the ES client reported
-   * a token-expiry 401 for it, returning the auth headers to retry with, or `null` when the request is not
+   * Replaces the credential of a service-account-bound fake request after a 401 was attributed to
+   * an expired token, returning the auth headers to retry with, or `null` when the request is not
    * bound to a service account or a replacement could not be minted. Only meant to be called by
-   * the ES-client unauthorized-error handler.
+   * the two unauthorized-error handlers that own a retry: the Elasticsearch client's, and Core's
+   * HTTP self client's.
+   *
+   * The result is credential-only by design. The Elasticsearch client merges it into the headers
+   * it sends upstream, so nothing that must not reach Elasticsearch — notably the UIAM
+   * internal-caller attestation — belongs here. The self client derives that itself, per attempt,
+   * from whichever credential it is about to send.
    *
    * Only requests minted by this backend are ever refreshed. Fake requests carrying external
    * (user-created) UIAM credentials and real inbound requests that happen to carry a service

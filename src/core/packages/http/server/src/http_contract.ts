@@ -21,6 +21,7 @@ import type {
   OnPreResponseHandler,
   OnPreRoutingHandler,
 } from './lifecycle';
+import type { HttpSelfUnauthorizedErrorHandler } from './self_client_unauthorized_error_handler';
 import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
@@ -452,6 +453,15 @@ export interface HttpServiceSetup<
    * @returns {RouterDeprecatedApiDetails[]}
    */
   getDeprecatedRoutes: () => RouterDeprecatedApiDetails[];
+
+  /**
+   * Set the {@link HttpSelfUnauthorizedErrorHandler | handler} consulted when a Kibana self HTTP
+   * call is rejected by the authentication lifecycle, giving its owner a chance to refresh a
+   * short-lived credential so the call can be replayed once.
+   *
+   * Can only be called once, and is reserved for the security plugin.
+   */
+  setSelfClientUnauthorizedErrorHandler: (handler: HttpSelfUnauthorizedErrorHandler) => void;
 }
 
 /** @public */

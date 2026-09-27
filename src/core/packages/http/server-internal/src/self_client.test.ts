@@ -8,7 +8,12 @@
  */
 
 import { NEVER } from 'rxjs';
-import type { IAuthHeadersStorage, KibanaRequest } from '@kbn/core-http-server';
+import type {
+  HttpSelfUnauthorizedErrorHandler,
+  IAuthHeadersStorage,
+  KibanaRequest,
+} from '@kbn/core-http-server';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
@@ -20,6 +25,7 @@ import {
   SELF_CALL_RECURSION_ERROR,
   type SelfClientUiamAttestationGetter,
 } from './self_client';
+import { SELF_CALL_AUTH_CHALLENGE_HEADER } from './self_client_observer';
 
 const originalFetch = global.fetch;
 
@@ -54,6 +60,7 @@ const createClient = ({
   } as HttpConfig),
   serverProtocol = 'http',
   getUiamAttestationGetter,
+  unauthorizedErrorHandler,
 }: {
   publicBaseUrl?: string | null;
   authHeaders?: Record<string, string>;
@@ -62,6 +69,7 @@ const createClient = ({
   getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
   serverProtocol?: 'http' | 'https';
   getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
+  unauthorizedErrorHandler?: HttpSelfUnauthorizedErrorHandler;
 } = {}) => {
   const authRequestHeaders =
     suppliedAuthRequestHeaders ??
@@ -91,10 +99,38 @@ const createClient = ({
     log,
     target,
     getUiamAttestationGetter,
+    getUnauthorizedErrorHandler: () => unauthorizedErrorHandler,
   });
 
   return { authRequestHeaders, getHttpConfig, log, self };
 };
+
+const okResponse = () =>
+  new Response(JSON.stringify({ ok: true }), {
+    headers: { 'content-type': 'application/json' },
+  });
+
+const unauthorizedResponse = ({ marked = true }: { marked?: boolean } = {}) =>
+  new Response(JSON.stringify({ message: 'Unauthorized' }), {
+    status: 401,
+    statusText: 'Unauthorized',
+    headers: {
+      'content-type': 'application/json',
+      ...(marked ? { [SELF_CALL_AUTH_CHALLENGE_HEADER]: 'true' } : {}),
+    },
+  });
+
+const mockFetchResponses = (...responses: Response[]) => {
+  const fetchMock = global.fetch as jest.Mock;
+  fetchMock.mockReset();
+  responses.forEach((response) => fetchMock.mockResolvedValueOnce(response));
+  fetchMock.mockResolvedValue(okResponse());
+};
+
+/** The `Request` handed to `fetch` on the nth attempt (0 = first attempt). */
+const sentRequest = (attempt = 0) => (global.fetch as jest.Mock).mock.calls[attempt][0] as Request;
+
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('InternalHttpSelfScopedClient', () => {
   beforeEach(() => {
@@ -152,6 +188,7 @@ describe('InternalHttpSelfScopedClient', () => {
         self_http_source_route_template: '/internal/source/{sourceId}',
         self_http_target_method: 'PATCH',
         self_http_target_mode: 'public',
+        self_http_retry: 'false',
       },
     });
     const [[message]] = (log.debug as jest.Mock).mock.calls;
@@ -177,6 +214,7 @@ describe('InternalHttpSelfScopedClient', () => {
         self_http_source_route_template: '/',
         self_http_target_method: 'GET',
         self_http_target_mode: 'public',
+        self_http_retry: 'false',
       },
     });
     const serializedLog = JSON.stringify((log.debug as jest.Mock).mock.calls);
@@ -469,6 +507,411 @@ describe('InternalHttpSelfScopedClient', () => {
       await withoutGetter.self.asScoped(createRequest()).fetch('/api/status');
       const requestWithoutGetter = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
       expect(requestWithoutGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
+    });
+  });
+
+  describe('401 retry', () => {
+    const retryHandler = (authHeaders: Record<string, string>): HttpSelfUnauthorizedErrorHandler =>
+      jest.fn(async (options, toolkit) => toolkit.retry({ authHeaders }));
+
+    // Stands in for the Security-provided getter, binding the attestation to whichever credential
+    // the client is about to send so a retry can be told apart from the first attempt.
+    const attestationGetter = (_request: KibanaRequest, outboundAuthorization: string | null) =>
+      outboundAuthorization
+        ? `attestation-for-${outboundAuthorization.replace('Bearer ', '')}`
+        : undefined;
+
+    it('replays the call once with the refreshed credential', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const handler = retryHandler({ authorization: 'Bearer essu_refreshed' });
+      const { self } = createClient({ unauthorizedErrorHandler: handler });
+
+      const result = await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+        .fetch('/api/status');
+
+      expect(result).toEqual({ ok: true });
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(sentRequest(0).headers.get('authorization')).toBe('Bearer essu_expired');
+      expect(sentRequest(1).headers.get('authorization')).toBe('Bearer essu_refreshed');
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({ path: '/api/status', responseHeaders: expect.any(Headers) }),
+        expect.anything()
+      );
+    });
+
+    it('re-derives the attestation for the refreshed credential', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const { self } = createClient({
+        unauthorizedErrorHandler: retryHandler({ authorization: 'Bearer essu_refreshed' }),
+        getUiamAttestationGetter: () => attestationGetter,
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+        .fetch('/api/status');
+
+      expect(sentRequest(0).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation-for-essu_expired'
+      );
+      expect(sentRequest(1).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation-for-essu_refreshed'
+      );
+    });
+
+    it('ignores an attestation the handler tried to supply, and stamps its own', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const { log, self } = createClient({
+        getUiamAttestationGetter: () => attestationGetter,
+        unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+          toolkit.retry({
+            authHeaders: {
+              authorization: 'Bearer essu_refreshed',
+              [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'handler-invented',
+            },
+          })
+        ),
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+        .fetch('/api/status');
+
+      // Core derives the attestation from the credential it is about to send, so a handler that
+      // names one is ignored rather than trusted.
+      expect(sentRequest(1).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation-for-essu_refreshed'
+      );
+      expect(log.warn).toHaveBeenCalledWith(
+        expect.stringContaining(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)
+      );
+    });
+
+    it('preserves the method, URL, and body on the replayed call', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const { self } = createClient({
+        unauthorizedErrorHandler: retryHandler({ authorization: 'Bearer essu_refreshed' }),
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+        .fetch('/api/thing', { method: 'POST', body: { name: 'value' } });
+
+      const [first, second] = [sentRequest(0), sentRequest(1)];
+      expect(second.method).toBe(first.method);
+      expect(second.url).toBe(first.url);
+      expect(await second.text()).toBe(JSON.stringify({ name: 'value' }));
+      expect(second.headers.get('x-kbn-self-call')).toBe('true');
+      expect(second.headers.get('kbn-version')).toBe('9.9.9');
+    });
+
+    it('does not replay a 401 that the authentication lifecycle did not raise', async () => {
+      // A route handler can return 401 after performing a side effect (Core forwards an
+      // Elasticsearch 401 thrown by a handler), so an unmarked 401 must never be replayed.
+      mockFetchResponses(unauthorizedResponse({ marked: false }), okResponse());
+      const handler = retryHandler({ authorization: 'Bearer essu_refreshed' });
+      const { self } = createClient({ unauthorizedErrorHandler: handler });
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+          .fetch('/api/thing', {
+            method: 'POST',
+            body: { name: 'value' },
+          })
+      ).rejects.toThrow();
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not consult the handler for a non-401 response', async () => {
+      mockFetchResponses(new Response('nope', { status: 403 }));
+      const handler = retryHandler({ authorization: 'Bearer essu_refreshed' });
+      const { self } = createClient({ unauthorizedErrorHandler: handler });
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+          .fetch('/api/status')
+      ).rejects.toThrow();
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('surfaces the original 401 when the handler does not handle it', async () => {
+      mockFetchResponses(unauthorizedResponse());
+      const { self } = createClient({
+        unauthorizedErrorHandler: jest.fn(async (options, toolkit) => toolkit.notHandled()),
+      });
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+          .fetch('/api/status')
+      ).rejects.toThrow('Unauthorized');
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not replay when the handler returns the credential that was just sent', async () => {
+      mockFetchResponses(unauthorizedResponse());
+      const { self } = createClient({
+        unauthorizedErrorHandler: retryHandler({ authorization: 'Bearer essu_expired' }),
+      });
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+          .fetch('/api/status')
+      ).rejects.toThrow();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('warns and does not replay when the handler throws', async () => {
+      mockFetchResponses(unauthorizedResponse());
+      const { log, self } = createClient({
+        unauthorizedErrorHandler: jest.fn(async () => {
+          throw new Error('mint exploded');
+        }),
+      });
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+          .fetch('/api/status')
+      ).rejects.toThrow();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('mint exploded'));
+    });
+
+    it('behaves exactly as before when no handler is registered', async () => {
+      mockFetchResponses(unauthorizedResponse());
+      const { self } = createClient();
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+          .fetch('/api/status')
+      ).rejects.toThrow();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops Core-owned headers from the overlay and warns', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const { log, self } = createClient({
+        unauthorizedErrorHandler: retryHandler({
+          authorization: 'Bearer essu_refreshed',
+          'kbn-version': '0.0.0',
+          host: 'evil.example',
+          cookie: 'sid=1',
+          'x-kbn-self-call': 'false',
+          'x-elastic-internal-origin': 'Evil',
+          'x-client-authentication': 'shared-secret',
+          'es-secondary-x-client-authentication': 'shared-secret',
+        }),
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+        .fetch('/api/status');
+
+      const replay = sentRequest(1);
+      expect(replay.headers.get('authorization')).toBe('Bearer essu_refreshed');
+      expect(replay.headers.get('kbn-version')).toBe('9.9.9');
+      expect(replay.headers.get('host')).not.toBe('evil.example');
+      expect(replay.headers.get('cookie')).toBeNull();
+      expect(replay.headers.get('x-kbn-self-call')).toBe('true');
+      expect(replay.headers.get('x-elastic-internal-origin')).toBeNull();
+      expect(replay.headers.get('x-client-authentication')).toBeNull();
+      expect(replay.headers.get('es-secondary-x-client-authentication')).toBeNull();
+      for (const name of [
+        'kbn-version',
+        'host',
+        'cookie',
+        'x-kbn-self-call',
+        'x-elastic-internal-origin',
+        'x-client-authentication',
+        'es-secondary-x-client-authentication',
+      ]) {
+        expect(log.warn).toHaveBeenCalledWith(expect.stringContaining(`[${name}]`));
+      }
+    });
+
+    it('cancels the discarded 401 body and returns the replayed raw response', async () => {
+      const cancel = jest.fn().mockResolvedValue(undefined);
+      const firstResponse = unauthorizedResponse();
+      Object.defineProperty(firstResponse, 'body', { value: { cancel } });
+      mockFetchResponses(firstResponse, okResponse());
+      const { self } = createClient({
+        unauthorizedErrorHandler: retryHandler({ authorization: 'Bearer essu_refreshed' }),
+      });
+
+      const { response } = await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+        .fetch('/api/status', { asResponse: true, rawResponse: true });
+
+      expect(cancel).toHaveBeenCalledTimes(1);
+      expect(response.status).toBe(200);
+    });
+
+    it('logs the replay attempt separately from the first one', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const { log, self } = createClient({
+        unauthorizedErrorHandler: retryHandler({ authorization: 'Bearer essu_refreshed' }),
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+        .fetch('/api/status');
+
+      expect(log.debug).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({ labels: expect.objectContaining({ self_http_retry: 'false' }) })
+      );
+      expect(log.debug).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({ labels: expect.objectContaining({ self_http_retry: 'true' }) })
+      );
+    });
+
+    describe('cancellation', () => {
+      it('does not consult the handler when the call was already aborted', async () => {
+        mockFetchResponses(unauthorizedResponse());
+        const handler = retryHandler({ authorization: 'Bearer essu_refreshed' });
+        const { self } = createClient({ unauthorizedErrorHandler: handler });
+        const signal = AbortSignal.abort();
+
+        await expect(
+          self
+            .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+            .fetch('/api/status', { signal })
+        ).rejects.toThrow();
+
+        expect(handler).not.toHaveBeenCalled();
+      });
+
+      it('stops waiting on the refresh when the caller aborts', async () => {
+        const cancel = jest.fn().mockResolvedValue(undefined);
+        const firstResponse = unauthorizedResponse();
+        Object.defineProperty(firstResponse, 'body', { value: { cancel } });
+        mockFetchResponses(firstResponse, okResponse());
+        const neverSettles = new Promise<never>(() => {});
+        const { self } = createClient({
+          unauthorizedErrorHandler: jest.fn(() => neverSettles),
+        });
+        const controller = new AbortController();
+
+        const pending = self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+          .fetch('/api/status', { signal: controller.signal });
+        await flushPromises();
+        controller.abort();
+
+        await expect(pending).rejects.toThrow();
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      it('stops waiting on the refresh when the call times out', async () => {
+        jest.useFakeTimers();
+        try {
+          mockFetchResponses(unauthorizedResponse(), okResponse());
+          const { self } = createClient({
+            unauthorizedErrorHandler: jest.fn(() => new Promise<never>(() => {})),
+          });
+          const startedAt = Date.now();
+
+          const pending = self
+            .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+            .fetch('/api/status', { timeout: 1_000 });
+          const assertion = expect(pending).rejects.toThrow();
+
+          await jest.advanceTimersByTimeAsync(1_000);
+          await assertion;
+          // The whole call, both attempts included, stayed inside the caller's budget.
+          expect(Date.now()).toBeLessThanOrEqual(1_000 + startedAt);
+          expect(global.fetch).toHaveBeenCalledTimes(1);
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
+      it('leaves a shared refresh running for the callers that did not abort', async () => {
+        const responses = [unauthorizedResponse(), unauthorizedResponse(), okResponse()];
+        mockFetchResponses(...responses);
+        let releaseMint: (headers: Record<string, string>) => void = () => {};
+        const mint = new Promise<Record<string, string>>((resolve) => {
+          releaseMint = resolve;
+        });
+        const { self } = createClient({
+          unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+            toolkit.retry({ authHeaders: await mint })
+          ),
+        });
+        const request = createFakeRequest({ authorization: 'Bearer essu_expired' });
+        const controller = new AbortController();
+
+        const aborted = self.asScoped(request).fetch('/api/status', { signal: controller.signal });
+        const survivor = self.asScoped(request).fetch('/api/status');
+        await flushPromises();
+
+        controller.abort();
+        await expect(aborted).rejects.toThrow();
+
+        releaseMint({ authorization: 'Bearer essu_refreshed' });
+        await expect(survivor).resolves.toEqual({ ok: true });
+        // Two first attempts plus exactly one replay: the aborted call never replayed.
+        expect(global.fetch).toHaveBeenCalledTimes(3);
+        expect(sentRequest(2).headers.get('authorization')).toBe('Bearer essu_refreshed');
+      });
+
+      it('ignores a handler that settles after the call was aborted', async () => {
+        mockFetchResponses(unauthorizedResponse(), okResponse());
+        let settle: (result: unknown) => void = () => {};
+        const late = new Promise((resolve) => {
+          settle = resolve;
+        });
+        const { self } = createClient({
+          unauthorizedErrorHandler: jest.fn(async (options, toolkit) => {
+            await late;
+            return toolkit.retry({ authHeaders: { authorization: 'Bearer essu_refreshed' } });
+          }),
+        });
+        const controller = new AbortController();
+
+        const pending = self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+          .fetch('/api/status', { signal: controller.signal });
+        await flushPromises();
+        controller.abort();
+        await expect(pending).rejects.toThrow();
+
+        settle(undefined);
+        await flushPromises();
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      it('ignores a handler that rejects after the call was aborted', async () => {
+        mockFetchResponses(unauthorizedResponse(), okResponse());
+        let fail: (error: Error) => void = () => {};
+        const late = new Promise<never>((_resolve, reject) => {
+          fail = reject;
+        });
+        const { log, self } = createClient({ unauthorizedErrorHandler: jest.fn(() => late) });
+        const controller = new AbortController();
+
+        const pending = self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+          .fetch('/api/status', { signal: controller.signal });
+        await flushPromises();
+        controller.abort();
+        await expect(pending).rejects.toThrow();
+
+        fail(new Error('mint exploded'));
+        await flushPromises();
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        expect(log.warn).not.toHaveBeenCalledWith(expect.stringContaining('mint exploded'));
+      });
     });
   });
 });
