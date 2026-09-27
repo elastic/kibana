@@ -63,7 +63,7 @@ const DEFAULT_TYPE_OPTIONS: Array<{ value: '' | DatasetMappingFieldType; text: s
 const CreateButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <EuiButton
-      size="s"
+      size="m"
       color="primary"
       fill
       onClick={onClick}
@@ -79,7 +79,7 @@ const CreateButton = ({ onClick }: { onClick: () => void }) => {
 const CancelButton = ({ onClick }: { onClick: () => void }) => {
   return (
     <EuiButtonEmpty
-      size="s"
+      size="m"
       onClick={onClick}
       data-test-subj="dataFederationMappingEditorCancelField"
     >
