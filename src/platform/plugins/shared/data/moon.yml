@@ -95,6 +95,7 @@ fileGroups:
     - test/scout/**/*
     - test/scout_http2/**/*
     - test/scout_search_sessions/**/*
+    - test/scout_test_plugins/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

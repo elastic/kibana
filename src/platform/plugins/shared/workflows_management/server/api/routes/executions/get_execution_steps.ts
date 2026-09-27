@@ -9,10 +9,9 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import {
-  WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
-  WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-} from '../../../../common';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+import { i18n } from '@kbn/i18n';
+import { WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE } from '../../../../common';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -33,7 +32,7 @@ export const executionStepsQuerySchema = schema.object({
   size: schema.number({
     min: 1,
     max: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
-    defaultValue: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+    defaultValue: 1000,
     meta: { description: 'Number of step executions per page.' },
     validate: (value) => (Number.isInteger(value) ? undefined : 'size must be an integer'),
   }),
@@ -47,7 +46,7 @@ export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDep
       security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
       summary: 'Get execution step executions',
       description:
-        "Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}. If a page exceeds Kibana's response buffer, the handler still returns 200 with `results: []` and the page `total`.",
+        "Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}. If a page exceeds Kibana's response buffer, the handler returns 413.",
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -87,6 +86,19 @@ export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDep
             body: stepExecutionListResult,
           });
         } catch (error) {
+          if (isMaximumResponseSizeExceededError(error)) {
+            return response.customError({
+              statusCode: 413,
+              body: {
+                message: i18n.translate(
+                  'workflows.getExecutionSteps.responseTooLargeErrorMessage',
+                  {
+                    defaultMessage: 'Step execution data is too large to load.',
+                  }
+                ),
+              },
+            });
+          }
           return handleRouteError(response, error, { checkNotFound: true });
         }
       })

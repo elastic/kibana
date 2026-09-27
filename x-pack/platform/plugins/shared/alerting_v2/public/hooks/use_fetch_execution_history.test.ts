@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
+import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
 import {
@@ -19,6 +20,18 @@ import {
 jest.mock('@kbn/core-di-browser');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
+
+const item: PolicyExecutionHistoryItem = {
+  dispatched_at: '2026-05-05T10:00:00.000Z',
+  policy: { id: 'policy-1', name: 'My Policy' },
+  rules: [{ id: 'rule-1', name: 'My Rule' }],
+  total_rule_count: 1,
+  outcome: 'success',
+  episode_count: 1,
+  action_group_count: 1,
+  workflows: [],
+  error: null,
+};
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -31,7 +44,9 @@ const createWrapper = () => {
 };
 
 describe('useFetchExecutionHistory', () => {
-  const mockListActionPolicyExecutions = jest.fn();
+  const mockListActionPolicyExecutions: jest.MockedFunction<
+    ExecutionHistoryApi['listActionPolicyExecutions']
+  > = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,18 +58,18 @@ describe('useFetchExecutionHistory', () => {
     });
   });
 
-  it('calls listActionPolicyExecutions with the provided params (page, perPage, search, outcome)', async () => {
+  it('calls listActionPolicyExecutions with the provided params (page, perPage, search, outcomes)', async () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 2,
-      perPage: 25,
-      totalEvents: 0,
-      searchMatches: null,
+      per_page: 25,
+      total: 0,
+      search_matches: null,
     });
 
     renderHook(
       () =>
-        useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcome: ['throttled'] }),
+        useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcomes: ['throttled'] }),
       {
         wrapper: createWrapper(),
       }
@@ -65,18 +80,18 @@ describe('useFetchExecutionHistory', () => {
         page: 2,
         per_page: 25,
         search: 'foo',
-        outcome: ['throttled'],
+        outcomes: ['throttled'],
       });
     });
   });
 
   it('returns data from the API on success', async () => {
     const fakeResponse = {
-      items: [{ dispatched_at: '2026-05-05T10:00:00Z' }],
+      items: [item],
       page: 1,
-      perPage: 50,
-      totalEvents: 1,
-      searchMatches: null,
+      per_page: 50,
+      total: 1,
+      search_matches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 
@@ -104,9 +119,9 @@ describe('useFetchExecutionHistory', () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
-      perPage: 50,
-      totalEvents: 0,
-      searchMatches: null,
+      per_page: 50,
+      total: 0,
+      search_matches: null,
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -118,9 +133,9 @@ describe('useFetchExecutionHistory', () => {
     expect(queryClient.getQueryData(executionHistoryKeys.list({ page: 3, perPage: 25 }))).toEqual({
       items: [],
       page: 1,
-      perPage: 50,
-      totalEvents: 0,
-      searchMatches: null,
+      per_page: 50,
+      total: 0,
+      search_matches: null,
     });
   });
 
@@ -128,9 +143,9 @@ describe('useFetchExecutionHistory', () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
-      perPage: 50,
-      totalEvents: 0,
-      searchMatches: null,
+      per_page: 50,
+      total: 0,
+      search_matches: null,
     });
 
     const { rerender } = renderHook(
@@ -153,18 +168,20 @@ describe('toListExecutionHistoryRequest', () => {
         perPage: 100,
         search: 'foo',
         ruleIds: ['rule-1', 'rule-2'],
-        outcome: ['dispatched'],
+        outcomes: ['success'],
         episodeIds: ['ep-1'],
-        startDate: '2026-01-01T00:00:00.000Z',
+        sortField: 'dispatchedAt',
+        sortOrder: 'asc',
       })
     ).toEqual({
       page: 1,
       per_page: 100,
       search: 'foo',
       rule_ids: ['rule-1', 'rule-2'],
-      outcome: ['dispatched'],
+      outcomes: ['success'],
       episode_ids: ['ep-1'],
-      start_date: '2026-01-01T00:00:00.000Z',
+      sort_field: 'dispatched_at',
+      sort_order: 'asc',
     });
   });
 });

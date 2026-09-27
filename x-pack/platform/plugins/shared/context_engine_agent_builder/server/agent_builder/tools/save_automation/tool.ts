@@ -24,7 +24,8 @@ import { validateAiIndexId } from '@kbn/context-engine-plugin/common/validation'
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
-import type { SavedWorkflowSummary } from './handler';
+import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
+import type { SaveAutomationParams, SavedWorkflowSummary } from './handler';
 import {
   getSaveAutomationErrorMessage,
   parseWorkflowEnabledFromYaml,
@@ -40,11 +41,28 @@ import {
 const MAX_ATTACHMENT_ID_LENGTH = 256;
 const MAX_WORKFLOW_YAML_LENGTH = 128_000;
 
+/**
+ * Some models fill every optional parameter and send whitespace for the ones they mean to omit.
+ * A blank string carries no information, so it is read as the parameter not being supplied.
+ */
+const blankToUndefined = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim().length > 0 ? value : undefined;
+
+/** The tool's parameters with blank optional strings dropped, so the rest of the tool sees one shape. */
+export const normalizeSaveAutomationParams = (
+  params: Record<string, unknown>
+): SaveAutomationParams => ({
+  workflowAttachmentId: blankToUndefined(params.workflowAttachmentId),
+  workflowYaml: blankToUndefined(params.workflowYaml),
+  workflowId: blankToUndefined(params.workflowId),
+  aiIndexId: blankToUndefined(params.aiIndexId),
+  run: params.run === true,
+});
+
 const saveAutomationSchema = z
   .object({
     workflowAttachmentId: z
       .string()
-      .min(1)
       .max(MAX_ATTACHMENT_ID_LENGTH)
       .optional()
       .describe(
@@ -52,7 +70,6 @@ const saveAutomationSchema = z
       ),
     workflowYaml: z
       .string()
-      .min(1)
       .max(MAX_WORKFLOW_YAML_LENGTH)
       .optional()
       .describe(
@@ -60,7 +77,6 @@ const saveAutomationSchema = z
       ),
     workflowId: z
       .string()
-      .min(1)
       .max(MAX_AI_INDEX_AUTOMATION_LENGTH)
       .optional()
       .describe(
@@ -80,7 +96,9 @@ const saveAutomationSchema = z
         'Run the automation over the full corpus once this call has saved or attached it — it applies to every way of calling this tool, including attaching a workflow that was already saved. Set only when the user asked for it: the confirmation dialog says so, and the run costs a model call per document. A disabled workflow is enabled in order to run, and stays enabled afterwards. Returns an execution id to poll rather than waiting for completion.'
       ),
   })
-  .superRefine((value, ctx) => {
+  .superRefine((raw, ctx) => {
+    const value = normalizeSaveAutomationParams(raw);
+
     // At most one definition, since two would be ambiguous about which gets saved. `workflowId` is
     // not a third alternative: it either stands alone as an attach, or names the target of the
     // definition supplied alongside it.
@@ -153,22 +171,14 @@ export const createSaveAutomationTool = ({
     Requires an ai_index attachment in the conversation unless aiIndexId is provided explicitly.
   `,
   schema: saveAutomationSchema,
+  availability: aiIndexToolsAvailability,
   confirmation: {
     askUser: 'always',
     getConfirmation: async ({ toolParams, context }) => {
       const { attachments, request, spaceId } = context;
-      const aiIndexLabel = tryResolveAiIndexDisplayLabelFromAttachments(
-        attachments,
-        typeof toolParams.aiIndexId === 'string' ? toolParams.aiIndexId : undefined
-      );
-      const workflowAttachmentId =
-        typeof toolParams.workflowAttachmentId === 'string'
-          ? toolParams.workflowAttachmentId
-          : undefined;
-      const workflowId =
-        typeof toolParams.workflowId === 'string' ? toolParams.workflowId : undefined;
-      const workflowYaml =
-        typeof toolParams.workflowYaml === 'string' ? toolParams.workflowYaml : undefined;
+      const { workflowAttachmentId, workflowId, workflowYaml, aiIndexId, run } =
+        normalizeSaveAutomationParams(toolParams);
+      const aiIndexLabel = tryResolveAiIndexDisplayLabelFromAttachments(attachments, aiIndexId);
 
       // The workflow whose stored definition this call would replace: named outright, or carried
       // by the attachment from the last time it was saved. Only meaningful alongside a definition
@@ -220,7 +230,7 @@ export const createSaveAutomationTool = ({
       // The dialog is binary, so a run the caller cannot perform is never offered as one: without
       // the execute privilege this degrades to a plain save, which is what the handler will do.
       const willRun =
-        toolParams.run === true &&
+        run &&
         (await hasWorkflowExecutePrivilege({
           security: await getSecurityStart(),
           request,
@@ -288,7 +298,7 @@ export const createSaveAutomationTool = ({
   handler: async (params, { request, spaceId, attachments, logger }) => {
     try {
       const result = await saveAutomationHandler({
-        params,
+        params: normalizeSaveAutomationParams(params),
         request,
         spaceId,
         attachments,

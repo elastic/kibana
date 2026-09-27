@@ -6,8 +6,14 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import type { CortexTelemetry } from '../telemetry';
 import { applyCortexEdits, optimizeCortex } from './optimize';
 import type { CortexPageStore } from './page_store';
+
+const createTelemetry = (): jest.Mocked<CortexTelemetry> => ({
+  reportHydrated: jest.fn(),
+  reportEditsApplied: jest.fn(),
+});
 
 describe('applyCortexEdits', () => {
   it('upserts, corroborates, and archives proposed pages', async () => {
@@ -23,8 +29,10 @@ describe('applyCortexEdits', () => {
       pruneDuplicates: jest.fn().mockResolvedValue(0),
     };
 
+    const telemetry = createTelemetry();
     await applyCortexEdits({
       store,
+      telemetry,
       logger: loggerMock.create(),
       edits: [
         {
@@ -59,6 +67,95 @@ describe('applyCortexEdits', () => {
     );
     expect(store.corroborate).toHaveBeenCalledWith('cortex_service_checkout');
     expect(store.archive).toHaveBeenCalledWith('cortex_topic_old-note');
+    expect(telemetry.reportEditsApplied).toHaveBeenCalledWith([
+      { action: 'upsert', entityType: 'service' },
+      { action: 'corroborate', entityType: 'service' },
+      { action: 'archive', entityType: 'topic' },
+    ]);
+  });
+
+  // Pages are written one at a time, so a mid-loop failure still leaves the earlier edits in the
+  // wiki. Dropping their counts would understate writes exactly when a run went wrong.
+  it('reports the edits already written when a later edit throws', async () => {
+    const store: CortexPageStore = {
+      list: jest.fn().mockResolvedValue({
+        pages: [],
+        stats: { total: 0, established: 0, total_corroborations: 0 },
+      }),
+      get: jest.fn().mockResolvedValue(undefined),
+      upsert: jest.fn().mockResolvedValue({}),
+      corroborate: jest.fn().mockRejectedValue(new Error('request_timeout')),
+      archive: jest.fn().mockResolvedValue({}),
+      pruneDuplicates: jest.fn().mockResolvedValue(0),
+    };
+
+    const telemetry = createTelemetry();
+    await expect(
+      applyCortexEdits({
+        store,
+        telemetry,
+        logger: loggerMock.create(),
+        edits: [
+          {
+            action: 'upsert',
+            entity_type: 'service',
+            slug: 'checkout',
+            title: 'Checkout',
+            content: 'Checkout talks to Redis.',
+          },
+          {
+            action: 'corroborate',
+            entity_type: 'service',
+            slug: 'checkout',
+            title: 'Checkout',
+          },
+          {
+            action: 'archive',
+            entity_type: 'topic',
+            slug: 'old-note',
+            title: 'Old note',
+          },
+        ],
+      })
+    ).rejects.toThrow('request_timeout');
+
+    expect(telemetry.reportEditsApplied).toHaveBeenCalledWith([
+      { action: 'upsert', entityType: 'service' },
+    ]);
+    expect(store.archive).not.toHaveBeenCalled();
+  });
+
+  // A proposal naming a page that does not exist leaves the wiki untouched, so counting it would
+  // overstate how much the optimizer actually writes.
+  it('reports only the edits that changed a page', async () => {
+    const store: CortexPageStore = {
+      list: jest.fn().mockResolvedValue({
+        pages: [],
+        stats: { total: 0, established: 0, total_corroborations: 0 },
+      }),
+      get: jest.fn().mockResolvedValue(undefined),
+      upsert: jest.fn().mockResolvedValue({}),
+      corroborate: jest.fn().mockResolvedValue(undefined),
+      archive: jest.fn().mockResolvedValue(undefined),
+      pruneDuplicates: jest.fn().mockResolvedValue(0),
+    };
+
+    const telemetry = createTelemetry();
+    await applyCortexEdits({
+      store,
+      telemetry,
+      logger: loggerMock.create(),
+      edits: [
+        {
+          action: 'corroborate',
+          entity_type: 'service',
+          slug: 'missing',
+          title: 'Missing',
+        },
+      ],
+    });
+
+    expect(telemetry.reportEditsApplied).toHaveBeenCalledWith([]);
   });
 
   it('rewrites prefixed slugs onto the existing page', async () => {
@@ -94,6 +191,7 @@ describe('applyCortexEdits', () => {
 
     await applyCortexEdits({
       store,
+      telemetry: createTelemetry(),
       logger: loggerMock.create(),
       edits: [
         {
@@ -131,6 +229,7 @@ describe('optimizeCortex', () => {
 
     await optimizeCortex({
       store,
+      telemetry: createTelemetry(),
       logger: loggerMock.create(),
       userMessage: 'Why is checkout slow?',
       assistantMessage: 'Redis lock contention on checkout.',
@@ -170,8 +269,10 @@ describe('optimizeCortex', () => {
       pruneDuplicates: jest.fn().mockResolvedValue(0),
     };
 
+    const telemetry = createTelemetry();
     await optimizeCortex({
       store,
+      telemetry,
       logger: loggerMock.create(),
       userMessage: 'hello',
       assistantMessage: 'nothing durable',
@@ -179,5 +280,6 @@ describe('optimizeCortex', () => {
     });
 
     expect(store.upsert).not.toHaveBeenCalled();
+    expect(telemetry.reportEditsApplied).not.toHaveBeenCalled();
   });
 });

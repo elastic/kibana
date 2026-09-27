@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
+import { createRouteContextMock } from '../route_context.mock';
 import { registerListActionsRoute } from './list_actions';
 
 const makeDeps = (actionsService: unknown) => {
@@ -43,7 +44,7 @@ describe('registerListActionsRoute', () => {
     const { handler } = makeDeps({ list });
     const response = httpServerMock.createResponseFactory();
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         path: '/internal/alertzero/actions',
         // simulate the router-parsed multi-valued query param
@@ -63,7 +64,7 @@ describe('registerListActionsRoute', () => {
     const list = jest.fn().mockResolvedValue({ actions: [], total: 0 });
     const { handler } = makeDeps({ list });
     const response = httpServerMock.createResponseFactory();
-    await handler({}, requestWithCategories(), response);
+    await handler(createRouteContextMock(), requestWithCategories(), response);
     expect(list).toHaveBeenCalledWith(
       'default',
       expect.objectContaining({ auth: { isAuthenticated: true } }),
@@ -78,7 +79,7 @@ describe('registerListActionsRoute', () => {
       path: '/internal/alertzero/actions',
       query: { categories: Array(21).fill('c') },
     });
-    await handler({}, request, response);
+    await handler(createRouteContextMock(), request, response);
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {
         message: expect.stringContaining('at most 20'),
@@ -90,7 +91,7 @@ describe('registerListActionsRoute', () => {
     const list = jest.fn().mockRejectedValue(new Error('boom'));
     const { handler } = makeDeps({ list });
     const response = httpServerMock.createResponseFactory();
-    await handler({}, requestWithCategories(), response);
+    await handler(createRouteContextMock(), requestWithCategories(), response);
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
       body: { message: 'Failed to list actions' },

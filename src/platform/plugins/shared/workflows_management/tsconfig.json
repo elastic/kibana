@@ -62,6 +62,7 @@
     "@kbn/unified-data-table",
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
+    "@kbn/ui-callout",
     "@kbn/storybook",
     "@kbn/react-field",
     "@kbn/storage-adapter",

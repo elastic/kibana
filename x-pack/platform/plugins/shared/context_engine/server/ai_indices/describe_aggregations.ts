@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isResponseError } from '@kbn/es-errors';
 import {
   MAX_AI_INDEX_DESCRIBE_TAG_COUNTS,
   MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
@@ -51,8 +50,8 @@ const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
 
 /**
  * Space-filtered `terms` counts on `type` / `tags`; each skipped unless an aggregatable keyword.
- * Shard failures error out rather than return undercounts. A 403 (caller lacks `read` on the
- * backing indices) yields no counts instead of failing the whole describe.
+ * Shard failures error out rather than return undercounts. A caller without index `read` is turned
+ * away by the read service before reaching here.
  */
 export const describeAiIndexAggregations = async ({
   esClient,
@@ -66,52 +65,45 @@ export const describeAiIndexAggregations = async ({
     return NO_COUNTS;
   }
 
-  try {
-    const response = await esClient.search<never, DescribeAggregations>({
-      index: target,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      allow_partial_search_results: false,
-      size: 0,
-      track_total_hits: false,
-      query: buildAiIndexSpaceFilter(spaceId),
-      aggs: {
-        ...(hasType && {
-          types: {
-            terms: {
-              field: KI_TYPE_FIELD,
-              size: MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
-              order: [{ _count: 'desc' }, { _key: 'asc' }],
-            },
+  const response = await esClient.search<never, DescribeAggregations>({
+    index: target,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    allow_partial_search_results: false,
+    size: 0,
+    track_total_hits: false,
+    query: buildAiIndexSpaceFilter(spaceId),
+    aggs: {
+      ...(hasType && {
+        types: {
+          terms: {
+            field: KI_TYPE_FIELD,
+            size: MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
+            order: [{ _count: 'desc' }, { _key: 'asc' }],
           },
-        }),
-        ...(hasTags && {
-          tags: {
-            terms: {
-              field: KI_TAGS_FIELD,
-              size: MAX_AI_INDEX_DESCRIBE_TAG_COUNTS,
-              order: [{ _count: 'desc' }, { _key: 'asc' }],
-            },
+        },
+      }),
+      ...(hasTags && {
+        tags: {
+          terms: {
+            field: KI_TAGS_FIELD,
+            size: MAX_AI_INDEX_DESCRIBE_TAG_COUNTS,
+            order: [{ _count: 'desc' }, { _key: 'asc' }],
           },
-        }),
-      },
-    });
+        },
+      }),
+    },
+  });
 
-    const { types, tags } = response.aggregations ?? {};
-    return {
-      kiTypeCounts: (types?.buckets ?? []).map(({ key, doc_count }) => ({
-        type: key,
-        count: doc_count,
-      })),
-      tagCounts: (tags?.buckets ?? []).map(({ key, doc_count }) => ({
-        tag: key,
-        count: doc_count,
-      })),
-    };
-  } catch (error) {
-    if (isResponseError(error) && error.statusCode === 403) {
-      return NO_COUNTS;
-    }
-    throw error;
-  }
+  const { types, tags } = response.aggregations ?? {};
+  return {
+    kiTypeCounts: (types?.buckets ?? []).map(({ key, doc_count }) => ({
+      type: key,
+      count: doc_count,
+    })),
+    tagCounts: (tags?.buckets ?? []).map(({ key, doc_count }) => ({
+      tag: key,
+      count: doc_count,
+    })),
+  };
 };

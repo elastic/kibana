@@ -92,6 +92,32 @@ describe('createSLOParamsSchema', () => {
     }
   });
 
+  it('accepts long name, description, query, index and tags, like the io-ts schema', () => {
+    const kqlIndicator = allWireIndicators.find(({ type }) => type === 'sli.kql.custom');
+    const result = decode(createSLOParamsSchema, {
+      body: {
+        ...minimalCreateBody,
+        name: 'n'.repeat(2000),
+        description: 'd'.repeat(20000),
+        indicator: {
+          ...kqlIndicator,
+          params: {
+            ...kqlIndicator?.params,
+            index: 'i'.repeat(2000),
+            filter: 'f'.repeat(10000),
+          },
+        },
+        tags: Array.from({ length: 1001 }, (_, i) => `tag-${i}`),
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value.body.name).toHaveLength(2000);
+      expect(result.value.body.description).toHaveLength(20000);
+      expect(result.value.body.tags).toHaveLength(1001);
+    }
+  });
+
   it.each(['name', 'description', 'indicator', 'timeWindow', 'budgetingMethod', 'objective'])(
     'rejects a payload missing %s',
     (field) => {
@@ -147,6 +173,14 @@ describe('updateSLOParamsSchema', () => {
     }
   });
 
+  it('accepts a long name and description', () => {
+    const result = decode(updateSLOParamsSchema, {
+      path: { id: VALID_ID },
+      body: { name: 'n'.repeat(2000), description: 'd'.repeat(20000) },
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('rejects an invalid path id', () => {
     expect(decode(updateSLOParamsSchema, { path: { id: 'short' }, body: {} }).success).toBe(false);
   });
@@ -172,6 +206,15 @@ describe('getSLOParamsSchema', () => {
     if (result.success) {
       expect(result.value.query?.instanceId).toBe('*');
       expect(result.value.query?.remoteName).toBe('my-remote');
+    }
+  });
+
+  it('accepts a long instanceId built from several groupings', () => {
+    const instanceId = Array.from({ length: 10 }, () => 'v'.repeat(200)).join(',');
+    const result = decode(getSLOParamsSchema, { path: { id: VALID_ID }, query: { instanceId } });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value.query?.instanceId).toBe(instanceId);
     }
   });
 
@@ -233,6 +276,22 @@ describe('findSLOParamsSchema', () => {
 
   it.each(['not_an_array', 42, [], [42, 'ok']])('rejects invalid searchAfter %p', (searchAfter) => {
     expect(decode(findSLOParamsSchema, { query: { searchAfter } }).success).toBe(false);
+  });
+
+  it('accepts long kqlQuery and filters values', () => {
+    const kqlQuery = `slo.id:(${Array.from({ length: 1000 }, (_, i) => `slo-${i}`).join(' or ')})`;
+    const filters = JSON.stringify({
+      filter: [{ terms: { 'slo.id': Array.from({ length: 1000 }, (_, i) => `slo-${i}`) } }],
+    });
+    expect(kqlQuery.length).toBeGreaterThan(8192);
+    expect(filters.length).toBeGreaterThan(8192);
+
+    const result = decode(findSLOParamsSchema, { query: { kqlQuery, filters } });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value.query?.kqlQuery).toBe(kqlQuery);
+      expect(result.value.query?.filters).toBe(filters);
+    }
   });
 
   it('accepts every documented sortBy value', () => {

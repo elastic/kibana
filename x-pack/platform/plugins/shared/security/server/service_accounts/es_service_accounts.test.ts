@@ -17,13 +17,13 @@ import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { CheckPrivileges, CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
 import type { ServiceAccountCredentialStore } from './credentials';
-import { EsServiceAccounts } from './es_service_accounts';
-import { licenseMock } from '../../common/licensing/index.mock';
 import {
-  ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
-  SERVICE_ACCOUNT_MAX_ROLES,
-  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
-} from '../../common/service_accounts';
+  ES_SERVICE_ACCOUNT_MAX_ROLES,
+  ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
+} from './es_role_limits';
+import { EsServiceAccounts } from './es_service_accounts';
+import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
+import { licenseMock } from '../../common/licensing/index.mock';
 import { securityTelemetry } from '../otel/instrumentation';
 
 jest.mock('../otel/instrumentation', () => ({
@@ -71,7 +71,13 @@ const accountEntry = (overrides = {}) => ({
 });
 
 describe('EsServiceAccounts', () => {
-  const createParams = { name: 'nightshift-relay' };
+  const createParams = { name: 'nightshift-relay', roles: ['viewer', 'editor'] };
+
+  const createdAccount = {
+    id: 'kibana/nightshift-relay',
+    name: 'nightshift-relay',
+    roles: ['viewer', 'editor'],
+  };
 
   let serviceAccounts: EsServiceAccounts;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
@@ -117,6 +123,7 @@ describe('EsServiceAccounts', () => {
     getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
 
     serviceAccounts = new EsServiceAccounts({
+      requestLifetimeMs: 600_000,
       logger,
       license,
       clusterClient,
@@ -132,17 +139,14 @@ describe('EsServiceAccounts', () => {
     it('creates the account, mints its token and stores the credential', async () => {
       mockHappyPath();
 
-      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
-        id: 'kibana/nightshift-relay',
-        name: 'nightshift-relay',
-      });
+      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual(createdAccount);
 
       const calls = esClient.asCurrentUser.transport.request.mock.calls;
       expect(calls[0][0]).toEqual(READ_ACCOUNT);
       expect(calls[1][0]).toEqual({
         method: 'PUT',
         path: ACCOUNT_PATH,
-        body: { roles: ['superuser'] },
+        body: { roles: ['viewer', 'editor'] },
         querystring: { refresh: 'wait_for' },
       });
       expect(calls[2][0]).toEqual({ method: 'POST', path: TOKEN_PATH });
@@ -171,93 +175,113 @@ describe('EsServiceAccounts', () => {
 
       const created = await serviceAccounts.create(request, createParams);
 
-      expect(Object.keys(created).sort()).toEqual(['id', 'name']);
+      expect(Object.keys(created).sort()).toEqual(['id', 'name', 'roles']);
       expect(JSON.stringify(created)).not.toContain('AAEAAW');
     });
 
-    it('assigns explicitly requested roles instead of the creator’s', async () => {
+    // The creator's own roles never reach the account: Elasticsearch reports none at all for an
+    // API key, and copying a user's would recreate the borrowed identity the feature replaces.
+    it("assigns the requested roles regardless of the creator's", async () => {
+      getCurrentUser.mockReturnValue(
+        mockAuthenticatedUser({
+          authentication_type: 'api_key',
+          roles: [],
+          api_key: { id: 'key-id', name: 'key-name', managed_by: 'elasticsearch' },
+        })
+      );
       mockHappyPath();
 
-      await serviceAccounts.create(request, { ...createParams, roles: ['viewer', 'editor'] });
+      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual(createdAccount);
+
+      expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ body: { roles: ['viewer', 'editor'] } })
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('drops duplicate roles, keeping first occurrences in order', async () => {
+      mockHappyPath();
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles: ['viewer', 'editor', 'viewer'] })
+      ).resolves.toEqual(createdAccount);
 
       expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
         expect.objectContaining({ body: { roles: ['viewer', 'editor'] } })
       );
     });
 
-    it('falls back to `superuser` and warns when roles cannot be derived', async () => {
-      request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'ApiKey a2V5LWlkOnNlY3JldA==' },
-      });
-      // Elasticsearch reports no roles at all for an API key, and the key's `limited_by` names
-      // its owner's roles regardless of the key's own restriction, so nothing can be inferred.
-      getCurrentUser.mockReturnValue(
-        mockAuthenticatedUser({
-          authentication_type: 'api_key',
-          roles: [],
-          api_key: { id: 'key-id', name: 'key-name', managed_by: 'elasticsearch' },
-        })
-      );
+    // Elasticsearch role names are case-sensitive, so these are two different roles.
+    it('keeps roles that differ only in case', async () => {
       mockHappyPath();
+      const roles = ['Viewer', 'viewer'];
 
-      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
-        id: 'kibana/nightshift-relay',
-        name: 'nightshift-relay',
+      await expect(serviceAccounts.create(request, { ...createParams, roles })).resolves.toEqual({
+        ...createdAccount,
+        roles,
       });
 
       expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
-        expect.objectContaining({ body: { roles: ['superuser'] } })
+        expect.objectContaining({ body: { roles } })
       );
-      expect(clusterClient.asScoped).toHaveBeenCalledWith(request);
-      // The widest possible grant must never be silent.
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('was granted [superuser]'));
     });
 
-    it('does not warn when the roles came from the caller', async () => {
+    // The two backends cap roles differently, so UIAM's lower cap must not leak into this one.
+    it(`accepts more roles than UIAM allows, up to ${ES_SERVICE_ACCOUNT_MAX_ROLES}`, async () => {
       mockHappyPath();
+      const roles = Array.from({ length: ES_SERVICE_ACCOUNT_MAX_ROLES }, (_, i) => `role-${i}`);
+      expect(roles.length).toBeGreaterThan(UIAM_SERVICE_ACCOUNT_MAX_ROLES);
 
-      await serviceAccounts.create(request, { ...createParams, roles: ['viewer'] });
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).resolves.toMatchObject({ roles });
 
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('does not warn when the roles were copied from the creator', async () => {
-      mockHappyPath();
-
-      await serviceAccounts.create(request, createParams);
-
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    // Elasticsearch caps no role count of its own, so a creator can hold more roles than Kibana
-    // is willing to read back. Copying them would create an account `readAccount` then refuses.
-    it('rejects a creator whose roles fall outside what an explicit `roles` may hold', async () => {
-      getCurrentUser.mockReturnValue(
-        mockAuthenticatedUser({
-          roles: new Array(SERVICE_ACCOUNT_MAX_ROLES + 1).fill('viewer'),
-        })
+      expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ body: { roles } })
       );
+    });
 
-      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+    it(`rejects more than ${ES_SERVICE_ACCOUNT_MAX_ROLES} distinct roles with a 400 before writing anything`, async () => {
+      const roles = Array.from({ length: ES_SERVICE_ACCOUNT_MAX_ROLES + 1 }, (_, i) => `role-${i}`);
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: expect.stringContaining('Specify `roles` explicitly'),
+        message: expect.stringContaining('`roles`'),
       });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    it('accepts an API-key caller that names the roles explicitly', async () => {
-      getCurrentUser.mockReturnValue(
-        mockAuthenticatedUser({
-          authentication_type: 'api_key',
-          roles: [],
-          api_key: { id: 'key-id', name: 'key-name', managed_by: 'elasticsearch' },
-        })
-      );
+    it(`accepts a role name of ${ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH} characters, the most Elasticsearch allows`, async () => {
       mockHappyPath();
+      const roles = ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH)];
 
       await expect(
-        serviceAccounts.create(request, { ...createParams, roles: ['viewer'] })
-      ).resolves.toEqual({ id: 'kibana/nightshift-relay', name: 'nightshift-relay' });
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).resolves.toMatchObject({ roles });
+    });
+
+    it(`rejects a role name longer than ${ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH} characters with a 400 before writing anything`, async () => {
+      const roles = ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH + 1)];
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('`roles.0`'),
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it("rejects an omitted `roles` with a 400 rather than granting the creator's privileges", async () => {
+      await expect(
+        serviceAccounts.create(request, { name: 'nightshift-relay' } as never)
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('`roles`'),
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
     it('rejects with a 409 when the name is taken, without writing anything', async () => {
@@ -271,8 +295,45 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.set).not.toHaveBeenCalled();
     });
 
-    // A third account type or a renamed field would otherwise read as "the name is free", and
-    // the PUT that follows is a full replacement.
+    // Accounts can be written to this namespace without Kibana, so an account as wide as
+    // Elasticsearch allows still has to read as "taken".
+    it.each([
+      [
+        'as many roles as Elasticsearch allows',
+        { roles: new Array(ES_SERVICE_ACCOUNT_MAX_ROLES).fill('viewer') },
+      ],
+      [
+        'as long a role name as Elasticsearch allows',
+        { roles: ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH)] },
+      ],
+    ])('rejects with a 409 when the taken account holds %s', async (_, entry) => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry(entry));
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      [
+        'more roles than Elasticsearch itself allows',
+        { roles: new Array(ES_SERVICE_ACCOUNT_MAX_ROLES + 1).fill('viewer') },
+      ],
+      [
+        'a longer role name than Elasticsearch itself allows',
+        { roles: ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH + 1)] },
+      ],
+    ])('refuses an account with %s', async (_, entry) => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry(entry));
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    // A third account type, a renamed field, or a role list outside Elasticsearch's own limits
+    // would otherwise read as "the name is free", and the PUT that follows is a full replacement.
     it('refuses rather than overwriting an account it cannot read', async () => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         'kibana/nightshift-relay': { type: 'user_managed', roles: 'superuser', enabled: true },
@@ -297,10 +358,7 @@ describe('EsServiceAccounts', () => {
         .mockResolvedValueOnce({ created: true })
         .mockResolvedValueOnce({ created: true, token: { value: 'token' } });
 
-      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
-        id: 'kibana/nightshift-relay',
-        name: 'nightshift-relay',
-      });
+      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual(createdAccount);
     });
 
     it('rejects with a 403 when security features are disabled', async () => {
@@ -314,6 +372,7 @@ describe('EsServiceAccounts', () => {
 
     it('rejects with a 424 when saved object encryption is unavailable', async () => {
       serviceAccounts = new EsServiceAccounts({
+        requestLifetimeMs: 600_000,
         logger,
         license,
         clusterClient,
@@ -341,35 +400,18 @@ describe('EsServiceAccounts', () => {
 
     it('rejects a name that could escape the Elasticsearch path', async () => {
       await expect(
-        serviceAccounts.create(request, { name: '../_cluster/settings' })
+        serviceAccounts.create(request, { ...createParams, name: '../_cluster/settings' })
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    // An explicit empty list means "no roles", which is not the same question as "work them out
-    // for me". Answering it with the widest possible grant would be the worst reading of it.
-    it('rejects an empty `roles` rather than falling back to `superuser`', async () => {
+    it('rejects an empty `roles` rather than writing an account with none', async () => {
       await expect(
         serviceAccounts.create(request, { ...createParams, roles: [] })
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
 
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('refuses a token longer than Elasticsearch should ever report, and rolls back', async () => {
-      esClient.asCurrentUser.transport.request
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({ created: true })
-        .mockResolvedValueOnce({
-          token: { value: 'a'.repeat(ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH + 1) },
-        });
-
-      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
-
-      expect(credentialStore.set).not.toHaveBeenCalled();
-      const calls = esClient.asCurrentUser.transport.request.mock.calls;
-      expect(calls[3][0]).toEqual({ method: 'DELETE', path: TOKEN_PATH });
     });
 
     it('rolls back the token and the account when the credential cannot be stored', async () => {
@@ -491,10 +533,7 @@ describe('EsServiceAccounts', () => {
       );
       getCurrentUserProfileId.mockRejectedValue(new Error('profile index unavailable'));
 
-      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual({
-        id: 'kibana/nightshift-relay',
-        name: 'nightshift-relay',
-      });
+      await expect(serviceAccounts.create(request, createParams)).resolves.toEqual(createdAccount);
 
       // Recorded without the profile id rather than not recorded at all.
       expect(credentialStore.set).toHaveBeenCalledWith(
@@ -946,12 +985,11 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    // Elasticsearch caps neither the role count nor the role name length, so an account created
-    // outside Kibana can sit outside the bounds Kibana puts on its own creates. Such an account
-    // lists fine, and must open fine too.
-    it('reads an account whose roles fall outside the bounds of a Kibana create', async () => {
-      const roles = Array.from({ length: SERVICE_ACCOUNT_MAX_ROLES + 1 }, (_, i) => `role-${i}`);
-      roles.push('a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1));
+    // An account created outside Kibana is still held to Elasticsearch's own limits, so one at
+    // those limits lists fine, and must open fine too.
+    it('reads an account with as many roles, and as long a role name, as Elasticsearch allows', async () => {
+      const roles = Array.from({ length: ES_SERVICE_ACCOUNT_MAX_ROLES - 1 }, (_, i) => `role-${i}`);
+      roles.push('a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH));
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry({ roles }));
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
@@ -986,27 +1024,6 @@ describe('EsServiceAccounts', () => {
         output: { statusCode: 403 },
       });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('#createFakeRequest', () => {
-    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(serviceAccounts.createFakeRequest()).rejects.toMatchObject({
-        message: 'Creating requests for Elasticsearch service accounts is not yet implemented',
-        output: { statusCode: 501 },
-      });
-    });
-  });
-
-  describe('#reauthenticateFakeRequest', () => {
-    it('resolves to null so unrelated fake requests stay on the not-handled path', async () => {
-      await expect(serviceAccounts.reauthenticateFakeRequest()).resolves.toBeNull();
-    });
-  });
-
-  describe('#releaseFakeRequest', () => {
-    it('is a no-op since this backend never mints requests', () => {
-      expect(() => serviceAccounts.releaseFakeRequest()).not.toThrow();
     });
   });
 });

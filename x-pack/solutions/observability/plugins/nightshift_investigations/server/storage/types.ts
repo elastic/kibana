@@ -110,4 +110,16 @@ export interface InvestigationSweepRepository {
     patch: InvestigationPatch;
     version?: string;
   }): Promise<void>;
+  deleteAllAcrossSpaces(): Promise<DeleteAllInvestigationsResult>;
+}
+
+export interface DeleteAllInvestigationsFailure {
+  id: string;
+  spaceId: string;
+  error: string;
+}
+
+export interface DeleteAllInvestigationsResult {
+  deleted: number;
+  failures: DeleteAllInvestigationsFailure[];
 }

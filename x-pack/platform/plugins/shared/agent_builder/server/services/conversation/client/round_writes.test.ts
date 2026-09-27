@@ -38,7 +38,10 @@ describe('reconcileEvents', () => {
 
   /** A stored `exec_0` that failed: user_message, execution_started, execution_failed. */
   const failedBlock = (): TimelineEvent[] => [
-    userMessageEvent({ id: 'r1', input: { message: 'hi' }, started_at: T0 }, conversation),
+    userMessageEvent(
+      { id: 'r1::user_message', input: { message: 'hi' }, createdAt: T0 },
+      conversation
+    ),
     executionStartedEvent({ id: 'r1', started_at: T0 }, conversation),
     {
       id: 'r1::execution_failed',
@@ -68,7 +71,10 @@ describe('reconcileEvents', () => {
 
   it('preserves an in-progress round block (receipt-time user_message only)', () => {
     const stored = [
-      userMessageEvent({ id: 'r1', input: { message: 'hi' }, started_at: T0 }, conversation),
+      userMessageEvent(
+        { id: 'r1::user_message', input: { message: 'hi' }, createdAt: T0 },
+        conversation
+      ),
     ];
     const result = reconcile({ ...conversation, rounds: [], events: stored });
     expect(ids(result)).toEqual(['r1::user_message']);

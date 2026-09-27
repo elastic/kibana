@@ -25,4 +25,8 @@ export type ApprovalProposal = Pick<
   | 'expiresAt'
   | 'actionWorkflowId'
   | 'action'
+  | 'decision'
+  | 'decidedBy'
+  | 'decidedAt'
+  | 'rationale'
 >;

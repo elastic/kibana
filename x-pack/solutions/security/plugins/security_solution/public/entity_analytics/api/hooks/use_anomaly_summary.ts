@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   AnomalySummaryRequestBody,
   GetAnomalySummaryRequestBodyInput,
@@ -19,6 +20,11 @@ interface UseAnomalySummaryParams {
   entityType: string;
   body?: GetAnomalySummaryRequestBodyInput;
   enabled?: boolean;
+  /**
+   * Optional Kibana execution context forwarded to the anomaly-summary fetch so slow logs and
+   * APM traces can attribute the query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 const DEFAULT_BODY: Required<Pick<AnomalySummaryRequestBody, 'page' | 'page_size' | 'sort'>> = {
@@ -32,6 +38,7 @@ export const useAnomalySummary = ({
   entityType,
   body,
   enabled = true,
+  executionContext,
 }: UseAnomalySummaryParams) => {
   const { fetchAnomalySummary } = useEntityAnalyticsRoutes();
 
@@ -39,7 +46,14 @@ export const useAnomalySummary = ({
 
   return useQuery(
     [...ANOMALY_SUMMARY_QUERY_KEY, entityType, entityId, resolvedBody],
-    ({ signal }) => fetchAnomalySummary({ entityType, entityId, body: resolvedBody, signal }),
+    ({ signal }) =>
+      fetchAnomalySummary({
+        entityType,
+        entityId,
+        body: resolvedBody,
+        signal,
+        context: executionContext,
+      }),
     {
       enabled: enabled && !!entityId,
       keepPreviousData: true,

@@ -307,6 +307,8 @@ export interface WorkflowExecutionDto {
   /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
+  /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
+  stepExecutionIds?: string[];
   duration: number | null;
   executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'

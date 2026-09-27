@@ -6,6 +6,7 @@
  */
 
 import {
+  ESQL_QUERY_ROW_LIMIT,
   ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES,
   chunkInClauseLiterals,
   getDispatchableAlertEventsQuery,
@@ -14,6 +15,10 @@ import {
   getEpisodeDataQueries,
 } from './queries';
 import { createAlertEpisode } from './fixtures/test_utils';
+
+// Without an explicit LIMIT, ES|QL truncates results to 1 000 rows.
+const endsWithRowLimit = (query: string) =>
+  query.trimEnd().endsWith(`| LIMIT ${ESQL_QUERY_ROW_LIMIT}`);
 
 describe('getDispatchableAlertEventsQuery', () => {
   const SCAN_WINDOW = {
@@ -142,7 +147,7 @@ describe('getDispatchableAlertEventsQuery', () => {
     const query = queryOf();
 
     expect(query).toContain('SORT last_event_timestamp ASC');
-    expect(query).toContain('LIMIT 10000');
+    expect(endsWithRowLimit(query)).toBe(true);
   });
 });
 
@@ -236,6 +241,16 @@ describe('getEpisodeDataQueries', () => {
     expect(requests[0].query).toContain('KEEP episode_id, data_json');
   });
 
+  it('ends every chunk with an explicit row limit', () => {
+    const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
+    const requests = getEpisodeDataQueries(longIds, { gte: GTE, lte: LTE });
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
+  });
+
   it('splits into multiple requests when episode ids exceed the size budget', () => {
     // 36-byte UUIDs + 6 bytes overhead = 42 bytes each; ~14_285 per 600 KB chunk.
     const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
@@ -249,6 +264,15 @@ describe('getEpisodeDataQueries', () => {
     const concatenated = requests.map((r) => r.query).join('\n');
     expect(concatenated).toContain(longIds[0]);
     expect(concatenated).toContain(longIds[longIds.length - 1]);
+  });
+
+  it('never puts more episode ids in a chunk than the row limit returns', () => {
+    const ids = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) => `ep-${i}`);
+
+    const requests = getEpisodeDataQueries(ids, { gte: GTE, lte: LTE });
+
+    expect(requests).toHaveLength(2);
+    expect(requests[1].query).toContain(`episode.id IN ("ep-${ESQL_QUERY_ROW_LIMIT}")`);
   });
 
   it('applies the same gte/lte bounds on every chunk', () => {
@@ -332,6 +356,24 @@ describe('chunkInClauseLiterals', () => {
     }
 
     expect(seen.size).toBe(literals.length);
+  });
+
+  it('caps each chunk at the row limit even when the byte budget would fit more', () => {
+    // 36-byte UUID-sized literals: the 600 KB budget alone fits ~14 285 per chunk.
+    const literals = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 5 }, (_, i) =>
+      `${i}`.padStart(36, '0')
+    );
+
+    const chunks = chunkInClauseLiterals(literals);
+
+    expect(chunks.map((chunk) => chunk.length)).toEqual([ESQL_QUERY_ROW_LIMIT, 5]);
+    expect(chunks.flat()).toEqual(literals);
+  });
+
+  it('honors a custom max literal count', () => {
+    const chunks = chunkInClauseLiterals(['a', 'b', 'c', 'd', 'e'], undefined, 2);
+
+    expect(chunks).toEqual([['a', 'b'], ['c', 'd'], ['e']]);
   });
 
   it('honors a custom budget smaller than the default', () => {
@@ -572,6 +614,20 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('WHERE subject IS NOT NULL');
   });
 
+  it('ends every chunk with an explicit row limit', () => {
+    const longSegment = 'l'.repeat(5_000);
+    const episodes = Array.from({ length: 200 }, (_, i) =>
+      createAlertEpisode({ rule_id: `${longSegment}-r${i}`, group_hash: `${longSegment}-g${i}` })
+    );
+
+    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
+  });
+
   it('uses episodeSubject for pair key construction (internal episode uses rule_id)', () => {
     const episodes = [
       createAlertEpisode({ source: 'internal', rule_id: 'rule-abc', group_hash: 'hash-abc' }),
@@ -748,6 +804,30 @@ describe('getLastNotifiedTimestampsQueries', () => {
     const requests = getLastNotifiedTimestampsQueries(['group-1']);
 
     expect(requests[0].query).toContain('BY action_group_id');
+  });
+
+  it('never puts more action group ids in a chunk than the row limit returns', () => {
+    // 40-char object-hash ids fit ~13 000 per chunk by bytes alone.
+    const ids = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
+      `${i}`.padStart(40, '0')
+    );
+
+    const requests = getLastNotifiedTimestampsQueries(ids);
+
+    expect(requests).toHaveLength(2);
+    expect(requests[1].query).toContain(`action_group_id IN ("${ids[ESQL_QUERY_ROW_LIMIT]}")`);
+  });
+
+  it('ends every chunk with an explicit row limit', () => {
+    const longSegment = 'z'.repeat(10_000);
+    const ids = Array.from({ length: 200 }, (_, i) => `${longSegment}-${i}`);
+
+    const requests = getLastNotifiedTimestampsQueries(ids);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
   });
 
   it('splits into multiple requests when ids exceed the size budget', () => {

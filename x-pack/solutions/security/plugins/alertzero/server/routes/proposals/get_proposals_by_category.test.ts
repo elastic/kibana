@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
+import { createRouteContextMock } from '../route_context.mock';
 import { registerGetProposalsByCategoryRoute } from './get_proposals_by_category';
 
 const makeDeps = (conversationProposalsService: unknown) => {
@@ -40,13 +41,31 @@ const makeDeps = (conversationProposalsService: unknown) => {
 };
 
 describe('registerGetProposalsByCategoryRoute', () => {
+  it('returns 404 when the per-space setting is off', async () => {
+    const listByCategory = jest.fn();
+    const { handler } = makeDeps({ listByCategory });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock({ settingEnabled: false }),
+      httpServerMock.createKibanaRequest({
+        params: { category: 'respond' },
+        query: { size: '10', from: '0' },
+      }),
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(listByCategory).not.toHaveBeenCalled();
+  });
+
   it('delegates to listByCategory with the correct category, size, from, and spaceId', async () => {
     const listByCategory = jest.fn().mockResolvedValue({ proposals: [], total: 0 });
     const { handler } = makeDeps({ listByCategory });
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         path: '/internal/alertzero/proposals/category/respond',
         params: { category: 'respond' },
@@ -74,7 +93,7 @@ describe('registerGetProposalsByCategoryRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { category: 'respond' },
         query: { size: 0, from: 0 },
@@ -98,7 +117,7 @@ describe('registerGetProposalsByCategoryRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { category: 'respond' },
         query: { size: '10', from: '0' },

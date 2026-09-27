@@ -119,7 +119,7 @@
     ],
     "esqlBrowser": "src/platform/packages/shared/esql/kbn-esql-browser",
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
-    "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",
+    "esqlUtils": "src/platform/packages/shared/esql/kbn-esql-utils",
     "reporting": "src/platform/packages/private/kbn-reporting",
     "savedObjects": "src/platform/plugins/shared/saved_objects",
     "savedObjectsFinder": "src/platform/plugins/shared/saved_objects_finder",
