@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import type { RuleSearchResult } from '../../types';
 
 export const getMockListModulesResponse = () => [
@@ -401,12 +401,17 @@ export const getMockRuleSearchResponse = (
   } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
 
 export const getMockThreatMatchRuleSO = ({
+  ruleId = 'a6261241-b236-4f5b-ac09-deab86330b3a',
   isElastic = false,
   isCustomized = false,
+  hasRuleSource = true,
   hasNegateThreatMapping = false,
 }: {
+  ruleId?: string;
   isElastic?: boolean;
   isCustomized?: boolean;
+  /** Legacy rules that have never been rewritten do not have `ruleSource` persisted */
+  hasRuleSource?: boolean;
   hasNegateThreatMapping?: boolean;
 } = {}): RuleSearchResult =>
   ({
@@ -423,17 +428,9 @@ export const getMockThreatMatchRuleSO = ({
         description: 'mock',
         falsePositives: [],
         from: 'now-5001h',
-        ruleId: 'a6261241-b236-4f5b-ac09-deab86330b3a',
+        ruleId,
         immutable: isElastic,
-        ruleSource: isCustomized
-          ? {
-              type: 'external',
-              isCustomized,
-              customizedFields: isCustomized
-                ? [{ fieldName: 'tags' }, { fieldName: 'name' }, { fieldName: 'description' }]
-                : [],
-            }
-          : { type: 'internal' },
+        ruleSource: getRuleSource({ isElastic, isCustomized, hasRuleSource }),
         license: '',
         outputIndex: '',
         meta: {
@@ -532,3 +529,49 @@ export const getMockThreatMatchRuleSearchResponse = (
     total: 1,
     saved_objects: rulesSO,
   } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
+
+type PrebuiltRuleAssetSearchResponse = Awaited<ReturnType<SavedObjectsClientContract['search']>>;
+
+export const getMockPrebuiltRuleAssetSearchResponse = (
+  versions: Array<{ rule_id: string; version: number }>
+): PrebuiltRuleAssetSearchResponse =>
+  ({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: {
+      total: { value: versions.length, relation: 'eq' },
+      max_score: null,
+      hits: versions.map((version) => ({
+        _index: '.kibana',
+        _id: `security-rule:${version.rule_id}_${version.version}`,
+        _source: { type: 'security-rule', 'security-rule': version },
+      })),
+    },
+  } as unknown as PrebuiltRuleAssetSearchResponse);
+
+const getRuleSource = ({
+  isElastic,
+  isCustomized,
+  hasRuleSource,
+}: {
+  isElastic: boolean;
+  isCustomized: boolean;
+  hasRuleSource: boolean;
+}) => {
+  if (!hasRuleSource) {
+    return undefined;
+  }
+
+  if (!isElastic) {
+    return { type: 'internal' };
+  }
+
+  return {
+    type: 'external',
+    isCustomized,
+    customizedFields: isCustomized
+      ? [{ fieldName: 'tags' }, { fieldName: 'name' }, { fieldName: 'description' }]
+      : [],
+  };
+};
