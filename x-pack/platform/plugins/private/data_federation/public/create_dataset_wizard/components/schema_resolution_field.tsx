@@ -103,7 +103,17 @@ export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: 
   );
 
   return (
-    <div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+    <div
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+        // Satisfy a11y linting for non-interactive wrappers with click handlers.
+        // Also prevent Enter/Space key events from bubbling up to the parent card.
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.stopPropagation();
+        }
+      }}
+    >
       <EuiSpacer size="m" />
       <EuiButtonEmpty
         size="s"
