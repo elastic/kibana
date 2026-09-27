@@ -65,22 +65,25 @@ export function registerExternalResumeFormRoute(deps: RouteDependencies) {
           },
         },
       },
-      withAvailabilityCheck(async (context, request, response) => {
-        try {
-          const { executionId, stepId } = request.params;
-          const { token } = request.query;
-          const body = await api.getExternalResumeFormPage({
-            token,
-            executionId,
-            stepId,
-            spaceId: spaces.getSpaceId(request),
-            basePath: request.basePath,
-          });
+      withAvailabilityCheck(
+        async (context, request, response) => {
+          try {
+            const { executionId, stepId } = request.params;
+            const { token } = request.query;
+            const body = await api.getExternalResumeFormPage({
+              token,
+              executionId,
+              stepId,
+              spaceId: spaces.getSpaceId(request),
+              basePath: request.basePath,
+            });
 
-          return htmlOk(response, body);
-        } catch (error) {
-          return handleExternalResumeError(response, error, logger);
-        }
-      })
+            return htmlOk(response, body);
+          } catch (error) {
+            return handleExternalResumeError(response, error, logger);
+          }
+        },
+        { bootstrapExecutionDataViews: false }
+      )
     );
 }

@@ -41,7 +41,10 @@ describe('createIndexWithMappings', () => {
     expect(esClient.indices.create).toHaveBeenCalledWith({
       index: '.test-index',
       mappings: { properties: {} },
-      settings: { auto_expand_replicas: '0-1' },
+      settings: {
+        auto_expand_replicas: '0-1',
+        index: { hidden: true },
+      },
     });
   });
 
@@ -128,7 +131,7 @@ describe('createOrUpdateIndex', () => {
       logger: logger as any,
     });
 
-    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+    expect(esClient.indices.putSettings).toHaveBeenNthCalledWith(1, {
       index: '.test-index',
       settings: { auto_expand_replicas: '0-1' },
     });
@@ -136,13 +139,19 @@ describe('createOrUpdateIndex', () => {
       index: '.test-index',
       properties: { id: { type: 'keyword' } },
     });
+    expect(esClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
+      index: '.test-index',
+      settings: { index: { hidden: true } },
+    });
     expect(esClient.indices.create).not.toHaveBeenCalled();
   });
 
-  it('continues if putSettings fails', async () => {
+  it('continues if the replica settings update fails', async () => {
     const esClient = createEsClientMock();
     esClient.indices.exists.mockResolvedValue(true);
-    esClient.indices.putSettings.mockRejectedValue(new Error('settings rejected'));
+    esClient.indices.putSettings
+      .mockRejectedValueOnce(new Error('replica settings rejected'))
+      .mockResolvedValueOnce({});
     esClient.indices.putMapping.mockResolvedValue({});
     const logger = createLoggerMock();
 
@@ -154,11 +163,11 @@ describe('createOrUpdateIndex', () => {
         logger: logger as any,
       })
     ).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('settings rejected'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('replica settings rejected'));
     expect(esClient.indices.putMapping).toHaveBeenCalled();
   });
 
-  it('continues if putMapping fails', async () => {
+  it('rethrows if putMapping fails', async () => {
     const esClient = createEsClientMock();
     esClient.indices.exists.mockResolvedValue(true);
     esClient.indices.putSettings.mockResolvedValue({});
@@ -172,8 +181,27 @@ describe('createOrUpdateIndex', () => {
         mappings: { properties: {} },
         logger: logger as any,
       })
-    ).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('mapping conflict'));
+    ).rejects.toThrow('mapping conflict');
+    expect(esClient.indices.putSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it('rethrows if the hidden setting update fails', async () => {
+    const esClient = createEsClientMock();
+    esClient.indices.exists.mockResolvedValue(true);
+    esClient.indices.putSettings
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(new Error('hidden setting rejected'));
+    esClient.indices.putMapping.mockResolvedValue({});
+    const logger = createLoggerMock();
+
+    await expect(
+      createOrUpdateIndex({
+        esClient: esClient as any,
+        indexName: '.test-index',
+        mappings: { properties: {} },
+        logger: logger as any,
+      })
+    ).rejects.toThrow('hidden setting rejected');
   });
 
   it('rethrows errors from index existence check', async () => {
