@@ -8,6 +8,7 @@
 import type { SpaceId } from '@kbn/core-spaces-common';
 
 import type { QueryPayload } from './get_query_payload';
+import type { DeduplicationQueryPlan } from './deduplication_query';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
@@ -35,6 +36,14 @@ export interface RulePipelineState {
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
+  /**
+   * Rule-event deduplication decision for this run, derived once from the
+   * breach query by `ExecuteRuleQueryStep`. `FilterDuplicateEventsStep` and
+   * `StoreAlertEventsStep` only assign deterministic ids when `eligible`;
+   * `mvExpandFields` are folded into those ids. Absent (e.g. before the
+   * query step ran) is treated as not eligible.
+   */
+  readonly deduplication?: Pick<DeduplicationQueryPlan, 'eligible' | 'mvExpandFields'>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
 }
@@ -116,10 +125,21 @@ export interface BulkIndexObservation {
  * reference the emitting step passed to the storage service, so recorders
  * correlate failures by identity.
  */
+/**
+ * Open bag of transport-level detail for a rejected document. `statusCode`
+ * is the one key the executor reads: Elasticsearch's per-item HTTP status,
+ * which `PersistedRuleEventsRecorder` uses to tell a deduplication conflict
+ * (409) from a genuine failure.
+ */
+export interface BulkIndexObservationErrorDetails {
+  readonly statusCode?: number;
+  readonly [key: string]: unknown;
+}
+
 export interface BulkIndexObservationError {
   readonly code: string;
   readonly message: string;
-  readonly details?: Readonly<Record<string, unknown>>;
+  readonly details?: BulkIndexObservationErrorDetails;
   readonly index: string;
   readonly document: Record<string, unknown>;
 }
