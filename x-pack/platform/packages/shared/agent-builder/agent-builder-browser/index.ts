@@ -57,7 +57,10 @@ export type {
 } from './events';
 export { WorkflowComboBox } from './workflow_combo_box';
 export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';
-export { ConversationInputShell } from './conversation_input_shell';
+export {
+  ConversationInputShell,
+  CONVERSATION_INPUT_SHELL_RADIUS,
+} from './conversation_input_shell';
 export type { ConversationInputShellProps } from './conversation_input_shell';
 export type {
   AgentBuilderPluginSetup,

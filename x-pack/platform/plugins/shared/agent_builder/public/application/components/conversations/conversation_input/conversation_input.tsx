@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiIcon, EuiText, euiCanAnimate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { ConversationInputShell, formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  CONVERSATION_INPUT_SHELL_RADIUS,
+  ConversationInputShell,
+  formatAgentBuilderErrorMessage,
+} from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
@@ -24,6 +29,7 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
+  useIsSharedConversation,
 } from '../../../hooks/use_conversation';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
@@ -37,23 +43,114 @@ const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.
   defaultMessage: 'Message input form',
 });
 
-const flexGrowZeroStyles = css`
+const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.postToTeam.label', {
+  defaultMessage: 'Leaving a post to the team',
+});
+
+const POST_TO_TEAM_HEADER_HEIGHT = 24;
+
+const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   flex-grow: 0;
+  width: 100%;
+  border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
+  ${euiCanAnimate} {
+    transition: background-color ${euiTheme.animation.fast} ease-out;
+  }
+`;
+
+const wrapperWithHeaderStyles = ({ euiTheme }: UseEuiTheme) => css`
+  background-color: ${euiTheme.colors.backgroundBaseDisabled};
+`;
+
+// The header stays mounted so it can slide back behind the input on the way out;
+// visibility is delayed on exit so it only leaves the accessibility tree once collapsed.
+const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  ${euiCanAnimate} {
+    transition: height ${euiTheme.animation.fast} ease-out,
+      visibility 0s linear ${euiTheme.animation.fast};
+  }
+`;
+
+const headerVisibleStyles = css`
+  height: ${POST_TO_TEAM_HEADER_HEIGHT}px;
+  visibility: visible;
+  ${euiCanAnimate} {
+    transition-delay: 0s;
+  }
+`;
+
+const headerContentStyles = ({ euiTheme }: UseEuiTheme) => css`
+  display: flex;
+  align-items: center;
+  gap: ${euiTheme.size.xs};
+  height: ${POST_TO_TEAM_HEADER_HEIGHT}px;
+  padding-inline: ${euiTheme.size.base};
 `;
 
 const InputContainer: React.FC<
-  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean }>
-> = ({ children, isDisabled, isCollapsed }) => (
-  <ConversationInputShell
-    isDisabled={isDisabled}
-    isCollapsed={isCollapsed}
-    css={flexGrowZeroStyles}
-    data-test-subj="agentBuilderConversationInputForm"
-    aria-label={containerAriaLabel}
-  >
-    {children}
-  </ConversationInputShell>
-);
+  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean; triggerMode: ChatTriggerMode }>
+> = ({ children, isDisabled, isCollapsed, triggerMode }) => {
+  const showHeader = triggerMode === ChatTriggerMode.Never;
+
+  return (
+    <div css={[wrapperStyles, showHeader && wrapperWithHeaderStyles]}>
+      <div
+        css={[headerStyles, showHeader && headerVisibleStyles]}
+        aria-hidden={!showHeader}
+        data-test-subj="agentBuilderConversationInputPostToTeamHeader"
+      >
+        <div css={headerContentStyles}>
+          <EuiIcon type="megaphone" size="s" aria-hidden={true} />
+          <EuiText size="xs">{postToTeamLabel}</EuiText>
+        </div>
+      </div>
+      <ConversationInputShell
+        isDisabled={isDisabled}
+        isCollapsed={isCollapsed}
+        data-test-subj="agentBuilderConversationInputForm"
+        aria-label={containerAriaLabel}
+      >
+        {children}
+      </ConversationInputShell>
+    </div>
+  );
+};
+
+/**
+ * The input stays mounted across conversations, so a trigger mode choice only applies to the
+ * conversation it was made in and is dropped once the selector stops being offered.
+ */
+const useTriggerMode = () => {
+  const conversationId = useConversationId();
+  const isSharedConversation = useIsSharedConversation();
+  const isExperimentalEnabled = useExperimentalFeatures();
+
+  const [choice, setChoice] = useState<{
+    conversationId?: string;
+    triggerMode: ChatTriggerMode;
+  }>();
+
+  const isSelectable = isSharedConversation && isExperimentalEnabled;
+
+  if (!isSelectable && choice) {
+    setChoice(undefined);
+  }
+
+  const setTriggerMode = useCallback(
+    (triggerMode: ChatTriggerMode) => setChoice({ conversationId, triggerMode }),
+    [conversationId]
+  );
+
+  const triggerMode =
+    isSelectable && choice && choice.conversationId === conversationId
+      ? choice.triggerMode
+      : ChatTriggerMode.Always;
+
+  return { triggerMode, setTriggerMode, isSelectable };
+};
 
 interface ConversationInputProps {
   onSubmit?: () => void;
@@ -122,8 +219,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
-  const isExperimentalEnabled = useExperimentalFeatures();
+  const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
@@ -249,7 +345,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   }
 
   return (
-    <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
+    <InputContainer
+      isDisabled={isInputDisabled}
+      isCollapsed={shouldCollapseInput}
+      triggerMode={triggerMode}
+    >
       {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
           <AttachmentPillsRow
@@ -280,7 +380,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
           isSubmitting={isCreatingConversation || isSendingUserMessage}
-          showTriggerModeToggle={!isNewConversation && isExperimentalEnabled}
+          showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
         />

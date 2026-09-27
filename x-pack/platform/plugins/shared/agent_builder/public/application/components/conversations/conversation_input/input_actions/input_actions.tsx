@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
+import { TriggerModeSelector } from './trigger_mode_selector';
 import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 
 const connectorFlexItemStyles = css`
@@ -19,15 +19,11 @@ const connectorFlexItemStyles = css`
   overflow: hidden;
 `;
 
-const runAgentLabel = i18n.translate('xpack.agentBuilder.conversationInput.runAgentSwitch.label', {
-  defaultMessage: 'Run agent',
-});
-
 interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   isSubmitting: boolean;
-  showTriggerModeToggle: boolean;
+  showTriggerModeSelector: boolean;
   triggerMode: ChatTriggerMode;
   onTriggerModeChange: (mode: ChatTriggerMode) => void;
 }
@@ -36,45 +32,45 @@ export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
   isSubmitting,
-  showTriggerModeToggle,
+  showTriggerModeSelector,
   triggerMode,
   onTriggerModeChange,
-}) => (
-  <EuiFlexItem grow={false}>
-    <EuiFlexGroup
-      gutterSize="s"
-      responsive={false}
-      alignItems="center"
-      justifyContent="spaceBetween"
-    >
-      <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
-        <ConnectorSelector />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-          {showTriggerModeToggle && (
+}) => {
+  const showConnectorSelector = triggerMode !== ChatTriggerMode.Never;
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        alignItems="center"
+        justifyContent={showConnectorSelector ? 'spaceBetween' : 'flexEnd'}
+      >
+        {showConnectorSelector && (
+          <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
+            <ConnectorSelector />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            {showTriggerModeSelector && (
+              <EuiFlexItem grow={false}>
+                <TriggerModeSelector
+                  triggerMode={triggerMode}
+                  onTriggerModeChange={onTriggerModeChange}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
-              <EuiSwitch
-                compressed
-                label={runAgentLabel}
-                checked={triggerMode === ChatTriggerMode.Always}
-                onChange={(event) =>
-                  onTriggerModeChange(
-                    event.target.checked ? ChatTriggerMode.Always : ChatTriggerMode.Never
-                  )
-                }
+              <ConversationActionButton
+                onSubmit={onSubmit}
+                isSubmitDisabled={isSubmitDisabled}
+                isSubmitting={isSubmitting}
               />
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <ConversationActionButton
-              onSubmit={onSubmit}
-              isSubmitDisabled={isSubmitDisabled}
-              isSubmitting={isSubmitting}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlexItem>
-);
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
