@@ -126,10 +126,23 @@ Return earliest host, timestamp, indicator, and delivery-vector hypothesis.
 ### 4. Attack timeline
 Merge process, file, network, and registry events for the host in the time window; sort by \`@timestamp\` ascending.
 The answer is an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the
-named host — never a prose paragraph. **Only include events supported by query results.** If telemetry is sparse or
-unavailable, still lay out the ordered reconstruction as a timeline skeleton (the sequence of stages to expect for that host),
-so the response remains a scoped chronological narrative. State the data gap explicitly and optionally provide a
-clearly labeled investigation plan (suggested ES|QL queries / indices to check).
+named host — never a prose paragraph. **Only include events supported by query results.** Every timeline entry must
+trace back to a returned event row; if you cannot point at the row it came from, it does not go in the timeline.
+
+When telemetry is sparse or unavailable, state the data gap explicitly and optionally provide a clearly labeled
+investigation plan (suggested ES|QL queries / indices to check).
+
+An expected-but-unobserved attack-stage sequence (a "skeleton" of the stages an attack on this host would
+typically follow) is permitted only under ALL of these conditions — otherwise omit it entirely:
+- The analyst explicitly asked for the expected, typical, or full sequence of attack stages. A bare "timeline of
+  attacker activity" request does not qualify.
+- The host's telemetry is empty or near-empty. If the host HAS real events that pattern-match attack techniques
+  but carry a plausible benign explanation (e.g. \`vssadmin\` shadow enumeration, an SMB mount of an admin or
+  backup share), do NOT render a skeleton: describe only the observed events, flag the ambiguity, and stop.
+- The skeleton is rendered as its own section AFTER the observed timeline, under a heading that says the stages
+  were not observed on this host (e.g. "Expected stages — NOT observed on this host"). Skeleton stages never
+  appear inside the observed timeline, never carry timestamps from the host's telemetry, and are never described
+  as having occurred.
 
 Every event must name the host it happened on and describe what happened with the specifics an analyst can act on:
 the process and its parent, PIDs, the acting user, the command line (truncated if long), file paths, destination
@@ -143,7 +156,8 @@ Where the timeline goes depends on how you were asked to answer:
   \`{ events }\`, where \`events\` is the ordered event array, earliest first, with each event as
   \`{ timestamp, host, description }\`. \`description\` carries the same detail you would have written
   for an analyst — do not shorten it to a label because it is going into a structured field.
-  Do not also render the timeline in a free-text field.
+  \`events\` contains observed events only — skeleton (expected-but-unobserved) stages NEVER go into
+  \`events\`, even labelled. Do not also render the timeline in a free-text field.
 
 ### 5. IoC extraction
 After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` with the host(s) and
