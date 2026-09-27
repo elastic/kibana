@@ -134,6 +134,8 @@ dependsOn:
   - '@kbn/mock-idp-utils'
   - '@kbn/discover-session-constants'
   - '@kbn/ci-stats-reporter'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
 tags:
   - plugin
   - prod

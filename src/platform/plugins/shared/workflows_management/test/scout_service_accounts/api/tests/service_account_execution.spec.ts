@@ -20,6 +20,7 @@ import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { cleanupEsServiceAccounts } from '../fixtures/cleanup_es_service_accounts';
 
 const authenticationStep = `  - name: authenticate
     type: elasticsearch.request
@@ -51,11 +52,13 @@ ${steps}`;
 
 apiTest.describe(
   '[NON-MKI] Saved workflow service account execution',
-  { tag: ['@local-serverless-search'] },
+  { tag: ['@local-serverless-search', '@local-stateful-classic'] },
   () => {
     let headers: Record<string, string>;
     let accountId: string;
     let otherAccountId: string;
+    let readOnlyAccountId: string;
+    const dataIndex = `cp2-sa-permissions-${Date.now()}`;
     const workflowIds = new Set<string>();
     const managedIds = new Set<string>();
     const managedPath = (id: string) =>
@@ -141,7 +144,7 @@ apiTest.describe(
       expect(typeof execution.executedBy).toBe('string');
     };
 
-    apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       headers = {
         ...cookieHeader,
@@ -150,21 +153,32 @@ apiTest.describe(
         'elastic-api-version': '2023-10-31',
       };
       const accounts: string[] = [];
-      for (const name of ['primary', 'child']) {
+      for (const name of ['primary', 'child', 'read-only']) {
         const response = await apiClient.post('internal/security/service_account', {
-          headers: {
-            'kbn-xsrf': 'true',
-            'x-elastic-internal-origin': 'kibana',
-            Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
+          headers: config.serverless
+            ? {
+                'kbn-xsrf': 'true',
+                'x-elastic-internal-origin': 'kibana',
+                Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
+              }
+            : headers,
+          body: {
+            name: `cp2-${name}-${Date.now()}`,
+            roles: [name === 'read-only' ? 'viewer' : config.serverless ? 'admin' : 'superuser'],
           },
-          body: { name: `cp2-${name}-${Date.now()}` },
           responseType: 'json',
         });
         expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
         accountIds.add(response.body.id as string);
         accounts.push(response.body.id as string);
       }
-      [accountId, otherAccountId] = accounts;
+      [accountId, otherAccountId, readOnlyAccountId] = accounts;
+      await esClient.index({
+        index: dataIndex,
+        id: 'readable',
+        document: { message: 'Explicit SA roles permit reading this document' },
+        refresh: 'wait_for',
+      });
     });
 
     const cleanupWorkflows = async (apiClient: ApiClientFixture): Promise<void> => {
@@ -279,40 +293,102 @@ apiTest.describe(
 
     apiTest.afterEach(async ({ apiClient }) => cleanupWorkflows(apiClient));
 
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ apiClient, esClient, config }) => {
       const failures: Error[] = [];
       try {
         await cleanupWorkflows(apiClient);
       } catch (error) {
         failures.push(new Error('Final workflow cleanup failed', { cause: error }));
       }
-      // Remove only this suite's disposable Cosmos fixtures; project-account revocation
-      // is not authorized by the seeded organization API key in the local UIAM image.
-      const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
-      try {
-        for (const id of accountIds) {
-          try {
-            const resource = `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS}/docs/${id}`;
-            const response = await fetch(`${MOCK_IDP_UIAM_COSMOS_DB_URL}/${resource}`, {
-              method: 'DELETE',
-              dispatcher,
-              headers: {
-                ...generateCosmosDBApiRequestHeaders('DELETE', 'docs', resource),
-                'x-ms-documentdb-partitionkey': JSON.stringify([id]),
-              },
-            });
-            expect(response.status, await response.text()).toBe(204);
-            accountIds.delete(id);
-          } catch (error) {
-            failures.push(new Error(`Failed to clean service account ${id}`, { cause: error }));
+      if (config.serverless) {
+        // Remove only this suite's disposable Cosmos fixtures; project-account revocation
+        // is not authorized by the seeded organization API key in the local UIAM image.
+        const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
+        try {
+          for (const id of accountIds) {
+            try {
+              const resource = `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS}/docs/${id}`;
+              const response = await fetch(`${MOCK_IDP_UIAM_COSMOS_DB_URL}/${resource}`, {
+                method: 'DELETE',
+                dispatcher,
+                headers: {
+                  ...generateCosmosDBApiRequestHeaders('DELETE', 'docs', resource),
+                  'x-ms-documentdb-partitionkey': JSON.stringify([id]),
+                },
+              });
+              expect(response.status, await response.text()).toBe(204);
+              accountIds.delete(id);
+            } catch (error) {
+              failures.push(new Error(`Failed to clean service account ${id}`, { cause: error }));
+            }
           }
+        } finally {
+          await dispatcher.close();
         }
-      } finally {
-        await dispatcher.close();
+      } else {
+        try {
+          await cleanupEsServiceAccounts(esClient, config, [...accountIds]);
+        } catch (error) {
+          failures.push(
+            new Error('Elasticsearch service account cleanup failed', { cause: error })
+          );
+        }
+      }
+      try {
+        await esClient.indices.delete({ index: dataIndex }, { ignore: [404] });
+      } catch (error) {
+        failures.push(new Error('Permission fixture cleanup failed', { cause: error }));
       }
       if (failures.length)
         throw new AggregateError(failures, 'Service-account suite cleanup failed');
     });
+
+    apiTest(
+      'executes with selected read-only roles instead of the creator privileges',
+      async ({ apiClient }) => {
+        const read = await create(
+          apiClient,
+          workflowYaml(
+            readOnlyAccountId,
+            `${authenticationStep}  - name: read
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /${dataIndex}/_doc/readable
+`
+          )
+        );
+        const readExecution = await wait(apiClient, await run(apiClient, read));
+        expectAccount(readExecution, readOnlyAccountId);
+        expect(
+          JSON.stringify(
+            readExecution.stepExecutions?.find((step) => step.stepId === 'read')?.output
+          )
+        ).toContain('Explicit SA roles permit reading this document');
+
+        const write = await create(
+          apiClient,
+          workflowYaml(
+            readOnlyAccountId,
+            `${authenticationStep}  - name: forbidden_write
+    type: elasticsearch.request
+    with:
+      method: PUT
+      path: /${dataIndex}/_doc/forbidden
+      body:
+        message: must not be written
+`
+          )
+        );
+        const deniedExecution = await wait(apiClient, await run(apiClient, write), 'failed');
+        expectAccount(deniedExecution, readOnlyAccountId);
+        const deniedStep = deniedExecution.stepExecutions?.find(
+          (step) => step.stepId === 'forbidden_write'
+        );
+        expect(deniedStep?.status).toBe('failed');
+        expect(JSON.stringify(deniedStep?.error)).toContain('security_exception');
+      }
+    );
 
     apiTest(
       'managed workflow installs, executes and rebinds with its service account',

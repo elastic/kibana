@@ -147,6 +147,11 @@ The `system-example-service-account` definition demonstrates an admin-authorized
 workflow installation. Its template accepts `serviceAccountId`, persists it in
 `settings.run_as`, and executes `elasticsearch.request GET /_security/_authenticate`.
 
+Create the account first with `POST /internal/security/service_account`, for example
+`{ "name": "workflow-example", "roles": ["viewer"] }`. Use the returned `id` in
+`serviceAccountId`; role names must exist on the target deployment and allow the workflow's
+steps. Creation requires explicit roles on both UIAM and Elasticsearch backends.
+
 With this example plugin and `xpack.security.serviceAccounts.enabled` enabled, the following
 internal endpoints use the authenticated request's space:
 
@@ -175,7 +180,8 @@ nvm use
 node scripts/scout run-tests --arch serverless --domain search --config src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/playwright.config.ts
 ```
 
-The `service_accounts` server configuration loads this example and uses local UIAM. The test
+The `service_accounts` server configuration loads this example on local UIAM and stateful Elasticsearch.
+Use `--arch stateful --domain classic` in the same command to validate the ES backend. The test
 checks both execution identity metadata and the identity returned by Elasticsearch. It does
 not validate `kibana.request` authentication or automatic startup provisioning.
 
