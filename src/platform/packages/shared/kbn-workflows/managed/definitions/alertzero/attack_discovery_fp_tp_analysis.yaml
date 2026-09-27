@@ -1,22 +1,20 @@
 version: "1"
 name: Attack Discovery FP/TP Analysis
 description: >
-  Judges whether one Attack Discovery's CORRELATION is supported by its evidence and
-  returns a verdict. It returns a result and applies nothing: the review that calls
-  it owns the verdict attachment and every lifecycle transition.
+  Judges whether one Attack Discovery's correlation is supported by its cited alerts,
+  the entity store, and raw events, and returns a verdict. It returns a result and
+  applies nothing: the review that calls it owns the verdict attachment and every
+  lifecycle transition.
 
-  The analysis body — deterministic evidence gathering, the agent that reasons over
-  those facts, and the non-LLM check on what it asserted — is #19282, which is
-  blocked on the #19280 contract spike. What is settled and implemented here is the
-  shell: the two inputs, the analyst-facing payload, the failure semantics and the
-  authoritative-load half of idempotency.
+  Gather is deterministic. The agent has no tools and reasons only over those hits.
+  The verdict it returns is emitted as-is. The workflow never emits `failed`.
 enabled: true
 tags:
   - security
   - attack-discovery
 settings:
-  # Provisional; the real bound is an open question in #19280.
-  timeout: "30m"
+  # Gather and the agent. Contract bound for this child.
+  timeout: "10m"
   # Retried here rather than at the review's call site, so a transient ES or
   # conversation-read failure never reaches the review as a `failed` verdict.
   # Workflow-level because every step is a required source or depends on one.
@@ -45,19 +43,21 @@ triggers:
           type: string
           maxLength: 128
           description: >-
-            Conversation id of the Investigation the review opened for this attack.
-            Read to confirm it exists before analysing; this workflow writes nothing
-            to it, because the verdict attachment is the review's to write.
+            Conversation id of the Investigation the review opened for this attack,
+            when there is one. Read to confirm it exists before analysing; this
+            workflow writes nothing to it, because the verdict attachment is the
+            review's to write. Omit it to analyse the attack with no Investigation.
       # The whole input surface: space comes from `workflow.spaceId`, attempt
       # identity from `execution.id`, and everything about the attack from the
       # loaded document, so no caller can pass a stale copy of any of them.
+      # `investigation_id` is optional so the analysis can run without one.
       required:
         - attack_discovery_id
-        - investigation_id
       additionalProperties: false
 # The analyst-facing payload, matching the `security.attack_discovery.verdict`
-# attachment (elastic/kibana#291932). `workflow.output` validates against this
-# schema and fails the run on a mismatch.
+# attachment (elastic/kibana#291932), plus the execution output from the #19280
+# contract. `workflow.output` validates against this schema and fails the run on
+# a mismatch.
 #
 # JSON Schema form rather than the legacy `- name:` array: only this form carries
 # `maxLength`, which the legacy conversion silently drops.
@@ -75,8 +75,7 @@ outputs:
     #
     # Capped to the attachment's own `max(8000)`. Oversize would otherwise complete
     # the child and then fail `attach_verdict`, which continues on failure, letting
-    # `apply_verdict` close or escalate with no evidence attached. #19282 owns
-    # staying inside the cap; this makes exceeding it loud.
+    # `apply_verdict` close or escalate with no evidence attached.
     summary_markdown:
       type: string
       maxLength: 8000
@@ -92,11 +91,29 @@ outputs:
     # the attack it asked about.
     attack_discovery_id:
       type: string
-  # Without these the review cannot tell a partial payload from a whole one, and
-  # would pair a real verdict with its "analysis failed" summary.
+    # Echoed when the caller named one. Not loaded as evidence.
+    investigation_id:
+      type: string
+    workflow_id:
+      type: string
+    # The workflow version is the prompt version.
+    workflow_version:
+      type: number
+    coverage:
+      type: object
+    # The same payload the flat fields carry, so a caller that reads the contract
+    # shape and the review that reads the flat fields see one verdict.
+    payload:
+      type: object
+    checks:
+      type: array
+    claims:
+      type: object
+  # Without verdict and summary the review cannot tell a partial payload from a
+  # whole one, and would pair a real verdict with its "analysis failed" summary.
   #
-  # No `additionalProperties: false`: #19282 adds richer execution output whose
-  # shape follows the #19280 spike.
+  # No `additionalProperties: false`: the execution output above is the contract
+  # shape, and a later telemetry field should not fail a run that already decided.
   required:
     - verdict
     - summary_markdown
@@ -107,6 +124,9 @@ consts:
     - false_positive
     - true_positive
     - inconclusive
+  # The template language has no empty-list literal, and `| default: []` returns
+  # nothing. This constant is the empty-list fallback for optional sources.
+  no_rows: []
 steps:
   # Loaded rather than received, so a retry cannot reason over a copy that went
   # stale. `ids` works because a persisted discovery is indexed under its
@@ -135,35 +155,313 @@ steps:
         "{{ inputs.attack_discovery_id }}" in space {{ workflow.spaceId }}.
         Required source unavailable; no classification was produced.
 
-  # A required source, so no `on-failure`. A metadata READ and nothing else:
-  # posting to this conversation, or running `ai.agent` against it, wakes the
-  # Investigation agent — so #19282's agent needs `create-conversation: true`
-  # against a separate backing conversation.
+  # A metadata READ and nothing else: posting to this conversation, or running
+  # `ai.agent` against it, wakes the Investigation agent. The agent below uses
+  # `create-conversation: true` on a separate backing conversation.
+  #
+  # Skipped when no Investigation was named, so the analysis can run on the attack
+  # alone. When one was named it is a required source: no `on-failure`, so a
+  # missing conversation fails the run.
   - name: load_investigation
     type: ai.conversation.metadata.read
+    if: "${{ inputs.investigation_id != blank }}"
     with:
       conversation_id: "{{ inputs.investigation_id }}"
 
-  # PLACEHOLDER — #19282 replaces this with the analysis proper, once #19280
-  # settles the criteria. `inconclusive` because it asserts nothing about the
-  # attack, while still exercising the review's escalation gate.
-  - name: analyze
+  # Required source: every alert the discovery cites. `found` counts returned hits,
+  # not `hits.total`, so a discovery citing more than `size` alerts fails instead of
+  # being judged on a subset.
+  - name: load_alerts
+    type: elasticsearch.search
+    with:
+      index: .alerts-security.alerts-{{ workflow.spaceId }}
+      size: 100
+      query:
+        ids:
+          values: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
+
+  - name: count_alerts
     type: data.set
     with:
-      verdict: inconclusive
-      # Says what did and did not happen, so `inconclusive` is not read as analysis
-      # that ran.
-      summary_markdown: >-
-        FP/TP analysis is not yet implemented
-        ([#19282](https://github.com/elastic/security-team/issues/19282)). The Attack
-        Discovery and the Investigation were both loaded successfully, so this
-        Investigation is ready for the analysis once it lands, but no evidence was
-        gathered and no classification was reached. Returned `inconclusive`, which
-        asserts nothing about the attack.
-      # No `rationale_markdown`: nothing to record, and the field is optional.
+      cited: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] | size }}"
+      found: "${{ steps.load_alerts.output.hits.hits | size }}"
+      host_ids: "${{ steps.load_alerts.output.hits.hits | map: '_source.host.id' | compact | uniq }}"
+      user_names: "${{ steps.load_alerts.output.hits.hits | map: '_source.user.name' | compact | uniq }}"
+      attack_timestamp: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}"
 
-  # The contract boundary, and the step that outlives the placeholder: it checks
-  # what the analysis produced, so #19282 is held to the same payload.
+  - name: require_cited_alerts
+    type: workflow.fail
+    if: "${{ steps.count_alerts.output.found != steps.count_alerts.output.cited }}"
+    with:
+      message: >-
+        Only {{ steps.count_alerts.output.found }} of {{ steps.count_alerts.output.cited }}
+        cited alerts were found for Attack Discovery "{{ inputs.attack_discovery_id }}".
+        Required source unavailable; no classification was produced.
+
+  # Optional. An empty or failed query does not fail the run. The verdict rules
+  # treat a missing source as unable to clear an alert.
+  - name: load_entities
+    type: elasticsearch.search
+    on-failure:
+      continue: true
+    with:
+      index: entities-latest-{{ workflow.spaceId }}
+      size: 50
+      query:
+        bool:
+          minimum_should_match: 1
+          should:
+            - terms:
+                host.id: "${{ steps.count_alerts.output.host_ids }}"
+            - terms:
+                user.name: "${{ steps.count_alerts.output.user_names }}"
+
+  # Optional. Raw endpoint events on the cited hosts, within two hours of the
+  # discovery, one shared cap of 50. A truncated page does not fail the run;
+  # `block_truncated_clear` stops it from clearing the attack.
+  - name: load_events
+    type: elasticsearch.search
+    on-failure:
+      continue: true
+    with:
+      index: logs-endpoint.events.*
+      size: 50
+      sort:
+        - "@timestamp": asc
+      query:
+        bool:
+          filter:
+            - terms:
+                host.id: "${{ steps.count_alerts.output.host_ids }}"
+            - range:
+                "@timestamp":
+                  gte: "{{ steps.count_alerts.output.attack_timestamp }}||-2h"
+                  lte: "{{ steps.count_alerts.output.attack_timestamp }}||+2h"
+
+  - name: source_status
+    type: data.set
+    with:
+      entities_failed: "${{ steps.load_entities.error != null }}"
+      events_failed: "${{ steps.load_events.error != null }}"
+
+  - name: analyze
+    type: ai.agent
+    agent-id: alertzero-thin-agent
+    # Keep in sync with ALERTZERO_REASONING_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_reasoning
+    # plugin-id: per-run cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
+    plugin-id: alertzero_fp_tp_analysis
+    aggregate-by: alertzero_parent
+    # Not the Investigation conversation. Posting there, or running the agent
+    # against it, wakes the Investigation agent.
+    create-conversation: true
+    timeout: "8m"
+    with:
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        skill_ids: []
+      message: |
+        You judge ONE persisted Attack Discovery as a chain: do the world facts around its
+        cited alerts support the attack story it tells? You do not generate a discovery,
+        judge individual detection rules, or confirm compromise. You have no tools; use
+        only the evidence below.
+
+        Verdicts:
+        - true_positive: the alerts plus the world warrant investigating them as one unit.
+        - false_positive: the world affirmatively refutes the story.
+        - inconclusive: you cannot decide from the evidence.
+
+        Missing telemetry is never a false_positive; only an affirmative contradiction is.
+        The discovery's own markdown is a claim to test, not evidence.
+
+        Run every check below and report exactly one entry per check. Status is
+        `completed` or `skipped` (the source is empty or unavailable). A completed check
+        also has a result: `supports`, `contradicts`, or `neutral`.
+
+        1. alert_linkage — cited alerts only. Alerts may connect by one shared field
+           or a path of pivots: one alert shares a host with a second, which shares a
+           user with a third. A pivot is a user, host, IP, process, agent.id, or
+           source.ip, together with a concrete bridge (process tree, session, event.id,
+           or process.entity_id). Shared identifiers without a bridge, or theme and
+           timing alone, are neutral. When the pivots connect, the time order still
+           has to read as an execution chain.
+           Report the strongest pivot; it does not decide the verdict.
+        2. entity_role — entity store only. An ordinary employee workstation or
+           account supports.
+           A management server, MDM, jump box, or service account is neutral, not contradicts:
+           the role is context for the other checks, and those machines are also
+           high-value targets. A thin or uncurated record is neutral.
+        3. process_parent — raw events only. A management agent, scheduler, Nessus
+           scan, software-distribution parent, or other config-management parent
+           that explains the child contradicts. An office program or browser supports.
+           A risk score or severity on a cited alert weighs how strong that parent is.
+           It is not a separate verdict.
+        4. network_destination — raw events only. Judge every destination shown.
+           A known vendor or internal management destination contradicts only when
+           every other destination is accounted for. A typosquat, a temporary host
+           (such as *.dev or *.worker), a public numeric IP URL, or another unknown
+           or known-bad endpoint supports.
+           One known-good callout does not cancel the rest.
+
+        The world checks are entity_role, process_parent, and network_destination.
+
+        Choose the verdict by the first rule that matches:
+        1. inconclusive — world checks both support and contradict; or you cannot cite
+           an id from the hits below.
+        2. false_positive — at least one world check contradicts, none supports, and
+           both the entity store and the raw events have hits. Missing evidence cannot
+           clear an alert: if either source is empty or its query failed, the verdict
+           is inconclusive.
+        3. true_positive — process_parent or network_destination supports and no world
+           check contradicts. An empty or failed entity store does not block this.
+           entity_role and alert_linkage corroborate but are never enough on their own.
+        4. inconclusive — anything else: every world check is skipped or neutral, or
+           only entity_role or alert_linkage supports.
+
+        A truncated raw-event list is missing evidence and cannot clear an attack. If more
+        events matched than are shown below, do not return false_positive.
+
+        Claims:
+        - claims.world: one entry for each world-check result the verdict relies on, with
+          `check`, `result` (supports or contradicts), `source` (entity_store or
+          raw_event), and `id` — the `entity.id` of an entity store hit or the `_id` of a
+          raw event hit. Cite only ids that appear in the hits below.
+        - claims.alert_link: when alert_linkage supports, the strongest pivot. `field`
+          is one of user.name, user.id, host.id, host.name, process.entity_id,
+          process.pid, agent.id, or source.ip. Include its `value` and the `_id`s of
+          at least two cited alerts that share it.
+
+        Writing:
+        - summary_markdown: one paragraph. State the verdict in prose (no heading), the
+          strongest reason, the id it rests on, and any empty or unavailable source.
+          At most 8000 characters.
+        - rationale_markdown: one bullet per check (status, result, coverage, and cited
+          ids) and one per empty or unavailable source. Omit it if it would only repeat
+          the summary.
+        - No JSON, no confidence scores, no restated instructions.
+
+        Attack Discovery:
+        {{ steps.load_attack_discovery.output.hits.hits[0] | json }}
+
+        Cited alerts ({{ steps.count_alerts.output.found }} of {{ steps.count_alerts.output.cited }}):
+        {{ steps.load_alerts.output.hits.hits | json }}
+
+        Entity store (query failed: {{ steps.source_status.output.entities_failed }}):
+        {{ steps.load_entities.output.hits.hits | default: consts.no_rows | json }}
+
+        Raw events within 2 hours of the discovery, showing at most 50 of {{ steps.load_events.output.hits.total.value | default: 0 }} that matched (query failed: {{ steps.source_status.output.events_failed }}):
+        {{ steps.load_events.output.hits.hits | default: consts.no_rows | json }}
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          verdict:
+            type: string
+            enum:
+              - true_positive
+              - false_positive
+              - inconclusive
+          summary_markdown:
+            type: string
+          rationale_markdown:
+            type: string
+          checks:
+            type: array
+            items:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                  enum:
+                    - alert_linkage
+                    - entity_role
+                    - process_parent
+                    - network_destination
+                status:
+                  type: string
+                  enum:
+                    - completed
+                    - skipped
+                result:
+                  type: string
+                  enum:
+                    - supports
+                    - contradicts
+                    - neutral
+                details:
+                  type: string
+              required:
+                - name
+                - status
+                - details
+          claims:
+            type: object
+            additionalProperties: false
+            properties:
+              alert_link:
+                type: object
+                additionalProperties: false
+                properties:
+                  field:
+                    type: string
+                    enum:
+                      - user.name
+                      - user.id
+                      - host.id
+                      - host.name
+                      - process.entity_id
+                      - process.pid
+                      - agent.id
+                      - source.ip
+                  value:
+                    type: string
+                  alert_ids:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - field
+                  - value
+                  - alert_ids
+              world:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    check:
+                      type: string
+                      enum:
+                        - entity_role
+                        - process_parent
+                        - network_destination
+                    result:
+                      type: string
+                      enum:
+                        - supports
+                        - contradicts
+                    source:
+                      type: string
+                      enum:
+                        - entity_store
+                        - raw_event
+                    id:
+                      type: string
+                  required:
+                    - check
+                    - result
+                    - source
+                    - id
+        required:
+          - verdict
+          - summary_markdown
+          - checks
+          - claims
+
+  # The contract boundary: an unsupported verdict fails the run instead of
+  # reaching the review's switch, whose default arm does nothing.
   #
   # Split in two because Liquid has no `not` and no parentheses, so the failure
   # condition cannot be the inline negation of this. Comparisons bind tighter than
@@ -171,11 +469,10 @@ steps:
   - name: check_payload
     type: data.set
     with:
-      payload_valid: "${{ consts.supported_verdicts contains steps.analyze.output.verdict and steps.analyze.output.summary_markdown != blank }}"
+      payload_valid: "${{ consts.supported_verdicts contains steps.analyze.output.structured_output.verdict and steps.analyze.output.structured_output.summary_markdown != blank }}"
 
   # An analysis with no usable classification has classified nothing. Emitting it
-  # would instead send an unknown verdict through the review's switch, whose default
-  # arm does nothing.
+  # would instead send an unknown verdict through the review's switch.
   #
   # `== false` rather than a bare negation, so an undefined never fires this.
   - name: require_supported_verdict
@@ -185,25 +482,58 @@ steps:
       message: >-
         FP/TP analysis produced no usable payload for Attack Discovery
         "{{ inputs.attack_discovery_id }}": verdict
-        "{{ steps.analyze.output.verdict }}" is not one of
+        "{{ steps.analyze.output.structured_output.verdict }}" is not one of
         {{ consts.supported_verdicts | join: ", " }}, or the summary was empty.
         No classification was produced.
+
+  # A truncated event page is missing evidence. The review closes the attack on
+  # `false_positive`, so that verdict becomes `inconclusive` before it is emitted.
+  # `true_positive` is left alone: truncation blocks a clear, not an escalation.
+  - name: block_truncated_clear
+    type: data.set
+    with:
+      verdict: "{% if steps.load_events.output.hits.total.value > 50 and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
+      summary_markdown: "{% if steps.load_events.output.hits.total.value > 50 and steps.analyze.output.structured_output.verdict == 'false_positive' %}Raw events were truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
 
   # `workflow.execute` resolves to the child's `context.output`, so a child with no
   # `workflow.output` step hands its parent nothing.
   #
   # Always `completed`: the failure path fails the run rather than reaching here,
   # which is what keeps `failed` out of the emitted verdict.
+  #
+  # Flat `verdict` / `summary_markdown` / `rationale_markdown` are what the review
+  # attaches. `payload` and the fields under it are the same verdict.
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      verdict: "{{ steps.analyze.output.verdict }}"
-      summary_markdown: "{{ steps.analyze.output.summary_markdown }}"
+      verdict: "{{ steps.block_truncated_clear.output.verdict }}"
+      summary_markdown: "{{ steps.block_truncated_clear.output.summary_markdown }}"
       # `${{ }}`, not `{{ }}`: `{{ }}` stringifies undefined to `""`, and the
       # attachment null-checks the field, so an empty string would render an empty
       # `## Rationale` section.
-      rationale_markdown: "${{ steps.analyze.output.rationale_markdown }}"
+      rationale_markdown: "${{ steps.analyze.output.structured_output.rationale_markdown }}"
       analysis_execution_id: "{{ execution.id }}"
       # From the document, not `inputs`.
       attack_discovery_id: "{{ steps.load_attack_discovery.output.hits.hits | map: '_id' | first }}"
+      # `${{ }}` omits the field when the caller named no Investigation, instead of
+      # writing an empty id.
+      investigation_id: "${{ inputs.investigation_id }}"
+      workflow_id: "{{ workflow.id }}"
+      workflow_version: "${{ workflow.version }}"
+      coverage:
+        alerts:
+          seen: "${{ steps.count_alerts.output.found }}"
+          total: "${{ steps.count_alerts.output.cited }}"
+        entities:
+          seen: "${{ steps.load_entities.output.hits.hits | default: consts.no_rows | size }}"
+        events:
+          seen: "${{ steps.load_events.output.hits.hits | default: consts.no_rows | size }}"
+          cap: 50
+          truncated: "${{ steps.load_events.output.hits.total.value > 50 }}"
+      payload:
+        verdict: "${{ steps.block_truncated_clear.output.verdict }}"
+        summary_markdown: "${{ steps.block_truncated_clear.output.summary_markdown }}"
+        rationale_markdown: "${{ steps.analyze.output.structured_output.rationale_markdown }}"
+      checks: "${{ steps.analyze.output.structured_output.checks }}"
+      claims: "${{ steps.analyze.output.structured_output.claims }}"
