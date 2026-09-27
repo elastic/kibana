@@ -658,6 +658,37 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (
+      // Scout suite: changes to its own Scout tests must still trigger it.
+      (await doAnyChangesMatch([
+        /^fleet_packages\.json/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/management/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/endpoint/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/common\/endpoint/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/scripts\/endpoint/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/rule_response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/detection_engine\/rule_response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/tools\/response/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/main\/components\/response_section/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/common\/components\/response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/test\/scout_edr_real_fleet/,
+        /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/edr_real_fleet/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/scout_edr_real_fleet\.yml/,
+        /^\.buildkite\/pipelines\/security_solution\/scout_edr_real_fleet_weekday\.yml/,
+        /^\.buildkite\/pipeline-resource-definitions\/kibana-scout-edr-real-fleet-weekday\.yml/,
+        /^\.buildkite\/scripts\/steps\/test\/scout_edr_real_fleet\.sh/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:scout-edr-real-fleet') ||
+      ALL_UI_TEST_SUITES
+    ) {
+      pipeline.push(
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/scout_edr_real_fleet.yml',
+          cancelable
+        )
+      );
+    }
+
+    if (
       GITHUB_PR_LABELS.includes('ci:security-genai-run-evals') ||
       GITHUB_PR_LABELS.includes('ci:security-genai-run-evals-local-prompts') ||
       ALL_UI_TEST_SUITES

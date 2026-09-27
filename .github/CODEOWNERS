@@ -3529,6 +3529,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/ai4soc @elastic/security-defend-workflows
@@ -3915,6 +3916,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/pipelines/build_pr_and_test_entity_store_performance.yml @elastic/contextual-security
 /.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /.buildkite/scout_ci_config.yml @elastic/appex-qa
+/.buildkite/pipelines/security_solution/scout_edr_real_fleet_weekday.yml @elastic/security-defend-workflows
+/.buildkite/pipeline-resource-definitions/kibana-scout-edr-real-fleet-weekday.yml @elastic/security-defend-workflows
 
 # Flaky test report pipeline (kibana / report-flaky-tests)
 /.buildkite/pipeline-resource-definitions/kibana-report-flaky-tests.yml @elastic/appex-qa @elastic/kibana-operations
