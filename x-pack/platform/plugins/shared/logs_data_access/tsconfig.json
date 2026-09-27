@@ -20,10 +20,14 @@
     "@kbn/core-ui-settings-server",
     "@kbn/core-ui-settings-browser",
     "@kbn/logging",
+    "@kbn/logging-mocks",
     "@kbn/core-saved-objects-api-server",
     "@kbn/es-query",
     "@kbn/use-tracked-promise",
     "@kbn/core-application-browser",
     "@kbn/i18n-react",
+    "@kbn/zod",
+    "@kbn/es-errors",
+    "@kbn/ml-random-sampler-utils"
   ]
 }

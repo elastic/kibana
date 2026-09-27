@@ -98,6 +98,9 @@ xpack.observabilityAIAssistant.scope: 'observability'
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability
 
+xpack.logsDataAccess.semanticLogSearch.rerankInferenceId: .jina-reranker-v3
+xpack.evals.enabled: true
+
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
 xpack.ml.nlp:

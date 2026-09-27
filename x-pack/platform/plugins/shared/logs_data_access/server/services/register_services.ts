@@ -8,13 +8,16 @@
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { Logger } from '@kbn/logging';
+import type { LogsDataAccessConfig } from '../config';
 import { createGetLogsRateTimeseries } from './get_logs_rate_timeseries/get_logs_rate_timeseries';
 import { createGetLogErrorRateTimeseries } from './get_logs_error_rate_timeseries/get_logs_error_rate_timeseries';
 import { createGetLogsRatesService } from './get_logs_rates_service';
 import { createLogSourcesServiceFactory } from './log_sources_service';
+import { createSemanticLogSearchService } from './semantic_log_search';
 
 export interface RegisterServicesParams {
   logger: Logger;
+  config: LogsDataAccessConfig;
   deps: {
     savedObjects: SavedObjectsServiceStart;
     uiSettings: UiSettingsServiceStart;
@@ -27,5 +30,6 @@ export function registerServices(params: RegisterServicesParams) {
     getLogsRateTimeseries: createGetLogsRateTimeseries(),
     getLogsErrorRateTimeseries: createGetLogErrorRateTimeseries(),
     logSourcesServiceFactory: createLogSourcesServiceFactory(params),
+    semanticLogSearch: createSemanticLogSearchService(params),
   };
 }

@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { uiSettings } from '../common/ui_settings';
+import type { LogsDataAccessConfig } from './config';
 import { registerServices } from './services/register_services';
 import type { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './types';
 
@@ -29,9 +30,11 @@ export class LogsDataAccessPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: LogsDataAccessConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<LogsDataAccessConfig>();
   }
   public setup(core: CoreSetup, plugins: LogsDataAccessPluginSetupDeps) {
     core.uiSettings.register(uiSettings);
@@ -40,6 +43,7 @@ export class LogsDataAccessPlugin
   public start(core: CoreStart, plugins: LogsDataAccessPluginStartDeps) {
     const services = registerServices({
       logger: this.logger,
+      config: this.config,
       deps: {
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,

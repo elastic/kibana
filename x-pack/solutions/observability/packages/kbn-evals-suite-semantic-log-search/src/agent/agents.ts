@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createHash } from 'crypto';
+import type { HttpHandler } from '@kbn/core/public';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { GET_LOGS_SEMANTIC_TOOL_ID, GET_LOGS_TOOL_ID } from '../constants';
+import type { Arm } from '../types';
+
+const AGENTS_API_PATH = '/api/agent_builder/agents';
+
+/** Agent ids are capped at 64 characters, so the connector id is hashed in. */
+const agentIdFor = (arm: Arm, connectorId: string): string => {
+  const connectorHash = createHash('sha256').update(connectorId).digest('hex').slice(0, 8);
+  return `eval_semlogs_${arm}_${connectorHash}_${Date.now().toString(36)}`;
+};
+
+// Only the arms that get an agent of their own. `baseline` uses the default agent, and `groups` is
+// retrieval-only, because `get_log_groups` takes no question and so has nothing to ask an agent.
+// Naming them in the type makes an omission a compile error rather than something an `else` branch
+// can quietly undo by handing an arm a tool it is supposed to be without, which is how adding the
+// `groups` arm was caught.
+type AgentArm = Exclude<Arm, 'baseline' | 'groups'>;
+
+const TOOL_IDS_BY_ARM: Record<AgentArm, string[]> = {
+  keyword: [GET_LOGS_TOOL_ID],
+  semantic: [GET_LOGS_SEMANTIC_TOOL_ID],
+};
+
+interface CreateAgentParams {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  connectorId: string;
+  arm: AgentArm;
+}
+
+/**
+ * Creates the agent for one arm, holding exactly one tool.
+ * One tool per arm keeps the comparison on retrieval quality; with both available, the model's
+ * tool choice would become part of what is being measured.
+ */
+export const createArmAgent = async ({
+  fetch,
+  log,
+  connectorId,
+  arm,
+}: CreateAgentParams): Promise<string> => {
+  const id = agentIdFor(arm, connectorId);
+
+  const toolIds = TOOL_IDS_BY_ARM[arm];
+
+  const instructions = [
+    'You are answering a question about application logs.',
+    'Use a logs tool to find evidence before answering.',
+    'Quote the log messages you found verbatim in your answer.',
+  ];
+
+  await fetch(AGENTS_API_PATH, {
+    method: 'POST',
+    version: '2023-10-31',
+    body: JSON.stringify({
+      id,
+      name: `Eval: semantic log search (${arm})`,
+      description: `Evaluation agent for the "${arm}" arm of semantic log search.`,
+      configuration: {
+        instructions: instructions.join('\n'),
+        tools: [{ tool_ids: toolIds }],
+      },
+    }),
+  });
+
+  log.debug(`Created eval agent "${id}" for the ${arm} arm`);
+
+  return id;
+};
+
+export const deleteAgent = async ({
+  fetch,
+  log,
+  agentId,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  agentId: string;
+}): Promise<void> => {
+  try {
+    await fetch(`${AGENTS_API_PATH}/${encodeURIComponent(agentId)}`, {
+      method: 'DELETE',
+      version: '2023-10-31',
+    });
+    log.debug(`Deleted eval agent "${agentId}"`);
+  } catch (error) {
+    // A leaked agent pollutes later runs, but discarding scores that were already produced is
+    // the worse outcome.
+    log.warning(
+      `Failed to delete eval agent "${agentId}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+};
