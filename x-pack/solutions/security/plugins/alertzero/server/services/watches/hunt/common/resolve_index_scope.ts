@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntTechnology, IndexScopeWindow, ResolvedIndexScope } from '@kbn/alertzero-common';
 import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
+import { discoverHuntDatasets } from './discover_hunt_datasets';
+import type { DiscoveredDataset } from './discover_hunt_datasets';
+import { matchDatasetsDeterministic, matchDatasetsWithModel } from './match_hunt_datasets';
+import type { HuntScopeReportContext } from './match_hunt_datasets';
 
 /** Default lookback window: 30 days. */
 const DEFAULT_WINDOW_DAYS = 30;
@@ -50,6 +55,39 @@ const deriveStatus = (blocked: boolean, degraded: boolean): ResolvedIndexScope['
   blocked ? 'blocked' : degraded ? 'degraded' : 'ok';
 
 /**
+ * Checks whether a single pattern resolves to anything in the cluster.
+ *
+ * A wildcard that matches nothing resolves to an empty list, but a concrete
+ * name that does not exist (the space-derived alerts index before any alert
+ * is written there) is a 404 unless `ignore_unavailable` is set. Either way
+ * the answer is "absent", never an error. A name can resolve as an index, a
+ * data stream, or an alias: `.alerts-security.alerts-{space}` is an alias
+ * over the hidden `.internal.alerts-*` write index, so it only ever shows up
+ * under `aliases`.
+ */
+const checkPattern = async (
+  esClient: ElasticsearchClient,
+  pattern: string
+): Promise<[string, boolean]> => {
+  try {
+    const response = await esClient.indices.resolveIndex({
+      name: pattern,
+      expand_wildcards: 'open',
+      ignore_unavailable: true,
+    });
+    return [
+      pattern,
+      response.indices.length > 0 ||
+        response.data_streams.length > 0 ||
+        response.aliases.length > 0,
+    ];
+  } catch (err) {
+    if ((err as { statusCode?: number }).statusCode === 404) return [pattern, false];
+    throw err;
+  }
+};
+
+/**
  * Resolves whether a technology's target indices actually exist in the given
  * space. Every pattern — required, optional, and the space-derived alerts
  * pattern — is checked with `resolveIndex` so a missing integration reads as
@@ -72,35 +110,9 @@ export const resolveIndexScope = async ({
   const alertsPattern = alertsIndexPattern(spaceId);
   const resolvedWindow = window ?? defaultWindow();
 
-  // A wildcard that matches nothing resolves to an empty list, but a concrete
-  // name that does not exist (the space-derived alerts index before any alert
-  // is written there) is a 404 unless `ignore_unavailable` is set. Either way
-  // the answer is "absent", never an error. A name can resolve as an index, a
-  // data stream, or an alias: `.alerts-security.alerts-{space}` is an alias
-  // over the hidden `.internal.alerts-*` write index, so it only ever shows up
-  // under `aliases`.
-  const checkPattern = async (pattern: string): Promise<[string, boolean]> => {
-    try {
-      const response = await esClient.indices.resolveIndex({
-        name: pattern,
-        expand_wildcards: 'open',
-        ignore_unavailable: true,
-      });
-      return [
-        pattern,
-        response.indices.length > 0 ||
-          response.data_streams.length > 0 ||
-          response.aliases.length > 0,
-      ];
-    } catch (err) {
-      if ((err as { statusCode?: number }).statusCode === 404) return [pattern, false];
-      throw err;
-    }
-  };
-
   const [requiredResults, optionalResults] = await Promise.all([
-    Promise.all(required.map(checkPattern)),
-    Promise.all([...optional, alertsPattern].map(checkPattern)),
+    Promise.all(required.map((pattern) => checkPattern(esClient, pattern))),
+    Promise.all([...optional, alertsPattern].map((pattern) => checkPattern(esClient, pattern))),
   ]);
 
   const missing: string[] = [];
@@ -144,21 +156,101 @@ export const getKnownHuntIndexPatterns = (): string[] =>
 
 /**
  * The scope a hunt actually runs against: one or more technologies' patterns
- * merged. `technologies` lists the technologies whose required indices exist in
- * the space; empty means nothing resolved and the hunt must not run.
+ * merged, or patterns discovered from the cluster when no known technology is
+ * present. `technologies` lists the known technologies whose required indices
+ * exist in the space; it is empty for a discovered scope and for a blocked one.
  */
 export type HuntScope = Omit<ResolvedIndexScope, 'technology'> & {
   technologies: HuntTechnology[];
+  /**
+   * The resolved `required` patterns, set on every path (static, discovered,
+   * blocked). This is what the coordinator reports on the wire.
+   */
+  index_patterns: string[];
 };
 
 const uniq = (values: string[]): string[] => Array.from(new Set(values));
 
+/** Which path produced a hunt scope; logged so a run's scope origin is auditable. */
+type HuntScopeSource = 'static' | 'discovered:deterministic' | 'discovered:model';
+
+const logScopeSource = (logger: Logger | undefined, source: HuntScopeSource, count: number) =>
+  logger?.info(`Hunt scope resolved via ${source} (${count} index pattern(s))`);
+
 /**
- * Resolves the hunt scope for a space. With an explicit `technology` it resolves
- * that one entry. Without one it resolves every known technology and keeps the
- * ones whose required indices exist, so a hunt never assumes a vendor the
- * environment does not have; when none are present the result is `blocked` and
- * `missing` lists every pattern that was checked.
+ * Merges per-technology scopes into one static hunt scope. When none is
+ * present the result is `blocked` and `missing` lists every checked pattern.
+ */
+const mergeStaticScopes = (scopes: ResolvedIndexScope[]): HuntScope => {
+  const present = scopes.filter((scope) => scope.status !== 'blocked');
+  const source = present.length > 0 ? present : scopes;
+  const status = deriveStatus(
+    present.length === 0,
+    present.some((scope) => scope.status === 'degraded')
+  );
+  const required = uniq(source.flatMap((scope) => scope.required));
+
+  return {
+    technologies: present.map((scope) => scope.technology),
+    status,
+    required,
+    optional: uniq(source.flatMap((scope) => scope.optional)),
+    missing: uniq(source.flatMap((scope) => scope.missing)),
+    index_patterns: required,
+    window: scopes[0].window,
+    row_limit: scopes[0].row_limit,
+  };
+};
+
+/**
+ * Builds a hunt scope from discovered datasets. The space-derived alerts
+ * pattern is the only optional; its absence degrades the scope exactly as it
+ * does for a static technology. `missing` carries the static patterns that
+ * were checked and absent so the caller can still see what was looked for.
+ */
+const buildDiscoveredScope = async ({
+  esClient,
+  spaceId,
+  matches,
+  blocked,
+  status,
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  matches: DiscoveredDataset[];
+  blocked: HuntScope;
+  status: 'ok' | 'degraded';
+}): Promise<HuntScope> => {
+  const alertsPattern = alertsIndexPattern(spaceId);
+  const [, alertsPresent] = await checkPattern(esClient, alertsPattern);
+  const required = uniq(matches.map((match) => match.index_pattern));
+
+  return {
+    technologies: [],
+    status: alertsPresent ? status : 'degraded',
+    required,
+    optional: [alertsPattern],
+    missing: uniq([...blocked.missing, ...(alertsPresent ? [] : [alertsPattern])]),
+    index_patterns: required,
+    window: blocked.window,
+    row_limit: blocked.row_limit,
+  };
+};
+
+/**
+ * Resolves the hunt scope for a space, static first.
+ *
+ * With an explicit `technology` it resolves that one entry. Without one it
+ * resolves every known technology and keeps the ones whose required indices
+ * exist, so a hunt never assumes a vendor the environment does not have.
+ *
+ * Only when every known technology is blocked and a `report` is given does it
+ * fall through to discovery: `discoverHuntDatasets` lists the cluster's log
+ * datasets, a deterministic vendor/product match yields an `ok` scope, and
+ * failing that a `model` (if given) picks datasets for a `degraded` scope,
+ * since a model-chosen scope is a weaker signal. Anything else, including a
+ * discovery error, is `blocked` (fail closed); there is no broad `logs-*`
+ * fallback. A discovered scope has no `technologies`.
  */
 export const resolveHuntScope = async ({
   esClient,
@@ -166,12 +258,18 @@ export const resolveHuntScope = async ({
   technology,
   window,
   row_limit,
+  report,
+  model,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
   technology?: HuntTechnology;
   window?: IndexScopeWindow;
   row_limit?: number;
+  report?: HuntScopeReportContext;
+  model?: ScopedModel;
+  logger?: Logger;
 }): Promise<HuntScope> => {
   const candidates = technology ? [technology] : HUNT_TECHNOLOGIES;
   const scopes = await Promise.all(
@@ -179,22 +277,52 @@ export const resolveHuntScope = async ({
       resolveIndexScope({ esClient, technology: candidate, spaceId, window, row_limit })
     )
   );
-  const present = scopes.filter((scope) => scope.status !== 'blocked');
-  const source = present.length > 0 ? present : scopes;
-  const status = deriveStatus(
-    present.length === 0,
-    present.some((scope) => scope.status === 'degraded')
-  );
+  const staticScope = mergeStaticScopes(scopes);
+  if (staticScope.status !== 'blocked') {
+    logScopeSource(logger, 'static', staticScope.index_patterns.length);
+    return staticScope;
+  }
+  if (technology || !report) return staticScope;
 
-  return {
-    technologies: present.map((scope) => scope.technology),
-    status,
-    required: uniq(source.flatMap((scope) => scope.required)),
-    optional: uniq(source.flatMap((scope) => scope.optional)),
-    missing: uniq(source.flatMap((scope) => scope.missing)),
-    window: scopes[0].window,
-    row_limit: scopes[0].row_limit,
-  };
+  let datasets: DiscoveredDataset[];
+  try {
+    datasets = await discoverHuntDatasets({ esClient, logger });
+  } catch (err) {
+    logger?.warn(`Hunt dataset discovery failed; scope stays blocked: ${(err as Error).message}`);
+    return staticScope;
+  }
+  if (datasets.length === 0) return staticScope;
+
+  const deterministic = matchDatasetsDeterministic({
+    datasets,
+    vendor: report.vendor,
+    product: report.product,
+  });
+  if (deterministic.length > 0) {
+    const scope = await buildDiscoveredScope({
+      esClient,
+      spaceId,
+      matches: deterministic,
+      blocked: staticScope,
+      status: 'ok',
+    });
+    logScopeSource(logger, 'discovered:deterministic', scope.index_patterns.length);
+    return scope;
+  }
+
+  if (!model) return staticScope;
+  const modelMatch = await matchDatasetsWithModel({ model, datasets, report, logger });
+  if (!modelMatch || modelMatch.matches.length === 0) return staticScope;
+
+  const scope = await buildDiscoveredScope({
+    esClient,
+    spaceId,
+    matches: modelMatch.matches,
+    blocked: staticScope,
+    status: 'degraded',
+  });
+  logScopeSource(logger, 'discovered:model', scope.index_patterns.length);
+  return scope;
 };
 
 const isHuntTechnology = (value: string): value is HuntTechnology =>
