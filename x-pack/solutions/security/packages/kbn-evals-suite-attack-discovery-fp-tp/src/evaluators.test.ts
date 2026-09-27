@@ -21,8 +21,13 @@ const completed: FpTpTaskOutput = {
   executionId: 'exec-1',
   executionStatus: ExecutionStatus.COMPLETED,
   outcome: 'false_positive',
-  payload: { verdict: 'false_positive', summary_markdown: 'A summary' },
+  payload: {
+    verdict: 'false_positive',
+    summary_markdown: 'A summary',
+    rationale_markdown: 'entity_store: hits; raw_events: hits\n- alert_linkage: supports',
+  },
   attackDiscoveryIdEcho: 'ad-1',
+  raw: { coverage: { entities: { seen: 1 }, events: { seen: 1 } } },
   seededIds: { attackDiscoveryId: 'ad-1', alertIds: [], entityIds: [], eventIds: [] },
   seededEvidence: { alerts: [], entities: [], events: [] },
   agentConversationIds: [],
@@ -110,8 +115,97 @@ describe('PayloadConformance', () => {
         payload: {
           verdict: 'inconclusive',
           summary_markdown: 'A summary',
-          rationale_markdown: 'x'.repeat(50001),
+          rationale_markdown: `entity_store: hits; raw_events: hits\n${'x'.repeat(50001)}`,
         },
+      },
+    ],
+    [
+      'a missing rationale',
+      { payload: { verdict: 'inconclusive', summary_markdown: 'A summary' } },
+    ],
+    [
+      'an empty rationale',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: ' ',
+        },
+      },
+    ],
+    [
+      'a rationale missing the evidence-gate source-status line',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: '- alert_linkage: supports',
+        },
+      },
+    ],
+    [
+      'a rationale whose source-status line has an invalid status word',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: unknown; raw_events: hits',
+        },
+      },
+    ],
+    [
+      'a rationale claiming hits for a source the run seeded no coverage for',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: hits; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 0 }, events: { seen: 1 } } },
+      },
+    ],
+    [
+      'a rationale claiming empty for a source the run actually retrieved hits from',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: empty; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 3 }, events: { seen: 1 } } },
+      },
+    ],
+    [
+      'a rationale claiming empty for a source whose query actually failed',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: empty; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 0, failed: true }, events: { seen: 1 } } },
+      },
+    ],
+    [
+      'a rationale claiming failed for a source that returned a successful zero-hit query',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: failed; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 0, failed: false }, events: { seen: 1 } } },
+      },
+    ],
+    [
+      'a rationale claiming failed for a source the run actually retrieved hits from',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: failed; raw_events: hits\n- alert_linkage: supports',
+        },
+        raw: { coverage: { entities: { seen: 3, failed: false }, events: { seen: 1 } } },
       },
     ],
     ['a different attack id echo', { attackDiscoveryIdEcho: 'ad-2' }],
@@ -119,6 +213,24 @@ describe('PayloadConformance', () => {
     ['no payload', { payload: undefined }],
   ])('returns 0 for %s', async (_, overrides) => {
     expect(await score(payloadConformance, { ...completed, ...overrides }, 'inconclusive')).toBe(0);
+  });
+
+  it('returns 1 for a rationale correctly claiming failed for a source whose query errored', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          payload: {
+            verdict: 'inconclusive',
+            summary_markdown: 'A summary',
+            rationale_markdown: 'entity_store: failed; raw_events: hits\n- alert_linkage: supports',
+          },
+          raw: { coverage: { entities: { seen: 0, failed: true }, events: { seen: 1 } } },
+        },
+        'inconclusive'
+      )
+    ).toBe(1);
   });
 
   it('returns 1 for a run that should fail and produced no payload', async () => {

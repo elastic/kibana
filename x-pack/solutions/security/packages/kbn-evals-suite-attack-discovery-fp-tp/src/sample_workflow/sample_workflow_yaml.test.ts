@@ -64,7 +64,11 @@ const completeOutput = {
     entities: { seen: 1 },
     events: { seen: 3, cap: 50, truncated: false },
   },
-  payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+  payload: {
+    verdict: 'inconclusive',
+    summary_markdown: 'A summary',
+    rationale_markdown: 'entity_store: hits; raw_events: hits',
+  },
   checks: [],
   claims: {},
 };
@@ -227,7 +231,10 @@ describe('sample FP/TP analysis workflow', () => {
 
   describe('the optional-source coverage', () => {
     const emit = stepIn('emit_result')?.with as {
-      coverage: { entities: { seen: string } };
+      coverage: {
+        entities: { seen: string; failed: string };
+        events: { seen: string; failed: string };
+      };
     };
 
     it('returns zero entities seen when the entity query failed', () => {
@@ -237,6 +244,30 @@ describe('sample FP/TP analysis workflow', () => {
           steps: { load_entities: { error: { message: 'boom' } } },
         })
       ).toBe(0);
+    });
+
+    it('reports entities.failed true when the entity query failed', () => {
+      expect(
+        evaluate(emit.coverage.entities.failed, {
+          steps: { source_status: { output: { entities_failed: true, events_failed: false } } },
+        })
+      ).toBe(true);
+    });
+
+    it('reports entities.failed false for a successful (possibly zero-hit) query', () => {
+      expect(
+        evaluate(emit.coverage.entities.failed, {
+          steps: { source_status: { output: { entities_failed: false, events_failed: false } } },
+        })
+      ).toBe(false);
+    });
+
+    it('reports events.failed true when the raw-events query failed', () => {
+      expect(
+        evaluate(emit.coverage.events.failed, {
+          steps: { source_status: { output: { entities_failed: false, events_failed: true } } },
+        })
+      ).toBe(true);
     });
   });
 
@@ -251,6 +282,15 @@ describe('sample FP/TP analysis workflow', () => {
     it('rejects an output without a payload', () => {
       const { payload, ...withoutPayload } = completeOutput;
       expect(validate(withoutPayload)).toBe(false);
+    });
+
+    it('rejects an output without rationale_markdown', () => {
+      expect(
+        validate({
+          ...completeOutput,
+          payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+        })
+      ).toBe(false);
     });
 
     it('rejects a summary longer than 8000 characters', () => {

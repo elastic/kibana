@@ -57,6 +57,8 @@ outputs:
           properties:
             seen:
               type: number
+            failed:
+              type: boolean
         events:
           type: object
           properties:
@@ -65,6 +67,8 @@ outputs:
             cap:
               type: number
             truncated:
+              type: boolean
+            failed:
               type: boolean
     payload:
       type: object
@@ -80,6 +84,7 @@ outputs:
       required:
         - verdict
         - summary_markdown
+        - rationale_markdown
     checks:
       type: array
       items:
@@ -220,7 +225,12 @@ steps:
         - false_positive: the world affirmatively refutes the story.
         - inconclusive: you cannot decide from the evidence.
 
-        Missing telemetry is never a false_positive; only an affirmative contradiction is.
+        Two rules that are never negotiable:
+        - Missing telemetry is never a false_positive; only an affirmative contradiction is.
+        - A contradiction is never negotiable. If any world check contradicts, you may not
+          dismiss it as neutral, as "not relevant", as "not explaining the activity", or as
+          outweighed by other checks. A contradicting check is a fixed input to the rules
+          below, and it blocks every true_positive and false_positive rule that excludes it.
         The discovery's own markdown is a claim to test, not evidence.
 
         Run every check below and report exactly one entry per check. Status is
@@ -234,25 +244,83 @@ steps:
            (ordinary employee workstation or account)?
         3. process_parent — raw events only. Is the parent of the suspicious process a
            management agent or scheduler (contradicts), or a user application such as an
-           Office program or browser (supports)?
+           Office program or browser (supports)? A management-agent parent (e.g. an SCCM,
+           MDM, RMM, or patch-management executable such as ccmexec.exe) contradicts
+           regardless of what happens downstream of the suspicious process — the parent
+           being routine tooling is itself evidence the discovery cites nothing suspicious.
         4. network_destination — raw events only. Is the destination a known vendor or
            internal management service (contradicts), or an unknown or known-bad
-           endpoint (supports)?
+           endpoint (supports)? A vendor management domain (e.g. manage.microsoft.com,
+           an MDM/RMM console, or a software-distribution point) contradicts even when the
+           process making the connection is the one under scrutiny — routine management
+           traffic to a named vendor endpoint is not attacker C2, independent of any other
+           check's result.
 
         The world checks are entity_role, process_parent, and network_destination.
+
+        EVIDENCE GATE — a mandatory precondition, checked before choosing any rule. State
+        the status of BOTH sources as the first line of rationale_markdown, in exactly this
+        form: "entity_store: hits|empty|failed; raw_events: hits|empty|failed".
+        - false_positive requires BOTH sources to be present. If either source is empty or
+          failed you may NOT return false_positive under any rule, no matter how clean,
+          total, or unambiguous the contradiction looks. You cannot exonerate an alert with
+          telemetry you never saw.
+        - A total contradiction on the raw events with an empty or failed entity store is
+          inconclusive, NOT false_positive. This is the single most common mistake this gate
+          exists to prevent: a decisive-looking raw-event contradiction does not become a
+          clearance when the other source is missing.
+        - Never let an unavailable source make the verdict MORE decisive. A source you could
+          not read weakens the verdict; it never strengthens it.
+        When the gate blocks false_positive, skip to whichever of rules 1, 3, or 4 applies.
 
         Choose the verdict by the first rule that matches:
         1. inconclusive — world checks both support and contradict; or you cannot cite
            an id from the hits below.
         2. false_positive — at least one world check contradicts, none supports, and
-           both the entity store and the raw events have hits. Missing evidence cannot
-           clear an alert: if either source is empty or its query failed, the verdict
-           is inconclusive.
+           both the entity store and the raw events have hits. (Blocked by the
+           evidence gate above when either source is empty or failed — inconclusive
+           applies instead.)
         3. true_positive — process_parent or network_destination supports and no world
            check contradicts. An empty or failed entity store does not block this.
            entity_role and alert_linkage corroborate but are never enough on their own.
         4. inconclusive — anything else: every world check is skipped or neutral, or
            only entity_role or alert_linkage supports.
+
+        MANDATORY SELF-CHECK — do this before you pick a rule, and write the result as the
+        first bullets of rationale_markdown: first the source-status line from the evidence
+        gate above, then every world check (entity_role, process_parent, network_destination)
+        with its status and result, exactly as you will report it below. Then re-read that
+        list once, specifically hunting for two traps: (a) any check you marked "contradicts"
+        and then talked yourself out of, and (b) any rule you are about to apply whose
+        precondition involves a source you just listed as empty or failed. For (a) its result
+        is still "contradicts" — you do not get to downgrade a contradiction to neutral or
+        supports because another check disagrees, because it seems unrelated to the process
+        chain, or because the overall story otherwise looks compelling. For (b) the rule does
+        not apply at all.
+
+        Three worked examples of the failure modes this self-check exists to catch:
+        - entity_role reads "contradicts" (host is a known MDM/management distribution
+          point) and process_parent reads "supports" (an Office app spawned the process).
+          These disagree, so the verdict is inconclusive under rule 1 — NOT true_positive.
+          It is wrong to reason "the management role doesn't explain this specific process
+          chain, so it doesn't count"; a contradiction never gets explained away, it only
+          gets weighed against other checks by rule 1.
+        - process_parent shows a patch-management executable (ccmexec.exe or equivalent)
+          launching the suspicious process, AND network_destination shows that process
+          connecting to a named vendor management domain (e.g. manage.microsoft.com). Both
+          checks contradict. It is wrong to reason "the connection happened, so it supports
+          the story"; the identity of the destination, not the fact that a connection
+          occurred, is what process_parent and network_destination test. Both contradicting
+          means rule 2 is the candidate — but its precondition is the next example's trap.
+        - raw_events shows BOTH process_parent and network_destination contradicting
+          (management agent parent, vendor management domain), the contradiction is total
+          and unambiguous, and the entity store is empty or failed. The verdict is
+          inconclusive — NOT false_positive. Rule 2's precondition ("both the entity store
+          and the raw events have hits") is unmet, so rule 2 does not apply, however
+          convincing the raw-event contradiction is. Entity_role being unevaluable is not
+          "no check supports"; it is a missing source, and a missing source can never clear
+          an alert. Do not write "entity_role could not be evaluated" and then still return
+          false_positive.
 
         Claims:
         - claims.world: one entry for each world-check result the verdict relies on, with
@@ -267,8 +335,9 @@ steps:
         - summary_markdown: one paragraph. State the verdict in prose (no heading), the
           strongest reason, the id it rests on, and any empty or unavailable source.
           At most 8000 characters.
-        - rationale_markdown: one bullet per check (status, result, cited ids) and one per
-          empty or unavailable source. Omit it if it would only repeat the summary.
+        - rationale_markdown: REQUIRED on every run. First line is the source-status line
+          from the evidence gate above, exactly as specified there. Then one bullet per
+          check (status, result, cited ids) and one per empty or unavailable source.
         - No JSON, no confidence scores, no restated instructions.
 
         Attack Discovery:
@@ -385,6 +454,7 @@ steps:
         required:
           - verdict
           - summary_markdown
+          - rationale_markdown
           - checks
           - claims
 
@@ -413,10 +483,12 @@ steps:
           total: '${{ steps.count_alerts.output.cited }}'
         entities:
           seen: '${{ steps.load_entities.output.hits.hits | default: consts.no_rows | size }}'
+          failed: '${{ steps.source_status.output.entities_failed }}'
         events:
           seen: '${{ steps.load_events.output.hits.hits | default: consts.no_rows | size }}'
           cap: 50
           truncated: '${{ steps.load_events.output.hits.total.value > 50 }}'
+          failed: '${{ steps.source_status.output.events_failed }}'
       payload:
         verdict: '${{ steps.analyze.output.structured_output.verdict }}'
         summary_markdown: '${{ steps.analyze.output.structured_output.summary_markdown }}'
