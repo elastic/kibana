@@ -17,6 +17,10 @@ import {
 } from '../../../common/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
+  getHistorySnapshotIndexName,
+  getLegacySecurityHistorySnapshotIndexName,
+} from '../../../../../server/domain/asset_manager/history_snapshot_index';
+import {
   clearEntityStoreIndices,
   forceLogExtraction,
   normalizeKeywordList,
@@ -181,6 +185,77 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         expect(normalizeKeywordList(latestBehaviors?.rule_names)).toStrictEqual([]);
         expect(normalizeKeywordList(latestBehaviors?.anomaly_job_ids)).toStrictEqual([]);
         expect((latestEntity.lifecycle as Record<string, unknown>)?.last_activity).toBeDefined();
+      }
+    }
+  );
+
+  apiTest(
+    'history snapshot: deletes indices older than retention using the date in the index name',
+    async ({ apiClient, esClient }) => {
+      const utcDaysAgo = (days: number, hours = 0): Date => {
+        const now = new Date();
+        return new Date(
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days, hours, 0, 0, 0)
+        );
+      };
+
+      const expiredIndex = getHistorySnapshotIndexName('default', utcDaysAgo(31, 0));
+      // 29 days ago is safely within the 30-day retention window regardless of when in the
+      // UTC day the snapshot runs. Exact cutoff-day/hour behavior is covered by unit tests.
+      const withinRetentionIndex = getHistorySnapshotIndexName('default', utcDaysAgo(29, 0));
+      const recentIndex = getHistorySnapshotIndexName('default', utcDaysAgo(5, 12));
+      const expiredLegacyIndex = getLegacySecurityHistorySnapshotIndexName(
+        'default',
+        utcDaysAgo(40, 0)
+      );
+
+      // Create only indices that don't already exist so we only clean up what we own.
+      // Only swallow resource_already_exists_exception (status 400); any other error
+      // (permission denied, template error, etc.) indicates a broken test environment
+      // and should fail the test immediately rather than silently skipping creation and
+      // producing a false-positive exists===false assertion.
+      const testIndices: string[] = [];
+      await Promise.all(
+        [expiredIndex, withinRetentionIndex, recentIndex, expiredLegacyIndex].map(async (idx) => {
+          try {
+            await esClient.indices.create({ index: idx });
+            testIndices.push(idx);
+          } catch (err) {
+            if (
+              (err as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error
+                ?.type !== 'resource_already_exists_exception'
+            ) {
+              throw err;
+            }
+          }
+        })
+      );
+
+      try {
+        const snapshotResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {},
+          }
+        );
+        expect(snapshotResponse.statusCode).toBe(200);
+        const body = snapshotResponse.body as { ok: boolean; historySnapshotIndex: string };
+        expect(body.ok).toBe(true);
+        expect(body.historySnapshotIndex).toBeDefined();
+
+        expect(await esClient.indices.exists({ index: expiredIndex })).toBe(false);
+        expect(await esClient.indices.exists({ index: expiredLegacyIndex })).toBe(false);
+        expect(await esClient.indices.exists({ index: withinRetentionIndex })).toBe(true);
+        expect(await esClient.indices.exists({ index: recentIndex })).toBe(true);
+        expect(await esClient.indices.exists({ index: body.historySnapshotIndex })).toBe(true);
+      } finally {
+        await Promise.all(
+          testIndices.map((idx) =>
+            esClient.indices.delete({ index: idx, ignore_unavailable: true }, { ignore: [404] })
+          )
+        );
       }
     }
   );

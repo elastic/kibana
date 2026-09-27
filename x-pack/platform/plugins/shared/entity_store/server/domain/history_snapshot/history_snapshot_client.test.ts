@@ -11,19 +11,12 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { HistorySnapshotClient } from './history_snapshot_client';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
-import {
-  resolveHistorySnapshotIndexPatterns,
-  resolveLatestEntitiesIndexName,
-} from '../asset_manager/resolve_entity_store_indices';
+import { deleteExpiredHistorySnapshots } from './expire_history_snapshots';
+import { DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS } from '../saved_objects';
+import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 
-jest.mock('../../infra/elasticsearch', () => ({
-  ...jest.createMockFromModule<typeof import('../../infra/elasticsearch')>(
-    '../../infra/elasticsearch'
-  ),
-  chunkByUrlLength: jest.requireActual<typeof import('../../infra/elasticsearch')>(
-    '../../infra/elasticsearch'
-  ).chunkByUrlLength,
-}));
+jest.mock('../../infra/elasticsearch');
+jest.mock('./expire_history_snapshots');
 jest.mock('../asset_manager/resolve_entity_store_indices');
 
 const mockCreateIndex = createIndex as jest.MockedFunction<typeof createIndex>;
@@ -31,10 +24,9 @@ const mockReindex = reindex as jest.MockedFunction<typeof reindex>;
 const mockUpdateByQueryWithScript = updateByQueryWithScript as jest.MockedFunction<
   typeof updateByQueryWithScript
 >;
-const mockResolveHistorySnapshotIndexPatterns =
-  resolveHistorySnapshotIndexPatterns as jest.MockedFunction<
-    typeof resolveHistorySnapshotIndexPatterns
-  >;
+const mockDeleteExpiredHistorySnapshots = deleteExpiredHistorySnapshots as jest.MockedFunction<
+  typeof deleteExpiredHistorySnapshots
+>;
 const mockResolveLatestEntitiesIndexName = resolveLatestEntitiesIndexName as jest.MockedFunction<
   typeof resolveLatestEntitiesIndexName
 >;
@@ -102,6 +94,8 @@ describe('HistorySnapshotClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDeleteExpiredHistorySnapshots.mockResolvedValue({ deleted: [] });
+    mockLogger = loggerMock.create();
     mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
     mockInternalEsClient = {} as jest.Mocked<ElasticsearchClient>;
     mockGlobalStateClient = createMockGlobalStateClient();
@@ -167,6 +161,13 @@ describe('HistorySnapshotClient', () => {
           lastError: undefined,
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: mockEsClient,
+          namespace,
+          retentionDays: 30,
+        })
+      );
     });
 
     it('uses nested entity field access in the reset script (no flat dotted keys)', () => {
@@ -199,6 +200,7 @@ describe('HistorySnapshotClient', () => {
           lastError: undefined,
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
 
     it('returns skipped when history snapshot status is not started', async () => {
@@ -215,6 +217,7 @@ describe('HistorySnapshotClient', () => {
       expect(mockCreateIndex).not.toHaveBeenCalled();
       expect(mockReindex).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(0);
     });
 
     it('returns error when createIndex throws', async () => {
@@ -233,6 +236,7 @@ describe('HistorySnapshotClient', () => {
           lastError: { message: 'index creation failed', timestamp: expect.any(String) },
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
 
     it('returns error when reindex throws', async () => {
@@ -251,6 +255,46 @@ describe('HistorySnapshotClient', () => {
           lastError: { message: 'reindex failed', timestamp: expect.any(String) },
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns error and still runs retention cleanup when source-index resolution fails', async () => {
+      mockResolveLatestEntitiesIndexName.mockRejectedValue(new Error('lookup failed'));
+
+      const result = await client.runHistorySnapshot();
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.message).toBe('History snapshot failed');
+      }
+      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
+        historySnapshot: expect.objectContaining({
+          lastError: { message: 'lookup failed', timestamp: expect.any(String) },
+        }),
+      });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
+    });
+
+    it('still succeeds when retention cleanup throws', async () => {
+      mockCreateIndex.mockResolvedValue(undefined);
+      mockReindex.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        versionConflicts: 0,
+        total: 0,
+        failures: [],
+      });
+      mockDeleteExpiredHistorySnapshots.mockRejectedValue(new Error('cleanup failed'));
+
+      const result = await client.runHistorySnapshot();
+
+      expect(result.ok).toBe(true);
+      if (result.ok && !('skipped' in result)) {
+        expect(result.docCount).toBe(0);
+      }
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'history snapshot: retention cleanup failed: cleanup failed'
+      );
     });
 
     it('returns error when updateByQueryWithScript throws', async () => {
@@ -278,6 +322,49 @@ describe('HistorySnapshotClient', () => {
           },
         }),
       });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls deleteExpiredHistorySnapshots with configured retentionDays when set in global state', async () => {
+      mockCreateIndex.mockResolvedValue(undefined);
+      mockReindex.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        versionConflicts: 0,
+        total: 0,
+        failures: [],
+      });
+      mockGlobalStateClient.findOrThrow.mockResolvedValue({
+        ...mockGlobalStateStarted,
+        historySnapshot: { ...mockGlobalStateStarted.historySnapshot, retentionDays: 7 },
+      });
+
+      await client.runHistorySnapshot();
+
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
+        expect.objectContaining({
+          retentionDays: 7,
+        })
+      );
+    });
+
+    it('calls deleteExpiredHistorySnapshots with default retention when retentionDays is not configured', async () => {
+      mockCreateIndex.mockResolvedValue(undefined);
+      mockReindex.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        versionConflicts: 0,
+        total: 0,
+        failures: [],
+      });
+
+      await client.runHistorySnapshot();
+
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
+        expect.objectContaining({
+          retentionDays: DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+        })
+      );
     });
   });
 
@@ -416,88 +503,55 @@ describe('HistorySnapshotClient', () => {
     });
 
     describe('with clearHistorySnapshots', () => {
-      let mockResolveIndex: jest.Mock;
-      let mockIndicesDelete: jest.Mock;
-
-      beforeEach(() => {
-        mockResolveIndex = jest.fn().mockResolvedValue({
-          indices: [
-            { name: '.entities.v2.history.default.2024-01-01-00' },
-            { name: '.entities.v2.history.default.2024-01-02-00' },
-          ],
-          aliases: [],
-          data_streams: [],
-        });
-        mockIndicesDelete = jest.fn().mockResolvedValue({});
-        mockInternalEsClient = {
-          ...mockInternalEsClient,
-          indices: { resolveIndex: mockResolveIndex, delete: mockIndicesDelete },
-        } as unknown as jest.Mocked<ElasticsearchClient>;
-        mockResolveHistorySnapshotIndexPatterns.mockResolvedValue([
-          '.entities.v2.history.default.*',
-        ]);
-        client = createClient();
-      });
-
       it('does not clear indices when option is not set', async () => {
         await client.disable(request);
         await flushPromises();
 
-        expect(mockResolveHistorySnapshotIndexPatterns).not.toHaveBeenCalled();
-        expect(mockIndicesDelete).not.toHaveBeenCalled();
+        expect(mockDeleteExpiredHistorySnapshots).not.toHaveBeenCalled();
       });
 
       it('does not clear indices when clearHistorySnapshots is false', async () => {
         await client.disable(request, { clearHistorySnapshots: false });
         await flushPromises();
 
-        expect(mockResolveHistorySnapshotIndexPatterns).not.toHaveBeenCalled();
-        expect(mockIndicesDelete).not.toHaveBeenCalled();
+        expect(mockDeleteExpiredHistorySnapshots).not.toHaveBeenCalled();
       });
 
-      it('asynchronously deletes all resolved history snapshot indices', async () => {
+      it('asynchronously deletes all history snapshot indices without a retention filter', async () => {
+        mockDeleteExpiredHistorySnapshots.mockResolvedValue({
+          deleted: [
+            '.entities.v2.history.default.2024-01-01-00',
+            '.entities.v2.history.default.2024-01-02-00',
+          ],
+        });
+
         await client.disable(request, { clearHistorySnapshots: true });
 
-        // deletion fires in the background — not yet called synchronously
-        expect(mockIndicesDelete).not.toHaveBeenCalled();
+        expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith({
+          esClient: mockInternalEsClient,
+          namespace,
+          logger: mockLogger,
+        });
+        expect(mockLogger.info).not.toHaveBeenCalled();
 
         await flushPromises();
 
-        expect(mockResolveHistorySnapshotIndexPatterns).toHaveBeenCalledWith(
-          mockInternalEsClient,
-          namespace
-        );
-        expect(mockResolveIndex).toHaveBeenCalledWith({
-          name: '.entities.v2.history.default.*',
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        });
-        expect(mockIndicesDelete).toHaveBeenCalledWith(
-          {
-            index: [
-              '.entities.v2.history.default.2024-01-01-00',
-              '.entities.v2.history.default.2024-01-02-00',
-            ],
-          },
-          { ignore: [404] }
-        );
         expect(mockLogger.info).toHaveBeenCalledWith(
           'Deleted 2 history snapshot indices after disabling'
         );
       });
 
       it('logs info when no history snapshot indices exist to clear', async () => {
-        mockResolveIndex.mockResolvedValue({ indices: [], aliases: [], data_streams: [] });
+        mockDeleteExpiredHistorySnapshots.mockResolvedValue({ deleted: [] });
 
         await client.disable(request, { clearHistorySnapshots: true });
         await flushPromises();
 
-        expect(mockIndicesDelete).not.toHaveBeenCalled();
         expect(mockLogger.info).toHaveBeenCalledWith('No history snapshot indices to delete.');
       });
 
-      it('does not throw and logs an error if index deletion fails', async () => {
-        mockIndicesDelete.mockRejectedValue(new Error('ES unavailable'));
+      it('does not throw and logs an error if clearing indices fails', async () => {
+        mockDeleteExpiredHistorySnapshots.mockRejectedValue(new Error('ES unavailable'));
 
         await expect(
           client.disable(request, { clearHistorySnapshots: true })
@@ -507,49 +561,6 @@ describe('HistorySnapshotClient', () => {
 
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.stringContaining('Failed to clear history snapshot indices')
-        );
-      });
-
-      it('does not throw and logs an error if resolveIndex fails', async () => {
-        mockResolveIndex.mockRejectedValue(new Error('Forbidden'));
-
-        await expect(
-          client.disable(request, { clearHistorySnapshots: true })
-        ).resolves.toBeUndefined();
-
-        await flushPromises();
-
-        expect(mockIndicesDelete).not.toHaveBeenCalled();
-        expect(mockLogger.error).toHaveBeenCalledWith(
-          expect.stringContaining('Failed to clear history snapshot indices')
-        );
-      });
-
-      it('splits deletion into multiple requests when indices exceed the URL length limit', async () => {
-        // Each name is ~1202 bytes. Two fit in one chunk (1202 + 3 + 1202 = 2407 < 3500),
-        // the third would push it to 2407 + 3 + 1202 = 3612 > 3500, so it starts a new chunk.
-        const index1 = `${'a'.repeat(1200)}-1`;
-        const index2 = `${'a'.repeat(1200)}-2`;
-        const index3 = `${'a'.repeat(1200)}-3`;
-        mockResolveIndex.mockResolvedValue({
-          indices: [{ name: index1 }, { name: index2 }, { name: index3 }],
-          aliases: [],
-          data_streams: [],
-        });
-
-        await client.disable(request, { clearHistorySnapshots: true });
-        await flushPromises();
-
-        expect(mockIndicesDelete).toHaveBeenCalledTimes(2);
-        expect(mockIndicesDelete).toHaveBeenNthCalledWith(
-          1,
-          { index: [index1, index2] },
-          { ignore: [404] }
-        );
-        expect(mockIndicesDelete).toHaveBeenNthCalledWith(
-          2,
-          { index: [index3] },
-          { ignore: [404] }
         );
       });
     });

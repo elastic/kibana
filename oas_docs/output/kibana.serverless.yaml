@@ -73913,6 +73913,11 @@ paths:
                       maxLength: 32
                       pattern: '[smdh]$'
                       type: string
+                    retentionDays:
+                      default: 30
+                      maximum: 3650
+                      minimum: 1
+                      type: integer
                 logExtraction:
                   additionalProperties: false
                   type: object

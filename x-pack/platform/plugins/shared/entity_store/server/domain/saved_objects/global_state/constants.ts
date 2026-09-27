@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod/v4';
 
 export const DEFAULT_HISTORY_SNAPSHOT_FREQUENCY = '24h';
+export const DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS = 30;
+export const MAX_HISTORY_SNAPSHOT_RETENTION_DAYS = 3650; // 10 years
 
 export const LOG_EXTRACTION_DELAY_DEFAULT = '1m';
 export const LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT = '3h';
@@ -138,6 +140,12 @@ export type HistorySnapshotState = z.infer<typeof HistorySnapshotState>;
 export const HistorySnapshotState = z.object({
   status: HistorySnapshotStatus.default('started'),
   frequency: durationString.default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
+  retentionDays: z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_HISTORY_SNAPSHOT_RETENTION_DAYS)
+    .default(DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS),
   lastExecutionTimestamp: z.string().max(MAX_TIMESTAMP_STRING_LENGTH).optional(),
   lastError: z
     .object({

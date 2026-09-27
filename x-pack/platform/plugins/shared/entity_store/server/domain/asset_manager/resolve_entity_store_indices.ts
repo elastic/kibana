@@ -109,10 +109,19 @@ export async function resolveMetadataDataStreamName(
  */
 export async function resolveHistorySnapshotIndexPatterns(
   esClient: ElasticsearchClient,
-  namespace: string
+  namespace: string,
+  signal?: AbortSignal,
+  strict?: boolean
 ): Promise<string[]> {
   const neutral = getHistorySnapshotIndexPattern(namespace);
-  if (await hasCollidingNeutralNamespaceAssets(esClient, namespace)) {
+  try {
+    if (await hasCollidingNeutralNamespaceAssets(esClient, namespace, signal, strict)) {
+      return [neutral];
+    }
+  } catch {
+    // Only reachable when strict=true: a non-404 alias-lookup failure means
+    // ownership cannot be verified, so omit the legacy pattern to avoid touching
+    // indices that may belong to the security_{namespace} space.
     return [neutral];
   }
   return [neutral, getLegacySecurityHistorySnapshotIndexPattern(namespace)];

@@ -7,28 +7,21 @@
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import pLimit from 'p-limit';
 import moment from 'moment';
 import { entityStoreMetrics } from '../../monitor/metrics';
 import type { EntityStoreGlobalStateClient } from '../saved_objects';
-import {
-  chunkByUrlLength,
-  createIndex,
-  reindex,
-  updateByQueryWithScript,
-} from '../../infra/elasticsearch';
+import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getErrorMessage } from '../../../common';
+import { DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS } from '../saved_objects';
 import {
   getHistorySnapshotIndexName,
   getLegacySecurityHistorySnapshotIndexName,
 } from '../asset_manager/history_snapshot_index';
-import {
-  resolveHistorySnapshotIndexPatterns,
-  resolveLatestEntitiesIndexName,
-} from '../asset_manager/resolve_entity_store_indices';
+import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { getHistorySnapshotTaskId } from '../../tasks/config';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
+import { deleteExpiredHistorySnapshots } from './expire_history_snapshots';
 
 export type RunHistorySnapshotResult =
   | { ok: true; historySnapshotIndex: string; docCount: number; resetCount: number }
@@ -43,8 +36,6 @@ export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
 const POLL_INTERVAL_MS = 30 * 1000;
 const POLL_MIN_INTERVAL_MS = 5 * 1000;
-
-const BATCH_CONCURRENCY_LIMIT = 10;
 
 export interface HistorySnapshotClientDependencies {
   logger: Logger;
@@ -185,31 +176,12 @@ export class HistorySnapshotClient {
   }
 
   private async clearSnapshotIndices(): Promise<number> {
-    const patterns = await resolveHistorySnapshotIndexPatterns(
-      this.internalEsClient,
-      this.namespace
-    );
-    const resolvedPerPattern = await Promise.all(
-      patterns.map(async (pattern) => {
-        const { indices } = await this.internalEsClient.indices.resolveIndex({
-          name: pattern,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        });
-        return indices.map((index) => index.name);
-      })
-    );
-    const indices = resolvedPerPattern.flat();
-    if (indices.length > 0) {
-      const limit = pLimit(BATCH_CONCURRENCY_LIMIT);
-      await Promise.all(
-        chunkByUrlLength(indices).map((chunk) =>
-          limit(() => this.internalEsClient.indices.delete({ index: chunk }, { ignore: [404] }))
-        )
-      );
-      this.logger.debug(`Cleared history snapshot indices: ${indices.join(', ')}`);
-    }
-    return indices.length;
+    const { deleted } = await deleteExpiredHistorySnapshots({
+      esClient: this.internalEsClient,
+      namespace: this.namespace,
+      logger: this.logger,
+    });
+    return deleted.length;
   }
 
   public async runHistorySnapshot(
@@ -226,13 +198,15 @@ export class HistorySnapshotClient {
 
     const timestampNow = moment.utc().toISOString();
     const snapshotDate = moment.utc().toDate();
-    const latestIndex = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
-    const historySnapshotIndex =
-      latestIndex === getLatestEntitiesIndexName(this.namespace)
-        ? getHistorySnapshotIndexName(this.namespace, snapshotDate)
-        : getLegacySecurityHistorySnapshotIndexName(this.namespace, snapshotDate);
 
+    let result: RunHistorySnapshotResult;
     try {
+      const latestIndex = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+      const historySnapshotIndex =
+        latestIndex === getLatestEntitiesIndexName(this.namespace)
+          ? getHistorySnapshotIndexName(this.namespace, snapshotDate)
+          : getLegacySecurityHistorySnapshotIndexName(this.namespace, snapshotDate);
+
       await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
 
       const reindexStart = Date.now();
@@ -280,7 +254,7 @@ export class HistorySnapshotClient {
       await this.updateGlobalStateOnSuccess();
       entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
       entityStoreMetrics.historySnapshotDocCount.record(docCount, { namespace: this.namespace });
-      return {
+      result = {
         ok: true,
         historySnapshotIndex,
         docCount,
@@ -290,8 +264,25 @@ export class HistorySnapshotClient {
       const caughtError = err instanceof Error ? err : new Error(String(err));
       this.logger.error(`history snapshot failed: ${caughtError.message}`, { error: caughtError });
       await this.updateGlobalStateOnError(caughtError);
-      return { ok: false, error: new Error('History snapshot failed') };
+      result = { ok: false, error: new Error('History snapshot failed') };
+    } finally {
+      try {
+        await deleteExpiredHistorySnapshots({
+          esClient: this.esClient,
+          namespace: this.namespace,
+          retentionDays:
+            globalState.historySnapshot?.retentionDays ?? DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+          logger: this.logger,
+          abortSignal,
+        });
+      } catch (cleanupErr) {
+        this.logger.error(
+          `history snapshot: retention cleanup failed: ${getErrorMessage(cleanupErr)}`
+        );
+      }
     }
+
+    return result;
   }
 
   private async updateGlobalStateOnSuccess(): Promise<void> {
