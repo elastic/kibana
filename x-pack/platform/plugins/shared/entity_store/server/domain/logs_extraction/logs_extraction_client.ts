@@ -530,6 +530,7 @@ export class LogsExtractionClient {
     let totalPages = 0;
     let totalLogs = 0;
     let lastSubWindowEnd = currentFromDateISO;
+    let sampledAnySubWindow = false;
 
     let hasNextPage = true;
     while (hasNextPage) {
@@ -574,6 +575,7 @@ export class LogsExtractionClient {
       totalPages += subResult.pages;
       totalLogs += subResult.logsProcessed;
       lastSubWindowEnd = subResult.lastSearchTimestamp;
+      sampledAnySubWindow = sampledAnySubWindow || subResult.sampledAnySlice;
 
       if (subResult.logsCapApplied) {
         this.logger.warn(
@@ -595,6 +597,7 @@ export class LogsExtractionClient {
         }
         entityStoreMetrics.extractionLogsProcessed.record(totalLogs, metricAttributes);
         this.recordLogsCapUtilization(totalLogs, maxLogsPerWindow, metricAttributes);
+        this.recordSampleEligibleRun(type, sampledAnySubWindow, metricAttributes);
         return {
           count: totalCount,
           pages: totalPages,
@@ -614,6 +617,7 @@ export class LogsExtractionClient {
 
     entityStoreMetrics.extractionLogsProcessed.record(totalLogs, metricAttributes);
     this.recordLogsCapUtilization(totalLogs, maxLogsPerWindow, metricAttributes);
+    this.recordSampleEligibleRun(type, sampledAnySubWindow, metricAttributes);
     return {
       count: totalCount,
       pages: totalPages,
@@ -623,6 +627,22 @@ export class LogsExtractionClient {
       logsCapApplied: false,
       logsProcessed: totalLogs,
     };
+  }
+
+  /**
+   * Counts scheduled runs of a sampling-capable non-priority process, labeled by whether any
+   * slice sampled. Other processes and types never record, so sampled/total reads directly as
+   * the share of eligible runs that sampled.
+   */
+  private recordSampleEligibleRun(
+    type: EntityType,
+    sampled: boolean,
+    metricAttributes: ExtractionAttributes
+  ): void {
+    if (this.extractionMode !== EXTRACTION_MODE.nonPriority || !supportsNonPrioritySampling(type)) {
+      return;
+    }
+    entityStoreMetrics.extractionSampleEligibleRuns.add(1, { ...metricAttributes, sampled });
   }
 
   /**
@@ -698,6 +718,7 @@ export class LogsExtractionClient {
     let pages = 0;
     let logsCapApplied = false;
     let logsCapTimestamp: string | undefined;
+    let sampledAnySlice = false;
     let state: EngineLogExtractionState = { ...initialEngineState };
 
     const onAbort = () => {
@@ -805,6 +826,13 @@ export class LogsExtractionClient {
             : 1;
           const samplingRate = dynamicOrOverrideRate < 1 ? dynamicOrOverrideRate : undefined;
 
+          // Only applied rates are recorded; unsampled slices record nothing so the histogram's
+          // distribution reflects actual sampling, not a stream of 1.0s.
+          if (samplingRate !== undefined) {
+            sampledAnySlice = true;
+            entityStoreMetrics.extractionSampleProbability.record(samplingRate, metricAttributes);
+          }
+
           // The budget counts processed volume, letting it stretch across the whole window.
           totalLogs +=
             samplingRate !== undefined ? Math.round(sliceLogCount * samplingRate) : sliceLogCount;
@@ -858,6 +886,7 @@ export class LogsExtractionClient {
       // lastSearchTimestamp; here we report where the loop actually stopped.
       lastSearchTimestamp: logsCapTimestamp ?? toDateISO,
       logsCapApplied,
+      sampledAnySlice,
     };
   }
 

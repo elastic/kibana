@@ -2804,4 +2804,75 @@ describe('LogsExtractionClient sampling wiring', () => {
     expect(result.success && result.logsProcessed).toBeGreaterThan(0);
     expect(result.success && result.logsProcessed).toBeLessThan(100_000);
   });
+
+  describe('sampling metrics', () => {
+    // Spies must be created after createSamplingContext, whose clearAllMocks would wipe them.
+    const spySampleMetrics = () => ({
+      probabilityRecord: jest
+        .spyOn(entityStoreMetrics.extractionSampleProbability, 'record')
+        .mockImplementation(),
+      eligibleRunsAdd: jest
+        .spyOn(entityStoreMetrics.extractionSampleEligibleRuns, 'add')
+        .mockImplementation(),
+    });
+
+    it('a sampled run records the applied rate and counts as sampled', async () => {
+      const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      const { probabilityRecord, eligibleRunsAdd } = spySampleMetrics();
+      mockHighVolumeSequence();
+
+      await client.extractLogs('user');
+
+      expect(probabilityRecord).toHaveBeenCalledWith(
+        expect.any(Number),
+        expect.objectContaining({ extraction_mode: EXTRACTION_MODE.nonPriority })
+      );
+      const [rate] = probabilityRecord.mock.calls[0];
+      expect(rate).toBeGreaterThanOrEqual(0.1);
+      expect(rate).toBeLessThan(1);
+      expect(eligibleRunsAdd).toHaveBeenCalledTimes(1);
+      expect(eligibleRunsAdd).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ sampled: true, extraction_mode: EXTRACTION_MODE.nonPriority })
+      );
+    });
+
+    it('an eligible unsampled run records no rate and counts as not sampled', async () => {
+      const client = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      const { probabilityRecord, eligibleRunsAdd } = spySampleMetrics();
+      mockLowVolumeSequence();
+
+      await client.extractLogs('user');
+
+      expect(probabilityRecord).not.toHaveBeenCalled();
+      expect(eligibleRunsAdd).toHaveBeenCalledTimes(1);
+      expect(eligibleRunsAdd).toHaveBeenCalledWith(1, expect.objectContaining({ sampled: false }));
+    });
+
+    it('a fixed override run records the override value', async () => {
+      const client = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
+      });
+      const { probabilityRecord } = spySampleMetrics();
+      mockLowVolumeSequence();
+
+      await client.extractLogs('user');
+
+      expect(probabilityRecord).toHaveBeenCalledWith(0.5, expect.anything());
+    });
+
+    it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
+      '%s mode records neither metric at any volume',
+      async (mode) => {
+        const client = createSamplingContext(mode);
+        const { probabilityRecord, eligibleRunsAdd } = spySampleMetrics();
+        mockHighVolumeSequence();
+
+        await client.extractLogs('user');
+
+        expect(probabilityRecord).not.toHaveBeenCalled();
+        expect(eligibleRunsAdd).not.toHaveBeenCalled();
+      }
+    );
+  });
 });
