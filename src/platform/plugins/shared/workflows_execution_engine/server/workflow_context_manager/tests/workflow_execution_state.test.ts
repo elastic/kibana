@@ -8,7 +8,7 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
@@ -471,6 +471,56 @@ describe('WorkflowExecutionState', () => {
           stepId: 'testStep',
         })
       );
+    });
+
+    describe('scoped to parallel branches', () => {
+      const branchFrames = (branchIndex: number): StackFrame[] => [
+        {
+          stepId: 'fanOut',
+          nestedScopes: [
+            {
+              nodeId: 'enterParallel_fanOut',
+              nodeType: 'enter-parallel',
+              scopeId: branchIndex.toString(),
+            },
+          ],
+        },
+      ];
+
+      beforeEach(() => {
+        underTest.upsertStep({ id: 'outside', stepId: 'mark', scopeStack: [] });
+        underTest.upsertStep({ id: 'branch-0', stepId: 'mark', scopeStack: branchFrames(0) });
+        underTest.upsertStep({ id: 'branch-1', stepId: 'mark', scopeStack: branchFrames(1) });
+      });
+
+      it('returns the execution from the reader branch, skipping later sibling branches', () => {
+        expect(underTest.getLatestStepExecution('mark', branchFrames(0))?.id).toBe('branch-0');
+      });
+
+      it('falls back to an execution outside the parallel when the branch has none', () => {
+        expect(underTest.getLatestStepExecution('mark', branchFrames(2))?.id).toBe('outside');
+      });
+
+      it('keeps last-write-wins for readers outside any parallel branch', () => {
+        expect(underTest.getLatestStepExecution('mark', [])?.id).toBe('branch-1');
+        expect(underTest.getLatestStepExecution('mark')?.id).toBe('branch-1');
+      });
+
+      it('treats the same branch index under different loop iterations as different branches', () => {
+        const iterationFrames = (iteration: number): StackFrame[] => [
+          {
+            stepId: 'loop',
+            nestedScopes: [
+              { nodeId: 'enterForeach_loop', nodeType: 'enter-foreach', scopeId: `${iteration}` },
+            ],
+          },
+          ...branchFrames(0),
+        ];
+        underTest.upsertStep({ id: 'iter-0', stepId: 'inner', scopeStack: iterationFrames(0) });
+        underTest.upsertStep({ id: 'iter-1', stepId: 'inner', scopeStack: iterationFrames(1) });
+
+        expect(underTest.getLatestStepExecution('inner', iterationFrames(0))?.id).toBe('iter-0');
+      });
     });
   });
 

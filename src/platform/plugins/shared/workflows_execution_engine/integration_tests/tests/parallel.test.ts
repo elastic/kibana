@@ -329,6 +329,74 @@ steps:
     });
   });
 
+  // Regression (kibana#290309, security-team#19670): a branch step reading an
+  // earlier step of its own branch via `steps.<name>.output` used to resolve to
+  // whichever concurrent branch wrote that step last.
+  describe.each([
+    { concurrency: 3, label: 'all branches in one window' },
+    { concurrency: 2, label: 'branches spread across windows' },
+  ])('branch step reads its own branch sibling output ($label)', ({ concurrency }) => {
+    let workflowRunFixture: WorkflowRunFixture;
+    const items = ['A', 'B', 'C'];
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      const yaml = `
+consts:
+  items: '${JSON.stringify(items)}'
+steps:
+  - name: fanOut
+    type: parallel
+    foreach: '{{ consts.items }}'
+    mode: settled
+    concurrency: { max: ${concurrency} }
+    steps:
+      - name: mark
+        type: data.set
+        with:
+          value: 'mark-for-{{ foreach.item }}'
+      - name: readBack
+        type: data.set
+        with:
+          myId: '{{ foreach.item }}'
+          markValue: '{{ steps.mark.output.value }}'
+  - name: afterJoin
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'last={{ steps.mark.output.value }}'
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      await driveToTerminal(workflowRunFixture);
+    });
+
+    it('completes the workflow', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('resolves steps.mark.output to the same branch execution', () => {
+      const readBacks = stepExecutionsFor(workflowRunFixture, 'readBack').map(
+        (execution) => execution.output as { myId: string; markValue: string }
+      );
+      expect(readBacks).toHaveLength(items.length);
+      readBacks.forEach(({ myId, markValue }) => {
+        expect(markValue).toBe(`mark-for-${myId}`);
+      });
+      expect(readBacks.map(({ myId }) => myId).sort()).toEqual(items);
+    });
+
+    it('still exposes a branch step output to steps after the join', () => {
+      const [call] = workflowRunFixture.unsecuredActionsClientMock.execute.mock.calls;
+      expect(call[0]).toEqual(
+        expect.objectContaining({
+          id: FakeConnectors.slack1.id,
+          params: { message: expect.stringMatching(/^last=mark-for-[ABC]$/) },
+        })
+      );
+    });
+  });
+
   describe('suspendable (poll) branches resume across ticks', () => {
     let workflowRunFixture: WorkflowRunFixture;
     const items = ['x', 'y'];

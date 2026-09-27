@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
-import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, SerializedError, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
@@ -55,6 +55,11 @@ export interface PrepareForReadArgs {
    * uses a fixed sentinel key that assumes single-consumer access.
    */
   consumerId?: string;
+  /**
+   * Scope of the reading node. Resolves `steps.<name>` to the reader's own
+   * `parallel` branch instead of a concurrently running sibling branch.
+   */
+  stackFrames?: readonly StackFrame[];
 }
 
 /**
@@ -67,7 +72,10 @@ export interface StepIoReader {
   getStepOutput(stepExecutionId: string): JsonValue | null | undefined;
   getStepInput(stepExecutionId: string): JsonValue | undefined;
   getStepError(stepExecutionId: string): SerializedError | undefined;
-  getLatestStepIO(stepId: string):
+  getLatestStepIO(
+    stepId: string,
+    stackFrames?: readonly StackFrame[]
+  ):
     | {
         input: JsonValue | undefined;
         output: JsonValue | null | undefined;
@@ -306,16 +314,20 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   /**
    * Returns the input/output/error of the latest execution of `stepId`, or
-   * `undefined` when the step has not run.
+   * `undefined` when the step has not run. `stackFrames` scope the lookup to
+   * the reader's `parallel` branch.
    */
-  public getLatestStepIO(stepId: string):
+  public getLatestStepIO(
+    stepId: string,
+    stackFrames?: readonly StackFrame[]
+  ):
     | {
         input: JsonValue | undefined;
         output: JsonValue | null | undefined;
         error: SerializedError | undefined;
       }
     | undefined {
-    const latest = this.state.getLatestStepExecution(stepId);
+    const latest = this.state.getLatestStepExecution(stepId, stackFrames);
     if (!latest) {
       return undefined;
     }
@@ -651,6 +663,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     node,
     predecessorsResolver,
     consumerId = '__single_consumer__',
+    stackFrames,
   }: PrepareForReadArgs): Promise<void> {
     // Fast path: eviction is disabled (default config, evictionMinBytes ===
     // Infinity). Nothing can ever be evicted → no race possible → zero work.
@@ -675,7 +688,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     //   2. Set pins before the `await rehydrateOutputs`: resident co-neededIds
     //      must be protected during the real ES fetch (a genuine macrotask yield
     //      where the persistence loop can fire).
-    const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
+    const neededIds = this.computeRehydrationTargets(node, predecessorsResolver, stackFrames);
     this.readPinnedOutputIdsByConsumer.set(consumerId, neededIds);
 
     // Zero-ES-call fast path: nothing is evicted and no stale transients need
@@ -820,14 +833,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   private computeRehydrationTargets(
     node: GraphNodeUnion,
-    predecessorsResolver: PredecessorsResolver
+    predecessorsResolver: PredecessorsResolver,
+    stackFrames?: readonly StackFrame[]
   ): Set<string> {
     const neededIds = new Set<string>();
     const referencedStepIds = extractReferencedStepIds(node);
 
     const fallbackToPredecessors = (): void => {
       for (const pred of predecessorsResolver(node)) {
-        const latestExec = this.state.getLatestStepExecution(pred.stepId);
+        const latestExec = this.state.getLatestStepExecution(pred.stepId, stackFrames);
         if (latestExec) {
           neededIds.add(latestExec.id);
         }
@@ -838,11 +852,14 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       // Static analysis ambiguous (dynamic bracket access).
       fallbackToPredecessors();
     } else {
-      this.addLatestExecutionIdsForStepIds(neededIds, referencedStepIds);
+      this.addLatestExecutionIdsForStepIds(neededIds, referencedStepIds, stackFrames);
       // If the analysis found nothing but a predecessor is actually evicted,
       // the analysis missed a reference. Fall back conservatively rather
       // than trust an empty set.
-      if (referencedStepIds.size === 0 && this.hasEvictedPredecessor(node, predecessorsResolver)) {
+      if (
+        referencedStepIds.size === 0 &&
+        this.hasEvictedPredecessor(node, predecessorsResolver, stackFrames)
+      ) {
         fallbackToPredecessors();
       }
     }
@@ -891,10 +908,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   private addLatestExecutionIdsForStepIds(
     neededIds: Set<string>,
-    referencedStepIds: ReadonlySet<string>
+    referencedStepIds: ReadonlySet<string>,
+    stackFrames?: readonly StackFrame[]
   ): void {
     for (const stepId of referencedStepIds) {
-      const latestExec = this.state.getLatestStepExecution(stepId);
+      const latestExec = this.state.getLatestStepExecution(stepId, stackFrames);
       if (latestExec) {
         neededIds.add(latestExec.id);
       }
@@ -966,10 +984,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   private hasEvictedPredecessor(
     node: GraphNodeUnion,
-    predecessorsResolver: PredecessorsResolver
+    predecessorsResolver: PredecessorsResolver,
+    stackFrames?: readonly StackFrame[]
   ): boolean {
     for (const pred of predecessorsResolver(node)) {
-      const latestExec = this.state.getLatestStepExecution(pred.stepId);
+      const latestExec = this.state.getLatestStepExecution(pred.stepId, stackFrames);
       if (latestExec && this.evictedOutputIds.has(latestExec.id)) {
         return true;
       }

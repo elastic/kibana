@@ -141,6 +141,7 @@ export class WorkflowContextManager {
       node: this.node,
       predecessorsResolver: () => this.predecessors,
       consumerId: this.consumerExecutionId,
+      stackFrames: this.stackFrames,
     });
   }
 
@@ -733,11 +734,14 @@ export class WorkflowContextManager {
         stepState: Record<string, unknown> | undefined;
       }
     | undefined {
-    const io = this.stepIoService.getLatestStepIO(stepId);
+    const io = this.stepIoService.getLatestStepIO(stepId, this.stackFrames);
     if (!io) {
       return;
     }
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(
+      stepId,
+      this.stackFrames
+    );
     return {
       runStepResult: {
         input: io.input,
