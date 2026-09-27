@@ -8,7 +8,10 @@
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import {
+  ensureEisConnectorCache,
   readSpaceIdsFlag,
+  requiredEisConnectorIds,
+  requiresEisConnectorCache,
   resolveEvalSuite,
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
@@ -68,6 +71,24 @@ export const runSuiteCmd: Command<void> = {
     const { suite, resolvedConfigPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
 
     const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
+
+    // `evals run` resolves its connector IDs the same way `start` does, so the
+    // EIS cache guard applies here too: without it an EIS-backed run with a
+    // missing, expired, or incomplete cache falls through to per-test 404s
+    // instead of failing fast. On success this also exports a fresh cache to
+    // KIBANA_TESTING_INFERENCE_ENDPOINTS for the Playwright child below.
+    const projects =
+      flagsReader
+        .string('project')
+        ?.split(',')
+        .map((p) => p.trim()) ?? [];
+    if (requiresEisConnectorCache(evaluationConnectorId, projects, repoRoot)) {
+      ensureEisConnectorCache({
+        log,
+        required: requiredEisConnectorIds(evaluationConnectorId, projects, repoRoot),
+        dryRun: flagsReader.boolean('dry-run'),
+      });
+    }
 
     const envOverrides: Record<string, string> = {
       EVAL_CONNECTOR_ID: evaluationConnectorId,

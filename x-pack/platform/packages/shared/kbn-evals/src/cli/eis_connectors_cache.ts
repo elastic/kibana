@@ -23,6 +23,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { validateInferenceEndpointEntry } from '../utils/inference_endpoint_definition';
 
 interface CachedEisConnectors {
   connectors: Record<string, object>;
@@ -33,28 +34,70 @@ const CACHE_DIR = path.join(os.homedir(), '.elastic');
 const CACHE_PATH = path.join(CACHE_DIR, 'eis-connectors-cache.json');
 const TTL_MS = 168 * 60 * 60 * 1000; // 7 days
 
-export const readCachedEisConnectors = (): Record<string, object> | undefined => {
+export type EisCacheStatus = 'fresh' | 'expired' | 'missing' | 'malformed';
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Every cached entry is exported as an inference endpoint definition, so an entry
+ * that `loadInferenceEndpoints()` would reject (null, scalar, or missing
+ * `inferenceId`/`provider`/`taskType`/`name`) has to fail here as `malformed`
+ * rather than surfacing as a Playwright startup crash.
+ */
+const connectorsAreUsable = (connectors: Record<string, unknown>): boolean =>
+  Object.entries(connectors).every(
+    ([id, definition]) => validateInferenceEndpointEntry(id, definition) === undefined
+  );
+
+const parseCachedEntry = (cachePath: string): CachedEisConnectors | undefined => {
   try {
-    if (!fs.existsSync(CACHE_PATH)) {
+    const raw = fs.readFileSync(cachePath, 'utf-8');
+    const cached: unknown = JSON.parse(raw);
+    if (!isPlainObject(cached)) {
       return undefined;
     }
-
-    const raw = fs.readFileSync(CACHE_PATH, 'utf-8');
-    const cached: CachedEisConnectors = JSON.parse(raw);
-
-    if (!cached.connectors || !cached.fetched_at_ms) {
+    const { connectors, fetched_at_ms: fetchedAtMs } = cached;
+    if (
+      !isPlainObject(connectors) ||
+      Object.keys(connectors).length === 0 ||
+      !connectorsAreUsable(connectors) ||
+      typeof fetchedAtMs !== 'number' ||
+      !Number.isFinite(fetchedAtMs)
+    ) {
       return undefined;
     }
-
-    const age = Date.now() - cached.fetched_at_ms;
-    if (age > TTL_MS) {
-      return undefined;
-    }
-
-    return cached.connectors;
+    return { connectors: connectors as Record<string, object>, fetched_at_ms: fetchedAtMs };
   } catch {
     return undefined;
   }
+};
+
+export const getEisCacheStatus = (cachePath: string = CACHE_PATH): EisCacheStatus => {
+  if (!fs.existsSync(cachePath)) {
+    return 'missing';
+  }
+
+  const cached = parseCachedEntry(cachePath);
+  if (!cached) {
+    return 'malformed';
+  }
+
+  if (Date.now() - cached.fetched_at_ms > TTL_MS) {
+    return 'expired';
+  }
+
+  return 'fresh';
+};
+
+export const readCachedEisConnectors = (
+  cachePath: string = CACHE_PATH
+): Record<string, object> | undefined => {
+  const cached = parseCachedEntry(cachePath);
+  if (!cached || Date.now() - cached.fetched_at_ms > TTL_MS) {
+    return undefined;
+  }
+  return cached.connectors;
 };
 
 export const writeCachedEisConnectors = (connectors: Record<string, object>): void => {

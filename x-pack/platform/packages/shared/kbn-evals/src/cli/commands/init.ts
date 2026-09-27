@@ -371,7 +371,11 @@ const listConnectorIds = (base64Payload: string): Array<{ id: string; name: stri
   }
 };
 
-export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Promise<void> => {
+export const runConnectorSetup = async (
+  repoRoot: string,
+  log: ToolingLog,
+  options?: { refresh?: boolean }
+): Promise<void> => {
   if (!isTTY()) {
     throw new Error(
       'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run with a TTY to use the setup wizard.'
@@ -436,7 +440,7 @@ export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Prom
 
   log.info('');
 
-  const cachedConnectors = readCachedEisConnectors();
+  const cachedConnectors = options?.refresh ? undefined : readCachedEisConnectors();
   if (cachedConnectors) {
     const connectorEntries = Object.entries(cachedConnectors);
     const base64Payload = Buffer.from(JSON.stringify(cachedConnectors)).toString('base64');
@@ -445,7 +449,7 @@ export const runConnectorSetup = async (repoRoot: string, log: ToolingLog): Prom
     log.info(`Using cached EIS connectors (${connectorEntries.length} connector(s)):`);
     connectorEntries.forEach(([id]) => log.info(`  - ${id}`));
     log.info('');
-    log.info('To force re-discovery, run: node scripts/evals init');
+    log.info('To force re-discovery, run: node scripts/evals init --refresh');
     return;
   }
 
@@ -507,12 +511,17 @@ export const initCmd: Command<void> = {
     node scripts/evals init
     node scripts/evals init config
     node scripts/evals init config --profile mysetup
+    node scripts/evals init --refresh
   `,
   flags: {
     string: ['profile'],
+    boolean: ['refresh'],
+    default: { refresh: false },
     help: `
       --profile <name>   Write config to config.<name>.json instead of config.json
                           (e.g. --profile mysetup creates config.mysetup.json)
+      --refresh          Re-discover EIS connectors and rewrite the cache even when
+                          a fresh one exists
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -520,6 +529,7 @@ export const initCmd: Command<void> = {
     const positionals = flagsReader.getPositionals();
     const configOnly = positionals.includes('config');
     const profile = flagsReader.string('profile') ?? undefined;
+    const refresh = flagsReader.boolean('refresh');
 
     const knownPositionals = new Set(['config']);
     const unknownPositionals = positionals.filter((p) => !knownPositionals.has(p));
@@ -541,7 +551,7 @@ export const initCmd: Command<void> = {
     log.info('');
     await runConfigInit(repoRoot, log, { profile });
     if (!configOnly) {
-      await runConnectorSetup(repoRoot, log);
+      await runConnectorSetup(repoRoot, log, { refresh });
     }
   },
 };
