@@ -190,8 +190,15 @@ export class ListingTableService extends FtrService {
   }
 
   public async clickActionButton(actionSelector: string, index: number = 0) {
-    const buttons = await this.testSubjects.findAll(actionSelector);
-    await buttons[index].click();
+    await this.retry.tryForTime(10000, async () => {
+      // The retry provides the wait; look up the buttons without an implicit wait.
+      const buttons = await this.testSubjects.findAll(actionSelector, 0);
+      const button = buttons[index];
+      if (!button) {
+        throw new Error(`Action ${actionSelector} is not available at index ${index}`);
+      }
+      await button.click();
+    });
   }
 
   /**
@@ -345,7 +352,18 @@ export class ListingTableService extends FtrService {
    * Clicks NewItem button on Landing page
    */
   public async clickNewButton(): Promise<void> {
-    await this.testSubjects.click('newItemButton');
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists('newItemButton')) {
+        await this.testSubjects.click('newItemButton');
+        return;
+      }
+      if (await this.testSubjects.exists('app-menu-overflow-button')) {
+        await this.testSubjects.click('app-menu-overflow-button');
+        await this.testSubjects.click('newItemButton');
+        return;
+      }
+      throw new Error('newItemButton not found');
+    });
   }
 
   public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
@@ -353,7 +371,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async onListingPage(appName: AppName) {
-    return await this.testSubjects.exists(`${appName}LandingPage`, {
+    return await this.testSubjects.waitForExists(`${appName}LandingPage`, {
       timeout: 5000,
     });
   }
