@@ -602,6 +602,62 @@ describe('CRUDClient', () => {
     });
   });
 
+  describe('clearRelationshipIds', () => {
+    beforeEach(() => {
+      esClient.indices.exists.mockResolvedValue(true);
+      // Runs as a background task: updateByQuery returns a task id, which is
+      // then polled to completion.
+      esClient.updateByQuery.mockResolvedValue({ task: 'task-1' } as never);
+      esClient.tasks.get.mockResolvedValue({
+        completed: true,
+        response: { updated: 3, total: 3 },
+      } as never);
+    });
+
+    it('clears the relationship on the resolved latest index', async () => {
+      const result = await client.clearRelationshipIds({
+        entitySource: 'workday',
+        relationshipKey: 'supervises',
+      });
+
+      const body = esClient.updateByQuery.mock.calls[0][0] as {
+        query: { bool: { filter: unknown[] } };
+      };
+      expect(body.query.bool.filter).toContainEqual({
+        term: { 'entity.source': 'workday' },
+      });
+      expect(result).toEqual({ updated: 3, total: 3 });
+    });
+
+    it('submits as a background task rather than blocking on the request', async () => {
+      // A synchronous update-by-query over a full index can exceed the client's
+      // request timeout on a large tenant, abandoning the reset half-applied.
+      await client.clearRelationshipIds({
+        entitySource: 'workday',
+        relationshipKey: 'supervises',
+      });
+
+      const body = esClient.updateByQuery.mock.calls[0][0] as { wait_for_completion: boolean };
+      expect(body.wait_for_completion).toBe(false);
+      expect(esClient.tasks.get).toHaveBeenCalled();
+    });
+
+    it('passes the relationship key as a param rather than interpolating it', async () => {
+      // The key is config-supplied; interpolating it into the script body would
+      // make it evaluable as Painless.
+      await client.clearRelationshipIds({
+        entitySource: 'workday',
+        relationshipKey: 'supervises',
+      });
+
+      const body = esClient.updateByQuery.mock.calls[0][0] as {
+        script: { source: string; params: Record<string, unknown> };
+      };
+      expect(body.script.params).toEqual({ relationshipKey: 'supervises' });
+      expect(body.script.source).not.toContain('supervises');
+    });
+  });
+
   describe('risk score trigger emit', () => {
     let emitWorkflowTriggerEvent: jest.Mock;
     let clientWithEmit: CRUDClient;

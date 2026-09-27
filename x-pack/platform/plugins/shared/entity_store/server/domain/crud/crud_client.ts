@@ -33,6 +33,7 @@ import type { EntityCreatedBy } from '../../../common/domain/definitions/common_
 import { validateAndTransformDoc } from './utils';
 import { buildEntityFromSource } from './entity_from_source';
 import { runWithSpan } from '../../telemetry/traces';
+import { clearRelationshipIdsByEntitySource } from '../../infra/elasticsearch';
 import {
   searchEntitiesV2,
   searchEntitiesV2Batch,
@@ -44,6 +45,11 @@ import {
 import { type WorkflowEmitTarget, WorkflowEventPublisher } from './workflow_event_publisher';
 
 const RETRY_ON_CONFLICT = 3;
+
+// Poll cadence for the background update-by-query behind `clearRelationshipIds`,
+// matching the history-snapshot client's settings for the same helper.
+const CLEAR_RELATIONSHIPS_POLL_INTERVAL_MS = 30 * 1000;
+const CLEAR_RELATIONSHIPS_POLL_MIN_INTERVAL_MS = 5 * 1000;
 
 // `fields` is merged last, so reserve builder-owned paths to prevent caller overrides.
 const RESERVED_CREATE_FROM_SOURCE_FIELDS: ReadonlySet<string> = new Set([
@@ -325,6 +331,29 @@ export class CRUDClient {
       configurable: true,
       writable: true,
     });
+
+    const baseClearRelationshipIds = this.clearRelationshipIds.bind(this);
+    const tracedClearRelationshipIds = (params: {
+      entitySource: string;
+      relationshipKey: string;
+      signal?: AbortSignal;
+    }): Promise<{ updated: number; total: number }> =>
+      runWithSpan({
+        name: 'entityStore.crud.clear_relationship_ids',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'clear_relationship_ids',
+          'entity_store.entity_source': params.entitySource,
+          'entity_store.relationship_key': params.relationshipKey,
+        },
+        cb: () => baseClearRelationshipIds(params),
+      });
+
+    Object.defineProperty(this, 'clearRelationshipIds', {
+      value: tracedClearRelationshipIds,
+      configurable: true,
+      writable: true,
+    });
   }
 
   private async assertInstalled(): Promise<void> {
@@ -456,7 +485,6 @@ export class CRUDClient {
     const previousDocs = await this.eventPublisher.maybeGetExistingDocs(
       emitTargets.map(({ doc }) => doc)
     );
-
     this.logger.debug(`Bulk updating ${objects.length} entities`);
     const resp = await this.esClient.bulk({
       index: await this.latestIndexName(),
@@ -494,6 +522,41 @@ export class CRUDClient {
     }
 
     return errors;
+  }
+
+  /**
+   * Clears `entity.relationships.<relationshipKey>.ids` for every entity from
+   * `entitySource`. Intended for snapshot-source maintainers that repopulate the
+   * relationship from a full scan immediately afterwards.
+   *
+   * Runs as a background task and polls until it completes: this is a
+   * full-index mutation, so on a large tenant a synchronous update-by-query can
+   * exceed the client's request timeout and abandon the reset half-applied.
+   * `forever: true` defers to the caller's own budget (the maintainer's 1h task
+   * timeout) and to `signal` for cancellation.
+   */
+  public async clearRelationshipIds({
+    entitySource,
+    relationshipKey,
+    signal,
+  }: {
+    entitySource: string;
+    relationshipKey: string;
+    signal?: AbortSignal;
+  }): Promise<{ updated: number; total: number }> {
+    await this.assertInstalled();
+    return clearRelationshipIdsByEntitySource(this.esClient, {
+      index: await this.latestIndexName(),
+      entitySource,
+      relationshipKey,
+      signal,
+      waitForTask: {
+        logger: this.logger,
+        minTimeout: CLEAR_RELATIONSHIPS_POLL_MIN_INTERVAL_MS,
+        maxTimeout: CLEAR_RELATIONSHIPS_POLL_INTERVAL_MS,
+        forever: true,
+      },
+    });
   }
 
   // createEntity generates EUID and creates the entity in the LATEST index

@@ -21,11 +21,16 @@ import {
  * Polls until the entity store status is `running` AND every engine component
  * shows `installed: true`. The plain `running` status flips before backing
  * indices are ready, causing races in tests that seed immediately after install.
+ *
+ * Defaults to 150s: provisioning four engines' backing indices routinely exceeds
+ * 60s on a loaded CI agent, and callers run this inside a `beforeAll` configured
+ * for 180s — the poll must give up before the hook does, so the failure names the
+ * missing components instead of surfacing as an opaque hook timeout.
  */
 export const waitForEntityStoreRunning = async (
   apiClient: MaintainerApiClient,
   headers: Record<string, string>,
-  timeoutMs = 60_000
+  timeoutMs = 150_000
 ): Promise<void> => {
   const start = Date.now();
   let lastStatus: string | undefined;
@@ -124,6 +129,14 @@ interface SeedUserEntityOptions {
     userIds?: string[];
     userNames?: string[];
     hostNames?: string[];
+    /**
+     * Resolved EUIDs seeded under `entity.relationships.<key>.ids`, as a
+     * maintainer would have written them on an earlier run. Needed by tests
+     * that must observe an existing relationship being preserved or cleared —
+     * seeding only `raw_identifiers` leaves `ids` absent, which reads the same
+     * as "cleared" and makes such assertions unable to fail.
+     */
+    ids?: string[];
   };
 }
 
@@ -160,9 +173,16 @@ export const seedUserEntity = async (
   if (relationship?.hostNames?.length) {
     rawIdentifiers.host = { name: relationship.hostNames };
   }
+  const relationshipBag: Record<string, unknown> = {};
+  if (Object.keys(rawIdentifiers).length > 0) {
+    relationshipBag.raw_identifiers = rawIdentifiers;
+  }
+  if (relationship?.ids?.length) {
+    relationshipBag.ids = relationship.ids;
+  }
   const relationships =
-    relationship && Object.keys(rawIdentifiers).length > 0
-      ? { [relationship.key]: { raw_identifiers: rawIdentifiers } }
+    relationship && Object.keys(relationshipBag).length > 0
+      ? { [relationship.key]: relationshipBag }
       : undefined;
 
   await esClient.index({
@@ -303,6 +323,34 @@ export const waitForRelationshipIds = async (
   );
 };
 
+/**
+ * Asserts no entity document exists for `entityId`.
+ *
+ * Distinct from `assertNoRelationshipId`, which maps a missing document to `[]`
+ * and so cannot tell "no entity" apart from "entity with no such relationship".
+ * Use this to prove the maintainer did not mint an entity from an unresolvable
+ * foreign key (e.g. a `Manager_ID` that matches nothing in the store).
+ */
+export const assertEntityDoesNotExist = async (
+  esClient: EsClient,
+  entityId: string
+): Promise<void> => {
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
+  const response = await esClient.search({
+    index: LATEST_ALIAS,
+    query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
+    size: 1,
+  });
+  const hits = response.hits.hits.map((hit) => hit._id);
+  if (hits.length > 0) {
+    throw new Error(
+      `Expected no entity document for '${entityId}', but found ${hits.length} (_id: ${hits.join(
+        ', '
+      )})`
+    );
+  }
+};
+
 /** Returns the current `entity.relationships.<key>.ids` array for an entity (empty if absent). */
 export const getRelationshipIds = async (
   esClient: EsClient,
@@ -319,6 +367,29 @@ export const getRelationshipIds = async (
   if (!source) return [];
   const idsPath = relationshipIdsPath(relationshipKey);
   return normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath]);
+};
+
+/**
+ * Reads `entity.relationships.<key>.raw_identifiers.user.email` for an entity.
+ *
+ * The reset clears only the maintainer-owned `ids`; sibling fields like this one
+ * belong to other integrations and must survive it.
+ */
+export const getRelationshipRawUserEmails = async (
+  esClient: EsClient,
+  relationshipKey: string,
+  entityId: string
+): Promise<string[]> => {
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
+  const response = await esClient.search({
+    index: LATEST_ALIAS,
+    query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
+    size: 1,
+  });
+  const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+  if (!source) return [];
+  const path = `entity.relationships.${relationshipKey}.raw_identifiers.user.email`;
+  return normalizeKeywordList(getNestedValue(source, path) ?? source[path]);
 };
 
 /** Asserts that `entity.relationships.<key>.ids` does NOT contain the given target EUID. */
@@ -386,9 +457,6 @@ export const triggerMaintainerRun = async (
 interface SeedLogDocumentOptions {
   /** `logs-*` data-stream target; `op_type: 'create'` is required. */
   index: string;
-  /** Written to `host.id` — becomes the `host:<id>` target EUID. */
-  hostId: string;
-  hostName: string;
   /**
    * Integration-specific fields merged into the document root. For plain-object
    * mapped fields (e.g. `device.registered_owners`), pass flattened parallel
@@ -397,14 +465,42 @@ interface SeedLogDocumentOptions {
   integrationFields: Record<string, unknown>;
   /** Defaults to 5 minutes ago (within the 30d lookback window). */
   timestamp?: string;
+  /**
+   * Written to `event.ingested`. Required for maintainers that gate on sync
+   * recency rather than `@timestamp` (e.g. Workday, whose `@timestamp` carries
+   * Hire_Date). Defaults to `timestamp`.
+   */
+  eventIngested?: string;
+  /** Overrides the default `{ kind: 'asset', category: [...] }` block. */
+  event?: Record<string, unknown>;
+  /** Written to `host.id` — becomes the `host:<id>` target EUID. Omit for user-target rows. */
+  hostId?: string;
+  hostName?: string;
 }
 
-/** Seeds one log document with standard ECS host fields plus integration-specific fields. */
+/** Seeds one log document with ECS scaffolding plus integration-specific fields. */
 export const seedLogDocument = async (
   esClient: EsClient,
-  { index, hostId, hostName, integrationFields, timestamp }: SeedLogDocumentOptions
+  {
+    index,
+    hostId,
+    hostName,
+    integrationFields,
+    timestamp,
+    eventIngested,
+    event,
+  }: SeedLogDocumentOptions
 ): Promise<void> => {
   const ts = timestamp ?? new Date(Date.now() - 5 * 60_000).toISOString();
+  const host =
+    hostId !== undefined || hostName !== undefined
+      ? {
+          host: {
+            ...(hostId !== undefined && { id: hostId }),
+            ...(hostName !== undefined && { name: hostName }),
+          },
+        }
+      : {};
 
   await esClient.index({
     index,
@@ -412,8 +508,8 @@ export const seedLogDocument = async (
     refresh: 'wait_for',
     document: {
       '@timestamp': ts,
-      event: { kind: 'asset', category: ['host'] },
-      host: { id: hostId, name: hostName },
+      event: { kind: 'asset', category: ['host'], ingested: eventIngested ?? ts, ...event },
+      ...host,
       ...integrationFields,
     },
   });

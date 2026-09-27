@@ -14,7 +14,9 @@ import { buildSupervisesConfigs } from './configs';
 export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
   id: 'supervises',
   description:
-    'Resolves supervises (user → user) relationships from raw_identifiers on entity documents',
+    'Resolves supervises (user → user) relationships. ' +
+    'Okta and Entra ID: from raw_identifiers on entity documents. ' +
+    "Workday: from user log documents, inverting each worker's manager fields into manager-keyed relationships.",
   interval: '1d',
   timeout: '1h',
   initialState: {},

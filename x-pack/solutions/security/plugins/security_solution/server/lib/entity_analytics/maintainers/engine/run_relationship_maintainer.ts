@@ -7,8 +7,6 @@
 
 import { randomUUID } from 'crypto';
 
-import { errors as esErrors } from '@elastic/elasticsearch';
-
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
@@ -24,6 +22,8 @@ import {
   buildActorPageFilter,
   buildLookbackFilter,
 } from './build_actor_discovery_query';
+import { runPreRunReset } from './run_pre_run_reset';
+import { isIndexNotFound, errMsg } from './es_errors';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import {
@@ -53,27 +53,6 @@ interface CompositeAggregations {
 interface EsqlQueryResult {
   columns: Array<{ name: string; type: string }>;
   values: unknown[][];
-}
-
-/**
- * Detects the index-not-found case the engine recovers from gracefully (Step 1
- * runs against `logs-{integration}-{namespace}` data streams that don't exist
- * until the integration ships at least one document).
- *
- * Uses the typed `ResponseError` from `@elastic/elasticsearch` rather than
- * duck-typing two error shapes — the contract is anchored to the client we
- * actually depend on, so a future client upgrade that changes internal
- * representation surfaces as a compile-time signal rather than silent
- * failure.
- */
-function isIndexNotFound(err: unknown): boolean {
-  return (
-    err instanceof esErrors.ResponseError && err.body?.error?.type === 'index_not_found_exception'
-  );
-}
-
-function errMsg(err: unknown): string {
-  return err instanceof Error ? err.message : JSON.stringify(err);
 }
 
 function mergeRelTypeApplied(
@@ -224,6 +203,28 @@ async function runIntegration(
     docsFailed: 0,
   };
 
+  const resetOutcome = await runPreRunReset(
+    config,
+    esClient,
+    logger,
+    namespace,
+    crudClient,
+    signal,
+    transportOpts,
+    logPrefix
+  );
+  if (resetOutcome !== 'proceed') {
+    return {
+      buckets: 0,
+      recordsCount: 0,
+      write: totalWriteResult,
+      metadata: totalMetadataResult,
+      outcome: resetOutcome,
+      iterations: 0,
+      truncated: false,
+    };
+  }
+
   try {
     do {
       if (signal?.aborted) {
@@ -234,6 +235,13 @@ async function runIntegration(
       iterations++;
       if (iterations > MAX_ITERATIONS) {
         logger.warn(`${logPrefix} Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
+        if (config.resetRelationshipsBeforeRun) {
+          // The relationship was cleared but not fully repopulated, so data is
+          // incomplete until the next clean run.
+          logger.warn(
+            `${logPrefix} Relationship was cleared before this run but pagination was truncated — data is incomplete until the next clean run`
+          );
+        }
         outcome = 'partial';
         truncated = true;
         break;

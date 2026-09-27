@@ -63,6 +63,7 @@ const makeClients = (
     .mockImplementation(async (docs: unknown[]) => ({ successful: docs.length, failed: 0 }));
   const crudClient = {
     bulkUpdateEntity: bulkUpdate,
+    clearRelationshipIds: jest.fn().mockResolvedValue({ updated: 0, total: 0 }),
   } as unknown as EntityUpdateClient;
   const entityMetadataClient = {
     bulkAppendMetadata: bulkAppend,
@@ -102,6 +103,14 @@ const successResponse = (
 ): SearchResponse => ({
   aggregations: { users: { buckets, after_key: afterKey } },
 });
+
+/**
+ * Response for the pre-flight source check that `resetRelationshipsBeforeRun`
+ * runs before clearing. `hits.total.value > 0` means "the source has documents
+ * to repopulate from", which is what allows the reset to proceed.
+ */
+const sourcePresenceResponse = (total: number): SearchResponse =>
+  ({ hits: { total: { value: total, relation: 'eq' }, hits: [] } } as unknown as SearchResponse);
 
 const indexNotFoundError = () =>
   new esErrors.ResponseError({
@@ -1697,6 +1706,234 @@ describe('runRelationshipMaintainer', () => {
       expect(completionLog).toContain('records=');
       expect(completionLog).toContain('written=');
       expect(completionLog).toContain('truncated=');
+    });
+  });
+
+  describe('resetRelationshipsBeforeRun', () => {
+    it('does not clear anything when the config omits the flag', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      search.mockResolvedValue(successResponse([]));
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [{ ...baseConfig, id: 'no-reset' }],
+        maintainerName: 'communicates_with',
+      });
+
+      expect(
+        (crudClient as unknown as { clearRelationshipIds: jest.Mock }).clearRelationshipIds
+      ).not.toHaveBeenCalled();
+    });
+
+    it('clears once per integration, before any write', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const clearMock = (crudClient as unknown as { clearRelationshipIds: jest.Mock })
+        .clearRelationshipIds;
+      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: jest.Mock })
+        .bulkUpdateEntity;
+      const callOrder: string[] = [];
+      clearMock.mockImplementation(async () => {
+        callOrder.push('clear');
+        return { updated: 0, total: 0 };
+      });
+      bulkUpdateMock.mockImplementation(async () => {
+        callOrder.push('write');
+        return [];
+      });
+
+      // First search is the pre-flight source check, then the composite agg:
+      // one bucket, one esql record so the write path is exercised.
+      search.mockResolvedValueOnce(sourcePresenceResponse(1));
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'supervises', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['user:bob@corp']]],
+      });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [
+          {
+            kind: 'standard',
+            id: 'workday',
+            name: 'Workday',
+            indexPattern: (ns) => `.entities.v2.latest.security_${ns}`,
+            targetEntityType: 'user',
+            relationshipKey: 'supervises',
+            esqlWhereClause: 'true',
+            resetRelationshipsBeforeRun: { entitySource: 'workday' },
+          },
+        ],
+        maintainerName: 'supervises',
+      });
+
+      expect(clearMock).toHaveBeenCalledTimes(1);
+      expect(clearMock).toHaveBeenCalledWith(
+        expect.objectContaining({ entitySource: 'workday', relationshipKey: 'supervises' })
+      );
+      // The clear must precede every write, or the run would erase its own output.
+      expect(callOrder[0]).toBe('clear');
+      expect(callOrder.filter((c) => c === 'clear')).toHaveLength(1);
+    });
+
+    it('clears both threshold keys for a bucketed config with resetRelationshipsBeforeRun', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const clearMock = (crudClient as unknown as { clearRelationshipIds: jest.Mock })
+        .clearRelationshipIds;
+      // Pre-flight source check passes, then the composite agg returns no buckets.
+      search.mockResolvedValueOnce(sourcePresenceResponse(1));
+      search.mockResolvedValue(successResponse([]));
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [
+          {
+            ...baseConfig,
+            id: 'bucketed-reset',
+            resetRelationshipsBeforeRun: { entitySource: 'bucketed-source' },
+          },
+        ],
+        maintainerName: 'accesses_frequently_and_infrequently',
+      });
+
+      // Both threshold keys must be cleared — clearing only one would leave the
+      // other stale, which is the exact bug this feature exists to prevent.
+      const clearedKeys = clearMock.mock.calls.map(
+        (c) => (c[0] as { relationshipKey: string }).relationshipKey
+      );
+      expect(clearedKeys.sort()).toStrictEqual(
+        ['accesses_frequently', 'accesses_infrequently'].sort()
+      );
+      expect(clearMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('skips the integration when the clear fails, without touching writes', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const clearMock = (crudClient as unknown as { clearRelationshipIds: jest.Mock })
+        .clearRelationshipIds;
+      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: jest.Mock })
+        .bulkUpdateEntity;
+      clearMock.mockRejectedValue(new Error('boom'));
+      // Pre-flight passes so the run reaches the clear, which is what fails here.
+      search.mockResolvedValueOnce(sourcePresenceResponse(1));
+      search.mockResolvedValue(successResponse([]));
+
+      const result = await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [
+          {
+            kind: 'standard',
+            id: 'workday',
+            name: 'Workday',
+            indexPattern: (ns) => `.entities.v2.latest.security_${ns}`,
+            targetEntityType: 'user',
+            relationshipKey: 'supervises',
+            esqlWhereClause: 'true',
+            resetRelationshipsBeforeRun: { entitySource: 'workday' },
+          },
+        ],
+        maintainerName: 'supervises',
+      });
+
+      // Populating on top of an unknown state is worse than leaving it alone.
+      expect(bulkUpdateMock).not.toHaveBeenCalled();
+      expect(result.totalWritten).toBe(0);
+    });
+
+    const resetConfig = {
+      ...baseConfig,
+      id: 'workday',
+      resetRelationshipsBeforeRun: { entitySource: 'workday' },
+    };
+
+    it('does not clear when the source has no documents to repopulate from', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const clearMock = (crudClient as unknown as { clearRelationshipIds: jest.Mock })
+        .clearRelationshipIds;
+      // A feed that has stopped emitting is not evidence that every
+      // relationship ended — clearing here would destroy data with nothing
+      // left to restore it.
+      search.mockResolvedValue(sourcePresenceResponse(0));
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [resetConfig],
+        maintainerName: 'supervises',
+      });
+
+      expect(clearMock).not.toHaveBeenCalled();
+    });
+
+    it('does not clear when the source index is missing', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const clearMock = (crudClient as unknown as { clearRelationshipIds: jest.Mock })
+        .clearRelationshipIds;
+      search.mockRejectedValue(indexNotFoundError());
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [resetConfig],
+        maintainerName: 'supervises',
+      });
+
+      expect(clearMock).not.toHaveBeenCalled();
+    });
+
+    it('does not clear when the source cannot be reached', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const clearMock = (crudClient as unknown as { clearRelationshipIds: jest.Mock })
+        .clearRelationshipIds;
+      // A transport failure tells us nothing about the source's contents, so
+      // the destructive path must not be taken.
+      search.mockRejectedValue(realEsError());
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [resetConfig],
+        maintainerName: 'supervises',
+      });
+
+      expect(clearMock).not.toHaveBeenCalled();
     });
   });
 });
