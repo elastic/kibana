@@ -2594,7 +2594,6 @@ describe('LogsExtractionClient sampling wiring', () => {
   // 15m sub-window because non-priority ignores the global maxTimeWindowSize override
   // (NON_PRIORITY_EXCLUSIVE_FIELDS) and falls back to the 15m default.
 
-
   const extractionRow: ESQLSearchResponse = {
     columns: extractionColumns,
     values: [['2025-01-15T11:52:00.000Z', 'hash1', 'entity1']],
