@@ -204,9 +204,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       obsAIAssistantManagement: {
         pathname: '/app/management/ai/observabilityAiAssistantManagement',
       },
-      searchPlayground: {
-        pathname: '/app/search_playground',
-      },
       agentBuilder: {
         pathname: '/app/agent_builder',
       },

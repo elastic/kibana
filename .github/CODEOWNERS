@@ -1401,7 +1401,6 @@ x-pack/solutions/search/plugins/search_getting_started @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_homepage @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_navigation @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-ml-ux
-x-pack/solutions/search/plugins/search_playground @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_query_rules @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-ml-ux
 x-pack/solutions/search/plugins/serverless_search @elastic/search-ml-ux
@@ -2751,7 +2750,6 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/w
 /x-pack/solutions/search/test/serverless/api_integration @elastic/search-ml-ux
 /x-pack/platform/test/serverless/functional/page_objects/svl_api_keys.ts @elastic/search-ml-ux
 /x-pack/solutions/search/test/functional_search/ @elastic/search-ml-ux
-/x-pack/solutions/search/test/api_integration/apis/search_playground/ @elastic/search-ml-ux
 
 # vectordb
 /x-pack/solutions/vectordb/test/serverless/api_integration/configs/config.ts @elastic/search-ml-ux @elastic/appex-qa

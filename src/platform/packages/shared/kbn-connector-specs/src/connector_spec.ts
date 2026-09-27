@@ -73,7 +73,6 @@ export interface ConnectorMetadata {
     | 'siem'
     | 'generativeAIForSecurity'
     | 'generativeAIForObservability'
-    | 'generativeAIForSearchPlayground'
     | 'endpointSecurity'
     | 'workflows'
     | 'agentBuilder'

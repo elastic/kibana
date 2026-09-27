@@ -1589,7 +1589,6 @@ packages:
   - 'x-pack/solutions/search/plugins/search_homepage'
   - 'x-pack/solutions/search/plugins/search_navigation'
   - 'x-pack/solutions/search/plugins/search_notebooks'
-  - 'x-pack/solutions/search/plugins/search_playground'
   - 'x-pack/solutions/search/plugins/search_query_rules'
   - 'x-pack/solutions/search/plugins/search_synonyms'
   - 'x-pack/solutions/search/plugins/serverless_search'
