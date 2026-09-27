@@ -61,7 +61,9 @@ spaceTest.describe(
     });
 
     spaceTest.beforeAll(suiteSetup.beforeAll);
+
     spaceTest.beforeEach(suiteSetup.beforeEach);
+
     spaceTest.afterAll(suiteSetup.afterAll);
 
     spaceTest('applies inline edits to a by-value panel', async ({ page, pageObjects }) => {

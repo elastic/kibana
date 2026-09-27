@@ -49,7 +49,9 @@ spaceTest.describe(
     });
 
     spaceTest.beforeAll(suiteSetup.beforeAll);
+
     spaceTest.beforeEach(suiteSetup.beforeEach);
+
     spaceTest.afterAll(async ({ kbnClient, scoutSpace, apiServices }) => {
       // The by-reference annotation test saves an `event-annotation-group`, which
       // `cleanStandardList()` does not cover; delete it via API so it cannot leak
