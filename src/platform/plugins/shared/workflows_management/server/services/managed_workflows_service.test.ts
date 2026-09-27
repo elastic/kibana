@@ -229,7 +229,12 @@ const createCrudServiceMock = () => {
       async (_id, _spaceId, params: ReadModifyWriteWorkflowDocumentParams) =>
         params.mutate(createWorkflowSource({}))
     ),
-    deleteWorkflows: jest.fn().mockResolvedValue(undefined),
+    deleteWorkflows: jest.fn(async (ids: string[]) => ({
+      total: ids.length,
+      deleted: ids.length,
+      failures: [],
+      successfulIds: ids,
+    })),
     logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(
       async ({
@@ -1476,6 +1481,7 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(1);
       expect(crudService.deleteWorkflows).toHaveBeenCalledWith(['system-orphan'], SPACE_ID, {
         force: true,
+        deleteRunning: true,
       });
       expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
         id: 'system-orphan',
@@ -1883,16 +1889,26 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledWith({
         includeDeleted: true,
       });
-      expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(2);
+      expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(4);
       expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
-        ['system-unregistered-owner', 'system-removed-definition'],
+        ['system-unregistered-owner'],
         SPACE_ID,
-        { force: true }
+        { force: true, deleteRunning: true }
       );
       expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
-        ['system-missing-owner', 'system-missing-definition'],
+        ['system-removed-definition'],
+        SPACE_ID,
+        { force: true, deleteRunning: true }
+      );
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
+        ['system-missing-owner'],
         'other-space',
-        { force: true }
+        { force: true, deleteRunning: true }
+      );
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
+        ['system-missing-definition'],
+        'other-space',
+        { force: true, deleteRunning: true }
       );
       expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
         id: 'system-missing-owner',
@@ -1912,6 +1928,51 @@ describe('ManagedWorkflowsService', () => {
         spaceId: 'other-space',
         reason: 'orphan_cleanup',
       });
+    });
+
+    it('continues removing orphans when one delete throws', async () => {
+      const knownDefinition = createDefinition({ id: 'system-known' });
+      mockManagedWorkflowDefinitions = [knownDefinition];
+      const { audit, crudService, logger, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-removed-definition',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+        {
+          id: 'system-unregistered-owner',
+          source: createWorkflowSource({
+            managedBy: 'removedPlugin',
+            originManagedWorkflowId: knownDefinition.id,
+          }),
+        },
+      ]);
+      crudService.deleteWorkflows.mockImplementation(async (ids: string[]) => {
+        if (ids[0] === 'system-removed-definition') {
+          throw new Error('doc delete failed');
+        }
+        return {
+          total: ids.length,
+          deleted: ids.length,
+          failures: [],
+          successfulIds: ids,
+        };
+      });
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledTimes(1);
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(
+        undefined,
+        expect.objectContaining({ id: 'system-unregistered-owner', reason: 'orphan_cleanup' })
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('system-removed-definition'),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
     });
 
     it('does not delete managed docs for registered owners with known definitions', async () => {

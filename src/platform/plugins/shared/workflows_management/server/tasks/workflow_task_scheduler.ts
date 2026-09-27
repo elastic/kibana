@@ -171,6 +171,51 @@ export class WorkflowTaskScheduler {
     }
   }
 
+  /** Removes run and resume tasks scoped to these executions. */
+  async removeExecutionScopedTasks(executionIds: string[]): Promise<void> {
+    if (executionIds.length === 0) {
+      return;
+    }
+
+    const taskIds: string[] = [];
+    for (const executionId of executionIds) {
+      const { docs } = await this.taskManager.fetch({
+        size: 100,
+        query: {
+          bool: {
+            filter: [{ term: { 'task.scope': `workflow:execution:${executionId}` } }],
+          },
+        },
+      });
+      for (const doc of docs) {
+        taskIds.push(doc.id);
+      }
+    }
+
+    if (taskIds.length === 0) {
+      return;
+    }
+
+    let bulkRemoveResult;
+    try {
+      bulkRemoveResult = await this.taskManager.bulkRemove(taskIds);
+    } catch (error) {
+      this.logger.error(`Failed to remove execution tasks: ${error}`);
+      throw error;
+    }
+
+    const failedRemovals = bulkRemoveResult.statuses.filter(
+      (status) => !status.success && status.error?.statusCode !== NOT_FOUND_STATUS
+    );
+    if (failedRemovals.length > 0) {
+      const error = new Error(
+        `Failed to remove execution tasks: ${failedRemovals.map((status) => status.id).join(', ')}`
+      );
+      this.logger.error(error.message);
+      throw error;
+    }
+  }
+
   /** Unschedules the scheduled workflow task by deterministic task id. */
   async unscheduleWorkflowTasks(workflowId: string): Promise<void> {
     const taskId = getScheduledWorkflowTaskId(workflowId);

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/workflows-execution-engine/server';
 
 import { deleteWorkflows } from './workflow_deletion';
+import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
 
 const logger = loggerMock.create();
 
@@ -222,6 +223,86 @@ describe('deleteWorkflows', () => {
           },
         })
       );
+    });
+
+    it('deletes workflows with running executions when orphan cleanup requests it', async () => {
+      const { client, storage } = makeStorageClient([
+        { _id: 'wf-1', _source: makeWorkflowSource() },
+        { _id: 'wf-2', _source: makeWorkflowSource() },
+      ]);
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
+      const getWorkflowExecutions = jest.fn().mockImplementation(async ({ workflowId }) => ({
+        total: 1,
+        results: [{ id: `exec-${workflowId}` }],
+        page: 1,
+        size: 100,
+      }));
+      const taskScheduler = {
+        removeExecutionScopedTasks: jest.fn().mockResolvedValue(undefined),
+        bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+      } as unknown as WorkflowTaskScheduler;
+
+      const result = await deleteWorkflows({
+        ids: ['wf-1', 'wf-2'],
+        spaceId: 'default',
+        force: true,
+        deleteRunning: true,
+        storage,
+        workflowExecutionsDataClient,
+        stepExecutionsDataClient,
+        taskScheduler,
+        logger,
+        getWorkflowExecutions,
+      });
+
+      expect(result.deleted).toBe(2);
+      expect(result.successfulIds).toEqual(['wf-1', 'wf-2']);
+      expect(taskScheduler.removeExecutionScopedTasks).toHaveBeenCalledWith(['exec-wf-1']);
+      expect(taskScheduler.removeExecutionScopedTasks).toHaveBeenCalledWith(['exec-wf-2']);
+      expect(client.delete).toHaveBeenCalledWith({ id: 'wf-1' });
+      expect(client.delete).toHaveBeenCalledWith({ id: 'wf-2' });
+    });
+
+    it('restores workflows when removing execution tasks fails', async () => {
+      const { client, storage } = makeStorageClient([
+        { _id: 'wf-1', _source: makeWorkflowSource() },
+      ]);
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
+      const getWorkflowExecutions = jest.fn().mockResolvedValue({
+        total: 1,
+        results: [{ id: 'exec-wf-1' }],
+        page: 1,
+        size: 100,
+      });
+      const taskScheduler = {
+        removeExecutionScopedTasks: jest.fn().mockRejectedValue(new Error('task remove failed')),
+        bulkUnscheduleWorkflowTasks: jest.fn(),
+      } as unknown as WorkflowTaskScheduler;
+      client.bulk
+        .mockResolvedValueOnce({
+          items: [{ index: { _id: 'wf-1', status: 200 } }],
+        })
+        .mockResolvedValueOnce({
+          items: [{ index: { _id: 'wf-1', status: 200 } }],
+        });
+
+      await expect(
+        deleteWorkflows({
+          ids: ['wf-1'],
+          spaceId: 'default',
+          force: true,
+          deleteRunning: true,
+          storage,
+          workflowExecutionsDataClient,
+          stepExecutionsDataClient,
+          taskScheduler,
+          logger,
+          getWorkflowExecutions,
+        })
+      ).rejects.toThrow('task remove failed');
+
+      expect(client.bulk).toHaveBeenCalledTimes(2);
+      expect(client.delete).not.toHaveBeenCalled();
     });
 
     it('throws when workflows have running executions', async () => {

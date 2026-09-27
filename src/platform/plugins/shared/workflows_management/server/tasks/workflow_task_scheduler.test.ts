@@ -355,6 +355,84 @@ describe('WorkflowTaskScheduler', () => {
     });
   });
 
+  describe('removeExecutionScopedTasks', () => {
+    it('bulk-removes tasks scoped to each execution', async () => {
+      const mockTm = makeMockTaskManager();
+      mockTm.fetch
+        .mockResolvedValueOnce(makeFetchResult(['workflow:exec-1:manual', 'workflow-wake-exec-1']))
+        .mockResolvedValueOnce(makeFetchResult(['workflow-immediate-resume-exec-2']));
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await scheduler.removeExecutionScopedTasks(['exec-1', 'exec-2']);
+
+      expect(mockTm.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: { filter: [{ term: { 'task.scope': 'workflow:execution:exec-1' } }] },
+          },
+        })
+      );
+      expect(mockTm.bulkRemove).toHaveBeenCalledWith([
+        'workflow:exec-1:manual',
+        'workflow-wake-exec-1',
+        'workflow-immediate-resume-exec-2',
+      ]);
+    });
+
+    it('does nothing when there are no execution ids', async () => {
+      const mockTm = makeMockTaskManager();
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await scheduler.removeExecutionScopedTasks([]);
+
+      expect(mockTm.fetch).not.toHaveBeenCalled();
+      expect(mockTm.bulkRemove).not.toHaveBeenCalled();
+    });
+
+    it('does not call bulkRemove when no tasks are found', async () => {
+      const mockTm = makeMockTaskManager();
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await scheduler.removeExecutionScopedTasks(['exec-1']);
+
+      expect(mockTm.bulkRemove).not.toHaveBeenCalled();
+    });
+
+    it('throws when bulkRemove reports a failure', async () => {
+      const mockTm = makeMockTaskManager();
+      mockTm.fetch.mockResolvedValueOnce(makeFetchResult(['workflow:exec-1:manual']));
+      mockTm.bulkRemove.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'workflow:exec-1:manual',
+            type: 'task',
+            success: false,
+            error: { statusCode: 500, message: 'delete failed' } as unknown as SavedObjectError,
+          },
+        ],
+      });
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await expect(scheduler.removeExecutionScopedTasks(['exec-1'])).rejects.toThrow(
+        'workflow:exec-1:manual'
+      );
+    });
+
+    it('rethrows when bulkRemove fails', async () => {
+      const mockTm = makeMockTaskManager();
+      mockTm.fetch.mockResolvedValueOnce(makeFetchResult(['workflow:exec-1:manual']));
+      mockTm.bulkRemove.mockRejectedValueOnce(new Error('ES unavailable'));
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await expect(scheduler.removeExecutionScopedTasks(['exec-1'])).rejects.toThrow(
+        'ES unavailable'
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to remove execution tasks')
+      );
+    });
+  });
+
   describe('unscheduleWorkflowTasks', () => {
     it('removes scheduled task by id', async () => {
       const mockTm = makeMockTaskManager();

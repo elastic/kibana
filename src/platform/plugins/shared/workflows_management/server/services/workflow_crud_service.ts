@@ -954,12 +954,13 @@ export class WorkflowCrudService {
   async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean }
+    options?: { force?: boolean; deleteRunning?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
     return deleteWorkflows({
       ids,
       spaceId,
       force: options?.force ?? false,
+      deleteRunning: options?.deleteRunning,
       storage: this.deps.workflowStorage,
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,

@@ -198,7 +198,7 @@ export class WorkflowsPlugin
     try {
       await this.workflowsService?.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
     } catch (error) {
-      this.logger.warn(
+      this.logger.error(
         'Workflows Management: Failed to complete global orphan cleanup for unregistered workflows',
         { error }
       );

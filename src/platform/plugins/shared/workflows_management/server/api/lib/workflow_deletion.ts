@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
@@ -138,6 +139,62 @@ const purgeWorkflowRelatedData = async (
   await Promise.allSettled(deleteOps);
 };
 
+const listNonTerminalExecutionIds = async (
+  workflowId: string,
+  spaceId: string,
+  getWorkflowExecutions: (
+    params: SearchWorkflowExecutionsParams,
+    sp: string
+  ) => Promise<WorkflowExecutionListDto>
+): Promise<string[]> => {
+  const executionIds: string[] = [];
+  let searchAfter: estypes.FieldValue[] | undefined;
+
+  do {
+    const page = await getWorkflowExecutions(
+      {
+        workflowId,
+        statuses: [...NonTerminalExecutionStatuses],
+        size: 100,
+        sortField: 'createdAt',
+        sortOrder: 'asc',
+        searchAfter,
+      },
+      spaceId
+    );
+    executionIds.push(...page.results.map((execution) => execution.id));
+    searchAfter =
+      page.searchAfter && page.searchAfter.length > 0
+        ? (page.searchAfter as estypes.FieldValue[])
+        : undefined;
+  } while (searchAfter);
+
+  return executionIds;
+};
+
+const removeNonTerminalExecutionTasks = async (
+  workflowIds: string[],
+  spaceId: string,
+  taskScheduler: WorkflowTaskScheduler | null,
+  getWorkflowExecutions: (
+    params: SearchWorkflowExecutionsParams,
+    sp: string
+  ) => Promise<WorkflowExecutionListDto>
+): Promise<void> => {
+  if (!taskScheduler) {
+    throw new Error('Cannot delete running orphan workflows without a task scheduler');
+  }
+
+  for (const workflowId of workflowIds) {
+    const executionIds = await listNonTerminalExecutionIds(
+      workflowId,
+      spaceId,
+      getWorkflowExecutions
+    );
+    await taskScheduler.removeExecutionScopedTasks(executionIds);
+  }
+};
+
 const hardDeleteWorkflows = async (
   ids: string[],
   hits: WorkflowHit[],
@@ -153,6 +210,7 @@ const hardDeleteWorkflows = async (
       params: SearchWorkflowExecutionsParams,
       sp: string
     ) => Promise<WorkflowExecutionListDto>;
+    deleteRunning?: boolean;
   }
 ): Promise<DeleteWorkflowsResponse> => {
   const {
@@ -161,34 +219,49 @@ const hardDeleteWorkflows = async (
     taskScheduler,
     logger,
     getWorkflowExecutions,
+    deleteRunning = false,
   } = deps;
   const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
 
   const disabledIds = await disableWorkflowsForDeletion(hits, client);
 
-  let executionChecks: Array<{ id: string; hasRunning: boolean }>;
-  try {
-    executionChecks = await Promise.all(
-      foundIds.map(async (id) => {
-        const executions = await getWorkflowExecutions(
-          { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-          spaceId
-        );
-        return { id, hasRunning: executions.total > 0 };
-      })
-    );
-  } catch (error) {
-    await restoreDisabledWorkflows(hits, disabledIds, client, logger);
-    throw error;
-  }
+  if (!deleteRunning) {
+    let executionChecks: Array<{ id: string; hasRunning: boolean }>;
+    try {
+      executionChecks = await Promise.all(
+        foundIds.map(async (id) => {
+          const executions = await getWorkflowExecutions(
+            { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+            spaceId
+          );
+          return { id, hasRunning: executions.total > 0 };
+        })
+      );
+    } catch (error) {
+      await restoreDisabledWorkflows(hits, disabledIds, client, logger);
+      throw error;
+    }
 
-  const runningIds = executionChecks.filter((c) => c.hasRunning).map((c) => c.id);
-  if (runningIds.length > 0) {
-    await restoreDisabledWorkflows(hits, disabledIds, client, logger);
-    throw new WorkflowConflictError(
-      `Cannot force-delete workflows with running executions: [${runningIds.join(', ')}]`,
-      runningIds[0]
-    );
+    const runningIds = executionChecks.filter((c) => c.hasRunning).map((c) => c.id);
+    if (runningIds.length > 0) {
+      await restoreDisabledWorkflows(hits, disabledIds, client, logger);
+      throw new WorkflowConflictError(
+        `Cannot force-delete workflows with running executions: [${runningIds.join(', ')}]`,
+        runningIds[0]
+      );
+    }
+  } else {
+    try {
+      await removeNonTerminalExecutionTasks(
+        foundIds,
+        spaceId,
+        taskScheduler,
+        getWorkflowExecutions
+      );
+    } catch (error) {
+      await restoreDisabledWorkflows(hits, disabledIds, client, logger);
+      throw error;
+    }
   }
 
   const successfulIds: string[] = [];
@@ -287,6 +360,7 @@ export const deleteWorkflows = async (params: {
   ids: string[];
   spaceId: string;
   force: boolean;
+  deleteRunning?: boolean;
   storage: WorkflowStorage;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
@@ -301,6 +375,7 @@ export const deleteWorkflows = async (params: {
     ids,
     spaceId,
     force,
+    deleteRunning,
     storage,
     workflowExecutionsDataClient,
     stepExecutionsDataClient,
@@ -330,6 +405,7 @@ export const deleteWorkflows = async (params: {
       taskScheduler,
       logger,
       getWorkflowExecutions,
+      deleteRunning,
     });
   }
 
