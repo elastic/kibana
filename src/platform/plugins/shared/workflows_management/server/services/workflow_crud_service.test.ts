@@ -2772,7 +2772,7 @@ describe('WorkflowCrudService', () => {
       );
       expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
       expect(deps.logger.warn).toHaveBeenCalledWith(
-        'Skipping scheduled triggers for global workflow wf-1: scheduling global workflows is not supported yet (elastic/security-team#17382)'
+        'Skipping scheduled triggers for global workflow wf-1: scheduling global workflows is not supported yet (elastic/security-team#17380)'
       );
     });
 

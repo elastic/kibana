@@ -54,10 +54,10 @@ export const syncSchedulerAfterSave = async (params: {
 
   // A scheduled run has no invoking space, so a global workflow's executions would be
   // stamped with '*' and be invisible from every space. Lift this guard once
-  // elastic/security-team#17382 defines global scheduled workflow fan-out.
+  // elastic/security-team#17380 defines scheduled runs for managed workflows.
   if (spaceId === GLOBAL_WORKFLOW_SPACE_ID) {
     logger.warn(
-      `Skipping scheduled triggers for global workflow ${workflowId}: scheduling global workflows is not supported yet (elastic/security-team#17382)`
+      `Skipping scheduled triggers for global workflow ${workflowId}: scheduling global workflows is not supported yet (elastic/security-team#17380)`
     );
     return;
   }
