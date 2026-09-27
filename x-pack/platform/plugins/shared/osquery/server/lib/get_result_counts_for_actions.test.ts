@@ -8,6 +8,15 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getResultCountsForActions } from './get_result_counts_for_actions';
 
+// The agent-carried space only speaks for documents Kibana never stamped, so the
+// fallback pairs its term with the absence of the trusted top-level field.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
+
 const createMockEsClient = (searchResponse: object): ElasticsearchClient =>
   ({
     search: jest.fn().mockResolvedValue(searchResponse),
@@ -269,7 +278,7 @@ describe('getResultCountsForActions', () => {
   });
 
   describe('space scoping', () => {
-    it('scopes the query to a named space with an exact space_id term', async () => {
+    it('scopes the query to a named space with space_id OR action_data.space_id', async () => {
       const esClient = createMockEsClient({
         aggregations: { action_ids: { buckets: [] } },
       });
@@ -278,10 +287,14 @@ describe('getResultCountsForActions', () => {
 
       const query = (esClient.search as jest.Mock).mock.calls[0][0].query;
       expect(query.bool.filter).toContainEqual({ terms: { action_id: ['action-1'] } });
-      expect(query.bool.filter).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(query.bool.filter).toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
+        },
+      });
     });
 
-    it('matches default space OR missing space_id when spaceId is "default"', async () => {
+    it('matches default space, missing space_id, or action_data.space_id when spaceId is "default"', async () => {
       const esClient = createMockEsClient({
         aggregations: { action_ids: { buckets: [] } },
       });
@@ -293,7 +306,17 @@ describe('getResultCountsForActions', () => {
         bool: {
           should: [
             { term: { space_id: 'default' } },
-            { bool: { must_not: { exists: { field: 'space_id' } } } },
+            // A response carrying action_data.space_id belongs to a known space, so
+            // the missing-field allowance must not treat it as unstamped.
+            {
+              bool: {
+                must_not: [
+                  { exists: { field: 'space_id' } },
+                  { exists: { field: 'action_data.space_id' } },
+                ],
+              },
+            },
+            actionDataFallback('default'),
           ],
         },
       });

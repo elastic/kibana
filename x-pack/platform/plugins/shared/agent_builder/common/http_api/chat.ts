@@ -16,16 +16,10 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
+import type { ChatTriggerMode } from '@kbn/agent-builder-common';
 import type { ConversationWithPermissions } from './conversations';
 
-/**
- * Whether a chat request executes the agent. `never` appends the user message to an existing
- * conversation and returns, leaving the execution options unused.
- */
-export enum ChatTriggerMode {
-  Always = 'always',
-  Never = 'never',
-}
+export { ChatTriggerMode } from '@kbn/agent-builder-common';
 
 /**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
@@ -59,15 +53,6 @@ export interface AbortExecutionResponse {
   acknowledged: boolean;
   /** True when the run wound down and its `execution_aborted` event was saved before returning. */
   terminal_persisted: boolean;
-}
-
-/**
- * Body payload for a user message request (`trigger_mode: 'never'`), which persists a message
- * on an existing conversation without executing the agent.
- */
-export interface UserMessagePayload extends Pick<ChatRequestBodyPayload, 'input' | 'attachments'> {
-  trigger_mode: ChatTriggerMode.Never;
-  conversation_id: string;
 }
 
 export type ChatResponse = Omit<

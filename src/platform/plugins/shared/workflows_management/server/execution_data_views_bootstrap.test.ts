@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
@@ -24,7 +20,6 @@ const flushPromises = async (): Promise<void> => {
 describe('ExecutionDataViewsBootstrap', () => {
   const savedObjectsClient = {} as SavedObjectsClientContract;
   const esClient = {} as ElasticsearchClient;
-  const request = {} as KibanaRequest;
 
   const createDataViewsPlugin = (dataViewsService: {
     get: jest.Mock;
@@ -41,14 +36,18 @@ describe('ExecutionDataViewsBootstrap', () => {
       create: jest.fn().mockImplementation(async (spec) => spec),
       createSavedObject: jest.fn().mockResolvedValue(undefined),
     };
-    const bootstrap = new ExecutionDataViewsBootstrap(
-      createDataViewsPlugin(dataViewsService),
-      loggerMock.create()
-    );
+    const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
+    const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, loggerMock.create());
 
-    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient);
     await flushPromises();
 
+    expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenCalledWith(
+      savedObjectsClient,
+      esClient,
+      undefined,
+      true
+    );
     expect(dataViewsService.create).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
@@ -83,8 +82,8 @@ describe('ExecutionDataViewsBootstrap', () => {
     const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
     const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, loggerMock.create());
 
-    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
-    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient);
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient);
     await flushPromises();
 
     expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenCalledTimes(1);
@@ -106,9 +105,9 @@ describe('ExecutionDataViewsBootstrap', () => {
     const logger = loggerMock.create();
     const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, logger);
 
-    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient);
     await flushPromises();
-    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient);
     await flushPromises();
 
     expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenCalledTimes(1);
@@ -128,9 +127,9 @@ describe('ExecutionDataViewsBootstrap', () => {
     const logger = loggerMock.create();
     const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, logger);
 
-    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient);
     await flushPromises();
-    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient);
     await flushPromises();
 
     expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenCalledTimes(2);
@@ -150,9 +149,9 @@ describe('ExecutionDataViewsBootstrap', () => {
     const logger = loggerMock.create();
     const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, logger);
 
-    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient);
     await flushPromises();
-    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient);
     await flushPromises();
 
     expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenCalledTimes(2);

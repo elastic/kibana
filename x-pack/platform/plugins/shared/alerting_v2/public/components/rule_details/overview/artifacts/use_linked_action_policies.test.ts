@@ -7,9 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
-import { useLinkedActionPolicies } from './use_linked_action_policies';
+import type { UseMatchedActionPoliciesResult } from '@kbn/alerting-v2-rule-form';
+import { useLinkedActionPolicies, sortMatchedActionPolicies } from './use_linked_action_policies';
 
-const mockUseMatchedActionPolicies = jest.fn();
+const mockUseMatchedActionPolicies = jest.fn<UseMatchedActionPoliciesResult, [unknown]>();
 const mockHttp = { fake: 'http-start-contract' };
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
@@ -34,19 +35,50 @@ const buildItem = (
     enabled: true,
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
     matcher: null,
-    groupBy: null,
-    tags: null,
-    groupingMode: 'per_episode',
+    group_by: null,
+    grouping_mode: 'per_episode',
     throttle: null,
-    snoozedUntil: null,
-    auth: { owner: 'user', createdByUser: true },
-    createdBy: 'user',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'user',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    snoozed_until: null,
+    created_by: { profile_uid: 'u_user' },
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: { profile_uid: 'u_user' },
+    updated_at: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  } as MatchedActionPolicy['action_policy'],
+  },
   category,
+});
+
+describe('sortMatchedActionPolicies', () => {
+  it('orders matching-criteria before catch-all, then by name', () => {
+    const sorted = sortMatchedActionPolicies([
+      buildItem('catch_all', { id: 'catch-z', name: 'Z catch-all' }),
+      buildItem('tags', { id: 'match-b', name: 'B matching' }),
+      buildItem('catch_all', { id: 'catch-a', name: 'A catch-all' }),
+      buildItem('tags', { id: 'match-a', name: 'A matching' }),
+    ]);
+
+    expect(sorted.map((item) => item.action_policy.id)).toEqual([
+      'match-a',
+      'match-b',
+      'catch-a',
+      'catch-z',
+    ]);
+  });
+
+  it('compares names with a fixed English locale', () => {
+    const localeCompare = jest.spyOn(String.prototype, 'localeCompare');
+
+    try {
+      sortMatchedActionPolicies([
+        buildItem('catch_all', { id: 'b', name: 'Beta' }),
+        buildItem('catch_all', { id: 'a', name: 'Alpha' }),
+      ]);
+
+      expect(localeCompare.mock.calls.some((call) => call[1] === 'en')).toBe(true);
+    } finally {
+      localeCompare.mockRestore();
+    }
+  });
 });
 
 describe('useLinkedActionPolicies', () => {
@@ -54,9 +86,9 @@ describe('useLinkedActionPolicies', () => {
     jest.clearAllMocks();
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -68,53 +100,72 @@ describe('useLinkedActionPolicies', () => {
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({ http: mockHttp, tags: RULE_TAGS });
   });
 
-  it('counts items with category "catch_all" as catch-all and "tags" as matching criteria', () => {
+  it('returns matched items sorted matching-criteria first', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
-        buildItem('catch_all', { id: 'catch-all-1' }),
-        buildItem('tags', { id: 'filtered-1' }),
-        buildItem('tags', { id: 'filtered-2' }),
+        buildItem('catch_all', { id: 'catch-all-1', name: 'Catch-all' }),
+        buildItem('tags', { id: 'filtered-1', name: 'Matching' }),
       ],
-      total: 3,
-      evaluatedCount: 3,
+      evaluatedCount: 2,
       isTruncated: false,
     });
 
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
-    expect(result.current.totalCount).toBe(3);
-    expect(result.current.catchAllCount).toBe(1);
-    expect(result.current.matchingCriteriaCount).toBe(2);
-    expect(result.current.isCountTruncated).toBe(false);
+    expect(result.current.items.map((item) => item.action_policy.id)).toEqual([
+      'filtered-1',
+      'catch-all-1',
+    ]);
+    expect(result.current.isMatchTruncated).toBe(false);
     expect(result.current.isError).toBe(false);
     expect(result.current.error).toBeNull();
   });
 
-  it('flags truncated counts when the space has more policies than the evaluation limit', () => {
+  it('flags truncated matches when some policies were not evaluated', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
-      items: [buildItem('tags'), buildItem('tags')],
+      items: [buildItem('tags')],
       evaluatedCount: 2,
-      total: 3,
       isTruncated: true,
     });
 
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_TAGS));
 
-    expect(result.current.totalCount).toBe(2);
+    expect(result.current.items).toHaveLength(1);
     expect(result.current.evaluatedCount).toBe(2);
-    expect(result.current.isCountTruncated).toBe(true);
+    expect(result.current.isMatchTruncated).toBe(true);
+  });
+
+  it('hides the previous matches while a new tag query is in flight', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: true,
+      error: null,
+      items: [buildItem('tags', { id: 'stale', name: 'Stale policy' })],
+      evaluatedCount: 4,
+      isTruncated: true,
+    });
+
+    const { result } = renderHook(() => useLinkedActionPolicies(['other']));
+
+    expect(result.current.items).toEqual([]);
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.evaluatedCount).toBe(0);
+    expect(result.current.isMatchTruncated).toBe(false);
+    expect(result.current.isError).toBe(false);
   });
 
   it('passes through the loading state', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: true,
+      isPreviousData: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -127,9 +178,9 @@ describe('useLinkedActionPolicies', () => {
   it('surfaces API errors', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: new Error('network error'),
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -138,6 +189,6 @@ describe('useLinkedActionPolicies', () => {
 
     expect(result.current.isError).toBe(true);
     expect(result.current.error?.message).toBe('network error');
-    expect(result.current.totalCount).toBe(0);
+    expect(result.current.items).toEqual([]);
   });
 });

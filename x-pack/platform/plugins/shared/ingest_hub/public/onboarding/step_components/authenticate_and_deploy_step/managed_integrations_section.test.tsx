@@ -243,6 +243,13 @@ describe('ManagedIntegrationsSection', () => {
   });
 
   describe('showIdentityFederation=true', () => {
+    it('describes both access keys and federated identity', () => {
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByTestId('managedIntegrationsSection-description')).toHaveTextContent(
+        'Utilize AWS Access Keys or Federated Identity to set up and deploy your AWS account.'
+      );
+    });
+
     it('renders method radio group', () => {
       renderSection({ showIdentityFederation: true });
       expect(
@@ -266,6 +273,15 @@ describe('ManagedIntegrationsSection', () => {
   });
 
   describe('showIdentityFederation=false', () => {
+    it('describes access keys only', () => {
+      renderSection({ showIdentityFederation: false });
+      const description = screen.getByTestId('managedIntegrationsSection-description');
+      expect(description).toHaveTextContent(
+        'Utilize AWS Access Keys to set up and deploy your AWS account.'
+      );
+      expect(description).not.toHaveTextContent('Federated Identity');
+    });
+
     it('hides method radio group', () => {
       renderSection({ showIdentityFederation: false });
       expect(

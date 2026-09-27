@@ -24,6 +24,7 @@ import { initSubscribers } from '../lib/events/init_subscribers';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { DISPATCHER_TASK_ID } from '../lib/dispatcher/constants';
+import { installAlertingV2ManagedWorkflows } from '../lib/workflow_extensions/managed_workflows';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
@@ -48,6 +49,16 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     });
 
     initSubscribers(container);
+
+    try {
+      await installAlertingV2ManagedWorkflows(
+        container.get(
+          PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions')
+        )
+      );
+    } catch (error) {
+      coreLogger.warn('Failed to install alerting v2 managed workflows', { error });
+    }
 
     scheduleDispatcherTask({ taskManager }).catch((error) => {
       tasksLogger.error({

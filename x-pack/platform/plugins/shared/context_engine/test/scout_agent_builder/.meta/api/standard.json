@@ -1,5 +1,5 @@
 {
-  "sha1": "3dcf51968dc746197ef83325a780790b732710ad",
+  "sha1": "977cc1ef3c5dcbf50d66d061172d0f720a9dfd36",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 216,
-        "column": 16
+        "line": 252,
+        "column": 12
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 236,
-        "column": 27
+        "line": 272,
+        "column": 21
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 249,
-        "column": 12
+        "line": 287,
+        "column": 58
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 261,
-        "column": 12
+        "line": 300,
+        "column": 24
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 275,
-        "column": 40
+        "line": 312,
+        "column": 12
       }
     },
     {
@@ -84,13 +84,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 321,
-        "column": 64
+        "line": 362,
+        "column": 14
       }
     },
     {
-      "id": "720459cc95e188a-1e728eac23b9d23",
-      "title": "context engine AI index describe API returns Elasticsearch 403 when the caller lacks view_index_metadata",
+      "id": "720459cc95e188a-43de1b1299ef94f",
+      "title": "context engine AI index describe API returns Elasticsearch 403 when the caller lacks view_index_metadata privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -98,13 +98,41 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 404,
+        "line": 373,
+        "column": 11
+      }
+    },
+    {
+      "id": "720459cc95e188a-ad2a6a73ede7a57",
+      "title": "context engine AI index describe API returns Elasticsearch 403 when the caller lacks read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
+        "line": 381,
+        "column": 17
+      }
+    },
+    {
+      "id": "720459cc95e188a-769b8b3aafce445",
+      "title": "context engine AI index describe API returns 403 when the caller holds no privilege on the backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
+        "line": 461,
         "column": 27
       }
     },
     {
-      "id": "720459cc95e188a-811f80c3307aa36",
-      "title": "context engine AI index describe API omits counts, not the whole block, when the caller lacks read",
+      "id": "720459cc95e188a-9bc3aaebf531966",
+      "title": "context engine AI index describe API describes an entry whose backing index does not exist yet",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -112,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 416,
+        "line": 472,
         "column": 27
       }
     },
@@ -308,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 128,
+        "line": 129,
         "column": 15
       }
     },
@@ -322,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 222,
+        "line": 223,
         "column": 9
       }
     },
@@ -336,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 235,
+        "line": 236,
         "column": 21
       }
     },
@@ -350,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 253,
+        "line": 254,
         "column": 27
       }
     },
@@ -364,8 +392,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 261,
+        "line": 262,
         "column": 53
+      }
+    },
+    {
+      "id": "ec1ea961b0a61a1-4476040377f43c2",
+      "title": "context engine AI indices API rejects an empty ES|QL source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
+        "line": 273,
+        "column": 53
+      }
+    },
+    {
+      "id": "ec1ea961b0a61a1-839fc8d538f3fb0",
+      "title": "context engine AI indices API rejects a syntactically invalid ES|QL source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
+        "line": 286,
+        "column": 68
       }
     },
     {
@@ -378,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 272,
+        "line": 297,
         "column": 64
       }
     },
@@ -392,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 280,
+        "line": 305,
         "column": 5
       }
     },
@@ -406,7 +462,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 287,
+        "line": 312,
         "column": 7
       }
     },
@@ -420,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 294,
+        "line": 319,
         "column": 72
       }
     },
@@ -434,7 +490,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 322,
+        "line": 347,
         "column": 59
       }
     },
@@ -448,7 +504,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 350,
+        "line": 375,
         "column": 14
       }
     },
@@ -462,7 +518,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 396,
+        "line": 421,
         "column": 60
       }
     },
@@ -476,7 +532,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 441,
+        "line": 466,
         "column": 16
       }
     },
@@ -490,7 +546,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 448,
+        "line": 473,
         "column": 71
       }
     },
@@ -504,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 461,
+        "line": 484,
         "column": 21
       }
     },
@@ -518,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 476,
+        "line": 497,
         "column": 13
       }
     },
@@ -532,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 524,
+        "line": 545,
         "column": 76
       }
     },
@@ -546,7 +602,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 551,
+        "line": 572,
         "column": 65
       }
     },
@@ -560,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 579,
+        "line": 600,
         "column": 4
       }
     },
@@ -574,7 +630,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 608,
+        "line": 629,
         "column": 14
       }
     },
@@ -588,7 +644,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 639,
+        "line": 660,
         "column": 13
       }
     },
@@ -602,7 +658,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 659,
+        "line": 680,
         "column": 13
       }
     },
@@ -616,7 +672,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 679,
+        "line": 700,
         "column": 84
       }
     },
@@ -630,7 +686,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 695,
+        "line": 716,
         "column": 30
       }
     },
@@ -644,8 +700,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 713,
+        "line": 734,
         "column": 30
+      }
+    },
+    {
+      "id": "ec1ea961b0a61a1-4e86b0e085e9597",
+      "title": "context engine AI indices API rejects an invalid ES|QL source on PUT without modifying the stored AI index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
+        "line": 785,
+        "column": 38
+      }
+    },
+    {
+      "id": "f32413f123c0cf8-adc956e4684e1c3",
+      "title": "context engine KI retrieval view exposes only current, active, unexpired KIs through the view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_view.spec.ts",
+        "line": 76,
+        "column": 5
+      }
+    },
+    {
+      "id": "f32413f123c0cf8-cda51273874ac7e",
+      "title": "context engine KI retrieval view exposes only the latest revision of each KI through a data stream view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_view.spec.ts",
+        "line": 180,
+        "column": 17
       }
     }
   ]

@@ -10,7 +10,7 @@
 import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import { candidateIssues, describeIssue, findMatchingIssues, indexIssues } from './match_issues';
 import { groupIntoSuites } from './suites';
-import { flakyTest, githubIssue, SUITE_PATH } from './test_fixtures';
+import { fileWideIssue, flakyTest, githubIssue, SUITE_PATH } from './test_fixtures';
 
 /** Body as `report_failed_tests` writes it: optional details table, then the metadata footer. */
 const failedTestBody = (
@@ -67,10 +67,24 @@ describe('describeIssue', () => {
     });
   });
 
-  it('reads the suite file of a suite issue title', () => {
+  it('reads the suite file and framework from the suite metadata, never from the title', () => {
     expect(
-      describeIssue(githubIssue({ number: 5, title: `Flaky FTR test suite: ${SUITE_PATH}` }))
+      describeIssue(
+        githubIssue({
+          number: 4,
+          title: 'Flaky Scout suite: default status alert',
+          body: `text\n\n<!-- kibanaCiData = {"flaky-test-suite":{"suite.filePath":"${SUITE_PATH}"}} -->`,
+        })
+      )
     ).toMatchObject({ suiteFilePath: SUITE_PATH, testName: undefined });
+    expect(describeIssue(fileWideIssue(5, { framework: 'ftr' }))).toMatchObject({
+      suiteFilePath: SUITE_PATH,
+      suiteFramework: 'ftr',
+      testName: undefined,
+    });
+    expect(
+      describeIssue(githubIssue({ number: 6, title: `Flaky Scout suite: ${SUITE_PATH}` }))
+    ).toMatchObject({ suiteFilePath: undefined });
   });
 
   it('restores dots in file paths and copes with hand-written issues', () => {
@@ -98,7 +112,7 @@ describe('indexIssues / candidateIssues', () => {
   it('indexes issues by every file name they mention, with JUnit dots restored', () => {
     const index = indexIssues([
       describeIssue(ftrIssue(1, 'x-pack/test/a.ts', 'a b')),
-      describeIssue(githubIssue({ number: 2, title: 'Flaky Scout test suite: src/b/c.spec.ts' })),
+      describeIssue(fileWideIssue(2, { filePath: 'src/b/c.spec.ts' })),
       describeIssue(
         githubIssue({ number: 3, body: 'Fails in `src/d/e.test.tsx` and mentions f.js too' })
       ),
@@ -137,7 +151,7 @@ describe('indexIssues / candidateIssues', () => {
     ]);
     const details = [
       describeIssue(scoutIssue(10, 'id-1', 'creates default alert')),
-      describeIssue(githubIssue({ number: 11, title: `Flaky Scout test suite: ${SUITE_PATH}` })),
+      describeIssue(fileWideIssue(11)),
       describeIssue(scoutIssue(12, 'id-x', 'another test')),
       describeIssue(scoutIssue(13, 'id-y', 'unrelated', 'x-pack/other.spec.ts')),
       describeIssue(jestIssue(14, 'src/plugins/a', 'A creates default alert')),
@@ -150,17 +164,15 @@ describe('indexIssues / candidateIssues', () => {
 });
 
 describe('findMatchingIssues', () => {
-  it('matches suite issues by title, ahead of per-test issues, open ones ahead of closed ones', () => {
+  it('matches suite issues by metadata, ahead of per-test issues, open ones ahead of closed ones', () => {
     const [suite] = groupIntoSuites([
       flakyTest({ testId: 'id-1', title: 'creates default alert' }),
     ]);
     const matches = findMatchingIssues(suite, [
       describeIssue(scoutIssue(10, 'id-1', 'creates default alert')),
-      describeIssue(
-        githubIssue({ number: 11, title: `Flaky Scout test suite: ${SUITE_PATH}`, state: 'closed' })
-      ),
-      describeIssue(githubIssue({ number: 12, title: `Flaky test suite: ${SUITE_PATH}` })),
-      describeIssue(githubIssue({ number: 13, title: 'Flaky Scout test suite: other.spec.ts' })),
+      describeIssue(fileWideIssue(11, { state: 'closed' })),
+      describeIssue(fileWideIssue(12)),
+      describeIssue(fileWideIssue(13, { filePath: 'other.spec.ts' })),
     ]);
 
     expect(matches.map(({ issue, match }) => [issue.number, match])).toEqual([
@@ -168,6 +180,82 @@ describe('findMatchingIssues', () => {
       [11, 'suite'],
       [10, 'test'],
     ]);
+  });
+
+  it('matches a suite issue by file and suite title, an issue about the whole file by file alone', () => {
+    const [suite] = groupIntoSuites([flakyTest({ suiteTitle: 'Default status alert' })]);
+    const suiteIssue = (number: number, title?: string) =>
+      describeIssue(
+        githubIssue({
+          number,
+          body: `text\n\n<!-- kibanaCiData = ${JSON.stringify({
+            'flaky-test-suite': { 'suite.filePath': SUITE_PATH, 'suite.title': title },
+          })} -->`,
+        })
+      );
+
+    const matches = findMatchingIssues(suite, [
+      suiteIssue(21, 'Default status alert'),
+      suiteIssue(22, 'Another describe of the file'),
+      suiteIssue(23),
+    ]);
+
+    // the issue about another describe of the file only mentions the file
+    expect(matches.map(({ issue, match }) => [issue.number, match])).toEqual([
+      [23, 'suite'],
+      [21, 'suite'],
+      [22, 'file'],
+    ]);
+  });
+
+  it('does not take a suite issue of another framework for the suite, same file and title', () => {
+    const [suite] = groupIntoSuites([flakyTest({ suiteTitle: 'Default status alert' })]);
+    const suiteIssue = (number: number, framework: string) =>
+      describeIssue(
+        githubIssue({
+          number,
+          body: `text\n\n<!-- kibanaCiData = ${JSON.stringify({
+            'flaky-test-suite': {
+              'suite.filePath': SUITE_PATH,
+              'suite.title': 'Default status alert',
+              'suite.framework': framework,
+            },
+          })} -->`,
+        })
+      );
+
+    const matches = findMatchingIssues(suite, [
+      suiteIssue(31, 'jest'),
+      suiteIssue(32, 'playwright'),
+    ]);
+
+    expect(matches.map(({ issue, match }) => [issue.number, match])).toEqual([
+      [32, 'suite'],
+      [31, 'file'],
+    ]);
+  });
+
+  it('keeps a per-test issue to the describe block it names when sibling suites share a test title', () => {
+    const [suiteA, suiteB] = groupIntoSuites([
+      flakyTest({ testId: 'a-loads', title: 'loads', suiteTitle: 'A', failedBuilds: 9 }),
+      flakyTest({ testId: 'b-loads', title: 'loads', suiteTitle: 'B', failedBuilds: 5 }),
+    ]);
+    // a Jest issue names the test as `<describe titles> <title>`
+    const issueForA = describeIssue(
+      githubIssue({
+        number: 41,
+        title:
+          'Failing test: Jest Tests.x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests - A loads',
+        body: updateIssueMetadata(`| Location | ${SUITE_PATH} |`, {
+          'test.class':
+            'Jest Tests.x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests',
+          'test.name': 'A loads',
+        }),
+      })
+    );
+
+    expect(findMatchingIssues(suiteA, [issueForA]).map(({ match }) => match)).toEqual(['test']);
+    expect(findMatchingIssues(suiteB, [issueForA]).map(({ match }) => match)).toEqual(['file']);
   });
 
   it('matches Scout issues by test id, or by file for other tests of the suite', () => {
@@ -191,7 +279,11 @@ describe('findMatchingIssues', () => {
 
   it('matches Jest issues by directory and test name, since the classname has no file', () => {
     const [suite] = groupIntoSuites([
-      flakyTest({ filePath: 'src/plugins/a/client.test.ts', title: 'drops every stored event' }),
+      flakyTest({
+        filePath: 'src/plugins/a/client.test.ts',
+        suiteTitle: 'ConversationClient events',
+        title: 'drops every stored event',
+      }),
     ]);
     const related = findMatchingIssues(suite, [
       describeIssue(
@@ -210,6 +302,7 @@ describe('findMatchingIssues', () => {
     const [suite] = groupIntoSuites([
       flakyTest({
         filePath: 'x-pack/test/functional/apps/ml/synchronize.ts',
+        suiteTitle: 'machine learning - stack management jobs synchronize',
         title: 'should have nothing to sync anymore',
       }),
     ]);

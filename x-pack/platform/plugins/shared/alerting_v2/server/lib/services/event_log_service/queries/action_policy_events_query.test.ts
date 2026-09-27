@@ -60,7 +60,15 @@ describe('action policy events queries', () => {
       );
     });
 
-    it('matches dispatched, throttled, and dispatch_failed when outcomes is omitted', () => {
+    it('adds @timestamp <= endDate to the range filter when endDate is provided', () => {
+      const until = '2026-05-05T00:00:00Z';
+      const filters = filtersOf(buildShared({ endDate: until }));
+      expect(filters).toEqual(
+        expect.arrayContaining([{ range: { '@timestamp': { gte: SINCE, lte: until } } }])
+      );
+    });
+
+    it('matches dispatched, throttled, and dispatch_failed when actions is omitted', () => {
       const filters = filtersOf(buildShared());
       expect(filters).toEqual(
         expect.arrayContaining([
@@ -77,8 +85,8 @@ describe('action policy events queries', () => {
       );
     });
 
-    it('narrows event.action to the provided outcomes', () => {
-      const filters = filtersOf(buildShared({ outcomes: ['throttled'] }));
+    it('narrows event.action to the provided actions', () => {
+      const filters = filtersOf(buildShared({ actions: ['throttled'] }));
       expect(filters).toEqual(
         expect.arrayContaining([{ terms: { 'event.action': ['throttled'] } }])
       );
@@ -292,9 +300,14 @@ describe('action policy events queries', () => {
       });
     });
 
-    it('sorts by @timestamp desc', () => {
+    it('sorts by @timestamp desc by default', () => {
       const body = buildShared();
       expect(body.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+    });
+
+    it('sorts by @timestamp asc when sortOrder=asc', () => {
+      const body = buildShared({ sortOrder: 'asc' });
+      expect(body.sort).toEqual([{ '@timestamp': { order: 'asc' } }]);
     });
 
     it('sets track_total_hits=true', () => {

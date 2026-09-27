@@ -119,6 +119,12 @@ jest.mock('../../../entities/workflows/model/use_workflow_execution_polling', ()
   useWorkflowExecutionPolling: () => mockUseWorkflowExecutionPolling(),
 }));
 
+// The component reads the polled execution from the store; mirror the mocked poll result there.
+jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
+  ...jest.requireActual('../../../entities/workflows/store/workflow_detail/selectors'),
+  selectExecution: () => mockUseWorkflowExecutionPolling().workflowExecution,
+}));
+
 const createMockExecution = (
   overrides: Partial<WorkflowExecutionDto> = {}
 ): WorkflowExecutionDto => ({

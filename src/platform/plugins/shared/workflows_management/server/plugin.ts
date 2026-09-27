@@ -138,12 +138,14 @@ export class WorkflowsPlugin
         }
 
         const spaceId = spaces.getSpaceId(request);
+        const savedObjectsClient = coreStart.savedObjects
+          .getUnsafeInternalClient()
+          .asScopedToNamespace(spaceId);
 
         this.executionDataViewsBootstrap.ensureForSpaceFireAndForget(
           spaceId,
-          coreStart.savedObjects.getScopedClient(request),
-          coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
-          request
+          savedObjectsClient,
+          coreStart.elasticsearch.client.asInternalUser
         );
       }
     );

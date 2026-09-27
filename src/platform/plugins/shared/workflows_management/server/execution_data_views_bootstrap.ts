@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../common';
 
@@ -41,8 +36,7 @@ export class ExecutionDataViewsBootstrap {
   ensureForSpaceFireAndForget(
     spaceId: string,
     savedObjectsClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    request: KibanaRequest
+    esClient: ElasticsearchClient
   ): void {
     const cached = this.bootstrappedSpaces.get(spaceId);
     if (cached !== undefined && Date.now() - cached < BOOTSTRAP_CACHE_TTL_MS) {
@@ -52,7 +46,7 @@ export class ExecutionDataViewsBootstrap {
       return;
     }
 
-    const operation = this.ensureForSpace(spaceId, savedObjectsClient, esClient, request)
+    const operation = this.ensureForSpace(spaceId, savedObjectsClient, esClient)
       .then(() => {
         this.bootstrappedSpaces.set(spaceId, Date.now());
       })
@@ -70,13 +64,12 @@ export class ExecutionDataViewsBootstrap {
   private async ensureForSpace(
     spaceId: string,
     savedObjectsClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    request: KibanaRequest
+    esClient: ElasticsearchClient
   ): Promise<void> {
     const dvService = await this.dataViewsPlugin.dataViewsServiceFactory(
       savedObjectsClient,
       esClient,
-      request,
+      undefined,
       true /* byPassCapabilities */
     );
 

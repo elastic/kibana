@@ -152,6 +152,24 @@ describe('withAvailabilityCheck', () => {
       expect(handler).toHaveBeenCalledTimes(1);
     });
 
+    it('does not start the data-view bootstrap when it is disabled', async () => {
+      const handler = jest.fn().mockResolvedValue(undefined);
+      const wrapped = withAvailabilityCheck(handler, {
+        bootstrapExecutionDataViews: false,
+      });
+      const response = httpServerMock.createResponseFactory();
+      const context = createWorkflowsContext({ license: enterpriseLicense() });
+      const getWorkflowsManagement = jest.fn().mockResolvedValue(undefined);
+      Object.defineProperty(context, 'workflowsManagement', {
+        get: getWorkflowsManagement,
+      });
+
+      await wrapped(context, request as never, response);
+
+      expect(getWorkflowsManagement).not.toHaveBeenCalled();
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
     it('calls the route handler when workflows are available in this environment', async () => {
       const handler = jest.fn().mockResolvedValue(undefined);
       const wrapped = withAvailabilityCheck(handler);
