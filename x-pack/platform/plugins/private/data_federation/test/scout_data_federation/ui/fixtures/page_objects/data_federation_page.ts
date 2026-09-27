@@ -28,7 +28,7 @@ export class DataFederationPage {
   readonly editDataSourceFlyout;
 
   readonly createDatasetWizard;
-  readonly createDatasetWizardAdvancedStep;
+  readonly createDatasetWizardAdditionalStep;
   readonly createDatasetWizardMappingStep;
   readonly createDatasetWizardReviewStep;
   readonly wizardNextButton;
@@ -65,11 +65,13 @@ export class DataFederationPage {
     this.editDataSourceFlyout = page.testSubj.locator('editDataSourceFlyout');
 
     this.createDatasetWizard = page.testSubj.locator('createDatasetWizard');
-    this.createDatasetWizardAdvancedStep = page.testSubj.locator('createDatasetWizardAdvancedStep');
+    this.createDatasetWizardAdditionalStep = page.testSubj.locator(
+      'createDatasetWizardAdditionalStep'
+    );
     this.createDatasetWizardMappingStep = page.testSubj.locator('createDatasetWizardMappingStep');
     this.createDatasetWizardReviewStep = page.testSubj.locator('createDatasetWizardReviewStep');
     this.wizardNextButton = page.testSubj.locator('nextButton');
-    this.createDataSetDataSource = page.testSubj.locator('createDatasetDataSource');
+    this.createDataSetDataSource = page.components.superSelect('createDatasetDataSource');
     this.createDataSetName = page.testSubj.locator('createDatasetName');
     this.createDataSetResource = page.testSubj.locator('createDatasetResource');
     this.createDataSetSettingsFormat = page.components.superSelect('createDatasetSettingsFormat');
@@ -164,16 +166,19 @@ export class DataFederationPage {
     await this.createDataSetButton.click();
     await this.createDatasetWizard.waitFor({ state: 'visible' });
 
-    await this.createDataSetDataSource.click();
-    await this.page.testSubj.locator(`createDatasetDataSource-${dataSourceName}`).click();
+    await this.createDataSetDataSource.selectOptionByValue(dataSourceName);
     await this.createDataSetName.fill(name);
     await this.createDataSetResource.fill(resource);
     await this.createDataSetSettingsFormat.selectOptionByValue(format);
 
     await this.wizardNextButton.click();
-    await this.createDatasetWizardAdvancedStep.waitFor({ state: 'visible' });
+    await this.createDatasetWizardAdditionalStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();
     await this.createDatasetWizardMappingStep.waitFor({ state: 'visible' });
+
+    // Mapping step defaults to "Timeseries data" enabled (requires @timestamp source field path).
+    await this.page.testSubj.locator('createDatasetWizardTimestampPath').fill('timestamp');
+
     await this.wizardNextButton.click();
     await this.createDatasetWizardReviewStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();
@@ -193,7 +198,7 @@ export class DataFederationPage {
 
     await this.createDataSetResource.fill(resource);
     await this.wizardNextButton.click();
-    await this.createDatasetWizardAdvancedStep.waitFor({ state: 'visible' });
+    await this.createDatasetWizardAdditionalStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();
     await this.createDatasetWizardMappingStep.waitFor({ state: 'visible' });
     await this.wizardNextButton.click();

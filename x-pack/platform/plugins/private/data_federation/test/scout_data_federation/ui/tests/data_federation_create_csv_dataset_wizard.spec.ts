@@ -211,8 +211,9 @@ test.describe(
         await pageObjects.dataFederation.createDataSetButton.click();
         await pageObjects.dataFederation.createDatasetWizard.waitFor({ state: 'visible' });
 
-        await pageObjects.dataFederation.createDataSetDataSource.click();
-        await page.getByTestId(`createDatasetDataSource-${createdDataSourceName}`).click();
+        await pageObjects.dataFederation.createDataSetDataSource.selectOptionByValue(
+          createdDataSourceName
+        );
 
         await pageObjects.dataFederation.createDataSetName.fill(createdDataSetName);
         await pageObjects.dataFederation.createDataSetResource.fill(resource);

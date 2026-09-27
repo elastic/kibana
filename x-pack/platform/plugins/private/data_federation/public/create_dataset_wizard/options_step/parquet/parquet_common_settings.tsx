@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Control } from 'react-hook-form';
 
-import type { CreateDatasetFormValues } from '../create_dataset_form_state';
+import type { CreateDatasetFormValues } from '../../create_dataset_form_state';
 
 export function ParquetCommonSettings(_props: { control: Control<CreateDatasetFormValues> }) {
   return <div data-test-subj="createDatasetParquetCommonSettings" />;

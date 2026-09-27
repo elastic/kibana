@@ -55,4 +55,3 @@ describe('OptimizedReaderSelect', () => {
     expect(getByTestId('optimizedReaderValue')).toHaveTextContent('false');
   });
 });
-

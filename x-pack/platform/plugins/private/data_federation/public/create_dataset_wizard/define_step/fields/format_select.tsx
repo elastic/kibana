@@ -10,7 +10,7 @@ import { EuiSuperSelect, EuiText, EuiTextColor, type EuiSuperSelectOption } from
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import type { DatasetFormatFormValue } from '../../create_dataset_form_state';
-import { DescribedOptionDisplay } from '../described_option_display';
+import { DescribedOptionDisplay } from '../../components/described_option_display';
 
 export const SUPPORTED_DATASET_FORMATS = ['csv', 'tsv', 'ndjson', 'parquet'] as const;
 export type SupportedDatasetFormat = (typeof SUPPORTED_DATASET_FORMATS)[number];
@@ -136,4 +136,3 @@ export function FormatSelect({
     />
   );
 }
-

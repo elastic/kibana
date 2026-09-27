@@ -69,4 +69,3 @@ describe('DataSourceSelect', () => {
     expect(getByTestId('dataSourceValue')).toHaveTextContent('my-s3');
   });
 });
-

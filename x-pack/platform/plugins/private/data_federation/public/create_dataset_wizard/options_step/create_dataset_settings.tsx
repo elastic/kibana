@@ -32,13 +32,13 @@ import {
 } from '../create_dataset_form_state';
 import { CsvTsvAdvancedSettings } from './csv_tsv/csv_tsv_advanced_settings';
 import { CsvTsvCommonSettings } from './csv_tsv/csv_tsv_common_settings';
-import { FormatSelect } from '../components/fields/format_select';
+import { FormatSelect } from '../define_step/fields/format_select';
 import { DelimiterSelect } from './csv_tsv/fields/delimiter_select';
 import { HeaderRow } from './csv_tsv/fields/header_row';
 import { QuoteMode } from './csv_tsv/fields/quote_mode';
-import { NdjsonCommonSettings } from '../components/ndjson_common_settings';
-import { ParquetAdvancedSettings } from '../components/parquet_advanced_settings';
-import { ParquetCommonSettings } from '../components/parquet_common_settings';
+import { NdjsonCommonSettings } from './ndjson/ndjson_common_settings';
+import { ParquetAdvancedSettings } from './parquet/parquet_advanced_settings';
+import { ParquetCommonSettings } from './parquet/parquet_common_settings';
 import { PartitionDetectionSelect } from '../components/fields/partition_detection_select';
 import { SharedAdvancedSettings } from './all_types/shared_advanced_settings';
 import { SharedCommonSettings } from './all_types/shared_common_settings';

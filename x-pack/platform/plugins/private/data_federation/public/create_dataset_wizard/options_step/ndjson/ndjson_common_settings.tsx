@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiCode, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 
-import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
+import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
   DEFAULT_DATETIME_FORMAT_LABEL,
   type CreateDatasetFormValues,
-} from '../create_dataset_form_state';
-import { DatetimeFormatSelect } from './fields/datetime_format_select';
-import { FormRowLabelWithInfo } from './form_row_label_with_info';
+} from '../../create_dataset_form_state';
+import { DatetimeFormatSelect } from '../../components/fields/datetime_format_select';
+import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 
 const helpTextDefault = (valueLabel: string) => (
   <EuiText size="xs" color="subdued">

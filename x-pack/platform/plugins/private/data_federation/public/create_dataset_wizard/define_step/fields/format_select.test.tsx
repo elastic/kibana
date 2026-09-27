@@ -55,4 +55,3 @@ describe('FormatSelect', () => {
     expect(getByTestId('formatValue')).toHaveTextContent('tsv');
   });
 });
-

@@ -17,8 +17,11 @@ import {
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
-import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
-import type { CreateDatasetFormValues, DatasetBooleanFormValue } from './create_dataset_form_state';
+import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
+import type {
+  CreateDatasetFormValues,
+  DatasetBooleanFormValue,
+} from '../../create_dataset_form_state';
 
 const OPTIMIZED_READER_OPTIONS = [
   {

@@ -15,10 +15,7 @@ import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
 import type { CreateDatasetFormValues, DatasetFormatFormValue } from '../create_dataset_form_state';
 import { CreateDatasetFormatField } from '../options_step/create_dataset_settings';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import {
-  SUPPORTED_DATASET_FORMATS,
-  type SupportedDatasetFormat,
-} from '../components/fields/format_select';
+import { SUPPORTED_DATASET_FORMATS, type SupportedDatasetFormat } from './fields/format_select';
 import type { DatasetWizardContent } from '../types';
 
 const isSupportedDatasetFormat = (value: string): value is SupportedDatasetFormat =>
