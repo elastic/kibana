@@ -6,6 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { EventLogClient } from './event_log_client';
 import type { EsContext } from './es';
 import { contextMock } from './es/context.mock';
@@ -278,6 +280,84 @@ describe('EventLogStart', () => {
         },
         includeSpaceAgnostic: true,
       });
+    });
+  });
+
+  describe('softDeleteByQuery', () => {
+    const validParams = {
+      query: { bool: { must: [{ term: { 'event.action': 'gap' } }] } },
+      field: 'kibana.alert.rule.gap.deleted' as const,
+    };
+
+    test('delegates to the adapter with nested namespace scoping injected', async () => {
+      await eventLogClient.softDeleteByQuery(validParams);
+      expect(esContext.esAdapter.softDeleteByQuery).toHaveBeenCalledWith({
+        ...validParams,
+        query: {
+          bool: {
+            must: [
+              validParams.query,
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: { must_not: { exists: { field: 'kibana.saved_objects.namespace' } } },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('injects a nested term filter for a named space', async () => {
+      const spacedClient = new EventLogClient({
+        esContext,
+        savedObjectGetter,
+        request: FakeRequest(),
+        spaceId: 'my-space' as SpaceId,
+        spacesService: { spaceIdToNamespace: (id: string) => id } as unknown as SpacesServiceStart,
+      });
+      await spacedClient.softDeleteByQuery(validParams);
+      expect(esContext.esAdapter.softDeleteByQuery).toHaveBeenCalledWith({
+        ...validParams,
+        query: {
+          bool: {
+            must: [
+              validParams.query,
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    term: { 'kibana.saved_objects.namespace': { value: 'my-space' } },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test.each([
+      ['an arbitrary field path', 'some.other.field'],
+      ['a flat field', 'deleted'],
+      ['an injection attempt', 'deleted = true; ctx._source.other'],
+      ['an empty string', ''],
+      ['a field with leading dot', '.deleted'],
+      ['a field with trailing dot', 'deleted.'],
+      ['a partial match of the allowed field', 'kibana.alert.rule.gap'],
+      ['a superset of the allowed field', 'kibana.alert.rule.gap.deleted.extra'],
+    ])('rejects %s', async (_label, field) => {
+      await expect(
+        eventLogClient.softDeleteByQuery({
+          ...validParams,
+          field,
+        })
+      ).rejects.toThrow(/\[field\]:/);
+
+      expect(esContext.esAdapter.softDeleteByQuery).not.toHaveBeenCalled();
     });
   });
 });

@@ -20,6 +20,7 @@ import type { IEventLogClient } from './types';
 import type {
   QueryEventsBySavedObjectResult,
   QueryEventsBySavedObjectSearchAfterResult,
+  SoftDeleteByQueryParams,
 } from './es/cluster_client_adapter';
 import type { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
@@ -95,6 +96,14 @@ export type FindOptionsSearchAfterType = Omit<FindOptionsType, 'page'> & {
   pit_id?: string;
   search_after?: estypes.SortResults;
 };
+
+const softDeleteByQuerySchema = schema.object({
+  query: schema.object({}, { unknowns: 'allow' }),
+  field: schema.oneOf([schema.literal('kibana.alert.rule.gap.deleted')]),
+  conflicts: schema.maybe(schema.oneOf([schema.literal('abort'), schema.literal('proceed')])),
+  slices: schema.maybe(schema.oneOf([schema.literal('auto'), schema.number({ min: 1 })])),
+  requestsPerSecond: schema.maybe(schema.number({ min: 1 })),
+});
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
@@ -238,6 +247,29 @@ export class EventLogClient implements IEventLogClient {
 
   public async refreshIndex(): Promise<void> {
     await this.esContext.esAdapter.refreshIndex();
+  }
+
+  public async softDeleteByQuery(
+    params: SoftDeleteByQueryParams
+  ): Promise<estypes.UpdateByQueryResponse> {
+    softDeleteByQuerySchema.validate(params);
+    const namespace = await this.getNamespace();
+    const innerNamespaceFilter: estypes.QueryDslQueryContainer =
+      namespace === undefined
+        ? { bool: { must_not: { exists: { field: 'kibana.saved_objects.namespace' } } } }
+        : { term: { 'kibana.saved_objects.namespace': { value: namespace } } };
+    const namespaceFilter: estypes.QueryDslQueryContainer = {
+      nested: {
+        path: 'kibana.saved_objects',
+        query: innerNamespaceFilter,
+      },
+    };
+    const scopedQuery: estypes.QueryDslQueryContainer = {
+      bool: {
+        must: [params.query, namespaceFilter],
+      },
+    };
+    return this.esContext.esAdapter.softDeleteByQuery({ ...params, query: scopedQuery });
   }
 
   public async findEventsBySavedObjectIdsSearchAfter(
