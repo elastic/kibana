@@ -7,6 +7,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
+import type { ShowDatePicker } from '@kbn/unified-search-plugin/public';
 import { compact } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { INDEX_EVENTS } from '../../../common';
@@ -27,7 +28,7 @@ interface Props {
   onRefreshClick: () => void;
   showSubmitButton?: boolean;
   dataTestSubj?: string;
-  showDatePicker?: boolean;
+  showDatePicker?: ShowDatePicker;
   showQueryMenu?: boolean;
 }
 
@@ -40,7 +41,7 @@ export function ProfilingSearchBar({
   onRefreshClick,
   showSubmitButton = true,
   dataTestSubj = 'profilingUnifiedSearchBar',
-  showDatePicker = true,
+  showDatePicker = 'active',
   showQueryMenu = true,
 }: Props) {
   const {

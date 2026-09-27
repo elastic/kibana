@@ -691,7 +691,7 @@ export const SignificantEventsTab = () => {
                   query: searchQuery,
                   language: 'text',
                 }}
-                showDatePicker
+                showDatePicker="active"
                 showQueryInput
                 enableDateRangePicker
                 submitButtonStyle="iconOnly"

@@ -68,7 +68,7 @@ export const WorkflowExecutionsSearchBar = React.memo<WorkflowExecutionsSearchBa
           })}
           query={query}
           refreshInterval={refreshInterval}
-          showDatePicker
+          showDatePicker="active"
           showFilterBar
           showQueryMenu
           showSubmitButton

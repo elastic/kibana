@@ -44,7 +44,7 @@ export function SloTemplatesSearchBar({ state, onStateChange }: Props) {
       disableQueryLanguageSwitcher
       nonKqlMode="text"
       showQueryMenu={false}
-      showDatePicker={false}
+      showDatePicker="hidden"
       showSavedQueryControls={false}
       showFilterBar={false}
       query={{ query: state.search, language: 'text' }}

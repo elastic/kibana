@@ -207,7 +207,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   public static defaultProps = {
     showQueryMenu: true,
     showFilterBar: true,
-    showDatePicker: true,
+    showDatePicker: 'active' as const,
     showSubmitButton: true,
     showAutoRefreshOnly: false,
     filtersForSuggestions: [],
@@ -336,7 +336,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   } as SearchBarState<QT>);
 
   public isDirty = () => {
-    if (!this.props.showDatePicker && this.state.query && this.props.query) {
+    if (this.props.showDatePicker === 'hidden' && this.state.query && this.props.query) {
       return !isEqual(this.state.query, this.props.query);
     }
 
@@ -365,7 +365,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   private shouldRenderTimeFilterInSavedQueryForm() {
     const { dateRangeFrom, dateRangeTo, showDatePicker, indexPatterns } = this.props;
 
-    if (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined) {
+    if (showDatePicker === 'hidden' && dateRangeFrom !== undefined && dateRangeTo !== undefined) {
       return false;
     }
 
@@ -677,7 +677,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
     });
 
-    const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
+    const timeRangeForSuggestionsOverride =
+      this.props.showDatePicker !== 'hidden' ? undefined : false;
 
     const saveAsNewQueryFormComponent = (
       <SaveQueryForm

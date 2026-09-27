@@ -162,7 +162,7 @@ export function QuerySearchBar({
                 onTimeRangeChange={(nRange) => {
                   setRange?.(nRange.dateRange);
                 }}
-                showDatePicker={isFlyoutOpen}
+                showDatePicker={isFlyoutOpen ? 'active' : 'hidden'}
                 showSubmitButton={isFlyoutOpen}
                 showQueryInput={true}
                 disableQueryLanguageSwitcher={true}

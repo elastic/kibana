@@ -266,7 +266,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
             onSelected('kql_query', String(value?.query));
           }}
           query={{ query: String(kqlQuery), language: 'kuery' }}
-          showDatePicker={false}
+          showDatePicker="hidden"
           disableQueryLanguageSwitcher={true}
           allowSavingQueries
           onClearSavedQuery={() => {}}

@@ -126,7 +126,7 @@ export function StreamsView() {
                 query: searchText,
                 language: 'text',
               }}
-              showDatePicker
+              showDatePicker="active"
               showQueryInput
               enableDateRangePicker
               submitButtonStyle="iconOnly"

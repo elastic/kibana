@@ -6,7 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { SearchBarProps } from '@kbn/unified-search-plugin/public/search_bar/search_bar';
+import type { SearchBarProps, ShowDatePicker } from '@kbn/unified-search-plugin/public';
 import type { QuickFiltersMenuItem } from './quick_filters';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
@@ -21,7 +21,7 @@ export interface AlertsSearchBarProps
   filters?: Filter[];
   quickFilters?: QuickFiltersMenuItem[];
   showFilterBar?: boolean;
-  showDatePicker?: boolean;
+  showDatePicker?: ShowDatePicker;
   showSubmitButton?: boolean;
   placeholder?: string;
   submitOnBlur?: boolean;

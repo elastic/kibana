@@ -102,7 +102,7 @@ export const DiscoverTopNav = ({
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
     if (dataView.type === DataViewType.ROLLUP) {
-      return false;
+      return 'hidden' as const;
     }
     const disabled =
       (dataView.type !== 'esql' && !dataView.isTimeBased()) ||

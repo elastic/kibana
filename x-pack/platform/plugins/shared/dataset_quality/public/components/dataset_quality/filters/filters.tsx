@@ -95,7 +95,7 @@ export default function Filters() {
       <EuiFlexItem grow={false}>
         <unifiedSearch.ui.SearchBar
           appName="datasetQuality"
-          showDatePicker={true}
+          showDatePicker="active"
           showFilterBar={false}
           showQueryMenu={false}
           showQueryInput={false}

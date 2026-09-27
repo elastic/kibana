@@ -162,7 +162,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
 TopNavMenu.defaultProps = {
   showSearchBar: false,
   showQueryInput: true,
-  showDatePicker: true,
+  showDatePicker: 'active',
   showFilterBar: true,
   screenTitle: '',
 };

@@ -152,7 +152,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
                         indexPatterns={[dataView]}
                         onQuerySubmit={() => {}}
                         isLoading={false}
-                        showDatePicker
+                        showDatePicker="active"
                         allowSavingQueries
                         showSearchBar
                         dataViewPickerComponentProps={

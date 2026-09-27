@@ -33,7 +33,7 @@ export function EmbeddableSearchBar({
         `}
       >
         <ProfilingSearchBar
-          showDatePicker={showDatePicker ?? true}
+          showDatePicker={showDatePicker ?? 'active'}
           showSubmitButton
           kuery={kuery}
           onQuerySubmit={({ dateRange, query }) => {

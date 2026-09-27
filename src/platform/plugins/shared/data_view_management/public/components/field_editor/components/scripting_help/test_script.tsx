@@ -229,7 +229,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             displayStyle="inPage"
             appName={'indexPatternManagement'}
             showFilterBar={false}
-            showDatePicker={false}
+            showDatePicker="hidden"
             showQueryInput={true}
             query={this.context.services.data.query.queryString.getDefaultQuery()}
             onQuerySubmit={this.previewScript}
