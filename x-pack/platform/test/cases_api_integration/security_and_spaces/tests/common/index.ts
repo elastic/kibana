@@ -19,6 +19,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./attachments/get_attachment'));
     loadTestFile(require.resolve('./attachments/delete_attachment'));
     loadTestFile(require.resolve('./attachments/delete_attachments'));
+    loadTestFile(require.resolve('./attachments/attachments_crud'));
     loadTestFile(require.resolve('./files/post_file'));
     loadTestFile(require.resolve('./files/post_file_attachment'));
     loadTestFile(require.resolve('./alerts/get_cases'));

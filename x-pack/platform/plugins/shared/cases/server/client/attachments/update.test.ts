@@ -56,7 +56,7 @@ describe('update', () => {
     );
   });
 
-  it('accepts unified type (v2) update request', async () => {
+  it('returns the case with comments', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseID]: 0 });
 
     const theCase = { ...mockCases[0], id: caseID };
@@ -78,10 +78,16 @@ describe('update', () => {
       },
       references: [{ type: 'cases', id: caseID, name: `associated-cases` }],
     };
+    const updatedAttachment = {
+      ...existingComment,
+      attributes: { ...existingComment.attributes, data: { content: 'updated content' } },
+      score: 0,
+    };
+
     caseService.getCase.mockResolvedValue(theCase);
     caseService.patchCase.mockResolvedValue(theCase);
     caseService.getAllCaseComments.mockResolvedValue({
-      saved_objects: [],
+      saved_objects: [updatedAttachment],
       total: 1,
       per_page: 1,
       page: 1,
@@ -92,14 +98,18 @@ describe('update', () => {
     attachmentService.getter.get.mockResolvedValue(
       existingComment as unknown as Awaited<ReturnType<typeof attachmentService.getter.get>>
     );
-    attachmentService.update.mockResolvedValue({
-      ...existingComment,
-      attributes: { ...existingComment.attributes, data: { content: 'updated content' } },
-    });
+    attachmentService.update.mockResolvedValue(updatedAttachment);
 
-    await expect(
-      update({ updateRequest: unifiedUpdateRequest, caseID }, clientArgs)
-    ).resolves.toBeDefined();
+    const res = await update({ updateRequest: unifiedUpdateRequest, caseID }, clientArgs);
+
+    expect(res.id).toEqual(caseID);
+    expect(res.comments).toEqual([
+      expect.objectContaining({
+        id: commentId,
+        type: updatedAttachment.attributes.type,
+        data: updatedAttachment.attributes.data,
+      }),
+    ]);
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({

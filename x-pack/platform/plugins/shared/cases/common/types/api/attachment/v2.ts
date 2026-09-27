@@ -17,9 +17,9 @@ import { UnifiedAttachmentRt, UnifiedAttachmentPayloadRt } from '../../domain/at
 import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema';
 export type { BulkGetAttachmentsRequest as BulkGetAttachmentsRequestV2 };
 
-export const UnifiedAttachmentPatchRequestRt = rt.intersection([
+export const UnifiedAttachmentPutRequestRt = rt.intersection([
   UnifiedAttachmentPayloadRt,
-  rt.strict({ id: rt.string, version: rt.string }),
+  rt.strict({ version: rt.string }),
 ]);
 
 export const BulkCreateUnifiedAttachmentsRequestRt = limitedArraySchema({
@@ -61,6 +61,7 @@ export const UnifiedAttachmentsFindResponseRt = rt.strict({
   total: rt.number,
 });
 
+export type UnifiedAttachmentPutRequest = rt.TypeOf<typeof UnifiedAttachmentPutRequestRt>;
 export type BulkCreateUnifiedAttachmentsRequest = rt.TypeOf<
   typeof BulkCreateUnifiedAttachmentsRequestRt
 >;

@@ -44,7 +44,7 @@ import { withUsageCounter } from '../usage_counters';
  */
 export interface AttachmentsSubClient {
   /**
-   * Adds an attachment to a case.
+   * Adds an attachment to a case. Returns the case with comments.
    */
   add(params: AddArgs): Promise<Case>;
   bulkCreate(params: BulkCreateArgs): Promise<Case>;
@@ -75,9 +75,7 @@ export interface AttachmentsSubClient {
    */
   get(getArgs: GetArgs): Promise<UnifiedAttachment>;
   /**
-   * Updates a specific attachment.
-   *
-   * The request must include all fields for the attachment. Even the fields that are not changing.
+   * Full replace. The request must include every field. Returns the case with comments.
    */
   update(updateArgs: UpdateArgs): Promise<Case>;
   /**
