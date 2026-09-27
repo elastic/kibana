@@ -59,7 +59,13 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
-      agentParams: { nextInput: { message: 'test' } },
+      agentParams: {
+        nextInput: { message: 'test' },
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+      },
       eventCount: 0,
       events: [],
     });
@@ -91,7 +97,13 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
-      agentParams: { nextInput: { message: 'test' } },
+      agentParams: {
+        nextInput: { message: 'test' },
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+      },
       eventCount: 0,
       events: [],
     });
@@ -119,7 +131,13 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
-      agentParams: { nextInput: { message: 'test' } },
+      agentParams: {
+        nextInput: { message: 'test' },
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+      },
       eventCount: 0,
       events: [],
     });
@@ -156,7 +174,13 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
-      agentParams: { nextInput: { message: 'test' } },
+      agentParams: {
+        nextInput: { message: 'test' },
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+      },
       eventCount: 0,
       events: [],
     });
@@ -191,7 +215,13 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
-      agentParams: { nextInput: { message: 'test' } },
+      agentParams: {
+        nextInput: { message: 'test' },
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+      },
       eventCount: 0,
       events: [],
     });
@@ -226,7 +256,13 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
-      agentParams: { nextInput: { message: 'test' } },
+      agentParams: {
+        nextInput: { message: 'test' },
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+      },
       eventCount: 0,
       events: [],
     });

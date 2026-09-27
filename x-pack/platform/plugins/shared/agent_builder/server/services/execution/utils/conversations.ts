@@ -27,6 +27,8 @@ import type {
   UserIdAndName,
   ChatEvent,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
 import {
   ConversationParentRelation,
   ConversationRoundStatus,
@@ -41,6 +43,7 @@ import {
   ROUND_DERIVED_EVENT_ID_SUFFIXES,
   executionTerminatedEventId,
   resumeExecutionId,
+  roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import {
@@ -115,38 +118,51 @@ const emitPersistedTimelineThenLifecycle = ({
 };
 
 /**
- * Receipt-time input write.
+ * Writes a `user_message` event onto a conversation, creating the conversation first when the
+ * resolution said so. The single place user messages are persisted: the executing path passes a
+ * round-derived event id, a message appended on its own passes a uuid. Returns the written id so
+ * a later execution can name it as its `trigger_event_id`.
  */
-export const persistRoundInput = async ({
+export const persistUserMessage = async ({
   conversation,
   conversationClient,
-  roundId,
+  eventId,
   receivedAt,
   input,
   author,
   origin,
+  user,
+  additionalEvents = [],
+  attachments,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
-  roundId: string;
+  eventId: string;
   receivedAt: Date;
   input: ConverseInput;
   author?: ConversationRoundAuthor;
   origin?: ConversationRoundOrigin;
-}): Promise<void> => {
+  /** Actor fallback when the poster has no author, for a conversation they do not own. */
+  user?: UserIdAndName;
+  /** Attachment change events to store in the same write, after the message. */
+  additionalEvents?: TimelineEvent[];
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+}): Promise<string> => {
   const event = userMessageEvent(
     {
-      id: roundId,
+      id: eventId,
+      createdAt: receivedAt.toISOString(),
       input: {
-        message: input.message ?? '',
+        message: input.message?.trim() ?? '',
         ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
       },
-      started_at: receivedAt.toISOString(),
       ...(author ? { author } : {}),
       ...(origin ? { origin } : {}),
     },
-    conversation
+    { ...conversation, ...(user ? { user } : {}) }
   );
+
+  const events = [event, ...additionalEvents];
 
   if (conversation.operation === 'CREATE') {
     const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
@@ -161,13 +177,15 @@ export const persistRoundInput = async ({
         origin: conversation.origin,
         read_only: conversation.read_only,
         rounds: [],
-        events: [event],
+        events,
+        // Nothing is stored yet, so the produced list needs no reconciliation.
+        ...(attachments ? { attachments: attachments.produced } : {}),
         ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
         ...(conversation.parent_conversation
           ? { parent_conversation: conversation.parent_conversation }
           : {}),
       });
-      return;
+      return event.id;
     } catch (error) {
       if (!isConversationAlreadyExistsError(error)) {
         throw error;
@@ -176,9 +194,11 @@ export const persistRoundInput = async ({
   }
 
   await conversationClient.appendEvents(
-    { id: conversation.id, events: [event] },
+    { id: conversation.id, events, ...(attachments ? { attachments } : {}) },
     { access: 'converse' }
   );
+
+  return event.id;
 };
 
 export const appendRoundTerminated$ = ({
@@ -503,17 +523,17 @@ export const persistExecutionInterruption = async (
     };
 
     if (!isResume) {
-      // Rebuilt with the exact inputs `persistRoundInput` used, so id, actor and created_at match
+      // Rebuilt with the exact inputs `persistUserMessage` used, so id, actor and created_at match
       // the receipt-time event; only `data` is upgraded to the processed input when known.
       const receiptInput: RoundInput = {
-        message: input.message ?? '',
+        message: input.message?.trim() ?? '',
         ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
       };
       const userMessage = userMessageEvent(
         {
-          id: roundId,
+          id: roundUserMessageEventId(roundId),
+          createdAt: receivedAt.toISOString(),
           input: processedInput ?? receiptInput,
-          started_at: receivedAt.toISOString(),
           ...(author ? { author } : {}),
           ...(origin ? { origin } : {}),
         },
@@ -595,8 +615,6 @@ export const persistExecutionInterruption = async (
     return [];
   }
 };
-
-export type ConversationOperation = 'CREATE' | 'UPDATE';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 

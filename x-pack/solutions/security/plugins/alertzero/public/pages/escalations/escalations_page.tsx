@@ -28,6 +28,7 @@ import { EscalationsPageHeader } from '../../components/escalations_page_header'
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
 import { useInvestigationDetails } from '../conversations/use_investigation_details';
+import { useStatusSignal } from '../../components/connected_status/use_status_signal';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
@@ -58,6 +59,12 @@ export const EscalationsPage: React.FC = () => {
   useInvestigationDetails({
     conversationId: selectedConversationId,
     onClose: handleFlyoutClose,
+  });
+
+  // When the flyout's status toggle changes status (isolated QueryClient), bump the signal
+  // so this page's QueryClient invalidates its escalation queries and the queue refreshes.
+  useStatusSignal(() => {
+    void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
   });
 
   // ---------------------------------------------------------------------------

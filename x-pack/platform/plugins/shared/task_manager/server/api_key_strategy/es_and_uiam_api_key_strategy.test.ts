@@ -422,7 +422,9 @@ describe('EsAndUiamApiKeyStrategy', () => {
           coreStart.security,
           { cloneApiKey: true, onApiKeyCreated }
         )
-      ).rejects.toThrow('Failed to grant UIAM API key for cloned task "task-2"');
+        // The strategy runs with `typeToUse: UIAM`, so the grant failure itself surfaces
+        // instead of being swallowed and re-reported as a missing cloned key.
+      ).rejects.toThrow('second grant failed');
 
       expect(onApiKeyCreated).toHaveBeenCalledTimes(1);
       expect(onApiKeyCreated).toHaveBeenCalledWith({
@@ -653,6 +655,78 @@ describe('EsAndUiamApiKeyStrategy', () => {
       const fields = result.get('task-1');
       expect(fields?.uiamApiKey).toBe('essu_from-request');
       expect(fields?.userScope.uiamApiKeyId).toBe('uiam-req-id');
+    });
+
+    test('throws when typeToUse is UIAM and the UIAM grant fails with a generic error', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy(ApiKeyType.UIAM);
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_uiam-credential' },
+      });
+
+      const esKeyMap = new Map();
+      esKeyMap.set('task-1', {
+        apiKey: Buffer.from('esId:esSecret').toString('base64'),
+        apiKeyId: 'esId',
+      });
+      createApiKeyMock.mockResolvedValueOnce(esKeyMap);
+      hasApiKeyMock.mockReturnValue(false);
+
+      mockUiam.grant.mockRejectedValueOnce(new Error('UIAM service unavailable'));
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      await expect(strategy.grantApiKeys(tasks, request, coreStart.security)).rejects.toThrow(
+        'UIAM service unavailable'
+      );
+    });
+
+    test('throws when typeToUse is UIAM and the UIAM grant returns null', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy(ApiKeyType.UIAM);
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_uiam-credential' },
+      });
+
+      const esKeyMap = new Map();
+      esKeyMap.set('task-1', {
+        apiKey: Buffer.from('esId:esSecret').toString('base64'),
+        apiKeyId: 'esId',
+      });
+      createApiKeyMock.mockResolvedValueOnce(esKeyMap);
+      hasApiKeyMock.mockReturnValue(false);
+
+      mockUiam.grant.mockResolvedValueOnce(null);
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      await expect(strategy.grantApiKeys(tasks, request, coreStart.security)).rejects.toThrow(
+        'Failed to create a Cloud API key for task type : report'
+      );
+    });
+
+    test('logs and falls back to ES keys when typeToUse is ES and the UIAM grant fails', async () => {
+      const { strategy, coreStart, mockUiam, logger } = createStrategy(ApiKeyType.ES);
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_uiam-credential' },
+      });
+
+      const esKeyMap = new Map();
+      esKeyMap.set('task-1', {
+        apiKey: Buffer.from('esId:esSecret').toString('base64'),
+        apiKeyId: 'esId',
+      });
+      createApiKeyMock.mockResolvedValueOnce(esKeyMap);
+      hasApiKeyMock.mockReturnValue(false);
+
+      mockUiam.grant.mockRejectedValueOnce(new Error('UIAM service unavailable'));
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
+
+      const fields = result.get('task-1');
+      expect(fields?.apiKey).toBe(Buffer.from('esId:esSecret').toString('base64'));
+      expect(fields?.uiamApiKey).toBeUndefined();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to create UIAM API key for task type: report: UIAM service unavailable',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
     });
 
     test('does not set uiamApiKey when request has non-UIAM api key', async () => {
