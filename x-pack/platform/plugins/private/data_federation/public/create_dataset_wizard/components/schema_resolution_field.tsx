@@ -27,11 +27,11 @@ import type {
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { DescribedOptionDisplay } from './described_option_display';
 
-type SchemaResolutionValue = {
+interface SchemaResolutionValue {
   id: Exclude<DatasetSchemaResolutionFormValue, ''>;
   description: string;
   isDefault?: boolean;
-};
+}
 
 const DEFAULT_SCHEMA_RESOLUTION: SchemaResolutionValue['id'] = 'first_file_wins';
 
@@ -167,4 +167,3 @@ export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: 
 });
 
 SchemaResolutionField.displayName = 'SchemaResolutionField';
-
