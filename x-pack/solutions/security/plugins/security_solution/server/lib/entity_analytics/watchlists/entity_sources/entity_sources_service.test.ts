@@ -441,4 +441,72 @@ describe('createEntitySourcesService', () => {
       );
     });
   });
+
+  describe('syncWatchlist serialization', () => {
+    const createService = () =>
+      createEntitySourcesService({
+        esClient,
+        soClient,
+        logger,
+        namespace,
+        getStartServices: mockGetStartServices as never,
+        hasEncryptionKey: true,
+      });
+
+    it('does not run two syncs of the same watchlist concurrently', async () => {
+      let inFlight = 0;
+      let maxInFlight = 0;
+      mockWatchlistGet.mockImplementation(async () => {
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        return { name: 'VIP Users' };
+      });
+      mockGetEntitySourceIds.mockImplementation(async () => {
+        inFlight -= 1;
+        return [];
+      });
+
+      await Promise.all([
+        createService().syncWatchlist('watchlist-1'),
+        createService().syncWatchlist('watchlist-1'),
+      ]);
+
+      expect(maxInFlight).toBe(1);
+      expect(mockWatchlistGet).toHaveBeenCalledTimes(2);
+    });
+
+    it('runs the queued sync even when the preceding one rejects', async () => {
+      mockWatchlistGet
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockResolvedValueOnce({ name: 'VIP Users' });
+      mockGetEntitySourceIds.mockResolvedValue([]);
+
+      const first = createService().syncWatchlist('watchlist-2');
+      const second = createService().syncWatchlist('watchlist-2');
+
+      await expect(first).rejects.toThrow('boom');
+      await expect(second).resolves.toBeUndefined();
+    });
+
+    it('does not serialize syncs of different watchlists', async () => {
+      let inFlight = 0;
+      let maxInFlight = 0;
+      mockWatchlistGet.mockImplementation(async () => {
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        return { name: 'VIP Users' };
+      });
+      mockGetEntitySourceIds.mockImplementation(async () => {
+        inFlight -= 1;
+        return [];
+      });
+
+      await Promise.all([
+        createService().syncWatchlist('watchlist-3'),
+        createService().syncWatchlist('watchlist-4'),
+      ]);
+
+      expect(maxInFlight).toBe(2);
+    });
+  });
 });
