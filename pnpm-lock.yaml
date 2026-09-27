@@ -5768,6 +5768,9 @@ importers:
       '@kbn/security-evals-alerts-snapshot':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot
+      '@kbn/security-evals-matrix':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-security-evals-matrix
       '@kbn/security-evals-workflow-traces':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-workflow-traces
@@ -9721,6 +9724,8 @@ importers:
   x-pack/solutions/security/packages/kbn-scout-security: {}
 
   x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot: {}
+
+  x-pack/solutions/security/packages/kbn-security-evals-matrix: {}
 
   x-pack/solutions/security/packages/kbn-security-evals-workflow-traces: {}
 

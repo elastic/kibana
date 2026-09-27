@@ -1425,7 +1425,10 @@ module.exports = {
     },
     // Allow node.js imports for security solution test packages
     {
-      files: ['x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/kbn-security-evals-matrix/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         'import/no-nodejs-modules': 'off',
       },
@@ -3144,6 +3147,7 @@ module.exports = {
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
         'x-pack/solutions/security/packages/test-api-clients/**',
+        'x-pack/solutions/security/packages/kbn-security-evals-matrix/**',
         'x-pack/platform/plugins/shared/automatic_import/**',
       ],
       rules: {

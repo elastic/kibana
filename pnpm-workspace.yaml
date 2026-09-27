@@ -1629,6 +1629,7 @@ packages:
   - 'x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment'
   - 'x-pack/solutions/security/packages/kbn-scout-security'
   - 'x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot'
+  - 'x-pack/solutions/security/packages/kbn-security-evals-matrix'
   - 'x-pack/solutions/security/packages/kbn-security-evals-workflow-traces'
   - 'x-pack/solutions/security/packages/kbn-securitysolution-autocomplete'
   - 'x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common'
