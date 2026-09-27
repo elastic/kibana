@@ -317,13 +317,11 @@ describe('entityRelationshipHistoryTool', () => {
     it('returns not_found without querying relationship metadata', async () => {
       mockRequireResolvedEntity.mockResolvedValueOnce({
         ok: false,
-        results: [
-          {
-            tool_result_id: 'err-1',
-            type: ToolResultType.error,
-            data: { message: 'No entity found for id: missing' },
-          },
-        ],
+        result: {
+          tool_result_id: 'err-1',
+          type: ToolResultType.error,
+          data: { message: 'No entity found for id: missing' },
+        },
       });
 
       const result = (await tool.handler(
@@ -340,16 +338,14 @@ describe('entityRelationshipHistoryTool', () => {
     it('returns ambiguous candidates without querying relationship metadata', async () => {
       mockRequireResolvedEntity.mockResolvedValueOnce({
         ok: false,
-        results: [
-          {
-            tool_result_id: 'amb-1',
-            type: ToolResultType.other,
-            data: {
-              message: 'Multiple entities matched "Alice".',
-              candidateEntityIds: ['user:alice@local', 'user:alice@corp'],
-            },
+        result: {
+          tool_result_id: 'amb-1',
+          type: ToolResultType.other,
+          data: {
+            message: 'Multiple entities matched "Alice".',
+            candidateEntityIds: ['user:alice@local', 'user:alice@corp'],
           },
-        ],
+        },
       });
 
       const result = (await tool.handler(
@@ -374,13 +370,11 @@ describe('entityRelationshipHistoryTool', () => {
         }
         return {
           ok: false,
-          results: [
-            {
-              tool_result_id: 'err-target',
-              type: ToolResultType.error,
-              data: { message: 'No entity found for id: ghost-host' },
-            },
-          ],
+          result: {
+            tool_result_id: 'err-target',
+            type: ToolResultType.error,
+            data: { message: 'No entity found for id: ghost-host' },
+          },
         };
       });
 

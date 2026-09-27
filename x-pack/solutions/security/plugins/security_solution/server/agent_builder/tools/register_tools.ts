@@ -29,6 +29,12 @@ import {
   listLeadsTool,
   dismissLeadTool,
   setAssetCriticalityTool,
+  getResolutionGroupTool,
+  linkEntitiesTool,
+  unlinkEntitiesTool,
+  listResolutionRulesTool,
+  enableResolutionRuleTool,
+  disableResolutionRuleTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
@@ -92,6 +98,13 @@ export const registerTools = (
     setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
   );
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
+
+  agentBuilder.tools.register(getResolutionGroupTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(linkEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(unlinkEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(listResolutionRulesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(enableResolutionRuleTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(disableResolutionRuleTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));

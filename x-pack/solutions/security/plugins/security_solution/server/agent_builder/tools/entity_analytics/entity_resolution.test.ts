@@ -183,8 +183,7 @@ describe('entity_resolution', () => {
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.results).toHaveLength(1);
-        expect(result.results[0]).toEqual(
+        expect(result.result).toEqual(
           expect.objectContaining({
             type: ToolResultType.error,
             data: { message: 'No entity found for id: ghost' },
@@ -210,7 +209,7 @@ describe('entity_resolution', () => {
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.results[0]).toEqual(
+        expect(result.result).toEqual(
           expect.objectContaining({
             type: ToolResultType.other,
             data: {
@@ -237,7 +236,7 @@ describe('entity_resolution', () => {
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.results[0]).toEqual(
+        expect(result.result).toEqual(
           expect.objectContaining({
             type: ToolResultType.error,
             data: {
