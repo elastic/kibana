@@ -423,7 +423,7 @@ steps:
         const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: 'test-workflow',
+            id: 'internal-test-workflow',
             name: 'Test Workflow',
             enabled: true,
             yaml: mockWorkflowYaml,
@@ -709,6 +709,48 @@ steps:
           { includeVariableRules: false }
         );
       });
+    });
+  });
+
+  describe('testStep', () => {
+    it('should use the reserved internal ID when testing an unsaved workflow step', async () => {
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: {
+          version: '1',
+          name: 'Test Workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [{ name: 'step1', type: 'console' }],
+        },
+      });
+      mockWorkflowsExecutionEngine.executeWorkflowStep.mockResolvedValue({
+        workflowExecutionId: 'test-step-exec-id',
+      });
+
+      const result = await api.testStep(
+        'name: Test Workflow',
+        'step1',
+        undefined,
+        undefined,
+        {},
+        'default',
+        mockRequest
+      );
+
+      expect(result).toBe('test-step-exec-id');
+      expect(mockWorkflowsExecutionEngine.executeWorkflowStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'internal-test-workflow',
+          isTestRun: true,
+          isEphemeral: true,
+        }),
+        'step1',
+        undefined,
+        {},
+        mockRequest
+      );
     });
   });
 
