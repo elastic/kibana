@@ -16,6 +16,16 @@ export const ATTACHMENT_SUMMARY_SHOW_LESS = i18n.translate(
   { defaultMessage: 'Show less' }
 );
 
+/**
+ * The kind is spelled out because the avatar only conveys it visually, and it would otherwise be
+ * dropped from the accessible name once the row's own label takes over.
+ */
+export const attachmentSummaryRowAriaLabel = (typeName: string, label: string) =>
+  i18n.translate('xpack.alertzero.attachmentSummary.rowAriaLabel', {
+    defaultMessage: '{typeName}: {label}',
+    values: { typeName, label },
+  });
+
 /** The `+` is the expand affordance; collapsing has none, so "Show less" carries no counterpart. */
 export const attachmentSummaryShowMore = (count: number) =>
   i18n.translate('xpack.alertzero.attachmentSummary.showMore', {

@@ -10,10 +10,10 @@ import { selectSummaryAttachments } from './select_summary_attachments';
 import type { SummaryAttachmentType } from './summary_attachment_types';
 
 const SUMMARY_TYPES: readonly SummaryAttachmentType[] = [
-  { name: 'Attack', types: ['security.attack_discovery'] },
-  { name: 'Alert', types: ['security.alert', 'security.alerts'] },
-  { name: 'Rule', types: ['security.rule'] },
-  { name: 'Entity', types: ['security.entity'] },
+  { types: ['security.alert', 'security.alerts'] },
+  { types: ['security.attack_discovery'] },
+  { types: ['security.entity'] },
+  { types: ['security.rule'] },
 ];
 
 interface AttachmentOverrides {
@@ -45,8 +45,7 @@ const makeAttachment = ({
   active,
 });
 
-const idsOf = (selected: ReturnType<typeof selectSummaryAttachments>) =>
-  selected.map(({ attachment }) => attachment.id);
+const idsOf = (selected: VersionedAttachment[]) => selected.map((a) => a.id);
 
 describe('selectSummaryAttachments', () => {
   it('orders by group before time', () => {
@@ -68,7 +67,6 @@ describe('selectSummaryAttachments', () => {
   });
 
   it('keeps a row in place when the attachment is updated', () => {
-    // `first` was attached earliest but edited most recently.
     const first = makeAttachment({
       id: 'first',
       type: 'security.alert',
@@ -105,7 +103,6 @@ describe('selectSummaryAttachments', () => {
   });
 
   it('compares instants rather than strings, so mixed UTC offsets still order correctly', () => {
-    // 09:00+02:00 is 07:00Z, so it precedes 08:00Z despite sorting after it as a string.
     const offset = makeAttachment({
       id: 'offset',
       type: 'security.alert',
@@ -193,7 +190,6 @@ describe('selectSummaryAttachments', () => {
       'alsoUndated',
       'undated',
     ]);
-    // Shuffled input, identical output: the id tie-break makes the order total.
     expect(idsOf(selectSummaryAttachments([dated, alsoUndated, undated], SUMMARY_TYPES))).toEqual([
       'dated',
       'alsoUndated',

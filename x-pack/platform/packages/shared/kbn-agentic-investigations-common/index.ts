@@ -63,8 +63,12 @@ export {
   type AttachmentSummarySectionProps,
   AttachmentSummaryList,
   type AttachmentSummaryListProps,
+  AttachmentSummaryGroup,
+  type AttachmentSummaryGroupProps,
+  DEFAULT_COLLAPSED_COUNT,
+  AttachmentSummaryRow,
+  type AttachmentSummaryRowProps,
   selectSummaryAttachments,
-  type SummaryAttachment,
   SUMMARY_ATTACHMENT_TYPES,
   type SummaryAttachmentType,
 } from './src/components/attachment_summary';

@@ -8,58 +8,48 @@
 import React, { memo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
+  EuiPanel,
   EuiToolTip,
   euiTextTruncate,
-  useEuiFontSize,
   useEuiTheme,
   useResizeObserver,
 } from '@elastic/eui';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { toRenderAttachment } from './to_render_attachment';
+import type { IconType } from '@elastic/eui';
+import { attachmentSummaryRowAriaLabel } from './translations';
 
 const FALLBACK_ICON = 'document';
 
 export interface AttachmentSummaryRowProps {
-  attachment: VersionedAttachment;
-  /** Display name of the attachment's kind, e.g. "Alert". */
+  /** Human-readable label for this row, e.g. the alert name or entity id. */
+  label: string;
+  /** Display name of the attachment's kind, e.g. "Alert". Used only for the aria-label. */
   typeName: string;
-  attachmentsService: AttachmentServiceStartContract;
-  /** A divider above every row but the first. */
-  hasTopBorder: boolean;
+  /** Icon type. Defaults to "document". */
+  iconType?: IconType;
+  /** Icon color passed directly to EuiIcon. */
+  iconColor?: string;
+  /** Tooltip shown on the icon. Defaults to typeName when absent. */
+  iconLabel?: string;
+  /** When provided the row becomes a clickable button with a chevron. */
+  onClick?: () => void;
+  /** Rendered inside the <li>, after the visible row content, for hidden side-effect nodes. */
+  children?: React.ReactNode;
 }
 
-/**
- * One attachment in the summary. Read-only for now: the chevron marks where the drill-down will
- * land, so the row is deliberately neither clickable nor focusable as a whole.
- */
+/** One row in the attachment summary. */
 export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
-  ({ attachment, typeName, attachmentsService, hasTopBorder }) => {
+  ({ label, typeName, iconType = FALLBACK_ICON, iconColor, iconLabel, onClick, children }) => {
     const { euiTheme } = useEuiTheme();
-    const { fontSize } = useEuiFontSize('s');
 
-    const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-
-    // A type whose UI definition was never registered has no label of its own: `security.rule`
-    // is gated on the `aiRuleCreationEnabled` experimental feature.
-    const label =
-      uiDefinition?.getLabel(toRenderAttachment(attachment)) ||
-      attachment.description ||
-      attachment.type;
-    const iconType = uiDefinition?.getIcon?.() ?? FALLBACK_ICON;
-
-    // A plain element rather than EuiText: EuiText does not forward a ref, and the element that
-    // ellipsizes is the one that has to be measured.
     const [labelElement, setLabelElement] = useState<HTMLDivElement | null>(null);
     const { width: labelWidth } = useResizeObserver(labelElement, 'width');
     const [isLabelTruncated, setIsLabelTruncated] = useState(false);
 
     useEffect(() => {
-      // CSS truncation leaves no trace in the props, so the rendered width is the only signal.
       setIsLabelTruncated(
         labelElement ? labelElement.scrollWidth > labelElement.clientWidth : false
       );
@@ -67,71 +57,90 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
 
     const labelStyles = css`
       ${euiTextTruncate()}
-      font-size: ${fontSize};
-      font-weight: ${euiTheme.font.weight.semiBold};
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: ${euiTheme.font.weight.medium};
+      color: ${euiTheme.colors.textParagraph};
     `;
 
-    return (
-      <EuiFlexItem
-        component="li"
-        grow={false}
-        css={css({
-          padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-          borderTop: hasTopBorder ? euiTheme.border.thin : undefined,
-        })}
-        data-test-subj="attachmentSummaryRow"
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            {/* `name` does the work here: EuiAvatar renders it as the hover tooltip and as the
-                element's aria-label, which is why the kind rather than the row's own title
-                belongs in it. Omitting `type` keeps the avatar a circle. */}
-            <EuiAvatar
-              name={typeName}
-              iconType={iconType}
-              iconSize="s"
-              size="s"
-              color={euiTheme.colors.backgroundBasePrimary}
-              iconColor={euiTheme.colors.textPrimary}
-              data-test-subj="attachmentSummaryRowIcon"
-            />
-          </EuiFlexItem>
+    const hasDrilldown = Boolean(onClick);
+    const padding = `12px ${euiTheme.size.base}`;
 
-          {/* Without min-inline-size the flex item's `auto` minimum defeats the truncation, and
-              the tooltip's anchor needs the same treatment to stay out of its way. */}
-          <EuiFlexItem css={css({ minInlineSize: 0 })}>
-            {isLabelTruncated ? (
-              <EuiToolTip
-                content={label}
-                position="top"
-                anchorProps={{ css: css({ display: 'block', minInlineSize: 0 }) }}
-              >
-                {/* Focusable only while cut off, so a row whose label already reads in full
-                    does not become a pointless tab stop. */}
-                <div
-                  ref={setLabelElement}
-                  tabIndex={0}
-                  data-test-subj="attachmentSummaryRowLabel"
-                  css={labelStyles}
-                >
-                  {label}
-                </div>
-              </EuiToolTip>
-            ) : (
+    const content = (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type={iconType}
+            color={iconColor}
+            size="s"
+            content={iconLabel ?? typeName}
+            position="top"
+            iconProps={{
+              'data-test-subj': 'attachmentSummaryRowIcon',
+              'aria-label': iconLabel ?? typeName,
+            }}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem css={css({ minInlineSize: 0 })}>
+          {isLabelTruncated ? (
+            <EuiToolTip
+              content={label}
+              position="top"
+              anchorProps={{ css: css({ display: 'block', minInlineSize: 0 }) }}
+            >
               <div
                 ref={setLabelElement}
+                tabIndex={hasDrilldown ? undefined : 0}
                 data-test-subj="attachmentSummaryRowLabel"
                 css={labelStyles}
               >
                 {label}
               </div>
-            )}
-          </EuiFlexItem>
+            </EuiToolTip>
+          ) : (
+            <div ref={setLabelElement} data-test-subj="attachmentSummaryRowLabel" css={labelStyles}>
+              {label}
+            </div>
+          )}
+        </EuiFlexItem>
 
+        {hasDrilldown ? (
           <EuiFlexItem grow={false}>
             <EuiIcon type="chevronSingleRight" color="subdued" size="s" aria-hidden={true} />
           </EuiFlexItem>
-        </EuiFlexGroup>
+        ) : null}
+      </EuiFlexGroup>
+    );
+
+    return (
+      <EuiFlexItem component="li" grow={false} data-test-subj="attachmentSummaryRow">
+        {hasDrilldown ? (
+          <EuiPanel
+            element="button"
+            type="button"
+            hasShadow={false}
+            hasBorder={false}
+            borderRadius="none"
+            color="transparent"
+            paddingSize="none"
+            onClick={onClick}
+            aria-label={attachmentSummaryRowAriaLabel(typeName, label)}
+            data-test-subj="attachmentSummaryRowButton"
+            css={css({
+              padding,
+              '&:hover': {
+                boxShadow: 'none',
+                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+              },
+            })}
+          >
+            {content}
+          </EuiPanel>
+        ) : (
+          <div css={css({ padding })}>{content}</div>
+        )}
+        {children}
       </EuiFlexItem>
     );
   }

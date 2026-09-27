@@ -8,41 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type {
-  AttachmentServiceStartContract,
-  AttachmentUIDefinition,
-} from '@kbn/agent-builder-browser';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AttachmentSummaryRow } from './attachment_summary_row';
 
-const attachment: VersionedAttachment = {
-  id: 'attachment-1',
-  type: 'security.alerts',
-  description: 'A described attachment',
-  versions: [{ version: 1, data: {}, created_at: '2026-09-01T10:00:00.000Z', content_hash: 'a' }],
-  current_version: 1,
-};
-
-const renderRow = (
-  uiDefinition: Partial<AttachmentUIDefinition> | undefined,
-  overrides: Partial<VersionedAttachment> = {}
-) => {
-  const attachmentsService = {
-    getAttachmentUiDefinition: () => uiDefinition,
-  } as unknown as AttachmentServiceStartContract;
-
-  return render(
-    <AttachmentSummaryRow
-      attachment={{ ...attachment, ...overrides }}
-      typeName="Alert"
-      attachmentsService={attachmentsService}
-      hasTopBorder={false}
-    />
-  );
-};
-
-// EUI's test-env mocks EuiIcon as a span whose text is its aria-label, so the icon and the label
-// both match a bare text query. Every label assertion goes through the label's own test subject.
 /** jsdom reports every width as 0; these are the two values the truncation check compares. */
 const mockLabelOverflow = ({
   scrollWidth,
@@ -62,64 +29,74 @@ const expectLabel = (expected: string) =>
   expect(screen.getByTestId('attachmentSummaryRowLabel')).toHaveTextContent(expected);
 
 describe('AttachmentSummaryRow', () => {
-  it('labels the row from the registered attachment type', () => {
-    renderRow({ getLabel: () => '3 alerts', getIcon: () => 'bell' });
-
-    expectLabel('3 alerts');
-  });
-
-  it('labels the row from the current version of the data', () => {
-    renderRow(
-      {
-        getLabel: (renderAttachment) =>
-          `${(renderAttachment.data as { count: number }).count} alerts`,
-      },
-      {
-        versions: [
-          {
-            version: 1,
-            data: { count: 2 },
-            created_at: '2026-09-01T10:00:00.000Z',
-            content_hash: 'a',
-          },
-          {
-            version: 2,
-            data: { count: 7 },
-            created_at: '2026-09-01T12:00:00.000Z',
-            content_hash: 'b',
-          },
-        ],
-        current_version: 2,
-      }
-    );
-
-    expectLabel('7 alerts');
-  });
-
-  it('falls back to the description when the type has not registered its UI yet', () => {
-    renderRow(undefined);
-
-    expectLabel('A described attachment');
-  });
-
-  it('falls back to the type when there is no description either', () => {
-    renderRow(undefined, { description: undefined });
-
-    expectLabel('security.alerts');
-  });
-
-  it('is not interactive, because the drill-down does not exist yet', () => {
-    renderRow({ getLabel: () => '3 alerts' });
+  it('stays read-only when onClick is absent', () => {
+    render(<AttachmentSummaryRow label="3 alerts" typeName="Alert" />);
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
+  describe('with onClick', () => {
+    const onClick = jest.fn();
+
+    beforeEach(() => onClick.mockClear());
+
+    it('names the row by its kind and label, since the kind is otherwise only visual', () => {
+      render(<AttachmentSummaryRow label="3 alerts" typeName="Alert" onClick={onClick} />);
+
+      expect(screen.getByRole('button', { name: 'Alert: 3 alerts' })).toBeInTheDocument();
+    });
+
+    it('shows the chevron, which marks the row as leading somewhere', () => {
+      const { container } = render(
+        <AttachmentSummaryRow label="3 alerts" typeName="Alert" onClick={onClick} />
+      );
+
+      expect(
+        container.querySelector('[data-euiicon-type="chevronSingleRight"]')
+      ).toBeInTheDocument();
+    });
+
+    it('calls onClick when clicked', async () => {
+      render(<AttachmentSummaryRow label="3 alerts" typeName="Alert" onClick={onClick} />);
+
+      await userEvent.click(screen.getByRole('button'));
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the label out of the tab order, since the row itself is the tab stop', () => {
+      const restore = mockLabelOverflow({ scrollWidth: 500, clientWidth: 100 });
+      try {
+        render(<AttachmentSummaryRow label="3 alerts" typeName="Alert" onClick={onClick} />);
+
+        expect(screen.getByTestId('attachmentSummaryRowLabel')).not.toHaveAttribute('tabindex');
+      } finally {
+        restore();
+      }
+    });
+  });
+
+  it('renders children inside the list item for hidden side-effect nodes', () => {
+    render(
+      <AttachmentSummaryRow label="3 alerts" typeName="Alert">
+        <div data-test-subj="side-effect" />
+      </AttachmentSummaryRow>
+    );
+
+    const li = screen.getByRole('listitem');
+    expect(li.querySelector('[data-test-subj="side-effect"]')).toBeInTheDocument();
+  });
+
   it('shows the full label in a tooltip once it is cut off', async () => {
-    // jsdom lays nothing out, so the overflow that drives the tooltip has to be simulated.
     const restore = mockLabelOverflow({ scrollWidth: 500, clientWidth: 100 });
     try {
-      renderRow({ getLabel: () => 'A label long enough that the row will cut it short' });
+      render(
+        <AttachmentSummaryRow
+          label="A label long enough that the row will cut it short"
+          typeName="Alert"
+        />
+      );
 
       await userEvent.hover(screen.getByTestId('attachmentSummaryRowLabel'));
 
@@ -134,7 +111,7 @@ describe('AttachmentSummaryRow', () => {
   it('leaves a label that already fits without a tooltip or a tab stop', async () => {
     const restore = mockLabelOverflow({ scrollWidth: 100, clientWidth: 100 });
     try {
-      renderRow({ getLabel: () => 'Short' });
+      render(<AttachmentSummaryRow label="Short" typeName="Alert" />);
       const labelElement = screen.getByTestId('attachmentSummaryRowLabel');
 
       await userEvent.hover(labelElement);
@@ -146,8 +123,8 @@ describe('AttachmentSummaryRow', () => {
     }
   });
 
-  it('shows the attachment kind, not its raw type id, in a tooltip on the icon', async () => {
-    renderRow({ getLabel: () => '3 alerts' });
+  it('shows the attachment kind in a tooltip on the icon', async () => {
+    render(<AttachmentSummaryRow label="3 alerts" typeName="Alert" />);
 
     await userEvent.hover(screen.getByTestId('attachmentSummaryRowIcon'));
 
