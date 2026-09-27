@@ -34,7 +34,7 @@ import { BreadcrumbProvider } from './breadcrumb_context';
 import { LocatorProvider } from './locator_context';
 import { TabsProvider } from './tabs_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
-import { MANAGEMENT_HOST, type AlertingV2HostApp } from '../locators';
+import type { AlertingV2HostApp } from '../locators';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { ManageRulesHrefProvider } from './manage_rules_href_context';
@@ -42,7 +42,7 @@ import { ManageRulesHrefProvider } from './manage_rules_href_context';
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  hostApp?: AlertingV2HostApp;
+  hostApp: AlertingV2HostApp;
   privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
   manageRulesHref?: string;
@@ -56,14 +56,14 @@ export interface InternalPageProps extends AlertingV2PageProps {
 const StandardProviders = ({
   container,
   setBreadcrumbs,
-  hostApp = MANAGEMENT_HOST,
+  hostApp,
   privilegeCheck,
   tabs,
   children,
 }: {
   container: Container;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  hostApp?: AlertingV2HostApp;
+  hostApp: AlertingV2HostApp;
   privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
   children: React.ReactNode;
@@ -162,7 +162,7 @@ export const AlertingV2EpisodesPage = ({
   coreStart,
   container,
   setBreadcrumbs,
-  hostApp = MANAGEMENT_HOST,
+  hostApp,
   privilegeCheck,
   manageRulesHref,
 }: InternalPageProps) => {

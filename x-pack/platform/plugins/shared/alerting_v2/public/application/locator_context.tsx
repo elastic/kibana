@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { LocatorHost } from '@kbn/rule-data-utils';
 import type {
   AlertingV2RulesLocatorParams,
   AlertingV2RuleLibraryLocatorParams,
@@ -15,12 +16,26 @@ import type {
   AlertingV2ExecutionHistoryLocatorParams,
 } from '../locators';
 
-export interface AlertingV2Locators {
+export type WithOptionalHost<P> = Omit<P, 'host'> & { host?: LocatorHost };
+
+/** Raw locators from the share plugin registry — `host` is required. */
+export interface RawAlertingV2Locators {
   rulesLocators: LocatorPublic<AlertingV2RulesLocatorParams>;
   ruleLibraryLocators: LocatorPublic<AlertingV2RuleLibraryLocatorParams>;
   episodesLocators: LocatorPublic<AlertingV2EpisodesLocatorParams>;
   actionPolicyLocators: LocatorPublic<AlertingV2ActionPoliciesLocatorParams>;
   executionHistoryLocators: LocatorPublic<AlertingV2ExecutionHistoryLocatorParams>;
+}
+
+/** Bound locators provided to components — `host` is optional (injected by binding). */
+export interface AlertingV2Locators {
+  rulesLocators: LocatorPublic<WithOptionalHost<AlertingV2RulesLocatorParams>>;
+  ruleLibraryLocators: LocatorPublic<WithOptionalHost<AlertingV2RuleLibraryLocatorParams>>;
+  episodesLocators: LocatorPublic<WithOptionalHost<AlertingV2EpisodesLocatorParams>>;
+  actionPolicyLocators: LocatorPublic<WithOptionalHost<AlertingV2ActionPoliciesLocatorParams>>;
+  executionHistoryLocators: LocatorPublic<
+    WithOptionalHost<AlertingV2ExecutionHistoryLocatorParams>
+  >;
 }
 
 const LocatorContext = createContext<AlertingV2Locators | null>(null);

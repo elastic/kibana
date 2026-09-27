@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRole } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, type AlertingApp, type AlertingPageObjects } from '../fixtures';
 import {
@@ -45,49 +44,50 @@ const accessTestBody =
       await test.step(`${app} is accessible`, async () => {
         await nav.goto(app);
         await expect(nav.pageHeading(app)).toBeVisible();
-        await expect(nav.managementLanding).toBeHidden();
+        await expect(nav.requiredPrivilegesPrompt).toBeHidden();
       });
     }
 
     for (const app of complement(ALL_APPS, allowedApps)) {
-      await test.step(`${app} falls through to the management landing page`, async () => {
+      await test.step(`${app} shows the required privileges prompt`, async () => {
         await nav.goto(app);
-        await expect(nav.managementLanding).toBeVisible();
+        await expect(nav.requiredPrivilegesPrompt).toBeVisible();
         await expect(nav.pageHeading(app)).toBeHidden();
       });
     }
   };
 
-test.describe('Management pages - required privileges', { tag: tags.deploymentAgnostic }, () => {
-  test('user with full access can view every management page', accessTestBody(ALL_ROLE, ALL_APPS));
+test.describe(
+  'Alerting pages - required privileges',
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  () => {
+    test('user with full access can view every page', accessTestBody(ALL_ROLE, ALL_APPS));
 
-  test(
-    'user with read-only access can view every management page',
-    accessTestBody(READ_ROLE, ALL_APPS)
-  );
+    test('user with read-only access can view every page', accessTestBody(READ_ROLE, ALL_APPS));
 
-  test(
-    'user without alerting_v2 access is redirected to the management landing on every page',
-    accessTestBody(NO_ACCESS_ROLE, [])
-  );
+    test(
+      'user without alerting_v2 access sees the required privileges prompt on every page',
+      accessTestBody(NO_ACCESS_ROLE, [])
+    );
 
-  test(
-    'user with rules read-only role can view the Rules and Rule library pages',
-    accessTestBody(ALERTING_V2_RULES_READ_ROLE, ['rules', 'ruleLibrary'])
-  );
+    test(
+      'user with rules read-only role can view the Rules and Rule library pages',
+      accessTestBody(ALERTING_V2_RULES_READ_ROLE, ['rules', 'ruleLibrary'])
+    );
 
-  test(
-    'user with alerts read-only role can only view the Alerts page',
-    accessTestBody(ALERTING_V2_ALERTS_READ_ROLE, ['alerts'])
-  );
+    test(
+      'user with alerts read-only role can only view the Alerts page',
+      accessTestBody(ALERTING_V2_ALERTS_READ_ROLE, ['alerts'])
+    );
 
-  test(
-    'user with action policies read-only role can only view the Action Policies page',
-    accessTestBody(ALERTING_V2_ACTION_POLICIES_READ_ROLE, ['actionPolicies'])
-  );
+    test(
+      'user with action policies read-only role can only view the Action Policies page',
+      accessTestBody(ALERTING_V2_ACTION_POLICIES_READ_ROLE, ['actionPolicies'])
+    );
 
-  test(
-    'user with execution history read-only role can only view the Execution History page',
-    accessTestBody(ALERTING_V2_EXECUTION_HISTORY_READ_ROLE, ['executionHistory'])
-  );
-});
+    test(
+      'user with execution history read-only role can only view the Execution History page',
+      accessTestBody(ALERTING_V2_EXECUTION_HISTORY_READ_ROLE, ['executionHistory'])
+    );
+  }
+);

@@ -20,95 +20,103 @@ import { buildCreateRuleData, test } from '../fixtures';
  */
 const TEST_INDEX = 'test-rule-tags-edit';
 
-test.describe('Rule tags — edit via ES|QL form', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ esClient, apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-    await esClient.indices.create(
-      {
-        index: TEST_INDEX,
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            'host.name': { type: 'keyword' },
+test.describe(
+  'Rule tags — edit via ES|QL form',
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  () => {
+    const createdRuleIds: string[] = [];
+
+    test.beforeAll(async ({ esClient }) => {
+      await esClient.indices.create(
+        {
+          index: TEST_INDEX,
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              'host.name': { type: 'keyword' },
+            },
           },
         },
-      },
-      { ignore: [400] }
-    );
-    await esClient.index({
-      index: TEST_INDEX,
-      document: { '@timestamp': new Date().toISOString(), 'host.name': 'host-1' },
-      refresh: 'wait_for',
-    });
-  });
-
-  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-    await browserAuth.loginAsAlertingV2Editor();
-    await pageObjects.rulesList.goto();
-    await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
-  });
-
-  test.afterAll(async ({ esClient, apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-    await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
-  });
-
-  test('removing all tags persists (does not restore the old tags)', async ({
-    pageObjects,
-    apiServices,
-  }) => {
-    let ruleId: string;
-
-    await test.step('seed an ES|QL rule with tags via API', async () => {
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          // No `builder_type`, so the edit flyout opens in ES|QL mode.
-          metadata: { name: 'scout-esql-clear-tags', tags: ['prod', 'infra'] },
-          query: {
-            format: 'composed',
-            base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
-            breach: { segment: '| WHERE count > 5' },
-          },
-          time_field: '@timestamp',
-          recovery_strategy: undefined,
-        })
+        { ignore: [400] }
       );
-      ruleId = rule.id;
-      expect(rule.metadata.tags).toStrictEqual(['prod', 'infra']);
+      await esClient.index({
+        index: TEST_INDEX,
+        document: { '@timestamp': new Date().toISOString(), 'host.name': 'host-1' },
+        refresh: 'wait_for',
+      });
     });
 
-    await test.step('refresh rules list', async () => {
+    test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+      await browserAuth.loginAsAlertingV2Editor();
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
     });
 
-    await test.step('open the edit flyout in ES|QL mode', async () => {
-      await pageObjects.composeDiscover.openEditFlyout(ruleId!);
-      await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
-      // A rule without builder_type opens directly in ES|QL mode (no builder switch).
-      await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
+    test.afterAll(async ({ esClient, apiServices }) => {
+      for (const id of createdRuleIds) {
+        await apiServices.alertingV2.rules.delete(id);
+      }
+      await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
     });
 
-    await test.step('navigate to the Details step and remove all tags', async () => {
-      await pageObjects.composeDiscover.clickNext();
-      await pageObjects.composeDiscover.clickNext();
-      await expect(pageObjects.composeDiscover.ruleNameInput).toBeVisible();
-      await pageObjects.composeDiscover.clearAllTags();
-    });
+    test('removing all tags persists (does not restore the old tags)', async ({
+      pageObjects,
+      apiServices,
+    }) => {
+      let ruleId: string;
 
-    await test.step('advance to the Actions step and submit', async () => {
-      await pageObjects.composeDiscover.clickNext();
-      await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
-      await pageObjects.composeDiscover.clickSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
-    });
+      await test.step('seed an ES|QL rule with tags via API', async () => {
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            // No `builder_type`, so the edit flyout opens in ES|QL mode.
+            metadata: { name: 'scout-esql-clear-tags', tags: ['prod', 'infra'] },
+            query: {
+              format: 'composed',
+              base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
+              breach: { segment: '| WHERE count > 5' },
+            },
+            time_field: '@timestamp',
+            recovery_strategy: undefined,
+          })
+        );
+        ruleId = rule.id;
+        createdRuleIds.push(ruleId);
+        expect(rule.metadata.tags).toStrictEqual(['prod', 'infra']);
+      });
 
-    await test.step('the rule has no tags after saving', async () => {
-      await expect
-        .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).metadata.tags, {
-          timeout: 30_000,
-        })
-        .toBeUndefined();
+      await test.step('refresh rules list', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      });
+
+      await test.step('open the edit flyout in ES|QL mode', async () => {
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+        // A rule without builder_type opens directly in ES|QL mode (no builder switch).
+        await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
+      });
+
+      await test.step('navigate to the Details step and remove all tags', async () => {
+        await pageObjects.composeDiscover.clickNext();
+        await pageObjects.composeDiscover.clickNext();
+        await expect(pageObjects.composeDiscover.ruleNameInput).toBeVisible();
+        await pageObjects.composeDiscover.clearAllTags();
+      });
+
+      await test.step('advance to the Actions step and submit', async () => {
+        await pageObjects.composeDiscover.clickNext();
+        await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
+        await pageObjects.composeDiscover.clickSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      });
+
+      await test.step('the rule has no tags after saving', async () => {
+        await expect
+          .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).metadata.tags, {
+            timeout: 30_000,
+          })
+          .toBeUndefined();
+      });
     });
-  });
-});
+  }
+);

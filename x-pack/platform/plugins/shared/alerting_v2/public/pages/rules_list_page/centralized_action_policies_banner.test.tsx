@@ -13,7 +13,15 @@ import {
   CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
 } from './centralized_action_policies_banner';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
-import { AlertingV2ActionPoliciesLocatorDefinition } from '../../locators';
+import { AlertingV2ActionPoliciesLocatorDefinition, createAlertingV2HostApp } from '../../locators';
+
+const TEST_HOST = createAlertingV2HostApp('test-app', {
+  rules: '/alerting/rules',
+  ruleLibrary: '/alerting/library',
+  episodes: '/alerting/inbox',
+  actionPolicies: '/alerting/action-policies',
+  executionHistory: '/alerting/execution-history',
+});
 
 const mockLocators = createMockLocators();
 const mockNavigateToUrl = jest.fn();
@@ -97,16 +105,19 @@ describe('CentralizedActionPoliciesBanner', () => {
     expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'create' });
   });
 
-  it('Create action policy CTA params resolve to management action policies create URL', async () => {
+  it('Create action policy CTA params resolve to action policies create URL for the bound host', async () => {
     renderBanner();
 
     fireEvent.click(screen.getByTestId('centralizedActionPoliciesCreate'));
 
     const [params] = jest.mocked(mockLocators.actionPolicyLocators.navigateSync).mock.calls[0];
-    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
+    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation({
+      ...params,
+      host: TEST_HOST.actionPolicies,
+    });
     expect(location).toMatchObject({
-      app: 'management',
-      path: '/alertingV2/action_policies/create',
+      app: 'test-app',
+      path: '/alerting/action-policies/create',
     });
   });
 

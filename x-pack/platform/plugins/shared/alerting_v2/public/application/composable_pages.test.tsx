@@ -133,6 +133,13 @@ const defaultProps = (): InternalPageProps => ({
   coreStart: createMockCoreStart(),
   container: createMockContainer() as unknown as Container,
   setBreadcrumbs: jest.fn() as (crumbs: ChromeBreadcrumb[]) => void,
+  hostApp: createAlertingV2HostApp('test', {
+    rules: '/alerting',
+    ruleLibrary: '/alerting/library',
+    episodes: '/alerting/inbox',
+    actionPolicies: '/alerting/action-policies',
+    executionHistory: '/alerting/execution-history',
+  }),
 });
 
 const renderInRouter = (ui: React.ReactElement, path = '/') =>

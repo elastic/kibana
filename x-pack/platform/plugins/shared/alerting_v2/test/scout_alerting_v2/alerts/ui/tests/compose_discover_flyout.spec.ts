@@ -52,10 +52,11 @@ const TWO_DATE_FIELDS_RULE_NAME = 'scout-compose-discover-two-date-fields';
 
 test.describe(
   'ComposeDiscoverFlyout — create and edit flows',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    test.beforeAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+    const createdRuleIds: string[] = [];
+
+    test.beforeAll(async ({ esClient }) => {
       await esClient.indices.create(
         {
           index: TEST_INDEX,
@@ -122,7 +123,9 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      for (const id of createdRuleIds) {
+        await apiServices.alertingV2.rules.delete(id);
+      }
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
       await esClient.indices.delete({ index: TIMESTAMP_ONLY_INDEX }, { ignore: [404] });
       await esClient.indices.delete({ index: TWO_DATE_FIELDS_INDEX }, { ignore: [404] });
@@ -194,7 +197,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
       });
 
-      await test.step('submit and verify rule created', async () => {
+      await test.step('submit and capture rule for teardown', async () => {
         await pageObjects.composeDiscover.clickSubmit();
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
 
@@ -204,14 +207,24 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: RULE_NAME,
               });
-              return items[0]?.artifacts?.some(
-                (artifact) =>
-                  artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
-              );
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
+              return items.length;
             },
             { timeout: 30_000 }
           )
-          .toBe(true);
+          .toBeGreaterThanOrEqual(1);
+      });
+
+      await test.step('the persisted rule includes the runbook artifact', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
+        expect(
+          items[0]?.artifacts?.some(
+            (artifact) =>
+              artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
+          )
+        ).toBe(true);
       });
     });
 
@@ -242,6 +255,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list', async () => {
@@ -301,6 +315,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list', async () => {
@@ -361,6 +376,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list and open the edit flyout', async () => {
@@ -413,6 +429,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list and open the edit flyout', async () => {
@@ -448,6 +465,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
         expect(rule.metadata.tags).toStrictEqual(['prod', 'infra']);
       });
 
@@ -525,6 +543,9 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: TWO_DATE_FIELDS_RULE_NAME,
               });
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
               return items[0]?.time_field;
             },
             { timeout: 30_000 }
@@ -569,6 +590,9 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: CREATE_SIGNAL_TIMESTAMP_RULE_NAME,
               });
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
               return items[0]?.time_field;
             },
             { timeout: 30_000 }

@@ -9,7 +9,6 @@ import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
@@ -259,7 +258,6 @@ export const getNavigationTreeDefinition = ({
                   id: 'stack_management_home',
                   title: '',
                 },
-                ...getAlertingV2ManagementNavPanel(core),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },

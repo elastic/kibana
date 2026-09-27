@@ -36,15 +36,11 @@ const SMOKE_VIEWER_ROLE: KibanaRole = {
 };
 
 /*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- *
  * Setup mirrors `list_execution_history_rule_lookup.spec.ts`: a rule-scoped
  * action policy plus a disabled rule, then a seeded alert event that the
  * dispatcher turns into a fire action and an execution-history event.
  */
-test.describe('Execution history — smoke', { tag: '@local-stateful-classic' }, () => {
+test.describe('Execution history — smoke', { tag: ['@local-stateful-classic'] }, () => {
   let policyId: string;
   let policyName: string;
   let ruleId: string;
@@ -129,7 +125,7 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
     await executionHistory.goto();
 
     await test.step('URL is the execution_history app path', async () => {
-      expect(page.url()).toContain('/app/management/alertingV2/execution_history');
+      expect(page.url()).toContain('/app/observability/alerting/execution-history');
     });
 
     await test.step('page header and tabs are visible', async () => {
