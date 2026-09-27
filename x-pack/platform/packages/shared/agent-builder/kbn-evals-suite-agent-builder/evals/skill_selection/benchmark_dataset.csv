@@ -66,7 +66,7 @@ entity-analytics,security,Find me the riskiest hosts in the finance network segm
 entity-analytics,security,Are there any ML anomaly detection jobs finding unusual behavior patterns in my environment?,distractor,find-security-ml-jobs,Distractor: ML job discovery maps to find-security-ml-jobs not entity-analytics
 detection-rule-edit,security,Create a new detection rule that fires when a user runs whoami followed by net user within 60 seconds,direct,detection-rule-edit,
 detection-rule-edit,security,Update the severity of the Suspicious PowerShell Execution rule from medium to high and add the persistence MITRE tag,direct,detection-rule-edit,
-detection-rule-edit,security,I want to start catching brute force login attempts against our Active Directory — set something up for that,indirect,detection-rule-edit,
+detection-rule-edit,security,I want to start catching brute force login attempts against our Active Directory — set something up for that,distractor,detection-coverage,Distractor: a gap statement with no rule logic maps to detection-coverage (checks existing rules first) not detection-rule-edit
 detection-rule-edit,security,The rule monitoring our AWS root account logins is not firing correctly — can you fix the detection query?,indirect,detection-rule-edit,
 detection-rule-edit,security,List all detection rules tagged with Credential Access that are currently enabled,distractor,find-security-rules,Distractor: read-only rule discovery maps to find-rules not detection-rule-edit
 find-security-rules,security,Show me all enabled detection rules that cover MITRE technique T1078 Valid Accounts,direct,find-security-rules,
