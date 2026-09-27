@@ -81,7 +81,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
   }
 
   // get host metadata info with queried agents
-  const agentsHostInfo =
+  let agentsHostInfo =
     normalizedActionRequest.agentType === 'endpoint'
       ? await getAgentHostNamesWithIds({
           endpointService,
@@ -89,6 +89,76 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
           agentIds: normalizedActionRequest.agents,
         })
       : {};
+
+  // Origin-only enrichment leaves linked-project agents with empty names.
+  // Under CPS, fall back to the request-scoped metadata index for those.
+  if (scoped?.isCpsRead() && normalizedActionRequest.agentType === 'endpoint') {
+    const unresolvedAgentIds = normalizedActionRequest.agents.filter(
+      (agentId) => !agentsHostInfo[agentId]
+    );
+
+    if (unresolvedAgentIds.length) {
+      // Batch into bounded searches: one search for the whole fan-out exceeds
+      // Elasticsearch's 10,000-result window for large actions — the search is
+      // then rejected and the catch silently drops ALL linked-project hostnames.
+      const HOSTNAME_LOOKUP_BATCH_SIZE = 500;
+      const hostnameByAgentId = new Map<string, string>();
+
+      for (
+        let offset = 0;
+        offset < unresolvedAgentIds.length;
+        offset += HOSTNAME_LOOKUP_BATCH_SIZE
+      ) {
+        const batch = unresolvedAgentIds.slice(offset, offset + HOSTNAME_LOOKUP_BATCH_SIZE);
+        const kuery = `united.agent.agent.id: (${batch.map((id) => `"${id}"`).join(' OR ')})`;
+        // Best-effort: a failed batch leaves names empty rather than failing the whole read
+        const metadata = await endpointService
+          .getEndpointMetadataService(spaceId)
+          .getHostMetadataList({ page: 0, pageSize: batch.length, kuery }, scoped)
+          .catch((error) => {
+            endpointService
+              .createLogger('getActionDetailsById')
+              .warn(`Failed to resolve linked-project hostnames: ${error.message}`);
+            return undefined;
+          });
+
+        // Index the metadata rows by agent id once. A `.find()` per unresolved
+        // agent rescans the whole metadata result every time, so a fan-out
+        // action targeting thousands of agents performs millions of
+        // comparisons and can delay or time out both this read and the status
+        // tool. A Map makes the enrichment linear in the fan-out.
+        for (const entry of metadata?.data ?? []) {
+          // Match on the Fleet agent id — the same id the action and this
+          // batch's kuery (`united.agent.agent.id`) key on — falling back to
+          // the endpoint's own `agent.id` only when Fleet's id is missing,
+          // mirroring `EndpointMetadataService.getEnrichedHostMetadata()`.
+          // Endpoint metadata's own `agent.id` can differ from the Fleet
+          // agent id; indexing by the wrong one silently drops the hostname.
+          const agentId = entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id;
+          const hostname = entry.metadata?.host?.hostname;
+
+          // First row wins, matching the previous `.find()` semantics when a
+          // backend returns more than one row for the same agent id.
+          if (agentId && hostname && !hostnameByAgentId.has(agentId)) {
+            hostnameByAgentId.set(agentId, hostname);
+          }
+        }
+      }
+
+      agentsHostInfo = unresolvedAgentIds.reduce(
+        (acc, agentId) => {
+          const hostname = hostnameByAgentId.get(agentId);
+
+          if (hostname) {
+            acc[agentId] = hostname;
+          }
+
+          return acc;
+        },
+        { ...agentsHostInfo }
+      );
+    }
+  }
 
   return createActionDetailsRecord<T>(normalizedActionRequest, actionResponses, agentsHostInfo);
 };

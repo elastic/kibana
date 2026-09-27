@@ -20,7 +20,10 @@ import {
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 import { createMockEndpointAppContextService } from '../../mocks';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 
@@ -30,6 +33,12 @@ describe('When using `getActionDetailsById()', () => {
   let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
   let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
   let endpointAppContextService: EndpointAppContextService;
+
+  const buildScoped = (cpsRead: boolean): ScopedEndpointServices =>
+    ({
+      isCpsRead: () => cpsRead,
+      getEsClient: () => esClient,
+    } as unknown as ScopedEndpointServices);
 
   beforeEach(() => {
     endpointAppContextService = createMockEndpointAppContextService();
@@ -184,5 +193,150 @@ describe('When using `getActionDetailsById()', () => {
     expect(
       endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace
     ).not.toHaveBeenCalled();
+  });
+
+  it('fills linked-project hostnames from the scoped metadata index when Fleet cannot resolve them', async () => {
+    const getHostMetadataList = jest.fn().mockResolvedValue({
+      data: [
+        {
+          metadata: {
+            agent: { id: 'agent-a' },
+            host: { hostname: 'linked-host-a' },
+          },
+        },
+      ],
+      total: 1,
+    });
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList,
+    });
+    // Origin Fleet knows nothing about the linked-project agent
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([]);
+
+    const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: buildScoped(true),
+    });
+
+    expect(getHostMetadataList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kuery: 'united.agent.agent.id: ("agent-a")',
+        page: 0,
+      }),
+      expect.anything()
+    );
+    expect(details.hosts).toEqual({ 'agent-a': { name: 'linked-host-a' } });
+  });
+
+  it('matches the linked-project metadata row by Fleet agent id, not the endpoint agent id', async () => {
+    // Endpoint metadata's own `agent.id` (`agent-a-endpoint-id`) differs from
+    // the Fleet agent id (`agent-a`) the action and the batch kuery
+    // (`united.agent.agent.id`) key on. Only `elastic.agent.id` should be
+    // used to match; a lookup keyed on the wrong id must not surface a
+    // hostname for a different agent.
+    const getHostMetadataList = jest.fn().mockResolvedValue({
+      data: [
+        {
+          metadata: {
+            agent: { id: 'agent-a-endpoint-id' },
+            elastic: { agent: { id: 'agent-a' } },
+            host: { hostname: 'linked-host-a' },
+          },
+        },
+      ],
+      total: 1,
+    });
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList,
+    });
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([]);
+
+    const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: buildScoped(true),
+    });
+
+    expect(details.hosts).toEqual({ 'agent-a': { name: 'linked-host-a' } });
+    // The endpoint's own agent id must never be used as the hostname lookup key.
+    expect(details.hosts).not.toHaveProperty('agent-a-endpoint-id');
+  });
+
+  it('resolves linked-project hostnames spanning more than one lookup batch', async () => {
+    // Production batches unresolvedAgentIds in groups of 500 (HOSTNAME_LOOKUP_BATCH_SIZE).
+    // A regression that processes only the first batch, sends an oversized
+    // search, or drops the second batch must fail this test.
+    const agentIds = Array.from({ length: 501 }, (_, i) => `agent-${i}`);
+    actionRequests = createActionRequestsEsSearchResultsMock(agentIds);
+    applyActionsEsSearchMock(esClient, actionRequests, actionResponses);
+
+    const getHostMetadataList = jest.fn().mockImplementation(async (queryOptions) => {
+      const kuery: string = queryOptions.kuery;
+      const idsInBatch = agentIds.filter((id) => kuery.includes(`"${id}"`));
+      return {
+        data: idsInBatch.map((id) => ({
+          metadata: {
+            agent: { id },
+            elastic: { agent: { id } },
+            host: { hostname: `linked-host-${id}` },
+          },
+        })),
+        total: idsInBatch.length,
+      };
+    });
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList,
+    });
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([]);
+
+    const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: buildScoped(true),
+    });
+
+    // Two batches: 500 + 1.
+    expect(getHostMetadataList).toHaveBeenCalledTimes(2);
+    for (const [queryOptions] of getHostMetadataList.mock.calls) {
+      expect(queryOptions.pageSize).toBeLessThanOrEqual(500);
+    }
+    // Every agent, including the one in the second (later) batch, must resolve.
+    expect(details.hosts['agent-0']).toEqual({ name: 'linked-host-agent-0' });
+    expect(details.hosts['agent-500']).toEqual({ name: 'linked-host-agent-500' });
+    expect(Object.keys(details.hosts)).toHaveLength(501);
+  });
+
+  it('does not query the scoped metadata index when the read is origin-only', async () => {
+    const getHostMetadataList = jest.fn();
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList,
+    });
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([]);
+
+    const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: buildScoped(false),
+    });
+
+    expect(getHostMetadataList).not.toHaveBeenCalled();
+    expect(details.hosts).toEqual({ 'agent-a': { name: '' } });
+  });
+
+  it('keeps returning details when the linked-project hostname lookup fails', async () => {
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList: jest.fn().mockRejectedValue(new Error('remote cluster unavailable')),
+    });
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([]);
+
+    const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: buildScoped(true),
+    });
+
+    expect(details.id).toBe('123');
+    expect(details.hosts).toEqual({ 'agent-a': { name: '' } });
   });
 });
