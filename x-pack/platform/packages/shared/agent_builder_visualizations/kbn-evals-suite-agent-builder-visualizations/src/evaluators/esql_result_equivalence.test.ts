@@ -145,4 +145,67 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
     expect((await evaluate(esClient, '')).label).toBe('skipped');
     expect((await evaluate(esClient, GOLD, '')).score).toBe(0);
   });
+
+  describe('sorted LIMIT', () => {
+    const TOP_GOLD = 'FROM logs | STATS c = COUNT(*) BY url | SORT c DESC | LIMIT 2';
+    const TOP_CANDIDATE = 'FROM logs | STATS n = COUNT(*) BY url | SORT n DESC | LIMIT 2';
+    const COLUMNS = [
+      { name: 'c', type: 'long' },
+      { name: 'url', type: 'keyword' },
+    ];
+
+    const buildTopEsClient = (goldProbeRows: unknown[][]) =>
+      ({
+        esql: {
+          query: jest.fn(async ({ query }: { query: string }) => {
+            if (query.includes('LIMIT 3')) {
+              return { columns: COLUMNS, values: goldProbeRows };
+            }
+            return {
+              columns: COLUMNS,
+              values: [
+                [10, '/a'],
+                [5, '/b'],
+              ],
+            };
+          }),
+        },
+      } as unknown as ElasticsearchClient);
+
+    it('skips when the LIMIT cuts through rows tied on the SORT key', async () => {
+      const esClient = buildTopEsClient([
+        [10, '/a'],
+        [5, '/b'],
+        [5, '/c'],
+      ]);
+
+      const result = await evaluate(esClient, TOP_GOLD, TOP_CANDIDATE);
+
+      expect(result.score).toBeNull();
+      expect(result.label).toBe('skipped');
+      expect(result.explanation).toContain('tied');
+    });
+
+    it('scores normally when the row after the cutoff sorts differently', async () => {
+      const esClient = buildTopEsClient([
+        [10, '/a'],
+        [5, '/b'],
+        [1, '/c'],
+      ]);
+
+      const result = await evaluate(esClient, TOP_GOLD, TOP_CANDIDATE);
+
+      expect(result.score).toBe(1);
+    });
+
+    it('skips a LIMIT that no SORT has ordered', async () => {
+      const result = await evaluate(
+        buildEsClient({}),
+        'FROM logs | STATS c = COUNT(*) BY url | LIMIT 2',
+        TOP_CANDIDATE
+      );
+
+      expect(result.label).toBe('skipped');
+    });
+  });
 });

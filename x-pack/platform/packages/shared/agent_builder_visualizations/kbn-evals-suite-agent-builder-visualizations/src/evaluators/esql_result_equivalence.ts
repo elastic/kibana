@@ -66,22 +66,92 @@ export function compareRowMultisets(
   };
 }
 
+interface SortedLimit {
+  limit: number;
+  /** Result column names of the SORT keys; `undefined` when a key is an expression. */
+  sortColumns: string[] | undefined;
+  location: { min: number; max: number };
+}
+
+interface LimitAnalysis {
+  unordered: boolean;
+  sorted?: SortedLimit;
+}
+
+const sortKeyColumn = (arg: unknown): string | undefined => {
+  if (typeof arg !== 'object' || arg === null) {
+    return undefined;
+  }
+  const node = arg as { type?: string; name?: string; args?: unknown[] };
+  if (node.type === 'column') {
+    return node.name;
+  }
+  return node.type === 'order' ? sortKeyColumn(node.args?.[0]) : undefined;
+};
+
 /**
- * True when a LIMIT truncates rows that no SORT has ordered since the last
- * STATS (or the source), so which rows survive is up to Elasticsearch.
+ * Finds the LIMIT that cuts the final rows. It is unordered when no SORT has
+ * ordered the rows since the last STATS (or the source), so which rows survive
+ * is up to Elasticsearch; otherwise it records the SORT keys it cuts through.
  */
-function hasUnorderedLimit(query: string): boolean {
-  let ordered = false;
-  for (const { name } of Parser.parse(query).root.commands) {
+function analyzeLimit(query: string): LimitAnalysis {
+  let sortColumns: string[] | undefined | null = null;
+  let analysis: LimitAnalysis = { unordered: false };
+  for (const { name, args, location } of Parser.parse(query).root.commands) {
     if (name === 'stats') {
-      ordered = false;
+      sortColumns = null;
     } else if (name === 'sort') {
-      ordered = true;
-    } else if (name === 'limit' && !ordered) {
-      return true;
+      const columns = args.map(sortKeyColumn);
+      sortColumns = columns.every((column): column is string => column !== undefined)
+        ? columns
+        : undefined;
+    } else if (name === 'limit') {
+      if (sortColumns === null) {
+        return { unordered: true };
+      }
+      const [limitArg] = args as Array<{ value?: unknown }>;
+      if (typeof limitArg?.value === 'number') {
+        analysis = { unordered: false, sorted: { limit: limitArg.value, sortColumns, location } };
+      }
     }
   }
-  return false;
+  return analysis;
+}
+
+/**
+ * True when the sorted LIMIT cuts through rows that tie on every SORT key, so
+ * which of the tied rows make the cut is arbitrary. Checked by re-running the
+ * gold with one extra row and comparing the keys either side of the cutoff.
+ */
+async function limitCutsThroughTie(
+  query: string,
+  goldRowCount: number,
+  { limit, sortColumns, location }: SortedLimit,
+  runQuery: EsqlQueryRunner
+): Promise<boolean> {
+  if (goldRowCount < limit || sortColumns === undefined) {
+    return false;
+  }
+  const probeQuery = `${query.slice(0, location.min)}LIMIT ${limit + 1}${query.slice(
+    location.max + 1
+  )}`;
+  try {
+    const { columns = [], values = [] } = await runQuery(probeQuery);
+    if (values.length <= limit) {
+      return false;
+    }
+    const keyIndexes = sortColumns.map((column) =>
+      columns.findIndex(({ name }) => name.replace(/`/g, '') === column)
+    );
+    if (keyIndexes.some((index) => index < 0)) {
+      return false;
+    }
+    const lastKept = values[limit - 1];
+    const firstCut = values[limit];
+    return keyIndexes.every((index) => lastKept[index] === firstCut[index]);
+  } catch {
+    return false;
+  }
 }
 
 const labelFromScore = (score: number): string =>
@@ -150,7 +220,9 @@ export function createEsqlResultEquivalenceEvaluator<
       if (!goldQuery) {
         return skippedResult('No gold query declared for this example.');
       }
-      if (hasUnorderedLimit(goldQuery)) {
+      const normalizedGold = normalizeEsqlForEquivalence(goldQuery);
+      const goldLimit = analyzeLimit(normalizedGold);
+      if (goldLimit.unordered) {
         return skippedResult(
           'Gold query truncates with LIMIT but no SORT; its result rows are not deterministic.'
         );
@@ -166,7 +238,7 @@ export function createEsqlResultEquivalenceEvaluator<
       // The suite treats the time-picker WHERE as cosmetic (the chart supplies the
       // window), so strip it from every side before executing, as the LLM judge does.
       const [goldResult, ...candidateResults] = await Promise.allSettled([
-        runQuery(normalizeEsqlForEquivalence(goldQuery)),
+        runQuery(normalizedGold),
         ...candidateQueries.map((query) => runQuery(normalizeEsqlForEquivalence(query))),
       ]);
 
@@ -180,7 +252,17 @@ export function createEsqlResultEquivalenceEvaluator<
         };
       }
 
-      const goldRows = normalizeRows(goldResult.value.values ?? [], normalize);
+      const goldValues = goldResult.value.values ?? [];
+      if (
+        goldLimit.sorted &&
+        (await limitCutsThroughTie(normalizedGold, goldValues.length, goldLimit.sorted, runQuery))
+      ) {
+        return skippedResult(
+          'Gold query LIMIT cuts through rows tied on every SORT key; which tied rows survive is not deterministic.'
+        );
+      }
+
+      const goldRows = normalizeRows(goldValues, normalize);
       const comparisons = candidateResults.map((result, index): CandidateComparison => {
         const candidateQuery = candidateQueries[index];
         if (result.status === 'rejected') {
