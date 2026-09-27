@@ -85,7 +85,8 @@ The only always-on cost of a soft flag is the tiny public plugin entry bundle (~
 Real data is served by default. Keep these in mind when running AlertZero in shared or production environments:
 
 - Watch reads require only `alertzero_read`; AlertZero owns the catalog projection and its managed definitions. Recent-run enrichment soft-fails when execution history is unavailable.
-- Settings writes require `alertzero_write`; managed install is requestless, so the AlertZero route is the authorization boundary.
+- Settings writes (autonomy, schedule, extras) require `alertzero_write`; managed install is requestless, so the AlertZero route is the authorization boundary for those fields.
+- Enable/disable also requires Workflows `workflowsManagement:update` **and** `workflowsManagement:managed:update`. `workflows:all` does **not** include `workflow_update_managed` — that sub-feature must be granted explicitly.
 - Autonomy and enablement are durable per Worker. There is no Watch-owned settings write path.
 
 ### Skills projection

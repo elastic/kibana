@@ -218,19 +218,15 @@ apiTest.describe(
       expect(response.body.pagination.per_page).toBe(5);
     });
 
-    apiTest(
-      'viewer (escalations_read via includeIn: read) can list escalations',
-      async ({ apiClient }) => {
-        // With the mutually_exclusive sub-feature, viewer holds escalations_read.
-        // They should be able to list but not create or update.
-        const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
-          headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
-          responseType: 'json',
-        });
+    apiTest('viewer (escalations_read) can list escalations', async ({ apiClient }) => {
+      // Viewer holds escalations_read explicitly. They can list but not create or update.
+      const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
+        responseType: 'json',
+      });
 
-        expect(response).toHaveStatusCode(200);
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+    });
 
     apiTest('returns 400 when per_page is 0', async ({ apiClient }) => {
       const response = await apiClient.get(`${LIST_ESCALATIONS_PATH}?page=1&per_page=0`, {

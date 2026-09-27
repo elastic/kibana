@@ -47,7 +47,7 @@ One Kibana feature, `agenticInvestigations`.
 
 The feature carries `minimumLicense: 'enterprise'`.
 
-Impact has no privilege of its own yet. Reads and writes require the investigations sub-feature privilege, `manage_investigations`, which `includeIn: 'all'` joins to the base All level. A dedicated impact privilege can be split out later if read and write need to diverge. Escalations sit in their own sub-feature, joined to the base levels through `includeIn: 'all'` / `includeIn: 'read'`. Follow that sub-feature pattern for any new entity that is not intrinsic to an investigation.
+So `read` can see the queue but cannot decide it. Impact has no privilege of its own yet. Reads and writes require the investigations sub-feature privilege, `manage_investigations`, which `includeIn: 'all'` joins to the base All level. A dedicated impact privilege can be split out later if read and write need to diverge. Escalations are a separate sub-feature with `includeIn: 'none'`, so `all` and `read` do not grant them. Follow that sub-feature pattern for any new entity that is not intrinsic to an investigation.
 
 **Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. They only grant sub-features marked `groupType: 'independent'`, and only when the user holds them explicitly.
 
@@ -86,8 +86,8 @@ The `escalations` sub-feature uses a `mutually_exclusive` privilege group, so a 
 
 | Sub-feature privilege | API | UI |
 | --- | --- | --- |
-| `escalations_all` (included in `all`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
-| `escalations_read` (included in `read`) | `read_escalations` | `showEscalations` |
+| `escalations_all` (`includeIn: 'none'`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
+| `escalations_read` (`includeIn: 'none'`) | `read_escalations` | `showEscalations` |
 
 ### API
 

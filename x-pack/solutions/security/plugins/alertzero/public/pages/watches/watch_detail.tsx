@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +21,7 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
@@ -32,6 +34,7 @@ export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
   const { euiTheme } = useEuiTheme();
+  const canWrite = useCanWriteAlertZero();
   const { data, isLoading, error, refetch } = useWatch(watchId);
   const {
     data: workersData,
@@ -259,6 +262,7 @@ export const WatchDetailPage: React.FC = () => {
                 error={draft.error}
                 settingsLocked={worker.state === 'unavailable'}
                 isSaving={isSaving}
+                canWrite={canWrite}
                 onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
                 onSettingsChange={(patch) => updateSettings(worker, patch)}
                 onTriggerValidityChange={(isValid) =>
@@ -278,10 +282,22 @@ export const WatchDetailPage: React.FC = () => {
       active={watchId}
       title={watch.name}
       badges={workerCountBadges}
-      headerPrimaryActionItem={headerPrimaryActionItem}
-      headerItems={headerItems}
+      headerPrimaryActionItem={canWrite ? headerPrimaryActionItem : undefined}
+      headerItems={canWrite ? headerItems : undefined}
     >
       <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+        {!canWrite ? (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              announceOnMount
+              iconType="alert"
+              title={settingsI18n.READ_ONLY_CALLOUT_TITLE}
+              data-test-subj="alertZeroReadOnlyCallout"
+            >
+              <p>{settingsI18n.READ_ONLY_CALLOUT_BODY}</p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        ) : null}
         {saveBlockedByInvalidDraft || hasInvalidDraft ? (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
