@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -116,6 +116,7 @@ export const Main: FunctionComponent = () => {
             title={mainTranslations.pageTitle}
             badges={[{ label: mainTranslations.experimental }]}
             tabs={tabs}
+            description={mainTranslations.pageDescription}
             spacing="bleed"
             docLink={dataFederationLinks.overview}
             menu={{
@@ -133,11 +134,6 @@ export const Main: FunctionComponent = () => {
             }}
           />
           <EuiSpacer size="l" />
-
-          <EuiText color="subdued" size="s">
-            <p>{mainTranslations.pageDescription}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
         </>
       )}
 
