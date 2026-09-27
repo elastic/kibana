@@ -21,11 +21,12 @@ export const updateTestConfigStats: Command<void> = {
   name: 'update-test-config-stats',
   description: `Fetch latest test config stats from Scout test events and store them locally under ${SCOUT_TEST_CONFIG_STATS_PATH}`,
   flags: {
-    string: ['esURL', 'esAPIKey', 'lookbackDays', 'branch', 'pipelineSlug'],
+    string: ['esURL', 'esAPIKey', 'esMaxRetries', 'lookbackDays', 'branch', 'pipelineSlug'],
     boolean: ['verifyTLSCerts'],
     default: {
       esURL: SCOUT_REPORTER_ES_URL,
       esAPIKey: SCOUT_REPORTER_ES_API_KEY,
+      esMaxRetries: '2',
       verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
       lookbackDays: '1',
       pipelineSlug: 'kibana-pull-request',
@@ -33,6 +34,7 @@ export const updateTestConfigStats: Command<void> = {
     help: `
     --esURL           (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
     --esAPIKey        (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
+    --esMaxRetries    (optional)  How many times should Elasticsearch API requests be retried (default: 2)
     --verifyTLSCerts  (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
     --lookbackDays    (optional)  How many days to look back when aggregating stats (default: 1)
     --branch          (optional)  Only look at events from a particular branch
@@ -52,6 +54,7 @@ export const updateTestConfigStats: Command<void> = {
         tls: {
           rejectUnauthorized: flagsReader.boolean('verifyTLSCerts'),
         },
+        maxRetries: flagsReader.requiredNumber('esMaxRetries'),
       },
       { log, cli: true }
     );

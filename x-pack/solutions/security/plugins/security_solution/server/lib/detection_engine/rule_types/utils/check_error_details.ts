@@ -6,7 +6,14 @@
  */
 import type { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 
-const USER_ERRORS_EXCEPTIONS = ['status_exception', 'verification_exception', 'parsing_exception'];
+const USER_ERRORS_EXCEPTIONS = [
+  'status_exception',
+  'verification_exception',
+  'parsing_exception',
+  // Raised when the rule owner's credentials are not authorized for the search, e.g. a missing
+  // `read` index privilege or a cross-project search linked project that rejects the request.
+  'security_exception',
+];
 
 /**
  * if error can be qualified as user error(configurational), returns isUserError: true
@@ -19,8 +26,10 @@ export const checkErrorDetails = (error: unknown): { isUserError: boolean } => {
   }
 
   const isUserError =
-    error instanceof Error &&
-    USER_ERRORS_EXCEPTIONS.some((exception) => error.message.includes(exception));
+    (error instanceof Error &&
+      USER_ERRORS_EXCEPTIONS.some((exception) => error.message.includes(exception))) ||
+    (typeof error === 'string' &&
+      USER_ERRORS_EXCEPTIONS.some((exception) => error.includes(exception)));
 
   return { isUserError };
 };

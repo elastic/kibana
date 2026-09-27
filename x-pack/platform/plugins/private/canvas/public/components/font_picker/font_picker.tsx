@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSuperSelect } from '@elastic/eui';
 import { fonts, FontValue } from '../../../common/lib/fonts';
@@ -20,7 +20,7 @@ interface Props {
   value?: FontValue;
 }
 
-export const FontPicker: FC<Props> = ({ value, onSelect }) => {
+export const FontPicker: CanvasFunctionComponent<Props> = ({ value, onSelect }) => {
   // While fonts are strongly-typed, we also support custom fonts someone might type in.
   // So let's cast the fonts and allow for additions.
   const displayedFonts: DisplayedFont[] = fonts;
@@ -48,7 +48,6 @@ FontPicker.propTypes = {
   /** Function to execute when a Font is selected. */
   onSelect: PropTypes.func,
   /** Initial value of the Font Picker. */
-  // @ts-expect-error upgrade typescript v5.9.3
   value: PropTypes.string,
 };
 

@@ -48,6 +48,7 @@ import {
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
+import { shouldTrackMissingGroups } from './lib/should_track_missing_groups';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
@@ -108,9 +109,10 @@ export const createCustomThresholdExecutor = ({
       alertOnGroupDisappear: boolean | undefined;
     };
 
-    // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear =
-      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
+    const alertOnGroupDisappear = shouldTrackMissingGroups(
+      params.noDataBehavior,
+      _alertOnGroupDisappear
+    );
     const compositeSize = config.customThresholdRule.groupByPageSize;
     const queryIsSame = isEqual(
       state.searchConfiguration?.query.query,

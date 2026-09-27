@@ -184,6 +184,12 @@ describe('v2 migration', () => {
           const lines = error.message
             .split('\n')
             .filter((line: string) => line.includes(`'complex'`))
+            .map((line: string) =>
+              line.replace(
+                /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+                '<uuid>'
+              )
+            )
             .join('\n');
           expect(lines).toMatchSnapshot();
         }

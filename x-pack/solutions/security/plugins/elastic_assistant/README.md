@@ -22,7 +22,7 @@ Maintained by the Security Solution team
 
 ### Generate graph structure
 
-To generate the graph structure, run `yarn draw-graph` from the plugin directory.
+To generate the graph structure, run `pnpm draw-graph` from the plugin directory.
 The graphs will be generated in the `docs/img` directory of the plugin.
 
 ### Testing

@@ -17,8 +17,10 @@ import { unenrollAgent } from './unenroll';
 export async function unenrollForAgentPolicyId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  policyId: string
+  policyId: string,
+  options?: { revoke?: boolean }
 ) {
+  const revoke = options?.revoke ?? false;
   let hasMore = true;
   let page = 1;
   while (hasMore) {
@@ -26,7 +28,7 @@ export async function unenrollForAgentPolicyId(
       kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(policyId)}"`,
       page: page++,
       perPage: 1000,
-      showInactive: false,
+      showInactive: revoke,
     });
 
     if (agents.length === 0) {
@@ -34,6 +36,8 @@ export async function unenrollForAgentPolicyId(
     }
     for (const agent of agents) {
       await unenrollAgent(soClient, esClient, agent.id, {
+        force: revoke,
+        revoke,
         skipAgentlessValidation: true,
       });
     }

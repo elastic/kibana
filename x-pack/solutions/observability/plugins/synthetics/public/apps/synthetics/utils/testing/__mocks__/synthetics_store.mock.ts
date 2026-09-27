@@ -163,7 +163,6 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     error: null,
   },
-  maintenanceWindows: {},
 };
 
 function getBrowserJourneyMockSlice() {

@@ -32,6 +32,7 @@ import { useInstallMigrationRules } from '../../logic/use_install_migration_rule
 import { useGetMigrationRules } from '../../logic/use_get_migration_rules';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_prebuilt_rules';
+import type { GetRuleMigrationPrebuiltRulesResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
@@ -93,8 +94,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const { data: translationStats, isLoading: isStatsLoading } =
       useGetMigrationTranslationStats(migrationId);
 
-    const { data: prebuiltRules = {}, isLoading: isPrebuiltRulesLoading } =
-      useGetMigrationPrebuiltRules(migrationId);
+    const {
+      data: prebuiltRules = {} as GetRuleMigrationPrebuiltRulesResponse,
+      isLoading: isPrebuiltRulesLoading,
+    } = useGetMigrationPrebuiltRules(migrationId);
 
     const filters = useMemo<RuleMigrationFilters>(
       () => ({ searchTerm, ...convertFilterOptions(filterOptions) }),

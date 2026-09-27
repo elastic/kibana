@@ -40,6 +40,8 @@ export function defineActionTypes(
     name: 'Test: Throw',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
+    // Fail on the first attempt without a retry so error-log counts stay deterministic
+    maxAttempts: 1,
     validate: {
       config: { schema: schema.object({}, { defaultValue: {} }) },
       secrets: { schema: schema.object({}, { defaultValue: {} }) },

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
@@ -97,5 +98,80 @@ describe('singleSearchAfter', () => {
         ruleExecutionLogger,
       })
     ).rejects.toThrow('Fake Error');
+    expect(ruleExecutionLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Searching events operation failed')
+    );
+  });
+
+  test('does not log an error when the response exceeds the elasticsearch.maxResponseSize limit', async () => {
+    mockService.scopedClusterClient.asCurrentUser.search.mockRejectedValueOnce(
+      new esErrors.RequestAbortedError(
+        'The content length (209715200) is bigger than the maximum allowed string (104857600)'
+      )
+    );
+    await expect(
+      singleSearchAfter({
+        searchRequest: mockSearchRequest,
+        services: mockService,
+        ruleExecutionLogger,
+      })
+    ).rejects.toThrow('content length');
+    expect(ruleExecutionLogger.error).not.toHaveBeenCalled();
+    expect(ruleExecutionLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Searching events operation failed')
+    );
+  });
+
+  test('if singleSearchAfter returns failures reported only per cluster as warnings', async () => {
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
+      took: 10,
+      timed_out: false,
+      _shards: {
+        total: 0,
+        successful: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      _clusters: {
+        total: 2,
+        successful: 1,
+        skipped: 1,
+        running: 0,
+        partial: 0,
+        failed: 0,
+        details: {
+          kayak: {
+            status: 'skipped',
+            indices: 'logs-a-*',
+            timed_out: false,
+            failures: [
+              {
+                shard: -1,
+                index: 'kayak:logs-a-000001',
+                node: 'node-1',
+                reason: {
+                  type: 'security_exception',
+                  reason: 'action [indices:data/read/search] is unauthorized',
+                },
+              },
+            ],
+          },
+        },
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+    });
+    const { searchErrors, searchWarnings } = await singleSearchAfter({
+      searchRequest: mockSearchRequest,
+      services: mockService,
+      ruleExecutionLogger,
+    });
+    expect(searchErrors).toEqual([]);
+    expect(searchWarnings).toEqual([
+      'Cluster "kayak" is "skipped" and its data may be missing from this rule run: index: "kayak:logs-a-000001" reason: "action [indices:data/read/search] is unauthorized" type: "security_exception"',
+    ]);
   });
 });

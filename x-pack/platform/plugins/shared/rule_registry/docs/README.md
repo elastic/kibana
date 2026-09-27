@@ -12,7 +12,7 @@ and: <https://www.npmjs.com/package/typedoc-plugin-markdown> for the markdown pl
 ## Install dependencies
 
 ```bash
-yarn global add typedoc typedoc-plugin-markdown
+pnpm add --global typedoc typedoc-plugin-markdown
 ```
 
 ## Generate the docs
@@ -39,6 +39,6 @@ If you run into tsc errors that seem unrelated to the cases plugin try executing
 
 ```bash
 cd <kibana root dir>
-npx yarn kbn bootstrap
+npx pnpm kbn bootstrap
 node scripts/build_ts_refs.js --clean --no-cache
 ```

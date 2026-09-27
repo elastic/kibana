@@ -22,6 +22,7 @@ import {
 import { Group } from '../../../../common/typings';
 import {
   CustomMetricExpressionParams,
+  NoDataBehavior,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../../../common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
@@ -43,6 +44,7 @@ export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
   groupBy?: string | string[];
   alertOnNoData: boolean;
   alertOnGroupDisappear?: boolean;
+  noDataBehavior?: NoDataBehavior;
 }
 
 export type CustomThresholdRuleTypeState = RuleTypeState & {

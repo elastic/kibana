@@ -37,6 +37,29 @@ should_enable_fips() {
   is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"
 }
 
+# Buildkite checkouts push with the Buildkite GitHub App credential, which has limited scopes. It cannot push to workflows for example.
+# Use an isolated git config so gh can provide GITHUB_TOKEN credentials for this push without changing global auth.
+push_as_github_token() {
+  local required_env_var
+
+  for required_env_var in GITHUB_TOKEN GITHUB_PR_OWNER GITHUB_PR_REPO GITHUB_PR_BRANCH; do
+    if [[ -z "${!required_env_var:-}" ]]; then
+      echo "Missing required environment variable for GITHUB_TOKEN push: $required_env_var" >&2
+      exit 1
+    fi
+  done
+
+  (
+    git_config_global="$(mktemp)"
+    trap 'rm -f "$git_config_global"' EXIT
+
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" gh auth setup-git --hostname github.com --force
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" git push \
+      "https://github.com/${GITHUB_PR_OWNER}/${GITHUB_PR_REPO}.git" \
+      "HEAD:${GITHUB_PR_BRANCH}"
+  )
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -184,7 +207,7 @@ set_git_merge_base() {
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
-  retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+  retry 3 1 timeout 10m buildkite-agent artifact download "$@"
 }
 
 GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
@@ -286,4 +309,19 @@ docker_with_retry () {
 clean_cached_images() {
   docker images -q | sort -u | xargs -r docker rmi -f || true
   docker image prune -af || true
+}
+
+# Move the first existing source dir onto dest (no-op if none exist).
+copy_first_available() {
+  local dest="$1"
+  shift
+  local src
+  for src in "$@"; do
+    if [[ -d "$src" ]]; then
+      echo "Using $src as a starting point"
+      mkdir -p "$(dirname "$dest")"
+      mv "$src" "$dest"
+      return 0
+    fi
+  done
 }

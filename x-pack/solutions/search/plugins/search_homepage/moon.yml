@@ -36,7 +36,6 @@ tags:
   - prod
   - group-search
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -44,6 +43,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

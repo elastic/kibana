@@ -26,5 +26,5 @@ export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
     args.push('--no-cache');
   }
 
-  await execa('yarn', args, { cwd: REPO_ROOT, stdio });
+  await execa('pnpm', args, { cwd: REPO_ROOT, stdio });
 }

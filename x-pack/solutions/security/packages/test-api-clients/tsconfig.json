@@ -17,6 +17,7 @@
     "@kbn/securitysolution-lists-common",
     "@kbn/osquery-plugin",
     "@kbn/tooling-log",
-    "@kbn/fleet-plugin"
+    "@kbn/fleet-plugin",
+    "@kbn/scout",
   ]
 }

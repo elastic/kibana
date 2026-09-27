@@ -12,9 +12,10 @@ import type { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
+import { cloneDeep } from 'lodash';
 import type { EndpointSecurityRoleDefinitions } from './roles_users';
 import { getAllEndpointSecurityRoles } from './roles_users';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { COMMON_API_HEADERS } from './constants';
 
 const ignoreHttp409Error = (error: KbnClientRequesterError) => {
@@ -108,6 +109,14 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
+  /**
+   * Get a copy of a predefined Role definition
+   * @param name
+   */
+  public getPreDefinedRole(name: keyof R): Role {
+    return cloneDeep(this.roles[name]);
+  }
+
   protected async createRole(role: Role): Promise<void> {
     const { name: roleName, ...roleDefinition } = role;
 
@@ -127,7 +136,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         return response;
       })
       .catch(ignoreHttp409Error)
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
       .catch(this.logPromiseError);
   }
 
@@ -160,7 +169,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         return response;
       })
       .catch(ignoreHttp409Error)
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
       .catch(this.logPromiseError);
   }
 }

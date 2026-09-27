@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
@@ -42,6 +42,7 @@ import { ExceptionsViewerUtility } from './utility_bar';
 import { ExceptionsViewerItems } from './all_items';
 import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
+import { ExceptionItemDeleteConfirmModal } from '../exception_item_delete_confirm_modal';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
@@ -424,6 +425,10 @@ const ExceptionsViewerComponent = ({
     [setFlyoutType, handleGetExceptionListItems, onRuleChange]
   );
 
+  const [exceptionToDelete, setExceptionToDelete] = useState<ExceptionListItemIdentifiers | null>(
+    null
+  );
+
   const handleDeleteException = useCallback(
     async ({ id: itemId, name, namespaceType }: ExceptionListItemIdentifiers) => {
       const abortCtrl = new AbortController();
@@ -454,6 +459,17 @@ const ExceptionsViewerComponent = ({
     },
     [handleGetExceptionListItems, services.http, setViewerState, toasts]
   );
+
+  const handleCancelDeleteException = useCallback(() => {
+    setExceptionToDelete(null);
+  }, []);
+
+  const handleConfirmDeleteException = useCallback(() => {
+    if (exceptionToDelete != null) {
+      handleDeleteException(exceptionToDelete);
+    }
+    setExceptionToDelete(null);
+  }, [exceptionToDelete, handleDeleteException]);
 
   // User privileges checks
   useEffect((): void => {
@@ -492,6 +508,14 @@ const ExceptionsViewerComponent = ({
             data-test-subj="editExceptionItemFlyout"
           />
         )}
+
+      {exceptionToDelete != null && (
+        <ExceptionItemDeleteConfirmModal
+          exceptionItemName={exceptionToDelete.name}
+          onCancel={handleCancelDeleteException}
+          onConfirm={handleConfirmDeleteException}
+        />
+      )}
 
       {currenFlyout === 'addException' && rule != null && (
         <AddExceptionFlyout
@@ -539,7 +563,7 @@ const ExceptionsViewerComponent = ({
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}
             viewerState={viewerState}
-            onDeleteException={handleDeleteException}
+            onDeleteException={setExceptionToDelete}
             onEditExceptionItem={handleEditException}
             onCreateExceptionListItem={handleAddException}
           />

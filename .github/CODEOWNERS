@@ -131,6 +131,7 @@ src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-d
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-program-team
 examples/controls_example @elastic/kibana-presentation
 src/platform/plugins/shared/controls @elastic/kibana-presentation
+src/cli @elastic/kibana-operations
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core
@@ -338,6 +339,7 @@ src/core/packages/test-helpers/deprecations-getters @elastic/kibana-core
 src/core/packages/test-helpers/http-setup-browser @elastic/kibana-core
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
+src/dev @elastic/kibana-operations
 src/core/packages/test-helpers/so-type-serializer @elastic/kibana-core
 src/core/packages/test-helpers/test-utils @elastic/kibana-core
 src/core/packages/theme/browser @elastic/kibana-core
@@ -1122,7 +1124,6 @@ x-pack/platform/plugins/private/watcher @elastic/kibana-management
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-xstate-utils @elastic/streams-ui
-packages/kbn-yarn-install-scripts @elastic/kibana-operations @elastic/kibana-security
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-engineering
@@ -2629,6 +2630,7 @@ x-pack/solutions/security/plugins/security_solution/common/security_integrations
 x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
 x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
 x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
+x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/ @elastic/security-service-integrations
 
 
 # Kibana design
@@ -2748,6 +2750,7 @@ oas_docs/output                               @elastic/core-docs @elastic/experi
 x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/synthetics_monitor_config.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 
 # Specialised GitHub workflows for the Observability robots
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
@@ -2785,6 +2788,15 @@ x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/flee
 # FTR config manifests have no single owner — touched by all solutions.
 # Leaving this unowned avoids routing every edit through Kibana Operations.
 /.buildkite/ftr-manifests/
+
+
+/.mise.toml @elastic/kibana-operations
+
+# PNPM
+pnpm-workspace.yaml @elastic/kibana-operations
+.pnpmfile.cjs @elastic/kibana-operations
+
+/knip.jsonc @elastic/kibana-security
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

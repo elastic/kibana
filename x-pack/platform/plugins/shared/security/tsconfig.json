@@ -93,6 +93,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/react-kibana-context-theme",
+    "@kbn/core-logging-server",
   ],
   "exclude": [
     "target/**/*",

@@ -21,7 +21,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { memoize } from 'lodash';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../public/management/pages/trusted_apps/constants';
 import { EVENT_FILTER_LIST_DEFINITION } from '../../../public/management/pages/event_filters/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '../../../public/management/pages/blocklist/constants';
@@ -75,7 +75,7 @@ const ensureArtifactListExists = memoize(
           'elastic-api-version': '1',
         },
       })
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
   },
   (kbnClient: KbnClient, artifactType: string) => {
     return `${artifactType}@[${kbnClient.resolveUrl('')}`;
@@ -104,7 +104,7 @@ const createExceptionListItem = async (
         'elastic-api-version': '2023-10-31',
       },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };
 

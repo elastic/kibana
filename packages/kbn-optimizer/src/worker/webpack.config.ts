@@ -86,6 +86,13 @@ export function getWebpackConfig(
     },
 
     plugins: [
+      {
+        apply(compiler: webpack.Compiler) {
+          // Schema rejects uniqueName: ''. After defaults read context/package.json,
+          // clear it so LoadScriptRuntimeModule skips the ~100B data-webpack attrs.
+          compiler.options.output.uniqueName = '';
+        },
+      },
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),

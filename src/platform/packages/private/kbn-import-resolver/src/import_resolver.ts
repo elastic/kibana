@@ -173,7 +173,7 @@ export class ImportResolver {
     if (req.startsWith('zod/v4')) {
       return Path.resolve(REPO_ROOT, `node_modules/zod/v4/index.cjs`);
     }
-    if (req.startsWith('zod') || req.startsWith('zod/v3')) {
+    if (req === 'zod' || req.startsWith('zod/v3')) {
       return Path.resolve(REPO_ROOT, `node_modules/zod/v3/index.cjs`);
     }
 

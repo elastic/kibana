@@ -181,10 +181,12 @@ export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
  */
 export const CRITICAL_FILES_SCOUT: readonly string[] = [
   'package.json',
-  'yarn.lock',
+  'pnpm-lock.yaml',
   'tsconfig.json',
   '.node-version',
   '.nvmrc',
+  'config/**/*.yml',
+  'config/node.options',
   'src/setup_node_env/**/*',
   'packages/kbn-babel-preset/**/*',
   'src/platform/packages/shared/kbn-repo-info/**/*',

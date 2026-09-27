@@ -11,7 +11,10 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { reduce, size } from 'lodash';
 import { RouteDependencies } from '../../../types';
 
-const bodySchema = schema.object({ pattern: schema.string() }, { unknowns: 'allow' });
+const bodySchema = schema.object(
+  { pattern: schema.string({ maxLength: 1000 }) },
+  { unknowns: 'allow' }
+);
 
 function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   return reduce(
