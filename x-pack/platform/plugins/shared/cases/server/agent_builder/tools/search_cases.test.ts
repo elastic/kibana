@@ -56,6 +56,14 @@ const buildMockAttachments = () => ({
   list: jest.fn(),
 });
 
+type CallSource = ToolHandlerContext['callContext']['callSource'];
+
+const buildCallContext = (callSource: CallSource = 'agent'): ToolHandlerContext['callContext'] => ({
+  toolId: 'platform.core.cases',
+  toolCallId: 'call-1',
+  callSource,
+});
+
 const buildToolContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHandlerContext => {
   const request = httpServerMock.createKibanaRequest();
   return {
@@ -63,9 +71,12 @@ const buildToolContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHand
     spaceId: 'default',
     logger: loggingSystemMock.createLogger(),
     attachments: buildMockAttachments(),
+    callContext: buildCallContext(),
     ...overrides,
   } as unknown as ToolHandlerContext;
 };
+
+const NON_AGENT_CALL_SOURCES: CallSource[] = ['mcp', 'user', 'unknown'];
 
 // ---------------------------------------------------------------------------
 // Setup helpers
@@ -335,6 +346,124 @@ describe('searchCasesTool handler — search mode', () => {
     );
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.message).toMatch(/page 1 of/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: non-agent callers (MCP, public API, unknown) get case data without
+// attachments — only an Agent Builder conversation can render them.
+// ---------------------------------------------------------------------------
+
+describe.each(NON_AGENT_CALL_SOURCES)('searchCasesTool handler — %s caller', (callSource) => {
+  interface ResultData {
+    cases: unknown[];
+    attachment_ids?: unknown;
+  }
+  const dataOf = (result: unknown): ResultData =>
+    (result as { results: Array<{ data: ResultData }> }).results[0].data;
+
+  let casesClient: CasesClientMock;
+  let attachments: ReturnType<typeof buildMockAttachments>;
+  let context: ToolHandlerContext;
+
+  beforeEach(() => {
+    casesClient = createCasesClientMock();
+    attachments = buildMockAttachments();
+    context = buildToolContext({
+      attachments: attachments as never,
+      callContext: buildCallContext(callSource),
+    });
+  });
+
+  it('get mode returns the case without emitting an attachment', async () => {
+    casesClient.cases.get.mockResolvedValue(buildCase() as never);
+    const { tool } = buildTool(casesClient);
+
+    const result = await tool.handler({ mode: 'get', case_id: 'case-1' } as never, context);
+
+    expect(attachments.add).not.toHaveBeenCalled();
+    const data = dataOf(result);
+    expect(data.cases).toHaveLength(1);
+    expect(data.attachment_ids).toBeUndefined();
+  });
+
+  it('bulk_get mode returns the cases without emitting an attachment', async () => {
+    casesClient.cases.bulkGet.mockResolvedValue({
+      cases: [buildCase({ id: 'c1' }), buildCase({ id: 'c2' })],
+      errors: [],
+    } as never);
+    const { tool } = buildTool(casesClient);
+
+    const result = await tool.handler(
+      { mode: 'bulk_get', case_ids: ['c1', 'c2'] } as never,
+      context
+    );
+
+    expect(attachments.add).not.toHaveBeenCalled();
+    const data = dataOf(result);
+    expect(data.cases).toHaveLength(2);
+    expect(data.attachment_ids).toBeUndefined();
+  });
+
+  it('similar mode returns the cases without emitting an attachment', async () => {
+    casesClient.cases.similar.mockResolvedValue({
+      cases: [buildCase({ id: 'c2' })],
+      page: 1,
+      per_page: 10,
+      total: 1,
+    } as never);
+    const { tool } = buildTool(casesClient);
+
+    const result = await tool.handler(
+      { mode: 'similar', similar_to_case_id: 'c1' } as never,
+      context
+    );
+
+    expect(attachments.add).not.toHaveBeenCalled();
+    const data = dataOf(result);
+    expect(data.cases).toHaveLength(1);
+    expect(data.attachment_ids).toBeUndefined();
+  });
+
+  it('by_alert mode returns the cases without emitting an attachment', async () => {
+    casesClient.cases.getCasesByAlertID.mockResolvedValue([
+      { id: 'c1', title: 'Case 1', totalComment: 0, createdAt: '', totals: {} as never },
+    ] as never);
+    casesClient.cases.bulkGet.mockResolvedValue({
+      cases: [buildCase({ id: 'c1' })],
+      errors: [],
+    } as never);
+    const { tool } = buildTool(casesClient);
+
+    const result = await tool.handler({ mode: 'by_alert', alert_ids: ['a1'] } as never, context);
+
+    expect(attachments.add).not.toHaveBeenCalled();
+    const data = dataOf(result);
+    expect(data.cases).toHaveLength(1);
+    expect(data.attachment_ids).toBeUndefined();
+  });
+
+  it('search mode returns the cases without emitting an attachment', async () => {
+    casesClient.cases.find.mockResolvedValue({
+      cases: [buildCase()],
+      total: 1,
+      page: 1,
+      per_page: 10,
+      count_open_cases: 0,
+      count_closed_cases: 0,
+      count_in_progress_cases: 0,
+    } as never);
+    const { tool } = buildTool(casesClient);
+
+    const result = await tool.handler(
+      { mode: 'search', owner: 'securitySolution' } as never,
+      context
+    );
+
+    expect(attachments.add).not.toHaveBeenCalled();
+    const data = dataOf(result);
+    expect(data.cases).toHaveLength(1);
+    expect(data.attachment_ids).toBeUndefined();
   });
 });
 

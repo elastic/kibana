@@ -15,6 +15,15 @@ import {
   type CasesAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
 
+/**
+ * Only an Agent Builder conversation persists emitted attachments and can resolve
+ * `<render_attachment id="..." />` tags. MCP clients, the public `tools/_execute`
+ * API and the CLI would receive attachment IDs they cannot use, so tools skip
+ * emission for them and return the case data alone.
+ */
+export const canRenderAttachments = (callContext: ToolHandlerContext['callContext']): boolean =>
+  callContext.callSource === 'agent';
+
 export const toCaseAttachmentData = (theCase: Case, url?: string | null): CaseAttachmentData => ({
   id: theCase.id,
   incremental_id: theCase.incremental_id ?? null,
