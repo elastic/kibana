@@ -41,7 +41,9 @@ export const useResolutionGroup = (entityId: string, options?: UseResolutionGrou
         version: API_VERSIONS.public.v1,
         method: 'GET',
         query: { entity_id: entityId },
-        context: options?.executionContext ?? buildExecutionContext('entity_analytics:entity_resolution', 'resolution_group'),
+        context:
+          options?.executionContext ??
+          buildExecutionContext('entity_analytics:entity_resolution', 'resolution_group'),
       }),
     enabled: options?.enabled !== false && !!entityId,
     refetchOnWindowFocus: false,
