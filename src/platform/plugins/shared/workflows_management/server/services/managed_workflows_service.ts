@@ -231,6 +231,17 @@ export class ManagedWorkflowsService {
       spaceId
     );
     const existing = existingDocument?.source;
+    if (
+      options.expectedDocumentVersion !== undefined &&
+      (existing == null || (existing.version ?? null) !== options.expectedDocumentVersion)
+    ) {
+      this.logger.debug(
+        `Managed workflows: skipping install for '${id}' because document version ${
+          existing == null ? 'missing' : String(existing.version ?? null)
+        } does not match expected ${String(options.expectedDocumentVersion)}`
+      );
+      return;
+    }
     const { yaml, managedTemplateValues } = this.resolveManagedWorkflowYaml({
       definition,
       values: options.values,
