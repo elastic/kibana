@@ -8,12 +8,34 @@
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-browser';
 
+import type { ListServiceAccountsResponse } from '../../common/service_accounts';
+
+export type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryCreator,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
+
+export interface ListServiceAccountsParams {
+  limit?: number;
+  after?: string;
+}
+
 export class ServiceAccountsAPIClient {
   constructor(private readonly http: HttpStart) {}
 
   public async create(params: CreateServiceAccountParams): Promise<ServiceAccount> {
     return await this.http.post<ServiceAccount>('/internal/security/service_account', {
       body: JSON.stringify(params),
+    });
+  }
+
+  public async list(params: ListServiceAccountsParams = {}): Promise<ListServiceAccountsResponse> {
+    return await this.http.get<ListServiceAccountsResponse>('/internal/security/service_account', {
+      query: {
+        ...(params.limit !== undefined ? { limit: params.limit } : {}),
+        ...(params.after !== undefined ? { after: params.after } : {}),
+      },
     });
   }
 }

@@ -25,6 +25,7 @@ import { usersManagementApp } from './users';
 import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
 import type { PluginStartDependencies } from '../plugin';
+import type { ServiceAccountsAPIClient } from '../service_accounts';
 
 export interface ManagementAppConfigType {
   userManagementEnabled?: boolean;
@@ -39,6 +40,7 @@ interface SetupParams {
   fatalErrors: FatalErrorsSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
   buildFlavor: BuildFlavor;
+  serviceAccountsAPIClient?: ServiceAccountsAPIClient;
 }
 
 interface StartParams {
@@ -62,7 +64,15 @@ export class ManagementService {
     this.serviceAccountsEnabled = config.serviceAccounts?.enabled === true;
   }
 
-  setup({ getStartServices, management, authc, license, fatalErrors, buildFlavor }: SetupParams) {
+  setup({
+    getStartServices,
+    management,
+    authc,
+    license,
+    fatalErrors,
+    buildFlavor,
+    serviceAccountsAPIClient,
+  }: SetupParams) {
     this.license = license;
     this.securitySection = management.sections.section.security;
     this.isUIAMEnabled = authc.isUIAMEnabled();
@@ -86,7 +96,17 @@ export class ManagementService {
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
 
     if (this.serviceAccountsEnabled) {
-      this.securitySection.registerApp(serviceAccountsManagementApp.create({ getStartServices }));
+      if (!serviceAccountsAPIClient) {
+        throw new Error(
+          'Service accounts API client is required when service accounts are enabled.'
+        );
+      }
+      this.securitySection.registerApp(
+        serviceAccountsManagementApp.create({
+          getStartServices,
+          serviceAccountsAPIClient,
+        })
+      );
     }
 
     if (this.roleMappingManagementEnabled) {
