@@ -127,17 +127,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await queryBar.submitQuery();
 
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        await filterBar.expectFilter('extension.raw', 'jpg');
         expect(await queryBar.getQueryString()).to.eql('response:200');
 
         await discover.clickNewSearchButton();
 
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        await filterBar.expectNoFilter('extension.raw', 'jpg');
         expect(await queryBar.getQueryString()).to.eql('');
 
         await dataViews.switchToAndValidate(dateNestedIndexPattern);
 
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        await filterBar.expectNoFilter('extension.raw', 'jpg');
         expect(await queryBar.getQueryString()).to.eql('');
 
         await dataViews.switchToAndValidate(logstashIndexPatternString);
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(hitCount).to.be('4,731');
         });
 
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        await filterBar.expectNoFilter('extension.raw', 'jpg');
         expect(await queryBar.getQueryString()).to.eql('');
 
         // reset state
@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        await filterBar.expectFilter('extension.raw', 'jpg');
         expect(timePickerValues.start).to.eql(from);
         expect(timePickerValues.end).to.eql(to);
       });
@@ -206,7 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('preserves the currently loaded query when the page is reloaded', async () => {
         await browser.refresh();
         const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        await filterBar.expectFilter('extension.raw', 'jpg');
         expect(timePickerValues.start).to.eql(from);
         expect(timePickerValues.end).to.eql(to);
         await retry.waitForWithTimeout('the right hit count', 65000, async () => {

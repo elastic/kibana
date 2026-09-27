@@ -340,11 +340,31 @@ export class SecurityPageObject extends FtrService {
     // When cookie-login is active, skip the /logout server round-trip entirely.
     // Clearing browser state is sufficient for test isolation — the next navigateToApp
     // will redirect to /login and loginIfPrompted will inject a fresh cookie.
-    if (this.config.get('security.cookieLogin') && this.browserAuth) {
+    const { browserAuth } = this;
+    if (this.config.get('security.cookieLogin') && browserAuth) {
       this.log.debug(
         '[security] cookieLogin: clearing browser state instead of navigating to /logout'
       );
-      await this.browserAuth.cleanBrowserState();
+      // Unload the app first. Requests that outlive the page (e.g. keepalive) can still
+      // re-set the session cookie after it is deleted, so clear until it stays cleared.
+      const hostPort = this.deployment.getHostPort();
+      await this.browser.get(hostPort + '/bootstrap-anonymous.js');
+      const alert = await this.browser.getAlert();
+      if (alert) await alert.accept();
+      await browserAuth.cleanBrowserState();
+      let clearedChecks = 0;
+      await this.retry.waitFor('session cookie to stay cleared', async () => {
+        if ((await this.browser.getCookies()).length > 0) {
+          clearedChecks = 0;
+          await browserAuth.cleanBrowserState();
+          return false;
+        }
+        clearedChecks++;
+        return clearedChecks >= 2;
+      });
+      // Land on a plain login page, which callers rely on. Returning to the previous app URL
+      // would add a `next` target that sends the next form login past the space selector.
+      await this.browser.get(hostPort + '/login');
       return;
     }
 

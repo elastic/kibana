@@ -128,8 +128,7 @@ export class SavedQueryManagementComponentService extends FtrService {
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.retry.waitFor('delete saved query', async () => {
       await this.testSubjects.click(`delete-saved-query-button`);
-      const exists = await this.testSubjects.exists('confirmModalTitleText');
-      return exists === true;
+      return await this.testSubjects.waitForExists('confirmModalTitleText', { timeout: 2000 });
     });
     await this.common.clickConfirmOnModal();
   }
@@ -187,7 +186,7 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async savedQueryExist(title: string) {
     await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
-    const exists = await this.testSubjects.exists(`~load-saved-query-${title}-button`);
+    const exists = await this.testSubjects.waitForExists(`~load-saved-query-${title}-button`);
     await this.closeSavedQueryManagementComponent();
     return exists;
   }
@@ -221,7 +220,7 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async openSavedQueryManagementComponent() {
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists('queryBarMenuPanel', { timeout: 1000 }))) {
+      if (!(await this.testSubjects.exists('queryBarMenuPanel'))) {
         await this.testSubjects.click('showQueryBarMenu');
       }
       await this.testSubjects.existOrFail('queryBarMenuPanel');

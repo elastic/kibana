@@ -200,9 +200,9 @@ export class ReportingPageObject extends FtrService {
 
   async checkForReportingToasts() {
     this.log.debug('Reporting:checkForReportingToasts');
-    const isToastPresent = await this.testSubjects.exists('completeReportSuccess', {
-      allowHidden: true,
+    const isToastPresent = await this.testSubjects.waitForExists('completeReportSuccess', {
       timeout: 90000,
+      allowHidden: true,
     });
     // Close toast so it doesn't obscure the UI.
     if (isToastPresent) {

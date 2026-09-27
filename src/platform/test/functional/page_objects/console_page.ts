@@ -506,15 +506,23 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+    const tourShown = await this.testSubjects.waitForExists('consoleSkipTourButton', {
+      timeout: 2000,
+    });
     if (tourShown) {
       await this.clickSkipTour();
     }
   }
 
   public async clickContextMenu() {
-    const contextMenu = await this.testSubjects.find('toggleConsoleMenu');
-    await contextMenu.click();
+    if (await this.isContextMenuOpen()) return;
+    await this.retry.tryForTime(5000, async () => {
+      const contextMenu = await this.testSubjects.find('toggleConsoleMenu', 1000);
+      await contextMenu.scrollIntoViewIfNecessary();
+      await contextMenu.moveMouseTo();
+      await contextMenu.click();
+      await this.testSubjects.existOrFail('consoleMenu', { timeout: 1500 });
+    });
   }
 
   public async isContextMenuOpen() {

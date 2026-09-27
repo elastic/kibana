@@ -22,15 +22,17 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
           'searchSynonymsCreateSynonymsSetModalForceWrite',
       },
       async expectSynonymsGetStartedPageComponentsToExist() {
-        await retry.tryForTime(10000, async () => {
-          if (!(await testSubjects.exists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 }))) {
+        await retry.tryForTime(15000, async () => {
+          if (
+            !(await testSubjects.waitForExists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 5000 }))
+          ) {
             await browser.refresh();
             throw new Error(`${this.TEST_IDS.GET_STARTED_BUTTON} not visible`);
           }
         });
       },
       async clickCreateSynonymsSetButton() {
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(15000, async () => {
           await browser.refresh();
           await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);
         });

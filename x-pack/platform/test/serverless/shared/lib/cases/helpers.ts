@@ -66,15 +66,21 @@ export const navigateToCasesApp = async (
   owner: string
 ) => {
   const common = getPageObject('common');
+  const header = getPageObject('header');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   await common.navigateToApp('landingPage');
+  await header.waitUntilLoadingHasFinished();
 
-  if (owner === SECURITY_SOLUTION_OWNER) {
-    await svlCommonNavigation.sidenav.clickLink({
-      deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId,
-    });
-  } else {
-    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
-  }
+  const link =
+    owner === SECURITY_SOLUTION_OWNER
+      ? { deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId }
+      : { deepLinkId: 'observability-overview:cases' as AppDeepLinkId };
+
+  await retry.tryForTime(30000, async () => {
+    await svlCommonNavigation.sidenav.clickLink(link);
+    await testSubjects.existOrFail('createNewCaseBtn', { timeout: 5000 });
+  });
 };

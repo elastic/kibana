@@ -19,6 +19,7 @@ export function DashboardDrilldownPanelActionsProvider({
 }: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   const { dashboard } = getPageObjects(['dashboard']);
@@ -95,12 +96,10 @@ export function DashboardDrilldownPanelActionsProvider({
       const panel = (await dashboard.getDashboardPanels())[panelIndex];
 
       try {
-        const exists = await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ, {
-          timeout: 500,
-        });
+        const exists = await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
         if (!exists) {
           await dashboardPanelActions.openContextMenu(panel);
-          if (!(await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ, { timeout: 500 }))) {
+          if (!(await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ))) {
             return 0;
           }
         }
@@ -119,6 +118,19 @@ export function DashboardDrilldownPanelActionsProvider({
       } finally {
         await dashboardPanelActions.toggleContextMenu(panel);
       }
+    }
+
+    /** Polls the panel's drilldown count until it equals `expected`. */
+    async expectPanelDrilldownCount(expected: number, panelIndex = 0): Promise<void> {
+      log.debug(`expectPanelDrilldownCount(${expected})`);
+      // The context menu's actions render together once it opens, so a zero count is final on
+      // the first read; only a non-zero badge can lag behind a save.
+      await retry.tryForTime(10000, async () => {
+        const count = await this.getPanelDrilldownCount(panelIndex);
+        if (count !== expected) {
+          throw new Error(`Expected ${expected} drilldowns on panel ${panelIndex}, found ${count}`);
+        }
+      });
     }
   })();
 }

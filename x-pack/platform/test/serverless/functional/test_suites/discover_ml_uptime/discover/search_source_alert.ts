@@ -229,17 +229,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openDiscoverAlertFlyout = async () => {
-    await testSubjects.click('app-menu-overflow-button');
-    await testSubjects.click('discoverAlertsButton');
-    if (await testSubjects.exists('discoverCreateAlertButton')) {
-      await testSubjects.click('discoverCreateAlertButton');
-    } else if (await testSubjects.exists('discoverLegacySearchThresholdRule')) {
-      await testSubjects.click('discoverLegacySearchThresholdRule');
-    } else if (await testSubjects.exists('discoverAppMenuCustomThresholdRule')) {
-      await testSubjects.click('discoverAppMenuCustomThresholdRule');
-    } else {
-      throw new Error('No discover alert rule option found in the app menu');
+    if (!(await testSubjects.exists('app-menu-popover'))) {
+      await testSubjects.click('app-menu-overflow-button');
     }
+    await testSubjects.existOrFail('discoverAlertsButton', { timeout: 5000 });
+    await testSubjects.click('discoverAlertsButton');
+    const ruleOption = await retry.tryForTime(10000, async () => {
+      for (const subject of [
+        'discoverCreateAlertButton',
+        'discoverLegacySearchThresholdRule',
+        'discoverAppMenuCustomThresholdRule',
+      ]) {
+        if (await testSubjects.exists(subject)) return subject;
+      }
+      throw new Error('No discover alert rule option found in the app menu');
+    });
+    await testSubjects.click(ruleOption);
   };
 
   const openManagementAlertFlyout = async () => {
@@ -362,9 +367,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const checkUpdatedRuleParamsState = async () => {
     expect(await toasts.getCount()).to.be(0);
     const queryString = await queryBar.getQueryString();
-    const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
+    await filterBar.expectFilter('message.keyword', 'msg-1');
     expect(queryString).to.be.equal('message:msg-1');
-    expect(hasFilter).to.be.equal(true);
     expect(await dataGrid.getDocCount()).to.be(1);
   };
 
@@ -754,7 +758,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        return await testSubjects.exists('ruleStatus-ok');
+        return await testSubjects.waitForExists('ruleStatus-ok', { timeout: 5000 });
       });
     });
   });

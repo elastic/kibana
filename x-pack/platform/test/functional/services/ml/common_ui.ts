@@ -354,7 +354,7 @@ export function MachineLearningCommonUIProvider({
 
       await retry.tryForTime(overallTimeout, async () => {
         for (const testSubj of subjectsToCheck) {
-          const subjExists = await testSubjects.exists(testSubj, { timeout: singleSubjectTimeout });
+          const subjExists = await testSubjects.exists(testSubj);
           if (subjExists) return; // stop ckecking once we found an existing element
         }
         throw new Error(
@@ -401,7 +401,7 @@ export function MachineLearningCommonUIProvider({
     async ensureAllMenuPopoversClosed() {
       await retry.tryForTime(5000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
-        const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
+        const popoverExists = await find.existsByCssSelector('.euiContextMenuPanel', 0);
         expect(popoverExists).to.eql(false, 'All popovers should be closed');
       });
     },
@@ -409,7 +409,7 @@ export function MachineLearningCommonUIProvider({
     async ensureComboBoxClosed() {
       await retry.tryForTime(5000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
-        const comboBoxOpen = await testSubjects.exists('~comboBoxOptionsList', { timeout: 50 });
+        const comboBoxOpen = await testSubjects.exists('~comboBoxOptionsList');
         expect(comboBoxOpen).to.eql(false, 'Combo box should be closed');
       });
     },
@@ -417,13 +417,28 @@ export function MachineLearningCommonUIProvider({
     async invokeTableRowAction(
       rowSelector: string,
       actionTestSubject: string,
-      fromContextMenu: boolean = true
+      fromContextMenu: boolean | 'auto' = true
     ) {
       await retry.tryForTime(30 * 1000, async () => {
-        if (fromContextMenu) {
+        const useContextMenu =
+          fromContextMenu === 'auto'
+            ? await testSubjects.exists(`${rowSelector} > euiCollapsedItemActionsButton`)
+            : fromContextMenu;
+        if (fromContextMenu === 'auto' && !useContextMenu) {
+          if (!(await testSubjects.exists(`${rowSelector} > ${actionTestSubject}`))) {
+            throw new Error(`Action "${actionTestSubject}" has not rendered for ${rowSelector}`);
+          }
+        }
+        if (useContextMenu) {
           await this.ensureAllMenuPopoversClosed();
 
-          await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
+          const collapsedActionsButton = `${rowSelector} > euiCollapsedItemActionsButton`;
+          if (fromContextMenu === 'auto') {
+            const button = await testSubjects.find(collapsedActionsButton, 5000);
+            await button.click();
+          } else {
+            await testSubjects.click(collapsedActionsButton);
+          }
           await find.byCssSelector('.euiContextMenuPanel');
 
           const isEnabled = await testSubjects.isEnabled(actionTestSubject);
