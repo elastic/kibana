@@ -53,6 +53,7 @@ export const useUpdateTimeline = () => {
       ruleNote,
       ruleAuthor,
       preventSettingQuery,
+      timeFieldSpec,
     }: UpdateTimeline) => {
       let _timeline = timeline;
       if (duplicate) {
@@ -64,6 +65,7 @@ export const useUpdateTimeline = () => {
       selectDataView({
         id: _timeline.dataViewId,
         fallbackPatterns: _timeline.indexNames,
+        fallbackTimeFieldSpec: timeFieldSpec,
         scope: PageScope.timeline,
       });
 

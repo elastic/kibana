@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import type { TimelineModel } from '../../store/model';
+import type { TimeFieldSpec } from '../../../data_view_manager/redux/actions';
 import type {
   Note,
   ResolvedTimeline,
@@ -213,6 +214,10 @@ export interface UpdateTimeline {
   ruleNote?: string;
   ruleAuthor?: string;
   preventSettingQuery?: boolean;
+  /**
+   * Time field for the ad-hoc data view created from `timeline.indexNames`
+   */
+  timeFieldSpec?: TimeFieldSpec;
 }
 
 export enum TimelineTabsStyle {
