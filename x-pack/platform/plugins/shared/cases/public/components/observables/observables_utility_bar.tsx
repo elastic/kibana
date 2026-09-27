@@ -8,23 +8,31 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { CaseUI } from '../../../common';
+import type { Observable } from '../../../common/types/domain/observable/v1';
 import { AddObservable } from './add_observable';
 import { ExtractObservablesSwitch } from '../case_settings/extract_observables_switch';
 import { DefaultObservableTypesModal } from './default_observable_types_modal';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { ObservablesBulkActions } from './observables_bulk_actions';
 import * as i18n from './translations';
 
 export interface ObservablesUtilityBarProps {
   caseData: CaseUI;
   isLoading: boolean;
   onExtractObservablesChanged: (isOn: boolean) => void;
+  /** Currently selected observables for bulk operations. */
+  selectedObservables: Observable[];
+  /** Whether the current user may run workflows from this case. */
+  canRunWorkflow: boolean;
 }
 
 export const ObservablesUtilityBar = ({
   caseData,
   isLoading,
   onExtractObservablesChanged,
+  selectedObservables,
+  canRunWorkflow,
 }: ObservablesUtilityBarProps) => {
   const { permissions } = useCasesContext();
   const { isExtractObservablesEnabled, observablesAuthorized } = useCasesFeatures();
@@ -38,6 +46,10 @@ export const ObservablesUtilityBar = ({
           </EuiText>
         )}
       </EuiFlexItem>
+
+      {canRunWorkflow && (
+        <ObservablesBulkActions caseData={caseData} selectedObservables={selectedObservables} />
+      )}
 
       {permissions.update && observablesAuthorized && isExtractObservablesEnabled ? (
         <>

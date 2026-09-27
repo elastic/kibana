@@ -255,6 +255,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   } = useRunDocumentWorkflowPanel({
     closePopover,
     documents: documentForWorkflow,
+    originEventId: ecsRowData._id,
   });
 
   const { addToChatActionItems } = useAddToChatAction({
