@@ -103,6 +103,37 @@ describe('Hosts Table', () => {
       expect(screen.getByTestId('table-allHosts-loading-false')).toBeInTheDocument();
     });
 
+    test('it renders keyboard-focusable info tooltips in the column headers', () => {
+      render(
+        <TestProviders store={store}>
+          <HostsTable
+            data={mockData}
+            id="hostsQuery"
+            isInspect={false}
+            fakeTotalCount={-1}
+            loading={false}
+            loadPage={loadPage}
+            setQuerySkip={jest.fn()}
+            showMorePagesIndicator={false}
+            totalCount={0}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      // "Last seen" is sortable, so EUI wraps the whole header in the tooltip
+      // and the natively focusable sort button is the tooltip anchor.
+      expect(
+        screen.getByTestId('tableHeaderCell_node.lastSeen_1').querySelector('button')
+      ).toBeInTheDocument();
+
+      // "OS" is not sortable, so EUI renders a focusable icon as the anchor.
+      // The EUI test environment renders `EuiIcon` as a stub that outputs its
+      // `aria-label` as text content instead of as an attribute.
+      const osTooltip = screen.getByText('More information about the operating system column');
+      expect(osTooltip).toHaveAttribute('tabindex', '0');
+    });
+
     test('it renders "Host Risk level" column when "isPlatinumOrTrialLicense" is truthy and user has risk-entity capability', () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseHasSecurityCapability.mockReturnValue(true);
