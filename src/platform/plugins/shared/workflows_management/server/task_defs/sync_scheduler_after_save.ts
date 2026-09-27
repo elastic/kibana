@@ -9,6 +9,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflow } from '@kbn/workflows';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
@@ -48,6 +49,16 @@ export const syncSchedulerAfterSave = async (params: {
   if (!hasScheduledTriggers(workflow.definition?.triggers ?? [])) {
     await taskScheduler.unscheduleWorkflowTasks(workflowId);
     logger.debug(`Removed scheduled tasks for workflow ${workflowId} (no scheduled triggers)`);
+    return;
+  }
+
+  // A scheduled run has no invoking space, so a global workflow's executions would be
+  // stamped with '*' and be invisible from every space. Leave it unscheduled until
+  // global scheduling semantics are defined.
+  if (spaceId === GLOBAL_WORKFLOW_SPACE_ID) {
+    logger.warn(
+      `Skipping scheduled triggers for global workflow ${workflowId}: scheduling global workflows is not supported`
+    );
     return;
   }
 
