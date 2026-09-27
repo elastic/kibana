@@ -166,7 +166,20 @@ export const bulkIndexWithOccRetry = async ({
   const maxAttempts = 1 + maxRetries;
 
   for (let attempt = 1; attempt <= maxAttempts && pendingHits.length > 0; attempt++) {
-    const operations = buildBulkIndexOperations(pendingHits, mutate, bumpVersion);
+    const operations: ReturnType<typeof buildBulkIndexOperations> = [];
+    pendingHits = pendingHits.filter((hit) => {
+      try {
+        operations.push(...buildBulkIndexOperations([hit], mutate, bumpVersion));
+        return true;
+      } catch (error) {
+        failures.push({
+          id: hit._id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        return false;
+      }
+    });
+    if (pendingHits.length === 0) break;
     const bulkResponse = await client.bulk({
       operations,
       refresh,

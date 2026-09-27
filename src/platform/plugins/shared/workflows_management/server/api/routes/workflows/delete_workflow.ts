@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
@@ -56,7 +57,10 @@ export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          await api.deleteWorkflows([id], spaceId, request, { force });
+          const result = await api.deleteWorkflows([id], spaceId, request, { force });
+          if (result.failures.length > 0) {
+            throw Boom.internal(result.failures[0].error);
+          }
           audit.logWorkflowDeleted(request, { id, force });
           return response.ok();
         } catch (error) {

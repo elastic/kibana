@@ -30,15 +30,19 @@ jest.mock('./lib/get_user', () => ({
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
 const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
     createWorkflowExecution: mockCreateWorkflowExecution,
     getWorkflowExecutionById: mockGetWorkflowExecutionById,
+    discardUnstartedExecution: mockDiscardUnstartedExecution,
   })),
 }));
 
+const mockIsWorkflowEnabledRealtime = jest.fn().mockResolvedValue(true);
+const mockGetWorkflow = jest.fn();
 const mockAreWorkflowsEnabled = jest.fn();
 const mockIsWorkflowEnabled = jest.fn().mockResolvedValue(true);
 jest.mock('@kbn/workflows', () => {
@@ -48,6 +52,8 @@ jest.mock('@kbn/workflows', () => {
     WorkflowRepository: jest.fn().mockImplementation(() => ({
       areWorkflowsEnabled: mockAreWorkflowsEnabled,
       isWorkflowEnabled: mockIsWorkflowEnabled,
+      isWorkflowEnabledRealtime: mockIsWorkflowEnabledRealtime,
+      getWorkflow: mockGetWorkflow,
     })),
   };
 });
@@ -102,6 +108,7 @@ describe('bulkScheduleWorkflow', () => {
   let pluginStart: Awaited<ReturnType<WorkflowsExecutionEnginePlugin['start']>>;
   let taskManager: ReturnType<typeof taskManagerMock.createStart>;
   const request = {} as KibanaRequest;
+  let coreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -124,7 +131,9 @@ describe('bulkScheduleWorkflow', () => {
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
     });
 
-    const coreStart = coreMock.createStart();
+    coreStart = coreMock.createStart();
+    mockIsWorkflowEnabledRealtime.mockReset().mockResolvedValue(true);
+    mockDiscardUnstartedExecution.mockReset().mockResolvedValue(undefined);
     taskManager = taskManagerMock.createStart();
     pluginStart = plugin.start(coreStart, {
       taskManager,
@@ -133,6 +142,105 @@ describe('bulkScheduleWorkflow', () => {
       workflowsExtensions: {} as any,
       licensing: licensingMock.createStart(),
     });
+  });
+
+  const enableBoundWorkflow = () => {
+    const workflow = createWorkflow('bound');
+    if (!workflow.definition) throw new Error('Missing definition');
+    workflow.definition.settings = { run_as: 'account' };
+    jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
+    jest.spyOn(coreStart.security.serviceAccounts, 'getWorkloadBinding').mockResolvedValue({
+      serviceAccountId: 'account',
+    } as never);
+    mockGetWorkflow.mockResolvedValue(workflow);
+    mockAreWorkflowsEnabled.mockResolvedValue(new Map([['default:bound', true]]));
+    return workflow;
+  };
+
+  it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
+    '%s rejects a bound execution when deletion wins during persistence',
+    async (method) => {
+      const workflow = enableBoundWorkflow();
+      const gate = makeGate();
+      let persisted!: () => void;
+      const writing = new Promise<void>((resolve) => {
+        persisted = resolve;
+      });
+      mockCreateWorkflowExecution.mockImplementationOnce(async (_execution, options) => {
+        expect(options.refresh).toBe(method === 'executeWorkflow' ? true : 'wait_for');
+        persisted();
+        await gate.promise;
+      });
+      const result = pluginStart[method](workflow, { spaceId: 'default' }, request);
+      const rejected = expect(result).rejects.toThrow('Workflow is disabled');
+      await writing;
+      // Deletion disabled/removed the workflow while the execution was not searchable.
+      mockIsWorkflowEnabledRealtime.mockResolvedValue(false);
+      gate.resolve(true);
+      await rejected;
+      expect(mockDiscardUnstartedExecution).toHaveBeenCalledWith(expect.any(String), 'default');
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+    }
+  );
+
+  it('makes a bound execution visible before admitting it and scheduling its task', async () => {
+    const workflow = enableBoundWorkflow();
+    let searchable = false;
+    mockCreateWorkflowExecution.mockImplementationOnce(async (_execution, options) => {
+      expect(options.refresh).toBe(true);
+      searchable = true;
+    });
+    mockIsWorkflowEnabledRealtime.mockImplementationOnce(async () => {
+      expect(searchable).toBe(true);
+      return true;
+    });
+    await pluginStart.executeWorkflow(workflow, { spaceId: 'default' }, request);
+    // A deletion starting now must find the pending execution in its post-disable search.
+    expect(searchable).toBe(true);
+    expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(mockDiscardUnstartedExecution).not.toHaveBeenCalled();
+  });
+
+  it('fails closed and removes the unstarted run if the final workflow read fails', async () => {
+    const workflow = enableBoundWorkflow();
+    mockIsWorkflowEnabledRealtime.mockRejectedValueOnce(new Error('workflow store unavailable'));
+    await expect(
+      pluginStart.executeWorkflow(workflow, { spaceId: 'default' }, request)
+    ).rejects.toThrow('workflow store unavailable');
+    expect(mockDiscardUnstartedExecution).toHaveBeenCalledTimes(1);
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('applies the admission check to a child before scheduling its own task', async () => {
+    const workflow = enableBoundWorkflow();
+    mockIsWorkflowEnabledRealtime.mockResolvedValueOnce(false);
+    await expect(
+      pluginStart.executeWorkflow(
+        workflow,
+        { spaceId: 'default', triggeredBy: 'workflow-step' },
+        request
+      )
+    ).rejects.toThrow('Workflow is disabled');
+    expect(mockDiscardUnstartedExecution).toHaveBeenCalledTimes(1);
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('excludes a concurrently deleted bound item from bulk scheduling', async () => {
+    const workflow = enableBoundWorkflow();
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions, options) => {
+      expect(options.refresh).toBe('wait_for');
+      mockIsWorkflowEnabledRealtime.mockResolvedValue(false);
+      return executions.map(({ id }: { id: string }) => ({ id }));
+    });
+    const result = await pluginStart.bulkScheduleWorkflow(
+      [{ workflow, context: { spaceId: 'default' } }],
+      request
+    );
+    expect(result).toEqual([
+      { status: 'error', error: { message: expect.stringContaining('Workflow is disabled') } },
+    ]);
+    expect(mockDiscardUnstartedExecution).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
   });
 
   it('returns [] immediately and skips license/ES/task-manager on empty input', async () => {
