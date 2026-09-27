@@ -273,4 +273,62 @@ describe('deanonymize', () => {
     expect(result).toStrictEqual(msg);
     expect(deanonymizations.length).toBe(0);
   });
+
+  describe('tool call id preservation', () => {
+    // Regression coverage: `getAnonymizableMessageParts` deliberately strips `toolCallId` before
+    // walking a message's tool calls (it's a technical identifier, not PII to anonymize). Prior
+    // to this fix, `deanonymize()` spread that stripped-down structure directly back onto the
+    // message, silently wiping every tool call's id — which breaks tool dispatch downstream
+    // (LangChain drops tool calls with no id), causing the model's valid tool-call response to be
+    // misclassified as an "empty response" and endlessly retried.
+    const anonymization: Anonymization = {
+      entity: { class_name: 'IP', value: '10.0.1.45', mask: createMask('IP', '10.0.1.45') },
+      rule: { type: 'RegExp' },
+    };
+
+    it('preserves toolCallId for a tool-calls-only response (no text content)', () => {
+      const assistantMsg: AssistantMessage = {
+        role: MessageRole.Assistant,
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'toolu_1',
+            function: { name: 'attachments_read', arguments: { attachment_id: 'screen-context' } },
+          },
+          {
+            toolCallId: 'toolu_2',
+            function: { name: 'load_skill', arguments: { skill: 'alert-analysis' } },
+          },
+        ],
+      };
+
+      const { message: deanonymized } = deanonymize(assistantMsg, [anonymization]);
+
+      const toolCalls = (deanonymized as AssistantMessage).toolCalls ?? [];
+      expect(toolCalls.map((tc) => tc.toolCallId)).toEqual(['toolu_1', 'toolu_2']);
+      expect(toolCalls.map((tc) => tc.function.name)).toEqual(['attachments_read', 'load_skill']);
+    });
+
+    it('preserves toolCallId for a response with both text content and tool calls', () => {
+      const assistantMsg: AssistantMessage = {
+        role: MessageRole.Assistant,
+        content: "I'll check the screen context first.",
+        toolCalls: [
+          {
+            toolCallId: 'toolu_1',
+            function: { name: 'attachments_read', arguments: { attachment_id: 'screen-context' } },
+          },
+          {
+            toolCallId: 'toolu_2',
+            function: { name: 'load_skill', arguments: { skill: 'alert-analysis' } },
+          },
+        ],
+      };
+
+      const { message: deanonymized } = deanonymize(assistantMsg, [anonymization]);
+
+      const toolCalls = (deanonymized as AssistantMessage).toolCalls ?? [];
+      expect(toolCalls.map((tc) => tc.toolCallId)).toEqual(['toolu_1', 'toolu_2']);
+    });
+  });
 });

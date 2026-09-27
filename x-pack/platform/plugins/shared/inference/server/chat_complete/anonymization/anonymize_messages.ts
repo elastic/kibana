@@ -6,7 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationOutput, AnonymizationRule, Message } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import type {
+  AnonymizationOutput,
+  AnonymizationRule,
+  AnonymizationFailureMode,
+  Message,
+} from '@kbn/inference-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { anonymizeRecords } from './anonymize_records';
 import { messageFromAnonymizationRecords } from './message_from_anonymization_records';
@@ -22,6 +28,8 @@ export async function anonymizeMessages({
   salt,
   effectivePolicy,
   knownReplacements,
+  onFailure,
+  logger,
 }: {
   system?: string | undefined;
   messages: Message[];
@@ -31,6 +39,9 @@ export async function anonymizeMessages({
   salt?: string;
   effectivePolicy?: EffectivePolicy;
   knownReplacements?: Array<{ anonymized: string; original: string }>;
+  /** How to react if a rule cannot run (e.g. a regex fails to compile/execute). Defaults to `block`. */
+  onFailure?: AnonymizationFailureMode;
+  logger?: Logger;
 }): Promise<AnonymizationOutput> {
   const rules = anonymizationRules.filter((rule) => rule.enabled);
   const hasEffectivePolicy = Boolean(effectivePolicy && Object.keys(effectivePolicy).length > 0);
@@ -58,6 +69,8 @@ export async function anonymizeMessages({
     salt,
     effectivePolicy,
     knownReplacements,
+    onFailure,
+    logger,
   });
 
   const anonymizedMessages = messages.map((original, index) => {

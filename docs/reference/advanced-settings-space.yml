@@ -614,6 +614,48 @@ groups:
           serverless: unavailable
         note: "{applies_to}`stack: ga 9.2` Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md)."
 
+      - setting: "ai:anonymizationSettings"
+        id: ai-anonymization-settings
+        description: |
+          List of anonymization rules for AI Assistant. Includes rules for Named Entity Recognition (NER) models and regular expression patterns to identify and anonymize sensitive data.
+
+          :::{dropdown} Default configuration
+          ```json
+          {
+            "rules": [
+              {
+                "entityClass": "EMAIL",
+                "type": "RegExp",
+                "pattern": "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
+                "enabled": false
+              },
+              {
+                "type": "NER",
+                "modelId": "elastic__distilbert-base-uncased-finetuned-conll03-english",
+                "enabled": false,
+                "allowedEntityClasses": [
+                  "PER",
+                  "ORG",
+                  "LOC"
+                ],
+                "timeoutSeconds": 30
+              }
+            ]
+          }
+          ```
+          :::
+        datatype: string
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: preview
+          elasticsearch: preview
+          security: preview
+        note: "Configure the `ai:anonymizationSettings` setting from the **Anonymization Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md)."
+
   - group: Presentation Labs
     id: presentation-labs
     settings:
@@ -1158,46 +1200,6 @@ groups:
   - group: "{{observability}}"
     id: observability-advanced-settings
     settings:
-
-      - setting: "ai:anonymizationSettings"
-        id: ai-anonymization-settings
-        description: |
-          List of anonymization rules for AI Assistant. Includes rules for Named Entity Recognition (NER) models and regular expression patterns to identify and anonymize sensitive data.
-
-          :::{dropdown} Default configuration
-          ```json
-          {
-            "rules": [
-              {
-                "entityClass": "EMAIL",
-                "type": "RegExp",
-                "pattern": "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
-                "enabled": false
-              },
-              {
-                "type": "NER",
-                "modelId": "elastic__distilbert-base-uncased-finetuned-conll03-english",
-                "enabled": false,
-                "allowedEntityClasses": [
-                  "PER",
-                  "ORG",
-                  "LOC"
-                ],
-                "timeoutSeconds": 30
-              }
-            ]
-          }
-          ```
-          :::
-        datatype: string
-        applies_to:
-          stack: preview
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          observability: preview
-          elasticsearch: preview
 
       - setting: "observability:logSources"
         id: observability-log-sources

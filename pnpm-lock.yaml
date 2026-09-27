@@ -592,6 +592,9 @@ importers:
       '@kbn/agentic-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agentic_investigations
+      '@kbn/ai-anonymization-settings-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/ai_anonymization_settings
       '@kbn/ai-assistant':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-assistant
@@ -9197,6 +9200,8 @@ importers:
   x-pack/platform/packages/shared/security/plugin_types_public: {}
 
   x-pack/platform/packages/shared/security/plugin_types_server: {}
+
+  x-pack/platform/plugins/private/ai_anonymization_settings: {}
 
   x-pack/platform/plugins/private/banners: {}
 

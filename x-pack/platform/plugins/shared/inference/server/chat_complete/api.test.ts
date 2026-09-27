@@ -1021,4 +1021,66 @@ describe('createChatCompleteApi', () => {
       expect(events[1].content).toBe('chunk-2');
     });
   });
+
+  describe('anonymization instructions', () => {
+    it('injects the anonymization instruction even when the request has no system prompt', async () => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      // A field policy anonymizes `content` without needing the (mocked, no-op) regex worker
+      // or an ML NER model, so this stays a self-contained unit test of the wiring in
+      // callback_api.ts rather than the full detection pipeline.
+      const callbackApiWithPolicy = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        anonymization: {
+          resolveEffectivePolicy: async () => ({
+            content: { action: 'anonymize', entityClass: 'HOST_NAME' },
+          }),
+        },
+      });
+      const chatCompleteWithPolicy = createChatCompleteApi({ callbackApi: callbackApiWithPolicy });
+
+      await chatCompleteWithPolicy({
+        connectorId: 'connectorId',
+        // Deliberately no `system` prompt.
+        messages: [{ role: MessageRole.User, content: 'echo back 10.0.0.1 to me' }],
+        maxRetries: 0,
+      });
+
+      // The *actual* outbound payload sent to the model must include the injected instruction —
+      // asserting on the real `chatComplete` call args (rather than a debug log of the payload)
+      // keeps this test agnostic to what gets logged.
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          system: expect.stringContaining('### Anonymization'),
+          messages: [
+            expect.objectContaining({
+              role: MessageRole.User,
+              content: expect.stringMatching(/^HOST_NAME_/),
+            }),
+          ],
+        })
+      );
+    });
+
+    it('does not add a system prompt when nothing was anonymized', async () => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ system: undefined })
+      );
+    });
+  });
 });

@@ -439,8 +439,8 @@ Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, 
 
 ### Configuring rules
 
-1.  Navigate to **Management ➜ Advanced Settings** and search for
-    **"Anonymization Settings"** (category *Observability*).
+1.  Navigate to **Management ➜ Anonymization** (sibling page to **GenAI Settings**), or to
+    **Management ➜ Advanced Settings** and search for **"Anonymization Settings"**.
 2.  Paste a JSON object with a `rules` array similar to the examples above.  The default template that
     ships with the plugin looks like:
     ```jsonc

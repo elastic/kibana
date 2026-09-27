@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ai-anonymization-settings-plugin",
+  "owner": ["@elastic/search-ml-ux"],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Management page for configuring AI anonymization rules (regex and NER), available to every offering.",
+  "plugin": {
+    "id": "aiAnonymizationSettings",
+    "browser": true,
+    "server": false,
+    "configPath": ["xpack", "aiAnonymizationSettings"],
+    "requiredPlugins": ["management"],
+    "requiredBundles": ["kibanaReact"]
+  }
+}
