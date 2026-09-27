@@ -239,6 +239,85 @@ describe('Handle request to schedule', () => {
       });
     });
 
+    test('creates a scheduled_report saved object with a realm-qualified createdById for a realm-bearing user', async () => {
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'testymcgee',
+          authentication_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        // @ts-ignore
+        req: mockRequest,
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        expect.objectContaining({
+          createdBy: 'testymcgee',
+          createdById: 'realm:["native","default_native","testymcgee"]',
+        }),
+        { id: 'mock-report-id' }
+      );
+    });
+
+    test('creates a scheduled_report saved object with createdById resolved via an API key profile lookup', async () => {
+      const apiKeyId = 'skdjtq4u543yt3rhewrh';
+      const esClient = await reportingCore.getEsClient();
+      const scopedEsClient = esClient.asScoped(mockRequest);
+      (scopedEsClient.asCurrentUser.security.getApiKey as jest.Mock).mockResolvedValue({
+        api_keys: [{ id: apiKeyId, profile_uid: 'profile-from-api-key' }],
+      });
+
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'testymcgee',
+          authentication_type: 'api_key',
+          authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        // @ts-ignore
+        req: {
+          ...mockRequest,
+          headers: {
+            authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+          },
+        },
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        expect.objectContaining({
+          createdBy: 'testymcgee',
+          createdById: 'profile-from-api-key',
+        }),
+        { id: 'mock-report-id' }
+      );
+      expect(scopedEsClient.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({
+        with_profile_uid: true,
+        id: apiKeyId,
+      });
+    });
+
     test('creates a scheduled_report saved object with notification', async () => {
       const report = await requestHandler.enqueueJob({
         exportTypeId: 'printablePdfV2',

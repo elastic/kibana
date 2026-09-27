@@ -16,5 +16,12 @@ export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
     createdBy: {
       type: 'keyword',
     },
+    createdById: {
+      type: 'keyword',
+      // Well above any realm-qualified username (e.g. a SAML NameID or LDAP DN). A value that did
+      // exceed this would not be indexed, and the ownership `list` filter would then treat the
+      // report as a legacy, username-owned document.
+      ignore_above: 1024,
+    },
   },
 };
