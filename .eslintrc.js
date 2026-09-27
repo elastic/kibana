@@ -3071,6 +3071,14 @@ module.exports = {
       },
     },
     {
+      // Raw EUI class selectors in Scout code, including kbn-scout* sources. The
+      // restricted classes are read from `@elastic/eui-test-helpers` at lint time.
+      files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
+      rules: {
+        '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
+      },
+    },
+    {
       // Platform & Solutions API Tests
       files: [
         'src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
