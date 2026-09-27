@@ -63,7 +63,6 @@ written by the template that owns the strategy:
 | `attributes.unit_key` | The field that identifies one unit of a unit profile, so a re-run replaces the same KI. | `unit-profile-template` |
 | `attributes.unit` | The value of `unit_key` this KI is about. | `unit-profile-template` |
 | `attributes.doc_count` | How many source rows the unit profile aggregated. | `unit-profile-template` |
-| `attributes.distinct_breakdown` | How many distinct values of the breakdown field the unit has. | `unit-profile-template` |
 | `attributes.prevalence` | For a targeted KI, the count, denominator and window of the finding behind it, as one string. | `targeted-ki-writer` |
 | `attributes.topics` | The themes a document KI covers, for facet filtering. | `document-template` |
 
@@ -94,8 +93,8 @@ Every entry carries `relation: derived_from`. Values that are not identifiers st
 
 A targeted KI carries at least one `trace://` or `conversation://` reference, or an
 `attributes.error_text`. A systemic KI references its source index:
-every generated template writes `index://`, the unit profile adds its catalog index when that is
-a separate one, and the document template adds `doc://` because its unit is a document.
+every generated template writes `index://`, and the document template adds `doc://` because its
+unit is a document.
 
 ## Structured values belong in both `content` and `attributes`
 

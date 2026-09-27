@@ -271,9 +271,10 @@ results as evidence lines:
    the document `_id`, reached with `METADATA _id`) or drop the claim. A key populated on one side
    only is a one-way lookup, and the proposal says which way.
 3. **One unit count for a per-unit strategy.** When one KI is about a unit rather than the whole
-   index, count the units the Unit section quotes and the Cost estimate multiplies:
-   `FROM <index> | STATS units = COUNT_DISTINCT(<unit_key>)`. Units, not rows: 62,884 sales rows
-   can be 2,517 products.
+   index, count the units the Unit section quotes and the Cost estimate multiplies, with the
+   agreed corpus filter applied so the count is of units the automation will actually process:
+   `FROM <index> <corpus filter> | STATS units = COUNT_DISTINCT(<unit_key>)`. Units, not rows:
+   62,884 sales rows can be 2,517 products.
 
 That is the whole budget: a row sample and a row count per source, a populated count per side of
 each claimed join, and one unit count for a per-unit strategy. Do not profile the index
@@ -290,7 +291,8 @@ proposals for the same index read the same way:
 - **Suggested automation** — the strategy by name where a catalog strategy fits (or "custom" with
   the unit named), the template it starts from, and whether it is new or replaces an automation,
   naming which.
-- **Unit** — what one KI is about, and how many units the corpus holds (a count you ran).
+- **Unit** — what one KI is about, and how many units the filtered corpus holds (a count you ran
+  with the corpus filter applied).
 - **Carries** — what one KI carries: the orientation and the access patterns, and the grounded
   figures that separate it from its siblings.
 - **Found and refreshed** — the discovery query, the corpus filter, and whether a unit is
@@ -299,9 +301,9 @@ proposals for the same index read the same way:
   for an existing index the counted findings with their denominators and windows. Every claim the
   proposal makes about the data points at a line here; a proposal with an empty Evidence section
   is not ready.
-- **Cost** — required. The corpus size, how many units one run writes, how many model calls that
-  is (one per unit for the profile templates, one per document for the document template), and,
-  once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
+- **Cost** — required. The corpus size, how many units one run writes (the unit count, or the
+  automation's own KI cap when that is lower), how many model calls that is (one per unit for the
+  profile templates, one per document for the document template), and, once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
   `ai-index-automations` lays out. Before the pilot, say the time is not yet measured rather than
   guessing.
 - **Example questions** — optional. Include it only when you are sure: a question belongs here
@@ -553,7 +555,3 @@ calls for — not before, because the filter depends on the unit.
 **No signals, on an index that exists.** Not evidence of health: an index nobody queries and an
 index that works perfectly look the same from here. Say which you can and cannot rule out rather
 than reporting the index as fine.
-
-**A corpus larger than 10,000 documents.** ES|QL caps at 10,000 rows per query, so an automation
-over a larger corpus needs pagination it will not get by default. Note the cap rather than
-proposing something that silently truncates; `ai-index-automations` has the shapes that handle it.

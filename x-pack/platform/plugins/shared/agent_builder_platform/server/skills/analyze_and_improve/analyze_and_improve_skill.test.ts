@@ -269,6 +269,11 @@ describe('analyzeAndImproveSkill', () => {
       );
       expect(content).toMatch(/\*\*One unit count for a per-unit strategy\.\*\*/);
       expect(content).toMatch(/STATS units = COUNT_DISTINCT\(<unit_key>\)/);
+      // Counted under the corpus filter, so the Unit and Cost lines only count units that run.
+      expect(content).toContain(
+        '`FROM <index> <corpus filter> | STATS units = COUNT_DISTINCT(<unit_key>)`'
+      );
+      expect(content).toMatch(/automation's own KI cap when that is lower/);
       expect(content).not.toMatch(/one query per source and one per claimed join/);
     });
 
