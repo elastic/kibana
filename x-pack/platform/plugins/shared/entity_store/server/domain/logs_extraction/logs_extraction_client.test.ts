@@ -1499,6 +1499,7 @@ describe('LogsExtractionClient', () => {
               paginationId: null,
               lastExecutionTimestamp: effectiveWindowEnd,
               sliceEndTimestamp: null,
+              sliceSamplingRate: null,
             },
           })
         );

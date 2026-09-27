@@ -308,6 +308,7 @@ export class LogsExtractionClient {
             paginationId: null,
             lastExecutionTimestamp: nextResumePointISO,
             sliceEndTimestamp: null,
+            sliceSamplingRate: null,
           }),
           ...this.errorPatch(null),
         });
