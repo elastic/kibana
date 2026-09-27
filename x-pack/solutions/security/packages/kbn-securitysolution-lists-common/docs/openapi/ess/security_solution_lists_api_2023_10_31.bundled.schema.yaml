@@ -2440,6 +2440,8 @@ components:
           $ref: '#/components/schemas/ListMetadata'
         name:
           $ref: '#/components/schemas/ListName'
+        storage:
+          $ref: '#/components/schemas/ListStorage'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and
             returned correctly.
@@ -2612,6 +2614,38 @@ components:
         - cluster
         - index
         - application
+    ListStorage:
+      description: |
+        Storage descriptor for the value list. Names the storage kind, and for a
+        lookup list the concrete index that holds its items. Absent for legacy
+        data-stream lists. This field is read-only and is never set through the
+        update or patch APIs.
+      type: object
+      properties:
+        locator:
+          type: object
+          properties:
+            alias:
+              description: >
+                The alias every read and write uses while the list is shared. It
+                sits
+
+                under the `.items*` wildcard that existing roles grant. Absent
+                once the
+
+                list is restricted to explicit grants on the concrete index.
+              type: string
+            index:
+              description: The concrete lookup index that holds the items.
+              type: string
+        type:
+          enum:
+            - data_stream
+            - lookup_index
+            - regular_index
+          type: string
+      required:
+        - type
     ListType:
       description: >
         Specifies the Elasticsearch data type of excludes the list container

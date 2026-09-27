@@ -9,6 +9,9 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
+  // POC: when true, every new value list is created in its own lookup-mode index
+  // (one index per list) instead of the shared `.items-<space>` data stream.
+  enableLookupIndices: schema.boolean({ defaultValue: false }),
   importBufferSize: schema.number({ defaultValue: 1000, min: 1 }),
   importTimeout: schema.duration({
     defaultValue: '5m',

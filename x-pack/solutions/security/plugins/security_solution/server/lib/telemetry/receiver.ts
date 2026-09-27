@@ -20,6 +20,7 @@ import type {
   AggregationsAggregate,
   IlmExplainLifecycleRequest,
   OpenPointInTimeResponse,
+  QueryDslQueryContainer,
   SearchRequest,
   SearchResponse,
   SearchRequest as ESSearchRequest,
@@ -79,6 +80,7 @@ import type {
   ValueListItemsResponseAggregation,
   ValueListExceptionListResponseAggregation,
   ValueListIndicatorMatchResponseAggregation,
+  ValueListStorageResponseAggregation,
   Nullable,
   EndpointMetricsAggregation,
   EndpointMetricsAbstract,
@@ -1255,6 +1257,29 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
     };
+    // A rule reads the shared stream when its threat index names one of the `.items-<space>`
+    // data streams. It reads a lookup list when it names a `.value-list` concrete index
+    // (present, or orphaned by a delete) or an alias or index recorded in a list's locator.
+    // A rule that reads both counts once, as a lookup reader: the legacy count is the rules
+    // that read only the shared stream.
+    const [legacyStreamNames, lookupAccessNames] = await Promise.all([
+      this.fetchLegacyItemStreamNames(),
+      this.fetchLookupListAccessNames(),
+    ]);
+    const readsLegacyStream: QueryDslQueryContainer[] =
+      legacyStreamNames.length > 0
+        ? [{ terms: { 'alert.params.threatIndex': legacyStreamNames } }]
+        : [{ match_none: {} }];
+    // Only names that exist decide: a concrete `.value-list` index or a name recorded in
+    // a list's locator. A pattern such as `.items-*` is neither, so it does not count as a
+    // lookup reader, and an alias dropped by a restrict is not counted either.
+    const readsLookupList: QueryDslQueryContainer[] = [
+      { prefix: { 'alert.params.threatIndex': '.value-list' } },
+      ...(lookupAccessNames.length > 0
+        ? [{ terms: { 'alert.params.threatIndex': lookupAccessNames } }]
+        : []),
+    ];
+    // indicator-match rules whose threat index is the shared `.items-<space>` stream
     const indicatorMatchRuleQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: this.getIndexForType?.('alert'),
@@ -1262,7 +1287,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       size: 0,
       query: {
         bool: {
-          must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
+          must: readsLegacyStream,
+          must_not: readsLookupList,
         },
       },
       aggs: {
@@ -1273,25 +1299,111 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
     };
-    const [listMetrics, itemMetrics, exceptionListMetrics, indicatorMatchMetrics] =
-      await Promise.all([
-        this.esClient().search(listQuery),
-        this.esClient().search(itemQuery),
-        this.esClient().search(exceptionListQuery),
-        this.esClient().search(indicatorMatchRuleQuery),
-      ]);
+    // indicator-match rules whose threat index is a lookup list's alias or concrete index
+    const indicatorMatchLookupRuleQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: this.getIndexForType?.('alert'),
+      ignore_unavailable: true,
+      size: 0,
+      query: {
+        bool: {
+          minimum_should_match: 1,
+          should: readsLookupList,
+        },
+      },
+      aggs: {
+        vl_used_in_indicator_match_rule_count: {
+          cardinality: {
+            field: 'alert.params.ruleId',
+          },
+        },
+      },
+    };
+    // Count lookup lists from the container itself (`.lists-*`), which the internal
+    // telemetry user can read, filtering on the `storage.type` descriptor. Counting the
+    // per-list `.value-list-*` indices directly returns zero here, because the internal
+    // user has no privileges on that index pattern.
+    const storageQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: '.lists-*',
+      ignore_unavailable: true,
+      size: 0,
+      query: { term: { 'storage.type': 'lookup_index' } },
+      aggs: {
+        lookup_list_count: {
+          cardinality: {
+            field: 'name',
+          },
+        },
+      },
+    };
+    const [
+      listMetrics,
+      itemMetrics,
+      exceptionListMetrics,
+      indicatorMatchMetrics,
+      indicatorMatchLookupMetrics,
+      storageMetrics,
+    ] = await Promise.all([
+      this.esClient().search(listQuery),
+      this.esClient().search(itemQuery),
+      this.esClient().search(exceptionListQuery),
+      this.esClient().search(indicatorMatchRuleQuery),
+      this.esClient().search(indicatorMatchLookupRuleQuery),
+      this.esClient().search(storageQuery),
+    ]);
     const listMetricsResponse = listMetrics as unknown as ValueListResponseAggregation;
     const itemMetricsResponse = itemMetrics as unknown as ValueListItemsResponseAggregation;
     const exceptionListMetricsResponse =
       exceptionListMetrics as unknown as ValueListExceptionListResponseAggregation;
     const indicatorMatchMetricsResponse =
       indicatorMatchMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
+    const indicatorMatchLookupMetricsResponse =
+      indicatorMatchLookupMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
+    const storageMetricsResponse = storageMetrics as unknown as ValueListStorageResponseAggregation;
     return {
       listMetricsResponse,
       itemMetricsResponse,
       exceptionListMetricsResponse,
       indicatorMatchMetricsResponse,
+      indicatorMatchLookupMetricsResponse,
+      storageMetricsResponse,
     };
+  }
+
+  /** The `.items-<space>` data streams: the shared value list item stores, one per space. */
+  private async fetchLegacyItemStreamNames(): Promise<string[]> {
+    try {
+      const response = await this.esClient().indices.getDataStream({
+        expand_wildcards: ['open' as const, 'hidden' as const],
+        name: '.items-*',
+      });
+      return response.data_streams.map((stream) => stream.name);
+    } catch (error) {
+      // without the stream names no legacy reader can be told apart, so count none
+      this.logger.warn('Error fetching value list item data streams', withErrorMessage(error));
+      return [];
+    }
+  }
+
+  /** Every alias and concrete index name recorded in the storage locators of lookup value lists. */
+  private async fetchLookupListAccessNames(): Promise<string[]> {
+    const response = await this.esClient().search({
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: '.lists-*',
+      ignore_unavailable: true,
+      size: 0,
+      query: { term: { 'storage.type': 'lookup_index' } },
+      aggs: {
+        alias: { terms: { field: 'storage.locator.alias', size: 10000 } },
+        index: { terms: { field: 'storage.locator.index', size: 10000 } },
+      },
+    });
+    const keysOf = (aggregation: unknown): string[] => {
+      const buckets = (aggregation as { buckets?: Array<{ key?: unknown }> } | undefined)?.buckets;
+      return Array.isArray(buckets) ? buckets.map((bucket) => String(bucket.key)) : [];
+    };
+    return [...keysOf(response.aggregations?.alias), ...keysOf(response.aggregations?.index)];
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {

@@ -245,6 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:verify_permissions',
         'fleet:version-specific-policy-assignment-task',
         'gap-auto-fill-scheduler-task',
+        'lists:coalesce-rebuild',
         'maintenance-window:generate-events',
         'nightshift-investigations:reconcile_investigation_statuses',
         'notification-center:cleanup',

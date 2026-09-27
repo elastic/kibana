@@ -864,6 +864,16 @@ describe('test metrics response to value list meta data', () => {
           vl_used_in_indicator_match_rule_count: { value: 6 },
         },
       },
+      indicatorMatchLookupMetricsResponse: {
+        aggregations: {
+          vl_used_in_indicator_match_rule_count: { value: 4 },
+        },
+      },
+      storageMetricsResponse: {
+        aggregations: {
+          lookup_list_count: { value: 2 },
+        },
+      },
     };
     const response = formatValueListMetaData(stubMetricResponses, stubClusterInfo, stubLicenseInfo);
     expect(response).toEqual({
@@ -872,6 +882,8 @@ describe('test metrics response to value list meta data', () => {
       cluster_name: 'elasticsearch',
       license_id: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
       total_list_count: 5,
+      lookup_list_count: 2,
+      legacy_list_count: 3,
       types: [
         {
           type: 'keyword',
@@ -902,6 +914,7 @@ describe('test metrics response to value list meta data', () => {
       ],
       included_in_exception_lists_count: 24,
       used_in_indicator_match_rule_count: 6,
+      used_in_indicator_match_rule_via_lookup_count: 4,
     });
   });
   test('can succeed when metrics response has no aggregation response', async () => {
@@ -910,6 +923,8 @@ describe('test metrics response to value list meta data', () => {
       itemMetricsResponse: {},
       exceptionListMetricsResponse: {},
       indicatorMatchMetricsResponse: {},
+      indicatorMatchLookupMetricsResponse: {},
+      storageMetricsResponse: {},
     };
     // @ts-ignore
     const response = formatValueListMetaData(stubMetricResponses, stubClusterInfo, stubLicenseInfo);
@@ -919,10 +934,13 @@ describe('test metrics response to value list meta data', () => {
       cluster_name: 'elasticsearch',
       license_id: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
       total_list_count: 0,
+      lookup_list_count: 0,
+      legacy_list_count: 0,
       types: [],
       lists: [],
       included_in_exception_lists_count: 0,
       used_in_indicator_match_rule_count: 0,
+      used_in_indicator_match_rule_via_lookup_count: 0,
     });
   });
 });
