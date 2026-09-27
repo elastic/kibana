@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { listPacks, getPack } from '../packs';
 import {
   assertPackProvenanceAuthored,
@@ -18,6 +19,10 @@ import {
   parsePacksFlag,
   stampOwnershipTags,
 } from './packs';
+import { readNdjson } from './episodes';
+import { enrichDocForGraph } from './graph_enrichment';
+import { scriptsDataDir } from './indexing';
+import { HOSTS } from './entities';
 
 describe('parsePacksFlag', () => {
   it('returns empty for blank input', () => {
@@ -143,5 +148,70 @@ describe('ensureEcsSourceIp', () => {
     };
     ensureEcsSourceIp(doc);
     expect((doc.source as { ip: string }).ip).toEqual('192.0.2.30');
+  });
+});
+
+describe('aws-iam AssumeRole hunt (Phase 5 technique closure)', () => {
+  it('registers exactly six aws-iam hunts including AssumeRole with T1078.004', () => {
+    const awsIam = getPack('aws-iam');
+    expect(awsIam).toBeDefined();
+    expect(awsIam!.hunts).toHaveLength(6);
+
+    const assumeRole = awsIam!.hunts.find((h) => h.name === 'AssumeRole');
+    expect(assumeRole).toBeDefined();
+    expect(assumeRole?.query).toEqual('event.action: "AssumeRole" and cloud.provider: "aws"');
+    expect(assumeRole?.mitre.map((m) => m.technique)).toEqual(['T1078.004']);
+  });
+});
+
+describe('aws-iam AssumeRole host pin (DC2 entity join)', () => {
+  const PINNED_HOST = 'WIN-ANALYST01';
+
+  it('pins the PINNED_HOST catalog host to every AssumeRole event', async () => {
+    expect(HOSTS[PINNED_HOST]).toBeDefined();
+
+    const eventsPath = path.join(scriptsDataDir('packs', 'aws-iam'), 'events.ndjson');
+    const events = await readNdjson(eventsPath);
+    const assumeRoleEvents = events.filter(
+      (doc) => (doc.event as { action?: string } | undefined)?.action === 'AssumeRole'
+    );
+    // Two original DC2 events plus two behavior-only events (event.provider / event_name).
+    expect(assumeRoleEvents).toHaveLength(4);
+    for (const doc of assumeRoleEvents) {
+      expect((doc.host as { name?: string } | undefined)?.name).toEqual(PINNED_HOST);
+      expect((doc.host as { id?: string } | undefined)?.id).toBeUndefined();
+    }
+
+    // No other aws-iam event carries a host, keeping CloudTrail lookup-only elsewhere.
+    const hostBearing = events.filter((doc) => doc.host !== undefined);
+    expect(hostBearing).toHaveLength(4);
+  });
+
+  it('adds event.provider and aws.cloudtrail.event_name only on the behavior-only AssumeRole rows', async () => {
+    const eventsPath = path.join(scriptsDataDir('packs', 'aws-iam'), 'events.ndjson');
+    const events = await readNdjson(eventsPath);
+    const withProvider = events.filter(
+      (doc) => (doc.event as { provider?: string } | undefined)?.provider === 'sts.amazonaws.com'
+    );
+    expect(withProvider).toHaveLength(2);
+    for (const doc of withProvider) {
+      expect((doc.event as { action?: string } | undefined)?.action).toEqual('AssumeRole');
+      expect(
+        (doc.aws as { cloudtrail?: { event_name?: string } } | undefined)?.cloudtrail?.event_name
+      ).toEqual('AssumeRole');
+      expect((doc.host as { name?: string } | undefined)?.name).toEqual(PINNED_HOST);
+    }
+  });
+
+  it('lets enrichDocForGraph populate related.hosts from the pinned host', async () => {
+    const eventsPath = path.join(scriptsDataDir('packs', 'aws-iam'), 'events.ndjson');
+    const events = await readNdjson(eventsPath);
+    const assumeRoleEvents = events.filter(
+      (doc) => (doc.event as { action?: string } | undefined)?.action === 'AssumeRole'
+    );
+    for (const doc of assumeRoleEvents) {
+      enrichDocForGraph(doc);
+      expect((doc.related as { hosts?: string[] } | undefined)?.hosts).toEqual([PINNED_HOST]);
+    }
   });
 });

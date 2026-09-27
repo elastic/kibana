@@ -53,8 +53,20 @@ export interface PackTiHistoricArticle {
   body: string;
 }
 
+/** Report-only correlation anchors applied to specific historic slots of this scenario. */
+export interface PackTiHistoricAnchors {
+  /** 1-based historic item indexes (the NN in historic-NN) that carry the anchors. */
+  slots: number[];
+  /** Written to extracted.threat_actors on the anchored slots only. */
+  threatActors: string[];
+  /** Appended to extracted.iocs (type 'hash') on the anchored slots only; report-only, not a join IOC. */
+  hashIoc: { value: string };
+}
+
 export interface PackTiScenario {
   packId: string;
+  /** Id scheme discriminator for report guids: `ti-report-<reportIdSlug>-<itemKey>`. Defaults to packId for primary scenarios. */
+  reportIdSlug: string;
   sourceId: string;
   name: string;
   /** Canonical live RSS title (Last 24h / workflow ingest). */
@@ -78,11 +90,25 @@ export interface PackTiScenario {
     emerging: string;
   };
   /**
+   * Browsable https article URL written into RSS `<channel>/<item><link>`.
+   * Becomes report `source.url` after mustard ingestion; must be http(s) so
+   * Intelligence Hub's `isBrowsableReportUrl` renders the external link.
+   */
+  articleUrl: string;
+  /**
    * Environment join keys. Must appear in the RSS body (value + optional
-   * defanged) AND on pack docs after `ensureEcsSourceIp` + `enrichDocForGraph`
-   * in the ECS fields mustard hunt searches.
+   * defanged). Unless `joinIocsArticleOnly` is true, they must also appear on
+   * pack docs after `ensureEcsSourceIp` + `enrichDocForGraph` in the ECS fields
+   * mustard hunt searches.
    */
   joinIocs: PackTiJoinIoc[];
+  /**
+   * When true, `joinIocs` are narrative/article-only: they must still appear in
+   * RSS/historic bodies (fixture article tests), but they deliberately do not
+   * appear on pack telemetry so Tier 1 IOC hunts stay clean while Tier 2 can
+   * still hit on technique/behavior ES|QL. Used by `aws-iam-behavior-only`.
+   */
+  joinIocsArticleOnly?: boolean;
   /**
    * Narrative anchors for RSS flavor / hunt-rule pairing (MITRE, event.action,
    * ARNs, short nicknames). Must appear in RSS; not required on pack ECS.
@@ -97,6 +123,8 @@ export interface PackTiScenario {
   categories: string[];
   /** Closed-set Hub regions for historic report docs (mustard `THREAT_REGIONS`). */
   regions: string[];
+  /** Report-only correlation anchors applied to specific historic slots (Phase 3). */
+  historicAnchors?: PackTiHistoricAnchors;
 }
 
 /** Flat list of strings that must appear in the RSS XML payload. */
@@ -201,341 +229,614 @@ export const collectPackJoinFieldValues = (
   return values;
 };
 
-export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
+export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
   // Intended enrich severity ladder from body wording only (mustard classify_severity):
   // okta → critical, aws-iam → high, kubernetes → medium, github-actions → low.
   // Titles stay natural (no "ACTIVE INCIDENT" / "Research note" demo prefixes).
-  okta: {
-    packId: 'okta',
-    sourceId: 'ti-rss-okta',
-    name: 'Okta identity takeover feed',
-    title: 'Okta Super Admin takeover via stolen sessions from Russian IP space',
-    body:
-      // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable
-      // true (generic "threat actors" alone has been gated false and skipped extract_diamond).
-      'Operators linked to a LAPSUS$-style identity campaign are actively abusing stolen Okta ' +
-      'sessions from Russian IP 192[.]0[.]2[.]50 (192.0.2.50) against production tenants. They are ' +
-      'resetting passwords, stripping MFA (user.mfa.factor.deactivate), and granting Super Admin to ' +
-      'finance and IT accounts including cfo@corp.example and it-admin@corp.example. Immediate ' +
-      'business impact includes system.api_token.create and privileged app group membership while ' +
-      'payroll and ERP SSO remain exposed. This is an ongoing breach with ransomware-adjacent ' +
-      'extortion risk; revoke sessions and lock down Super Admin immediately. Hunt ATT&CK ' +
-      'T1078.004, T1556, T1098, and T1136.003 across okta.system telemetry.',
-    historicArticles: [
-      {
-        title: 'Follow-up: Okta session replay still tied to finance SSO abuse',
-        body:
-          'A follow-up bulletin revisits stolen Okta sessions from 192[.]0[.]2[.]50 (192.0.2.50) ' +
-          'where operators continue targeting cfo@corp.example and it-admin@corp.example. Watch for ' +
-          'user.mfa.factor.deactivate ahead of Super Admin grants and api token creation. Prior ' +
-          'detections still map to ATT&CK T1078.004, T1556, T1098, and T1136.003 in okta.system.',
+  okta: [
+    {
+      packId: 'okta',
+      reportIdSlug: 'okta',
+      sourceId: 'ti-rss-okta',
+      name: 'Okta identity takeover feed',
+      title: 'Okta Super Admin takeover via stolen sessions from Russian IP space',
+      body:
+        // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable
+        // true (generic "threat actors" alone has been gated false and skipped extract_diamond).
+        'Operators linked to a LAPSUS$-style identity campaign are actively abusing stolen Okta ' +
+        'sessions from Russian IP 192[.]0[.]2[.]50 (192.0.2.50) against production tenants. They are ' +
+        'resetting passwords, stripping MFA (user.mfa.factor.deactivate), and granting Super Admin to ' +
+        'finance and IT accounts including cfo@corp.example and it-admin@corp.example. Immediate ' +
+        'business impact includes system.api_token.create and privileged app group membership while ' +
+        'payroll and ERP SSO remain exposed. This is an ongoing breach with ransomware-adjacent ' +
+        'extortion risk; revoke sessions and lock down Super Admin immediately. Hunt ATT&CK ' +
+        'T1078.004, T1556, T1098, and T1136.003 across okta.system telemetry.',
+      historicArticles: [
+        {
+          title: 'Follow-up: Okta session replay still tied to finance SSO abuse',
+          body:
+            'A follow-up bulletin revisits stolen Okta sessions from 192[.]0[.]2[.]50 (192.0.2.50) ' +
+            'where operators continue targeting cfo@corp.example and it-admin@corp.example. Watch for ' +
+            'user.mfa.factor.deactivate ahead of Super Admin grants and api token creation. Prior ' +
+            'detections still map to ATT&CK T1078.004, T1556, T1098, and T1136.003 in okta.system.',
+        },
+        {
+          title: 'Identity campaign note: MFA strip patterns against Okta Super Admin',
+          body:
+            'Campaign analysts catalogued MFA strip sequences (user.mfa.factor.deactivate) before ' +
+            'privileged role changes. Related infrastructure includes 192[.]0[.]2[.]50 (192.0.2.50) and ' +
+            'mailbox pivots into cfo@corp.example plus it-admin@corp.example. Map hunts to T1078.004, ' +
+            'T1556, T1098, and T1136.003 when reviewing Okta admin audit trails.',
+        },
+        {
+          title: 'Okta tenant hardening advisory after Russian IP session theft',
+          body:
+            'Hardening guidance after session theft from Russian IP space 192[.]0[.]2[.]50 (192.0.2.50). ' +
+            'Validate that cfo@corp.example and it-admin@corp.example cannot receive Super Admin without ' +
+            'break-glass review, and alert on user.mfa.factor.deactivate. Coverage should include ' +
+            'T1078.004, T1556, T1098, and T1136.003 across identity telemetry.',
+        },
+        {
+          title: 'Threat research: LAPSUS$-style Okta privilege chains in enterprise tenants',
+          body:
+            'Research summary of LAPSUS$-style Okta privilege chains using 192[.]0[.]2[.]50 (192.0.2.50). ' +
+            'Observed mailbox and admin targets include cfo@corp.example and it-admin@corp.example with ' +
+            'user.mfa.factor.deactivate as an early signal. Technique coverage: T1078.004, T1556, T1098, ' +
+            'and T1136.003.',
+        },
+        {
+          title: 'Okta API token creation spikes after stolen session reuse',
+          body:
+            'Operators reusing stolen sessions from 192[.]0[.]2[.]50 (192.0.2.50) were seen creating API ' +
+            'tokens after elevating cfo@corp.example and it-admin@corp.example. Correlate ' +
+            'user.mfa.factor.deactivate with Super Admin membership changes. Hunt ATT&CK T1078.004, ' +
+            'T1556, T1098, and T1136.003 in okta.system logs.',
+        },
+        {
+          title: 'Detection coverage refresh for Okta Super Admin and MFA disable events',
+          body:
+            'Detection engineering refresh for Okta Super Admin abuse. Seed hunts with IP ' +
+            '192[.]0[.]2[.]50 (192.0.2.50), users cfo@corp.example and it-admin@corp.example, and ' +
+            'user.mfa.factor.deactivate. Retain ATT&CK mappings T1078.004, T1556, T1098, and T1136.003 ' +
+            'for identity takeover playbooks.',
+        },
+      ],
+      categories: ['insider-threat', 'cloud-security'],
+      regions: ['north-america', 'europe'],
+      historicSourceAliases: {
+        emerging: 'Okta session intel digest',
       },
-      {
-        title: 'Identity campaign note: MFA strip patterns against Okta Super Admin',
-        body:
-          'Campaign analysts catalogued MFA strip sequences (user.mfa.factor.deactivate) before ' +
-          'privileged role changes. Related infrastructure includes 192[.]0[.]2[.]50 (192.0.2.50) and ' +
-          'mailbox pivots into cfo@corp.example plus it-admin@corp.example. Map hunts to T1078.004, ' +
-          'T1556, T1098, and T1136.003 when reviewing Okta admin audit trails.',
-      },
-      {
-        title: 'Okta tenant hardening advisory after Russian IP session theft',
-        body:
-          'Hardening guidance after session theft from Russian IP space 192[.]0[.]2[.]50 (192.0.2.50). ' +
-          'Validate that cfo@corp.example and it-admin@corp.example cannot receive Super Admin without ' +
-          'break-glass review, and alert on user.mfa.factor.deactivate. Coverage should include ' +
-          'T1078.004, T1556, T1098, and T1136.003 across identity telemetry.',
-      },
-      {
-        title: 'Threat research: LAPSUS$-style Okta privilege chains in enterprise tenants',
-        body:
-          'Research summary of LAPSUS$-style Okta privilege chains using 192[.]0[.]2[.]50 (192.0.2.50). ' +
-          'Observed mailbox and admin targets include cfo@corp.example and it-admin@corp.example with ' +
-          'user.mfa.factor.deactivate as an early signal. Technique coverage: T1078.004, T1556, T1098, ' +
-          'and T1136.003.',
-      },
-      {
-        title: 'Okta API token creation spikes after stolen session reuse',
-        body:
-          'Operators reusing stolen sessions from 192[.]0[.]2[.]50 (192.0.2.50) were seen creating API ' +
-          'tokens after elevating cfo@corp.example and it-admin@corp.example. Correlate ' +
-          'user.mfa.factor.deactivate with Super Admin membership changes. Hunt ATT&CK T1078.004, ' +
-          'T1556, T1098, and T1136.003 in okta.system logs.',
-      },
-      {
-        title: 'Detection coverage refresh for Okta Super Admin and MFA disable events',
-        body:
-          'Detection engineering refresh for Okta Super Admin abuse. Seed hunts with IP ' +
-          '192[.]0[.]2[.]50 (192.0.2.50), users cfo@corp.example and it-admin@corp.example, and ' +
-          'user.mfa.factor.deactivate. Retain ATT&CK mappings T1078.004, T1556, T1098, and T1136.003 ' +
-          'for identity takeover playbooks.',
-      },
-    ],
-    categories: ['insider-threat', 'cloud-security'],
-    regions: ['north-america', 'europe'],
-    historicSourceAliases: {
-      emerging: 'Okta session intel digest',
+      articleUrl: 'https://www.elastic.co/security-labs/okta-and-lapsus-what-you-need-to-know',
+      joinIocs: [
+        { type: 'ip', value: '192.0.2.50', defanged: '192[.]0[.]2[.]50' },
+        { type: 'email', value: 'cfo@corp.example' },
+        { type: 'email', value: 'it-admin@corp.example' },
+      ],
+      narrative: ['user.mfa.factor.deactivate', 'T1078.004', 'T1556', 'T1098', 'T1136.003'],
+      tags: ['threat-intel', 'pack:okta', 'okta', 'identity'],
+      mitre: ['T1078.004', 'T1556', 'T1098', 'T1136.003'],
     },
-    joinIocs: [
-      { type: 'ip', value: '192.0.2.50', defanged: '192[.]0[.]2[.]50' },
-      { type: 'email', value: 'cfo@corp.example' },
-      { type: 'email', value: 'it-admin@corp.example' },
-    ],
-    narrative: ['user.mfa.factor.deactivate', 'T1078.004', 'T1556', 'T1098', 'T1136.003'],
-    tags: ['threat-intel', 'pack:okta', 'okta', 'identity'],
-    mitre: ['T1078.004', 'T1556', 'T1098', 'T1136.003'],
-  },
-  'aws-iam': {
-    packId: 'aws-iam',
-    sourceId: 'ti-rss-aws-iam',
-    name: 'AWS IAM privilege escalation feed',
-    title: 'AWS IAM privilege escalation and credential theft in account 123456789012',
-    body:
-      'Security researchers documented a confirmed privilege-escalation campaign in AWS account ' +
-      '123456789012. Compromised user dev-user@corp.example (source IP 192[.]0[.]2[.]30 / 192.0.2.30) ' +
-      'attached AdministratorAccess, assumed escalated-role, and staged access toward S3 bucket ' +
-      'corp-prod-data. Follow-on activity from 192[.]0[.]2[.]31 (192.0.2.31) included GetSecretValue ' +
-      'on prod/db-credentials plus StopLogging and DeleteTrail for defense evasion. The campaign ' +
-      'is well evidenced with reusable IOCs and ATT&CK mappings, so defenders should prioritize ' +
-      'hunts, but this write-up does not assert that customer production is currently offline. ' +
-      'Hunt ATT&CK T1098.001, T1078.004, and T1562.008 in aws.cloudtrail logs.',
-    historicArticles: [
-      {
-        title: 'CloudTrail retrospective: AdministratorAccess attach in account 123456789012',
-        body:
-          'Retrospective for AWS account 123456789012 where user dev-user (dev-user@corp.example) from ' +
-          '192[.]0[.]2[.]30 (192.0.2.30) attached AdministratorAccess and later reached bucket ' +
-          'corp-prod-data. Secondary IP 192[.]0[.]2[.]31 (192.0.2.31) called GetSecretValue on ' +
-          'prod/db-credentials and StopLogging. Map to T1098.001, T1078.004, and T1562.008.',
+  ],
+  'aws-iam': [
+    {
+      packId: 'aws-iam',
+      reportIdSlug: 'aws-iam',
+      sourceId: 'ti-rss-aws-iam',
+      name: 'AWS IAM privilege escalation feed',
+      title: 'AWS IAM privilege escalation and credential theft in account 123456789012',
+      body:
+        // Both-tiers fixture: pack IOCs hit Tier 1; narrative drives two CloudTrail-backed
+        // Tier 2 techniques (T1078.004 AssumeRole + T1562.008 StopLogging) for two SSEs.
+        // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable.
+        'Security researchers attribute a confirmed privilege-escalation campaign in AWS account ' +
+        '123456789012 to the TA-DEMO-SHADOW-ADMIN intrusion set. Operators tied to TA-DEMO-SHADOW-ADMIN ' +
+        'compromised user dev-user@corp.example (source IP 192[.]0[.]2[.]30 / 192.0.2.30), ' +
+        'called sts.AssumeRole (event.provider sts.amazonaws.com, aws.cloudtrail.event_name AssumeRole) ' +
+        'into escalated-role (ATT&CK T1078.004), attached AdministratorAccess, and staged access toward S3 ' +
+        'bucket corp-prod-data. Follow-on activity from 192[.]0[.]2[.]31 (192.0.2.31) included GetSecretValue ' +
+        'on prod/db-credentials plus StopLogging (event.action StopLogging) and DeleteTrail for defense ' +
+        'evasion (ATT&CK T1562.008), consistent with TA-DEMO-SHADOW-ADMIN tradecraft. Prioritize two ' +
+        'independent CloudTrail hunts: (1) AssumeRole / sts.amazonaws.com toward escalated-role for ' +
+        'T1078.004, and (2) StopLogging against the account trail for T1562.008. Also note T1098.001 ' +
+        'for AdministratorAccess attach. Reusable IOCs are listed; this write-up does not assert that ' +
+        'customer production is currently offline.',
+      historicArticles: [
+        {
+          title: 'CloudTrail retrospective: AdministratorAccess attach in account 123456789012',
+          body:
+            // Keep the anchored actor name in this slot's body directly (mirrors scenario.body) so
+            // enrich_taxonomy's diamond_suitable gate fires on the historic-01 doc, not just the live twin.
+            'Retrospective for AWS account 123456789012 attributed to the TA-DEMO-SHADOW-ADMIN intrusion set, ' +
+            'where user dev-user (dev-user@corp.example) from ' +
+            '192[.]0[.]2[.]30 (192.0.2.30) called sts.AssumeRole (event.provider sts.amazonaws.com) into ' +
+            'escalated-role (T1078.004), attached AdministratorAccess, and later reached bucket corp-prod-data. ' +
+            'Secondary IP 192[.]0[.]2[.]31 (192.0.2.31) called GetSecretValue on prod/db-credentials and ' +
+            'StopLogging (T1562.008), consistent with TA-DEMO-SHADOW-ADMIN tradecraft. Hunt T1078.004 and ' +
+            'T1562.008 as separate CloudTrail queries; also map T1098.001.',
+        },
+        {
+          title: 'Secrets Manager access after IAM escalation toward corp-prod-data',
+          body:
+            'After privilege escalation in 123456789012, analysts saw GetSecretValue on ' +
+            'prod/db-credentials from 192[.]0[.]2[.]31 (192.0.2.31) following sts.AssumeRole ' +
+            '(sts.amazonaws.com / AssumeRole, T1078.004) by dev-user@corp.example (dev-user) into ' +
+            'escalated-role at 192[.]0[.]2[.]30 (192.0.2.30). AdministratorAccess and StopLogging ' +
+            '(T1562.008) preceded S3 staging on corp-prod-data. Run distinct hunts for T1078.004 and ' +
+            'T1562.008; note T1098.001.',
+        },
+        {
+          title: 'Defense evasion note: StopLogging paired with DeleteTrail in AWS IAM abuse',
+          body:
+            'Defense-evasion note for account 123456789012. Operators used StopLogging (T1562.008, ' +
+            'event.action StopLogging) after sts.AssumeRole (T1078.004, event.provider sts.amazonaws.com) ' +
+            'into escalated-role and AdministratorAccess attach by dev-user / dev-user@corp.example from ' +
+            '192[.]0[.]2[.]30 (192.0.2.30), with follow-on 192[.]0[.]2[.]31 (192.0.2.31) against ' +
+            'prod/db-credentials and corp-prod-data. Prefer two ES|QL hunts: AssumeRole for T1078.004 and ' +
+            'StopLogging for T1562.008. Also T1098.001.',
+        },
+        {
+          title: 'IAM role assumption playbook for escalated-role in production accounts',
+          body:
+            'Playbook covering sts.AssumeRole (sts.amazonaws.com) into escalated-role in 123456789012 ' +
+            'for T1078.004, plus StopLogging (T1562.008) after escalation. Seed with ' +
+            'dev-user@corp.example (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
+            '192[.]0[.]2[.]31 (192.0.2.31), AdministratorAccess attach, corp-prod-data access, ' +
+            'prod/db-credentials reads. ATT&CK: T1078.004, T1562.008, T1098.001.',
+        },
+        {
+          title: 'S3 staging indicators after credential theft in AWS account 123456789012',
+          body:
+            'S3 staging indicators for corp-prod-data in account 123456789012 following credential ' +
+            'theft by dev-user@corp.example (dev-user), who used sts.AssumeRole (T1078.004) to reach ' +
+            'escalated-role. Ingress IPs 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) ' +
+            'align with AdministratorAccess, GetSecretValue on prod/db-credentials, and StopLogging ' +
+            '(T1562.008). Cover T1078.004 and T1562.008 as primary CloudTrail hunts; also T1098.001.',
+        },
+        {
+          title: 'AWS privilege-escalation IOC refresh for CloudTrail monitoring teams',
+          body:
+            'IOC refresh for CloudTrail monitors in 123456789012: 192[.]0[.]2[.]30 (192.0.2.30), ' +
+            '192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example, short name dev-user, sts.AssumeRole ' +
+            '(sts.amazonaws.com) into escalated-role for T1078.004, AdministratorAccess, corp-prod-data, ' +
+            'prod/db-credentials, and StopLogging for T1562.008. Keep hunts aligned to T1078.004, ' +
+            'T1562.008, and T1098.001.',
+        },
+      ],
+      articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
+      joinIocs: [
+        { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
+        { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
+        { type: 'email', value: 'dev-user@corp.example' },
+        { type: 'user', value: 'dev-user' },
+      ],
+      narrative: [
+        '123456789012',
+        'AdministratorAccess',
+        'corp-prod-data',
+        'prod/db-credentials',
+        'StopLogging',
+        'AssumeRole',
+        'escalated-role',
+        'T1098.001',
+        'T1078.004',
+        'T1562.008',
+      ],
+      tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security'],
+      mitre: ['T1098.001', 'T1078.004', 'T1562.008'],
+      categories: ['cloud-security', 'insider-threat'],
+      regions: ['north-america', 'global'],
+      historicSourceAliases: {
+        emerging: 'AWS IAM privilege intel stream',
       },
-      {
-        title: 'Secrets Manager access after IAM escalation toward corp-prod-data',
-        body:
-          'After privilege escalation in 123456789012, analysts saw GetSecretValue on ' +
-          'prod/db-credentials from 192[.]0[.]2[.]31 (192.0.2.31) following activity by ' +
-          'dev-user@corp.example (dev-user) at 192[.]0[.]2[.]30 (192.0.2.30). AdministratorAccess ' +
-          'and StopLogging preceded S3 staging on corp-prod-data. Hunt T1098.001, T1078.004, T1562.008.',
+      historicAnchors: {
+        slots: [1],
+        threatActors: ['TA-DEMO-SHADOW-ADMIN'],
+        hashIoc: { value: 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789' },
       },
-      {
-        title: 'Defense evasion note: StopLogging paired with DeleteTrail in AWS IAM abuse',
-        body:
-          'Defense-evasion note for account 123456789012. Operators used StopLogging after ' +
-          'AdministratorAccess attach by dev-user / dev-user@corp.example from 192[.]0[.]2[.]30 ' +
-          '(192.0.2.30), with follow-on 192[.]0[.]2[.]31 (192.0.2.31) against prod/db-credentials and ' +
-          'corp-prod-data. Techniques: T1098.001, T1078.004, T1562.008.',
-      },
-      {
-        title: 'IAM role assumption playbook for escalated-role in production accounts',
-        body:
-          'Playbook covering escalated-role assumption in 123456789012. Seed with ' +
-          'dev-user@corp.example (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
-          '192[.]0[.]2[.]31 (192.0.2.31), AdministratorAccess attach, corp-prod-data access, ' +
-          'prod/db-credentials reads, and StopLogging. ATT&CK: T1098.001, T1078.004, T1562.008.',
-      },
-      {
-        title: 'S3 staging indicators after credential theft in AWS account 123456789012',
-        body:
-          'S3 staging indicators for corp-prod-data in account 123456789012 following credential ' +
-          'theft by dev-user@corp.example (dev-user). Ingress IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
-          '192[.]0[.]2[.]31 (192.0.2.31) align with AdministratorAccess, GetSecretValue on ' +
-          'prod/db-credentials, and StopLogging. Cover T1098.001, T1078.004, and T1562.008.',
-      },
-      {
-        title: 'AWS privilege-escalation IOC refresh for CloudTrail monitoring teams',
-        body:
-          'IOC refresh for CloudTrail monitors in 123456789012: 192[.]0[.]2[.]30 (192.0.2.30), ' +
-          '192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example, short name dev-user, ' +
-          'AdministratorAccess, corp-prod-data, prod/db-credentials, and StopLogging. Keep hunts ' +
-          'aligned to T1098.001, T1078.004, and T1562.008.',
-      },
-    ],
-    joinIocs: [
-      { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
-      { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
-      { type: 'email', value: 'dev-user@corp.example' },
-      { type: 'user', value: 'dev-user' },
-    ],
-    narrative: [
-      '123456789012',
-      'AdministratorAccess',
-      'corp-prod-data',
-      'prod/db-credentials',
-      'StopLogging',
-      'T1098.001',
-      'T1078.004',
-      'T1562.008',
-    ],
-    tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security'],
-    mitre: ['T1098.001', 'T1078.004', 'T1562.008'],
-    categories: ['cloud-security', 'insider-threat'],
-    regions: ['north-america', 'global'],
-    historicSourceAliases: {
-      emerging: 'AWS IAM privilege intel stream',
     },
-  },
-  kubernetes: {
-    packId: 'kubernetes',
-    sourceId: 'ti-rss-kubernetes',
-    name: 'Kubernetes audit abuse feed',
-    title: 'Kubernetes service-account abuse indicators observed near prod-us-east-1',
-    body:
-      'This advisory summarizes indicators previously associated with Kubernetes audit abuse for ' +
-      'detection coverage. Watch for service account system:serviceaccount:default:compromised-sa ' +
-      '(short name compromised-sa) in cluster prod-us-east-1 accessing secrets such as ' +
-      'db-credentials, creating clusterrolebindings/escalation-binding toward cluster-admin, and ' +
-      'traffic from 192[.]0[.]2[.]60 (192.0.2.60). Related behaviors may include pod exec against ' +
-      'exec-pod and kube-system ConfigMap changes. Apply as monitoring guidance; the advisory does ' +
-      'not claim your cluster is under active compromise. Hunt ATT&CK T1552.007, T1078, and T1610 ' +
-      'in kubernetes.audit logs.',
-    historicArticles: [
-      {
-        title: 'Cluster audit review: compromised-sa secret reads in prod-us-east-1',
-        body:
-          'Audit review for cluster prod-us-east-1 where system:serviceaccount:default:compromised-sa ' +
-          '(compromised-sa) read db-credentials and created escalation-binding. Source IP ' +
-          '192[.]0[.]2[.]60 (192.0.2.60) also appeared near exec-pod activity. Hunt T1552.007, T1078, ' +
-          'and T1610 in kubernetes.audit.',
+    {
+      packId: 'aws-iam',
+      reportIdSlug: 'aws-iam-assume-role',
+      sourceId: 'aws-iam-assume-role',
+      name: 'AWS IAM AssumeRole Activity',
+      title: 'AWS IAM AssumeRole abuse escalates access to escalated-role in account 123456789012',
+      body:
+        // Keep campaign/actor language explicit so enrich_taxonomy marks diamond_suitable
+        // true (generic "threat actors" alone has been gated false and skipped extract_diamond).
+        'Analysts attribute repeated sts.AssumeRole calls escalating dev-user (dev-user@corp.example) ' +
+        'into escalated-role within AWS account 123456789012 to the TA-DEMO-SHADOW-ADMIN intrusion set, ' +
+        'originating from 192[.]0[.]2[.]30 ' +
+        '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31). The assumed role was then used toward ' +
+        'AdministratorAccess and S3 staging on corp-prod-data, consistent with TA-DEMO-SHADOW-ADMIN ' +
+        'tradecraft in the broader IAM ' +
+        'privilege-escalation campaign in this account. Hunt ATT&CK T1078.004 for sts.AssumeRole ' +
+        'in aws.cloudtrail logs.',
+      historicArticles: [
+        {
+          title: 'AssumeRole chaining note: escalated-role reused across sessions',
+          body:
+            // Keep the anchored actor name in this slot's body directly (mirrors scenario.body) so
+            // enrich_taxonomy's diamond_suitable gate fires on the historic-01 doc, not just the live twin.
+            'A follow-up note attributed to the TA-DEMO-SHADOW-ADMIN intrusion set on repeated sts.AssumeRole calls into escalated-role in account ' +
+            '123456789012 by dev-user (dev-user@corp.example) from 192[.]0[.]2[.]30 (192.0.2.30) and ' +
+            '192[.]0[.]2[.]31 (192.0.2.31). Sessions preceded AdministratorAccess and corp-prod-data ' +
+            'staging, consistent with TA-DEMO-SHADOW-ADMIN tradecraft. Hunt T1078.004 for AssumeRole in aws.cloudtrail.',
+        },
+        {
+          title: 'CloudTrail retrospective: sts.AssumeRole into escalated-role',
+          body:
+            'Retrospective covering sts.AssumeRole activity elevating dev-user into escalated-role ' +
+            'in account 123456789012. Source IPs 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 ' +
+            '(192.0.2.31) align with dev-user@corp.example. Watch for AdministratorAccess and ' +
+            'corp-prod-data access afterward. Technique: T1078.004.',
+        },
+        {
+          title: 'Role-assumption playbook update for escalated-role in 123456789012',
+          body:
+            'Playbook update for escalated-role assumption in account 123456789012. Seed with ' +
+            'dev-user@corp.example (dev-user), source IPs 192[.]0[.]2[.]30 (192.0.2.30) and ' +
+            '192[.]0[.]2[.]31 (192.0.2.31), and downstream AdministratorAccess plus corp-prod-data ' +
+            'access. ATT&CK: T1078.004.',
+        },
+        {
+          title: 'AssumeRole telemetry refresh for CloudTrail monitoring teams',
+          body:
+            'Telemetry refresh for CloudTrail monitors tracking sts.AssumeRole into escalated-role ' +
+            'in 123456789012 en route to AdministratorAccess and corp-prod-data: 192[.]0[.]2[.]30 ' +
+            '(192.0.2.30), 192[.]0[.]2[.]31 (192.0.2.31), dev-user@corp.example, short name dev-user. ' +
+            'Keep hunts aligned to T1078.004.',
+        },
+      ],
+      articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
+      joinIocs: [
+        { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
+        { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
+        { type: 'email', value: 'dev-user@corp.example' },
+        { type: 'user', value: 'dev-user' },
+      ],
+      narrative: [
+        '123456789012',
+        'escalated-role',
+        'AdministratorAccess',
+        'corp-prod-data',
+        'T1078.004',
+      ],
+      tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security'],
+      mitre: ['T1078.004'],
+      categories: ['cloud-security', 'insider-threat'],
+      regions: ['north-america', 'global'],
+      historicSourceAliases: {
+        emerging: 'AWS IAM AssumeRole intel stream',
       },
-      {
-        title: 'Service-account lateral movement patterns toward cluster-admin bindings',
-        body:
-          'Lateral movement patterns for system:serviceaccount:default:compromised-sa (compromised-sa) ' +
-          'creating escalation-binding toward cluster-admin in prod-us-east-1. Correlate secret access ' +
-          'to db-credentials, exec-pod, and 192[.]0[.]2[.]60 (192.0.2.60). Techniques T1552.007, T1078, ' +
-          'T1610 remain primary.',
+      historicAnchors: {
+        slots: [1],
+        threatActors: ['TA-DEMO-SHADOW-ADMIN'],
+        hashIoc: { value: 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789' },
       },
-      {
-        title: 'Kubernetes secret theft advisory for db-credentials in shared namespaces',
-        body:
-          'Advisory on db-credentials theft via system:serviceaccount:default:compromised-sa ' +
-          '(compromised-sa) in prod-us-east-1. Monitor 192[.]0[.]2[.]60 (192.0.2.60), ' +
-          'escalation-binding creation, and exec-pod. Map detections to T1552.007, T1078, and T1610.',
-      },
-      {
-        title: 'Pod exec abuse notes tied to compromised-sa in prod-us-east-1',
-        body:
-          'Pod exec notes for exec-pod when driven by system:serviceaccount:default:compromised-sa ' +
-          '(compromised-sa) in prod-us-east-1. Related IOCs include 192[.]0[.]2[.]60 (192.0.2.60), ' +
-          'db-credentials access, and escalation-binding. Cover ATT&CK T1552.007, T1078, and T1610.',
-      },
-      {
-        title: 'RBAC escalation-binding detections for Kubernetes audit pipelines',
-        body:
-          'RBAC detections for escalation-binding in prod-us-east-1 involving ' +
-          'system:serviceaccount:default:compromised-sa (compromised-sa). Seed with IP ' +
-          '192[.]0[.]2[.]60 (192.0.2.60), db-credentials reads, and exec-pod. Techniques: T1552.007, ' +
-          'T1078, T1610.',
-      },
-      {
-        title: 'Container platform IOC pack: compromised-sa and 192.0.2.60 revisit',
-        body:
-          'IOC pack revisit for system:serviceaccount:default:compromised-sa (compromised-sa), ' +
-          '192[.]0[.]2[.]60 (192.0.2.60), prod-us-east-1, db-credentials, escalation-binding, and ' +
-          'exec-pod. Keep kubernetes.audit hunts on T1552.007, T1078, and T1610.',
-      },
-    ],
-    joinIocs: [
-      { type: 'ip', value: '192.0.2.60', defanged: '192[.]0[.]2[.]60' },
-      // Full SA principal — short "compromised-sa" alone is narrative only (not term-matchable).
-      { type: 'user', value: 'system:serviceaccount:default:compromised-sa' },
-    ],
-    narrative: [
-      'compromised-sa',
-      'prod-us-east-1',
-      'db-credentials',
-      'escalation-binding',
-      'exec-pod',
-      'T1552.007',
-      'T1078',
-      'T1610',
-    ],
-    tags: ['threat-intel', 'pack:kubernetes', 'kubernetes', 'containers'],
-    mitre: ['T1552.007', 'T1078', 'T1610'],
-    categories: ['cloud-security', 'malware'],
-    regions: ['north-america', 'europe'],
-    historicSourceAliases: {
-      emerging: 'Kubernetes cluster threat feed',
     },
-  },
-  'github-actions': {
-    packId: 'github-actions',
-    sourceId: 'ti-rss-github-actions',
-    name: 'GitHub supply-chain abuse feed',
-    title: 'Recurring contractor IOCs in GitHub supply-chain reporting',
-    body:
-      'Background research note for situational awareness. Prior public reporting has mentioned ' +
-      'contractor-style accounts such as dev-contractor-42@corp.example (user dev-contractor-42) in ' +
-      'GitHub org corp-example, source IP 192[.]0[.]2[.]70 (192.0.2.70), and invitee ' +
-      'malicious-actor-x@external.example as illustrative indicators. Historical write-ups also ' +
-      'referenced making corp-example/payment-service public, deploy_key.create, secret-scanning ' +
-      'alert dismissals, and fine-grained PATs. No immediate incident response is requested; this ' +
-      'catalogs previously reported indicators for optional hunting. Related ATT&CK references: ' +
-      'T1567, T1098, and T1195 in github.audit telemetry.',
-    historicArticles: [
-      {
-        title: 'Supply-chain bulletin: contractor invite patterns in corp-example org',
-        body:
-          'Bulletin on contractor invites in org corp-example. Watch ' +
-          'dev-contractor-42@corp.example (dev-contractor-42), invitee malicious-actor-x@external.example, ' +
-          'and source IP 192[.]0[.]2[.]70 (192.0.2.70) near payment-service visibility changes and ' +
-          'deploy_key.create. Optional hunts: T1567, T1098, T1195.',
+    {
+      packId: 'aws-iam',
+      reportIdSlug: 'aws-iam-ioc-only',
+      sourceId: 'aws-iam-ioc-only',
+      name: 'AWS IAM IOC digest feed',
+      title: 'IOC digest: observed infrastructure near AWS account 123456789012',
+      body:
+        // Tier 1-only fixture: pack-join IOCs hit environment telemetry, but the article is an
+        // IOC digest without CloudTrail API/behavior hunt language so Tier 2 should not execute-hit.
+        'This IOC digest lists infrastructure previously observed near AWS account 123456789012 for ' +
+        'monitoring coverage. Track source IPs 192[.]0[.]2[.]30 (192.0.2.30) and 192[.]0[.]2[.]31 ' +
+        '(192.0.2.31), mailbox and short name for user dev-user@corp.example (dev-user), and related ' +
+        'account identifiers. Apply as watchlist / indicator matching guidance only. This write-up does ' +
+        'not describe API call sequences, role-assumption tradecraft, logging changes, or ATT&CK technique ' +
+        'hunts, and it does not assert that customer production is under active compromise.',
+      historicArticles: [
+        {
+          title: 'Watchlist refresh: ingress IPs for account 123456789012',
+          body:
+            'Watchlist refresh for AWS account 123456789012 covering ingress IPs 192[.]0[.]2[.]30 ' +
+            '(192.0.2.30) and 192[.]0[.]2[.]31 (192.0.2.31) plus mailbox dev-user@corp.example and ' +
+            'short name dev-user. Use for indicator matching and enrichment only.',
+        },
+        {
+          title: 'Indicator bulletin: mailbox and IP join keys near 123456789012',
+          body:
+            'Indicator bulletin listing join keys near account 123456789012: 192[.]0[.]2[.]30 (192.0.2.30), ' +
+            '192[.]0[.]2[.]31 (192.0.2.31), and dev-user@corp.example (dev-user). No behavioral playbook ' +
+            'is included in this digest.',
+        },
+        {
+          title: 'Network IOC note for CloudTrail enrichment teams',
+          body:
+            'Network IOC note for enrichment teams: associate 192[.]0[.]2[.]30 (192.0.2.30) and ' +
+            '192[.]0[.]2[.]31 (192.0.2.31) with identity context for 123456789012 and ' +
+            'dev-user@corp.example (dev-user) when pivoting historical telemetry.',
+        },
+        {
+          title: 'Identity indicator card: dev-user near account 123456789012',
+          body:
+            'Identity indicator card for short name dev-user / mailbox dev-user@corp.example near ' +
+            'AWS account 123456789012. Correlate with previously listed IPs 192[.]0[.]2[.]30 (192.0.2.30) ' +
+            'and 192[.]0[.]2[.]31 (192.0.2.31) for watchlisting.',
+        },
+      ],
+      articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
+      joinIocs: [
+        { type: 'ip', value: '192.0.2.30', defanged: '192[.]0[.]2[.]30' },
+        { type: 'ip', value: '192.0.2.31', defanged: '192[.]0[.]2[.]31' },
+        { type: 'email', value: 'dev-user@corp.example' },
+        { type: 'user', value: 'dev-user' },
+      ],
+      // Intentionally omit CloudTrail API / ATT&CK tokens so Tier 2 lacks executable evidence quotes.
+      narrative: ['123456789012', 'dev-user@corp.example', 'dev-user'],
+      tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security', 'ioc-only'],
+      mitre: [],
+      categories: ['cloud-security', 'insider-threat'],
+      regions: ['north-america', 'global'],
+      historicSourceAliases: {
+        emerging: 'AWS IAM IOC digest stream',
       },
-      {
-        title: 'GitHub audit revisit: deploy_key.create around payment-service exposure',
-        body:
-          'Audit revisit for deploy_key.create when corp-example/payment-service exposure coincided ' +
-          'with dev-contractor-42@corp.example (dev-contractor-42) and malicious-actor-x@external.example ' +
-          'from 192[.]0[.]2[.]70 (192.0.2.70). Map github.audit to T1567, T1098, and T1195.',
-      },
-      {
-        title: 'PAT and secret-scanning dismissal patterns in contractor abuse reporting',
-        body:
-          'Reporting on fine-grained PATs and secret-scanning dismissals linked to ' +
-          'dev-contractor-42@corp.example (dev-contractor-42) in corp-example, IP ' +
-          '192[.]0[.]2[.]70 (192.0.2.70), and malicious-actor-x@external.example. payment-service and ' +
-          'deploy_key.create remain useful pivots for T1567, T1098, T1195.',
-      },
-      {
-        title: 'Org hardening note after public flip of corp-example/payment-service',
-        body:
-          'Hardening note after corp-example/payment-service was made public. Review activity from ' +
-          'dev-contractor-42@corp.example (dev-contractor-42), malicious-actor-x@external.example, and ' +
-          '192[.]0[.]2[.]70 (192.0.2.70), including deploy_key.create. Techniques T1567, T1098, T1195.',
-      },
-      {
-        title: 'External invitee tracking for malicious-actor-x across GitHub orgs',
-        body:
-          'Invitee tracking for malicious-actor-x@external.example alongside ' +
-          'dev-contractor-42@corp.example (dev-contractor-42) in corp-example. Correlate ' +
-          '192[.]0[.]2[.]70 (192.0.2.70), payment-service, and deploy_key.create. Hunt T1567, T1098, ' +
-          'and T1195 in github.audit.',
-      },
-      {
-        title: 'GitHub supply-chain IOC catalog refresh for optional hunting',
-        body:
-          'IOC catalog refresh: 192[.]0[.]2[.]70 (192.0.2.70), dev-contractor-42@corp.example, ' +
-          'dev-contractor-42, malicious-actor-x@external.example, corp-example, payment-service, and ' +
-          'deploy_key.create. Keep optional hunts on T1567, T1098, and T1195.',
-      },
-    ],
-    joinIocs: [
-      { type: 'ip', value: '192.0.2.70', defanged: '192[.]0[.]2[.]70' },
-      { type: 'email', value: 'dev-contractor-42@corp.example' },
-      { type: 'user', value: 'dev-contractor-42' },
-      { type: 'email', value: 'malicious-actor-x@external.example' },
-    ],
-    narrative: ['corp-example', 'payment-service', 'deploy_key.create', 'T1567', 'T1098', 'T1195'],
-    tags: ['threat-intel', 'pack:github-actions', 'github', 'supply-chain'],
-    mitre: ['T1567', 'T1098', 'T1195'],
-    categories: ['supply-chain', 'insider-threat'],
-    regions: ['north-america', 'europe'],
-    historicSourceAliases: {
-      emerging: 'GitHub Actions supply-chain watch',
     },
-  },
+    {
+      packId: 'aws-iam',
+      reportIdSlug: 'aws-iam-behavior-only',
+      sourceId: 'aws-iam-behavior-only',
+      name: 'AWS IAM behavior-led AssumeRole feed',
+      title:
+        'Behavior-led advisory: sts.AssumeRole into escalated-role without reusable hunting IOCs',
+      body:
+        // Technique/behavior-led: join IOCs are TEST-NET decoys that are not in pack
+        // telemetry, so Tier 1 IOC hunts stay clean while Tier 2 can still execute
+        // AssumeRole ES|QL against the shared aws-iam CloudTrail window.
+        'This behavior-led advisory describes sts.AssumeRole chaining into escalated-role ' +
+        'within AWS account 123456789012 (ATT&CK T1078.004) without publishing the production ' +
+        'ingress IPs used in the live environment. The write-up cites placeholder research ' +
+        'indicators 198[.]51[.]100[.]40 (198.51.100.40) and 198[.]51[.]100[.]41 (198.51.100.41) ' +
+        'plus analyst mailbox research-analyst@lab.example so article parsers still see IP join ' +
+        'IOCs, but those values are not present in seeded CloudTrail. Hunt the AssumeRole ' +
+        'behavior itself (event.action / aws.cloudtrail.event_name AssumeRole, event.provider ' +
+        'sts.amazonaws.com) toward escalated-role and host WIN-ANALYST01 rather than matching ' +
+        'the placeholder IPs. Map to T1078.004.',
+      historicArticles: [
+        {
+          title: 'Behavior note: AssumeRole into escalated-role without env-join IOCs',
+          body:
+            'Behavior note for account 123456789012 covering sts.AssumeRole into escalated-role ' +
+            '(T1078.004). Placeholder research IPs 198[.]51[.]100[.]40 (198.51.100.40) and ' +
+            '198[.]51[.]100[.]41 (198.51.100.41) plus research-analyst@lab.example appear for ' +
+            'article parsing only. Prefer hunting event.provider sts.amazonaws.com and ' +
+            'aws.cloudtrail.event_name AssumeRole toward WIN-ANALYST01 over matching those IPs.',
+        },
+        {
+          title: 'CloudTrail behavior brief: T1078.004 role assumption without live IOCs',
+          body:
+            'Brief on T1078.004 AssumeRole into escalated-role in 123456789012. Research ' +
+            'indicators 198[.]51[.]100[.]40 (198.51.100.40), 198[.]51[.]100[.]41 (198.51.100.41), ' +
+            'and research-analyst@lab.example are narrative-only. Detect via AssumeRole ' +
+            'behavior fields (event.provider sts.amazonaws.com) and host WIN-ANALYST01.',
+        },
+        {
+          title: 'Playbook: behavior-first AssumeRole hunts when join IOCs are absent',
+          body:
+            'Playbook for behavior-first AssumeRole hunts in account 123456789012 when reusable ' +
+            'join IOCs are absent. Seed articles may cite 198[.]51[.]100[.]40 (198.51.100.40), ' +
+            '198[.]51[.]100[.]41 (198.51.100.41), and research-analyst@lab.example. Execute ES|QL ' +
+            'for AssumeRole / escalated-role / WIN-ANALYST01 via event.provider sts.amazonaws.com ' +
+            '(T1078.004) instead of those IPs.',
+        },
+        {
+          title: 'Telemetry refresh: AssumeRole event.provider fields for Tier 2 execute',
+          body:
+            'Telemetry refresh for account 123456789012 reminding hunters that sts.amazonaws.com ' +
+            'AssumeRole events (aws.cloudtrail.event_name) toward escalated-role on WIN-ANALYST01 ' +
+            'prove T1078.004 even when article IOCs are placeholders 198[.]51[.]100[.]40 ' +
+            '(198.51.100.40), 198[.]51[.]100[.]41 (198.51.100.41), and research-analyst@lab.example.',
+        },
+      ],
+      articleUrl: 'https://www.elastic.co/security-labs/exploring-aws-sts-assumeroot',
+      joinIocsArticleOnly: true,
+      joinIocs: [
+        // TEST-NET-2 decoys: required in article bodies, deliberately absent from pack ECS.
+        { type: 'ip', value: '198.51.100.40', defanged: '198[.]51[.]100[.]40' },
+        { type: 'ip', value: '198.51.100.41', defanged: '198[.]51[.]100[.]41' },
+        { type: 'email', value: 'research-analyst@lab.example' },
+      ],
+      narrative: [
+        '123456789012',
+        'escalated-role',
+        'AssumeRole',
+        'sts.amazonaws.com',
+        'WIN-ANALYST01',
+        'T1078.004',
+      ],
+      tags: ['threat-intel', 'pack:aws-iam', 'aws', 'cloud-security', 'behavior-only'],
+      mitre: ['T1078.004'],
+      categories: ['cloud-security', 'insider-threat'],
+      regions: ['north-america', 'global'],
+      historicSourceAliases: {
+        emerging: 'AWS IAM behavior-led AssumeRole stream',
+      },
+    },
+  ],
+  kubernetes: [
+    {
+      packId: 'kubernetes',
+      reportIdSlug: 'kubernetes',
+      sourceId: 'ti-rss-kubernetes',
+      name: 'Kubernetes audit abuse feed',
+      title: 'Kubernetes service-account abuse indicators observed near prod-us-east-1',
+      body:
+        'This advisory summarizes indicators previously associated with Kubernetes audit abuse for ' +
+        'detection coverage. Watch for service account system:serviceaccount:default:compromised-sa ' +
+        '(short name compromised-sa) in cluster prod-us-east-1 accessing secrets such as ' +
+        'db-credentials, creating clusterrolebindings/escalation-binding toward cluster-admin, and ' +
+        'traffic from 192[.]0[.]2[.]60 (192.0.2.60). Related behaviors may include pod exec against ' +
+        'exec-pod and kube-system ConfigMap changes. Apply as monitoring guidance; the advisory does ' +
+        'not claim your cluster is under active compromise. Hunt ATT&CK T1552.007, T1078, and T1610 ' +
+        'in kubernetes.audit logs.',
+      historicArticles: [
+        {
+          title: 'Cluster audit review: compromised-sa secret reads in prod-us-east-1',
+          body:
+            'Audit review for cluster prod-us-east-1 where system:serviceaccount:default:compromised-sa ' +
+            '(compromised-sa) read db-credentials and created escalation-binding. Source IP ' +
+            '192[.]0[.]2[.]60 (192.0.2.60) also appeared near exec-pod activity. Hunt T1552.007, T1078, ' +
+            'and T1610 in kubernetes.audit.',
+        },
+        {
+          title: 'Service-account lateral movement patterns toward cluster-admin bindings',
+          body:
+            'Lateral movement patterns for system:serviceaccount:default:compromised-sa (compromised-sa) ' +
+            'creating escalation-binding toward cluster-admin in prod-us-east-1. Correlate secret access ' +
+            'to db-credentials, exec-pod, and 192[.]0[.]2[.]60 (192.0.2.60). Techniques T1552.007, T1078, ' +
+            'T1610 remain primary.',
+        },
+        {
+          title: 'Kubernetes secret theft advisory for db-credentials in shared namespaces',
+          body:
+            'Advisory on db-credentials theft via system:serviceaccount:default:compromised-sa ' +
+            '(compromised-sa) in prod-us-east-1. Monitor 192[.]0[.]2[.]60 (192.0.2.60), ' +
+            'escalation-binding creation, and exec-pod. Map detections to T1552.007, T1078, and T1610.',
+        },
+        {
+          title: 'Pod exec abuse notes tied to compromised-sa in prod-us-east-1',
+          body:
+            'Pod exec notes for exec-pod when driven by system:serviceaccount:default:compromised-sa ' +
+            '(compromised-sa) in prod-us-east-1. Related IOCs include 192[.]0[.]2[.]60 (192.0.2.60), ' +
+            'db-credentials access, and escalation-binding. Cover ATT&CK T1552.007, T1078, and T1610.',
+        },
+        {
+          title: 'RBAC escalation-binding detections for Kubernetes audit pipelines',
+          body:
+            'RBAC detections for escalation-binding in prod-us-east-1 involving ' +
+            'system:serviceaccount:default:compromised-sa (compromised-sa). Seed with IP ' +
+            '192[.]0[.]2[.]60 (192.0.2.60), db-credentials reads, and exec-pod. Techniques: T1552.007, ' +
+            'T1078, T1610.',
+        },
+        {
+          title: 'Container platform IOC pack: compromised-sa and 192.0.2.60 revisit',
+          body:
+            'IOC pack revisit for system:serviceaccount:default:compromised-sa (compromised-sa), ' +
+            '192[.]0[.]2[.]60 (192.0.2.60), prod-us-east-1, db-credentials, escalation-binding, and ' +
+            'exec-pod. Keep kubernetes.audit hunts on T1552.007, T1078, and T1610.',
+        },
+      ],
+      articleUrl: 'https://www.elastic.co/security-labs/teampcp-container-attack-scenario',
+      joinIocs: [
+        { type: 'ip', value: '192.0.2.60', defanged: '192[.]0[.]2[.]60' },
+        // Full SA principal — short "compromised-sa" alone is narrative only (not term-matchable).
+        { type: 'user', value: 'system:serviceaccount:default:compromised-sa' },
+      ],
+      narrative: [
+        'compromised-sa',
+        'prod-us-east-1',
+        'db-credentials',
+        'escalation-binding',
+        'exec-pod',
+        'T1552.007',
+        'T1078',
+        'T1610',
+      ],
+      tags: ['threat-intel', 'pack:kubernetes', 'kubernetes', 'containers'],
+      mitre: ['T1552.007', 'T1078', 'T1610'],
+      categories: ['cloud-security', 'malware'],
+      regions: ['north-america', 'europe'],
+      historicSourceAliases: {
+        emerging: 'Kubernetes cluster threat feed',
+      },
+    },
+  ],
+  'github-actions': [
+    {
+      packId: 'github-actions',
+      reportIdSlug: 'github-actions',
+      sourceId: 'ti-rss-github-actions',
+      name: 'GitHub supply-chain abuse feed',
+      title: 'Recurring contractor IOCs in GitHub supply-chain reporting',
+      body:
+        'Background research note for situational awareness. Prior public reporting has mentioned ' +
+        'contractor-style accounts such as dev-contractor-42@corp.example (user dev-contractor-42) in ' +
+        'GitHub org corp-example, source IP 192[.]0[.]2[.]70 (192.0.2.70), and invitee ' +
+        'malicious-actor-x@external.example as illustrative indicators. Historical write-ups also ' +
+        'referenced making corp-example/payment-service public, deploy_key.create, secret-scanning ' +
+        'alert dismissals, and fine-grained PATs. No immediate incident response is requested; this ' +
+        'catalogs previously reported indicators for optional hunting. Related ATT&CK references: ' +
+        'T1567, T1098, and T1195 in github.audit telemetry.',
+      historicArticles: [
+        {
+          title: 'Supply-chain bulletin: contractor invite patterns in corp-example org',
+          body:
+            'Bulletin on contractor invites in org corp-example. Watch ' +
+            'dev-contractor-42@corp.example (dev-contractor-42), invitee malicious-actor-x@external.example, ' +
+            'and source IP 192[.]0[.]2[.]70 (192.0.2.70) near payment-service visibility changes and ' +
+            'deploy_key.create. Optional hunts: T1567, T1098, T1195.',
+        },
+        {
+          title: 'GitHub audit revisit: deploy_key.create around payment-service exposure',
+          body:
+            'Audit revisit for deploy_key.create when corp-example/payment-service exposure coincided ' +
+            'with dev-contractor-42@corp.example (dev-contractor-42) and malicious-actor-x@external.example ' +
+            'from 192[.]0[.]2[.]70 (192.0.2.70). Map github.audit to T1567, T1098, and T1195.',
+        },
+        {
+          title: 'PAT and secret-scanning dismissal patterns in contractor abuse reporting',
+          body:
+            'Reporting on fine-grained PATs and secret-scanning dismissals linked to ' +
+            'dev-contractor-42@corp.example (dev-contractor-42) in corp-example, IP ' +
+            '192[.]0[.]2[.]70 (192.0.2.70), and malicious-actor-x@external.example. payment-service and ' +
+            'deploy_key.create remain useful pivots for T1567, T1098, T1195.',
+        },
+        {
+          title: 'Org hardening note after public flip of corp-example/payment-service',
+          body:
+            'Hardening note after corp-example/payment-service was made public. Review activity from ' +
+            'dev-contractor-42@corp.example (dev-contractor-42), malicious-actor-x@external.example, and ' +
+            '192[.]0[.]2[.]70 (192.0.2.70), including deploy_key.create. Techniques T1567, T1098, T1195.',
+        },
+        {
+          title: 'External invitee tracking for malicious-actor-x across GitHub orgs',
+          body:
+            'Invitee tracking for malicious-actor-x@external.example alongside ' +
+            'dev-contractor-42@corp.example (dev-contractor-42) in corp-example. Correlate ' +
+            '192[.]0[.]2[.]70 (192.0.2.70), payment-service, and deploy_key.create. Hunt T1567, T1098, ' +
+            'and T1195 in github.audit.',
+        },
+        {
+          title: 'GitHub supply-chain IOC catalog refresh for optional hunting',
+          body:
+            'IOC catalog refresh: 192[.]0[.]2[.]70 (192.0.2.70), dev-contractor-42@corp.example, ' +
+            'dev-contractor-42, malicious-actor-x@external.example, corp-example, payment-service, and ' +
+            'deploy_key.create. Keep optional hunts on T1567, T1098, and T1195.',
+        },
+      ],
+      articleUrl: 'https://www.elastic.co/security-labs/axios-supply-chain-compromise-detections',
+      joinIocs: [
+        { type: 'ip', value: '192.0.2.70', defanged: '192[.]0[.]2[.]70' },
+        { type: 'email', value: 'dev-contractor-42@corp.example' },
+        { type: 'user', value: 'dev-contractor-42' },
+        { type: 'email', value: 'malicious-actor-x@external.example' },
+      ],
+      narrative: [
+        'corp-example',
+        'payment-service',
+        'deploy_key.create',
+        'T1567',
+        'T1098',
+        'T1195',
+      ],
+      tags: ['threat-intel', 'pack:github-actions', 'github', 'supply-chain'],
+      mitre: ['T1567', 'T1098', 'T1195'],
+      categories: ['supply-chain', 'insider-threat'],
+      regions: ['north-america', 'europe'],
+      historicSourceAliases: {
+        emerging: 'GitHub Actions supply-chain watch',
+      },
+    },
+  ],
 };
 export const allThreatIntelSourceIds = (): string[] =>
-  Object.values(PACK_TI_SCENARIOS).map((s) => s.sourceId);
+  Object.values(PACK_TI_SCENARIOS)
+    .flat()
+    .map((s) => s.sourceId);
 
 export const resolveThreatIntelPackIds = (packIds: string[]): string[] => {
   if (packIds.length > 0) return packIds;
@@ -655,6 +956,8 @@ export interface PackRssReportItem {
   /** Stable suffix for RSS guid (`ti-report-<pack>-<itemKey>`). */
   itemKey: string;
   reportTimestamp: string;
+  /** Present only on the historic slots this scenario's historicAnchors.slots names. */
+  anchors?: PackTiHistoricAnchors;
 }
 
 export interface HistoricThreatReportDoc {
@@ -678,6 +981,8 @@ export interface HistoricThreatReportDoc {
     ttps: { techniques: string[] };
     iocs: Array<{ type: string; value: string; defanged?: string }>;
     relevance: number;
+    /** Report-only correlation anchor (Phase 3); only present on anchored historic slots. */
+    threat_actors?: string[];
   };
   geography?: { regions: string[] };
   lineage: {
@@ -738,12 +1043,14 @@ export const reportTimestampsForWindow = (
 
 /** Historic Hub report slots across the full generate window (not written into RSS). */
 export const buildPackHistoricReportItemsForScenario = ({
+  scenario,
   packIndex,
   packCount,
   startMs,
   endMs,
   reportsPerPack = THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
 }: {
+  scenario: PackTiScenario;
   packIndex: number;
   packCount: number;
   startMs: number;
@@ -751,10 +1058,17 @@ export const buildPackHistoricReportItemsForScenario = ({
   reportsPerPack?: number;
 }): PackRssReportItem[] => {
   const ratios = reportTimestampRatiosForPack(packIndex, packCount, reportsPerPack);
-  return reportTimestampsForWindow(startMs, endMs, ratios).map((reportTimestamp, itemIndex) => ({
-    itemKey: `historic-${String(itemIndex + 1).padStart(2, '0')}`,
-    reportTimestamp,
-  }));
+  return reportTimestampsForWindow(startMs, endMs, ratios).map((reportTimestamp, itemIndex) => {
+    const slot = itemIndex + 1;
+    const anchors = scenario.historicAnchors?.slots.includes(slot)
+      ? scenario.historicAnchors
+      : undefined;
+    return {
+      itemKey: `historic-${String(slot).padStart(2, '0')}`,
+      reportTimestamp,
+      ...(anchors ? { anchors } : {}),
+    };
+  });
 };
 
 /**
@@ -784,9 +1098,10 @@ export const buildPackRssCurrentReportItems = ({
 export const buildPackRssReportItemsForScenario = buildPackHistoricReportItemsForScenario;
 
 /**
- * Offline mock "upstream article" for Intelligence Hub's external link.
- * Becomes report `source.url` after mustard RSS ingestion. Requires mustard
- * `isBrowsableReportUrl` to allow `data:` (http/https alone hides the link).
+ * Builds an inline `data:text/html` article for directly seeded (non-RSS) reports.
+ * These fixtures have no real server to host the content, so the article body is
+ * embedded in the URL. RSS-ingested reports use `scenario.articleUrl` (http/https)
+ * as `source.url` instead and will show a browsable link in Intelligence Hub.
  */
 export const buildPackArticleDataUrl = (
   scenario: PackTiScenario,
@@ -832,7 +1147,7 @@ export const buildPackRssDataUrl = ({
   }
   const mitreLine = scenario.mitre.length ? ` Techniques: ${scenario.mitre.join(', ')}.` : '';
   const description = `${scenario.body}${mitreLine}`;
-  const articleLink = xmlEscape(buildPackArticleDataUrl(scenario));
+  const articleLink = xmlEscape(scenario.articleUrl);
   const itemsXml = reportItems
     .map((item) => {
       const guid = `ti-report-${scenario.packId}-${item.itemKey}`;
@@ -888,7 +1203,7 @@ export const buildHistoricThreatReportDoc = ({
       : undefined;
   const title = historicVariant?.title ?? scenario.title;
   const articleBody = historicVariant?.body ?? scenario.body;
-  const guid = `ti-report-${scenario.packId}-${item.itemKey}`;
+  const guid = `ti-report-${scenario.reportIdSlug}-${item.itemKey}`;
   const articleUrl = buildPackArticleDataUrl(
     scenario,
     historicVariant ? { title, body: articleBody } : undefined
@@ -936,12 +1251,16 @@ export const buildHistoricThreatReportDoc = ({
     doc.extracted = {
       categories,
       ttps: { techniques: [...scenario.mitre] },
-      iocs: scenario.joinIocs.map((ioc) => ({
-        type: ioc.type,
-        value: ioc.value,
-        ...(ioc.defanged ? { defanged: ioc.defanged } : {}),
-      })),
+      iocs: [
+        ...scenario.joinIocs.map((ioc) => ({
+          type: ioc.type,
+          value: ioc.value,
+          ...(ioc.defanged ? { defanged: ioc.defanged } : {}),
+        })),
+        ...(item.anchors ? [{ type: 'hash', value: item.anchors.hashIoc.value }] : []),
+      ],
       relevance: 0.72,
+      ...(item.anchors ? { threat_actors: [...item.anchors.threatActors] } : {}),
     };
     doc.geography = { regions: [region] };
     doc.lineage.extracted_at = item.reportTimestamp;
@@ -1018,8 +1337,8 @@ export const cleanThreatIntelFixtures = async ({
 }): Promise<void> => {
   const scenarios =
     packIds && packIds.length > 0
-      ? packIds.map((id) => PACK_TI_SCENARIOS[id]).filter(Boolean)
-      : Object.values(PACK_TI_SCENARIOS);
+      ? packIds.flatMap((id) => PACK_TI_SCENARIOS[id] ?? [])
+      : Object.values(PACK_TI_SCENARIOS).flat();
   const sourceIds = [...scenarios.map((s) => s.sourceId), ...LEGACY_THREAT_INTEL_SOURCE_IDS];
   const subscriptionIds = [THREAT_INTEL_SUBSCRIPTION_ID, ...LEGACY_THREAT_INTEL_SUBSCRIPTION_IDS];
 
@@ -1091,6 +1410,7 @@ const seedHistoricThreatReports = async ({
     const currentItems = buildPackRssCurrentReportItems({ endMs });
     const feedUrl = buildPackRssDataUrl({ scenario, reportItems: currentItems });
     const historicItems = buildPackHistoricReportItemsForScenario({
+      scenario,
       packIndex,
       packCount: scenarios.length,
       startMs: historicStartMs,
@@ -1116,10 +1436,15 @@ const seedHistoricThreatReports = async ({
   if (docs.length === 0) return 0;
 
   try {
-    const bulkBody = docs.flatMap((doc) => [{ create: { _index: THREAT_REPORTS_INDEX } }, doc]);
+    // Explicit `index` op with `_id = guid` makes re-seeding idempotent (overwrites
+    // the same up-to-99-per-scenario ids instead of duplicating on each run).
+    const bulkBody = docs.flatMap((doc) => [
+      { index: { _index: THREAT_REPORTS_INDEX, _id: doc.lineage.source_doc_ref.id } },
+      doc,
+    ]);
     const bulkResponse = await esClient.bulk({ refresh: true, body: bulkBody });
     if (bulkResponse.errors) {
-      const firstError = bulkResponse.items.find((item) => item.create?.error)?.create?.error;
+      const firstError = bulkResponse.items.find((item) => item.index?.error)?.index?.error;
       throw new Error(
         `Historic threat-report bulk index had errors: ${
           firstError?.reason ?? firstError?.type ?? 'unknown'
@@ -1168,12 +1493,12 @@ export const seedThreatIntelForPacks = async ({
   historicReportsPerPack?: number;
 }): Promise<{ sourceCount: number; reportItemCount: number; historicReportCount: number }> => {
   const resolved = resolveThreatIntelPackIds(packIds);
-  const scenarios = resolved.map((id) => {
-    const scenario = PACK_TI_SCENARIOS[id];
-    if (!scenario) {
+  const scenarios = resolved.flatMap((id) => {
+    const scenariosForPack = PACK_TI_SCENARIOS[id];
+    if (!scenariosForPack || scenariosForPack.length === 0) {
       throw new Error(`No threat-intel RSS scenario for pack "${id}"`);
     }
-    return scenario;
+    return scenariosForPack;
   });
 
   log.info(`Seeding threat-intel RSS fixtures for packs: ${resolved.join(', ')}`);
@@ -1188,7 +1513,16 @@ export const seedThreatIntelForPacks = async ({
     // RSS stays current-only so workflow ingest does not replay the historic archive.
     const reportItems = buildPackRssCurrentReportItems({ endMs });
     reportItemCount += reportItems.length;
-    const url = buildPackRssDataUrl({ scenario, reportItems });
+    // #291836 moved feed-URL resolution out of the sources index and into the
+    // code-authoritative CATALOG_SOURCE_URLS map, keyed by source id (not by any
+    // per-document field). The `.kibana-threat-intel-sources` mapping is `dynamic:
+    // strict` with no `config` property, so a document carrying `config: { url }`
+    // throws on index() and aborts the whole seeding call before historic reports
+    // are ever written. `buildPackRssDataUrl`'s `data:` URL still exists for the
+    // rss adapter to decode locally, but it cannot be persisted on the source
+    // document anymore — it is threaded through some other test-only path if a
+    // future scenario needs it; for now the fixture just stops writing it.
+    buildPackRssDataUrl({ scenario, reportItems });
     await esClient.index({
       index: THREAT_INTEL_SOURCES_INDEX,
       id: scenario.sourceId,
@@ -1197,7 +1531,6 @@ export const seedThreatIntelForPacks = async ({
         adapter_type: 'rss',
         name: scenario.name,
         enabled: true,
-        config: { url },
         tags: scenario.tags,
         space_id: spaceId,
         created_at: sourceTimestamp,
