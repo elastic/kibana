@@ -259,6 +259,68 @@ describe('StepIoService', () => {
       expect(service.getDataSetVariables()).toEqual({ foo: 1 });
     });
 
+    describe('getDataSetVariables scoped to parallel branches', () => {
+      const branchFrames = (fanOut: string, branch: number): StackFrame[] => [
+        {
+          stepId: fanOut,
+          nestedScopes: [
+            {
+              nodeId: `enter-${fanOut}`,
+              nodeType: 'enter-parallel',
+              scopeId: branch.toString(),
+            },
+          ],
+        },
+      ];
+      const seedDataSet = (
+        state: WorkflowExecutionState,
+        service: StepIoService,
+        id: string,
+        output: JsonValue,
+        scopeStack: StackFrame[]
+      ) => {
+        state.upsertStep({
+          id,
+          stepId: id,
+          stepType: 'data.set',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack,
+        });
+        service.setStepOutput(id, output);
+      };
+
+      it('hides sibling branch writes and keeps root and earlier fan-out writes', () => {
+        const { state, service } = buildHarness();
+        seedDataSet(state, service, 'root', { who: 'root', rootOnly: 'kept' }, []);
+        seedDataSet(state, service, 'a-0', { who: 'a-0' }, branchFrames('fanOutA', 0));
+        seedDataSet(state, service, 'a-1', { who: 'a-1' }, branchFrames('fanOutA', 1));
+
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 0))).toEqual({
+          who: 'a-0',
+          rootOnly: 'kept',
+        });
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 2))).toEqual({
+          who: 'root',
+          rootOnly: 'kept',
+        });
+        expect(service.getDataSetVariables(branchFrames('fanOutB', 0))).toEqual({
+          who: 'a-1',
+          rootOnly: 'kept',
+        });
+        expect(service.getDataSetVariables()).toEqual({ who: 'a-1', rootOnly: 'kept' });
+      });
+
+      it('invalidates every branch view on a new data.set write', () => {
+        const { state, service } = buildHarness();
+        seedDataSet(state, service, 'a-0', { who: 'first' }, branchFrames('fanOutA', 0));
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 0))).toEqual({ who: 'first' });
+
+        seedDataSet(state, service, 'a-0-again', { who: 'second' }, branchFrames('fanOutA', 0));
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 0))).toEqual({ who: 'second' });
+        expect(service.getDataSetVariables(branchFrames('fanOutA', 1))).toEqual({});
+      });
+    });
+
     it('setStepOutput writes the output through state and records the size', () => {
       const { state, service } = buildHarness();
       // The runtime would write the lifecycle fields first; tests exercise

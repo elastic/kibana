@@ -17,6 +17,8 @@ import {
   extractReferencedStepIds,
   extractReferencedStepIdsFromVariables,
 } from './extract_referenced_step_ids';
+import type { ParallelBranchScope } from './parallel_branch_scope';
+import { areParallelBranchesCompatible, getParallelBranchScopes } from './parallel_branch_scope';
 import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_types';
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -82,7 +84,7 @@ export interface StepIoReader {
         error: SerializedError | undefined;
       }
     | undefined;
-  getDataSetVariables(): Record<string, unknown>;
+  getDataSetVariables(stackFrames?: readonly StackFrame[]): Record<string, unknown>;
 }
 
 /**
@@ -276,12 +278,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   private readonly dataSetOutputs = new Map<string, JsonValue | null>();
   /**
-   * Memoised aggregation of {@link dataSetOutputs}. Invalidated on every
-   * `data.set` write — that is what makes the read path cheap in the common
-   * case (the same context manager calls `getVariables` 5–10× per step but
-   * the underlying data only changes when a `data.set` step runs).
+   * Memoised aggregations of {@link dataSetOutputs}, keyed by the reader's
+   * `parallel` branch lineage. Invalidated on every `data.set` write — that is
+   * what makes the read path cheap in the common case (the same context
+   * manager calls `getVariables` 5–10× per step but the underlying data only
+   * changes when a `data.set` step runs).
    */
-  private dataSetVariablesCache: Record<string, unknown> | undefined;
+  private readonly dataSetVariablesCache = new Map<string, Record<string, unknown>>();
 
   constructor(init: StepIoServiceInit) {
     this.stepRepository = init.stepRepository;
@@ -345,20 +348,43 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * matches `globalExecutionIndex` order) — `O(K)` where K is the number of
    * `data.set` executions, not the total number of step executions. The
    * result is memoised because the same context manager calls
-   * `getVariables()` 5–10× per step.
+   * `getVariables()` 5–10× per step. `stackFrames` skip `data.set` writes
+   * made by a sibling `parallel` branch of the reader.
    */
-  public getDataSetVariables(): Record<string, unknown> {
-    if (this.dataSetVariablesCache !== undefined) {
-      return this.dataSetVariablesCache;
+  public getDataSetVariables(stackFrames?: readonly StackFrame[]): Record<string, unknown> {
+    const readerBranchScopes = stackFrames ? getParallelBranchScopes(stackFrames) : [];
+    const cacheKey = JSON.stringify(readerBranchScopes);
+    const cached = this.dataSetVariablesCache.get(cacheKey);
+    if (cached !== undefined) {
+      return cached;
     }
     const result: Record<string, unknown> = {};
-    for (const output of this.dataSetOutputs.values()) {
-      if (output != null && typeof output === 'object' && !Array.isArray(output)) {
+    for (const [stepExecutionId, output] of this.dataSetOutputs) {
+      if (
+        output != null &&
+        typeof output === 'object' &&
+        !Array.isArray(output) &&
+        this.isVisibleToBranches(stepExecutionId, readerBranchScopes)
+      ) {
         Object.assign(result, output);
       }
     }
-    this.dataSetVariablesCache = result;
+    this.dataSetVariablesCache.set(cacheKey, result);
     return result;
+  }
+
+  private isVisibleToBranches(
+    stepExecutionId: string,
+    readerBranchScopes: readonly ParallelBranchScope[]
+  ): boolean {
+    if (readerBranchScopes.length === 0) {
+      return true;
+    }
+    const writerScopeStack = this.state.getStepExecution(stepExecutionId)?.scopeStack ?? [];
+    return areParallelBranchesCompatible(
+      readerBranchScopes,
+      getParallelBranchScopes(writerScopeStack)
+    );
   }
 
   /**
@@ -369,7 +395,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   private recordDataSetOutput(stepExecutionId: string, output: JsonValue | null): void {
     this.dataSetOutputs.set(stepExecutionId, output);
-    this.dataSetVariablesCache = undefined;
+    this.dataSetVariablesCache.clear();
   }
 
   // ----- IO writes ----------------------------------------------------------
@@ -538,7 +564,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   public async load(): Promise<void> {
     this.dataSetOutputs.clear();
-    this.dataSetVariablesCache = undefined;
+    this.dataSetVariablesCache.clear();
 
     const stepExecutionIds = this.state.getWorkflowExecutionStepExecutionIds();
     if (!stepExecutionIds) {

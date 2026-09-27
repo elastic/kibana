@@ -446,6 +446,91 @@ steps:
     });
   });
 
+  // A branch reading `{{ variables.* }}` used to see a concurrent sibling
+  // branch's `data.set` of the same key.
+  describe.each([
+    { concurrency: 3, pause: false, label: 'all branches in one window' },
+    { concurrency: 2, pause: false, label: 'branches spread across windows' },
+    { concurrency: 3, pause: true, label: 'read after resume' },
+  ])('branch variables are scoped to the branch ($label)', ({ concurrency, pause }) => {
+    let workflowRunFixture: WorkflowRunFixture;
+    const items = ['A', 'B', 'C'];
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      const pauseStep = `
+      - name: pause
+        type: wait
+        with:
+          duration: 20m`;
+      const yaml = `
+consts:
+  items: '${JSON.stringify(items)}'
+steps:
+  - name: setRoot
+    type: data.set
+    with:
+      who: root
+      rootOnly: kept
+  - name: fanOutA
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: ${concurrency} }
+    steps:
+      - name: setWho
+        type: data.set
+        with:
+          who: '{{ foreach.item }}'${pause ? pauseStep : ''}
+      - name: readBack
+        type: data.set
+        with:
+          myId: '{{ foreach.item }}'
+          who: '{{ variables.who }}'
+          rootOnly: '{{ variables.rootOnly }}'
+  - name: fanOutB
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: ${concurrency} }
+    steps:
+      - name: readPrevious
+        type: data.set
+        with:
+          got: '{{ variables.who }}'
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      for (let guard = 0; guard < 10; guard++) {
+        if (getExecution(workflowRunFixture)?.status !== ExecutionStatus.WAITING) break;
+        await workflowRunFixture.resumeWorkflowAtScheduledTime();
+      }
+    });
+
+    it('completes the workflow', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('resolves variables to the branch own data.set and keeps root variables visible', () => {
+      const readBacks = stepExecutionsFor(workflowRunFixture, 'readBack').map(
+        (execution) => execution.output as { myId: string; who: string; rootOnly: string }
+      );
+      expect(readBacks).toHaveLength(items.length);
+      readBacks.forEach(({ myId, who, rootOnly }) => {
+        expect(who).toBe(myId);
+        expect(rootOnly).toBe('kept');
+      });
+    });
+
+    it('keeps an earlier fan-out branch variable visible inside a later fan-out', () => {
+      const reads = stepExecutionsFor(workflowRunFixture, 'readPrevious').map(
+        (execution) => (execution.output as { got: string }).got
+      );
+      expect(reads).toHaveLength(items.length);
+      reads.forEach((got) => {
+        expect(got).toMatch(/^[ABC]$/);
+      });
+    });
+  });
+
   describe('suspendable (poll) branches resume across ticks', () => {
     let workflowRunFixture: WorkflowRunFixture;
     const items = ['x', 'y'];
@@ -979,6 +1064,52 @@ steps:
           params: { message: 'hash:abc123' },
         })
       );
+    });
+  });
+
+  describe('branches nested in a foreach keep the outer foreach context', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      const yaml = `
+steps:
+  - name: outer
+    type: foreach
+    foreach: '["x","y"]'
+    steps:
+      - name: enrich
+        type: parallel
+        branches:
+          - name: left
+            steps:
+              - name: readLeft
+                type: data.set
+                with:
+                  got: '{{ foreach.item }}'
+          - name: right
+            steps:
+              - name: readRight
+                type: data.set
+                with:
+                  got: '{{ foreach.item }}'
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      await driveToTerminal(workflowRunFixture);
+    });
+
+    it('completes the workflow', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('renders {{ foreach.item }} from the enclosing foreach in every branch', () => {
+      for (const stepId of ['readLeft', 'readRight']) {
+        const reads = stepExecutionsFor(workflowRunFixture, stepId).map(
+          (execution) => (execution.output as { got: string }).got
+        );
+        expect(reads).toEqual(['x', 'y']);
+      }
     });
   });
 
