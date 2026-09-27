@@ -316,21 +316,15 @@ export const TakeActionDropdown = memo(
         ecsRowData: dataAsNestedObject,
       });
 
-    const documents = useMemo(
-      () => [
-        {
-          _id: dataAsNestedObject._id,
-          _index: dataAsNestedObject._index ?? '',
-          ...(searchHit?._source ?? {}),
-        },
-      ],
-      [dataAsNestedObject._id, dataAsNestedObject._index, searchHit]
+    const documentIds = useMemo(
+      () => [{ _id: dataAsNestedObject._id, _index: dataAsNestedObject._index ?? '' }],
+      [dataAsNestedObject._id, dataAsNestedObject._index]
     );
 
     const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
       useRunDocumentWorkflowPanel({
         closePopover: closePopoverHandler,
-        documents,
+        documentIds,
       });
 
     const showAlertActions = !isEvent && Boolean(alertSummaryData.ruleId);
