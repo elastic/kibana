@@ -31,7 +31,7 @@ import { AccessControlForm } from '@kbn/entity-access-control-ui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   WorkflowAccessControlRole,
@@ -152,17 +152,6 @@ export const WorkflowAccessControlModal = ({
         </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
-        <KbnWarningCallout
-          size="s"
-          title={i18n.translate('workflows.access.executionDataWarningTitle', {
-            defaultMessage: 'Private access does not restrict execution data queries',
-          })}
-          text={i18n.translate('workflows.access.executionDataWarningDescription', {
-            defaultMessage:
-              'Workflow access rules apply in the Workflows UI and APIs. Users with Elasticsearch access to execution or step data can still read it through Discover, ES|QL, or direct queries, even when the workflow is private.',
-          })}
-        />
-        <EuiSpacer size="m" />
         {(hasError || isSearchError || isCurrentProfileError) && (
           <>
             <KbnDangerCallout
