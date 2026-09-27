@@ -13,6 +13,7 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
+import { hasWorkflowAccess } from './lib/has_workflow_access';
 import {
   getWorkflowOriginalRequest,
   withWorkflowExecutionIdentity,
@@ -99,4 +100,35 @@ describe('workflow service account execution', () => {
     );
     expect(run).not.toHaveBeenCalled();
   });
+
+  it.each(['owner', 'unlisted'])(
+    'checks private workflow access as the original caller %s during service-account execution',
+    async (profileId) => {
+      const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+      const request = httpServerMock.createKibanaRequest();
+      const scopedRequest = httpServerMock.createKibanaRequest();
+      core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
+        async (_params, run) => run(scopedRequest)
+      );
+      core.userProfile.getCurrentProfileId.mockImplementation(async ({ request: actual }) =>
+        actual === request ? profileId : null
+      );
+
+      const allowed = await withWorkflowExecutionIdentity(
+        core,
+        execution('account-a'),
+        request,
+        (actual) =>
+          hasWorkflowAccess(
+            { owner_id: 'owner', access_control: { access_mode: 'private', entries: [] } },
+            actual,
+            core
+          )
+      );
+
+      expect(allowed).toBe(profileId === 'owner');
+      expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
+    }
+  );
 });

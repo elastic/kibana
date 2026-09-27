@@ -41,6 +41,12 @@ export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
           request: {
             params: idParamSchema,
             query: schema.object({
+              acknowledgeAclLoss: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description: 'Confirm that permanent deletion removes workflow access controls.',
+                },
+              }),
               force: schema.boolean({
                 defaultValue: false,
                 meta: {
@@ -53,11 +59,14 @@ export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
-        const { force } = request.query;
+        const { force, acknowledgeAclLoss } = request.query;
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          const result = await api.deleteWorkflows([id], spaceId, request, { force });
+          const result = await api.deleteWorkflows([id], spaceId, request, {
+            force,
+            acknowledgeAclLoss,
+          });
           if (result.failures.length > 0) {
             throw Boom.internal(result.failures[0].error);
           }
