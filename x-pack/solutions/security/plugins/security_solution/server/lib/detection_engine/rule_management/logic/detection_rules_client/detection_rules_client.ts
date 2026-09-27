@@ -53,6 +53,7 @@ import {
   sendRuleRestoreTelemetryEvent,
   sendRuleRestoreErrorTelemetryEvent,
 } from './restore_telemetry';
+import { createDefaultExternalRuleSource } from './mergers/rule_source/create_default_external_rule_source';
 import { sendRuleLifecycleTelemetryEvent } from './rule_lifecycle_telemetry';
 import {
   DETECTION_RULE_REVERT_EVENT,
@@ -151,7 +152,30 @@ export const createDetectionRulesClient = ({
 
     async bulkCreatePrebuiltRules(args: BulkCreatePrebuiltRulesArgs) {
       return withSecuritySpan('DetectionRulesClient.bulkCreatePrebuiltRules', async () => {
-        return bulkCreatePrebuiltRules({ actionsClient, rulesClient, mlAuthz, args });
+        const result = await bulkCreatePrebuiltRules({ actionsClient, rulesClient, mlAuthz, args });
+
+        if (analytics) {
+          const typeByRule = new Map(
+            args.rules.map((rule) => [`${rule.rule_id}:${rule.version}`, rule.type])
+          );
+          for (const item of result.results) {
+            const type = typeByRule.get(`${item.rule_id}:${item.version}`);
+            if (type) {
+              sendRuleLifecycleTelemetryEvent(
+                analytics,
+                DETECTION_RULE_INSTALL_EVENT,
+                {
+                  id: item.id,
+                  type,
+                  rule_source: createDefaultExternalRuleSource(),
+                },
+                logger
+              );
+            }
+          }
+        }
+
+        return result;
       });
     },
 
