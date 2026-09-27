@@ -47,7 +47,7 @@ const nerRuleSchema = schema.allOf([
 export function getUiSettings(): Record<string, UiSettingsParams> {
   return {
     [aiAnonymizationSettings]: {
-      category: ['observability'],
+      category: ['general'],
       name: i18n.translate('xpack.inference.anonymizationSettingsLabel', {
         defaultMessage: 'Anonymization Settings',
       }),
@@ -94,7 +94,6 @@ export function getUiSettings(): Record<string, UiSettingsParams> {
       }),
       type: 'json',
       requiresPageReload: true,
-      solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
     },
   };
