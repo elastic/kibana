@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { EntityType } from '@kbn/entity-store/common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useEntitiesListQuery } from './use_entities_list_query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import React from 'react';
@@ -57,9 +58,75 @@ describe('useEntitiesListQuery', () => {
           sortOrder: 'desc',
         },
         signal: expect.any(AbortSignal),
+        context: undefined,
       });
       expect(result.current.data).toEqual(v2Response);
     });
+  });
+
+  it('forwards a caller-supplied executionContext to fetchEntitiesListV2', async () => {
+    const executionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_store_management',
+        id: 'entities_list',
+      },
+    };
+    const searchParams = {
+      entityTypes: ['host'] as EntityType[],
+      page: 1,
+      perPage: 20,
+      sortField: '@timestamp',
+      sortOrder: 'desc' as const,
+    };
+    fetchEntitiesListV2Mock.mockResolvedValueOnce({ records: [] });
+
+    renderHook(() => useEntitiesListQuery({ ...searchParams, skip: false, executionContext }), {
+      wrapper: TestWrapper,
+    });
+
+    await waitFor(() => {
+      expect(fetchEntitiesListV2Mock).toHaveBeenCalledWith(
+        expect.objectContaining({ context: executionContext })
+      );
+    });
+  });
+
+  it('does not re-fetch when only executionContext identity changes', async () => {
+    // Regression guard: executionContext must NOT be part of the react-query queryKey.
+    // If it were, every inline buildExecutionContext(...) at the call site would produce
+    // a fresh object per render → new queryKey → unbounded refetch loop.
+    const makeContext = (): KibanaExecutionContext => ({
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_store_management',
+        id: 'entities_list',
+      },
+    });
+    const searchParams = {
+      entityTypes: ['host'] as EntityType[],
+      page: 1,
+      perPage: 20,
+      sortField: '@timestamp',
+      sortOrder: 'desc' as const,
+    };
+    fetchEntitiesListV2Mock.mockResolvedValue({ records: [] });
+
+    const { rerender } = renderHook(
+      ({ executionContext }: { executionContext: KibanaExecutionContext }) =>
+        useEntitiesListQuery({ ...searchParams, skip: false, executionContext }),
+      { wrapper: TestWrapper, initialProps: { executionContext: makeContext() } }
+    );
+
+    await waitFor(() => expect(fetchEntitiesListV2Mock).toHaveBeenCalledTimes(1));
+
+    // Rerender 5 times with a fresh (identity-different) context object each time.
+    for (let i = 0; i < 5; i++) {
+      act(() => rerender({ executionContext: makeContext() }));
+    }
+
+    // The fetch count must not grow — context identity changes must not trigger refetches.
+    expect(fetchEntitiesListV2Mock).toHaveBeenCalledTimes(1);
   });
 
   it('does not call fetchEntitiesListV2 when skip is true', async () => {

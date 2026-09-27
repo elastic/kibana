@@ -47,11 +47,21 @@ describe('useResolutionGroup', () => {
     });
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(RESOLUTION_GROUP_ROUTE, {
-        version: '2023-10-31',
-        method: 'GET',
-        query: { entity_id: 'target-1' },
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        RESOLUTION_GROUP_ROUTE,
+        expect.objectContaining({
+          version: '2023-10-31',
+          method: 'GET',
+          query: { entity_id: 'target-1' },
+          context: {
+            child: {
+              type: 'security_solution',
+              name: 'entity_analytics:entity_resolution',
+              id: 'resolution_group',
+            },
+          },
+        })
+      );
       expect(result.current.data).toEqual(mockGroup);
     });
   });
