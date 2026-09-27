@@ -312,6 +312,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/shared-ux-utility'
   - '@kbn/app-header'
+  - '@kbn/app-menu'
   - '@kbn/core-execution-context-common'
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
