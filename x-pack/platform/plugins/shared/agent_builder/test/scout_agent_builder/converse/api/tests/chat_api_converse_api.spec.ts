@@ -12,6 +12,7 @@ import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import {
   ChatEventType,
   CONVERSATION_SCHEMA_VERSION,
+  DEFAULT_CONVERSATION_TITLE,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 import {
@@ -150,43 +151,32 @@ apiTest.describe(
         const requestsBefore = llmProxy.interceptedRequests.length;
         const headers = { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
 
-        await apiTest.step('a user message without a conversation is rejected', async () => {
-          const orphan = await apiClient.post(CHAT_CONVERSE, {
-            headers,
-            body: { trigger_mode: 'never', input: 'Pool limit is now 200' },
-            responseType: 'json',
-          });
-          expect(orphan).toHaveStatusCode(400);
-        });
-
-        const conversationId = await apiTest.step('create an empty conversation', async () => {
-          const created = await apiClient.post(`${API_AGENT_BUILDER}/conversations`, {
-            headers,
-            body: { title: 'Incident 4821' },
-            responseType: 'json',
-          });
-          expect(created).toHaveStatusCode(200);
-          const id = (created.body as GetConversationResponse).id;
-          conversationIds.push(id);
-
-          return id;
-        });
-
-        const firstMessageId = await apiTest.step(
-          'append two user messages without triggering the agent',
+        const conversationId = await apiTest.step(
+          'a user message without a conversation creates one, with a placeholder title',
           async () => {
-            const first = await apiClient.post(CHAT_CONVERSE, {
+            const created = await apiClient.post(CHAT_CONVERSE, {
               headers,
-              body: {
-                trigger_mode: 'never',
-                conversation_id: conversationId,
-                input: 'Pool limit is now 200',
-              },
+              body: { trigger_mode: 'never', input: 'Pool limit is now 200' },
               responseType: 'json',
             });
-            expect(first).toHaveStatusCode(200);
+            expect(created).toHaveStatusCode(200);
 
-            const second = await apiClient.post(CHAT_CONVERSE, {
+            const conversation = created.body as GetConversationResponse;
+            conversationIds.push(conversation.id);
+            expect(conversation.rounds).toStrictEqual([]);
+            expect(conversation.events?.map(({ type }) => type)).toStrictEqual([
+              TimelineEventType.userMessage,
+            ]);
+            expect(conversation.title).toBe(DEFAULT_CONVERSATION_TITLE);
+
+            return conversation.id;
+          }
+        );
+
+        await apiTest.step(
+          'a second user message is appended without triggering the agent',
+          async () => {
+            const appended = await apiClient.post(CHAT_CONVERSE, {
               headers,
               body: {
                 trigger_mode: 'never',
@@ -195,9 +185,7 @@ apiTest.describe(
               },
               responseType: 'json',
             });
-            expect(second).toHaveStatusCode(200);
-
-            return (first.body as GetConversationResponse).events?.[0].id;
+            expect(appended).toHaveStatusCode(200);
           }
         );
 
@@ -211,7 +199,6 @@ apiTest.describe(
             );
             expect(stored.rounds).toStrictEqual([]);
             expect(stored.events).toHaveLength(2);
-            expect(stored.events?.[0].id).toBe(firstMessageId);
             expect(
               stored.events?.every((event) => event.type === TimelineEventType.userMessage)
             ).toBe(true);
@@ -219,56 +206,137 @@ apiTest.describe(
           }
         );
 
-        await apiTest.step('the next execution sees them, in order', async () => {
-          await setupAgentDirectAnswer({
-            proxy: llmProxy,
-            response: 'Incident mitigated',
-            continueConversation: true,
-          });
-          const executed = await postChatConverse(apiClient, adminCredentials.apiKeyHeader, {
-            conversation_id: conversationId,
-            input: 'Summarize the incident',
-            connector_id: connectorId,
-          });
-          expect(executed).toHaveStatusCode(200);
-          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        await apiTest.step(
+          'the next execution sees them, in order, and generates a title',
+          async () => {
+            await setupAgentDirectAnswer({
+              proxy: llmProxy,
+              title: 'Incident Summary',
+              response: 'Incident mitigated',
+            });
+            const executed = await postChatConverse(apiClient, adminCredentials.apiKeyHeader, {
+              conversation_id: conversationId,
+              input: 'Summarize the incident',
+              connector_id: connectorId,
+            });
+            expect(executed).toHaveStatusCode(200);
+            await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-          const modelRequest = llmProxy.interceptedRequests
-            .slice(requestsBefore)
-            .find(
-              (entry) => entry.matchingInterceptorName === 'final-assistant-response'
-            )?.requestBody;
-          expect(modelRequest).toBeDefined();
+            const modelRequest = llmProxy.interceptedRequests
+              .slice(requestsBefore)
+              .find(
+                (entry) => entry.matchingInterceptorName === 'final-assistant-response'
+              )?.requestBody;
+            expect(modelRequest).toBeDefined();
 
-          // Consecutive human turns reach the model as one message whose content is a list of
-          // parts, so flatten everything into the prompt text before asserting on it.
-          const prompt = (modelRequest?.messages ?? []).map(promptText).join('\n');
+            // Consecutive human turns reach the model as one message whose content is a list of
+            // parts, so flatten everything into the prompt text before asserting on it.
+            const prompt = (modelRequest?.messages ?? []).map(promptText).join('\n');
 
-          for (const text of [
-            'Pool limit is now 200',
-            'Errors returned to normal',
-            'Summarize the incident',
-          ]) {
-            expect(prompt.split(text)).toHaveLength(2);
+            for (const text of [
+              'Pool limit is now 200',
+              'Errors returned to normal',
+              'Summarize the incident',
+            ]) {
+              expect(prompt.split(text)).toHaveLength(2);
+            }
+
+            expect(prompt.indexOf('Pool limit is now 200')).toBeLessThan(
+              prompt.indexOf('Errors returned to normal')
+            );
+            expect(prompt.indexOf('Errors returned to normal')).toBeLessThan(
+              prompt.indexOf('Summarize the incident')
+            );
+            // Each appended message keeps its author attribution.
+            expect(prompt).toMatch(/\[User: [^\]]+ — Sent: [^\]]+\]\n\nPool limit is now 200/);
           }
+        );
 
-          expect(prompt.indexOf('Pool limit is now 200')).toBeLessThan(
-            prompt.indexOf('Errors returned to normal')
-          );
-          expect(prompt.indexOf('Errors returned to normal')).toBeLessThan(
-            prompt.indexOf('Summarize the incident')
-          );
-          // Each appended message keeps its author attribution.
-          expect(prompt).toMatch(/\[User: [^\]]+ — Sent: [^\]]+\]\n\nPool limit is now 200/);
+        await apiTest.step(
+          'the executed round joins the same timeline and replaces the placeholder title',
+          async () => {
+            const stored = await getConversation(
+              apiClient,
+              adminCredentials.apiKeyHeader,
+              conversationId
+            );
+            expect(
+              stored.events?.filter((event) => event.type === TimelineEventType.userMessage)
+            ).toHaveLength(3);
+            expect(stored.title).toBe('Incident Summary');
+          }
+        );
+      }
+    );
+
+    apiTest(
+      'trigger_mode: never still validates execution-only options, even though they are unused',
+      async ({ apiClient }) => {
+        const headers = { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
+        const requestsBefore = llmProxy.interceptedRequests.length;
+
+        const res = await apiClient.post(CHAT_CONVERSE, {
+          headers,
+          body: {
+            trigger_mode: 'never',
+            input: 'Pool limit is now 200',
+            configuration_overrides: { skill_ids: ['no-such-skill'] },
+          },
+          responseType: 'json',
         });
 
-        await apiTest.step('the executed round joins the same timeline', async () => {
-          expect(
-            (
-              await getConversation(apiClient, adminCredentials.apiKeyHeader, conversationId)
-            ).events?.filter((event) => event.type === TimelineEventType.userMessage)
-          ).toHaveLength(3);
+        expect(res).toHaveStatusCode(400);
+        expect(String((res.body as { message?: string }).message)).toContain(
+          'Invalid skill override'
+        );
+        expect(llmProxy.interceptedRequests).toHaveLength(requestsBefore);
+      }
+    );
+
+    apiTest(
+      'trigger_mode: never persists an attachment-only message, and rejects an invalid one',
+      async ({ apiClient }) => {
+        const headers = { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
+
+        const invalid = await apiClient.post(CHAT_CONVERSE, {
+          headers,
+          body: {
+            trigger_mode: 'never',
+            attachments: [{ type: 'text', data: {} }],
+          },
+          responseType: 'json',
         });
+        expect(invalid).toHaveStatusCode(400);
+        expect(String((invalid.body as { message?: string }).message)).toContain(
+          'Attachment validation failed'
+        );
+
+        const created = await apiClient.post(CHAT_CONVERSE, {
+          headers,
+          body: {
+            trigger_mode: 'never',
+            attachments: [{ type: 'text', data: { content: 'attached incident log' } }],
+          },
+          responseType: 'json',
+        });
+        expect(created).toHaveStatusCode(200);
+
+        const conversation = created.body as GetConversationResponse;
+        conversationIds.push(conversation.id);
+        expect(conversation.rounds).toStrictEqual([]);
+        // The user message plus the attachment_added change event it carried alongside it.
+        expect(conversation.events).toHaveLength(2);
+        const userMessage = conversation.events!.find(
+          (event) => event.type === TimelineEventType.userMessage
+        )!;
+        expect((userMessage.data as { message?: string }).message).toBe('');
+        expect((userMessage.data as { attachment_refs?: unknown[] }).attachment_refs).toHaveLength(
+          1
+        );
+        expect(
+          conversation.events!.some((event) => event.type === TimelineEventType.attachmentAdded)
+        ).toBe(true);
+        expect(conversation.attachments).toHaveLength(1);
       }
     );
 
@@ -336,6 +404,43 @@ apiTest.describe(
       // Two completed rounds project to two event trios.
       expect(body.events).toHaveLength(ROUND_DERIVED_EVENT_TYPES.length * 2);
     });
+
+    apiTest(
+      'a user message on the streaming route reports the conversation and stops',
+      async ({ apiClient }) => {
+        const requestsBefore = llmProxy.interceptedRequests.length;
+
+        const res = await apiClient.post(CHAT_CONVERSE_ASYNC, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: { trigger_mode: 'never', input: 'Disk is filling up' },
+          responseType: 'buffer',
+        });
+
+        expect(res).toHaveStatusCode(200);
+        expect(String(res.headers['content-type'])).toContain('text/event-stream');
+
+        const streamText = (res.body as Buffer).toString('utf8');
+        const conversationId = conversationIdFromSseStream(streamText);
+        expect(conversationId, 'expected a conversation_id in the SSE stream').toBeDefined();
+        conversationIds.push(conversationId!);
+
+        // Nothing ran, so the stream carries the conversation and none of the agent's own events.
+        const streamed = parseSseBlocks(streamText).map(({ type }) => type);
+        expect(streamed).not.toContain(TimelineEventType.executionStarted);
+        expect(streamed).not.toContain(ChatEventType.messageChunk);
+        expect(llmProxy.interceptedRequests).toHaveLength(requestsBefore);
+
+        const stored = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          conversationId!
+        );
+        expect(stored.rounds).toStrictEqual([]);
+        expect(stored.events?.map(({ type }) => type)).toStrictEqual([
+          TimelineEventType.userMessage,
+        ]);
+      }
+    );
 
     apiTest('streaming converse responds with an event stream', async ({ apiClient }) => {
       const MOCKED_LLM_RESPONSE = 'streamed ack';

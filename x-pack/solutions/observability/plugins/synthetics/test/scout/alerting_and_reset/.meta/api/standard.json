@@ -1,5 +1,5 @@
 {
-  "sha1": "fbe20ab225f38fccdba2068b98c7ace4f61d51d6",
+  "sha1": "950b43bf98b62cd460f85c8a1b35c27ecdccc1a5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 196,
+        "line": 199,
         "column": 25
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 209,
+        "line": 213,
         "column": 7
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 261,
+        "line": 265,
         "column": 31
       }
     },
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 269,
+        "line": 273,
         "column": 16
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 274,
+        "line": 278,
         "column": 28
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 283,
+        "line": 287,
         "column": 69
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 294,
+        "line": 298,
         "column": 7
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 331,
+        "line": 335,
         "column": 7
       }
     },
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 395,
+        "line": 399,
         "column": 16
       }
     },
@@ -210,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 393,
+        "line": 397,
         "column": 27
       }
     },
@@ -742,8 +742,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 233,
-        "column": 13
+        "line": 251,
+        "column": 7
       }
     },
     {
@@ -756,8 +756,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 238,
-        "column": 9
+        "line": 257,
+        "column": 23
       }
     },
     {
@@ -770,8 +770,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 258,
-        "column": 28
+        "line": 277,
+        "column": 15
       }
     },
     {
@@ -784,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 268,
-        "column": 55
+        "line": 288,
+        "column": 40
       }
     },
     {
@@ -798,8 +798,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 296,
-        "column": 13
+        "line": 313,
+        "column": 20
       }
     },
     {

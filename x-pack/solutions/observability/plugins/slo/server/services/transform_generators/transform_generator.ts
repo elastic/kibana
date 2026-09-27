@@ -37,7 +37,9 @@ export abstract class TransformGenerator {
   }
 
   public buildDescription(slo: SLODefinition): string {
-    return `Rolled-up SLI data for SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}]`;
+    return `Rolled-up SLI data for SLO: ${slo.name.slice(0, 850)} [id: ${slo.id}, revision: ${
+      slo.revision
+    }]`;
   }
 
   public buildCommonGroupBy(

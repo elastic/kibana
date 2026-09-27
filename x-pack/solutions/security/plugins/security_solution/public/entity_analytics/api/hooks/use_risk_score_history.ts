@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useEntityAnalyticsRoutes } from '../api';
@@ -15,6 +16,11 @@ import type { FetchRiskScoreHistoryParams } from '../api';
 export interface UseRiskScoreHistoryParams extends Omit<FetchRiskScoreHistoryParams, 'entityId'> {
   entityId: string | undefined;
   skip?: boolean;
+  /**
+   * Optional Kibana execution context forwarded to the risk-score history fetch so slow logs and
+   * APM traces can attribute the query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -30,6 +36,7 @@ export const useRiskScoreHistory = ({
   scoreType,
   includeContributions,
   skip = false,
+  executionContext,
 }: UseRiskScoreHistoryParams) => {
   const { fetchRiskScoreHistory } = useEntityAnalyticsRoutes();
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
@@ -53,6 +60,7 @@ export const useRiskScoreHistory = ({
       return fetchRiskScoreHistory({
         signal,
         params: { entityType, entityId, from, to, scoreType, includeContributions },
+        context: executionContext,
       });
     },
     enabled,

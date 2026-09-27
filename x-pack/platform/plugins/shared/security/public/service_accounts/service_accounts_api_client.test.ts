@@ -13,17 +13,10 @@ describe('ServiceAccountsAPIClient', () => {
   describe('#create', () => {
     it('posts the params to the internal route and returns the created account', async () => {
       const http = httpServiceMock.createStartContract();
-      const created = {
-        id: 'service-account-id',
-        type: 'project' as const,
-        name: 'nightshift-relay',
-        organization_id: 'organization-id',
-        role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-        assumable_by: [],
-      };
+      const created = { id: 'service-account-id', name: 'nightshift-relay', roles: ['viewer'] };
       http.post.mockResolvedValue(created);
 
-      const params = { name: 'nightshift-relay' };
+      const params = { name: 'nightshift-relay', roles: ['viewer'] };
 
       await expect(new ServiceAccountsAPIClient(http).create(params)).resolves.toBe(created);
 
