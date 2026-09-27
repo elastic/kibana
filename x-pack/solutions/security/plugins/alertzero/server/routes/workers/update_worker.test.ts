@@ -60,7 +60,7 @@ describe('registerUpdateWorkerRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { workerId: TRIAGE },
         body: { enabled: true },
@@ -117,7 +117,7 @@ describe('registerUpdateWorkerRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { workerId: TRIAGE },
         body: { settingsRevision: 1, settings: { autonomy: 'manual' } },
