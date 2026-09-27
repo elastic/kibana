@@ -413,7 +413,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
               <EuiButton
                 size="s"
                 color="primary"
-                fill
+                iconType="plusCircle"
                 onClick={openAddFieldForm}
                 data-test-subj="dataFederationMappingEditorAddField"
               >
