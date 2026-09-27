@@ -145,16 +145,65 @@ describe('collectColumnBindings', () => {
       ['clientip', 'measure'],
     ]);
   });
+
+  it('collects every field definition of an array-valued channel', () => {
+    expect(
+      collectColumnBindings({
+        esql: 'FROM a',
+        renderer: 'vega',
+        visualization: {
+          spec: JSON.stringify({
+            mark: 'point',
+            encoding: {
+              x: { field: 'avg' },
+              tooltip: [{ field: 'avg' }, { field: 'missing' }, { value: 'static' }],
+            },
+          }),
+        },
+      }).map(({ path, column }) => [path, column])
+    ).toEqual([
+      ['spec.encoding.x', 'avg'],
+      ['spec.encoding.tooltip[0]', 'avg'],
+      ['spec.encoding.tooltip[1]', 'missing'],
+    ]);
+  });
+
+  it('marks unescaped dotted Vega fields as nested access', () => {
+    expect(
+      collectColumnBindings({
+        esql: 'FROM a',
+        renderer: 'vega',
+        visualization: {
+          spec: JSON.stringify({
+            mark: 'bar',
+            encoding: {
+              x: { field: 'machine\\.os\\.keyword' },
+              y: { field: 'machine.os.keyword' },
+            },
+          }),
+        },
+      }).map(({ column, nestedVegaAccess }) => [column, nestedVegaAccess])
+    ).toEqual([
+      ['machine.os.keyword', undefined],
+      ['machine.os.keyword', true],
+    ]);
+  });
 });
 
 describe('checkColumnBindings', () => {
-  it('flags missing columns and non-numeric measures, tolerating backticks', () => {
+  it('flags missing columns, non-numeric measures, and nested Vega access, tolerating backticks', () => {
     const checks = checkColumnBindings(
       [
         { path: 'x', column: '`response.keyword`', role: 'dimension' },
         { path: 'y[0]', column: 'count', role: 'measure' },
         { path: 'y[1]', column: 'response.keyword', role: 'measure' },
         { path: 'breakdown_by', column: 'host', role: 'dimension' },
+        {
+          path: 'spec.encoding.x',
+          column: 'response.keyword',
+          role: 'other',
+          nestedVegaAccess: true,
+        },
       ],
       RESULT_COLUMNS
     );
@@ -164,6 +213,7 @@ describe('checkColumnBindings', () => {
       ['y[0]', 'ok'],
       ['y[1]', 'non_numeric_measure'],
       ['breakdown_by', 'missing'],
+      ['spec.encoding.x', 'nested_vega_access'],
     ]);
   });
 });

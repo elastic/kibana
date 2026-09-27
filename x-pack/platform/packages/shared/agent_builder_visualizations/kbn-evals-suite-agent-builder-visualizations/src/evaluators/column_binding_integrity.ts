@@ -20,9 +20,11 @@ export interface ColumnBinding {
   path: string;
   column: string;
   role: BindingRole;
+  /** Vega field with an unescaped `.`, `[` or `]`, which Vega-Lite reads as nested access. */
+  nestedVegaAccess?: boolean;
 }
 
-export type BindingStatus = 'ok' | 'missing' | 'non_numeric_measure';
+export type BindingStatus = 'ok' | 'missing' | 'non_numeric_measure' | 'nested_vega_access';
 
 export interface BindingCheck extends ColumnBinding {
   status: BindingStatus;
@@ -115,6 +117,9 @@ const VEGA_VIEW_KEYS = ['layer', 'concat', 'hconcat', 'vconcat', 'spec'] as cons
 // Aggregates that count rows, so the field they reference may be of any type.
 const VEGA_COUNTING_AGGREGATES = new Set(['count', 'distinct', 'valid', 'missing']);
 
+// A `.`, `[` or `]` not preceded by a backslash.
+const UNESCAPED_VEGA_ACCESSOR = /(^|[^\\])[.[\]]/;
+
 const vegaRoleFor = (definition: Record<string, unknown>): BindingRole =>
   definition.type === 'quantitative' &&
   !(typeof definition.aggregate === 'string' && VEGA_COUNTING_AGGREGATES.has(definition.aggregate))
@@ -141,14 +146,20 @@ function walkVegaView(view: unknown, path: string, bindings: ColumnBinding[]): v
     return;
   }
   if (isRecord(view.encoding)) {
-    for (const [channel, definition] of Object.entries(view.encoding)) {
-      if (isRecord(definition) && typeof definition.field === 'string') {
+    for (const [channel, value] of Object.entries(view.encoding)) {
+      // Channels such as `tooltip` accept an array of field definitions.
+      const definitions = Array.isArray(value) ? value : [value];
+      definitions.forEach((definition, index) => {
+        if (!isRecord(definition) || typeof definition.field !== 'string') {
+          return;
+        }
         bindings.push({
-          path: `${path}.encoding.${channel}`,
+          path: `${path}.encoding.${channel}${Array.isArray(value) ? `[${index}]` : ''}`,
           column: unescapeVegaField(definition.field),
           role: vegaRoleFor(definition),
+          ...(UNESCAPED_VEGA_ACCESSOR.test(definition.field) ? { nestedVegaAccess: true } : {}),
         });
-      }
+      });
     }
   }
   for (const key of VEGA_VIEW_KEYS) {
@@ -172,6 +183,9 @@ export function checkColumnBindings(
     if (!column) {
       return { ...binding, status: 'missing' };
     }
+    if (binding.nestedVegaAccess) {
+      return { ...binding, status: 'nested_vega_access', columnType: column.type };
+    }
     if (binding.role === 'measure' && !isNumericColumn(column)) {
       return { ...binding, status: 'non_numeric_measure', columnType: column.type };
     }
@@ -179,10 +193,16 @@ export function checkColumnBindings(
   });
 }
 
-const describeFailure = (check: BindingCheck): string =>
-  check.status === 'missing'
-    ? `${check.path}: column "${check.column}" is not in the query result`
-    : `${check.path}: measure "${check.column}" is ${check.columnType}, not numeric`;
+const describeFailure = (check: BindingCheck): string => {
+  switch (check.status) {
+    case 'missing':
+      return `${check.path}: column "${check.column}" is not in the query result`;
+    case 'nested_vega_access':
+      return `${check.path}: Vega field "${check.column}" is not escaped, so Vega-Lite reads it as a nested path instead of the flat column`;
+    default:
+      return `${check.path}: measure "${check.column}" is ${check.columnType}, not numeric`;
+  }
+};
 
 /**
  * CODE evaluator: executes each visualization's ES|QL and checks that every
