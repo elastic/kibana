@@ -20,11 +20,14 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/config-schema'
   - '@kbn/core'
+  - '@kbn/esql'
+  - '@kbn/esql-language'
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
   - '@kbn/features-plugin'
   - '@kbn/i18n'
   - '@kbn/management-plugin'
+  - '@kbn/esql-editor'
 tags:
   - plugin
   - prod

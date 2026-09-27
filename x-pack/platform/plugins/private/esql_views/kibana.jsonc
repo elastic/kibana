@@ -16,6 +16,7 @@
       "esqlViews"
     ],
     "requiredPlugins": [
+      "esql",
       "features",
       "management"
     ]
