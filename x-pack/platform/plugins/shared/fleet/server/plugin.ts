@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { filter, take } from 'rxjs';
@@ -369,6 +368,16 @@ export class FleetPlugin
   private policyWatcher?: PolicyWatcher;
   private fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   private lockManagerService?: LockManagerService;
+  private messageSigningService?: MessageSigningServiceInterface;
+  private uninstallTokenServiceInstance?: UninstallTokenServiceInterface;
+  /** Set once `bindStartContext` has run; both `lazyInitialize` and `start` call that method. */
+  private startContextBound = false;
+  private setupCompletedResolve!: () => void;
+  // Resolves once the current (or most recent) `lazyInitialize` run has settled, regardless of
+  // whether it succeeded or failed — mirrors the old `fleetSetupPromise` semantics.
+  private setupCompletedPromise: Promise<void> = new Promise((resolve) => {
+    this.setupCompletedResolve = resolve;
+  });
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -807,64 +816,8 @@ export class FleetPlugin
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
-    this.spacesPluginsStart = plugins.spaces;
+    this.bindStartContext(core, plugins);
 
-    const messageSigningService = new MessageSigningService(
-      this.initializerContext.logger,
-      plugins.encryptedSavedObjects.getClient({
-        includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
-      })
-    );
-
-    const uninstallTokenService = new UninstallTokenService(
-      plugins.encryptedSavedObjects.getClient({
-        includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
-      })
-    );
-
-    appContextService.start({
-      elasticsearch: core.elasticsearch,
-      data: plugins.data,
-      encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
-      encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
-      securityCoreStart: core.security,
-      securitySetup: this.securitySetup,
-      securityStart: plugins.security,
-      configInitialValue: this.configInitialValue,
-      config$: this.config$,
-      experimentalFeatures: parseExperimentalConfigValue(
-        this.configInitialValue.enableExperimental || [],
-        this.configInitialValue.experimentalFeatures || {}
-      ),
-      savedObjects: core.savedObjects,
-      savedObjectsTagging: plugins.savedObjectsTagging,
-      isProductionMode: this.isProductionMode,
-      kibanaVersion: this.kibanaVersion,
-      kibanaBranch: this.kibanaBranch,
-      kibanaInstanceId: this.kibanaInstanceId,
-      httpSetup: this.httpSetup,
-      cloud: this.cloud,
-      logger: this.logger,
-      telemetryEventsSender: this.telemetryEventsSender,
-      bulkActionsResolver: this.bulkActionsResolver!,
-      messageSigningService,
-      uninstallTokenService,
-      unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
-      deleteUnenrolledAgentsTask: this.deleteUnenrolledAgentsTask!,
-      updateAgentlessDeploymentsTask: this.updateAgentlessDeploymentsTask!,
-      automaticAgentUpgradeTask: this.automaticAgentUpgradeTask!,
-      taskManagerStart: plugins.taskManager,
-      fetchUsage: this.fetchUsage,
-      syncIntegrationsTask: this.syncIntegrationsTask!,
-      lockManagerService: this.lockManagerService,
-      autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
-      agentStatusChangeTask: this.agentStatusChangeTask,
-      fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
-      alertingStart: plugins.alerting,
-      reportingStart: plugins.reporting,
-      featureFlags: core.featureFlags,
-    });
-    licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
     this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
     this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
@@ -905,96 +858,6 @@ export class FleetPlugin
 
     this.policyWatcher.start(licenseService);
 
-    const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
-
-    const fleetSetupPromise = (async () => {
-      try {
-        // Fleet remains `available` during setup as to excessively delay Kibana's boot process.
-        // This should be reevaluated as Fleet's setup process is optimized and stabilized.
-        this.fleetStatus$.next({
-          level: ServiceStatusLevels.available,
-          summary: 'Fleet is setting up',
-        });
-
-        // We need to wait for the licence feature to be available,
-        // to have our internal saved object client with encrypted saved object working properly
-        await plugins.licensing.license$
-          .pipe(
-            filter(
-              (licence) =>
-                licence.getFeature('security').isEnabled &&
-                licence.getFeature('security').isAvailable
-            ),
-            take(1)
-          )
-          .toPromise();
-
-        const randomIntFromInterval = (min: number, max: number) => {
-          return Math.floor(Math.random() * (max - min + 1) + min);
-        };
-
-        // Retry Fleet setup w/ backoff
-        await backOff(
-          async () => {
-            await setupFleet(
-              core.savedObjects.getUnsafeInternalClient({
-                excludedExtensions: [SPACES_EXTENSION_ID],
-              }),
-              core.elasticsearch.client.asInternalUser,
-              { useLock: true }
-            );
-          },
-          {
-            numOfAttempts: setupAttempts,
-            delayFirstAttempt: true,
-            // 1s initial backoff
-            startingDelay: randomIntFromInterval(100, 1000),
-            // 5m max backoff
-            maxDelay: 60000 * 5,
-            timeMultiple: 2,
-            // avoid HA contention with other Kibana instances
-            jitter: 'full',
-            retry: (error: any, attemptCount: number) => {
-              const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
-              logger.warn(summary, { error });
-
-              this.fleetStatus$.next({
-                level: ServiceStatusLevels.available,
-                summary,
-                meta: {
-                  attemptCount,
-                  error,
-                },
-              });
-              return true;
-            },
-          }
-        );
-
-        // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
-        this.initializeUninstallTokens().catch(() => {});
-
-        this.fleetStatus$.next({
-          level: ServiceStatusLevels.available,
-          summary: 'Fleet is available',
-        });
-      } catch (error) {
-        logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
-          error,
-        });
-
-        this.fleetStatus$.next({
-          // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
-          // See https://github.com/elastic/kibana/issues/120237
-          level: ServiceStatusLevels.available,
-          summary: 'Fleet setup failed',
-          meta: {
-            error: error.message,
-          },
-        });
-      }
-    })();
-
     const internalSoClient = core.savedObjects.getUnsafeInternalClient({
       excludedExtensions: [SPACES_EXTENSION_ID],
     });
@@ -1005,7 +868,7 @@ export class FleetPlugin
       agentless: {
         enabled: this.configInitialValue.agentless?.enabled ?? false,
       },
-      fleetSetupCompleted: () => fleetSetupPromise,
+      fleetSetupCompleted: () => this.setupCompletedPromise,
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
         internalSoClient
@@ -1034,8 +897,8 @@ export class FleetPlugin
           logger: this.initializerContext.logger,
         })
       ),
-      messageSigningService,
-      uninstallTokenService,
+      messageSigningService: this.messageSigningService!,
+      uninstallTokenService: this.uninstallTokenServiceInstance!,
       createFleetActionsClient(packageName: string) {
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
@@ -1047,6 +910,130 @@ export class FleetPlugin
       cloudConnectorService,
       runWithCache,
     };
+  }
+
+  /** Idempotent: both `lazyInitialize` (first) and `start` call this so `setupFleet` can run. */
+  private bindStartContext(core: CoreStart, plugins: FleetStartDeps): void {
+    if (this.startContextBound) {
+      return;
+    }
+    this.startContextBound = true;
+    this.spacesPluginsStart = plugins.spaces;
+
+    this.messageSigningService = new MessageSigningService(
+      this.initializerContext.logger,
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
+      })
+    );
+
+    this.uninstallTokenServiceInstance = new UninstallTokenService(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      })
+    );
+
+    appContextService.start({
+      elasticsearch: core.elasticsearch,
+      data: plugins.data,
+      encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
+      securityCoreStart: core.security,
+      securitySetup: this.securitySetup,
+      securityStart: plugins.security,
+      configInitialValue: this.configInitialValue,
+      config$: this.config$,
+      experimentalFeatures: parseExperimentalConfigValue(
+        this.configInitialValue.enableExperimental || [],
+        this.configInitialValue.experimentalFeatures || {}
+      ),
+      savedObjects: core.savedObjects,
+      savedObjectsTagging: plugins.savedObjectsTagging,
+      isProductionMode: this.isProductionMode,
+      kibanaVersion: this.kibanaVersion,
+      kibanaBranch: this.kibanaBranch,
+      kibanaInstanceId: this.kibanaInstanceId,
+      httpSetup: this.httpSetup,
+      cloud: this.cloud,
+      logger: this.logger,
+      telemetryEventsSender: this.telemetryEventsSender,
+      bulkActionsResolver: this.bulkActionsResolver!,
+      messageSigningService: this.messageSigningService,
+      uninstallTokenService: this.uninstallTokenServiceInstance,
+      unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
+      deleteUnenrolledAgentsTask: this.deleteUnenrolledAgentsTask!,
+      updateAgentlessDeploymentsTask: this.updateAgentlessDeploymentsTask!,
+      automaticAgentUpgradeTask: this.automaticAgentUpgradeTask!,
+      taskManagerStart: plugins.taskManager,
+      fetchUsage: this.fetchUsage,
+      syncIntegrationsTask: this.syncIntegrationsTask!,
+      lockManagerService: this.lockManagerService,
+      autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
+      agentStatusChangeTask: this.agentStatusChangeTask,
+      fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
+      alertingStart: plugins.alerting,
+      reportingStart: plugins.reporting,
+      featureFlags: core.featureFlags,
+    });
+    licenseService.start(plugins.licensing.license$);
+  }
+
+  public async lazyInitialize(core: CoreStart, plugins: FleetStartDeps): Promise<void> {
+    this.bindStartContext(core, plugins);
+
+    const logger = appContextService.getLogger();
+
+    try {
+      // Fleet remains `available` during setup as to not excessively delay Kibana's boot process.
+      // This should be reevaluated as Fleet's setup process is optimized and stabilized.
+      this.fleetStatus$.next({
+        level: ServiceStatusLevels.available,
+        summary: 'Fleet is setting up',
+      });
+
+      // We need to wait for the licence feature to be available,
+      // to have our internal saved object client with encrypted saved object working properly
+      await plugins.licensing.license$
+        .pipe(
+          filter(
+            (licence) =>
+              licence.getFeature('security').isEnabled && licence.getFeature('security').isAvailable
+          ),
+          take(1)
+        )
+        .toPromise();
+
+      await setupFleet(
+        core.savedObjects.getUnsafeInternalClient({
+          excludedExtensions: [SPACES_EXTENSION_ID],
+        }),
+        core.elasticsearch.client.asInternalUser,
+        { useLock: true }
+      );
+
+      // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
+      this.initializeUninstallTokens().catch(() => {});
+
+      this.fleetStatus$.next({
+        level: ServiceStatusLevels.available,
+        summary: 'Fleet is available',
+      });
+    } catch (error) {
+      logger.warn('Fleet setup failed', { error });
+
+      this.fleetStatus$.next({
+        // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
+        // See https://github.com/elastic/kibana/issues/120237
+        level: ServiceStatusLevels.available,
+        summary: 'Fleet setup failed',
+        meta: {
+          error: error.message,
+        },
+      });
+      throw error;
+    } finally {
+      this.setupCompletedResolve();
+    }
   }
 
   public stop() {
