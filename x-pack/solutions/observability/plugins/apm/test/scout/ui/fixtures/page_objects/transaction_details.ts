@@ -165,6 +165,18 @@ export class TransactionDetailsPage {
   // Transaction interaction methods
 
   /**
+   * Click a waterfall item by its display name to open its details flyout. Targets the item's
+   * name text, not the row container, whose centre can land on a nested badge link instead.
+   */
+  async clickWaterfallItem(name: string) {
+    await this.page
+      .getByTestId('waterfall')
+      .getByTestId('apmBarDetailsName')
+      .getByText(name, { exact: true })
+      .click();
+  }
+
+  /**
    * Click transaction accordion button using aria-controls selector
    */
   async clickTransactionWithAriaControls(transactionId: string) {

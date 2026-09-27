@@ -43,7 +43,7 @@ test.describe(
       });
 
       await test.step('opens span flyout and shows span links details', async () => {
-        await page.getByText('Span A').click();
+        await transactionDetailsPage.clickWaterfallItem('Span A');
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const producerConsumerLink = page.getByRole('link', { name: 'zzz-producer-consumer' });
@@ -89,10 +89,7 @@ test.describe(
       });
 
       await test.step('opens span flyout and shows span links details', async () => {
-        await page
-          .getByTestId('waterfall')
-          .getByLabel('View details for Span B', { exact: true })
-          .click();
+        await transactionDetailsPage.clickWaterfallItem('Span B');
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const consumerMultipleLink = page.getByRole('link', {
@@ -123,7 +120,7 @@ test.describe(
           end: timeRange.rangeTo,
         });
 
-        await page.getByRole('button', { name: /View details for Transaction C/ }).click();
+        await transactionDetailsPage.clickWaterfallItem('Transaction C');
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const consumerMultipleLink = page.getByRole('link', {
@@ -160,7 +157,7 @@ test.describe(
           end: timeRange.rangeTo,
         });
 
-        await page.getByRole('button', { name: /View details for Transaction D/ }).click();
+        await transactionDetailsPage.clickWaterfallItem('Transaction D');
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const producerConsumerLink = page.getByRole('link', { name: 'zzz-producer-consumer' });
@@ -195,7 +192,7 @@ test.describe(
           end: timeRange.rangeTo,
         });
 
-        await page.getByText('Span E').click();
+        await transactionDetailsPage.clickWaterfallItem('Span E');
         await transactionDetailsPage.getSpanLinksTab().click();
 
         await expect(transactionDetailsPage.getSpanLinkTypeSelect()).toContainText(
