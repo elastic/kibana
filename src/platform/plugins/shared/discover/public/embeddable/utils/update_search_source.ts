@@ -61,7 +61,6 @@ export const updateSearchSource = (
     })
   );
 
-  searchSource.removeField('fieldsFromSource');
   searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
 
   // if the search source has a parent, update that too based on fetch context

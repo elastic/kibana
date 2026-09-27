@@ -98,7 +98,6 @@ export function updateSearchSource(
     .setField('sort', sort)
     .setField('trackTotalHits', false);
 
-  searchSource.removeField('fieldsFromSource');
   searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
 
   return searchSource;
