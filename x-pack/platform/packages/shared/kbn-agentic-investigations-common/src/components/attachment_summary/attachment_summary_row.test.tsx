@@ -108,11 +108,139 @@ describe('AttachmentSummaryRow', () => {
     expectLabel('security.alerts');
   });
 
-  it('is not interactive, because the drill-down does not exist yet', () => {
+  it('stays read-only for a type that registered no drill-down', () => {
     renderRow({ getLabel: () => '3 alerts' });
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('stays read-only when the type reports this attachment cannot be opened', async () => {
+    const renderConversationDetailsContent = jest.fn(() => <div data-test-subj="drilldown" />);
+    renderRow({
+      getLabel: () => '3 alerts',
+      renderConversationDetailsContent,
+      hasConversationDetailsContent: () => false,
+    });
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(
+      screen
+        .queryByTestId('attachmentSummaryRow')
+        ?.querySelector('[data-euiicon-type="chevronSingleRight"]')
+    ).toBeNull();
+    expect(renderConversationDetailsContent).not.toHaveBeenCalled();
+  });
+
+  it('is clickable when the type reports this attachment can be opened', () => {
+    renderRow({
+      getLabel: () => '3 alerts',
+      renderConversationDetailsContent: () => null,
+      hasConversationDetailsContent: () => true,
+    });
+
+    expect(screen.getByRole('button')).toBeInTheDocument();
+  });
+
+  it('shows no chevron on a read-only row, which would promise a drill-down it lacks', () => {
+    const { container } = renderRow({ getLabel: () => '3 alerts' });
+
+    expect(container.querySelector('[data-euiicon-type="chevronSingleRight"]')).toBeNull();
+  });
+
+  describe('with a registered drill-down', () => {
+    const renderConversationDetailsContent = jest.fn(() => <div data-test-subj="drilldown" />);
+
+    beforeEach(() => renderConversationDetailsContent.mockClear());
+
+    const renderDrilldownRow = (overrides: Partial<VersionedAttachment> = {}) =>
+      renderRow(
+        { getLabel: () => '3 alerts', getIcon: () => 'bell', renderConversationDetailsContent },
+        overrides
+      );
+
+    it('shows the chevron, which marks the row as leading somewhere', () => {
+      const { container } = renderDrilldownRow();
+
+      expect(
+        container.querySelector('[data-euiicon-type="chevronSingleRight"]')
+      ).toBeInTheDocument();
+    });
+
+    it('names the row by its kind and label, since the kind is otherwise only visual', () => {
+      renderDrilldownRow();
+
+      expect(screen.getByRole('button', { name: 'Alert: 3 alerts' })).toBeInTheDocument();
+    });
+
+    it('renders the drill-down only once the row is clicked', async () => {
+      renderDrilldownRow();
+
+      expect(screen.queryByTestId('drilldown')).not.toBeInTheDocument();
+      expect(renderConversationDetailsContent).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByRole('button'));
+
+      expect(screen.getByTestId('drilldown')).toBeInTheDocument();
+    });
+
+    it('hands the drill-down the current version of the attachment', async () => {
+      renderDrilldownRow({
+        versions: [
+          {
+            version: 1,
+            data: { count: 2 },
+            created_at: '2026-09-01T10:00:00.000Z',
+            content_hash: 'a',
+          },
+          {
+            version: 2,
+            data: { count: 7 },
+            created_at: '2026-09-01T12:00:00.000Z',
+            content_hash: 'b',
+          },
+        ],
+        current_version: 2,
+      });
+
+      await userEvent.click(screen.getByRole('button'));
+
+      expect(renderConversationDetailsContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attachment: expect.objectContaining({ id: 'attachment-1', data: { count: 7 } }),
+        })
+      );
+    });
+
+    it('remounts the drill-down on a second click, so the flyout reopens', async () => {
+      // The opener acts on mount, so a re-render of the same element would not reopen anything.
+      const onMount = jest.fn();
+      const CountMounts = () => {
+        React.useEffect(() => onMount(), []);
+        return null;
+      };
+      renderRow({
+        getLabel: () => '3 alerts',
+        renderConversationDetailsContent: () => <CountMounts />,
+      });
+
+      await userEvent.click(screen.getByRole('button'));
+      expect(onMount).toHaveBeenCalledTimes(1);
+
+      await userEvent.click(screen.getByRole('button'));
+      expect(onMount).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps the label out of the tab order, since the row itself is now the tab stop', async () => {
+      const restore = mockLabelOverflow({ scrollWidth: 500, clientWidth: 100 });
+      try {
+        renderDrilldownRow();
+
+        expect(screen.getByTestId('attachmentSummaryRowLabel')).not.toHaveAttribute('tabindex');
+      } finally {
+        restore();
+      }
+    });
   });
 
   it('shows the full label in a tooltip once it is cut off', async () => {

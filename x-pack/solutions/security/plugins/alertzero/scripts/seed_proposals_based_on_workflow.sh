@@ -103,6 +103,9 @@ else
   KIBANA_API_BASE="${KIBANA_URL}/s/${KIBANA_SPACE}"
 fi
 
+# Mirrors `getAlertsIndex` on the server: the detection alerts alias for this space.
+ALERTS_INDEX=".alerts-security.alerts-${KIBANA_SPACE}"
+
 kibana_curl() {
   curl --silent --fail-with-body \
     -u "${KIBANA_USER}:${KIBANA_PASSWORD}" \
@@ -170,13 +173,16 @@ attach_attack() {
     }')"
 }
 
+# `_index` is what the summary's drill-down opens the alert flyout against. Seeded ids resolve to
+# nothing, so the flyout opens on an empty document — enough to prove the row is wired, not enough
+# to review an alert. Attach a real alert from the Security app for that.
 attach_alert() {
   local label="$1" id
   id="$(next_seed_id)"
-  attach security.alert "$(jq -n --arg label "$label" --arg id "$id" \
+  attach security.alert "$(jq -n --arg label "$label" --arg id "$id" --arg index "$ALERTS_INDEX" \
     '{
       attachmentLabel: $label,
-      alert: ({ _id: $id, "kibana.alert.rule.name": $label } | tojson)
+      alert: ({ _id: [$id], _index: [$index], "kibana.alert.rule.name": [$label] } | tojson)
     }')"
 }
 
@@ -206,10 +212,17 @@ attach_rule() {
 
 # Without `attachmentLabel` a single entity renders as the literal "Risk Entity".
 # `{type}: {identifier}` is the convention the entity tools use.
+# `entityStoreId` is the canonical `entity.id` every entity flyout resolves by, so the summary's
+# drill-down needs it; a seeded one resolves to no entity, which still proves the row is wired.
 attach_entity() {
   local identifier_type="$1" identifier="$2"
   attach security.entity "$(jq -n --arg t "$identifier_type" --arg i "$identifier" \
-    '{ identifierType: $t, identifier: $i, attachmentLabel: ($t + ": " + $i) }')"
+    '{
+      identifierType: $t,
+      identifier: $i,
+      entityStoreId: ($t + ":" + $i),
+      attachmentLabel: ($t + ": " + $i)
+    }')"
 }
 
 # Deliberately NOT in the summary. Seeded only to prove the filter drops it —

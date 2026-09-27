@@ -17,6 +17,8 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { createAttachmentSummaryDrilldown } from '../attachment_summary_drilldown/create_details_drilldown';
 
 /**
  * Conversation-scoped so field-pill flyouts opened from an Investigation do not
@@ -94,20 +96,26 @@ export const AttackDiscoveryInlineContent = ({
   );
 };
 
-export const createAttackDiscoveryAttachmentDefinition =
-  (): AttachmentUIDefinition<AttackDiscoveryAttachment> => ({
-    getIcon: () => 'sparkles',
-    getLabel: (attachment) => attachment.data?.title ?? DEFAULT_LABEL,
-    renderInlineContent: (props) => <AttackDiscoveryInlineContent {...props} />,
-  });
+export const createAttackDiscoveryAttachmentDefinition = ({
+  resolveSecurityCanvasContext,
+}: {
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+}): AttachmentUIDefinition<AttackDiscoveryAttachment> => ({
+  getIcon: () => 'sparkles',
+  getLabel: (attachment) => attachment.data?.title ?? DEFAULT_LABEL,
+  renderInlineContent: (props) => <AttackDiscoveryInlineContent {...props} />,
+  ...createAttachmentSummaryDrilldown<AttackDiscoveryAttachment>({ resolveSecurityCanvasContext }),
+});
 
 export const registerAttackDiscoveryAttachment = ({
   attachments,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
+  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.attackDiscovery,
-    createAttackDiscoveryAttachmentDefinition()
+    createAttackDiscoveryAttachmentDefinition({ resolveSecurityCanvasContext })
   );
 };
