@@ -101,7 +101,13 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
-export { Impact, investigationEntityIds } from './src/components/filters/impact';
+export {
+  Impact,
+  impactPills,
+  investigationEntityIds,
+  matchesEntityFilter,
+  type ImpactPill,
+} from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
 export { AssignActionModal } from './src/components/modals/assign_action_modal';

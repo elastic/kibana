@@ -17,6 +17,7 @@ import {
   InvestigationActionModals,
   type EscalationModalRenderProps,
   Impact,
+  impactPills,
 } from '@kbn/agentic-investigations-common';
 import {
   useApproveProposal,
@@ -77,7 +78,20 @@ export const ConversationsPage: React.FC = () => {
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
-  const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
+  const [entityFilter, setEntityFilter] = useState<string | null>(null);
+  const availableEntityIds = useMemo(
+    () => new Set(impactPills(conversations).map((pill) => pill.entityId)),
+    [conversations]
+  );
+  // A poll or a collapsed section can drop the selected entity from the loaded
+  // rows. Keep filtering only while that pill is still there to clear.
+  const effectiveEntityFilter =
+    entityFilter !== null && availableEntityIds.has(entityFilter) ? entityFilter : null;
+  useEffect(() => {
+    if (entityFilter !== effectiveEntityFilter) {
+      setEntityFilter(effectiveEntityFilter);
+    }
+  }, [entityFilter, effectiveEntityFilter]);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
@@ -372,8 +386,8 @@ export const ConversationsPage: React.FC = () => {
         <EuiFlexItem>
           <Impact
             investigations={conversations}
-            surfaceFilter={surfaceFilter}
-            onSurfaceFilterChange={setSurfaceFilter}
+            entityFilter={effectiveEntityFilter}
+            onEntityFilterChange={setEntityFilter}
           />
         </EuiFlexItem>
 
@@ -383,7 +397,7 @@ export const ConversationsPage: React.FC = () => {
           <EuiFlexItem key={section.id} grow={false}>
             <QueueSection
               section={section}
-              surfaceFilter={surfaceFilter}
+              entityFilter={effectiveEntityFilter}
               selectedConversationId={selectedConversationId}
               onClickRecommendedAction={onClickRecommendedAction}
               onClickAction={onClickAction}

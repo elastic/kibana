@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   ConversationQueue,
-  investigationEntityIds,
+  matchesEntityFilter,
   type BaseActionsProps,
   type ConversationsActionsGroupProps,
   type Investigation,
@@ -18,7 +18,7 @@ import type { QueueSection as QueueSectionState } from './use_queue_section';
 
 export interface QueueSectionProps {
   section: QueueSectionState;
-  surfaceFilter: string | null;
+  entityFilter: string | null;
   /** Conversation behind the open flyout; its cards are marked as current. */
   selectedConversationId?: string;
   onClickAction: BaseActionsProps['onClickAction'];
@@ -35,7 +35,7 @@ export interface QueueSectionProps {
 
 export const QueueSection = ({
   section,
-  surfaceFilter,
+  entityFilter,
   selectedConversationId,
   ...handlers
 }: QueueSectionProps) => {
@@ -59,12 +59,10 @@ export const QueueSection = ({
 
   const briefingList = useMemo(
     () =>
-      surfaceFilter
-        ? investigations.filter((investigation) =>
-            investigationEntityIds(investigation).includes(surfaceFilter)
-          )
+      entityFilter
+        ? investigations.filter((investigation) => matchesEntityFilter(investigation, entityFilter))
         : investigations,
-    [investigations, surfaceFilter]
+    [investigations, entityFilter]
   );
 
   const selectedIds = useMemo(
@@ -99,7 +97,7 @@ export const QueueSection = ({
       onShowMore={loadMore}
       isLoadingMore={isLoadingMore}
       hasLoadMoreError={hasLoadMoreError}
-      isFiltered={Boolean(surfaceFilter)}
+      isFiltered={Boolean(entityFilter)}
       selectedIds={selectedIds}
       getOutcomeLabel={getOutcomeLabel}
       {...handlers}

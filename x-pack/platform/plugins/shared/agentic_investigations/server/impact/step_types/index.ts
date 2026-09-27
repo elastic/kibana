@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ResolveUser } from '../../services/resolve_user';
 import type { ImpactService } from '../services/impact_service';
@@ -18,14 +20,24 @@ export const registerImpactStepDefinitions = ({
   getImpactService,
   resolveUser,
   privileges,
+  getAttachmentClient,
+  getConversationClient,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getImpactService: () => ImpactService;
   resolveUser: ResolveUser;
   privileges: ImpactPrivilegesChecker;
+  getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
+  getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
 }) => {
   workflowsExtensions.registerStepDefinition(
-    getAttachImpactStepDefinition({ getImpactService, resolveUser, privileges })
+    getAttachImpactStepDefinition({
+      getImpactService,
+      resolveUser,
+      privileges,
+      getAttachmentClient,
+      getConversationClient,
+    })
   );
   workflowsExtensions.registerStepDefinition(
     getGetImpactStepDefinition({ getImpactService, privileges })
