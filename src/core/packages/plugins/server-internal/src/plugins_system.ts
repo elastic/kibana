@@ -8,6 +8,7 @@
  */
 
 import { map } from 'rxjs';
+import { metrics, ValueType, type Histogram } from '@opentelemetry/api';
 import { withTimeout, isPromise } from '@kbn/std';
 import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -16,6 +17,7 @@ import { PluginType } from '@kbn/core-base-common';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -32,6 +34,20 @@ import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 import { type DeferredInitEngine, toServiceStatus } from './deferred_init';
 
 const Sec = 1000;
+
+let lifecycleHistogram: Histogram | undefined;
+const getLifecycleHistogram = (): Histogram => {
+  if (!lifecycleHistogram) {
+    lifecycleHistogram = metrics
+      .getMeter('kibana.plugins')
+      .createHistogram('kibana.plugin.lifecycle.duration_ms', {
+        description: 'Wall-clock duration of each plugin setup() or start() call.',
+        unit: 'ms',
+        valueType: ValueType.DOUBLE,
+      });
+  }
+  return lifecycleHistogram;
+};
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
@@ -200,7 +216,7 @@ export class PluginsSystem<T extends PluginType> {
       ) {
         const setupDeps = deps as PluginsServiceSetupDeps;
         const engine = this.deferredInitEngine;
-        engine.register(plugin.name);
+        engine.register(plugin.name, plugin.source);
         // Path A: core reflects deferred-init state into the plugin's `/status` entry (the
         // readiness/liveness probe), so the plugin author writes no status code. This is
         // read-only via `engine.state$` and never kicks initialization. Registered during
@@ -215,31 +231,44 @@ export class PluginsSystem<T extends PluginType> {
       }
 
       let contract: unknown;
-      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          this.log.warn(
-            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-        const contractMaybe = await withTimeout<any>({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
-        });
+      const pluginAttrs = { 'plugin.id': pluginName, 'plugin.source': plugin.source };
+      const setupStartNs = process.hrtime.bigint();
+      try {
+        const contractOrPromise = withActiveSpan(
+          'kibana.plugin.setup',
+          { attributes: pluginAttrs },
+          () => plugin.setup(pluginSetupContext, pluginDepContracts)
+        );
+        if (isPromise(contractOrPromise)) {
+          if (this.coreContext.env.mode.dev) {
+            this.log.warn(
+              `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+            );
+          }
+          const contractMaybe = await withTimeout<any>({
+            promise: contractOrPromise,
+            timeoutMs: 10 * Sec,
+          });
 
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-          );
+          if (contractMaybe.timedout) {
+            throw new Error(
+              `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+            );
+          } else {
+            contract = contractMaybe.value;
+          }
         } else {
-          contract = contractMaybe.value;
+          contract = contractOrPromise;
         }
-      } else {
-        contract = contractOrPromise;
-      }
 
-      contracts.set(pluginName, contract);
-      this.satupPlugins.push(pluginName);
+        contracts.set(pluginName, contract);
+        this.satupPlugins.push(pluginName);
+      } finally {
+        getLifecycleHistogram().record(Number(process.hrtime.bigint() - setupStartNs) / 1e6, {
+          ...pluginAttrs,
+          lifecycle: 'setup',
+        });
+      }
     }
 
     this.runtimeResolver.resolveSetupRequests(contracts);
@@ -302,34 +331,46 @@ export class PluginsSystem<T extends PluginType> {
 
         this.log.debug(`Starting plugin "${pluginName}"...`);
         let contract: unknown;
-        const contractOrPromise = plugin.start(startContext, pluginDepContracts);
-        if (isPromise(contractOrPromise)) {
-          if (this.coreContext.env.mode.dev) {
-            this.log.warn(
-              `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
-            );
-          }
-          const contractMaybe = await withTimeout({
-            promise: contractOrPromise,
-            timeoutMs: 10 * Sec,
-          });
+        const pluginAttrs = { 'plugin.id': pluginName, 'plugin.source': plugin.source };
+        const startStartNs = process.hrtime.bigint();
+        try {
+          const contractOrPromise = withActiveSpan(
+            'kibana.plugin.start',
+            { attributes: pluginAttrs },
+            () => plugin.start(startContext, pluginDepContracts)
+          );
+          if (isPromise(contractOrPromise)) {
+            if (this.coreContext.env.mode.dev) {
+              this.log.warn(
+                `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+              );
+            }
+            const contractMaybe = await withTimeout({
+              promise: contractOrPromise,
+              timeoutMs: 10 * Sec,
+            });
 
-          if (contractMaybe.timedout) {
-            throw new Error(
-              `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-            );
+            if (contractMaybe.timedout) {
+              throw new Error(
+                `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+              );
+            } else {
+              contract = contractMaybe.value;
+            }
           } else {
-            contract = contractMaybe.value;
+            contract = contractOrPromise;
           }
-        } else {
-          contract = contractOrPromise;
+          contracts.set(pluginName, contract);
+          // Unblocks any dependent whose own `start()` is mid-loop, already awaiting this plugin's
+          // contract via `onStart` — otherwise that dependent would have to wait for the whole loop
+          // (including its own `start()` call) to finish, which can't happen.
+          this.runtimeResolver.notifyStartContractAvailable(pluginName, contract);
+        } finally {
+          getLifecycleHistogram().record(Number(process.hrtime.bigint() - startStartNs) / 1e6, {
+            ...pluginAttrs,
+            lifecycle: 'start',
+          });
         }
-
-        contracts.set(pluginName, contract);
-        // Unblocks any dependent whose own `start()` is mid-loop, already awaiting this plugin's
-        // contract via `onStart` — otherwise that dependent would have to wait for the whole loop
-        // (including its own `start()` call) to finish, which can't happen.
-        this.runtimeResolver.notifyStartContractAvailable(pluginName, contract);
       }
     } finally {
       this.deferredInitEngine?.endStartCycle();
@@ -356,10 +397,23 @@ export class PluginsSystem<T extends PluginType> {
       lazyInitialize: () => plugin.runLazyInitialize(startContext, pluginDepContracts),
       start: async () => {
         this.log.debug(`Starting lazy plugin "${pluginName}"...`);
-        const contract = await plugin.start(startContext, pluginDepContracts);
-        // Published before the engine flips to `available`, so a `loadPluginContract` or
-        // `onLazyStartService` that wakes up on that transition finds the contract in place.
-        this.runtimeResolver.notifyStartContractAvailable(pluginName, contract);
+        const pluginAttrs = { 'plugin.id': pluginName, 'plugin.source': plugin.source };
+        const startStartNs = process.hrtime.bigint();
+        try {
+          const contract = await withActiveSpan(
+            'kibana.plugin.start',
+            { attributes: pluginAttrs },
+            () => plugin.start(startContext, pluginDepContracts)
+          );
+          // Published before the engine flips to `available`, so a `loadPluginContract` or
+          // `onLazyStartService` that wakes up on that transition finds the contract in place.
+          this.runtimeResolver.notifyStartContractAvailable(pluginName, contract);
+        } finally {
+          getLifecycleHistogram().record(Number(process.hrtime.bigint() - startStartNs) / 1e6, {
+            ...pluginAttrs,
+            lifecycle: 'start',
+          });
+        }
       },
     });
   }
@@ -386,7 +440,7 @@ export class PluginsSystem<T extends PluginType> {
       )}] now.`
     );
     for (const pluginName of lazyPluginNames) {
-      this.deferredInitEngine.ensureInitialized(pluginName);
+      this.deferredInitEngine.ensureInitialized(pluginName, { type: 'explicit' });
     }
   }
 

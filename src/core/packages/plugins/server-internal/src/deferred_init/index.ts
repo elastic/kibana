@@ -8,7 +8,11 @@
  */
 
 export { DeferredInitEngine } from './deferred_init_engine';
-export type { DeferredInitRunner, DeferredInitFailureDetails } from './deferred_init_engine';
+export type {
+  DeferredInitRunner,
+  DeferredInitFailureDetails,
+  InitTrigger,
+} from './deferred_init_engine';
 export { createGuardedRouter } from './guarded_router';
 export { registerDeferredInitStatusRoute } from './register_status_route';
 export { toServiceStatus } from './status_mapping';
