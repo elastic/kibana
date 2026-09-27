@@ -22,10 +22,10 @@ import { buildDatasetPayload } from './build_dataset_payload';
 import { type CreateDatasetFormValues } from './create_dataset_form_state';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
-import { StepAdditional } from './step_additional';
-import { StepDataset } from './step_dataset';
-import { StepMapping } from './step_mapping';
-import { StepReview } from './step_review';
+import { StepAdditional } from './options_step/step_additional';
+import { StepDataset } from './define_step/step_dataset';
+import { StepMapping } from './mapping step/step_mapping';
+import { StepReview } from './review_step/step_review';
 import type { DatasetWizardContent, DatasetWizardSection } from './types';
 
 const { FormWizard, FormWizardStep } = Forms;

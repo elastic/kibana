@@ -12,8 +12,8 @@ import type {
   DatasetSettingsFile,
   DatasetMappings,
 } from '../../common/dataset_types';
-import type { MappingEditorValue } from '../components/mapping_editor';
-import { emptyMappingEditorValue } from '../components/mapping_editor';
+import type { MappingEditorValue } from './mapping step/mapping_editor';
+import { emptyMappingEditorValue } from './mapping step/mapping_editor';
 import {
   emptyCreateDatasetSettingsFormValues,
   type CreateDatasetFormValues,
