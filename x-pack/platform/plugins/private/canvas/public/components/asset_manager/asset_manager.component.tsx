@@ -125,6 +125,7 @@ export const AssetManager: FC<Props> = (props) => {
               <Loading animated text={strings.getLoadingText()} />
             ) : (
               <EuiFilePicker
+                aria-label={strings.getFilePickerPromptText()}
                 initialPromptText={strings.getFilePickerPromptText()}
                 compressed
                 display="default"

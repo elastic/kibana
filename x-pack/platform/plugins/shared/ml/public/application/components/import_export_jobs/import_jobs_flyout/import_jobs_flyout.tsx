@@ -45,6 +45,10 @@ import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 import { useEnabledFeatures } from '../../../contexts/ml';
 
+const SELECT_FILE_LABEL = i18n.translate('xpack.ml.importExport.importFlyout.fileSelect', {
+  defaultMessage: 'Select or drag and drop a file',
+});
+
 export interface Props {
   isDisabled: boolean;
   onImportComplete: (() => void) | null;
@@ -427,12 +431,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete, isOp
                   disabled={importing}
                   fullWidth
                   id="filePicker"
-                  initialPromptText={i18n.translate(
-                    'xpack.ml.importExport.importFlyout.fileSelect',
-                    {
-                      defaultMessage: 'Select or drag and drop a file',
-                    }
-                  )}
+                  aria-label={SELECT_FILE_LABEL}
+                  initialPromptText={SELECT_FILE_LABEL}
                   onChange={onFilePickerChange}
                   className="file-datavisualizer-file-picker"
                 />

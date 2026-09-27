@@ -13,6 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 const SUPPORTED_CONFIG_EXTENSIONS = ['application/json', 'text/plain'];
 
+const SELECT_CONFIG_FILE_LABEL = i18n.translate(
+  'xpack.osquery.configUploader.initialPromptTextLabel',
+  {
+    defaultMessage: 'Select or drag and drop osquery config file',
+  }
+);
+
 const ExampleConfigLink = React.memo(() => (
   <EuiLink
     href="https://github.com/osquery/osquery/blob/master/tools/deployment/osquery.example.conf"
@@ -115,9 +122,8 @@ const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) =>
         <EuiFilePicker
           ref={filePickerRef}
           id="osquery_config_picker"
-          initialPromptText={i18n.translate('xpack.osquery.configUploader.initialPromptTextLabel', {
-            defaultMessage: 'Select or drag and drop osquery config file',
-          })}
+          aria-label={SELECT_CONFIG_FILE_LABEL}
+          initialPromptText={SELECT_CONFIG_FILE_LABEL}
           onChange={handleInputChange}
           display="large"
           fullWidth

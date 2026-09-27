@@ -38,6 +38,13 @@ import { importContent, previewContent } from './requests';
 import { getFormattedError } from '../../../../util/errors';
 import { hasSelectedObjects, isEmptyContentPack } from './helpers';
 
+const IMPORT_FILE_PICKER_PROMPT = i18n.translate(
+  'xpack.streams.streamDetailDashboard.importContentFilePickerPrompt',
+  {
+    defaultMessage: 'Drop a content pack .zip here to preview and import it.',
+  }
+);
+
 export function ImportContentPackFlyout({
   definition,
   onImport,
@@ -92,12 +99,8 @@ export function ImportContentPackFlyout({
             `}
             id={'streams-content-import'}
             multiple={false}
-            initialPromptText={i18n.translate(
-              'xpack.streams.streamDetailDashboard.importContentFilePickerPrompt',
-              {
-                defaultMessage: 'Drop a content pack .zip here to preview and import it.',
-              }
-            )}
+            aria-label={IMPORT_FILE_PICKER_PROMPT}
+            initialPromptText={IMPORT_FILE_PICKER_PROMPT}
             fullWidth
             onChange={async (files) => {
               if (files?.length) {
