@@ -72,7 +72,7 @@ export class DataFederationPage {
     this.createDataSetDataSource = page.testSubj.locator('createDatasetDataSource');
     this.createDataSetName = page.testSubj.locator('createDatasetName');
     this.createDataSetResource = page.testSubj.locator('createDatasetResource');
-    this.createDataSetSettingsFormat = page.testSubj.locator('createDatasetSettingsFormat');
+    this.createDataSetSettingsFormat = page.components.superSelect('createDatasetSettingsFormat');
   }
 
   async goto(): Promise<void> {
@@ -168,7 +168,7 @@ export class DataFederationPage {
     await this.page.testSubj.locator(`createDatasetDataSource-${dataSourceName}`).click();
     await this.createDataSetName.fill(name);
     await this.createDataSetResource.fill(resource);
-    await this.createDataSetSettingsFormat.selectOption({ value: format });
+    await this.createDataSetSettingsFormat.selectOptionByValue(format);
 
     await this.wizardNextButton.click();
     await this.createDatasetWizardAdvancedStep.waitFor({ state: 'visible' });

@@ -36,7 +36,7 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
     }
   });
 
-  test('creates, edits, and deletes a dataset', async ({
+  test('creates, edits, and deletes a data set', async ({
     browserAuth,
     kbnClient,
     page,
