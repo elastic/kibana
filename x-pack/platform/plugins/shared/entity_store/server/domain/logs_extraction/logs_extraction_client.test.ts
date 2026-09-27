@@ -15,7 +15,10 @@ import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
 import { ENGINE_METADATA_UNTYPED_ID_FIELD, TIMESTAMP_FIELD } from './query_builder_commons';
-import { LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD } from './log_pagination_probe_query_builder';
+import {
+  LOG_EXTRACTION_SAMPLE_PROBABILITY,
+  LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD,
+} from './log_pagination_probe_query_builder';
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 import type { ExtractionMode } from '../../../common/domain/definitions/entity_schema';
 
@@ -2648,25 +2651,40 @@ describe('LogsExtractionClient sampling wiring', () => {
       .map(([args]) => args.query);
 
   /**
-   * One probed slice (11:50 → 11:55, 4 min of window left) followed by an empty probe and the
-   * sweep it triggers. sliceLogCount = sampledProbeDocs x 10 (probe sample probability 0.1) and
-   * the window projection = sliceLogCount x 1.8 (5-min slice density over the remaining 4 min).
+   * The real probe query has `LIMIT scaledProbeLimit` baked in, so no single probe response can
+   * ever report more sampled docs than this - a mock feeding a higher value describes a result
+   * the query could never produce.
    */
-  const mockVolumeSequence = (sampledProbeDocs: number) => {
+  const REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE = Math.round(
+    LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT * LOG_EXTRACTION_SAMPLE_PROBABILITY
+  );
+
+  /**
+   * One probed slice ending at `sliceEndISO`, followed by an empty probe and the sweep it
+   * triggers. sliceLogCount = sampledProbeDocs x 10 (probe sample probability 0.1); the window
+   * projection extrapolates that density over the remaining time to 11:59.
+   *
+   * `sampledProbeDocs` must be >= the realistic per-probe ceiling for the mocked `sliceEndISO`
+   * to actually take effect: below it, `isLastLogsPage` is true and the real code discards the
+   * probe's cursor in favor of the window's natural end, collapsing the slice to zero remaining
+   * time regardless of what boundary was mocked here.
+   */
+  const mockVolumeSequence = (sampledProbeDocs: number, sliceEndISO: string) => {
     mockExecuteEsqlQuery
-      .mockResolvedValueOnce(
-        mockLogPaginationCursorProbeRow('2025-01-15T11:55:00.000Z', sampledProbeDocs)
-      )
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(sliceEndISO, sampledProbeDocs))
       .mockResolvedValueOnce(extractionRow)
       .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
       .mockResolvedValueOnce({ columns: [], values: [] });
   };
 
-  /** ~500K raw in the window, far above the 100K default cap. */
-  const mockHighVolumeSequence = () => mockVolumeSequence(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+  /** A single slice at the realistic per-probe ceiling (50K raw) over a dense 3-min slice,
+   * projecting to 150K for the whole window - above the 100K default cap without describing a
+   * probe result the real query could never return. */
+  const mockHighVolumeSequence = () =>
+    mockVolumeSequence(REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE, '2025-01-15T11:53:00.000Z');
 
-  /** ~1.8K raw in the window, far below the 100K default cap. */
-  const mockLowVolumeSequence = () => mockVolumeSequence(100);
+  /** ~3K raw in the window, far below the 100K default cap. */
+  const mockLowVolumeSequence = () => mockVolumeSequence(100, '2025-01-15T11:53:00.000Z');
 
   beforeEach(() => {
     jest.useFakeTimers({ now: fixedNow.getTime() });
@@ -2716,19 +2734,21 @@ describe('LogsExtractionClient sampling wiring', () => {
 
   it('a window projecting just above the 100K default samples', async () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
-    // 6000 sampled → 60K raw → projection 108K > 100K
-    mockVolumeSequence(6000);
+    // Realistic ceiling (5000 sampled → 50K raw) over a 4-min slice, 5 min left in the window:
+    // projection = 50K x (1 + 5/4) = 112.5K > 100K
+    mockVolumeSequence(REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE, '2025-01-15T11:54:00.000Z');
 
     const result = await client.extractLogs('user');
 
     expect(result.success).toBe(true);
-    expect(extractionQueries()[0]).toContain('| SAMPLE 0.9');
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.');
   });
 
   it('a window projecting just below the 100K default does not sample', async () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
-    // 5000 sampled → 50K raw → projection 90K < 100K
-    mockVolumeSequence(5000);
+    // Same realistic ceiling (5000 sampled → 50K raw), but over a wider 5-min slice with only
+    // 4 min left: projection = 50K x (1 + 4/5) = 90K < 100K
+    mockVolumeSequence(REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE, '2025-01-15T11:55:00.000Z');
 
     const result = await client.extractLogs('user');
 
@@ -2755,7 +2775,7 @@ describe('LogsExtractionClient sampling wiring', () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
     });
-    mockHighVolumeSequence(); // dynamic rate would be ~0.11
+    mockHighVolumeSequence(); // dynamic rate would be ~0.667
 
     const result = await client.extractLogs('user');
 
@@ -2827,7 +2847,7 @@ describe('LogsExtractionClient sampling wiring', () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { maxLogsPerWindow: 500_000 },
     });
-    mockHighVolumeSequence(); // ~500K raw fits the raised cap, but projects far above the 100K default
+    mockHighVolumeSequence(); // 50K raw fits the raised cap, but projects to 150K, above the 100K default
 
     const result = await client.extractLogs('user');
 
@@ -2839,8 +2859,9 @@ describe('LogsExtractionClient sampling wiring', () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { maxLogsPerWindow: 20_000 },
     });
-    // 5000 sampled → 50K raw → projection 90K, under the 100K default trigger but over the 20K cap
-    mockVolumeSequence(5000);
+    // 3000 sampled (< the realistic 5000 ceiling) → last page, so no extrapolation: projected
+    // volume is just the raw 30K itself - under the 100K default trigger but over the 20K cap
+    mockVolumeSequence(3000, '2025-01-15T11:53:00.000Z');
 
     const result = await client.extractLogs('user');
 
@@ -2853,16 +2874,47 @@ describe('LogsExtractionClient sampling wiring', () => {
 
   it('the budget counts processed volume, so a sampled over-cap window does not fire the cap', async () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
-    mockHighVolumeSequence();
+    // 4 consecutive slices, each at the realistic per-probe ceiling (50K raw). Cumulative raw
+    // reaches 100K (the cap) by slice 2 already - raw accounting would have fired there. Cumulative
+    // processed volume, throttled by the rate each slice computes, stays under 45K after all 4.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:51:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:52:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:53:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:54:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
 
     const result = await client.extractLogs('user');
 
     expect(result.success).toBe(true);
-    // ~500K raw at the computed rate lands well under the 100K default cap; raw accounting
-    // would have fired the cap on the first slice.
     expect(result.success && result.logsCapApplied).toBe(false);
     expect(result.success && result.logsProcessed).toBeGreaterThan(0);
-    expect(result.success && result.logsProcessed).toBeLessThan(100_000);
+    expect(result.success && result.logsProcessed).toBeLessThan(45_000);
   });
 
   it('rounds a slice contribution up rather than to nearest, so a small nonzero amount is never lost to zero', async () => {
@@ -2886,19 +2938,30 @@ describe('LogsExtractionClient sampling wiring', () => {
 
   it('recalculates the rate for a later slice from the budget the earlier slice consumed', async () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
-    // Slice 1: 11:50→11:51 (1 min), 60K raw. Projects 540K remaining (8 min left at this
-    // density) → p1 ≈ 0.185, consuming ~11.1K of the 100K default budget.
-    // Slice 2: 11:51→11:55 (4 min), 60K raw. Same raw volume as slice 1, but spread over a
-    // longer slice with less window left (4 min) projects only 120K remaining, and the budget
-    // is down to ~88.9K after slice 1 → p2 ≈ 0.741. Both rates land strictly inside (0.1, 1),
-    // and p2 is well above p1: as the window nears its end there is less left to protect,
-    // so the rate recomputed from the remaining budget rises, exactly the self-correction
-    // the resolver is meant to produce - only reachable if slice 2 truly recalculates instead
-    // of reusing slice 1's rate.
+    // Both slices at the realistic per-probe ceiling (5000 sampled → 50K raw).
+    // Slice 1: 11:50→11:51 (1 min), 8 min left. Projects 450K remaining → p1 ≈ 0.222,
+    // consuming ~11.1K of the 100K default budget.
+    // Slice 2: 11:51→11:55 (4 min), 4 min left. Same raw volume as slice 1, but spread over a
+    // longer slice with less window left projects only 100K remaining, and the budget is down
+    // to ~88.9K after slice 1 → p2 ≈ 0.889. Both rates land strictly inside (0.1, 1), and p2 is
+    // well above p1: as the window nears its end there is less left to protect, so the rate
+    // recomputed from the remaining budget rises, exactly the self-correction the resolver is
+    // meant to produce - only reachable if slice 2 truly recalculates instead of reusing
+    // slice 1's rate.
     mockExecuteEsqlQuery
-      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:51:00.000Z', 6000))
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:51:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
       .mockResolvedValueOnce(extractionRow)
-      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:55:00.000Z', 6000))
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:55:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
       .mockResolvedValueOnce(extractionRow)
       .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
       .mockResolvedValueOnce({ columns: [], values: [] });
@@ -2911,8 +2974,8 @@ describe('LogsExtractionClient sampling wiring', () => {
     const firstRate = rateOf(firstQuery);
     const secondRate = rateOf(secondQuery);
 
-    expect(firstRate).toBeCloseTo(0.185, 2);
-    expect(secondRate).toBeCloseTo(0.741, 2);
+    expect(firstRate).toBeCloseTo(0.222, 2);
+    expect(secondRate).toBeCloseTo(0.889, 2);
     expect(secondRate).toBeGreaterThan(firstRate);
   });
 
