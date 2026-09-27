@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { StorageClientBulkIndexOccMetadata } from '@kbn/storage-adapter';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
@@ -29,23 +30,36 @@ type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
 interface WorkflowHit {
   _id?: string;
   _source?: WorkflowProperties;
+  _seq_no?: number;
+  _primary_term?: number;
 }
 
-const disableWorkflowsForDeletion = async (
+const concurrencyMetadata = (hit: WorkflowHit): StorageClientBulkIndexOccMetadata =>
+  hit._seq_no !== undefined && hit._primary_term !== undefined
+    ? { if_seq_no: hit._seq_no, if_primary_term: hit._primary_term }
+    : {};
+
+const prepareWorkflowsForDeletion = async (
   hits: WorkflowHit[],
   client: WorkflowStorageClient
 ): Promise<string[]> => {
   const disableOperations = hits
     .filter(
       (hit): hit is { _id: string; _source: WorkflowProperties } =>
-        Boolean(hit._id) && Boolean(hit._source) && hit._source?.enabled === true
+        Boolean(hit._id) &&
+        Boolean(hit._source) &&
+        (hit._source?.enabled === true || hit._source?.access_control?.access_mode === 'private')
     )
     .map((hit) => ({
       index: {
         _id: hit._id,
+        ...concurrencyMetadata(hit),
         document: {
           ...(hit._source satisfies WorkflowProperties),
           enabled: false,
+          ...(hit._source.access_control?.access_mode === 'private' && {
+            deleted_at: hit._source.deleted_at ?? new Date(),
+          }),
         },
       },
     }));
@@ -54,8 +68,15 @@ const disableWorkflowsForDeletion = async (
     const response = await client.bulk({ operations: disableOperations, refresh: true });
     return disableOperations
       .filter((_, i) => {
-        const status = response.items[i]?.index?.status ?? 0;
-        return status >= 200 && status < 300;
+        const item = response.items[i]?.index;
+        const status = item?.status ?? 0;
+        const hit = hits.find((candidate) => candidate._id === disableOperations[i].index._id);
+        if (status >= 200 && status < 300 && hit) {
+          hit._seq_no = item?._seq_no;
+          hit._primary_term = item?._primary_term;
+          return true;
+        }
+        return false;
       })
       .map((op) => op.index._id);
   }
@@ -81,6 +102,7 @@ const restoreDisabledWorkflows = async (
     .map((hit) => ({
       index: {
         _id: hit._id,
+        ...concurrencyMetadata(hit),
         document: hit._source satisfies WorkflowProperties,
       },
     }));
@@ -103,7 +125,7 @@ const purgeWorkflowRelatedData = async (
   spaceId: string,
   workflowExecutionsDataClient: WorkflowExecutionsDataClient,
   stepExecutionsDataClient: StepExecutionsDataClient,
-  logger: Logger
+  { strict, logger }: { strict: boolean; logger: Logger }
 ): Promise<void> => {
   if (workflowIds.length === 0) {
     return;
@@ -118,25 +140,45 @@ const purgeWorkflowRelatedData = async (
   const deleteByQueryRequest = {
     query,
     refresh: true,
-    conflicts: 'proceed',
+    conflicts: strict ? 'abort' : 'proceed',
   } as const;
 
-  const deleteOps = [
-    workflowExecutionsDataClient.deleteByQuery(deleteByQueryRequest).catch((error) => {
+  const purge = async (
+    dataClient: WorkflowExecutionsDataClient | StepExecutionsDataClient,
+    label: string
+  ) => {
+    try {
+      const response = await dataClient.deleteByQuery(deleteByQueryRequest);
+      if (
+        strict &&
+        (response.timed_out || response.version_conflicts || response.failures?.length)
+      ) {
+        throw new Error(
+          `History cleanup incomplete: timed_out=${response.timed_out ?? false}, ` +
+            `version_conflicts=${response.version_conflicts ?? 0}, ` +
+            `failures=${response.failures?.length ?? 0}`
+        );
+      }
+    } catch (error) {
+      if (strict) throw error;
       logger.warn(
-        `Failed to purge executions for workflows [${workflowIds.join(', ')}]: ${error.message}`
-      );
-    }),
-    stepExecutionsDataClient.deleteByQuery(deleteByQueryRequest).catch((error) => {
-      logger.warn(
-        `Failed to purge step executions for workflows [${workflowIds.join(', ')}]: ${
-          error.message
+        `Failed to purge ${label} for workflows [${workflowIds.join(', ')}]: ${
+          error instanceof Error ? error.message : String(error)
         }`
       );
-    }),
-  ];
+    }
+  };
 
-  await Promise.allSettled(deleteOps);
+  if (strict) {
+    // Keep execution records until their steps are gone, and keep the ACL until both are gone.
+    await purge(stepExecutionsDataClient, 'step executions');
+    await purge(workflowExecutionsDataClient, 'executions');
+  } else {
+    await Promise.all([
+      purge(workflowExecutionsDataClient, 'executions'),
+      purge(stepExecutionsDataClient, 'step executions'),
+    ]);
+  }
 };
 
 const hardDeleteWorkflows = async (
@@ -146,6 +188,7 @@ const hardDeleteWorkflows = async (
   spaceId: string,
   failures: Array<{ id: string; error: string }>,
   deps: {
+    acknowledgeAclLoss?: boolean;
     workflowExecutionsDataClient: WorkflowExecutionsDataClient;
     stepExecutionsDataClient: StepExecutionsDataClient;
     taskScheduler: WorkflowTaskScheduler | null;
@@ -165,7 +208,29 @@ const hardDeleteWorkflows = async (
   } = deps;
   const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
 
-  const disabledIds = await disableWorkflowsForDeletion(hits, client);
+  const privateIds = hits
+    .filter((hit) => hit._source?.access_control?.access_mode === 'private')
+    .map((hit) => hit._id)
+    .filter((id): id is string => Boolean(id));
+  if (privateIds.length > 0 && !deps.acknowledgeAclLoss) {
+    throw new WorkflowConflictError(
+      'Hard deletion removes workflow access controls. Any remaining execution data will use Workflows feature privileges. Set acknowledgeAclLoss=true to confirm.',
+      privateIds[0]
+    );
+  }
+
+  const disabledIds = await prepareWorkflowsForDeletion(hits, client);
+  if (
+    hits.some(
+      (hit) =>
+        hit._id &&
+        (hit._source?.enabled || privateIds.includes(hit._id)) &&
+        !disabledIds.includes(hit._id)
+    )
+  ) {
+    await restoreDisabledWorkflows(hits, disabledIds, client, logger);
+    throw new WorkflowConflictError('A workflow changed during deletion. Try again.', foundIds[0]);
+  }
 
   let executionChecks: Array<{ id: string; hasRunning: boolean }>;
   try {
@@ -192,10 +257,36 @@ const hardDeleteWorkflows = async (
     );
   }
 
+  try {
+    await purgeWorkflowRelatedData(
+      privateIds,
+      spaceId,
+      workflowExecutionsDataClient,
+      stepExecutionsDataClient,
+      { strict: true, logger }
+    );
+  } catch (error) {
+    await restoreDisabledWorkflows(
+      hits,
+      disabledIds.filter((id) => !privateIds.includes(id)),
+      client,
+      logger
+    );
+    throw new WorkflowConflictError(
+      `Could not delete workflow history. Workflow documents and access controls were retained. ` +
+        `Private workflows remain soft-deleted and disabled. ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      privateIds[0]
+    );
+  }
+
   const successfulIds: string[] = [];
-  for (const id of foundIds) {
+  for (const hit of hits) {
+    const id = hit._id;
+    if (!id) throw new Error('Workflow document is missing its ID');
     try {
-      await client.delete({ id });
+      await client.delete({ id, ...concurrencyMetadata(hit) });
       successfulIds.push(id);
     } catch (error) {
       failures.push({
@@ -207,11 +298,11 @@ const hardDeleteWorkflows = async (
 
   await unscheduleWorkflowTasks(successfulIds, taskScheduler);
   await purgeWorkflowRelatedData(
-    successfulIds,
+    successfulIds.filter((id) => !privateIds.includes(id)),
     spaceId,
     workflowExecutionsDataClient,
     stepExecutionsDataClient,
-    logger
+    { strict: false, logger }
   );
 
   return {
@@ -243,6 +334,7 @@ const softDeleteWorkflows = async (
   const bulkOperations = validHits.map((hit) => ({
     index: {
       _id: hit._id,
+      ...concurrencyMetadata(hit),
       document: {
         ...(hit._source satisfies WorkflowProperties),
         deleted_at: now,
@@ -301,7 +393,7 @@ export const cleanupDeletedWorkflows = async (
       params.spaceId,
       params.workflowExecutionsDataClient,
       params.stepExecutionsDataClient,
-      params.logger
+      { strict: false, logger: params.logger }
     );
   }
 };
@@ -319,6 +411,14 @@ const deleteBoundWorkflow = async (
   params: Parameters<typeof deleteWorkflows>[0]
 ): Promise<DeleteWorkflowsResponse> => {
   const { id, document } = guarded;
+  params.assertCanDelete?.(document);
+  const isPrivate = document.access_control?.access_mode === 'private';
+  if (params.force && isPrivate && !params.acknowledgeAclLoss) {
+    throw new WorkflowConflictError(
+      'Hard deletion removes workflow access controls. Set acknowledgeAclLoss=true to confirm.',
+      id
+    );
+  }
   const client = params.storage.getClient();
   const write = async (
     source: WorkflowProperties,
@@ -338,7 +438,15 @@ const deleteBoundWorkflow = async (
   };
 
   if (params.force) {
-    const disabledRevision = await write({ ...document, enabled: false }, guarded);
+    const disabledRevision = await write(
+      {
+        ...document,
+        enabled: false,
+        ...(isPrivate && { deleted_at: document.deleted_at ?? new Date() }),
+      },
+      guarded
+    );
+    let retainPrivateAcl = false;
     try {
       // Retain the check after disabling to catch executions started after the preflight.
       const executions = await params.getWorkflowExecutions(
@@ -351,8 +459,26 @@ const deleteBoundWorkflow = async (
           id
         );
       }
+      if (isPrivate) {
+        retainPrivateAcl = true;
+        await purgeWorkflowRelatedData(
+          [id],
+          params.spaceId,
+          params.workflowExecutionsDataClient,
+          params.stepExecutionsDataClient,
+          { strict: true, logger: params.logger }
+        );
+      }
       await guarded.deleteDocument(disabledRevision.seqNo, disabledRevision.primaryTerm);
     } catch (error) {
+      if (retainPrivateAcl) {
+        throw new WorkflowConflictError(
+          `Could not complete workflow deletion. The private workflow remains soft-deleted with its access controls. ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+          id
+        );
+      }
       try {
         // Restore only our own disabled revision, never overwrite a concurrent editor.
         await write(document, disabledRevision);
@@ -366,7 +492,9 @@ const deleteBoundWorkflow = async (
   } else {
     await write({ ...document, enabled: false, deleted_at: new Date() }, guarded);
   }
-  if (!params.deferCleanup) await cleanupDeletedWorkflows([id], params);
+  if (!params.deferCleanup) {
+    await cleanupDeletedWorkflows([id], { ...params, force: params.force && !isPrivate });
+  }
   return { total: 1, deleted: 1, failures: [], successfulIds: [id] };
 };
 
@@ -377,6 +505,8 @@ export const deleteWorkflows = async (params: {
   ids: string[];
   spaceId: string;
   force: boolean;
+  acknowledgeAclLoss?: boolean;
+  assertCanDelete?: (workflow: WorkflowProperties) => void;
   guardedDelete?: GuardedWorkflowDeletion;
   guardedBatch?: OccWorkflowHit[];
   deferCleanup?: boolean;
@@ -397,7 +527,10 @@ export const deleteWorkflows = async (params: {
     const result = await bulkIndexWithOccRetry({
       client: params.storage.getClient(),
       hits: params.guardedBatch,
-      mutate: (hit) => ({ ...hit._source, enabled: false, deleted_at: now }),
+      mutate: (hit) => {
+        params.assertCanDelete?.(hit._source);
+        return { ...hit._source, enabled: false, deleted_at: now };
+      },
       maxRetries: 0,
     });
     if (!params.deferCleanup) await cleanupDeletedWorkflows(result.successIds, params);
@@ -430,12 +563,17 @@ export const deleteWorkflows = async (params: {
     query: { bool: { must } },
     size: ids.length,
     track_total_hits: false,
+    seq_no_primary_term: true,
   });
 
   const hits = searchResponse.hits.hits;
+  for (const hit of hits) {
+    if (hit._source) params.assertCanDelete?.(hit._source);
+  }
 
   if (force) {
     return hardDeleteWorkflows(ids, hits, client, spaceId, failures, {
+      acknowledgeAclLoss: params.acknowledgeAclLoss,
       workflowExecutionsDataClient,
       stepExecutionsDataClient,
       taskScheduler,

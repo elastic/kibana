@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 
@@ -34,6 +35,8 @@ const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowPropertie
  */
 export const disableAllWorkflows = async (params: {
   storage: WorkflowStorage;
+  accessControlFilter?: estypes.QueryDslQueryContainer;
+  assertCanEdit?: (workflow: WorkflowProperties) => void;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
   spaceId?: string;
@@ -44,7 +47,15 @@ export const disableAllWorkflows = async (params: {
   failures: Array<{ id: string; error: string }>;
   disabledWorkflows: Array<{ id: string; document: WorkflowProperties }>;
 }> => {
-  const { storage, taskScheduler, logger, spaceId, canModifyBoundWorkflows = true } = params;
+  const {
+    storage,
+    taskScheduler,
+    logger,
+    spaceId,
+    accessControlFilter,
+    assertCanEdit,
+    canModifyBoundWorkflows = true,
+  } = params;
   const bumpVersion = Boolean(spaceId);
   const client = storage.getClient();
   const pageSize = 1000;
@@ -54,7 +65,11 @@ export const disableAllWorkflows = async (params: {
 
   const query = {
     bool: {
-      must: [{ term: { enabled: true } }, ...(spaceId ? [{ term: { spaceId } }] : [])],
+      must: [
+        { term: { enabled: true } },
+        ...(spaceId ? [{ term: { spaceId } }] : []),
+        ...(accessControlFilter ? [accessControlFilter] : []),
+      ],
       must_not: [{ exists: { field: 'deleted_at' } }],
     },
   };
@@ -87,6 +102,7 @@ export const disableAllWorkflows = async (params: {
           client,
           hits: occHits,
           mutate: (hit) => {
+            assertCanEdit?.(hit._source);
             // This runs again on the refreshed document after an OCC conflict.
             if (hit._source.definition?.settings?.run_as && !canModifyBoundWorkflows) {
               throw Boom.forbidden(

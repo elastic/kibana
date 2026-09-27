@@ -66,6 +66,7 @@ export class ConversationProposalsService {
     const { proposals, total } = await this.proposalsService.list(
       { category, status: 'pending', excludeSuperseded: true, excludeExpired: false, size, from },
       spaceId,
+      request,
       [{ createdAt: { order: 'desc' as const } }, ...TIEBREAKER]
     );
 
@@ -87,6 +88,7 @@ export class ConversationProposalsService {
         from,
       },
       spaceId,
+      request,
       [
         { decidedAt: { order: 'desc' as const } },
         { createdAt: { order: 'desc' as const } },
