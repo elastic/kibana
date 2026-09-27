@@ -63,7 +63,9 @@ const stripBackticks = (name: string): string => name.replace(/`/g, '');
 
 /**
  * Every column the config binds to a chart role. Lens bindings are `{ column }`
- * objects under role keys; Vega bindings are `encoding.<channel>.field`.
+ * objects under role keys; Vega bindings are `encoding.<channel>.field` on the
+ * root view and any layered or concatenated view, with quantitative channels
+ * treated as measures.
  * Custom content is an HTML template and binds nothing.
  */
 export function collectColumnBindings(visualization: ExtractedVisualization): ColumnBinding[] {
@@ -108,6 +110,17 @@ function walkLens(
   }
 }
 
+// Vega-Lite keys whose value is a nested view (or list of views) that carries its own encoding.
+const VEGA_VIEW_KEYS = ['layer', 'concat', 'hconcat', 'vconcat', 'spec'] as const;
+// Aggregates that count rows, so the field they reference may be of any type.
+const VEGA_COUNTING_AGGREGATES = new Set(['count', 'distinct', 'valid', 'missing']);
+
+const vegaRoleFor = (definition: Record<string, unknown>): BindingRole =>
+  definition.type === 'quantitative' &&
+  !(typeof definition.aggregate === 'string' && VEGA_COUNTING_AGGREGATES.has(definition.aggregate))
+    ? 'measure'
+    : 'other';
+
 function collectVegaBindings(spec: unknown): ColumnBinding[] {
   if (typeof spec !== 'string') {
     return [];
@@ -118,20 +131,34 @@ function collectVegaBindings(spec: unknown): ColumnBinding[] {
   } catch {
     return [];
   }
-  if (!isRecord(parsed) || !isRecord(parsed.encoding)) {
-    return [];
+  const bindings: ColumnBinding[] = [];
+  walkVegaView(parsed, 'spec', bindings);
+  return bindings;
+}
+
+function walkVegaView(view: unknown, path: string, bindings: ColumnBinding[]): void {
+  if (!isRecord(view)) {
+    return;
   }
-  return Object.entries(parsed.encoding).flatMap(([channel, definition]) =>
-    isRecord(definition) && typeof definition.field === 'string'
-      ? [
-          {
-            path: `spec.encoding.${channel}`,
-            column: unescapeVegaField(definition.field),
-            role: 'other' as const,
-          },
-        ]
-      : []
-  );
+  if (isRecord(view.encoding)) {
+    for (const [channel, definition] of Object.entries(view.encoding)) {
+      if (isRecord(definition) && typeof definition.field === 'string') {
+        bindings.push({
+          path: `${path}.encoding.${channel}`,
+          column: unescapeVegaField(definition.field),
+          role: vegaRoleFor(definition),
+        });
+      }
+    }
+  }
+  for (const key of VEGA_VIEW_KEYS) {
+    const child = view[key];
+    if (Array.isArray(child)) {
+      child.forEach((item, index) => walkVegaView(item, `${path}.${key}[${index}]`, bindings));
+    } else {
+      walkVegaView(child, `${path}.${key}`, bindings);
+    }
+  }
 }
 
 /** Resolves each binding against the executed result columns. */
@@ -160,10 +187,10 @@ const describeFailure = (check: BindingCheck): string =>
 /**
  * CODE evaluator: executes each visualization's ES|QL and checks that every
  * column the Lens config (or Vega encoding) binds to exists in the result, and
- * that measure roles bind numeric columns. Catches configs that parse against
- * the schema but reference columns the query never produces. A chart that
- * binds no column at all scores 0; only a Vega spec without a top-level
- * `encoding` is left unscored.
+ * that measure roles (Lens measures, quantitative Vega channels) bind numeric
+ * columns. Catches configs that parse against the schema but reference columns
+ * the query never produces. A chart that binds no column at all scores 0; only
+ * a Vega spec without any encoding field is left unscored.
  */
 export function createColumnBindingIntegrityEvaluator<
   TExample extends Example = Example,
@@ -208,9 +235,9 @@ export function createColumnBindingIntegrityEvaluator<
         visualizations.map(async (visualization, index) => {
           const bindings = collectColumnBindings(visualization);
           if (bindings.length === 0) {
-            // A Vega spec without top-level `encoding` (layered / concat) may still bind
-            // columns we do not parse, so it is left out of the score. Anything else
-            // that binds no column at all is a broken chart, not a pass.
+            // A Vega spec without encoding fields may still bind columns through
+            // transforms or data-driven expressions, so it is left out of the score.
+            // Anything else that binds no column at all is a broken chart, not a pass.
             const unscorable = visualization.renderer === 'vega';
             const renderer = visualization.renderer ?? 'lens';
             return {
@@ -252,9 +279,7 @@ export function createColumnBindingIntegrityEvaluator<
         detail.score === undefined ? [] : [detail.score]
       );
       if (scores.length === 0) {
-        return skippedResult(
-          'No column bindings to resolve (Vega spec without top-level encoding).'
-        );
+        return skippedResult('No column bindings to resolve (Vega spec without encoding fields).');
       }
       const score = scores.reduce((sum, value) => sum + value, 0) / scores.length;
       const failures = details.flatMap((detail) => detail.failures);

@@ -100,6 +100,51 @@ describe('collectColumnBindings', () => {
       { path: 'spec.encoding.y', column: 'cnt', role: 'other' },
     ]);
   });
+
+  it('collects encoding fields from layered and concatenated views', () => {
+    expect(
+      collectColumnBindings({
+        esql: 'FROM a',
+        renderer: 'vega',
+        visualization: {
+          spec: JSON.stringify({
+            encoding: { x: { field: 'avg' } },
+            layer: [
+              { mark: 'point', encoding: { y: { field: 'missing' } } },
+              { hconcat: [{ mark: 'bar', encoding: { color: { field: 'host' } } }] },
+            ],
+          }),
+        },
+      }).map(({ path, column }) => [path, column])
+    ).toEqual([
+      ['spec.encoding.x', 'avg'],
+      ['spec.layer[0].encoding.y', 'missing'],
+      ['spec.layer[1].hconcat[0].encoding.color', 'host'],
+    ]);
+  });
+
+  it('treats quantitative Vega channels as measures unless they count rows', () => {
+    expect(
+      collectColumnBindings({
+        esql: 'FROM a',
+        renderer: 'vega',
+        visualization: {
+          spec: JSON.stringify({
+            mark: 'point',
+            encoding: {
+              x: { field: 'host', type: 'nominal' },
+              y: { field: 'host', type: 'quantitative', aggregate: 'count' },
+              size: { field: 'clientip', type: 'quantitative' },
+            },
+          }),
+        },
+      }).map(({ column, role }) => [column, role])
+    ).toEqual([
+      ['host', 'other'],
+      ['host', 'other'],
+      ['clientip', 'measure'],
+    ]);
+  });
 });
 
 describe('checkColumnBindings', () => {
