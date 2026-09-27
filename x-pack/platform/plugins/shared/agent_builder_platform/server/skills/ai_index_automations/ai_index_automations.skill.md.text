@@ -46,13 +46,13 @@ Whatever the strategy, a generated workflow has to:
   detections a distribution aggregation whose observed counts every threshold must quote. Sample
   with `function_score` + `random_score` so repeated runs see different records rather than always
   the first-ingested ones.
-- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and set its
-  `connector-id` to `.google-gemini-3.5-flash-chat_completion`. That is the default model for
-  every prompt step in every automation this skill produces: the templates carry it, and a
-  workflow you assemble outside the templates carries it too, on each `ai.prompt` and `ai.agent`
-  step. Use a different connector only when the user names one, and look its id up with
-  `platform.workflows.get_connectors`; they can change it after the save, in the workflow editor,
-  without your involvement.
+- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and set
+  `connector-id-by-feature: context_engine_prompt` on every `ai.prompt` step. Leave `connector-id`
+  off. `connector-id-by-feature` resolves the connector from the admin-configured "Context Engine AI
+  Prompt" feature at run time (Management → Model Settings), which defaults to Gemini Flash Lite —
+  keeping per-document model calls cheap. Naming a `connector-id` pins a saved automation to a
+  connector that can be renamed, removed, or run out of billing quota long after the conversation
+  that wrote it — and the failure lands on a scheduled run with nobody watching.
 - **Retry every `ai.prompt`**: `on-failure.retry` with three attempts, exponential delay and
   jitter. Rate limits, transient connector errors and a structured output that failed to parse
   once are the ordinary failures of a model call, and without the retry each one costs the unit
@@ -449,11 +449,11 @@ Each template opens with a comment saying what to change and what to leave. Take
 Rewriting the parts it tells you to leave is how a draft acquires faults the template does not
 have, and none of them announce themselves — the workflow still runs, and still writes indicators.
 
-Every `ai.prompt` step in the templates carries `connector-id: .google-gemini-3.5-flash-chat_completion`.
-That is the default, not a placeholder: leave it as it stands unless the user has named another
-connector, and put the same id on any prompt step you add or write outside the templates. A
-workflow whose prompt step has no `connector-id` falls back to whatever the deployment happens to
-call its default, which is not what the user approved.
+The templates set `connector-id-by-feature: context_engine_prompt` on their `ai.prompt` steps and
+leave `connector-id` off. Both are deliberate: `connector-id-by-feature` resolves the connector from
+the admin-configured "Context Engine AI Prompt" feature at run time rather than pinning a literal
+connector id, keeping the automation deployment-agnostic. Do not remove
+`connector-id-by-feature: context_engine_prompt` and do not add a `connector-id`.
 
 **Do not generate a workflow.** `platform.core.generate_workflow` may be in your toolset whether or
 not any skill offered it (the default agent has it; the Context Engine agent does not), and both
@@ -506,6 +506,7 @@ correctly, so a lookup is worth a call only for a step type you are adding that 
 
 `platform.workflows.get_examples` is one call for the example library rather than one per step, and
 `platform.workflows.get_trigger_definitions` gives the event context a trigger provides.
+`platform.workflows.get_connectors` lists the available AI connector ids for a step's `connector-id` field.
 
 Validation establishes that the workflow parses, that its step types exist and that its references
 resolve. It does **not** establish that a query inside it returns anything, which is why the rest of
@@ -651,7 +652,7 @@ privileges you have, so starting the same workflow yourself fails the same way; 
 came after the run began, a second attempt doubles it. Report what it said and stop.
 
 What remains unauthorized is starting a run of your own accord on a workflow already saved: do not
-execute a saved workflow unless the run you are in has told you to.
+execute a saved workflow unless the context in this conversation calls for it.
 `platform.core.execute_workflow` starts one and `platform.core.get_workflow_execution_status` reports
 on it.
 

@@ -16,15 +16,31 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
  */
 export const AiPromptStepTypeId = 'ai.prompt';
 
-export const ConfigSchema = z.object({
-  'connector-id': z.string().optional(),
-  'reasoning-level': z
-    .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
-    .optional()
-    .describe(
-      '[tech preview] Reasoning effort level forwarded to the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
-    ),
-});
+export const ConfigSchema = z
+  .object({
+    'connector-id': z.string().optional(),
+    'reasoning-level': z
+      .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+      .optional()
+      .describe(
+        '[tech preview] Reasoning effort level forwarded to the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
+      ),
+    'connector-id-by-feature': z
+      .string()
+      .optional()
+      .describe(
+        'Resolve the connector from a named inference feature (as configured in Management → Model Settings) rather than using a literal connector id. Mutually exclusive with connector-id. Example: "context_engine_prompt".'
+      ),
+  })
+  .superRefine((cfg, ctx) => {
+    if (cfg['connector-id'] !== undefined && cfg['connector-id-by-feature'] !== undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Cannot specify both connector-id and connector-id-by-feature.',
+        path: ['connector-id-by-feature'],
+      });
+    }
+  });
 
 // Maybe we can define specific schema for metadata in the future
 // For now it's a record with string keys and any values

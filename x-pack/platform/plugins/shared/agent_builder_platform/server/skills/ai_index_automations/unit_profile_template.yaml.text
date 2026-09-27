@@ -175,11 +175,7 @@ steps:
 
           - name: profile_unit
             type: ai.prompt
-            # The default model for every prompt step. Change it to another AI connector id if the
-            # user asks for one; leave it in place otherwise.
-            connector-id: .google-gemini-3.5-flash-chat_completion
-            # Transient connector errors, rate limits and structured-output parse failures are
-            # retried; a prompt that can never satisfy its schema still fails every attempt.
+            connector-id-by-feature: context_engine_prompt
             on-failure:
               retry:
                 max-attempts: 3
