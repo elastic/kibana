@@ -3418,7 +3418,6 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring @elastic/security-detection-engineering
-/x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/rules @elastic/security-detection-engineering
 
@@ -3455,7 +3454,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/ @elastic/security-detection-engineering
-/x-pack/solutions/security/plugins/security_solution/test/scout_managed_mitre @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine @elastic/security-detection-engineering
 
 /x-pack/solutions/security/plugins/security_solution/scripts/openapi @elastic/security-detection-engineering
 

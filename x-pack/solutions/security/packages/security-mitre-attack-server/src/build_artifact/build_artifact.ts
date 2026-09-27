@@ -17,7 +17,7 @@ import { mapTechniques } from './mappers/map_techniques';
 // Each tag must correspond to the version used for prebuilt rules in
 // https://github.com/elastic/detection-rules.
 // Tags are published at https://github.com/mitre/cti/tags.
-export const MITRE_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.1'];
+export const MITRE_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.2'];
 
 /** Strips the 'ATT&CK-v' prefix, e.g. 'ATT&CK-v19.1' -> '19.1'. */
 const toFrameworkVersion = (tag: string): string => tag.replace(/^ATT&CK-v/, '');

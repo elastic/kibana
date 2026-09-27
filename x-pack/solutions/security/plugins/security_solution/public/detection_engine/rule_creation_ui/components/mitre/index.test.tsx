@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { shallow } from 'enzyme';
 
 import { AddMitreAttackThreat } from '.';
@@ -15,6 +16,7 @@ import {
   createEmptyMitreConfiguration,
   createPopulatedMitreConfiguration,
 } from '../../../../common/hooks/mitre/use_mitre_configuration.mock';
+import { buildMockMitreTacticSummary } from '../../../../../common/detection_engine/mitre/mitre_entity_builders.mock';
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
@@ -86,5 +88,38 @@ describe('AddMitreThreat', () => {
 
     expect(screen.getByTestId('mitreAttackError')).toBeInTheDocument();
     expect(screen.queryByTestId('addMitreAttackTactic')).not.toBeInTheDocument();
+  });
+
+  it('renders tactic options in the order provided by the MITRE configuration', async () => {
+    const tactics = [
+      buildMockMitreTacticSummary({ id: 'TA0001', name: 'Charlie', position: 0 }),
+      buildMockMitreTacticSummary({ id: 'TA0002', name: 'Bravo', position: 1 }),
+      buildMockMitreTacticSummary({ id: 'TA0003', name: 'Alpha', position: 2 }),
+    ];
+    mockUseMitreConfiguration.mockReturnValue(createPopulatedMitreConfiguration({ tactics }));
+
+    const Component = () => {
+      const field = useFormFieldMock<unknown>({
+        value: [{ tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] }],
+      });
+      return (
+        <AddMitreAttackThreat
+          dataTestSubj="dataTestSubj"
+          idAria="idAria"
+          isDisabled={false}
+          field={field}
+        />
+      );
+    };
+    render(<Component />, { wrapper: TestProviders });
+
+    await userEvent.click(screen.getByTestId('mitreAttackTactic'));
+
+    const options = screen.getAllByRole('option');
+    const labels = options
+      .map((option) => option.textContent)
+      .filter((text) => text != null && !text.includes('Select a tactic'));
+
+    expect(labels).toEqual(['Charlie (TA0001)', 'Bravo (TA0002)', 'Alpha (TA0003)']);
   });
 });

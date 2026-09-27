@@ -1,0 +1,100 @@
+{
+  "sha1": "9ec67c2e1a4a7a6abb4a9d88845510af06a3faf9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "2b399116595eb54-dcb22b3a7aa5473",
+      "title": "Seed synthetic MITRE entities (version 99.0)",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/global.setup.ts",
+        "line": 19,
+        "column": 1
+      }
+    },
+    {
+      "id": "eb023ae1d3c943e-e095692b83aa564",
+      "title": "Coverage Overview — managed MITRE source renders the tactic matrix from the managed source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
+    {
+      "id": "eb023ae1d3c943e-c8a7726bd3be711",
+      "title": "Coverage Overview — managed MITRE source renders tactics in ascending position order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "eb023ae1d3c943e-5e311561db93fdd",
+      "title": "Coverage Overview — managed MITRE source does not break the matrix when the rule activity filter is changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
+        "line": 43,
+        "column": 28
+      }
+    },
+    {
+      "id": "176ca0ecf589cb0-c6a4e67e2d9dda8",
+      "title": "Rule creation MITRE picker — managed MITRE source loads tactics from the managed MITRE API and persists a tactic/technique/subtechnique selection after rule save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/mitre_picker.spec.ts",
+        "line": 40,
+        "column": 25
+      }
+    },
+    {
+      "id": "176ca0ecf589cb0-dcff54fdb354b6d",
+      "title": "Rule creation MITRE picker — managed MITRE source offers a multi-tactic technique under each of its tactics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/mitre_picker.spec.ts",
+        "line": 99,
+        "column": 11
+      }
+    },
+    {
+      "id": "a764ffbb01ba080-9151f5692b280e6",
+      "title": "Remove synthetic MITRE entities (version 99.0)",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/global.teardown.ts",
+        "line": 16,
+        "column": 1
+      }
+    }
+  ]
+}

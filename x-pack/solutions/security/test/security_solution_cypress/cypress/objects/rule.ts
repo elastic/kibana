@@ -6,7 +6,7 @@
  */
 
 import type { SeverityMappingItem, Threat } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getMockThreatData } from '@kbn/security-solution-plugin/common/detection_engine/mitre/mitre_tactics_techniques';
+import { getMockThreatData } from '@kbn/security-solution-plugin/common/detection_engine/mitre/mitre_threat_data.mock';
 import type {
   EqlRuleCreateProps,
   EsqlRuleCreateProps,

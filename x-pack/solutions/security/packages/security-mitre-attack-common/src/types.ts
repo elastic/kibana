@@ -24,6 +24,7 @@ export type MitreEntitySummary =
   | MitreTechniqueSummary
   | MitreSubtechniqueSummary;
 
+/** Entities grouped by type. Order is guaranteed: tactics ascending by position (matrix order), techniques and subtechniques ascending by name. */
 export interface MitreEntitySummaryBuckets {
   tactics: MitreTacticSummary[];
   techniques: MitreTechniqueSummary[];
@@ -40,7 +41,7 @@ export interface MitreEntitySummaryCollection extends MitreEntitySummaryBuckets 
   frameworkVersion?: string;
 }
 
-/** Entities grouped by type but without the containing framework metadata. */
+/** Entities grouped by type. Order is guaranteed: tactics ascending by position (matrix order), techniques and subtechniques ascending by name. */
 export interface MitreEntityBuckets {
   tactics: MitreTactic[];
   techniques: MitreTechnique[];
