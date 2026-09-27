@@ -10,7 +10,7 @@
 import type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from '@kbn/scout';
 import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 {{#each operations}}
 {{#if (or requestQuery requestParams requestBody response)}}
@@ -64,7 +64,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
       const path = `${basePath}{{#if requestParams}}${replaceParams('{{path}}', encodePathParams(props.params))}{{else}}{{path}}{{/if}}`;
 
       return apiClient.{{method}}<ScoutResponseBody<TResponseType{{#if response}}, {{operationId}}Response{{/if}}>>(
-        {{~#if requestQuery}}`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`{{else}}path{{/if}},
+        {{~#if requestQuery}}`${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`{{else}}path{{/if}},
         {
           headers: {
             'kbn-xsrf': 'true',

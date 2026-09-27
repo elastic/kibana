@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import React from 'react';
 
 import { Redirect, useRouteMatch } from 'react-router-dom';
@@ -32,14 +32,14 @@ export const MlHostConditionalContainer = React.memo(() => {
         exact
         path={path}
         render={({ location }) => {
-          const queryStringDecoded = parse(location.search.substring(1), {
+          const queryStringDecoded = queryString.parse(location.search.substring(1), {
             sort: false,
           }) as Required<QueryStringType>;
 
           if (queryStringDecoded.query != null) {
             queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
           }
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+          const reEncoded = queryString.stringify(urlUtils.encodeQuery(queryStringDecoded), {
             sort: false,
             encode: false,
           });
@@ -54,7 +54,7 @@ export const MlHostConditionalContainer = React.memo(() => {
             params: { hostName },
           },
         }) => {
-          const queryStringDecoded = parse(location.search.substring(1), {
+          const queryStringDecoded = queryString.parse(location.search.substring(1), {
             sort: false,
           }) as Required<QueryStringType>;
 
@@ -62,7 +62,7 @@ export const MlHostConditionalContainer = React.memo(() => {
             queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
           }
           if (emptyEntity(hostName)) {
-            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            const reEncoded = queryString.stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,
               encode: false,
             });
@@ -75,14 +75,14 @@ export const MlHostConditionalContainer = React.memo(() => {
               hosts,
               queryStringDecoded.query || ''
             );
-            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            const reEncoded = queryString.stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,
               encode: false,
             });
 
             return <Redirect to={`${HOSTS_PATH}/${HostsTableType.anomalies}?${reEncoded}`} />;
           } else {
-            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            const reEncoded = queryString.stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,
               encode: false,
             });

@@ -10,7 +10,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { EventEmitter } from 'events';
 import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '@kbn/visualizations-common';
@@ -61,7 +61,7 @@ export const useSavedVisInstance = (
       try {
         let savedVisInstance: SavedVisInstance;
         if (history.location.pathname === '/create') {
-          const searchParams = parse(history.location.search);
+          const searchParams = queryString.parse(history.location.search);
           const visType = (await getTypes().all()).find(({ name }) => name === searchParams.type);
 
           if (!visType) {

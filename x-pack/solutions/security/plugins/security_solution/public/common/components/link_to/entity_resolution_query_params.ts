@@ -6,7 +6,7 @@
  */
 
 import type { ParsedQuery } from 'query-string';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { encode, safeDecode } from '@kbn/rison';
 import { URL_PARAM_KEY } from '../../hooks/constants';
 import {
@@ -95,7 +95,7 @@ export const mergeEntityResolutionIntoUrlState = (
   options: EntityResolutionQueryOptions
 ): string => {
   const raw = stripLeadingQuestion(urlStateQuery ?? '');
-  const urlParams = parse(raw, { sort: false }) as ParsedQuery<string>;
+  const urlParams = queryString.parse(raw, { sort: false }) as ParsedQuery<string>;
 
   delete urlParams[URL_PARAM_KEY.entityId];
   delete urlParams[URL_PARAM_KEY.identityFields];

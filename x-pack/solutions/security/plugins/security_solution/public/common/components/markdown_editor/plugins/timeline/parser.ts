@@ -8,7 +8,7 @@
 import type { Plugin } from 'unified';
 import type { RemarkTokenizer } from '@elastic/eui';
 import { safeDecode } from '@kbn/rison';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 
 import { ID, PREFIX } from './constants';
 import * as i18n from './translations';
@@ -72,7 +72,7 @@ export const TimelineParser: Plugin = function () {
 
     try {
       const timelineSearch = timelineUrl.split('?');
-      const parseTimelineUrlSearch = parse(timelineSearch[1]) as { timeline: string };
+      const parseTimelineUrlSearch = queryString.parse(timelineSearch[1]) as { timeline: string };
       const decodedTimeline = safeDecode(parseTimelineUrlSearch.timeline ?? '') as {
         id?: string;
       } | null;

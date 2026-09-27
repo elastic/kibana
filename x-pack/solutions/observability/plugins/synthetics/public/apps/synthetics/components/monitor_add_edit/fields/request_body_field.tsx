@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { stringify, parse } from 'query-string';
+import queryString from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabbedContent } from '@elastic/eui';
@@ -77,14 +77,14 @@ export const RequestBodyField = ({
       }, {});
       return setValues((prevValues) => ({
         ...prevValues,
-        [CodeEditorMode.FORM]: stringify(formattedPairs),
+        [CodeEditorMode.FORM]: queryString.stringify(formattedPairs),
       }));
     },
     [setValues]
   );
 
   const defaultFormPairs: Pair[] = useMemo(() => {
-    const pairs = parse(values[CodeEditorMode.FORM]);
+    const pairs = queryString.parse(values[CodeEditorMode.FORM]);
     const keys = Object.keys(pairs);
     const formattedPairs: Pair[] = keys.map((key: string) => {
       // key, value, checked;

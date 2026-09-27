@@ -20,7 +20,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type {
   AlertsMigrationCleanupRequestBodyInput,
@@ -400,7 +400,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     const path = `${basePath}/api/detection_engine/rules`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteRuleResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -434,7 +434,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     const path = `${basePath}/api/detection_engine/rules/_export`;
 
     return apiClient.post<ScoutResponseBody<TResponseType>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -487,7 +487,7 @@ finishes and then call this operation once.
     const path = `${basePath}/api/detection_engine/rules/_find`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindRulesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -528,7 +528,7 @@ finishes and then call this operation once.
     const path = `${basePath}/api/detection_engine/rules/_import`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, ImportRulesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -626,7 +626,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     const path = `${basePath}/api/detection_engine/rules/_bulk_action`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, PerformRulesBulkActionResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -683,7 +683,7 @@ each of those indices.
     const path = `${basePath}/api/detection_engine/signals/migration_status`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadAlertsMigrationStatusResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -769,7 +769,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     const path = `${basePath}/api/detection_engine/rules`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadRuleResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -918,7 +918,7 @@ the immediately preceding revision in `old_values`.
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, RuleChangesHistoryResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -946,7 +946,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     const path = `${basePath}/api/detection_engine/rules/preview`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, RulePreviewResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1283,7 +1283,7 @@ Optionally cascade the change to related detection alerts via `kibana.alert.atta
     const path = `${basePath}/internal/detection_engine/users/_find`;
 
     return apiClient.post<ScoutResponseBody<TResponseType>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
