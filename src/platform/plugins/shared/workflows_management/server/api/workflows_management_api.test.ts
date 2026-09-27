@@ -29,7 +29,7 @@ import {
 } from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
 import {
   type AlertPreprocessingContext,
   type SmlIndexAttachmentFn,
@@ -51,7 +51,10 @@ const mockResumeExternallyWithInput =
     typeof resumeWorkflowExecutionExternallyWithInput
   >;
 
-jest.mock('./routes/executions/utils/preprocess_alert_inputs');
+jest.mock('./routes/executions/utils/preprocess_trigger_inputs', () => ({
+  ...jest.requireActual('./routes/executions/utils/preprocess_trigger_inputs'),
+  preprocessTriggerInputs: jest.fn(),
+}));
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
@@ -59,7 +62,7 @@ describe('WorkflowsManagementApi', () => {
   let mockRequest: KibanaRequest;
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
   const logger = loggingSystemMock.createLogger();
-  const mockPreprocessAlertInputs = jest.mocked(preprocessAlertInputs);
+  const mockPreprocessTriggerInputs = jest.mocked(preprocessTriggerInputs);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,7 +74,7 @@ describe('WorkflowsManagementApi', () => {
       workflowExecutionId: 'sched-exec-id',
     });
     mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
-    mockPreprocessAlertInputs.mockImplementation(async (inputs) => inputs);
+    mockPreprocessTriggerInputs.mockImplementation(async (inputs) => inputs);
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
@@ -739,7 +742,7 @@ steps:
       };
       const context = {} as AlertPreprocessingContext;
       const metadata = { caseIds: ['case-1'] };
-      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+      mockPreprocessTriggerInputs.mockResolvedValue(processedInputs);
 
       await expect(
         api.runWorkflowWithAlertPreprocessing({
@@ -754,7 +757,10 @@ steps:
         workflowExecutionId: 'test-exec-id',
       });
 
-      expect(mockPreprocessAlertInputs).toHaveBeenCalledWith(inputs, context, 'default', logger);
+      expect(mockPreprocessTriggerInputs).toHaveBeenCalledWith(inputs, context, 'default', logger, [
+        'alertIds',
+        'documentIds',
+      ]);
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         workflow,
         {
@@ -766,6 +772,37 @@ steps:
         },
         mockRequest
       );
+    });
+
+    it('expands only the selection kinds the caller allows', async () => {
+      const workflow = {
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Test workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+        yaml: 'name: Test workflow',
+      } as WorkflowExecutionEngineModel;
+      const inputs = { event: { triggerType: 'alert' } };
+      const context = {} as AlertPreprocessingContext;
+
+      await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs,
+        request: mockRequest,
+        preprocessingContext: context,
+        expandSelections: ['alertIds'],
+      });
+
+      expect(mockPreprocessTriggerInputs).toHaveBeenCalledWith(inputs, context, 'default', logger, [
+        'alertIds',
+      ]);
     });
 
     it('merges eventOverrides into event after preprocessing so caller-owned fields survive event replacement', async () => {
@@ -788,13 +825,13 @@ steps:
           alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
         },
       };
-      // preprocessAlertInputs replaces the whole event — caseIds would be lost without overrides.
+      // Preprocessing replaces the whole event — caseIds would be lost without overrides.
       const processedInputs = {
         event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] },
       };
       const context = {} as AlertPreprocessingContext;
       const eventOverrides = { caseIds: ['case-1'] };
-      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+      mockPreprocessTriggerInputs.mockResolvedValue(processedInputs);
 
       const result = await api.runWorkflowWithAlertPreprocessing({
         workflow,

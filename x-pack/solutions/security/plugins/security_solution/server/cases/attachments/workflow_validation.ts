@@ -11,19 +11,22 @@ import type { WorkflowAttachmentValidationContext } from '@kbn/cases-plugin/serv
 
 const getSelectedIds = (
   inputs: Record<string, unknown>,
-  field: 'alertIds' | 'documents'
+  fields: ReadonlyArray<'alertIds' | 'documents' | 'documentIds'>
 ): string[] => {
   const event = isPlainObject(inputs.event) ? (inputs.event as Record<string, unknown>) : undefined;
-  const pairs = event?.[field];
-  if (!Array.isArray(pairs)) {
-    return [];
-  }
 
-  return pairs.flatMap((pair) => {
-    if (!isPlainObject(pair) || typeof pair._id !== 'string') {
+  return fields.flatMap((field) => {
+    const pairs = event?.[field];
+    if (!Array.isArray(pairs)) {
       return [];
     }
-    return [pair._id];
+
+    return pairs.flatMap((pair) => {
+      if (!isPlainObject(pair) || typeof pair._id !== 'string') {
+        return [];
+      }
+      return [pair._id];
+    });
   });
 };
 
@@ -40,7 +43,7 @@ export const validateAlertWorkflowTargets = ({
   targets,
   inputs,
 }: WorkflowAttachmentValidationContext): void => {
-  const selectedIds = getSelectedIds(inputs, 'alertIds');
+  const selectedIds = getSelectedIds(inputs, ['alertIds']);
   if (selectedIds.length === 0) {
     throw Boom.badRequest('Alert attachment workflow origins require selected alert inputs.');
   }
@@ -58,7 +61,7 @@ export const validateEventWorkflowTargets = ({
   targets,
   inputs,
 }: WorkflowAttachmentValidationContext): void => {
-  const selectedIds = getSelectedIds(inputs, 'documents');
+  const selectedIds = getSelectedIds(inputs, ['documents', 'documentIds']);
   if (selectedIds.length === 0) {
     throw Boom.badRequest('Event attachment workflow origins require selected document inputs.');
   }

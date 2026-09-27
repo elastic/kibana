@@ -30,6 +30,24 @@ describe('attachment workflow validation', () => {
     ).toThrow('Alert workflow origin targets must match the selected alerts.');
   });
 
+  it('accepts event targets selected through documentIds', () => {
+    expect(() =>
+      validateEventWorkflowTargets({
+        targets: [{ id: 'event-1' }],
+        inputs: { event: { documentIds: [{ _id: 'event-1', _index: 'logs' }] } },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects event targets that do not match the selected documentIds', () => {
+    expect(() =>
+      validateEventWorkflowTargets({
+        targets: [{ id: 'event-1' }],
+        inputs: { event: { documentIds: [{ _id: 'event-2', _index: 'logs' }] } },
+      })
+    ).toThrow('Event workflow origin targets must match the selected documents.');
+  });
+
   it('rejects event targets without document inputs', () => {
     expect(() =>
       validateEventWorkflowTargets({

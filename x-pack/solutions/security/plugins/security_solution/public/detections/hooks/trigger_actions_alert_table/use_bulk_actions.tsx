@@ -133,7 +133,10 @@ export const useBulkActionsByTableType = (
 
   const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
 
-  const { runWorkflowItems, runWorkflowPanels } = useBulkRunAlertWorkflowPanel();
+  // Shares timelineActionParams: the run-workflow panel resolves a "select all" selection with
+  // the same table query and time range that add-to-timeline uses.
+  const { runWorkflowItems, runWorkflowPanels } =
+    useBulkRunAlertWorkflowPanel(timelineActionParams);
 
   const items = useMemo(() => {
     return [

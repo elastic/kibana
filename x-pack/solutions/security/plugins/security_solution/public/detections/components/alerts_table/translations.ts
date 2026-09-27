@@ -366,3 +366,17 @@ export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
     defaultMessage: 'Select workflow',
   }
 );
+
+export const RUN_WORKFLOW_SELECTION_TRIMMED = (maxAlerts: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.workflow.selectionTrimmed', {
+    values: { maxAlerts },
+    defaultMessage:
+      'Your selection is larger than the {maxAlerts} alerts a workflow run supports. The workflow will run on the {maxAlerts} most recent alerts.',
+  });
+
+export const RUN_WORKFLOW_SELECTION_FAILED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.selectionFailed',
+  {
+    defaultMessage: 'Could not load the selected alerts. Try again.',
+  }
+);

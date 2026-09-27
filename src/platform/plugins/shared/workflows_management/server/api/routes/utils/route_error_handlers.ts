@@ -26,6 +26,7 @@ import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change
 import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
 import { WorkflowHistoryPaginationError } from '../../../lib/workflow_history_pagination_error';
 import { WorkflowForbiddenError } from '../../workflow_forbidden_error';
+import { WorkflowTriggerInputError } from '../../workflow_trigger_input_error';
 
 /**
  * Unified error handler for workflow management routes
@@ -132,6 +133,14 @@ export function handleRouteError(
   }
 
   if (error instanceof WorkflowDisabledError) {
+    return response.badRequest({
+      body: {
+        message: error.message,
+      },
+    });
+  }
+
+  if (error instanceof WorkflowTriggerInputError) {
     return response.badRequest({
       body: {
         message: error.message,
