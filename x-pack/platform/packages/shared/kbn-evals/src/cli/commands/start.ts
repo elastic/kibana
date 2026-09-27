@@ -33,6 +33,7 @@ export const startCmd: Command<void> = {
     node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
     node scripts/evals start --suite agent-builder --grep "product documentation"
     node scripts/evals start --suite agent-builder --skip-server
+    node scripts/evals start --suite agent-builder --concurrency 8
     node scripts/evals stop
   `,
   flags: evalRunFlags,

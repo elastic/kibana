@@ -24,6 +24,7 @@ import type {
   TaskOutput,
 } from '../types';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
+import { DEFAULT_EXPERIMENT_CONCURRENCY } from '../utils/concurrency';
 
 const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
 
@@ -50,6 +51,10 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       model: Model;
       executionId?: string;
       repetitions?: number;
+      /** Examples each experiment runs at once when the spec doesn't pass its own. */
+      concurrency?: number;
+      /** What `--concurrency` / `EVAL_CONCURRENCY` asked for, so overriding it can be reported. */
+      requestedConcurrency?: number;
       /**
        * Persists the dataset and resolves to the id the server stored it under,
        * which scores are stamped with. An id it didn't return would detach them.
@@ -119,6 +124,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<DatasetRunResult[]> {
     const experimentName = name ?? datasets[0].name;
+    const runConcurrency = this.resolveConcurrency(experimentName, concurrency);
 
     const results: DatasetRunResult[] = [];
     for (const ds of datasets) {
@@ -129,7 +135,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
             dataset: ds,
             task,
             metadata: experimentMetadata,
-            concurrency,
+            concurrency: runConcurrency,
             trustUpstreamDataset,
           },
           evaluators
@@ -137,6 +143,24 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       );
     }
     return results;
+  }
+
+  private resolveConcurrency(experimentName: string, specConcurrency?: number): number {
+    const {
+      concurrency = DEFAULT_EXPERIMENT_CONCURRENCY,
+      requestedConcurrency,
+      log,
+    } = this.options;
+    if (specConcurrency === undefined) {
+      return concurrency;
+    }
+
+    if (requestedConcurrency !== undefined && specConcurrency !== requestedConcurrency) {
+      log.warning(
+        `Experiment "${experimentName}" sets its own concurrency (${specConcurrency}), so the requested --concurrency / EVAL_CONCURRENCY (${requestedConcurrency}) does not apply to it.`
+      );
+    }
+    return specConcurrency;
   }
 
   private async runSingleDatasetExperiment<
@@ -155,7 +179,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
-      concurrency?: number;
+      concurrency: number;
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
@@ -179,7 +203,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       );
       await this.options.onExperimentStart?.({ experimentId });
       const repetitions = this.options.repetitions ?? 3;
-      const runConcurrency = Math.max(1, concurrency ?? 5);
+      const runConcurrency = Math.max(1, concurrency);
       const limiter = pLimit(runConcurrency);
 
       const evaluationRuns: DatasetRunResult['evaluationRuns'] = [];

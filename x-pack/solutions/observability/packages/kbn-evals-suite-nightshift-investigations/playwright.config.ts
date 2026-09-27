@@ -23,6 +23,7 @@ if (fellBackToSmoke && process.env.TEST_WORKER_INDEX === undefined) {
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   timeout: runInvestigations ? 45 * 60_000 : 10 * 60_000,
+  concurrency: 16,
   testIgnore: [
     ...(runSmoke ? [] : ['**/smoke/**']),
     ...(runInvestigations ? [] : ['**/investigation/**']),

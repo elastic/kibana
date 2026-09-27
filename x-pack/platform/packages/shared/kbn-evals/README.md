@@ -51,6 +51,7 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 | `--judge <id>`      | Connector for LLM-as-a-judge evaluators                                |
 | `--grep <pattern>`  | Filter tests by name                                                   |
 | `--repetitions <n>` | Repeat each example N times                                            |
+| `--concurrency <n>` | Examples each experiment runs at once (default 5)                      |
 | `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
 | `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
 | `--skip-init`       | Skip config and connector setup                                        |
@@ -72,14 +73,17 @@ Use `--datasets-profile` when dataset credentials should come from the shared go
 node scripts/evals start --suite agent-builder --datasets-profile dev-vault
 ```
 
-#### Filtering, model selection, judge, repetitions
+#### Filtering, model selection, judge, repetitions, concurrency
 
 ```bash
 node scripts/evals start --suite agent-builder --grep "product documentation"
 node scripts/evals start --suite agent-builder --model eis-gpt-4.1 --judge eis-claude-4-5-sonnet
 node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
 node scripts/evals start --suite agent-builder --repetitions 3
+node scripts/evals start --suite agent-builder --concurrency 8
 ```
+
+`--concurrency` (or `EVAL_CONCURRENCY`) sets how many examples each experiment runs at once. It falls back to the `concurrency` passed to `createPlaywrightEvalsConfig`, then 5. A spec that passes its own `concurrency` to `runExperiment` still wins, and the run logs a warning when that overrides the value you asked for. Server-side limits such as Task Manager capacity stay with the suite's Scout config set.
 
 #### Advanced options
 
@@ -221,6 +225,7 @@ Run a suite on any branch without a PR:
 | `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_CONCURRENCY`                | no                 | Examples each experiment runs at once (same as `--concurrency`)                                              |
 | `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
 | `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
 

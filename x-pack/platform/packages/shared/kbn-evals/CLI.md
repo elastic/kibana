@@ -84,6 +84,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--export-profile <name>`        |           | Override export settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)           |
 | `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                            |
 | `--repetitions <n>`              |           | Number of times to repeat each example                                          |
+| `--concurrency <n>`              |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
 | `--space-ids <ids>`              |           | Comma-separated spaces to assign datasets and scores to (see [Spaces](#spaces)) |
 | `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                             |
 | `--skip-init`                    |           | Skip automatic config and connector setup                                       |
@@ -174,6 +175,7 @@ node scripts/evals run --suite streams --dry-run
 | `--evaluation-connector-id <id>`  | `--judge` | Connector for LLM-as-a-judge evaluators                                         |
 | `--grep <pattern>`                |           | Filter tests by name (passed to Playwright `--grep`)                            |
 | `--repetitions <n>`               |           | Repeat each example N times                                                     |
+| `--concurrency <n>`               |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
 | `--space-ids <ids>`               |           | Comma-separated spaces to assign datasets and scores to (see [Spaces](#spaces)) |
 | `--profile <name>`                |           | Load both dataset + export settings from `config.<name>.json`                   |
 | `--datasets-profile <name>`       |           | Load dataset settings from `config.<name>.json`                                 |

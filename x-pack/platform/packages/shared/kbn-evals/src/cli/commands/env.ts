@@ -25,6 +25,12 @@ const ENV_DOCS = [
     example: 'EVAL_REPETITIONS=3',
   },
   {
+    name: 'EVAL_CONCURRENCY',
+    description:
+      'Overrides how many examples an experiment runs at once (default 5). A concurrency passed to runExperiment in the spec still wins.',
+    example: 'EVAL_CONCURRENCY=8',
+  },
+  {
     name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
     description:
       'Skip automatic connector setup/teardown. Use this option when evaluating with pre-defined connectors.',

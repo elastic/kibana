@@ -33,6 +33,7 @@ import {
 import { runScoutHook } from './scout_hook';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
+import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
 import {
   runConfigInit,
   runConnectorSetup,
@@ -196,6 +197,21 @@ export const resolveEvalSuite = async (
 export const readSpaceIdsFlag = (flagsReader: FlagsReader): string[] | undefined => {
   try {
     return parseSpaceIds(flagsReader.string('space-ids'));
+  } catch (error) {
+    throw createFlagError(error instanceof Error ? error.message : String(error));
+  }
+};
+
+/** Reads `--concurrency`, failing on a bad flag or `EVAL_CONCURRENCY` before a stack boots. */
+export const readConcurrencyFlag = (flagsReader: FlagsReader): string | undefined => {
+  try {
+    const concurrency = parseConcurrency(flagsReader.string('concurrency'), '--concurrency');
+    if (concurrency !== undefined) {
+      return String(concurrency);
+    }
+    // Without the flag, EVAL_CONCURRENCY passes through untouched to the Playwright config.
+    getConcurrencyFromEnv();
+    return undefined;
   } catch (error) {
     throw createFlagError(error instanceof Error ? error.message : String(error));
   }
@@ -404,6 +420,11 @@ export const buildEvalRunEnv = ({
     envOverrides.EVAL_REPETITIONS = repetitions;
   }
 
+  const concurrency = readConcurrencyFlag(flagsReader);
+  if (concurrency) {
+    envOverrides.EVAL_CONCURRENCY = concurrency;
+  }
+
   const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
     envOverrides.EVAL_SPACE_IDS = spaceIds.join(',');
@@ -476,6 +497,11 @@ export const buildEvalRunArgs = ({
     runArgs.push('--repetitions', repetitions);
   }
 
+  const concurrency = readConcurrencyFlag(flagsReader);
+  if (concurrency) {
+    runArgs.push('--concurrency', concurrency);
+  }
+
   const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
     runArgs.push('--space-ids', spaceIds.join(','));
@@ -495,6 +521,7 @@ export const evalRunFlags: FlagOptions = {
     'evaluation-connector-id',
     'project',
     'repetitions',
+    'concurrency',
     'space-ids',
     'grep',
     'profile',
