@@ -35,11 +35,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const detectionsApi = getService('detectionsApi');
   const es = getService('es');
   const log = getService('log');
+  const utils = getService('securitySolutionUtils');
 
-  // Skip in Serverless until "xpack.alerting.ruleChangeTracking.enabled" and
-  // xpack.securitySolution.enableExperimental: [ruleChangesHistoryEnabled] feature flags
-  // permanently enabled
-  describe('@ess @skipInServerless rule change history', () => {
+  describe('@ess @serverless rule change history', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
@@ -63,9 +61,11 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.total).toBe(1);
         expect(body.items).toHaveLength(1);
 
+        const username = await utils.getUsername();
+
         const [item] = body.items;
         expect(item.action).toBe('rule_create');
-        expect(item.user).toEqual({ name: 'elastic' });
+        expect(item.user).toEqual({ name: username });
         expect(item.rule).toMatchObject({ id: rule.id, revision: 0 });
         expect(item.old_values).toBeNull();
       });
@@ -294,9 +294,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.items).toHaveLength(1);
 
+        const username = await utils.getUsername();
+
         const [item] = body.items;
         expect(item.action).toBe('rule_import');
-        expect(item.user).toEqual({ name: 'elastic' });
+        expect(item.user).toEqual({ name: username });
         expect(item.old_values).toBeNull();
         expect(item.metadata?.bulk_count).toBe(1);
         expect(item.rule).toMatchObject({
@@ -347,9 +349,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.items).toHaveLength(1);
 
+        const username = await utils.getUsername();
+
         const [item] = body.items;
         expect(item.action).toBe('rule_import');
-        expect(item.user).toEqual({ name: 'elastic' });
+        expect(item.user).toEqual({ name: username });
         expect(item.old_values).toBeNull();
         expect(item.metadata?.bulk_count).toBe(1);
         expect(item.rule).toMatchObject({
@@ -403,9 +407,11 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.total).toBe(2);
         expect(body.items).toHaveLength(2);
 
+        const username = await utils.getUsername();
+
         const [imported, created] = body.items;
         expect(imported.action).toBe('rule_import');
-        expect(imported.user).toEqual({ name: 'elastic' });
+        expect(imported.user).toEqual({ name: username });
         expect(imported.metadata?.bulk_count).toBe(1);
         expect(imported.rule).toMatchObject({
           id: rule.id,
