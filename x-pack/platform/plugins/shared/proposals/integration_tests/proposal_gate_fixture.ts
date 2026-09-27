@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ExecutionStatus } from '@kbn/workflows';
 import { CREATE_PROPOSAL_WORKFLOW_ID, getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
@@ -220,7 +221,11 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
      */
     revise: async (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => {
       const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);
-      await service.revise({ id: live.id, ...overrides }, live.spaceId ?? 'fake_space_id');
+      await service.revise(
+        { id: live.id, ...overrides },
+        live.spaceId ?? 'fake_space_id',
+        httpServerMock.createKibanaRequest()
+      );
     },
     timeOutGate: async () => {
       // No `resumeInput`, which is the whole signal: the step reads the wait as

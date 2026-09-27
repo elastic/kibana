@@ -19,6 +19,7 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
+  getWorkflowPermissions,
   isTerminalStatus,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
@@ -53,6 +54,7 @@ import {
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
+import { hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
   failExecutionMissingIdentity,
@@ -866,6 +868,12 @@ export class WorkflowsExecutionEnginePlugin
                     state: taskInstance.state,
                   };
                 }
+                if (!(await hasWorkflowAccess(workflow, fakeRequest, coreStart))) {
+                  logger.warn(
+                    `Skipping scheduled workflow ${workflow.id}: execution access was removed.`
+                  );
+                  return { state: taskInstance.state };
+                }
                 logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
                 // Overlap / recovery: always run so past-tick abandoned `pending` orphans are
@@ -1176,12 +1184,12 @@ export class WorkflowsExecutionEnginePlugin
     // Re-check that a workflow is still enabled right before persisting an
     // execution document.  The route-level check may have read a stale value
     // if a concurrent hard-delete disabled the workflow in the meantime.
-    // Skipped for ephemeral workflows — unsaved workflows don't exist in the workflow index.
+    // Test runs can use disabled or unsaved workflows.
     const ensureWorkflowEnabled = async (
       workflow: WorkflowExecutionEngineModel,
       spaceId: string
     ) => {
-      if (workflow.isEphemeral) {
+      if (workflow.isEphemeral || workflow.isTestRun) {
         return;
       }
       const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId, {
@@ -1212,6 +1220,21 @@ export class WorkflowsExecutionEnginePlugin
       });
     };
 
+    const ensureExecutionAccess = async (
+      workflow: WorkflowExecutionEngineModel,
+      spaceId: string,
+      request: KibanaRequest
+    ): Promise<void> => {
+      if (workflow.isEphemeral) return;
+      const current = await workflowRepository.getWorkflow(workflow.id, spaceId, {
+        includeGlobal: true,
+        includeDeleted: true,
+      });
+      if (current && !(await hasWorkflowAccess(current, request, coreStart))) {
+        throw new Error('You do not have permission to execute this workflow.');
+      }
+    };
+
     const createAndPersistWorkflowExecution = async (
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, unknown>,
@@ -1222,6 +1245,11 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
+      await ensureExecutionAccess(
+        workflow,
+        (context.spaceId as string | undefined) || 'default',
+        request
+      );
       await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
 
       const authenticatedUser = await getAuthenticatedUser(
@@ -1475,17 +1503,18 @@ export class WorkflowsExecutionEnginePlugin
       const spaceIdFor = (item: (typeof items)[number]) =>
         (item.context.spaceId as string | undefined) || 'default';
 
-      // Single ES search for the enabled flags of every (workflowId, spaceId)
-      // referenced by the batch. Skips ephemeral items (they are not indexed as workflows).
       const enabledRefs = items
         .filter((item) => !item.workflow.isEphemeral)
         .map((item) => ({ workflowId: item.workflow.id, spaceId: spaceIdFor(item) }));
-      const enabledMap =
-        enabledRefs.length === 0
-          ? new Map<string, boolean>()
-          : await workflowRepository.areWorkflowsEnabled(enabledRefs, {
-              includeGlobal: true,
-            });
+      const executionStates = await workflowRepository.getWorkflowExecutionStates(enabledRefs, {
+        includeGlobal: true,
+      });
+      const hasPrivateWorkflows = [...executionStates.values()].some(
+        ({ access_control }) => access_control?.access_mode === 'private'
+      );
+      const profileId = hasPrivateWorkflows
+        ? (await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined
+        : undefined;
 
       interface PreparedItem {
         idx: number;
@@ -1498,8 +1527,11 @@ export class WorkflowsExecutionEnginePlugin
         try {
           if (!item.workflow.isEphemeral) {
             const spaceId = spaceIdFor(item);
-            const enabled = enabledMap.get(`${spaceId}:${item.workflow.id}`) ?? false;
-            if (!enabled) {
+            const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
+            if (state && !getWorkflowPermissions(state, profileId).execute) {
+              throw new Error('You do not have permission to execute this workflow.');
+            }
+            if (!state?.enabled) {
               throw new Error(
                 `Workflow is disabled: ${item.workflow.id}. Enable the workflow to run it.`
               );

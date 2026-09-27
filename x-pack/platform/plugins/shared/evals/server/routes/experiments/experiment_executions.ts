@@ -131,7 +131,7 @@ export const registerGetExperimentExecutionRoute = ({
             // The step `output` holds the authoritative final counters
             // (example_count/completed/failed/scores_ingested); it is excluded by
             // default, so opt in for accurate run progress.
-            { includeOutput: true }
+            { includeOutput: true, request }
           );
           if (!dto || !isEvalsExperimentExecution(dto)) {
             return response.notFound({
@@ -188,7 +188,8 @@ export const registerCancelExperimentExecutionRoute = ({
           // cannot abort unrelated workflow executions in the space (fail-closed).
           const dto = await workflowsManagement.management.getWorkflowExecution(
             workflowExecutionId,
-            spaceId
+            spaceId,
+            { request }
           );
           if (!dto || !isEvalsExperimentExecution(dto)) {
             return response.notFound({

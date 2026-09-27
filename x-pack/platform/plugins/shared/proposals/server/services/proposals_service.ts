@@ -132,7 +132,7 @@ export class ProposalsService {
     // that produced it), and rejecting an `actionInput` the action could not
     // accept — before an analyst is asked to approve something that cannot run.
     const metadata = actionWorkflowId
-      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId)
+      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId, request)
       : undefined;
 
     // Caller first in both: it knows the situation the proposal came out of,
@@ -227,9 +227,9 @@ export class ProposalsService {
     }
   }
 
-  async get(id: string, spaceId: string): Promise<ProposalWithMetadata> {
+  async get(id: string, spaceId: string, request: KibanaRequest): Promise<ProposalWithMetadata> {
     const { proposal } = await this.load(id, spaceId);
-    return this.withMetadata(stripRanks(proposal), spaceId);
+    return this.withMetadata(stripRanks(proposal), spaceId, request);
   }
 
   /**
@@ -246,6 +246,7 @@ export class ProposalsService {
   async list(
     query: ListProposalsQuery,
     spaceId: string,
+    request: KibanaRequest,
     /** Replaces the default priority sort; the queues page by recency instead. */
     sort?: SortCombinations[]
   ): Promise<ListProposalsResponse> {
@@ -268,7 +269,8 @@ export class ProposalsService {
       response.hits.hits
         .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
         .map((hit) => toProposal(hit._id, hit._source as ProposalDocument)),
-      spaceId
+      spaceId,
+      request
     );
 
     return {
@@ -624,7 +626,8 @@ export class ProposalsService {
    */
   async revise(
     { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<{ proposalId: string; revision: number }> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
@@ -664,7 +667,12 @@ export class ProposalsService {
         : { ...original.actionInput, ...actionInput };
 
     if (mergedActionInput !== undefined && original.actionWorkflowId !== undefined) {
-      await this.resolveAndValidateAction(original.actionWorkflowId, mergedActionInput, spaceId);
+      await this.resolveAndValidateAction(
+        original.actionWorkflowId,
+        mergedActionInput,
+        spaceId,
+        request
+      );
     }
 
     // Resolved once, so the enums and the ranks derived from them cannot drift.
@@ -867,9 +875,10 @@ export class ProposalsService {
    */
   async resolveActionMetadata(
     actionWorkflowId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ActionMetadata | undefined> {
-    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId);
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
     return definition && this.readActionMetadata(actionWorkflowId, definition);
   }
 
@@ -881,9 +890,10 @@ export class ProposalsService {
   private async resolveAndValidateAction(
     actionWorkflowId: string,
     actionInput: Record<string, unknown> | undefined,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ActionMetadata | undefined> {
-    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId);
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
     if (!definition) {
       return undefined;
     }
@@ -924,10 +934,13 @@ export class ProposalsService {
 
   private async fetchActionDefinition(
     actionWorkflowId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ActionWorkflowDefinition | undefined> {
     try {
-      const workflow = await this.deps.getWorkflowsApi().getWorkflow(actionWorkflowId, spaceId);
+      const workflow = await this.deps
+        .getWorkflowsApi()
+        .getWorkflow(actionWorkflowId, spaceId, request);
       return workflow?.definition as ActionWorkflowDefinition | undefined;
     } catch (error) {
       this.deps.logger.warn(
@@ -1065,7 +1078,9 @@ export class ProposalsService {
     }
 
     const api = this.deps.getWorkflowsApi();
-    const execution = await api.getWorkflowExecution(proposal.workflowExecutionId, spaceId);
+    const execution = await api.getWorkflowExecution(proposal.workflowExecutionId, spaceId, {
+      request,
+    });
     if (!execution) {
       throw new ProposalConflictError(
         `Execution [${proposal.workflowExecutionId}] for proposal [${proposal.id}] not found`
@@ -1088,9 +1103,13 @@ export class ProposalsService {
     );
   }
 
-  private async withMetadata(proposal: Proposal, spaceId: string): Promise<ProposalWithMetadata> {
+  private async withMetadata(
+    proposal: Proposal,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ProposalWithMetadata> {
     const action = proposal.actionWorkflowId
-      ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId)
+      ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId, request)
       : undefined;
 
     return { ...proposal, action, expired: isExpired(proposal) };
@@ -1105,7 +1124,8 @@ export class ProposalsService {
    */
   private async withMetadataBatch(
     proposals: Proposal[],
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ProposalWithMetadata[]> {
     const uniqueWorkflowIds = [
       ...new Set(
@@ -1114,7 +1134,7 @@ export class ProposalsService {
     ];
 
     const metaEntries = await asyncMapWithLimit(uniqueWorkflowIds, 10, async (id) => {
-      const meta = await this.resolveActionMetadata(id, spaceId);
+      const meta = await this.resolveActionMetadata(id, spaceId, request);
       return [id, meta] as [string, ActionMetadata | undefined];
     });
 

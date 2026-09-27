@@ -620,7 +620,7 @@ describe('proposals.getProposal step', () => {
 
     const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
 
-    expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID);
+    expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID, FAKE_REQUEST);
     expect(result.output).toEqual({
       status: 'failed',
       decision: 'approved',

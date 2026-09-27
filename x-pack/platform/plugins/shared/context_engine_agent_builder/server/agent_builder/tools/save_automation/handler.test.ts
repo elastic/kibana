@@ -347,7 +347,7 @@ describe('saveAutomationHandler', () => {
       workflowId: 'wf-new',
       status: 'attached',
     });
-    expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('wf-new', 'marketing');
+    expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('wf-new', 'marketing', request);
     expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
   });
 

@@ -215,6 +215,7 @@ export const createSaveAutomationTool = ({
               workflowsManagement: getWorkflowsManagement(),
               workflowId: id,
               spaceId,
+              request,
             })
           : undefined;
       };

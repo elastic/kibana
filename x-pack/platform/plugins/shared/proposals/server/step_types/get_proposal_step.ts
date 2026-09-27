@@ -26,9 +26,10 @@ export const getGetProposalStepDefinition = ({
         const input = parseStepInput(getProposalStepCommonDefinition.inputSchema, context.input);
         const spaceId = context.contextManager.getContext().workflow.spaceId;
 
-        await privileges.assertCanRead(context.contextManager.getFakeRequest());
+        const request = context.contextManager.getFakeRequest();
+        await privileges.assertCanRead(request);
 
-        const proposal = await getProposalsService().get(input.proposalId, spaceId);
+        const proposal = await getProposalsService().get(input.proposalId, spaceId, request);
 
         return {
           output: {

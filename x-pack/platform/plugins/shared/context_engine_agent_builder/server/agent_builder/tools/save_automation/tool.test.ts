@@ -151,7 +151,7 @@ describe('save_automation tool', () => {
     );
 
     expect(savedConfirmation?.message).toContain('workflow "workflow-1"');
-    expect(getWorkflowMock).toHaveBeenCalledWith('workflow-1', 'default');
+    expect(getWorkflowMock).toHaveBeenCalledWith('workflow-1', 'default', expect.anything());
   });
 
   it('uses the saved workflow name when workflowId is provided', async () => {
@@ -409,7 +409,7 @@ describe('save_automation tool', () => {
       );
 
       expect(confirmation?.title).toBe('Replace workflow automation');
-      expect(getWorkflowMock).toHaveBeenCalledWith('workflow-7', 'default');
+      expect(getWorkflowMock).toHaveBeenCalledWith('workflow-7', 'default', expect.anything());
     });
 
     it('still offers a plain save when the attachment has never been saved', async () => {

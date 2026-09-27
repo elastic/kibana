@@ -178,6 +178,7 @@ describe('CasesWorkflowRunService', () => {
     });
 
     expect(mockEnsureAuthorizedToRunWorkflow).toHaveBeenCalledWith({ ids: ['case-1'] }, clientArgs);
+    expect(management.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default', request);
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
     expect(
       (mockEnsureAuthorizedToRunWorkflow as jest.Mock).mock.invocationCallOrder[0]

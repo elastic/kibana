@@ -254,7 +254,7 @@ export class CasesWorkflowRunService {
     // Fail fast before anything irreversible: check the per-case user-action limit for all cases.
     await workflowOperations.preflightWorkflowExecution({ caseIds });
 
-    const workflow = await this.management.getWorkflow(workflowId, spaceId);
+    const workflow = await this.management.getWorkflow(workflowId, spaceId, request);
     if (!workflow) {
       throw Boom.notFound(`Workflow "${workflowId}" was not found.`);
     }

@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
+import { storedWorkflowAccessControlSchema } from '../../common/access_control';
 import { pickWorkflowDocumentVersion } from '../../common/utils';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
 import { buildWorkflowFilters } from '../lib/workflow_filters';
@@ -43,7 +44,7 @@ export class WorkflowRepository {
   async getWorkflow(
     workflowId: string,
     spaceId: string,
-    options?: WorkflowLookupOptions
+    options?: WorkflowLookupOptions & { includeDeleted?: boolean }
   ): Promise<EsWorkflow | null> {
     try {
       const { must, must_not } = buildWorkflowFilters({
@@ -52,12 +53,13 @@ export class WorkflowRepository {
           id: spaceId,
           includeGlobal: options?.includeGlobal ?? false,
         },
-        deleted: 'not_deleted',
+        deleted: options?.includeDeleted ? 'all' : 'not_deleted',
         managed: options?.managedFilter,
       });
 
       const response = await this.options.esClient.search({
         index: this.options.indexName,
+        allow_partial_search_results: false,
         query: {
           bool: {
             must,
@@ -68,6 +70,9 @@ export class WorkflowRepository {
         track_total_hits: false,
       });
 
+      if (response.timed_out || response._shards.failed > 0) {
+        throw new Error('Could not load workflow access from incomplete search results.');
+      }
       if (response.hits.hits.length === 0) {
         return null;
       }
@@ -79,6 +84,7 @@ export class WorkflowRepository {
 
       // Map index _source → EsWorkflow (read created_at / updated_at; EsWorkflow uses createdAt / lastUpdatedAt).
       const source = document._source as Record<string, unknown>;
+      const accessControl = storedWorkflowAccessControlSchema.parse(source.access_control);
       const managed = typeof source.managed === 'boolean' ? (source.managed as boolean) : undefined;
       const managedBy = typeof source.managedBy === 'string' ? source.managedBy : undefined;
       const billable = typeof source.billable === 'boolean' ? source.billable : undefined;
@@ -90,6 +96,8 @@ export class WorkflowRepository {
         typeof source.managedVersion === 'number' ? source.managedVersion : undefined;
       return {
         id: workflowId,
+        ...(source.owner_id ? { owner_id: source.owner_id as string } : {}),
+        ...(accessControl ? { access_control: accessControl } : {}),
         name: source.name as string,
         description: source.description as string | undefined,
         enabled: source.enabled as boolean,
@@ -130,23 +138,20 @@ export class WorkflowRepository {
     return map.get(`${spaceId}:${workflowId}`) ?? false;
   }
 
-  /**
-   * Bulk-check whether the given (workflowId, spaceId) pairs refer to enabled,
-   * non-soft-deleted workflows. Runs a single `_search` fetching only the
-   * `enabled` field across all requested ids.
-   *
-   * When `options.includeGlobal` is `true`, a workflow stored in the global
-   * space (`*`) is considered visible for each requested space and contributes
-   * to that `${spaceId}:${workflowId}` result.
-   *
-   * The returned map is keyed by `${spaceId}:${workflowId}`. Missing docs and
-   * soft-deleted docs (`deleted_at` present) resolve to `false`.
-   */
   async areWorkflowsEnabled(
     refs: Array<{ workflowId: string; spaceId: string }>,
     options?: WorkflowLookupOptions
   ): Promise<Map<string, boolean>> {
-    const result = new Map<string, boolean>();
+    const states = await this.getWorkflowExecutionStates(refs, options);
+    return new Map([...states].map(([key, state]) => [key, state.enabled]));
+  }
+
+  /** Loads current enabled state and ACLs in one query, with missing and deleted workflows disabled. */
+  async getWorkflowExecutionStates(
+    refs: Array<{ workflowId: string; spaceId: string }>,
+    options?: WorkflowLookupOptions
+  ): Promise<Map<string, Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'>>> {
+    const result = new Map<string, Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'>>();
     if (refs.length === 0) {
       return result;
     }
@@ -184,7 +189,8 @@ export class WorkflowRepository {
     try {
       const response = await this.options.esClient.search({
         index: this.options.indexName,
-        _source: ['enabled', 'spaceId'],
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
+        allow_partial_search_results: false,
         size: uniqueKeys.size,
         track_total_hits: false,
         query: {
@@ -196,6 +202,9 @@ export class WorkflowRepository {
         },
       });
 
+      if (response.timed_out || response._shards.failed > 0) {
+        throw new Error('Could not load workflow access from incomplete search results.');
+      }
       const requestedSpacesByWorkflowId = refs.reduce<Map<string, Set<string>>>((acc, ref) => {
         const existing = acc.get(ref.workflowId) ?? new Set<string>();
         existing.add(ref.spaceId);
@@ -204,16 +213,23 @@ export class WorkflowRepository {
       }, new Map<string, Set<string>>());
 
       for (const hit of response.hits.hits) {
-        const source = hit._source as { enabled?: boolean; spaceId?: string } | undefined;
+        const source = hit._source as
+          | (Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'> & { spaceId?: string })
+          | undefined;
         if (source) {
+          const state = {
+            enabled: source.enabled ?? false,
+            owner_id: source.owner_id,
+            access_control: storedWorkflowAccessControlSchema.parse(source.access_control),
+          };
           if (source.spaceId === GLOBAL_WORKFLOW_SPACE_ID && options?.includeGlobal) {
             const requestedSpaces = requestedSpacesByWorkflowId.get(hit._id ?? '');
             requestedSpaces?.forEach((requestedSpaceId) => {
-              result.set(`${requestedSpaceId}:${hit._id}`, source.enabled ?? false);
+              result.set(`${requestedSpaceId}:${hit._id}`, state);
             });
           } else {
             const key = `${source.spaceId}:${hit._id}`;
-            result.set(key, source.enabled ?? false);
+            result.set(key, state);
           }
         }
       }
@@ -227,7 +243,7 @@ export class WorkflowRepository {
 
     for (const key of uniqueKeys) {
       if (!result.has(key)) {
-        result.set(key, false);
+        result.set(key, { enabled: false });
       }
     }
 

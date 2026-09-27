@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { randomBytes } from 'node:crypto';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   DEFAULT_MAX_RETRIES,
@@ -21,6 +23,7 @@ import {
 import {
   type CreateWorkflowCommand,
   type EsWorkflow,
+  storedWorkflowAccessControlSchema,
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
@@ -32,6 +35,7 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
+import { assertWorkflowOperation } from './workflow_access_control';
 import type {
   IndexWorkflowDocumentOptions,
   ReadModifyWriteWorkflowDocumentParams,
@@ -167,7 +171,11 @@ export class WorkflowCrudService {
       query: { bool: { must, must_not } },
       size: 1,
       track_total_hits: false,
+      allow_partial_search_results: false,
     });
+    if (searchResponse.timed_out) {
+      throw new Error('Could not determine workflow access from an incomplete search.');
+    }
 
     const hit = searchResponse.hits.hits[0];
     return (hit?._source as WorkflowProperties | undefined) ?? null;
@@ -354,7 +362,7 @@ export class WorkflowCrudService {
     }
     const triggerDefinitions = params.lightweightValidation ? undefined : allTriggerDefinitions;
 
-    return prepareWorkflowDocumentFromYaml({
+    const prepared = prepareWorkflowDocumentFromYaml({
       id: params.id,
       yaml: params.yaml,
       zodSchema,
@@ -363,6 +371,16 @@ export class WorkflowCrudService {
       spaceId: params.spaceId,
       triggerDefinitions,
     });
+    const profileId = params.request
+      ? (await this.deps
+          .getCoreStart()
+          .userProfile.getCurrentProfileId({ request: params.request })) ?? undefined
+      : undefined;
+    if (profileId) {
+      prepared.workflowData.owner_id = profileId;
+      prepared.workflowData.access_control = { access_mode: 'public', entries: [] };
+    }
+    return prepared;
   }
 
   async getManagedWorkflowDocuments(
@@ -460,7 +478,11 @@ export class WorkflowCrudService {
       query: { bool: { must, must_not } },
       size: ids.length,
       track_total_hits: false,
+      allow_partial_search_results: false,
     });
+    if (response.timed_out || response._shards.failed > 0) {
+      throw new Error('Could not determine workflow access from an incomplete search.');
+    }
 
     return response.hits.hits.map((hit) =>
       transformStorageDocumentToWorkflowDto(hit._id, hit._source)
@@ -471,7 +493,11 @@ export class WorkflowCrudService {
     ids: string[],
     spaceId: string,
     source?: string[],
-    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
+    options?: {
+      includeDeleted?: boolean;
+      includeGlobal?: boolean;
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+    }
   ): Promise<WorkflowPartialDetailDto[]> {
     if (ids.length === 0) {
       return [];
@@ -484,15 +510,16 @@ export class WorkflowCrudService {
     });
 
     const response = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must, must_not } },
-      _source: source ?? true,
+      query: { bool: { must, must_not, filter: options?.accessControlFilter } },
+      _source: source ? [...new Set([...source, 'access_control'])] : true,
       size: ids.length,
       track_total_hits: false,
     });
 
-    return response.hits.hits.map((hit) =>
-      transformStoragePartialToWorkflowDto(hit._id, hit._source)
-    );
+    return response.hits.hits.map((hit) => {
+      storedWorkflowAccessControlSchema.parse(hit._source?.access_control);
+      return transformStoragePartialToWorkflowDto(hit._id, hit._source);
+    });
   }
 
   async createWorkflow(
@@ -528,6 +555,13 @@ export class WorkflowCrudService {
       triggerDefinitions,
       nameFallback: options?.nameFallback,
     });
+
+    const profileId =
+      (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;
+    if (profileId) {
+      workflowData.owner_id = profileId;
+      workflowData.access_control = { access_mode: 'public', entries: [] };
+    }
 
     let id = baseId;
     if (workflow.id) {
@@ -591,6 +625,7 @@ export class WorkflowCrudService {
       request
     );
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
+    const profileId = await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request });
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
@@ -613,6 +648,11 @@ export class WorkflowCrudService {
           spaceId,
           triggerDefinitions,
         });
+
+        if (profileId) {
+          prepared.workflowData.owner_id = profileId;
+          prepared.workflowData.access_control = { access_mode: 'public', entries: [] };
+        }
 
         validWorkflows.push({
           idx: i,
@@ -644,6 +684,7 @@ export class WorkflowCrudService {
       const overwriteResult = await this.executeBulkOverwrite(resolvedWorkflows, spaceId, {
         request,
         timestamp: now,
+        profileId: profileId ?? undefined,
       });
       created.push(...overwriteResult.created);
       failed.push(...overwriteResult.failed);
@@ -769,6 +810,8 @@ export class WorkflowCrudService {
     restoreMetadata?: WorkflowRestoreMetadata
   ): Promise<ApplyWorkflowUpdateResult> {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
+    const profileId =
+      (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;
     const now = new Date();
     const validationErrors: string[] = [];
     let shouldUpdateScheduler = false;
@@ -796,6 +839,7 @@ export class WorkflowCrudService {
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
       getOptions: { includeDeleted: true, includeGlobal: true },
       mutate: (existingSource: WorkflowProperties) => {
+        assertWorkflowOperation(existingSource, 'edit', profileId);
         let updatedData: Partial<WorkflowProperties> = {
           lastUpdatedBy: authenticatedUser,
           updated_at: now.toISOString(),
@@ -954,12 +998,24 @@ export class WorkflowCrudService {
   async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean }
+    options?: { force?: boolean; acknowledgeAclLoss?: boolean; request?: KibanaRequest }
   ): Promise<DeleteWorkflowsResponse> {
+    const profileId = options?.request
+      ? (await this.deps
+          .getCoreStart()
+          .userProfile.getCurrentProfileId({ request: options.request })) ?? undefined
+      : undefined;
     return deleteWorkflows({
       ids,
       spaceId,
       force: options?.force ?? false,
+      acknowledgeAclLoss: options?.acknowledgeAclLoss ?? false,
+      assertCanDelete: (workflow) =>
+        assertWorkflowOperation(
+          workflow,
+          options?.force && workflow.access_control?.access_mode === 'private' ? 'manage' : 'edit',
+          profileId
+        ),
       storage: this.deps.workflowStorage,
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
@@ -978,7 +1034,22 @@ export class WorkflowCrudService {
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
+    const profileId = request
+      ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
+      : undefined;
     const result = await disableAllWorkflows({
+      ...(request
+        ? {
+            accessControlFilter: buildEntityReadAccessQuery({
+              profileId,
+              ownerField: 'owner_id',
+              accessControlField: 'access_control',
+              includeMissing: true,
+            }),
+            assertCanEdit: (workflow: WorkflowProperties) =>
+              assertWorkflowOperation(workflow, 'edit', profileId),
+          }
+        : {}),
       storage: this.deps.workflowStorage,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
@@ -1083,6 +1154,8 @@ export class WorkflowCrudService {
         ...prepared,
         created_at: existing.created_at,
         createdBy: existing.createdBy,
+        owner_id: existing.owner_id,
+        access_control: existing.access_control,
       },
       existing
     );
@@ -1091,7 +1164,7 @@ export class WorkflowCrudService {
   private async executeBulkOverwrite(
     entries: BulkWorkflowEntry[],
     spaceId: string,
-    params: { request: KibanaRequest; timestamp: Date }
+    params: { request: KibanaRequest; timestamp: Date; profileId?: string }
   ): Promise<{
     created: WorkflowDetailDto[];
     failed: BulkFailureEntry[];
@@ -1111,6 +1184,7 @@ export class WorkflowCrudService {
     }
 
     const client = this.deps.workflowStorage.getClient();
+    const { profileId } = params;
     const { refreshed: occHits } = await fetchOccHitsByIds(
       client,
       entries.map((entry) => entry.id)
@@ -1140,7 +1214,7 @@ export class WorkflowCrudService {
 
     if (newEntries.length > 0) {
       const operations = newEntries.map((entry) => ({
-        index: {
+        create: {
           _id: entry.id,
           document: applyWorkflowVersion(entry.workflowData, undefined),
         },
@@ -1151,9 +1225,9 @@ export class WorkflowCrudService {
       });
 
       for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
-        const operation = bulkResponse.items[itemIndex].index;
+        const operation = bulkResponse.items[itemIndex].create;
         const entry = newEntries[itemIndex];
-        const document = operations[itemIndex].index.document;
+        const document = operations[itemIndex].create.document;
 
         if (!operation?.error) {
           created.push(transformStorageDocumentToWorkflowDto(entry.id, document));
@@ -1182,6 +1256,7 @@ export class WorkflowCrudService {
             getOptions: bulkOverwriteGetOptions,
             mutate: (existing) => {
               previousVersion = existing.version;
+              assertWorkflowOperation(existing, 'edit', profileId);
               return this.buildBulkOverwriteDocument(prepared, existing);
             },
           });
@@ -1207,6 +1282,7 @@ export class WorkflowCrudService {
     if (crossSpaceOverwriteEntries.length > 0) {
       for (const { entry, occHit } of crossSpaceOverwriteEntries) {
         try {
+          assertWorkflowOperation(occHit._source, 'edit', profileId);
           const document = await this.writeWorkflowDocumentWithOcc(entry.id, spaceId, {
             document: this.buildBulkOverwriteDocument(entry.workflowData, occHit._source),
             ifSeqNo: occHit.seqNo,

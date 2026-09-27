@@ -50,13 +50,18 @@ export function registerGetChildrenExecutionsRoute({ router, api, spaces }: Rout
           const { executionId } = request.params;
           const spaceId = spaces.getSpaceId(request);
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
+            request,
             omitStepExecutions: true,
           });
           if (!workflowExecution) {
             return response.notFound();
           }
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
-          const childExecutions = await api.getChildWorkflowExecutions(executionId, spaceId);
+          const childExecutions = await api.getChildWorkflowExecutions(
+            executionId,
+            spaceId,
+            request
+          );
           return response.ok({ body: childExecutions });
         } catch (error) {
           const statusCode =

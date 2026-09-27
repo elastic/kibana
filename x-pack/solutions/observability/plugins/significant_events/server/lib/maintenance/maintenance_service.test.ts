@@ -101,7 +101,12 @@ function makeManagementApi(options?: {
   );
 
   return {
-    api: { getWorkflow, updateWorkflow, cancelAllActiveWorkflowExecutions },
+    api: {
+      getWorkflow,
+      updateWorkflow,
+      cancelAllActiveWorkflowExecutions,
+      getClient: jest.fn(() => ({ getWorkflow })),
+    },
     getWorkflow,
     updateWorkflow,
     cancelAllActiveWorkflowExecutions,
@@ -377,6 +382,7 @@ describe('SignificantEventsMaintenanceService', () => {
         }
       );
       const api = {
+        getClient: jest.fn(() => ({ getWorkflow })),
         getWorkflow,
         updateWorkflow,
         cancelAllActiveWorkflowExecutions: jest.fn(),

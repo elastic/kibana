@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { waitFor } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -17,6 +18,7 @@ import {
   WORKFLOWS_UI_SETTING_ID,
 } from '@kbn/workflows/common/constants';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
+import { createStartServicesMock } from './mocks';
 import { WorkflowsPlugin } from './plugin';
 import { triggerSchemas } from './trigger_schemas';
 import { PLUGIN_ID } from '../common';
@@ -153,6 +155,69 @@ describe('WorkflowsPlugin', () => {
 
       expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
       expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
+    });
+
+    describe('disabling workflows from Advanced Settings', () => {
+      let updates$: Subject<{ key: string; oldValue: boolean; newValue: boolean }>;
+
+      beforeEach(() => {
+        updates$ = new Subject();
+        coreStart.settings.client.getUpdate$.mockReturnValue(updates$);
+        plugin.start(coreStart, { ...createStartServicesMock(), ...startDeps });
+      });
+
+      afterEach(() => plugin.stop());
+
+      const disableWorkflows = () =>
+        updates$.next({
+          key: WORKFLOWS_UI_SETTING_ID,
+          oldValue: true,
+          newValue: false,
+        });
+
+      it('warns when a successful HTTP response contains workflow failures', async () => {
+        coreStart.http.post.mockResolvedValue({
+          total: 2,
+          disabled: 1,
+          failures: [{ id: 'shared', error: 'Access denied' }],
+        });
+
+        disableWorkflows();
+
+        await waitFor(() =>
+          expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith({
+            title: 'Some workflows could not be disabled',
+            text: '1 workflow could not be disabled and may still run.',
+          })
+        );
+        expect(coreStart.http.post).toHaveBeenCalledWith('/internal/workflows/disable', {
+          version: '1',
+        });
+        expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      });
+
+      it('does not warn when all workflows were disabled', async () => {
+        coreStart.http.post.mockResolvedValue({ total: 2, disabled: 2, failures: [] });
+
+        disableWorkflows();
+        await coreStart.http.post.mock.results[0].value;
+
+        expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
+        expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      });
+
+      it('shows an error when the disable request fails', async () => {
+        coreStart.http.post.mockRejectedValue(new Error('Request failed'));
+
+        disableWorkflows();
+
+        await waitFor(() =>
+          expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
+            title: 'Could not disable workflows',
+            text: 'Workflows may still run. Try again.',
+          })
+        );
+      });
     });
 
     describe('app visibility (visibleIn)', () => {

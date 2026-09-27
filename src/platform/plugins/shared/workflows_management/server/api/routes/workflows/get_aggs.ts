@@ -99,7 +99,7 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
           const fields = Array.isArray(rawFields) ? rawFields : [rawFields];
           const spaceId = spaces.getSpaceId(request);
           const managedFilter = resolveAuthorizedManagedFilter(request, managed);
-          const aggs = await api.getWorkflowAggs(fields, spaceId, { managedFilter });
+          const aggs = await api.getWorkflowAggs(fields, spaceId, { managedFilter, request });
           return response.ok({ body: aggs || {} });
         } catch (error) {
           return handleRouteError(response, error);

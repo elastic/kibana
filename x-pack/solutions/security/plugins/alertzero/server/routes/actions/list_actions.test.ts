@@ -52,7 +52,11 @@ describe('registerListActionsRoute', () => {
       }),
       response
     );
-    expect(list).toHaveBeenCalledWith('default', ['contain', 'escalate']);
+    expect(list).toHaveBeenCalledWith(
+      'default',
+      expect.objectContaining({ auth: { isAuthenticated: true } }),
+      ['contain', 'escalate']
+    );
     expect(response.ok).toHaveBeenCalled();
   });
 
@@ -61,7 +65,11 @@ describe('registerListActionsRoute', () => {
     const { handler } = makeDeps({ list });
     const response = httpServerMock.createResponseFactory();
     await handler(createRouteContextMock(), requestWithCategories(), response);
-    expect(list).toHaveBeenCalledWith('default', undefined);
+    expect(list).toHaveBeenCalledWith(
+      'default',
+      expect.objectContaining({ auth: { isAuthenticated: true } }),
+      undefined
+    );
   });
 
   it('maps an invalid categories param to 400 with the param message', async () => {

@@ -95,7 +95,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
       expect(result.status).toBe('waiting');
       expect(mockEngine.executeWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'child-workflow-id', isTestRun: false }),
+        expect.objectContaining({ id: 'child-workflow-id', isTestRun: false, isEphemeral: false }),
         expect.objectContaining({
           spaceId: 'default',
           inputs: { param1: 'value1' },
@@ -151,7 +151,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
       await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
       expect(mockEngine.executeWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ isTestRun: true }),
+        expect.objectContaining({ isTestRun: true, isEphemeral: false }),
         expect.any(Object),
         mockRequest
       );

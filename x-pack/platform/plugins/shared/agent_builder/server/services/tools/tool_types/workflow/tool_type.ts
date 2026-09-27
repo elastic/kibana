@@ -42,7 +42,7 @@ export const getWorkflowToolType = ({
 
   return {
     toolType: ToolType.workflow,
-    getDynamicProps: (config, { spaceId }) => {
+    getDynamicProps: (config, { spaceId, request: schemaRequest }) => {
       return {
         getHandler: () => {
           return async (params, { request, runContext }) => {
@@ -96,7 +96,8 @@ export const getWorkflowToolType = ({
         getSchema: async () => {
           const workflow = await workflowsManagement.management.getWorkflow(
             config.workflow_id,
-            spaceId
+            spaceId,
+            schemaRequest
           );
           if (!workflow) {
             // if workflow is not accessible, error will be handled elsewhere
@@ -138,6 +139,7 @@ export const getWorkflowToolType = ({
       });
       await validateWorkflowId({
         workflows: workflowsManagement,
+        request,
         workflowId: config.workflow_id,
         spaceId,
       });
@@ -156,6 +158,7 @@ export const getWorkflowToolType = ({
       });
       await validateWorkflowId({
         workflows: workflowsManagement,
+        request,
         workflowId: mergedConfig.workflow_id,
         spaceId,
       });

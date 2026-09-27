@@ -29,10 +29,18 @@ import { setupDependencies } from './setup_dependencies';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
-import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
+const mockGetCurrentWorkflow = jest.fn().mockResolvedValue(null);
+jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
+  WorkflowRepository: jest.fn().mockImplementation(() => ({ getWorkflow: mockGetCurrentWorkflow })),
+}));
 jest.mock('./setup_dependencies');
 jest.mock('../concurrency/handle_queued_workflow_run_at_task_start', () => ({
   handleQueuedWorkflowRunAtTaskStart: jest.fn().mockResolvedValue(false),
@@ -90,6 +98,7 @@ describe('runWorkflow', () => {
     const runWorkflowWithDefaults = (overrides?: {
       meteringService?: WorkflowsMeteringService;
       workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+      internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
     }) =>
       runWorkflow({
         workflowRunId,
@@ -102,6 +111,7 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine:
           overrides?.workflowsExecutionEngine ?? mockWorkflowExecutionEngine,
         meteringService: overrides?.meteringService,
+        internalResumeWorkflowExecution: overrides?.internalResumeWorkflowExecution,
         workflowExecutionRepository: workflowExecutionRepository as any,
         stepExecutionRepository,
       });
@@ -137,6 +147,146 @@ describe('runWorkflow', () => {
       });
 
       mockWorkflowExecutionLoop.mockResolvedValue(undefined);
+    });
+
+    describe('current workflow access', () => {
+      it.each([null, '2026-09-14T00:00:00.000Z'])(
+        'stops a run after access is removed with deleted_at=%s',
+        async (deletedAt) => {
+          mockGetCurrentWorkflow.mockResolvedValueOnce({
+            owner_id: 'owner',
+            access_control: { access_mode: 'private', entries: [] },
+            deleted_at: deletedAt,
+          });
+          dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue(
+            'former-executor'
+          );
+          await runWorkflowWithDefaults();
+          expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+            expect.objectContaining({
+              status: ExecutionStatus.FAILED,
+              error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+            })
+          );
+          expect(workflowRuntime.start).not.toHaveBeenCalled();
+          expect(mockGetCurrentWorkflow).toHaveBeenCalledWith('wf', spaceId, {
+            includeGlobal: true,
+            includeDeleted: true,
+          });
+        }
+      );
+
+      it('denies a private workflow when the execution identity has no profile', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+        dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue(null);
+
+        await runWorkflowWithDefaults();
+
+        expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.FAILED,
+            error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+          })
+        );
+        expect(workflowRuntime.start).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      });
+
+      it('resumes the waiting parent after child execution access is removed', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+        dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('former-executor');
+        const childExecution = {
+          ...defaultRunningExecution(),
+          context: {
+            parentWorkflowInvocation: 'sync',
+            parentWorkflowExecutionId: 'parent-execution',
+          },
+        };
+        mockGetWorkflowExecutionFromState.mockReturnValue(childExecution);
+        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue({
+          ...childExecution,
+          status: ExecutionStatus.FAILED,
+        });
+        const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+
+        await runWorkflowWithDefaults({ internalResumeWorkflowExecution });
+
+        expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
+          'parent-execution',
+          spaceId,
+          undefined
+        );
+        expect(workflowRuntime.start).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        { role: 'executor', isEphemeral: false, allowed: true },
+        { role: 'executor', isEphemeral: true, allowed: false },
+        { role: 'executor', isEphemeral: undefined, allowed: false },
+        { role: 'viewer', isEphemeral: false, allowed: false },
+        { role: 'editor', isEphemeral: true, allowed: true },
+      ])(
+        'checks $role access for a test with isEphemeral=$isEphemeral',
+        async ({ role, isEphemeral, allowed }) => {
+          mockGetCurrentWorkflow.mockResolvedValueOnce({
+            owner_id: 'owner',
+            enabled: false,
+            access_control: {
+              access_mode: 'private',
+              entries: [{ type: 'user', id: 'recipient', role }],
+            },
+          });
+          dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('recipient');
+          mockGetWorkflowExecutionFromState.mockReturnValue({
+            ...defaultRunningExecution(),
+            isTestRun: true,
+            isEphemeral,
+          });
+
+          await runWorkflowWithDefaults();
+
+          if (allowed) {
+            expect(workflowRuntime.start).toHaveBeenCalled();
+          } else {
+            expect(workflowRuntime.start).not.toHaveBeenCalled();
+            expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+              expect.objectContaining({
+                status: ExecutionStatus.FAILED,
+                error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+              })
+            );
+          }
+        }
+      );
+
+      it('runs a public workflow without requiring an ACL profile', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'public', entries: [] },
+        });
+        await runWorkflowWithDefaults();
+        expect(dependencies.coreStart.userProfile.getCurrentProfileId).not.toHaveBeenCalled();
+        expect(workflowRuntime.start).toHaveBeenCalled();
+      });
+
+      it('resolves the execution profile before checking a private workflow', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+        dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('owner');
+        await runWorkflowWithDefaults();
+        expect(dependencies.coreStart.userProfile.getCurrentProfileId).toHaveBeenCalledWith({
+          request: fakeRequest,
+        });
+        expect(workflowRuntime.start).toHaveBeenCalled();
+      });
     });
 
     describe('happy path / wiring', () => {

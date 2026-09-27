@@ -46,10 +46,12 @@ async function classifyReleaseGateError(
   proposalsService: {
     get: (
       id: string,
-      spaceId: string
+      spaceId: string,
+      request: KibanaRequest
     ) => Promise<{ decision?: unknown; status: string; expired: boolean }>;
   },
-  spaceId: string
+  spaceId: string,
+  request: KibanaRequest
 ): Promise<'skipped' | 'retry' | 'failed'> {
   if (!(err instanceof Error)) return 'failed';
 
@@ -61,7 +63,7 @@ async function classifyReleaseGateError(
     // Re-read the proposal to determine its actual state.
     let proposal: { decision?: unknown; status: string; expired: boolean };
     try {
-      proposal = await proposalsService.get(proposalId, spaceId);
+      proposal = await proposalsService.get(proposalId, spaceId, request);
     } catch (readErr) {
       if (readErr instanceof Error && readErr.name === 'ProposalNotFoundError') {
         return 'skipped';
@@ -134,7 +136,8 @@ export class InvestigationStatusService {
    */
   async listPendingProposals(
     conversationId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<ClosePreviewProposal[]> {
     const proposals = this.getProposals();
     if (!proposals) return [];
@@ -155,7 +158,8 @@ export class InvestigationStatusService {
           size,
           from,
         },
-        spaceId
+        spaceId,
+        request
       );
       allProposals.push(
         ...page.proposals.map((p) => ({
@@ -187,7 +191,7 @@ export class InvestigationStatusService {
       await proposals.getProposalPrivileges().assertCanRead(request);
     }
     const spaceId = this.getSpaceId(request);
-    return this.listPendingProposals(conversationId, spaceId);
+    return this.listPendingProposals(conversationId, spaceId, request);
   }
 
   async getPreview(
@@ -256,7 +260,8 @@ export class InvestigationStatusService {
                   firstErr,
                   p.id,
                   proposalsService,
-                  spaceId
+                  spaceId,
+                  request
                 );
                 if (classification === 'skipped') {
                   return { id: p.id, outcome: 'skipped' as const };

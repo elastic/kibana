@@ -17,7 +17,7 @@ const workflow = { enabled: true, valid: true, definition: {} };
 const agentBuilder = {} as never;
 const workflowsExtensions = {} as never;
 const workflowsManagement = {
-  management: { getWorkflow: jest.fn().mockResolvedValue(workflow) },
+  management: { getClient: () => ({ getWorkflow: jest.fn().mockResolvedValue(workflow) }) },
 } as never;
 
 const createFeatureFlagsMock = (enabled = true): FeatureFlagsStart =>
@@ -97,7 +97,7 @@ it('returns false when any dependency, connector, or workflow definition is unav
       } as never,
       workflowsExtensions,
       workflowsManagement: {
-        management: { getWorkflow: jest.fn().mockResolvedValue({}) },
+        management: { getClient: () => ({ getWorkflow: jest.fn().mockResolvedValue({}) }) },
       } as never,
     })
   ).resolves.toBe(false);

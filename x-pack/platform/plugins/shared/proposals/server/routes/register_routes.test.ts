@@ -213,18 +213,16 @@ describe('proposals routes', () => {
     const { posts, byPath } = registerAndCollect({ revise });
     const response = httpServerMock.createResponseFactory();
 
-    await byPath(posts, '/revisions').handler(
-      {},
-      httpServerMock.createKibanaRequest({
-        params: { proposalId: 'proposal-1' },
-        body: { comment: 'Tightened the match', confidence: 'high' },
-      }),
-      response
-    );
+    const request = httpServerMock.createKibanaRequest({
+      params: { proposalId: 'proposal-1' },
+      body: { comment: 'Tightened the match', confidence: 'high' },
+    });
+    await byPath(posts, '/revisions').handler({}, request, response);
 
     expect(revise).toHaveBeenCalledWith(
       { id: 'proposal-1', comment: 'Tightened the match', confidence: 'high' },
-      'default'
+      'default',
+      request
     );
     expect(response.ok).toHaveBeenCalledWith({
       body: { proposalId: 'proposal-2', revision: 2, status: 'pending' },

@@ -303,7 +303,7 @@ export const createSignificantEventsMaintenanceService = ({
   ): Promise<boolean> => {
     const target = `workflow:${id}@${spaceId}`;
     try {
-      const workflow = await mgmt.getWorkflow(id, spaceId);
+      const workflow = await mgmt.getClient(request).getWorkflow(id, spaceId);
       if (!workflow || !workflow.enabled) {
         return false;
       }
@@ -421,7 +421,7 @@ export const createSignificantEventsMaintenanceService = ({
   ): Promise<'toggled' | 'already' | 'gone' | 'failed'> => {
     const target = `workflow:${id}@${spaceId}`;
     try {
-      const workflow = await mgmt.getWorkflow(id, spaceId);
+      const workflow = await mgmt.getClient(request).getWorkflow(id, spaceId);
       if (!workflow) {
         // Gone — surface it, but don't keep the deployment paused on a workflow
         // that no longer exists.

@@ -122,6 +122,7 @@ describe('ConversationProposalsService', () => {
           from: 0,
         }),
         spaceId,
+        request,
         [
           { createdAt: { order: 'desc' } },
           { rootProposalId: { order: 'asc' } },
@@ -406,6 +407,7 @@ describe('ConversationProposalsService', () => {
           from: 0,
         }),
         spaceId,
+        request,
         [
           { decidedAt: { order: 'desc' } },
           { createdAt: { order: 'desc' } },

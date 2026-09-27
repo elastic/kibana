@@ -443,7 +443,8 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     expect(mockManagement.getWorkflow).toHaveBeenCalledWith(
       NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-      SPACE_ID
+      SPACE_ID,
+      mockRequest
     );
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
@@ -576,7 +577,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       trigger_type: 'manual',
     });
 
-    expect(mockManagement.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID);
+    expect(mockManagement.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID, mockRequest);
   });
 
   it('persists an explicit trigger_type into the workflow context', async () => {

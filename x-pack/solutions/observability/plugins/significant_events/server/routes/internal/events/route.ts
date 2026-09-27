@@ -481,6 +481,7 @@ const investigationStatusesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const statuses = await resolveInvestigationStatuses({
+      request,
       workflowsManagement: server.workflowsManagement,
       spaceId: await getSpaceId(request),
       workflowExecutionIds: params.body.workflow_execution_ids,

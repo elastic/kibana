@@ -27,7 +27,7 @@ describe('createKiIdentificationStartTool', () => {
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: managementApi as never,
+      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
     });
     const maintenanceService = {

@@ -519,7 +519,8 @@ describe('WorkersService', () => {
 
     expect(harness.management.getWorkflow).toHaveBeenCalledWith(
       reportedWorkflowId(TRIAGE, SPACE),
-      SPACE
+      SPACE,
+      request
     );
     expect(triage?.skills?.some((s) => s.id === 'test.installed.skill')).toBe(true);
   });

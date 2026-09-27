@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { INVESTIGATE_STEP_ID, type InvestigationState } from '@kbn/significant-events-schema';
@@ -125,8 +126,9 @@ describe('resolveInvestigationStatuses', () => {
 
   const resolve = (getWorkflowExecution?: jest.Mock, workflowExecutionIds: string[] = ['exec-1']) =>
     resolveInvestigationStatuses({
+      request: httpServerMock.createKibanaRequest(),
       workflowsManagement: getWorkflowExecution
-        ? ({ management: { getWorkflowExecution } } as never)
+        ? ({ management: { getClient: () => ({ getWorkflowExecution }) } } as never)
         : undefined,
       spaceId: 'default',
       workflowExecutionIds,

@@ -77,6 +77,7 @@ export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDepe
           const { size, page, sortField, sortOrder, stepExecutionId } = request.query;
           const spaceId = spaces.getSpaceId(request);
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
+            request,
             omitStepExecutions: true,
           });
           if (!workflowExecution) {
@@ -85,6 +86,7 @@ export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDepe
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
 
           const logs = await api.getWorkflowExecutionLogs({
+            request,
             executionId,
             spaceId,
             size,
