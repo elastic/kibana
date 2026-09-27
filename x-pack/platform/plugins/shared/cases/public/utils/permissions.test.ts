@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { noCasesPermissions, readCasesPermissions } from '../common/mock';
+import { buildCasesPermissions, noCasesPermissions, readCasesPermissions } from '../common/mock';
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from './permissions';
 
 describe('permissions', () => {
@@ -18,10 +18,73 @@ describe('permissions', () => {
       ['all'],
       ['assign'],
       ['createComment'],
+      ['reopenCase'],
+      ['settings'],
+      ['manageTemplates'],
     ];
 
     it('returns true if the user has only read permissions', async () => {
       expect(isReadOnlyPermissions(readCasesPermissions())).toBe(true);
+    });
+
+    it('returns false if the user has read and settings permissions', async () => {
+      expect(
+        isReadOnlyPermissions(
+          buildCasesPermissions({
+            read: true,
+            settings: true,
+            create: false,
+            update: false,
+            delete: false,
+            push: false,
+            assign: false,
+            createComment: false,
+            reopenCase: false,
+            manageTemplates: false,
+            connectors: false,
+          })
+        )
+      ).toBe(false);
+    });
+
+    it('returns false if the user has read and reopenCase permissions', async () => {
+      expect(
+        isReadOnlyPermissions(
+          buildCasesPermissions({
+            read: true,
+            reopenCase: true,
+            create: false,
+            update: false,
+            delete: false,
+            push: false,
+            assign: false,
+            createComment: false,
+            manageTemplates: false,
+            settings: false,
+            connectors: false,
+          })
+        )
+      ).toBe(false);
+    });
+
+    it('returns false if the user has read and manageTemplates permissions', async () => {
+      expect(
+        isReadOnlyPermissions(
+          buildCasesPermissions({
+            read: true,
+            manageTemplates: true,
+            create: false,
+            update: false,
+            delete: false,
+            push: false,
+            assign: false,
+            createComment: false,
+            reopenCase: false,
+            settings: false,
+            connectors: false,
+          })
+        )
+      ).toBe(false);
     });
 
     it('returns true if the user has not read permissions', async () => {

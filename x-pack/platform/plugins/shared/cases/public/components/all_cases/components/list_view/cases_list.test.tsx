@@ -38,6 +38,8 @@ jest.mock('./case_list_item', () => ({
   ),
 }));
 
+const alwaysSelectable = () => true;
+
 const mockData: CasesFindResponseUI = {
   cases: [basicCase],
   countClosedCases: 0,
@@ -64,7 +66,7 @@ const defaultProps = {
   selectedFields: [],
   selectedCases: [],
   onSelectionChange: jest.fn(),
-  isSelectable: true,
+  isSelectable: alwaysSelectable,
 };
 
 describe('CasesList', () => {
@@ -140,7 +142,7 @@ describe('CasesList', () => {
         {...defaultProps}
         selectedCases={[basicCase]}
         onSelectionChange={jest.fn()}
-        isSelectable={true}
+        isSelectable={alwaysSelectable}
       />
     );
 
@@ -159,7 +161,7 @@ describe('CasesList', () => {
         data={{ ...mockData, cases: [basicCase, secondCase], total: 2 }}
         selectedCases={[secondCase]}
         onSelectionChange={jest.fn()}
-        isSelectable={true}
+        isSelectable={alwaysSelectable}
       />
     );
 
