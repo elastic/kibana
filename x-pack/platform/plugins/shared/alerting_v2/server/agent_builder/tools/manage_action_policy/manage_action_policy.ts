@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -14,6 +15,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
 import {
   actionPolicyOperationSchema,
   executeActionPolicyOperations,
@@ -35,19 +37,38 @@ const manageActionPolicySchema = z.object({
 
 export interface ManageActionPolicyToolDeps {
   logger: LoggerServiceContract;
-  getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
+  getWorkflow: (
+    id: string,
+    spaceId: string
+  ) => Promise<{
+    id: string;
+    name?: string;
+    yaml?: string;
+  } | null>;
   getAvailableConnectors: (
     spaceId: string,
-    request: import('@kbn/core/server').KibanaRequest
+    request: KibanaRequest
   ) => Promise<{
     connectorTypes: Record<string, { instances: Array<{ id: string; name: string }> }>;
   }>;
+  /**
+   * Runs a workflow's YAML through the workflows validation service (schema,
+   * variable refs, Liquid syntax). Optional — when omitted, destination
+   * workflows are still checked for a manual trigger and `inputs.payload`,
+   * but variable-ref errors are not surfaced.
+   */
+  validateWorkflow?: (
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<ValidateWorkflowResponseDto>;
 }
 
 export const manageActionPolicyTool = ({
   logger,
   getWorkflow,
   getAvailableConnectors,
+  validateWorkflow,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
   id: ALERTING_TOOL_IDS.manageActionPolicy,
   type: ToolType.builtin,
@@ -92,6 +113,13 @@ Use operations[] to:
       // Prefer persisted origin; fall back to draft / pre-assigned id (also in tool result).
       policyId = policyId ?? updatedData.id;
 
+      let workflowDiagnostics: Array<{
+        destinationId: string;
+        severity: 'warning';
+        source: 'structural' | 'workflow-validation';
+        message: string;
+      }> = [];
+
       if (updatedData.destinations?.length) {
         const findConnectorById = async (
           id: string
@@ -108,12 +136,15 @@ Use operations[] to:
           return null;
         };
 
-        await validateDestinations(updatedData.destinations, {
+        const destinationResult = await validateDestinations(updatedData.destinations, {
           attachments,
           workflowLookup: { getWorkflow },
           connectorLookup: { findConnectorById },
           spaceId,
+          validateWorkflow,
+          request,
         });
+        workflowDiagnostics = destinationResult.diagnostics;
       }
 
       const attachmentInput = {
@@ -159,6 +190,7 @@ Use operations[] to:
                 groupingMode: updatedData.grouping_mode,
                 throttle: updatedData.throttle,
               },
+              ...(workflowDiagnostics.length > 0 ? { workflowDiagnostics } : {}),
             },
           },
         ],
