@@ -200,6 +200,7 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
+        await discover.waitUntilSearchingHasFinished();
         await datePicker.setAbsoluteRange({
           from: '2015-09-20T00:00:00.000Z',
           to: '2015-09-20T23:50:13.253Z',
