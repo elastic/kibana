@@ -134,6 +134,7 @@
     "@kbn/ci-stats-reporter",
     "@kbn/es",
     "@kbn/test-es-server",
+    "@kbn/core-security-common",
   ],
   "exclude": ["target/**/*"]
 }

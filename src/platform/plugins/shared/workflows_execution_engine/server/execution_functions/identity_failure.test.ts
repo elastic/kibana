@@ -236,6 +236,28 @@ describe.each([
     });
   });
 
+  it('keeps parent cleanup pending when wake-up and fail-closed recovery fail', async () => {
+    const { params, accounts } = setup();
+    const repository = params.workflowExecutionRepository;
+    const read = jest.mocked(repository.getWorkflowExecutionById).getMockImplementation();
+    if (!read) throw new Error('Missing test repository implementation');
+    jest.mocked(repository.getWorkflowExecutionById).mockImplementation(async (id, space) => {
+      if (id === 'parent') throw new Error('Parent read unavailable');
+      return read(id, space);
+    });
+    params.internalResumeWorkflowExecution.mockRejectedValue(new Error('Wake unavailable'));
+    await expect(execute(params)).rejects.toThrow('Parent read unavailable');
+    expect((await read('child', 'default'))?.context?.serviceAccountFailureCleanupPending).toBe(
+      true
+    );
+    params.internalResumeWorkflowExecution.mockResolvedValue(undefined);
+    await execute(params);
+    expect((await read('child', 'default'))?.context?.serviceAccountFailureCleanupPending).toBe(
+      false
+    );
+    expect(accounts.withScopedRequestForWorkload).toHaveBeenCalledTimes(1);
+  });
+
   it.each([
     ExecutionStatus.COMPLETED,
     ExecutionStatus.FAILED,

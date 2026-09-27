@@ -9,6 +9,7 @@
 
 import { randomBytes } from 'node:crypto';
 
+import pMap from 'p-map';
 import type { KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
@@ -57,7 +58,7 @@ import type {
 import { getWorkflowZodSchema } from '../../common/schema';
 import { fetchOccHitsByIds, type OccWorkflowHit } from '../api/lib/bulk_occ_index';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
-import { deleteWorkflows } from '../api/lib/workflow_deletion';
+import { cleanupDeletedWorkflows, deleteWorkflows } from '../api/lib/workflow_deletion';
 import { disableAllWorkflows } from '../api/lib/workflow_disable_all';
 import {
   transformStorageDocumentToWorkflowDto,
@@ -289,6 +290,7 @@ export class WorkflowCrudService {
     if (!accountId && !previous?.definition?.settings?.run_as) return write();
     if (!bindings) throw new Error('Service account bindings are unavailable.');
     return withWorkflowBindingChange({
+      getSpaceId: this.deps.getSpaceId,
       bindings,
       core: this.deps.getCoreStart(),
       logger: this.deps.logger,
@@ -1065,14 +1067,51 @@ export class WorkflowCrudService {
       failures: [],
       successfulIds: [],
     };
+    const batch = ids.length > 1;
+    const versionedById = new Map<string, VersionedWorkflowDocument>();
+    if (batch) {
+      const { must, must_not } = buildWorkflowFilters({
+        ids,
+        space: { id: spaceId },
+        deleted: 'all',
+      });
+      const response = await this.deps.workflowStorage.getClient().search({
+        query: { bool: { must, must_not } },
+        seq_no_primary_term: true,
+        size: ids.length,
+        track_total_hits: false,
+      });
+      response.hits.hits.forEach((hit) => {
+        if (!hit._id || !hit._source) return;
+        if (hit._seq_no == null || hit._primary_term == null)
+          throw new Error(`Missing workflow revision for ${hit._id}.`);
+        versionedById.set(hit._id, {
+          source: hit._source,
+          seqNo: hit._seq_no,
+          primaryTerm: hit._primary_term,
+        });
+      });
+    }
+    const unboundSoftDeletes: OccWorkflowHit[] = [];
     const deleteWorkflow = async (id: string): Promise<void> => {
       try {
         // Authorize and delete the same revision, including initially unbound workflows.
-        const versioned = await this.getWorkflowDocumentWithVersion(id, spaceId, {
-          includeDeleted: true,
-        });
+        const versioned = batch
+          ? versionedById.get(id)
+          : await this.getWorkflowDocumentWithVersion(id, spaceId, {
+              includeDeleted: true,
+            });
         if (!versioned) return;
         const accountId = versioned.source.definition?.settings?.run_as;
+        if (batch && !accountId && !options?.force) {
+          unboundSoftDeletes.push({
+            _id: id,
+            _source: versioned.source,
+            seqNo: versioned.seqNo,
+            primaryTerm: versioned.primaryTerm,
+          });
+          return;
+        }
         if (accountId) {
           await ensureWorkflowServiceAccountMutationAuthorized(this.deps.getCoreStart(), request);
           if (options?.force) {
@@ -1089,6 +1128,7 @@ export class WorkflowCrudService {
           }
         }
         await withWorkflowBindingChange({
+          getSpaceId: this.deps.getSpaceId,
           bindings,
           core: this.deps.getCoreStart(),
           logger: this.deps.logger,
@@ -1098,7 +1138,14 @@ export class WorkflowCrudService {
           previousAccountId: accountId,
           getWorkflowRevision: () => this.getWorkflowRevision(id, spaceId),
           write: async () => {
-            const item = await this.deleteWorkflowDocuments([id], spaceId, options, versioned);
+            const item = await this.deleteWorkflowDocuments(
+              [id],
+              spaceId,
+              options,
+              versioned,
+              undefined,
+              batch
+            );
             if (item.deleted !== 1)
               throw new Error(item.failures[0]?.error ?? 'Workflow deletion failed.');
             result.deleted += item.deleted;
@@ -1120,7 +1167,29 @@ export class WorkflowCrudService {
         });
       }
     };
-    for (const id of ids) await deleteWorkflow(id);
+    await pMap([...new Set(ids)], deleteWorkflow, { concurrency: 10 });
+    if (unboundSoftDeletes.length > 0) {
+      const deleted = await this.deleteWorkflowDocuments(
+        unboundSoftDeletes.map((hit) => hit._id),
+        spaceId,
+        options,
+        undefined,
+        unboundSoftDeletes,
+        true
+      );
+      result.deleted += deleted.deleted;
+      result.successfulIds?.push(...(deleted.successfulIds ?? []));
+      result.failures.push(...deleted.failures);
+    }
+    if (batch)
+      await cleanupDeletedWorkflows(result.successfulIds ?? [], {
+        force: options?.force ?? false,
+        spaceId,
+        taskScheduler: this.deps.getTaskScheduler(),
+        workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+        stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+        logger: this.deps.logger,
+      });
     return result;
   }
 
@@ -1128,11 +1197,15 @@ export class WorkflowCrudService {
     ids: string[],
     spaceId: string,
     options?: { force?: boolean },
-    versionedWorkflow?: VersionedWorkflowDocument
+    versionedWorkflow?: VersionedWorkflowDocument,
+    guardedBatch?: OccWorkflowHit[],
+    deferCleanup = false
   ): Promise<DeleteWorkflowsResponse> {
     return deleteWorkflows({
       ids,
       spaceId,
+      guardedBatch,
+      deferCleanup,
       ...(versionedWorkflow
         ? {
             guardedDelete: {

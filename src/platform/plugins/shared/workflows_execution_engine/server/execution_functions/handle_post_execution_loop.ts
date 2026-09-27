@@ -80,6 +80,7 @@ export async function handlePostExecutionLoop({
   if (finalExecution) {
     await resumeSyncParentIfNeeded({
       childExecution: finalExecution,
+      throwOnFailure: finalExecution.context?.serviceAccountFailureCleanupPending === true,
       spaceId,
       internalResumeWorkflowExecution,
       workflowExecutionRepository,

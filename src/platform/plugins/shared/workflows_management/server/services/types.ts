@@ -38,6 +38,7 @@ export interface WorkflowStorageDeps {
 
 /** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
 export interface WorkflowCrudDeps extends WorkflowStorageDeps {
+  getSpaceId: (request: KibanaRequest) => string;
   getServiceAccountBindings: () => WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
   getSecurity: () => SecurityServiceStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;

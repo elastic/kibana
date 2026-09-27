@@ -49,6 +49,7 @@ const setup = () => {
     client,
     binding,
     params: {
+      getSpaceId: jest.fn().mockReturnValue('default'),
       core,
       bindings,
       logger: loggingSystemMock.createLogger(),
@@ -72,6 +73,25 @@ describe('workflow binding reconciliation', () => {
     expect(bindings.unbindWorkload).not.toHaveBeenCalled();
     expect(params.write).not.toHaveBeenCalled();
   });
+
+  it.each(['a', undefined])(
+    'rejects a cross-space mutation before binding changes (%s)',
+    async (accountId) => {
+      const { params, bindings } = setup();
+      await expect(
+        withWorkflowBindingChange({
+          ...params,
+          spaceId: 'other',
+          previousAccountId: 'a',
+          accountId,
+        })
+      ).rejects.toThrow('request must target');
+      expect(bindings.getWorkloadBinding).not.toHaveBeenCalled();
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+      expect(params.write).not.toHaveBeenCalled();
+    }
+  );
 
   it('requires manage_security even if the account has not changed', async () => {
     const { client, params, bindings } = setup();

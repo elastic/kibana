@@ -322,6 +322,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
     } as unknown as WorkflowValidationService;
 
     const deps: WorkflowCrudDeps = {
+      getSpaceId: () => 'default',
       getServiceAccountBindings: () => securityServiceMock.createStart().serviceAccounts,
       logger: loggerMock.create(),
       workflowStorage: { getClient: () => client } as any,

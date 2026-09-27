@@ -17,6 +17,7 @@ import type {
 } from '@kbn/workflows-execution-engine/server';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
+import { bulkIndexWithOccRetry, type OccWorkflowHit } from './bulk_occ_index';
 import { partitionBulkResults } from './bulk_response_helpers';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
 import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
@@ -280,6 +281,31 @@ const softDeleteWorkflows = async (
   };
 };
 
+/** Cleans up only successfully deleted workflows, sharing purge requests across a batch. */
+export const cleanupDeletedWorkflows = async (
+  ids: string[],
+  params: Pick<
+    Parameters<typeof deleteWorkflows>[0],
+    | 'force'
+    | 'spaceId'
+    | 'taskScheduler'
+    | 'workflowExecutionsDataClient'
+    | 'stepExecutionsDataClient'
+    | 'logger'
+  >
+): Promise<void> => {
+  await unscheduleWorkflowTasks(ids, params.taskScheduler);
+  if (params.force) {
+    await purgeWorkflowRelatedData(
+      ids,
+      params.spaceId,
+      params.workflowExecutionsDataClient,
+      params.stepExecutionsDataClient,
+      params.logger
+    );
+  }
+};
+
 interface GuardedWorkflowDeletion {
   id: string;
   document: WorkflowProperties;
@@ -340,16 +366,7 @@ const deleteBoundWorkflow = async (
   } else {
     await write({ ...document, enabled: false, deleted_at: new Date() }, guarded);
   }
-  await unscheduleWorkflowTasks([id], params.taskScheduler);
-  if (params.force) {
-    await purgeWorkflowRelatedData(
-      [id],
-      params.spaceId,
-      params.workflowExecutionsDataClient,
-      params.stepExecutionsDataClient,
-      params.logger
-    );
-  }
+  if (!params.deferCleanup) await cleanupDeletedWorkflows([id], params);
   return { total: 1, deleted: 1, failures: [], successfulIds: [id] };
 };
 
@@ -361,6 +378,8 @@ export const deleteWorkflows = async (params: {
   spaceId: string;
   force: boolean;
   guardedDelete?: GuardedWorkflowDeletion;
+  guardedBatch?: OccWorkflowHit[];
+  deferCleanup?: boolean;
   storage: WorkflowStorage;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
@@ -372,6 +391,23 @@ export const deleteWorkflows = async (params: {
   ) => Promise<WorkflowExecutionListDto>;
 }): Promise<DeleteWorkflowsResponse> => {
   if (params.guardedDelete) return deleteBoundWorkflow(params.guardedDelete, params);
+  if (params.guardedBatch) {
+    if (params.force) throw new Error('Guarded batch writes only support soft deletion.');
+    const now = new Date();
+    const result = await bulkIndexWithOccRetry({
+      client: params.storage.getClient(),
+      hits: params.guardedBatch,
+      mutate: (hit) => ({ ...hit._source, enabled: false, deleted_at: now }),
+      maxRetries: 0,
+    });
+    if (!params.deferCleanup) await cleanupDeletedWorkflows(result.successIds, params);
+    return {
+      total: params.ids.length,
+      deleted: result.successIds.length,
+      failures: result.failures,
+      successfulIds: result.successIds,
+    };
+  }
   const {
     ids,
     spaceId,

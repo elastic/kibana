@@ -46,8 +46,10 @@ export const withWorkflowBindingChange = async <T>({
   accountId,
   write,
   getWorkflowRevision,
+  getSpaceId,
 }: {
   bindings: Bindings;
+  getSpaceId: (request: KibanaRequest) => string;
   core: CoreStart;
   logger: Logger;
   workflowId: string;
@@ -70,6 +72,9 @@ export const withWorkflowBindingChange = async <T>({
   }
   if (!bindings.isEnabled()) throw Boom.forbidden('Service account execution is disabled.');
   const authenticatedRequest = await ensureWorkflowServiceAccountMutationAuthorized(core, request);
+  if (getSpaceId(authenticatedRequest) !== spaceId) {
+    throw Boom.badRequest('The authenticated request must target the workflow binding space.');
+  }
   const coordinates = { workloadType: 'workflow', workloadId: workflowId, spaceId };
   const previous = await bindings.getWorkloadBinding(coordinates);
   const changed = accountId !== previous?.serviceAccountId;
