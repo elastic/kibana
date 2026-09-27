@@ -111,6 +111,12 @@ export interface RulesListProps {
   ruleDetailsRoute?: string;
   ruleParamFilter?: Record<string, string | number | object>;
   rulesListKey?: string;
+  /**
+   * When true (default), filter state (search, status, type, etc.) is persisted to and
+   * restored from localStorage so it survives page reloads and navigation. Set to false
+   * to keep filter state only in URL and props (no localStorage).
+   */
+  persistFiltersInLocalStorage?: boolean;
   searchFilter?: string;
   showActionFilter?: boolean;
   showCreateRuleButtonInPrompt?: boolean;
@@ -155,6 +161,7 @@ export const RulesList = ({
   ruleDetailsRoute,
   ruleParamFilter,
   rulesListKey,
+  persistFiltersInLocalStorage = true,
   searchFilter = '',
   showActionFilter = true,
   showCreateRuleButtonInPrompt = false,
@@ -252,6 +259,7 @@ export const RulesList = ({
       lastResponseFilter,
       lastRunOutcomeFilter,
       rulesListKey,
+      persistFiltersInLocalStorage,
       ruleParamFilter,
       statusFilter,
       searchFilter,

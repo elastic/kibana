@@ -18,6 +18,7 @@ type FilterStoreProps = Pick<
   | 'lastResponseFilter'
   | 'lastRunOutcomeFilter'
   | 'rulesListKey'
+  | 'persistFiltersInLocalStorage'
   | 'ruleParamFilter'
   | 'statusFilter'
   | 'searchFilter'
@@ -53,6 +54,7 @@ export const useRulesListFilterStore = ({
   lastResponseFilter,
   lastRunOutcomeFilter,
   rulesListKey = RULES_LIST_FILTERS_KEY,
+  persistFiltersInLocalStorage = true,
   ruleParamFilter,
   statusFilter,
   searchFilter,
@@ -76,10 +78,11 @@ export const useRulesListFilterStore = ({
   );
   const hasFilterFromLocalStorage = useMemo(
     () =>
+      persistFiltersInLocalStorage &&
       rulesListFilterLocal
         ? !Object.values(rulesListFilterLocal).every((filters) => isEmpty(filters))
         : false,
-    [rulesListFilterLocal]
+    [persistFiltersInLocalStorage, rulesListFilterLocal]
   );
 
   const rulesListFilterUrl = useMemo(
@@ -97,7 +100,11 @@ export const useRulesListFilterStore = ({
 
   const filtersStore = useMemo(
     () =>
-      hasFilterFromUrl ? rulesListFilterUrl : hasFilterFromLocalStorage ? rulesListFilterLocal : {},
+      hasFilterFromUrl
+        ? rulesListFilterUrl
+        : hasFilterFromLocalStorage
+          ? rulesListFilterLocal
+          : {},
     [hasFilterFromLocalStorage, hasFilterFromUrl, rulesListFilterLocal, rulesListFilterUrl]
   );
   const [filters, setFilters] = useState<RulesListFilters>({
@@ -121,9 +128,11 @@ export const useRulesListFilterStore = ({
 
   const updateLocalFilters = useCallback(
     (updatedParams: RulesListFilters) => {
-      setRulesListFilterLocal(convertRulesListFiltersToFilterAttributes(updatedParams));
+      if (persistFiltersInLocalStorage) {
+        setRulesListFilterLocal(convertRulesListFiltersToFilterAttributes(updatedParams));
+      }
     },
-    [setRulesListFilterLocal]
+    [persistFiltersInLocalStorage, setRulesListFilterLocal]
   );
 
   const setFiltersStore = useCallback(
