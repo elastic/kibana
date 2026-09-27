@@ -448,6 +448,9 @@ importers:
       '@elastic/search-ui-engines-connector':
         specifier: 1.24.2
         version: 1.24.2(@elastic/elasticsearch@8.19.2(supports-color@10.2.2))(supports-color@10.2.2)
+      '@elastic/statistics':
+        specifier: link:<project-root>/elastic/statistics
+        version: link:<project-root>/elastic/statistics
       '@emotion/cache':
         specifier: 11.14.0
         version: 11.14.0
@@ -4843,9 +4846,6 @@ importers:
       semver:
         specifier: 7.8.0
         version: 7.8.0
-      simple-statistics:
-        specifier: 7.8.8
-        version: 7.8.8
       snakecase-keys:
         specifier: 8.0.1
         version: 8.0.1
@@ -24318,9 +24318,6 @@ packages:
   simple-sha256@1.1.0:
     resolution: {integrity: sha512-jMdj+5MR1dRiFbrQ8idmkPv+HCoJEmJVBBwc0vQQz4Gtg3PEkjdpVxUM4BSwK898zhNP/ub3vcP9edw47EHuLQ==}
 
-  simple-statistics@7.8.8:
-    resolution: {integrity: sha512-CUtP0+uZbcbsFpqEyvNDYjJCl+612fNgjT8GaVuvMG7tBuJg8gXGpsP5M7X658zy0IcepWOZ6nPBu1Qb9ezA1w==}
-
   sinon@22.1.0:
     resolution: {integrity: sha512-n1ajF2rBWMTtEwbKcw4UdFg4nCnDdq/U6RDoxtOd7oapOlRoJ5ynwFx60owROyhDpA9QhMZi0pCO/xtmwFjG7w==}
 
@@ -43614,8 +43611,6 @@ snapshots:
       - supports-color
 
   simple-sha256@1.1.0: {}
-
-  simple-statistics@7.8.8: {}
 
   sinon@22.1.0:
     dependencies:
