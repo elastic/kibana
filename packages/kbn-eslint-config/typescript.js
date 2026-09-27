@@ -11,6 +11,8 @@ module.exports = {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
+      // `ban/*` and `@eslint-community/eslint-comments/*` rules run in oxlint (.oxlint/ban.jsonc,
+      // .oxlint/eslint_comments.jsonc); registered so `eslint-disable` directives naming them resolve.
       plugins: ['@typescript-eslint', 'ban', 'import', '@eslint-community/eslint-comments'],
 
       env: {
@@ -196,20 +198,7 @@ module.exports = {
             },
           ],
           // Old tslint yml override or defined rules
-          'ban/ban': [
-            2,
-            { name: ['describe', 'only'], message: 'No exclusive suites.' },
-            { name: ['it', 'only'], message: 'No exclusive tests.' },
-            { name: ['test', 'only'], message: 'No exclusive tests.' },
-            { name: ['testSuggestions', 'only'], message: 'No exclusive tests.' },
-            { name: ['testErrorsAndWarnings', 'only'], message: 'No exclusive tests.' },
-          ],
           'import/no-default-export': 'error',
-
-          // `no-unused-disable` is intentionally not enabled: oxlint (`node scripts/lint`) honors
-          // `eslint-disable` directives for the rules it owns, which ESLint would report as unused
-          // and strip on autofix.
-          '@eslint-community/eslint-comments/no-unused-enable': 'error',
           'no-restricted-syntax': [
             'error',
             {

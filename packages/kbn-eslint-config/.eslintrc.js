@@ -60,13 +60,7 @@ const USES_ELASTIC_APM_AGENT = [
 ];
 
 module.exports = {
-  extends: [
-    './javascript.js',
-    './typescript.js',
-    './jest.js',
-    './react.js',
-    'plugin:@elastic/eui/recommended',
-  ],
+  extends: ['./javascript.js', './typescript.js', './jest.js', './react.js'],
 
   plugins: [
     '@kbn/eslint-plugin-disable',
@@ -76,6 +70,8 @@ module.exports = {
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-alerting-v2',
     '@kbn/eslint-plugin-kbn-ui',
+    // `@elastic/eui/*` and `depend/*` rules run in oxlint (.oxlint/eui.jsonc, .oxlint/depend.jsonc).
+    // The plugins stay registered so `eslint-disable` directives naming their rules resolve.
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -90,19 +86,6 @@ module.exports = {
   },
 
   rules: {
-    // Suggests better replacements for packages: https://github.com/es-tooling/module-replacements/tree/main/docs/modules
-    'depend/ban-dependencies': [
-      'error',
-      {
-        allowed: [
-          '^@kbn/*', // internal packages
-          'lodash', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/lodash-underscore.md
-          'moment', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/momentjs.md
-          'jquery', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/jquery.md
-        ],
-      },
-    ],
-
     'prettier/prettier': [
       'error',
       {
@@ -397,49 +380,6 @@ module.exports = {
     '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
     '@kbn/kbn-ui/prefer_kbn_ui_callout': 'warn',
     '@kbn/kbn-ui/no_restricted_package_imports': 'error',
-
-    /**
-     * EUI Team rules
-     */
-
-    '@elastic/eui/callout-prefer-props-for-content': [
-      'warn',
-      {
-        components: [
-          'EuiCallOut',
-          'KbnInfoCallout',
-          'KbnSuccessCallout',
-          'KbnWarningCallout',
-          'KbnDangerCallout',
-        ],
-      },
-    ],
-    '@elastic/eui/no-restricted-eui-imports': [
-      'warn',
-      {
-        patterns: ['@kbn/ui-theme'],
-        message: 'For client-side, please use `useEuiTheme` instead.',
-      },
-    ],
-
-    /**
-     * a11y-related rules:
-     * all existing violations were fixed; keep this as error to prevent new ones.
-     */
-    '@elastic/eui/callout-announce-on-mount': 'error',
-    '@elastic/eui/prefer-eui-icon-tip': 'error',
-    '@elastic/eui/sr-output-disabled-tooltip': 'error',
-    '@elastic/eui/badge-accessibility-rules': 'error',
-    '@elastic/eui/no-unnamed-interactive-element': 'error',
-    '@elastic/eui/consistent-is-invalid-props': 'error',
-    '@elastic/eui/tooltip-no-interactive-content': 'error',
-    '@elastic/eui/require-table-caption': 'error',
-    '@elastic/eui/accessible-interactive-element': 'error',
-    '@elastic/eui/icon-accessibility-rules': 'error',
-    '@elastic/eui/tooltip-button-icon-wrap': 'error',
-    '@elastic/eui/tooltip-focusable-anchor': 'error',
-    '@elastic/eui/no-unnamed-radio-group': 'error',
-    '@elastic/eui/require-aria-label-for-modals': 'error',
   },
 
   overrides: [

@@ -5,18 +5,38 @@
   // `@kbn/eslint-config` so each rule runs in exactly one linter. When enabling a rule here,
   // delete it from packages/kbn-eslint-config/*.js; when removing one, add it back there.
   // A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
+  //
+  // ESLint plugins run here through `jsPlugins` stay registered (with no rules) in the ESLint
+  // config, because ESLint rejects `eslint-disable` directives that name rules it does not know.
 
   "extends": [
     "./.oxlint/javascript.jsonc",
     "./.oxlint/typescript.jsonc",
     "./.oxlint/jest.jsonc",
-    "./.oxlint/react.jsonc"
+    "./.oxlint/react.jsonc",
+    "./.oxlint/ban.jsonc",
+    "./.oxlint/cypress.jsonc",
+    "./.oxlint/depend.jsonc",
+    "./.oxlint/eslint_comments.jsonc",
+    "./.oxlint/eui.jsonc",
+    "./.oxlint/n.jsonc",
+    "./.oxlint/playwright.jsonc",
+    "./.oxlint/testing_library.jsonc"
   ],
 
   "plugins": ["react", "typescript", "import", "jsx-a11y", "react-perf", "node", "jest"],
 
   "categories": {
     "correctness": "off"
+  },
+
+  // `settings` are not inherited from extended configs, so plugin settings live here.
+  "settings": {
+    "playwright": {
+      "globalAliases": {
+        "test": ["test", "spaceTest", "apiTest"]
+      }
+    }
   },
 
   // Oxlint 1.79 drops rule options inherited from JSON configs, so option-bearing rules stay here.
