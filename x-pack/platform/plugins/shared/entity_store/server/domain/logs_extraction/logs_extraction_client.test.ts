@@ -2865,6 +2865,25 @@ describe('LogsExtractionClient sampling wiring', () => {
     expect(result.success && result.logsProcessed).toBeLessThan(100_000);
   });
 
+  it('rounds a slice contribution up rather than to nearest, so a small nonzero amount is never lost to zero', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      // maxLogsPerPage=5 escalates the probe to an exact (unsampled) count - see
+      // pickSampleProbability - so sliceLogCount is exactly the mocked value, not extrapolated.
+      // 4 * 0.1 = 0.4, which rounds to nearest as 0 but must round up to 1.
+      nonPriorityLogExtractionConfig: { maxLogsPerPage: 5, samplingRate: 0.1 },
+    });
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:55:00.000Z', 4))
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(result.success && result.logsProcessed).toBe(1);
+  });
+
   describe('sampling metrics', () => {
     // Spies must be created after createSamplingContext, whose clearAllMocks would wipe them.
     const spySampleMetrics = () => ({

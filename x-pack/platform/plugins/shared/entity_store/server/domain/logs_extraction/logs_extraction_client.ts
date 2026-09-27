@@ -840,7 +840,7 @@ export class LogsExtractionClient {
 
           // The budget counts processed volume, letting it stretch across the whole window.
           totalLogs +=
-            samplingRate !== undefined ? Math.round(sliceLogCount * samplingRate) : sliceLogCount;
+            samplingRate !== undefined ? Math.ceil(sliceLogCount * samplingRate) : sliceLogCount;
 
           const sliceIngestOutcome = await this.ingestEntityPagesWithinCurrentLogPage({
             type,
