@@ -10,6 +10,9 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../fixtures';
 
+/** The app scroll container is offset while a push flyout is open, so with none open it is zero. */
+const NO_PUSH_OFFSET = '0px';
+
 spaceTest.describe(
   'Metrics in Discover - Grid Settings',
   { tag: testData.METRICS_EXPERIENCE_TAGS },
@@ -157,7 +160,7 @@ spaceTest.describe(
           await metricsExperience.waitForFirstCard('gauge_0-0');
           await metricsExperience.openInsightsFlyout(0);
           await flyout.esqlQuery.tabButton.click();
-          await expect(flyout.esqlQuery.codeBlock).toContainText('MIN(gauge_0)');
+          await expect(flyout.esqlQuery.codeBlock).toContainText('MIN(MIN_OVER_TIME(gauge_0))');
           await flyout.closeButton.click();
           await metricsExperience.clearSearch();
         });
@@ -261,5 +264,75 @@ spaceTest.describe(
         await expect(gridSettings.counterSelect).toContainText('Maximum');
       });
     });
+
+    spaceTest(
+      'never shows the configuration and insights flyouts at the same time',
+      async ({ page, pageObjects }) => {
+        const { metricsExperience } = pageObjects;
+        const { gridSettings, flyout } = metricsExperience;
+
+        await page.setViewportSize(testData.PUSH_FLYOUT_VIEWPORT);
+
+        await spaceTest.step('open the configuration', async () => {
+          await metricsExperience.openInsightsFlyout(0);
+          await expect(flyout.container).toBeVisible();
+
+          await gridSettings.open();
+
+          await expect(flyout.container).toBeHidden();
+          await expect(gridSettings.flyout).toBeVisible();
+          // The outgoing insights flyout must not clear the offset the surviving configuration
+          // owns, otherwise it overlays the grid instead of pushing it aside.
+          await expect(metricsExperience.appScrollContainer).not.toHaveCSS(
+            'padding-inline-end',
+            NO_PUSH_OFFSET
+          );
+        });
+
+        await spaceTest.step('opening the insights flyout closes the configuration', async () => {
+          await metricsExperience.openInsightsFlyout(0);
+
+          await expect(gridSettings.flyout).toBeHidden();
+          await expect(flyout.container).toBeVisible();
+          await expect(metricsExperience.appScrollContainer).not.toHaveCSS(
+            'padding-inline-end',
+            NO_PUSH_OFFSET
+          );
+        });
+
+        await spaceTest.step('closing the surviving flyout leaves both closed', async () => {
+          await flyout.closeButton.click();
+
+          await expect(flyout.container).toBeHidden();
+          await expect(gridSettings.flyout).toBeHidden();
+          await expect(metricsExperience.appScrollContainer).toHaveCSS(
+            'padding-inline-end',
+            NO_PUSH_OFFSET
+          );
+        });
+      }
+    );
+
+    spaceTest(
+      'leaves no gap after closing the configuration opened from the inspector',
+      async ({ page, pageObjects }) => {
+        const { metricsExperience, inspector } = pageObjects;
+        const { gridSettings } = metricsExperience;
+
+        await page.setViewportSize(testData.PUSH_FLYOUT_VIEWPORT);
+
+        await metricsExperience.openInspectorFlyout(0);
+        await inspector.panel.waitFor({ state: 'visible' });
+
+        await gridSettings.open();
+        await expect(inspector.panel).toBeHidden();
+
+        await gridSettings.cancel();
+        await expect(metricsExperience.appScrollContainer).toHaveCSS(
+          'padding-inline-end',
+          NO_PUSH_OFFSET
+        );
+      }
+    );
   }
 );

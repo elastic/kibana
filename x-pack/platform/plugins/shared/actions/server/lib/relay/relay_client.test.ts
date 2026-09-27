@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SSLSettings } from '@kbn/actions-utils';
+import type { SystemIdentity } from '@kbn/security-plugin-types-server';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { request } from '../axios_utils';
 import { RelayClient } from './relay_client';
@@ -25,16 +26,136 @@ const configurationUtilities = {
   getRelaySSLSettings: jest.fn().mockReturnValue(relaySSLSettings),
 } as unknown as ActionsConfigurationUtilities;
 
-const createClient = () =>
+const systemIdentity: jest.Mocked<SystemIdentity> = {
+  createEphemeralToken: jest.fn(),
+};
+
+const createClient = ({
+  useSystemIdentity = true,
+  getSystemIdentity = () => systemIdentity,
+}: { useSystemIdentity?: boolean; getSystemIdentity?: () => SystemIdentity | undefined } = {}) =>
   new RelayClient({
     baseUrl: 'https://relay.test',
     configurationUtilities,
     logger,
+    useSystemIdentity,
+    getSystemIdentity,
   });
 
 describe('RelayClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    systemIdentity.createEphemeralToken.mockResolvedValue('essu_kibana-token');
+  });
+
+  describe('authentication', () => {
+    it('mints a fresh system identity token for every request and sends it as a bearer', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: {} } as never);
+      systemIdentity.createEphemeralToken
+        .mockResolvedValueOnce('essu_first')
+        .mockResolvedValueOnce('essu_second');
+
+      const client = createClient();
+      await client.bind('tenant-1', 'C123');
+      await client.unbindChannel('tenant-1', 'C123');
+
+      expect(systemIdentity.createEphemeralToken).toHaveBeenCalledTimes(2);
+      expect(requestMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer essu_first' },
+        })
+      );
+      expect(requestMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer essu_second' },
+        })
+      );
+    });
+
+    it('authenticates callbacks the same way as control-plane calls', async () => {
+      requestMock.mockResolvedValue({ status: 202, data: {} } as never);
+
+      await createClient().postCallback(
+        'https://relay.test/v1/events',
+        { execution_id: 'exec-1' },
+        new AbortController().signal
+      );
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/events',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer essu_kibana-token',
+          },
+        })
+      );
+    });
+
+    it("mints the token under the caller's abort signal", async () => {
+      requestMock.mockResolvedValue({ status: 202, data: {} } as never);
+      const controller = new AbortController();
+
+      await createClient().postCallback(
+        'https://relay.test/v1/events',
+        { execution_id: 'exec-1' },
+        controller.signal
+      );
+
+      expect(systemIdentity.createEphemeralToken).toHaveBeenCalledWith(controller.signal);
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({ signal: controller.signal })
+      );
+    });
+
+    it('resolves the system identity per request so a security plugin that starts after construction is picked up', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: {} } as never);
+      const security: { systemIdentity?: SystemIdentity } = {};
+      const client = createClient({ getSystemIdentity: () => security.systemIdentity });
+
+      security.systemIdentity = systemIdentity;
+      await client.bind('tenant-1', 'C123');
+      expect(requestMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer essu_kibana-token',
+          },
+        })
+      );
+    });
+
+    it('fails closed when `relay.uiam.enabled` is on but there is no system identity', async () => {
+      await expect(
+        createClient({ getSystemIdentity: () => undefined }).bind('tenant-1', 'C123')
+      ).rejects.toThrow(
+        '`xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity'
+      );
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+
+    it('sends no bearer and never consults the identity when `relay.uiam.enabled` is off', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: {} } as never);
+
+      await createClient({ useSystemIdentity: false }).bind('tenant-1', 'C123');
+
+      expect(systemIdentity.createEphemeralToken).not.toHaveBeenCalled();
+      const [{ headers }] = requestMock.mock.calls[0];
+      expect(headers).toEqual({ 'Content-Type': 'application/json' });
+      expect(headers).not.toHaveProperty('Authorization');
+    });
+
+    it('fails closed: a mint failure rejects before anything is sent', async () => {
+      const failure = new Error('UIAM unavailable');
+      systemIdentity.createEphemeralToken.mockRejectedValue(failure);
+
+      await expect(
+        createClient().trigger({ tenantKey: 'tenant-1', channel: 'C123', message: 'hi' })
+      ).rejects.toBe(failure);
+      expect(requestMock).not.toHaveBeenCalled();
+    });
   });
 
   it('posts installs through the Actions HTTP plane with Relay SSL overrides', async () => {
@@ -232,7 +353,7 @@ describe('RelayClient', () => {
           channel: 'C123',
           message: 'hello',
         })
-      ).resolves.toEqual({ ref: '1700000000.000100', tenantKey: 'team-A' });
+      ).resolves.toEqual({ ref: '1700000000.000100', tenantKey: 'team-A', channel: 'C123' });
 
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -264,7 +385,7 @@ describe('RelayClient', () => {
       );
     });
 
-    it.each([403, 409, 502])(
+    it.each([403, 409, 429, 502])(
       'turns a %s into a RelayRequestError carrying the status',
       async (status) => {
         requestMock.mockResolvedValue({ status, data: { message: 'nope' } } as never);
@@ -310,7 +431,32 @@ describe('RelayClient', () => {
           channel: 'C123',
           message: 'hello',
         })
-      ).resolves.toEqual({ ref: '1700000000.000400', tenantKey: 'team-A' });
+      ).resolves.toEqual({ ref: '1700000000.000400', tenantKey: 'team-A', channel: 'C123' });
+    });
+
+    it("forwards a channel name and returns Relay's resolved channel id", async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000500', tenant_key: 'team-A', channel: 'C0123456789' },
+      } as never);
+
+      await expect(
+        createClient().trigger({
+          tenantKey: 'team-A',
+          channel: '#general',
+          message: 'hello',
+        })
+      ).resolves.toEqual({
+        ref: '1700000000.000500',
+        tenantKey: 'team-A',
+        channel: 'C0123456789',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { tenant_key: 'team-A', channel: '#general', message: 'hello' },
+        })
+      );
     });
   });
 

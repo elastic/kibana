@@ -1,0 +1,222 @@
+[
+  {
+    "id": "global.inference-chat-cache-read_anthropic-claude-4-6-sonnet",
+    "name": "Anthropic Claude 4.6 Sonnet - Chat Completion - Cache Read",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-08-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.45,
+    "token_tier": null
+  },
+  {
+    "id": "global.inference-chat-input_anthropic-claude-4-6-sonnet",
+    "name": "Anthropic Claude 4.6 Sonnet - Chat Completion - Input",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-03-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 4.5,
+    "token_tier": null
+  },
+  {
+    "id": "global.inference-chat-output_anthropic-claude-4-6-sonnet",
+    "name": "Anthropic Claude 4.6 Sonnet - Chat Completion - Output",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-03-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 21,
+    "token_tier": null
+  },
+  {
+    "id": "global.inference-chat-cache-read_openai-gpt-5-4_0-272k",
+    "name": "OpenAI GPT-5.4 - Chat Completion - Cache Read",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-08-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.375,
+    "token_tier": "<=272k"
+  },
+  {
+    "id": "global.inference-chat-cache-read_openai-gpt-5-4_272k-inf",
+    "name": "OpenAI GPT-5.4 - Chat Completion - Cache Read",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-08-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.75,
+    "token_tier": ">272k"
+  },
+  {
+    "id": "global.inference-chat-input_openai-gpt-5-4_0-272k",
+    "name": "OpenAI GPT-5.4 - Chat Completion - Input",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-04-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 3.75,
+    "token_tier": "<=272K"
+  },
+  {
+    "id": "global.inference-chat-input_openai-gpt-5-4_272k-inf",
+    "name": "OpenAI GPT-5.4 - Chat Completion - Input",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-04-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 7.5,
+    "token_tier": ">272K"
+  },
+  {
+    "id": "global.inference-chat-output_openai-gpt-5-4_0-272k",
+    "name": "OpenAI GPT-5.4 - Chat Completion - Output",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-04-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 21,
+    "token_tier": "<=272K"
+  },
+  {
+    "id": "global.inference-chat-output_openai-gpt-5-4_272k-inf",
+    "name": "OpenAI GPT-5.4 - Chat Completion - Output",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-04-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 31.5,
+    "token_tier": ">272K"
+  },
+  {
+    "id": "global.inference-chat-input_openai-gpt-5-6-luna",
+    "name": "OpenAI GPT-5.6 Luna - Chat Completion - Input",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-08-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 1.5,
+    "token_tier": null
+  },
+  {
+    "id": "global.inference-chat-output_openai-gpt-5-6-luna",
+    "name": "OpenAI GPT-5.6 Luna - Chat Completion - Output",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-08-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 8.4,
+    "token_tier": null
+  },
+  {
+    "id": "global.inference-chat-cache-read_openai-gpt-5-6-luna_0-272k",
+    "name": "OpenAI GPT-5.6 Luna - Chat Completion - Cache Read",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-09-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.03,
+    "token_tier": "<=272k"
+  },
+  {
+    "id": "global.inference-chat-cache-read_openai-gpt-5-6-luna_272k-inf",
+    "name": "OpenAI GPT-5.6 Luna - Chat Completion - Cache Read",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-09-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.06,
+    "token_tier": ">272k"
+  },
+  {
+    "id": "global.inference-chat-input_openai-gpt-5-6-luna_0-272k",
+    "name": "OpenAI GPT-5.6 Luna - Chat Completion - Input",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-09-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.3,
+    "token_tier": "<=272K"
+  },
+  {
+    "id": "global.inference-chat-input_openai-gpt-5-6-luna_272k-inf",
+    "name": "OpenAI GPT-5.6 Luna - Chat Completion - Input",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-09-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.6,
+    "token_tier": ">272K"
+  },
+  {
+    "id": "global.inference-chat-output_openai-gpt-5-6-luna_0-272k",
+    "name": "OpenAI GPT-5.6 Luna - Chat Completion - Output",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-09-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 1.68,
+    "token_tier": "<=272K"
+  },
+  {
+    "id": "global.inference-chat-output_openai-gpt-5-6-luna_272k-inf",
+    "name": "OpenAI GPT-5.6 Luna - Chat Completion - Output",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-09-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 2.52,
+    "token_tier": ">272K"
+  },
+  {
+    "id": "global.inference-chat-cache-write-1h_anthropic-claude-4-6-sonnet",
+    "name": "Anthropic Claude 4.6 Sonnet - Chat Completion - Cache Write (1h)",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-08-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 9,
+    "token_tier": null
+  },
+  {
+    "id": "global.inference-chat-cache-write-5m_anthropic-claude-4-6-sonnet",
+    "name": "Anthropic Claude 4.6 Sonnet - Chat Completion - Cache Write (5m)",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-08-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 5.625,
+    "token_tier": null
+  },
+  {
+    "id": "global.inference-chat-cache-write_openai-gpt-5-6-luna_0-272k",
+    "name": "OpenAI GPT-5.6 Luna - Chat Completion - Cache Write",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-09-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.375,
+    "token_tier": "<=272k"
+  },
+  {
+    "id": "global.inference-embed-text-dense_openai-text-embedding-3-large",
+    "name": "OpenAI Text Embedding 003 Large - Dense Text Embedding",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-02-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.195,
+    "token_tier": null
+  },
+  {
+    "id": "global.inference-rerank_jina-reranker-v3",
+    "name": "Jina Reranker v3 - Rerank",
+    "product_type": "inference",
+    "unit": "1M Token",
+    "start": "2026-02-01T00:00:00Z",
+    "end": null,
+    "unit_amount": 0.08,
+    "token_tier": null
+  }
+]

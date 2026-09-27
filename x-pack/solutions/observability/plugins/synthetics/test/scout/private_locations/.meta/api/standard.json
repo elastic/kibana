@@ -1,5 +1,5 @@
 {
-  "sha1": "7691aefe097afcc0e80d15868a2fb2c4eb8b3afc",
+  "sha1": "56ad5e969b26ab66e1dbcf5f874a692fd1cbaa37",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -71,20 +71,6 @@
       }
     },
     {
-      "id": "22912baa484e96f-8f09e233a3b358a",
-      "title": "ClassicPrivateLocationNoCondition never stamps a condition on a classic private location, on create or edit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/classic_private_location_no_condition.spec.ts",
-        "line": 45,
-        "column": 25
-      }
-    },
-    {
       "id": "a5c3f83be276d2a-6771baf1db2b03d",
       "title": "CleanUpExtraPackagePolicies cleans up orphaned package policies",
       "expectedStatus": "passed",
@@ -110,20 +96,6 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
         "line": 84,
         "column": 51
-      }
-    },
-    {
-      "id": "a56530651b7f21f-596439d3ed034eb",
-      "title": "DisableScalablePrivateLocation disabling sharding clears a leftover agent pin before the location is persisted",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/disable_scalable_private_location.spec.ts",
-        "line": 45,
-        "column": 23
       }
     },
     {
@@ -853,8 +825,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_monitor_crud.spec.ts",
-        "line": 59,
-        "column": 28
+        "line": 54,
+        "column": 25
       }
     },
     {
@@ -866,20 +838,20 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_placement.spec.ts",
-        "line": 83,
+        "line": 80,
         "column": 51
       }
     },
     {
       "id": "6faf871c5041796-a511d209d7cca3e",
-      "title": "ScalablePrivateLocationRebalance moves a stale agent\u2019s monitors to the survivor with no drops and a revision bump",
+      "title": "ScalablePrivateLocationRebalance moves a stale agent’s monitors to the survivor with no drops and a revision bump",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_rebalance.spec.ts",
-        "line": 80,
+        "line": 79,
         "column": 38
       }
     }

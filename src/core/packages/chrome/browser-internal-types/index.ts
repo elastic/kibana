@@ -15,6 +15,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
@@ -24,7 +25,6 @@ import type {
   ChromeControls,
   ChromeHelp,
   ChromeNewsfeedHandler,
-  ChromeNext,
   ChromeUserBanner,
   GlobalSearchConfig,
   NavigationCustomization,
@@ -34,10 +34,22 @@ import type {
   SolutionId,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
+
+/** @internal */
+export interface InlineAppHeaderState {
+  title?: AppHeaderTitle;
+}
+
+/** @internal */
+export interface InlineAppHeaderRegistration {
+  update(title?: AppHeaderTitle): void;
+  unregister(): void;
+}
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -49,6 +61,7 @@ export interface InternalChromeStart extends ChromeStart {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;
     readonly capabilities: Capabilities;
+    readonly docTitleParts$: Observable<readonly string[]>;
   };
 
   sideNav: ChromeStart['sideNav'] & {
@@ -148,6 +161,16 @@ export interface InternalChromeStart extends ChromeStart {
 
     /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
     registerCustomizeNavigationHandler(handler: () => void): void;
+
+    /**
+     * Attach hover lists to an existing project-nav deep link.
+     * Does not require project chrome style; unused until project nav renders.
+     * Primary and footer hover only; not attached in More.
+     */
+    registerNavigationLinks(links: ProjectNavigationLinks): void;
+
+    /** Registered hover lists. Live updates. */
+    getRegisteredNavigationLinks$(): Observable<readonly ProjectNavigationLinks[]>;
   };
 
   /** Persistent chrome controls, including getters for Chrome-owned renderers. */
@@ -156,8 +179,17 @@ export interface InternalChromeStart extends ChromeStart {
   /** Help action registration, including getters for Chrome-owned renderers. */
   help: InternalChromeHelp;
 
-  /** @internal Extends public `next` with `get$` for Chrome layout components. */
-  next: InternalChromeNext;
+  /** Chrome-owned app-header registry. Public apps should use `@kbn/app-header`. */
+  appHeader: {
+    set(config: ChromeAppHeaderConfig): () => void;
+    get$(): Observable<ChromeAppHeaderConfig | undefined>;
+  };
+
+  /** Whether the active app currently mounts an inline `AppHeader`. */
+  inlineAppHeader: {
+    get$(): Observable<InlineAppHeaderState | undefined>;
+    register(title?: AppHeaderTitle): InlineAppHeaderRegistration;
+  };
 }
 
 /** @internal */
@@ -183,20 +215,4 @@ export interface InternalChromeControls extends ChromeControls {
 export interface InternalChromeHelp extends ChromeHelp {
   getFeedbackHandler$(): Observable<(() => void) | undefined>;
   getNewsfeedHandler$(): Observable<ChromeNewsfeedHandler | undefined>;
-}
-
-/** @internal */
-export interface InternalChromeNext extends ChromeNext {
-  aiButton: InternalChromeControls['aiButton'];
-  contextSwitcher: InternalChromeControls['contextSwitcher'];
-  projectPicker: InternalChromeControls['projectPicker'];
-  globalSearch: InternalChromeControls['globalSearch'];
-  userMenu: InternalChromeControls['userMenu'];
-  inlineAppHeader: {
-    get$(): Observable<boolean>;
-    set(mounted: boolean): void;
-  };
-  appHeader: ChromeNext['appHeader'] & {
-    get$(): Observable<ChromeAppHeaderConfig | undefined>;
-  };
 }

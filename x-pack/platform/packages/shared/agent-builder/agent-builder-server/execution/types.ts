@@ -9,10 +9,10 @@ import type { Observable } from 'rxjs';
 import type {
   AgentExecutionMode,
   ChatEvent,
+  ChatTriggerMode,
   ConverseInput,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
-  ConversationAction,
   ConversationAccessControl,
   ConversationRoundOrigin,
   ConversationOrigin,
@@ -21,9 +21,14 @@ import type {
   InteractivityConfig,
   InteractivityConfigInput,
   SerializedExecutionError,
+  ExecutionAbortReason,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 
 /**
  * Common execution parameters shared between conversation and standalone modes.
@@ -41,7 +46,10 @@ export interface BaseExecutionParams {
   outputSchema?: Record<string, unknown>;
   /** Runtime configuration overrides for this execution only. */
   configurationOverrides?: AgentConfigurationOverrides;
-  /** Id of the parent execution that spawned this execution. */
+  /**
+   * Id of the parent execution that spawned this execution. The execution runs as that
+   * execution's owner, so it must name the running parent, never a value from user or model input.
+   */
   parentExecutionId?: string;
   /**
    * Connector telemetry to attribute this execution's LLM calls to a specific feature
@@ -53,6 +61,10 @@ export interface BaseExecutionParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  /**
+   * Optional reasoning level forwarded to the inference plugin.
+   */
+  reasoningLevel?: ChatCompletionReasoningEffort;
   projectRouting?: string;
 }
 
@@ -70,6 +82,10 @@ export type ExecutionConversationOrigin = ConversationOrigin &
 /**
  * Execution parameters for conversation mode — tied to a conversation with persistence.
  */
+
+/** Whether a request resolved an existing conversation or created it. */
+export type ConversationOperation = 'CREATE' | 'UPDATE';
+
 export interface ConversationExecutionParams extends BaseExecutionParams {
   /** Id of the conversation to continue. */
   conversationId?: string;
@@ -90,8 +106,6 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   };
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];
-  /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
-  action?: ConversationAction;
   /**
    * Used to establish the parent linkage and add subagent-specific metadata
    * to the newly-created child conversation.
@@ -101,6 +115,31 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
     subagentName: string;
     subagentPurpose?: string;
   };
+  /**
+   * Whether the agent runs. `never` persists the user message and stops there, leaving every
+   * other option here unused. Defaults to `always`.
+   */
+  triggerMode?: ChatTriggerMode;
+}
+
+/**
+ * What the execution service stores on a conversation-mode record, and what a run reads back:
+ * the caller's parameters plus the resolution the service already performed on the request node.
+ * The service is its only producer — callers of {@link AgentExecutionService.executeAgent} pass
+ * {@link ConversationExecutionParams}.
+ */
+export interface StoredConversationExecutionParams extends ConversationExecutionParams {
+  /** The conversation the service resolved, created by the time the run starts. */
+  conversationId: string;
+  /** The round the service opened, so the run reuses the ids of the events written for it. */
+  roundId: string;
+  /** When the request node persisted the round's opening message, ISO 8601. */
+  receivedAt: string;
+  /**
+   * How the conversation was resolved, so the run reports a creation this request made rather
+   * than the update its own read sees.
+   */
+  conversationOperation: ConversationOperation;
 }
 
 /**
@@ -109,9 +148,9 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
 export type StandaloneExecutionParams = BaseExecutionParams;
 
 /**
- * Union of all execution parameter types.
+ * Union of all stored execution parameter types — the shape of a record's `agent_params`.
  */
-export type AgentExecutionParams = ConversationExecutionParams | StandaloneExecutionParams;
+export type AgentExecutionParams = StoredConversationExecutionParams | StandaloneExecutionParams;
 
 /**
  * Common fields shared by all agent execution documents.
@@ -129,8 +168,12 @@ interface BaseAgentExecution {
   agentId: string;
   /** Id of the space the execution was performed in. */
   spaceId: string;
+  /** The user the request that created this execution authenticated as. */
+  owner?: UserIdAndName;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
+  /** Why the execution was aborted, present when status is 'aborted' and the origin recorded it. */
+  abortReason?: ExecutionAbortReason;
   /** Number of events stored on the document (kept in sync with `events.length`). */
   eventCount: number;
   /** Inline events emitted during the execution. The array index is the event number. */
@@ -150,7 +193,7 @@ interface BaseAgentExecution {
  */
 export interface ConversationAgentExecution extends BaseAgentExecution {
   executionMode: AgentExecutionMode.conversation;
-  agentParams: ConversationExecutionParams;
+  agentParams: StoredConversationExecutionParams;
 }
 
 /**
@@ -173,6 +216,8 @@ export type AgentExecution = ConversationAgentExecution | StandaloneAgentExecuti
 export interface ExecuteAgentResult {
   /** The unique execution ID. */
   executionId: string;
+  /** The conversation the run writes to, resolved before the run was dispatched. */
+  conversationId?: string;
   /**
    * Observable of events for this execution.
    * - Local mode: the live agent event stream (multicasted).
@@ -180,6 +225,15 @@ export interface ExecuteAgentResult {
    */
   events$: Observable<ChatEvent>;
 }
+
+/**
+ * Result of a request that may not have run the agent. The execution id is absent when
+ * `trigger_mode: 'never'` persisted the user message instead of starting a run, so there is
+ * nothing to address; a caller that always needs one runs the agent through
+ * {@link AgentExecutionService.executeAgent}.
+ */
+export type MaybeExecuteAgentResult = Pick<ExecuteAgentResult, 'events$' | 'conversationId'> &
+  Partial<Pick<ExecuteAgentResult, 'executionId'>>;
 
 /**
  * Base parameters for {@link AgentExecutionService.executeAgent}.
@@ -259,12 +313,37 @@ export interface FindExecutionsOptions {
  * The agent execution service - entry point for deferred agent execution.
  * Replaces the direct call to ChatService.converse in the request flow.
  */
+export interface AbortExecutionOptions {
+  /** Where the abort comes from; defaults to `{ source: 'api' }`. */
+  reason?: ExecutionAbortReason;
+  /**
+   * Wait for the executing node to record the interruption (the terminal timeline event) before
+   * resolving, bounded by a timeout. Defaults to true.
+   */
+  waitForTerminal?: boolean;
+}
+
+export interface AbortExecutionResult {
+  /** False when the execution was unknown or already terminal (nothing was aborted). */
+  acknowledged: boolean;
+  /**
+   * True when the interruption is recorded on the conversation. False when the abort was not
+   * awaited, the execution had not started yet (nothing to record), or the wait timed out.
+   */
+  terminalPersisted: boolean;
+}
+
 export interface AgentExecutionService {
   /**
    * Execute an agent, either locally or on a Task Manager node.
    * Creates an execution document and returns the execution ID along with an events observable.
    */
   executeAgent(params: ExecuteAgentParams): Promise<ExecuteAgentResult>;
+  /**
+   * Persists the request's user message, then runs the agent unless its trigger mode said not to.
+   * The chat API's entry point; a caller that always runs the agent calls `executeAgent`.
+   */
+  maybeExecuteAgent(params: ExecuteAgentParams): Promise<MaybeExecuteAgentResult>;
 
   /**
    * Retrieve an agent execution by its ID.
@@ -273,9 +352,16 @@ export interface AgentExecutionService {
 
   /**
    * Abort an ongoing execution.
-   * Sets the execution status to 'aborted', which the TM handler will detect via polling.
+   * Sets the execution status to 'aborted', which the executing node detects via polling and then
+   * winds down, recording the interruption on the conversation. By default the call waits (bounded)
+   * for that record to land, so a caller that re-reads the conversation afterwards sees the aborted
+   * execution rather than a dangling message; `waitForTerminal: false` returns right after the
+   * status flip. `reason` records where the abort came from; it defaults to the abort API.
    */
-  abortExecution(executionId: string): Promise<void>;
+  abortExecution(
+    executionId: string,
+    options?: AbortExecutionOptions
+  ): Promise<AbortExecutionResult>;
 
   /**
    * Follow an execution by polling for events.

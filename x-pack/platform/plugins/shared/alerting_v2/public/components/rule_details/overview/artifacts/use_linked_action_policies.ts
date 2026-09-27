@@ -5,33 +5,65 @@
  * 2.0.
  */
 
-import { useService, CoreStart } from '@kbn/core-di-browser';
+import { useMemo } from 'react';
 import { useMatchedActionPolicies } from '@kbn/alerting-v2-rule-form';
+import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
+import { useService, CoreStart } from '@kbn/core-di-browser';
 
-/** Max policies evaluated by _match_for_rule; counts may undercount when the space has more. */
-export const LINKED_ACTION_POLICIES_FETCH_LIMIT = 100;
+const CATEGORY_ORDER: Record<MatchedActionPolicy['category'], number> = {
+  tags: 0,
+  catch_all: 1,
+};
+
+/** Matching-criteria first, then catch-all, then name. */
+export const sortMatchedActionPolicies = (
+  items: readonly MatchedActionPolicy[]
+): MatchedActionPolicy[] =>
+  [...items].sort((a, b) => {
+    const categoryDiff = CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category];
+    if (categoryDiff !== 0) {
+      return categoryDiff;
+    }
+    return a.action_policy.name.localeCompare(b.action_policy.name, 'en');
+  });
 
 export interface UseLinkedActionPoliciesResult {
-  totalCount: number;
-  catchAllCount: number;
-  matchingCriteriaCount: number;
-  /** True when the space has more policies than {@link LINKED_ACTION_POLICIES_FETCH_LIMIT} and some may not have been evaluated. */
-  isCountTruncated: boolean;
+  items: MatchedActionPolicy[];
+  evaluatedCount: number;
+  /** True when some policies in the space were not evaluated and the list may be incomplete. */
+  isMatchTruncated: boolean;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
 }
 
-export const useLinkedActionPolicies = (ruleId: string): UseLinkedActionPoliciesResult => {
+export const useLinkedActionPolicies = (tags: string[]): UseLinkedActionPoliciesResult => {
   const http = useService(CoreStart('http'));
-  const { isLoading, error, items, total } = useMatchedActionPolicies({ http, ruleId });
+  const {
+    isLoading,
+    isPreviousData = false,
+    error,
+    items,
+    evaluatedCount,
+    isTruncated,
+  } = useMatchedActionPolicies({
+    http,
+    tags,
+  });
+  // keepPreviousData keeps the last tag query on screen with isLoading false.
+  // Hide those rows until the match for the current tags arrives.
+  const awaitingCurrentMatches = isPreviousData && error == null;
+
+  const sortedItems = useMemo(
+    () => (awaitingCurrentMatches ? [] : sortMatchedActionPolicies(items)),
+    [awaitingCurrentMatches, items]
+  );
 
   return {
-    totalCount: items.length,
-    catchAllCount: items.filter((item) => item.category === 'global').length,
-    matchingCriteriaCount: items.filter((item) => item.category === 'global-filtered').length,
-    isCountTruncated: total > LINKED_ACTION_POLICIES_FETCH_LIMIT,
-    isLoading,
+    items: sortedItems,
+    evaluatedCount: awaitingCurrentMatches ? 0 : evaluatedCount,
+    isMatchTruncated: awaitingCurrentMatches ? false : isTruncated,
+    isLoading: isLoading || awaitingCurrentMatches,
     isError: error != null,
     error,
   };

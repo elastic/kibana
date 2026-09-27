@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { BASE_BUCKET_DAILY } from './bucket_config';
+import { BASE_BUCKET_DAILY } from './bucket_config.ts';
 
 interface ManifestEntry {
   filename?: string;
@@ -24,7 +24,7 @@ interface ManifestEntry {
 (async () => {
   console.log('--- Create ES Snapshot Manifest');
 
-  const destination = process.argv[2] || __dirname + '/test';
+  const destination = process.argv[2] || `${import.meta.dirname}/test`;
 
   const ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
   const ES_CLOUD_IMAGE = process.env.ELASTICSEARCH_CLOUD_IMAGE;
@@ -106,9 +106,9 @@ interface ManifestEntry {
       echo '--- Upload files to GCS'
       .buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
       cd "${destination}"
-      gsutil -m cp -r *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
+      gcloud storage cp --recursive *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
 
       buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST 'https://storage.googleapis.com/${BASE_BUCKET_DAILY}/${DESTINATION}/manifest.json'
       buildkite-agent meta-data set ES_SNAPSHOT_VERSION '${VERSION}'

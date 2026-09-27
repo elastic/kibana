@@ -8,12 +8,11 @@ import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
 import { requestOAuthPasswordToken } from './request_oauth_password_token';
+import type { PasswordOAuthRequestParams } from './request_oauth_password_token';
 
-interface GetOAuthPasswordAccessTokenOpts {
+interface GetOAuthPasswordAccessTokenOpts extends PasswordOAuthRequestParams {
   connectorId?: string;
   tokenUrl: string;
-  username: string;
-  password: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   connectorTokenClient?: ConnectorTokenClientContract;
@@ -27,6 +26,11 @@ export const getOAuthPasswordAccessToken = async ({
   password,
   configurationUtilities,
   connectorTokenClient,
+  clientId,
+  scope,
+  usernameField,
+  requestBodyFormat,
+  tokenType,
 }: GetOAuthPasswordAccessTokenOpts) => {
   if (!username || !password) {
     logger.warn(`Missing required fields for requesting OAuth Password Grant access token`);
@@ -56,7 +60,7 @@ export const getOAuthPasswordAccessToken = async ({
     const tokenResult = await requestOAuthPasswordToken(
       tokenUrl,
       logger,
-      { username, password },
+      { username, password, clientId, scope, usernameField, requestBodyFormat, tokenType },
       configurationUtilities
     );
     accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;

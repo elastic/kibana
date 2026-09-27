@@ -143,7 +143,6 @@ interface FormValues {
     name: string;
     enabled: boolean;
     description?: string;
-    owner?: string;
     tags?: string[];
   };
   timeField: string;
@@ -181,7 +180,7 @@ All flyout components require:
 This package includes Storybook stories for visual development and testing.
 
 ```bash
-yarn storybook alerting_v2_rule_form
+pnpm storybook alerting_v2_rule_form
 ```
 
 Stories are located in `flyout/__stories__/`.

@@ -28,9 +28,9 @@ import {
 
 const serverFields = {
   enabled: true,
-  createdBy: 'user-1',
+  createdBy: { profile_uid: 'user-1' },
   createdAt: '2025-01-01T00:00:00.000Z',
-  updatedBy: 'user-1',
+  updatedBy: { profile_uid: 'user-1' },
   updatedAt: '2025-01-01T00:00:00.000Z',
   version: 1,
 };
@@ -47,7 +47,7 @@ const createRuleSoAttributesWithArtifacts = () =>
   createRuleSoAttributes({
     artifacts: [
       { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-      { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
     ],
   });
 
@@ -130,7 +130,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -148,7 +148,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -166,7 +166,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -183,7 +183,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -200,7 +200,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -217,7 +217,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -232,7 +232,7 @@ describe('utils', () => {
       const updateData: UpdateRuleData = {};
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -247,7 +247,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -264,7 +264,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -282,7 +282,7 @@ describe('utils', () => {
 
       expect(() =>
         buildUpdateRuleAttributes(existing, updateData, {
-          updatedBy: 'user-2',
+          updatedBy: { profile_uid: 'user-2' },
           updatedAt: '2025-01-02T00:00:00.000Z',
           version: 2,
         })
@@ -299,7 +299,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -316,7 +316,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -334,7 +334,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -352,7 +352,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -369,7 +369,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -387,7 +387,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -405,7 +405,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -427,7 +427,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -446,7 +446,7 @@ describe('utils', () => {
         existing,
         {},
         {
-          updatedBy: 'user-2',
+          updatedBy: { profile_uid: 'user-2' },
           updatedAt: '2025-01-02T00:00:00.000Z',
           version: 2,
         }
@@ -454,7 +454,7 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
   });
@@ -467,7 +467,7 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
@@ -485,7 +485,7 @@ describe('utils', () => {
           {
             id: 'dashboard-1',
             type: 'dashboard',
-            data: { dashboardId: 'dash-1' },
+            data: { dashboard_id: 'dash-1' },
             // @ts-expect-error legacy key retained on disk for rollback
             value: 'dash-1',
           },
@@ -496,7 +496,7 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
@@ -869,6 +869,62 @@ describe('utils', () => {
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG (400) when a recovering delay is set while recovery is disabled', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'none',
+        state_transition: { recovering_count: 3 },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message:
+            'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG when a recovering_timeframe is set while recovery is unset', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: undefined,
+        state_transition: { recovering_timeframe: '5m' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not throw for a recovering delay when recovery is enabled', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'no_breach',
+        state_transition: { recovering_count: 3, recovering_timeframe: '5m' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG for recovering_count 0 when recovery is disabled', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'none',
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
     });
   });
 

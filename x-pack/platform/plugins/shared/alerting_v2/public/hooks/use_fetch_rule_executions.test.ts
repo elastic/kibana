@@ -47,7 +47,7 @@ describe('useFetchRuleExecutions', () => {
       perPage: 50,
     });
 
-    renderHook(() => useFetchRuleExecutions({ page: 2, perPage: 50, outcome: ['failure'] }), {
+    renderHook(() => useFetchRuleExecutions({ page: 2, perPage: 50, outcomes: ['failure'] }), {
       wrapper: createWrapper(),
     });
 
@@ -55,7 +55,7 @@ describe('useFetchRuleExecutions', () => {
       expect(mockListRuleExecutions).toHaveBeenCalledWith({
         page: 2,
         per_page: 50,
-        outcome: ['failure'],
+        outcomes: ['failure'],
       });
     });
   });
@@ -88,6 +88,16 @@ describe('useFetchRuleExecutions', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBe(error);
   });
+
+  it('does not call the API when enabled is false', async () => {
+    const { result } = renderHook(
+      () => useFetchRuleExecutions({ page: 1, perPage: 10, enabled: false }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(mockListRuleExecutions).not.toHaveBeenCalled();
+  });
 });
 
 describe('toListRuleExecutionsRequest', () => {
@@ -97,20 +107,20 @@ describe('toListRuleExecutionsRequest', () => {
         page: 2,
         perPage: 50,
         ruleIds: ['rule-1'],
-        outcome: ['failure'],
+        outcomes: ['failure'],
         from: '2026-01-01T00:00:00.000Z',
         to: '2026-01-02T00:00:00.000Z',
-        sort: 'startedAt',
+        sortField: 'startedAt',
         sortOrder: 'asc',
       })
     ).toEqual({
       page: 2,
       per_page: 50,
       rule_ids: ['rule-1'],
-      outcome: ['failure'],
+      outcomes: ['failure'],
       from: '2026-01-01T00:00:00.000Z',
       to: '2026-01-02T00:00:00.000Z',
-      sort: 'started_at',
+      sort_field: 'started_at',
       sort_order: 'asc',
     });
   });

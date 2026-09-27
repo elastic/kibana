@@ -14,7 +14,7 @@ import {
   RUNTIME_FIELD_COMPOSITE_TYPE,
   scriptSchema,
 } from './common';
-import { fieldSettingsBaseSchema } from '../schema_field_settings';
+import { fieldSettingsBaseSchema } from '../field_settings/schema_field_settings';
 
 export const runtimeFieldBaseSchema = fieldSettingsBaseSchema
   .extend({

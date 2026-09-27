@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, {
+  cloneElement,
+  isValidElement,
+  type FunctionComponent,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTextTruncate, useEuiMemoizedStyles } from '@elastic/eui';
+import { EuiLink, EuiText, EuiTextTruncate, useEuiMemoizedStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { MetaBlocksProps } from './types';
 
@@ -20,6 +26,7 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       flex-wrap: wrap;
       align-items: center;
       gap: ${euiTheme.size.xs} ${euiTheme.size.m};
+      margin: 0;
     `,
     item: css`
       display: flex;
@@ -27,6 +34,11 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       gap: ${euiTheme.size.xs};
       flex: 0 1 auto;
       min-width: 0;
+
+      /* Holds an anchor at body weight, so the sizing copy measures the rendered width. */
+      a {
+        font-weight: ${euiTheme.font.weight.regular};
+      }
     `,
     key: css`
       flex: 0 0 auto;
@@ -39,10 +51,6 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-
-      a {
-        font-weight: ${euiTheme.font.weight.regular};
-      }
     `,
     truncatedValue: css`
       position: relative;
@@ -64,42 +72,77 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
   };
 };
 
+interface TruncationHostProps {
+  href?: string;
+  children?: ReactNode;
+}
+
+/**
+ * An anchor is inline text, so it can host the truncation. `EuiTextTruncate` measures a block-level
+ * box, which collapses to zero width inside a shrink-to-fit parent, so two kinds of value cannot
+ * host it: wrappers that size themselves to their content, such as badges, and an `EuiLink` with no
+ * `href`, which renders a `button`.
+ */
+const isTruncationHost = (value: ReactNode): value is ReactElement<TruncationHostProps> =>
+  isValidElement<TruncationHostProps>(value) &&
+  (value.type === 'a' || (value.type === EuiLink && typeof value.props.href === 'string'));
+
+/** The text a value reduces to, or `undefined` when the value is richer than a single string. */
+const getTruncatableText = (value: ReactNode): string | undefined => {
+  if (typeof value === 'string' || typeof value === 'number') {
+    // Inline layout collapses surrounding whitespace, but the truncation measurement counts it,
+    // which reports text that fits as overflowing.
+    return String(value).trim();
+  }
+  if (isTruncationHost(value)) {
+    return getTruncatableText(value.props.children);
+  }
+  return undefined;
+};
+
+/**
+ * Values are often identifiers, where both ends carry meaning. A link stays outside the truncation:
+ * `EuiTextTruncate` marks its truncated text `aria-hidden`, so a link nested within would be
+ * focusable yet unreachable to a screen reader.
+ */
+const renderTruncated = (value: ReactNode, text: string) => {
+  const truncated = <EuiTextTruncate text={text} truncation="middle" />;
+  return isTruncationHost(value) ? cloneElement(value, undefined, truncated) : truncated;
+};
+
 /** A compact, responsive row of key-value pairs. */
 export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest }) => {
-  const memoized = useEuiMemoizedStyles(styles);
+  const memoizedStyles = useEuiMemoizedStyles(styles);
 
   if (items.length === 0) {
     return null;
   }
 
   return (
-    <div css={memoized.list} data-test-subj={rest['data-test-subj'] ?? 'metablocks-container'}>
-      {items.map((item, index) => {
-        const isStringValue = typeof item.value === 'string';
+    <dl css={memoizedStyles.list} data-test-subj={rest['data-test-subj'] ?? 'metablocks-container'}>
+      {items.map(({ id, title, value, ...itemProps }, index) => {
+        const truncatableText = getTruncatableText(value);
 
         return (
-          <EuiText
-            key={item.id ?? index}
-            size="s"
-            css={memoized.item}
-            data-test-subj={item['data-test-subj']}
-          >
-            <span css={memoized.key}>{item.title}</span>
-            {isStringValue ? (
-              <span css={memoized.truncatedValue}>
-                <span css={memoized.fullTextSizer} aria-hidden>
-                  {item.value}
+          // `EuiText` renders a `div`, the one wrapper `dl` accepts around a `dt`/`dd` pair. It
+          // keeps each pair a single flex item, which is what makes the row wrap pair by pair.
+          <EuiText key={id ?? index} {...itemProps} size="s" css={memoizedStyles.item}>
+            <dt css={memoizedStyles.key}>{title}</dt>
+            {truncatableText !== undefined ? (
+              <dd css={memoizedStyles.truncatedValue}>
+                <span css={memoizedStyles.fullTextSizer} aria-hidden>
+                  {truncatableText}
                 </span>
-                <span css={memoized.truncationOverlay}>
-                  <EuiTextTruncate text={item.value as string} truncation="middle" />
+                <span css={memoizedStyles.truncationOverlay}>
+                  {renderTruncated(value, truncatableText)}
                 </span>
-              </span>
+              </dd>
             ) : (
-              <span css={memoized.value}>{item.value}</span>
+              <dd css={memoizedStyles.value}>{value}</dd>
             )}
           </EuiText>
         );
       })}
-    </div>
+    </dl>
   );
 };

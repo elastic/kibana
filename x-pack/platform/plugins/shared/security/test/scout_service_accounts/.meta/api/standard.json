@@ -1,0 +1,359 @@
+{
+  "sha1": "cd6522b764938e6aaa4b8dbdc79f85e4f5b99b45",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "9c74fe5c346746e-5cff0607f7ce78a",
+      "title": "Create Elasticsearch service accounts creates the account with the requested roles, mints its token, and reports the id, name and roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 54,
+        "column": 1
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-e45d71c299b3890",
+      "title": "Create Elasticsearch service accounts refuses a request that names no roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 90,
+        "column": 14
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-25bc3a44a987915",
+      "title": "Create Elasticsearch service accounts creates an account with 1000 roles, the most Elasticsearch allows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 108,
+        "column": 38
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-e941ece115bbfac",
+      "title": "Create Elasticsearch service accounts refuses more than 1000 roles without writing anything",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 130,
+        "column": 18
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-8839e1389c31119",
+      "title": "Create Elasticsearch service accounts creates an account with a 507-character role name, the longest Elasticsearch allows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 155,
+        "column": 50
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-1676a66f5c799ce",
+      "title": "Create Elasticsearch service accounts refuses a role name longer than 507 characters without writing anything",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 175,
+        "column": 14
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-495a95e38265d82",
+      "title": "Create Elasticsearch service accounts refuses a name that is already taken",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 197,
+        "column": 15
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-5a2b3236aa81fd6",
+      "title": "Create Elasticsearch service accounts rejects a name that could escape the Elasticsearch path",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 224,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-4199c3d47ea42a5",
+      "title": "Create Elasticsearch service accounts API-key caller: creates the account with the requested roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 245,
+        "column": 21
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-3ddff7a9140419f",
+      "title": "Create Elasticsearch service accounts API-key caller: refuses a key without `manage_security`",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 282,
+        "column": 55
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-033d4aebedccb22",
+      "title": "Create Elasticsearch service accounts refuses a caller without `manage_security`",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 318,
+        "column": 18
+      }
+    },
+    {
+      "id": "0eb73a3c441f598-876734e2c1092d5",
+      "title": "Execute Elasticsearch service account workloads uses the account identity and permits only its own roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
+        "line": 95,
+        "column": 13
+      }
+    },
+    {
+      "id": "0eb73a3c441f598-9761d752788de80",
+      "title": "Execute Elasticsearch service account workloads renews an expired token transparently on an existing scoped ES client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
+        "line": 118,
+        "column": 28
+      }
+    },
+    {
+      "id": "0eb73a3c441f598-42b563a62f0aa1d",
+      "title": "Execute Elasticsearch service account workloads isolates workload bindings by space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
+        "line": 130,
+        "column": 25
+      }
+    },
+    {
+      "id": "0eb73a3c441f598-b9c26581cd5cfa5",
+      "title": "Execute Elasticsearch service account workloads unbind denies renewal while leaving the issued token valid until expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
+        "line": 160,
+        "column": 14
+      }
+    },
+    {
+      "id": "0eb73a3c441f598-259bf3df208982d",
+      "title": "Execute Elasticsearch service account workloads disable denies renewal while leaving the issued token valid until expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
+        "line": 160,
+        "column": 14
+      }
+    },
+    {
+      "id": "0eb73a3c441f598-44b2c3fe997636b",
+      "title": "Execute Elasticsearch service account workloads delete_token denies renewal while leaving the issued token valid until expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
+        "line": 160,
+        "column": 14
+      }
+    },
+    {
+      "id": "0eb73a3c441f598-719b03d79f6445f",
+      "title": "Execute Elasticsearch service account workloads refuses an unauthorized caller before executing a workload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
+        "line": 180,
+        "column": 20
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-62b1cce9a885512",
+      "title": "List and get Elasticsearch service accounts lists every user-managed account, whichever namespace it lives in",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 127,
+        "column": 1
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-9543b0bec995b1c",
+      "title": "List and get Elasticsearch service accounts pages through the directory with `limit` and `after`",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 148,
+        "column": 24
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-9ccd0292d444cf1",
+      "title": "List and get Elasticsearch service accounts gets an account by its URL-encoded id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 178,
+        "column": 7
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-b996862d44cf376",
+      "title": "List and get Elasticsearch service accounts gets an account this Kibana cannot assume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 184,
+        "column": 22
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-1907ba75c5a8bf0",
+      "title": "List and get Elasticsearch service accounts stops reporting the account assumable once it is recreated outside Kibana",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 198,
+        "column": 22
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-8d653fad5eaa674",
+      "title": "List and get Elasticsearch service accounts answers 404 for an unknown account, a built-in one, and an id that is no principal at all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 257,
+        "column": 15
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-f132f1bdd3be274",
+      "title": "List and get Elasticsearch service accounts rejects a page size outside 1 to 100",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 272,
+        "column": 9
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-d578af991c99a56",
+      "title": "List and get Elasticsearch service accounts allows a caller with `read_security` to read but not to create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 281,
+        "column": 18
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-bbaea54c7e12533",
+      "title": "List and get Elasticsearch service accounts refuses a caller without `read_security`",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 335,
+        "column": 40
+      }
+    }
+  ]
+}

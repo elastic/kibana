@@ -66,7 +66,7 @@ export const useBadges = <
     (async () => {
       const initialBadges = await getActionsForTrigger(PANEL_BADGE_TRIGGER);
       if (canceled) return;
-      setBadges(initialBadges);
+      setBadges(initialBadges as Action<EmbeddableApiContext>[]);
 
       const apiContext = { embeddable: api };
 
@@ -102,6 +102,16 @@ export const useBadges = <
 
   return useMemo(() => {
     return badges?.map((badge) => {
+      const context = { embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] };
+
+      if (badge.MenuItem) {
+        return React.createElement(badge.MenuItem, {
+          key: badge.id,
+          context,
+          dataTestSubj: `embeddablePanelBadge-${badge.id}`,
+        });
+      }
+
       const tooltipText = badge.getDisplayNameTooltip?.({
         embeddable: api,
         trigger: triggers[PANEL_BADGE_TRIGGER],
@@ -118,14 +128,7 @@ export const useBadges = <
           data-test-subj={`embeddablePanelBadge-${badge.id}`}
           {...(tooltipText ? { 'aria-label': tooltipText } : {})}
         >
-          {badge.MenuItem
-            ? React.createElement(badge.MenuItem, {
-                context: {
-                  embeddable: api,
-                  trigger: triggers[PANEL_BADGE_TRIGGER],
-                },
-              })
-            : badge.getDisplayName({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
+          {badge.getDisplayName({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
         </EuiBadge>
       );
 

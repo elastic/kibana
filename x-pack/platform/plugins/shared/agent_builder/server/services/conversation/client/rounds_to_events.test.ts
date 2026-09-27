@@ -9,6 +9,9 @@ import type {
   Conversation,
   ConversationRound,
   ConversationRoundStep,
+  ExecutionAbortedEvent,
+  ExecutionFailedEvent,
+  TimelineEvent,
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import {
@@ -17,9 +20,18 @@ import {
   ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
+  TimelineTriggerType,
+  executionTerminatedEventId,
+  parseExecutionId,
+  resumeExecutionId,
 } from '@kbn/agent-builder-common';
 import {
+  agentActor,
   executionStartedEvent,
+  interruptedExecutionToEvents,
+  lastTerminatedExecutionIndex,
+  nextResumeIndex,
+  resumeExecutionStartedEvent,
   isRoundDerivedEventId,
   roundsToEvents,
   userMessageEvent,
@@ -227,7 +239,15 @@ describe('userMessageEvent (split builder)', () => {
   it('produces exactly one user_message event with the round input and actor', () => {
     const round = baseRound();
     const conversation = baseConversation([round]);
-    const event = userMessageEvent(round, conversation);
+    const event = userMessageEvent(
+      {
+        id: `${round.id}::user_message`,
+        createdAt: round.started_at,
+        input: round.input,
+        author: round.author,
+      },
+      conversation
+    );
 
     expect(event).toMatchObject({
       id: 'round-1::user_message',
@@ -279,6 +299,13 @@ describe('isRoundDerivedEventId', () => {
     expect(isRoundDerivedEventId('round-42::step::12')).toBe(true);
   });
 
+  it('recognizes the terminal ids of interrupted executions (initial and resume)', () => {
+    expect(isRoundDerivedEventId('round-1::execution_failed')).toBe(true);
+    expect(isRoundDerivedEventId('round-1::execution_aborted')).toBe(true);
+    expect(isRoundDerivedEventId('round-1::execution::3::execution_failed')).toBe(true);
+    expect(isRoundDerivedEventId('round-1::execution::3::execution_aborted')).toBe(true);
+  });
+
   it('rejects ids that are not round-derived', () => {
     expect(isRoundDerivedEventId('some-additive-error')).toBe(false);
     expect(isRoundDerivedEventId('::user_message::follow-up')).toBe(false);
@@ -289,5 +316,255 @@ describe('isRoundDerivedEventId', () => {
     expect(isRoundDerivedEventId('my-error::step::context')).toBe(false);
     expect(isRoundDerivedEventId('round-1::step::0::retry')).toBe(false);
     expect(isRoundDerivedEventId('round-1::step::')).toBe(false);
+  });
+});
+
+describe('parseExecutionId', () => {
+  it.each([1, 2, 10])('parses resume %i', (index) => {
+    expect(parseExecutionId(resumeExecutionId('round::nested', index))).toEqual({
+      roundId: 'round::nested',
+      index,
+    });
+  });
+
+  it('parses an initial execution', () => {
+    expect(parseExecutionId('round::execution')).toEqual({ roundId: 'round', index: 0 });
+  });
+
+  it.each(['round', 'round::execution::bad', 'round::execution::1::step::0'])(
+    'rejects unrelated id %s',
+    (id) => expect(parseExecutionId(id)).toBeUndefined()
+  );
+});
+
+describe('resumeExecutionStartedEvent', () => {
+  it('produces an execution_started event scoped to the resume execution', () => {
+    const conversation = baseConversation([baseRound()]);
+    const event = resumeExecutionStartedEvent({
+      roundId: 'round-1',
+      executionIndex: 2,
+      startedAt: '2026-01-02T00:00:00.000Z',
+      triggerEventId: 'round-1::prompt_response::2',
+      conversation,
+    });
+
+    expect(event).toMatchObject({
+      id: 'round-1::execution::2::execution_started',
+      type: TimelineEventType.executionStarted,
+      created_at: '2026-01-02T00:00:00.000Z',
+      actor: { type: EventActorType.agent, id: 'agent-1' },
+      execution_id: 'round-1::execution::2',
+      trigger_event_id: 'round-1::prompt_response::2',
+    });
+  });
+});
+
+describe('nextResumeIndex', () => {
+  it('returns 0 when the conversation has no events', () => {
+    expect(nextResumeIndex({ events: undefined }, 'round-1')).toBe(0);
+    expect(nextResumeIndex({ events: [] }, 'round-1')).toBe(0);
+  });
+
+  it('counts distinct executions for the target round only', () => {
+    const events = [
+      { execution_id: 'round-1::execution' },
+      { execution_id: 'round-1::execution' },
+      { execution_id: 'round-1::execution::1' },
+      { execution_id: 'round-2::execution' },
+    ] as never;
+    expect(nextResumeIndex({ events }, 'round-1')).toBe(2);
+    expect(nextResumeIndex({ events }, 'round-2')).toBe(1);
+    expect(nextResumeIndex({ events }, 'round-3')).toBe(0);
+  });
+
+  it('ignores events without an execution_id', () => {
+    const events = [{ id: 'x' }, { execution_id: 'round-1::execution' }] as never;
+    expect(nextResumeIndex({ events }, 'round-1')).toBe(1);
+  });
+});
+
+describe('interruptedExecutionToEvents', () => {
+  const conversation = baseConversation([]);
+  const T0 = '2024-01-01T00:00:00.000Z';
+  const usage = { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 };
+  const reasoningStep = {
+    type: ConversationRoundStepType.reasoning,
+    reasoning: 'thinking',
+  } as ConversationRoundStep;
+
+  it('projects a failed initial execution: started, steps, one execution_failed', () => {
+    const events = interruptedExecutionToEvents({
+      roundId: 'r1',
+      executionIndex: 0,
+      startedAt: T0,
+      triggerEventId: 'r1::user_message',
+      steps: [reasoningStep],
+      summary: { time_to_last_token: 1500, model_usage: usage },
+      interruption: { type: 'failed', error: { code: 'internalError', message: 'boom' } as never },
+      conversation,
+    });
+
+    expect(events.map((e) => [e.id, e.type, e.execution_id, e.trigger_event_id])).toEqual([
+      ['r1::execution_started', 'execution_started', 'r1::execution', 'r1::user_message'],
+      ['r1::step::0', 'execution_step', 'r1::execution', 'r1::user_message'],
+      ['r1::execution_failed', 'execution_failed', 'r1::execution', 'r1::user_message'],
+    ]);
+    expect(events[1].data).toEqual({ step: reasoningStep, sequence: 0 });
+    const terminal = events[2] as ExecutionFailedEvent;
+    expect(terminal.created_at).toBe('2024-01-01T00:00:01.500Z');
+    expect(terminal.actor).toEqual(agentActor(conversation));
+    expect(terminal.data).toEqual({
+      time_to_last_token: 1500,
+      model_usage: usage,
+      error: { code: 'internalError', message: 'boom' },
+    });
+  });
+
+  it('projects an aborted resume execution under exec_k ids', () => {
+    const events = interruptedExecutionToEvents({
+      roundId: 'r1',
+      executionIndex: 2,
+      startedAt: T0,
+      triggerEventId: 'r1::prompt_response::2',
+      steps: [],
+      summary: { time_to_last_token: 10 },
+      interruption: { type: 'aborted' },
+      conversation,
+    });
+
+    expect(events.map((e) => [e.id, e.type, e.execution_id, e.trigger_event_id])).toEqual([
+      [
+        'r1::execution::2::execution_started',
+        'execution_started',
+        'r1::execution::2',
+        'r1::prompt_response::2',
+      ],
+      [
+        'r1::execution::2::execution_aborted',
+        'execution_aborted',
+        'r1::execution::2',
+        'r1::prompt_response::2',
+      ],
+    ]);
+    expect(events[0].data).toEqual({ trigger_type: TimelineTriggerType.promptResponse });
+    expect((events[1] as ExecutionAbortedEvent).data).toEqual({ time_to_last_token: 10 });
+  });
+
+  it('carries aborted_by on the aborted terminal when the interruption records it', () => {
+    const abortedBy = { source: 'task_manager' as const };
+    const [, terminal] = interruptedExecutionToEvents({
+      roundId: 'r1',
+      executionIndex: 0,
+      startedAt: T0,
+      triggerEventId: 'r1::user_message',
+      steps: [],
+      summary: { time_to_last_token: 10 },
+      interruption: { type: 'aborted', aborted_by: abortedBy },
+      conversation,
+    });
+    expect(terminal.data).toEqual({ time_to_last_token: 10, aborted_by: abortedBy });
+  });
+
+  it('numbers resume steps under the execution id', () => {
+    const events = interruptedExecutionToEvents({
+      roundId: 'r1',
+      executionIndex: 1,
+      startedAt: T0,
+      triggerEventId: 'r1::prompt_response::1',
+      steps: [reasoningStep, reasoningStep],
+      summary: { time_to_last_token: 10 },
+      interruption: { type: 'aborted' },
+      conversation,
+    });
+
+    expect(events.slice(1, 3).map((e) => e.id)).toEqual([
+      'r1::execution::1::step::0',
+      'r1::execution::1::step::1',
+    ]);
+  });
+
+  it('never carries steps in the terminal payload', () => {
+    const [, , terminal] = interruptedExecutionToEvents({
+      roundId: 'r1',
+      executionIndex: 0,
+      startedAt: T0,
+      triggerEventId: 'r1::user_message',
+      steps: [reasoningStep],
+      summary: { time_to_last_token: 1 },
+      interruption: { type: 'aborted' },
+      conversation,
+    });
+    expect(terminal.data).not.toHaveProperty('steps');
+  });
+});
+
+describe('lastTerminatedExecutionIndex', () => {
+  const conversation = baseConversation([]);
+  const lifecycle = (executionId: string, type: TimelineEventType, id: string): TimelineEvent =>
+    ({
+      id,
+      type,
+      created_at: '2024-01-01T00:00:00.000Z',
+      actor: agentActor(conversation),
+      execution_id: executionId,
+      trigger_event_id: 'r1::user_message',
+      data: {},
+    } as unknown as TimelineEvent);
+
+  it('returns the index of the last execution_terminated of the round, skipping interrupted ones', () => {
+    const events = [
+      lifecycle('r1::execution', TimelineEventType.executionTerminated, 'r1::execution_terminated'),
+      lifecycle(
+        'r1::execution::1',
+        TimelineEventType.executionAborted,
+        'r1::execution::1::execution_aborted'
+      ),
+      lifecycle(
+        'r1::execution::2',
+        TimelineEventType.executionFailed,
+        'r1::execution::2::execution_failed'
+      ),
+      // another round's terminated must not count
+      lifecycle(
+        'r2::execution::5',
+        TimelineEventType.executionTerminated,
+        'r2::execution::5::execution_terminated'
+      ),
+    ];
+    expect(lastTerminatedExecutionIndex({ events }, 'r1')).toBe(0);
+  });
+
+  it('returns the highest terminated index when several executions terminated', () => {
+    const events = [
+      lifecycle('r1::execution', TimelineEventType.executionTerminated, 'r1::execution_terminated'),
+      lifecycle(
+        'r1::execution::1',
+        TimelineEventType.executionTerminated,
+        'r1::execution::1::execution_terminated'
+      ),
+      lifecycle(
+        'r1::execution::2',
+        TimelineEventType.executionFailed,
+        'r1::execution::2::execution_failed'
+      ),
+    ];
+    expect(lastTerminatedExecutionIndex({ events }, 'r1')).toBe(1);
+    expect(executionTerminatedEventId('r1', 1)).toBe('r1::execution::1::execution_terminated');
+  });
+
+  it('returns -1 when the round has no execution_terminated', () => {
+    const events = [
+      userMessageEvent(
+        {
+          id: 'r1::user_message',
+          input: { message: 'hello' },
+          createdAt: '2024-01-01T00:00:00.000Z',
+        },
+        conversation
+      ),
+      lifecycle('r1::execution', TimelineEventType.executionFailed, 'r1::execution_failed'),
+    ];
+    expect(lastTerminatedExecutionIndex({ events }, 'r1')).toBe(-1);
+    expect(lastTerminatedExecutionIndex({ events: undefined }, 'r1')).toBe(-1);
   });
 });

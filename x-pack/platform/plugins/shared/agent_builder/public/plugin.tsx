@@ -14,6 +14,11 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import {
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  MAX_IMAGE_BYTES,
+  SUPPORTED_IMAGE_MIME_TYPES,
+} from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
@@ -27,6 +32,7 @@ import {
   AgentService,
   AttachmentsService,
   RenderersService,
+  ConversationEventsService,
   ChatService,
   ConversationsService,
   ConversationTemplatesService,
@@ -45,9 +51,11 @@ import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicConversationTemplatesContract } from './services/conversation_templates';
 import { createPublicRenderersContract } from './services/renderers';
+import { createPublicConversationEventsContract } from './services/conversation_events';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
+import { createPublicConversationsContract } from './services/conversations';
 import { registerWorkflowSteps } from './step_types';
 import type {
   ConfigSchema,
@@ -70,6 +78,8 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
+import { appPaths } from './application/utils/app_paths';
+import { searchParamNames } from './application/search_param_names';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -118,6 +128,12 @@ export class AgentBuilderPlugin
     this.isEarsEnabled = deps.actions.isEarsEnabled;
     this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
 
+    deps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+    });
+
     registerApp({
       core,
       getServices: () => {
@@ -158,9 +174,14 @@ export class AgentBuilderPlugin
       () => ProjectRoutingAccess.EDITABLE
     );
 
+    const filesClient = startDependencies.files.filesClientFactory.asScoped(
+      CHAT_ATTACHMENT_IMAGES_FILE_KIND
+    );
+
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
     const renderersService = new RenderersService();
+    const conversationEventsService = new ConversationEventsService();
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
@@ -242,9 +263,11 @@ export class AgentBuilderPlugin
     };
 
     const internalServices: AgentBuilderInternalService = {
+      filesClient,
       agentService,
       attachmentsService,
       renderersService,
+      conversationEventsService,
       chatService,
       conversationsService,
       conversationTemplatesService,
@@ -329,15 +352,33 @@ export class AgentBuilderPlugin
         }));
       });
 
+    const publicAttachmentsService = createPublicAttachmentContract({ attachmentsService });
+
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
-      attachments: createPublicAttachmentContract({ attachmentsService }),
+      attachments: publicAttachmentsService,
       conversationTemplates: createPublicConversationTemplatesContract({
         conversationTemplatesService,
+        context: {
+          attachmentsService: publicAttachmentsService,
+          openSidebarConversation: (conversationId) => {
+            openSidebarInternal({ conversationId });
+          },
+          openFullscreenConversation: ({ conversationId, agentId, openDetails }) => {
+            agentBuilderSidebar.close();
+            const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
+            const path = openDetails
+              ? `${basePath}?${searchParamNames.openConversationDetails}=true`
+              : basePath;
+            return core.application.navigateToApp(AGENTBUILDER_APP_ID, { path });
+          },
+        },
       }),
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      conversationEvents: createPublicConversationEventsContract({ conversationEventsService }),
+      conversations: createPublicConversationsContract({ conversationsService }),
       getAgentBuilderAccess: createPublicEmbeddableChatAccess({
         accessChecker,
         application: core.application,
@@ -388,7 +429,7 @@ export class AgentBuilderPlugin
     };
 
     if (hasAgentBuilder) {
-      core.chrome.next.aiButton.register({
+      core.chrome.controls.aiButton.register({
         content: (
           <AgentBuilderNavControlInitiator
             coreStart={core}

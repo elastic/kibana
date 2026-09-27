@@ -24,9 +24,11 @@ import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../../common/components/eve
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import {
+  CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { CustomYaraSignatureHighlightedFieldLink } from './custom_yara_signature_highlighted_field_link';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import * as useFlyoutApiModule from '../../../use_flyout_api';
 
@@ -66,13 +68,18 @@ jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fall
 
 const createMockHit = (
   flattened: DataTableRecord['flattened'],
-  rawIndex?: string
+  rawIndex?: string,
+  source?: Record<string, unknown>
 ): DataTableRecord =>
   ({
     id: '1',
     // Only set raw._index when a test asks for it: the component prefers raw._index over the
     // flattened `_index` field, so a default here would shadow hits that rely on the fallback.
-    raw: rawIndex ? { _index: rawIndex } : {},
+    // `_source` carries the nested `ancestors` objects that the Source-event link resolves against.
+    raw: {
+      ...(rawIndex ? { _index: rawIndex } : {}),
+      ...(source ? { _source: source } : {}),
+    },
     flattened,
     isAnchor: false,
   } as DataTableRecord);
@@ -111,6 +118,7 @@ describe('InvestigationSection', () => {
         overlays: {
           openSystemFlyout: mockOpenSystemFlyout,
         },
+        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
         telemetry: { reportEvent: jest.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -301,10 +309,18 @@ describe('InvestigationSection', () => {
 
   it('renders a Source event link that opens the ancestor document in a new flyout', () => {
     mockUseExpandSection.mockReturnValue(true);
-    const sourceEventHit = createMockHit({
-      'event.kind': 'signal',
-      'signal.ancestors.index': '.internal.alerts-security.alerts-default',
-    });
+    const sourceEventHit = createMockHit(
+      {
+        'event.kind': 'signal',
+        'signal.ancestors.index': '.internal.alerts-security.alerts-default',
+      },
+      undefined,
+      {
+        'signal.ancestors': [
+          { id: 'ancestor-id-1', index: '.internal.alerts-security.alerts-default' },
+        ],
+      }
+    );
 
     render(
       <IntlProvider locale="en">
@@ -399,6 +415,35 @@ describe('InvestigationSection', () => {
     expect(element.props.value).toBe('host-1');
   });
 
+  it('wraps custom YARA signature fields in a CYS page link', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    const cysHit = createMockHit({
+      'event.kind': 'signal',
+      'rule.custom_yara_signature.entry_id': '123-456',
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={cysHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    const renderFlyoutLink = mockHighlightedFields.mock.calls[0][0].renderFlyoutLink;
+    const element = renderFlyoutLink!({
+      field: CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME,
+      value: 'User defined entry name',
+      hit: cysHit,
+      children: <span data-test-subj="cysChild" />,
+    }) as React.ReactElement;
+
+    expect(element.type).toBe(CustomYaraSignatureHighlightedFieldLink);
+    expect(element.props.hit).toBe(cysHit);
+  });
+
   it('uses Security history key when opening flyout inside Security app', () => {
     mockUseExpandSection.mockReturnValue(true);
     mockUseIsInSecurityApp.mockReturnValue(true);
@@ -460,7 +505,7 @@ describe('InvestigationSection Source event link under CPS', () => {
     jest.mocked(useExpandSection).mockReturnValue(true);
     // Stub the flyout API for this block only. The tests above intentionally exercise the real
     // useFlyoutApi chain (down to overlays.openSystemFlyout), so a file-wide jest.mock is not an
-    // option; a scoped spy lets these tests assert on openDocumentFlyoutFromIndex directly.
+    // option; a scoped spy lets these tests assert on openDocumentFlyoutFromPattern directly.
     useFlyoutApiSpy = jest.spyOn(useFlyoutApiModule, 'useFlyoutApi').mockReturnValue(flyoutApiMock);
   });
 
@@ -494,11 +539,16 @@ describe('InvestigationSection Source event link under CPS', () => {
           'event.kind': 'signal',
           'signal.ancestors.index': 'logs-endpoint.alerts.caf6b705.2026.08.13',
         },
-        'linked_local_project:.ds-.alerts-security.alerts-default-2026.08.13-000001'
+        'linked_local_project:.ds-.alerts-security.alerts-default-2026.08.13-000001',
+        {
+          'signal.ancestors': [
+            { id: 'ancestor-id-1', index: 'logs-endpoint.alerts.caf6b705.2026.08.13' },
+          ],
+        }
       )
     );
 
-    expect(flyoutApiMock.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+    expect(flyoutApiMock.openDocumentFlyoutFromPattern).toHaveBeenCalledWith(
       expect.objectContaining({
         documentId: 'ancestor-id-1',
         indexName: 'linked_local_project:logs-endpoint.alerts.caf6b705.2026.08.13',
@@ -513,11 +563,16 @@ describe('InvestigationSection Source event link under CPS', () => {
           'event.kind': 'signal',
           'signal.ancestors.index': 'logs-endpoint.alerts.caf6b705.2026.08.13',
         },
-        '.ds-.alerts-security.alerts-default-2026.08.13-000001'
+        '.ds-.alerts-security.alerts-default-2026.08.13-000001',
+        {
+          'signal.ancestors': [
+            { id: 'ancestor-id-1', index: 'logs-endpoint.alerts.caf6b705.2026.08.13' },
+          ],
+        }
       )
     );
 
-    expect(flyoutApiMock.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+    expect(flyoutApiMock.openDocumentFlyoutFromPattern).toHaveBeenCalledWith(
       expect.objectContaining({
         documentId: 'ancestor-id-1',
         indexName: 'logs-endpoint.alerts.caf6b705.2026.08.13',

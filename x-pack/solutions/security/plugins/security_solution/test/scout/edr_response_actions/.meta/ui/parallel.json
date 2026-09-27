@@ -1,0 +1,65 @@
+{
+  "sha1": "5ccf0b4b0a0234b6282595e3daeefbb15c0bbf31",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "09db0f9b251af6a-62e78b299821a45",
+      "title": "Global setup",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "cd5149de2565f1d-304c5df0555dbdc",
+      "title": "Automated response actions form RBAC rule_author cannot add an Elastic Defend response action while creating a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "cd5149de2565f1d-8339d1821f3d70f",
+      "title": "Automated response actions form RBAC rule_author cannot edit or remove existing Elastic Defend response actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
+        "line": 64,
+        "column": 15
+      }
+    },
+    {
+      "id": "6226bf77440ddea-c74636a2cd0185d",
+      "title": "Response actions history page filters response actions by trigger type and opens the linked rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/history_log.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    }
+  ]
+}

@@ -6,15 +6,12 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId, useConversation } from './use_conversation';
 import { useConnectorSelection } from './chat/use_connector_selection';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
-import { useNavigation } from './use_navigation';
-import { appPaths } from '../utils/app_paths';
 
 /**
  * Per-conversation scoped slice of the streaming state machine.
@@ -35,45 +32,19 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
-  const { attachments, resetAttachments, browserApiTools, isEmbeddedContext } =
-    useConversationContext();
+  const { attachments, resetAttachments, browserApiTools, onSubmit } = useConversationContext();
   const { selectedConnector: connectorId } = useConnectorSelection();
-  const { navigateToAgentBuilderUrl } = useNavigation();
 
-  const resetToNewConversation = useCallback(
-    (message: string) => {
-      if (isEmbeddedContext || !agentId) {
-        return;
-      }
-      navigateToAgentBuilderUrl(
-        appPaths.agent.conversations.new({ agentId }),
-        {},
-        { initialMessage: message, autoSendInitialMessage: false }
-      );
-    },
-    [isEmbeddedContext, agentId, navigateToAgentBuilderUrl]
-  );
-
-  const {
-    activeStreams,
-    mutateSendMessage,
-    mutateResumeRound,
-    cancelStream,
-    removeError: removeErrorCtx,
-  } = useStreamingContext();
+  const { activeStreams, mutateSendMessage, mutateResumeRound, cancelStream } =
+    useStreamingContext();
 
   const record = useStreamRecord(conversationId);
 
   const myStream = conversationId ? activeStreams.get(conversationId) : undefined;
   const isMyStreamActive = Boolean(myStream);
 
-  const lastRound = conversation?.rounds?.at(-1);
-  const isLastRoundInProgress = lastRound?.status === ConversationRoundStatus.inProgress;
-
-  const isResponseLoading =
-    isMyStreamActive && (isLastRoundInProgress || myStream?.type === 'resume');
+  const isResponseLoading = isMyStreamActive;
   const isResuming = isMyStreamActive && myStream?.type === 'resume';
-  const isRegenerating = isMyStreamActive && myStream?.type === 'regenerate';
 
   const sendMessage = useCallback(
     ({
@@ -86,6 +57,7 @@ export const useConversationStream = () => {
       if (!agentId) {
         throw new Error('agentId is required to send a message');
       }
+      onSubmit?.();
       mutateSendMessage({
         message,
         conversationId: targetConversationId,
@@ -95,8 +67,6 @@ export const useConversationStream = () => {
         conversationAttachments: conversation?.attachments,
         resetAttachments,
         browserApiTools,
-        onResetToNewConversation:
-          !isEmbeddedContext && agentId ? resetToNewConversation : undefined,
       });
     },
     [
@@ -107,37 +77,18 @@ export const useConversationStream = () => {
       conversation?.attachments,
       resetAttachments,
       browserApiTools,
-      isEmbeddedContext,
-      resetToNewConversation,
+      onSubmit,
     ]
   );
 
-  const regenerate = useCallback(() => {
-    if (!conversationId) {
-      throw new Error('Cannot regenerate without a conversation id');
-    }
-    if (!agentId) {
-      throw new Error('agentId is required to regenerate');
-    }
-    mutateSendMessage({
-      action: 'regenerate',
-      conversationId,
-      agentId,
-      connectorId,
-      conversationAttachments: conversation?.attachments,
-      browserApiTools,
-    });
-  }, [
-    mutateSendMessage,
-    conversationId,
-    agentId,
-    connectorId,
-    conversation?.attachments,
-    browserApiTools,
-  ]);
-
   const resumeRound = useCallback(
-    ({ prompts }: { prompts: Record<string, PromptResponse> }) => {
+    ({
+      prompts,
+      promptRequestedEventId,
+    }: {
+      prompts: Record<string, PromptResponse>;
+      promptRequestedEventId: string;
+    }) => {
       if (!conversationId) {
         throw new Error('Cannot resume without a conversation id');
       }
@@ -150,21 +101,11 @@ export const useConversationStream = () => {
         agentId,
         connectorId,
         browserApiTools,
+        promptRequestedEventId,
       });
     },
     [mutateResumeRound, conversationId, agentId, connectorId, browserApiTools]
   );
-
-  const retry = useCallback(() => {
-    if (isResponseLoading || !record.error) return;
-    if (!record.pendingMessage) {
-      throw new Error('Pending message is not present');
-    }
-    if (!conversationId) {
-      throw new Error('Cannot retry without a conversation id');
-    }
-    sendMessage({ message: record.pendingMessage, conversationId });
-  }, [isResponseLoading, record.error, record.pendingMessage, conversationId, sendMessage]);
 
   const cancel = useCallback(() => {
     if (conversationId) {
@@ -172,27 +113,17 @@ export const useConversationStream = () => {
     }
   }, [cancelStream, conversationId]);
 
-  const removeError = useCallback(() => {
-    if (conversationId) {
-      removeErrorCtx(conversationId);
-    }
-  }, [removeErrorCtx, conversationId]);
-
   return useMemo(
     () => ({
       sendMessage,
-      regenerate,
       resumeRound,
-      retry,
       cancel,
-      removeError,
       isResponseLoading,
       isResuming,
-      isRegenerating,
       pendingMessage: record.pendingMessage,
-      error: record.error,
-      errorSteps: record.errorSteps,
-      canCancel: isMyStreamActive,
+      // Stop needs the server to know the run: only once `execution_started` has arrived.
+      canCancel: isMyStreamActive && Boolean(myStream?.started),
+      isCancelling: Boolean(myStream?.cancelling),
       // Use this when the question is "is the conversation locked from external action because
       // a mutation is in flight?" — `isResponseLoading` answers a narrower question (round-level loading
       // spinner semantics) and goes false during HITL pause.
@@ -200,18 +131,14 @@ export const useConversationStream = () => {
     }),
     [
       sendMessage,
-      regenerate,
       resumeRound,
-      retry,
       cancel,
-      removeError,
       isResponseLoading,
       isResuming,
-      isRegenerating,
       record.pendingMessage,
-      record.error,
-      record.errorSteps,
       isMyStreamActive,
+      myStream?.started,
+      myStream?.cancelling,
     ]
   );
 };

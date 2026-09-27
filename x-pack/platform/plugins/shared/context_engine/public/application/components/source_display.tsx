@@ -48,7 +48,7 @@ const SOURCE_DISPLAY: Record<SourceType, SourceDisplayFactory> = {
       typeLabel,
       label: value,
       content: (
-        <EuiCode language="sql" transparentBackground>
+        <EuiCode language="esql" transparentBackground>
           {value}
         </EuiCode>
       ),

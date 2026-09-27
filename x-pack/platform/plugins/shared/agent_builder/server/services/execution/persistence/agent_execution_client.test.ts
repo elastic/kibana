@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 
 const mockStorageClient = {
   index: jest.fn(),
@@ -48,6 +48,25 @@ describe('AgentExecutionClient', () => {
       );
     });
 
+    it('stores the owner on the document and returns it', async () => {
+      const owner = { id: 'profile-alice', username: 'alice' };
+
+      const execution = await client.create({ ...createParams, owner });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ owner }) })
+      );
+      expect(execution.owner).toEqual(owner);
+    });
+
+    it('omits the owner when the caller has none', async () => {
+      const execution = await client.create(createParams);
+
+      const [{ document }] = mockStorageClient.index.mock.calls[0];
+      expect(document).not.toHaveProperty('owner');
+      expect(execution.owner).toBeUndefined();
+    });
+
     it('propagates document conflicts to the caller', async () => {
       const conflict = Object.assign(new Error('version conflict'), {
         meta: { statusCode: 409 },
@@ -55,6 +74,57 @@ describe('AgentExecutionClient', () => {
       mockStorageClient.index.mockRejectedValueOnce(conflict);
 
       await expect(client.create(createParams)).rejects.toBe(conflict);
+    });
+  });
+
+  describe('updateStatus', () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const statusClient = createAgentExecutionClient({ logger: loggerMock.create(), esClient });
+
+    it('writes the status and the error through a script that keeps aborted sticky', async () => {
+      await statusClient.updateStatus('exec-1', ExecutionStatus.failed, {
+        error: { code: 'internalError', message: 'boom' } as never,
+      });
+
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+      const [request] = esClient.update.mock.calls[0];
+      expect(request).toMatchObject({ id: 'exec-1' });
+      const script = (request as { script: { source: string; params: Record<string, unknown> } })
+        .script;
+      expect(script.params).toEqual({
+        status: ExecutionStatus.failed,
+        error: { code: 'internalError', message: 'boom' },
+        abort_reason: null,
+      });
+      expect(script.source).toContain('if (params.abort_reason != null)');
+      // aborted must survive any later status (failed, completed, and a late running)
+      expect(script.source).toContain(
+        "ctx._source.status == 'aborted' && params.status != 'aborted'"
+      );
+      expect(script.source).toContain('if (params.error != null)');
+    });
+
+    it('passes a null error when none is given', async () => {
+      await statusClient.updateStatus('exec-1', ExecutionStatus.running);
+
+      const [request] = esClient.update.mock.calls[0];
+      expect((request as { script: { params: unknown } }).script.params).toEqual({
+        status: ExecutionStatus.running,
+        error: null,
+        abort_reason: null,
+      });
+    });
+
+    it('records the abort reason when given', async () => {
+      const abortReason = { source: 'api' as const, actor: { id: 'u1', username: 'alice' } };
+      await statusClient.updateStatus('exec-1', ExecutionStatus.aborted, { abortReason });
+
+      const [request] = esClient.update.mock.calls[0];
+      expect((request as { script: { params: unknown } }).script.params).toEqual({
+        status: ExecutionStatus.aborted,
+        error: null,
+        abort_reason: abortReason,
+      });
     });
   });
 });

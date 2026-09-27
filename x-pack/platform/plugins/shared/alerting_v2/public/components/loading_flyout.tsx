@@ -6,18 +6,29 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiFlyout, EuiFlyoutBody, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiLoadingSpinner,
+  type EuiFlyoutProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const FLYOUT_TITLE_ID = 'loadingFlyoutTitle';
 
 interface Props {
   onClose: () => void;
+  type?: EuiFlyoutProps['type'];
+  session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
 }
 
-export const LoadingFlyout = ({ onClose }: Props) => (
+export const LoadingFlyout = ({ onClose, type = 'push', session, ownFocus }: Props) => (
   <EuiFlyout
-    type="push"
+    type={type}
+    session={session}
+    ownFocus={ownFocus}
     size="s"
     onClose={onClose}
     aria-labelledby={FLYOUT_TITLE_ID}

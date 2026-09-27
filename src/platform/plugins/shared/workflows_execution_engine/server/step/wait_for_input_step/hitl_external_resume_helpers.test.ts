@@ -17,50 +17,67 @@ import {
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 
 describe('mintHitlExternalResumeToken', () => {
-  it('converts workflow timeout to a token expiration timestamp', () => {
+  const waitingRuntime = {
+    stepExecutionId: 'step-exec-1',
+    stepExecution: { startedAt: '2026-01-01T00:00:00.000Z' },
+  } as StepExecutionRuntime;
+
+  it('expires at startedAt plus timeout', () => {
+    const result = mintHitlExternalResumeToken({
+      stepExecutionRuntime: waitingRuntime,
+      execution: { id: 'execution-id', workflowId: 'workflow-id' } as Parameters<
+        typeof mintHitlExternalResumeToken
+      >[0]['execution'],
+      timeout: '2w',
+    });
+
+    expect(result.token).toHaveLength(64);
+    expect(result.tokenHash).toHaveLength(64);
+    expect(result.expiresAt).toBe('2026-01-15T00:00:00.000Z');
+  });
+
+  it('ignores Date.now() when startedAt is earlier', () => {
     jest.useFakeTimers();
     try {
-      jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+      jest.setSystemTime(new Date('2026-01-01T00:00:05.000Z'));
 
       const result = mintHitlExternalResumeToken({
-        stepExecutionRuntime: { stepExecutionId: 'step-exec-1' } as StepExecutionRuntime,
+        stepExecutionRuntime: waitingRuntime,
         execution: { id: 'execution-id', workflowId: 'workflow-id' } as Parameters<
           typeof mintHitlExternalResumeToken
         >[0]['execution'],
-        timeout: '2w',
+        timeout: '30s',
       });
 
-      expect(result.token).toHaveLength(64);
-      expect(result.tokenHash).toHaveLength(64);
-      expect(result.expiresAt).toBe('2026-01-15T00:00:00.000Z');
+      expect(result.expiresAt).toBe('2026-01-01T00:00:30.000Z');
     } finally {
       jest.useRealTimers();
     }
   });
 
-  it('produces an HMAC that binds executionId, stepExecutionId, and expiresAt', () => {
-    jest.useFakeTimers();
-    try {
-      jest.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
-
-      const result = mintHitlExternalResumeToken({
+  it('throws when the wait has no startedAt', () => {
+    expect(() =>
+      mintHitlExternalResumeToken({
         stepExecutionRuntime: { stepExecutionId: 'step-exec-1' } as StepExecutionRuntime,
-        execution: { id: 'exec-1', workflowId: 'wf-1' } as Parameters<
+        execution: { id: 'execution-id', workflowId: 'workflow-id' } as Parameters<
           typeof mintHitlExternalResumeToken
         >[0]['execution'],
-        timeout: '1h',
-      });
+        timeout: '30s',
+      })
+    ).toThrow('HITL resume token requires a started wait');
+  });
 
-      const expectedHmac = computeTokenHmac(
-        result.token,
-        'exec-1',
-        'step-exec-1',
-        result.expiresAt
-      );
-      expect(result.tokenHash).toBe(expectedHmac);
-    } finally {
-      jest.useRealTimers();
-    }
+  it('produces an HMAC that binds executionId, stepExecutionId, and expiresAt', () => {
+    const result = mintHitlExternalResumeToken({
+      stepExecutionRuntime: waitingRuntime,
+      execution: { id: 'exec-1', workflowId: 'wf-1' } as Parameters<
+        typeof mintHitlExternalResumeToken
+      >[0]['execution'],
+      timeout: '1h',
+    });
+
+    const expectedHmac = computeTokenHmac(result.token, 'exec-1', 'step-exec-1', result.expiresAt);
+    expect(result.tokenHash).toBe(expectedHmac);
   });
 
   it('HMAC changes when executionId differs', () => {

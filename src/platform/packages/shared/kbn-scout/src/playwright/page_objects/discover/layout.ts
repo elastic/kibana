@@ -10,6 +10,7 @@
 import type { Locator } from '../../../..';
 import { expect } from '../..';
 import { resolveSelector } from '../../utils';
+import { euiSelectors } from '../../eui_components';
 import { type DataViewOptions } from './base';
 import { SaveMixin } from './save';
 
@@ -51,6 +52,10 @@ export abstract class LayoutMixin extends SaveMixin {
     await dataViewSwitch.click();
   }
 
+  private async getDataViewSwitchName(dataViewSwitch: Locator): Promise<string> {
+    return (await dataViewSwitch.getByTestId('fullText').innerText()).trim();
+  }
+
   async selectDataView(
     name: string,
     {
@@ -59,7 +64,7 @@ export abstract class LayoutMixin extends SaveMixin {
     }: { createAdHocIfMissing?: boolean; waitForFieldList?: boolean } = {}
   ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    const currentValue = await dataViewSwitch.innerText();
+    const currentValue = await this.getDataViewSwitchName(dataViewSwitch);
     if (currentValue === name) {
       return;
     }
@@ -94,10 +99,14 @@ export abstract class LayoutMixin extends SaveMixin {
    * Returns the trimmed display name of the currently selected data view.
    */
   async getSelectedDataViewName(): Promise<string> {
-    return (await this.getSelectedDataView().innerText()).trim();
+    return this.getDataViewSwitchName(await this.getVisibleDataViewSwitch());
   }
 
-  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
+  private async fillAndSubmitDataViewEditor({
+    name,
+    adHoc = false,
+    waitUntilLoaded = true,
+  }: DataViewOptions) {
     // Minimal inline interaction with the data view editor flyout. The full
     // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
     // `kbn-scout` is a base package and must not depend on a plugin, so the few
@@ -115,18 +124,10 @@ export abstract class LayoutMixin extends SaveMixin {
     const title = name.endsWith('*') ? name : `${name}*`;
     const timestampCombo = this.page.components.comboBox('timestampField');
 
-    // Retry: title validation can race its debounced index lookup and get stuck
-    // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
-    // Re-submitting also covers serverless, where the form's submission re-validation can
-    // transiently report "no matching indices" even though the matching sources panel already
-    // shows results, leaving the flyout open with its submit buttons disabled.
-    const maxAttempts = 3;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const isLastAttempt = attempt === maxAttempts;
+    await titleInput.waitFor({ state: 'visible', timeout: 30_000 });
 
-      if (attempt > 1) {
-        await titleInput.fill(''); // force a real value change to re-trigger validation
-      }
+    await expect(async () => {
+      await titleInput.fill('');
       await titleInput.fill(title);
       // wait for async title validation to settle before continuing.
       await form
@@ -147,32 +148,22 @@ export abstract class LayoutMixin extends SaveMixin {
             }
             return (await timestampCombo.getSelectedOptions()).length > 0;
           },
-          { timeout: 30_000, intervals: [200] }
+          { timeout: 15_000, intervals: [200] }
         )
         .toBe(true);
 
-      if (adHoc) {
-        await this.page.testSubj.click('exploreIndexPatternButton');
-      } else {
-        await this.page.testSubj.click('saveIndexPatternButton');
-      }
+      await this.page.testSubj.click(
+        adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
+      );
 
-      const flyoutClosed = await flyout
-        .waitFor({ state: 'hidden', timeout: isLastAttempt ? 10_000 : 3_000 })
-        .then(() => true)
-        .catch(() => false);
+      await expect(this.getSelectedDataView()).toHaveAccessibleName(title, { timeout: 20_000 });
+    }).toPass({ timeout: 45_000, intervals: [0] });
 
-      if (flyoutClosed) {
-        break;
-      }
-      if (isLastAttempt) {
-        throw new Error(
-          `indexPatternEditorFlyout did not close after ${maxAttempts} attempts to submit "${title}"`
-        );
-      }
+    // New empty tabs stay uninitialized after a data-view change; the caller knows
+    // that and should pass `waitUntilLoaded: false` instead of probing the prompt.
+    if (waitUntilLoaded) {
+      await this.waitUntilTabIsLoaded();
     }
-
-    await this.waitUntilTabIsLoaded();
   }
 
   /**
@@ -210,12 +201,7 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   async isCurrentDataViewAdHoc(): Promise<boolean> {
-    const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    const dataViewTitle = await dataViewSwitch.getAttribute('title');
-
-    if (!dataViewTitle) {
-      throw new Error('Current data view switch is missing a title attribute');
-    }
+    const dataViewTitle = await this.getSelectedDataViewName();
 
     await this.openDataViewSwitcher();
     const switcher = this.page.testSubj.locator('indexPattern-switcher');
@@ -296,6 +282,12 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   // ── Runtime field / field editor helpers ───────────────────────────────────
+
+  /** Opens the field editor from the sidebar's "Add a field" button, which is gated on `canEditDataView`. */
+  async openAddFieldEditorFromSidebar() {
+    await this.page.testSubj.click('dataView-add-field_btn');
+    await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
+  }
 
   async createRuntimeField({
     fieldName,
@@ -486,23 +478,6 @@ export abstract class LayoutMixin extends SaveMixin {
     await flyout.waitFor({ state: 'hidden' });
     await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
   }
-
-  public readonly controls = {
-    getControlFrame: (controlId: string): Locator =>
-      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
-    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
-      this.controls.getControlFrame(controlId).getByText(value),
-    /**
-     * Locator for an options-list control's selected-values label, e.g. `AE` for a
-     * single selection or `AE, CN` for multiple. Unlike
-     * {@link getControlFrameSelectedValue} this matches the whole label, so it can
-     * assert that a value is the *only* selection.
-     */
-    getSelectionsLocator: (controlId: string): Locator =>
-      this.page.testSubj
-        .locator(`optionsList-control-${controlId}`)
-        .getByTestId('optionsListSelections'),
-  };
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
 
@@ -723,17 +698,22 @@ export abstract class LayoutMixin extends SaveMixin {
     return (await button.getAttribute('data-selected-value')) || '';
   }
 
-  /**
-   * Pick a histogram chart interval (e.g. `"Day"`).
-   */
-  async setChartInterval(intervalTitle: string) {
+  /** Opens the histogram's interval selector popover without picking an option. */
+  async openChartIntervalSelector() {
     await this.page.testSubj.click('unifiedHistogramTimeIntervalSelectorButton');
     await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
       state: 'visible',
     });
+  }
+
+  /**
+   * Pick a histogram chart interval (e.g. `"Day"`).
+   */
+  async setChartInterval(intervalTitle: string) {
+    await this.openChartIntervalSelector();
     await this.page
       .locator(
-        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+        `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
       )
       .click();
     await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
@@ -746,19 +726,17 @@ export abstract class LayoutMixin extends SaveMixin {
    * `value` is the selectable item value when it differs from the visible label.
    */
   async chooseBreakdownField(field: string, value = field) {
+    const selectable = this.page.testSubj.locator('unifiedHistogramBreakdownSelectorSelectable');
     await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'visible',
-    });
+    await selectable.waitFor({ state: 'visible' });
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
-    await this.page
-      .locator(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${value}"]`
-      )
-      .click();
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'hidden',
+    // The list is virtualised; clicking while EUI is still filtering misses the option
+    // and leaves the popover open.
+    await selectable.and(this.page.locator('[data-is-searching="false"]')).waitFor({
+      state: 'attached',
     });
+    await selectable.locator(`.euiSelectableListItem[value="${value}"]`).click();
+    await selectable.waitFor({ state: 'hidden' });
   }
 
   /**
@@ -785,17 +763,23 @@ export abstract class LayoutMixin extends SaveMixin {
 
   async showChart() {
     const showButton = this.page.testSubj.locator('dscShowHistogramButton');
+    const hideButton = this.page.testSubj.locator('dscHideHistogramButton');
+    // The toggle renders as exactly one of these; wait for it to mount before
+    // probing so a slow post-navigation render can't make the guard silently no-op.
+    await expect(showButton.or(hideButton)).toBeVisible();
     if (await showButton.isVisible()) {
       await showButton.click();
-      await this.waitUntilTabIsLoaded();
+      await expect(this.getHistogramChart()).toBeVisible();
     }
   }
 
   async hideChart() {
+    const showButton = this.page.testSubj.locator('dscShowHistogramButton');
     const hideButton = this.page.testSubj.locator('dscHideHistogramButton');
+    await expect(showButton.or(hideButton)).toBeVisible();
     if (await hideButton.isVisible()) {
       await hideButton.click();
-      await this.waitUntilTabIsLoaded();
+      await expect(this.getHistogramChart()).toBeHidden();
     }
   }
 
@@ -806,6 +790,41 @@ export abstract class LayoutMixin extends SaveMixin {
   async openLensEditFlyout() {
     await this.page.testSubj.locator('unifiedHistogramEditFlyoutVisualization').click();
     await this.getLensEditFlyout().waitFor({ state: 'visible' });
+  }
+
+  async changeVisualizationShape(seriesType: string) {
+    await this.openLensEditFlyout();
+    const chartSwitch = this.page.testSubj.locator('lnsChartSwitchPopover');
+    await chartSwitch.click();
+    await this.page.testSubj.fill('lnsChartSwitchSearch', seriesType);
+    await this.page.testSubj.locator(`lnsChartSwitchPopover_${seriesType.toLowerCase()}`).click();
+    await chartSwitch.getByText(seriesType, { exact: true }).waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.page.testSubj.locator('customizeLens').waitFor({ state: 'hidden' });
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async chooseVisualizationSuggestion(suggestionType: string) {
+    await this.openLensEditFlyout();
+    await this.page.testSubj.click('lensSuggestionsPanelToggleButton');
+    const suggestion = this.page.testSubj.locator(`lnsSuggestion-${suggestionType}`);
+    await suggestion.waitFor({ state: 'visible' });
+    await suggestion.click();
+    await suggestion
+      .locator('[data-test-subj="lnsSuggestion"]')
+      .and(this.page.locator('[aria-current="true"]'))
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getVisualizationTitle(): Promise<string> {
+    await this.openLensEditFlyout();
+    const title = await this.page.testSubj.innerText('lnsChartSwitchPopover');
+    await this.page.testSubj.click('cancelFlyoutButton');
+    return title;
   }
 
   getLensEditFlyout(): Locator {
@@ -841,8 +860,8 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getHitCountLocator().innerText();
   }
 
-  getRefreshDataButton(): Locator {
-    return this.page.testSubj.locator('refreshDataButton');
+  getQueryInEsqlButton(): Locator {
+    return this.page.testSubj.locator('queryInEsqlButton');
   }
 
   getQuerySubmitButton(): Locator {
@@ -891,8 +910,9 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   getDocHeaderLabels(): Locator {
+    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
     return this.page.locator(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
     );
   }
 
@@ -1024,10 +1044,14 @@ export abstract class LayoutMixin extends SaveMixin {
     }
   }
 
+  /** Switches to the Field statistics view and waits for its content to mount. */
   async selectFieldStatisticsView() {
     await this.page.testSubj.click('dscViewModeToggleButton');
     await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
     await this.page.testSubj.click('dscViewModeFieldStatsOption');
+    // The Documents view stays mounted until the stats table renders, so callers
+    // need this gate to avoid acting on the previous view.
+    await this.page.testSubj.locator('dscFieldStatsEmbeddedContent').waitFor({ state: 'visible' });
   }
 
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {

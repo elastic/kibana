@@ -52,6 +52,7 @@ export interface DocLinks {
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
     readonly metricsUi: string;
+    readonly troubleshootingTooManyTransactions: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -407,6 +408,7 @@ export interface DocLinks {
     readonly queryESQLApproximateResults: string;
     readonly queryESQLMultiValueControls: string;
     readonly queryESQLMvIntersects: string;
+    readonly queryESQLViews: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -539,6 +541,7 @@ export interface DocLinks {
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
+    esqlDataFederationSecurityPrivileges: string;
     indicesPrivileges: string;
     kibanaTLS: string;
     kibanaPrivileges: string;
@@ -763,6 +766,9 @@ export interface DocLinks {
     readonly federatedIdentity: string;
     readonly querying: string;
     readonly security: string;
+  };
+  readonly contextEngine: {
+    readonly overview: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;
