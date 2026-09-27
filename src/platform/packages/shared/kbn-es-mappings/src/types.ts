@@ -13,9 +13,11 @@ import type { UnionKeys, Exact, MissingKeysError, PartialWithArrayValues } from 
 
 export type StrictDynamic = false | 'strict';
 
-type ToStrictMappingProperty<P extends api.MappingProperty> = Omit<P, 'properties'> & {
-  dynamic?: StrictDynamic;
-};
+// Distributes over union members so alias-specific properties like `path` are
+// not lost when P is the full MappingProperty union.
+type ToStrictMappingProperty<P extends api.MappingProperty> = P extends any
+  ? Omit<P, 'properties'> & { dynamic?: StrictDynamic }
+  : never;
 
 export type Strict<P extends api.MappingProperty> = ToStrictMappingProperty<P>;
 
@@ -63,6 +65,7 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'flattened'
     | 'object'
     | 'flattened'
+    | 'alias'
   );
 
 type MappingPropertyObjectType = Required<ObjectMapping, 'type'>;
@@ -71,10 +74,31 @@ export type MappingProperty =
   | Extract<api.MappingProperty, { type: Exclude<SupportedMappingPropertyType, 'object'> }>
   | MappingPropertyObjectType;
 
+// Returns true when a property contributes at least one writable (non-alias)
+// leaf field to _source. Object fields whose every child is an alias resolve
+// at query time only and must not appear in source-document types.
+type HasNonAliasChild<Props extends Record<string, MappingProperty>> = {
+  [K in keyof Props]: Props[K] extends { type: 'alias' } ? never : K;
+}[keyof Props] extends never
+  ? false
+  : true;
+
 export type ToPrimitives<O extends { properties: Record<string, MappingProperty> }> = {} extends O
   ? never
   : {
-      [K in keyof O['properties']]: {} extends O['properties'][K]
+      // Alias fields are query-time projections that do not exist in _source.
+      // Object fields whose every child is an alias are also excluded — they
+      // would resolve to {} in source-document types, causing EnsureSubsetOf
+      // to require them even though _source never contains them.
+      [K in keyof O['properties'] as O['properties'][K] extends { type: 'alias' }
+        ? never
+        : O['properties'][K] extends { type: 'object'; properties: infer SubProps }
+        ? SubProps extends Record<string, MappingProperty>
+          ? HasNonAliasChild<SubProps> extends true
+            ? K
+            : never
+          : K
+        : K]: {} extends O['properties'][K]
         ? never
         : O['properties'][K] extends { type: infer T }
         ? T extends 'keyword'

@@ -47,7 +47,7 @@ apiTest.describe('Create unsnooze series action API', { tag: '@local-stateful-cl
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: 'unsnooze-happy-episode', status: 'active' },
+          alert: { id: 'unsnooze-happy-episode', status: 'active' },
         }),
       ]);
 

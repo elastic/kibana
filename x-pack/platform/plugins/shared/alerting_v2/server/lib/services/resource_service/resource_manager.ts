@@ -44,6 +44,7 @@ export interface ResourceManagerContract {
   waitUntilReady(): Promise<void>;
   isReady(key: string): boolean;
   ensureResourceReady(key: string): Promise<void>;
+  retryResource(key: string): Promise<void>;
 }
 
 @injectable()
@@ -140,6 +141,25 @@ export class ResourceManager implements ResourceManagerContract {
 
   public isReady(key: string): boolean {
     return this.resources.get(key)?.status === 'ready';
+  }
+
+  /**
+   * Reset a resource that is in a terminal state back to `not_started` and
+   * re-run initialization against the registered initializer.
+   *
+   * Intended for the manual reset route: after the route has rebuilt the data
+   * stream it calls this so `ResourceManager` reflects the restored state and
+   * subsequent API calls succeed without a Kibana restart.
+   */
+  public async retryResource(key: string): Promise<void> {
+    const state = this.resources.get(key);
+    if (!state) {
+      throw new Error(`ResourceManager: resource [${key}] is not registered`);
+    }
+    state.status = 'not_started';
+    state.error = undefined;
+    state.initializationPromise = undefined;
+    await this.initResource(key);
   }
 
   /**

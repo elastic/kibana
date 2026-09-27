@@ -111,7 +111,7 @@ export class AlertEventsClient {
       status,
       source,
       type: alertEventType.alert,
-      episode: {
+      alert: {
         id: episodeId,
         status: episodeStatus,
         ...(statusCount != null ? { status_count: statusCount } : {}),

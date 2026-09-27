@@ -118,8 +118,8 @@ export class DirectorService {
           logger,
         });
 
-        if (isNewEpisode && alertEvent.episode) {
-          newEpisodeIds.push(alertEvent.episode.id);
+        if (isNewEpisode && alertEvent.alert) {
+          newEpisodeIds.push(alertEvent.alert.id);
         }
 
         return alertEvent;
@@ -169,15 +169,15 @@ export class DirectorService {
     // the user hits `deactivate` (which flips the lifecycle marker
     // back and lets the strategy own transitions again). We preserve
     // the incoming event's `status` (e.g. `recovered`) so downstream
-    // analytics keep the raw engine signal. Only `episode.status` is
-    // forced. `episode.status_count` is dropped to mirror how the
+    // analytics keep the raw engine signal. Only `alert.status` is
+    // forced. `alert.status_count` is dropped to mirror how the
     // strategies emit any → active transitions.
     if (this.isUserLocked(previousAlertEvent)) {
       return {
         alertEvent: {
           ...currentAlertEvent,
           type: alertEventType.alert,
-          episode: {
+          alert: {
             id: previousAlertEvent!.last_episode_id!,
             status: alertEpisodeStatus.active,
           },
@@ -213,7 +213,7 @@ export class DirectorService {
     return {
       alertEvent: {
         ...currentAlertEvent,
-        episode: {
+        alert: {
           id: episodeId,
           status: result.status,
           ...(result.statusCount != null ? { status_count: result.statusCount } : {}),

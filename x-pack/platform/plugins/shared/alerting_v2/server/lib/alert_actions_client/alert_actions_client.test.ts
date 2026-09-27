@@ -226,7 +226,7 @@ describe('AlertActionsClient', () => {
       const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
       expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
       expect(operations[1]).toMatchObject({
-        episode: { id: 'episode-3', status: 'inactive' },
+        alert: { id: 'episode-3', status: 'inactive' },
         status: 'recovered',
       });
       expect(operations[2]).toEqual({ create: { _index: '.alert-actions' } });
@@ -502,7 +502,7 @@ describe('AlertActionsClient', () => {
       const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
       expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
       expect(operations[1]).toMatchObject({
-        episode: { id: 'episode-1', status: 'active' },
+        alert: { id: 'episode-1', status: 'active' },
         status: 'breached',
       });
       expect(operations[3]).toMatchObject({

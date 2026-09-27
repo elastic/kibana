@@ -28,7 +28,7 @@ const buildAlertEvent = (overrides: {
   type: 'alert',
   rule: { id: overrides.ruleId, version: 1 },
   group_hash: `${overrides.ruleId}-group`,
-  episode: {
+  alert: {
     id: `${overrides.ruleId}-episode`,
     status: overrides.status ?? 'active',
   },

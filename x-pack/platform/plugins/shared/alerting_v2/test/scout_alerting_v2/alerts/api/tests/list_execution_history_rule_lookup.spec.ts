@@ -42,7 +42,7 @@ const buildSeedEvent = (ruleId: string): AlertEvent =>
     type: 'alert',
     rule: { id: ruleId, version: 1 },
     group_hash: `${ruleId}-series`,
-    episode: { id: `${ruleId}-episode`, status: 'active' },
+    alert: { id: `${ruleId}-episode`, status: 'active' },
     data: {},
     status: 'breached',
     source: 'internal',

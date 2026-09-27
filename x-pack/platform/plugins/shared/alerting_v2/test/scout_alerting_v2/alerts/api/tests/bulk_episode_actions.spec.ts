@@ -55,12 +55,12 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashOne,
-          episode: { id: episodeIdOne, status: 'active' },
+          alert: { id: episodeIdOne, status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashTwo,
-          episode: { id: episodeIdTwo, status: 'active' },
+          alert: { id: episodeIdTwo, status: 'active' },
         }),
       ]);
 
@@ -110,12 +110,12 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashOne,
-          episode: { id: episodeIdOne, status: 'active' },
+          alert: { id: episodeIdOne, status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashTwo,
-          episode: { id: episodeIdTwo, status: 'active' },
+          alert: { id: episodeIdTwo, status: 'active' },
         }),
       ]);
 
@@ -168,7 +168,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       }),
     ]);
 
@@ -204,7 +204,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
 
@@ -242,7 +242,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: knownGroup,
-          episode: { id: knownEpisode, status: 'active' },
+          alert: { id: knownEpisode, status: 'active' },
         }),
       ]);
 
@@ -286,7 +286,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: knownGroup,
-          episode: { id: knownEpisode, status: 'active' },
+          alert: { id: knownEpisode, status: 'active' },
         }),
       ]);
 
@@ -361,7 +361,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           status: 'breached',
           source: 'engine-x',
           type: 'alert',
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
 
@@ -398,7 +398,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         status: 'recovered',
         source: 'engine-x',
         type: 'alert',
-        episode: { id: episodeId, status: 'inactive' },
+        alert: { id: episodeId, status: 'inactive' },
       });
     }
   );
@@ -417,7 +417,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           status: 'recovered',
           source: 'engine-x',
           type: 'alert',
-          episode: { id: episodeId, status: 'inactive' },
+          alert: { id: episodeId, status: 'inactive' },
         }),
       ]);
 
@@ -451,7 +451,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         status: 'breached',
         source: 'engine-x',
         type: 'alert',
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       });
     }
   );
@@ -469,14 +469,14 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           group_hash: buildGroupHash('bulk-skip-deactivate-ok-group'),
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeIdOk, status: 'active' },
+          alert: { id: episodeIdOk, status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: buildGroupHash('bulk-skip-deactivate-inactive-group'),
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeIdInactive, status: 'inactive' },
+          alert: { id: episodeIdInactive, status: 'inactive' },
         }),
       ]);
 
@@ -522,7 +522,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           group_hash: groupHash,
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
 
@@ -546,7 +546,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       // The latest .rule-events state must remain unchanged.
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       });
     }
   );
@@ -568,13 +568,13 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
@@ -615,13 +615,13 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 

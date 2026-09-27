@@ -93,7 +93,7 @@ export const activateHandler: ActionHandler<ActivateAlertActionBody> = {
       source: alertEvent.source,
       type: alertEventType.alert,
       space_id: alertEvent.space_id,
-      episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
+      alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
       severity: alertEvent.severity ?? undefined,
     });
 

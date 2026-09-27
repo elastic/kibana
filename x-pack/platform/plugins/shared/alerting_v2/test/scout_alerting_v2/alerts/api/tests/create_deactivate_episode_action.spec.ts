@@ -48,7 +48,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
 
@@ -87,7 +87,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
         buildAlertEvent({
           rule: { id: ruleId, version: 7 },
           group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
           data: { 'host.name': 'host-a' },
           severity: 'high',
           status: 'breached',
@@ -114,7 +114,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
         group_hash: groupHash,
         status: 'recovered',
         type: 'alert',
-        episode: { id: episodeId, status: 'inactive' },
+        alert: { id: episodeId, status: 'inactive' },
         data: { 'host.name': 'host-a' },
         severity: 'high',
         space_id: 'default',
@@ -123,7 +123,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
       // The synthetic inactive event is the latest state, so a re-breach starts a new episode.
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'inactive' },
+        alert: { id: episodeId, status: 'inactive' },
       });
     }
   );
@@ -206,13 +206,13 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
           '@timestamp': new Date(now - 60_000).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: olderEpisodeId, status: 'active' },
+          alert: { id: olderEpisodeId, status: 'active' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
@@ -249,7 +249,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
           group_hash: groupHash,
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeId, status: 'inactive' },
+          alert: { id: episodeId, status: 'inactive' },
         }),
       ]);
 
@@ -284,7 +284,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
           group_hash: groupHash,
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeId, status: 'pending', status_count: 1 },
+          alert: { id: episodeId, status: 'pending', status_count: 1 },
         }),
       ]);
 
@@ -297,7 +297,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'inactive' },
+        alert: { id: episodeId, status: 'inactive' },
         status: 'recovered',
       });
     }
@@ -316,7 +316,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
           group_hash: groupHash,
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeId, status: 'recovering' },
+          alert: { id: episodeId, status: 'recovering' },
         }),
       ]);
 
@@ -329,7 +329,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'inactive' },
+        alert: { id: episodeId, status: 'inactive' },
       });
     }
   );

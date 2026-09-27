@@ -76,7 +76,7 @@ export const deactivateHandler: ActionHandler<DeactivateAlertActionBody> = {
       source: alertEvent.source,
       type: alertEventType.alert,
       space_id: alertEvent.space_id,
-      episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.inactive },
+      alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.inactive },
       severity: alertEvent.severity ?? undefined,
     });
 

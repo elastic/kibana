@@ -157,6 +157,8 @@ dependsOn:
   - '@kbn/core-ui-settings-server'
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
+  - '@kbn/tooling-log'
+  - '@kbn/test'
 tags:
   - plugin
   - prod

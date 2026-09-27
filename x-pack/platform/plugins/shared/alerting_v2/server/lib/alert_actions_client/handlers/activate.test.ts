@@ -61,7 +61,7 @@ describe('activateHandler', () => {
         source: alertEvent.source,
         type: alertEventType.alert,
         space_id: alertEvent.space_id,
-        episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
+        alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
         severity: alertEvent.severity,
       });
     });
@@ -78,8 +78,8 @@ describe('activateHandler', () => {
 
     it('omits episode.status_count on the synthetic event — mirroring the director on any → active transition', () => {
       const prepared = activateHandler.prepare(buildItem());
-      expect(prepared.ruleEvent?.episode).toBeDefined();
-      expect(prepared.ruleEvent?.episode?.status_count).toBeUndefined();
+      expect(prepared.ruleEvent?.alert).toBeDefined();
+      expect(prepared.ruleEvent?.alert?.status_count).toBeUndefined();
     });
 
     it('defaults rule version to 1 when the alert event omits it', () => {

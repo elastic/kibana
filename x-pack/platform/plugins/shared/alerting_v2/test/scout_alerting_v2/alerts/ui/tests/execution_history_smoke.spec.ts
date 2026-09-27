@@ -90,7 +90,7 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: `${ruleId}-series`,
-        episode: { id: `${ruleId}-episode`, status: 'active' },
+        alert: { id: `${ruleId}-episode`, status: 'active' },
         status: 'breached',
         source: 'internal',
         '@timestamp': new Date().toISOString(),
