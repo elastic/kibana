@@ -92,6 +92,8 @@ import type {
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
+const INTERNAL_TEST_WORKFLOW_ID = 'internal-test-workflow';
+
 const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
   const fields = Object.keys(workflow);
   return fields.length === 1 && fields[0] === 'enabled';
@@ -500,7 +502,12 @@ export class WorkflowsManagementApi {
       throw new ManagedWorkflowDeleteForbiddenError();
     }
 
-    const result = await this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
+    const result = await this.workflowsService.deleteWorkflows(
+      workflowIds,
+      spaceId,
+      options,
+      request
+    );
     if (result.successfulIds) {
       for (const id of result.successfulIds) {
         this.notifySml(id, 'delete', request);
@@ -797,7 +804,7 @@ export class WorkflowsManagementApi {
     }
 
     if (!resolvedWorkflowId) {
-      resolvedWorkflowId = 'test-workflow';
+      resolvedWorkflowId = INTERNAL_TEST_WORKFLOW_ID;
     }
 
     if (!resolvedYaml) {
@@ -871,7 +878,7 @@ export class WorkflowsManagementApi {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflowStep(
       {
-        id: workflowId ?? 'test-workflow',
+        id: workflowId ?? INTERNAL_TEST_WORKFLOW_ID,
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,

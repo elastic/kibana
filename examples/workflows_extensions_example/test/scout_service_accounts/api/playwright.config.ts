@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer } from '@kbn/core/server';
-import type { IndexPatternsTestPluginSetup, IndexPatternsTestPluginStart } from './plugin';
-import { IndexPatternsTestPlugin } from './plugin';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const plugin: PluginInitializer<
-  IndexPatternsTestPluginSetup,
-  IndexPatternsTestPluginStart
-> = async () => new IndexPatternsTestPlugin();
+export default createPlaywrightConfig({
+  testDir: './tests',
+  workers: 1,
+});

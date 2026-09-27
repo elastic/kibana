@@ -1149,7 +1149,6 @@ packages:
   - 'src/platform/test/plugin_functional/plugins/data_search'
   - 'src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin'
   - 'src/platform/test/plugin_functional/plugins/hardening'
-  - 'src/platform/test/plugin_functional/plugins/index_patterns'
   - 'src/platform/test/plugin_functional/plugins/kbn_top_nav'
   - 'src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations'
   - 'src/platform/test/plugin_functional/plugins/rendering_plugin'
