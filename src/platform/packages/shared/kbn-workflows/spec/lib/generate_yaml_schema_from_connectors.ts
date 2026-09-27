@@ -9,6 +9,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { CONNECTOR_ID_MAX_LENGTH } from '../../common/constants';
+import {
+  TEMPLATE_EXPRESSION_MAX_LENGTH,
+  WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX,
+} from '../../common/template_expressions';
 import type { ConnectorContractUnion } from '../../types/v1';
 import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
@@ -166,6 +170,92 @@ function hasNoRequiredFields(schema: z.ZodType): boolean {
   );
 }
 
+// Validates delimiter shape only — Liquid validity is not checked at schema time.
+const LIQUID_TEMPLATE_SCHEMA = z
+  .string()
+  .regex(WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX)
+  .max(TEMPLATE_EXPRESSION_MAX_LENGTH);
+
+/**
+ * A `.optional()` / `.default()` layer stripped off a params field.
+ * Defaults keep a getter: in Zod v4, `def.defaultValue` evaluates a factory on every read,
+ * so reading it once at unwrap time would freeze that result into every subsequent parse.
+ */
+type FieldWrapper = { kind: 'optional' } | { kind: 'default'; getValue: () => unknown };
+
+/**
+ * Strips the `.optional()` / `.default()` layers off a params field, returning the wrapped type
+ * together with the layers in outermost-first order.
+ */
+function unwrapFieldWrappers(field: z.ZodType): { inner: z.ZodType; wrappers: FieldWrapper[] } {
+  const wrappers: FieldWrapper[] = [];
+  let inner = field;
+  while (inner instanceof z.ZodOptional || inner instanceof z.ZodDefault) {
+    if (inner instanceof z.ZodOptional) {
+      wrappers.push({ kind: 'optional' });
+    } else {
+      const zodDefault = inner;
+      wrappers.push({ kind: 'default', getValue: () => zodDefault.def.defaultValue });
+    }
+    inner = inner.unwrap() as z.ZodType;
+  }
+  return { inner, wrappers };
+}
+
+/**
+ * Rebuilds the wrapper stack returned by {@link unwrapFieldWrappers} in its original order.
+ * The order is load-bearing: coalescing the layers would collapse stacked defaults onto the
+ * innermost value instead of the outermost one that Zod actually applies.
+ */
+function rewrapField(field: z.ZodType, wrappers: FieldWrapper[]): z.ZodType {
+  // `wrappers` is outermost-first, so replay it back-to-front to end up with the same stack.
+  // Pass `getValue` itself into `.default()` so Zod invokes the original supplier per parse.
+  return wrappers.reduceRight<z.ZodType>(
+    (acc, wrapper) =>
+      wrapper.kind === 'optional' ? acc.optional() : acc.default(wrapper.getValue),
+    field
+  );
+}
+
+/** True when the object carries `.refine()` / `.superRefine()` checks of its own. */
+function hasObjectLevelChecks(schema: z.ZodObject): boolean {
+  return (schema.def.checks?.length ?? 0) > 0;
+}
+
+/**
+ * Widens top-level array fields of a connector params schema to also accept a whole-value
+ * Liquid template expression (`${{ expr }}`), so that passing a templated value where an array
+ * is declared is not reported as a type error.
+ *
+ * This is not editor-only: the same generated schema is the server-side gate for workflow
+ * create/update, so it decides what can be persisted, not just what Monaco underlines.
+ *
+ * Only the direct children of the params schema (not nested objects) are widened, to avoid
+ * disturbing deeply nested schemas such as the ES API's MappingTypeMapping.
+ *
+ * Schemas with object-level checks are left unwidened — those checks are written against
+ * concrete array values and cannot evaluate a template string. Widen such a connector's params
+ * only when it actually needs template support.
+ */
+function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
+  if (!(paramsSchema instanceof z.ZodObject)) return paramsSchema;
+  if (hasObjectLevelChecks(paramsSchema)) return paramsSchema;
+
+  const widenedShape: Record<string, z.ZodType> = {};
+  for (const [key, field] of Object.entries(paramsSchema.shape as Record<string, z.ZodType>)) {
+    const { inner, wrappers } = unwrapFieldWrappers(field);
+    if (inner instanceof z.ZodArray) {
+      // Rewrap to preserve .optional()/.default() so omitting a defaulted param stays valid.
+      widenedShape[key] = rewrapField(z.union([LIQUID_TEMPLATE_SCHEMA, inner]), wrappers);
+    }
+  }
+
+  if (Object.keys(widenedShape).length === 0) return paramsSchema;
+
+  // safeExtend preserves the unknownKeys policy (strict/passthrough), unlike extend().
+  return paramsSchema.safeExtend(widenedShape as z.ZodRawShape);
+}
+
 function generateStepSchemaForConnector(
   connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
@@ -179,11 +269,13 @@ function generateStepSchemaForConnector(
       connector.hasConnectorId === 'required' ? connectorId : connectorId.optional();
   }
 
+  const templateAwareParamsSchema = withTemplateStringSupport(connector.paramsSchema);
+
   // If all params are optional (or there are none), `with` itself should be optional so users
   // don't have to write an empty `with: {}` block for steps that need no inputs.
   const withSchema = hasNoRequiredFields(connector.paramsSchema)
-    ? connector.paramsSchema.optional()
-    : connector.paramsSchema;
+    ? templateAwareParamsSchema.optional()
+    : templateAwareParamsSchema;
 
   return BaseConnectorStepSchema.extend({
     type: connector.description
