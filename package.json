@@ -701,6 +701,8 @@
     "@kbn/encrypted-saved-objects-plugin": "workspace:*",
     "@kbn/encrypted-saved-objects-shared": "workspace:*",
     "@kbn/enterprise-search-plugin": "workspace:*",
+    "@kbn/entity-access-control": "workspace:*",
+    "@kbn/entity-access-control-ui": "workspace:*",
     "@kbn/entity-store": "workspace:*",
     "@kbn/error-boundary-example-plugin": "workspace:*",
     "@kbn/es-errors": "workspace:*",

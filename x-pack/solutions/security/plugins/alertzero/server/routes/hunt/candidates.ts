@@ -7,6 +7,7 @@
 
 import type { CandidatesResponse } from '@kbn/alertzero-common';
 import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import type { KibanaRequest } from '@kbn/core/server';
 import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -40,7 +41,8 @@ type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
  */
 const readAllOpenProposalConversationIds = async (
   proposalsService: ProposalsService,
-  space: string
+  space: string,
+  request: KibanaRequest
 ): Promise<Set<string>> => {
   const conversationIds = new Set<string>();
   for (const status of OPEN_PROPOSAL_STATUSES) {
@@ -69,7 +71,8 @@ const readAllOpenProposalConversationIds = async (
           size: MAX_PROPOSALS_PAGE_SIZE,
           from,
         },
-        space
+        space,
+        request
       );
       for (const proposal of page.proposals) {
         conversationIds.add(proposal.conversationId);
@@ -125,7 +128,7 @@ export const registerCandidatesRoute = ({
 
           const proposalsService = getHuntServices().getProposalsService();
           const readOpenProposalConversationIds: OpenProposalConversationIdsReader = (space) =>
-            readAllOpenProposalConversationIds(proposalsService, space);
+            readAllOpenProposalConversationIds(proposalsService, space, request);
 
           const body: CandidatesResponse = await buildCandidateQuery(
             esClient,
