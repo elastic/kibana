@@ -42,3 +42,34 @@ steps:
     enablement: 'restorable',
   },
 } as const satisfies ManagedWorkflowDefinition<ExampleManagedWorkflowTemplateValues>;
+
+export const EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID = 'system-example-service-account';
+
+export interface ServiceAccountWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
+  serviceAccountId: string;
+}
+
+export const EXAMPLE_SERVICE_ACCOUNT_WORKFLOW = {
+  id: EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
+  pluginId: 'workflowsExtensionsExample',
+  version: 1,
+  billable: false,
+  yamlTemplate: ({ serviceAccountId }) => `name: Managed service account identity proof
+enabled: true
+settings:
+  run_as: ${JSON.stringify(serviceAccountId)}
+triggers:
+  - type: manual
+steps:
+  - name: authenticate
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /_security/_authenticate
+`,
+  management: {
+    lifecycle: 'dynamic',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+} as const satisfies ManagedWorkflowDefinition<ServiceAccountWorkflowTemplateValues>;

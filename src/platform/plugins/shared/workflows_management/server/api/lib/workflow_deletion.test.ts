@@ -46,6 +46,7 @@ const makeStorageClient = (
       items: hits.map((h) => ({ index: { _id: h._id, status: 200 } })),
     }),
     delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    index: jest.fn().mockResolvedValue({ _seq_no: 8, _primary_term: 1 }),
   };
   return {
     client: mockClient,
@@ -335,5 +336,76 @@ describe('deleteWorkflows', () => {
       expect(result.deleted).toBe(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to purge'));
     });
+  });
+});
+
+describe('bound workflow deletion OCC', () => {
+  const setup = (force: boolean) => {
+    const document = makeWorkflowSource();
+    const { client, storage } = makeStorageClient([]);
+    const deleteDocument = jest.fn().mockResolvedValue(undefined);
+    const params = {
+      ids: ['bound'],
+      spaceId: 'default',
+      force,
+      storage,
+      ...makeExecutionsDataAccess(),
+      taskScheduler: null,
+      logger,
+      getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
+      guardedDelete: { id: 'bound', document, seqNo: 7, primaryTerm: 1, deleteDocument },
+    };
+    return { client, params, deleteDocument };
+  };
+
+  it.each([false, true])(
+    'does not delete a concurrently changed definition (force: %s)',
+    async (force) => {
+      const { client, params, deleteDocument } = setup(force);
+      const conflict = new Error('version conflict');
+      client.index.mockRejectedValueOnce(conflict);
+      await expect(deleteWorkflows(params)).rejects.toBe(conflict);
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({ if_seq_no: 7, if_primary_term: 1 })
+      );
+      expect(deleteDocument).not.toHaveBeenCalled();
+      expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+    }
+  );
+
+  it('hard-deletes only the revision it disabled', async () => {
+    const { params, deleteDocument } = setup(true);
+    await expect(deleteWorkflows(params)).resolves.toMatchObject({ deleted: 1 });
+    expect(deleteDocument).toHaveBeenCalledWith(8, 1);
+  });
+
+  it('does not overwrite an update that wins after disabling', async () => {
+    const { client, params, deleteDocument } = setup(true);
+    const conflict = new Error('concurrent update won');
+    deleteDocument.mockRejectedValue(conflict);
+    client.index
+      .mockResolvedValueOnce({ _seq_no: 8, _primary_term: 1 })
+      .mockRejectedValueOnce(conflict);
+    await expect(deleteWorkflows(params)).rejects.toBe(conflict);
+    expect(client.index).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ if_seq_no: 8, if_primary_term: 1 })
+    );
+    expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
+  it('checks executions again after disabling and restores with OCC', async () => {
+    const { client, params, deleteDocument } = setup(true);
+    params.getWorkflowExecutions.mockResolvedValue({ total: 1, results: [] });
+    await expect(deleteWorkflows(params)).rejects.toThrow('running executions');
+    expect(deleteDocument).not.toHaveBeenCalled();
+    expect(client.index).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        if_seq_no: 8,
+        if_primary_term: 1,
+        document: expect.objectContaining({ enabled: true }),
+      })
+    );
   });
 });

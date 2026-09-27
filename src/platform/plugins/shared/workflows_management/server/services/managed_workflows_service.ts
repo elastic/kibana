@@ -182,11 +182,12 @@ export class ManagedWorkflowsService {
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowServiceInstallOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     for (let attempt = 0; attempt <= MAX_MANAGED_INSTALL_RETRIES; attempt++) {
       try {
-        await this.installManagedWorkflowOnce(id, options, registeredPluginId);
+        await this.installManagedWorkflowOnce(id, options, registeredPluginId, request);
         return;
       } catch (error) {
         if (!isRetryableWorkflowWriteConflict(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
@@ -203,7 +204,8 @@ export class ManagedWorkflowsService {
   private async installManagedWorkflowOnce(
     id: ManagedWorkflowId,
     options: ManagedWorkflowServiceInstallOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
     if (!definition) {
@@ -263,7 +265,8 @@ export class ManagedWorkflowsService {
       const savedDocument = await this.deps.crudService.createWorkflowDocument(
         workflowDocumentId,
         spaceId,
-        documentWithVersion
+        documentWithVersion,
+        request
       );
       await this.deps.crudService.logWorkflowChangesAfterWrite({
         workflows: [{ id: workflowDocumentId, document: savedDocument }],
@@ -271,7 +274,7 @@ export class ManagedWorkflowsService {
         spaceId,
         timestamp: now,
       });
-      this.deps.audit?.logWorkflowCreated(undefined, {
+      this.deps.audit?.logWorkflowCreated(request, {
         id: workflowDocumentId,
         managed: true,
         originalWorkflowId: definition.id,
@@ -327,6 +330,19 @@ export class ManagedWorkflowsService {
       spaceId,
       {
         document: documentWithVersion,
+        request,
+        // Only registered code upgrades may reuse an existing delegation without a user request.
+        ...(!request &&
+        definition.management.versionStrategy === 'auto' &&
+        existing.definition?.settings?.run_as &&
+        this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)
+          ? {
+              managedWorkflowUpgrade: {
+                pluginId: registeredPluginId,
+                definitionId: definition.id,
+              },
+            }
+          : {}),
         ifSeqNo: existingDocument.seqNo,
         ifPrimaryTerm: existingDocument.primaryTerm,
       }
@@ -339,7 +355,7 @@ export class ManagedWorkflowsService {
         timestamp: now,
       });
     }
-    this.deps.audit?.logWorkflowUpdated(undefined, {
+    this.deps.audit?.logWorkflowUpdated(request, {
       id: workflowDocumentId,
       managed: true,
       originalWorkflowId: definition.id,
@@ -352,7 +368,8 @@ export class ManagedWorkflowsService {
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
     if (!definition) {
@@ -373,8 +390,13 @@ export class ManagedWorkflowsService {
       return;
     }
 
-    await this.deps.crudService.deleteWorkflows([workflowDocumentId], spaceId, { force: true });
-    this.deps.audit?.logWorkflowDeleted(undefined, {
+    await this.deps.crudService.deleteWorkflows(
+      [workflowDocumentId],
+      spaceId,
+      { force: true },
+      request
+    );
+    this.deps.audit?.logWorkflowDeleted(request, {
       id: workflowDocumentId,
       force: true,
       managed: true,

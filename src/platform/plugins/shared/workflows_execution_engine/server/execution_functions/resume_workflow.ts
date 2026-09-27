@@ -9,14 +9,18 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { completeIdentityFailureCleanup } from './complete_identity_failure_cleanup';
+import { finalizeWorkflowIdentityFailure } from './finalize_workflow_identity_failure';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
+import { emitWorkflowIdentityFailureEvent } from '../lib/emit_workflow_identity_failure_event';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { withWorkflowExecutionIdentity } from '../service_account_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -27,8 +31,9 @@ import {
   ensureWorkflowIdleTimeoutResumeAfterLoop,
   getIdleTimeoutResumeDeadlineMs,
 } from '../workflow_execution_loop/handle_execution_delay';
+import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
-export async function resumeWorkflow({
+async function resumeWorkflowWithRequest({
   workflowRunId,
   spaceId,
   signal,
@@ -177,3 +182,62 @@ export async function resumeWorkflow({
 
   return {};
 }
+
+export const resumeWorkflow = async (
+  params: Parameters<typeof resumeWorkflowWithRequest>[0]
+): ReturnType<typeof resumeWorkflowWithRequest> => {
+  const execution = await params.workflowExecutionRepository.getWorkflowExecutionById(
+    params.workflowRunId,
+    params.spaceId
+  );
+  if (!execution) {
+    throw new Error('Workflow execution not found.');
+  }
+  if (isTerminalStatus(execution.status)) {
+    await completeIdentityFailureCleanup(execution, {
+      ...params,
+      workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+      cloudSetup: params.dependencies.cloudSetup,
+    });
+    return {};
+  }
+  let enteredExecution = false;
+  try {
+    return await withWorkflowExecutionIdentity(
+      params.dependencies.coreStart,
+      execution,
+      params.fakeRequest,
+      (fakeRequest) => {
+        enteredExecution = true;
+        return resumeWorkflowWithRequest({ ...params, fakeRequest });
+      }
+    );
+  } catch (error) {
+    if (!enteredExecution && execution.workflowDefinition?.settings?.run_as) {
+      const executionError = {
+        type: 'ServiceAccountExecutionError',
+        message: error instanceof Error ? error.message : String(error),
+      };
+      const failedExecution = await finalizeWorkflowIdentityFailure({
+        ...params,
+        error: executionError,
+      });
+      if (!failedExecution) throw error;
+      if (failedExecution.status === ExecutionStatus.FAILED) {
+        await emitWorkflowIdentityFailureEvent({
+          execution: failedExecution,
+          request: params.fakeRequest,
+          emitEvent: params.workflowsExecutionEngine.triggerEvents.emitEvent,
+          logger: params.logger,
+          maxEventChainDepth: params.config.eventDriven.maxChainDepth,
+        });
+      }
+      await completeIdentityFailureCleanup(failedExecution, {
+        ...params,
+        workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+        cloudSetup: params.dependencies.cloudSetup,
+      });
+    }
+    throw error;
+  }
+};

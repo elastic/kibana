@@ -155,6 +155,14 @@ Orphan reconciliation only targets documents whose definition has `lifecycle: 's
 
 Dynamic workflows with `versionStrategy: 'auto'` are still eligible for startup upgrades: when the owning plugin calls `ready()`, persisted dynamic instances for that plugin are re-applied from the current registry definition while preserving their stored template values.
 
+For installed workflows with `settings.run_as`, automatic upgrades may reuse the existing
+SA binding without a user request. This is limited to the registered owning plugin's
+code-defined upgrade: the persisted owner, definition ID, space, template values, and
+`run_as` must remain unchanged, and the binding must still match. The write uses optimistic
+concurrency control and never creates or repairs a binding. User-requested edits, initial
+binding, rebinding, and unbinding still require `manage_security` in addition to the normal
+Workflows privileges. Requestless deletion of a bound workflow remains unsupported.
+
 ## 4) Space-scoped vs global installs
 
 Managed workflows can live in a specific space or in the **global** space (`'*'`, exported as `GLOBAL_WORKFLOW_SPACE_ID` from `@kbn/workflows/server`).

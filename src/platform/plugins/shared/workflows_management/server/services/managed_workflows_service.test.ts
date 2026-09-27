@@ -9,6 +9,7 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isOccConflictError, OccWriter } from '@kbn/occ';
 import type { WorkflowExecutionEngineModel, WorkflowYaml } from '@kbn/workflows';
@@ -367,8 +368,7 @@ const createExecutionEngineMock = () =>
     executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'execution-1' }),
   } as unknown as WorkflowsExecutionEnginePluginStart);
 
-const createService = () => {
-  const crudService = createCrudServiceMock();
+const createService = (crudService = createCrudServiceMock()) => {
   const workflowsExecutionEngine = createExecutionEngineMock();
   const logger = loggerMock.create();
   const audit = {
@@ -608,6 +608,46 @@ describe('ManagedWorkflowsService', () => {
       expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('dynamic auto upgrade'));
     });
 
+    it('preserves the authenticated request through create, rebind and uninstall', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { audit, crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID, request);
+      expect(crudService.createWorkflowDocument).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.any(Object),
+        request
+      );
+      expect(audit.logWorkflowCreated).toHaveBeenCalledWith(request, expect.any(Object));
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(createWorkflowSource({ definitionHash: 'old-hash' }))
+      );
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID, request);
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ request })
+      );
+      expect(audit.logWorkflowUpdated).toHaveBeenCalledWith(request, expect.any(Object));
+      crudService.getWorkflowDocumentSource.mockResolvedValue(createWorkflowSource());
+      await service.uninstallManagedWorkflow(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        PLUGIN_ID,
+        request
+      );
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
+        [WORKFLOW_ID],
+        SPACE_ID,
+        { force: true },
+        request
+      );
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(request, expect.any(Object));
+    });
+
     it('creates a new managed workflow document', async () => {
       const definition = createDefinition();
       mockManagedWorkflowDefinitions = [definition];
@@ -624,7 +664,8 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.createWorkflowDocument).toHaveBeenCalledWith(
         WORKFLOW_ID,
         SPACE_ID,
-        expect.any(Object)
+        expect.any(Object),
+        undefined
       );
       const indexedDocument = getIndexedDocument(crudService);
       expect(indexedDocument).toEqual(
@@ -690,7 +731,8 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.createWorkflowDocument).toHaveBeenCalledWith(
         WORKFLOW_ID,
         SPACE_ID,
-        expect.objectContaining({ version: INITIAL_WORKFLOW_VERSION })
+        expect.objectContaining({ version: INITIAL_WORKFLOW_VERSION }),
+        undefined
       );
     });
 
@@ -1156,9 +1198,12 @@ describe('ManagedWorkflowsService', () => {
         definition.pluginId
       );
 
-      expect(crudService.deleteWorkflows).toHaveBeenCalledWith([WORKFLOW_ID], SPACE_ID, {
-        force: true,
-      });
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
+        [WORKFLOW_ID],
+        SPACE_ID,
+        { force: true },
+        undefined
+      );
       expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
         id: WORKFLOW_ID,
         force: true,
@@ -1424,6 +1469,145 @@ describe('ManagedWorkflowsService', () => {
         `Managed workflow '${WORKFLOW_ID}' is owned by plugin 'otherPlugin' but was registered by '${PLUGIN_ID}'`
       );
       expect(crudService.getWorkflowDocumentSource).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bound managed workflow upgrades', () => {
+    const sourceWithAccount = (source: WorkflowProperties): WorkflowProperties => ({
+      ...source,
+      definition: {
+        version: '1',
+        name: source.name,
+        enabled: source.enabled,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: { run_as: 'account-a' },
+      },
+    });
+
+    it.each(['static', 'dynamic'] as const)(
+      'upgrades installed %s v1 to registered v2 after restart without a user request',
+      async (lifecycle) => {
+        const v1 = createDefinition({
+          yaml: `${workflowYaml()}settings:\n  run_as: account-a\n`,
+          management: { lifecycle },
+        });
+        mockManagedWorkflowDefinitions = [v1];
+        const { service, crudService } = createService();
+        const prepare = crudService.prepareWorkflowDocumentForStorage.getMockImplementation();
+        if (!prepare) throw new Error('Missing prepare mock');
+        crudService.prepareWorkflowDocumentForStorage.mockImplementation(async (params) => {
+          const { workflowData } = await prepare(params);
+          return { workflowData: sourceWithAccount(workflowData) };
+        });
+        const installer = httpServerMock.createKibanaRequest();
+        crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+        await service.installManagedWorkflow(
+          WORKFLOW_ID,
+          { spaceId: SPACE_ID },
+          PLUGIN_ID,
+          installer
+        );
+        expect(crudService.createWorkflowDocument).toHaveBeenCalledWith(
+          WORKFLOW_ID,
+          SPACE_ID,
+          expect.any(Object),
+          installer
+        );
+        const v1Document = crudService.createWorkflowDocument.mock.calls[0][2];
+        crudService.createWorkflowDocument.mockClear();
+
+        const v2 = createDefinition({
+          version: 2,
+          yaml: `${workflowYaml({ name: 'Upgraded v2' })}settings:\n  run_as: account-a\n`,
+          management: { lifecycle },
+        });
+        mockManagedWorkflowDefinitions = [v2];
+        crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+          createVersionedDocument(v1Document)
+        );
+        crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+          { id: WORKFLOW_ID, source: v1Document },
+        ]);
+        const { service: restarted } = createService(crudService);
+        if (lifecycle === 'static') {
+          await restarted.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID);
+        }
+        await restarted.pluginReady(PLUGIN_ID);
+
+        expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledTimes(1);
+        expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
+          WORKFLOW_ID,
+          SPACE_ID,
+          expect.objectContaining({
+            document: expect.objectContaining({
+              managedVersion: 2,
+              yaml: expect.stringContaining('Upgraded v2'),
+              definition: expect.objectContaining({ settings: { run_as: 'account-a' } }),
+            }),
+            request: undefined,
+            ifSeqNo: 7,
+            ifPrimaryTerm: 13,
+            managedWorkflowUpgrade: { pluginId: PLUGIN_ID, definitionId: WORKFLOW_ID },
+          })
+        );
+        expect(crudService.createWorkflowDocument).not.toHaveBeenCalled();
+        expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      }
+    );
+
+    it('does not give request-scoped edits the trusted upgrade context', async () => {
+      mockManagedWorkflowDefinitions = [createDefinition({ version: 2 })];
+      const { service, crudService } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(sourceWithAccount(createWorkflowSource()))
+      );
+      const request = httpServerMock.createKibanaRequest();
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID, request);
+      const params = crudService.writeWorkflowDocumentWithOcc.mock.calls[0][2];
+      expect(params.request).toBe(request);
+      expect(params.managedWorkflowUpgrade).toBeUndefined();
+    });
+
+    it('does not trust changes to installed template values', async () => {
+      mockManagedWorkflowDefinitions = [createTemplateDefinition()];
+      const { service, crudService } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          sourceWithAccount(
+            createWorkflowSource({
+              managedTemplateValues: { recipient: 'original', enabled: true },
+            })
+          )
+        )
+      );
+      await service.installManagedWorkflow(
+        WORKFLOW_ID,
+        {
+          spaceId: SPACE_ID,
+          values: { recipient: 'changed', enabled: true },
+        },
+        PLUGIN_ID
+      );
+      expect(
+        crudService.writeWorkflowDocumentWithOcc.mock.calls[0][2].managedWorkflowUpgrade
+      ).toBeUndefined();
+    });
+
+    it('does not upgrade on_adopt workflows at restart', async () => {
+      mockManagedWorkflowDefinitions = [
+        createDefinition({
+          version: 2,
+          management: { lifecycle: 'dynamic', versionStrategy: 'on_adopt' },
+        }),
+      ];
+      const { service, crudService } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(sourceWithAccount(createWorkflowSource()))
+      );
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID);
+      await service.pluginReady(PLUGIN_ID);
+      expect(crudService.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
     });
   });
 

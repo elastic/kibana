@@ -118,13 +118,13 @@ describe('ExecutionListFilters', () => {
     });
   });
 
-  it('does not show "Executed by" section when showExecutor is false', async () => {
+  it('does not show "Triggered by" section when showExecutor is false', async () => {
     renderComponent({ showExecutor: false });
     await openPopover();
-    expect(screen.queryByText('Executed by')).not.toBeInTheDocument();
+    expect(screen.queryByText('Triggered by')).not.toBeInTheDocument();
   });
 
-  it('shows "Executed by" section when showExecutor is true', async () => {
+  it('shows "Triggered by" section when showExecutor is true', async () => {
     renderComponent({
       showExecutor: true,
       availableExecutedByOptions: [
@@ -133,7 +133,7 @@ describe('ExecutionListFilters', () => {
       ],
     });
     await openPopover();
-    expect(screen.getByText('Executed by')).toBeInTheDocument();
+    expect(screen.getByText('Triggered by')).toBeInTheDocument();
   });
 
   it('filters by the profile UID behind a display label', async () => {

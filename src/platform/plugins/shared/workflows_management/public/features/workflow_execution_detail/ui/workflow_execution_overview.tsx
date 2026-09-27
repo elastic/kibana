@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -72,10 +80,16 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     const { euiTheme } = useEuiTheme();
 
     const context = stepExecution.input as Record<string, unknown> | undefined;
-    const executionData = context?.execution as { isTestRun?: boolean } | undefined;
+    const executionData = context?.execution as
+      | {
+          isTestRun?: boolean;
+          executedBy?: string;
+          effectiveIdentity?: { type: 'service_account'; id: string };
+        }
+      | undefined;
     const isTestRun = executionData?.isTestRun === true;
     const executionStarted = stepExecution.startedAt;
-    const executionEnded = context?.now as string | undefined;
+    const executionEnded = stepExecution.finishedAt || (context?.now as string | undefined);
 
     return (
       <EuiPanel
@@ -89,6 +103,27 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
+          {executionData?.effectiveIdentity?.type === 'service_account' && (
+            <EuiFlexItem grow={false}>
+              <EuiDescriptionList
+                data-test-subj="workflowExecutionIdentity"
+                listItems={[
+                  {
+                    title: i18n.translate('workflows.execution.triggeredByLabel', {
+                      defaultMessage: 'Triggered by',
+                    }),
+                    description: executionData.executedBy ?? '-',
+                  },
+                  {
+                    title: i18n.translate('workflows.execution.runAsLabel', {
+                      defaultMessage: 'Run as',
+                    }),
+                    description: executionData.effectiveIdentity.id,
+                  },
+                ]}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>

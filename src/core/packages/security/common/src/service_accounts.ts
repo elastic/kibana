@@ -83,6 +83,12 @@ export interface ServiceAccountWorkloadCoordinates extends ServiceAccountWorkloa
   spaceId: string;
 }
 
+/** Parameters for minting credentials for a workload, optionally pinned to an account. @public */
+export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkloadCoordinates {
+  /** Reject before minting if the verified binding points to another account. */
+  expectedServiceAccountId?: string;
+}
+
 /**
  * Parameters for binding a service account to a workload. The binding is created in the space of
  * the request, and the returned {@link ServiceAccountWorkloadBinding} reports which space that

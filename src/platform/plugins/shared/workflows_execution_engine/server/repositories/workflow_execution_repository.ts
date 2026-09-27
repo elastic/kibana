@@ -56,6 +56,44 @@ export class WorkflowExecutionRepository {
     return doc;
   }
 
+  public async getWorkflowExecutionWithVersion(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<{
+    execution: EsWorkflowExecution;
+    seqNo: number;
+    primaryTerm: number;
+  } | null> {
+    const { items } = await this.workflowExecutionsDataClient.getByIds([workflowExecutionId]);
+    const item = items[0];
+    if (!item || item.document.spaceId !== spaceId) return null;
+    if (item.seqNo == null || item.primaryTerm == null) {
+      throw new Error(`Missing revision for workflow execution ${workflowExecutionId}.`);
+    }
+    return { execution: item.document, seqNo: item.seqNo, primaryTerm: item.primaryTerm };
+  }
+
+  public async tryUpdateWorkflowExecutionWithVersion(
+    update: Partial<EsWorkflowExecution> & { id: string },
+    revision: { seqNo: number; primaryTerm: number }
+  ): Promise<boolean> {
+    const response = await this.workflowExecutionsDataClient.bulk({
+      items: [{ operation: 'update', document: update, ...revision }],
+      refresh: 'wait_for',
+    });
+    const item = response.items[0];
+    if (!item) throw new Error(`Missing update result for workflow execution ${update.id}.`);
+    const error = item.error;
+    if (
+      error?.type === 'version_conflict_engine_exception' ||
+      error?.type === 'document_missing_exception'
+    ) {
+      return false;
+    }
+    if (error) throw new Error(`Failed to update workflow execution ${update.id}: ${error.reason}`);
+    return true;
+  }
+
   /**
    * Creates a new workflow execution document in Elasticsearch.
    *
@@ -94,6 +132,17 @@ export class WorkflowExecutionRepository {
           itemError.reason ?? JSON.stringify(itemError)
         }`
       );
+    }
+  }
+
+  /** Removes a searchable execution rejected before any task or step was started. */
+  public async discardUnstartedExecution(id: string, spaceId: string): Promise<void> {
+    const response = await this.workflowExecutionsDataClient.deleteByQuery({
+      query: { bool: { filter: [{ ids: { values: [id] } }, { term: { spaceId } }] } },
+      refresh: true,
+    });
+    if (response.failures?.length || response.timed_out) {
+      throw new Error(`Failed to discard unstarted workflow execution ${id}.`);
     }
   }
 

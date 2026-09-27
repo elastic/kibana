@@ -249,3 +249,93 @@ describe('disableAllWorkflows', () => {
     expect(doc.version).toBe(5);
   });
 });
+
+describe('bound workflow bulk-disable authorization', () => {
+  const boundSource: Partial<WorkflowProperties> = {
+    definition: {
+      version: '1',
+      name: 'Bound',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [],
+      settings: { run_as: 'account' },
+    },
+  };
+
+  it('does not disable bound workflows without manage_security', async () => {
+    const { storage, client } = makeStorageClient([[makeHit('bound', true, 1, boundSource)]]);
+    const result = await disableAllWorkflows({
+      storage,
+      logger,
+      taskScheduler: null,
+      canModifyBoundWorkflows: false,
+    });
+    expect(result.disabled).toBe(0);
+    expect(result.failures).toEqual([
+      { id: 'bound', error: expect.stringContaining('manage_security') },
+    ]);
+    expect(client.bulk).not.toHaveBeenCalled();
+  });
+
+  it('rechecks a workflow that becomes bound before an OCC retry', async () => {
+    const { storage, client } = makeStorageClient([[makeHit('workflow')]]);
+    client.search.mockResolvedValueOnce({
+      hits: { hits: [makeHit('workflow', true, 2, boundSource)] },
+    });
+    client.bulk.mockResolvedValueOnce({
+      items: [{ index: { _id: 'workflow', status: 409, error: { reason: 'conflict' } } }],
+    });
+    const result = await disableAllWorkflows({
+      storage,
+      logger,
+      taskScheduler: null,
+      canModifyBoundWorkflows: false,
+    });
+    expect(result.disabled).toBe(0);
+    expect(result.failures).toEqual([
+      { id: 'workflow', error: expect.stringContaining('manage_security') },
+    ]);
+    expect(client.bulk).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([true, undefined])(
+    'allows privileged or system disable (authorized: %s)',
+    async (canModifyBoundWorkflows) => {
+      const { storage, client } = makeStorageClient([[makeHit('bound', true, 1, boundSource)]]);
+      const result = await disableAllWorkflows({
+        storage,
+        logger,
+        taskScheduler: null,
+        canModifyBoundWorkflows,
+      });
+      expect(result.disabled).toBe(1);
+      expect(result.failures).toEqual([]);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+    }
+  );
+});
+
+it('disables ordinary workflows alongside unauthorized bound workflows', async () => {
+  const bound = makeHit('bound', true, 1, {
+    definition: {
+      version: '1',
+      name: 'Bound',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [],
+      settings: { run_as: 'account' },
+    },
+  });
+  const { storage } = makeStorageClient([[bound, makeHit('ordinary')]]);
+  const result = await disableAllWorkflows({
+    storage,
+    logger,
+    taskScheduler: null,
+    canModifyBoundWorkflows: false,
+  });
+  expect(result.disabled).toBe(1);
+  expect(result.disabledWorkflows.map(({ id }) => id)).toEqual(['ordinary']);
+  expect(result.failures).toEqual([
+    { id: 'bound', error: expect.stringContaining('manage_security') },
+  ]);
+});
