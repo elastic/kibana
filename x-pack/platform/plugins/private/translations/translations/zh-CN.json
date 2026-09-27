@@ -18665,7 +18665,6 @@
     "xpack.dataFederation.errors.idRequired": "“名称”必填。",
     "xpack.dataFederation.errors.unknown": "未知错误",
     "xpack.dataFederation.filters.allDataSources": "数据源",
-    "xpack.dataFederation.filters.dataSource": "数据源",
     "xpack.dataFederation.pageDescription": "连接到外部数据源并添加特定数据集以使用 ES|QL 进行查询，就像您的索引数据一样。无需摄取。",
     "xpack.dataFederation.pageTitle": "ES|QL 数据联邦",
     "xpack.dataFederation.pluginName": "ES|QL 数据联邦",

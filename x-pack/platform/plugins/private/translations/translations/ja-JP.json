@@ -18657,7 +18657,6 @@
     "xpack.dataFederation.errors.idRequired": "名前が必要です。",
     "xpack.dataFederation.errors.unknown": "不明なエラー",
     "xpack.dataFederation.filters.allDataSources": "データソース",
-    "xpack.dataFederation.filters.dataSource": "データソース",
     "xpack.dataFederation.pageDescription": "外部データソースに接続し、インデックス付きデータと同様に、ES|QLでクエリを実行するための特定のデータセットを追加します。インジェストは不要です。",
     "xpack.dataFederation.pageTitle": "ES|QL データフェデレーション",
     "xpack.dataFederation.pluginName": "ES|QL データフェデレーション",
