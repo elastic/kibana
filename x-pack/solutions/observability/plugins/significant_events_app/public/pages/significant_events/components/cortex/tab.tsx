@@ -172,6 +172,8 @@ export function CortexTab() {
           onClose={() => setIsCreatingPage(false)}
           onCreated={(id) => {
             setIsCreatingPage(false);
+            setStatusFilter('all');
+            setSearchQuery('');
             setSelection({ kind: 'page', id });
           }}
         />
