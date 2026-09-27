@@ -53,21 +53,44 @@ describe('buildHostLoadEvents', () => {
 });
 
 describe('cleanHostLoadMetrics', () => {
-  const createEsClient = () => ({
+  const RUN_QUERY = {
+    index: HOST_METRICS_INDEX,
+    query: {
+      bool: {
+        filter: [{ term: { 'host.name': HOST_NAME } }, { term: { 'agent.id': 'viz-eval-run' } }],
+      },
+    },
+    refresh: true,
+  };
+
+  const createEsClient = (remaining = 0) => ({
     indices: { deleteDataStream: jest.fn().mockResolvedValue({}) },
     deleteByQuery: jest.fn().mockResolvedValue({}),
+    count: jest.fn().mockResolvedValue({ count: remaining }),
   });
 
-  it('deletes the data stream only when the fixture created it', async () => {
-    const esClient = createEsClient();
+  it('deletes the run documents, then the data stream it created once empty', async () => {
+    const esClient = createEsClient(0);
 
     await cleanHostLoadMetrics(esClient as never, {
       createdDataStream: true,
       runId: 'viz-eval-run',
     });
 
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(RUN_QUERY);
     expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({ name: HOST_METRICS_INDEX });
-    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
+  it('keeps a data stream it created when another run has written to it', async () => {
+    const esClient = createEsClient(75);
+
+    await cleanHostLoadMetrics(esClient as never, {
+      createdDataStream: true,
+      runId: 'viz-eval-run',
+    });
+
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(RUN_QUERY);
+    expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
   });
 
   it('removes only the documents this run seeded from a pre-existing data stream', async () => {
@@ -78,21 +101,14 @@ describe('cleanHostLoadMetrics', () => {
       runId: 'viz-eval-run',
     });
 
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(RUN_QUERY);
+    expect(esClient.count).not.toHaveBeenCalled();
     expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: HOST_METRICS_INDEX,
-      query: {
-        bool: {
-          filter: [{ term: { 'host.name': HOST_NAME } }, { term: { 'agent.id': 'viz-eval-run' } }],
-        },
-      },
-      refresh: true,
-    });
   });
 
   it('warns instead of throwing when cleanup fails', async () => {
     const esClient = createEsClient();
-    esClient.indices.deleteDataStream.mockRejectedValue(new Error('boom'));
+    esClient.deleteByQuery.mockRejectedValue(new Error('boom'));
     const log = { warning: jest.fn() };
 
     await expect(

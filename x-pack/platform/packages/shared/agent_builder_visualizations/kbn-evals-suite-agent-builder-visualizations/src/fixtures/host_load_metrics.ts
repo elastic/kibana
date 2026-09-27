@@ -122,9 +122,9 @@ export async function seedHostLoadMetrics(
 }
 
 /**
- * Removes the data stream when the fixture created it; otherwise deletes only
- * the documents this run seeded, so pre-existing data (including earlier or
- * concurrent runs) is left untouched.
+ * Deletes the documents this run seeded, then drops the data stream only when
+ * this run created it and nothing else has written to it since, so data from
+ * earlier or concurrent runs (and real Beats data) is left untouched.
  */
 export async function cleanHostLoadMetrics(
   esClient: Client,
@@ -132,10 +132,6 @@ export async function cleanHostLoadMetrics(
   log?: ToolingLog
 ): Promise<void> {
   try {
-    if (fixture.createdDataStream) {
-      await esClient.indices.deleteDataStream({ name: HOST_METRICS_INDEX });
-      return;
-    }
     await esClient.deleteByQuery({
       index: HOST_METRICS_INDEX,
       query: {
@@ -145,6 +141,15 @@ export async function cleanHostLoadMetrics(
       },
       refresh: true,
     });
+    if (!fixture.createdDataStream) {
+      return;
+    }
+    const { count } = await esClient.count({ index: HOST_METRICS_INDEX });
+    if (count > 0) {
+      log?.info(`Keeping ${HOST_METRICS_INDEX}: ${count} document(s) from other writers remain`);
+      return;
+    }
+    await esClient.indices.deleteDataStream({ name: HOST_METRICS_INDEX });
   } catch (error) {
     log?.warning(`Failed to clean ${HOST_METRICS_INDEX}: ${(error as Error).message}`);
   }
