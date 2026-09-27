@@ -448,6 +448,9 @@ importers:
       '@elastic/search-ui-engines-connector':
         specifier: 1.24.2
         version: 1.24.2(@elastic/elasticsearch@8.19.2(supports-color@10.2.2))(supports-color@10.2.2)
+      '@elastic/statistics':
+        specifier: 0.0.1
+        version: 0.0.1
       '@emotion/cache':
         specifier: 11.14.0
         version: 11.14.0
@@ -4843,9 +4846,6 @@ importers:
       semver:
         specifier: 7.8.0
         version: 7.8.0
-      simple-statistics:
-        specifier: 7.8.8
-        version: 7.8.8
       snakecase-keys:
         specifier: 8.0.1
         version: 8.0.1
@@ -11120,6 +11120,10 @@ packages:
 
   '@elastic/search-ui@1.24.2':
     resolution: {integrity: sha512-fQ/BGEbh4EvX+IWw89xiSUXD3p3iDvZPA46WCHwH+jfEtKiC9P+274UiR32POI3znaWfZElxm9kIyNioVGin0Q==}
+
+  '@elastic/statistics@0.0.1':
+    resolution: {integrity: sha512-EmgH/skrYeQDHJ21hsrUkAmBeUUkdlpvO02qOvqaoWCBoU8tisiHeX7hoIdCqzwQHwL9BB5bxeVvGtcgdh832Q==}
+    engines: {node: '>=22'}
 
   '@elastic/transport@8.11.0':
     resolution: {integrity: sha512-1QD1j7gQF8+tVrf+UOcOrLF1LXnhBYwBnNl4xd+fYxkQONjaOjiTcfqXcALHesKezUv8wRzv3tedEnhtYLBmhw==}
@@ -24318,8 +24322,8 @@ packages:
   simple-sha256@1.1.0:
     resolution: {integrity: sha512-jMdj+5MR1dRiFbrQ8idmkPv+HCoJEmJVBBwc0vQQz4Gtg3PEkjdpVxUM4BSwK898zhNP/ub3vcP9edw47EHuLQ==}
 
-  simple-statistics@7.8.8:
-    resolution: {integrity: sha512-CUtP0+uZbcbsFpqEyvNDYjJCl+612fNgjT8GaVuvMG7tBuJg8gXGpsP5M7X658zy0IcepWOZ6nPBu1Qb9ezA1w==}
+  simple-statistics@7.12.0:
+    resolution: {integrity: sha512-ESS3eJRxeQe8+p8R67nMGtl+vSziJLTqdnPcd+psKi2Xn/TX5PW5z0YwBxa8P3nSzgZzBI5sf7SvUdK8imL79Q==}
 
   sinon@22.1.0:
     resolution: {integrity: sha512-n1ajF2rBWMTtEwbKcw4UdFg4nCnDdq/U6RDoxtOd7oapOlRoJ5ynwFx60owROyhDpA9QhMZi0pCO/xtmwFjG7w==}
@@ -28189,6 +28193,10 @@ snapshots:
       deep-equal: 1.1.2
       history: 4.9.0
       qs: 6.16.0
+
+  '@elastic/statistics@0.0.1':
+    dependencies:
+      simple-statistics: 7.12.0
 
   '@elastic/transport@8.11.0(supports-color@10.2.2)':
     dependencies:
@@ -43615,7 +43623,7 @@ snapshots:
 
   simple-sha256@1.1.0: {}
 
-  simple-statistics@7.8.8: {}
+  simple-statistics@7.12.0: {}
 
   sinon@22.1.0:
     dependencies:

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { gammaln, mean, tTest } from 'simple-statistics';
+import { pairedT } from '@elastic/statistics';
 import type { Direction, EvaluationScoreDocument } from './schemas/common_attributes.gen';
 import type { PairedTTestResult } from './schemas/experiments/compare_experiments_route.gen';
 
@@ -55,10 +55,6 @@ export function isImproved(diff: number, direction: Direction): boolean {
   return direction === 'maximize' ? diff > 0 : diff < 0;
 }
 
-const MAX_BETA_ITERATIONS = 100;
-const BETA_EPSILON = 3e-7;
-const BETA_TINY = 1e-30;
-
 function buildPairKey(score: EvaluationScoreDocument): string {
   return [
     score.example.dataset.id,
@@ -70,6 +66,10 @@ function buildPairKey(score: EvaluationScoreDocument): string {
 
 function isFiniteNumber(value: number | null | undefined): value is number {
   return typeof value === 'number' && Number.isFinite(value);
+}
+
+function mean(values: number[]): number {
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
 /**
@@ -141,19 +141,6 @@ export function pairScores(
 }
 
 /**
- * Convert a t-statistic into a two-tailed p-value using the Student's t-distribution.
- */
-function tStatisticToPValue(tStatistic: number, degreesOfFreedom: number): number {
-  if (!Number.isFinite(tStatistic) || degreesOfFreedom <= 0) {
-    return 1;
-  }
-
-  const t = Math.abs(tStatistic);
-  const x = degreesOfFreedom / (degreesOfFreedom + t * t);
-  return clampProbability(incompleteBeta(x, degreesOfFreedom / 2, 0.5));
-}
-
-/**
  * Compute paired t-test results grouped by dataset and evaluator.
  * Accepts either raw score documents (which are paired internally)
  * or pre-computed pairs to avoid duplicate pairing work.
@@ -187,13 +174,9 @@ export function computePairedTTestResults(
   for (const group of groups.values()) {
     const groupTargetScores = group.map((pair) => pair.scoreTarget);
     const groupBaselineScores = group.map((pair) => pair.scoreBaseline);
-    const differences = groupTargetScores.map((score, index) => score - groupBaselineScores[index]);
 
-    let pValue: number | null = null;
-    if (differences.length >= 2) {
-      const tStatistic = tTest(differences, 0);
-      pValue = tStatisticToPValue(tStatistic, differences.length - 1);
-    }
+    // Two-tailed paired t-test; `pValue` is null when fewer than two pairs are available.
+    const { pValue } = pairedT(groupTargetScores, groupBaselineScores);
 
     const direction =
       group.find((pair) => pair.direction !== undefined)?.direction ??
@@ -212,91 +195,4 @@ export function computePairedTTestResults(
   }
 
   return results;
-}
-
-function clampProbability(value: number): number {
-  if (!Number.isFinite(value)) {
-    return 1;
-  }
-
-  if (value < 0) {
-    return 0;
-  }
-
-  if (value > 1) {
-    return 1;
-  }
-
-  return value;
-}
-
-/**
- * Regularized incomplete beta function.
- * Numerical Recipes in C, 2nd Edition, Chapter 6.4.
- */
-function incompleteBeta(x: number, a: number, b: number): number {
-  if (x <= 0) {
-    return 0;
-  }
-
-  if (x >= 1) {
-    return 1;
-  }
-
-  const logBeta = gammaln(a + b) - gammaln(a) - gammaln(b) + a * Math.log(x) + b * Math.log(1 - x);
-  const bt = Math.exp(logBeta);
-
-  if (x < (a + 1) / (a + b + 2)) {
-    return (bt * betaContinuedFraction(a, b, x)) / a;
-  }
-
-  return 1 - (bt * betaContinuedFraction(b, a, 1 - x)) / b;
-}
-
-function betaContinuedFraction(a: number, b: number, x: number): number {
-  const qab = a + b;
-  const qap = a + 1;
-  const qam = a - 1;
-  let c = 1;
-  let d = 1 - (qab * x) / qap;
-
-  if (Math.abs(d) < BETA_TINY) {
-    d = BETA_TINY;
-  }
-  d = 1 / d;
-  let h = d;
-
-  for (let m = 1; m <= MAX_BETA_ITERATIONS; m += 1) {
-    const m2 = 2 * m;
-    let aa = (m * (b - m) * x) / ((qam + m2) * (a + m2));
-    d = 1 + aa * d;
-    if (Math.abs(d) < BETA_TINY) {
-      d = BETA_TINY;
-    }
-    c = 1 + aa / c;
-    if (Math.abs(c) < BETA_TINY) {
-      c = BETA_TINY;
-    }
-    d = 1 / d;
-    h *= d * c;
-
-    aa = (-(a + m) * (qab + m) * x) / ((a + m2) * (qap + m2));
-    d = 1 + aa * d;
-    if (Math.abs(d) < BETA_TINY) {
-      d = BETA_TINY;
-    }
-    c = 1 + aa / c;
-    if (Math.abs(c) < BETA_TINY) {
-      c = BETA_TINY;
-    }
-    d = 1 / d;
-    const delta = d * c;
-    h *= delta;
-
-    if (Math.abs(delta - 1) < BETA_EPSILON) {
-      break;
-    }
-  }
-
-  return h;
 }
