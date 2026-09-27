@@ -179,6 +179,7 @@ describe('RunTracker', () => {
       toolRenderState: { c0: { toolName: 'x', kind: 'server' } },
       currentCycle: 0,
       errorCount: 0,
+      pendingToolCallIds: [],
     });
     expect(() => tracker.finalState()).toThrow(/without streaming any state/);
 
@@ -193,8 +194,42 @@ describe('RunTracker', () => {
       toolRenderState: { c1: { toolName: 'x', kind: 'server' } },
       currentCycle: 0,
       errorCount: 0,
+      pendingToolCallIds: [],
     });
     expect(tracker.finalState()).toBe(tracker.latestState());
+  });
+
+  it('exposes pendingToolCallIds on the latest snapshot', () => {
+    const tracker = new RunTracker({ graphName: GRAPH });
+    tracker.seed({ steps: [] });
+    tracker.observeGraphEvent(
+      createRootStateChunkEvent(GRAPH, { steps: [toolCall('tc1')], pendingToolCallIds: ['tc1'] })
+    );
+    expect(tracker.latestState().pendingToolCallIds).toEqual(['tc1']);
+  });
+
+  it('seeds pendingToolCallIds from the inherited pending calls until the first chunk', () => {
+    const tracker = new RunTracker({ graphName: GRAPH });
+    tracker.seed({
+      steps: [toolCall('tc1')],
+      inherited: { steps: [toolCall('tc1')], pendingToolCallIds: ['tc1'] },
+    });
+    expect(tracker.latestState().pendingToolCallIds).toEqual(['tc1']);
+
+    tracker.observeGraphEvent(stateChunk([toolCall('tc1', [result('r1')])]));
+    expect(tracker.latestState().pendingToolCallIds).toEqual([]);
+  });
+
+  it('rejects a chunk without pendingToolCallIds as malformed', () => {
+    const tracker = new RunTracker({ graphName: GRAPH });
+    tracker.seed({ steps: [reasoning('seeded')] });
+    tracker.observeGraphEvent({
+      ...stateChunk([toolCall('c1')]),
+      data: {
+        chunk: { steps: [toolCall('c1')], toolRenderState: {}, currentCycle: 0, errorCount: 0 },
+      },
+    });
+    expect(tracker.latestState().steps).toEqual([reasoning('seeded')]);
   });
 
   it('ignores stream chunks that are not the root state of this run', () => {
@@ -308,6 +343,7 @@ describe('RunTracker', () => {
         toolRenderState: { b1: { toolName: 'browser_x', kind: 'browser' } },
         currentCycle: 1,
         errorCount: 0,
+        pendingToolCallIds: [],
       })
     ).toEqual([toolCall('pending', [result('r1')])]);
   });

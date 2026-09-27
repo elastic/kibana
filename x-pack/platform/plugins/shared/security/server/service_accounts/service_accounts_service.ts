@@ -12,18 +12,22 @@ import type {
   Logger,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 import {
-  createNotImplementedWorkloadBindings,
   SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
   ServiceAccountWorkloadBindings,
   WorkloadBindingStore,
 } from './bindings';
 import { SERVICE_ACCOUNT_CREDENTIAL_TYPE, ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
-import type { CloudProjectContext, ServiceAccountsServiceStart } from './types';
+import type {
+  CloudProjectContext,
+  ServiceAccountsBackend,
+  ServiceAccountsServiceStart,
+} from './types';
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
@@ -75,6 +79,7 @@ export class ServiceAccountsService {
       return null;
     }
 
+    let backend: ServiceAccountsBackend;
     if (isServerless) {
       // `SecurityPlugin#setup` rejects a serverless deployment without `uiam.enabled`, and the
       // service is only ever constructed from that same config, so this is unreachable in
@@ -99,7 +104,7 @@ export class ServiceAccountsService {
         return null;
       }
 
-      const backend = new UiamServiceAccounts({
+      backend = new UiamServiceAccounts({
         logger: this.logger,
         requestLifetimeMs: config.serviceAccounts.requestLifetime.asMilliseconds(),
         license,
@@ -108,40 +113,11 @@ export class ServiceAccountsService {
         cloudProjectContext,
         getCurrentUser,
       });
-
-      const bindingsLogger = this.logger.get('workload-bindings');
-      const store = new WorkloadBindingStore({
-        client: savedObjects.getUnsafeInternalClient({
-          excludedExtensions: ['spaces'],
-          includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
-        }),
-        encryptedClient: encryptedSavedObjects.getClient({
-          includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
-        }),
-        isEncryptionError: encryptedSavedObjects.isEncryptionError,
-        logger: bindingsLogger,
-      });
-
-      return {
-        backend,
-        workloads: new ServiceAccountWorkloadBindings({
-          logger: bindingsLogger,
-          license,
-          store,
-          backend,
-          checkPrivilegesWithRequest,
-          getCurrentUser,
-          getCurrentUserProfileId,
-          getSpaceId,
-          canEncrypt,
-        }),
-      };
-    }
-
-    this.logger.debug('Using the Elasticsearch service accounts backend.');
-    return {
-      backend: new EsServiceAccounts({
-        logger: this.logger.get('elasticsearch'),
+    } else {
+      this.logger.debug('Using the Elasticsearch service accounts backend.');
+      backend = new EsServiceAccounts({
+        logger: this.logger,
+        requestLifetimeMs: config.serviceAccounts.requestLifetime.asMilliseconds(),
         license,
         clusterClient,
         checkPrivilegesWithRequest,
@@ -158,10 +134,36 @@ export class ServiceAccountsService {
         canEncrypt,
         getCurrentUser,
         getCurrentUserProfileId,
+      });
+    }
+
+    const bindingsLogger = this.logger.get('workload-bindings');
+    const store = new WorkloadBindingStore({
+      client: savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
+        // The binding store supplies the namespace explicitly on every operation.
+        excludedExtensions: [SPACES_EXTENSION_ID],
       }),
-      // Workload binding is a UIAM-only capability until the Elasticsearch token exchange
-      // lands; see https://github.com/elastic/kibana/issues/284466.
-      workloads: createNotImplementedWorkloadBindings(),
+      encryptedClient: encryptedSavedObjects.getClient({
+        includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
+      }),
+      isEncryptionError: encryptedSavedObjects.isEncryptionError,
+      logger: bindingsLogger,
+    });
+
+    return {
+      backend,
+      workloads: new ServiceAccountWorkloadBindings({
+        logger: bindingsLogger,
+        license,
+        store,
+        backend,
+        checkPrivilegesWithRequest,
+        getCurrentUser,
+        getCurrentUserProfileId,
+        getSpaceId,
+        canEncrypt,
+      }),
     };
   }
 }

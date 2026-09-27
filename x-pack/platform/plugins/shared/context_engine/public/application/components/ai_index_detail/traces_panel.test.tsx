@@ -16,14 +16,14 @@ import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices'
 import { TracesPanel } from './traces_panel';
 
 const mockUseAgentBuilderAgents = jest.fn();
-const mockUseSearchDataStreams = jest.fn();
+const mockUseIndices = jest.fn();
 
 jest.mock('../../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
 }));
 
-jest.mock('../../hooks/use_search_data_streams', () => ({
-  useSearchDataStreams: () => mockUseSearchDataStreams(),
+jest.mock('../../hooks/use_indices', () => ({
+  useIndices: () => mockUseIndices(),
 }));
 
 const aiIndex: GetAiIndexResponse = {
@@ -64,10 +64,9 @@ describe('TracesPanel', () => {
       isLoading: false,
       error: undefined,
     });
-    mockUseSearchDataStreams.mockReturnValue({
-      dataStreams: ['logs-genai-default'],
-      isLoading: false,
-      isError: false,
+    mockUseIndices.mockReturnValue({
+      indexNames: ['logs-genai-default'],
+      isFetching: false,
     });
   });
 

@@ -55,6 +55,7 @@ const AI_INDEX = {
   traceRejectTrailingComma: 'scout_traces_reject_trailing_comma',
   traceRejectMissingAgent: 'scout_traces_reject_missing_agent',
   traceRejectPut: 'scout_traces_reject_put',
+  sourceRejectPut: 'scout_sources_reject_put',
 };
 
 const DATA_STREAMS = [
@@ -269,6 +270,30 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     expect(response).toHaveStatusCode(400);
   });
 
+  apiTest('rejects an empty ES|QL source', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.lifecycle), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: { ...aiIndexBody, sources: [{ type: 'esql', value: '' }] },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain(
+      'value has length [0] but it must have a minimum length of [1]'
+    );
+  });
+
+  apiTest('rejects a syntactically invalid ES|QL source', async ({ apiClient }) => {
+    const response = await apiClient.put(aiIndexPath(AI_INDEX.lifecycle), {
+      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+      body: { ...aiIndexBody, sources: [{ type: 'esql', value: 'FROM logs | WHERE' }] },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toMatch(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /);
+  });
+
   apiTest('rejects an id with disallowed characters', async ({ apiClient }) => {
     const response = await apiClient.put(aiIndexPath('Invalid_ID'), {
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
@@ -451,9 +476,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain(
-      'must name a single index or data stream, not a pattern'
-    );
+    expect(response.body.message).toContain('Must use only lowercase letters');
   });
 
   apiTest('rejects a comma-separated dest', async ({ apiClient }) => {
@@ -464,9 +487,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain(
-      'must name a single index or data stream, not a pattern'
-    );
+    expect(response.body.message).toContain('Must use only lowercase letters');
   });
 
   apiTest('rejects an alias dest', async ({ apiClient }) => {
@@ -751,6 +772,52 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
           expect(response.body.traces).toStrictEqual([
             { type: 'index', value: DEST.traces, query: `FROM ${DEST.traces}` },
           ]);
+        }
+      );
+    }
+  );
+
+  apiTest(
+    'rejects an invalid ES|QL source on PUT without modifying the stored AI index',
+    async ({ apiClient }) => {
+      const id = AI_INDEX.sourceRejectPut;
+      const path = aiIndexPath(id);
+      const sources = [{ type: 'esql', value: `FROM ${DEST.dataStream}` }];
+
+      await apiTest.step('creates an AI index with a valid ES|QL source', async () => {
+        const response = await apiClient.post(COLLECTION, {
+          headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+          body: { id, ...emptyAiIndex(DEST.dataStream), sources },
+        });
+
+        expect(response).toHaveStatusCode(201);
+      });
+
+      await apiTest.step('rejects a PUT with a syntactically invalid ES|QL source', async () => {
+        const response = await apiClient.put(path, {
+          headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+          body: {
+            ...emptyAiIndex(DEST.dataStream),
+            sources: [{ type: 'esql', value: 'FROM logs | WHERE' }],
+          },
+        });
+
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.message).toMatch(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /);
+      });
+
+      await apiTest.step(
+        'leaves the original sources unchanged after the rejected PUT',
+        async () => {
+          const response = await apiClient.get(path, {
+            headers: { ...viewerApiCredentials.apiKeyHeader, ...API_HEADERS },
+            responseType: 'json',
+          });
+
+          expect(response).toHaveStatusCode(200);
+          expect(response.body.sources).toStrictEqual(sources);
         }
       );
     }

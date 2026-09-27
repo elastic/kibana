@@ -199,22 +199,37 @@ export const TimeoutPropSchema = z.object({
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
-/** Upper bound on a HITL Liquid timeout template. Matches other dynamic expressions in this schema. */
+/** Upper bound on a Liquid duration template. Matches other dynamic expressions in this schema. */
 export const DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH = 2000;
 
-const LiquidTimeoutTemplateSchema = z
-  .string()
-  .max(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH)
-  .regex(
-    /\{\{[\s\S]*\}\}/,
-    'Invalid timeout. Use a duration (e.g. "72h") or a template that renders to one.'
-  );
+const liquidDurationTemplateSchema = (message: string) =>
+  z
+    .string()
+    .max(DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH)
+    .regex(/\{\{[\s\S]*\}\}/, message);
 
 /** A duration, or Liquid that renders to one at step entry. */
 export const DynamicTimeoutSchema = z
-  .union([DurationSchema, LiquidTimeoutTemplateSchema])
+  .union([
+    DurationSchema,
+    liquidDurationTemplateSchema(
+      'Invalid timeout. Use a duration (e.g. "72h") or a template that renders to one.'
+    ),
+  ])
   .describe(
     "Duration (`72h`) or Liquid that renders to one (`{{ inputs.expiresIn | default: '72h' }}`)."
+  );
+
+/** A wait duration, or Liquid that renders to one at step entry. */
+export const DynamicDurationSchema = z
+  .union([
+    DurationSchema,
+    liquidDurationTemplateSchema(
+      'Invalid duration. Use a duration (e.g. "5s") or a template that renders to one.'
+    ),
+  ])
+  .describe(
+    "Duration (`5s`) or Liquid that renders to one (`{{ inputs.waitFor | default: '5s' }}`)."
   );
 
 export const DynamicTimeoutPropSchema = z.object({
@@ -267,7 +282,7 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   with: z.record(z.string(), z.any()).optional(),
 })
   .merge(StepWithForEachSchema)
-  .merge(TimeoutPropSchema)
+  .merge(DynamicTimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
@@ -287,8 +302,9 @@ export const BuiltInStepProperties = [
 export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
 export const WaitStepInputSchema = z.object({
-  duration: DurationSchema.describe(
-    'Duration to wait, e.g. "5s", "1h30m". Units in descending order (w/d/h/m/s/ms).'
+  duration: DynamicDurationSchema.describe(
+    'Duration to wait, e.g. "5s", "1h30m". Units in descending order (w/d/h/m/s/ms). ' +
+      "Accepts Liquid that renders to one (`{{ inputs.waitFor | default: '5s' }}`)."
   ),
 });
 export const WaitStepSchema = BaseStepSchema.extend({

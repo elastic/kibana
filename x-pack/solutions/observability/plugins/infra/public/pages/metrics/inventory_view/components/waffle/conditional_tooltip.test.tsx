@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { ConditionalToolTip } from './conditional_tooltip';
 import type { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
@@ -22,11 +22,18 @@ import { escapeQuotes } from '@kbn/es-query';
 import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
+jest.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
+  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
+}));
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
 const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.Mock<
   ReturnType<typeof useWaffleOptionsContext>
+>;
+const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as jest.MockedFunction<
+  typeof useIsPodSchemaSelectorEnabled
 >;
 
 const NODE: InfraWaffleMapNode = {
@@ -53,7 +60,10 @@ const CUSTOM_METRICS = [
   },
 ];
 
-const buildWaffleOptions = (preferredSchema: DataSchemaFormat) => ({
+const buildWaffleOptions = (
+  preferredSchema: DataSchemaFormat,
+  nodeType: InventoryItemType = 'host'
+) => ({
   preferredSchema,
   metric: {
     type: 'cpu',
@@ -64,7 +74,7 @@ const buildWaffleOptions = (preferredSchema: DataSchemaFormat) => ({
     formatTemplate: '{{value}}%',
   },
   groupBy: [],
-  nodeType: 'host',
+  nodeType,
   view: 'map',
   customOptions: {
     legend: { steps: 10 },
@@ -108,6 +118,7 @@ describe('ConditionalToolTip', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
   });
 
   it('renders the ECS metric set (including legacy cpu/tx/rx) when preferredSchema=ecs', () => {
@@ -227,5 +238,86 @@ describe('ConditionalToolTip', () => {
     const arn = 'arn:aws:rds:us-west-2:123456789012:db:my-db';
     const useSnapshotCall = mockedUseSnapshot.mock.calls[0][0] as UseSnapshotRequest;
     expect(useSnapshotCall.kuery).toBe(`"aws.rds.db_instance.arn": "${escapeQuotes(arn)}"`);
+  });
+
+  it('keeps leftover Hosts OpenTelemetry schema off Kubernetes Pod tooltip requests', () => {
+    const POD_NODE: InfraWaffleMapNode = {
+      pathId: 'pod-01',
+      id: 'pod-01',
+      name: 'pod-01',
+      path: [{ value: 'pod-01', label: 'pod-01' }],
+      metrics: [{ name: 'cpu' }],
+    };
+
+    mockedUseSnapshot.mockReturnValue(
+      buildBaseSnapshotResponse(['cpu', 'memory', 'rx', 'tx', ...CUSTOM_METRICS.map((m) => m.id)])
+    );
+    // Intentional `as ReturnType<typeof useWaffleOptionsContext>` type assertion as the waffle-options mock is a partial test double;
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      buildWaffleOptions('semconv', 'pod') as unknown as ReturnType<typeof useWaffleOptionsContext>
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={POD_NODE} nodeType="pod" />);
+
+    // Intentional `as UseSnapshotRequest` type assertion as Jest's toHaveBeenCalledWith matcher is untyped relative to the hook request;
+    expect(mockedUseSnapshot).toHaveBeenCalledWith({
+      kuery: '"kubernetes.pod.uid": "pod-01"',
+      metrics: [
+        { type: 'cpu' },
+        { type: 'memory' },
+        { type: 'rx' },
+        { type: 'tx' },
+        ...CUSTOM_METRICS,
+      ],
+      groupBy: [],
+      nodeType: 'pod',
+      sourceId: 'default',
+      includeTimeseries: true,
+      currentTime,
+      accountId: '',
+      region: '',
+      schema: 'ecs',
+    } as UseSnapshotRequest);
+  });
+
+  it('queries Kubernetes Pod tooltips with k8s.pod.uid when the selector flag is on and OpenTelemetry is selected', () => {
+    const POD_NODE: InfraWaffleMapNode = {
+      pathId: 'pod-01',
+      id: 'pod-01',
+      name: 'pod-01',
+      path: [{ value: 'pod-01', label: 'pod-01' }],
+      metrics: [{ name: 'cpu' }],
+    };
+
+    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
+    mockedUseSnapshot.mockReturnValue(
+      buildBaseSnapshotResponse(['cpu', 'memory', 'rx', 'tx', ...CUSTOM_METRICS.map((m) => m.id)])
+    );
+    // Intentional `as ReturnType<typeof useWaffleOptionsContext>` type assertion as the waffle-options mock is a partial test double;
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      buildWaffleOptions('semconv', 'pod') as unknown as ReturnType<typeof useWaffleOptionsContext>
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={POD_NODE} nodeType="pod" />);
+
+    // Intentional `as UseSnapshotRequest` type assertion as Jest's toHaveBeenCalledWith matcher is untyped relative to the hook request;
+    expect(mockedUseSnapshot).toHaveBeenCalledWith({
+      kuery: '"k8s.pod.uid": "pod-01"',
+      metrics: [
+        { type: 'cpu' },
+        { type: 'memory' },
+        { type: 'rx' },
+        { type: 'tx' },
+        ...CUSTOM_METRICS,
+      ],
+      groupBy: [],
+      nodeType: 'pod',
+      sourceId: 'default',
+      includeTimeseries: true,
+      currentTime,
+      accountId: '',
+      region: '',
+      schema: 'semconv',
+    } as UseSnapshotRequest);
   });
 });

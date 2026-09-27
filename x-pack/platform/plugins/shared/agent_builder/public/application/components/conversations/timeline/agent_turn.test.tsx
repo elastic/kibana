@@ -21,7 +21,7 @@ import { Timeline } from './timeline';
 jest.mock('../../../context/conversation/use_conversation_id', () => ({
   useConversationId: () => 'conv-1',
 }));
-jest.mock('../conversation_rounds/round_response/response_message', () => ({
+jest.mock('./response/response_message', () => ({
   ResponseMessage: ({
     isLoading,
     conversationId,
@@ -43,8 +43,8 @@ jest.mock('../conversation_rounds/round_response/response_message', () => ({
     </div>
   ),
 }));
-jest.mock('../conversation_rounds/round_attachment_references', () => ({
-  RoundAttachmentReferences: ({
+jest.mock('./attachments/attachment_references', () => ({
+  AttachmentReferences: ({
     attachmentRefs,
     actorFilter,
   }: {
@@ -148,18 +148,19 @@ describe('AgentTurn', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /tool/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
+    expect(screen.getByText('2 tools stopped')).toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderExecutionFailedToggle')).toHaveTextContent(
       'An error occurred'
     );
-    expect(screen.queryByTestId('agentBuilderRoundError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderExecutionError')).not.toBeInTheDocument();
   });
 
   it('expands the error details on click and keeps them open through the saved replacement', () => {
     const { rerender } = renderTimeline(failed);
 
     fireEvent.click(screen.getByTestId('agentBuilderExecutionFailedToggle'));
-    expect(screen.getByTestId('agentBuilderRoundError')).toBeInTheDocument();
-    expect(screen.queryByTestId('agentBuilderRoundErrorRetryButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderExecutionError')).toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderExecutionErrorRetryButton')).not.toBeInTheDocument();
 
     rerender(
       <I18nProvider>
@@ -168,7 +169,7 @@ describe('AgentTurn', () => {
         </EuiProvider>
       </I18nProvider>
     );
-    expect(screen.getByTestId('agentBuilderRoundError')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderExecutionError')).toBeInTheDocument();
   });
 
   it('renders the steps that ran above the stopped notice for an aborted turn', () => {
@@ -176,6 +177,7 @@ describe('AgentTurn', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /tool/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
+    expect(screen.getByText('2 tools stopped')).toBeInTheDocument();
     expect(screen.getByText('Response stopped by petr')).toBeInTheDocument();
   });
 

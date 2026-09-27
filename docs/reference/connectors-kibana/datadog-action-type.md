@@ -27,6 +27,39 @@ Datadog site
 Authentication
 :   API Key and Application Key. Both are required for monitor, downtime, incident, event, metric, and log actions. Create them under **Organization Settings > API Keys** and **Organization Settings > Application Keys** in Datadog.
 
+## Receive Datadog webhook events [datadog-inbound-events]
+
+The connector provides an ingest URL for Datadog webhooks. Each accepted request emits a `datadog.alert` workflow event. The event contains the raw JSON payload in `event.body`.
+
+Use this JSON payload in the Datadog webhook configuration. Do not enable form encoding:
+
+```json
+{
+  "message": "$EVENT_MSG",
+  "last_updated": "$LAST_UPDATED",
+  "event_type": "$EVENT_TYPE",
+  "title": "$EVENT_TITLE",
+  "severity": "$ALERT_PRIORITY",
+  "alert_type": "$ALERT_TYPE",
+  "alert_query": "$ALERT_QUERY",
+  "alert_transition": "$ALERT_TRANSITION",
+  "date": "$DATE",
+  "scopes": "$ALERT_SCOPE",
+  "org": {
+    "id": "$ORG_ID",
+    "name": "$ORG_NAME"
+  },
+  "url": "$LINK",
+  "tags": "$TAGS",
+  "id": "$ID",
+  "monitor_id": "$ALERT_ID"
+}
+```
+
+The managed Datadog alert translation workflow uses `monitor_id` and `scopes` as the alert fingerprint. It sets status to `inactive` when `alert_transition` is `Recovered`, and to `active` for other transitions.
+
+The ingest token authenticates the webhook request. The workflow runs with the identity of the last user who saved the connector.
+
 ## Available actions [datadog-available-actions]
 
 | Action | Description |

@@ -191,6 +191,37 @@ describe('ConversationClient', () => {
     );
   };
 
+  const mockGetReturnsIndexedDocument = () => {
+    mockRawEsClient.get.mockImplementation(async ({ id }: { id: string }) => {
+      const { calls, results } = mockEsClient.index.mock;
+      let callIndex = -1;
+      for (let i = calls.length - 1; i >= 0; i--) {
+        if (calls[i][0].id === id) {
+          callIndex = i;
+          break;
+        }
+      }
+      if (callIndex === -1) {
+        throw Object.assign(new Error('not found'), { meta: { statusCode: 404 } });
+      }
+
+      const { document } = calls[callIndex][0] as { document: Document['_source'] };
+      const indexed = (await results[callIndex].value) as {
+        _seq_no?: number;
+        _primary_term?: number;
+      };
+
+      return {
+        _id: id,
+        _index: TEST_CONVERSATION_INDEX,
+        _source: document,
+        _seq_no: indexed._seq_no,
+        _primary_term: indexed._primary_term,
+        found: true,
+      };
+    });
+  };
+
   const expectNoReadBy = (conversation: unknown) => {
     expect(conversation).not.toHaveProperty('read_by');
     expect(conversation).not.toHaveProperty('pinned_by');
@@ -1066,6 +1097,32 @@ describe('ConversationClient', () => {
   // Reads-by-id go through `esClient.get` (no space filter), so cross-space isolation is enforced
   // in application code inside `getDocument`. These tests lock in that guarantee, which used to
   // come for free from the DSL `createSpaceDslFilter`.
+  describe('getAuthor', () => {
+    const createClientForUser = (user: { id?: string; username: string }) =>
+      createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { ...user, isAdmin: false },
+      });
+
+    it('prefers the origin author over the client user', () => {
+      const originAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
+
+      expect(client.getAuthor(originAuthor)).toEqual(originAuthor);
+    });
+
+    it('attributes the round to the client user', () => {
+      expect(client.getAuthor()).toEqual({ id: 'user-1', username: 'test-user' });
+    });
+
+    it('assigns no author when the user has no profile id', () => {
+      expect(createClientForUser({ username: 'test-user' }).getAuthor()).toBeUndefined();
+    });
+  });
+
   describe('space isolation for reads-by-id', () => {
     const createClientInSpace = (space: string) =>
       createClient({
@@ -1115,8 +1172,8 @@ describe('ConversationClient', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
@@ -1134,6 +1191,83 @@ describe('ConversationClient', () => {
         })
       );
       expectNoReadBy(result);
+    });
+
+    it('forces an immediate refresh instead of waiting for the scheduled one', async () => {
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(expect.objectContaining({ refresh: true }));
+    });
+
+    it('reads the created conversation back by id through the converse access gate', async () => {
+      const result = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      // The response is built from a read-after-write, not from the request payload, so it goes
+      // through the same raw `get` and agent `use` check as `client.get`.
+      expect(mockRawEsClient.get).toHaveBeenCalledWith({
+        index: TEST_CONVERSATION_INDEX,
+        id: 'conversation-1',
+      });
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(result).toMatchObject({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        user: { id: 'user-1', username: 'test-user' },
+        rounds: [],
+        events: [],
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        read: false,
+        pinned: false,
+        read_only: false,
+      });
+      expect(result.created_at).toBe(result.updated_at);
+      expectOwnerPermissions(result);
+      expectNoReadBy(result);
+    });
+
+    it('returns the same shape as get for the created conversation', async () => {
+      const created = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      const { document: indexedDoc } = mockEsClient.index.mock.calls[0][0] as {
+        document: Document['_source'];
+      };
+      mockGetDocumentResponse({
+        _id: 'conversation-1',
+        _seq_no: 0,
+        _primary_term: 1,
+        _source: indexedDoc,
+      });
+
+      await expect(client.get('conversation-1')).resolves.toEqual(created);
+    });
+
+    it('fails when the index response carries no version metadata', async () => {
+      mockEsClient.index.mockResolvedValueOnce({ result: 'created' });
+
+      await expect(
+        client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        })
+      ).rejects.toThrow('Conversation conversation-1 was indexed without version metadata');
     });
 
     it('throws an already-exists error when the id already exists', async () => {
@@ -2137,6 +2271,53 @@ describe('ConversationClient', () => {
       });
     });
 
+    it('default (owner) denies a non-owner on a public conversation', async () => {
+      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user',
+          username: 'other',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
+
+      await expect(client.patchMetadata('conversation-1', { x: 'value' })).rejects.toMatchObject({
+        message: expect.stringContaining('conversation-1'),
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('explicit { access: converse } allows a non-owner on a public conversation', async () => {
+      const template = makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } });
+      getTemplateMock.mockReturnValue(template);
+      // The document must carry a template_id so patchMetadata can resolve the template.
+      const doc = createConversationDocumentWithTemplate({
+        templateId: 'tmpl-a',
+        // Override user and access_mode to simulate a public conversation owned by someone else.
+      });
+      // Patch the access_control to be Public and userId to be a different user.
+      const publicOtherDoc = {
+        ...doc,
+        _source: {
+          ...doc._source,
+          user_id: 'other-user',
+          user_name: 'other',
+          access_control: { access_mode: ConversationAccessControlMode.Public },
+        },
+      };
+      mockGetDocumentResponse(publicOtherDoc as Document);
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+      mockGetDocumentResponseOnce(publicOtherDoc as Document);
+
+      const { changedFields } = await client.patchMetadata(
+        'conversation-1',
+        { x: 'value' },
+        { access: 'converse' }
+      );
+      expect(changedFields).toEqual(['x']);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
     describe('emitMetadataPatched via event emitter', () => {
       const template = makeTemplate('tmpl-cb', {
         status: {
@@ -2271,8 +2452,8 @@ describe('ConversationClient', () => {
   describe('create with template', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocumentWithTemplate());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
     });
 
     it('seeds metadata from template fields that have a default value and stamps template_version', async () => {
@@ -2852,8 +3033,8 @@ describe('ConversationClient', () => {
     });
 
     it('create fires with the attachment events of the initial batch', async () => {
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetReturnsIndexedDocument();
       const added = attachmentAddedEvent('evt-att-3');
 
       await clientWithCb.create({
@@ -2913,7 +3094,7 @@ describe('ConversationClient', () => {
     });
 
     it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
-      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1 }));
+      mockGetReturnsIndexedDocument();
 
       await client.create({
         id: 'conversation-1',
@@ -2939,22 +3120,52 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
+    it('appends to a legacy conversation by deriving its timeline first, promoting the document', async () => {
+      // A pre-events-native document: rounds only, no schema_version, no stored events.
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+        })
+      );
+
+      await client.appendEvents({
+        id: 'conversation-1',
+        events: [
+          {
+            id: '9c2e0f11-0000-4000-8000-000000000001',
+            type: TimelineEventType.userMessage,
+            created_at: '2026-09-22T10:00:00.000Z',
+            actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+            data: { message: 'Pool limit is now 200' },
+          },
+        ],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string }>;
+          conversation_rounds: Array<{ id: string }>;
+        };
+      };
+      // The round's derived events survive, the appended message lands after them, and the
+      // document is now events-native.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+        '9c2e0f11-0000-4000-8000-000000000001',
+      ]);
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(indexed.conversation_rounds).toHaveLength(1);
+    });
+
     it('round-trips attachment_refs through the stored events projection', async () => {
+      mockGetReturnsIndexedDocument();
       const attachmentRefs = [
         { attachment_id: 'attachment-a', version: 1 },
         { attachment_id: 'attachment-b', version: 2 },
       ];
-
-      const written = createConversationDocument({
-        schemaVersion: 1,
-        rounds: [
-          {
-            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
-            input: { message: 'hi', attachment_refs: attachmentRefs },
-          },
-        ],
-      });
-      mockGetDocumentResponse(written);
 
       const created = await client.create({
         id: 'conversation-1',

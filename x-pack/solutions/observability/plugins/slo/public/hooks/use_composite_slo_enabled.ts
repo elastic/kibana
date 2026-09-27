@@ -13,5 +13,5 @@ export function useCompositeSloEnabled(): boolean {
     services: { featureFlags },
   } = useKibana();
 
-  return featureFlags.getBooleanValue(SLO_COMPOSITE_ENABLED, false);
+  return featureFlags.useBooleanValue(SLO_COMPOSITE_ENABLED, false);
 }

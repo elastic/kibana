@@ -1266,10 +1266,19 @@ describe('UiamService', () => {
   });
 
   describe('#createServiceAccount', () => {
+    const roleAssignments = {
+      organization: [
+        {
+          role_id: 'organization-application-only',
+          organization_id: 'organization-id',
+          application_roles: ['viewer'],
+        },
+      ],
+    };
     const body = {
       organization_id: 'organization-id',
       name: 'nightshift-relay',
-      role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+      role_assignments: roleAssignments,
       assumable_by: [
         {
           type: 'project-service-account' as const,
@@ -1286,7 +1295,7 @@ describe('UiamService', () => {
         type: 'project',
         name: 'nightshift-relay',
         organization_id: 'organization-id',
-        role_assignments: body.role_assignments,
+        role_assignments: roleAssignments,
         assumable_by: body.assumable_by,
       };
 
@@ -1427,6 +1436,190 @@ describe('UiamService', () => {
           body
         )
       ).rejects.toThrowError('socket hang up');
+    });
+  });
+
+  describe('#listServiceAccounts', () => {
+    const mockResponse = {
+      service_accounts: [
+        {
+          id: 'service-account-id',
+          type: 'project',
+          name: 'nightshift-relay',
+          organization_id: 'organization-id',
+          role_assignments: {},
+          assumable_by: [],
+          creator: { type: 'user', id: 'user-id', first_name: 'Ada', last_name: 'Lovelace' },
+        },
+      ],
+    };
+
+    it('authenticates with the mTLS client certificate only, sending no credential headers', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(uiamService.listServiceAccounts()).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {
+        method: 'GET',
+        headers: { 'User-Agent': 'Kibana/9.0.0' },
+        dispatcher: AGENT_MOCK,
+      });
+
+      const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty('Authorization');
+      expect(headers).not.toHaveProperty('authorization');
+      expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
+    });
+
+    it('forwards limit and after as query parameters', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await uiamService.listServiceAccounts({
+        limit: 25,
+        after: 'cursor',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts?limit=25&after=cursor',
+        expect.anything()
+      );
+    });
+
+    it('reproduces the UIAM status code when listing is unsupported', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 501,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'NOT_IMPLEMENTED',
+            type: 'not_implemented',
+            message: 'Listing service accounts is not implemented',
+          },
+        }),
+      });
+
+      await expect(uiamService.listServiceAccounts()).rejects.toMatchObject({
+        output: { statusCode: 501 },
+      });
+    });
+
+    it('reproduces a 403 when Kibana is not in assumable_by', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'FORBIDDEN',
+            type: 'authorization',
+            message: 'The assumable_by list doesn’t authorize the principal',
+          },
+        }),
+      });
+
+      await expect(uiamService.listServiceAccounts()).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
+
+    it('reproduces a 401 when client credentials cannot be authenticated', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'UNAUTHORIZED',
+            type: 'authentication',
+            message: 'Credentials could not be authenticated',
+          },
+        }),
+      });
+
+      await expect(uiamService.listServiceAccounts()).rejects.toMatchObject({
+        output: { statusCode: 401 },
+      });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(uiamService.listServiceAccounts()).rejects.toThrowError('socket hang up');
+    });
+  });
+
+  describe('#getServiceAccount', () => {
+    const mockResponse = {
+      id: 'service-account-id',
+      type: 'project',
+      name: 'nightshift-relay',
+      organization_id: 'organization-id',
+      role_assignments: {},
+      assumable_by: [],
+      creator: { type: 'user', id: 'user-id', first_name: 'Ada', last_name: 'Lovelace' },
+    };
+
+    it('authenticates with the mTLS client certificate only, sending no credential headers', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(uiamService.getServiceAccount('service-account-id')).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/service-account-id',
+        {
+          method: 'GET',
+          headers: { 'User-Agent': 'Kibana/9.0.0' },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+
+      const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty('Authorization');
+      expect(headers).not.toHaveProperty('authorization');
+      expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
+    });
+
+    it('URL-encodes the service account id', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await uiamService.getServiceAccount('id/with spaces');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/id%2Fwith%20spaces',
+        expect.anything()
+      );
+    });
+
+    it('reproduces a 404 when the account is missing', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'NOT_FOUND',
+            type: 'not_found',
+            message: 'Not found',
+          },
+        }),
+      });
+
+      await expect(uiamService.getServiceAccount('missing')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(uiamService.getServiceAccount('service-account-id')).rejects.toThrowError(
+        'socket hang up'
+      );
     });
   });
 
