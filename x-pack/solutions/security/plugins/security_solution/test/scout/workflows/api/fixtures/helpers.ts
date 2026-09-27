@@ -51,12 +51,13 @@ export const deleteWorkflow = async (
 export const runWorkflow = async (
   apiClient: ApiClient,
   headers: Record<string, string>,
-  workflowId: string
+  workflowId: string,
+  inputs: Record<string, unknown> = {}
 ): Promise<string> => {
   const res = await apiClient.post(`/api/workflows/workflow/${workflowId}/run`, {
     headers,
     responseType: 'json',
-    body: { inputs: {} },
+    body: { inputs },
   });
   expect(res).toHaveStatusCode(200);
   return (res.body as { workflowExecutionId: string }).workflowExecutionId;
@@ -80,14 +81,15 @@ export const getExecution = async (
 export const waitForExecution = async (
   apiClient: ApiClient,
   headers: Record<string, string>,
-  workflowExecutionId: string
+  workflowExecutionId: string,
+  timeoutMs: number = POLL_TIMEOUT_MS
 ): Promise<WorkflowExecutionDto> => {
-  const deadline = Date.now() + POLL_TIMEOUT_MS;
+  const deadline = Date.now() + timeoutMs;
   let execution = await getExecution(apiClient, headers, workflowExecutionId);
   while (!isTerminalStatus(execution.status ?? '')) {
     if (Date.now() > deadline) {
       throw new Error(
-        `Execution ${workflowExecutionId} did not terminate within ${POLL_TIMEOUT_MS}ms ` +
+        `Execution ${workflowExecutionId} did not terminate within ${timeoutMs}ms ` +
           `(last status: ${execution.status})`
       );
     }
