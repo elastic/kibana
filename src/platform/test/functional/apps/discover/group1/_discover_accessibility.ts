@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.pressKeys(browser.keys.ESCAPE);
           // A bug exists with the create rule flyout where sometimes the confirm modal
           // shows even though the form hasn't been touched, so this works around it
-          if (await testSubjects.exists('confirmRuleCloseModal', { timeout: 0 })) {
+          if (await testSubjects.exists('confirmRuleCloseModal')) {
             await focusAndPressButton(
               await testSubjects.findDescendant(
                 'confirmModalConfirmButton',
