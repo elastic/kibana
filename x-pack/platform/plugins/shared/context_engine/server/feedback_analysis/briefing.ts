@@ -73,7 +73,7 @@ const renderGroup = (group: SignalPatternGroup, rank: number): string => {
   if (group.example?.error) {
     lines.push('', `Example error: \`${truncate(group.example.error)}\``);
   }
-  if (group.example && !group.example.error) {
+  if (group.example && !group.example.error && group.example.row_count !== undefined) {
     lines.push('', `Rows returned by the example: ${group.example.row_count}`);
   }
 

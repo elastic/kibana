@@ -78,8 +78,6 @@ interface ParsedReturned {
   row_count: number;
 }
 
-const EMPTY_RETURNED: ParsedReturned = { columns: [], row_count: 0 };
-
 interface EsqlResultsData {
   columns?: Array<{ name?: string } | string>;
   values?: unknown[][];
@@ -102,20 +100,26 @@ const extractEsqlResultsData = (parsed: unknown): EsqlResultsData | undefined =>
   return undefined;
 };
 
-export const parseReturned = (result: string | undefined | null): ParsedReturned => {
+export const parseReturned = (result: string | undefined | null): ParsedReturned | undefined => {
+  // A missing result attribute is UNKNOWN, not zero: agent_builder trace spans map
+  // `attributes.gen_ai.tool.call.result` as keyword with `ignore_above: 1024`, so any
+  // result serialized longer than 1024 chars is kept in `_source` but not indexed —
+  // ES|QL then reads it back as NULL even though the tool call succeeded and returned
+  // rows. Treating that as 0 rows misclassifies successful retrievals as
+  // `empty_retrieval` (see the classify gate below).
   if (!result) {
-    return EMPTY_RETURNED;
+    return undefined;
   }
   let parsed: unknown;
   try {
     parsed = JSON.parse(result);
   } catch {
-    return EMPTY_RETURNED;
+    return undefined;
   }
 
   const esqlData = extractEsqlResultsData(parsed);
   if (!esqlData) {
-    return EMPTY_RETURNED;
+    return undefined;
   }
 
   const columns = (esqlData.columns ?? []).map((column) =>
@@ -214,7 +218,8 @@ export const build = ({ toolRows, convAgent }: BuildInput): EsqlToolCallSignal[]
       const query =
         typeof rawQuery === 'string' ? rawQuery.slice(0, MAX_SIGNAL_TEXT_LENGTH) : undefined;
       const targetIndex = targetIndices[i];
-      const returned = parseReturned(row['attributes.gen_ai.tool.call.result']);
+      // `returned` stays an object; an unreadable result yields row_count: undefined
+      const returned = parseReturned(row['attributes.gen_ai.tool.call.result']) ?? {};
       const errorMessage = row['status.message']?.slice(0, MAX_SIGNAL_TEXT_LENGTH);
 
       signals.push({
