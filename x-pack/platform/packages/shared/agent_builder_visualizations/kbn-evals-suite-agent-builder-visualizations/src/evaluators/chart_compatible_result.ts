@@ -5,32 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
-import { substituteEsqlBindParams } from './esql_bind_params';
+import { isNumericColumn, type EsqlColumn } from './esql_column_types';
+import type { EsqlQueryRunner } from './esql_query_runner';
 
 export const CHART_COMPATIBLE_RESULT_EVALUATOR_NAME = 'Chart Compatible Result';
-
-interface EsqlColumn {
-  name: string;
-  type: string;
-}
-
-const NUMERIC_TYPES = new Set([
-  'integer',
-  'long',
-  'double',
-  'float',
-  'unsigned_long',
-  'number',
-  'half_float',
-  'scaled_float',
-]);
-
-const isNumericColumn = (column: EsqlColumn): boolean =>
-  NUMERIC_TYPES.has(column.type.toLowerCase());
 
 const resolveChartType = (
   visualization: ExtractedVisualization,
@@ -129,14 +110,15 @@ export function createChartCompatibleResultEvaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput
 >(config: {
-  esClient: ElasticsearchClient;
+  /** Executes ES|QL; share one runner across evaluators so each query runs once. */
+  runQuery: EsqlQueryRunner;
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   expectedChartTypeExtractor?: (expected: TExample['output']) => string | string[] | undefined;
   name?: string;
   scoreOnEmptyVisualizations?: number;
 }): Evaluator<TExample, TTaskOutput> {
   const {
-    esClient,
+    runQuery,
     visualizationExtractor,
     expectedChartTypeExtractor,
     name = CHART_COMPATIBLE_RESULT_EVALUATOR_NAME,
@@ -174,14 +156,24 @@ export function createChartCompatibleResultEvaluator<
 
       const details = await Promise.all(
         visualizations.map(async (visualization, index) => {
+          if (visualization.renderer === 'custom_content') {
+            return {
+              index,
+              chartType: visualization.chartType ?? null,
+              renderer: 'custom_content' as const,
+              compatible: false,
+              reason: 'custom_content renders an HTML template; there is no chart to fit',
+              columnCount: 0,
+              rowCount: 0,
+            };
+          }
+
           // Vega is not bound to Lens chart-type shape rules; treat as compatible
           // when the query executes with at least one column.
           if (visualization.renderer === 'vega') {
             try {
-              const response = await esClient.esql.query({
-                query: substituteEsqlBindParams(visualization.esql),
-              });
-              const columns = (response.columns ?? []) as EsqlColumn[];
+              const response = await runQuery(visualization.esql);
+              const columns: EsqlColumn[] = response.columns ?? [];
               const rowCount = response.values?.length ?? 0;
               const compatible = columns.length > 0;
               return {
@@ -219,10 +211,8 @@ export function createChartCompatibleResultEvaluator<
           }
 
           try {
-            const response = await esClient.esql.query({
-              query: substituteEsqlBindParams(visualization.esql),
-            });
-            const columns = (response.columns ?? []) as EsqlColumn[];
+            const response = await runQuery(visualization.esql);
+            const columns: EsqlColumn[] = response.columns ?? [];
             const rowCount = response.values?.length ?? 0;
             const { compatible, reason } = isChartCompatibleResult(chartType, columns, rowCount);
             return {

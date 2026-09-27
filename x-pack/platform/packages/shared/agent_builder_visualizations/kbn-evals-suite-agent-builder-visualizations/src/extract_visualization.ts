@@ -6,6 +6,8 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
+import { isRecord } from './evaluator_utils';
 
 const CREATE_VISUALIZATION_TOOL_ID = platformCoreTools.createVisualization;
 const VISUALIZATION_RESULT_TYPE = 'visualization';
@@ -14,13 +16,21 @@ interface ConverseLikeOutput {
   steps?: Array<Record<string, unknown>>;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+const RENDERERS: ReadonlySet<VisualizationRenderer> = new Set<VisualizationRenderer>([
+  'lens',
+  'vega',
+  'custom_content',
+]);
+
+const isRenderer = (value: unknown): value is VisualizationRenderer =>
+  typeof value === 'string' && RENDERERS.has(value as VisualizationRenderer);
 
 export interface ExtractedVisualization {
+  /** Empty only for static custom content, which has no backing query. */
   esql: string;
   chartType?: string;
-  renderer?: 'lens' | 'vega';
+  /** Absent on payloads that predate the field; treat as Lens. */
+  renderer?: VisualizationRenderer;
   visualization?: Record<string, unknown> & { spec?: string };
   attachmentId?: string;
 }
@@ -58,16 +68,18 @@ export function extractVisualizations(output: ConverseLikeOutput): ExtractedVisu
         attachment_id: attachmentId,
       } = candidate.data;
 
-      if (typeof esql !== 'string' || esql.trim().length === 0) {
+      const hasEsql = typeof esql === 'string' && esql.trim().length > 0;
+      // A chart is always query-backed; only custom content may be static.
+      if (!hasEsql && renderer !== 'custom_content') {
         continue;
       }
 
-      const extracted: ExtractedVisualization = { esql };
+      const extracted: ExtractedVisualization = { esql: hasEsql ? esql : '' };
 
       if (typeof chartType === 'string' && chartType.trim().length > 0) {
         extracted.chartType = chartType;
       }
-      if (renderer === 'lens' || renderer === 'vega') {
+      if (isRenderer(renderer)) {
         extracted.renderer = renderer;
       }
       if (isRecord(visualization)) {

@@ -16,7 +16,7 @@ const config = createPlaywrightEvalsConfig({
   // LLM judges. The whole dataset runs in a single test, so the per-test
   // timeout must cover every example serially — the default 5 min is not
   // enough. Mirrors the security ES|QL suite.
-  // ~17 examples × converse + evaluators; keep headroom for retries / slow models.
+  // ~21 creation examples × converse + evaluators (edits run two turns); keep headroom for retries / slow models.
   timeout: 45 * 60_000,
 });
 

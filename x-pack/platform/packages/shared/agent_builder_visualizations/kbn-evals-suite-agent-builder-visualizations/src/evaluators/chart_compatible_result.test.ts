@@ -11,6 +11,7 @@ import {
   createChartCompatibleResultEvaluator,
   isChartCompatibleResult,
 } from './chart_compatible_result';
+import { createEsqlQueryRunner } from './esql_query_runner';
 
 describe('isChartCompatibleResult', () => {
   it('accepts a single numeric column for metric charts', () => {
@@ -107,7 +108,7 @@ describe('createChartCompatibleResultEvaluator', () => {
     } as unknown as ElasticsearchClient;
 
     const evaluator = createChartCompatibleResultEvaluator({
-      esClient,
+      runQuery: createEsqlQueryRunner(esClient),
       visualizationExtractor: () => visualizations,
       expectedChartTypeExtractor: (expected) =>
         (expected as { chartType?: string } | undefined)?.chartType,
