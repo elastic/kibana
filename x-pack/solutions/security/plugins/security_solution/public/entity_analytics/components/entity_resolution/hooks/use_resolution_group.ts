@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
@@ -22,6 +23,11 @@ export interface ResolutionGroup {
 
 interface UseResolutionGroupOptions {
   enabled?: boolean;
+  /**
+   * Optional Kibana execution context forwarded to the resolution-group fetch so slow logs and
+   * APM traces can attribute the query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 export const useResolutionGroup = (entityId: string, options?: UseResolutionGroupOptions) => {
@@ -34,6 +40,7 @@ export const useResolutionGroup = (entityId: string, options?: UseResolutionGrou
         version: API_VERSIONS.public.v1,
         method: 'GET',
         query: { entity_id: entityId },
+        ...(options?.executionContext != null ? { context: options.executionContext } : {}),
       }),
     enabled: options?.enabled !== false && !!entityId,
     refetchOnWindowFocus: false,

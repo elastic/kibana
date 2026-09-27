@@ -50,6 +50,7 @@ export const useEntityStoreRiskScoreKpi = ({
   skip,
   riskEntity,
   timerange,
+  executionContext,
 }: UseRiskScoreKpiProps) => {
   const { addError } = useAppToasts();
   const { fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
@@ -57,7 +58,7 @@ export const useEntityStoreRiskScoreKpi = ({
     data: riskEngineStatus,
     isFetching: isStatusLoading,
     refetch: refetchEngineStatus,
-  } = useRiskEngineStatus();
+  } = useRiskEngineStatus({}, { executionContext });
   const { isPlatinumOrTrialLicense } = useMlCapabilities();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
@@ -139,6 +140,7 @@ export const useEntityStoreRiskScoreKpi = ({
             sortField,
             sortOrder: 'asc',
           },
+          context: executionContext,
         });
 
         total = res.total;

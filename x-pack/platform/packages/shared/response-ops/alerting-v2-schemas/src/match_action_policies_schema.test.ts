@@ -48,30 +48,28 @@ describe('matchActionPoliciesBodySchema', () => {
 });
 
 describe('matchActionPoliciesResponseSchema', () => {
-  const emptyResponse = { items: [], total: 0, evaluated_count: 0, is_truncated: false };
+  const emptyResponse = { items: [], evaluated_count: 0, is_truncated: false };
 
   it.each([
     emptyResponse,
-    { items: [], total: 3, evaluated_count: 3, is_truncated: false },
-    { items: [], total: 250, evaluated_count: 100, is_truncated: true },
+    { items: [], evaluated_count: 3, is_truncated: false },
+    { items: [], evaluated_count: 100, is_truncated: true },
   ])('accepts a response with an empty list and evaluation metadata: %j', (response) => {
     expect(matchActionPoliciesResponseSchema.parse(response)).toEqual(response);
   });
 
-  it.each(['total', 'evaluated_count', 'is_truncated'])('requires %s', (field) => {
+  it.each(['evaluated_count', 'is_truncated'])('requires %s', (field) => {
     expect(() =>
       matchActionPoliciesResponseSchema.parse({ ...emptyResponse, [field]: undefined })
     ).toThrow();
   });
 
-  it.each([
-    { total: -1 },
-    { evaluated_count: -1 },
-    { evaluated_count: 1.5 },
-    { is_truncated: 'true' },
-  ])('rejects invalid evaluation metadata: %j', (invalidFields) => {
-    expect(() =>
-      matchActionPoliciesResponseSchema.parse({ ...emptyResponse, ...invalidFields })
-    ).toThrow();
-  });
+  it.each([{ evaluated_count: -1 }, { evaluated_count: 1.5 }, { is_truncated: 'true' }])(
+    'rejects invalid evaluation metadata: %j',
+    (invalidFields) => {
+      expect(() =>
+        matchActionPoliciesResponseSchema.parse({ ...emptyResponse, ...invalidFields })
+      ).toThrow();
+    }
+  );
 });

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TransactionDetailFlyoutHeader } from './header';
 
@@ -44,6 +44,27 @@ describe('TransactionDetailFlyoutHeader', () => {
     const link = screen.getByTestId('transactionDetailFlyoutTitleLink');
     expect(link).toHaveAttribute('href', '/app/apm/services/checkout/transactions/view?name=GET');
     expect(link).toHaveTextContent('GET /api/orders');
+    expect(link).toHaveAttribute('data-ebt-action', 'viewSpan');
+    expect(link).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutTitle');
+  });
+
+  it('shows a tooltip describing the title link destination', async () => {
+    mockUseTransactionDetailFlyoutLinks.mockReturnValue({
+      loading: false,
+      apm: { transactionDetailsHref: '/app/apm/services/checkout/transactions/view?name=GET' },
+      discover: { href: undefined, openInDiscoverTab: undefined },
+    });
+
+    renderHeader();
+
+    const link = screen.getByTestId('transactionDetailFlyoutTitleLink');
+    const tooltipAnchor = link.closest('.euiToolTipAnchor') ?? link;
+    fireEvent.mouseEnter(tooltipAnchor);
+    fireEvent.mouseOver(tooltipAnchor);
+
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Open transaction details');
+    });
   });
 
   it('renders plain text when the APM href is unavailable', () => {

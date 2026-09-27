@@ -25,7 +25,7 @@ const validView = {
   space_id: 'default',
   started_at: '2026-06-01T00:00:00.000Z',
   ended_at: '2026-06-01T00:00:01.500Z',
-  timings: { duration: 1500, scheduled_delay: 250 },
+  timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
   outcome: 'success' as const,
   reason: null,
   error: null,
@@ -60,17 +60,17 @@ describe('rule_execution_history_schema', () => {
       it('fills in defaults when no fields are provided', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).toEqual({
-          sort: 'started_at',
+          sort_field: 'started_at',
           sort_order: 'desc',
           page: 1,
           per_page: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
         });
       });
 
-      it('does not inject rule_ids / outcome / from / to when missing', () => {
+      it('does not inject rule_ids / outcomes / from / to when missing', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('rule_ids');
-        expect(parsed).not.toHaveProperty('outcome');
+        expect(parsed).not.toHaveProperty('outcomes');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
       });
@@ -144,28 +144,28 @@ describe('rule_execution_history_schema', () => {
       });
     });
 
-    describe('outcome', () => {
+    describe('outcomes', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = listRuleExecutionsRequestSchema.parse({ outcome: 'success' });
-        expect(parsed.outcome).toEqual(['success']);
+        const parsed = listRuleExecutionsRequestSchema.parse({ outcomes: 'success' });
+        expect(parsed.outcomes).toEqual(['success']);
       });
 
       it('accepts an array of valid outcomes', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({
-          outcome: ['success', 'failure'],
+          outcomes: ['success', 'failure'],
         });
-        expect(parsed.outcome).toEqual(['success', 'failure']);
+        expect(parsed.outcomes).toEqual(['success', 'failure']);
       });
 
       it('rejects an empty array', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ outcome: [] }).success).toBe(false);
+        expect(listRuleExecutionsRequestSchema.safeParse({ outcomes: [] }).success).toBe(false);
       });
 
       it('rejects outcome values Task Manager does not emit (incl. ECS `unknown`)', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ outcome: ['skipped'] }).success).toBe(
+        expect(listRuleExecutionsRequestSchema.safeParse({ outcomes: ['skipped'] }).success).toBe(
           false
         );
-        expect(listRuleExecutionsRequestSchema.safeParse({ outcome: ['unknown'] }).success).toBe(
+        expect(listRuleExecutionsRequestSchema.safeParse({ outcomes: ['unknown'] }).success).toBe(
           false
         );
       });
@@ -173,7 +173,7 @@ describe('rule_execution_history_schema', () => {
       it('rejects arrays longer than the number of distinct outcomes', () => {
         expect(
           listRuleExecutionsRequestSchema.safeParse({
-            outcome: ['success', 'failure', 'success'],
+            outcomes: ['success', 'failure', 'success'],
           }).success
         ).toBe(false);
       });
@@ -203,18 +203,20 @@ describe('rule_execution_history_schema', () => {
       });
     });
 
-    describe('sort / sort_order', () => {
+    describe('sort_field / sort_order', () => {
       it('accepts the supported sort fields', () => {
-        expect(listRuleExecutionsRequestSchema.parse({ sort: 'started_at' }).sort).toBe(
+        expect(listRuleExecutionsRequestSchema.parse({ sort_field: 'started_at' }).sort_field).toBe(
           'started_at'
         );
-        expect(listRuleExecutionsRequestSchema.parse({ sort: 'duration' }).sort).toBe('duration');
+        expect(
+          listRuleExecutionsRequestSchema.parse({ sort_field: 'duration_ms' }).sort_field
+        ).toBe('duration_ms');
       });
 
       it('rejects unknown sort fields', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ sort: 'created_at' }).success).toBe(
-          false
-        );
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({ sort_field: 'created_at' }).success
+        ).toBe(false);
       });
 
       it('accepts asc and desc as sort order', () => {
@@ -271,8 +273,12 @@ describe('rule_execution_history_schema', () => {
         expect(parsed.per_page).toBe(25);
       });
 
-      it('rejects per_page below 1', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ per_page: 0 }).success).toBe(false);
+      it('accepts per_page=0 for a count-only read', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ per_page: 0 }).per_page).toBe(0);
+      });
+
+      it('rejects negative per_page', () => {
+        expect(listRuleExecutionsRequestSchema.safeParse({ per_page: -1 }).success).toBe(false);
       });
 
       it('rejects per_page above the maximum', () => {
@@ -306,15 +312,24 @@ describe('rule_execution_history_schema', () => {
         });
         expect(result.success).toBe(false);
       });
+
+      it('never trips the guard for a count-only read (per_page=0)', () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({
+            page: EXECUTION_HISTORY_MAX_RESULT_WINDOW,
+            per_page: 0,
+          }).success
+        ).toBe(true);
+      });
     });
 
     it('round-trips a fully populated query (with already-array fields)', () => {
       const input = {
         rule_ids: ['rule-x', 'rule-y'],
-        outcome: ['success', 'failure'] as const,
+        outcomes: ['success', 'failure'] as const,
         from: '2026-06-01T00:00:00Z',
         to: '2026-06-02T00:00:00Z',
-        sort: 'duration' as const,
+        sort_field: 'duration_ms' as const,
         sort_order: 'asc' as const,
         page: 2,
         per_page: 25,
@@ -373,17 +388,17 @@ describe('rule_execution_history_schema', () => {
     });
 
     it('rejects negative duration', () => {
-      const row = { ...validView, timings: { duration: -1, scheduled_delay: 0 } };
+      const row = { ...validView, timings: { duration_ms: -1, scheduled_delay_ms: 0 } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
-    it('allows a negative scheduled_delay (run started ahead of scheduled time)', () => {
-      const row = { ...validView, timings: { duration: 100, scheduled_delay: -50 } };
-      expect(ruleExecutionViewSchema.parse(row).timings.scheduled_delay).toBe(-50);
+    it('allows a negative scheduled_delay_ms (run started ahead of scheduled time)', () => {
+      const row = { ...validView, timings: { duration_ms: 100, scheduled_delay_ms: -50 } };
+      expect(ruleExecutionViewSchema.parse(row).timings.scheduled_delay_ms).toBe(-50);
     });
 
     it('rejects non-integer timings', () => {
-      const row = { ...validView, timings: { duration: 1.5, scheduled_delay: 0 } };
+      const row = { ...validView, timings: { duration_ms: 1.5, scheduled_delay_ms: 0 } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
@@ -439,7 +454,7 @@ describe('rule_execution_history_schema', () => {
       ).toBe(false);
     });
 
-    it('rejects page or per_page below 1', () => {
+    it('rejects page below 1', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
@@ -448,13 +463,26 @@ describe('rule_execution_history_schema', () => {
           per_page: 20,
         }).success
       ).toBe(false);
+    });
 
+    it('accepts per_page=0 for a count-only read', () => {
+      expect(
+        listRuleExecutionsResponseSchema.safeParse({
+          items: [],
+          total: 42,
+          page: 1,
+          per_page: 0,
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects a negative per_page', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
           total: 0,
           page: 1,
-          per_page: 0,
+          per_page: -1,
         }).success
       ).toBe(false);
     });

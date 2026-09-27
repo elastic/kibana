@@ -31,7 +31,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-util",
     "@kbn/scout",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/i18n-react"
   ],
   "exclude": ["target/**/*"]
 }
