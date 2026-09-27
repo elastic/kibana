@@ -25,6 +25,7 @@ export type EsqlConversionFailureReason =
   | 'terms_not_supported'
   | 'terms_other_bucket_not_supported'
   | 'terms_order_by_not_supported'
+  | 'terms_multi_level_not_supported'
   | 'saved_to_library_not_supported'
   | 'trendline_not_supported'
   | 'unsupported_settings'
@@ -96,6 +97,13 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     {
       defaultMessage:
         'Cannot convert to ES|QL: This Top values ranking option is not supported for conversion.',
+    }
+  ),
+  terms_multi_level_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsMultiLevelTooltip',
+    {
+      defaultMessage:
+        'Cannot convert to ES|QL: More than two Top values dimensions will be supported in an upcoming update.',
     }
   ),
   saved_to_library_not_supported: i18n.translate(
