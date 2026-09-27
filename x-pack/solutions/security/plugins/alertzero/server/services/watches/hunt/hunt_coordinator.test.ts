@@ -191,6 +191,37 @@ describe('huntCoordinator', () => {
     expect(result.technologies).toEqual(['aws_iam']);
   });
 
+  it('derives the Investigation headline and narrative from the outcome, naming the report', async () => {
+    const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+    mockLoad.mockResolvedValueOnce({
+      iocs: [{ type: 'ip', value: '192.0.2.30' }],
+      techniques: ['T1078.004'],
+      text: 'report body text',
+      title: 'CloudTrail retrospective',
+    });
+
+    const result = await huntCoordinator(
+      { esClient, reportsEsClient: esClient },
+      undefined,
+      logger,
+      {
+        spaceId: 'default',
+        trigger: 'scheduled',
+        run_id: 'run-narrative',
+        report_id: 'rpt-1',
+        tier2_when: 'on_hits',
+      }
+    );
+
+    expect(result.headline).toBe('no confirmed hits: Tier 1 found no matches; Tier 2 skipped');
+    expect(result.narrative).toContain(
+      '### Hunt Watch found no confirmed hits\n\nHunt Watch found no confirmed hits for threat report **"CloudTrail retrospective"** (`rpt-1`) in `aws_iam` telemetry.'
+    );
+    expect(result.narrative).toContain('- **Indices:** `logs-aws.cloudtrail-*` (required)');
+    expect(result.narrative).toContain('only escalates to Tier 2 on a hit');
+    expect(result.narrative).toContain('_Hunt run `run-narrative`._');
+  });
+
   it('echoes the caller-supplied run_id', async () => {
     const result = await huntCoordinator(
       { esClient, reportsEsClient: esClient },

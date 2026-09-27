@@ -1,0 +1,185 @@
+version: "1"
+name: Hunt Watch - proposal gate
+description: >
+  Child dispatched by PR 4's packaging child (`hunt_package_report.yaml`) via
+  `workflow.executeAsync`, one per minted Proposal (registered id
+  system-security-hunt-proposal-gate). Wraps `system-create-proposal`'s single
+  `waitForApproval` (no second gate); that workflow creates the Proposal
+  idempotently, parks on the decision, records it, and settles expiry. After
+  the wrap returns, re-queries every Proposal on the Investigation's
+  conversation and closes it (`close_reason: resolved`) only when the section
+  C settlement predicate holds: created >= expectedProposalCount, zero
+  pending, zero executing. Never throws past its own on-failure fallbacks; a
+  requery or close failure continues rather than aborting, since the
+  Investigation staying open with its pending state visible is the accepted
+  unrecoverable case (section H) -- recovery is manual.
+enabled: true
+tags:
+  - security
+  - continuous-threat-hunt
+settings:
+  # Must cover system-create-proposal's own settings.timeout (168h): this
+  # child waits on it synchronously via workflow.execute, so its own ceiling
+  # has to be at least as long or the wait gets cut short first (same reasoning
+  # as attack_discovery_review.yaml's settings.timeout against its own
+  # escalation_gate). Pinned to exactly 168h, not padded, since the two
+  # requery/close steps after the wrap are near-instant.
+  timeout: '168h'
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        conversationId:
+          type: string
+          description: Conversation this Proposal belongs to (create_proposal.yaml's own required field).
+        comment:
+          type: string
+          description: Explains what is being proposed, rendered as markdown.
+        actionWorkflowId:
+          type: string
+          description: Managed action workflow to execute once approved. Absent for an actionless recommendation.
+        actionInput:
+          type: object
+          additionalProperties: true
+          description: Input for the action workflow, passed through as its single actionInput object.
+        impact:
+          type: string
+          description: Impact snapshotted at creation.
+        category:
+          type: string
+          description: Grouping axis for the decision queue; always set by the packaging child's mint payload.
+        investigationConversationId:
+          type: string
+          description: Investigation conversation id this gate closes on settlement.
+        runId:
+          type: string
+          description: Run id the Worker's fan-out minted for this sweep.
+        closureSummary:
+          type: string
+          description: Precomputed closure summary from the packaging child, written on close.
+        expectedProposalCount:
+          type: number
+          description: The creation barrier this gate checks (created >= this) before closing the Investigation.
+      required:
+        - conversationId
+        - comment
+        - category
+        - investigationConversationId
+        - runId
+        - closureSummary
+        - expectedProposalCount
+      additionalProperties: false
+outputs:
+  - name: proposalStatus
+    type: string
+  - name: decision
+    type: string
+  - name: expired
+    type: boolean
+steps:
+  # The gate child adds no second gate (mvp-slice.md:934): this is the settled
+  # single sync wrap of system-create-proposal's own waitForApproval.
+  # on-failure: continue rather than a fallback ending in workflow.output,
+  # since this is this workflow's own terminal concern, not a stage a Worker
+  # branch depends on continuing past (section A's rule is for the Worker's
+  # parallel branch specifically) -- but continuing here still lets the
+  # requery/close steps below run their own best-effort cleanup rather than
+  # aborting the whole execution if the wrap itself never resolves normally.
+  - name: create_and_gate_proposal
+    type: workflow.execute
+    with:
+      workflow-id: system-create-proposal
+      inputs:
+        conversationId: "{{ inputs.conversationId }}"
+        comment: "{{ inputs.comment }}"
+        actionWorkflowId: "{{ inputs.actionWorkflowId }}"
+        actionInput: "${{ inputs.actionInput }}"
+        impact: "{{ inputs.impact }}"
+        category: "{{ inputs.category }}"
+    on-failure:
+      continue: true
+
+  - name: resolve_gate_wrapper_output
+    type: data.set
+    with:
+      proposal_status: "{{ steps.create_and_gate_proposal.output.status }}"
+      proposal_decision: "{{ steps.create_and_gate_proposal.output.decision }}"
+      proposal_expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
+
+  # Two calls, not a conditional retry: `!= filter chain -> comparison` in one
+  # expression is illegal in this engine (Phase 0 task 7), so an "only requery
+  # again if the first read looks stale" branch would need the same split this
+  # avoids entirely. Bounded (exactly one retry, always run) rather than
+  # unbounded: a just-created Proposal must be visible (section C item 4), and
+  # a second immediate read after the wrap has already returned is enough
+  # margin for the common case.
+  - name: requery_proposals
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        size: 100
+    on-failure:
+      continue: true
+
+  - name: requery_proposals_retry
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        size: 100
+    on-failure:
+      continue: true
+
+  # `where`/`size` on a nil `.proposals` (a failed requery, on-failure
+  # swallowed) resolve to 0, not a hard-fail -- verified live, unlike
+  # `foreach` on a nil source (Phase 0 task 7 finding). No `default: []`
+  # guard needed. `total` (not the array length) is the created count per
+  # section C item 4: never assume one page is complete.
+  - name: resolve_settlement_counts
+    type: data.set
+    with:
+      created_count: "${{ steps.requery_proposals_retry.output.total | default: 0 }}"
+      pending_count: "${{ steps.requery_proposals_retry.output.proposals | where: 'status', 'pending' | size }}"
+      executing_count: "${{ steps.requery_proposals_retry.output.proposals | where: 'status', 'executing' | size }}"
+
+  # Three-term `and` chain, no `or` mixed in -- verified live this associates
+  # left-to-right without the mixed and/or precedence hazard create_proposal.yaml
+  # warns about (that warning is specifically about mixing and/or, not chaining
+  # multiple ands). Section C item 3's full settlement predicate.
+  - name: resolve_settled
+    type: data.set
+    with:
+      settled: "${{ variables.created_count >= inputs.expectedProposalCount and variables.pending_count == 0 and variables.executing_count == 0 }}"
+
+  # Idempotent close (a second close on an already-closed Investigation is a
+  # no-op returning closed: true, per the client's own patchMetadata contract);
+  # accepted unrecoverable case on failure: the Investigation stays open with
+  # its pending state visible, recovery is manual (section H).
+  - name: close_if_settled
+    type: ai.conversation.metadata.patch
+    if: "${{ variables.settled == true }}"
+    with:
+      conversation_id: "{{ inputs.investigationConversationId }}"
+      updates:
+        status: closed
+        close_reason: resolved
+        summary: "{{ inputs.closureSummary }}"
+    on-failure:
+      continue: true
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      proposalStatus: "{{ variables.proposal_status }}"
+      decision: "{{ variables.proposal_decision }}"
+      expired: "${{ variables.proposal_expired }}"

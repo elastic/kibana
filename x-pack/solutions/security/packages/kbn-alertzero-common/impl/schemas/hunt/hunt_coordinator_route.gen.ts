@@ -244,6 +244,38 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .describe(
         'Whether the report should stay eligible for a later run. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.'
       ),
+    /**
+     * One clause for the run conclusion message: the outcome (confirmed hit or not) plus what each tier did.
+     */
+    headline: z
+      .string()
+      .optional()
+      .describe(
+        'One clause for the run conclusion message: the outcome (confirmed hit or not) plus what each tier did.'
+      ),
+    /**
+     * The full hunt results narrative the hunt child writes to the Investigation: what was hunted, where and when, what each tier found, and why a tier did not run. Deterministic markdown derived from the structured fields, self-sufficient because the SSE attachment may not render everywhere.
+     */
+    narrative: z
+      .string()
+      .optional()
+      .describe(
+        'The full hunt results narrative the hunt child writes to the Investigation: what was hunted, where and when, what each tier found, and why a tier did not run. Deterministic markdown derived from the structured fields, self-sufficient because the SSE attachment may not render everywhere.'
+      ),
+    /**
+     * Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per proposed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
+     */
+    sse: z
+      .array(
+        z.object({
+          attachment_id: z.string(),
+          data: z.object({}).catchall(z.unknown()),
+        })
+      )
+      .optional()
+      .describe(
+        'Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per proposed technique (a single report-scoped entry when Tier 2 produced none). The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
+      ),
   })
 );
 export type HuntCoordinatorResponse = z.infer<typeof HuntCoordinatorResponse>;

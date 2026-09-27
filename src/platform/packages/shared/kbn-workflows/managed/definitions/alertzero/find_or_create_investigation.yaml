@@ -1,0 +1,152 @@
+version: "1"
+name: Hunt Watch - find or create Investigation
+description: >
+  Untagged child invoked by PR 4's tagged Worker (registered id
+  system-security-hunt-find-or-create-investigation; kept in sync with
+  kbn-workflows/managed/definitions/alertzero/hunt_continuous_threat_hunt.yaml).
+  Wraps the native hunt.findOrCreateInvestigation step, which mints the
+  deterministic Investigation id (uuidv5(hunt:report:{reportId})), creates the
+  conversation, or verifies an existing one on a conflict. Never throws past
+  its own on-failure fallback; a partial run is reported through the typed
+  output, not an exception. No kibana.request: PR 3b never shipped an
+  Investigation-write route, and the id is minted server-side because Liquid
+  cannot compute the uuidv5 hash.
+enabled: true
+tags: []
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        reportId:
+          type: string
+          description: Threat report id to find-or-create a Hunt Watch Investigation for.
+        runId:
+          type: string
+          description: >-
+            Optional run id the Worker's fan-out minted for this sweep, named
+            in the trigger message narrative when present.
+      required:
+        - reportId
+      additionalProperties: false
+outputs:
+  - name: status
+    type: string
+  - name: stage
+    type: string
+  - name: reason
+    type: string
+  - name: investigationConversationId
+    type: string
+steps:
+  - name: find_or_create
+    type: hunt.findOrCreateInvestigation
+    with:
+      reportId: "{{ inputs.reportId }}"
+    on-failure:
+      fallback:
+        - name: emit_find_or_create_failed
+          type: workflow.output
+          status: completed
+          with:
+            status: failed
+            stage: find_or_create
+            reason: "{{ steps.find_or_create.error.message }}"
+
+  # By reference (security.threat's own contract: report_id plus optional
+  # captured-fallback fields; the live report document is resolved
+  # space-projected at render time, so no fallback fields are required here).
+  # `triggerAttachmentId` (trigger-{sha256(space|reportId)}, computed by the
+  # native step alongside the deterministic conversation id) is fixed per
+  # (space, reportId), so a rerun against the same conversation 409s rather
+  # than appending a second copy, and packaging's documented fallback lookup
+  # (section B: `conversations.search({ filter: 'attachment_id: <this id>' })`)
+  # resolves to it. `on-failure: continue: true` because losing this pill is
+  # not a reason to fail an otherwise-successful find-or-create. Skipped when
+  # find_or_create itself failed: there is no conversation id to attach to.
+  - name: attach_threat_report
+    type: ai.attachment.add
+    if: "${{ steps.find_or_create.output.investigationConversationId != nil and steps.find_or_create.output.investigationConversationId != empty }}"
+    with:
+      conversation_id: "{{ steps.find_or_create.output.investigationConversationId }}"
+      id: "{{ steps.find_or_create.output.triggerAttachmentId }}"
+      type: security.threat
+      data:
+        report_id: "{{ inputs.reportId }}"
+      description: The threat report this Investigation hunts against
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # Decoupled from the attachment above (Steph, 2026-09-25): a separate
+  # journal_note call rather than one converse call carrying both, since this
+  # message type does not depend on the attachment landing to be useful on its
+  # own. Same skip guard; a rerun gets its own trigger message on the same
+  # Investigation (section B: a manual rerun appends a new run cycle, it does
+  # not create a second Investigation), and says so: `created` distinguishes
+  # the first run from a rerun.
+  #
+  # The message is the first line of the Investigation's story, so it names
+  # the report (title, source, publication time, severity), what the report
+  # exposes for hunting (indicator count and ATT&CK techniques), and what the
+  # run is about to do. Every report fact is optional (the native step reads
+  # the report best-effort); the message degrades to the report id alone.
+  # Markdown (Agent Builder conversations render it): a heading, a fact list,
+  # and a closing paragraph. Literal block scalar so line breaks survive;
+  # block tags use `-%}` only (a leading `{%-` would eat the previous line's
+  # newline and glue two lines together).
+  - name: write_trigger_message
+    type: workflow.execute
+    if: "${{ steps.find_or_create.output.investigationConversationId != nil and steps.find_or_create.output.investigationConversationId != empty }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      inputs:
+        conversation_id: "{{ steps.find_or_create.output.investigationConversationId }}"
+        message: |-
+          {% assign report = steps.find_or_create.output.report -%}
+          {% if steps.find_or_create.output.created == true -%}
+          ### Hunt Watch opened this Investigation
+          {% else -%}
+          ### Hunt Watch started a new hunt run on this Investigation
+          {% endif -%}
+          Threat report {% if report.title != nil and report.title != empty %}**"{{ report.title }}"** (`{{ inputs.reportId }}`){% else %}`{{ inputs.reportId }}`{% endif %}.
+
+          {% if report.sourceName != nil and report.sourceName != empty -%}
+          - **Source:** {{ report.sourceName }}
+          {% endif -%}
+          {% if report.publishedAt != nil and report.publishedAt != empty -%}
+          - **Published:** {{ report.publishedAt }}
+          {% endif -%}
+          {% if report.severity != nil and report.severity != empty -%}
+          - **Source severity:** {{ report.severity }}
+          {% endif -%}
+          {% if report != nil -%}
+          - **Indicators for Tier 1 to search:** {{ report.iocCount }}
+          - **ATT&CK techniques:** {% if report.techniques != nil and report.techniques != empty %}{% for technique in report.techniques %}`{{ technique }}`{% unless forloop.last %}, {% endunless %}{% endfor %}{% else %}none{% endif %}
+          {% endif -%}
+          {% if inputs.runId != nil and inputs.runId != empty -%}
+          - **Hunt run:** `{{ inputs.runId }}`
+          {% endif %}
+          This run searches the space's telemetry for those indicators and techniques (Tier 1), derives behavior hunts from the report text and executes them as ES|QL (Tier 2), and appends what it finds to this Investigation.
+    on-failure:
+      continue: true
+
+  # `data.set` first, since `workflow.output`'s `with:` values are read, not
+  # templated with `{% if %}` blocks directly (the hunt.yaml convention).
+  - name: resolve_result_status
+    type: data.set
+    with:
+      result_status: |-
+        {%- if steps.find_or_create.output.investigationConversationId != nil -%}
+        success
+        {%- else -%}
+        failed
+        {%- endif -%}
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      status: "{{ variables.result_status }}"
+      stage: find_or_create
+      investigationConversationId: "{{ steps.find_or_create.output.investigationConversationId }}"
+      reason: "{{ steps.find_or_create.error.message }}"

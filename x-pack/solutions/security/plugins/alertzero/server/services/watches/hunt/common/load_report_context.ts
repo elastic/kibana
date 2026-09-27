@@ -16,6 +16,11 @@ export interface ReportHuntContext {
   iocs: HuntIoc[];
   techniques: string[];
   text?: string;
+  /** Descriptive fields the Investigation narratives cite; absent when the report does not carry them. */
+  title?: string;
+  source_name?: string;
+  published_at?: string;
+  severity?: string;
   /**
    * What the bounds below dropped, so the run can report the part of the report it
    * never looked at. Silently hunting a prefix is the failure mode: an IOC past the
@@ -35,7 +40,10 @@ export interface ReportHuntContext {
 }
 
 interface StoredReportSource {
-  content?: { body_text?: string };
+  '@timestamp'?: string;
+  content?: { title?: string; body_text?: string };
+  source?: { name?: string };
+  severity?: { level?: string };
   extracted?: {
     iocs?: Array<{ type?: string; value?: string }>;
     ttps?: { techniques?: string[] };
@@ -65,6 +73,13 @@ const isSearchableIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc
 
 const isWithinIocValueBound = ({ value }: HuntIoc): boolean =>
   value.length <= MAX_HUNT_IOC_VALUE_CHARS;
+
+const MAX_REPORT_LABEL_CHARS = 512;
+
+const asLabel = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0
+    ? value.slice(0, MAX_REPORT_LABEL_CHARS)
+    : undefined;
 
 const isHuntTechnique = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= MAX_HUNT_TECHNIQUE_CHARS;
@@ -100,7 +115,15 @@ export const loadReportHuntContext = async ({
         filter: [buildHuntSpaceFilterTerms(spaceId), { ids: { values: [reportId] } }],
       },
     },
-    _source: ['content.body_text', 'extracted.iocs', 'extracted.ttps.techniques'],
+    _source: [
+      '@timestamp',
+      'content.title',
+      'content.body_text',
+      'source.name',
+      'severity.level',
+      'extracted.iocs',
+      'extracted.ttps.techniques',
+    ],
   });
   const source = response.hits.hits[0]?._source;
   if (!source) return null;
@@ -143,7 +166,15 @@ export const loadReportHuntContext = async ({
       }),
   };
 
+  const title = asLabel(source.content?.title);
+  const sourceName = asLabel(source.source?.name);
+  const publishedAt = asLabel(source['@timestamp']);
+  const severity = asLabel(source.severity?.level);
   return {
+    ...(title !== undefined ? { title } : {}),
+    ...(sourceName !== undefined ? { source_name: sourceName } : {}),
+    ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),
+    ...(severity !== undefined ? { severity } : {}),
     iocs: mappableIocs.slice(0, MAX_HUNT_REPORT_IOCS).map(({ type, value }) => ({ type, value })),
     techniques: validTechniques.slice(0, MAX_HUNT_REPORT_TECHNIQUES),
     ...(text !== undefined ? { text } : {}),

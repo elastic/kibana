@@ -1,0 +1,203 @@
+version: "1"
+name: Hunt Watch - package report
+description: >
+  Child invoked by PR 4's tagged Worker (registered id
+  system-security-hunt-package-report; kept in sync with
+  kbn-workflows/managed/definitions/alertzero/hunt_continuous_threat_hunt.yaml).
+  Wraps the native hunt.packageReport step, which owns the mint-versus-dismiss
+  decision table, writes pending coverage KIs, resolves every fillable
+  category:respond catalog action, and commits the hunt.expectedProposalCount
+  barrier. This child fans the returned mint payloads out to per-Proposal gate
+  children (workflow.executeAsync, fire-and-forget: it does not join them),
+  then closes the Investigation benignly when the run was clean. Never throws
+  past its own on-failure fallback; a partial run (including a partial gate
+  dispatch) is reported through the typed output, not an exception. Skips the
+  real packaging call entirely when the Worker's own find_or_create_investigation
+  failed upstream (empty investigationConversationId), same guard as hunt.yaml's
+  run_hunt_coordinator.
+enabled: true
+# security + continuous-threat-hunt: the per-feature child-grouping pair every
+# other Watch's children carry (detection-rule-creation/detection-rule-tuning/
+# attack-discovery/detection-coverage on their own children), for Workflows-list
+# findability. Never watch/watch-hunt, which stays Worker-only.
+tags:
+  - security
+  - continuous-threat-hunt
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        reportId:
+          type: string
+          description: Threat report id this Investigation is bound to.
+        investigationConversationId:
+          type: string
+          description: Conversation id of the report's Investigation (already created by the Worker).
+        runId:
+          type: string
+          description: Run id the Worker's fan-out minted for this sweep; packaging reads only attachments scoped to this run.
+      required:
+        - reportId
+        - investigationConversationId
+        - runId
+      additionalProperties: false
+outputs:
+  - name: status
+    type: string
+  - name: stage
+    type: string
+  - name: reason
+    type: string
+  # Plain-prose account of what packaging did (proposals minted and for what,
+  # benign dismissal, coverage knowledge written), quoted verbatim by the
+  # Worker's run conclusion message.
+  - name: summary
+    type: string
+steps:
+  # No Investigation to package against (the Worker's find_or_create failed)
+  # means there is nothing to decide: skip the real packaging call rather than
+  # run it against a nonexistent Investigation (Phase 5 task 2; same guard as
+  # hunt.yaml's run_hunt_coordinator).
+  - name: decide_and_package
+    type: hunt.packageReport
+    if: "${{ inputs.investigationConversationId != nil and inputs.investigationConversationId != empty }}"
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+      reportId: "{{ inputs.reportId }}"
+      investigationConversationId: "{{ inputs.investigationConversationId }}"
+      runId: "{{ inputs.runId }}"
+    on-failure:
+      fallback:
+        - name: emit_package_failed
+          type: workflow.output
+          status: completed
+          with:
+            status: run_incomplete
+            stage: packaging
+            reason: "{{ steps.decide_and_package.error.message }}"
+
+  # `if:` gates the whole parallel step, not just its `foreach` source, and
+  # checks `!= nil`/`!= empty` rather than a `| default: []` filter chain: a
+  # bracket array literal is not a valid filter argument in this engine (it
+  # silently drops the field) and `foreach` itself hard-fails on a nil
+  # predecessor rather than treating it as empty (Phase 0 task 7 finding,
+  # section A item 8 — same reasoning as the Worker's own report_fan_out).
+  # Fire-and-forget: this child does not join the gates (Phase 5 task 4), so
+  # `mode: settled` plus the failed count read below is how a launch failure
+  # is observed without an on-failure inside the branch body (illegal there
+  # per Phase 0 task 7 finding 1).
+  - name: start_proposal_gates
+    type: parallel
+    if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.proposals != nil and steps.decide_and_package.output.proposals != empty }}"
+    foreach: "${{ steps.decide_and_package.output.proposals }}"
+    mode: settled
+    concurrency:
+      max: 5
+    steps:
+      - name: dispatch_gate
+        type: workflow.executeAsync
+        with:
+          workflow-id: system-security-hunt-proposal-gate
+          inputs:
+            conversationId: "{{ foreach.item.conversationId }}"
+            comment: "{{ foreach.item.comment }}"
+            category: "{{ foreach.item.category }}"
+            impact: "{{ foreach.item.impact }}"
+            actionWorkflowId: "{{ foreach.item.actionWorkflowId }}"
+            actionInput: "${{ foreach.item.actionInput }}"
+            investigationConversationId: "{{ inputs.investigationConversationId }}"
+            runId: "{{ inputs.runId }}"
+            closureSummary: "{{ steps.decide_and_package.output.closureSummary }}"
+            expectedProposalCount: "${{ steps.decide_and_package.output.expectedProposalCount }}"
+
+  # A scalar `default: 0` (not a bracket array literal) is fine in this engine
+  # (Phase 0 task 7 only flagged `default: []`); safe when start_proposal_gates
+  # was itself skipped (no proposals) or never ran.
+  - name: resolve_dispatch_status
+    type: data.set
+    with:
+      dispatch_failed_count: "${{ steps.start_proposal_gates.output.failed | default: 0 }}"
+
+  # Section C item 5: a partial gate launch (k of N dispatched) marks the
+  # packaging stage `partial`, same as a `run_incomplete` native result — the
+  # Worker's own outcome derivation only checks this child's status for
+  # equality to `run_incomplete`, so both collapse to the one literal it reads.
+  - name: resolve_package_status
+    type: data.set
+    with:
+      package_status: |-
+        {%- if inputs.investigationConversationId == nil or inputs.investigationConversationId == empty -%}
+        run_incomplete
+        {%- elsif steps.decide_and_package.output.status != 'packaged' -%}
+        run_incomplete
+        {%- elsif variables.dispatch_failed_count > 0 -%}
+        run_incomplete
+        {%- else -%}
+        success
+        {%- endif -%}
+      package_reason: |-
+        {%- if inputs.investigationConversationId == nil or inputs.investigationConversationId == empty -%}
+        no Investigation available (find_or_create failed upstream; packaging was not called)
+        {%- elsif steps.decide_and_package.output.status == 'run_incomplete' -%}
+        {{ steps.decide_and_package.output.reason }}
+        {%- elsif steps.decide_and_package.error.message != nil and steps.decide_and_package.error.message != empty -%}
+        {{ steps.decide_and_package.error.message }}
+        {%- elsif variables.dispatch_failed_count > 0 -%}
+        {{ variables.dispatch_failed_count }} of {{ steps.decide_and_package.output.proposals | size }} gate dispatch(es) failed to launch
+        {%- endif -%}
+
+  # The packaging story for the run conclusion. Written from the native step's
+  # structured output rather than a second copy of the decision logic: what was
+  # minted (one bullet per proposal: category, host, executable action or the
+  # reason it is recommendation-only), whether the Investigation was dismissed
+  # as benign, and how many coverage knowledge items were written or skipped.
+  # On an incomplete run it explains why packaging stopped, in the same words
+  # the `reason` output carries. Markdown, embedded under the conclusion's
+  # "Packaging" heading, so it starts with a sentence and may add bullets;
+  # block tags use `-%}` only so the bullet line breaks survive.
+  - name: resolve_package_summary
+    type: data.set
+    with:
+      package_summary: |-
+        {% assign packaged = steps.decide_and_package.output -%}
+        {% if variables.package_status != 'success' and packaged.status != 'packaged' -%}
+        Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
+        {% elsif packaged.dismiss == true -%}
+        No confirmed hits, so packaging closed this Investigation as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %} and recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        {% else -%}
+        Packaging minted {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% else %} Each proposal waits on its own approval gate; the Investigation stays open until every gate is decided.{% endif %}
+        {% for p in packaged.proposals -%}
+          - **{{ p.category }}**{% if p.hostName != nil and p.hostName != empty %} on `{{ p.hostName }}`{% endif %}{% if p.actionWorkflowId != nil and p.actionWorkflowId != empty %}: runs `{{ p.actionWorkflowId }}` on approval{% else %}: recommendation only{% if p.actionlessReason != nil and p.actionlessReason != empty %} ({{ p.actionlessReason | replace: "_", " " }}){% endif %}{% endif %}
+        {% endfor -%}
+        {% if packaged.coverage.written != nil and packaged.coverage.written != empty -%}
+          - Recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch.
+        {% endif -%}
+        {% if packaged.coverage.skipped != nil and packaged.coverage.skipped != empty -%}
+          - {{ packaged.coverage.skipped | size }} coverage knowledge item{% if packaged.coverage.skipped.size != 1 %}s were{% else %} was{% endif %} not written ({{ packaged.coverage.skipped | map: "reason" | uniq | join: ", " | replace: "_", " " }}).
+        {% endif -%}
+        {% endif -%}
+
+  # Benign close: only when packaging actually ran and decided to dismiss
+  # (clean run, no hits). A packaging failure or skip never reaches `dismiss`
+  # (steps.decide_and_package.output stays nil in both cases), so this cannot
+  # close an Investigation packaging never evaluated.
+  - name: dismiss_investigation_if_clean
+    type: ai.conversation.metadata.patch
+    if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.dismiss == true }}"
+    with:
+      conversation_id: "{{ inputs.investigationConversationId }}"
+      updates:
+        status: closed
+        close_reason: benign
+        summary: "{{ steps.decide_and_package.output.closureSummary }}"
+    on-failure:
+      continue: true
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      status: "{{ variables.package_status }}"
+      stage: packaging
+      reason: "{{ variables.package_reason }}"
+      summary: "{{ variables.package_summary }}"

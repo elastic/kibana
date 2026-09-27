@@ -1,18 +1,229 @@
 version: "1"
 name: Continuous Threat Hunt
-description: Hunt Watch continuous threat hunt worker stub.
+description: >
+  Hunt Watch's per-space sweep: gates on index scope, selects candidate
+  reports, fans out one Investigation per candidate (find-or-create, hunt,
+  package), and always resolves to a run conclusion regardless of which stage
+  failed inside a candidate's branch. R.7: no correlation step here (3B
+  inserts it between hunt and packaging).
 enabled: false
 tags:
   - watch
   - watch-hunt
+settings:
+  # Per-space: prevents a second sweep from starting while the first is still
+  # running. Not an ordering, atomicity, or gate-wait bound (section F);
+  # distinct from report_fan_out's own concurrency.max below, which throttles
+  # branches within one sweep, not sweeps against each other.
+  concurrency:
+    key: hunt-continuous-threat-hunt
+    strategy: drop
+    max: 1
+# Triggers are rendered from autonomy: manual = manual only; assisted/supervised
+# add the schedule. Dial placeholders land in consts so Phase 3 can wire them.
 triggers:
-  - type: manual
+__WORKER_TRIGGERS__
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+    extras: __WORKER_EXTRAS__
+    # Flat dial mirrors for Phase 3 kibana.request / child inputs (same values as extras).
+    tier2When: __WORKER_TIER2_WHEN__
+    candidateLimit: __WORKER_CANDIDATE_LIMIT__
+    fanOutMax: __WORKER_FAN_OUT_MAX__
+    technology: __WORKER_TECHNOLOGY__
 steps:
-  - name: stub
-    type: console
+  # Tier 1 index check (which telemetry indices exist), not Security Solution
+  # threat-intel readiness. `continue: true` (no fallback capture): a route
+  # exception collapses totalTechnologies/blockedTechnologies to 0/0 below,
+  # which resolve_index_scope_gate treats the same as all-blocked, so
+  # selection and the fan-out are both skipped and the run ends with no writes.
+  - name: check_index_scope
+    type: kibana.request
     with:
-      message: "Continuous Threat Hunt worker stub"
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/index_scope"
+      headers:
+        elastic-api-version: "1"
+    on-failure:
+      continue: true
+
+  # Filter chains and comparisons cannot combine in one expression (engine
+  # constraint, Phase 0 task 7); each resolves in its own step first.
+  - name: count_index_scope_statuses
+    type: data.set
+    with:
+      totalTechnologies: "${{ steps.check_index_scope.output | default: [] | size }}"
+      blockedTechnologies: "${{ steps.check_index_scope.output | default: [] | where: 'status', 'blocked' | size }}"
+
+  # Blocked stops selection: either every technology's required indices are
+  # missing, or check_index_scope errored outright (total and blocked both
+  # collapse to 0, and 0 >= 0 is blocked). Degraded (some optional pattern
+  # missing on an otherwise-usable technology) proceeds; the coordinator
+  # resolves per-technology scope itself.
+  - name: resolve_index_scope_gate
+    type: data.set
+    with:
+      index_scope_blocked: "${{ steps.count_index_scope_statuses.output.blockedTechnologies >= steps.count_index_scope_statuses.output.totalTechnologies }}"
+
+  # A manual trigger naming reportIds is a bypass sweep; the hunt child's own
+  # `trigger` input needs this (hunt.yaml's hunt-once semantics), even though
+  # the candidates route below derives its own selection trigger independently
+  # from report_ids presence and the Worker never templates a trigger literal
+  # into that call.
+  - name: resolve_trigger_mode
+    type: data.set
+    with:
+      trigger_mode: |-
+        {%- if inputs.reportIds != nil and inputs.reportIds != empty -%}
+        manual
+        {%- else -%}
+        scheduled
+        {%- endif -%}
+
+  # Empty selection (`ids: []`) is a successful sweep: no error, no writes; the
+  # empty-array fan-out no-op is proven by the Phase 0 engine test (case 02).
+  # Reports the route returns under `skipped` are logged in sweep diagnostics
+  # and never enter the fan-out (not surfaced here; see the route's own response).
+  - name: select_candidate_reports
+    type: kibana.request
+    if: "${{ steps.resolve_index_scope_gate.output.index_scope_blocked != true }}"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/candidates"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        report_ids: "${{ inputs.reportIds }}"
+        limit: "${{ consts.worker_settings.candidateLimit }}"
+    on-failure:
+      continue: true
+
+  # `if:` gates the whole parallel step, not just its `foreach` source: a
+  # filter's `| default: []` does not produce a usable array for a skipped or
+  # nil predecessor in this engine (bracket array literals are not valid filter
+  # arguments here — verified live; the key is silently dropped rather than
+  # substituted), and `foreach` itself hard-fails ("must evaluate to an array")
+  # rather than treating a missing predecessor as empty. Skipping the whole
+  # step when the candidates call was blocked or itself failed sidesteps that
+  # entirely: index_scope_blocked covers the gate above; the `!= nil` check
+  # covers select_candidate_reports failing via its own `continue: true`.
+  - name: report_fan_out
+    type: parallel
+    if: "${{ steps.resolve_index_scope_gate.output.index_scope_blocked != true and steps.select_candidate_reports.output.ids != nil }}"
+    foreach: "${{ steps.select_candidate_reports.output.ids }}"
+    mode: settled
+    # Hardcoded pending security-team#19670 (steps.<name>.output cross-branch
+    # contamination inside a parallel branch when concurrency.max > 1). Not
+    # wired to __WORKER_FAN_OUT_MAX__: foreach still processes every selected
+    # candidate regardless of this value (proven by the engine's own
+    # "fan-out larger than the concurrency window" regression test), so
+    # fanOutMax stays a real, stored dial for whenever this is wired back in;
+    # only the wall-clock per sweep changes meanwhile.
+    concurrency:
+      max: 1
+    # Straight-line branch body, atomic steps only: no on-failure/if/foreach on
+    # any step here (Phase 0 task 7 — the engine rejects nested flow-control in
+    # a parallel branch body). Each risky stage is its own child workflow,
+    # invoked via a single unconditional workflow.execute; the child owns its
+    # own on-failure and always resolves to `completed` (section A item 2), so
+    # these calls never abort the branch.
+    steps:
+      - name: find_or_create_investigation
+        type: workflow.execute
+        with:
+          workflow-id: system-security-hunt-find-or-create-investigation
+          inputs:
+            reportId: "{{ foreach.item }}"
+            runId: "{{ execution.id }}"
+
+      - name: hunt
+        type: workflow.execute
+        with:
+          workflow-id: system-security-hunt-execute
+          inputs:
+            reportId: "{{ foreach.item }}"
+            investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+            runId: "{{ execution.id }}"
+            trigger: "{{ steps.resolve_trigger_mode.output.trigger_mode }}"
+            tier2_when: "{{ consts.worker_settings.tier2When }}"
+            technology: "{{ consts.worker_settings.technology }}"
+
+      # R.7: no correlation step here. 3B re-inserts workflow.execute
+      # system-security-hunt-correlation between hunt and packaging.
+      - name: package_report
+        type: workflow.execute
+        with:
+          workflow-id: system-security-hunt-package-report
+          inputs:
+            reportId: "{{ foreach.item }}"
+            investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+            runId: "{{ execution.id }}"
+
+      # Outcome derivation (section A): find_or_create failing means no
+      # Investigation ever existed, so no conclusion is possible (handled by
+      # write_run_conclusion below no-op'ing on an empty conversation id).
+      # Otherwise: hunt not succeeding is `failed`; packaging returning
+      # `run_incomplete` is `partial`; anything else is `completed`.
+      - name: resolve_run_outcome
+        type: data.set
+        with:
+          outcome: |-
+            {%- if steps.hunt.output.status != 'success' -%}
+            failed
+            {%- elsif steps.package_report.output.status == 'run_incomplete' -%}
+            partial
+            {%- else -%}
+            completed
+            {%- endif -%}
+          incomplete_stage: |-
+            {%- if steps.hunt.output.status != 'success' -%}
+            hunt
+            {%- elsif steps.package_report.output.status == 'run_incomplete' -%}
+            packaging
+            {%- endif -%}
+
+      # Always-runs terminal step (D41), unconditional (no `if`: a nested
+      # flow-control key on a branch-body step is rejected — Phase 0 task 7).
+      # journal_note.yaml's own `on-failure: continue: true` makes an empty
+      # conversation_id (find_or_create never minted one) a silent no-op,
+      # which is exactly "a run that never obtained an Investigation writes no
+      # conclusion" (section A) without a branch-level conditional.
+      #
+      # The single closing message (mvp-slice.md's message contract): the run
+      # outcome, what the hunt found (the hunt child's `headline`), what
+      # packaging did (the packaging child's `summary`), the failing or
+      # incomplete stage and its reason when the run did not complete cleanly,
+      # and the workflow execution link for full per-stage detail. Markdown
+      # (heading, fact list, link), built only from child outputs (no nested
+      # tier data, which a parallel branch body cannot safely reach into).
+      # Literal block scalar; block tags use `-%}` only so line breaks survive.
+      - name: write_run_conclusion
+        type: workflow.execute
+        with:
+          workflow-id: system-alertzero-journal-note
+          inputs:
+            conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+            message: |-
+              {% if steps.resolve_run_outcome.output.outcome == 'completed' -%}
+              ### Hunt Watch run completed
+              - **Report:** `{{ foreach.item }}`
+              - **Hunt:** {{ steps.hunt.output.headline }}.
+              - **Packaging:** {{ steps.package_report.output.summary | strip }}
+              {% elsif steps.resolve_run_outcome.output.outcome == 'partial' -%}
+              ### Hunt Watch run partial: packaging did not complete
+              - **Report:** `{{ foreach.item }}`
+              - **Hunt:** {{ steps.hunt.output.headline }}.
+              - **Packaging:** did not complete. {{ steps.package_report.output.reason }}.
+              - **What this means:** no proposals were created from this run. The hunt evidence was recorded, so the report will not be re-hunted automatically; the Investigation stays open for a manual rerun or review.
+              {% else -%}
+              ### Hunt Watch run failed: the hunt did not complete
+              - **Report:** `{{ foreach.item }}`
+              - **Hunt:** did not complete. {{ steps.hunt.output.reason }}
+              - **What this means:** no findings or hunt evidence were recorded, so the report stays eligible for the next scheduled sweep or a manual rerun.
+              {% endif -%}
+              - **Run:** `{{ execution.id }}` ([full per-stage detail]({{ execution.url }}))

@@ -9,6 +9,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
+  type ElasticsearchClient,
   type KibanaRequest,
   type Logger,
   type Plugin,
@@ -44,6 +45,8 @@ import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerStepDefinitions } from './step_types';
+import { registerHuntInvestigationTemplate } from './conversation_templates/hunt_investigation';
 
 export class AlertZeroPlugin
   implements
@@ -67,6 +70,7 @@ export class AlertZeroPlugin
   private proposals?: AlertZeroStartDependencies['proposals'];
   private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
   private huntServices?: HuntServices;
+  private reportsEsClient?: ElasticsearchClient;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -100,7 +104,16 @@ export class AlertZeroPlugin
     registerOwner({ workflowsExtensions });
     registerAgentType(agentBuilder);
     registerAttachments(agentBuilder);
+    registerHuntInvestigationTemplate(agentBuilder);
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
+    // Steps register during setup but only run after start; deps resolve lazily.
+    registerStepDefinitions({
+      workflowsExtensions,
+      getActionsService: () => this.requireActionsService(),
+      getConversations: () => this.requireAgentBuilderConversations(),
+      getReportsEsClient: () => this.requireReportsEsClient(),
+      logger: this.logger.get('steps'),
+    });
     // Registered in setup so the builtin tool is available to Agent Builder before
     // the first agent run; the handler resolves the service lazily like the routes do.
     agentBuilder.tools.register({
@@ -149,8 +162,9 @@ export class AlertZeroPlugin
     return { isEnabled: true };
   }
 
-  start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
+  start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
+    this.reportsEsClient = core.elasticsearch.client.asInternalUser;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
@@ -248,6 +262,10 @@ export class AlertZeroPlugin
 
   private requireHuntServices(): HuntServices {
     return this.requireStarted(this.huntServices, 'Hunt services');
+  }
+
+  private requireReportsEsClient(): ElasticsearchClient {
+    return this.requireStarted(this.reportsEsClient, 'internal Elasticsearch client');
   }
 
   private getSpaceId(request: KibanaRequest): string {

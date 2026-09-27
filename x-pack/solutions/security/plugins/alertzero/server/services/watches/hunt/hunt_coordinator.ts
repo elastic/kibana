@@ -18,6 +18,8 @@ import type {
 } from '@kbn/alertzero-common';
 import { completedSuccessfully, huntCompletenessOf } from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
+import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
+import type { HuntNarrativeContext } from './common/build_hunt_narrative';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
 import type { HuntScope } from './common/resolve_index_scope';
 import { SUMMARIZE_HIT_SOURCE_FIELDS, summarizeHit } from './common/summarize_hit';
@@ -65,7 +67,8 @@ export interface HuntCoordinatorTier2 extends HuntBehaviorResult {
   tier: 2;
 }
 
-export interface HuntCoordinatorResult {
+/** The coordinator's structured outcome, before the Investigation narrative is derived from it. */
+export interface HuntCoordinatorCoreResult {
   status: HuntCoordinatorStatus;
   report_id?: string;
   run_id: string;
@@ -99,6 +102,17 @@ export interface HuntCoordinatorResult {
    * it; that is what `completeness` is for.
    */
   completed_successfully: boolean;
+}
+
+export interface HuntCoordinatorResult extends HuntCoordinatorCoreResult {
+  /** One clause for the run conclusion message: outcome plus what each tier did. */
+  headline: string;
+  /**
+   * The full hunt results narrative the hunt child writes to the Investigation:
+   * what was hunted, where and when, what each tier found, and why a tier did
+   * not run. Deterministic markdown, derived from the fields above.
+   */
+  narrative: string;
 }
 
 const DEFAULT_TIER2_SAMPLE_EVENTS = 5;
@@ -318,12 +332,13 @@ const coordinatorGaps = ({
   return gaps;
 };
 
-export const huntCoordinator = async (
+const huntCoordinatorCore = async (
   { esClient, reportsEsClient }: HuntCoordinatorClients,
   model: ScopedModel | undefined,
   logger: Logger,
-  params: HuntCoordinatorParams
-): Promise<HuntCoordinatorResult> => {
+  params: HuntCoordinatorParams,
+  narrativeContext: HuntNarrativeContext
+): Promise<HuntCoordinatorCoreResult> => {
   const {
     report_id: reportId,
     spaceId,
@@ -385,6 +400,7 @@ export const huntCoordinator = async (
   // alone — still searched the report's IOCs and could confirm a hit on them.
   const iocs = callerIocs ?? reportContext?.iocs ?? [];
   const techniques = callerTechniques ?? reportContext?.techniques ?? [];
+  if (reportContext?.title) narrativeContext.reportTitle = reportContext.title;
   // Clamp after merge: request schema bounds caller `text`, but report-loaded
   // `content.body_text` has no such bound and must not exceed the Tier 2 contract.
   const text = clampHuntReportText(callerText ?? reportContext?.text);
@@ -476,6 +492,8 @@ export const huntCoordinator = async (
   }
 
   const { technologies, ...indexScope } = scope;
+  narrativeContext.requiredIndexPatterns = indexScope.required;
+  narrativeContext.optionalIndexPatterns = indexScope.optional;
 
   // A blocked scope is a failed run, never a clean one: no required index exists,
   // so there is nothing to hunt and the caller must not write hunt evidence.
@@ -552,7 +570,7 @@ export const huntCoordinator = async (
     nextStep: string;
     skipDetail?: string;
     readReportText?: boolean;
-  }): HuntCoordinatorResult => {
+  }): HuntCoordinatorCoreResult => {
     const completeness = huntCompletenessOf([
       ...runGaps(readReportText),
       // Tier 2 never ran on any of these paths, so nothing it could have executed
@@ -716,5 +734,25 @@ export const huntCoordinator = async (
     has_confirmed_hit: hasConfirmedHit,
     completeness,
     completed_successfully: completedSuccessfully(completeness),
+  };
+};
+
+/**
+ * Runs the two-tier hunt and derives the Investigation narrative from the
+ * structured outcome, so every caller (the hunt child, the standalone route)
+ * gets the same deterministic story for the same result.
+ */
+export const huntCoordinator = async (
+  clients: HuntCoordinatorClients,
+  model: ScopedModel | undefined,
+  logger: Logger,
+  params: HuntCoordinatorParams
+): Promise<HuntCoordinatorResult> => {
+  const narrativeContext: HuntNarrativeContext = {};
+  const core = await huntCoordinatorCore(clients, model, logger, params, narrativeContext);
+  return {
+    ...core,
+    headline: buildHuntHeadline(core),
+    narrative: buildHuntNarrative(core, narrativeContext),
   };
 };

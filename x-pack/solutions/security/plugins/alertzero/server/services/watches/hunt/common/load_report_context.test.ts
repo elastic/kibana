@@ -60,6 +60,40 @@ describe('loadReportHuntContext', () => {
     expect(context?.text).toEqual(expect.stringContaining('AssumeRole'));
   });
 
+  it('carries the descriptive facts the Investigation narratives cite', async () => {
+    esClient.search.mockResolvedValue(
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            '@timestamp': '2026-09-02T17:51:57.050Z',
+            content: { ...reportHit._source.content, title: 'CloudTrail retrospective' },
+            source: { name: 'AWS IAM privilege escalation feed' },
+            severity: { level: 'medium', score: 40 },
+          },
+        },
+      ])
+    );
+    const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+    expect(context).toEqual(
+      expect.objectContaining({
+        title: 'CloudTrail retrospective',
+        source_name: 'AWS IAM privilege escalation feed',
+        published_at: '2026-09-02T17:51:57.050Z',
+        severity: 'medium',
+      })
+    );
+  });
+
+  it('omits descriptive facts the report does not carry instead of writing empty strings', async () => {
+    const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+    expect(context).not.toHaveProperty('title');
+    expect(context).not.toHaveProperty('source_name');
+    expect(context).not.toHaveProperty('published_at');
+    expect(context).not.toHaveProperty('severity');
+  });
+
   it('clamps body text to the Tier 2 request maxLength', async () => {
     const oversized = 'x'.repeat(200_001);
     esClient.search.mockResolvedValue(

@@ -28,6 +28,10 @@ import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_t
 import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_attack_discovery';
 import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_endpoint_analysis';
 import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_run_endpoint_analysis';
+import { ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
+import { ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID } from './find_or_create_investigation';
+import { ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID } from './hunt_package_report';
+import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID } from './hunt_proposal_gate';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './hunt_continuous_threat_hunt';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID } from './journal_note';
 import {
@@ -92,6 +96,19 @@ export {
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
 } from './journal_note';
+export { ALERTZERO_HUNT_WORKFLOW, ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
+export {
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
+} from './find_or_create_investigation';
+export {
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
+} from './hunt_package_report';
+export {
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
+} from './hunt_proposal_gate';
 export {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -161,6 +178,31 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
  */
 export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+] as const;
+
+/**
+ * Hunt Watch's children invoked via `workflow.execute`/`workflow.executeAsync`
+ * from the tagged Worker (`hunt_continuous_threat_hunt.yaml`) or from each
+ * other: the hunt child (former 3D, now on PR 4, `system-security-hunt-execute`),
+ * the find-or-create-Investigation child (added Phase 0 task 7: the deterministic
+ * id it mints needs a uuidv5 hash Liquid cannot compute, so it cannot live inline
+ * in the Worker's `parallel` branch), the packaging child (Phase 5: wraps
+ * `hunt.packageReport`, fans mint payloads out to the proposal-gate child, closes
+ * the Investigation on a clean run), and the proposal-gate child (Phase 6: wraps
+ * `system-create-proposal`'s single `waitForApproval`, closes the Investigation
+ * on settlement). Own no trigger, so — like `journal_note` above — all four must
+ * be installed globally for the calling `workflow.execute`/`workflow.executeAsync`
+ * steps to resolve them. Correlation (`system-security-hunt-correlation`) lands
+ * with 3B under R.7. `find_or_create_investigation` and `hunt` stay untagged
+ * (Worker-branch-internal plumbing); `package_report` and `proposal_gate` carry
+ * `security` + `continuous-threat-hunt` (feature children, per the plan's
+ * tag convention) for Workflows-list findability.
+ */
+export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [
+  ALERTZERO_HUNT_WORKFLOW_ID,
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
 ] as const;
 
 /**

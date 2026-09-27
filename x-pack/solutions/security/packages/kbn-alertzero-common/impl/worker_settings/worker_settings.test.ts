@@ -11,6 +11,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '../../constants';
 import { WorkerSettings } from '../schemas';
@@ -70,6 +71,66 @@ describe('Worker settings declarations', () => {
     });
     expect(createDefaultWorkerSettings(TRIAGE)).toEqual({ workerId: TRIAGE, autonomy: 'manual' });
     expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
+  });
+
+  it('nests Continuous Threat Hunt dials under extras with a 4h schedule', () => {
+    expect(createDefaultWorkerSettings(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)).toEqual(
+      {
+        workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+        extras: { tier2When: 'on_hits', candidateLimit: 10, fanOutMax: 10 },
+      }
+    );
+  });
+
+  it('rejects an unknown Continuous Threat Hunt extras key by name', () => {
+    expect(
+      issuesOf(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID, {
+        workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+        extras: {
+          tier2When: 'on_hits',
+          candidateLimit: 10,
+          fanOutMax: 10,
+          huntCooldownMinutes: 240,
+        },
+      })
+    ).toMatch(/extras.*huntCooldownMinutes/);
+  });
+
+  it.each([0, 11, 5.5])('rejects Continuous Threat Hunt candidateLimit %s', (candidateLimit) => {
+    expect(
+      issuesOf(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID, {
+        workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+        extras: {
+          tier2When: 'on_hits',
+          candidateLimit,
+          fanOutMax: 10,
+        },
+      })
+    ).toContain('extras.candidateLimit');
+  });
+
+  it('accepts an optional technology dial on Continuous Threat Hunt', () => {
+    expect(
+      getCompleteWorkerSettingsSchema(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID).safeParse(
+        {
+          workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+          autonomy: 'assisted',
+          scheduleInterval: '4h',
+          extras: {
+            tier2When: 'always',
+            candidateLimit: 5,
+            fanOutMax: 3,
+            technology: 'aws_iam',
+          },
+        }
+      ).success
+    ).toBe(true);
   });
 
   it('rejects an unknown top-level key by name', () => {

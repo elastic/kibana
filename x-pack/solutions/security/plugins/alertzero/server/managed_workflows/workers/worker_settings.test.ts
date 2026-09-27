@@ -6,10 +6,12 @@
  */
 
 import {
+  CONTINUOUS_THREAT_HUNT_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -21,8 +23,9 @@ import type { RegisteredWorkerId } from '../worker_registry';
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 const FORENSICS_WORKER_ID = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
+const HUNT_WORKER_ID = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 
-const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
+const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID, HUNT_WORKER_ID];
 
 const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
   (id) => !SCHEDULED_WORKER_IDS.includes(id)
@@ -437,6 +440,84 @@ describe('createWorkerSettingsRegistration', () => {
         ).toMatch(/extras/);
       }
     );
+  });
+
+  describe('Worker-specific settings — continuous threat hunt', () => {
+    const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
+    const defaultExtras = CONTINUOUS_THREAT_HUNT_DEFAULT_EXTRAS;
+    const storedDefaults = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '4h',
+      extras: defaultExtras,
+    };
+
+    it('stores extras nested and projects them under settings.extras', () => {
+      expect(registration.createDefaultValues()).toEqual(storedDefaults);
+      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
+        workerId: HUNT_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('fills extras from defaults when a stored document has none', () => {
+      const stored = {
+        settingsVersion: 1,
+        autonomyLevel: 'assisted',
+        scheduleInterval: '4h',
+      };
+
+      expect(registration.withMissingDefaults(stored)).toEqual({
+        ...stored,
+        extras: defaultExtras,
+      });
+      expect(registration.toSettings(stored)).toEqual({
+        workerId: HUNT_WORKER_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '4h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('keeps extras when a shared-field patch omits them', () => {
+      expect(registration.applyPatch(storedDefaults, { scheduleInterval: '6h' })).toEqual({
+        values: { ...storedDefaults, scheduleInterval: '6h' },
+      });
+    });
+
+    it('replaces extras whole when the patch supplies them', () => {
+      expect(
+        registration.applyPatch(storedDefaults, {
+          extras: { ...defaultExtras, candidateLimit: 5, technology: 'fortigate' },
+        })
+      ).toEqual({
+        values: {
+          ...storedDefaults,
+          extras: { ...defaultExtras, candidateLimit: 5, technology: 'fortigate' },
+        },
+      });
+    });
+
+    it('rejects an unknown extras key, naming it', () => {
+      expect(
+        expectInvalid(
+          registration.applyPatch(storedDefaults, {
+            extras: { ...defaultExtras, huntCooldownMinutes: 240 },
+          })
+        )
+      ).toMatch(/extras.*huntCooldownMinutes/);
+    });
+
+    it.each([0, 11, 5.5])('rejects a stored candidateLimit of %s', (candidateLimit) => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, candidateLimit },
+        })
+      ).toThrow(/extras\.candidateLimit/);
+    });
   });
 
   describe('schedule interval — the Workers that own no schedule', () => {
