@@ -291,13 +291,13 @@ describe('migration_utils', () => {
       ).toBe(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
     });
 
-    it('returns the top-level type for unmigrated external reference subtypes', () => {
+    it('returns the raw subtype id for unmigrated external reference subtypes', () => {
       expect(
         getAttachmentTypeFromAttributes({
           type: AttachmentType.externalReference,
           externalReferenceAttachmentTypeId: 'some-unknown-type',
         })
-      ).toBe(AttachmentType.externalReference);
+      ).toBe('some-unknown-type');
     });
 
     it('returns the top-level type for external references without externalReferenceAttachmentTypeId', () => {
@@ -348,9 +348,9 @@ describe('migration_utils', () => {
       );
     });
 
-    it('falls back to the top-level type for unknown externalReference subtypes', () => {
+    it('falls back to the raw subtype id for unknown externalReference subtypes', () => {
       expect(resolveUnifiedAttachmentType(makeExternalReference('unknownSubtype'), owner)).toBe(
-        AttachmentType.externalReference
+        'unknownSubtype'
       );
     });
 
