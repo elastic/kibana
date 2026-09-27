@@ -28,16 +28,26 @@ export type PublishUnitConfig = (params: PublishUnitConfigParams) => Promise<voi
 export type EncryptUnitCredentials = (secrets: StreamsUnit.Secrets) => Promise<UnitCredential[]>;
 
 /**
+ * Result of config-distributor `POST /v1/validate` when the unit compiles.
+ * `compiled_config` is the raw OpenTelemetry collector YAML when the
+ * distributor returns it.
+ */
+export interface UnitValidationResult {
+  compiled_config?: string;
+}
+
+/**
  * Backend-owned unit config steps. The config-distributor client supplies
  * `validate` and `publish`.
  */
 export interface UnitConfigHooks {
   /**
-   * Semantic / graph validation via config-distributor `POST /v1/validate`.
-   * Called after structural checks and before the configuration saved object
-   * is written. Throw to reject the PUT. Credentials are not required.
+   * Unit validation via config-distributor `POST /v1/validate`. This is the
+   * only unit-document check on the write path. Called before the
+   * configuration saved object is written. Throw to reject the PUT.
+   * Credentials are not required.
    */
-  validate?: (unit: StreamsUnit.Configuration) => Promise<void>;
+  validate?: (unit: StreamsUnit.Configuration) => Promise<UnitValidationResult>;
   /**
    * Publish the unit to config-distributor `PUT /v1/units/{id}` after the
    * configuration saved object is written.

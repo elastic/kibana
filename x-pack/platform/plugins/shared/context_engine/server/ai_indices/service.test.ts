@@ -86,7 +86,7 @@ const aiIndexDocument: AiIndexDocument = {
   space: DEFAULT_SPACE,
   description: 'KIs representing previously answered, commonly asked questions',
   managed: false,
-  dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
+  dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
   sources: [{ type: 'esql', value: 'FROM ai-index-customer_support | LIMIT 10' }],
   traces: [],
@@ -161,7 +161,7 @@ describe('AiIndexService', () => {
 
   const properties = {
     description: 'KIs representing previously answered, commonly asked questions',
-    dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
+    dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support' },
     automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
     sources: [{ type: 'esql' as const, value: 'FROM ai-index-customer_support | LIMIT 10' }],
     traces: [],
@@ -212,15 +212,91 @@ describe('AiIndexService', () => {
         AiIndexManagedError
       );
       expect(storageClient.index).not.toHaveBeenCalled();
+      expect(esClient.esql.putView).not.toHaveBeenCalled();
+    });
+
+    it('creates the retrieval view for the dest', async () => {
+      await service.create('customer_support', DEFAULT_SPACE, properties);
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'v-ai-index-customer_support',
+        query: [
+          'FROM ai-index-ds-customer_support METADATA _id, _index, _score',
+          'EVAL id = COALESCE(id, _id)',
+          'INLINE STATS latest = MAX(@timestamp) BY id',
+          'WHERE @timestamp == latest',
+          'INLINE STATS latest_doc = MAX(_id) BY id',
+          'WHERE _id == latest_doc',
+          'DROP latest, latest_doc',
+          'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
+          'WHERE expires_at IS NULL OR expires_at > NOW()',
+          'DROP governance.*',
+        ].join('\n| '),
+      });
+    });
+
+    it('creates a view without the revision collapse for an index dest', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: 'ai-index-idx-logs-app', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await service.create('logs_app', DEFAULT_SPACE, {
+        ...properties,
+        dest: { type: 'index', value: 'ai-index-idx-logs-app' },
+      });
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'v-ai-index-logs_app',
+        query: [
+          'FROM ai-index-idx-logs-app METADATA _id, _index, _score',
+          'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
+          'WHERE expires_at IS NULL OR expires_at > NOW()',
+          'DROP governance.*',
+        ].join('\n| '),
+      });
+    });
+
+    it('fails when the view cannot be created', async () => {
+      esClient.esql.putView.mockRejectedValue(new Error('views are disabled'));
+
+      await expect(service.create('customer_support', DEFAULT_SPACE, properties)).rejects.toThrow(
+        'views are disabled'
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('removes the view when the write fails', async () => {
+      storageClient.index.mockRejectedValue(new Error('es_error'));
+
+      await expect(service.create('customer_support', DEFAULT_SPACE, properties)).rejects.toThrow(
+        'es_error'
+      );
+      expect(esClient.esql.deleteView).toHaveBeenCalledWith(
+        { name: 'v-ai-index-customer_support' },
+        { ignore: [404] }
+      );
     });
 
     it('rejects an invalid dest before writing', async () => {
       await expect(
         service.create('customer_support', DEFAULT_SPACE, {
           ...properties,
-          dest: { type: 'data_stream', value: 'customer_support*' },
+          dest: { type: 'data_stream', value: 'customer_support' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects a dest with characters outside the index name allowlist', async () => {
+      await expect(
+        service.create('customer_support', DEFAULT_SPACE, {
+          ...properties,
+          dest: { type: 'index', value: 'ai-index-idx-mine\n| EVAL leaked = 1' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
@@ -280,6 +356,23 @@ describe('AiIndexService', () => {
       expect(indexArgs.document?.date_modified).not.toBe(aiIndexDocument.date_modified);
     });
 
+    it('replaces the retrieval view with the new dest', async () => {
+      mockSearchHits(storedHit(aiIndexDocument));
+      esClient.indices.resolveIndex.mockResponse({ indices: [], aliases: [], data_streams: [] });
+
+      await service.put('customer_support', DEFAULT_SPACE, {
+        ...properties,
+        dest: { type: 'data_stream', value: 'ai-index-ds-customer_support_v2' },
+      });
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'v-ai-index-customer_support',
+        query: expect.stringContaining(
+          'FROM ai-index-ds-customer_support_v2 METADATA _id, _index, _score'
+        ),
+      });
+    });
+
     it('persists feedback_analysis when updating an existing AI index', async () => {
       mockSearchHits(storedHit(aiIndexDocument));
 
@@ -312,6 +405,35 @@ describe('AiIndexService', () => {
       await expect(
         service.put('customer_support', DEFAULT_SPACE, properties)
       ).rejects.toBeInstanceOf(AiIndexConflictError);
+    });
+
+    it('repoints the view at the winning write after a 409', async () => {
+      mockSearchHitsOnce(storedHit(aiIndexDocument));
+      mockSearchHits(
+        storedHit({
+          ...aiIndexDocument,
+          dest: { type: 'data_stream', value: 'ai-index-ds-winner' },
+        })
+      );
+      storageClient.index.mockRejectedValue(createConflictError());
+
+      await expect(
+        service.put('customer_support', DEFAULT_SPACE, {
+          ...properties,
+          dest: { type: 'data_stream', value: 'ai-index-ds-loser' },
+        })
+      ).rejects.toBeInstanceOf(AiIndexConflictError);
+      expect(esClient.indices.refresh).toHaveBeenCalledWith({
+        index: '.contextengine-ai-indices',
+        ignore_unavailable: true,
+      });
+      expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+        storageClient.search.mock.invocationCallOrder[1]
+      );
+      expect(esClient.esql.putView).toHaveBeenLastCalledWith({
+        name: 'v-ai-index-customer_support',
+        query: expect.stringContaining('FROM ai-index-ds-winner METADATA'),
+      });
     });
 
     it('throws AiIndexManagedError when the entry is managed', async () => {
@@ -360,6 +482,19 @@ describe('AiIndexService', () => {
       expect(storageClient.index).toHaveBeenCalled();
     });
 
+    it('rejects a data_stream dest when an alias exists at that name', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        aliases: [{ name: 'ai-index-ds-customer_support', indices: ['ai-index-ds-a'] }],
+        data_streams: [],
+      });
+
+      await expect(service.put('customer_support', DEFAULT_SPACE, properties)).rejects.toThrow(
+        /'ai-index-ds-customer_support' is an alias/
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
     it('rejects a data_stream dest when a plain index exists at that name', async () => {
       esClient.indices.resolveIndex.mockResponse({
         indices: [{ name: 'ai-index-ds-customer_support', attributes: ['open'] }],
@@ -377,7 +512,7 @@ describe('AiIndexService', () => {
       await expect(
         service.put('customer_support', DEFAULT_SPACE, {
           ...properties,
-          dest: { type: 'data_stream', value: 'customer_support*' },
+          dest: { type: 'data_stream', value: 'customer_support' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
@@ -405,7 +540,7 @@ describe('AiIndexService', () => {
 
     const indexProperties = {
       ...properties,
-      dest: { type: 'index' as const, value: 'ai-index-idx-logs-*' },
+      dest: { type: 'index' as const, value: 'ai-index-idx-logs' },
     };
 
     it('creates an index AI index when the value matches an index', async () => {
@@ -428,6 +563,19 @@ describe('AiIndexService', () => {
 
       await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).resolves.toBe('created');
       expect(storageClient.index).toHaveBeenCalled();
+    });
+
+    it('rejects an index dest when an alias exists at that name', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        aliases: [{ name: 'ai-index-idx-logs', indices: ['ai-index-idx-a', 'ai-index-idx-b'] }],
+        data_streams: [],
+      });
+
+      await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).rejects.toBeInstanceOf(
+        InvalidAiIndexDestError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
     });
 
     it('rejects an index dest when a data stream exists at that name', async () => {
@@ -490,22 +638,36 @@ describe('AiIndexService', () => {
       expect(storageClient.index).toHaveBeenCalled();
     });
 
-    it('rejects a mixed expression that includes a system index', async () => {
-      esClient.indices.resolveIndex.mockResponse({
-        indices: [
-          { name: 'ai-index-idx-logs-app', attributes: ['open'] },
-          { name: 'ai-index-idx-kibana', attributes: ['open', 'hidden', 'system'] },
-        ],
-        aliases: [],
-        data_streams: [],
-      });
-
+    it('rejects a wildcard index dest without resolving it', async () => {
       await expect(
         service.put('logs', DEFAULT_SPACE, {
           ...indexProperties,
-          dest: { type: 'index', value: 'ai-index-idx-logs-*,ai-index-idx-kibana*' },
+          dest: { type: 'index', value: 'ai-index-idx-logs-*' },
+        })
+      ).rejects.toThrow(/must name a single index or data stream, not a pattern/);
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects a comma-separated index dest without resolving it', async () => {
+      await expect(
+        service.put('logs', DEFAULT_SPACE, {
+          ...indexProperties,
+          dest: { type: 'index', value: 'ai-index-idx-logs,ai-index-idx-kibana' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects an index dest whose id has invalid characters', async () => {
+      await expect(
+        service.put('logs', DEFAULT_SPACE, {
+          ...indexProperties,
+          dest: { type: 'index', value: 'ai-index-idx-logs?' },
+        })
+      ).rejects.toThrow(/the part after 'ai-index-idx-' must be a valid AI index id/);
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
@@ -513,18 +675,7 @@ describe('AiIndexService', () => {
       await expect(
         service.put('logs', DEFAULT_SPACE, {
           ...indexProperties,
-          dest: { type: 'index', value: '.kibana*' },
-        })
-      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
-      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
-      expect(storageClient.index).not.toHaveBeenCalled();
-    });
-
-    it('rejects a mixed expression when one expression lacks the prefix', async () => {
-      await expect(
-        service.put('logs', DEFAULT_SPACE, {
-          ...indexProperties,
-          dest: { type: 'index', value: 'ai-index-idx-logs-*,.kibana*' },
+          dest: { type: 'index', value: '.kibana' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
@@ -588,6 +739,10 @@ describe('AiIndexService', () => {
           space: DEFAULT_SPACE,
           managed: true,
         }),
+      });
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'v-ai-index-elastic',
+        query: expect.stringContaining('FROM ai-index-idx-sml-data'),
       });
     });
 

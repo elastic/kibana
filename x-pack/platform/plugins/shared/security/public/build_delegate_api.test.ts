@@ -8,7 +8,7 @@
 import { of } from 'rxjs';
 
 import type { Capabilities } from '@kbn/core/public';
-import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
+import type { CoreSecurityDelegateContract, ServiceAccount } from '@kbn/core-security-browser';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import type { UserProfileAPIClient } from '@kbn/security-plugin-types-public';
 
@@ -67,7 +67,7 @@ describe('buildSecurityApi', () => {
       );
     });
 
-    it('returns false when the setting is not available, as is the case outside of serverless', () => {
+    it('returns false when the setting was not exposed to the browser at all', () => {
       expect(api.serviceAccounts.isEnabled()).toBe(false);
     });
   });
@@ -98,7 +98,7 @@ describe('buildSecurityApi', () => {
   });
 
   describe('serviceAccounts.create', () => {
-    const params = { name: 'nightshift-relay' };
+    const params = { name: 'nightshift-relay', roles: ['viewer'] };
 
     it('properly delegates to the API client', async () => {
       await api.serviceAccounts.create(params);
@@ -108,13 +108,12 @@ describe('buildSecurityApi', () => {
     });
 
     it('returns the result from the API client', async () => {
-      const created = {
+      // Annotated, so a change to the contract shape fails here rather than sliding through:
+      // passing an un-annotated variable to `mockResolvedValue` skips the excess-property check.
+      const created: ServiceAccount = {
         id: 'service-account-id',
-        type: 'project' as const,
         name: 'nightshift-relay',
-        organization_id: 'organization-id',
-        role_assignments: {},
-        assumable_by: [],
+        roles: ['viewer'],
       };
       serviceAccounts.create.mockResolvedValue(created);
 

@@ -37,22 +37,16 @@ const unit: StreamsUnit.Configuration = {
 };
 
 describe('validateUnitForWrite', () => {
-  it('rejects duplicate ids before calling the distributor hook', async () => {
-    const validate = jest.fn();
+  it('delegates duplicate ids to the distributor hook', async () => {
+    const validate = jest.fn().mockResolvedValue({});
+    const withDuplicate: StreamsUnit.Configuration = {
+      ...unit,
+      destinations: [{ id: 'otlp-input', type: 'debug', supported_telemetry: ['logs'] }],
+    };
 
-    await expect(
-      validateUnitForWrite(
-        {
-          ...unit,
-          destinations: [{ id: 'otlp-input', type: 'debug', supported_telemetry: ['logs'] }],
-        },
-        { validate }
-      )
-    ).rejects.toMatchObject({
-      statusCode: 400,
-      data: { duplicate_ids: ['otlp-input'] },
-    });
-    expect(validate).not.toHaveBeenCalled();
+    await validateUnitForWrite(withDuplicate, { validate });
+
+    expect(validate).toHaveBeenCalledWith(withDuplicate);
   });
 
   it('delegates semantic validation to the injected distributor hook', async () => {
@@ -66,7 +60,7 @@ describe('validateUnitForWrite', () => {
   });
 
   it('still calls the distributor hook for incomplete units', async () => {
-    const validate = jest.fn().mockResolvedValue(undefined);
+    const validate = jest.fn().mockResolvedValue({});
     const incomplete: StreamsUnit.Configuration = {
       sources: unit.sources,
       destinations: [],
@@ -76,5 +70,13 @@ describe('validateUnitForWrite', () => {
     await validateUnitForWrite(incomplete, { validate });
 
     expect(validate).toHaveBeenCalledWith(incomplete);
+  });
+
+  it('returns compiled_config from the distributor hook', async () => {
+    const validate = jest.fn().mockResolvedValue({ compiled_config: 'receivers: {}' });
+
+    await expect(validateUnitForWrite(unit, { validate })).resolves.toEqual({
+      compiled_config: 'receivers: {}',
+    });
   });
 });

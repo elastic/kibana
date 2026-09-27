@@ -6,6 +6,8 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
+import type { ExtractionMode } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { TIMESTAMP_FIELD } from './query_builder_commons';
 import {
@@ -116,7 +118,7 @@ describe('buildLogPaginationCursorProbeEsql', () => {
  * strand logs inside a slice that no pass ever scans.
  */
 describe('buildLogPaginationCursorProbeEsql extraction gate', () => {
-  const probeFor = (extractionMode: 'single' | 'priority' | 'nonPriority') =>
+  const probeFor = (extractionMode: ExtractionMode) =>
     buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
       entityDefinition: getEntityDefinition('user', 'default', extractionMode),
@@ -126,20 +128,22 @@ describe('buildLogPaginationCursorProbeEsql extraction gate', () => {
     });
 
   it('single: probes without a gate', () => {
-    expect(probeFor('single')).not.toContain('event.kind');
+    expect(probeFor(EXTRACTION_MODE.single)).not.toContain('event.kind');
   });
 
   it('priority: probes only asset documents', () => {
-    expect(probeFor('priority')).toContain('AND (MV_CONTAINS(TO_STRING(event.kind), "asset"))');
+    expect(probeFor(EXTRACTION_MODE.priority)).toContain(
+      'AND (MV_CONTAINS(TO_STRING(event.kind), "asset"))'
+    );
   });
 
   it('nonPriority: probes the complement, including documents without event.kind', () => {
-    expect(probeFor('nonPriority')).toContain(
+    expect(probeFor(EXTRACTION_MODE.nonPriority)).toContain(
       'AND (TO_STRING(event.kind) IS NULL OR NOT (MV_CONTAINS(TO_STRING(event.kind), "asset")))'
     );
   });
 
-  it.each(['priority', 'nonPriority'] as const)(
+  it.each([EXTRACTION_MODE.priority, EXTRACTION_MODE.nonPriority] as const)(
     '%s: the gate is the only difference from the single probe',
     (extractionMode) => {
       const gateLine = probeFor(extractionMode)
@@ -147,7 +151,9 @@ describe('buildLogPaginationCursorProbeEsql extraction gate', () => {
         .find((line) => line.includes('event.kind'));
 
       expect(gateLine).toBeDefined();
-      expect(probeFor(extractionMode).replace(`\n${gateLine}`, '')).toBe(probeFor('single'));
+      expect(probeFor(extractionMode).replace(`\n${gateLine}`, '')).toBe(
+        probeFor(EXTRACTION_MODE.single)
+      );
     }
   );
 });

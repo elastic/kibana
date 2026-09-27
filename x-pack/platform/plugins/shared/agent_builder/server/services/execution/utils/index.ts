@@ -11,16 +11,17 @@ export { handleCancellation, createAbortedError } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';
 export {
   getConversation,
-  persistRoundInput,
+  persistUserMessage,
   appendRoundTerminated$,
   appendResumeExecution$,
   persistExecutionInterruption,
   isPendingResumeConversation,
+  isPlaceholderUser,
   placeholderConversation,
-  type ConversationOperation,
   type ConversationWithOperation,
   type PersistExecutionInterruptionParams,
 } from './conversations';
+export { getPendingResumeRound, resolveTelemetryOrigin } from './pending_round';
 export { convertErrors, toClientError } from './convert_errors';
 export { serializeExecutionError, getHttpStatusFromError } from './serialize_execution_error';
 export { resolveServices } from './resolve_services';

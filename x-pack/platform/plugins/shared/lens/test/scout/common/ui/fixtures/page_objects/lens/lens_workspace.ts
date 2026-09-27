@@ -359,6 +359,14 @@ export class LensWorkspace {
     return JSON.parse(debugJson) as DebugState;
   }
 
+  /**
+   * Filters the visualization in from an elastic-charts legend item (e.g. `jpg`).
+   */
+  async filterLegend(value: string) {
+    await this.page.testSubj.click(`legend-${value}`);
+    await this.page.testSubj.click(`legend-${value}-filterIn`);
+  }
+
   async openMessageList() {
     await this.messageListTrigger.click();
   }
@@ -467,7 +475,12 @@ export class LensWorkspace {
    *   (e.g. `partitionVisChart` for treemap/pie, `xyVisChart` for bar/line/area).
    */
   async applySuggestion(suggestionTestSubj: string, chartTestSubj: string) {
-    const suggestion = this.page.testSubj.locator(`${suggestionTestSubj} > lnsSuggestion`);
+    // A multi-layer chart can offer the same chart type once per layer, so the title
+    // test subject matches more than one card. The first card is the earlier suggestion
+    // (the first layer when scores tie), which is what callers assert on.
+    // TODO: Find a better way of differentiating suggestions
+    // eslint-disable-next-line playwright/no-nth-methods
+    const suggestion = this.page.testSubj.locator(`${suggestionTestSubj} > lnsSuggestion`).first();
     await suggestion.waitFor({ state: 'visible' });
     await suggestion.click();
     await this.deps.waitForVisualization(chartTestSubj);

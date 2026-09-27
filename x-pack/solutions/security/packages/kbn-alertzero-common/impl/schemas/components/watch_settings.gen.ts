@@ -120,6 +120,15 @@ export const Worker = lazySchema(() =>
       .describe(
         'Logical workflow version for best-effort stale settings detection. Null when the per-space managed Worker has not been installed yet.'
       ),
+    /**
+     * Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id.
+     */
+    workflowId: z
+      .string()
+      .nullable()
+      .describe(
+        "Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id."
+      ),
     skills: z.array(WatchCallableRef).optional(),
   })
 );

@@ -27,7 +27,9 @@ const createWrapper = () => {
 };
 
 describe('useCountNewActionPolicyExecutions', () => {
-  const mockListActionPolicyExecutions = jest.fn();
+  const mockListActionPolicyExecutions: jest.MockedFunction<
+    ExecutionHistoryApi['listActionPolicyExecutions']
+  > = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,9 +45,9 @@ describe('useCountNewActionPolicyExecutions', () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
-      perPage: 0,
-      totalEvents: 7,
-      searchMatches: null,
+      per_page: 0,
+      total: 7,
+      search_matches: null,
     });
 
     renderHook(
@@ -54,29 +56,29 @@ describe('useCountNewActionPolicyExecutions', () => {
           since: '2026-01-01T00:00:00.000Z',
           search: 'foo',
           ruleIds: ['rule-1'],
-          outcome: ['throttled'],
+          outcomes: ['throttled'],
         }),
       { wrapper: createWrapper() }
     );
 
     await waitFor(() => {
       expect(mockListActionPolicyExecutions).toHaveBeenCalledWith({
-        start_date: '2026-01-01T00:00:00.000Z',
+        from: '2026-01-01T00:00:00.000Z',
         per_page: 0,
         search: 'foo',
         rule_ids: ['rule-1'],
-        outcome: ['throttled'],
+        outcomes: ['throttled'],
       });
     });
   });
 
-  it('exposes the list response (with totalEvents) as data', async () => {
+  it('exposes the list response (with total) as data', async () => {
     const fakeResponse = {
       items: [],
       page: 1,
-      perPage: 0,
-      totalEvents: 42,
-      searchMatches: null,
+      per_page: 0,
+      total: 42,
+      search_matches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 

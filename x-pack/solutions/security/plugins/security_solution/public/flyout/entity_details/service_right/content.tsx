@@ -38,6 +38,8 @@ interface ServicePanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
   refetchEntityRecord?: () => void;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.service>;
@@ -75,6 +77,7 @@ export const ServicePanelContent = ({
   isPreviewMode,
   openDetailsPanel,
   onAssetCriticalityChange,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
   onShowEntity,
@@ -134,7 +137,7 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      {!entityRecord && (
+      {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: serviceName, type: EntityType.service }}
           onChange={onAssetCriticalityChange}

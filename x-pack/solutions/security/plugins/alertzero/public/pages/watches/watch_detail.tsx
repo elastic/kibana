@@ -200,7 +200,16 @@ export const WatchDetailPage: React.FC = () => {
     );
   }
 
-  const intro = settingsI18n.watchIntro(watch.id);
+  const workerCountBadges =
+    !workersLoading && !workersError
+      ? [
+          {
+            label: i18n.workerCountLabel(members.length),
+            color: 'hollow' as const,
+            'data-test-subj': 'alertZeroWatchWorkerCount',
+          },
+        ]
+      : undefined;
 
   const renderWorkers = () => {
     if (workersError) {
@@ -271,6 +280,7 @@ export const WatchDetailPage: React.FC = () => {
     <WatchesSectionLayout
       active={watchId}
       title={watch.name}
+      badges={workerCountBadges}
       headerPrimaryActionItem={canWrite ? headerPrimaryActionItem : undefined}
       headerItems={canWrite ? headerItems : undefined}
     >
@@ -279,14 +289,6 @@ export const WatchDetailPage: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
               <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
-            </EuiText>
-          </EuiFlexItem>
-        ) : null}
-
-        {intro ? (
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued" data-test-subj="alertZeroWatchIntro">
-              <p>{intro}</p>
             </EuiText>
           </EuiFlexItem>
         ) : null}

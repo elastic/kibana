@@ -7,6 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AlertZeroConfig } from './config';
 import { ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE } from '../common/constants';
@@ -67,7 +68,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
 
-      plugin.setup(
+      const result = plugin.setup(
         coreSetup as never,
         {
           features,
@@ -76,12 +77,31 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         } as never
       );
 
+      expect(result).toEqual({ isEnabled: false });
       expect(registerOwner).not.toHaveBeenCalled();
       expect(features.registerKibanaFeature).not.toHaveBeenCalled();
       expect(registerRoutes).not.toHaveBeenCalled();
       expect(coreSetup.http.createRouter).not.toHaveBeenCalled();
       expect(registerAgentType).not.toHaveBeenCalled();
       expect(registerAlertZeroInferenceFeatures).not.toHaveBeenCalled();
+      expect(coreSetup.uiSettings.register).not.toHaveBeenCalled();
+    });
+
+    // Serverless allowlists `securitySolution:enableAlertZero` off this contract; a wrong answer
+    // here fails Kibana startup in dev with "in the allowlist but is not registered".
+    it('reports isEnabled false so consumers do not allowlist an unregistered setting', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
+
+      const contract = plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsManagement: undefined,
+        } as never
+      );
+
+      expect(contract).toEqual({ isEnabled: false });
     });
 
     it('does not install managed worker workflows on start', () => {
@@ -105,16 +125,20 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
 
-      plugin.setup(
+      const result = plugin.setup(
         coreSetup as never,
         {
           features,
           workflowsExtensions,
           workflowsManagement: { management: {} },
-          agentBuilder: { tools: { register: jest.fn() } },
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+          },
         } as never
       );
 
+      expect(result).toEqual({ isEnabled: true });
       expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
       expect(features.registerKibanaFeature).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -137,12 +161,59 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(registerAgentType).toHaveBeenCalled();
     });
 
+    it('registers the per-space enablement advanced setting', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const coreSetup = coreMock.createSetup();
+
+      plugin.setup(
+        coreSetup as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsManagement: { management: {} },
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+          },
+        } as never
+      );
+
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [ALERTZERO_ENABLED_SETTING_ID]: expect.objectContaining({ value: false }),
+        })
+      );
+    });
+
+    it('reports isEnabled true so consumers can allowlist the setting', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+
+      const contract = plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsManagement: { management: {} },
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+          },
+        } as never
+      );
+
+      expect(contract).toEqual({ isEnabled: true });
+    });
+
     it('registers the AlertZero thin agent type when Agent Builder is available at setup', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
-      const agentBuilder = { agents: { registerType: jest.fn() }, tools: { register: jest.fn() } };
+      const agentBuilder = {
+        agents: { registerType: jest.fn() },
+        tools: { register: jest.fn() },
+        attachments: { registerType: jest.fn() },
+      };
 
       plugin.setup(
         coreSetup as never,
@@ -155,6 +226,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
     });
 
     it('registers the inference tiers with the optional searchInferenceEndpoints setup contract', () => {
@@ -167,7 +239,10 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           features: { registerKibanaFeature: jest.fn() },
           workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
           workflowsManagement: { management: {} },
-          agentBuilder: { tools: { register: jest.fn() } },
+          agentBuilder: {
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+          },
           searchInferenceEndpoints,
         } as never
       );
@@ -186,7 +261,11 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions,
-        agenticInvestigations: { getProposalsService: jest.fn().mockReturnValue({}) },
+        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
+        agenticInvestigations: {
+          getImpactClient: jest.fn(),
+        },
+        inference: {},
       } as never);
 
       expect(initializeManagedWorkflows).toHaveBeenCalledWith(
@@ -205,7 +284,11 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         spaces: undefined,
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
         agentBuilder,
-        agenticInvestigations: { getProposalsService: jest.fn().mockReturnValue({}) },
+        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
+        agenticInvestigations: {
+          getImpactClient: jest.fn(),
+        },
+        inference: {},
       } as never);
 
       expect(ensureAgentSafe).toHaveBeenCalledWith(

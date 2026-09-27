@@ -61,6 +61,7 @@ import { createConfigDistributorClient } from './lib/unit_config/config_distribu
 import type { UnitConfigHooks } from './lib/unit_config/types';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
+const STREAMS_ALLOWED_PROJECT_TYPES = ['observability', 'security'];
 
 export interface StreamsPluginSetup {
   registerKnowledgeIndicatorClientProvider(
@@ -101,12 +102,14 @@ export class StreamsPlugin
   private subscriptions: Subscription[] = [];
   private canEncrypt = false;
   private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClientContract>;
+  private readonly isServerless: boolean;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
     this.processorSuggestionsService = new ProcessorSuggestionsService();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -233,7 +236,15 @@ export class StreamsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
-    if (plugins.agentBuilder) {
+    const serverlessProjectType = this.isServerless
+      ? plugins.cloud?.serverless.projectType
+      : undefined;
+
+    const isStreamsAgentBuilderAllowed =
+      !this.isServerless ||
+      (!!serverlessProjectType && STREAMS_ALLOWED_PROJECT_TYPES.includes(serverlessProjectType));
+
+    if (plugins.agentBuilder && isStreamsAgentBuilderAllowed) {
       void core
         .getStartServices()
         .then(async ([]) => {
@@ -246,6 +257,7 @@ export class StreamsPlugin
             server,
             logger: this.logger,
             telemetry: telemetryClient,
+            core,
           });
         })
         .catch((err) => {
@@ -290,8 +302,8 @@ export class StreamsPlugin
 
     // `encryptCredentials` is the distributor sidecar transform (project public
     // key → `credentials[]`). It is not wired until the project public key is
-    // available; publish with non-empty secrets fails rather than
-    // sending plaintext. At-rest encryption is Encrypted Saved Objects.
+    // available. Publish then omits the credentials sidecar instead of sending
+    // plaintext or failing the unit write. At-rest encryption is Encrypted Saved Objects.
     const unitConfigHooks: UnitConfigHooks = createConfigDistributorClient({
       config: this.config.distributor,
       logger: this.logger.get('config-distributor'),

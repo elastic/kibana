@@ -16,6 +16,7 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
 } from '@kbn/management-settings-ids';
@@ -29,6 +30,7 @@ import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
 } from '@kbn/security-solution-navigation';
+import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { ProductTier } from '../common/product';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
@@ -125,6 +127,14 @@ export class SecuritySolutionServerlessPlugin
     // administrator disables it globally; in that case the toggle is a harmless noop.
     projectSettings.push(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
 
+    // AlertZero registers `securitySolution:enableAlertZero` only when its `xpack.alertzero.enabled`
+    // kill switch is on, and the plugin is additionally cascade-disabled while its required
+    // `agenticInvestigations` dependency is off. Allowlisting a key that was never registered fails
+    // startup in dev, so follow the contract the plugin reports rather than assuming it ran.
+    if (pluginsSetup.alertzero?.isEnabled) {
+      projectSettings.push(ALERTZERO_ENABLED_SETTING_ID);
+    }
+
     // This setting is only registered when `enableAlertsAndAttacksAlignment` is enabled
     if (this.config.experimentalFeatures.enableAlertsAndAttacksAlignment) {
       projectSettings.push(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
@@ -157,6 +167,9 @@ export class SecuritySolutionServerlessPlugin
       }
       if (!projectSettings.includes(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID)) {
         projectSettings.push(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID);
+      }
+      if (!projectSettings.includes(AGENT_BUILDER_API_DISCOVERY_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_API_DISCOVERY_SETTING_ID);
       }
     }
 

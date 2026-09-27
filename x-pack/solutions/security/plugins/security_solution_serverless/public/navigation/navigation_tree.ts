@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
@@ -25,9 +26,8 @@ export const createNavigationTree = async (
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): Promise<NavigationTreeDefinition> => {
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
-  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
-    AGENT_BUILDER_NAV_AT_TOP_FLAG,
-    false
+  const agentBuilderNavAtTop = await firstValueFrom(
+    services.featureFlags.getBooleanValue$(AGENT_BUILDER_NAV_AT_TOP_FLAG, false)
   );
   const agentBuilderLink = {
     icon: 'productAgent',
@@ -46,7 +46,7 @@ export const createNavigationTree = async (
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // AlertZero body (nodes omitted when xpack.alertzero.enabled is false)
+      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
       ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
@@ -79,9 +79,7 @@ export const createNavigationTree = async (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(
-        services.experimentalFeatures.entityAnalyticsNewHomePageEnabled
-      ),
+      defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {
