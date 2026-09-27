@@ -366,18 +366,34 @@ describe('detection rule workflows', () => {
       expect(settingsInputs.impact).toBe('low');
     });
 
-    // The review parks in WAITING_FOR_CHILD while the gate holds the decision for up
-    // to 72h (80h with the gate's own margin); the engine's default 6h workflow
-    // timeout would cancel it under the analyst.
-    it('outlives the proposal gate it waits on', () => {
+    // The review parks in WAITING_FOR_CHILD while the gate holds the decision,
+    // and the engine's default 6h workflow timeout would cancel it under the
+    // analyst. What it has to outlive is the *deadline* its own proposals get,
+    // not the gate workflow's `settings.timeout` — that is a sentinel meaning
+    // "never", so comparing against it would only ever assert that this
+    // workflow's timeout is longer than a year.
+    it('outlives the decision deadline its own proposals get', () => {
       const review = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
       ) as WorkflowYaml;
-      const gate = parse(getManagedYaml(CREATE_PROPOSAL_WORKFLOW_ID)) as WorkflowYaml;
       const hours = (timeout: unknown) => Number(String(timeout).replace(/h$/, ''));
 
+      // None of this workflow's gates passes `expiresIn`, so each takes the
+      // gate's 72h default. A gate that starts asking for its own deadline has
+      // to be checked against the ceiling here.
+      //
+      // Flattened, not top-level: only `propose_entry` sits at the top, and
+      // the other four hang off `propose_tuning`'s switch cases and default.
+      const proposals = flattenSteps(review.steps as NestedStep[]).filter(
+        (step) => step.with?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
+      );
+      expect(proposals.length).toBe(5);
+      for (const proposal of proposals) {
+        expect((proposal.with?.inputs as Record<string, unknown>)?.expiresIn).toBeUndefined();
+      }
+
       expect(String(review.settings?.timeout)).toMatch(/^\d+h$/);
-      expect(hours(review.settings?.timeout)).toBeGreaterThan(hours(gate.settings?.timeout));
+      expect(hours(review.settings?.timeout)).toBeGreaterThan(72);
     });
 
     // The sweep has no ai.agent step; the diagnosing skill lives in the review child.

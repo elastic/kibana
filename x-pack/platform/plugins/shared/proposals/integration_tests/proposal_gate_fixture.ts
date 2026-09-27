@@ -111,11 +111,31 @@ export interface ProposalGateFixture {
   stepExecutions: (
     stepId: string,
     stepType?: string
-  ) => Array<{ status: string; stepType?: string; input?: unknown; output?: unknown }>;
+  ) => Array<{
+    status: string;
+    stepType?: string;
+    input?: unknown;
+    output?: unknown;
+    state?: Record<string, unknown>;
+  }>;
+  /**
+   * The duration the parked gate will actually be held for — the rendered
+   * `dynamicTimeout` frozen on step state at wait-entry, which is what the
+   * idle wake-up and the resume check both read.
+   */
+  gateTimeout: () => string | undefined;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
   resume: (approved: boolean, respondedBy?: string) => Promise<void>;
+  /**
+   * The same answer, arriving after the deadline. Reachable because the step
+   * only treats a wake as expired when it carries no `resumeInput`, so a
+   * resume through the platform API or the Inbox is accepted past the
+   * deadline where the HTTP routes would refuse it. That is the only reason
+   * `settle_expired_after_gate` exists.
+   */
+  resumeAfterDeadline: (approved: boolean, respondedBy?: string) => Promise<void>;
   /** Revises the live proposal through the real service while the gate is parked. */
   revise: (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => Promise<void>;
   /**
@@ -123,8 +143,11 @@ export interface ProposalGateFixture {
    * scheduled wake task does in production. The fixture's task manager mock has
    * no `ensureScheduled`, so the task is never really scheduled here and the
    * wake has to be driven by hand.
+   *
+   * `advanceMs` overrides how far the clock jumps, for a gate parked against a
+   * caller-supplied deadline rather than the 72h default.
    */
-  timeOutGate: () => Promise<void>;
+  timeOutGate: (advanceMs?: number) => Promise<void>;
   /** Flips what `proposals.checkDecidePrivileges` reports. */
   setCanDecide: (canDecide: boolean) => void;
   /** Replaces what the action workflow declares, e.g. to make it `always-gate`. */
@@ -174,6 +197,18 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       ([id, { document }]) => ({ id, ...document } as Proposal & { id: string })
     );
 
+  /** Stages the payload `waitForApproval` reduces a resume to, without waking the run. */
+  const stageResume = (approved: boolean, respondedBy: string) => {
+    const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    )!;
+    // The shape `waitForApproval` reduces a resume payload to. Anything else
+    // a caller sends is discarded by the platform, which is why the route
+    // has to write the dismiss reason itself.
+    execution.context = { ...execution.context, resumeInput: { approved }, resumedBy: respondedBy };
+    engine.workflowExecutionRepositoryMock.workflowExecutions.set(execution.id, execution);
+  };
+
   return {
     engine,
     proposals,
@@ -192,6 +227,14 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
         .filter((step) => step.stepId === stepId)
         .filter((step) => stepType === undefined || step.stepType === stepType)
         .sort((a, b) => (a.stepExecutionIndex ?? 0) - (b.stepExecutionIndex ?? 0)),
+    gateTimeout: () => {
+      const parks = [...engine.stepExecutionRepositoryMock.stepExecutions.values()]
+        .filter((step) => step.stepId === 'await_decision' && step.stepType === 'waitForApproval')
+        .sort((a, b) => (a.stepExecutionIndex ?? 0) - (b.stepExecutionIndex ?? 0));
+      const latest = parks[parks.length - 1];
+      const dynamicTimeout = latest?.state?.dynamicTimeout;
+      return typeof dynamicTimeout === 'string' ? dynamicTimeout : undefined;
+    },
     start: async (inputs = {}) => {
       await engine.runWorkflow({
         workflowYaml: gateWorkflowYaml(),
@@ -199,19 +242,20 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       });
     },
     resume: async (approved, respondedBy = 'analyst') => {
-      const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(
-        'fake_workflow_execution_id'
-      )!;
-      // The shape `waitForApproval` reduces a resume payload to. Anything else
-      // a caller sends is discarded by the platform, which is why the route
-      // has to write the dismiss reason itself.
-      execution.context = {
-        ...execution.context,
-        resumeInput: { approved },
-        resumedBy: respondedBy,
-      };
-      engine.workflowExecutionRepositoryMock.workflowExecutions.set(execution.id, execution);
+      stageResume(approved, respondedBy);
       await engine.resumeWorkflow();
+    },
+    resumeAfterDeadline: async (approved, respondedBy = 'analyst') => {
+      stageResume(approved, respondedBy);
+      // Past the deadline, but carrying an answer — so the step accepts the
+      // resume instead of failing the wait, and the loop's own post-gate
+      // deadline check is what has to catch it.
+      jest.useFakeTimers({ now: new Date(Date.now() + GATE_TIMEOUT_MS + 60_000) });
+      try {
+        await engine.resumeWorkflow();
+      } finally {
+        jest.useRealTimers();
+      }
     },
     /**
      * Goes through the real service, the same path the tool and HTTP route take,
@@ -222,10 +266,10 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);
       await service.revise({ id: live.id, ...overrides }, live.spaceId ?? 'fake_space_id');
     },
-    timeOutGate: async () => {
+    timeOutGate: async (advanceMs = GATE_TIMEOUT_MS + 60_000) => {
       // No `resumeInput`, which is the whole signal: the step reads the wait as
       // expired and fails itself with a `TimeoutError`.
-      jest.useFakeTimers({ now: new Date(Date.now() + GATE_TIMEOUT_MS + 60_000) });
+      jest.useFakeTimers({ now: new Date(Date.now() + advanceMs) });
       try {
         await engine.resumeWorkflow();
       } finally {

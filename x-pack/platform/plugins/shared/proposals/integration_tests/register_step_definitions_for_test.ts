@@ -13,6 +13,7 @@ import { getCloneProposalStepDefinition } from '../server/step_types/clone_propo
 import { getCreateProposalStepDefinition } from '../server/step_types/create_proposal_step';
 import { getGetLatestRevisionStepDefinition } from '../server/step_types/get_latest_revision_step';
 import { getGetProposalStepDefinition } from '../server/step_types/get_proposal_step';
+import { getSettleIncompleteProposalStepDefinition } from '../server/step_types/settle_incomplete_proposal_step';
 import { getUpdateProposalStepDefinition } from '../server/step_types/update_proposal_step';
 
 /**
@@ -41,6 +42,7 @@ export const registerStepDefinitionsForTest = ({
   const definitions = [
     getCreateProposalStepDefinition({ getProposalsService, resolveUser, privileges }),
     getUpdateProposalStepDefinition({ getProposalsService, resolveUser, privileges }),
+    getSettleIncompleteProposalStepDefinition({ getProposalsService }),
     getCheckDecidePrivilegesStepDefinition({ privileges }),
     getGetProposalStepDefinition({ getProposalsService, privileges }),
     getCloneProposalStepDefinition({ getProposalsService, privileges }),

@@ -42,4 +42,10 @@ export const registerProposalsPublicStepDefinitions = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./clone_proposal_step').then((m) => m.cloneProposalPublicStepDefinition)
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./settle_incomplete_proposal_step').then(
+      (m) => m.settleIncompleteProposalPublicStepDefinition
+    )
+  );
 };

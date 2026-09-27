@@ -21,6 +21,15 @@ const ACTION_WORKFLOW_ID = 'system-alertzero-action-create-rule';
  * step execution, that `data.set` variables survive a resume, and that every
  * decision/status pair the workflow writes is one the service will accept.
  */
+/**
+ * Hours between `from` and the proposal's recorded deadline. Approximate by
+ * construction: the service stamps `expiresAt` from its own clock a few
+ * milliseconds after the caller reads one, so assertions compare to a
+ * precision, not to an exact boundary.
+ */
+const hoursUntilDeadline = (fixture: ProposalGateFixture, from: number): number =>
+  (Date.parse(fixture.onlyProposal().expiresAt!) - from) / 3_600_000;
+
 describe('create-investigation-proposal workflow execution', () => {
   let fixture: ProposalGateFixture;
 
@@ -42,6 +51,43 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
 
       expect(fixture.onlyProposal().expiresAt).toEqual(expect.any(String));
+    });
+
+    it('should default that deadline to 72h when the caller does not ask for one', async () => {
+      const before = Date.now();
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+
+      expect(hoursUntilDeadline(fixture, before)).toBeCloseTo(72, 1);
+    });
+
+    it('should honour a deadline the caller does ask for', async () => {
+      // The gate parks against whatever this resolves to, so a worker that
+      // knows its decision is urgent can shorten the window without the queue
+      // and the gate disagreeing about when it expires.
+      const before = Date.now();
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, expiresIn: '4h' });
+
+      expect(hoursUntilDeadline(fixture, before)).toBeCloseTo(4, 1);
+    });
+
+    it('should park the gate for that deadline, not for the default', async () => {
+      // The recorded `expiresAt` and the duration the gate is actually held
+      // for are two different values, and only the second one decides when an
+      // unanswered proposal expires. This reads the rendered `dynamicTimeout`
+      // the engine froze at wait-entry, which is what the idle wake-up and the
+      // resume check both consult.
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, expiresIn: '4h' });
+
+      const parkedSeconds = Number(String(fixture.gateTimeout()).replace(/s$/, ''));
+      expect(parkedSeconds).toBeGreaterThan(3.9 * 3600);
+      expect(parkedSeconds).toBeLessThanOrEqual(4 * 3600);
+    });
+
+    it('should expire at that deadline rather than holding for 72h', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, expiresIn: '4h' });
+      await fixture.timeOutGate(5 * 60 * 60 * 1000);
+
+      expect(fixture.onlyProposal().status).toBe('expired');
     });
 
     it('should record the execution so approving resumes the run that created it', async () => {
@@ -191,6 +237,28 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(supersededOriginal.id).toBe(original.id);
       expect(supersededOriginal.status).toBe('superseded');
       expect(supersededOriginal.supersededBy).toBe(revision.id);
+      expect(revision.decision).toBe('approved');
+    });
+
+    // The loop no longer re-checks the clock after the gate. The engine's own
+    // timeout task settles anything the deadline caught, and the release route
+    // refuses an expired decision, so the only thing that reached the old
+    // post-gate check was a resume landing in the seconds before Task Manager
+    // claimed the timeout task. That decision is now honoured, and — the part
+    // worth pinning — it is honoured against the revision, not the row it
+    // replaced.
+    it('honours a decision resumed after the deadline, against the live revision', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      const original = fixture.onlyProposal();
+
+      await fixture.revise({ comment: 'clarified per analyst request' });
+      await fixture.resumeAfterDeadline(true);
+
+      const [predecessor, revision] = fixture.proposals();
+      expect(predecessor.id).toBe(original.id);
+      // Untouched: the decision has to land on the head, not resurrect the row
+      // it replaced.
+      expect(predecessor.status).toBe('superseded');
       expect(revision.decision).toBe('approved');
     });
   });
