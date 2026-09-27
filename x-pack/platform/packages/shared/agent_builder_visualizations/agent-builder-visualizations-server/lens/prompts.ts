@@ -64,7 +64,7 @@ ${JSON.stringify(schema)}
         : 'Bind only result columns from the resolved ES|QL query supplied with the request.'
     }
 3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and bind only columns produced by the layer's query.
-4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.`,
+4. Follow the schema definition strictly and never add properties it does not define. It intentionally omits 'data_source'; never add it.`,
     getChartTypeConfigPromptContent(chartType),
     getColorConfigPromptContent(chartType, parsedExistingConfig),
     `Return ONLY a JSON object wrapped in a markdown code block. The "authoring_note" must be one factual sentence describing what the final chart measures, its breakdown, and notable presentation choices. Do not include reasoning. The "config" must contain only the Lens configuration:
