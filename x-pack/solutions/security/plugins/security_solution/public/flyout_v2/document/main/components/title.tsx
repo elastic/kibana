@@ -13,6 +13,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-utils';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { EventKind } from '../constants/event_kinds';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { getDocumentTitle } from '../utils/get_header_title';
@@ -41,10 +42,30 @@ export const Title: FC<TitleProps> = memo(({ hit, hideLink = false }) => {
   const { services } = useKibana();
 
   const isAlert = useMemo(
-    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    () =>
+      (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+      (getFieldValue(hit, 'type') as string) === 'alert',
     [hit]
   );
-  const title = useMemo(() => getDocumentTitle(hit), [hit]);
+  // v2 episodes carry `rule.id` (a rule UUID) but no `rule.name`, so the title comes from the RnA
+  // rules-by-ids lookup, exactly like the episodes table's rule column. v1 documents keep reading
+  // the rule name straight off `kibana.alert.rule.name` via `getDocumentTitle`.
+  const isEpisode = useMemo(() => getFieldValue(hit, 'episode.id') != null, [hit]);
+  const episodeRuleId = useMemo(() => getFieldValue(hit, 'rule.id') as string | undefined, [hit]);
+  // Stable array reference: the hook feeds `ruleIds` straight into a `useAsync` dependency list, so a
+  // fresh `[episodeRuleId]` on every render would re-trigger the fetch endlessly (infinite loop).
+  const ruleIds = useMemo(
+    () => (isEpisode && episodeRuleId ? [episodeRuleId] : []),
+    [isEpisode, episodeRuleId]
+  );
+  const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
+
+  const title = useMemo(() => {
+    if (isEpisode && episodeRuleId) {
+      return rulesCache[episodeRuleId]?.metadata?.name ?? episodeRuleId;
+    }
+    return getDocumentTitle(hit);
+  }, [isEpisode, episodeRuleId, rulesCache, hit]);
   const iconType = isAlert ? 'warning' : 'analyzeEvent';
 
   const isRemoteDocument = useMemo(

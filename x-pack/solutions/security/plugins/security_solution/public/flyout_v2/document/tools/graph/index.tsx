@@ -48,7 +48,9 @@ export const GraphDetails = memo(
     const { euiTheme } = useEuiTheme();
     const eventId = hit.raw._id ?? '';
     const { timestamp, eventIds } = useGraphPreview({ hit });
-    const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
+    const isAlert =
+      (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+      (getFieldValue(hit, 'type') as string) === 'alert';
 
     const open = useOpenFlyout();
     const { historyKey } = useFlyoutSessionContext();

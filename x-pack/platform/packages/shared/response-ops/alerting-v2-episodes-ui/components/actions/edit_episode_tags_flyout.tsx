@@ -35,6 +35,11 @@ export interface AlertEpisodeTagsFlyoutProps {
   embedded?: boolean;
   /** Extra tag values (e.g. from other alert sources) merged into suggestions. */
   additionalSuggestions?: string[];
+  /**
+   * Extra tag options always offered in the list, on top of the ES-fetched suggestions — e.g. a
+   * consumer's preset tag vocabulary (Security passes its `securitySolution:alertTags` setting).
+   */
+  presetTags?: string[];
 }
 
 export function AlertEpisodeTagsFlyout({
@@ -44,6 +49,7 @@ export function AlertEpisodeTagsFlyout({
   onSave,
   embedded = false,
   additionalSuggestions = [],
+  presetTags = [],
 }: AlertEpisodeTagsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
@@ -55,13 +61,14 @@ export function AlertEpisodeTagsFlyout({
 
   const allKnownTags = useMemo(() => {
     const merged = new Set<string>([
+      ...presetTags,
       ...suggestionTags,
       ...additionalSuggestions,
       ...currentTags,
       ...selectedTags,
     ]);
     return [...merged].sort((a, b) => a.localeCompare(b));
-  }, [suggestionTags, additionalSuggestions, currentTags, selectedTags]);
+  }, [presetTags, suggestionTags, additionalSuggestions, currentTags, selectedTags]);
 
   const trimmedSearch = searchValue.trim();
   const atTagCountLimit = selectedTags.length >= MAX_TAGS;

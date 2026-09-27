@@ -52,7 +52,9 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const isAlert = useMemo(
-    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    () =>
+      (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+      (getFieldValue(hit, 'type') as string) === 'alert',
     [hit]
   );
   const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);

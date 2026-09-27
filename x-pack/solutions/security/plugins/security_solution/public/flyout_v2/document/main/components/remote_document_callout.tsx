@@ -98,7 +98,9 @@ export const RemoteDocumentCallout: FC<RemoteDocumentCalloutProps> = ({ hit, chi
     [hit]
   );
   const isAlert = useMemo(
-    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    () =>
+      (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+      (getFieldValue(hit, 'type') as string) === 'alert',
     [hit]
   );
   const isAttack = useMemo(

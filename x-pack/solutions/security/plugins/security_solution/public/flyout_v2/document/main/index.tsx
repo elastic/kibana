@@ -108,7 +108,9 @@ export const DocumentFlyout = memo(
   ({ hit, onAlertUpdated, renderCellActions, dataTestSubj }: DocumentFlyoutProps) => {
     const { openNotes, openDocumentFlyoutFromPattern } = useFlyoutApi();
     const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      () =>
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+        (getFieldValue(hit, 'type') as string) === 'alert',
       [hit]
     );
     const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);

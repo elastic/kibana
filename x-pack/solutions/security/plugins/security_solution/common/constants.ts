@@ -114,6 +114,8 @@ export const DETECTIONS_PATH = '/detections' as const;
 // TODO: https://github.com/elastic/kibana/issues/242434
 // Investigate possibility of using `detections` instead
 export const ALERTS_PATH = '/alerts' as const;
+// RnA / Alerting v2 POC: new alerts page that lives next to the existing alerts page.
+export const ALERTS_V2_PATH = '/alerts_v2' as const;
 export const ATTACKS_PATH = '/attacks' as const;
 export const ALERT_DETECTIONS = '/alert_detections' as const;
 

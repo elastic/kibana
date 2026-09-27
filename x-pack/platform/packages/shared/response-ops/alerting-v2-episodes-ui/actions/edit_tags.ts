@@ -32,6 +32,8 @@ export interface EditTagsActionDeps {
   spaces: SpacesPluginStart;
   queryClient: QueryClient;
   fetchAdditionalTagSuggestions?: () => Promise<string[]>;
+  /** Extra tag options always offered in the flyout (e.g. a consumer's preset tag vocabulary). */
+  presetTags?: string[];
 }
 
 export const EDIT_TAGS_ACTION_ID = 'ALERTING_V2_EDIT_EPISODE_TAGS';
@@ -53,6 +55,7 @@ export const createEditTagsAction = (
       spaces: deps.spaces,
       queryClient: deps.queryClient,
       fetchAdditionalSuggestions: deps.fetchAdditionalTagSuggestions,
+      presetTags: deps.presetTags,
     });
     if (tags == null) return;
 

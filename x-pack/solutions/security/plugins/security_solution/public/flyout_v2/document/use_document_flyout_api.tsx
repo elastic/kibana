@@ -70,6 +70,11 @@ const DocumentFlyoutWrapperFromPattern = lazy(() =>
     default: m.DocumentFlyoutWrapperFromPattern,
   }))
 );
+// The bare flyout content (no fetch wrapper) — used by `openDocumentFlyoutFromHit` to render
+// straight from an in-memory `hit`.
+const DocumentFlyout = lazy(() =>
+  import('./main').then((m) => ({ default: m.DocumentFlyout }))
+);
 const AnalyzerGraph = lazy(() =>
   import('./tools/analyzer').then((m) => ({ default: m.AnalyzerGraph }))
 );
@@ -118,6 +123,19 @@ export interface OpenDocumentFlyoutParams {
    *   to the bare "Alert" label so EUI's managed flyout never shows "Unknown Flyout" in its
    *   navigation history. Supply a richer title (e.g. `"Alert: <rule name>"`) when available.
    */
+  title?: string;
+}
+
+export interface OpenDocumentFlyoutFromHitParams {
+  /** The already-materialized document record to display (rendered as-is, no fetch). */
+  hit: DataTableRecord;
+  /** Renderer for cell actions in the flyout. Defaults to the standard `cellActionRenderer`. */
+  renderCellActions?: CellActionRenderer;
+  /** Invoked after an alert is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
+  onAlertUpdated?: () => void;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
+  /** Flyout-history title; falls back to the bare "Alert" label. */
   title?: string;
 }
 
@@ -228,6 +246,14 @@ export interface DocumentFlyoutApi {
    * (for callers that don't know the concrete `_index`, e.g. notes).
    */
   openDocumentFlyoutFromPattern: (params: OpenDocumentFlyoutParams) => void;
+  /**
+   * Opens the document details flyout directly from an already-materialized `hit` — the same
+   * `DataTableRecord` the caller already holds — skipping the `_id`/`_index` re-fetch that
+   * `openDocumentFlyoutFromIndex` performs. Use when the row already carries the full document
+   * (e.g. an ES|QL-derived table) and there is no concrete index to resolve against. Not
+   * URL-restorable: an in-memory document can't be re-fetched from a URL.
+   */
+  openDocumentFlyoutFromHit: (params: OpenDocumentFlyoutFromHitParams) => void;
   /** Opens the analyzer tools flyout for a document. */
   openAnalyzer: (params: OpenAnalyzerParams) => void;
   /** Opens the session view tools flyout for a document. */
@@ -428,6 +454,40 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey, sessionMode, writeOnOpen, buildOnClose]
+  );
+
+  const openDocumentFlyoutFromHit = useCallback(
+    ({
+      hit,
+      renderCellActions = cellActionRenderer,
+      onAlertUpdated = noop,
+      origin,
+      title,
+    }: OpenDocumentFlyoutFromHitParams) => {
+      // No `writeOnOpen`/`onClose` URL wiring here: the flyout renders straight from the in-memory
+      // `hit`, which can't be serialized back into a re-fetch, so it is intentionally not
+      // URL-restorable.
+      open(
+        <DocumentFlyout
+          hit={hit}
+          renderCellActions={renderCellActions}
+          onAlertUpdated={onAlertUpdated}
+        />,
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: sessionMode,
+          title: title ?? getAlertHistoryTitle(),
+        },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: sessionMode,
+          origin,
+        }
+      );
+    },
+    [open, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openAnalyzer = useCallback(
@@ -799,6 +859,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
+      openDocumentFlyoutFromHit,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,
@@ -813,6 +874,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
+      openDocumentFlyoutFromHit,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,
