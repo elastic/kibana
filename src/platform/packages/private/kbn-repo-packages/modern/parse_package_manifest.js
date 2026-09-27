@@ -65,6 +65,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,
+    enableLazyInitialize,
     type,
     __category__,
   } = plugin;
@@ -125,6 +126,17 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     throw err(`plugin.enabledOnAnonymousPages`, enabledOnAnonymousPages, `must be a boolean`);
   }
 
+  if (enableLazyInitialize !== undefined && typeof enableLazyInitialize !== 'boolean') {
+    throw err(`plugin.enableLazyInitialize`, enableLazyInitialize, `must be a boolean`);
+  }
+  if (enableLazyInitialize === true && server !== true) {
+    throw err(
+      `plugin.enableLazyInitialize`,
+      enableLazyInitialize,
+      `requires plugin.server to be true; deferred initialization is a server-side lifecycle`
+    );
+  }
+
   if (type !== undefined && type !== 'preboot') {
     throw err(`plugin.type`, type, `must be undefined or "preboot"`);
   }
@@ -166,6 +178,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,
+    enableLazyInitialize,
     extraPublicDirs,
     [PLUGIN_CATEGORY]: __category__,
   };

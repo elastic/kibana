@@ -53,6 +53,12 @@ function parseLegacyKibanaPlatformPlugin(manifestPath) {
     );
   }
 
+  if (manifest.enableLazyInitialize && !manifest.server) {
+    throw new TypeError(
+      `Plugin ${manifest.id} sets enableLazyInitialize without a server entry; deferred initialization is a server-side lifecycle (${manifestPath})`
+    );
+  }
+
   return {
     directory: Path.dirname(manifestPath),
     manifestPath,
@@ -68,6 +74,7 @@ function parseLegacyKibanaPlatformPlugin(manifestPath) {
       owner: manifest.owner,
       description: manifest.description,
       enabledOnAnonymousPages: Boolean(manifest.enabledOnAnonymousPages),
+      enableLazyInitialize: Boolean(manifest.enableLazyInitialize),
       requiredPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredPlugins'),
       optionalPlugins: isValidDepsDeclaration(manifest.optionalPlugins, 'optionalPlugins'),
       requiredBundles: isValidDepsDeclaration(manifest.requiredBundles, 'requiredBundles'),
