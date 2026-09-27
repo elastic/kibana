@@ -165,7 +165,7 @@ describe('syncSchedulerAfterSave', () => {
     expect(mockTaskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
     expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
-      'Skipping scheduled triggers for global workflow wf-1: scheduling global workflows is not supported'
+      'Skipping scheduled triggers for global workflow wf-1: scheduling global workflows is not supported yet (elastic/security-team#17382)'
     );
   });
 

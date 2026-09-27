@@ -185,6 +185,8 @@ This is the right choice for:
 - system-level workflows that don't need a per-space copy but still must respect per-space data boundaries at runtime
 - workflows that are space-agnostic (their behavior does not depend on the invoking space at all)
 
+> **Scheduled triggers are not supported for global workflows yet.** A scheduled run has no invoking space, so the platform never schedules a global workflow's `scheduled` triggers (it logs a warning instead). Use a space-scoped install per space if you need scheduled runs. Tracked in elastic/security-team#17382.
+
 ```ts
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
