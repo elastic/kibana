@@ -1,0 +1,127 @@
+version: "1"
+name: Install prebuilt detection rule
+description: >
+  AlertZero action: installs an Elastic prebuilt detection rule and turns it on.
+  Executed by the investigation proposal gate once an analyst approves, so the
+  change is attributed to the approver.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Metadata has to
+  # live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Install prebuilt detection rule
+    description: Installs an Elastic prebuilt rule from the package and enables it.
+    category: configure
+    impact: medium
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            Identity of the prebuilt rule to install. The rule has no saved object
+            until it is installed, so it is addressed by its signature id and
+            package version rather than a saved-object id.
+          properties:
+            rule_id:
+              type: string
+              minLength: 1
+              maxLength: 512
+              description: Signature rule id (`rule_id`) of the prebuilt rule.
+            version:
+              # Package versions are integers; a fraction would pass here and only
+              # fail at the install API, after an analyst has approved it.
+              type: integer
+              minimum: 1
+              description: Package version of the prebuilt rule to install.
+          required:
+            - rule_id
+            - version
+          additionalProperties: false
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: id
+    type: string
+  - name: installed
+    type: boolean
+  - name: enabled
+    type: boolean
+steps:
+  - name: install_rule
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detection_engine/prebuilt_rules/installation/_perform"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        x-elastic-internal-origin: kibana
+        Content-Type: application/json
+      body:
+        mode: SPECIFIC_RULES
+        rules:
+          - rule_id: "{{ inputs.actionInput.rule_id }}"
+            version: "${{ inputs.actionInput.version }}"
+
+  # A fresh install answers with the new saved object, so enable it by uuid.
+  - name: enable_installed_rule
+    type: security.enableRule
+    if: "${{ steps.install_rule.output.summary.succeeded > 0 }}"
+    with:
+      ids:
+        - "{{ steps.install_rule.output.results.created[0].id }}"
+
+  # A rule installed between proposal and approval is reported as skipped with no
+  # saved object in the response, so the signature id is the only handle left.
+  - name: enable_existing_rule
+    type: security.enableRule
+    if: "${{ steps.install_rule.output.summary.skipped > 0 }}"
+    with:
+      query: 'alert.attributes.params.ruleId: "{{ inputs.actionInput.rule_id }}"'
+
+  # The install API answers 200 even when it installed nothing (`summary.failed`,
+  # for a version the package no longer carries), and the proposal gate counts any
+  # error-free run as success. Step `if` cannot group with parentheses, so what
+  # landed is computed here and read below as flags.
+  - name: outcome
+    type: data.set
+    with:
+      installed: "${{ steps.install_rule.output.summary.succeeded > 0 or steps.install_rule.output.summary.skipped > 0 }}"
+      enabled: >-
+        ${{ steps.enable_installed_rule.output.succeeded > 0
+          or steps.enable_installed_rule.output.skipped > 0
+          or steps.enable_existing_rule.output.succeeded > 0
+          or steps.enable_existing_rule.output.skipped > 0 }}
+
+  # A rule that is not installed and enabled fails the action, so the gate records
+  # the proposal `failed` and re-offers it instead of reporting `succeeded`.
+  - name: fail_not_applied
+    type: workflow.fail
+    if: "${{ steps.outcome.output.installed != true or steps.outcome.output.enabled != true }}"
+    with:
+      message: >-
+        Prebuilt rule {{ inputs.actionInput.rule_id }} version {{ inputs.actionInput.version }}
+        was not {% if steps.outcome.output.installed != true %}installed{% else %}enabled{% endif %}.
+        Install summary: {{ steps.install_rule.output.summary | json }}
+        {{ steps.install_rule.output.errors | json }}
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      id: "{{ steps.install_rule.output.results.created[0].id }}"
+      installed: "${{ steps.outcome.output.installed }}"
+      enabled: "${{ steps.outcome.output.enabled }}"

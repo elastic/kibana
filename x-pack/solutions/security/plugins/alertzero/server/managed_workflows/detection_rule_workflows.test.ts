@@ -222,25 +222,25 @@ describe('detection rule workflows', () => {
       }
     });
 
-    // Only `waitForApproval` renders the approve/reject buttons; a `waitForInput` gate
-    // makes an analyst hand-author the resume payload as JSON instead.
-    it('gates the creation worker on approval responses', () => {
+    // The decision lives on the investigation as a proposal, and the gate workflow
+    // creates the rule as the approver. The worker itself must neither gate nor create.
+    it('gates the creation worker through the investigation proposal', () => {
       const { steps } = parse(getManagedYaml(ALERTZERO_RULE_CREATION_WORKFLOW_ID)) as WorkflowYaml;
       const all = flattenSteps(steps as unknown as NestedStep[]);
-      const gates = all.filter(({ type }) => type === 'waitForApproval');
+      const types = all.map(({ type }) => type);
 
+      expect(types).not.toContain('waitForApproval');
+      expect(types).not.toContain('waitForInput');
+      expect(types).not.toContain('security.createRule');
+
+      const gates = all.filter(
+        ({ type, with: input }) =>
+          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
+      );
       expect(gates).toHaveLength(1);
-      expect(all.map(({ type }) => type)).not.toContain('waitForInput');
-
-      const [gate] = gates;
-      const conditions = all
-        .flatMap(({ if: stepIf }) => (stepIf ? [stepIf] : []))
-        .filter((expr) => expr.includes(gate.name));
-
-      expect(conditions.length).toBeGreaterThan(0);
-      for (const expr of conditions) {
-        expect(expr).toContain(`steps.${gate.name}.output.response.approved`);
-      }
+      const inputs = gates[0].with?.inputs as Record<string, unknown>;
+      expect(inputs.actionWorkflowId).toBe('system-alertzero-action-create-rule');
+      expect(inputs.actionInput).toBe('${{ steps.draft_creation.output.structured_output.rule }}');
     });
 
     // Every change type decides at the proposal gate, which runs the action as
@@ -1253,13 +1253,24 @@ describe('detection rule workflows', () => {
           }>
         ).find(({ type }) => type === 'manual')!.inputs!.properties;
 
-        expect(consts.lookback_days).toBe(7);
+        expect(consts.lookback_days).toBe(14);
         expect(query).toContain(
           '"gte":"now-{{ inputs.lookback_days | default: consts.lookback_days }}d"'
         );
         expect(JSON.stringify(search.with?.sort)).toContain('"order":"asc"');
         expect(inputs.lookback_days.minimum).toBe(1);
         expect(inputs.lookback_days.maximum).toBe(90);
+      });
+
+      // A review parks on its proposal for up to its timeout, and an expired proposal
+      // leaves the indicator pending for the next sweep. That sweep only retries it if
+      // the indicator is still inside the window.
+      it('looks back further than the longest review can park', () => {
+        const { timeout } = (review as unknown as { settings: { timeout: string } }).settings;
+        const reviewHours = Number(timeout.replace(/h$/, ''));
+
+        expect(timeout).toMatch(/^\d+h$/);
+        expect(Number(consts.lookback_days) * 24).toBeGreaterThan(reviewHours);
       });
 
       // Async fan-out: the sweep starts one review per indicator and exits. Each review
