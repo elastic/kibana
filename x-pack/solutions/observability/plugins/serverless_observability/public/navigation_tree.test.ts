@@ -164,9 +164,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('uses a single Alerts link to classic Observability alerts even when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
+  it('uses a single Alerts link to classic Observability alerts when alerting v2 is disabled', () => {
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
@@ -180,9 +178,91 @@ describe('Navigation Tree', () => {
         icon: 'warning',
       })
     );
+    expect(flatAlerts).not.toHaveProperty('renderAs');
   });
 
-  it('does not include Stack Alerts in Admin and Settings > Alerts and insights', () => {
+  it('opens an Alerts panel pointing at observability alerting deep links when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_alerts: { read: true },
+      alerting_v2_rules: { read: true },
+      alerting_v2_action_policies: { read: true },
+      alerting_v2_execution_history: { read: true },
+      observabilityAlerts: { show: true },
+      management: {
+        ...core.application.capabilities.management,
+        insightsAndAlerting: {
+          ...core.application.capabilities.management?.insightsAndAlerting,
+          triggersActionsAlerts: true,
+          triggersActionsRules: true,
+          maintenanceWindows: true,
+        },
+      },
+    };
+
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
+    const alertsPanel = body.find(
+      (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
+    );
+
+    expect(alertsPanel).toEqual(
+      expect.objectContaining({
+        id: 'alerting',
+        title: 'Alerting',
+        icon: 'warning',
+        renderAs: 'panelOpener',
+      })
+    );
+    expect(alertsPanel).not.toHaveProperty('link');
+    expect(alertsPanel?.children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
+          ]),
+        }),
+        expect.objectContaining({
+          title: 'Rule Management',
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:rules-v2' }),
+            expect.objectContaining({
+              link: 'observabilityAlerting:rules-v1',
+              sideNavStatus: 'hidden',
+            }),
+          ]),
+        }),
+        expect.objectContaining({
+          title: 'Notifications and Suppressions',
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:action-policies' }),
+            expect.objectContaining({ link: 'management:maintenanceWindows' }),
+          ]),
+        }),
+        expect.objectContaining({
+          title: 'Operations',
+          children: expect.arrayContaining([
+            expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
+          ]),
+        }),
+      ])
+    );
+  });
+
+  it('omits Alerting V2 Preview from Admin and Settings when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    const adminSettingsNode = getAdminSettingsNode({ core });
+
+    expect(adminSettingsNode.children).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'alerting_v2_panel' })])
+    );
+    expect(adminSettingsNode.children).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'alerts_and_insights' })])
+    );
+  });
+
+  it('keeps Stack Rules and hides Stack Alerts while alerting v2 is disabled', () => {
     const adminSettingsNode = getAdminSettingsNode({ core });
     const alertsSection = adminSettingsNode.children?.find(
       (item) => item.id === 'alerts_and_insights'
@@ -193,6 +273,25 @@ describe('Navigation Tree', () => {
     expect(alertsLinks).toEqual(
       expect.arrayContaining([
         'management:triggersActions',
+        'management:triggersActionsConnectors',
+        'management:maintenanceWindows',
+      ])
+    );
+  });
+
+  it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    const adminSettingsNode = getAdminSettingsNode({ core });
+    const alertsSection = adminSettingsNode.children?.find(
+      (item) => item.id === 'alerts_and_insights'
+    );
+    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
+
+    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+    expect(alertsLinks).not.toContain('management:triggersActions');
+    expect(alertsLinks).toEqual(
+      expect.arrayContaining([
         'management:triggersActionsConnectors',
         'management:maintenanceWindows',
       ])

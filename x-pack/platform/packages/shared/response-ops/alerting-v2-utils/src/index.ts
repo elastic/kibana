@@ -7,10 +7,13 @@
 
 export { getAlertingV2ManagementNavPanel } from './get_management_nav_panel';
 export {
+  hasAlertingV2Capability,
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
-  hasAlertingV2RulesReadCapability,
+  shouldShowClassicObservabilityAlertsTable,
   canAccessAlertingV2Rules,
+  type AlertingV2CapabilityFeature,
+  type AlertingV2CapabilityLevel,
 } from './is_alerting_v2_enabled';
 export { normalizeTags } from './normalize_tags';
 export { resolveArtifactId } from './resolve_artifact_id';

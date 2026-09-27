@@ -8,6 +8,7 @@
 import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import type { Services } from '../common/services';
@@ -81,9 +82,28 @@ describe('createNavigationTree', () => {
     expect(contextEngineIndex).toBe(1);
   });
 
+  it('includes Stack Rules in project settings > Alerts and Insights', async () => {
+    const { footer } = (await createNavigationTree(
+      createServices(),
+      AIChatExperience.Classic
+    )) as NavigationTreeDefinition;
+    const managementCategory = footer?.find((item) => item.id === 'category-management');
+    const stackManagement = managementCategory?.children?.find(
+      (item) => item.id === STACK_MANAGEMENT_NAV_ID
+    );
+    const alertsSection = stackManagement?.children?.find((item) =>
+      item.children?.some((child) => child.link === 'management:triggersActions')
+    );
+
+    expect(alertsSection?.children).toContainEqual(
+      expect.objectContaining({ id: 'stackRules', link: 'management:triggersActions' })
+    );
+  });
+
   it('includes service accounts in Admin and Settings', async () => {
     const { footer = [] } = (await createNavigationTree(
-      createServices()
+      createServices(),
+      AIChatExperience.Classic
     )) as NavigationTreeDefinition;
 
     expect(containsLink(footer, 'management:service_accounts')).toBe(true);

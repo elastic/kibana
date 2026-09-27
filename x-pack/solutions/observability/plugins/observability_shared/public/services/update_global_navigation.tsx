@@ -18,7 +18,7 @@ import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
 
 /** Capability-based Observability access — pricing tiers do not affect this. */
-function hasObservabilityCapabilities(capabilities: Capabilities): boolean {
+export function hasObservabilityCapabilities(capabilities: Capabilities): boolean {
   const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
   /* logs is a special case.
    * It is not a nav link but still exists as a
@@ -46,11 +46,13 @@ export function updateGlobalNavigation({
   deepLinks,
   updater$,
   pricing,
+  showClassicAlertsInGlobalSearch = true,
 }: {
   capabilities: ApplicationStart['capabilities'];
   deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
   pricing: PricingServiceStart;
+  showClassicAlertsInGlobalSearch?: boolean;
 }) {
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
   const hasObsCapabilities = hasObservabilityCapabilities(capabilities);
@@ -74,10 +76,11 @@ export function updateGlobalNavigation({
         case 'alerts':
           // Observability feature access only — cases-only users do not get alerts/rules nav.
           if (hasObsCapabilities) {
-            return {
-              ...link,
-              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
-            };
+            const alertsVisibleIn: AppDeepLinkLocations[] = ['classicSideNav', 'projectSideNav'];
+            if (showClassicAlertsInGlobalSearch) {
+              alertsVisibleIn.push('globalSearch');
+            }
+            return { ...link, visibleIn: alertsVisibleIn };
           }
           return null;
         case 'rules':

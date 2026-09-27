@@ -31,7 +31,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   }) {
     it('navigates to the rules page', async () => {
       await retry.try(async () => {
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        await svlCommonNavigation.sidenav.clickLink({
+          deepLinkId: 'observability-overview:alerts',
+        });
         expect(await testSubjects.exists('manageRulesPageButton')).toBeTruthy();
         await testSubjects.click('manageRulesPageButton');
       });
