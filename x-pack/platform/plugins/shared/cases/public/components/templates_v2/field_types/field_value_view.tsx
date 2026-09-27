@@ -6,10 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiIcon, EuiText, EuiTextColor, useEuiTheme, useEuiFontSize } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiMarkdownFormat,
+  EuiText,
+  EuiTextColor,
+  useEuiTheme,
+  useEuiFontSize,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
+import { useProseCss } from '../../markdown_editor/use_prose_css';
 import * as commonI18n from '../../../common/translations';
 import * as i18n from '../translations';
 
@@ -259,10 +267,14 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
   isRequiredOnClose,
   onEdit,
 }) => {
+  const proseCss = useProseCss();
   const valueText = useMemo(() => getValueText(field, value), [field, value]);
   const label = field.label ?? field.name;
+  const isMarkdownTextarea =
+    field.control === FieldType.TEXTAREA && field.metadata?.markdown === true;
   const isTextValue =
-    field.control === FieldType.INPUT_TEXT || field.control === FieldType.TEXTAREA;
+    !isMarkdownTextarea &&
+    (field.control === FieldType.INPUT_TEXT || field.control === FieldType.TEXTAREA);
 
   // "Required" is only actionable while the field is empty; repeating it on filled fields is noise.
   // "Required on close" is a standing obligation, so it stays regardless.
@@ -281,7 +293,28 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
       onEdit={onEdit}
     >
       {valueText !== undefined ? (
-        valueText
+        isMarkdownTextarea ? (
+          // Stop link clicks from bubbling to the row button so the link navigates normally.
+          // Non-link clicks still reach the button and open edit mode.
+          <div
+            onClick={(e) => {
+              if ((e.target as HTMLElement).closest('a')) {
+                e.stopPropagation();
+              }
+            }}
+            onKeyDown={(e) => {
+              if ((e.key === 'Enter' || e.key === ' ') && (e.target as HTMLElement).closest('a')) {
+                e.stopPropagation();
+              }
+            }}
+          >
+            <EuiMarkdownFormat css={proseCss} textSize="s">
+              {valueText}
+            </EuiMarkdownFormat>
+          </div>
+        ) : (
+          valueText
+        )
       ) : (
         // One phrase for every empty field, editable or not, so a column of them reads as one
         // state rather than a mix of instructions. Subdued but upright: italics on a third of
