@@ -10,7 +10,8 @@ export const CATALOG_LOAD_TIMEOUT_MS = 5_000;
 export const withCatalogTimeout = async <T>(
   promise: Promise<T>,
   ms: number,
-  onTimeout: () => T
+  onTimeout: () => T,
+  onError?: (error: unknown) => T
 ): Promise<T> => {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   let timedOut = false;
@@ -21,7 +22,21 @@ export const withCatalogTimeout = async <T>(
     }, ms);
   });
   try {
-    return await Promise.race([promise, timeoutPromise]);
+    return await Promise.race([
+      promise.then(
+        (value) => value,
+        (error: unknown) => {
+          if (timedOut) {
+            return new Promise<T>(() => undefined);
+          }
+          if (onError) {
+            return onError(error);
+          }
+          throw error;
+        }
+      ),
+      timeoutPromise,
+    ]);
   } finally {
     if (timeoutId !== undefined) {
       clearTimeout(timeoutId);

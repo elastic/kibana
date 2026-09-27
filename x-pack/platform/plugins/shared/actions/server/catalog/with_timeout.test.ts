@@ -34,4 +34,14 @@ describe('withCatalogTimeout', () => {
     jest.advanceTimersByTime(5_000);
     expect(onTimeout).not.toHaveBeenCalled();
   });
+
+  it('returns onError when the promise rejects before the timeout', async () => {
+    const result = withCatalogTimeout(
+      Promise.reject(new Error('cluster_block_exception')),
+      5_000,
+      () => 'timed-out',
+      (error) => `failed:${error instanceof Error ? error.message : String(error)}`
+    );
+    await expect(result).resolves.toBe('failed:cluster_block_exception');
+  });
 });

@@ -1251,6 +1251,90 @@ describe('update()', () => {
       expect(result.specVersion).toBe('1.1');
     });
 
+    test('omitted config and secrets validate stored values against the target and write them with the pin', async () => {
+      const soResult = makeSavedObjectResult({
+        actionTypeId: '.abuseipdb',
+        specVersion: '1.0',
+        config: { baseUrl: 'http://stored.example' },
+        secrets: { encrypted: true },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        ...soResult,
+        attributes: {
+          ...soResult.attributes,
+          secrets: { Key: 'stored-secret' },
+        },
+      } as never);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(
+        makeSavedObjectResult({
+          actionTypeId: '.abuseipdb',
+          specVersion: '1.1',
+          config: { baseUrl: 'http://stored.example' },
+          secrets: { Key: 'stored-secret' },
+        })
+      );
+
+      await update({
+        context: mockContext,
+        id: '1',
+        action: { name: 'Test Connector', specVersion: '1.1' },
+      });
+
+      expect(customValidator).toHaveBeenCalledWith(
+        { baseUrl: 'http://stored.example' },
+        expect.objectContaining({ specVersion: '1.1' })
+      );
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        'action',
+        '1'
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          specVersion: '1.1',
+          config: { baseUrl: 'http://stored.example' },
+          secrets: { Key: 'stored-secret' },
+        }),
+        expect.anything()
+      );
+    });
+
+    test('does not overwrite stored secrets with {} when secrets are omitted', async () => {
+      const soResult = makeSavedObjectResult({
+        actionTypeId: '.abuseipdb',
+        specVersion: '1.0',
+        config: { baseUrl: 'http://stored.example' },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        ...soResult,
+        attributes: {
+          ...soResult.attributes,
+          secrets: { Key: 'keep-me' },
+        },
+      } as never);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(
+        makeSavedObjectResult({ actionTypeId: '.abuseipdb', specVersion: '1.1' })
+      );
+
+      await update({
+        context: mockContext,
+        id: '1',
+        action: { name: 'Test Connector', config: { baseUrl: 'http://new.example' } },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          specVersion: '1.1',
+          config: { baseUrl: 'http://new.example' },
+          secrets: { Key: 'keep-me' },
+        }),
+        expect.anything()
+      );
+    });
+
     test('rejects a requested version on a classic connector type', async () => {
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(
         getConnectorType({

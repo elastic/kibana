@@ -776,6 +776,19 @@ describe('Actions Plugin', () => {
           'Connector catalog load timed out; starting with in-tree types only'
         );
       });
+
+      it('returns the start contract when catalog load rejects', async () => {
+        const loadAtBoot = jest.fn().mockRejectedValue(new Error('cluster_block_exception'));
+        (DeclarativeCatalogService as jest.Mock).mockImplementationOnce(() => ({
+          loadAtBoot,
+          stop: jest.fn(),
+        }));
+        await setupEnabledCatalog();
+        await expect(plugin.start(coreStart, pluginsStart)).resolves.toBeDefined();
+        expect(context.logger.get().warn).toHaveBeenCalledWith(
+          'Connector catalog load failed; starting with in-tree types only: cluster_block_exception'
+        );
+      });
     });
 
     it('should throw when there is an invalid connector type in enabledActionTypes', async () => {

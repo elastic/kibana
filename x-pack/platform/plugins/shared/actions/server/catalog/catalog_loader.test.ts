@@ -13,11 +13,14 @@ import { createVersionedConnectorType } from './versioned_connector_type';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../plugin';
 import {
   LIVE_ABUSEIPDB_1_1_YAML,
+  LIVE_ABUSEIPDB_1_0_YAML,
   LIVE_CATALOG_MANIFEST,
   LIVE_CATALOG_SIGNATURE,
   LIVE_ABUSEIPDB_ICON,
+  LIVE_OKTA_1_0_YAML,
   TYPE_METADATA_FIXTURE,
 } from './test_fixtures';
+import { getContentHash } from './icon';
 import type { ConnectorCatalogStorage } from './catalog_storage';
 import { createConnectorTypeFromSpec } from '../lib/single_file_connectors/create_connector_from_spec';
 import { z } from '@kbn/zod/v4';
@@ -35,6 +38,8 @@ describe('loadCatalogFromIndex', () => {
   const actions = {} as ActionsPluginSetupContract;
 
   beforeEach(() => {
+    logger.error.mockClear();
+    logger.warn.mockClear();
     mockedCreateType.mockImplementation((spec) => ({
       id: spec.metadata.id,
       name: spec.metadata.displayName,
@@ -162,5 +167,128 @@ describe('loadCatalogFromIndex', () => {
     });
     expect(result.registered).toBe(1);
     expect(registered).toEqual(['.abuseipdb']);
+  });
+
+  it('builds a definition when the stored YAML hash matches the signed manifest row', async () => {
+    const storage = createStorage();
+    storage.getDefinition.mockImplementation(async (id: string, version: string) => ({
+      id,
+      version,
+      yaml: version === '1.0' ? LIVE_ABUSEIPDB_1_0_YAML : LIVE_ABUSEIPDB_1_1_YAML,
+      contentHash: 'sha256:aa',
+      catalogVersion: 'sha256:aa',
+      addedAt: '2026-09-17T12:00:00.000Z',
+    }));
+    const registered: string[] = [];
+    const result = await loadCatalogFromIndex({
+      storage,
+      publicKeys: CATALOG_PUBLIC_KEYS,
+      registry: {
+        registerType: (type) => registered.push(type.id),
+        isTypeRegistered: () => false,
+      },
+      pinnedClient: {
+        find: jest.fn().mockResolvedValue({ aggregations: { types: { buckets: [] } } }),
+      },
+      buildType: ({ id, versions, metadata }) =>
+        createVersionedConnectorType({ id, versions, metadata, actions, logger }),
+      types: new Map(),
+      logger,
+      logOnce: createLogOnce(logger),
+    });
+    expect(result.registered).toBe(1);
+    expect(registered).toEqual(['.abuseipdb']);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('skips a definition whose YAML hash does not match the signed manifest row', async () => {
+    const storage = createStorage();
+    storage.listDefinitions.mockResolvedValue([
+      { id: '.abuseipdb', version: '1.1', contentHash: getContentHash(LIVE_ABUSEIPDB_1_0_YAML) },
+    ]);
+    storage.getDefinition.mockResolvedValue({
+      id: '.abuseipdb',
+      version: '1.1',
+      yaml: LIVE_ABUSEIPDB_1_0_YAML,
+      contentHash: getContentHash(LIVE_ABUSEIPDB_1_0_YAML),
+      catalogVersion: 'sha256:aa',
+      addedAt: '2026-09-17T12:00:00.000Z',
+    });
+    const registered: string[] = [];
+    const result = await loadCatalogFromIndex({
+      storage,
+      publicKeys: CATALOG_PUBLIC_KEYS,
+      registry: {
+        registerType: (type) => registered.push(type.id),
+        isTypeRegistered: () => false,
+      },
+      pinnedClient: {
+        find: jest.fn().mockResolvedValue({ aggregations: { types: { buckets: [] } } }),
+      },
+      buildType: ({ id, versions, metadata }) =>
+        createVersionedConnectorType({ id, versions, metadata, actions, logger }),
+      types: new Map(),
+      logger,
+      logOnce: createLogOnce(logger),
+    });
+    expect(result.registered).toBe(0);
+    expect(registered).toEqual([]);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed integrity check'));
+  });
+
+  it('registers remaining ids when ensureSufficientLicense throws for one id', async () => {
+    const storage = createStorage();
+    storage.listDefinitions.mockResolvedValue([
+      { id: '.abuseipdb', version: '1.1', contentHash: getContentHash(LIVE_ABUSEIPDB_1_1_YAML) },
+      { id: '.okta', version: '1.0', contentHash: getContentHash(LIVE_OKTA_1_0_YAML) },
+    ]);
+    storage.getDefinition.mockImplementation(async (id: string, version: string) => ({
+      id,
+      version,
+      yaml: id === '.okta' ? LIVE_OKTA_1_0_YAML : LIVE_ABUSEIPDB_1_1_YAML,
+      contentHash:
+        id === '.okta'
+          ? getContentHash(LIVE_OKTA_1_0_YAML)
+          : getContentHash(LIVE_ABUSEIPDB_1_1_YAML),
+      catalogVersion: 'sha256:aa',
+      addedAt: '2026-09-17T12:00:00.000Z',
+    }));
+    const registered: string[] = [];
+    const result = await loadCatalogFromIndex({
+      storage,
+      publicKeys: CATALOG_PUBLIC_KEYS,
+      registry: {
+        registerType: (type) => {
+          if (type.id === '.abuseipdb') {
+            throw new Error(
+              'Third party action type ".abuseipdb" can only set minimumLicenseRequired to a gold license or higher'
+            );
+          }
+          registered.push(type.id);
+        },
+        isTypeRegistered: () => false,
+      },
+      pinnedClient: {
+        find: jest.fn().mockResolvedValue({ aggregations: { types: { buckets: [] } } }),
+      },
+      buildType: ({ id, versions, metadata }) =>
+        createVersionedConnectorType({
+          id,
+          versions,
+          metadata: {
+            ...TYPE_METADATA_FIXTURE,
+            ...metadata,
+            ...(id === '.abuseipdb' ? { minimumLicense: 'basic' as const } : {}),
+          },
+          actions,
+          logger,
+        }),
+      types: new Map(),
+      logger,
+      logOnce: createLogOnce(logger),
+    });
+    expect(result.registered).toBe(1);
+    expect(registered).toEqual(['.okta']);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('.abuseipdb'));
   });
 });

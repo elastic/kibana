@@ -84,7 +84,22 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
   const { actionTypeId, authMode, specVersion } = attributes;
-  const { name, config, secrets, specVersion: requestedSpecVersion } = action;
+  const {
+    name,
+    config: requestedConfig,
+    secrets: requestedSecrets,
+    specVersion: requestedSpecVersion,
+  } = action;
+
+  const storedConfigForValidation = (attributes.config ?? {}) as Record<string, unknown>;
+  let storedSecrets: Record<string, unknown> | undefined;
+  if (requestedSecrets === undefined) {
+    const decrypted =
+      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', id);
+    storedSecrets = (decrypted.attributes.secrets ?? {}) as Record<string, unknown>;
+  }
+  const config = (requestedConfig ?? storedConfigForValidation) as Record<string, unknown>;
+  const secrets = (requestedSecrets ?? storedSecrets ?? {}) as Record<string, unknown>;
 
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);

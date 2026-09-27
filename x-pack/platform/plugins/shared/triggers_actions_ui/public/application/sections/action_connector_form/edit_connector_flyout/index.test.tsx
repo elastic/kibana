@@ -807,5 +807,43 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
       expect(await screen.findByTestId('testConnectorTab')).toBeEnabled();
     });
+
+    it('updates spec version without sending secrets from the connector object', async () => {
+      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue([
+        {
+          id: '.test',
+          name: 'Test',
+          enabled: true,
+          enabled_in_config: true,
+          enabled_in_license: true,
+          supported_feature_ids: [],
+          minimum_license_required: 'basic',
+          is_system_action_type: false,
+          is_deprecated: false,
+          spec_version: '1.1',
+          spec_versions: { '1': '1.1' },
+        },
+      ]);
+      appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={{ ...connector, specVersion: '1.0' }}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      expect(await screen.findByTestId('connector-spec-version-upgrade')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('connector-spec-version-upgrade'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
+          '/api/actions/connector/123',
+          {
+            body: '{"name":"My test","config":{"testTextField":"My text field"},"spec_version":"1.1"}',
+          }
+        );
+      });
+    });
   });
 });

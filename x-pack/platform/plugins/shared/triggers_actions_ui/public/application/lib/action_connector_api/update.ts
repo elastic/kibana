@@ -43,7 +43,8 @@ export async function updateActionConnector({
   id,
 }: {
   http: HttpSetup;
-  connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets' | 'specVersion'>;
+  connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'specVersion'> &
+    Partial<Pick<ActionConnectorWithoutId, 'secrets'>>;
   id: string;
 }): Promise<ActionConnector> {
   const res = await http.put<Parameters<typeof rewriteBodyRes>[0]>(
@@ -52,7 +53,7 @@ export async function updateActionConnector({
       body: JSON.stringify({
         name: connector.name,
         config: connector.config,
-        secrets: connector.secrets,
+        ...(connector.secrets !== undefined ? { secrets: connector.secrets } : {}),
         ...(connector.specVersion !== undefined ? { spec_version: connector.specVersion } : {}),
       }),
     }

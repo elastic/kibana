@@ -20,12 +20,12 @@ export const updateConnectorBodySchema = schema.object(
       validate: validateEmptyStrings,
       meta: { description: 'The display name for the connector.' },
     }),
-    config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-      defaultValue: {},
-    }),
-    secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-      defaultValue: {},
-    }),
+    config: schema.maybe(
+      schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }))
+    ),
+    secrets: schema.maybe(
+      schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }))
+    ),
     spec_version: schema.maybe(
       schema.string({
         minLength: 1,

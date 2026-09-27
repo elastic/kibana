@@ -441,7 +441,6 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
                   currentValues={{
                     name: connector.name,
                     config: (connector as ActionConnectorWithoutId).config,
-                    secrets: (connector as ActionConnectorWithoutId).secrets,
                   }}
                   onConnectorUpdated={onConnectorUpdated}
                   onValidationFailure={(target) => {

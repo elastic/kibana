@@ -23,7 +23,7 @@ export interface SpecVersionCalloutProps {
   connector: ActionConnector;
   /** False while the form has unsaved edits or the user cannot save connectors. */
   canUpgrade: boolean;
-  currentValues: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
+  currentValues: Pick<ActionConnectorWithoutId, 'name' | 'config'>;
   onConnectorUpdated?: (connector: ActionConnector) => void;
   onValidationFailure: (target: string) => void;
 }
@@ -74,7 +74,6 @@ export const SpecVersionCallout: React.FC<SpecVersionCalloutProps> = ({
         connector: {
           name: currentValues.name,
           config: currentValues.config,
-          secrets: currentValues.secrets,
           specVersion: target,
         },
       });
@@ -104,7 +103,6 @@ export const SpecVersionCallout: React.FC<SpecVersionCalloutProps> = ({
     connector.id,
     currentValues.config,
     currentValues.name,
-    currentValues.secrets,
     http,
     onConnectorUpdated,
     onValidationFailure,

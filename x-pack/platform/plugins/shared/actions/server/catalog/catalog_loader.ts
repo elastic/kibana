@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ConnectorCatalogStorage } from './catalog_storage';
 import { getContentHash, toIconDataUrl, validateSvgIcon } from './icon';
+import { assertDefinitionYamlHash } from './definition_integrity';
 import type { CatalogLogOnce } from './log_once';
 import { parseCatalogManifest } from './parse_manifest';
 import { verifyCatalogSignature } from './signature';
@@ -130,146 +131,160 @@ export const loadCatalogFromIndex = async ({
   let registered = 0;
 
   for (const id of ids) {
-    const typeMetadata = manifest.typeMetadata[id];
-    if (!typeMetadata) {
-      logOnce.warn(
-        manifest.catalogVersion,
-        `metadata:${id}`,
-        `Skipping connector "${id}": type metadata is missing from the signed manifest`
-      );
-      continue;
-    }
-
-    if (registry.isTypeRegistered(id) && !types.has(id)) {
-      logOnce.warn(
-        manifest.catalogVersion,
-        `collision:${id}`,
-        `Skipping catalog connector "${id}" because an in-tree type is already registered`
-      );
-      continue;
-    }
-
-    const storedVersions = (listedById.get(id) ?? []).map((row) => row.version);
-    const byMajor = acceptedLatestPerMajor(storedVersions);
-    const majors = [...byMajor.keys()].sort((left, right) => right - left);
-    if (majors.length === 0 && !pinned.get(id)?.size) {
-      continue;
-    }
-
-    const iconHash = typeMetadata.icon?.contentHash;
-    const storedIcon = iconHash ? assets.get(iconHash) : undefined;
-    let iconDataUrl: string | undefined;
-    if (storedIcon) {
-      try {
-        if (getContentHash(storedIcon.svg) !== storedIcon.contentHash) {
-          throw new Error('hash mismatch');
-        }
-        validateSvgIcon(storedIcon.svg);
-        iconDataUrl = toIconDataUrl(storedIcon.svg);
-      } catch (error) {
+    try {
+      const typeMetadata = manifest.typeMetadata[id];
+      if (!typeMetadata) {
         logOnce.warn(
           manifest.catalogVersion,
-          `icon:${id}`,
-          `Skipping icon for "${id}": ${errorMessage(error)}`
+          `metadata:${id}`,
+          `Skipping connector "${id}": type metadata is missing from the signed manifest`
         );
+        continue;
       }
-    }
-    const metadata = toTypeMetadataState(id, typeMetadata, iconDataUrl);
 
-    const tryBuild = async (version: string) => {
-      try {
-        const definition = await storage.getDefinition(id, version);
-        if (!definition) {
+      if (registry.isTypeRegistered(id) && !types.has(id)) {
+        logOnce.warn(
+          manifest.catalogVersion,
+          `collision:${id}`,
+          `Skipping catalog connector "${id}" because an in-tree type is already registered`
+        );
+        continue;
+      }
+
+      const storedVersions = (listedById.get(id) ?? []).map((row) => row.version);
+      const byMajor = acceptedLatestPerMajor(storedVersions);
+      const majors = [...byMajor.keys()].sort((left, right) => right - left);
+      if (majors.length === 0 && !pinned.get(id)?.size) {
+        continue;
+      }
+
+      const iconHash = typeMetadata.icon?.contentHash;
+      const storedIcon = iconHash ? assets.get(iconHash) : undefined;
+      let iconDataUrl: string | undefined;
+      if (storedIcon) {
+        try {
+          if (getContentHash(storedIcon.svg) !== storedIcon.contentHash) {
+            throw new Error('hash mismatch');
+          }
+          validateSvgIcon(storedIcon.svg);
+          iconDataUrl = toIconDataUrl(storedIcon.svg);
+        } catch (error) {
+          logOnce.warn(
+            manifest.catalogVersion,
+            `icon:${id}`,
+            `Skipping icon for "${id}": ${errorMessage(error)}`
+          );
+        }
+      }
+      const metadata = toTypeMetadataState(id, typeMetadata, iconDataUrl);
+
+      const tryBuild = async (version: string) => {
+        try {
+          const definition = await storage.getDefinition(id, version);
+          if (!definition) {
+            return undefined;
+          }
+          try {
+            assertDefinitionYamlHash(definition, manifest.connectors);
+          } catch (error) {
+            logOnce.error(manifest.catalogVersion, `hash:${id}@${version}`, errorMessage(error));
+            return undefined;
+          }
+          return buildVersion(definition.yaml);
+        } catch (error) {
+          logOnce.warn(
+            manifest.catalogVersion,
+            `build:${id}@${version}`,
+            `Failed to build connector "${id}@${version}": ${errorMessage(error)}`
+          );
           return undefined;
         }
-        return buildVersion(definition.yaml);
-      } catch (error) {
-        logOnce.warn(
-          manifest.catalogVersion,
-          `build:${id}@${version}`,
-          `Failed to build connector "${id}@${version}": ${errorMessage(error)}`
-        );
-        return undefined;
-      }
-    };
+      };
 
-    const needed = new Set<string>();
-    for (const major of majors) {
-      const candidates = byMajor.get(major) ?? [];
-      for (const version of candidates) {
-        const built = await tryBuild(version);
-        if (built) {
-          needed.add(version);
-          break;
+      const needed = new Set<string>();
+      for (const major of majors) {
+        const candidates = byMajor.get(major) ?? [];
+        for (const version of candidates) {
+          const built = await tryBuild(version);
+          if (built) {
+            needed.add(version);
+            break;
+          }
         }
       }
-    }
-    for (const version of pinned.get(id) ?? []) {
-      needed.add(version);
-    }
+      for (const version of pinned.get(id) ?? []) {
+        needed.add(version);
+      }
 
-    const existing = types.get(id);
-    if (existing) {
+      const existing = types.get(id);
+      if (existing) {
+        for (const version of needed) {
+          if (existing.hasVersion(version)) {
+            continue;
+          }
+          const built = await tryBuild(version);
+          if (built) {
+            existing.addVersion(built);
+          }
+        }
+        const previousLicense = existing.getMetadata().minimumLicense;
+        existing.updateMetadata(metadata);
+        if (previousLicense !== metadata.minimumLicense) {
+          registry.updateFeatureUsageTier?.(existing.actionType);
+        }
+        continue;
+      }
+
+      const initialVersion =
+        majors.length === 0
+          ? undefined
+          : await (async () => {
+              for (const version of byMajor.get(majors[0]) ?? []) {
+                const built = await tryBuild(version);
+                if (built) {
+                  return built;
+                }
+              }
+              return undefined;
+            })();
+
+      if (!initialVersion) {
+        continue;
+      }
+
+      const type = buildType({
+        id,
+        versions: [initialVersion],
+        metadata,
+      });
       for (const version of needed) {
-        if (existing.hasVersion(version)) {
+        if (type.hasVersion(version)) {
           continue;
         }
         const built = await tryBuild(version);
         if (built) {
-          existing.addVersion(built);
+          type.addVersion(built);
         }
       }
-      const previousLicense = existing.getMetadata().minimumLicense;
-      existing.updateMetadata(metadata);
-      if (previousLicense !== metadata.minimumLicense) {
-        registry.updateFeatureUsageTier?.(existing.actionType);
-      }
-      continue;
-    }
 
-    const initialVersion =
-      majors.length === 0
-        ? undefined
-        : await (async () => {
-            for (const version of byMajor.get(majors[0]) ?? []) {
-              const built = await tryBuild(version);
-              if (built) {
-                return built;
-              }
-            }
-            return undefined;
-          })();
-
-    if (!initialVersion) {
-      continue;
-    }
-
-    const type = buildType({
-      id,
-      versions: [initialVersion],
-      metadata,
-    });
-    for (const version of needed) {
-      if (type.hasVersion(version)) {
+      if (registry.isTypeRegistered(id)) {
+        logOnce.warn(
+          manifest.catalogVersion,
+          `collision:${id}`,
+          `Skipping catalog connector "${id}" because an in-tree type is already registered`
+        );
         continue;
       }
-      const built = await tryBuild(version);
-      if (built) {
-        type.addVersion(built);
-      }
-    }
-
-    if (registry.isTypeRegistered(id)) {
-      logOnce.warn(
+      registry.registerType(type.actionType);
+      types.set(id, type);
+      registered += 1;
+    } catch (error) {
+      logOnce.error(
         manifest.catalogVersion,
-        `collision:${id}`,
-        `Skipping catalog connector "${id}" because an in-tree type is already registered`
+        `register:${id}`,
+        `Skipping connector "${id}": ${errorMessage(error)}`
       );
-      continue;
     }
-    registry.registerType(type.actionType);
-    types.set(id, type);
-    registered += 1;
   }
 
   return { registered };

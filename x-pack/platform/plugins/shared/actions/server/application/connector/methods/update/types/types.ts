@@ -10,8 +10,8 @@ import type { ActionsClientContext } from '../../../../../actions_client';
 
 export interface ConnectorUpdate {
   name: string;
-  config: SavedObjectAttributes;
-  secrets: SavedObjectAttributes;
+  config?: SavedObjectAttributes;
+  secrets?: SavedObjectAttributes;
   specVersion?: string;
 }
 

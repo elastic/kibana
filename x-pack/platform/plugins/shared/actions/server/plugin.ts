@@ -1236,7 +1236,7 @@ export class ActionsPlugin
       return;
     }
     assertCatalogUrlAllowed(catalog.url, this.isDev);
-    const loader = new SpecVersionLoader({ logger: this.logger });
+    const loader = new SpecVersionLoader({ logger: this.logger, publicKeys: CATALOG_PUBLIC_KEYS });
     const buildType: VersionedTypeFactory = ({ id, versions, metadata }) =>
       createVersionedConnectorType({
         id,
@@ -1271,28 +1271,43 @@ export class ActionsPlugin
     if (!catalog?.enabled || !this.catalogService) {
       return;
     }
-    await withCatalogTimeout(
-      this.catalogService.loadAtBoot({
-        registerType: (actionType) => {
-          if (this.actionTypeRegistry!.has(actionType.id)) {
-            return;
-          }
-          ensureSufficientLicense(actionType);
-          this.actionTypeRegistry!.register(actionType);
+    try {
+      await withCatalogTimeout(
+        this.catalogService.loadAtBoot({
+          registerType: (actionType) => {
+            if (this.actionTypeRegistry!.has(actionType.id)) {
+              return;
+            }
+            ensureSufficientLicense(actionType);
+            this.actionTypeRegistry!.register(actionType);
+          },
+          isTypeRegistered: (id) => this.actionTypeRegistry!.has(id),
+          updateFeatureUsageTier: (actionType) =>
+            this.actionTypeRegistry!.updateFeatureUsageTier(actionType as ActionType),
+          esClient: core.elasticsearch.client.asInternalUser,
+          savedObjectsRepository: core.savedObjects.createInternalRepository([
+            ACTION_SAVED_OBJECT_TYPE,
+          ]),
+        }),
+        CATALOG_LOAD_TIMEOUT_MS,
+        () => {
+          this.logger.warn('Connector catalog load timed out; starting with in-tree types only');
         },
-        isTypeRegistered: (id) => this.actionTypeRegistry!.has(id),
-        updateFeatureUsageTier: (actionType) =>
-          this.actionTypeRegistry!.updateFeatureUsageTier(actionType as ActionType),
-        esClient: core.elasticsearch.client.asInternalUser,
-        savedObjectsRepository: core.savedObjects.createInternalRepository([
-          ACTION_SAVED_OBJECT_TYPE,
-        ]),
-      }),
-      CATALOG_LOAD_TIMEOUT_MS,
-      () => {
-        this.logger.warn('Connector catalog load timed out; starting with in-tree types only');
-      }
-    );
+        (error) => {
+          this.logger.warn(
+            `Connector catalog load failed; starting with in-tree types only: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Connector catalog load failed; starting with in-tree types only: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
     await scheduleCatalogRefreshTask(plugins.taskManager, catalog.refreshInterval, this.logger);
   }
 

@@ -41,7 +41,6 @@ const connector = {
 const currentValues = {
   name: connector.name,
   config: { baseUrl: 'http://example.test' },
-  secrets: { Key: 'k' },
 };
 
 const renderCallout = (props: Partial<React.ComponentProps<typeof SpecVersionCallout>> = {}) => {
@@ -97,7 +96,11 @@ describe('SpecVersionCallout', () => {
       expect(updateMock).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'c1',
-          connector: expect.objectContaining({ specVersion: '1.1' }),
+          connector: {
+            name: 'Pinned',
+            config: { baseUrl: 'http://example.test' },
+            specVersion: '1.1',
+          },
         })
       )
     );
