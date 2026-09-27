@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-eslint'],
-  moduleNameMapper: {
-    '^@oxlint/plugins$': '<rootDir>/node_modules/@oxlint/plugins/index.cjs',
-  },
-};
+/* eslint-disable no-restricted-syntax */
+
+export const privileges = {
+  invalid: 'invalid-privilege' as const,
+  valid: 'read_privilege' as const,
+} as const;

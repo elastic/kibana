@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./no_this_in_property_initializers');
+const rule = require('..').rules.no_this_in_property_initializers;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

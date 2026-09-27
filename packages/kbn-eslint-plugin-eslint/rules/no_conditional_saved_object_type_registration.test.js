@@ -9,7 +9,7 @@
 
 const { RuleTester } = require('eslint');
 const dedent = require('dedent');
-const rule = require('./no_conditional_saved_object_type_registration');
+const rule = require('..').rules.no_conditional_saved_object_type_registration;
 
 const errorMessage =
   'Saved object type registration must be unconditional. Move savedObjects.registerType() outside conditional control flow to avoid migration ON/OFF conflicts.';

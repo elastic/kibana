@@ -15,6 +15,10 @@
 
   "plugins": ["react", "typescript", "import", "jsx-a11y", "react-perf", "node", "jest"],
 
+  "jsPlugins": [
+    { "name": "@kbn/eslint", "specifier": "./packages/kbn-eslint-plugin-eslint/oxlint_plugin.js" }
+  ],
+
   "categories": {
     "correctness": "off"
   },
@@ -47,7 +51,15 @@
     "dot-notation": ["error", { "allowKeywords": true }],
     "react/no-multi-comp": ["error", { "ignoreStateless": true }],
     "react/no-unknown-property": ["error", { "ignore": ["css"] }],
-    "react/prefer-es6-class": ["error", "always"]
+    "react/prefer-es6-class": ["error", "always"],
+    "@kbn/eslint/no_async_promise_body": "error",
+    "@kbn/eslint/no_async_foreach": "error",
+    "@kbn/eslint/require_kibana_feature_privileges_naming": "warn",
+    "@kbn/eslint/no_trailing_import_slash": "error",
+    "@kbn/eslint/no_constructor_args_in_property_initializers": "error",
+    "@kbn/eslint/no_this_in_property_initializers": "error",
+    "@kbn/eslint/no_conditional_saved_object_type_registration": "error",
+    "@kbn/eslint/no_unsafe_console": "error"
   },
 
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an

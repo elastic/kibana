@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { relative } from 'path';
+
 import execa from 'execa';
 
 import { createFailError } from '@kbn/dev-cli-errors';
@@ -104,7 +106,7 @@ export async function lintFiles(
   if (fullRepo) {
     reports.push(await runOxlint(fixArgs));
   } else {
-    const paths = files.map((file) => file.getRelativePath());
+    const paths = files.map((file) => relative(REPO_ROOT, file.getAbsolutePath()));
     for (let i = 0; i < paths.length; i += MAX_PATHS_PER_RUN) {
       reports.push(await runOxlint([...fixArgs, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
     }

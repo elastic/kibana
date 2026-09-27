@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-eslint'],
-  moduleNameMapper: {
-    '^@oxlint/plugins$': '<rootDir>/node_modules/@oxlint/plugins/index.cjs',
-  },
-};
+const { execFileSync } = require('child_process');
+const { resolve } = require('path');
+
+it('replays migrated base rule cases with Oxlint', () => {
+  execFileSync(process.execPath, [resolve(__dirname, '__fixtures__/run_oxlint_rule_tests.mjs')], {
+    cwd: resolve(__dirname, '../../..'),
+    stdio: 'inherit',
+  });
+});
