@@ -40,6 +40,11 @@ export const getPlaywrightProject = (
   }
 };
 
+export const getUiModeLaunchMessage = (pwProject: ScoutPlaywrightProjects): string =>
+  pwProject === 'local'
+    ? 'scout: Launching Playwright UI mode. Test servers will be started first and kept running until the UI is closed.'
+    : `scout: Launching Playwright UI mode against the pre-provisioned '${pwProject}' servers.`;
+
 const getScoutRunCommandForReporting = (argv: string[]): string => {
   const [nodeBin, scriptPath, ...rest] = argv;
   const nodeDisplay =
@@ -198,6 +203,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     );
   }
 
+  if (options.ui) {
+    log.info(getUiModeLaunchMessage(pwProject));
+  }
+
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
@@ -207,10 +216,17 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
     ...(options.repeatEach ? [`--repeat-each=${options.repeatEach}`] : []),
+    ...(options.ui ? ['--ui'] : []),
+    ...(options.ui && options.uiHost ? [`--ui-host=${options.uiHost}`] : []),
+    ...(options.ui && options.uiPort !== undefined ? [`--ui-port=${options.uiPort}`] : []),
   ];
 
   await withProcRunner(log, async (procs) => {
-    const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+    // UI mode is interactive and long-running; the `--list` pre-check is incompatible
+    // with `--ui`, so we skip it and let the Playwright UI surface any config errors.
+    const exitCode = options.ui
+      ? 0
+      : await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
     const pwEnv = {
       SCOUT_LOG_LEVEL: logsLevel,
       SCOUT_TARGET_LOCATION: options.testTarget.location,
@@ -229,10 +245,14 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, pwEnv);
     }
 
-    reportTime(runStartTime, 'ready', {
-      success: true,
-      ...options,
-    });
+    // UI mode is an interactive local session, not a batch run, so its wall-clock
+    // time is not a meaningful CI-stats signal.
+    if (!options.ui) {
+      reportTime(runStartTime, 'ready', {
+        success: true,
+        ...options,
+      });
+    }
   });
 }
 
