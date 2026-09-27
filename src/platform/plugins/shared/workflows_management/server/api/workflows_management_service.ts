@@ -285,6 +285,8 @@ export class WorkflowsService {
     await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
+      getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
+      getServiceAccountBindings: () => this.workflowsExecutionEngine.serviceAccountBindings,
       logger: this.logger,
       workflowStorage: this.workflowStorage,
       getSecurity: () => this.coreStart.security,
@@ -466,10 +468,11 @@ export class WorkflowsService {
   public async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean; acknowledgeAclLoss?: boolean; request?: KibanaRequest }
+    options?: { force?: boolean; acknowledgeAclLoss?: boolean },
+    request?: KibanaRequest
   ): Promise<DeleteWorkflowsResponse> {
     await this.ensureInitialized();
-    return this.crudService.deleteWorkflows(ids, spaceId, options);
+    return this.crudService.deleteWorkflows(ids, spaceId, options, request);
   }
 
   /**
@@ -738,7 +741,8 @@ export class WorkflowsService {
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowServiceInstallOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     await this.ensureInitialized();
     const readiness = await this.ensureManagedInstallReady(`install '${id}'`);
@@ -747,16 +751,27 @@ export class WorkflowsService {
       this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
       return;
     }
-    return this.managedWorkflowsService.installManagedWorkflow(id, options, registeredPluginId);
+    return this.managedWorkflowsService.installManagedWorkflow(
+      id,
+      options,
+      registeredPluginId,
+      request
+    );
   }
 
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     await this.ensureInitialized();
-    return this.managedWorkflowsService.uninstallManagedWorkflow(id, options, registeredPluginId);
+    return this.managedWorkflowsService.uninstallManagedWorkflow(
+      id,
+      options,
+      registeredPluginId,
+      request
+    );
   }
 
   public async getManagedWorkflowStatus(

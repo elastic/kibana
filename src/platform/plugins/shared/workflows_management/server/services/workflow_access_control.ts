@@ -271,6 +271,8 @@ export class WorkflowAccessControlService {
       previous: existing.access_control,
     });
     const document = await this.crud.writeWorkflowDocumentWithOcc(id, spaceId, {
+      request,
+      previousDocument: existing,
       ifSeqNo: seqNo,
       ifPrimaryTerm: primaryTerm,
       document: applyWorkflowVersion(

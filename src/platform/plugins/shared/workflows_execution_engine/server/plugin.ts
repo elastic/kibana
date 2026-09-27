@@ -8,6 +8,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import isEqual from 'lodash/isEqual';
 import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -49,6 +51,7 @@ import { handlePostExecutionLoop } from './execution_functions/handle_post_execu
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
+import { ensureBoundExecutionAdmitted } from './lib/ensure_bound_execution_admitted';
 import {
   MISSING_EXECUTION_IDENTITY_MESSAGE,
   UNKNOWN_EXECUTION_IDENTITY,
@@ -76,6 +79,10 @@ import { createDataClientBundle, type DataClientBundle } from './repositories/da
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import {
+  getWorkflowOriginalRequest,
+  WORKFLOW_SERVICE_ACCOUNT_TYPE,
+} from './service_account_execution';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -246,6 +253,10 @@ export class WorkflowsExecutionEnginePlugin
     const config = this.config;
 
     this.coreSetup = core;
+    core.security.serviceAccounts.registerWorkloadType({
+      type: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+      name: 'Workflow',
+    });
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
@@ -983,6 +994,11 @@ export class WorkflowsExecutionEnginePlugin
                 await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
                   refresh: 'wait_for',
                 });
+                await ensureBoundExecutionAdmitted(
+                  workflowExecution,
+                  workflowRepository,
+                  workflowExecutionRepository
+                );
                 workflowExecutionId = workflowExecution.id;
 
                 if (workflowExecution.status === ExecutionStatus.FAILED) {
@@ -1200,6 +1216,30 @@ export class WorkflowsExecutionEnginePlugin
       }
     };
 
+    const ensureServiceAccountBinding = async (
+      workflow: WorkflowExecutionEngineModel,
+      spaceId: string
+    ): Promise<void> => {
+      const serviceAccountId = workflow.definition?.settings?.run_as;
+      if (serviceAccountId) {
+        if (!coreStart.security.serviceAccounts.isEnabled())
+          throw Boom.forbidden('Service account execution is disabled.');
+        const saved = await workflowRepository.getWorkflow(workflow.id, spaceId);
+        if (!saved || !isEqual(saved.definition, workflow.definition)) {
+          throw Boom.badRequest(
+            'Service accounts require the latest saved version of the workflow; inline or unsaved YAML cannot run as a service account.'
+          );
+        }
+        const binding = await coreStart.security.serviceAccounts.getWorkloadBinding({
+          workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+          workloadId: workflow.id,
+          spaceId,
+        });
+        if (binding?.serviceAccountId !== serviceAccountId)
+          throw Boom.forbidden('Workflow service account binding does not match.');
+      }
+    };
+
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
       context: Record<string, unknown>;
@@ -1207,6 +1247,10 @@ export class WorkflowsExecutionEnginePlugin
       authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
+      await ensureServiceAccountBinding(
+        args.workflow,
+        (args.context.spaceId as string | undefined) || 'default'
+      );
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
@@ -1274,15 +1318,21 @@ export class WorkflowsExecutionEnginePlugin
         failureLogLabel: 'Concurrency queue drain before enqueue failed',
       });
 
-      // Only pay the refresh cost when the concurrency check will actually run.
-      // Without a concurrencyGroupKey there is no check, so refresh:false is fine.
-      // When a check will run, the caller dictates the strategy: manual/UI paths use
-      // refresh:true (immediate, no latency for the user); async paths use refresh:'wait_for'
-      // (piggybacks on the scheduled cycle, lower cluster cost).
+      // Bound executions must be searchable before the final admission check so
+      // force deletion cannot miss an admitted run. Other runs retain the concurrency-only refresh.
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: workflowExecution.concurrencyGroupKey ? options.refresh : false,
+        refresh: workflowExecution.workflowDefinition?.settings?.run_as
+          ? options.refresh || 'wait_for'
+          : workflowExecution.concurrencyGroupKey
+          ? options.refresh
+          : false,
       });
 
+      await ensureBoundExecutionAdmitted(
+        workflowExecution,
+        workflowRepository,
+        workflowExecutionRepository
+      );
       return { workflowExecution, repository: workflowExecutionRepository };
     };
 
@@ -1308,7 +1358,8 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+    const executeWorkflow: ExecuteWorkflow = async (workflow, context, originalRequest) => {
+      const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
@@ -1428,7 +1479,8 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
+    const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, originalRequest) => {
+      const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
       const { workflowExecution } = await createAndPersistWorkflowExecution(
@@ -1483,13 +1535,14 @@ export class WorkflowsExecutionEnginePlugin
 
     const bulkScheduleWorkflow = async (
       items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
-      request: KibanaRequest
+      originalRequest: KibanaRequest
     ): Promise<BulkScheduleWorkflowResult> => {
       if (items.length === 0) {
         return [];
       }
 
       await checkLicense(plugins.licensing);
+      const request = getWorkflowOriginalRequest(originalRequest);
 
       const authenticatedUser = await getAuthenticatedUser(
         request,
@@ -1575,7 +1628,19 @@ export class WorkflowsExecutionEnginePlugin
             error: { message: writeResult.error },
           };
         } else {
-          succeeded.push(p);
+          try {
+            await ensureBoundExecutionAdmitted(
+              p.workflowExecution,
+              workflowRepository,
+              workflowExecutionRepository
+            );
+            succeeded.push(p);
+          } catch (error) {
+            results[p.idx] = {
+              status: 'error',
+              error: { message: error instanceof Error ? error.message : String(error) },
+            };
+          }
         }
       }
 
@@ -1679,6 +1744,11 @@ export class WorkflowsExecutionEnginePlugin
       request
     ) => {
       await checkLicense(plugins.licensing);
+      if (workflow.definition?.settings?.run_as) {
+        throw Boom.badRequest(
+          'Service-account step tests could bypass the saved workflow control flow. Run the complete latest saved workflow instead.'
+        );
+      }
 
       await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
 
@@ -1936,6 +2006,7 @@ export class WorkflowsExecutionEnginePlugin
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       triggerEvents,
+      serviceAccountBindings: coreStart.security.serviceAccounts,
       __internalStorage: {
         workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),
         stepExecutionsDataClient: this.dataClientBundle.createStepDataClient(),

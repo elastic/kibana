@@ -10,6 +10,7 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { getWorkflowPermissions } from '@kbn/workflows';
 import type { WorkflowAccessSubject } from '@kbn/workflows';
+import { getWorkflowOriginalRequest } from '../service_account_execution';
 
 export const hasWorkflowAccess = async (
   workflow: WorkflowAccessSubject,
@@ -19,7 +20,9 @@ export const hasWorkflowAccess = async (
 ): Promise<boolean> => {
   const profileId =
     workflow.access_control?.access_mode === 'private'
-      ? (await core.userProfile.getCurrentProfileId({ request })) ?? undefined
+      ? (await core.userProfile.getCurrentProfileId({
+          request: getWorkflowOriginalRequest(request),
+        })) ?? undefined
       : undefined;
   return getWorkflowPermissions(workflow, profileId)[operation];
 };

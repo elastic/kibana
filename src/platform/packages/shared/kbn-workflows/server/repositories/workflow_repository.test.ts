@@ -558,3 +558,33 @@ describe('WorkflowRepository.isWorkflowEnabled', () => {
     ).resolves.toBe(true);
   });
 });
+
+describe('WorkflowRepository.isWorkflowEnabledRealtime', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const repository = new WorkflowRepository({ esClient, logger: loggingSystemMock.create().get() });
+
+  it.each([
+    [{ enabled: true, spaceId: 'default' }, true],
+    [{ enabled: false, spaceId: 'default' }, false],
+    [{ enabled: true, spaceId: 'other' }, false],
+    [{ enabled: true, spaceId: '*' }, false],
+    [{ enabled: true, spaceId: 'default', deleted_at: '2026-09-27' }, false],
+  ])('checks current state and space for %j', async (source, expected) => {
+    esClient.get.mockResolvedValue({ _source: source } as never);
+    await expect(repository.isWorkflowEnabledRealtime('workflow', 'default')).resolves.toBe(
+      expected
+    );
+    expect(esClient.get).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'workflow', realtime: true })
+    );
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('treats a deleted workflow as disabled but propagates storage errors', async () => {
+    esClient.get.mockRejectedValueOnce({ statusCode: 404 });
+    await expect(repository.isWorkflowEnabledRealtime('workflow', 'default')).resolves.toBe(false);
+    const error = new Error('storage unavailable');
+    esClient.get.mockRejectedValueOnce(error);
+    await expect(repository.isWorkflowEnabledRealtime('workflow', 'default')).rejects.toBe(error);
+  });
+});

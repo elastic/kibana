@@ -277,6 +277,7 @@ describe('WorkflowAccessControlService', () => {
       access_mode: 'private',
       entries: [{ type: 'user', id: 'reader', role: 'viewer', added_at: '2026-09-10' }],
     };
+    const previousDocument = document;
     jest.mocked(crud.writeWorkflowDocumentWithOcc).mockImplementation(async () => {
       document = makeDocument();
       throw new WorkflowConflictError('Workflow was updated concurrently.', 'id');
@@ -298,7 +299,7 @@ describe('WorkflowAccessControlService', () => {
     expect(crud.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
       'id',
       'default',
-      expect.objectContaining({ ifSeqNo: 1, ifPrimaryTerm: 1 })
+      expect.objectContaining({ ifSeqNo: 1, ifPrimaryTerm: 1, request, previousDocument })
     );
     expect(atSpace).not.toHaveBeenCalled();
     expect(document.access_control?.entries).toEqual([]);

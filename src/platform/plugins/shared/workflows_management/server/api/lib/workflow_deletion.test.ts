@@ -54,6 +54,7 @@ const makeStorageClient = (
         })
       ),
     delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    index: jest.fn().mockResolvedValue({ _seq_no: 8, _primary_term: 1 }),
   };
   return {
     client: mockClient,
@@ -731,5 +732,147 @@ describe('deleteWorkflows', () => {
         }
       );
     });
+  });
+});
+
+describe('bound workflow deletion OCC', () => {
+  const setup = (force: boolean, privateWorkflow = false) => {
+    const document = makeWorkflowSource(
+      privateWorkflow
+        ? { owner_id: 'owner', access_control: { access_mode: 'private', entries: [] } }
+        : {}
+    );
+    const { client, storage } = makeStorageClient([]);
+    const deleteDocument = jest.fn().mockResolvedValue(undefined);
+    const params = {
+      ids: ['bound'],
+      spaceId: 'default',
+      force,
+      acknowledgeAclLoss: privateWorkflow,
+      storage,
+      ...makeExecutionsDataAccess(),
+      taskScheduler: null,
+      logger,
+      getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
+      guardedDelete: { id: 'bound', document, seqNo: 7, primaryTerm: 1, deleteDocument },
+    };
+    return { client, params, deleteDocument };
+  };
+
+  it.each([false, true])('checks ACLs before a guarded delete (force: %s)', async (force) => {
+    const { client, params, deleteDocument } = setup(force, true);
+    await expect(
+      deleteWorkflows({
+        ...params,
+        assertCanDelete: () => {
+          throw new Error('Access revoked');
+        },
+      })
+    ).rejects.toThrow('Access revoked');
+    expect(client.index).not.toHaveBeenCalled();
+    expect(deleteDocument).not.toHaveBeenCalled();
+    expect(params.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
+  it('requires confirmation before deleting a private guarded workflow', async () => {
+    const { client, params } = setup(true, true);
+    await expect(deleteWorkflows({ ...params, acknowledgeAclLoss: false })).rejects.toThrow(
+      'acknowledgeAclLoss'
+    );
+    expect(client.index).not.toHaveBeenCalled();
+  });
+
+  it('removes private history before deleting the guarded workflow document', async () => {
+    const { params, deleteDocument } = setup(true, true);
+    const calls: string[] = [];
+    jest.mocked(params.stepExecutionsDataClient.deleteByQuery).mockImplementationOnce(async () => {
+      calls.push('steps');
+      return { deleted: 1 };
+    });
+    jest
+      .mocked(params.workflowExecutionsDataClient.deleteByQuery)
+      .mockImplementationOnce(async () => {
+        calls.push('executions');
+        return { deleted: 1 };
+      });
+    deleteDocument.mockImplementationOnce(async () => {
+      calls.push('workflow');
+    });
+    await expect(deleteWorkflows(params)).resolves.toMatchObject({ deleted: 1 });
+    expect(calls).toEqual(['steps', 'executions', 'workflow']);
+  });
+
+  it.each(['steps', 'executions'] as const)(
+    'retains the private guarded workflow ACL when %s cleanup is incomplete',
+    async (target) => {
+      const { client, params, deleteDocument } = setup(true, true);
+      const dataClient =
+        target === 'steps' ? params.stepExecutionsDataClient : params.workflowExecutionsDataClient;
+      jest.mocked(dataClient.deleteByQuery).mockResolvedValueOnce({ version_conflicts: 1 });
+
+      await expect(deleteWorkflows(params)).rejects.toThrow('remains soft-deleted');
+      expect(deleteDocument).not.toHaveBeenCalled();
+      expect(client.index).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            enabled: false,
+            deleted_at: expect.any(Date),
+            access_control: { access_mode: 'private', entries: [] },
+          }),
+        })
+      );
+    }
+  );
+
+  it.each([false, true])(
+    'does not delete a concurrently changed definition (force: %s)',
+    async (force) => {
+      const { client, params, deleteDocument } = setup(force);
+      const conflict = new Error('version conflict');
+      client.index.mockRejectedValueOnce(conflict);
+      await expect(deleteWorkflows(params)).rejects.toBe(conflict);
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({ if_seq_no: 7, if_primary_term: 1 })
+      );
+      expect(deleteDocument).not.toHaveBeenCalled();
+      expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+    }
+  );
+
+  it('hard-deletes only the revision it disabled', async () => {
+    const { params, deleteDocument } = setup(true);
+    await expect(deleteWorkflows(params)).resolves.toMatchObject({ deleted: 1 });
+    expect(deleteDocument).toHaveBeenCalledWith(8, 1);
+  });
+
+  it('does not overwrite an update that wins after disabling', async () => {
+    const { client, params, deleteDocument } = setup(true);
+    const conflict = new Error('concurrent update won');
+    deleteDocument.mockRejectedValue(conflict);
+    client.index
+      .mockResolvedValueOnce({ _seq_no: 8, _primary_term: 1 })
+      .mockRejectedValueOnce(conflict);
+    await expect(deleteWorkflows(params)).rejects.toBe(conflict);
+    expect(client.index).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ if_seq_no: 8, if_primary_term: 1 })
+    );
+    expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+  });
+
+  it('checks executions again after disabling and restores with OCC', async () => {
+    const { client, params, deleteDocument } = setup(true);
+    params.getWorkflowExecutions.mockResolvedValue({ total: 1, results: [] });
+    await expect(deleteWorkflows(params)).rejects.toThrow('running executions');
+    expect(deleteDocument).not.toHaveBeenCalled();
+    expect(client.index).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        if_seq_no: 8,
+        if_primary_term: 1,
+        document: expect.objectContaining({ enabled: true }),
+      })
+    );
   });
 });

@@ -1807,9 +1807,12 @@ steps:
         deleteResult
       );
 
-      expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default', {
-        request: mockRequest,
-      });
+      expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(
+        ['wf-1'],
+        'default',
+        undefined,
+        mockRequest
+      );
     });
   });
 
