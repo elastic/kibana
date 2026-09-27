@@ -10,9 +10,9 @@ import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
-import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import { validateSkipRows, type CreateDatasetFormValues } from '../create_dataset_form_state';
-import { FormRowLabelWithInfo } from './form_row_label_with_info';
+import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
+import { validateSkipRows, type CreateDatasetFormValues } from '../../create_dataset_form_state';
+import { FormRowLabelWithInfo } from '../form_row_label_with_info';
 
 export function SkipRowsField({ control }: { control: Control<CreateDatasetFormValues> }) {
   const { field: skipRowsField, fieldState: skipRowsState } = useController({
@@ -20,10 +20,12 @@ export function SkipRowsField({ control }: { control: Control<CreateDatasetFormV
     control,
     rules: { validate: validateSkipRows },
   });
+
   const skipRowsInlineError = useMemo(() => {
     const result = validateSkipRows(skipRowsField.value);
     return result === true ? undefined : result;
   }, [skipRowsField.value]);
+
   const skipRowsErrorMessage = skipRowsState.error?.message ?? skipRowsInlineError;
   const isSkipRowsInvalid = Boolean(skipRowsErrorMessage);
 

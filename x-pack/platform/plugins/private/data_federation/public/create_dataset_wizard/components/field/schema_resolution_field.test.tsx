@@ -11,9 +11,9 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import type { CreateDatasetFormValues } from '../create_dataset_form_state';
-import { emptyDatasetFormValues } from '../dataset_form_initial_values';
-import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
+import type { CreateDatasetFormValues } from '../../create_dataset_form_state';
+import { emptyDatasetFormValues } from '../../dataset_form_initial_values';
+import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import { SchemaResolutionField } from './schema_resolution_field';
 
 const renderField = ({
@@ -138,4 +138,3 @@ describe('SchemaResolutionField', () => {
     expect(getByRole('combobox')).toBeDisabled();
   });
 });
-

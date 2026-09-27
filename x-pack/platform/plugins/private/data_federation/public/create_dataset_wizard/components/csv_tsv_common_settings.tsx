@@ -24,7 +24,7 @@ import { EncodingSelect } from './encoding_select';
 import { HeaderRow } from './header_row';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { QuoteMode } from './quote_mode';
-import { SkipRowsField } from './skip_rows_field';
+import { SkipRowsField } from './field/skip_rows_field';
 
 const helpTextDefault = (valueLabel: string) => (
   <EuiText size="xs" color="subdued">

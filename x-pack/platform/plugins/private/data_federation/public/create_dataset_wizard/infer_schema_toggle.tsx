@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SchemaResolutionField } from './components/schema_resolution_field';
+import { SchemaResolutionField } from './components/field/schema_resolution_field';
 
 export interface InferSchemaToggleProps {
   dynamicMode: boolean;

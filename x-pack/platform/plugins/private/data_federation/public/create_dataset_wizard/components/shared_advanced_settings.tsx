@@ -19,8 +19,8 @@ import {
 import { ErrorModeSelect } from './error_mode_select';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { FileExclusionsSelect } from './file_exclusions_select';
-import { MaxErrorRatioField } from './max_error_ratio_field';
-import { MaxErrorsField } from './max_errors_field';
+import { MaxErrorRatioField } from './field/max_error_ratio_field';
+import { MaxErrorsField } from './field/max_errors_field';
 import { PartitionDetectionSelect } from './partition_detection_select';
 
 const helpTextDefault = (valueLabel: string) => (

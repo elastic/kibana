@@ -23,9 +23,9 @@ import { useController, useFormContext } from 'react-hook-form';
 import type {
   CreateDatasetFormValues,
   DatasetSchemaResolutionFormValue,
-} from '../create_dataset_form_state';
-import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import { DescribedOptionDisplay } from './described_option_display';
+} from '../../create_dataset_form_state';
+import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
+import { DescribedOptionDisplay } from '../described_option_display';
 
 interface SchemaResolutionValue {
   id: Exclude<DatasetSchemaResolutionFormValue, ''>;

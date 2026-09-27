@@ -10,9 +10,12 @@ import { EuiCode, EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
-import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import { validateMaxErrorRatio, type CreateDatasetFormValues } from '../create_dataset_form_state';
-import { FormRowLabelWithInfo } from './form_row_label_with_info';
+import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
+import {
+  validateMaxErrorRatio,
+  type CreateDatasetFormValues,
+} from '../../create_dataset_form_state';
+import { FormRowLabelWithInfo } from '../form_row_label_with_info';
 
 const helpTextDefault = (valueLabel: string) => (
   <EuiText size="xs" color="subdued">
