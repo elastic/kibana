@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
@@ -75,15 +74,14 @@ describe('IacUpgradeCallout', () => {
     expect(screen.queryByText(/Checked/)).not.toBeInTheDocument();
   });
 
-  it('calls onUpdateStack when the update button is clicked', async () => {
-    const user = userEvent.setup();
+  it('calls onUpdateStack when the update button is clicked', () => {
     const onUpdateStack = jest.fn();
     renderComponent({ onUpdateStack, canUpdate: true });
 
     const button = screen.getByTestId(
       CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON
     );
-    await user.click(button);
+    fireEvent.click(button);
 
     expect(onUpdateStack).toHaveBeenCalledTimes(1);
   });
