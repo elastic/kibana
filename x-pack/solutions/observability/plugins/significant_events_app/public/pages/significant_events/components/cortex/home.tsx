@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, type Ref } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,9 +26,10 @@ interface CortexHomeProps {
   pages: CortexPageSummary[];
   stats: CortexStats;
   onSelectPage: (id: string) => void;
+  titleRef?: Ref<HTMLHeadingElement>;
 }
 
-export function CortexHome({ pages, stats, onSelectPage }: CortexHomeProps) {
+export function CortexHome({ pages, stats, onSelectPage, titleRef }: CortexHomeProps) {
   const recentlyUpdated = useMemo(
     () => [...pages].sort((a, b) => b.updated_at.localeCompare(a.updated_at)).slice(0, 8),
     [pages]
@@ -45,7 +46,7 @@ export function CortexHome({ pages, stats, onSelectPage }: CortexHomeProps) {
   return (
     <div data-test-subj="nightshiftCortexHome">
       <EuiTitle size="s">
-        <h2>
+        <h2 ref={titleRef} tabIndex={-1}>
           <FormattedMessage
             id="xpack.significantEventsApp.cortex.homeTitle"
             defaultMessage="Cortex"

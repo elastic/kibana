@@ -165,6 +165,32 @@ describe('createCortexPageStore', () => {
     expect(page.corroborations).toBe(0);
   });
 
+  it('writes and returns the same id for slugs with repeated copied prefixes', async () => {
+    const esClient = {
+      get: jest.fn().mockRejectedValue({ statusCode: 404 }),
+      index: jest.fn().mockResolvedValue({}),
+    };
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    const page = await store.upsert({
+      entityType: 'service',
+      slug: 'cortex-cortex-service-email-service',
+      title: 'Email',
+      content: '',
+      status: 'tentative',
+    });
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({ id: `default:${page.id}` }),
+      expect.anything()
+    );
+    expect(page.id).toBe(toCortexKiId('service', page.slug));
+  });
+
   it('creates a page with a create-only write', async () => {
     const esClient = { create: jest.fn().mockResolvedValue({}) };
     const store = createCortexPageStore({

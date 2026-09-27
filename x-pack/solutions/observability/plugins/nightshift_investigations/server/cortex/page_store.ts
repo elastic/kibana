@@ -91,6 +91,10 @@ export const toCortexKiId = (entityType: CortexEntityType, slug: string): string
   return `cortex_${entityType}_${normalizedSlug}`.slice(0, 512);
 };
 
+/** Id a page write stores for this slug; matches the id returned on the written page. */
+export const toCortexPageId = (entityType: CortexEntityType, slug: string): string =>
+  toCortexKiId(entityType, canonicalizeSlug(entityType, slug));
+
 export const slugFromCortexId = (id: string, entityType: CortexEntityType): string => {
   const prefix = `cortex_${entityType}_`;
   if (id.startsWith(prefix)) {
@@ -296,7 +300,7 @@ export const createCortexPageStore = ({
   ): { id: string; document: CortexKiSource } => {
     const canonicalSlug = canonicalizeSlug(entityType, slug);
     return {
-      id: toCortexKiId(entityType, canonicalSlug),
+      id: toCortexPageId(entityType, slug),
       document: {
         '@timestamp': new Date().toISOString(),
         type: entityType,
@@ -359,7 +363,7 @@ export const createCortexPageStore = ({
     },
 
     async upsert(page) {
-      const id = toCortexKiId(page.entityType, page.slug);
+      const id = toCortexPageId(page.entityType, page.slug);
       const existing = await getSource(id);
       const { document } = buildDocument(
         page,

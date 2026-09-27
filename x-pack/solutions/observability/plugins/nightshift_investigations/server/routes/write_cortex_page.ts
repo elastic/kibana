@@ -9,7 +9,7 @@ import { conflict, notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { CORTEX_ENTITY_TYPES, CORTEX_PAGE_STATUSES } from '../../common/cortex';
-import { toCortexKiId } from '../cortex/page_store';
+import { toCortexPageId } from '../cortex/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const MAX_DESCRIPTION_LENGTH = 4_096;
@@ -51,7 +51,7 @@ export const createCortexPageRoute = createNightshiftInvestigationsServerRoute({
     await store.pruneDuplicates();
     const created = await store.create({ entityType, ...page });
     if (!created) {
-      throw conflict(`Cortex page ${toCortexKiId(entityType, page.slug)} already exists`);
+      throw conflict(`Cortex page ${toCortexPageId(entityType, page.slug)} already exists`);
     }
     return { page: created };
   },
@@ -63,7 +63,7 @@ export const updateCortexPageRoute = createNightshiftInvestigationsServerRoute({
     access: 'internal',
     summary: 'Update a Cortex page',
     description:
-      'Overwrites the editable fields of a Cortex wiki page, keeping its corroborations.',
+      'Overwrites the editable fields of an existing Cortex wiki page, keeping its corroborations.',
   },
   security: {
     authz: { requiredPrivileges: ['agentBuilder:write'] },
@@ -76,6 +76,10 @@ export const updateCortexPageRoute = createNightshiftInvestigationsServerRoute({
     const store = getCortexPageStore(request);
     // A legacy page must be folded into its canonical id first, or the edit would fork it.
     await store.pruneDuplicates();
+    const id = toCortexPageId(entityType, page.slug);
+    if (!(await store.get(id))) {
+      throw notFound(`Cortex page ${id} was not found`);
+    }
     return { page: await store.upsert({ entityType, ...page }) };
   },
 });

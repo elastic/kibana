@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -40,7 +40,16 @@ export function CortexTab() {
   const [statusFilter, setStatusFilter] = useState<CortexStatusFilter>('all');
   const [selection, setSelection] = useState<CortexSidebarSelection>({ kind: 'home' });
   const [isCreatingPage, setIsCreatingPage] = useState(false);
+  const [archiveCount, setArchiveCount] = useState(0);
+  const homeTitleRef = useRef<HTMLHeadingElement>(null);
   const { data, isLoading, isError } = useCortexPages();
+
+  // Archiving unmounts the focused page view, so hand focus to the home heading that replaces it.
+  useEffect(() => {
+    if (archiveCount > 0) {
+      homeTitleRef.current?.focus();
+    }
+  }, [archiveCount]);
 
   if (isLoading) {
     return <EuiLoadingSpinner size="xl" data-test-subj="nightshiftCortexLoading" />;
@@ -135,6 +144,7 @@ export function CortexTab() {
                 pages={pages}
                 stats={stats}
                 onSelectPage={(id) => setSelection({ kind: 'page', id })}
+                titleRef={homeTitleRef}
               />
             )}
             {selection.kind === 'activity' && (
@@ -148,7 +158,10 @@ export function CortexTab() {
                 key={selection.id}
                 pageId={selection.id}
                 canEdit={canWrite}
-                onArchived={() => setSelection({ kind: 'home' })}
+                onArchived={() => {
+                  setSelection({ kind: 'home' });
+                  setArchiveCount((count) => count + 1);
+                }}
               />
             )}
           </div>

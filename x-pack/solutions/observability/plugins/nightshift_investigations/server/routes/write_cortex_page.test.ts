@@ -34,6 +34,7 @@ const page: CortexPage = {
 const setup = ({ existing, enabled = true }: { existing?: CortexPage; enabled?: boolean } = {}) => {
   const store = {
     pruneDuplicates: jest.fn().mockResolvedValue(0),
+    get: jest.fn().mockResolvedValue(existing),
     create: jest.fn().mockResolvedValue(existing ? undefined : page),
     upsert: jest.fn().mockResolvedValue(page),
   };
@@ -85,5 +86,14 @@ describe('updateCortexPageRoute', () => {
       store.upsert.mock.invocationCallOrder[0]
     );
     expect(store.upsert).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'service' }));
+  });
+
+  it('throws not found instead of creating a missing page', async () => {
+    const { store, context } = setup();
+    await expect(update(context)).rejects.toEqual(
+      notFound('Cortex page cortex_service_checkout was not found')
+    );
+    expect(store.get).toHaveBeenCalledWith('cortex_service_checkout');
+    expect(store.upsert).not.toHaveBeenCalled();
   });
 });
