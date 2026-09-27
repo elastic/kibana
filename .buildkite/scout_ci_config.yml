@@ -141,4 +141,5 @@ excluded_configs:
   - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts
+  - x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/playwright.config.ts
   - x-pack/platform/plugins/shared/alerting/test/scout_cps_local/api/playwright.config.ts

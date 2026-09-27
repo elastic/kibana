@@ -400,6 +400,11 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getCurrentUser,
+      // The schema rejects savedObjectDiff.enabled without audit.enabled.
+      savedObjectDiffEnabled: config.audit.savedObjectDiff.enabled,
+      savedObjectDiffTypesToInclude: config.audit.savedObjectDiff.typesToInclude,
+      savedObjectDiffFieldSizeLimit: config.audit.savedObjectDiff.fieldSizeLimit.getValueInBytes(),
+      logger: this.logger.get('saved-objects-audit'),
     });
 
     this.registerDeprecations(core, license);
@@ -512,6 +517,20 @@ export class SecurityPlugin
         : undefined;
 
     const config = this.getConfig();
+
+    if (config.audit.savedObjectDiff.enabled) {
+      const typeRegistry = core.savedObjects.getTypeRegistry();
+      const unregisteredTypes = config.audit.savedObjectDiff.typesToInclude.filter(
+        (type) => !typeRegistry.getType(type)
+      );
+      if (unregisteredTypes.length > 0) {
+        this.logger.warn(
+          `xpack.security.audit.savedObjectDiff.typesToInclude lists saved object types that are not registered and will never emit diffs: ${unregisteredTypes.join(
+            ', '
+          )}`
+        );
+      }
+    }
 
     const { protocol, hostname, port } = core.http.getServerInfo();
     const serverBaseUrl = `${protocol}://${hostname}:${port}`;
