@@ -138,4 +138,3 @@ describe('SchemaResolutionField', () => {
     expect(getByRole('combobox')).toBeDisabled();
   });
 });
-

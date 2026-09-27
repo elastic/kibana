@@ -62,4 +62,3 @@ describe('QuoteMode', () => {
     expect(getAllByText(createDatasetWizardStrings.defaultBadgeLabel)).toHaveLength(1);
   });
 });
-

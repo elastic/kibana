@@ -74,4 +74,3 @@ describe('SkipRowsField', () => {
     expect(queryByText(createDatasetWizardStrings.settingsSkipRowsInvalid)).toBeNull();
   });
 });
-

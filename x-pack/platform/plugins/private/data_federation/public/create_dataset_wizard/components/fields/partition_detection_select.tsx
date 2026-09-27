@@ -56,7 +56,11 @@ const PARTITION_DETECTION_OPTIONS: Option[] = [
   },
 ];
 
-export function PartitionDetectionSelect({ control }: { control: Control<CreateDatasetFormValues> }) {
+export function PartitionDetectionSelect({
+  control,
+}: {
+  control: Control<CreateDatasetFormValues>;
+}) {
   const { field: partitionDetectionField } = useController({
     name: 'settings.partition_detection',
     control,
@@ -95,4 +99,3 @@ export function PartitionDetectionSelect({ control }: { control: Control<CreateD
     />
   );
 }
-

@@ -56,4 +56,3 @@ describe('EncodingSelect', () => {
     expect(getByTestId('encodingValue')).toHaveTextContent('UTF-16');
   });
 });
-

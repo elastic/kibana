@@ -67,4 +67,3 @@ describe('MaxErrorsField', () => {
     expect(queryByText(createDatasetWizardStrings.settingsMaxErrorsInvalid)).toBeNull();
   });
 });
-

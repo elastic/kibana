@@ -74,4 +74,3 @@ export function MaxErrorRatioField({ control }: { control: Control<CreateDataset
     </EuiFormRow>
   );
 }
-

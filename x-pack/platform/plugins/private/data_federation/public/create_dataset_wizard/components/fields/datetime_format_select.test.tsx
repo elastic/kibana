@@ -56,4 +56,3 @@ describe('DatetimeFormatSelect', () => {
     expect(getByTestId('datetimeFormatValue')).toHaveTextContent('ISO8601');
   });
 });
-

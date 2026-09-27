@@ -59,4 +59,3 @@ describe('HeaderRow', () => {
     expect(onChange).toHaveBeenCalledWith('');
   });
 });
-
