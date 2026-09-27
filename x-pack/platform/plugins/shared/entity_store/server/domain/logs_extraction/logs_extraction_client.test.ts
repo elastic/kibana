@@ -15,7 +15,10 @@ import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
 import { ENGINE_METADATA_UNTYPED_ID_FIELD, TIMESTAMP_FIELD } from './query_builder_commons';
-import { LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD } from './log_pagination_probe_query_builder';
+import {
+  LOG_EXTRACTION_SAMPLE_PROBABILITY,
+  LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD,
+} from './log_pagination_probe_query_builder';
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 import type { ExtractionMode } from '../../../common/domain/definitions/entity_schema';
 
@@ -2585,6 +2588,465 @@ describe('LogsExtractionClient extraction metrics', () => {
     expect(lagRecord).toHaveBeenCalledWith(
       expect.any(Number),
       expect.objectContaining({ remote: true })
+    );
+  });
+});
+
+describe('LogsExtractionClient sampling wiring', () => {
+  // Window: lookbackPeriod 10m → 11:50, delay 1m → effectiveWindowEnd 11:59. Kept inside one
+  // 15m sub-window because non-priority ignores the global maxTimeWindowSize override
+  // (NON_PRIORITY_EXCLUSIVE_FIELDS) and falls back to the 15m default.
+
+  const extractionRow: ESQLSearchResponse = {
+    columns: extractionColumns,
+    values: [['2025-01-15T11:52:00.000Z', 'hash1', 'entity1']],
+  };
+
+  function createSamplingContext(
+    mode: ExtractionMode,
+    descriptorExtras: Record<string, unknown> = {}
+  ) {
+    jest.clearAllMocks();
+    mockExecuteEsqlQuery.mockReset();
+    mockIngestEntities.mockReset();
+
+    const mockEsClient = {
+      indices: {
+        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      },
+    } as unknown as jest.Mocked<ElasticsearchClient>;
+    const mockDataViewsService = {
+      get: jest.fn().mockResolvedValue({ getIndexPattern: jest.fn().mockReturnValue('logs-*') }),
+    } as unknown as jest.Mocked<DataViewsService>;
+    const mockEngineDescriptorClient: jest.Mocked<
+      Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
+    > = {
+      findOrThrow: jest.fn().mockResolvedValue({
+        ...createMockEngineDescriptor('user'),
+        ...descriptorExtras,
+      } as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>),
+      update: jest.fn().mockResolvedValue({}),
+    };
+
+    const client = new LogsExtractionClient({
+      logger: loggerMock.create(),
+      namespace: 'default',
+      esClient: mockEsClient,
+      dataViewsService: mockDataViewsService,
+      engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+      globalStateClient: createMockGlobalStateClient({
+        lookbackPeriod: '10m',
+      }) as unknown as EntityStoreGlobalStateClient,
+      extractionMode: mode,
+    });
+
+    mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
+    return { client, mockEngineDescriptorClient };
+  }
+
+  /** Queries sent as extraction (the probe has its own estimation SAMPLE and is excluded). */
+  const extractionQueries = (): string[] =>
+    mockExecuteEsqlQuery.mock.calls
+      .filter(([args]) => args.telemetry?.name === 'extraction_query')
+      .map(([args]) => args.query);
+
+  /**
+   * The real probe query has `LIMIT scaledProbeLimit` baked in, so no single probe response can
+   * ever report more sampled docs than this - a mock feeding a higher value describes a result
+   * the query could never produce.
+   */
+  const REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE = Math.round(
+    LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT * LOG_EXTRACTION_SAMPLE_PROBABILITY
+  );
+
+  /**
+   * One probed slice ending at `sliceEndISO`, followed by an empty probe and the sweep it
+   * triggers. sliceLogCount = sampledProbeDocs x 10 (probe sample probability 0.1); the window
+   * projection extrapolates that density over the remaining time to 11:59.
+   *
+   * `sampledProbeDocs` must be >= the realistic per-probe ceiling for the mocked `sliceEndISO`
+   * to actually take effect: below it, `isLastLogsPage` is true and the real code discards the
+   * probe's cursor in favor of the window's natural end, collapsing the slice to zero remaining
+   * time regardless of what boundary was mocked here.
+   */
+  const mockVolumeSequence = (sampledProbeDocs: number, sliceEndISO: string) => {
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(sliceEndISO, sampledProbeDocs))
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
+  };
+
+  /** A single slice at the realistic per-probe ceiling (50K raw) over a dense 3-min slice,
+   * projecting to 150K for the whole window - above the 100K default cap without describing a
+   * probe result the real query could never return. */
+  const mockHighVolumeSequence = () =>
+    mockVolumeSequence(REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE, '2025-01-15T11:53:00.000Z');
+
+  /** ~3K raw in the window, far below the 100K default cap. */
+  const mockLowVolumeSequence = () => mockVolumeSequence(100, '2025-01-15T11:53:00.000Z');
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: fixedNow.getTime() });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('nonPriority above the default cap samples the extraction query', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    mockHighVolumeSequence();
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.');
+  });
+
+  it('nonPriority below the default cap emits no SAMPLE stage', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    mockLowVolumeSequence();
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    for (const query of extractionQueries()) {
+      expect(query).not.toContain('SAMPLE');
+    }
+  });
+
+  it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
+    '%s mode never samples, even far above the default cap',
+    async (mode) => {
+      const { client } = createSamplingContext(mode);
+      mockHighVolumeSequence();
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      expect(extractionQueries().length).toBeGreaterThan(0);
+      for (const query of extractionQueries()) {
+        expect(query).not.toContain('SAMPLE');
+      }
+    }
+  );
+
+  it('a window projecting just above the 100K default samples', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    // Realistic ceiling (5000 sampled → 50K raw) over a 4-min slice, 5 min left in the window:
+    // projection = 50K x (1 + 5/4) = 112.5K > 100K
+    mockVolumeSequence(REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE, '2025-01-15T11:54:00.000Z');
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.');
+  });
+
+  it('a window projecting just below the 100K default does not sample', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    // Same realistic ceiling (5000 sampled → 50K raw), but over a wider 5-min slice with only
+    // 4 min left: projection = 50K x (1 + 4/5) = 90K < 100K
+    mockVolumeSequence(REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE, '2025-01-15T11:55:00.000Z');
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries().length).toBeGreaterThan(0);
+    for (const query of extractionQueries()) {
+      expect(query).not.toContain('SAMPLE');
+    }
+  });
+
+  it('a descriptor samplingRate override samples even below the default cap', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
+    });
+    mockLowVolumeSequence();
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.5');
+  });
+
+  it('a descriptor samplingRate override replaces the dynamic rate above the cap', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
+    });
+    mockHighVolumeSequence(); // dynamic rate would be ~0.667
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.5');
+  });
+
+  describe('mid-slice resume', () => {
+    const resumeCheckpoint = '2025-01-15T11:50:00.000Z';
+    const resumeSliceEnd = '2025-01-15T11:55:00.000Z';
+
+    it('reuses the pinned sampling rate instead of recomputing an unsampled one', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionState: {
+          checkpointTimestamp: resumeCheckpoint,
+          paginationId: 'entity-cursor',
+          lastExecutionTimestamp: null,
+          sliceEndTimestamp: resumeSliceEnd,
+          sliceSamplingRate: 0.3,
+        },
+      });
+      // Resumed slice: extraction directly (no probe), 1 row < docsLimit → slice completes.
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      expect(extractionQueries()[0]).toContain('| SAMPLE 0.3');
+    });
+
+    it('clears the pinned sampling rate once the resumed slice completes', async () => {
+      const { client, mockEngineDescriptorClient } = createSamplingContext(
+        EXTRACTION_MODE.nonPriority,
+        {
+          nonPriorityLogExtractionState: {
+            checkpointTimestamp: resumeCheckpoint,
+            paginationId: 'entity-cursor',
+            lastExecutionTimestamp: null,
+            sliceEndTimestamp: resumeSliceEnd,
+            sliceSamplingRate: 0.3,
+          },
+        }
+      );
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(extractionRow)
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      await client.extractLogs('user');
+
+      const stateUpdates = mockEngineDescriptorClient.update.mock.calls
+        .map(
+          ([, update]) =>
+            (update as { nonPriorityLogExtractionState?: unknown }).nonPriorityLogExtractionState
+        )
+        .filter(Boolean);
+      expect(stateUpdates[0]).toMatchObject({
+        paginationId: null,
+        sliceEndTimestamp: null,
+        sliceSamplingRate: null,
+      });
+    });
+  });
+
+  it('a raised effective cap does not suppress sampling - the trigger stays pinned to the default', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      nonPriorityLogExtractionConfig: { maxLogsPerWindow: 500_000 },
+    });
+    mockHighVolumeSequence(); // 50K raw fits the raised cap, but projects to 150K, above the 100K default
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.');
+  });
+
+  it('a lowered effective cap below the default does not trigger sampling - the cap just fires', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      nonPriorityLogExtractionConfig: { maxLogsPerWindow: 20_000 },
+    });
+    // 3000 sampled (< the realistic 5000 ceiling) → last page, so no extrapolation: projected
+    // volume is just the raw 30K itself - under the 100K default trigger but over the 20K cap
+    mockVolumeSequence(3000, '2025-01-15T11:53:00.000Z');
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    for (const query of extractionQueries()) {
+      expect(query).not.toContain('SAMPLE');
+    }
+    expect(result.success && result.logsCapApplied).toBe(true);
+  });
+
+  it('the budget counts processed volume, so a sampled over-cap window does not fire the cap', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    // 4 consecutive slices, each at the realistic per-probe ceiling (50K raw). Cumulative raw
+    // reaches 100K (the cap) by slice 2 already - raw accounting would have fired there. Cumulative
+    // processed volume, throttled by the rate each slice computes, stays under 45K after all 4.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:51:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:52:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:53:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:54:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(result.success && result.logsCapApplied).toBe(false);
+    expect(result.success && result.logsProcessed).toBeGreaterThan(0);
+    expect(result.success && result.logsProcessed).toBeLessThan(45_000);
+  });
+
+  it('rounds a slice contribution up rather than to nearest, so a small nonzero amount is never lost to zero', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      // maxLogsPerPage=5 escalates the probe to an exact (unsampled) count - see
+      // pickSampleProbability - so sliceLogCount is exactly the mocked value, not extrapolated.
+      // 4 * 0.1 = 0.4, which rounds to nearest as 0 but must round up to 1.
+      nonPriorityLogExtractionConfig: { maxLogsPerPage: 5, samplingRate: 0.1 },
+    });
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:55:00.000Z', 4))
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(result.success && result.logsProcessed).toBe(1);
+  });
+
+  it('recalculates the rate for a later slice from the budget the earlier slice consumed', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    // Both slices at the realistic per-probe ceiling (5000 sampled → 50K raw).
+    // Slice 1: 11:50→11:51 (1 min), 8 min left. Projects 450K remaining → p1 ≈ 0.222,
+    // consuming ~11.1K of the 100K default budget.
+    // Slice 2: 11:51→11:55 (4 min), 4 min left. Same raw volume as slice 1, but spread over a
+    // longer slice with less window left projects only 100K remaining, and the budget is down
+    // to ~88.9K after slice 1 → p2 ≈ 0.889. Both rates land strictly inside (0.1, 1), and p2 is
+    // well above p1: as the window nears its end there is less left to protect, so the rate
+    // recomputed from the remaining budget rises, exactly the self-correction the resolver is
+    // meant to produce - only reachable if slice 2 truly recalculates instead of reusing
+    // slice 1's rate.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:51:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(
+        mockLogPaginationCursorProbeRow(
+          '2025-01-15T11:55:00.000Z',
+          REALISTIC_MAX_SAMPLED_DOCS_PER_PROBE
+        )
+      )
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    const [firstQuery, secondQuery] = extractionQueries();
+    const rateOf = (query: string) => Number(query.match(/\| SAMPLE ([\d.]+)/)?.[1]);
+    const firstRate = rateOf(firstQuery);
+    const secondRate = rateOf(secondQuery);
+
+    expect(firstRate).toBeCloseTo(0.222, 2);
+    expect(secondRate).toBeCloseTo(0.889, 2);
+    expect(secondRate).toBeGreaterThan(firstRate);
+  });
+
+  describe('sampling metrics', () => {
+    // Spies must be created after createSamplingContext, whose clearAllMocks would wipe them.
+    const spySampleMetrics = () => ({
+      probabilityRecord: jest
+        .spyOn(entityStoreMetrics.extractionSampleProbability, 'record')
+        .mockImplementation(),
+      eligibleRunsAdd: jest
+        .spyOn(entityStoreMetrics.extractionSampleEligibleRuns, 'add')
+        .mockImplementation(),
+    });
+
+    it('a sampled run records the applied rate and counts as sampled', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      const { probabilityRecord, eligibleRunsAdd } = spySampleMetrics();
+      mockHighVolumeSequence();
+
+      await client.extractLogs('user');
+
+      expect(probabilityRecord).toHaveBeenCalledWith(
+        expect.any(Number),
+        expect.objectContaining({ extraction_mode: EXTRACTION_MODE.nonPriority })
+      );
+      const [rate] = probabilityRecord.mock.calls[0];
+      expect(rate).toBeGreaterThanOrEqual(0.1);
+      expect(rate).toBeLessThan(1);
+      expect(eligibleRunsAdd).toHaveBeenCalledTimes(1);
+      expect(eligibleRunsAdd).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ sampled: true, extraction_mode: EXTRACTION_MODE.nonPriority })
+      );
+    });
+
+    it('an eligible unsampled run records no rate and counts as not sampled', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+      const { probabilityRecord, eligibleRunsAdd } = spySampleMetrics();
+      mockLowVolumeSequence();
+
+      await client.extractLogs('user');
+
+      expect(probabilityRecord).not.toHaveBeenCalled();
+      expect(eligibleRunsAdd).toHaveBeenCalledTimes(1);
+      expect(eligibleRunsAdd).toHaveBeenCalledWith(1, expect.objectContaining({ sampled: false }));
+    });
+
+    it('a fixed override run records the override value', async () => {
+      const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+        nonPriorityLogExtractionConfig: { samplingRate: 0.5 },
+      });
+      const { probabilityRecord } = spySampleMetrics();
+      mockLowVolumeSequence();
+
+      await client.extractLogs('user');
+
+      expect(probabilityRecord).toHaveBeenCalledWith(0.5, expect.anything());
+    });
+
+    it.each([EXTRACTION_MODE.single, EXTRACTION_MODE.priority])(
+      '%s mode records neither metric at any volume',
+      async (mode) => {
+        const { client } = createSamplingContext(mode);
+        const { probabilityRecord, eligibleRunsAdd } = spySampleMetrics();
+        mockHighVolumeSequence();
+
+        await client.extractLogs('user');
+
+        expect(probabilityRecord).not.toHaveBeenCalled();
+        expect(eligibleRunsAdd).not.toHaveBeenCalled();
+      }
     );
   });
 });
