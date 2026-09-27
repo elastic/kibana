@@ -9,7 +9,7 @@
 
 import { usageApiPluginMock } from '@kbn/usage-api-plugin/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { getEventChainContext } from '@kbn/workflows-extensions/server';
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import {
@@ -24,7 +24,12 @@ import { setupDependencies } from './setup_dependencies';
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
-import { createMockWorkflowDataClient } from '../repositories/data_access_layer/mocks';
+import {
+  createMockGetExecutionsByIdsResponse,
+  createMockStepDataClient,
+  createMockWorkflowDataClient,
+} from '../repositories/data_access_layer/mocks';
+import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 jest.mock('./setup_dependencies');
@@ -138,7 +143,8 @@ describe.each([
     await expect(execute(params)).rejects.toThrow('Binding changed');
     expect(params.stepExecutionRepository.markNonTerminalStepsFailed).toHaveBeenCalledWith(
       'child',
-      expect.objectContaining({ type: 'ServiceAccountExecutionError' })
+      expect.objectContaining({ type: 'ServiceAccountExecutionError' }),
+      undefined
     );
     expect(params.internalResumeWorkflowExecution).toHaveBeenCalledWith(
       'parent',
@@ -153,6 +159,47 @@ describe.each([
       params.dependencies.cloudSetup
     );
     expect(setupDependencies).not.toHaveBeenCalled();
+  });
+
+  it('finalizes a waiting step that has not been refreshed before publishing failure', async () => {
+    const { params } = setup();
+    const step: EsWorkflowStepExecution = {
+      id: 'unrefreshed-approval',
+      stepId: 'approval',
+      workflowRunId: 'child',
+      workflowId: 'workflow',
+      spaceId: 'default',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    } as EsWorkflowStepExecution;
+    await params.workflowExecutionRepository.updateWorkflowExecution({
+      id: 'child',
+      stepExecutionIds: [step.id],
+    });
+    const stepClient = createMockStepDataClient();
+    stepClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+    stepClient.getByIds.mockResolvedValue(createMockGetExecutionsByIdsResponse([step]));
+    stepClient.bulk.mockImplementation(async ({ items }) => {
+      expect(
+        params.workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion
+      ).not.toHaveBeenCalled();
+      Object.assign(step, items[0].document);
+      return { errors: false, items: [{ id: step.id, index: '.workflows-step-executions' }] };
+    });
+
+    await expect(
+      execute({
+        ...params,
+        stepExecutionRepository: new StepExecutionRepository(stepClient),
+      })
+    ).rejects.toThrow('Binding changed');
+
+    expect(step.status).toBe(ExecutionStatus.FAILED);
+    expect(step.finishedAt).toEqual(expect.any(String));
+    expect(stepClient.getByIds).toHaveBeenCalledWith([step.id], expect.any(Object));
+    expect(stepClient.search).not.toHaveBeenCalled();
+    expect(
+      await params.workflowExecutionRepository.getWorkflowExecutionById('child', 'default')
+    ).toMatchObject({ status: ExecutionStatus.FAILED });
   });
 
   it('emits a failure event using the original request when minting fails', async () => {

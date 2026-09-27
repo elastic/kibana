@@ -63,6 +63,13 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return Promise.resolve();
   }
 
+  public async discardUnstartedExecution(id: string, spaceId: string): Promise<void> {
+    if (this.workflowExecutions.get(id)?.spaceId === spaceId) {
+      this.workflowExecutions.delete(id);
+      this.revisions.delete(id);
+    }
+  }
+
   public async bulkCreateWorkflowExecutions(
     executions: Array<Partial<EsWorkflowExecution>>,
     _options: { refresh?: boolean | 'wait_for' } = {}

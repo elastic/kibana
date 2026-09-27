@@ -47,7 +47,8 @@ export const finalizeWorkflowIdentityFailure = async ({
             type: 'WorkflowCancelled',
             message: execution.cancellationReason ?? 'Workflow cancelled.',
           }
-        : error
+        : error,
+      execution.stepExecutionIds
     );
     const updated = await workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion(
       {

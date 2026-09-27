@@ -41,6 +41,27 @@ describe('WorkflowExecutionRepository', () => {
     );
   });
 
+  describe('discardUnstartedExecution', () => {
+    it('removes only the rejected execution in its space', async () => {
+      workflowExecutionsDataClient.deleteByQuery.mockResolvedValue({ deleted: 1 } as never);
+      await repository.discardUnstartedExecution('execution', 'space');
+      expect(workflowExecutionsDataClient.deleteByQuery).toHaveBeenCalledWith({
+        query: {
+          bool: { filter: [{ ids: { values: ['execution'] } }, { term: { spaceId: 'space' } }] },
+        },
+        refresh: true,
+      });
+    });
+    it('reports partial cleanup failures', async () => {
+      workflowExecutionsDataClient.deleteByQuery.mockResolvedValue({
+        failures: [{ cause: {} }],
+      } as never);
+      await expect(repository.discardUnstartedExecution('execution', 'space')).rejects.toThrow(
+        'Failed to discard'
+      );
+    });
+  });
+
   describe('conditional terminal updates', () => {
     it('uses the observed revision without retrying a stale update', async () => {
       workflowExecutionsDataClient.bulk.mockResolvedValue({

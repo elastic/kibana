@@ -135,6 +135,17 @@ export class WorkflowExecutionRepository {
     }
   }
 
+  /** Removes a searchable execution rejected before any task or step was started. */
+  public async discardUnstartedExecution(id: string, spaceId: string): Promise<void> {
+    const response = await this.workflowExecutionsDataClient.deleteByQuery({
+      query: { bool: { filter: [{ ids: { values: [id] } }, { term: { spaceId } }] } },
+      refresh: true,
+    });
+    if (response.failures?.length || response.timed_out) {
+      throw new Error(`Failed to discard unstarted workflow execution ${id}.`);
+    }
+  }
+
   /**
    * Bulk creates multiple workflow execution documents in a single Elasticsearch request.
    * Per-doc errors are reported per item in input order instead of throwing.

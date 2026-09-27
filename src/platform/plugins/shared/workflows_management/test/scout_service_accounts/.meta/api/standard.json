@@ -1,315 +1,287 @@
 {
-  "sha1": "33ea2061472ae86a86ec30adb4505bc79eadf163",
+  "sha1": "97c71e97580daf5d1dd8595a325c1d98a1eb9011",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "59645759a29407d-24d4395fb42bb90",
-      "title": "[NON-MKI] Saved workflow service account execution executes with selected read-only roles instead of the creator privileges",
+      "id": "eec95e8af9b194d-0bafa8f6f53c36e",
+      "title": "[NON-MKI] Workflow service accounts: authorization executes with selected read-only roles instead of the creator privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 374,
-        "column": 28
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_authorization.spec.ts",
+        "line": 24,
+        "column": 42
       }
     },
     {
-      "id": "59645759a29407d-8243c972e8322d6",
-      "title": "[NON-MKI] Saved workflow service account execution managed workflow installs, executes and rebinds with its service account",
+      "id": "eec95e8af9b194d-8b306c062b34b0d",
+      "title": "[NON-MKI] Workflow service accounts: authorization runs the saved definition as its bound account and rejects modified test YAML",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 414,
-        "column": 19
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_authorization.spec.ts",
+        "line": 46,
+        "column": 23
       }
     },
     {
-      "id": "59645759a29407d-f384878e89b9b0d",
-      "title": "[NON-MKI] Saved workflow service account execution managed workflow allows execution but rejects SA mutations without manage_security",
+      "id": "eec95e8af9b194d-d34e1a28b6218bb",
+      "title": "[NON-MKI] Workflow service accounts: authorization rejects service-account step tests even with unchanged saved YAML",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 445,
-        "column": 26
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_authorization.spec.ts",
+        "line": 87,
+        "column": 47
       }
     },
     {
-      "id": "59645759a29407d-2d51a0be839ac57",
-      "title": "[NON-MKI] Saved workflow service account execution runs the saved definition as its bound account and rejects modified test YAML",
+      "id": "eec95e8af9b194d-d1fbbdfb3982208",
+      "title": "[NON-MKI] Workflow service accounts: authorization allows an executor to run but prevents definition edits without manage_security",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 499,
-        "column": 44
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_authorization.spec.ts",
+        "line": 127,
+        "column": 58
       }
     },
     {
-      "id": "59645759a29407d-616861f11af8511",
-      "title": "[NON-MKI] Saved workflow service account execution rejects service-account step tests even with unchanged saved YAML",
+      "id": "da471a0a48fcee6-5ae91a7ca96dad0",
+      "title": "[NON-MKI] Workflow service accounts: deletion returns conflict when force-deleting an unbound workflow with a paused execution",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 529,
-        "column": 85
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 31,
+        "column": 32
       }
     },
     {
-      "id": "59645759a29407d-1011aad880151c4",
-      "title": "[NON-MKI] Saved workflow service account execution allows an executor to run but prevents definition edits without manage_security",
+      "id": "da471a0a48fcee6-4d18ff7d6c6cfc1",
+      "title": "[NON-MKI] Workflow service accounts: deletion returns conflict when force-deleting a bound workflow with a paused execution",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 571,
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 31,
+        "column": 32
+      }
+    },
+    {
+      "id": "da471a0a48fcee6-771f38bee58eb84",
+      "title": "[NON-MKI] Workflow service accounts: deletion cleanup continues after one failure and tolerates already deleted workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 71,
+        "column": 24
+      }
+    },
+    {
+      "id": "da471a0a48fcee6-1116744522f8ed2",
+      "title": "[NON-MKI] Workflow service accounts: deletion cleanup removes a workflow left paused for input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 98,
+        "column": 23
+      }
+    },
+    {
+      "id": "392f04ca02e6e25-327473e6c8d99f1",
+      "title": "[NON-MKI] Workflow service accounts: events SA continuation audit: binding failure dispatches the failure handler",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_events.spec.ts",
+        "line": 24,
+        "column": 42
+      }
+    },
+    {
+      "id": "b5e4229ab317d56-18bcf07788d040a",
+      "title": "[NON-MKI] Workflow service accounts: import clone and bulk import create independent bindings, and overwrite can unbind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_import.spec.ts",
+        "line": 19,
+        "column": 42
+      }
+    },
+    {
+      "id": "956a46181e9404d-e383abb79f31e60",
+      "title": "[NON-MKI] Workflow service accounts: nested SA continuation audit: unbound child approval does not change parent identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested.spec.ts",
+        "line": 26,
+        "column": 32
+      }
+    },
+    {
+      "id": "956a46181e9404d-c107efc34634030",
+      "title": "[NON-MKI] Workflow service accounts: nested SA continuation audit: bound child approval does not change parent identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested.spec.ts",
+        "line": 26,
+        "column": 32
+      }
+    },
+    {
+      "id": "956a46181e9404d-e0d62fb9b7ac166",
+      "title": "[NON-MKI] Workflow service accounts: nested a nested child selects its own account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested.spec.ts",
+        "line": 77,
         "column": 17
       }
     },
     {
-      "id": "59645759a29407d-845fc0fedbf8da6",
-      "title": "[NON-MKI] Saved workflow service account execution returns conflict when force-deleting an unbound workflow with a paused execution",
+      "id": "de4adc7eaf2d461-8a2ee97083faa6a",
+      "title": "[NON-MKI] Workflow service accounts: resume resumes with the original service account",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 695,
-        "column": 30
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 23,
+        "column": 42
       }
     },
     {
-      "id": "59645759a29407d-e3ed55dd03ec2e6",
-      "title": "[NON-MKI] Saved workflow service account execution returns conflict when force-deleting a bound workflow with a paused execution",
+      "id": "de4adc7eaf2d461-fa618ccea035340",
+      "title": "[NON-MKI] Workflow service accounts: resume fails resume after rebind without executing the next step",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 695,
-        "column": 30
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 27,
+        "column": 13
       }
     },
     {
-      "id": "59645759a29407d-e04cfefe05a81d9",
-      "title": "[NON-MKI] Saved workflow service account execution cleanup continues after one failure and tolerates already deleted workflows",
+      "id": "de4adc7eaf2d461-c9a7ffbcf5c5b73",
+      "title": "[NON-MKI] Workflow service accounts: resume SA continuation audit: timer retains the bound identity",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 732,
-        "column": 16
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 39,
+        "column": 15
       }
     },
     {
-      "id": "59645759a29407d-428d02025f1eb76",
-      "title": "[NON-MKI] Saved workflow service account execution cleanup removes a workflow left paused for input",
+      "id": "de4adc7eaf2d461-ae654bf07dbf2c9",
+      "title": "[NON-MKI] Workflow service accounts: resume SA continuation audit: retry retains the bound identity",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 760,
-        "column": 11
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 39,
+        "column": 15
       }
     },
     {
-      "id": "59645759a29407d-4eecc0ce72fbf26",
-      "title": "[NON-MKI] Saved workflow service account execution resumes with the original service account",
+      "id": "3513f71c0c16c80-6721e5abba14999",
+      "title": "[NON-MKI] Workflow service accounts: scheduling scheduled execution uses its service account",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 775,
-        "column": 83
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_scheduling.spec.ts",
+        "line": 24,
+        "column": 42
       }
     },
     {
-      "id": "59645759a29407d-2482183f7a649fb",
-      "title": "[NON-MKI] Saved workflow service account execution fails resume after rebind without executing the next step",
+      "id": "3513f71c0c16c80-2b32e9d42379a96",
+      "title": "[NON-MKI] Workflow service accounts: scheduling SA continuation audit: queued execution retains its identity on promotion",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 779,
-        "column": 16
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_scheduling.spec.ts",
+        "line": 42,
+        "column": 25
       }
     },
     {
-      "id": "59645759a29407d-930803d430a6144",
-      "title": "[NON-MKI] Saved workflow service account execution scheduled execution uses its service account",
+      "id": "3513f71c0c16c80-cc0fb18874bf620",
+      "title": "[NON-MKI] Workflow service accounts: scheduling SA continuation audit: queued execution rejects a changed binding",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 808,
-        "column": 20
-      }
-    },
-    {
-      "id": "59645759a29407d-f540b6f10298e00",
-      "title": "[NON-MKI] Saved workflow service account execution clone and bulk import create independent bindings, and overwrite can unbind",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 824,
-        "column": 17
-      }
-    },
-    {
-      "id": "59645759a29407d-60b93d04e2278c8",
-      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: timer retains the bound identity",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 883,
-        "column": 17
-      }
-    },
-    {
-      "id": "59645759a29407d-0edae74a23d9ca8",
-      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: retry retains the bound identity",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 883,
-        "column": 17
-      }
-    },
-    {
-      "id": "59645759a29407d-11f4f36964b059a",
-      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: queued execution retains its identity on promotion",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 918,
-        "column": 27
-      }
-    },
-    {
-      "id": "59645759a29407d-39ca95989e85ded",
-      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: queued execution rejects a changed binding",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 918,
-        "column": 27
-      }
-    },
-    {
-      "id": "59645759a29407d-0a284496f27165a",
-      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: unbound child approval does not change parent identity",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 962,
-        "column": 41
-      }
-    },
-    {
-      "id": "59645759a29407d-a4c532b1d0a5a22",
-      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: bound child approval does not change parent identity",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 962,
-        "column": 41
-      }
-    },
-    {
-      "id": "59645759a29407d-832de6fb582b888",
-      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: binding failure dispatches the failure handler",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 1030,
-        "column": 27
-      }
-    },
-    {
-      "id": "59645759a29407d-2686bef061f6fc6",
-      "title": "[NON-MKI] Saved workflow service account execution a nested child selects its own account",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search",
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 1098,
-        "column": 1
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_scheduling.spec.ts",
+        "line": 42,
+        "column": 25
       }
     }
   ]

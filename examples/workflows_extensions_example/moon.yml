@@ -24,6 +24,11 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/config-schema'
   - '@kbn/workflows'
+  - '@kbn/scout'
+  - '@kbn/core-security-common'
+  - '@kbn/mock-idp-utils'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
 tags:
   - plugin
   - prod
@@ -36,5 +41,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout_service_accounts/**/*
     - '!target/**/*'
 tasks: {}

@@ -135,7 +135,8 @@ describe('runWorkflow', () => {
 
     expect(stepExecutionRepository.markNonTerminalStepsFailed).toHaveBeenCalledWith(
       'run-identity-failure',
-      expect.objectContaining({ type: 'ServiceAccountExecutionError' })
+      expect.objectContaining({ type: 'ServiceAccountExecutionError' }),
+      undefined
     );
     expect(workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion).toHaveBeenCalledWith(
       expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) }),

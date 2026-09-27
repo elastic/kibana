@@ -50,6 +50,7 @@ import { handlePostExecutionLoop } from './execution_functions/handle_post_execu
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
+import { ensureBoundExecutionAdmitted } from './lib/ensure_bound_execution_admitted';
 import {
   MISSING_EXECUTION_IDENTITY_MESSAGE,
   UNKNOWN_EXECUTION_IDENTITY,
@@ -985,6 +986,11 @@ export class WorkflowsExecutionEnginePlugin
                 await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
                   refresh: 'wait_for',
                 });
+                await ensureBoundExecutionAdmitted(
+                  workflowExecution,
+                  workflowRepository,
+                  workflowExecutionRepository
+                );
                 workflowExecutionId = workflowExecution.id;
 
                 if (workflowExecution.status === ExecutionStatus.FAILED) {
@@ -1284,15 +1290,21 @@ export class WorkflowsExecutionEnginePlugin
         failureLogLabel: 'Concurrency queue drain before enqueue failed',
       });
 
-      // Only pay the refresh cost when the concurrency check will actually run.
-      // Without a concurrencyGroupKey there is no check, so refresh:false is fine.
-      // When a check will run, the caller dictates the strategy: manual/UI paths use
-      // refresh:true (immediate, no latency for the user); async paths use refresh:'wait_for'
-      // (piggybacks on the scheduled cycle, lower cluster cost).
+      // Bound executions must be searchable before the final admission check so
+      // force deletion cannot miss an admitted run. Other runs retain the concurrency-only refresh.
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: workflowExecution.concurrencyGroupKey ? options.refresh : false,
+        refresh: workflowExecution.workflowDefinition?.settings?.run_as
+          ? options.refresh || 'wait_for'
+          : workflowExecution.concurrencyGroupKey
+          ? options.refresh
+          : false,
       });
 
+      await ensureBoundExecutionAdmitted(
+        workflowExecution,
+        workflowRepository,
+        workflowExecutionRepository
+      );
       return { workflowExecution, repository: workflowExecutionRepository };
     };
 
@@ -1584,7 +1596,19 @@ export class WorkflowsExecutionEnginePlugin
             error: { message: writeResult.error },
           };
         } else {
-          succeeded.push(p);
+          try {
+            await ensureBoundExecutionAdmitted(
+              p.workflowExecution,
+              workflowRepository,
+              workflowExecutionRepository
+            );
+            succeeded.push(p);
+          } catch (error) {
+            results[p.idx] = {
+              status: 'error',
+              error: { message: error instanceof Error ? error.message : String(error) },
+            };
+          }
         }
       }
 
