@@ -16,33 +16,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { InstrumentationProfile } from '../common_attributes.gen';
+import { EvaluationSubject } from '../common_attributes.gen';
 
 export const ValidateRequestBody = lazySchema(() =>
   z.object({
-    subject: z.object({
-      mode: z.enum(['single-turn', 'multi-turn']).optional().default('single-turn'),
-      traces: z
-        .array(
-          z.object({
-            trace_id: z.string().max(256),
-            reference_data: z.object({}).catchall(z.unknown()).optional(),
-          })
-        )
-        .min(1)
-        .max(1),
-      /**
-       * Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.
-       */
-      instrumentation: z
-        .object({
-          profile: InstrumentationProfile.default('elastic-inference'),
-        })
-        .optional()
-        .describe(
-          'Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.'
-        ),
-    }),
+    subject: EvaluationSubject,
     evaluators: z
       .array(
         z.object({

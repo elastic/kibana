@@ -333,17 +333,307 @@ describe('EvaluatorDefinitionClient', () => {
   });
 
   describe('update', () => {
-    it('writes a new version at the next minor without touching the old one', async () => {
+    it('writes a new version without touching the old one', async () => {
       const { client, docs } = createClient();
       const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
 
       const updated = await client.update('tone', { description: 'Sharper tone' });
 
-      expect(updated.version).toBe('1.1.0');
       expect(updated.description).toBe('Sharper tone');
       expect(docs.get(created.id)).toEqual(
         expect.objectContaining({ version: '1.0.0', description: 'Tone' })
       );
+    });
+
+    describe('version level', () => {
+      // The level is derived from the edit, so it reports what happened rather than what
+      // the author claimed. Scores only compare across a patch or a minor.
+      const bumpFor = async (updates: Parameters<EvaluatorDefinitionClient['update']>[1]) => {
+        const { client } = createClient();
+        await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+        const { version } = await client.update('tone', updates);
+        return version;
+      };
+
+      it('patches a description the judge never sees', async () => {
+        expect(await bumpFor({ description: 'Sharper tone' })).toBe('1.0.1');
+      });
+
+      it('takes a minor when the rubric changes but the scores still line up', async () => {
+        expect(
+          await bumpFor({ judge: { ...JUDGE, prompt: 'Rate {{{agent_response}}} hard' } })
+        ).toBe('1.1.0');
+      });
+
+      it('takes a minor when scoring criteria change', async () => {
+        expect(
+          await bumpFor({
+            judge: {
+              ...JUDGE,
+              output: { scores: [{ name: 'tone', type: 'number', description: 'Warmth' }] },
+            },
+          })
+        ).toBe('1.1.0');
+      });
+
+      it('takes a major when a score is added, since earlier runs lack it', async () => {
+        expect(
+          await bumpFor({
+            judge: {
+              ...JUDGE,
+              output: {
+                scores: [
+                  { name: 'tone', type: 'number' },
+                  { name: 'clarity', type: 'number' },
+                ],
+              },
+            },
+          })
+        ).toBe('2.0.0');
+      });
+
+      it('takes a major when a score changes type', async () => {
+        expect(
+          await bumpFor({
+            judge: {
+              ...JUDGE,
+              output: {
+                scores: [
+                  {
+                    name: 'tone',
+                    type: 'categorical',
+                    labels: [
+                      { value: 'warm', score: 1 },
+                      { value: 'cold', score: 0 },
+                    ],
+                  },
+                ],
+              },
+            },
+          })
+        ).toBe('2.0.0');
+      });
+
+      it('takes a major when a label is rescored, which moves the scale', async () => {
+        const { client } = createClient();
+        const categorical: LlmJudgeConfig = {
+          ...JUDGE,
+          output: {
+            scores: [
+              {
+                name: 'tone',
+                type: 'categorical',
+                labels: [
+                  { value: 'warm', score: 1 },
+                  { value: 'cold', score: 0 },
+                ],
+              },
+            ],
+          },
+        };
+        await client.create({ name: 'tone', description: 'Tone', judge: categorical });
+
+        const { version } = await client.update('tone', {
+          judge: {
+            ...categorical,
+            output: {
+              scores: [
+                {
+                  name: 'tone',
+                  type: 'categorical',
+                  labels: [
+                    { value: 'warm', score: 1 },
+                    { value: 'cold', score: 0.25 },
+                  ],
+                },
+              ],
+            },
+          },
+        });
+
+        expect(version).toBe('2.0.0');
+      });
+
+      it('takes a major when the required evidence changes', async () => {
+        expect(await bumpFor({ judge: { ...JUDGE, evidence: ['input', 'response'] } })).toBe(
+          '2.0.0'
+        );
+      });
+
+      it('takes a major when an example must supply a new reference key', async () => {
+        expect(
+          await bumpFor({
+            judge: {
+              ...JUDGE,
+              prompt: 'Rate {{{agent_response}}} against {{{expected}}}',
+              reference_data_keys: ['expected'],
+            },
+          })
+        ).toBe('2.0.0');
+      });
+
+      it('leaves the scale alone when scores are only reordered', async () => {
+        const { client } = createClient();
+        const twoScores: LlmJudgeConfig = {
+          ...JUDGE,
+          output: {
+            scores: [
+              { name: 'tone', type: 'number' },
+              { name: 'clarity', type: 'number' },
+            ],
+          },
+        };
+        await client.create({ name: 'tone', description: 'Tone', judge: twoScores });
+
+        const { version } = await client.update('tone', {
+          judge: {
+            ...twoScores,
+            output: {
+              scores: [
+                { name: 'clarity', type: 'number' },
+                { name: 'tone', type: 'number' },
+              ],
+            },
+          },
+        });
+
+        expect(version).toBe('1.1.0');
+      });
+
+      it('resets the lower levels on a major', async () => {
+        const { client } = createClient();
+        await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+        await client.update('tone', { description: 'Sharper tone' });
+        await client.update('tone', { judge: { ...JUDGE, prompt: 'Rate {{{agent_response}}}!' } });
+
+        const { version } = await client.update('tone', {
+          judge: { ...JUDGE, evidence: ['input', 'response'] },
+        });
+
+        expect(version).toBe('2.0.0');
+      });
+    });
+
+    it('leaves the history alone when the update changes nothing', async () => {
+      const { client, docs } = createClient();
+      const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      const sizeAfterCreate = docs.size;
+
+      const unchanged = await client.update('tone', { description: 'Tone', judge: JUDGE });
+
+      expect(unchanged.version).toBe('1.0.0');
+      expect(unchanged.id).toBe(created.id);
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('treats an update that omits every field as a no-op', async () => {
+      const { client, docs } = createClient();
+      await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      const sizeAfterCreate = docs.size;
+
+      await expect(client.update('tone', {})).resolves.toEqual(
+        expect.objectContaining({ version: '1.0.0' })
+      );
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('treats an omitted reference_data_keys and an empty one as the same judge', async () => {
+      const { client, docs } = createClient();
+      const { reference_data_keys: _omitted, ...judgeWithoutKeys } = JUDGE;
+      await client.create({ name: 'tone', description: 'Tone', judge: judgeWithoutKeys });
+      const sizeAfterCreate = docs.size;
+
+      // The form always sends the key, so a definition created through the API would
+      // otherwise mint a version the first time anyone opened and saved it unchanged.
+      const unchanged = await client.update('tone', {
+        judge: { ...judgeWithoutKeys, reference_data_keys: [] },
+      });
+
+      expect(unchanged.version).toBe('1.0.0');
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('ignores the order of evidence, which is a set of requirements', async () => {
+      const { client, docs } = createClient();
+      await client.create({
+        name: 'tone',
+        description: 'Tone',
+        judge: { ...JUDGE, evidence: ['input', 'response'] },
+      });
+      const sizeAfterCreate = docs.size;
+
+      const unchanged = await client.update('tone', {
+        judge: { ...JUDGE, evidence: ['response', 'input'] },
+      });
+
+      expect(unchanged.version).toBe('1.0.0');
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('treats a blank score description as no description', async () => {
+      const { client, docs } = createClient();
+      await client.create({
+        name: 'tone',
+        description: 'Tone',
+        judge: {
+          ...JUDGE,
+          output: { scores: [{ name: 'tone', type: 'number', description: '  ' }] },
+        },
+      });
+      const sizeAfterCreate = docs.size;
+
+      // The form omits a blank description, so it would otherwise read as a change.
+      const unchanged = await client.update('tone', {
+        judge: { ...JUDGE, output: { scores: [{ name: 'tone', type: 'number' }] } },
+      });
+
+      expect(unchanged.version).toBe('1.0.0');
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('still writes when a score description changes in substance', async () => {
+      const { client } = createClient();
+      await client.create({
+        name: 'tone',
+        description: 'Tone',
+        judge: { ...JUDGE, output: { scores: [{ name: 'tone', type: 'number' }] } },
+      });
+
+      const updated = await client.update('tone', {
+        judge: {
+          ...JUDGE,
+          output: { scores: [{ name: 'tone', type: 'number', description: 'Be strict' }] },
+        },
+      });
+
+      expect(updated.version).toBe('1.1.0');
+    });
+
+    it('still writes when the evidence set itself changes', async () => {
+      const { client } = createClient();
+      await client.create({
+        name: 'tone',
+        description: 'Tone',
+        judge: { ...JUDGE, evidence: ['response'] },
+      });
+
+      const updated = await client.update('tone', {
+        judge: { ...JUDGE, evidence: ['response', 'steps'] },
+      });
+
+      // Major: an example that satisfied the old evidence set may not satisfy this one.
+      expect(updated.version).toBe('2.0.0');
+    });
+
+    it('still writes when only the judge config changes', async () => {
+      const { client } = createClient();
+      await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+
+      const updated = await client.update('tone', {
+        judge: { ...JUDGE, prompt: 'Rate {{{agent_response}}} strictly.' },
+      });
+
+      expect(updated.version).toBe('1.1.0');
     });
 
     it('carries omitted fields forward from the version it read', async () => {
@@ -378,14 +668,68 @@ describe('EvaluatorDefinitionClient', () => {
       expect(updated.updated_at).toBe(updated.created_at);
     });
 
+    it('reapplies onto a concurrent edit that derived a different level', async () => {
+      const { client, docs, index } = createClient();
+      const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      const racingJudge: LlmJudgeConfig = { ...JUDGE, evidence: ['input', 'response'] };
+
+      // Two writers from 1.0.0: this one patches the description, the other takes a major for
+      // changing the evidence. Their ids differ, so nothing collides and both writes land.
+      index.mockImplementationOnce(async (params: Record<string, unknown>) => {
+        docs.set(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', '2.0.0'), {
+          ...docs.get(created.id)!,
+          version: '2.0.0',
+          judge: racingJudge,
+          created_at: '2126-01-01T00:00:00.000Z',
+        });
+        docs.set(params.id as string, params.document as EvaluatorStorageProperties);
+        return { result: 'created' };
+      });
+
+      const updated = await client.update('tone', { description: 'Sharper' });
+
+      // Landing below the head would have left the description out of what everything reads.
+      expect(updated.version).toBe('2.0.1');
+      expect(updated.description).toBe('Sharper');
+      expect(updated.judge).toEqual(racingJudge);
+      await expect(client.getLatest('tone')).resolves.toEqual(
+        expect.objectContaining({ version: '2.0.1', description: 'Sharper' })
+      );
+    });
+
+    it('settles without a new version when the head already carries the edit', async () => {
+      const { client, docs, index } = createClient();
+      const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
+      const ownJudge: LlmJudgeConfig = { ...JUDGE, evidence: ['input', 'response'] };
+
+      // The racing writer carried this judge forward onto a higher version, so re-reading
+      // finds the edit already applied and there is nothing left to write.
+      index.mockImplementationOnce(async (params: Record<string, unknown>) => {
+        docs.set(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', '2.0.1'), {
+          ...docs.get(created.id)!,
+          version: '2.0.1',
+          judge: ownJudge,
+          created_at: '2126-01-01T00:00:00.000Z',
+        });
+        docs.set(params.id as string, params.document as EvaluatorStorageProperties);
+        return { result: 'created' };
+      });
+
+      const updated = await client.update('tone', { judge: ownJudge });
+
+      expect(updated.version).toBe('2.0.1');
+      expect(docs.has(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', '2.0.2'))).toBe(false);
+    });
+
     it('bumps past a version another writer took first', async () => {
       const { client, docs, index } = createClient();
       const created = await client.create({ name: 'tone', description: 'Tone', judge: JUDGE });
 
       const racingJudge: LlmJudgeConfig = { ...JUDGE, prompt: 'Prompt from the racing update' };
 
-      // A racing update lands 1.1.0 between this call's read and its write, so
-      // the write conflicts and the retry has to re-read to find 1.2.0 free.
+      // A racing update lands 1.1.0 between this call's read and its write, so the write
+      // conflicts and the retry has to re-read. This call only edits the description, so
+      // it patches the version it finds: 1.1.1.
       index.mockImplementationOnce(async () => {
         docs.set(getEvaluatorDefinitionId(DEFAULT_SPACE_ID, 'tone', '1.1.0'), {
           ...docs.get(created.id)!,
@@ -398,7 +742,7 @@ describe('EvaluatorDefinitionClient', () => {
 
       const updated = await client.update('tone', { description: 'Sharper' });
 
-      expect(updated.version).toBe('1.2.0');
+      expect(updated.version).toBe('1.1.1');
       // The retry re-read instead of reusing what it had: the judge it carried
       // forward is the racing update's, not the one it first saw.
       expect(updated.judge).toEqual(racingJudge);
@@ -454,10 +798,10 @@ describe('EvaluatorDefinitionClient', () => {
         await client.update('tone', { description: `v${bump + 2}` });
       }
 
-      // `1.10.0` sorts below `1.9.0` as a keyword, so only semver ordering
+      // `1.0.10` sorts below `1.0.9` as a keyword, so only semver ordering
       // returns the version that was actually written last.
       await expect(client.getLatest('tone')).resolves.toEqual(
-        expect.objectContaining({ version: '1.10.0' })
+        expect.objectContaining({ version: '1.0.10' })
       );
     });
 
@@ -480,7 +824,7 @@ describe('EvaluatorDefinitionClient', () => {
 
       await expect(client.listLatest()).resolves.toEqual([
         expect.objectContaining({ name: 'brevity', version: '1.0.0' }),
-        expect.objectContaining({ name: 'tone', version: '1.1.0' }),
+        expect.objectContaining({ name: 'tone', version: '1.0.1' }),
       ]);
     });
 
@@ -510,7 +854,7 @@ describe('EvaluatorDefinitionClient', () => {
       await client.update('tone', { description: 'v2' });
 
       await expect(client.listVersions('tone')).resolves.toEqual([
-        expect.objectContaining({ version: '1.1.0' }),
+        expect.objectContaining({ version: '1.0.1' }),
         expect.objectContaining({ version: '1.0.0' }),
       ]);
       expect(search).toHaveBeenLastCalledWith(
@@ -723,7 +1067,7 @@ describe('EvaluatorDefinitionClient', () => {
 
       await expect(client.delete('tone', { version: '1.0.0' })).resolves.toEqual({ deleted: 1 });
       await expect(client.listVersions('tone')).resolves.toEqual([
-        expect.objectContaining({ version: '1.1.0' }),
+        expect.objectContaining({ version: '1.0.1' }),
       ]);
     });
 

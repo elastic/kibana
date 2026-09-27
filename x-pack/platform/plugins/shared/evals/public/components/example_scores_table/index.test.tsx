@@ -28,6 +28,7 @@ const buildScore = ({
   evaluatorMetadata,
   evaluatorTraceId,
   evaluatorModelId = 'evaluator-model-1',
+  evaluatorVersion,
   repetitionIndex = 0,
 }: {
   timestamp?: string;
@@ -39,6 +40,7 @@ const buildScore = ({
   evaluatorMetadata?: Record<string, unknown> | null;
   evaluatorTraceId?: string | null;
   evaluatorModelId?: string;
+  evaluatorVersion?: string;
   repetitionIndex?: number;
 } = {}): EvaluationExperimentDatasetExample['scores'][number] => ({
   '@timestamp': timestamp,
@@ -63,6 +65,7 @@ const buildScore = ({
     explanation: evaluatorExplanation,
     metadata: evaluatorMetadata,
     trace_id: evaluatorTraceId,
+    version: evaluatorVersion,
     model: evaluatorModelId ? { id: evaluatorModelId } : undefined,
   },
   metadata: {
@@ -289,6 +292,43 @@ describe('ExampleScoresTable', () => {
     expect(screen.getByText('PARTIAL')).toBeInTheDocument();
     expect(screen.getByText('judged by openai-gpt-5.6-luna')).toBeInTheDocument();
     expect(screen.getByText('judged by google-gemini-3.5-flash')).toBeInTheDocument();
+  });
+
+  describe('evaluator version', () => {
+    const buildVersionedScores = (versions: [string?, string?, string?]) => [
+      buildScore({ evaluatorName: 'correctness.factuality', evaluatorVersion: versions[0] }),
+      buildScore({ evaluatorName: 'correctness.relevance', evaluatorVersion: versions[1] }),
+      buildScore({ evaluatorName: 'groundedness', evaluatorVersion: versions[2] }),
+    ];
+
+    it('names the definition once per evaluator, not once per sub-score', () => {
+      renderTable([buildExample('example-1', buildVersionedScores(['1.2.0', '1.2.0', '2.0.0']))]);
+
+      // `correctness` produced two sub-scores from one definition, so it is labelled once.
+      expect(screen.getAllByText('v1.2.0')).toHaveLength(1);
+      expect(screen.getAllByText('v2.0.0')).toHaveLength(1);
+    });
+
+    it('falls back to per-score labels when an edit landed mid-run', () => {
+      renderTable([buildExample('example-1', buildVersionedScores(['1.2.0', '1.3.0', '2.0.0']))]);
+
+      expect(screen.getByText('v1.2.0')).toBeInTheDocument();
+      expect(screen.getByText('v1.3.0')).toBeInTheDocument();
+    });
+
+    it('does not attribute an unversioned score to a sibling version', () => {
+      renderTable([buildExample('example-1', buildVersionedScores([undefined, '1.3.0', '2.0.0']))]);
+
+      // The group is mixed, so the version that is present cannot stand for the whole group.
+      expect(screen.getByText('v1.3.0')).toBeInTheDocument();
+      expect(screen.queryByText('v1.2.0')).not.toBeInTheDocument();
+    });
+
+    it('says nothing for scores written before the version was recorded', () => {
+      renderTable([buildExample('example-1', buildVersionedScores([]))]);
+
+      expect(screen.queryByText(/^v\d/)).not.toBeInTheDocument();
+    });
   });
 
   it('shows lazy-detail errors without hiding summary scores', () => {

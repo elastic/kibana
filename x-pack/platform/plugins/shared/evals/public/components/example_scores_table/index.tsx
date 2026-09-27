@@ -153,18 +153,24 @@ const splitScoreName = (scoreName: string): { evaluatorName: string; scoreLabel:
   };
 };
 
+/**
+ * A missing value counts as its own entry rather than being dropped, so a group that mixes
+ * scores carrying the attribute with scores that lack it cannot collapse onto the one value
+ * that happens to be present and label the others with it.
+ */
 const collectModelIds = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
-  new Set(
-    scores
-      .map((scoreDoc) => scoreDoc.evaluator.model?.id)
-      .filter((modelId): modelId is string => Boolean(modelId))
-  );
+  new Set(scores.map((scoreDoc) => scoreDoc.evaluator.model?.id ?? ''));
+
+const collectVersions = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
+  new Set(scores.map((scoreDoc) => scoreDoc.evaluator.version ?? ''));
 
 interface EvaluatorScoreGroup {
   evaluatorName: string;
   scores: EvaluationExperimentDatasetExample['scores'];
   /** Only set when the group's scores agree on one judge, so the group can label itself once. */
   sharedModelId?: string;
+  /** Only set when the group's scores agree on one definition, as they do outside a mid-run edit. */
+  sharedVersion?: string;
 }
 
 const groupScoresByEvaluator = (
@@ -184,9 +190,12 @@ const groupScoresByEvaluator = (
 
   return Array.from(groupsByName.values()).map((group) => {
     const [onlyModelId, ...otherModelIds] = collectModelIds(group.scores);
-    return otherModelIds.length === 0 && onlyModelId
-      ? { ...group, sharedModelId: onlyModelId }
-      : group;
+    const [onlyVersion, ...otherVersions] = collectVersions(group.scores);
+    return {
+      ...group,
+      ...(otherModelIds.length === 0 && onlyModelId ? { sharedModelId: onlyModelId } : {}),
+      ...(otherVersions.length === 0 && onlyVersion ? { sharedVersion: onlyVersion } : {}),
+    };
   });
 };
 
@@ -207,6 +216,18 @@ const JudgeLabel: React.FC<{ modelId: string }> = ({ modelId }) => (
   <EuiText size="xs" color="subdued">
     <em>{i18n.getJudgedByLabel(modelId)}</em>
   </EuiText>
+);
+
+/**
+ * Which definition produced the score. A user-defined evaluator can be edited after a run, so
+ * without this the numbers cannot be traced back to what was actually asked of the judge.
+ */
+const VersionLabel: React.FC<{ version: string }> = ({ version }) => (
+  <EuiToolTip content={i18n.getEvaluatorVersionTooltip(version)}>
+    <EuiBadge color="hollow" tabIndex={0}>
+      {i18n.getEvaluatorVersionLabel(version)}
+    </EuiBadge>
+  </EuiToolTip>
 );
 
 interface ExampleDetailsContext {
@@ -396,8 +417,9 @@ const EvaluatorScoreAccordion: React.FC<{
   exampleId: string;
   scoreLabel: string;
   judgeModelId?: string;
+  version?: string;
   onTraceClick: (traceId: string) => void;
-}> = ({ score, exampleId, scoreLabel, judgeModelId, onTraceClick }) => {
+}> = ({ score, exampleId, scoreLabel, judgeModelId, version, onTraceClick }) => {
   const { evaluator } = score;
   const accordionId = [exampleId, evaluator.name, score.task.repetition_index].join('-');
 
@@ -418,6 +440,11 @@ const EvaluatorScoreAccordion: React.FC<{
           <EuiBadge color={getVerdictBadgeColor(evaluator.label, evaluator.score)}>
             {evaluator.label}
           </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {version && (
+        <EuiFlexItem grow={false}>
+          <VersionLabel version={version} />
         </EuiFlexItem>
       )}
       {judgeModelId && (
@@ -490,7 +517,7 @@ const EvaluatorScoreGroupBlock: React.FC<{
   onTraceClick: (traceId: string) => void;
 }> = ({ group, exampleId, showJudge, onTraceClick }) => {
   const { euiTheme } = useEuiTheme();
-  const { evaluatorName, scores, sharedModelId } = group;
+  const { evaluatorName, scores, sharedModelId, sharedVersion } = group;
 
   // A single-score evaluator needs no heading: the score already carries the evaluator name.
   if (scores.length === 1) {
@@ -501,6 +528,7 @@ const EvaluatorScoreGroupBlock: React.FC<{
         exampleId={exampleId}
         scoreLabel={score.evaluator.name}
         judgeModelId={showJudge ? score.evaluator.model?.id : undefined}
+        version={score.evaluator.version}
         onTraceClick={onTraceClick}
       />
     );
@@ -508,9 +536,18 @@ const EvaluatorScoreGroupBlock: React.FC<{
 
   return (
     <div css={{ marginBottom: euiTheme.size.s }}>
-      <EuiText size="xs" color="subdued">
-        <strong>{evaluatorName}</strong>
-      </EuiText>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <strong>{evaluatorName}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        {sharedVersion && (
+          <EuiFlexItem grow={false}>
+            <VersionLabel version={sharedVersion} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       {showJudge && sharedModelId && <JudgeLabel modelId={sharedModelId} />}
       {/* The rule marks where the evaluator's scores end, so the next top-level score is not
           mistaken for one of them. */}
@@ -531,6 +568,8 @@ const EvaluatorScoreGroupBlock: React.FC<{
               // The group heading already names a shared judge; only per-score judges are left.
               showJudge && !sharedModelId ? score.evaluator.model?.id : undefined
             }
+            // Likewise: only shown here when a mid-run edit split the group across versions.
+            version={sharedVersion ? undefined : score.evaluator.version}
             onTraceClick={onTraceClick}
           />
         ))}
