@@ -5,27 +5,32 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type {
+  BulkUpdateRulesParams,
+  BulkUpdateRulesResult,
+  RulesClient,
+} from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
+import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
+import type { RuleParams } from '../../../../../rule_schema';
 import { convertRuleResponseToAlertingRule } from '../../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../../mergers/apply_rule_update';
-import { toggleRuleEnabledOnUpdate } from '../../utils';
-import { createRuleImportErrorObject, isRuleImportError } from './errors';
+import { createRuleImportErrorObject } from './errors';
 import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { RULE_IMPORT_BULK_UPDATE_CONCURRENCY } from '../../../../api/constants';
 import type {
   ImportRuleSuccess,
   ImportRuleError,
   ImportableRuleData,
+  ImportRulesOptions,
   ImportRulesResult,
 } from './types';
 
 interface OverwriteRulesParams {
   rules: ImportableRuleData[];
   existingRules: Record<string, RuleResponse>;
+  matchingAssetsByRuleId: Record<string, PrebuiltRuleAsset>;
+  options: ImportRulesOptions;
   deps: OverwriteRulesDeps;
 }
 
@@ -33,63 +38,176 @@ interface OverwriteRulesDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export async function overwriteRules({
   rules,
   existingRules,
+  matchingAssetsByRuleId,
+  options,
   deps,
 }: OverwriteRulesParams): Promise<ImportRulesResult> {
-  const { actionsClient, rulesClient, prebuiltRuleAssetClient, changeTracking } = deps;
+  const { actionsClient, rulesClient, prebuiltRuleAssetClient } = deps;
   const successes: ImportRuleSuccess[] = [];
   const errors: ImportRuleError[] = [];
+  const pending = new Map<string, ImportRuleSuccess>();
+  const bulkInputs: BulkUpdateRulesParams<RuleParams>['rules'] = [];
+  const toEnable: string[] = [];
+  const toDisable: string[] = [];
 
-  await pMap(
-    rules,
-    async ({ rule, immutable, ruleSource, exceptionsList }) => {
-      try {
-        const existingRule = existingRules[rule.rule_id];
-        let ruleWithUpdates = await applyRuleUpdate({
-          prebuiltRuleAssetClient,
-          existingRule,
-          // The rule must carry the checked exceptions list with references to
-          // non-existent exception lists removed and `id` fields pointing at
-          // the lists installed in this cluster.
-          ruleUpdate: { ...rule, exceptions_list: [...(exceptionsList ?? [])] },
-        });
-        // applyRuleUpdate prefers the existing rule's values for `rule_source` and `immutable`, but we want to use the importing rule's calculated values
-        ruleWithUpdates = { ...ruleWithUpdates, rule_source: ruleSource, immutable };
+  for (const { rule, immutable, ruleSource, exceptionsList } of rules) {
+    const existingRule = existingRules[rule.rule_id];
 
-        const updatedRule = await rulesClient.update({
-          id: existingRule.id,
-          data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
-          changeTracking,
-        });
+    try {
+      let updated = await applyRuleUpdate({
+        prebuiltRuleAssetClient,
+        existingRule,
+        // The rule must carry the checked exceptions list with references to
+        // non-existent exception lists removed and `id` fields pointing at
+        // the lists installed in this cluster.
+        ruleUpdate: { ...rule, exceptions_list: [...(exceptionsList ?? [])] },
+        matchingAsset: matchingAssetsByRuleId[rule.rule_id] ?? null, // null = already looked, missing
+      });
+      // applyRuleUpdate prefers the existing rule's values for `rule_source` and `immutable`, but we want to use the importing rule's calculated values
+      updated = { ...updated, rule_source: ruleSource, immutable };
 
-        await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);
-
-        successes.push({
-          rule_id: updatedRule.params.ruleId,
-          telemetry: {
-            id: existingRule.id,
-            type: rule.type,
-            rule_source: ruleSource,
-          },
-        });
-      } catch (err) {
-        errors.push(
-          isRuleImportError(err)
-            ? err
-            : createRuleImportErrorObject({
-                ruleId: rule.rule_id,
-                message: err?.message ?? 'unknown error',
-              })
-        );
+      const requestedEnabled = rule.enabled ?? existingRule.enabled;
+      if (!existingRule.enabled && requestedEnabled) {
+        toEnable.push(existingRule.id);
+      } else if (existingRule.enabled && !requestedEnabled) {
+        toDisable.push(existingRule.id);
       }
-    },
-    { concurrency: RULE_IMPORT_BULK_UPDATE_CONCURRENCY }
-  );
 
+      pending.set(existingRule.id, {
+        rule_id: rule.rule_id,
+        telemetry: {
+          id: existingRule.id,
+          type: rule.type,
+          rule_source: ruleSource,
+        },
+      });
+      bulkInputs.push({
+        id: existingRule.id,
+        data: convertRuleResponseToAlertingRule(updated, actionsClient),
+      });
+    } catch (e) {
+      errors.push(
+        createRuleImportErrorObject({
+          ruleId: rule.rule_id,
+          message: e instanceof Error ? e.message : String(e),
+        })
+      );
+    }
+  }
+
+  if (bulkInputs.length === 0) {
+    return { successes, errors };
+  }
+
+  let result: BulkUpdateRulesResult;
+  try {
+    result = await rulesClient.bulkUpdateRules<RuleParams>({
+      rules: bulkInputs,
+      batchSize: options.batchSize,
+      allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
+      changeTracking: options.changeTracking,
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    for (const source of pending.values()) {
+      errors.push(createRuleImportErrorObject({ ruleId: source.rule_id, message }));
+    }
+    return { successes, errors };
+  }
+
+  const { successfulIds, errors: bulkErrors } = result;
+  const successIds = new Set(successfulIds);
+  const { errors: toggleErrors, failedIds } = await toggleState({
+    rulesClient,
+    pending,
+    enableIds: toEnable.filter((id) => successIds.has(id)),
+    disableIds: toDisable.filter((id) => successIds.has(id)),
+  });
+
+  for (const id of successfulIds) {
+    const source = pending.get(id);
+    if (source != null && !failedIds.has(id)) {
+      successes.push(source);
+    }
+  }
+
+  for (const err of bulkErrors) {
+    const failed = pending.get(err.rule.id);
+    if (failed != null) {
+      errors.push(
+        createRuleImportErrorObject({
+          ruleId: failed.rule_id,
+          message: err.message,
+        })
+      );
+    }
+  }
+
+  errors.push(...toggleErrors);
   return { successes, errors };
 }
+
+const toggleState = async ({
+  rulesClient,
+  pending,
+  enableIds,
+  disableIds,
+}: {
+  rulesClient: RulesClient;
+  pending: Map<string, ImportRuleSuccess>;
+  enableIds: string[];
+  disableIds: string[];
+}): Promise<{ errors: ImportRuleError[]; failedIds: Set<string> }> => {
+  const errors: ImportRuleError[] = [];
+  const failedIds = new Set<string>();
+  const fail = (id: string, message: string) => {
+    if (failedIds.has(id)) {
+      return;
+    }
+    failedIds.add(id);
+    const source = pending.get(id);
+    if (source != null) {
+      errors.push(createRuleImportErrorObject({ ruleId: source.rule_id, message }));
+    }
+  };
+
+  if (enableIds.length > 0) {
+    try {
+      const { errors: enableErrors, taskIdsFailedToBeEnabled } = await rulesClient.bulkEnableRules({
+        ids: enableIds,
+      });
+      for (const err of enableErrors) {
+        fail(err.rule.id, err.message);
+      }
+      for (const id of taskIdsFailedToBeEnabled) {
+        fail(id, 'Failed to enable task');
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      for (const id of enableIds) {
+        fail(id, message);
+      }
+    }
+  }
+
+  if (disableIds.length > 0) {
+    try {
+      const { errors: disableErrors } = await rulesClient.bulkDisableRules({ ids: disableIds });
+      for (const err of disableErrors) {
+        fail(err.rule.id, err.message);
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      for (const id of disableIds) {
+        fail(id, message);
+      }
+    }
+  }
+
+  return { errors, failedIds };
+};
