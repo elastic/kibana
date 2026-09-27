@@ -151,6 +151,29 @@ describe('createChartTypeVsIntentEvaluator', () => {
     expect(result.label).toBe('partial');
   });
 
+  it('abstains when the judge fails on some visualizations, even if the rest satisfy', async () => {
+    let call = 0;
+    const flaky: ChartIntentJudge = async (args) => {
+      if (call++ === 0) {
+        return satisfies(args);
+      }
+      throw new Error('no tool call');
+    };
+
+    const result = await evaluate({
+      gold: { chartType: 'xy' },
+      judge: flaky,
+      visualizations: [
+        { esql: 'FROM a', chartType: 'xy' },
+        { esql: 'FROM a', chartType: 'xy' },
+      ],
+    });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('judge-failure');
+    expect(result.explanation).toContain('1/2');
+  });
+
   it('abstains with a null score when the judge throws', async () => {
     const failing: ChartIntentJudge = async () => {
       throw new Error('no tool call');

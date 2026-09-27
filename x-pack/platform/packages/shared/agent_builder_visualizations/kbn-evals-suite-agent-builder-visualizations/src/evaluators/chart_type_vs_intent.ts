@@ -300,22 +300,18 @@ export function createChartTypeVsIntentEvaluator<
       );
 
       // A judge that returns no verdict is an infrastructure failure, not an agent
-      // failure. Verdicts that did come back are scored; only when none did does the
-      // evaluator abstain, as the others do for gold-side problems.
+      // failure. Scoring only the verdicts that came back would report incomplete
+      // judging as full agreement, so any failure makes the evaluator abstain.
       const judged = details.filter((detail) => detail.fallback === undefined);
       const judgeFailures = details.filter((detail) => detail.fallback !== undefined);
-      const failureSummary =
-        judgeFailures.length === 0
-          ? ''
-          : `Judge failed on ${judgeFailures.length}/${
-              details.length
-            } visualization(s): ${judgeFailures.map((detail) => detail.reason).join('; ')}`;
 
-      if (judged.length === 0) {
+      if (judgeFailures.length > 0) {
         return {
           score: null,
           label: 'judge-failure',
-          explanation: failureSummary,
+          explanation: `Judge failed on ${judgeFailures.length}/${
+            details.length
+          } visualization(s): ${judgeFailures.map((detail) => detail.reason).join('; ')}`,
           metadata: {
             gold,
             totalVisualizations: details.length,
@@ -332,14 +328,10 @@ export function createChartTypeVsIntentEvaluator<
       return {
         score,
         label: score === 1 ? 'match' : score === 0 ? 'mismatch' : 'partial',
-        explanation: [...judged.map((detail) => detail.reason), failureSummary]
-          .filter((part) => part.length > 0)
-          .join(' '),
+        explanation: judged.map((detail) => detail.reason).join(' '),
         metadata: {
           gold,
           satisfiedCount,
-          judgedVisualizations: judged.length,
-          judgeFailures: judgeFailures.length,
           totalVisualizations: details.length,
           visualizations: details,
           judgeVersion: CHART_TYPE_VS_INTENT_JUDGE_VERSION,
