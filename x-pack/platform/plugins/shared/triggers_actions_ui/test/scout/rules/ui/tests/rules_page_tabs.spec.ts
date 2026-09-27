@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule } from '../fixtures';
 
 const RULES_LIST_SUBJ = 'rulesList';
-const RULES_TAB_SUBJ = 'rulesTab';
-const LOGS_TAB_SUBJ = 'logsTab';
+const LOGS_LINK_SUBJ = 'rulesLogsLink';
 
 const RULES_URL_RE = /\/app\/management\/insightsAndAlerting\/triggersActions(\/|$|\?|#)/;
 const LOGS_URL_RE = /\/app\/management\/insightsAndAlerting\/triggersActions\/logs(\/|$|\?|#)/;
@@ -32,31 +32,32 @@ test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, ()
     }
   });
 
-  test('navigate to the Rules and Logs tabs', async ({ page, browserAuth }) => {
+  test('navigate to the Rules list and Logs page', async ({ page, browserAuth, pageObjects }) => {
     await test.step('navigates to the Rules page', async () => {
       await browserAuth.loginAsAdmin();
       await page.gotoApp('rules');
       await page.waitForURL(RULES_URL_RE);
     });
 
-    await test.step('selects the Rules tab by default on load', async () => {
+    await test.step('selects the Rules list by default on load', async () => {
       expect(page.url()).toMatch(RULES_URL_RE);
       expect(page.url()).not.toMatch(LOGS_URL_RE);
       await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
     });
 
-    await test.step('shows the Logs tab when the user has permission', async () => {
-      await expect(page.testSubj.locator(LOGS_TAB_SUBJ)).toBeVisible();
+    await test.step('shows the Logs link in the app menu when the user has permission', async () => {
+      await pageObjects.appMenu.openOverflow();
+      await expect(page.testSubj.locator(LOGS_LINK_SUBJ)).toBeVisible();
     });
 
-    await test.step('navigates to the logs tab', async () => {
-      await page.testSubj.click(LOGS_TAB_SUBJ);
+    await test.step('navigates to Logs via the app menu', async () => {
+      await pageObjects.appMenu.clickItem(LOGS_LINK_SUBJ);
       await page.waitForURL(LOGS_URL_RE);
       expect(page.url()).toMatch(LOGS_URL_RE);
     });
 
     await test.step('navigates back to the rules list', async () => {
-      await page.testSubj.click(RULES_TAB_SUBJ);
+      await page.testSubj.click(APP_HEADER_TEST_SUBJECTS.back);
       await page.waitForURL(RULES_URL_RE);
       expect(page.url()).not.toMatch(LOGS_URL_RE);
       await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();

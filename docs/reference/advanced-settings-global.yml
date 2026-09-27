@@ -46,15 +46,12 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: preview 9.5+
+          stack: experimental =9.5, removed 9.6+
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          serverless: preview
-        note: |
-          :applies_to: security: ga
-          This setting is unavailable on the [Elastic AI SOC Engine (EASE)](docs-content://solutions/security/ai/ease/ease-intro.md) Security project type.
+          serverless: unavailable
 
   - group: Custom branding
     id: kibana-custom-branding-settings

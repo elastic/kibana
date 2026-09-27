@@ -24,7 +24,6 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import {
-  ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_RULE_LIBRARY_APP_ID,
@@ -40,7 +39,6 @@ import { RuleTemplatesApi } from './services/rule_templates_api';
 import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
-import { disableAlertingManagementUi } from './lib/disable_management_ui';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
@@ -315,16 +313,6 @@ const pluginModule = new ContainerModule(({ bind }) => {
         minimumScheduleInterval,
         container: diContainer,
       });
-
-      const alertingEnabled = coreStart.settings.globalClient.get<boolean>(
-        ALERTING_V2_ENABLED_SETTING_ID,
-        false
-      );
-
-      if (!alertingEnabled) {
-        disableAlertingManagementUi(alertingSection);
-        return;
-      }
 
       const agentBuilderToken = PluginStart('agentBuilder');
       if (diContainer.isBound(agentBuilderToken)) {

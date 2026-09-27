@@ -43,12 +43,6 @@ describe('createRuleManagementSkill', () => {
     expect(skill.experimental).toBe(true);
   });
 
-  it('gates the skill on the alerting:v2:enabled advanced setting', () => {
-    const skill = createRuleManagementSkill(createDeps());
-
-    expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
-  });
-
   it('is unavailable when the current space has not enabled Alerting V2 experimental features', async () => {
     const skill = createRuleManagementSkill(createDeps());
     const uiSettings = { get: jest.fn().mockResolvedValue(false) };

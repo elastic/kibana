@@ -26,7 +26,6 @@ export function TransformNavigationProvider({ getPageObjects, getService }: FtrP
 
     async navigateToRules() {
       await pageObjects.common.navigateToApp('rules');
-      await testSubjects.click('rulesTab');
       await testSubjects.existOrFail('rulesList');
     },
   };

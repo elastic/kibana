@@ -171,7 +171,7 @@ export const createAiNavigationTree = (
             },
           ],
         },
-        ...getAlertingV2ManagementNavPanel(core),
+        ...getAlertingV2ManagementNavPanel(),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           children: [

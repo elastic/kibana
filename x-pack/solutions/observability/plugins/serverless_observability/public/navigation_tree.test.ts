@@ -29,7 +29,6 @@ describe('Navigation Tree', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
-    core.settings.globalClient.get = <T>(_key: string) => false as T;
   });
 
   it('should generate tree with overview', () => {
@@ -165,8 +164,6 @@ describe('Navigation Tree', () => {
   });
 
   it('uses a single Alerts link to classic Observability alerts even when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'

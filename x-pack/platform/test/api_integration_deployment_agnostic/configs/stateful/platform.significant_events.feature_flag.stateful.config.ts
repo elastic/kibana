@@ -11,12 +11,9 @@ import { createStatefulFeatureFlagTestConfig } from '../../default_configs/featu
 export default createStatefulFeatureFlagTestConfig({
   testFiles: [require.resolve('./platform.significant_events.feature_flag.index.ts')],
   // Significant events is gated behind this flag (defaults to false); force it on for these suites.
-  // The Alerting v2 override exposes its HTTP API for rule lifecycle assertions; Significant
-  // Events provisioning itself uses the programmatic client and does not depend on this setting.
-  kbnServerArgs: [
-    `--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`,
-    '--uiSettings.globalOverrides.alerting:v2:enabled=true',
-  ],
+  // Alerting v2's HTTP API (used for rule lifecycle assertions) is on by default wherever the
+  // plugin loads; Significant Events provisioning itself uses the programmatic client.
+  kbnServerArgs: [`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`],
   junit: {
     reportName: 'Platform Stateful - Streams Significant Events API Integration Tests',
   },

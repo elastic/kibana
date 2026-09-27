@@ -7,23 +7,12 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { CreateRuleData, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { RuleLibraryPage } from './rule_library_page';
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
-}));
-
-jest.mock('@kbn/app-header', () => ({
-  APP_HEADER_TEST_SUBJECTS: { title: 'appHeaderTitle' },
-  AppHeader: ({ title }: { title: string }) => (
-    <div>
-      <h1 data-test-subj="appHeaderTitle">{title}</h1>
-      <span data-test-subj="alertingV2ExperimentalBadge" />
-    </div>
-  ),
 }));
 
 const mockGetRuleTemplate = jest.fn();
@@ -94,13 +83,6 @@ describe('RuleLibraryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetRuleTemplate.mockResolvedValue(mockTemplate);
-  });
-
-  it('renders the page title and experimental badge', () => {
-    renderPage();
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rule library');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('renders the rule library list', () => {

@@ -152,7 +152,7 @@ test.describe('Classic (v1) Rules host-aware URLs', { tag: tags.stateful.classic
     });
   });
 
-  test('rules and logs tab switches stay on Stack Management', async ({
+  test('rules and logs navigation stays on Stack Management', async ({
     kbnUrl,
     page,
     pageObjects,
@@ -161,16 +161,16 @@ test.describe('Classic (v1) Rules host-aware URLs', { tag: tags.stateful.classic
     await rules.goto(kbnUrl);
     await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
 
-    await test.step('switch to logs and back to rules', async () => {
-      await rules.clickLogsTab();
+    await test.step('navigate to logs and back to rules', async () => {
+      await rules.openLogsFromMoreMenu();
       await expectManagementHost(page, CLASSIC_RULES_LOGS_URL_RE);
 
-      await rules.clickRulesTab();
+      await rules.clickBack();
       await expectManagementHost(page, CLASSIC_RULES_LIST_URL_RE);
     });
 
     await test.step('browser back and forward keep the management host', async () => {
-      await rules.clickLogsTab();
+      await rules.openLogsFromMoreMenu();
       await expectManagementHost(page, CLASSIC_RULES_LOGS_URL_RE);
 
       await page.goBack();

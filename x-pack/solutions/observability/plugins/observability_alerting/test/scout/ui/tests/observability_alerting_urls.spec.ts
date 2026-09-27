@@ -15,10 +15,6 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/test/scout/common/ui/fixtures/helpers';
 import { test } from '../fixtures';
 import {
-  setAlertingV2EnabledSetting,
-  unsetAlertingV2EnabledSetting,
-} from '../fixtures/alerting_v2_setting';
-import {
   MANAGEMENT_ALERTING_V2_URL_RE,
   MANAGEMENT_CLASSIC_RULES_URL_RE,
   OBSERVABILITY_ALERTING_SURFACES,
@@ -40,13 +36,8 @@ import {
 } from '../../../../public/constants';
 
 /*
- * Lives under the default Scout config (`test/scout/`) so
- * `alerting:v2:enabled` stays unpinned and can be flipped at runtime. Flag
- * on/off URL mounts, tab switches, and classic v1 host-aware coverage share
- * this one describe so they cannot run on parallel workers against the same
- * global setting (Scout `fullyParallel: false`). Scout allows only one
- * describe per file and forbids nesting. The dedicated `scout_alerting_v2`
- * config pins the setting on and cannot cover the flag-off case.
+ * URL mounts, tab switches, and classic v1 host-aware coverage share this one
+ * describe: Scout allows only one describe per file and forbids nesting.
  *
  * One test per URL so a redirect or title mismatch is isolated to that path.
  * Assert v1 page URLs only after in-page clicks (or browser back/forward),
@@ -77,7 +68,6 @@ test.describe(
     const templateName = `Scout v1 template ${templateId}`;
 
     test.beforeAll(async ({ apiServices, kbnClient }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
       const response = await apiServices.alerting.rules.create(
         makeEsQueryRule('scout-obs-v1-host-aware')
       );
@@ -91,9 +81,8 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
-      await setAlertingV2EnabledSetting(kbnClient, true);
     });
 
     test.afterAll(async ({ apiServices, kbnClient }) => {
@@ -108,32 +97,10 @@ test.describe(
       } catch {
         // beforeAll may have failed before the template was created
       }
-      await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
     for (const surface of OBSERVABILITY_ALERTING_SURFACES) {
-      test(`returns app not found for ${surface.name} (${surface.path}) when alerting v2 is disabled`, async ({
-        kbnClient,
-        log,
-        pageObjects,
-      }) => {
-        await unsetAlertingV2EnabledSetting(kbnClient);
-
-        const requested = pageObjects.observabilityAlerting.urlFor(surface.path);
-        log.debug(`[observability-alerting] requested ${requested}`);
-
-        const landed = await pageObjects.observabilityAlerting.goto(surface.path);
-        log.debug(`[observability-alerting] landed ${landed}`);
-
-        await expect(pageObjects.observabilityAlerting.appNotFoundPageContent).toBeVisible({
-          timeout: 30_000,
-        });
-      });
-
-      test(`loads ${surface.name} (${surface.path}) when alerting v2 is enabled`, async ({
-        log,
-        pageObjects,
-      }) => {
+      test(`loads ${surface.name} (${surface.path})`, async ({ log, pageObjects }) => {
         const requested = pageObjects.observabilityAlerting.urlFor(surface.path);
         log.debug(`[observability-alerting] requested ${requested}`);
 

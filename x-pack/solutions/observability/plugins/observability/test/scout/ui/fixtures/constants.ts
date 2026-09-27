@@ -13,7 +13,6 @@ export const SHORTER_TIMEOUT = 5000 as const;
  */
 export const RULES_SETTINGS_TEST_SUBJECTS = {
   // Rules List Page
-  RULE_PAGE_TAB: 'logsTab',
   RULES_SETTINGS_LINK: 'rulesSettingsLink',
   RULES_TABLE_CONTAINER: 'rulesListSection',
   RULES_TABLE: 'rulesList',
@@ -54,10 +53,10 @@ export const RULE_TYPE_MODAL_TEST_SUBJECTS = {
 } as const;
 
 /**
- * Constants for data-test-subj values used in logs tab tests
+ * Constants for data-test-subj values used in Logs page tests
  */
 export const LOGS_TAB_TEST_SUBJECTS = {
-  LOGS_TAB: 'logsTab',
+  RULES_LOGS_MENU_ITEM: 'rulesLogsLink',
   EVENT_LOG_TABLE: 'ruleEventLogListTable',
   RULE_DETAILS: 'appHeaderTitle',
 } as const;

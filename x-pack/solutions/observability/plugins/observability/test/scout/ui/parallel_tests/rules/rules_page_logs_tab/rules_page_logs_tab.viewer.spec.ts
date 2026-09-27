@@ -11,7 +11,7 @@ import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
 
 test.describe(
-  'Rules Page - Logs Tab',
+  'Rules Page - Logs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -19,35 +19,30 @@ test.describe(
       // Navigate to the rules list page
       await pageObjects.rulesPage.goto();
       // Verify we're on the rules page
-      await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
+      await expect(pageObjects.rulesPage.rulesTableContainer).toBeVisible();
     });
 
-    test('should navigate to logs tab and display event log table', async ({ pageObjects }) => {
-      // Click the logs tab
-      await pageObjects.rulesPage.clickLogsTab();
+    test('opens Logs from the More menu and displays the event log table', async ({
+      pageObjects,
+    }) => {
+      await pageObjects.rulesPage.openLogsFromMoreMenu();
 
       // Verify the event log table is visible
       await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
 
-      // Verify the tab is marked as active
-      await pageObjects.rulesPage.expectLogsTabActive();
+      await pageObjects.rulesPage.expectLogsPageActive();
     });
 
-    test('should load logs tab content when navigating directly via URL', async ({
-      pageObjects,
-    }) => {
-      // Navigate directly to logs tab via URL
-      await pageObjects.rulesPage.gotoLogsTab();
+    test('loads Logs content when navigating directly via URL', async ({ pageObjects }) => {
+      await pageObjects.rulesPage.gotoLogsPage();
 
       // Verify the event log table loads correctly
       await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
     });
 
-    test('should persist logs tab selection in URL', async ({ page, pageObjects }) => {
-      // Navigate to logs tab
-      await pageObjects.rulesPage.clickLogsTab();
+    test('navigates to the Logs URL from the More menu', async ({ page, pageObjects }) => {
+      await pageObjects.rulesPage.openLogsFromMoreMenu();
 
-      // Verify URL contains logs tab indicator
       const url = page.url();
       expect(url).toContain('logs');
     });
@@ -55,8 +50,7 @@ test.describe(
     test('should navigate to rule details when clicking on a rule in event logs', async ({
       pageObjects,
     }) => {
-      // Navigate to logs tab
-      await pageObjects.rulesPage.clickLogsTab();
+      await pageObjects.rulesPage.openLogsFromMoreMenu();
 
       // Wait for logs table to load
       await pageObjects.rulesPage.waitForLogsTableToLoad();

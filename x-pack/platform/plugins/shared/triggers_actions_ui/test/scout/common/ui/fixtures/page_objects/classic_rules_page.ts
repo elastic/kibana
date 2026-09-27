@@ -7,6 +7,7 @@
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { AppMenu } from '@kbn/scout';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 
 export const CLASSIC_RULES_LIST_URL_RE = new RegExp(`${triggersActionsRoute}/?(?:\\?|#|$)`);
@@ -37,8 +38,6 @@ export class ClassicRulesPage {
   public readonly esQueryRuleTypeOption: Locator;
   public readonly ruleForm: Locator;
   public readonly cancelButton: Locator;
-  public readonly rulesTab: Locator;
-  public readonly logsTab: Locator;
   public readonly searchField: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -55,8 +54,6 @@ export class ClassicRulesPage {
     this.esQueryRuleTypeOption = this.page.testSubj.locator('.es-query-SelectOption');
     this.ruleForm = this.page.testSubj.locator('ruleForm');
     this.cancelButton = this.page.testSubj.locator('rulePageFooterCancelButton');
-    this.rulesTab = this.page.testSubj.locator('rulesTab');
-    this.logsTab = this.page.testSubj.locator('logsTab');
     this.searchField = this.page.testSubj.locator('ruleSearchField');
   }
 
@@ -83,7 +80,6 @@ export class ClassicRulesPage {
 
   async openListAndSearch(kbnUrl: KibanaUrl, ruleName: string): Promise<void> {
     await this.goto(kbnUrl);
-    await this.rulesTab.click();
     await this.rulesList.waitFor({ state: 'visible' });
     const clearFilters = this.page.testSubj.locator('rules-list-clear-filter');
     if (await clearFilters.isVisible()) {
@@ -131,15 +127,12 @@ export class ClassicRulesPage {
     await this.cancelButton.click();
   }
 
-  async clickLogsTab(): Promise<void> {
-    await this.logsTab.click();
+  /**
+   * Navigates to Logs via the app menu's "Logs" item.
+   */
+  async openLogsFromMoreMenu(): Promise<void> {
+    await new AppMenu(this.page).clickItem('rulesLogsLink');
     await this.page.waitForURL(CLASSIC_RULES_LOGS_URL_RE);
-  }
-
-  async clickRulesTab(): Promise<void> {
-    await this.rulesTab.click();
-    await this.page.waitForURL(CLASSIC_RULES_LIST_URL_RE);
-    await this.rulesList.waitFor({ state: 'visible' });
   }
 
   async openEditFromList(ruleId: string): Promise<void> {

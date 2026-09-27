@@ -8,7 +8,6 @@
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
 import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
@@ -27,7 +26,6 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../lib/services/logger_service/logger_service';
-import { UiSettingsClientToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 
 type AgentBuilderSetup = NonNullable<AlertingServerSetupDependencies['agentBuilder']>;
@@ -100,12 +98,6 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
 
     const agentBuilderSml = container.get(agentBuilderSmlToken);
 
-    // Resolved lazily at crawl time (start phase) so the SML hooks reflect the
-    // current value of the `alerting:v2:enabled` global advanced setting on
-    // every crawl, rather than a value captured once at setup.
-    const getIsAlertingV2Enabled = () =>
-      container.get(UiSettingsClientToken).get<boolean>(ALERTING_V2_ENABLED_SETTING_ID);
-
     // SML types are registered inline (not via a token registry like attachments):
     // registration happens at setup, but their clients must be resolved lazily at
     // crawl time (start phase), so deps cannot be eagerly injected at bind time.
@@ -113,14 +105,12 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       createRuleSmlType({
         getScopedRulesClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, RulesClient),
-        getIsAlertingV2Enabled,
       })
     );
     agentBuilderSml.registerType(
       createActionPolicySmlType({
         getScopedActionPolicyClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, ActionPolicyClient),
-        getIsAlertingV2Enabled,
       })
     );
   });

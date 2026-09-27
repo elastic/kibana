@@ -8,10 +8,6 @@
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
-import {
-  setAlertingV2EnabledSetting,
-  unsetAlertingV2EnabledSetting,
-} from '../fixtures/alerting_v2_setting';
 import type { ObservabilityAlertingPage } from '../fixtures/page_objects';
 import {
   createV1ThresholdSourceIndex,
@@ -199,7 +195,6 @@ test.describe(
 
     test.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       test.setTimeout(180_000);
-      await setAlertingV2EnabledSetting(kbnClient, true);
       await createV1ThresholdSourceIndex(esClient);
       await apiServices.dataViews.create({
         id: THRESHOLD_DATA_VIEW_ID,
@@ -251,7 +246,6 @@ test.describe(
       if (v2RuleId) {
         await deleteV2PrivilegeRule(esClient, kbnClient, v2RuleId);
       }
-      await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
     test('user with logs read privilege sees the full inbox page', async ({

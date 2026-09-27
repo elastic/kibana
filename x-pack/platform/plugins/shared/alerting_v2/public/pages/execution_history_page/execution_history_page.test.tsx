@@ -274,13 +274,6 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByRole('tab', { name: /action policies/i })).toBeInTheDocument();
   });
 
-  it('renders the experimental badge in the page header', () => {
-    mockFetchResult();
-    renderPage();
-
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   describe('Rules tab (default)', () => {
     it('renders the rules execution history table by default', () => {
       // The grid (and its wrapper) only renders when there are rows — an empty result shows the

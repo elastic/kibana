@@ -9,7 +9,6 @@ import { Container, ContainerModule } from 'inversify';
 import { OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
 import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
@@ -19,7 +18,6 @@ import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { createLoggerService } from '../lib/services/logger_service/logger_service.mock';
-import { UiSettingsClientToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 import { bindAgentBuilder } from './bind_agent_builder';
 
@@ -75,7 +73,6 @@ describe('bindAgentBuilder', () => {
   let container: Container;
   let agentBuilder: ReturnType<typeof agentBuilderMocks.createSetup>;
   let agentBuilderSml: { registerType: jest.Mock };
-  let uiSettingsClient: { get: jest.Mock };
   let workflowsManagementApi: { getWorkflow: jest.Mock; getAvailableConnectors: jest.Mock };
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
 
@@ -91,7 +88,6 @@ describe('bindAgentBuilder', () => {
     container = new Container();
     agentBuilder = agentBuilderMocks.createSetup();
     agentBuilderSml = { registerType: jest.fn() };
-    uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
     workflowsManagementApi = {
       getWorkflow: jest.fn(),
       getAvailableConnectors: jest.fn(),
@@ -115,7 +111,6 @@ describe('bindAgentBuilder', () => {
 
     container.bind(CoreStart('injection')).toConstantValue({} as never);
     container.bind(LoggerServiceToken).toConstantValue(loggerService);
-    container.bind(UiSettingsClientToken).toConstantValue(uiSettingsClient as never);
     container.bind(WorkflowsManagementApiToken).toConstantValue(workflowsManagementApi as never);
 
     container.load(new ContainerModule((options) => bindAgentBuilder(options)));
@@ -163,19 +158,6 @@ describe('bindAgentBuilder', () => {
       expect(createActionPolicySmlTypeMock).toHaveBeenCalledTimes(1);
       expect(agentBuilderSml.registerType).toHaveBeenNthCalledWith(1, ruleSmlType);
       expect(agentBuilderSml.registerType).toHaveBeenNthCalledWith(2, actionPolicySmlType);
-    });
-
-    it('reads alerting:v2:enabled lazily at crawl time rather than capturing it at setup', async () => {
-      bindAgentBuilderPlugin();
-      bindAgentBuilderSmlPlugin();
-
-      runOnSetup();
-
-      const { getIsAlertingV2Enabled } = createRuleSmlTypeMock.mock.calls[0][0];
-      expect(uiSettingsClient.get).not.toHaveBeenCalled();
-
-      await expect(getIsAlertingV2Enabled()).resolves.toBe(true);
-      expect(uiSettingsClient.get).toHaveBeenCalledWith(ALERTING_V2_ENABLED_SETTING_ID);
     });
   });
 

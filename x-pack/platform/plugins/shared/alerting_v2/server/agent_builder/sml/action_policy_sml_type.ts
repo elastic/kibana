@@ -20,28 +20,15 @@ import type { ActionPolicyClient } from '../../lib/action_policy_client';
 
 interface CreateActionPolicySmlTypeOptions {
   getScopedActionPolicyClient: (request: KibanaRequest) => ActionPolicyClient;
-  /**
-   * Resolves the `alerting:v2:enabled` global advanced setting. When the engine
-   * is disabled, the SML hooks below become no-ops: `list` yields nothing (so
-   * the crawler's mark-and-sweep removes any previously indexed policy chunks),
-   * and `getSmlEntry` / `toAttachment` return `undefined`. This gates action
-   * policy data out of the context layer dynamically, without a restart.
-   */
-  getIsAlertingV2Enabled: () => Promise<boolean>;
 }
 
 export const createActionPolicySmlType = ({
   getScopedActionPolicyClient,
-  getIsAlertingV2Enabled,
 }: CreateActionPolicySmlTypeOptions): SmlTypeDefinition => ({
   id: ACTION_POLICY_KI_TYPE,
   fetchFrequency: () => '1m',
 
   async *list(context) {
-    if (!(await getIsAlertingV2Enabled())) {
-      return;
-    }
-
     const finder =
       context.savedObjectsClient.createPointInTimeFinder<ActionPolicySavedObjectAttributes>({
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -64,10 +51,6 @@ export const createActionPolicySmlType = ({
   },
 
   getSmlEntry: async (originId, context) => {
-    if (!(await getIsAlertingV2Enabled())) {
-      return undefined;
-    }
-
     try {
       const so = await context.savedObjectsClient.get<ActionPolicySavedObjectAttributes>(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -106,10 +89,6 @@ export const createActionPolicySmlType = ({
   getPermissions: () => kibanaPermissions({ kiType: ACTION_POLICY_KI_TYPE }),
 
   toAttachment: async (item, context) => {
-    if (!(await getIsAlertingV2Enabled())) {
-      return undefined;
-    }
-
     try {
       const client = getScopedActionPolicyClient(context.request);
       const policy = await client.getActionPolicy({ id: getSmlOriginId(item) });

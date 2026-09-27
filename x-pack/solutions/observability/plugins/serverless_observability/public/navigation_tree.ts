@@ -540,7 +540,7 @@ export const createNavigationTree = ({
               },
             ],
           },
-          ...getAlertingV2ManagementNavPanel(core),
+          ...getAlertingV2ManagementNavPanel(),
           {
             id: 'alerts_and_insights',
             title: i18n.translate(

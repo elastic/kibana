@@ -16,7 +16,6 @@ const SPACE_2 = {
 };
 
 const RULES_APP_NAME = 'rules';
-const LOGS_TAB_SUBJ = 'logsTab';
 const ALL_SPACES_SWITCH_SUBJ = 'showAllSpacesSwitch';
 
 test.describe('Rule logs "show all spaces" switch', { tag: tags.stateful.classic }, () => {
@@ -24,10 +23,14 @@ test.describe('Rule logs "show all spaces" switch', { tag: tags.stateful.classic
     await apiServices.spaces.delete(SPACE_2.id);
   });
 
-  test('hides the switch when only the default space exists', async ({ browserAuth, page }) => {
+  test('hides the switch when only the default space exists', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp(RULES_APP_NAME);
-    await page.testSubj.click(LOGS_TAB_SUBJ);
+    await pageObjects.classicRulesPage.openLogsFromMoreMenu();
 
     await expect(page.testSubj.locator(ALL_SPACES_SWITCH_SUBJ)).toBeHidden();
   });
@@ -36,11 +39,12 @@ test.describe('Rule logs "show all spaces" switch', { tag: tags.stateful.classic
     apiServices,
     browserAuth,
     page,
+    pageObjects,
   }) => {
     await apiServices.spaces.create(SPACE_2);
     await browserAuth.loginAsAdmin();
     await page.gotoApp(RULES_APP_NAME);
-    await page.testSubj.click(LOGS_TAB_SUBJ);
+    await pageObjects.classicRulesPage.openLogsFromMoreMenu();
 
     const spacesSwitch = page.testSubj.locator(ALL_SPACES_SWITCH_SUBJ);
     await expect(spacesSwitch).toBeVisible();
@@ -57,6 +61,7 @@ test.describe('Rule logs "show all spaces" switch', { tag: tags.stateful.classic
     browserAuth,
     kbnUrl,
     page,
+    pageObjects,
   }) => {
     await apiServices.spaces.create(SPACE_2);
 
@@ -74,7 +79,7 @@ test.describe('Rule logs "show all spaces" switch', { tag: tags.stateful.classic
       ],
     });
     await page.goto(kbnUrl.app(RULES_APP_NAME, { space: SPACE_2.id }));
-    await page.testSubj.click(LOGS_TAB_SUBJ);
+    await pageObjects.classicRulesPage.openLogsFromMoreMenu();
 
     await expect(page.testSubj.locator(ALL_SPACES_SWITCH_SUBJ)).toBeHidden();
   });

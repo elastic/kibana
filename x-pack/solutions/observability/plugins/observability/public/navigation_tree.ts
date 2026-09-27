@@ -581,7 +581,7 @@ function createNavTree({
                   ]),
             ],
           },
-          ...getAlertingV2ManagementNavPanel(coreStart),
+          ...getAlertingV2ManagementNavPanel(),
           {
             id: 'alerts_and_insights',
             title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {

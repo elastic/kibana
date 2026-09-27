@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { experimentalBadge } from '../../components/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
@@ -26,12 +25,7 @@ export const RuleLibraryPage = () => {
 
   return (
     <div data-test-subj="ruleLibraryPage">
-      <AppHeader
-        sticky={false}
-        title={RULE_LIBRARY_PAGE_TITLE}
-        badges={[experimentalBadge]}
-        spacing="bleed"
-      />
+      <AppHeader sticky={false} title={RULE_LIBRARY_PAGE_TITLE} spacing="bleed" />
       <EuiSpacer size="m" />
       <RuleLibraryList />
       {flyout}

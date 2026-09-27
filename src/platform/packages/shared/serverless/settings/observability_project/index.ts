@@ -15,7 +15,6 @@ import {
 } from '@kbn/workflows/common/constants';
 
 export const OBSERVABILITY_PROJECT_SETTINGS = [
-  settings.ALERTING_V2_ENABLED_SETTING_ID,
   settings.ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   settings.DEFAULT_ROUTE_ID,
   settings.OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID,

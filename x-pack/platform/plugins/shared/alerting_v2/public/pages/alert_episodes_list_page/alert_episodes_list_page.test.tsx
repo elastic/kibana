@@ -8,7 +8,6 @@
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { ManageRulesHrefProvider } from '../../application/manage_rules_href_context';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
@@ -253,11 +252,6 @@ describe('AlertEpisodesListPage', () => {
       const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
       expect(lastCall?.rows?.length).toBeGreaterThan(0);
     });
-  });
-
-  it('renders the experimental badge in the page header', () => {
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alert episodes');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('renders the manage rules link in the app header menu', async () => {

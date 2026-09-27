@@ -259,7 +259,7 @@ export const getNavigationTreeDefinition = ({
                   id: 'stack_management_home',
                   title: '',
                 },
-                ...getAlertingV2ManagementNavPanel(core),
+                ...getAlertingV2ManagementNavPanel(),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
