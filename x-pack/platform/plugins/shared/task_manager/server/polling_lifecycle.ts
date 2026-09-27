@@ -6,8 +6,17 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { Subject, withLatestFrom, BehaviorSubject, combineLatest } from 'rxjs';
-import { distinctUntilChanged, startWith, pairwise, map as rxMap, share, scan } from 'rxjs';
+import { Subject, withLatestFrom, BehaviorSubject, combineLatest, timer } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  startWith,
+  pairwise,
+  map as rxMap,
+  share,
+  scan,
+  throttle,
+} from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
@@ -65,6 +74,7 @@ import {
 import type { BackpressureReason } from './lib/backpressure_reason';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import type { TaskExecutionControlService, TaskExecutionControlState } from './execution_control';
 
 const MAX_BUFFER_OPERATIONS = 100;
@@ -88,6 +98,12 @@ export interface TaskPollingLifecycleOpts {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  /**
+   * Triggers an immediate claim cycle when another node requests one, instead of waiting for
+   * `poll_interval`. Throttled to one cycle per poll interval, and ignored entirely while this
+   * node is backing off from Elasticsearch errors.
+   */
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 export type TaskLifecycleEvent =
@@ -117,6 +133,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private stopped = false;
   private readonly executionControlService: TaskExecutionControlService;
   private executionControlSubscription?: Subscription;
+  private errorBackoffSubscription?: Subscription;
   private backpressureSubscription?: Subscription;
 
   public pool: TaskPool;
@@ -159,6 +176,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    claimNudgeService,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -193,6 +211,33 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.pollIntervalConfiguration$.subscribe((newPollInterval) => {
       this.currentPollInterval = newPollInterval;
     });
+
+    // Ignore claim nudges while the last error-count window saw Elasticsearch errors (the same
+    // signal that reduces capacity and widens the poll interval above). `errorCheck$` only emits
+    // on its flush interval, so this trails reality by up to that window in both directions; it is
+    // a coarse brake, not a guarantee. The regular poll picks up nudged tasks either way.
+    let inErrorBackoff = false;
+    this.errorBackoffSubscription = errorCheck$.subscribe(({ count, isBlockException }) => {
+      inErrorBackoff = count > 0 || isBlockException;
+    });
+    const claimNudge$ = claimNudgeService?.claimNudge$.pipe(
+      // Checked before the throttle so an ignored nudge does not open a window of its own.
+      filter(() => {
+        if (inErrorBackoff) {
+          logger.debug(
+            'Ignoring claim nudge because task manager is backing off after Elasticsearch errors; the next regular poll cycle will claim the task'
+          );
+          return false;
+        }
+        return true;
+      }),
+      // Caps nudge-triggered cycles at one per poll interval. Dropping a throttled nudge rather
+      // than deferring it matters: the leading nudge's cycle re-anchored the cadence, so a regular
+      // cycle is already due when the window closes, and a nudge there only re-anchors it later,
+      // delaying the expired-task cancellation that rides on every cycle. Re-read per window so
+      // the window widens with the managed poll interval.
+      throttle(() => timer(this.currentPollInterval), { leading: true, trailing: false })
+    );
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -284,6 +329,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: this.pollIntervalConfiguration$,
+      claimNudge$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {
@@ -372,6 +418,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   public stop() {
     this.stopped = true;
     this.executionControlSubscription?.unsubscribe();
+    // `countErrors()` is cold, so this subscription owns its own flush interval timer.
+    this.errorBackoffSubscription?.unsubscribe();
     this.backpressureSubscription?.unsubscribe();
     this.poller.stop();
   }

@@ -10,7 +10,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 import type { Option } from 'fp-ts/Option';
 import { none } from 'fp-ts/Option';
@@ -25,6 +25,11 @@ interface Opts<H> {
   logger: Logger;
   initialPollInterval: number;
   pollInterval$: Observable<number>;
+  /**
+   * Emits when a Kibana node requests an immediate claim cycle (e.g. via `runSoon`),
+   * triggering a cycle right away instead of waiting for the next `pollInterval`.
+   */
+  claimNudge$?: Observable<void>;
   getCapacity: () => number;
   work: WorkFn<H>;
 }
@@ -50,19 +55,23 @@ export function createTaskPoller<T, H>({
   logger,
   initialPollInterval,
   pollInterval$,
+  claimNudge$,
   getCapacity,
   work,
 }: Opts<H>): TaskPoller<T, H> {
   const hasCapacity = () => getCapacity() > 0;
   let running: boolean = false;
+  let isCycleRunning: boolean = false;
+  let nudgeRequestedDuringCycle: boolean = false;
   let timeoutId: NodeJS.Timeout | null = null;
-  let hasSubscribed: boolean = false;
+  let subscriptions: Subscription | null = null;
   let pollInterval = initialPollInterval;
   let pollIntervalDelay = 0;
   const subject = new Subject<Result<H, PollingError<T>>>();
 
   async function runCycle() {
     timeoutId = null;
+    isCycleRunning = true;
     const start = Date.now();
     try {
       if (hasCapacity()) {
@@ -73,16 +82,22 @@ export function createTaskPoller<T, H>({
       }
     } catch (e) {
       subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
+    } finally {
+      isCycleRunning = false;
     }
 
     if (running) {
+      const nextDelay = nudgeRequestedDuringCycle
+        ? 0
+        : Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0);
+      nudgeRequestedDuringCycle = false;
       // Set the next runCycle call
       timeoutId = setTimeout(
         () =>
           runCycle().catch((e) => {
             subject.next(asPollingError(e, PollingErrorType.PollerError));
           }),
-        Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
+        nextDelay
       );
       // Reset delay, it's designed to shuffle only once
       pollIntervalDelay = 0;
@@ -91,26 +106,63 @@ export function createTaskPoller<T, H>({
     }
   }
 
-  function subscribe() {
-    if (hasSubscribed) {
+  function runCycleNow() {
+    if (!running) {
       return;
     }
-    pollInterval$.subscribe((interval) => {
-      if (!Number.isSafeInteger(interval) || interval < 0) {
-        // TODO: Investigate why we sometimes get null / NaN, causing the setTimeout logic to always schedule
-        // the next polling cycle to run immediately. If we don't see occurrences of this message by December 2024,
-        // we can remove the TODO and/or check because we now have a cap to how much we increase the poll interval.
-        logger.error(
-          new Error(
-            `Expected the new interval to be a number > 0, received: ${interval} but poller will keep using: ${pollInterval}`
-          )
-        );
-        return;
-      }
-      pollInterval = interval;
-      logger.debug(`Task poller now using interval of ${interval}ms`);
+
+    if (isCycleRunning) {
+      // Coalesce bursts of nudges into a single immediate follow-up cycle.
+      nudgeRequestedDuringCycle = true;
+      return;
+    }
+
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+
+    runCycle().catch((e) => {
+      subject.next(asPollingError(e, PollingErrorType.PollerError));
     });
-    hasSubscribed = true;
+  }
+
+  function subscribe() {
+    if (subscriptions) {
+      return;
+    }
+    subscriptions = new Subscription();
+    subscriptions.add(
+      pollInterval$.subscribe((interval) => {
+        if (!Number.isSafeInteger(interval) || interval < 0) {
+          // TODO: Investigate why we sometimes get null / NaN, causing the setTimeout logic to always schedule
+          // the next polling cycle to run immediately. If we don't see occurrences of this message by December 2024,
+          // we can remove the TODO and/or check because we now have a cap to how much we increase the poll interval.
+          logger.error(
+            new Error(
+              `Expected the new interval to be a number > 0, received: ${interval} but poller will keep using: ${pollInterval}`
+            )
+          );
+          return;
+        }
+        pollInterval = interval;
+        logger.debug(`Task poller now using interval of ${interval}ms`);
+      })
+    );
+    if (claimNudge$) {
+      subscriptions.add(
+        claimNudge$.subscribe(() => {
+          // RxJS reports a throw here through `reportUnhandledError`, which defers it into a
+          // macrotask and crashes Kibana. A missed nudge must never cost more than a poll interval.
+          try {
+            logger.debug('Task poller received a claim nudge, running a claim cycle immediately');
+            runCycleNow();
+          } catch (err) {
+            logger.error(`Failed to run a claim cycle for a claim nudge: ${err}`);
+          }
+        })
+      );
+    }
   }
 
   return {
@@ -134,6 +186,13 @@ export function createTaskPoller<T, H>({
         timeoutId = null;
       }
       running = false;
+      // Otherwise a nudge from the previous run makes the first cycle after `start()` schedule a
+      // redundant immediate follow-up.
+      nudgeRequestedDuringCycle = false;
+      // Releases the nudge throttle's pending duration timer, which would otherwise keep the event
+      // loop alive until it elapsed, and drops this poller as an observer of the nudge service.
+      subscriptions?.unsubscribe();
+      subscriptions = null;
     },
   };
 }

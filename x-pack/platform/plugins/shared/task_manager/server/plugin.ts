@@ -64,7 +64,8 @@ import {
   registerTaskManagerUsageCollector,
   scheduleEventLogTelemetryTask,
 } from './usage';
-import { TASK_MANAGER_INDEX } from './constants';
+import { TASK_MANAGER_CLAIM_NUDGE_INDEX, TASK_MANAGER_INDEX } from './constants';
+import { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import type { Metrics } from './metrics';
@@ -174,6 +175,7 @@ export class TaskManagerPlugin
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
   private enrichFakeRequest?: FakeRequestEnricher;
+  private claimNudgeService?: TaskManagerClaimNudgeService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -371,6 +373,7 @@ export class TaskManagerPlugin
     const { savedObjects, elasticsearch, executionContext, security } = core;
     const enrichFakeRequest = this.enrichFakeRequest;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -378,6 +381,15 @@ export class TaskManagerPlugin
       INVALIDATE_API_KEY_SO_NAME,
       TASK_EXECUTION_CONTROL_SO_NAME,
     ]);
+
+    if (this.config.claim_nudge.enabled) {
+      this.claimNudgeService = new TaskManagerClaimNudgeService({
+        logger: this.logger,
+        esClient: elasticsearch.client.asInternalUser,
+        index: TASK_MANAGER_CLAIM_NUDGE_INDEX,
+        isServerless,
+      });
+    }
 
     this.kibanaDiscoveryService = new KibanaDiscoveryService({
       savedObjectsRepository,
@@ -427,8 +439,6 @@ export class TaskManagerPlugin
     });
     this.taskStore = taskStore;
 
-    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
-
     const defaultCapacity = getDefaultCapacity({
       autoCalculateDefaultEchCapacity: this.config.auto_calculate_default_ech_capacity,
       claimStrategy: this.config?.claim_strategy,
@@ -454,6 +464,8 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
+      this.claimNudgeService?.start();
+
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
         logger: this.logger,
         store: taskStore,
@@ -483,6 +495,7 @@ export class TaskManagerPlugin
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
+        claimNudgeService: this.claimNudgeService,
       });
     }
 
@@ -513,6 +526,7 @@ export class TaskManagerPlugin
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      claimNudgeService: this.claimNudgeService,
     });
 
     scheduleEventLogTelemetryTask(this.logger, taskScheduling).catch(() => {});
@@ -558,6 +572,7 @@ export class TaskManagerPlugin
 
   public async stop() {
     this.licenseSubscriber?.cleanup();
+    this.claimNudgeService?.stop();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
