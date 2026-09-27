@@ -177,7 +177,7 @@ if [[ "${#slack_body}" -gt 38000 ]]; then
 _(truncated for Slack length limit)_"
 fi
 
-if [[ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ ]]; then
+if [[ "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ ]]; then
   buildkite-agent meta-data set 'slack:kbn_evals_weekly_failures:body' "$slack_body" >/dev/null 2>&1 || true
 fi
 

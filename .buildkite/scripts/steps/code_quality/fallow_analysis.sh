@@ -79,7 +79,7 @@ else
   echo "--- Skip saving snapshot (FALLOW_SAVE_SNAPSHOT not set to 'true')"
 fi
 
-if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
+if [ "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
   echo "--- Send Slack notification"
   CHANNEL="${SLACK_NOTIFICATIONS_CHANNEL:-}"
   if [ -z "$CHANNEL" ]; then

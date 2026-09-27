@@ -91,7 +91,7 @@ printf '%s\\n' "$*" > "\${TEST_ROOT}/buildkite-agent-args"
       PARENT_DIR: parentDir,
       KIBANA_DIR: kibanaDir,
       BUILDKITE_BRANCH: 'main',
-      KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true',
+      ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true',
       TEST_ROOT: root,
       TEST_EXISTING_PR: String(existingPr),
       TEST_PR_TITLE: PR_TITLE,

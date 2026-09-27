@@ -20,10 +20,10 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-merge-queue-alerts'
-        KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_COMMIT_STATUS_CONTEXT: 'kibana-ci'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_ALL_BRANCHES: 'true'
       allow_rebuilds: true
       branch_configuration: gh-readonly-queue/* gh-readonly-queue/*/*
