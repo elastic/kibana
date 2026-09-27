@@ -58,8 +58,6 @@ const COMMON_STATE_IGNORE_PATHS = [
   // TODO: check missing properties striped out in transforms
   'state.datasourceStates.formBased.layers.*.indexPatternId',
   'state.datasourceStates.formBased.currentIndexPatternId',
-  // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
-  'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
   // TODO: check missing/different properties on colorMapping
   'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
   'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',

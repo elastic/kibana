@@ -21,6 +21,7 @@ import type {
   IndexPattern,
   IndexPatternField,
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   PercentileIndexPatternColumn,
   PercentileRanksIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -29,12 +30,16 @@ import type {
 import { isColumnOfType } from '@kbn/lens-common';
 import { operationDefinitionMap } from '..';
 import { filtersDefaultLabel } from '../filters/filters';
+import { getDefaultDateFieldName } from '../helpers';
 import { isReferenced } from '../../layer_helpers';
 
 import type { FieldBasedOperationErrorMessage } from '..';
 
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes, MAX_TERMS_OTHER_ENABLED } from './constants';
 import {
+  TERMS_CUSTOM_RANK_LAST_VALUE_NO_DATE_FIELD,
+  TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_INVALID_TYPE,
+  TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_NOT_FOUND,
   TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS,
   TERMS_WITH_MULTIPLE_TIMESHIFT,
 } from '../../../../../user_messages_ids';
@@ -242,6 +247,133 @@ export function getDisallowedTermsMessage(
       },
     },
   ];
+}
+
+/**
+ * A terms column ordered by a custom `last_value` order-agg, narrowed so that `params.orderAgg` is a
+ * `LastValueOrderAggColumn`.
+ */
+export type TermsColumnWithLastValueOrderAgg = TermsIndexPatternColumn & {
+  params: TermsIndexPatternColumn['params'] & { orderAgg: LastValueOrderAggColumn };
+};
+
+/**
+ * Type guard for a terms column ordered by a custom `last_value` order-agg. Shared by the sortField
+ * status resolver, its consumers, and render-time auto-fill so they all narrow the column the same
+ * way.
+ */
+export function isCustomLastValueOrderAgg(
+  column: GenericIndexPatternColumn | undefined
+): column is TermsColumnWithLastValueOrderAgg {
+  if (!column || !isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
+    return false;
+  }
+
+  const { orderBy, orderAgg } = column.params;
+  return (
+    orderBy.type === 'custom' &&
+    !!orderAgg &&
+    isColumnOfType<LastValueOrderAggColumn>('last_value', orderAgg)
+  );
+}
+
+/**
+ * Status of the `sortField` on a terms column whose custom `rank_by` is a `last_value` order-agg.
+ * `missing-with-default` carries the date field the render/editor should fall back to.
+ */
+export type OrderAggLastValueSortFieldStatus =
+  | { status: 'ok' }
+  | { status: 'missing-with-default'; defaultField: string }
+  | { status: 'missing-no-default' }
+  | { status: 'not-found' }
+  | { status: 'wrong-type' };
+
+/**
+ * Resolves the sortField status of a terms column ordered by a custom last_value order-agg so that
+ * render auto-fill, editor warnings, and blocking errors all reason about the same field.
+ */
+export function getOrderAggLastValueSortFieldStatus(
+  column: TermsColumnWithLastValueOrderAgg,
+  indexPattern: IndexPattern
+): OrderAggLastValueSortFieldStatus {
+  const sortField = column.params.orderAgg.params?.sortField;
+
+  if (!sortField) {
+    const defaultField = getDefaultDateFieldName(indexPattern);
+    return defaultField
+      ? { status: 'missing-with-default', defaultField }
+      : { status: 'missing-no-default' };
+  }
+
+  const field = indexPattern.getFieldByName(sortField);
+  if (!field) {
+    return { status: 'not-found' };
+  }
+  if (field.type !== 'date') {
+    return { status: 'wrong-type' };
+  }
+  return { status: 'ok' };
+}
+
+/**
+ * Blocking errors for a terms column ordered by a custom last_value order-agg whose `sortField`
+ * cannot be resolved to a date. The `missing-with-default` case is handled by a non-blocking
+ * warning + render auto-fill, so it produces no error here.
+ */
+export function getOrderAggErrorMessages(
+  layer: FormBasedLayer,
+  columnId: string,
+  indexPattern: IndexPattern
+): FieldBasedOperationErrorMessage[] {
+  const column = layer.columns[columnId];
+  if (!isCustomLastValueOrderAgg(column)) {
+    return [];
+  }
+
+  const status = getOrderAggLastValueSortFieldStatus(column, indexPattern);
+  const sortField = column.params.orderAgg.params?.sortField ?? '';
+
+  switch (status.status) {
+    case 'missing-no-default':
+      return [
+        {
+          uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_NO_DATE_FIELD,
+          message: i18n.translate('xpack.lens.indexPattern.terms.customRankLastValueNoDateField', {
+            defaultMessage:
+              'To rank top values by their last value, the data view must have a date field, but this one has none',
+          }),
+        },
+      ];
+    case 'not-found':
+      return [
+        {
+          uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.lens.indexPattern.terms.customRankLastValueSortFieldNotFound',
+            {
+              defaultMessage: 'Sort field {sortField} was not found',
+              values: { sortField },
+            }
+          ),
+        },
+      ];
+    case 'wrong-type':
+      return [
+        {
+          uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_INVALID_TYPE,
+          message: i18n.translate(
+            'xpack.lens.indexPattern.terms.customRankLastValueSortFieldInvalidType',
+            {
+              defaultMessage:
+                'Field {invalidField} is not a date field and cannot be used for sorting',
+              values: { invalidField: sortField },
+            }
+          ),
+        },
+      ];
+    default:
+      return [];
+  }
 }
 
 function checkLastValue(column: GenericIndexPatternColumn) {

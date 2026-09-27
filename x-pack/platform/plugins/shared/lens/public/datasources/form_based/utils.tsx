@@ -12,7 +12,7 @@ import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { escapeQuotes, type TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, uniq, uniqBy } from 'lodash';
@@ -60,9 +60,13 @@ import {
 } from './operations';
 
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
+import {
+  getOrderAggLastValueSortFieldStatus,
+  isCustomLastValueOrderAgg,
+} from './operations/definitions/terms/helpers';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
-import { supportsRarityRanking } from './operations/definitions/terms';
+import { supportsRarityRanking, termsOperation } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { ReducedSamplingSectionEntries } from './info_badges';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
@@ -73,6 +77,7 @@ import {
   PRECISION_ERROR_ACCURACY_MODE_DISABLED,
   PRECISION_ERROR_ACCURACY_MODE_ENABLED,
   PRECISION_ERROR_ASC_COUNT_PRECISION,
+  TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD,
   TSDB_UNSUPPORTED_COUNTER_OP,
   UNSUPPORTED_DOWNSAMPLED_INDEX_AGG_PREFIX,
 } from '../../user_messages_ids';
@@ -597,6 +602,118 @@ export function getPrecisionErrorWarningMessages(
         }
       });
   }
+
+  return warningMessages;
+}
+
+/**
+ * Non-blocking warning for terms columns ranked by a custom `last_value` order-agg whose `sortField`
+ * is missing but can fall back to a default date field.
+ * Render auto-fills the default so the chart still works. This surfaces the fallback and, in the editor,
+ * offers a fix that persists the field onto the order-agg so the ranking becomes explicit on the next save.
+ */
+export function getCustomRankLastValueSortFieldWarningMessages(
+  state: FormBasedPrivateState,
+  { dataViews }: FramePublicAPI,
+  setState?: StateSetter<FormBasedPrivateState>
+): UserMessage[] {
+  const warningMessages: UserMessage[] = [];
+
+  if (!state) {
+    return warningMessages;
+  }
+
+  Object.entries(state.layers).forEach(([layerId, layer]) => {
+    const indexPattern = dataViews.indexPatterns[layer.indexPatternId];
+    if (!indexPattern) {
+      return;
+    }
+
+    Object.keys(layer.columns).forEach((columnId) => {
+      const column = layer.columns[columnId];
+      if (!isCustomLastValueOrderAgg(column)) {
+        return;
+      }
+
+      const status = getOrderAggLastValueSortFieldStatus(column, indexPattern);
+      if (status.status !== 'missing-with-default') {
+        return;
+      }
+
+      const { defaultField } = status;
+      const { orderAgg } = column.params;
+      // API-generated panels persist an empty `label`, so fall back to the operation's default
+      // label (and finally the source field) to avoid an empty {name} in the message.
+      const columnName =
+        (column.customLabel && column.label) ||
+        termsOperation.getDefaultLabel?.(column, layer.columns, indexPattern);
+
+      warningMessages.push({
+        uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD,
+        severity: 'warning',
+        fixableInEditor: true,
+        displayLocations: [
+          { id: 'toolbar' },
+          { id: 'dimensionButton', dimensionId: columnId },
+          { id: 'embeddableBadge' },
+        ],
+        shortMessage: i18n.translate(
+          'xpack.lens.indexPattern.terms.customRankLastValueMissingSortField.shortMessage',
+          {
+            defaultMessage: 'Set a date field for ranking by last value',
+          }
+        ),
+        longMessage: (
+          <>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.terms.customRankLastValueMissingSortField"
+              defaultMessage="{name} is ranked by the last value of {sourceField}, but no date field is set. {field} is used for now. Edit the visualization and set a date field in Rank by."
+              values={{
+                name: <strong>{columnName}</strong>,
+                sourceField: <strong>{orderAgg.sourceField}</strong>,
+                field: <strong>{defaultField}</strong>,
+              }}
+            />
+            {setState ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiButtonEmpty
+                  data-test-subj="lnsCustomRankLastValueSortByField"
+                  size="s"
+                  flush="left"
+                  onClick={() => {
+                    setState((prevState) =>
+                      mergeLayer({
+                        state: prevState,
+                        layerId,
+                        newLayer: updateDefaultLabels(
+                          updateColumnParam({
+                            layer,
+                            columnId,
+                            paramName: 'orderAgg',
+                            value: {
+                              ...orderAgg,
+                              params: { ...orderAgg.params, sortField: defaultField },
+                            },
+                          }),
+                          indexPattern
+                        ),
+                      })
+                    );
+                  }}
+                >
+                  {i18n.translate('xpack.lens.indexPattern.terms.customRankLastValueSortByField', {
+                    defaultMessage: 'Set {field} as date field',
+                    values: { field: defaultField },
+                  })}
+                </EuiButtonEmpty>
+              </>
+            ) : null}
+          </>
+        ),
+      });
+    });
+  });
 
   return warningMessages;
 }

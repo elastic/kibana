@@ -101,13 +101,29 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
       'standard_deviation',
       'unique_count',
       'sum',
-      'last_value',
     ]),
   })
   .meta({
     id: 'visTermsRankByCustomOperation',
     title: 'Terms Rank By Custom Operation',
     description: 'Terms ranked by custom operation.',
+  });
+
+const bucketTermsRankByCustomLastValueOperationSchema = bucketTermsRankByCustomSharedSchema
+  .extend({
+    operation: z.literal('last_value'),
+    /**
+     * Time field used to determine document recency for the last-value ranking. Mirrors the
+     * `time_field` of the `last_value` metric operation.
+     */
+    time_field: z.string().optional().meta({
+      description: 'Time field used to determine document recency for the last-value ranking.',
+    }),
+  })
+  .meta({
+    id: 'visTermsRankByCustomLastValueOperation',
+    title: 'Terms Rank By Custom Last Value Operation',
+    description: 'Terms ranked by the last value of a field.',
   });
 
 const bucketTermsRankByCustomCountOperationSchema = bucketTermsRankByCustomSharedSchema
@@ -290,6 +306,7 @@ export const bucketTermsOperationSchema = z
             description: 'Terms ranked by a linked metric.',
           }),
         bucketTermsRankByCustomOperationSchema,
+        bucketTermsRankByCustomLastValueOperationSchema,
         bucketTermsRankByCustomCountOperationSchema,
         bucketTermsRankByPercentileOperationSchema,
         bucketTermsRankByPercentileRankOperationSchema,
@@ -418,6 +435,9 @@ export const bucketOperationDefinitionSchema = z
 
 export type TermOperationRankByCustomOperationType = z.output<
   typeof bucketTermsRankByCustomOperationSchema
+>;
+export type TermOperationRankByCustomLastValueType = z.output<
+  typeof bucketTermsRankByCustomLastValueOperationSchema
 >;
 export type TermOperationRankByCustomCountOperationType = z.output<
   typeof bucketTermsRankByCustomCountOperationSchema
