@@ -14,6 +14,21 @@ node scripts/evals start --suite nightshift-investigations
 services, so iteration is fast. Use `node scripts/evals run --suite nightshift-investigations`
 when they are already up.
 
+### Serverless by default
+
+The suite runs against a local **serverless observability** Scout cluster (`scoutArch` /
+`scoutDomain` in its [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json)
+entry), locally and in CI. Serverless Elasticsearch runs in Docker, so Docker must be running;
+Kibana starts with `--serverless=oblt` on `5620`. To run on stateful instead:
+
+```bash
+node scripts/evals start --suite nightshift-investigations --scout-arch stateful
+```
+
+Switching arch restarts Scout. Both arches run the smoke eval's snapshot seeding: serverless Elasticsearch has no keystore, so `kbn-es` passes `GCS_CREDENTIALS` to it as a file secret instead.
+
+Serverless Elasticsearch always binds transport ports `9300`–`9302`. A development Elasticsearch started with `yarn es snapshot` (as the `local` profile below needs) also takes `9300`, so give it another transport port: `yarn es snapshot --license trial -E transport.port=9400`.
+
 ### Choosing where scores are recorded
 
 The `--profile` flag decides which cluster records the run. Refer to [`--profile` in the `@kbn/evals` README](../../../../platform/packages/shared/kbn-evals/README.md#profiles) for the full list of profiles and how each one resolves its credentials. The two that matter most here:
@@ -29,7 +44,7 @@ The `--profile` flag decides which cluster records the run. Refer to [`--profile
 
 ```bash
 # terminal 1
-yarn es snapshot --license trial   # Elasticsearch on localhost:9200
+yarn es snapshot --license trial -E transport.port=9400   # Elasticsearch on localhost:9200
 
 # terminal 2
 yarn start                         # Kibana on localhost:5601
@@ -463,6 +478,8 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 Registered in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json)
 as `nightshift-investigations`.
 
+- **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
+  `scoutDomain` from the suite entry.
 - **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
   hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
   `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the

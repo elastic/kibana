@@ -10,6 +10,7 @@ import Path from 'path';
 import { createHash } from 'crypto';
 import { execFileSync, spawn, type SpawnOptions } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { DEFAULT_SCOUT_TARGET, formatScoutTarget, type ScoutTarget } from './scout_target';
 
 const EVALS_DIR = 'target/evals';
 const STATE_FILE = 'target/evals/services.json';
@@ -26,6 +27,9 @@ interface ServiceEntry {
   connectorsHash?: string;
   /** The serverConfigSet used to start Scout */
   serverConfigSet?: string;
+  /** The Scout arch/domain; entries written before these were recorded ran stateful/classic. */
+  scoutArch?: ScoutTarget['arch'];
+  scoutDomain?: string;
   /**
    * SHA-256 of the env the service was started with (Scout: TRACING_EXPORTERS,
    * GCS_CREDENTIALS, suite scoutHook output; EDOT: ELASTICSEARCH_HOST).
@@ -100,13 +104,14 @@ export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean =
 
 /**
  * Returns true if the running Scout was started with a different set of connectors
- * than what's currently in the environment, a different serverConfigSet, or
+ * than what's currently in the environment, a different serverConfigSet or arch/domain, or
  * different forwarded env vars (e.g. TRACING_EXPORTERS, GCS_CREDENTIALS).
  */
 export const isScoutStale = (
   repoRoot: string,
   requestedConfigSet?: string,
-  scoutEnv?: Record<string, string>
+  scoutEnv?: Record<string, string>,
+  requestedTarget: ScoutTarget = DEFAULT_SCOUT_TARGET
 ): { stale: boolean; reason?: string } => {
   const state = readState(repoRoot);
   const entry = state.scout;
@@ -133,6 +138,18 @@ export const isScoutStale = (
       reason: `serverConfigSet changed (running: ${
         entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET
       }, requested: ${targetConfigSet})`,
+    };
+  }
+
+  const runningTarget = formatScoutTarget({
+    arch: entry.scoutArch ?? DEFAULT_SCOUT_TARGET.arch,
+    domain: entry.scoutDomain ?? DEFAULT_SCOUT_TARGET.domain,
+  });
+  const targetScout = formatScoutTarget(requestedTarget);
+  if (runningTarget !== targetScout) {
+    return {
+      stale: true,
+      reason: `Scout arch/domain changed (running: ${runningTarget}, requested: ${targetScout})`,
     };
   }
 
@@ -173,6 +190,7 @@ export const startService = (
   opts?: {
     connectorsHash?: string;
     serverConfigSet?: string;
+    scoutTarget?: ScoutTarget;
     envHash?: string;
     env?: Record<string, string | undefined>;
   }
@@ -205,6 +223,9 @@ export const startService = (
     startedAt: new Date().toISOString(),
     ...(opts?.connectorsHash ? { connectorsHash: opts.connectorsHash } : {}),
     ...(opts?.serverConfigSet ? { serverConfigSet: opts.serverConfigSet } : {}),
+    ...(opts?.scoutTarget
+      ? { scoutArch: opts.scoutTarget.arch, scoutDomain: opts.scoutTarget.domain }
+      : {}),
     ...(opts?.envHash ? { envHash: opts.envHash } : {}),
   };
   writeState(repoRoot, state);

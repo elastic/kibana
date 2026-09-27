@@ -8,14 +8,13 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../default/stateful/base.config';
+import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
 import { withEvalsTracing } from '../shared';
 
 /**
- * Custom Scout stateful server configuration that enables OTLP trace exporting
- * from Kibana to a local OpenTelemetry collector (e.g. `node scripts/edot_collector.js`).
+ * Serverless observability counterpart of the stateful `evals_tracing` config set.
  *
  * Usage:
- *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_tracing
+ *   node scripts/scout start-server --arch serverless --domain observability_complete --serverConfigSet evals_tracing
  */
 export const servers: ScoutServerConfig = withEvalsTracing(defaultConfig);

@@ -100,3 +100,21 @@ describe('evals.suites.json shards', () => {
     expect(problems).toEqual([]);
   });
 });
+
+describe('evals.suites.json Scout arch/domain', () => {
+  it('only uses arches run_suite.sh and the evals CLI support, with a domain for serverless', () => {
+    const problems = suites.flatMap(({ id, scoutArch, scoutDomain }) => {
+      if (scoutArch === undefined) return [];
+      if (scoutArch !== 'stateful' && scoutArch !== 'serverless') {
+        return [`${id}: scoutArch "${scoutArch}" is not stateful or serverless`];
+      }
+      // `node scripts/evals start` refuses a serverless suite without a domain; catch it at PR time.
+      if (scoutArch === 'serverless' && !scoutDomain) {
+        return [`${id}: scoutArch "serverless" has no scoutDomain`];
+      }
+      return [];
+    });
+
+    expect(problems).toEqual([]);
+  });
+});

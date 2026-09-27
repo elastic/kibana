@@ -39,6 +39,15 @@ const SUITES = {
       configPath: 'x-pack/smoke-tests/playwright.config.ts',
       defaultModelGroups: ['eis/anthropic-claude-4.5-haiku'],
     },
+    {
+      id: 'nightshift-investigations',
+      name: 'Nightshift Investigations',
+      ciLabels: ['evals:nightshift-investigations'],
+      configPath: 'x-pack/nightshift-investigations/playwright.config.ts',
+      serverConfigSet: 'evals_nightshift_investigations',
+      scoutArch: 'serverless',
+      scoutDomain: 'observability_complete',
+    },
   ],
 };
 
@@ -244,6 +253,30 @@ describe('eval_pipeline', () => {
       expect(yaml).not.toContain("exit_status: '-1'");
       // A single generic retry is still allowed.
       expect(yaml).toContain("exit_status: '*'");
+    });
+  });
+
+  describe('getEvalPipeline Scout arch/domain', () => {
+    it("passes the suite's scoutArch/scoutDomain to run_suite.sh", () => {
+      const yaml = getEvalPipeline(
+        'evals:nightshift-investigations,models:eis/openai-gpt-5.4'
+      ) as string;
+      const { env } = parseStep(yaml).steps[0];
+
+      expect(env).toEqual(
+        expect.objectContaining({
+          EVAL_SERVER_CONFIG_SET: 'evals_nightshift_investigations',
+          EVAL_SCOUT_ARCH: 'serverless',
+          EVAL_SCOUT_DOMAIN: 'observability_complete',
+        })
+      );
+    });
+
+    it('leaves suites without Scout settings on the run_suite.sh default (stateful/classic)', () => {
+      const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).not.toContain('EVAL_SCOUT_ARCH');
+      expect(yaml).not.toContain('EVAL_SCOUT_DOMAIN');
     });
   });
 

@@ -86,6 +86,8 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--repetitions <n>`              |           | Number of times to repeat each example                                          |
 | `--space-ids <ids>`              |           | Comma-separated spaces to assign datasets and scores to (see [Spaces](#spaces)) |
 | `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                             |
+| `--scout-arch <arch>`            |           | Scout `--arch` (`stateful`/`serverless`); defaults to the suite's `scoutArch`  |
+| `--scout-domain <domain>`        |           | Scout `--domain` (e.g. `observability_complete`); defaults to the suite's      |
 | `--skip-init`                    |           | Skip automatic config and connector setup                                       |
 | `--dry-run`                      |           | Print configuration and exit without running                                    |
 
@@ -148,10 +150,11 @@ node scripts/evals logs --service edot --from-start
 
 ### `scout` -- Start Scout standalone
 
-Convenience wrapper around `node scripts/scout.js start-server` with evals defaults (`--arch stateful --domain classic --serverConfigSet evals_tracing`). Extra flags are forwarded to Scout.
+Convenience wrapper around `node scripts/scout.js start-server` with evals defaults (`--arch stateful --domain classic --serverConfigSet evals_tracing`). `--suite` uses a suite's `serverConfigSet` and `scoutArch` / `scoutDomain`, and runs its `scoutHook` on the `--profile` config; `--serverConfigSet`, `--arch` and `--domain` override them. Positional arguments are forwarded to Scout.
 
 ```bash
 node scripts/evals scout
+node scripts/evals scout --suite nightshift-investigations --profile dev-vault
 ```
 
 Use this when you want to manage Scout separately from the `start` workflow.

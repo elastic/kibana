@@ -22,7 +22,9 @@ import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertAgentTrace, assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
-evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
+const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
+
+evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, () => {
   evaluate(
     'persists ungraded investigations and complete agent traces',
     async ({ executorClient, connector, fetch, evalsClient, traceEsClient, repetitions, log }) => {

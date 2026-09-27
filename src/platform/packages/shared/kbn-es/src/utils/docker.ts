@@ -40,6 +40,7 @@ import {
 import { initializeUiamContainers, runUiamContainer, getUiamContainers } from './docker_uiam';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
+import { readFileSecrets } from './read_file_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
 import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
@@ -54,6 +55,7 @@ import {
   SERVERLESS_SECRETS_SSL_PATH,
   SERVERLESS_ROLES_ROOT_PATH,
   SERVERLESS_OPERATOR_PATH,
+  SERVERLESS_SECRETS_DIR,
 } from '../paths';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
@@ -186,6 +188,11 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
    * (see list of files that can be overwritten under `src/platform/packages/shared/kbn-es/src/serverless_resources/users`)
    */
   resources?: string | string[];
+  /**
+   * Secure settings files (`setting=/path/to/file`), delivered as `file_secrets` because
+   * serverless ES has no keystore
+   */
+  secureFiles?: string[];
   /** Configure ES serverless with UIAM support */
   uiam?: boolean;
   /** Configure ES serverless with UIAM OAuth support (starts an additional uiam-oauth container) */
@@ -813,11 +820,13 @@ export async function setupServerlessVolumes(
     ssl,
     files,
     resources,
+    secureFiles,
     projectType,
     productTier,
     dataPath = 'stateless',
   } = options;
   const objectStorePath = resolve(basePath, dataPath);
+  const fileSecrets = await readFileSecrets(secureFiles);
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
   log.indent(4);
@@ -939,7 +948,8 @@ export async function setupServerlessVolumes(
       esSettingsProjectTypeFromKbn.get(projectType)!,
       ssl,
       overrides?.projectId,
-      overrides?.operatorPath
+      overrides?.operatorPath,
+      fileSecrets
     )),
 
     '--volume',
@@ -1181,7 +1191,7 @@ export async function runLinkedServerlessCluster(log: ToolingLog, options: Serve
     uiam: true,
   };
 
-  const linkedOperatorPath = resolve(REPO_ROOT, '.es', `operator${LINKED_CLUSTER_NAME_SUFFIX}`);
+  const linkedOperatorPath = join(SERVERLESS_SECRETS_DIR, `operator${LINKED_CLUSTER_NAME_SUFFIX}`);
   const volumeCmd = await setupServerlessVolumes(log, linkedOptions, {
     projectId: linkedProject.projectId,
     operatorPath: linkedOperatorPath,
@@ -1326,7 +1336,11 @@ async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: S
 export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
   log.info('Stopping serverless ES cluster.');
 
-  await execa('docker', ['container', 'stop'].concat(nodes));
+  try {
+    await execa('docker', ['container', 'stop'].concat(nodes));
+  } finally {
+    await Fsp.rm(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
+  }
 }
 
 /**
@@ -1339,22 +1353,27 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
       ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) => image)
       : []),
   ];
-  const { stdout } = execa.commandSync(
-    `docker ps --filter status=running ${imagesToKillContainersFor
-      .map((image) => `--filter ancestor=${image}`)
-      .join(' ')} --quiet`
-  );
-  // Filter empty strings
-  const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
+  try {
+    const { stdout } = execa.commandSync(
+      `docker ps --filter status=running ${imagesToKillContainersFor
+        .map((image) => `--filter ancestor=${image}`)
+        .join(' ')} --quiet`
+    );
+    // Filter empty strings
+    const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
 
-  if (runningNodes.length) {
-    log.info('Killing running serverless containers.');
+    if (runningNodes.length) {
+      log.info('Killing running serverless containers.');
 
-    try {
-      execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
-    } catch {
-      log.debug('Some containers had already stopped before kill completed.');
+      try {
+        execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+      } catch {
+        log.debug('Some containers had already stopped before kill completed.');
+      }
     }
+  } finally {
+    // The operator settings carry the cluster secrets, so they must not outlive the cluster.
+    fs.rmSync(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
   }
 }
 
@@ -1421,13 +1440,20 @@ export async function runDockerContainer(
  * @param ssl Whether SSL is enabled (determines which secrets file to embed).
  * @param projectId Override for the project ID (defaults to MOCK_IDP_UIAM_PROJECT_ID).
  * @param operatorPath Override for the operator directory path on the host.
+ * @param fileSecrets Base64 file secrets to add to the cluster secrets.
  */
 async function getOperatorVolume(
   projectType: string,
   ssl: boolean = false,
   projectId: string = MOCK_IDP_UIAM_PROJECT_ID,
-  operatorPath: string = SERVERLESS_OPERATOR_PATH
+  operatorPath: string = SERVERLESS_OPERATOR_PATH,
+  fileSecrets: Record<string, string> = {}
 ) {
+  // Other host users cannot enter the owner-only parent, but the container reads the operator
+  // directory through a bind mount that never traverses it, so the directory and settings.json
+  // themselves stay readable by the elasticsearch user, whose uid need not match the host user's.
+  await Fsp.mkdir(SERVERLESS_SECRETS_DIR, { recursive: true });
+  await Fsp.chmod(SERVERLESS_SECRETS_DIR, 0o700);
   await Fsp.mkdir(operatorPath, { recursive: true });
 
   // Settings should include information about the project that's normally populated by the Elasticsearch Controller.
@@ -1455,12 +1481,16 @@ async function getOperatorVolume(
         metadata: { version: '100', compatibility: '' },
         state: {
           project: { ...projectInfo, tags: projectTags },
-          cluster_secrets: { string_secrets: stringSecrets },
+          cluster_secrets: {
+            string_secrets: stringSecrets,
+            ...(Object.keys(fileSecrets).length > 0 ? { file_secrets: fileSecrets } : {}),
+          },
         },
       },
       null,
       2
-    )
+    ),
+    { mode: 0o644 }
   );
   return ['--volume', `${operatorPath}:${SERVERLESS_CONFIG_PATH}operator`];
 }
