@@ -19,7 +19,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
+import type {
+  DocViewerApi,
+  DocViewerRestorableState,
+  DocViewerShareableState,
+} from '@kbn/unified-doc-viewer';
+import { mergeShareableStateIntoRestorable } from '@kbn/unified-doc-viewer';
 import { getDisplayedColumns, getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import {
@@ -71,6 +76,7 @@ export const DiscoverDocumentFlyout = memo(
     const expandedDocCascadePath = useCurrentTabSelector((state) => state.expandedDocCascadePath);
     const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocumentViewMeta);
     const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
+    const docViewerState = useAppStateSelector((state) => state.docViewerState);
     const cascadedColumnsMeta = useCurrentTabSelector(
       (state) => state.cascadedDocumentsState.columnsMeta
     );
@@ -140,6 +146,22 @@ export const DiscoverDocumentFlyout = memo(
       [dispatch, setInitialDocViewerTabIdAction]
     );
 
+    const setDocViewerShareableStateAction = useCurrentTabAction(
+      internalStateActions.setDocViewerShareableState
+    );
+    const onShareableStateChange = useCallback(
+      (newDocViewerState: DocViewerShareableState) => {
+        dispatch(setDocViewerShareableStateAction({ docViewerState: newDocViewerState }));
+      },
+      [dispatch, setDocViewerShareableStateAction]
+    );
+
+    // Restore the per-tab shareable slices from the URL by seeding the doc viewer's initial state.
+    const initialDocViewerState = useMemo(
+      () => mergeShareableStateIntoRestorable(docViewerUiState, docViewerState),
+      [docViewerUiState, docViewerState]
+    );
+
     const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
       () =>
         documentState.esqlQueryColumns
@@ -179,7 +201,7 @@ export const DiscoverDocumentFlyout = memo(
         columnsMeta={flyoutColumnsMeta}
         savedSearchId={persistedDiscoverSession?.id}
         query={query}
-        initialTabId={initialDocViewerTabId}
+        initialTabId={initialDocViewerTabId ?? docViewerState?.selectedTabId}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumn}
         onAddColumn={onAddColumn}
@@ -188,8 +210,9 @@ export const DiscoverDocumentFlyout = memo(
         flyoutMenuTrailingActions={flyoutMenuTrailingActions}
         docViewerRef={docViewerRef}
         onUpdateSelectedTabId={onUpdateSelectedTabId}
-        initialDocViewerState={docViewerUiState}
+        initialDocViewerState={initialDocViewerState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+        onShareableStateChange={onShareableStateChange}
       />
     );
   }
