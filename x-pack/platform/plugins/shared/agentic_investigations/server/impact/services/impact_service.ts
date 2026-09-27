@@ -28,6 +28,13 @@ interface VersionedImpact extends Impact {
   primaryTerm: number;
 }
 
+/** Document indexed by `attach`, plus the body that index overwrote. */
+export interface WrittenAttach {
+  written: Impact;
+  /** Absent when this attempt created the document. */
+  previous?: Impact;
+}
+
 /**
  * Owns every write to the impact index. One document per space and conversation:
  * attaching more entities unions them onto that record, which is what
@@ -39,7 +46,7 @@ export class ImpactService {
   async attach(
     params: AttachImpactRequest,
     { spaceId, user }: { spaceId: string; user?: User }
-  ): Promise<Impact> {
+  ): Promise<WrittenAttach> {
     const entities = unionEntities(params.entities);
     if (entities.length === 0) {
       throw new ImpactInvalidRequestError('entities must contain at least one entity');
@@ -54,9 +61,9 @@ export class ImpactService {
 
     const id = impactDocumentId(spaceId, params.conversationId);
     for (let attempt = 0; attempt < MAX_ATTACH_ATTEMPTS; attempt++) {
-      const written = await this.writeAttach(id, params.conversationId, spaceId, entities, user);
-      if (written) {
-        return written;
+      const attached = await this.writeAttach(id, params.conversationId, spaceId, entities, user);
+      if (attached) {
+        return attached;
       }
     }
 
@@ -89,8 +96,8 @@ export class ImpactService {
 
   /**
    * Undoes an attach whose conversation attachment did not land. Deletes a
-   * document this call created, or restores the previous entity set, only while
-   * the stored body is still the one `attach` wrote.
+   * document this call created, or restores `previous`, only while the stored
+   * body is still the one `attach` wrote. `previous` is the body that write overwrote.
    */
   async revertAttach({ written, previous }: { written: Impact; previous?: Impact }): Promise<void> {
     const current = await this.findById(written.id);
@@ -180,8 +187,8 @@ export class ImpactService {
   }
 
   /**
-   * Returns the written impact, or undefined when a concurrent attach won the
-   * version check and the caller should re-read and union again.
+   * Returns the indexed document and the body it overwrote, or undefined when a
+   * concurrent attach won the version check and the caller should re-read and union again.
    */
   private async writeAttach(
     id: string,
@@ -189,7 +196,7 @@ export class ImpactService {
     spaceId: string,
     entities: ImpactEntity[],
     user?: User
-  ): Promise<Impact | undefined> {
+  ): Promise<WrittenAttach | undefined> {
     const existing = await this.findById(id);
     if (!existing) {
       const document: ImpactDocument = {
@@ -201,7 +208,7 @@ export class ImpactService {
       };
       try {
         await this.deps.storage.index({ id, document, op_type: 'create' });
-        return toImpact(id, document);
+        return { written: toImpact(id, document) };
       } catch (error) {
         if (isVersionConflict(error)) {
           return undefined;
@@ -231,7 +238,7 @@ export class ImpactService {
         if_seq_no: existing.seqNo,
         if_primary_term: existing.primaryTerm,
       });
-      return toImpact(id, document);
+      return { written: toImpact(id, document), previous: withoutVersion(existing) };
     } catch (error) {
       if (isVersionConflict(error)) {
         return undefined;

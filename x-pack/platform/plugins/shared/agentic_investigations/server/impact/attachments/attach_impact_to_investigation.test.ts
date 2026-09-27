@@ -12,7 +12,6 @@ import {
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
 import { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
 import type { Impact } from '../../../common/impact/impact';
-import { ImpactNotFoundError } from '../services/errors';
 import { attachImpactToInvestigation } from './attach_impact_to_investigation';
 
 const impact: Impact = {
@@ -31,11 +30,8 @@ const ownerConversations = () =>
 const run = ({
   attachments,
   conversations = ownerConversations(),
-  readImpact = jest
-    .fn()
-    .mockResolvedValue(impact)
-    .mockRejectedValueOnce(new ImpactNotFoundError('conv-1')),
-  writeImpact = jest.fn().mockResolvedValue(impact),
+  readImpact = jest.fn().mockResolvedValue(impact),
+  writeImpact = jest.fn().mockResolvedValue({ written: impact }),
   revertImpact = jest.fn().mockResolvedValue(undefined),
 }: {
   attachments: AttachmentPublicClient;
@@ -56,7 +52,7 @@ const run = ({
 describe('attachImpactToInvestigation', () => {
   it('writes impact only after the caller is the conversation owner, then creates the attachment', async () => {
     const conversations = ownerConversations();
-    const writeImpact = jest.fn().mockResolvedValue(impact);
+    const writeImpact = jest.fn().mockResolvedValue({ written: impact });
     const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
 
     await run({
@@ -146,11 +142,11 @@ describe('attachImpactToInvestigation', () => {
     expect(result).toEqual(impact);
   });
 
-  it('reverts the index write when the attachment cannot be put on the conversation', async () => {
+  it('reverts to the document the successful write overwrote', async () => {
     const previous: Impact = { ...impact, entities: [{ id: 'user-1' }] };
-    const writeImpact = jest.fn().mockResolvedValue(impact);
+    const writeImpact = jest.fn().mockResolvedValue({ written: impact, previous });
     const revertImpact = jest.fn().mockResolvedValue(undefined);
-    const readImpact = jest.fn().mockResolvedValueOnce(previous).mockResolvedValue(impact);
+    const readImpact = jest.fn().mockResolvedValue(impact);
 
     await expect(
       run({
@@ -171,11 +167,8 @@ describe('attachImpactToInvestigation', () => {
       ...impact,
       entities: [{ id: 'host-1' }, { id: 'user-2' }],
     };
-    const writeImpact = jest.fn().mockResolvedValue(impact);
-    const readImpact = jest
-      .fn()
-      .mockResolvedValue(merged)
-      .mockRejectedValueOnce(new ImpactNotFoundError('conv-1'));
+    const writeImpact = jest.fn().mockResolvedValue({ written: impact });
+    const readImpact = jest.fn().mockResolvedValue(merged);
     const revertImpact = jest.fn().mockResolvedValue(undefined);
     const update = jest.fn().mockResolvedValue({ id: 'impact-1' });
     const attachments = {
@@ -209,12 +202,8 @@ describe('attachImpactToInvestigation', () => {
       ...impact,
       entities: [{ id: 'host-1' }, { id: 'user-2' }],
     };
-    const writeImpact = jest.fn().mockResolvedValue(impact);
-    const readImpact = jest
-      .fn()
-      .mockResolvedValue(merged)
-      .mockRejectedValueOnce(new ImpactNotFoundError('conv-1'))
-      .mockResolvedValueOnce(impact);
+    const writeImpact = jest.fn().mockResolvedValue({ written: impact });
+    const readImpact = jest.fn().mockResolvedValueOnce(impact).mockResolvedValue(merged);
     const update = jest.fn().mockResolvedValue({ id: 'impact-1' });
     const attachments = {
       create: jest

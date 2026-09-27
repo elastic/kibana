@@ -13,7 +13,7 @@ import {
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
 import { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
 import type { Impact } from '../../../common/impact/impact';
-import { ImpactNotFoundError } from '../services/errors';
+import type { WrittenAttach } from '../services/impact_service';
 
 /** Two stamps can race; retry while a fresher document appears. */
 const MAX_STAMP_ATTEMPTS = 3;
@@ -115,8 +115,8 @@ const stampCurrentImpact = async (
 /**
  * Writes impact only after the caller is allowed to update the conversation,
  * then puts the by-reference attachment from a fresh read. A failed attachment
- * write reverts the index write so a later read cannot see entities the
- * conversation does not carry.
+ * write restores the body the successful index overwrote, so a concurrent merge
+ * this call built on is kept.
  */
 export const attachImpactToInvestigation = async ({
   conversations,
@@ -130,21 +130,12 @@ export const attachImpactToInvestigation = async ({
   attachments: AttachmentPublicClient;
   conversationId: string;
   readImpact: () => Promise<Impact>;
-  writeImpact: () => Promise<Impact>;
+  writeImpact: () => Promise<WrittenAttach>;
   revertImpact: (args: { written: Impact; previous?: Impact }) => Promise<void>;
 }): Promise<Impact> => {
   await assertConversationOwner(conversations, conversationId);
 
-  let previous: Impact | undefined;
-  try {
-    previous = await readImpact();
-  } catch (error) {
-    if (!(error instanceof ImpactNotFoundError)) {
-      throw error;
-    }
-  }
-
-  const written = await writeImpact();
+  const { written, previous } = await writeImpact();
   try {
     return await stampCurrentImpact(attachments, readImpact);
   } catch (error) {

@@ -82,7 +82,7 @@ describe('ImpactService', () => {
       const storage = createStorage();
       const service = createService(storage);
 
-      const impact = await service.attach(
+      const { written: impact, previous } = await service.attach(
         { conversationId: CONVERSATION_ID, entities: [{ id: 'user-1' }, { id: 'host-1' }] },
         { spaceId: SPACE_ID, user: analyst }
       );
@@ -108,16 +108,16 @@ describe('ImpactService', () => {
       );
       expect(impact.entities).toEqual([{ id: 'user-1' }, { id: 'host-1' }]);
       expect(impact.id).toBe(id);
+      expect(previous).toBeUndefined();
       expect(impactDocumentId('other-space', CONVERSATION_ID)).not.toBe(id);
     });
 
     it('unions entities onto the existing document and fills fields a later attach adds', async () => {
-      const storage = createStorage(
-        baseDocument({ entities: [{ id: 'checkout-api', name: 'checkout-api' }] })
-      );
+      const existing = baseDocument({ entities: [{ id: 'checkout-api', name: 'checkout-api' }] });
+      const storage = createStorage(existing);
       const service = createService(storage);
 
-      const impact = await service.attach(
+      const { written: impact, previous } = await service.attach(
         {
           conversationId: CONVERSATION_ID,
           entities: [
@@ -164,6 +164,7 @@ describe('ImpactService', () => {
         },
         { id: 'host-1' },
       ]);
+      expect(previous).toEqual({ id: impact.id, ...existing });
     });
 
     it('refuses a create that exceeds the entity id ceiling', async () => {
@@ -203,7 +204,7 @@ describe('ImpactService', () => {
       storage.index.mockRejectedValueOnce(conflictError()).mockResolvedValueOnce({});
       const service = createService(storage);
 
-      const impact = await service.attach(
+      const { written: impact, previous } = await service.attach(
         { conversationId: CONVERSATION_ID, entities: [{ id: 'host-1' }] },
         { spaceId: SPACE_ID, user: analyst }
       );
@@ -225,6 +226,7 @@ describe('ImpactService', () => {
         })
       );
       expect(impact.entities).toEqual([{ id: 'service-1' }, { id: 'host-1' }]);
+      expect(previous).toEqual({ id: impact.id, ...winner });
     });
 
     it('retries a lost update and keeps entities both writers added', async () => {
@@ -241,7 +243,7 @@ describe('ImpactService', () => {
       storage.index.mockRejectedValueOnce(conflictError()).mockResolvedValueOnce({});
       const service = createService(storage);
 
-      const impact = await service.attach(
+      const { written: impact, previous } = await service.attach(
         { conversationId: CONVERSATION_ID, entities: [{ id: 'host-1' }] },
         { spaceId: SPACE_ID }
       );
@@ -255,6 +257,10 @@ describe('ImpactService', () => {
         })
       );
       expect(impact.entities).toEqual([{ id: 'user-1' }, { id: 'service-1' }, { id: 'host-1' }]);
+      expect(previous).toEqual({
+        id: impact.id,
+        ...baseDocument({ entities: [{ id: 'user-1' }, { id: 'service-1' }] }),
+      });
     });
 
     it('gives up when every attempt loses the version check', async () => {

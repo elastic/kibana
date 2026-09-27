@@ -42,6 +42,17 @@ const ownerConversation = {
   }),
 };
 
+/** The stamp reads back the document `attach` indexed. */
+const impactReadsAfterAttach = (attach: jest.Mock) =>
+  jest.fn(async () => {
+    const attached = [...attach.mock.results].reverse().find((entry) => entry.type === 'return');
+    if (!attached) {
+      throw new ImpactNotFoundError('conv-1');
+    }
+    const result = await attached.value;
+    return result.written;
+  });
+
 const registerAndCollect = (
   service: Partial<ImpactService>,
   getAttachmentClient: ImpactRouteDependencies['getAttachmentClient'] = async () =>
@@ -57,6 +68,7 @@ const registerAndCollect = (
   const router = httpServiceMock.createRouter();
   const posts: RegisteredRoute[] = [];
   const gets: RegisteredRoute[] = [];
+  const attach = (service.attach ?? jest.fn()) as jest.Mock;
 
   (router.versioned.post as jest.Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => posts.push({ config, handler }),
@@ -70,10 +82,11 @@ const registerAndCollect = (
     logger: loggingSystemMock.createLogger(),
     getImpactService: () =>
       ({
-        getByConversationId: jest.fn().mockRejectedValue(new ImpactNotFoundError('conv-1')),
         revertAttach: jest.fn().mockResolvedValue(undefined),
         ...service,
-      } as ImpactService),
+        attach,
+        getByConversationId: service.getByConversationId ?? impactReadsAfterAttach(attach),
+      } as unknown as ImpactService),
     getSpaceId: () => 'default',
     resolveUser: async () => ANALYST,
     getAttachmentClient,
@@ -104,7 +117,9 @@ describe('investigation impact routes', () => {
   });
 
   it('attaches through the service with the space and the resolved user, never a body actor', async () => {
-    const attach = jest.fn().mockResolvedValue({ id: 'impact-1', entities: [{ id: 'user-1' }] });
+    const attach = jest.fn().mockResolvedValue({
+      written: { id: 'impact-1', conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
+    });
     const { posts } = registerAndCollect({ attach });
     const response = httpServerMock.createResponseFactory();
 
@@ -129,7 +144,7 @@ describe('investigation impact routes', () => {
       conversationId: 'conv-1',
       entities: [{ id: 'user-1' }],
     };
-    const attach = jest.fn().mockResolvedValue(impact);
+    const attach = jest.fn().mockResolvedValue({ written: impact });
     const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
     const conversations = {
       get: jest.fn().mockResolvedValue({

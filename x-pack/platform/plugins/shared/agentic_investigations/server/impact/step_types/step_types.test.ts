@@ -94,7 +94,16 @@ describe('investigations.attachImpact step', () => {
       getImpactService: () =>
         ({
           attach,
-          getByConversationId: jest.fn().mockRejectedValue(new ImpactNotFoundError('conv-1')),
+          getByConversationId: jest.fn(async () => {
+            const attached = [...attach.mock.results]
+              .reverse()
+              .find((entry) => entry.type === 'return');
+            if (!attached) {
+              throw new ImpactNotFoundError('conv-1');
+            }
+            const result = await attached.value;
+            return result.written;
+          }),
           revertAttach: jest.fn().mockResolvedValue(undefined),
         } as unknown as ImpactService),
       resolveUser,
@@ -108,9 +117,11 @@ describe('investigations.attachImpact step', () => {
   it('should attach through the service with the space and the resolved user', async () => {
     const entities = [{ id: 'user-1' }, { id: 'host-1', name: 'fin-dc-01' }];
     const attach = jest.fn().mockResolvedValue({
-      id: 'impact-1',
-      conversationId: 'conv-1',
-      entities,
+      written: {
+        id: 'impact-1',
+        conversationId: 'conv-1',
+        entities,
+      },
     });
     const { definition } = createDefinition(attach);
 
@@ -173,7 +184,7 @@ describe('investigations.attachImpact step', () => {
       conversationId: 'conv-1',
       entities: [{ id: 'user-1' }],
     };
-    const attach = jest.fn().mockResolvedValue(impact);
+    const attach = jest.fn().mockResolvedValue({ written: impact });
     const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
     const { definition } = createDefinition(attach, allowAll(), async () => ({ create }));
 
