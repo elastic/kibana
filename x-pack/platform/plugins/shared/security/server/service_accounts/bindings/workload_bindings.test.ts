@@ -80,6 +80,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
       reauthenticateFakeRequest: jest.fn(),
       releaseFakeRequest: jest.fn(),
+      getFakeRequestPrincipal: jest.fn(),
     };
 
     license = licenseMock.create();

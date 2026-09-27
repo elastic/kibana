@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedPrincipal, AuthenticatedUser } from '@kbn/core-security-common';
 import type { APIKeysType } from './authentication';
 
 /**
@@ -24,6 +24,16 @@ export interface CoreAuthenticationService {
    * @param request The request to retrieve the authenticated user for.
    */
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
+  /**
+   * Classify the principal bound to the provided request: a user, an anonymous user, an API key
+   * or a service account, each Elasticsearch-issued (`stack`) or UIAM-issued (`uiam`) where that
+   * applies. Performs no I/O.
+   *
+   * `null` means no authenticated principal is known, e.g. for unauthenticated requests.
+   *
+   * @param request The request to classify the authenticated principal for.
+   */
+  getPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null;
   /**
    * Retrieve the redacted session ID for the provided request.
    * Returns a redacted form of the session ID (e.g. last N characters).

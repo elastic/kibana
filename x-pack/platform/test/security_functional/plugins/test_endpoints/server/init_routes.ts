@@ -1045,6 +1045,23 @@ export function initRoutes(
     }
   );
 
+  // Reports how Core classified the request's principal. Authorization is intentionally off:
+  // the point is to observe classification for every credential kind, including ones without
+  // Kibana privileges.
+  router.get(
+    {
+      path: '/test_endpoints/principal',
+      validate: false,
+      security: {
+        authz: { enabled: false, reason: 'Test endpoint reporting the authenticated principal' },
+      },
+    },
+    async (context, request, response) => {
+      const { security: coreSecurity } = await context.core;
+      return response.ok({ body: { principal: coreSecurity.authc.getPrincipal() } });
+    }
+  );
+
   // UIAM API Key Grant Route
   router.post(
     {
