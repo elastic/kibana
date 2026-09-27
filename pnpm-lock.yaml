@@ -316,8 +316,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
@@ -4370,8 +4368,8 @@ importers:
         specifier: 3.3.3
         version: 3.3.3(react@18.2.0)
       copy-to-clipboard:
-        specifier: 3.3.3
-        version: 3.3.3
+        specifier: 4.0.2
+        version: 4.0.2
       core-js:
         specifier: 3.50.0
         version: 3.50.0
@@ -4418,8 +4416,8 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
       dom-to-image-more:
-        specifier: 3.6.0
-        version: 3.6.0
+        specifier: 3.10.2
+        version: 3.10.2
       dompurify:
         specifier: 3.4.14
         version: 3.4.14
@@ -4634,8 +4632,8 @@ importers:
         specifier: 3.24.3
         version: 3.24.3(@types/node@24.10.13)
       node-diff3:
-        specifier: 3.1.2
-        version: 3.1.2
+        specifier: 3.2.1
+        version: 3.2.1
       node-fetch:
         specifier: 2.7.0
         version: 2.7.0
@@ -4718,8 +4716,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(@types/react@18.2.79)(react@18.2.0)
       react-diff-view:
-        specifier: 3.3.1
-        version: 3.3.1(react@18.2.0)
+        specifier: 3.3.3
+        version: 3.3.3(react@18.2.0)
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
@@ -4788,13 +4786,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -4847,8 +4845,8 @@ importers:
         specifier: 7.8.8
         version: 7.8.8
       snakecase-keys:
-        specifier: 8.0.1
-        version: 8.0.1
+        specifier: 9.0.2
+        version: 9.0.2
       source-map-support:
         specifier: 0.5.21
         version: 0.5.21
@@ -4883,8 +4881,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       type-fest:
-        specifier: 4.41.0
-        version: 4.41.0
+        specifier: 5.9.0
+        version: 5.9.0
       typescript-fsa:
         specifier: 3.0.0
         version: 3.0.0
@@ -5974,7 +5972,7 @@ importers:
         version: 1.63.0
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.6.2
-        version: 0.6.2(@types/webpack@5.28.5(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-dev-server@5.2.6)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
+        version: 0.6.2(@types/webpack@5.28.5(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@5.9.0)(webpack-dev-server@5.2.6)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
       '@redocly/cli':
         specifier: 2.35.1
         version: 2.35.1
@@ -16948,6 +16946,9 @@ packages:
   chance@1.1.13:
     resolution: {integrity: sha512-V6lQCljcLznE7tUYUM9EOAnnKXbctE6j/rdQkYOHIWbfGQbrzTsAXNW9CdU5XCo4ArXQCj/rb6HgxPlmGJcaUg==}
 
+  change-case@5.4.4:
+    resolution: {integrity: sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w==}
+
   change-emitter@0.1.6:
     resolution: {integrity: sha512-YXzt1cQ4a2jqazhcuSWEOc1K2q8g9H6eWNsyZgi640LDzRWVQ2eDe+Y/kVdftH+vYdPF2rgDb3dLdpxE1jvAxw==}
 
@@ -17433,6 +17434,9 @@ packages:
 
   copy-to-clipboard@3.3.3:
     resolution: {integrity: sha512-2KV8NhB5JqC3ky0r9PMCAZKbUHSwtEo4CwCs0KXgruG43gX5PMqDEBbVU4OUzw2MuAWUfsuFmWvEKG5QRfSnJA==}
+
+  copy-to-clipboard@4.0.2:
+    resolution: {integrity: sha512-gklSft7IuhriZKHKpuoA1fpJSLPNgvUMWMo5BlnzAJm0zNKnznoSv23IjtNqclx8eKi6ZcdvFFzYEER/+U1LoQ==}
 
   core-js-compat@3.50.0:
     resolution: {integrity: sha512-XGpFGbMLHwSt74YLTKho7Ib242qi6O8MSX+sRokV4oz7iKXvQWGYZthjIhjRGMxjzVkAubBO512dKGYcefmX3Q==}
@@ -18238,8 +18242,8 @@ packages:
   dom-serializer@2.0.0:
     resolution: {integrity: sha512-wIkAryiqt/nV5EQKqQpo3SToSOV9J0DnbJqwK7Wv/Trc92zIAYZ4FlMu+JPFW1DfGFt81ZTCGgDEabffXeLyJg==}
 
-  dom-to-image-more@3.6.0:
-    resolution: {integrity: sha512-0BB0M9gRRP7znKBNLRAvNyWnkDIzSgMSDcS7WdPDzPnWhW2YJqxUR/dCHiJ2HdCV3K2rVky5Vba8UF31mvrCuQ==}
+  dom-to-image-more@3.10.2:
+    resolution: {integrity: sha512-+ZNbiRB7Fpsfzn8WSCmAIKUFSXp8uahlI+LsY8t8oWtAATqokeKS3eD3oQikheouap6aVMht8y0b4oAobWRr9w==}
 
   domain-browser@4.22.0:
     resolution: {integrity: sha512-IGBwjF7tNk3cwypFNH/7bfzBcgSCbaMOD3GsaY1AU/JRrnHnYgEM0+9kQt52iZxjNsjBtJYtao146V+f8jFZNw==}
@@ -21242,6 +21246,10 @@ packages:
     resolution: {integrity: sha512-hdN1wVrZbb29eBGiGjJbeP8JbKjq1urkHJ/LIP/NY48MZ1QVXUsQBV1G1zvYFHn1XE06cwjBsOI2K3Ulnj1YXQ==}
     engines: {node: '>=8'}
 
+  map-obj@5.0.2:
+    resolution: {integrity: sha512-K6K2NgKnTXimT3779/4KxSvobxOtMmx1LBZ3NwRxT/MDIR3Br/fQ4Q+WCX5QxjyUR8zg5+RV9Tbf2c5pAWTD2A==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   map-or-similar@1.5.0:
     resolution: {integrity: sha512-0aF7ZmVon1igznGI4VS30yugpduQW3y3GkcgGJOp7d8x8QrizhigUxjI/m2UojsXXto+jLAH3KSz+xOJTiORjg==}
 
@@ -21896,9 +21904,9 @@ packages:
     resolution: {integrity: sha512-VijLXbi3UACN69I0JVXJsX4tjACjNoQDgv2gTF6sx2wWEi8tkSg2eX8p5gSIFi8z2+DL3oHmY6OyKce38SDolg==}
     engines: {node: ^18 || ^20 || >= 21}
 
-  node-diff3@3.1.2:
-    resolution: {integrity: sha512-wUd9TWy059I8mZdH6G3LPNlAEfxDvXtn/RcyFrbqL3v34WlDxn+Mh4HDhOwWuaMk/ROVepe5tTpnGHbve6Db2g==}
-    engines: {node: '>14'}
+  node-diff3@3.2.1:
+    resolution: {integrity: sha512-eKZcJ8RtMQ3cIaA15EgmtwG927fYnRlhtdA4Q9HAcCpAZPQhhU2XptnTH9GeAkMiX2bAXxlJSAFa9shFbztPgw==}
+    engines: {bun: '>=1.3.10'}
 
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
@@ -23209,8 +23217,8 @@ packages:
       '@types/react':
         optional: true
 
-  react-diff-view@3.3.1:
-    resolution: {integrity: sha512-Xeh3g5p6IUN4GvtSLAeNDyZwC9mYUqpVhCN6973B7pBywn+d5SMjTKL0pTt3WyXBCzhwCX8STk2Az2tEizCwCA==}
+  react-diff-view@3.3.3:
+    resolution: {integrity: sha512-CPveApk6n7ZbkW7T6PoptR7LWAvD9hohTHZ7WnKnu3GZkTfUB5rvg486apPo94iYVi4fZd3Nt+rtBZ5877exoQ==}
     peerDependencies:
       react: '>=16.14.0'
 
@@ -23562,12 +23570,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -24366,12 +24378,9 @@ packages:
     resolution: {integrity: sha512-kCZr2V3ch9i00x8zXRhjUNVcjG9ijES5dDudkXvUVCT5QlJNQWElSJdZqyPemffHoLNUYwOcou0Fy+ojN0uHSQ==}
     engines: {node: '>= 18'}
 
-  snake-case@3.0.4:
-    resolution: {integrity: sha512-LAOh4z89bGQvl9pFfNF8V146i7o7/CqFPbqzYgP+yYzDIDeS9HaNFtXABamRW+AQzEVODcvE79ljJ+8a9YSdMg==}
-
-  snakecase-keys@8.0.1:
-    resolution: {integrity: sha512-Sj51kE1zC7zh6TDlNNz0/Jn1n5HiHdoQErxO8jLtnyrkJW/M5PrI7x05uDgY3BO7OUQYKCvmeMurW6BPUdwEOw==}
-    engines: {node: '>=18'}
+  snakecase-keys@9.0.2:
+    resolution: {integrity: sha512-Tr4gONsDj1Pa6HJH9D3b411r6tuRyCGgb1l7YpzDFp/thjVSWs7rcbNjyTyRqJi5SUV23sFpzf9epIJRbLR6Yw==}
+    engines: {node: '>=22'}
 
   socket.io-adapter@2.5.8:
     resolution: {integrity: sha512-6Oy52pbg+kvdCVvjcN+FnY7BvxZ7cIHNScbvztT/It5d0vbwoJoVZmF2gjJmnV0/4WlXRfG15zc45ySk9Ah8bw==}
@@ -31267,7 +31276,7 @@ snapshots:
     dependencies:
       playwright: 1.63.0
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.6.2(@types/webpack@5.28.5(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-dev-server@5.2.6)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)':
+  '@pmmmwh/react-refresh-webpack-plugin@0.6.2(@types/webpack@5.28.5(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4))(react-refresh@0.18.0)(type-fest@5.9.0)(webpack-dev-server@5.2.6)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)':
     dependencies:
       anser: 2.3.5
       core-js-pure: 3.50.0
@@ -31279,7 +31288,7 @@ snapshots:
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4)
     optionalDependencies:
       '@types/webpack': 5.28.5(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4)
-      type-fest: 4.41.0
+      type-fest: 5.9.0
       webpack-dev-server: 5.2.6(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(webpack-cli@5.1.4)(webpack@5.96.1)
       webpack-hot-middleware: 2.26.1
 
@@ -31375,7 +31384,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -34672,6 +34681,8 @@ snapshots:
 
   chance@1.1.13: {}
 
+  change-case@5.4.4: {}
+
   change-emitter@0.1.6: {}
 
   char-regex@1.0.2: {}
@@ -35115,6 +35126,8 @@ snapshots:
   copy-to-clipboard@3.3.3:
     dependencies:
       toggle-selection: 1.0.6
+
+  copy-to-clipboard@4.0.2: {}
 
   core-js-compat@3.50.0:
     dependencies:
@@ -36063,7 +36076,7 @@ snapshots:
       domhandler: 5.0.3
       entities: 4.5.0
 
-  dom-to-image-more@3.6.0: {}
+  dom-to-image-more@3.10.2: {}
 
   domain-browser@4.22.0: {}
 
@@ -39860,6 +39873,8 @@ snapshots:
 
   map-obj@4.3.0: {}
 
+  map-obj@5.0.2: {}
+
   map-or-similar@1.5.0: {}
 
   mapbox-gl-draw-rectangle-mode@1.0.4: {}
@@ -40798,7 +40813,7 @@ snapshots:
   node-addon-api@8.9.2:
     optional: true
 
-  node-diff3@3.1.2: {}
+  node-diff3@3.2.1: {}
 
   node-domexception@1.0.0: {}
 
@@ -42251,7 +42266,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.2.79
 
-  react-diff-view@3.3.1(react@18.2.0):
+  react-diff-view@3.3.3(react@18.2.0):
     dependencies:
       classnames: 2.5.1
       diff-match-patch: 1.0.5
@@ -42740,17 +42755,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
@@ -43665,15 +43684,10 @@ snapshots:
 
   smol-toml@1.8.0: {}
 
-  snake-case@3.0.4:
+  snakecase-keys@9.0.2:
     dependencies:
-      dot-case: 3.0.4
-      tslib: 2.8.1
-
-  snakecase-keys@8.0.1:
-    dependencies:
-      map-obj: 4.3.0
-      snake-case: 3.0.4
+      change-case: 5.4.4
+      map-obj: 5.0.2
       type-fest: 4.41.0
 
   socket.io-adapter@2.5.8(supports-color@10.2.2):
