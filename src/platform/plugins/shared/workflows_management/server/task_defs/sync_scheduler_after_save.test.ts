@@ -151,4 +151,35 @@ describe('syncSchedulerAfterSave', () => {
       mockRequest
     );
   });
+
+  it('does not schedule an enabled global workflow with scheduled triggers', async () => {
+    await syncSchedulerAfterSave({
+      workflowId: 'wf-1',
+      spaceId: '*',
+      request: mockRequest,
+      getWorkflow: makeGetWorkflow(baseWorkflow),
+      taskScheduler: mockTaskScheduler,
+      logger,
+    });
+
+    expect(mockTaskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+    expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Skipping scheduled triggers for global workflow wf-1: scheduling global workflows is not supported'
+    );
+  });
+
+  it('still unschedules a disabled global workflow', async () => {
+    await syncSchedulerAfterSave({
+      workflowId: 'wf-1',
+      spaceId: '*',
+      request: mockRequest,
+      getWorkflow: makeGetWorkflow({ ...baseWorkflow, enabled: false }),
+      taskScheduler: mockTaskScheduler,
+      logger,
+    });
+
+    expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
+    expect(mockTaskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+  });
 });

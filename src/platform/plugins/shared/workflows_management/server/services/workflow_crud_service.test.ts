@@ -2727,7 +2727,7 @@ describe('WorkflowCrudService', () => {
       expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
     });
 
-    it('uses the persisted space for the post-write scheduler re-read', async () => {
+    it('re-reads a global workflow in the persisted space and does not schedule it', async () => {
       const taskScheduler = makeTaskScheduler();
       const { deps, client } = makeDeps();
       (deps as any).getTaskScheduler = () => taskScheduler;
@@ -2770,11 +2770,55 @@ describe('WorkflowCrudService', () => {
           },
         })
       );
-      expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'wf-1' }),
-        '*',
-        request
+      expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+      expect(deps.logger.warn).toHaveBeenCalledWith(
+        'Skipping scheduled triggers for global workflow wf-1: scheduling global workflows is not supported'
       );
+    });
+
+    it('unschedules a global workflow disabled from a named space', async () => {
+      const taskScheduler = makeTaskScheduler();
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      } as any;
+      const existingSource = makeSource({
+        spaceId: '*',
+        enabled: true,
+        valid: true,
+        triggerTypes: ['scheduled'],
+        definition: scheduledDefinition,
+      });
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [{ _id: 'wf-1', _source: existingSource, _seq_no: 2, _primary_term: 1 }],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({
+                  ...existingSource,
+                  enabled: false,
+                  definition: { ...scheduledDefinition, enabled: false },
+                }),
+              },
+            ],
+          },
+        });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
+
+      expect(taskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
+      expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
     });
   });
 
