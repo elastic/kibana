@@ -2884,6 +2884,38 @@ describe('LogsExtractionClient sampling wiring', () => {
     expect(result.success && result.logsProcessed).toBe(1);
   });
 
+  it('recalculates the rate for a later slice from the budget the earlier slice consumed', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority);
+    // Slice 1: 11:50→11:51 (1 min), 60K raw. Projects 540K remaining (8 min left at this
+    // density) → p1 ≈ 0.185, consuming ~11.1K of the 100K default budget.
+    // Slice 2: 11:51→11:55 (4 min), 60K raw. Same raw volume as slice 1, but spread over a
+    // longer slice with less window left (4 min) projects only 120K remaining, and the budget
+    // is down to ~88.9K after slice 1 → p2 ≈ 0.741. Both rates land strictly inside (0.1, 1),
+    // and p2 is well above p1: as the window nears its end there is less left to protect,
+    // so the rate recomputed from the remaining budget rises, exactly the self-correction
+    // the resolver is meant to produce - only reachable if slice 2 truly recalculates instead
+    // of reusing slice 1's rate.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:51:00.000Z', 6000))
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:55:00.000Z', 6000))
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    const [firstQuery, secondQuery] = extractionQueries();
+    const rateOf = (query: string) => Number(query.match(/\| SAMPLE ([\d.]+)/)?.[1]);
+    const firstRate = rateOf(firstQuery);
+    const secondRate = rateOf(secondQuery);
+
+    expect(firstRate).toBeCloseTo(0.185, 2);
+    expect(secondRate).toBeCloseTo(0.741, 2);
+    expect(secondRate).toBeGreaterThan(firstRate);
+  });
+
   describe('sampling metrics', () => {
     // Spies must be created after createSamplingContext, whose clearAllMocks would wipe them.
     const spySampleMetrics = () => ({
