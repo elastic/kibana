@@ -10,6 +10,7 @@
 import Boom from '@hapi/boom';
 import isEqual from 'lodash/isEqual';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 
 import type { IndexWorkflowDocumentOptions } from './workflow_occ_types';
@@ -62,6 +63,11 @@ export const withWorkflowBindingChange = async <T>({
   } | null>;
 }): Promise<T> => {
   if (!previousAccountId && !accountId) return write();
+  if (spaceId === GLOBAL_WORKFLOW_SPACE_ID) {
+    throw Boom.badRequest(
+      'Service account bindings require a workflow installed in a specific space.'
+    );
+  }
   if (!bindings.isEnabled()) throw Boom.forbidden('Service account execution is disabled.');
   const authenticatedRequest = await ensureWorkflowServiceAccountMutationAuthorized(core, request);
   const coordinates = { workloadType: 'workflow', workloadId: workflowId, spaceId };

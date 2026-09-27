@@ -83,9 +83,22 @@ describe('resumeWorkflow', () => {
         settings: { run_as: 'account-a' },
       },
     });
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      'run-identity-failure',
+      'default'
+    );
+    if (!execution) throw new Error('Missing test execution');
+    jest
+      .spyOn(workflowExecutionRepository, 'getWorkflowExecutionWithVersion')
+      .mockResolvedValue({ execution, seqNo: 1, primaryTerm: 1 });
+    jest
+      .spyOn(workflowExecutionRepository, 'tryUpdateWorkflowExecutionWithVersion')
+      .mockResolvedValue(true);
     const stepExecutionRepository = createMockStepExecutionRepository();
     stepExecutionRepository.markNonTerminalStepsFailed.mockImplementation(async () => {
-      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(
+        workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion
+      ).not.toHaveBeenCalled();
     });
 
     await expect(
@@ -107,8 +120,9 @@ describe('resumeWorkflow', () => {
       'run-identity-failure',
       expect.objectContaining({ type: 'ServiceAccountExecutionError' })
     );
-    expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-      expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) })
+    expect(workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) }),
+      { seqNo: 1, primaryTerm: 1 }
     );
     expect(mockSetupDependencies).not.toHaveBeenCalled();
     expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();

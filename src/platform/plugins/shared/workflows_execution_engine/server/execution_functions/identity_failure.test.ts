@@ -62,10 +62,36 @@ const setup = () => {
       settings: { run_as: 'account-a', concurrency: { strategy: 'queue', max: 1 } },
     },
   };
-  const repository = new WorkflowExecutionRepository(createMockWorkflowDataClient());
+  let seqNo = 1;
+  const dataClient = createMockWorkflowDataClient();
+  dataClient.getByIds.mockImplementation(async () => ({
+    items: [{ document: execution, index: '.workflows-executions', seqNo, primaryTerm: 1 }],
+    missing: [],
+  }));
+  dataClient.bulk.mockImplementation(async ({ items }) => {
+    const item = items[0];
+    if (item.seqNo !== seqNo) {
+      return {
+        errors: true,
+        items: [
+          {
+            id: 'child',
+            index: '.workflows-executions',
+            error: { type: 'version_conflict_engine_exception' },
+          },
+        ],
+      };
+    }
+    execution = { ...execution, ...item.document };
+    seqNo++;
+    return { errors: false, items: [{ id: 'child', index: '.workflows-executions' }] };
+  });
+  const repository = new WorkflowExecutionRepository(dataClient);
+  jest.spyOn(repository, 'tryUpdateWorkflowExecutionWithVersion');
   jest.spyOn(repository, 'getWorkflowExecutionById').mockImplementation(async () => execution);
   jest.spyOn(repository, 'updateWorkflowExecution').mockImplementation(async (update) => {
     execution = { ...execution, ...update };
+    seqNo++;
   });
   const meteringService = new WorkflowsMeteringService(
     usageApiPluginMock.createSetupContract().usageReporting,
@@ -74,6 +100,7 @@ const setup = () => {
   jest.spyOn(meteringService, 'reportWorkflowExecution').mockResolvedValue(undefined);
   return {
     accounts,
+    dataClient,
     setTestRun: () => {
       execution.isTestRun = true;
     },
@@ -101,7 +128,10 @@ describe.each([
   ['run', runWorkflow],
   ['resume', resumeWorkflow],
 ] as const)('%s identity failure', (_name, execute) => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(drainConcurrencyQueueSlots).mockReset();
+  });
 
   it('finalizes the execution and immediately wakes its parent, drains the queue and reports metering', async () => {
     const { params } = setup();
@@ -195,7 +225,8 @@ describe.each([
     await execute(params);
 
     expect(accounts.withScopedRequestForWorkload).toHaveBeenCalledTimes(1);
-    expect(repository.updateWorkflowExecution).toHaveBeenCalledTimes(2);
+    expect(repository.tryUpdateWorkflowExecutionWithVersion).toHaveBeenCalledTimes(1);
+    expect(repository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
     expect({
       parentResumes: params.internalResumeWorkflowExecution.mock.calls,
       queueDrains: jest.mocked(drainConcurrencyQueueSlots).mock.calls,
@@ -230,5 +261,67 @@ describe.each([
     expect(params.internalResumeWorkflowExecution).toHaveBeenCalledTimes(1);
     expect(drainConcurrencyQueueSlots).toHaveBeenCalledTimes(1);
     expect(params.meteringService.reportWorkflowExecution).toHaveBeenCalledTimes(1);
+  });
+  it('retries failed queue cleanup and retains the marker until it succeeds', async () => {
+    const { params } = setup();
+    jest.mocked(drainConcurrencyQueueSlots).mockRejectedValueOnce(new Error('ES unavailable'));
+    await expect(execute(params)).rejects.toThrow('queue cleanup is still pending');
+    expect(
+      (await params.workflowExecutionRepository.getWorkflowExecutionById('child', 'default'))
+        ?.context?.serviceAccountFailureCleanupPending
+    ).toBe(true);
+    await execute(params);
+    expect(drainConcurrencyQueueSlots).toHaveBeenCalledTimes(2);
+    expect(
+      (await params.workflowExecutionRepository.getWorkflowExecutionById('child', 'default'))
+        ?.context?.serviceAccountFailureCleanupPending
+    ).toBe(false);
+  });
+
+  it.each(['during minting', 'during finalization'])(
+    'preserves a cancellation committed %s',
+    async (when) => {
+      const { params, accounts } = setup();
+      const cancel = async () =>
+        params.workflowExecutionRepository.updateWorkflowExecution({
+          id: 'child',
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+        });
+      if (when === 'during minting') {
+        jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+          await cancel();
+          throw new Error('Binding changed');
+        });
+      } else {
+        jest
+          .mocked(params.stepExecutionRepository.markNonTerminalStepsFailed)
+          .mockImplementationOnce(cancel);
+      }
+      await expect(execute(params)).rejects.toThrow('Binding changed');
+      expect(
+        (await params.workflowExecutionRepository.getWorkflowExecutionById('child', 'default'))
+          ?.status
+      ).toBe(ExecutionStatus.CANCELLED);
+      expect(params.workflowsExecutionEngine.triggerEvents.emitEvent).not.toHaveBeenCalled();
+    }
+  );
+
+  it('finalizes a pending cancellation instead of emitting an identity-failure event', async () => {
+    const { params, accounts } = setup();
+    jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+      await params.workflowExecutionRepository.updateWorkflowExecution({
+        id: 'child',
+        cancelRequested: true,
+      });
+      throw new Error('Binding changed');
+    });
+    await expect(execute(params)).rejects.toThrow('Binding changed');
+    expect(
+      (await params.workflowExecutionRepository.getWorkflowExecutionById('child', 'default'))
+        ?.status
+    ).toBe(ExecutionStatus.CANCELLED);
+    expect(params.workflowsExecutionEngine.triggerEvents.emitEvent).not.toHaveBeenCalled();
+    expect(drainConcurrencyQueueSlots).toHaveBeenCalledTimes(1);
   });
 });

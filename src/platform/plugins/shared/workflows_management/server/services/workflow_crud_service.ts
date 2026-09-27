@@ -208,7 +208,8 @@ export class WorkflowCrudService {
   }
 
   private async getWorkflowRevision(
-    id: string
+    id: string,
+    spaceId: string
   ): Promise<
     (Pick<VersionedWorkflowDocument, 'seqNo' | 'primaryTerm'> & { accountId?: string }) | null
   > {
@@ -219,13 +220,14 @@ export class WorkflowCrudService {
         .elasticsearch.client.asInternalUser.get<WorkflowProperties>({
           index: workflowIndexName,
           id,
-          _source_includes: ['definition.settings.run_as', 'deleted_at'],
+          _source_includes: ['definition.settings.run_as', 'deleted_at', 'spaceId'],
           realtime: true,
         });
       if (!response.found) return null;
       if (response._seq_no == null || response._primary_term == null || !response._source) {
         throw new Error(`Missing workflow revision or source for ${id}.`);
       }
+      if (response._source.spaceId !== spaceId) return null;
       return {
         seqNo: response._seq_no,
         primaryTerm: response._primary_term,
@@ -295,7 +297,7 @@ export class WorkflowCrudService {
       request: options?.request,
       previousAccountId: previous?.definition?.settings?.run_as,
       accountId,
-      getWorkflowRevision: () => this.getWorkflowRevision(id),
+      getWorkflowRevision: () => this.getWorkflowRevision(id, document.spaceId),
       write,
     });
   }
@@ -683,6 +685,7 @@ export class WorkflowCrudService {
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
     const validWorkflows: BulkWorkflowEntry[] = [];
+    const seenCustomIds = new Set<string>();
 
     for (let i = 0; i < workflows.length; i++) {
       try {
@@ -699,6 +702,12 @@ export class WorkflowCrudService {
           spaceId,
           triggerDefinitions,
         });
+
+        if (customId) {
+          if (seenCustomIds.has(customId))
+            throw new Error(`Duplicate workflow id '${customId}' in batch`);
+          seenCustomIds.add(customId);
+        }
 
         if (prepared.definition?.settings?.run_as && !options?.overwrite) {
           created.push(await this.createWorkflow(workflows[i], spaceId, request));
@@ -1049,85 +1058,70 @@ export class WorkflowCrudService {
     request?: KibanaRequest
   ): Promise<DeleteWorkflowsResponse> {
     const bindings = this.deps.getServiceAccountBindings?.();
-    if (bindings) {
-      const workflows = await this.getWorkflowsByIds(ids, spaceId, { includeDeleted: true });
-      if (workflows.some((workflow) => workflow.definition?.settings?.run_as)) {
-        const result: DeleteWorkflowsResponse = {
-          total: ids.length,
-          deleted: 0,
-          failures: [],
-          successfulIds: [],
-        };
-        for (const id of ids) {
-          const workflow = workflows.find((item) => item.id === id);
-          try {
-            let versionedWorkflow: VersionedWorkflowDocument | undefined;
-            if (workflow?.definition?.settings?.run_as) {
-              await ensureWorkflowServiceAccountMutationAuthorized(
-                this.deps.getCoreStart(),
-                request
+    if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, options);
+    const result: DeleteWorkflowsResponse = {
+      total: ids.length,
+      deleted: 0,
+      failures: [],
+      successfulIds: [],
+    };
+    const deleteWorkflow = async (id: string): Promise<void> => {
+      try {
+        // Authorize and delete the same revision, including initially unbound workflows.
+        const versioned = await this.getWorkflowDocumentWithVersion(id, spaceId, {
+          includeDeleted: true,
+        });
+        if (!versioned) return;
+        const accountId = versioned.source.definition?.settings?.run_as;
+        if (accountId) {
+          await ensureWorkflowServiceAccountMutationAuthorized(this.deps.getCoreStart(), request);
+          if (options?.force) {
+            const executions = await this.deps.executionQueryService.getWorkflowExecutions(
+              { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+              spaceId
+            );
+            if (executions.total > 0) {
+              throw new WorkflowConflictError(
+                `Cannot force-delete workflow with running executions: ${id}`,
+                id
               );
-              const versioned = await this.getWorkflowDocumentWithVersion(id, spaceId, {
-                includeDeleted: true,
-              });
-              if (!versioned)
-                throw new WorkflowConflictError('Workflow changed before deletion.', id);
-              versionedWorkflow = versioned;
-              if (options?.force) {
-                const executions = await this.deps.executionQueryService.getWorkflowExecutions(
-                  { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-                  spaceId
-                );
-                if (executions.total > 0) {
-                  throw new WorkflowConflictError(
-                    `Cannot force-delete workflow with running executions: ${id}`,
-                    id
-                  );
-                }
-              }
             }
-            await withWorkflowBindingChange({
-              bindings,
-              core: this.deps.getCoreStart(),
-              logger: this.deps.logger,
-              workflowId: id,
-              spaceId,
-              request,
-              previousAccountId: workflow?.definition?.settings?.run_as,
-              getWorkflowRevision: () => this.getWorkflowRevision(id),
-              write: async () => {
-                const item = await this.deleteWorkflowDocuments(
-                  [id],
-                  spaceId,
-                  options,
-                  versionedWorkflow
-                );
-                if (item.deleted !== 1)
-                  throw new Error(item.failures[0]?.error ?? 'Workflow deletion failed.');
-                result.deleted += item.deleted;
-                result.successfulIds?.push(id);
-              },
-            });
-          } catch (error) {
-            const deletionError =
-              !(error instanceof WorkflowConflictError) && isElasticsearchWriteConflict(error)
-                ? new WorkflowConflictError(
-                    'Workflow changed during deletion. Retry with the latest version.',
-                    id
-                  )
-                : error;
-            // Preserve typed route errors for single deletes after binding compensation completes.
-            if (ids.length === 1) throw deletionError;
-            result.failures.push({
-              id,
-              error: deletionError instanceof Error ? deletionError.message : String(deletionError),
-            });
           }
         }
-        return result;
+        await withWorkflowBindingChange({
+          bindings,
+          core: this.deps.getCoreStart(),
+          logger: this.deps.logger,
+          workflowId: id,
+          spaceId,
+          request,
+          previousAccountId: accountId,
+          getWorkflowRevision: () => this.getWorkflowRevision(id, spaceId),
+          write: async () => {
+            const item = await this.deleteWorkflowDocuments([id], spaceId, options, versioned);
+            if (item.deleted !== 1)
+              throw new Error(item.failures[0]?.error ?? 'Workflow deletion failed.');
+            result.deleted += item.deleted;
+            result.successfulIds?.push(id);
+          },
+        });
+      } catch (error) {
+        const deletionError =
+          !(error instanceof WorkflowConflictError) && isElasticsearchWriteConflict(error)
+            ? new WorkflowConflictError(
+                'Workflow changed during deletion. Retry with the latest version.',
+                id
+              )
+            : error;
+        if (ids.length === 1) throw deletionError;
+        result.failures.push({
+          id,
+          error: deletionError instanceof Error ? deletionError.message : String(deletionError),
+        });
       }
-    }
-    return this.deleteWorkflowDocuments(ids, spaceId, options);
+    };
+    for (const id of ids) await deleteWorkflow(id);
+    return result;
   }
 
   private async deleteWorkflowDocuments(

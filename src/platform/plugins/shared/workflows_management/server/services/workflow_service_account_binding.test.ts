@@ -63,6 +63,16 @@ const setup = () => {
 };
 
 describe('workflow binding reconciliation', () => {
+  it('rejects a global binding before changing either storage system', async () => {
+    const { params, bindings } = setup();
+    await expect(withWorkflowBindingChange({ ...params, spaceId: '*' })).rejects.toThrow(
+      'specific space'
+    );
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    expect(params.write).not.toHaveBeenCalled();
+  });
+
   it('requires manage_security even if the account has not changed', async () => {
     const { client, params, bindings } = setup();
     client.security.hasPrivileges.mockResolvedValue({

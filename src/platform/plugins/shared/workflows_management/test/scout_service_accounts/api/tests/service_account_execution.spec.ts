@@ -8,6 +8,7 @@
  */
 
 import { Agent, fetch } from 'undici';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   generateCosmosDBApiRequestHeaders,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS,
@@ -56,6 +57,7 @@ apiTest.describe(
   () => {
     let headers: Record<string, string>;
     let accountId: string;
+    let initiatingUser: Pick<AuthenticatedUser, 'username' | 'profile_uid'>;
     let otherAccountId: string;
     let readOnlyAccountId: string;
     const dataIndex = `cp2-sa-permissions-${Date.now()}`;
@@ -134,14 +136,20 @@ apiTest.describe(
         .toBe(status);
       return get();
     };
-    const expectAccount = (execution: WorkflowExecutionDto, id: string) => {
+    const expectAccount = (
+      execution: WorkflowExecutionDto,
+      id: string,
+      expectedUser = initiatingUser
+    ) => {
       expect(execution.effectiveIdentity).toStrictEqual({ type: 'service_account', id });
       expect(
         JSON.stringify(
           execution.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output
         )
       ).toContain(id);
-      expect(typeof execution.executedBy).toBe('string');
+      expect([expectedUser.username, expectedUser.profile_uid].filter(Boolean)).toContain(
+        execution.executedBy
+      );
     };
 
     apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient }) => {
@@ -152,6 +160,11 @@ apiTest.describe(
         'x-elastic-internal-origin': 'kibana',
         'elastic-api-version': '2023-10-31',
       };
+      const user = await apiClient.get('internal/security/me', { headers, responseType: 'json' });
+      expect(user).toHaveStatusCode(200);
+      initiatingUser = user.body;
+      expect(typeof initiatingUser.username).toBe('string');
+      expect(initiatingUser.username).not.toBe('');
       const accounts: string[] = [];
       for (const name of ['primary', 'child', 'read-only']) {
         const response = await apiClient.post('internal/security/service_account', {
@@ -433,6 +446,11 @@ apiTest.describe(
           kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
         });
         const executorHeaders = { ...headers, ...cookieHeader };
+        const executor = await apiClient.get('internal/security/me', {
+          headers: executorHeaders,
+          responseType: 'json',
+        });
+        expect(executor).toHaveStatusCode(200);
         const deniedInstall = await apiClient.post(managedPath(id), {
           headers: executorHeaders,
           body: { serviceAccountId: accountId },
@@ -462,7 +480,11 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(executed, JSON.stringify(executed.body)).toHaveStatusCode(200);
-        expectAccount(await wait(apiClient, executed.body.workflowExecutionId), accountId);
+        expectAccount(
+          await wait(apiClient, executed.body.workflowExecutionId),
+          accountId,
+          executor.body
+        );
       }
     );
 
@@ -551,6 +573,11 @@ apiTest.describe(
           kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
         });
         const executorHeaders = { ...headers, ...cookieHeader };
+        const executor = await apiClient.get('internal/security/me', {
+          headers: executorHeaders,
+          responseType: 'json',
+        });
+        expect(executor).toHaveStatusCode(200);
         const edit = await apiClient.put(`api/workflows/workflow/${id}`, {
           headers: executorHeaders,
           body: { yaml: workflowYaml(accountId).replace('identity proof', 'changed definition') },
@@ -587,7 +614,11 @@ apiTest.describe(
         });
         expect(ordinary).toHaveStatusCode(404);
         workflowIds.delete(ordinaryId);
-        expectAccount(await wait(apiClient, await run(apiClient, id, executorHeaders)), accountId);
+        expectAccount(
+          await wait(apiClient, await run(apiClient, id, executorHeaders)),
+          accountId,
+          executor.body
+        );
       }
     );
 
@@ -640,25 +671,6 @@ apiTest.describe(
         .toBe(true);
     };
 
-    const discardPausedFixture = async (apiClient: ApiClientFixture, id: string): Promise<void> => {
-      if (!workflowIds.has(id)) return;
-      // Soft deletion supports active executions and releases bindings without waiting for resume.
-      const response = await apiClient.delete('api/workflows', {
-        headers,
-        body: { ids: [id] },
-        responseType: 'json',
-      });
-      expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
-      expect(response.body.failures).toStrictEqual([]);
-      expect(response.body.deleted).toBe(1);
-      const remaining = await apiClient.get(`api/workflows/workflow/${id}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(remaining).toHaveStatusCode(404);
-      workflowIds.delete(id);
-    };
-
     for (const bound of [false, true]) {
       apiTest(
         `returns conflict when force-deleting ${
@@ -698,7 +710,7 @@ apiTest.describe(
             }
             await cleanupWorkflows(apiClient);
           } finally {
-            await discardPausedFixture(apiClient, id);
+            await cleanupWorkflows(apiClient);
           }
         }
       );
@@ -749,7 +761,7 @@ apiTest.describe(
         expect(workflow).toHaveStatusCode(404);
       } finally {
         // Recover the fixture even when the cleanup under test fails before deleting it.
-        await discardPausedFixture(apiClient, paused.id);
+        await cleanupWorkflows(apiClient);
       }
     });
 

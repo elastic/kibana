@@ -2789,7 +2789,7 @@ describe('binding compensation revision reads', () => {
       ...revision,
       _seq_no: 2,
       _version: 2,
-      _source: { definition: { settings: { run_as: 'b' } } },
+      _source: { spaceId: 'default', definition: { settings: { run_as: 'b' } } },
     });
     const { deps, client } = makeDeps(undefined, {
       getCoreStart: () => core,
@@ -2832,7 +2832,7 @@ describe('binding compensation revision reads', () => {
     expect(core.elasticsearch.client.asInternalUser.get).toHaveBeenCalledWith({
       index: '.workflows-workflows',
       id: 'workflow',
-      _source_includes: ['definition.settings.run_as', 'deleted_at'],
+      _source_includes: ['definition.settings.run_as', 'deleted_at', 'spaceId'],
       realtime: true,
     });
     expect(bindings.bindWorkload).toHaveBeenCalledTimes(1);
@@ -2876,34 +2876,34 @@ describe('bound workflow deletion errors', () => {
       _seq_no: 1,
       _primary_term: 1,
       _version: 1,
-      _source: { definition: { settings: { run_as: 'account-a' } } },
+      _source: { spaceId: 'default', definition: { settings: { run_as: 'account-a' } } },
     });
     const { deps, client } = makeDeps(undefined, {
       getCoreStart: () => core,
       getServiceAccountBindings: () => bindings,
     });
-    client.search.mockResolvedValue({
+    client.search.mockImplementation(async (search) => ({
       hits: {
         hits: [
-          {
-            _id: 'bound',
-            _seq_no: 1,
-            _primary_term: 1,
-            _source: makeSource({
-              definition: {
-                version: '1',
-                name: 'Bound workflow',
-                enabled: true,
-                triggers: [{ type: 'manual' }],
-                steps: [],
-                settings: { run_as: 'account-a' },
-              },
-            }),
-          },
-          { _id: 'ordinary', _source: makeSource() },
+          JSON.stringify(search).includes('ordinary')
+            ? occSearchHit('ordinary')
+            : occSearchHit(
+                'bound',
+                {
+                  definition: {
+                    version: '1',
+                    name: 'Bound workflow',
+                    enabled: true,
+                    triggers: [{ type: 'manual' }],
+                    steps: [],
+                    settings: { run_as: 'account-a' },
+                  },
+                },
+                1
+              ),
         ],
       },
-    });
+    }));
     const conflict = new WorkflowConflictError('Workflow has an active execution', 'bound');
     const deleteDocuments = jest
       .spyOn(workflowDeletion, 'deleteWorkflows')
@@ -3216,5 +3216,135 @@ describe('trusted managed service account upgrades', () => {
     expect(client.index).toHaveBeenCalledTimes(1);
     expect(bindings.bindWorkload).not.toHaveBeenCalled();
     expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+  });
+});
+
+describe('service account mutation race regressions', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  const setupProbe = () => {
+    const core = {
+      ...coreMock.createStart(),
+      security: securityServiceMock.createStart(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
+    };
+    const bindings = core.security.serviceAccounts;
+    bindings.isEnabled.mockReturnValue(true);
+    core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: true,
+      username: 'owner',
+      cluster: { manage_security: true },
+      index: {},
+      application: {},
+    });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      getServiceAccountBindings: () => bindings,
+    });
+    return { core, bindings, client, service: new WorkflowCrudService(deps) };
+  };
+
+  it.each([false, true])(
+    'keeps the first duplicate ID in a mixed ordinary/bound import (bound first=%s)',
+    async (boundFirst) => {
+      const { service, client, bindings } = setupProbe();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      client.bulk.mockResolvedValue({ items: [{ create: { _id: 'same', status: 201 } }] });
+      const bound = `${lightweightWorkflowYaml}\nsettings:\n  run_as: account-a\n`;
+      const yamls = boundFirst
+        ? [bound, lightweightWorkflowYaml]
+        : [lightweightWorkflowYaml, bound];
+      const result = await service.bulkCreateWorkflows(
+        yamls.map((yaml) => ({ id: 'same', yaml })),
+        'default',
+        httpServerMock.createKibanaRequest()
+      );
+      expect(result.created).toHaveLength(1);
+      expect(result.created[0].definition?.settings?.run_as).toBe(
+        boundFirst ? 'account-a' : undefined
+      );
+      expect(result.failed).toEqual([
+        { index: 1, id: 'same', error: "Duplicate workflow id 'same' in batch" },
+      ]);
+      expect(bindings.bindWorkload).toHaveBeenCalledTimes(boundFirst ? 1 : 0);
+    }
+  );
+
+  it.each([false, true])(
+    'rejects a concurrent bind while deleting an initially unbound workflow (force=%s)',
+    async (force) => {
+      const { service, client, core, bindings } = setupProbe();
+      const request = httpServerMock.createKibanaRequest();
+      core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+        username: 'editor',
+        cluster: { manage_security: false },
+        index: {},
+        application: {},
+      });
+      client.search.mockResolvedValue({ hits: { hits: [occSearchHit('workflow', undefined, 5)] } });
+      // The admin's concurrent binding write advances the workflow to revision 6.
+      client.index.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409 })
+      );
+      await expect(
+        service.deleteWorkflows(['workflow'], 'default', { force }, request)
+      ).rejects.toBeInstanceOf(WorkflowConflictError);
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({ if_seq_no: 5, if_primary_term: 1 })
+      );
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+      expect(client.bulk).not.toHaveBeenCalled();
+      expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
+    }
+  );
+
+  it('does not adopt another space account when a create loses a global ID collision', async () => {
+    const { service, client, core, bindings } = setupProbe();
+    const request = httpServerMock.createKibanaRequest();
+    const binding = {
+      pluginId: 'workflowsExecutionEngine',
+      workloadType: 'workflow',
+      workloadId: 'workflow',
+      spaceId: 'space-a',
+      serviceAccountId: 'account-a',
+      boundAt: '2026-09-27',
+      boundBy: { type: 'user' as const, username: 'owner' },
+    };
+    bindings.getWorkloadBinding.mockResolvedValueOnce(null).mockResolvedValueOnce(binding);
+    bindings.bindWorkload.mockResolvedValue(binding);
+    client.index.mockRejectedValue(new Error('ID collision'));
+    core.elasticsearch.client.asInternalUser.get.mockResolvedValue({
+      _index: '.workflows-workflows',
+      _id: 'workflow',
+      found: true,
+      _seq_no: 2,
+      _primary_term: 1,
+      _version: 1,
+      _source: { spaceId: 'space-b', definition: { settings: { run_as: 'account-b' } } },
+    });
+    await expect(
+      service.indexWorkflowDocument(
+        'workflow',
+        makeSource({
+          spaceId: 'space-a',
+          definition: {
+            version: '1',
+            name: 'Test',
+            enabled: true,
+            triggers: [{ type: 'manual' }],
+            steps: [],
+            settings: { run_as: 'account-a' },
+          },
+        }),
+        { create: true, request }
+      )
+    ).rejects.toThrow('ID collision');
+    expect(bindings.bindWorkload).not.toHaveBeenCalledWith(
+      request,
+      expect.objectContaining({
+        serviceAccountId: 'account-b',
+      })
+    );
   });
 });

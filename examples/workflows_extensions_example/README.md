@@ -172,6 +172,9 @@ registered definition, preserving their template values and verified SA binding.
 request or SA security-administration privilege is needed for that upgrade. Creating,
 changing, or removing the binding still requires an authorized request.
 
+SA-bound managed workflows must be installed in a concrete space. Installation with
+`spaceId: '*'` is rejected before creating a binding; global SA bindings are not supported.
+
 The Workflows service-account Scout suite covers installation, actual SA execution,
 authorized rebinding, rejection of unauthorized installation/rebinding/removal, and cleanup:
 

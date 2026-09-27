@@ -52,6 +52,7 @@ export async function handlePostExecutionLoop({
 
   if (!finalExecution) return;
 
+  let queueCleanupFailed = false;
   if (finalExecution && isTerminalStatus(finalExecution.status)) {
     const concurrency = finalExecution.workflowDefinition?.settings?.concurrency;
     const groupKey = finalExecution.concurrencyGroupKey;
@@ -66,6 +67,7 @@ export async function handlePostExecutionLoop({
           concurrencySettings: concurrency,
         });
       } catch (drainErr) {
+        queueCleanupFailed = true;
         logger.debug(
           `Concurrency queue drain after terminal failed for execution ${workflowRunId}: ${
             drainErr instanceof Error ? drainErr.message : String(drainErr)
@@ -97,6 +99,11 @@ export async function handlePostExecutionLoop({
     });
   }
   if (finalExecution.context?.serviceAccountFailureCleanupPending) {
+    if (queueCleanupFailed) {
+      throw new Error(
+        `Concurrency queue cleanup is still pending for workflow execution ${workflowRunId}.`
+      );
+    }
     await workflowExecutionRepository.updateWorkflowExecution({
       id: finalExecution.id,
       context: { ...finalExecution.context, serviceAccountFailureCleanupPending: false },

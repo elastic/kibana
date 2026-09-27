@@ -15,6 +15,7 @@ import {
   isTerminalStatus,
 } from '@kbn/workflows';
 import { completeIdentityFailureCleanup } from './complete_identity_failure_cleanup';
+import { finalizeWorkflowIdentityFailure } from './finalize_workflow_identity_failure';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
@@ -272,29 +273,20 @@ export const runWorkflow = async (
         type: 'ServiceAccountExecutionError',
         message: error instanceof Error ? error.message : String(error),
       };
-      const failedExecution = {
-        ...execution,
-        status: ExecutionStatus.FAILED,
-        finishedAt: new Date().toISOString(),
-        error: executionError,
-        context: { ...execution.context, serviceAccountFailureCleanupPending: true },
-      };
-      // Finalize steps before publishing the terminal execution status that stops UI polling.
-      await params.stepExecutionRepository.markNonTerminalStepsFailed(execution.id, executionError);
-      await params.workflowExecutionRepository.updateWorkflowExecution({
-        id: execution.id,
-        status: ExecutionStatus.FAILED,
-        context: failedExecution.context,
-        finishedAt: failedExecution.finishedAt,
+      const failedExecution = await finalizeWorkflowIdentityFailure({
+        ...params,
         error: executionError,
       });
-      await emitWorkflowIdentityFailureEvent({
-        execution: failedExecution,
-        request: params.fakeRequest,
-        emitEvent: params.workflowsExecutionEngine.triggerEvents.emitEvent,
-        logger: params.logger,
-        maxEventChainDepth: params.config.eventDriven.maxChainDepth,
-      });
+      if (!failedExecution) throw error;
+      if (failedExecution.status === ExecutionStatus.FAILED) {
+        await emitWorkflowIdentityFailureEvent({
+          execution: failedExecution,
+          request: params.fakeRequest,
+          emitEvent: params.workflowsExecutionEngine.triggerEvents.emitEvent,
+          logger: params.logger,
+          maxEventChainDepth: params.config.eventDriven.maxChainDepth,
+        });
+      }
       await completeIdentityFailureCleanup(failedExecution, {
         ...params,
         workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),

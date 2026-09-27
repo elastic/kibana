@@ -41,6 +41,67 @@ describe('WorkflowExecutionRepository', () => {
     );
   });
 
+  describe('conditional terminal updates', () => {
+    it('uses the observed revision without retrying a stale update', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'execution', index: '.workflows-executions' }],
+      });
+      const update = { id: 'execution', status: ExecutionStatus.FAILED };
+      await expect(
+        repository.tryUpdateWorkflowExecutionWithVersion(update, { seqNo: 4, primaryTerm: 2 })
+      ).resolves.toBe(true);
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
+        items: [{ operation: 'update', document: update, seqNo: 4, primaryTerm: 2 }],
+        refresh: 'wait_for',
+      });
+    });
+
+    it.each(['version_conflict_engine_exception', 'document_missing_exception'])(
+      'preserves a concurrent winner on %s',
+      async (type) => {
+        workflowExecutionsDataClient.bulk.mockResolvedValue({
+          errors: true,
+          items: [{ id: 'execution', index: '.workflows-executions', error: { type } }],
+        });
+        await expect(
+          repository.tryUpdateWorkflowExecutionWithVersion(
+            { id: 'execution', status: ExecutionStatus.FAILED },
+            { seqNo: 4, primaryTerm: 2 }
+          )
+        ).resolves.toBe(false);
+      }
+    );
+
+    it('reports storage failures instead of treating them as a competing update', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            id: 'execution',
+            index: '.workflows-executions',
+            error: { type: 'unavailable_shards_exception', reason: 'Unavailable' },
+          },
+        ],
+      });
+      await expect(
+        repository.tryUpdateWorkflowExecutionWithVersion(
+          { id: 'execution' },
+          { seqNo: 4, primaryTerm: 2 }
+        )
+      ).rejects.toThrow('Unavailable');
+    });
+
+    it('rejects an empty update result', async () => {
+      await expect(
+        repository.tryUpdateWorkflowExecutionWithVersion(
+          { id: 'execution' },
+          { seqNo: 4, primaryTerm: 2 }
+        )
+      ).rejects.toThrow('Missing update result');
+    });
+  });
+
   describe('createWorkflowExecution', () => {
     it('should create a workflow execution', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'default' };
