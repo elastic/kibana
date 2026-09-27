@@ -12,6 +12,7 @@ export const NAVIGATION_ROOT_SELECTOR = `${NAVIGATION_SELECTOR_PREFIX}-root`;
 export const PRIMARY_NAVIGATION_ID = `${NAVIGATION_SELECTOR_PREFIX}-primaryNavigation`;
 export const MORE_MENU_ID = `${NAVIGATION_SELECTOR_PREFIX}-moreMenu`;
 export const MAIN_PANEL_ID = `${NAVIGATION_SELECTOR_PREFIX}-mainPanel`;
+export const NESTED_PANEL_FOOTER_CLASS_NAME = `${NAVIGATION_SELECTOR_PREFIX}-nestedPanelFooter`;
 export const MAX_MENU_ITEMS = 12;
 export const MAX_FOOTER_ITEMS = 5;
 export const POPOVER_HOVER_DELAY = 300;

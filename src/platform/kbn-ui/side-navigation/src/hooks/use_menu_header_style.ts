@@ -10,6 +10,8 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { getScrollFadeStyles } from './use_scroll';
+
 /**
  * There is a requirement for the menu header to have a sticky position.
  * We cannot apply border to the header because we need to account for the scrollbar.
@@ -29,5 +31,6 @@ export function useMenuHeaderStyle() {
       var(--horizontal-padding);
     margin: 0 1px;
     min-height: var(--secondary-menu-header-height);
+    ${getScrollFadeStyles(euiTheme, 'top')}
   `;
 }

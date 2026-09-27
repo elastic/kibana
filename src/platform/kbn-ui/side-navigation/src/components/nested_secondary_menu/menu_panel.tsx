@@ -10,12 +10,14 @@
 import React, { useCallback } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import { EuiScreenReaderOnly, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiScreenReaderOnly, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SecondaryMenu } from '../secondary_menu';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { getScrollFadeStyles } from '../../hooks/use_scroll';
 import { useNestedMenu } from './use_nested_menu';
-import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { NAVIGATION_SELECTOR_PREFIX, NESTED_PANEL_FOOTER_CLASS_NAME } from '../../constants';
 
 export interface PanelIds {
   panelNavigationInstructionsId: string;
@@ -26,12 +28,17 @@ export type PanelChildren = ReactNode | ((ids: PanelIds) => ReactNode);
 
 export interface PanelProps {
   children: PanelChildren;
+  /**
+   * Content pinned to the bottom of the scroll container while the panel is shown.
+   */
+  footer?: ReactNode;
   id: string;
   title?: string;
 }
 
-export const Panel: FC<PanelProps> = ({ children, id, title }) => {
+export const Panel: FC<PanelProps> = ({ children, footer, id, title }) => {
   const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
+  const { euiTheme } = useEuiTheme();
   const nestedPanelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-nestedPanel-${id}`;
   const panelNavigationInstructionsId = useGeneratedHtmlId({
     prefix: `panel-navigation-instructions-${id}`,
@@ -92,31 +99,61 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
 
   if (currentPanel !== id) return null;
 
-  if (title) {
-    return (
-      <SecondaryMenu
-        data-test-subj={nestedPanelTestSubj}
-        ref={panelRef}
-        title={title}
-        isPanel={false}
-      >
-        <EuiScreenReaderOnly>
-          <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
-        </EuiScreenReaderOnly>
-        <EuiScreenReaderOnly>
-          <p id={panelEnterSubmenuInstructionsId}>{enterSubmenuInstructions}</p>
-        </EuiScreenReaderOnly>
-        {renderChildren()}
-      </SecondaryMenu>
-    );
-  }
-
-  return (
+  const menu = title ? (
+    <SecondaryMenu
+      data-test-subj={nestedPanelTestSubj}
+      ref={panelRef}
+      title={title}
+      isPanel={false}
+    >
+      <EuiScreenReaderOnly>
+        <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
+      </EuiScreenReaderOnly>
+      <EuiScreenReaderOnly>
+        <p id={panelEnterSubmenuInstructionsId}>{enterSubmenuInstructions}</p>
+      </EuiScreenReaderOnly>
+      {renderChildren()}
+    </SecondaryMenu>
+  ) : (
     <div data-test-subj={nestedPanelTestSubj} ref={panelRef}>
       <EuiScreenReaderOnly>
         <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
       </EuiScreenReaderOnly>
       {renderChildren()}
     </div>
+  );
+
+  if (!footer) return menu;
+
+  // Mirrors the sticky menu header, which also uses the 1px margin and radius to stay inside the popover border.
+  const footerStyles = css`
+    position: sticky;
+    bottom: 0;
+    z-index: calc(${euiTheme.levels.content} + 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: var(--secondary-menu-footer-height);
+    margin: 0 1px;
+    // Less top padding offsets the fade above the footer
+    padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.m};
+    background: ${euiTheme.colors.backgroundBasePlain};
+    border-radius: ${euiTheme.border.radius.medium};
+    ${getScrollFadeStyles(euiTheme, 'bottom')}
+  `;
+
+  // Rendered as a sibling of the menu so it sticks to the popover scroll container.
+  return (
+    <>
+      {menu}
+      <div
+        className={NESTED_PANEL_FOOTER_CLASS_NAME}
+        css={footerStyles}
+        data-test-subj={`${nestedPanelTestSubj}-footer`}
+      >
+        {footer}
+      </div>
+    </>
   );
 };

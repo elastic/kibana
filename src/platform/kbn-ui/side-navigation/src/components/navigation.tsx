@@ -11,7 +11,7 @@ import React, { useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiButton, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -279,6 +279,25 @@ export const Navigation = ({
                         title={i18n.translate('kbnUI.sideNavigation.nestedSecondaryMenuMoreTitle', {
                           defaultMessage: 'More',
                         })}
+                        footer={
+                          onCustomizeNavigation && (
+                            <EuiButton
+                              iconType="controls"
+                              color="text"
+                              size="s"
+                              onClick={() => {
+                                closePopover();
+                                onCustomizeNavigation();
+                              }}
+                              data-test-subj="customizeNavigationMoreMenuButton"
+                            >
+                              <FormattedMessage
+                                id="kbnUI.sideNavigation.customizeNavigationButton"
+                                defaultMessage="Customize navigation"
+                              />
+                            </EuiButton>
+                          )
+                        }
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
                           <>
@@ -313,26 +332,6 @@ export const Navigation = ({
                                   </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
                                 );
                               })}
-                              {onCustomizeNavigation && (
-                                <>
-                                  <EuiSpacer size="s" />
-                                  <EuiButton
-                                    iconType="controls"
-                                    color="text"
-                                    size="s"
-                                    onClick={() => {
-                                      closePopover();
-                                      onCustomizeNavigation();
-                                    }}
-                                    data-test-subj="customizeNavigationMoreMenuButton"
-                                  >
-                                    <FormattedMessage
-                                      id="kbnUI.sideNavigation.customizeNavigationButton"
-                                      defaultMessage="Customize navigation"
-                                    />
-                                  </EuiButton>
-                                </>
-                              )}
                             </SideNav.NestedSecondaryMenu.Section>
                           </>
                         )}
