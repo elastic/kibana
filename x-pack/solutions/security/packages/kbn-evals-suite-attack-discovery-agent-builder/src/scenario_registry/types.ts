@@ -16,8 +16,12 @@
  * model that looks good correlating 4 alerts is not shown to correlate 90+;
  * volume is the variable under test, so it must be a committed input rather
  * than whatever happened to sit in a live index on the day.
+ *
+ * `full` is clean plus cloud scenarios and background noise (see
+ * `full_scenarios.ts` / `background_noise.ts`), used by the on-demand
+ * full-profile discrimination cohort.
  */
-export type Ad2SeedProfile = 'clean' | 'dense';
+export type Ad2SeedProfile = 'clean' | 'dense' | 'full';
 
 export type Ad2ScenarioOs = 'windows' | 'linux' | 'macos';
 
@@ -67,6 +71,7 @@ export interface Ad2SeedPlan {
   readonly scenarioKeys: readonly string[];
   readonly alerts: readonly Ad2IndexedAlert[];
   readonly rawEvents: readonly Ad2IndexedRawEvent[];
+  readonly noiseAlertIds?: readonly string[];
 }
 
 /**
@@ -85,4 +90,5 @@ export interface Ad2SeedSummary extends Ad2SeedRunScope {
   readonly scenarioKeys: readonly string[];
   readonly alertCount: number;
   readonly rawEventCount: number;
+  readonly noiseAlertCount?: number;
 }

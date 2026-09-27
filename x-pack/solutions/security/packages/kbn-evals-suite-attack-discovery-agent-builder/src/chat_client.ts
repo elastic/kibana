@@ -19,24 +19,28 @@ export interface AgentBuilderConverseResponse {
 }
 
 const parseInsightsFromMessage = (message: string): AttackDiscovery[] | null => {
-  // The agent returns the insights JSON inside a fenced code block at the end
-  // of the report. Extract the last JSON block and parse it.
+  // Extract insights from the last ```json fenced block in the message.
+  // This is fragile — if the model emits a proposed ES|QL rule after the
+  // insights block, this grabs the wrong one, which is why message and
+  // reasoning steps are scanned BACKWARDS below.
   const matches = message.match(/```json\s*([\s\S]*?)\s*```/g);
   if (!matches || matches.length === 0) {
     return null;
   }
 
-  const lastBlock = matches[matches.length - 1].replace(/```json\s*/, '').replace(/\s*```/, '');
-
-  try {
-    const parsed = JSON.parse(lastBlock);
-    if (parsed && Array.isArray(parsed.insights)) {
-      return parsed.insights;
+  // Search from the end backwards for a block containing "insights"
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const block = matches[i].replace(/```json\s*/, '').replace(/\s*```/, '');
+    try {
+      const parsed = JSON.parse(block);
+      if (parsed && Array.isArray(parsed.insights)) {
+        return parsed.insights;
+      }
+    } catch {
+      // not valid JSON, try next block
     }
-    return null;
-  } catch {
-    return null;
   }
+  return null;
 };
 
 // On long runs the agent's report and insights JSON land in a `reasoning` step

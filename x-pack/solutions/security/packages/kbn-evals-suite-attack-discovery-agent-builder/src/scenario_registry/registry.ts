@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
+ * Elastic License 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import {
   AD2_CLEAN_SCENARIO_KEYS,
   AD2_CLEAN_SCENARIOS,
@@ -12,13 +18,29 @@ import {
 } from './clean_scenarios';
 import { AD2_DENSE_SCENARIO_KEYS, AD2_DENSE_SCENARIOS } from './dense_scenarios';
 import { ad2ScenarioAlertId } from './ids';
+import { buildBackgroundNoiseAlerts, buildLoudClusterAlerts } from './background_noise';
+import {
+  AD2_FULL_ONLY_SCENARIO_KEYS,
+  AD2_FULL_ONLY_SCENARIOS,
+  type Ad2FullOnlyScenarioKey,
+} from './full_scenarios';
 import { buildScenarioDocuments } from './build_documents';
 import { getAd2RunMarker } from './run_marker';
 import type { Ad2ScenarioDefinition, Ad2SeedPlan, Ad2SeedProfile } from './types';
 
+export const AD2_FULL_SCENARIO_KEYS = [
+  ...AD2_CLEAN_SCENARIO_KEYS,
+  ...AD2_FULL_ONLY_SCENARIO_KEYS,
+] as const;
+
+export type Ad2FullScenarioKey = (typeof AD2_FULL_SCENARIO_KEYS)[number];
+
 export const listAd2ScenarioKeys = (profile: Ad2SeedProfile = 'clean'): readonly string[] => {
   if (profile === 'dense') {
     return AD2_DENSE_SCENARIO_KEYS;
+  }
+  if (profile === 'full') {
+    return AD2_FULL_SCENARIO_KEYS;
   }
   return AD2_CLEAN_SCENARIO_KEYS;
 };
@@ -30,7 +52,13 @@ export const getAd2Scenario = (
   if (profile === 'dense') {
     return AD2_DENSE_SCENARIOS[scenarioKey];
   }
-  return AD2_CLEAN_SCENARIOS[scenarioKey as Ad2CleanScenarioKey];
+  if (scenarioKey in AD2_CLEAN_SCENARIOS) {
+    return AD2_CLEAN_SCENARIOS[scenarioKey as Ad2CleanScenarioKey];
+  }
+  if (profile === 'full' && scenarioKey in AD2_FULL_ONLY_SCENARIOS) {
+    return AD2_FULL_ONLY_SCENARIOS[scenarioKey as Ad2FullOnlyScenarioKey];
+  }
+  return undefined;
 };
 
 export const buildAd2SeedPlan = ({
@@ -63,7 +91,15 @@ export const buildAd2SeedPlan = ({
     rawEvents.push(...built.rawEvents);
   }
 
-  return { profile, runMarker, scenarioKeys, alerts, rawEvents };
+  let noiseAlertIds: readonly string[] = [];
+  if (profile === 'full' && !scenarioKey) {
+    const backgroundAlerts = buildBackgroundNoiseAlerts(runMarker, baseTime);
+    const loudClusterAlerts = buildLoudClusterAlerts(runMarker, baseTime);
+    alerts.push(...backgroundAlerts, ...loudClusterAlerts);
+    noiseAlertIds = [...backgroundAlerts, ...loudClusterAlerts].map((alert) => alert.id);
+  }
+
+  return { profile, runMarker, scenarioKeys, alerts, rawEvents, noiseAlertIds };
 };
 
 /**

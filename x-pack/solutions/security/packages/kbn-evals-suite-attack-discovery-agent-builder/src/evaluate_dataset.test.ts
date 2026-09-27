@@ -9,13 +9,17 @@ import {
   ALERT_INDEX_FAMILY,
   buildWorkflow,
   computeWorkflowAlertCounts,
+  createEvaluateAttackDiscoveryAgentBuilderDataset,
   extractAdToolEsqlQuery,
   extractAgentAlertRetrievalPopulation,
   extractAgentEsqlRowCounts,
   extractRetrievalEvidence,
   extractUnscopedAlertRetrievalRowCounts,
   findAdToolResult,
+  insightsFromValidatedDiscoveries,
   trackedStageKeys,
+  waitForValidationPhase,
+  WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS,
   trackedStages,
 } from './evaluate_dataset';
 import { createAdToolResultEvaluator } from './evaluators/ad_tool_result_evaluator';
@@ -1341,5 +1345,502 @@ describe('retrieval evidence persisted on the task output', () => {
     expect(workflow.retrievalEvidence.pipelineAlertRetrieval).toEqual([
       { alertsContextCount: 95, extractionStrategy: 'default_esql', alertsCount: null },
     ]);
+  });
+});
+
+describe('slow-path handoff (#293046): insights from pipeline validated discoveries', () => {
+  it('maps snake_case validated discoveries into harness AttackDiscovery shape', () => {
+    const insights = insightsFromValidatedDiscoveries([
+      {
+        title: 'LSASS credential access chain',
+        summary_markdown: 'summary A',
+        details_markdown: 'details A',
+        alert_ids: ['a1', 'a2'],
+      },
+      {
+        title: 'Cloud OAuth abuse',
+        summary_markdown: 'summary B',
+        details_markdown: 'details B',
+        alert_ids: ['b1'],
+        entity_summary_markdown: 'entities B',
+      },
+    ]);
+
+    expect(insights).toEqual([
+      {
+        title: 'LSASS credential access chain',
+        summaryMarkdown: 'summary A',
+        detailsMarkdown: 'details A',
+        alertIds: ['a1', 'a2'],
+      },
+      {
+        title: 'Cloud OAuth abuse',
+        summaryMarkdown: 'summary B',
+        detailsMarkdown: 'details B',
+        entitySummaryMarkdown: 'entities B',
+        alertIds: ['b1'],
+      },
+    ]);
+  });
+
+  it('omits entitySummaryMarkdown when the pipeline entry has none', () => {
+    const insights = insightsFromValidatedDiscoveries([
+      { title: 't', summary_markdown: 's', details_markdown: 'd', alert_ids: [] },
+    ]);
+    expect(insights![0].entitySummaryMarkdown).toBeUndefined();
+  });
+
+  it('returns undefined for a non-array (no fabrication when the pipeline has none)', () => {
+    expect(insightsFromValidatedDiscoveries(null)).toBeUndefined();
+    expect(insightsFromValidatedDiscoveries(undefined)).toBeUndefined();
+  });
+
+  it('maps a hallucination-filtered run to an EMPTY array, not undefined', () => {
+    // Empty array is a real measurement (all discoveries filtered); undefined
+    // would fall through the ?? chain and hide it.
+    expect(insightsFromValidatedDiscoveries([])).toEqual([]);
+  });
+});
+
+describe('slow-path handoff (#293046): waitForValidationPhase', () => {
+  const trackingWith = (validation: unknown) => ({
+    generation: { workflow_id: 'wf-gen' },
+    validation,
+  });
+
+  // A failed execution never reaches the validation phase, so waiting for it
+  // burns the whole budget on a predicate that can never be satisfied.
+  it('stops polling once the AD tool reported a terminal failure', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        // Tracking is available (generation only); validation never started.
+        .mockResolvedValueOnce({ generation: { workflow_id: 'wf-gen' }, validation: null })
+        // Any further poll is the stall this guards against.
+        .mockImplementation(async () => {
+          throw new Error('polled again after a terminal execution failure');
+        });
+
+      const settled = await waitForValidationPhase({
+        fetch,
+        executionId: 'exec-1',
+        executionFailed: true,
+      });
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(settled.generation?.workflow_id).toBe('wf-gen');
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // The validation phase takes precedence: if it actually started, the run did
+  // reach it and the AD tool's error status must not short-circuit the wait.
+  it('still waits for validation when it already started despite a terminal failure', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-failed-exec' })
+        )
+        // validation run probe: terminal
+        .mockResolvedValueOnce({ status: 'completed' })
+        // tracking poll again: now reportable as finished
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-failed-exec' })
+        );
+
+      const pending = waitForValidationPhase({
+        fetch,
+        executionId: 'exec-1',
+        executionFailed: true,
+      });
+      const settled = await jest.advanceTimersByTimeAsync(10_000).then(() => pending);
+
+      expect(settled.validation?.workflow_run_id).toBe('run-failed-exec');
+      expect(fetch).toHaveBeenCalledTimes(3);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('returns immediately when validation is already tracked', async () => {
+    const fetch = jest.fn().mockResolvedValue(trackingWith({ workflow_id: 'wf-val' }));
+    const tracking = await waitForValidationPhase({ fetch, executionId: 'exec-1' });
+
+    expect(tracking.generation?.workflow_id).toBe('wf-gen');
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  // A non-null `tracking.validation` means the validation phase has STARTED,
+  // not finished (the product writes the tracking before the workflow runs).
+  // Returning at that point reads the pipeline mid-validation, where
+  // `validated_discoveries` can be absent. The poller must hold until the
+  // validation workflow run itself reports a terminal status.
+  it('keeps polling while the validation workflow run is still in flight, then returns once it is terminal', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        // tracking polls: validation tracked, run still going
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-1' }))
+        // run status probe: still running
+        .mockResolvedValueOnce({ status: 'running' })
+        // tracking poll again
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-1' }))
+        // run status probe: terminal
+        .mockResolvedValueOnce({ status: 'completed' })
+        // final tracking poll returns the same snapshot
+        .mockResolvedValue(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-1' }));
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await jest.advanceTimersByTimeAsync(15_000).then(() => pending);
+
+      expect(settled.validation).toMatchObject({ workflow_run_id: 'run-1' });
+      const trackingCalls = fetch.mock.calls.filter((c: unknown[]) =>
+        String(c[0]).includes('/tracking')
+      );
+      expect(trackingCalls.length).toBeGreaterThanOrEqual(3);
+      // The run-status endpoint was consulted, not just the tracking snapshot.
+      expect(
+        fetch.mock.calls.some((c: unknown[]) => String(c[0]).includes('/api/workflows/executions/'))
+      ).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('returns a tracking snapshot whose validation has no run id (nothing beyond non-null is observable)', async () => {
+    const fetch = jest.fn().mockResolvedValue(trackingWith({ workflow_id: 'wf-val' }));
+    const tracking = await waitForValidationPhase({ fetch, executionId: 'exec-1' });
+
+    expect(tracking.validation).toEqual({ workflow_id: 'wf-val' });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('polls until validation appears (handoff race: generation still running)', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val' }));
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await jest.advanceTimersByTimeAsync(10_000).then(() => pending);
+
+      expect(fetch).toHaveBeenCalledTimes(3);
+      expect(settled.validation).toEqual({ workflow_id: 'wf-val' });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('keeps polling through 404s (execution not indexed into the event log yet)', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockRejectedValueOnce(Object.assign(new Error('404'), { response: { status: 404 } }))
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val' }));
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch((e) => e);
+      const settled = await jest.advanceTimersByTimeAsync(5_000).then(() => pending);
+
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(settled.validation).toEqual({ workflow_id: 'wf-val' });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('returns the last snapshot rather than throwing when the timeout wins', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest.fn().mockResolvedValue(trackingWith(null));
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await jest
+        .advanceTimersByTimeAsync(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS)
+        .then(() => pending);
+
+      expect(settled.validation).toBeNull();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // A final failed GET (e.g. a transient 404 at the deadline) must not discard
+  // an earlier usable snapshot: the loop retains the last successful response
+  // across iterations, so the deadline path returns it instead of throwing
+  // `never became trackable` and aborting the whole eval run.
+  it('returns the earlier snapshot when the last tracking GET fails at the deadline', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockImplementation(async () => {
+          throw new Error('404 not indexed');
+        });
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch(
+        (error: Error) => error
+      );
+      await jest.advanceTimersByTimeAsync(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS);
+      const settled = await pending;
+
+      expect(settled).not.toBeInstanceOf(Error);
+      expect(settled).toMatchObject({ generation: { workflow_id: 'wf-gen' } });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // A permanent HTTP error (401/403/…) can never succeed on retry, unlike the
+  // expected not-yet-indexed 404 or a transient network error — surface it
+  // immediately instead of looping the full 10-minute budget and reporting a
+  // misleading `never became trackable`.
+  it('fails fast on a permanent HTTP error when no snapshot has been taken yet', async () => {
+    jest.useFakeTimers();
+    try {
+      const permanentError = Object.assign(new Error('Unauthorized'), {
+        response: { status: 403 },
+      });
+      const fetch = jest.fn().mockImplementation(async () => {
+        throw permanentError;
+      });
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch(
+        (error: Error) => error
+      );
+      const result = await pending;
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(result).toBeInstanceOf(Error);
+      expect((result as Error).message).toMatch(/failed permanently/);
+      expect((result as Error).cause).toBe(permanentError);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('returns the earlier snapshot when a permanent HTTP error hits after one was taken', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockImplementation(async () => {
+          throw Object.assign(new Error('Forbidden'), { response: { status: 403 } });
+        });
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      // The first poll succeeds, the second throws a permanent error — but the
+      // loop's `sleep` between them only advances under fake timers.
+      const settled = await jest.advanceTimersByTimeAsync(5_000).then(() => pending);
+
+      expect(settled).toMatchObject({ generation: { workflow_id: 'wf-gen' } });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // The status probe can fail permanently too (401/403): the tracking GET is
+  // still healthy, so no further poll can ever make the run look terminal.
+  // Surface it immediately, exactly as the tracking GET does, instead of
+  // looping the full budget and then scoring a possibly incomplete pipeline.
+  it('fails fast when the validation status probe fails permanently', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        // tracking poll: validation started, workflow run still in flight
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-probe-403' })
+        )
+        // status probe: permanent authorization failure
+        .mockRejectedValueOnce(Object.assign(new Error('Forbidden'), { response: { status: 403 } }))
+        // anything past this point is the budget-burning bug under guard
+        .mockImplementation(async () => {
+          throw new Error('poller kept going after a permanent status-probe failure');
+        });
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await pending;
+
+      // Exactly the tracking GET and the one failed probe — no sleep, no budget burn.
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(settled).toMatchObject({ generation: { workflow_id: 'wf-gen' } });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // A not-yet-indexed 404 from the status probe is the expected transient
+  // case and must keep polling (this is the classification the tracking-GET
+  // regression test above no longer covers vacuously).
+  it('keeps polling when the validation status probe returns the expected 404', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-probe-404' })
+        )
+        .mockRejectedValueOnce(Object.assign(new Error('Not Found'), { response: { status: 404 } }))
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-probe-404' })
+        )
+        .mockResolvedValueOnce({ status: 'completed' })
+        .mockResolvedValue(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-probe-404' })
+        );
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await jest.advanceTimersByTimeAsync(10_000).then(() => pending);
+
+      expect(fetch).toHaveBeenCalledTimes(5);
+      expect(settled).toMatchObject({ generation: { workflow_id: 'wf-gen' } });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('throws when the execution never becomes trackable at all', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest.fn().mockImplementation(async () => {
+        throw new Error('connection refused');
+      });
+      // Attach the catch handler immediately so the rejection is never
+      // "unhandled" while fake timers advance — Node's process-level
+      // PromiseRejectionHandledWarning kills the Kibana jest runner.
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch(
+        (error: Error) => error
+      );
+      await jest.advanceTimersByTimeAsync(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS);
+      const result = await pending;
+
+      expect(result).toBeInstanceOf(Error);
+      expect((result as Error).message).toMatch(/never became trackable/);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // The budget is a safety valve, not a model-fit knob: the default must be
+  // generous enough that slow models (OSS models on eval cells) are not
+  // falsely truncated, and per-environment override must be honored when set
+  // to a finite number (and ignored when set to garbage).
+  it('defaults to a 10-minute safety valve', () => {
+    expect(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS).toBeGreaterThanOrEqual(600_000);
+  });
+});
+
+describe('slow-path handoff (#293046): task-level backfill', () => {
+  // Removing the `insights: response.insights ?? insightsFromValidatedDiscoveries(...)`
+  // assignment in buildTask leaves every other test green while handoff runs
+  // score as having no discoveries. This invokes the real task through the
+  // dataset factory — the executor is the only thing mocked — and asserts the
+  // output handed to evaluators carries the pipeline-validated insights.
+  it('passes the pipeline-validated discoveries to evaluators when converse returns only the handoff', async () => {
+    jest.useFakeTimers();
+    try {
+      const converseResponse = {
+        steps: [
+          {
+            type: 'tool_call',
+            tool_id: 'security.attack-discovery.run',
+            results: [
+              {
+                // The 90s soft-deadline handoff: an execution id, no status,
+                // no discoveries.
+                data: { execution_uuid: 'exec-task-level' },
+                tool_result_id: 'handoff',
+                type: 'other',
+              },
+            ],
+          },
+        ],
+        insights: undefined,
+      };
+      const chatClient = {
+        converse: jest.fn().mockResolvedValue(converseResponse),
+      };
+
+      const fetch = jest.fn(async (url: string) => {
+        if (url.endsWith('/tracking')) {
+          return {
+            generation: { workflow_id: 'wf-gen', workflow_run_id: 'run-gen-task-1' },
+            validation: { workflow_id: 'wf-val', workflow_run_id: 'run-val-task-1' },
+          };
+        }
+        if (url.startsWith('/api/workflows/executions/')) {
+          return { status: 'completed' };
+        }
+        // Pipeline response: generation completed, discoveries validated.
+        return {
+          validated_discoveries: [
+            {
+              title: 'LSASS credential access chain',
+              summary_markdown: 'summary A',
+              details_markdown: 'details A',
+              alert_ids: ['a1', 'a2'],
+            },
+          ],
+        };
+      });
+
+      let taskOutput: unknown;
+      const executorClient = {
+        runExperiment: jest.fn(
+          async ({
+            datasets,
+            task,
+          }: {
+            datasets: Array<{ examples: Array<{ question: string }> }>;
+            task: (args: { input: { question: string } }) => Promise<unknown>;
+          }) => {
+            for (const example of datasets[0].examples) {
+              taskOutput = await task({ input: example });
+            }
+          }
+        ),
+      };
+
+      const run = createEvaluateAttackDiscoveryAgentBuilderDataset({
+        chatClient: chatClient as never,
+        fetch: fetch as never,
+        evaluators: { traceBasedEvaluators: {} } as never,
+        executorClient: executorClient as never,
+        traceEsClient: {} as never,
+      });
+
+      const pending = run({
+        dataset: {
+          name: 'slow-path-task',
+          description: '',
+          examples: [
+            {
+              input: {
+                question: 'q',
+                triageType: 'provided-alerts',
+                expectedSkills: [],
+                expectedToolPath: [],
+              },
+            },
+          ],
+        },
+      });
+      await jest.advanceTimersByTimeAsync(60_000).then(() => pending);
+
+      expect(fetch).toHaveBeenCalled();
+      expect(converseResponse.insights).toBeUndefined(); // the fallback had to fire
+      expect((taskOutput as { insights?: unknown }).insights).toEqual([
+        {
+          title: 'LSASS credential access chain',
+          summaryMarkdown: 'summary A',
+          detailsMarkdown: 'details A',
+          alertIds: ['a1', 'a2'],
+        },
+      ]);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

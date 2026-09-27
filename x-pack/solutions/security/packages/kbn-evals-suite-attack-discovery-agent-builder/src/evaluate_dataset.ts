@@ -17,6 +17,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { AttackDiscoveryAgentBuilderChatClient } from './chat_client';
 import { attackDiscoveryFixtureIndex } from './fixtures';
 import type {
+  AttackDiscovery,
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
   AttackDiscoveryRetrievalEvidence,
@@ -32,6 +33,11 @@ import { createResponseSkillInvocationEvaluator } from './evaluators/skill_invok
 import { createStrictTrajectoryEvaluator } from './evaluators/trajectory_evaluator';
 import { createWorkflowEvidenceEvaluator } from './evaluators/workflow_evidence_evaluator';
 import { redactExecutionIds } from './redact';
+import {
+  createDiscoveryCountCapEvaluator,
+  createMinValidatedDiscoveryEvaluator,
+  createNoiseFalsePositiveEvaluator,
+} from './evaluators/noise_fpr_evaluator';
 
 type AdToolResult = NonNullable<AttackDiscoveryAgentBuilderTaskOutput['adToolResult']>;
 
@@ -1088,6 +1094,226 @@ export const buildWorkflow = ({
   };
 };
 
+/**
+ * Slow-path handoff handling (#293046): when generation exceeds the sync tool's
+ * 90s soft deadline, the converse returns `{ execution_uuid }` while the
+ * pipeline keeps running in the background. The validation phase is the LAST
+ * pipeline phase, so `tracking.validation` becomes non-null only once generation
+ * has produced output. Poll tracking until that happens (bounded), so the
+ * pipeline response read afterwards reflects the completed run instead of a
+ * mid-flight snapshot. A 404 means the execution has not been indexed into the
+ * event log yet — keep polling, the deadline handoff commonly wins that race.
+ * Budget: 90s soft deadline + observed ~80s generation tail, with headroom —
+ * a 170s completion would miss a 120s budget (observed in run-29 rep 1).
+ */
+// Safety valve only — the loop exits on the validation workflow's terminal
+// status, not on this deadline; a wedged run must not hang the suite. The
+// default is deliberately generous (10 min) so slow models (OSS models on
+// eval cells routinely exceed 180s) are not falsely truncated; the observed
+// gpt-5.2 tail is 90s deadline + ~80s generation. Override per environment
+// (e.g. known-fast stacks) with AD2_VALIDATION_WAIT_TIMEOUT_MS.
+const DEFAULT_WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = 600_000;
+const WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = Number.isFinite(
+  Number(process.env.AD2_VALIDATION_WAIT_TIMEOUT_MS)
+)
+  ? Number(process.env.AD2_VALIDATION_WAIT_TIMEOUT_MS)
+  : DEFAULT_WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS;
+const WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS = 5_000;
+
+export { WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS, WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS };
+
+/**
+ * Maps a pipeline `validated_discoveries` entry (snake_case API shape with
+ * `alert_ids`, plus `title`/`summary`-style prose fields) into the harness
+ * `AttackDiscovery` shape the insight-based evaluators consume. Only fields
+ * with an unambiguous equivalent are mapped; everything else is omitted
+ * rather than guessed.
+ */
+export const insightsFromValidatedDiscoveries = (
+  validated: unknown[] | null | undefined
+): AttackDiscovery[] | undefined => {
+  if (!Array.isArray(validated)) return undefined;
+  return validated.map((entry) => {
+    const d = (entry ?? {}) as Record<string, unknown>;
+    return {
+      title: typeof d.title === 'string' ? d.title : '',
+      // The evaluator's shape contract (AttackDiscoveryBasic) requires
+      // non-empty summaryMarkdown and detailsMarkdown; the pipeline persists
+      // snake_case fields. Missing strings become '' so the evaluator scores
+      // the shape honestly instead of us fabricating content.
+      summaryMarkdown: typeof d.summary_markdown === 'string' ? d.summary_markdown : '',
+      detailsMarkdown: typeof d.details_markdown === 'string' ? d.details_markdown : '',
+      // Same unambiguous-equivalent rule: pass the pipeline's entity summary
+      // through when present; omit rather than fabricate. The rubric evaluator
+      // reads entitySummaryMarkdown and degrades to '' when absent.
+      ...(typeof d.entity_summary_markdown === 'string'
+        ? { entitySummaryMarkdown: d.entity_summary_markdown }
+        : {}),
+      alertIds: Array.isArray(d.alert_ids) ? (d.alert_ids as string[]) : [],
+    } as AttackDiscovery;
+  });
+};
+
+interface ExecutionTrackingWorkflowSnapshot {
+  workflow_id?: string;
+  workflow_run_id?: string;
+}
+
+interface ExecutionTrackingResponse {
+  generation?: ExecutionTrackingWorkflowSnapshot | null;
+  validation?: ExecutionTrackingWorkflowSnapshot | null;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Only the EXPECTED not-yet-indexed failures are retryable. The Kibana http
+ * layer surfaces an error response as an `IHttpFetchError` carrying the raw
+ * `Response`; a 401/403 can never succeed on retry, so burning the whole
+ * budget on them only delays surfacing the authorization/configuration
+ * failure (and masks it behind a misleading `never became trackable`).
+ */
+const PERMANENT_HTTP_STATUSES = new Set([400, 401, 403, 405, 410, 499, 501]);
+
+const isPermanentHttpError = (error: unknown): boolean => {
+  if (error == null || typeof error !== 'object') return false;
+  const response = (error as { response?: { status?: unknown } }).response;
+  const status = response?.status;
+  return typeof status === 'number' && PERMANENT_HTTP_STATUSES.has(status);
+};
+
+/**
+ * A non-null `tracking.validation` means the validation phase has STARTED (the
+ * product writes the workflow tracking into the event log before the workflow
+ * runs — see `writeValidationStartedEvent`), not that it has finished. Reading
+ * the pipeline at that point can snapshot it mid-validation, where
+ * `validated_discoveries` is absent or incomplete. Probing the validation
+ * workflow run itself is the product's own completion signal
+ * (`pollForWorkflowCompletion` reads the same engine status); the run's status
+ * must reach a terminal value before the single pipeline snapshot below is
+ * safe to take.
+ */
+const VALIDATION_TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled']);
+
+// workflow_run_id -> terminal status observed. Cached so a timed-out poll does
+// not re-probe the same run.
+const validationRunTerminal = new Map<string, boolean>();
+
+const isValidationFinished = (validation: unknown): boolean => {
+  if (validation == null || typeof validation !== 'object') return false;
+  const runId = (validation as ExecutionTrackingWorkflowSnapshot).workflow_run_id;
+  // A snapshot without a run id carries nothing beyond non-null to observe, so
+  // treat "tracked" as done (the pre-fix behavior for that legacy shape).
+  if (typeof runId !== 'string' || runId.length === 0) return true;
+  return validationRunTerminal.get(runId) === true;
+};
+
+export const waitForValidationPhase = async ({
+  fetch,
+  executionId,
+  executionFailed = false,
+}: {
+  fetch: HttpHandler;
+  executionId: string;
+  /**
+   * The AD tool reported a terminal failure for this execution (`adToolResult.status`).
+   * Validation runs after generation in the same pipeline, so a failed run never
+   * reaches it and `tracking.validation` stays null — there is nothing to wait for.
+   */
+  executionFailed?: boolean;
+}): Promise<ExecutionTrackingResponse> => {
+  const deadline = Date.now() + WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS;
+  let lastError: unknown;
+  let lastTracking: ExecutionTrackingResponse | null = null;
+  for (;;) {
+    let tracking: ExecutionTrackingResponse | null = lastTracking;
+    try {
+      tracking = (await fetch(`/internal/attack_discovery/executions/${executionId}/tracking`, {
+        method: 'GET',
+        headers: { 'elastic-api-version': '1' },
+      })) as ExecutionTrackingResponse;
+      lastTracking = tracking;
+    } catch (error) {
+      lastError = error;
+      // A permanent HTTP failure (401/403/…, unlike the expected
+      // not-yet-indexed 404 or a transient network error) can never succeed on
+      // retry — surface it immediately instead of looping the full budget and
+      // reporting `never became trackable`. An earlier usable snapshot is
+      // still returned, same as the deadline path.
+      if (isPermanentHttpError(error)) {
+        if (lastTracking) {
+          return lastTracking;
+        }
+        throw new Error(
+          `Attack Discovery execution ${executionId} tracking request failed permanently`,
+          { cause: error }
+        );
+      }
+    }
+    if (tracking && tracking.validation != null) {
+      if (isValidationFinished(tracking.validation)) {
+        return tracking;
+      }
+      // Validation has started but its workflow run is still in flight. Probe
+      // the run status the product's own poller reads; once terminal, the next
+      // loop pass returns the (re-fetched) tracking snapshot.
+      const runId = tracking.validation.workflow_run_id;
+      if (runId) {
+        try {
+          const run = (await fetch(`/api/workflows/executions/${encodeURIComponent(runId)}`, {
+            method: 'GET',
+            headers: { 'elastic-api-version': '2023-10-31' },
+          })) as { status?: string } | null;
+          if (run?.status && VALIDATION_TERMINAL_STATUSES.has(run.status)) {
+            validationRunTerminal.set(runId, true);
+          }
+        } catch (probeError) {
+          // Status probe is best-effort: a 404 (run not indexed yet) or a
+          // transient failure just means "not terminal yet" — keep polling.
+          // A permanent failure (401/403/…) can never succeed on retry, so
+          // surface it as the tracking GET above does rather than burning
+          // the whole budget and scoring a possibly incomplete pipeline.
+          if (isPermanentHttpError(probeError)) {
+            if (lastTracking) {
+              return lastTracking;
+            }
+            throw new Error(
+              `Attack Discovery execution ${executionId} validation status probe failed permanently`,
+              { cause: probeError }
+            );
+          }
+        }
+      }
+    }
+    // The execution terminally failed before the validation phase, so
+    // `tracking.validation` can never become non-null. Return the snapshot we
+    // have rather than poll for the rest of the budget on a predicate that can
+    // no longer be satisfied — a wedged run must not stall the suite.
+    if (executionFailed && tracking?.validation == null) {
+      if (lastTracking) {
+        return lastTracking;
+      }
+      throw new Error(
+        `Attack Discovery execution ${executionId} failed before reaching the validation phase`,
+        { cause: lastError }
+      );
+    }
+    if (Date.now() >= deadline) {
+      if (lastTracking) {
+        // Timed out still waiting: return the LAST SUCCESSFUL snapshot rather
+        // than failing the run — a final failed GET must not discard an
+        // earlier usable generation snapshot. The caller reads whatever
+        // pipeline state exists, and the evaluators score that honestly.
+        return lastTracking;
+      }
+      throw new Error(
+        `Attack Discovery execution ${executionId} never became trackable within ${WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS}ms`,
+        { cause: lastError }
+      );
+    }
+    await sleep(WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS);
+  }
+};
 const inspectWorkflow = async ({
   fetch,
   executionId,
@@ -1106,11 +1332,15 @@ const inspectWorkflow = async ({
   agentAlertRetrievalPopulation: number | null;
   retrievalScope: string | null;
   unscopedAgentAlertRetrievalRowCounts: number[];
-}): Promise<AttackDiscoveryAgentBuilderTaskOutput['workflow']> => {
-  const tracking = (await fetch(`/internal/attack_discovery/executions/${executionId}/tracking`, {
-    method: 'GET',
-    headers: { 'elastic-api-version': '1' },
-  })) as { generation?: { workflow_id?: string } | null };
+}): Promise<{
+  workflow: AttackDiscoveryAgentBuilderTaskOutput['workflow'];
+  pipeline: AttackDiscoveryPipelineResponse | null;
+}> => {
+  const tracking = await waitForValidationPhase({
+    fetch,
+    executionId,
+    executionFailed: adToolResult?.status === 'error',
+  });
   const workflowId = tracking.generation?.workflow_id;
   const pipeline = workflowId
     ? ((await fetch(`/internal/attack_discovery/workflow/${workflowId}/execution/${executionId}`, {
@@ -1122,15 +1352,18 @@ const inspectWorkflow = async ({
   // Without a generation workflow there is no pipeline response to read, but the
   // agent's own retrieval (recorded in `steps`) is still observable — which is
   // the whole point of `buildWorkflow` taking a nullable pipeline.
-  return buildWorkflow({
+  return {
     pipeline,
-    adToolResult,
-    agentEsqlRowCounts,
-    adToolEsqlQuery,
-    agentAlertRetrievalPopulation,
-    retrievalScope,
-    unscopedAgentAlertRetrievalRowCounts,
-  });
+    workflow: buildWorkflow({
+      pipeline,
+      adToolResult,
+      agentEsqlRowCounts,
+      adToolEsqlQuery,
+      agentAlertRetrievalPopulation,
+      retrievalScope,
+      unscopedAgentAlertRetrievalRowCounts,
+    }),
+  };
 };
 
 const buildTask =
@@ -1169,28 +1402,42 @@ const buildTask =
       retrievalScope
     );
     const executionId = adToolResult?.executionUuid;
-    const workflow = executionId
+    const { workflow, pipeline } = executionId
       ? await inspectWorkflow({
-          fetch,
           executionId,
           adToolResult,
+          fetch,
           agentEsqlRowCounts,
           adToolEsqlQuery,
           agentAlertRetrievalPopulation,
           retrievalScope,
           unscopedAgentAlertRetrievalRowCounts,
         })
-      : buildWorkflow({
+      : {
+          workflow: buildWorkflow({
+            pipeline: null,
+            adToolResult,
+            agentEsqlRowCounts,
+            adToolEsqlQuery,
+            agentAlertRetrievalPopulation,
+            retrievalScope,
+            unscopedAgentAlertRetrievalRowCounts,
+          }),
           pipeline: null,
-          adToolResult,
-          agentEsqlRowCounts,
-          adToolEsqlQuery,
-          agentAlertRetrievalPopulation,
-          retrievalScope,
-          unscopedAgentAlertRetrievalRowCounts,
-        });
+        };
     return {
       ...response,
+      // Slow-path handoff (#293046): when the sync tool returns the
+      // `{ execution_uuid }` handoff at its 90s soft deadline, the converse
+      // response carries no insights even though generation completes in the
+      // background moments later. Fall back to the pipeline's validated
+      // discoveries (mapped to the harness `AttackDiscovery` shape) so
+      // insight-based evaluators (NoiseFalsePositive, AttackDiscoveryBasic)
+      // score the completed run rather than the handoff stub. A run whose
+      // discoveries were all hallucination-filtered legitimately yields an
+      // empty array — do not fabricate.
+      insights:
+        response.insights ?? insightsFromValidatedDiscoveries(pipeline?.validated_discoveries),
       // Redact transient execution UUIDs from steps and adToolResult before
       // they reach evaluators — these are per-run values that would pollute
       // score reports and make diff comparisons noisy.
@@ -1242,6 +1489,9 @@ export const createEvaluateAttackDiscoveryAgentBuilderDataset =
         createWorkflowEvidenceEvaluator(),
         trajectory,
         createForbiddenToolsEvaluator(),
+        createNoiseFalsePositiveEvaluator(),
+        createDiscoveryCountCapEvaluator(),
+        createMinValidatedDiscoveryEvaluator(),
         createCostPerAlertEvaluator(),
         createAttackDiscoveryBasicEvaluator(),
         createAttackDiscoveryCriteriaEvaluator({ evaluators }) as Evaluator<
