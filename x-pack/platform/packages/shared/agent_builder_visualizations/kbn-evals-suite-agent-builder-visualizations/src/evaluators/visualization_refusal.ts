@@ -6,7 +6,8 @@
  */
 
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
-import { skippedResult } from '../evaluator_utils';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents';
+import { isRecord, skippedResult } from '../evaluator_utils';
 import type { ExtractedVisualization } from '../extract_visualization';
 
 export const VISUALIZATION_REFUSAL_EVALUATOR_NAME = 'Visualization Refusal';
@@ -23,6 +24,9 @@ export interface ExpectedRefusal {
   reason: RefusalReason;
 }
 
+const isClarifyingQuestion = (prompt: unknown): boolean =>
+  isRecord(prompt) && prompt.type === AgentPromptType.ask_user_question;
+
 /**
  * CODE evaluator for negative examples: the agent should produce no
  * visualization and should answer with text. Skips positive examples.
@@ -33,7 +37,10 @@ export function createVisualizationRefusalEvaluator<
 >(config: {
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   messagesExtractor: (output: TTaskOutput) => string[];
-  /** Structured prompts (clarifying questions) count as answering the user. */
+  /**
+   * Structured prompts the agent raised. Only clarifying questions count as answering
+   * the user; confirmation and authorization prompts ask to proceed, not to decline.
+   */
   promptsExtractor?: (output: TTaskOutput) => unknown[];
   expectedRefusalExtractor: (expected: TExample['output']) => ExpectedRefusal | undefined;
   name?: string;
@@ -60,7 +67,7 @@ export function createVisualizationRefusalEvaluator<
       const message = messagesExtractor(output).join('\n').trim();
       const prompts = promptsExtractor(output);
       const refused = visualizations.length === 0;
-      const askedUser = prompts.length > 0;
+      const askedUser = prompts.some(isClarifyingQuestion);
       const explained = message.length > 0 || askedUser;
 
       const score = refused ? (explained ? 1 : 0.5) : 0;
@@ -84,7 +91,7 @@ export function createVisualizationRefusalEvaluator<
         metadata: {
           reason: refusal.reason,
           producedVisualizations: visualizations.length,
-          promptCount: prompts.length,
+          promptTypes: prompts.map((prompt) => (isRecord(prompt) ? prompt.type : undefined)),
           messageExcerpt: message.slice(0, 300),
         },
       };

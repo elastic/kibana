@@ -59,6 +59,17 @@ describe('createVisualizationRefusalEvaluator', () => {
     expect(result.label).toBe('asked-clarification');
   });
 
+  it('does not count a confirmation prompt as declining', async () => {
+    const result = await evaluate({
+      visualizations: [],
+      messages: [''],
+      prompts: [{ type: 'confirmation' }],
+      refusal: { reason: 'missing_index' },
+    });
+    expect(result.score).toBe(0.5);
+    expect(result.label).toBe('silent-refusal');
+  });
+
   it('scores 0.5 when the agent refuses silently', async () => {
     const result = await evaluate({
       visualizations: [],
