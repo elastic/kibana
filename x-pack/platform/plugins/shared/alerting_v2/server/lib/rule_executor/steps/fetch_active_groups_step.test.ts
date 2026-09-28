@@ -67,7 +67,7 @@ describe('FetchActiveGroupsStep', () => {
     mockActiveGroups(internalEsClient, ['group-a', 'group-b']);
 
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse({ kind: 'alert', recovery_strategy: 'no_breach' });
+    const rule = createRuleResponse({ kind: 'alert', recovery: { strategy: 'no_breach' } });
 
     const state = createRulePipelineState({ input, rule });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -85,7 +85,11 @@ describe('FetchActiveGroupsStep', () => {
     mockActiveGroups(internalEsClient, ['group-a', 'group-b']);
 
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse({ kind: 'alert', recovery_strategy: 'none' });
+    const rule = createRuleResponse({
+      kind: 'alert',
+      recovery: { strategy: 'manual' },
+      no_data: { strategy: 'ignore' },
+    });
 
     const state = createRulePipelineState({ input, rule });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
