@@ -9,6 +9,7 @@
 
 import type { StepSelectionValues } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
+import type { StepPropertyItem } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 
 import {
@@ -17,7 +18,6 @@ import {
 } from './validate_step_properties';
 import { stepSchemas } from '../../../../common/step_schemas';
 import * as stepPropertySelectionCache from '../../../shared/lib/step_property_selection_cache';
-import type { StepPropertyItem } from '../model/types';
 
 // Mock the dependencies
 jest.mock('../../../../common/step_schemas', () => ({

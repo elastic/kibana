@@ -225,12 +225,16 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/packages/shared/esql/kbn-esql-language/scripts/**/*',
   'src/platform/kbn-ui/_tooling/**/*',
 ];
 
-/** Restricted imports with suggested alternatives */
-const RESTRICTED_IMPORTS = [
+/**
+ * Security-related restricted imports. These are enforced by the dedicated
+ * `@kbn/eslint/security_imports_restriction` rule so that local
+ * `no-restricted-imports` overrides cannot silently drop them.
+ */
+const SECURITY_RESTRICTED_IMPORTS = [
   {
     name: 'lodash',
     importNames: ['set', 'setWith', 'template'],
@@ -289,6 +293,15 @@ const RESTRICTED_IMPORTS = [
     name: 'lodash/fp/template',
     message: 'lodash.template is unsafe, and not compatible with our content security policy.',
   },
+  {
+    name: 'axios',
+    message:
+      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
+  },
+];
+
+/** Restricted imports with suggested alternatives */
+const RESTRICTED_IMPORTS = [
   {
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
@@ -427,11 +440,6 @@ const RESTRICTED_IMPORTS = [
   {
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
-  },
-  {
-    name: 'axios',
-    message:
-      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
   },
 ];
 
@@ -1046,6 +1054,7 @@ module.exports = {
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
           'warn',
           {
@@ -1284,7 +1293,7 @@ module.exports = {
         'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/platform/plugins/shared/significant_events_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/significant_events_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/packages/shared/kbn-unified-chart-section-viewer/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
@@ -1425,7 +1434,10 @@ module.exports = {
     },
     // Allow node.js imports for security solution test packages
     {
-      files: ['x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/kbn-security-evals-matrix/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         'import/no-nodejs-modules': 'off',
       },
@@ -1489,7 +1501,6 @@ module.exports = {
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1538,7 +1549,6 @@ module.exports = {
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
-        'no-extend-native': 'error',
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
@@ -1590,7 +1600,6 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
@@ -1697,7 +1706,6 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
@@ -1847,7 +1855,6 @@ module.exports = {
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
-        'no-extend-native': 'error',
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
@@ -1888,11 +1895,9 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        '@typescript-eslint/explicit-member-accessibility': 'error',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
         '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-unused-vars': 'error',
@@ -2283,11 +2288,8 @@ module.exports = {
         // react
         'react/no-did-mount-set-state': 'error',
         'react/no-did-update-set-state': 'error',
-        'react/no-multi-comp': ['error', { ignoreStateless: true }],
-        'react/self-closing-comp': 'error',
         'react/sort-comp': 'error',
         'react/jsx-boolean-value': 'error',
-        'react/no-unescaped-entities': ['error', { forbid: ['>', '}'] }],
         'react/forbid-elements': [
           'error',
           {
@@ -2331,7 +2333,7 @@ module.exports = {
     },
     {
       files: ['x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js'],
-      globals: { canvas: true, $: true },
+      globals: { canvas: true },
     },
     {
       files: ['x-pack/platform/plugins/private/canvas/public/**/*.js'],
@@ -2340,12 +2342,37 @@ module.exports = {
       },
     },
     {
-      files: ['src/platform/packages/shared/kbn-flot-charts/lib/**/*.js'],
-      env: {
-        jquery: true,
+      files: [
+        'src/platform/packages/shared/kbn-flot-charts/**/*.{js,ts,tsx,d.ts}',
+        'x-pack/platform/plugins/private/canvas/public/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/monitoring/public/components/chart/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/monitoring/public/components/sparkline/**/*.{js,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-globals': [
+          'error',
+          ...require('@kbn/eslint-config/restricted_globals'),
+          {
+            name: '$',
+            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
+          },
+          {
+            name: 'jQuery',
+            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
+          },
+        ],
       },
     },
-
+    {
+      files: [
+        'src/platform/packages/shared/kbn-flot-charts/index.js',
+        'src/platform/packages/shared/kbn-flot-charts/index.d.ts',
+      ],
+      rules: {
+        'import/no-default-export': 'off',
+      },
+    },
     /**
      * TSVB overrides
      */
@@ -2387,6 +2414,19 @@ module.exports = {
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
+        // The `recommended` presets above re-enable these rules; they run in oxlint instead.
+        'no-cond-assign': 'off',
+        'no-debugger': 'off',
+        'no-empty': 'off',
+        'no-unused-labels': 'off',
+        'use-isnan': 'off',
+        'react/jsx-no-undef': 'off',
+        'react/no-is-mounted': 'off',
+        'react/no-unescaped-entities': 'off',
+        'react/no-unknown-property': 'off',
+        '@typescript-eslint/no-extra-non-null-assertion': 'off',
+        '@typescript-eslint/no-misused-new': 'off',
+        '@typescript-eslint/no-namespace': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/no-empty-object-type': 'off',
         '@typescript-eslint/no-unsafe-function-type': 'off',
@@ -2575,7 +2615,6 @@ module.exports = {
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
-        'no-extend-native': 'error',
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
@@ -2627,7 +2666,6 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
@@ -2645,7 +2683,6 @@ module.exports = {
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -2806,6 +2843,12 @@ module.exports = {
       files: [
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'scripts/capture_sigevents_env_snapshot.js',
+        'scripts/capture_sigevents_otel_demo_snapshots.js',
+        'scripts/probe_sigevents_eval_snapshot.js',
+        'scripts/replay_sigevents_eval_snapshot.js',
+        'scripts/restore_sigevents_env_snapshot.js',
+        'scripts/seed_sigevents_env.js',
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)*',
 
@@ -2841,7 +2884,7 @@ module.exports = {
       // loads them natively via createRequire (see rspack_runtime.ts).
       files: [
         'packages/kbn-rspack-optimizer/**/*.{ts,tsx}',
-        'packages/kbn-plugin-helpers/src/tasks/optimize_rspack.ts',
+        'packages/kbn-plugin-helpers/src/tasks/optimize.ts',
       ],
       rules: {
         '@typescript-eslint/no-restricted-imports': [
@@ -3062,6 +3105,14 @@ module.exports = {
       },
     },
     {
+      // Raw EUI class selectors in Scout code, including kbn-scout* sources. The
+      // restricted classes are read from `@elastic/eui-test-helpers` at lint time.
+      files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
+      rules: {
+        '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
+      },
+    },
+    {
       // Platform & Solutions API Tests
       files: [
         'src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
@@ -3072,6 +3123,30 @@ module.exports = {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
           'error',
           { alternativeFixtures: ['esClient'] },
+        ],
+      },
+    },
+    {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          {
+            alternativeFixtures: [
+              'esClient',
+              'detectionsApi',
+              'discoveriesApi',
+              'endpointExceptionsApi',
+              'endpointManagementApi',
+              'entityAnalyticsApi',
+              'exceptionsApi',
+              'listsApi',
+              'osqueryApi',
+              'timelinesApi',
+            ],
+          },
         ],
       },
     },
@@ -3111,6 +3186,7 @@ module.exports = {
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
         'x-pack/solutions/security/packages/test-api-clients/**',
+        'x-pack/solutions/security/packages/kbn-security-evals-matrix/**',
         'x-pack/platform/plugins/shared/automatic_import/**',
       ],
       rules: {
@@ -3169,22 +3245,24 @@ module.exports = {
     },
     {
       // Allow axios in files that already use it. New axios imports are blocked
-      // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
-      // as consumers migrate to the native `fetch` API. Placed last so it wins
-      // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
-      // security_solution block). The trade-off: the allowlisted files that
-      // overlap with that block lose their `*legacy*` pattern check; verified
-      // that none of them currently import any path matching `*legacy*`. The
-      // workflows_management overlap is gone, and this comment can be dropped
-      // entirely once the remaining security_solution consumers migrate. The
-      // js-yaml freeze is handled separately via
-      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
-      // so it does not interact with this override.
+      // globally by SECURITY_RESTRICTED_IMPORTS; this allowlist should only ever
+      // shrink as consumers migrate to the native `fetch` API.
+      // The `no-restricted-imports` entry preserves this block's historical
+      // behavior: it is placed last, so the allowlisted files that overlap with
+      // an earlier override (e.g. the security_solution block) lose that
+      // override's `*legacy*` pattern check; verified that none of them
+      // currently import any path matching `*legacy*`. The workflows_management
+      // overlap is gone, and this entry can be dropped entirely once the
+      // remaining security_solution consumers migrate. The js-yaml freeze is
+      // handled separately via @kbn/eslint/module_migration in
+      // packages/kbn-eslint-config/.eslintrc.js so it does not interact with
+      // this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
-        'no-restricted-imports': [
+        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/security_imports_restriction': [
           'error',
-          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
+          ...SECURITY_RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
       },
     },

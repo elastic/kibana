@@ -11,7 +11,6 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
-  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -98,7 +97,6 @@ export const getRulesClientMockParams = (
     backfillClient,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     isSystemAction: jest.fn(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
     isServerless: false,
     analytics: { reportEvent: jest.fn() },
     ...overrides,

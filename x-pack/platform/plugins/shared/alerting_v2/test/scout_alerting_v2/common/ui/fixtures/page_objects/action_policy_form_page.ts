@@ -25,6 +25,8 @@ export class ActionPolicyFormPage {
   public readonly container: Locator;
   public readonly pageTitle: Locator;
   public readonly nameInput: Locator;
+  /** Toggle button for the Advanced Matching accordion. */
+  public readonly advancedMatchingToggle: Locator;
   /** KQL query bar (`QueryStringInput`) backing the `matcher` field. */
   public readonly matcherInput: Locator;
   public readonly submitButton: Locator;
@@ -36,6 +38,7 @@ export class ActionPolicyFormPage {
     this.container = this.page.testSubj.locator('actionPolicyFormPage');
     this.pageTitle = this.container.getByTestId('pageTitle');
     this.nameInput = this.container.getByTestId('nameInput');
+    this.advancedMatchingToggle = this.container.getByTestId('advancedMatchingAccordionToggle');
     this.matcherInput = this.container.getByTestId('matcherInput');
     this.submitButton = this.container.getByTestId('submitButton');
     this.cancelButton = this.container.getByTestId('cancelButton');
@@ -57,7 +60,14 @@ export class ActionPolicyFormPage {
   }
 
   async setMatcher(matcher: string) {
-    await this.matcherInput.fill(matcher);
+    // Open the accordion only when it is currently collapsed; toggling an
+    // already-open accordion would hide the input and make the fill time out.
+    if ((await this.advancedMatchingToggle.getAttribute('aria-expanded')) !== 'true') {
+      await this.advancedMatchingToggle.click();
+    }
+    // QueryStringInput is React-controlled; fill() races with prop sync.
+    // pressSequentially() drives keydown events that React always wins.
+    await this.matcherInput.pressSequentially(matcher);
     // Typing opens the KQL suggestions popover, which overlays the rest of the
     // form and would swallow the submit click.
     await this.matcherInput.press('Escape');

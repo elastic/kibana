@@ -24,7 +24,7 @@ By default, when running `tilt up` without any additional configuration, Tilt wi
 
 If you want to run Kibana locally and connect it with the Kubernetes cluster, follow these steps:
 
-- Start your local Kibana instance (`yarn start`)
+- Start your local Kibana instance (`pnpm start`)
 - Navigate to the APM Server Repo and start Tilt with the '--local-kibana' flag: `$ tilt up -- --local-kibana`
 
 **Note**: You should start the local Kibana instance before or immediately after running the Tilt command.
