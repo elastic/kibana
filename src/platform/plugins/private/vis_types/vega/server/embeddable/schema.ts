@@ -29,10 +29,11 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
         ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
         query: asCodeQuerySchema.optional().meta({
           description:
-            'Panel-level KQL or Lucene query. Applied together with the dashboard query.',
+            'Panel-level KQL or Lucene query. Applied together with the dashboard query to Elasticsearch data sources that use `%context%: true` or `%dashboard_context-*%` placeholders, and to ES|QL data sources.',
         }),
         filters: z.array(asCodeFilterSchema).max(100).optional().meta({
-          description: 'Panel-level filters. Applied together with the dashboard filters.',
+          description:
+            'Panel-level filters. Applied together with the dashboard filters to Elasticsearch data sources that use `%context%: true` or `%dashboard_context-*%` placeholders, and to ES|QL data sources.',
         }),
         spec: z
           .discriminatedUnion('format', [
