@@ -121,7 +121,7 @@ export const ESQLDataGridAccordion = ({
         )}
         {dataGridAttrs && (
           <div css={styles.gridContainer}>
-            {isLoading && dataGridAttrs.rows.length > 0 && (
+            {isLoading && hasRows && (
               <EuiProgress
                 size="xs"
                 color="accent"
