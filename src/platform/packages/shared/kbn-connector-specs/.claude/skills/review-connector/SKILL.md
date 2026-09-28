@@ -139,12 +139,15 @@ actual documented behavior — flag them even without live access to the API, ba
   `truncated: true`), and that it preserves the continuation URL's own query string rather than
   re-applying `params` — that corrupts a URL already carrying an api-version and a skip token.
 - **A cross-host continuation link followed with the authenticated client**: Treat this as high severity.
-  A vendor-supplied absolute `nextLink` is caller-untrusted data, and `ctx.client` carries the
-  connector's credentials. Axios strips a standard authorization header on a cross-host *redirect*, but
-  an explicit new request to an absolute URL gets no such protection, so an attacker-influenced link
-  sends the credentials to the host it names and can reach an internal address. Flag any pagination
-  helper that passes a continuation URL to `ctx.client` with no origin check against the request it sent
-  (or an explicitly allowed host).
+  A vendor-supplied `nextLink` is caller-untrusted data, and `ctx.client` carries the connector's
+  credentials. Axios strips a standard authorization header on a cross-host *redirect*, but an explicit
+  new request gets no such protection, so an attacker-influenced link sends the credentials to the host
+  it names and can reach an internal address. Flag any pagination helper that passes a continuation URL
+  to `ctx.client` with no origin check against the request it sent (or an explicitly allowed host).
+  Check how the link is parsed, too: a bare `new URL(nextLink)` throws on the relative link (`?page=2`,
+  `/items?page=2`) a `Link` header commonly carries, so it stops pagination at page one for those
+  vendors. The helper should resolve the link against the request URL and use the resolved URL for the
+  next request, which handles both forms and still compares the right origin.
 - **"At least one of" update inputs**: If every field on an update-action's input schema is optional, check
   for a `.refine()` (or equivalent) requiring at least one to be set. Without it, a call with no fields set
   silently no-ops instead of erroring.

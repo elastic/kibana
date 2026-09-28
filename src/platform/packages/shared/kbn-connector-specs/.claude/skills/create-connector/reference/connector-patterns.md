@@ -298,16 +298,23 @@ Three details that are easy to get wrong:
   internal address. Confirm the link's origin matches the request you sent (or an explicitly allowed
   host) and stop paginating if it does not:
 
+  Resolve the link against the URL of the request that produced it, and request the *resolved* URL.
+  `new URL(nextLink)` alone throws on a relative link (`?page=2`, `/items?page=2`), which a `Link`
+  header commonly carries, so a bare parse both breaks those vendors and reads as if every link were
+  absolute:
+
   ```typescript
-  const { origin } = new URL(url, baseUrl);
-  if (new URL(nextLink).origin !== origin) {
+  const requested = new URL(url, baseUrl);
+  const next = new URL(nextLink, requested); // resolves '?page=2' against the request
+  if (next.origin !== requested.origin) {
     break;
   }
+  // request next.href, so a query-only link keeps the path it was relative to
   ```
 
-- A continuation URL is usually absolute and already carries the api-version and a skip token, so do not
-  re-apply your own `params` — that corrupts it. Preserve its query string as the vendor gave it, once
-  the origin check above passes.
+- A continuation URL already carries the api-version and any skip token, whether the vendor gives it
+  absolute or relative, so do not re-apply your own `params` — that corrupts it. Request the resolved
+  URL as the vendor composed it, once the origin check above passes.
 - Cap the number of pages followed, and report the cap in the result (e.g. `truncated: true`) so an agent
   narrows its query rather than treating a capped list as complete.
 
