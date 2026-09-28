@@ -6,7 +6,6 @@
  */
 
 import {
-  getConnectorByIdMock,
   getInferenceExecutorMock,
   getInferenceAdapterMock,
   resolveInferenceEndpointMock,
@@ -105,7 +104,6 @@ describe('createChatCompleteApi', () => {
   });
 
   afterEach(() => {
-    getConnectorByIdMock.mockReset();
     getInferenceExecutorMock.mockReset();
     getInferenceAdapterMock.mockReset();
     mockEsClient.get.mockClear();
@@ -616,9 +614,11 @@ describe('createChatCompleteApi', () => {
     const createChatCompleteWithCheck = ({
       isDefaultConnectorOnly,
       getDefaultConnectorId,
+      resolveConnectorId = jest.fn().mockRejectedValue(new Error('not found')),
     }: {
       isDefaultConnectorOnly: () => Promise<boolean>;
       getDefaultConnectorId: () => Promise<string | undefined>;
+      resolveConnectorId?: (connectorId: string) => Promise<string>;
     }) => {
       const callbackApi = createChatCompleteCallbackApi({
         request,
@@ -631,6 +631,7 @@ describe('createChatCompleteApi', () => {
         endpointIdCache,
         isDefaultConnectorOnly,
         getDefaultConnectorId,
+        resolveConnectorId,
       });
       return createChatCompleteApi({ callbackApi });
     };
@@ -753,12 +754,13 @@ describe('createChatCompleteApi', () => {
     });
 
     it('allows a stack connector id that resolves to the default inference endpoint', async () => {
-      getConnectorByIdMock.mockResolvedValue({ connectorId: 'my-endpoint' });
+      const resolveConnectorId = jest.fn().mockResolvedValue('my-endpoint');
       const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
       const getDefaultConnectorId = jest.fn().mockResolvedValue('my-endpoint');
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
+        resolveConnectorId,
       });
 
       const response = await chatCompleteWithCheck({
@@ -768,18 +770,16 @@ describe('createChatCompleteApi', () => {
       });
 
       expect(response.content).toBe('chunk-1');
-      expect(getConnectorByIdMock).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorId: 'connectorId' })
-      );
+      expect(resolveConnectorId).toHaveBeenCalledWith('connectorId');
     });
 
     it('blocks the call when resolving the requested connector fails', async () => {
-      getConnectorByIdMock.mockRejectedValue(new Error('not found'));
       const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
       const getDefaultConnectorId = jest.fn().mockResolvedValue('my-endpoint');
       const chatCompleteWithCheck = createChatCompleteWithCheck({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
+        resolveConnectorId: jest.fn().mockRejectedValue(new Error('not found')),
       });
 
       await expect(

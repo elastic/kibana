@@ -48,7 +48,6 @@ import { addAnonymizationInstruction } from './anonymization/add_anonymization_i
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
-import { getConnectorById } from '../util/get_connector_by_id';
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
 import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
@@ -68,6 +67,7 @@ interface CreateChatCompleteApiOptions {
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -125,6 +125,7 @@ export function createChatCompleteCallbackApi({
   isTokenUsageTrackingEnabled,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -155,6 +156,7 @@ export function createChatCompleteCallbackApi({
         isTokenUsageTrackingEnabled,
         isDefaultConnectorOnly,
         getDefaultConnectorId,
+        resolveConnectorId,
       })
     ).pipe(
       retryHoldingTokenCountEvents({
@@ -330,6 +332,7 @@ function resolveAndCreatePipeline({
   isTokenUsageTrackingEnabled,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -348,14 +351,14 @@ function resolveAndCreatePipeline({
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }) {
   return from(
     throwIfConnectorNotAllowed({
       connectorId,
       isDefaultConnectorOnly,
       getDefaultConnectorId,
-      resolveConnectorId: async () =>
-        (await getConnectorById({ connectorId, actions, request, esClient, logger })).connectorId,
+      resolveConnectorId,
       logger,
     }).then(() => endpointIdCache.has(connectorId))
   ).pipe(
@@ -511,7 +514,7 @@ async function throwIfConnectorNotAllowed({
   connectorId: string;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
-  resolveConnectorId: () => Promise<string>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
   logger: Logger;
 }): Promise<void> {
   if (!isDefaultConnectorOnly || !getDefaultConnectorId) {
@@ -533,8 +536,8 @@ async function throwIfConnectorNotAllowed({
   }
   // a `.inference` stack connector id resolves to its underlying inference endpoint,
   // which is what the default connector id refers to
-  if (defaultConnectorId) {
-    const resolvedConnectorId = await resolveConnectorId().catch(() => undefined);
+  if (defaultConnectorId && resolveConnectorId) {
+    const resolvedConnectorId = await resolveConnectorId(connectorId).catch(() => undefined);
     if (resolvedConnectorId === defaultConnectorId) {
       return;
     }
