@@ -189,7 +189,7 @@ describe('Quick search visor', () => {
     it('should show the Stop button while NL generation is in progress', async () => {
       (corePluginMock.http.post as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
-      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+      const { getByRole, getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
 
       await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
       await act(async () => {
@@ -202,6 +202,7 @@ describe('Quick search visor', () => {
       });
 
       await waitFor(() => expect(getByTestId('esqlVisorStopGeneration')).toBeInTheDocument());
+      expect(getByRole('button', { name: 'Stop' })).toBe(getByTestId('esqlVisorStopGeneration'));
     });
 
     it('should return to KQL mode when the KQL mode button is clicked', async () => {
