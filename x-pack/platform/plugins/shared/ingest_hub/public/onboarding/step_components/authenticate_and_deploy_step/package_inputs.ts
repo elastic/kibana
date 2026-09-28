@@ -105,8 +105,7 @@ function resolveActiveInputs(
 /**
  * Distinguish "never configured" (key absent → default to all DS) from "explicitly emptied"
  * (key present with enabledDataStreams: [] → user turned everything off → skip).
- * Vars are keyed by instance id since duplicates exist; `instanceId` falls back to the service id
- * for sessions predating instance keying — the same chain deployGroup applies.
+ * Vars are keyed by instance id since duplicates exist.
  */
 function resolveServiceVars(
   storedServiceVars: Record<string, ServiceVars>,
@@ -114,8 +113,7 @@ function resolveServiceVars(
   instanceId: string = service.id
 ): ServiceVars {
   return (
-    storedServiceVars[instanceId] ??
-    storedServiceVars[service.id] ?? {
+    storedServiceVars[instanceId] ?? {
       enabledDataStreams: service.dataStreams,
       varsByDataStream: {},
     }

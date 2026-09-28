@@ -200,14 +200,12 @@ export async function buildGroupPackagePolicy(
   } = opts;
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
-  // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
-    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? {
-        enabledDataStreams: service.dataStreams,
-        varsByDataStream: {},
-      };
+    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
+      enabledDataStreams: service.dataStreams,
+      varsByDataStream: {},
+    };
   }
 
   const services = members.map(({ service }) => service);
