@@ -14,6 +14,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { ConversationDetailsFlyoutSnapshot } from './conversation_details_flyout';
+import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
 const generateTitleId = htmlIdGenerator('agentBuilderConversationDetailsFlyoutTitle');
 
@@ -55,6 +56,7 @@ export const openConversationDetailsFlyout = async ({
       flyoutMenuProps: { trailingActions: menuActions },
       type: 'push',
       paddingSize: 'm',
+      css: flyoutMenuRowStyles,
       role: 'region',
       'data-test-subj': 'agentBuilderConversationDetailsFlyout-snapshot',
       'aria-labelledby': titleId,

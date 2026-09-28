@@ -29,6 +29,7 @@ import type { ConversationsService } from '../services/conversations/conversatio
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
+import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
 const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Chat info',
@@ -273,6 +274,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       size="s"
       type="push"
       paddingSize="m"
+      css={flyoutMenuRowStyles}
       role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationDetailsFlyout-live"
