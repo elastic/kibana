@@ -90,6 +90,33 @@ const paginatedSearch = async <T>(
 
 export type EntitySourcesService = ReturnType<typeof createEntitySourcesService>;
 
+/**
+ * Runs a watchlist sync and never rejects — errors are swallowed and logged.
+ * Callers that want fire-and-forget behavior (not waiting on
+ * a potentially full entity-store scan, only on the source being saved) should call this as
+ * `void syncWatchlistInBackground(...)`;
+ */
+export const syncWatchlistInBackground = async ({
+  watchlistId,
+  logContext,
+  ...serviceParams
+}: {
+  watchlistId: string;
+  logContext: string;
+} & Parameters<typeof createEntitySourcesService>[0]): Promise<void> => {
+  const { logger } = serviceParams;
+  try {
+    const entitySourcesService = createEntitySourcesService(serviceParams);
+    await entitySourcesService.syncWatchlist(watchlistId);
+    logger.info(`[${logContext}] Background sync completed for watchlist ${watchlistId}`);
+  } catch (syncError) {
+    const errorMessage = syncError instanceof Error ? syncError.message : String(syncError);
+    logger.warn(
+      `[${logContext}] Background sync failed for watchlist ${watchlistId}: ${errorMessage}`
+    );
+  }
+};
+
 export const createEntitySourcesService = ({
   esClient,
   soClient,

@@ -10,7 +10,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { createEntitySourcesService } from './entity_sources_service';
+import { createEntitySourcesService, syncWatchlistInBackground } from './entity_sources_service';
 
 jest.mock('../management/watchlist_config');
 jest.mock('./infra/entity_source_client');
@@ -438,6 +438,49 @@ describe('createEntitySourcesService', () => {
         expect.stringContaining(
           'Abort signal received: after index sync for watchlist watchlist-1, skipping cleanup'
         )
+      );
+    });
+  });
+
+  describe('syncWatchlistInBackground', () => {
+    it('resolves and logs completion when the sync succeeds', async () => {
+      await syncWatchlistInBackground({
+        watchlistId: 'watchlist-1',
+        logContext: 'TestCaller',
+        esClient,
+        soClient,
+        logger,
+        namespace,
+        getStartServices: mockGetStartServices as never,
+        hasEncryptionKey: true,
+      });
+
+      expect(logger.info).toHaveBeenCalledWith(
+        '[TestCaller] Background sync completed for watchlist watchlist-1'
+      );
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('Background sync failed')
+      );
+    });
+
+    it('never rejects, and logs a warning when the sync fails', async () => {
+      mockWatchlistGet.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        syncWatchlistInBackground({
+          watchlistId: 'watchlist-1',
+          logContext: 'TestCaller',
+          esClient,
+          soClient,
+          logger,
+          namespace,
+          getStartServices: mockGetStartServices as never,
+          hasEncryptionKey: true,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        '[TestCaller] Background sync failed for watchlist watchlist-1: boom'
       );
     });
   });
