@@ -1058,11 +1058,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable token usage tracking in Kibana',
     },
   },
-  'alerting:v1:showClassicAlertsTable': {
+  'alerting:v1:showStandardObservabilityAlertsPage': {
     type: 'boolean',
     _meta: {
       description:
-        'Whether the classic Observability alerts table is shown when Alerting v2 is enabled.',
+        'Whether the standard Observability alerts page is shown when Alerting v2 is enabled.',
     },
   },
 };

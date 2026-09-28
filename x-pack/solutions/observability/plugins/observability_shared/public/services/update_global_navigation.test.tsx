@@ -389,7 +389,7 @@ describe('updateGlobalNavigation', () => {
         });
       });
 
-      it('excludes the alerts deep link from globalSearch when showClassicAlertsInGlobalSearch is false', () => {
+      it('excludes the alerts deep link from globalSearch when showStandardAlertsInGlobalSearch is false', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
           logs: { show: true },
@@ -415,7 +415,7 @@ describe('updateGlobalNavigation', () => {
           deepLinks,
           updater$,
           pricing,
-          showClassicAlertsInGlobalSearch: false,
+          showStandardAlertsInGlobalSearch: false,
         });
 
         expect(callback).toHaveBeenCalledWith({

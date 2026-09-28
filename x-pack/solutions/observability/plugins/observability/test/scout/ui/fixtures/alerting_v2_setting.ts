@@ -7,7 +7,7 @@
 
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
-  ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID,
+  ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
 import type { KbnClient } from '@kbn/scout-oblt';
 
@@ -50,18 +50,18 @@ export const unsetAlertingV2EnabledSetting = async (kbnClient: KbnClient): Promi
 };
 
 /**
- * Unsets the space-scoped classic-table toggle on spaces this Scout config
+ * Unsets the space-scoped standard-alerts-page toggle on spaces this Scout config
  * owns: `default` and `test-space-N`. Does not touch other named spaces on a
  * shared or Cloud server.
  */
-export const unsetAlertingV2ShowClassicAlertsTableSetting = async (
+export const unsetAlertingV2ShowStandardAlertsPageSetting = async (
   kbnClient: KbnClient
 ): Promise<void> => {
   const spaceIds = await listOwnedSpaceIds(kbnClient);
 
   await Promise.all(
     spaceIds.map((spaceId) =>
-      kbnClient.uiSettings.unset(ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID, {
+      kbnClient.uiSettings.unset(ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID, {
         space: spaceId === DEFAULT_SPACE_ID ? undefined : spaceId,
       })
     )
@@ -74,7 +74,7 @@ export const unsetAlertingV2ShowClassicAlertsTableSetting = async (
  */
 export const resetAlertingV2NavSettings = async (kbnClient: KbnClient): Promise<void> => {
   await unsetAlertingV2EnabledSetting(kbnClient);
-  await unsetAlertingV2ShowClassicAlertsTableSetting(kbnClient);
+  await unsetAlertingV2ShowStandardAlertsPageSetting(kbnClient);
   await kbnClient.uiSettings.waitForEventualCacheRefresh();
 };
 
@@ -107,19 +107,19 @@ const listOwnedSpaceIds = async (kbnClient: KbnClient): Promise<string[]> => {
 };
 
 /**
- * Sets the global v2 flag and the space-scoped classic-page toggle, then waits
+ * Sets the global v2 flag and the space-scoped standard-alerts-page toggle, then waits
  * once so both writes are visible on every Kibana node before navigation.
  */
 export const setAlertingV2NavSettings = async (
   kbnClient: KbnClient,
   scoutSpace: ScoutSpaceUiSettings,
-  { v2Enabled, showClassicAlertsPage }: { v2Enabled: boolean; showClassicAlertsPage: boolean }
+  { v2Enabled, showStandardAlertsPage }: { v2Enabled: boolean; showStandardAlertsPage: boolean }
 ): Promise<void> => {
   await kbnClient.uiSettings.updateGlobal({
     [ALERTING_V2_ENABLED_SETTING_ID]: v2Enabled,
   });
   await scoutSpace.uiSettings.set({
-    [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: showClassicAlertsPage,
+    [ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID]: showStandardAlertsPage,
   });
   await kbnClient.uiSettings.waitForEventualCacheRefresh();
 };

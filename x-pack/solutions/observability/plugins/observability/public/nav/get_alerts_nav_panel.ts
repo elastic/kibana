@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   hasAlertingV2Capability,
   isAlertingV2Enabled,
-  shouldShowClassicObservabilityAlertsTable,
+  shouldShowStandardObservabilityAlertsPage,
 } from '@kbn/alerting-v2-utils';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
@@ -71,11 +71,11 @@ const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
     });
   }
 
-  if (canReadV1Alerts(core) && shouldShowClassicObservabilityAlertsTable(core)) {
+  if (canReadV1Alerts(core) && shouldShowStandardObservabilityAlertsPage(core)) {
     alertsChildren.push({
       link: ALERTS_LINK,
       title: i18n.translate('xpack.observability.nav.alertsV1', {
-        defaultMessage: 'Alerts (V1)',
+        defaultMessage: 'Alerts (Standard)',
       }),
     });
   }
