@@ -533,7 +533,10 @@ export function useMiDeploy({
               setIsDeploying(false);
               // Include undeployed retry targets so they remain queued for the next retry run.
               const retryDeployTargets = plan.groupsToDeploy.flatMap((g) => g.instanceIds);
-              const allRetryFailedIds = [...Object.keys(policyIdsByInstance), ...retryDeployTargets];
+              const allRetryFailedIds = [
+                ...Object.keys(policyIdsByInstance),
+                ...retryDeployTargets,
+              ];
               setFailedInstances(allRetryFailedIds);
               updateDetectAndReviewStep({
                 isDeploying: false,

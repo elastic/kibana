@@ -95,8 +95,7 @@ export function ManagedIntegrationsSection({
     clearStagedStaticKeys,
     setPendingIacTemplate,
     authenticateAndDeployStep,
-  } =
-    useOnboardingFlow();
+  } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
   // The Existing Identity check renders the stack update without writing the key; the template

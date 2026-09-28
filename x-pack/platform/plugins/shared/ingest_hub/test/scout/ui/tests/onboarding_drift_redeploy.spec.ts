@@ -104,7 +104,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ item: makeSoItem(DEP_ID, { connectorId: null, authMethod: 'static_keys' }) }),
+          body: JSON.stringify({
+            item: makeSoItem(DEP_ID, { connectorId: null, authMethod: 'static_keys' }),
+          }),
         })
     );
 
@@ -158,7 +160,10 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await page.testSubj.click('staticKeysReplace-accessKeyId-toggle');
     await page.testSubj.fill('staticKeysReplace-accessKeyId', 'AKIAIOSFODNN7EXAMPLE');
     await page.testSubj.click('staticKeysReplace-secretAccessKey-toggle');
-    await page.testSubj.fill('staticKeysReplace-secretAccessKey', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
+    await page.testSubj.fill(
+      'staticKeysReplace-secretAccessKey',
+      'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+    );
     const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
     await expect(deployButton).toBeEnabled();
 

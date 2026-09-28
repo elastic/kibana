@@ -728,6 +728,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       {driftCheckError && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.title"
