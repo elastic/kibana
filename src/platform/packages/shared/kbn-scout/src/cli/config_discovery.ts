@@ -25,6 +25,7 @@ import {
 } from '../tests_discovery/search_configs';
 import {
   collectUniqueTags,
+  findLimitTagIssues,
   getServerRunFlagsFromTags,
   getTestTagsForTarget,
   isScoutTestFile,
@@ -76,6 +77,28 @@ const buildModuleDiscoveryInfo = (
       };
     }),
   }));
+};
+
+// Checks every committed manifest for misuse of '@limit/*' tags. Runs against the raw
+// manifests, since the run's own attributes would otherwise have already filtered the
+// offending tests out.
+export const validateLimitTags = (): void => {
+  const issues = testableModules.allIncludingConfigs.flatMap((module) =>
+    module.configs.flatMap((config) =>
+      config.manifest.tests.flatMap((test) =>
+        findLimitTagIssues(test).map(
+          (issue) => `${test.location?.file ?? config.path}: test "${test.title}" ${issue}`
+        )
+      )
+    )
+  );
+
+  if (issues.length > 0) {
+    throw createFailError(
+      `Found ${issues.length} invalid Scout test limit tag usage(s):\n` +
+        issues.map((issue) => `  - ${issue}`).join('\n')
+    );
+  }
 };
 
 // Filters modules by target tags and computes server run flags
@@ -275,6 +298,8 @@ const handleNonFlattenedOutput = (
   }
 
   if (flagsReader.boolean('validate')) {
+    validateLimitTags();
+
     if (!bypassCiFilter) {
       filterModulesByScoutCiConfig(log, filteredModules);
     }

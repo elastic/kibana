@@ -105,6 +105,53 @@ export const selectTestsForTargetAttributes = <T extends LimitableTest>(
   attributes: readonly ScoutTargetAttribute[]
 ): T[] => tests.filter((test) => isTestAllowedForTargetAttributes(test, attributes));
 
+/**
+ * Report misuse of `@limit/*` tags on a manifest test.
+ *
+ * The `validateTags` fixture applies the same rules, but only to tests that actually run —
+ * and a test breaking either rule is filtered out long before that, so the fixture can never
+ * see it. Checking the manifest is what makes these rules enforceable.
+ */
+export const findLimitTagIssues = (test: LimitableTest): string[] => {
+  const testTags = test.tags ?? [];
+  const limits = testLimits.fromPlaywrightTags(testTags.filter(testLimits.isPlaywrightTag));
+
+  if (limits.length === 0) {
+    return [];
+  }
+
+  const issues: string[] = [];
+  const selectionTags = new Set([
+    ...testTargets.all.map((target) => target.playwrightTag),
+    ...tags.performance,
+  ]);
+
+  if (!testTags.some((tag) => selectionTags.has(tag))) {
+    issues.push(
+      'carries limit tags but no test target tag, so it would never be selected to run. ' +
+        'A limit narrows an existing target selection, it cannot be one.'
+    );
+  }
+
+  const selectionMethodsByAttribute = new Map<string, Set<string>>();
+  for (const limit of limits) {
+    const methods = selectionMethodsByAttribute.get(limit.targetAttribute) ?? new Set<string>();
+    methods.add(limit.selectionMethod);
+    selectionMethodsByAttribute.set(limit.targetAttribute, methods);
+  }
+
+  for (const [targetAttribute, methods] of selectionMethodsByAttribute) {
+    if (methods.size > 1) {
+      issues.push(
+        `carries conflicting limit tags for the '${targetAttribute}' target attribute ` +
+          `(${[...methods].sort().join(' and ')}), so it would never run.`
+      );
+    }
+  }
+
+  return issues;
+};
+
 // Collects unique test target tags from runnable tests (skip global setup/teardown hooks).
 // Limit tags are dropped: they narrow a selection rather than being a selection themselves.
 export const collectUniqueTags = (

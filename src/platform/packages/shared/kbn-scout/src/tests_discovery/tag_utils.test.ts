@@ -9,6 +9,7 @@
 
 import {
   collectUniqueTags,
+  findLimitTagIssues,
   getServerRunFlagsFromTags,
   getTestTagsForTarget,
   isScoutTestFile,
@@ -186,6 +187,43 @@ describe('selectTestsForTargetAttributes', () => {
   });
 });
 
+describe('findLimitTagIssues', () => {
+  it('accepts a limited test that also carries a test target tag', () => {
+    expect(findLimitTagIssues({ tags: ['@local-stateful-classic', '@limit/only-fips'] })).toEqual(
+      []
+    );
+  });
+
+  it('accepts a limited performance test', () => {
+    expect(findLimitTagIssues({ tags: ['@perf', '@limit/only-fips'] })).toEqual([]);
+  });
+
+  it('ignores tests that carry no limit tags', () => {
+    expect(findLimitTagIssues({ tags: ['@local-stateful-classic'] })).toEqual([]);
+    expect(findLimitTagIssues({})).toEqual([]);
+  });
+
+  it('rejects a test tagged with limits alone', () => {
+    expect(findLimitTagIssues({ tags: ['@limit/only-fips'] })).toEqual([
+      expect.stringContaining('no test target tag'),
+    ]);
+  });
+
+  it('rejects conflicting limits for the same attribute', () => {
+    expect(
+      findLimitTagIssues({
+        tags: ['@local-stateful-classic', '@limit/only-fips', '@limit/except-fips'],
+      })
+    ).toEqual([expect.stringContaining("conflicting limit tags for the 'fips'")]);
+  });
+
+  it('reports every issue at once', () => {
+    expect(findLimitTagIssues({ tags: ['@limit/only-fips', '@limit/except-fips'] })).toHaveLength(
+      2
+    );
+  });
+});
+
 describe('resolveTargetAttributes', () => {
   const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
 
@@ -211,7 +249,9 @@ describe('resolveTargetAttributes', () => {
   });
 
   it('lets flag values win over the environment', () => {
-    process.env.SCOUT_TARGET_ATTRIBUTES = '';
+    // A bogus env value proves precedence: if the environment were consulted at all when a
+    // flag is present, resolution would throw instead of returning the flag value.
+    process.env.SCOUT_TARGET_ATTRIBUTES = 'quantum';
 
     expect(resolveTargetAttributes(['fips'])).toEqual(['fips']);
   });

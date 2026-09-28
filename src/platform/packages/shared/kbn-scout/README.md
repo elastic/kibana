@@ -400,7 +400,9 @@ test.describe(
 
 Tagging a single test works the same way: `test('...', { tag: [tags.limit.only.fips] }, ...)` — the test target tag can come from the enclosing `describe`.
 
-Two limit tags for the same attribute (`tags.limit.only.fips` **and** `tags.limit.except.fips`) is rejected: such a test could never run.
+Two limit tags for the same attribute (`tags.limit.only.fips` **and** `tags.limit.except.fips`) is rejected: such a test could never run. Limit tags on their own are rejected too, for the same reason — they narrow a target selection rather than being one.
+
+Both rules are enforced by `scout discover-playwright-configs --validate` (which CI runs on every pull request) against the committed manifests, not only by the `validateTags` runtime fixture. A test breaking either rule is filtered out before it ever executes, so the fixture alone would never see it.
 
 #### Declaring target attributes
 
@@ -427,11 +429,11 @@ Committed test config manifests (`**/test/scout/.meta/*.json`) always record eve
 
 #### Target attributes in test events and runtime statistics
 
-Every Scout test event records the attributes its run was executed under as `test_run.target.attributes`. `scout update-test-config-stats` groups runtime statistics by that attribute set, and `scout create-test-tracks` only draws on statistics gathered under the attributes the lane is about to run with — a FIPS run is not a useful runtime prediction for a non-FIPS one, and vice versa.
+Every Scout test event records the attributes its run was executed under as `test_run.target.attributes`. `scout update-test-config-stats` groups runtime statistics by that attribute set, and `scout create-test-tracks` prefers statistics gathered under the attributes the lane is about to run with — a FIPS run is not a useful runtime prediction for a non-FIPS one, and vice versa.
 
-A lane with no matching history falls back to a full-lane runtime estimate (with a warning), so expect coarse packing for a newly-introduced attribute until a lookback window's worth of runs has accumulated.
+When an attribute has no history, lane packing falls back to statistics measured without attributes (logging a warning) rather than to a full-lane estimate per config. Attribute history is slow to appear — the attribute-carrying pipelines run daily rather than per commit, and `update-test-config-stats` looks at one pipeline at a time — so this fallback is the normal state for a while after a new attribute is introduced, not a rare edge case.
 
-The `test_run.target.attributes` mapping ships with the code but is only applied to the reporting cluster by `scout initialize-report-datastream`. Until that runs, `update-test-config-stats` logs a warning and falls back to attribute-blind statistics rather than failing.
+The `test_run.target.attributes` mapping ships with the code. `scout initialize-report-datastream` applies it explicitly; failing that, the first event carrying the field creates it dynamically. Until either happens the column does not exist, and `update-test-config-stats` logs a warning and falls back to attribute-blind statistics rather than failing.
 
 ### Test Types and Directory Structure
 
