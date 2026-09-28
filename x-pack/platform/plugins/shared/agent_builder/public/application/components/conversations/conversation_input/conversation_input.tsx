@@ -47,8 +47,6 @@ const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.pos
   defaultMessage: 'Leaving a post to the team',
 });
 
-const POST_TO_TEAM_HEADER_HEIGHT = 24;
-
 const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   flex-grow: 0;
   width: 100%;
@@ -64,30 +62,36 @@ const wrapperWithHeaderStyles = ({ euiTheme }: UseEuiTheme) => css`
 
 // The header stays mounted so it can slide back behind the input on the way out;
 // visibility is delayed on exit so it only leaves the accessibility tree once collapsed.
+// Animating the grid row lets the height follow the label, which can wrap when translated.
 const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
-  height: 0;
-  overflow: hidden;
+  display: grid;
+  grid-template-rows: 0fr;
   visibility: hidden;
   ${euiCanAnimate} {
-    transition: height ${euiTheme.animation.fast} ease-out,
+    transition: grid-template-rows ${euiTheme.animation.fast} ease-out,
       visibility 0s linear ${euiTheme.animation.fast};
   }
 `;
 
 const headerVisibleStyles = css`
-  height: ${POST_TO_TEAM_HEADER_HEIGHT}px;
+  grid-template-rows: 1fr;
   visibility: visible;
   ${euiCanAnimate} {
     transition-delay: 0s;
   }
 `;
 
+// Padding lives one level down: a padded grid item cannot collapse to a zero-height row.
+const headerClipStyles = css`
+  min-height: 0;
+  overflow: hidden;
+`;
+
 const headerContentStyles = ({ euiTheme }: UseEuiTheme) => css`
   display: flex;
   align-items: center;
   gap: ${euiTheme.size.xs};
-  height: ${POST_TO_TEAM_HEADER_HEIGHT}px;
-  padding-inline: ${euiTheme.size.base};
+  padding: ${euiTheme.size.xs} ${euiTheme.size.base};
 `;
 
 const InputContainer: React.FC<
@@ -102,9 +106,11 @@ const InputContainer: React.FC<
         aria-hidden={!showHeader}
         data-test-subj="agentBuilderConversationInputPostToTeamHeader"
       >
-        <div css={headerContentStyles}>
-          <EuiIcon type="megaphone" size="s" aria-hidden={true} />
-          <EuiText size="xs">{postToTeamLabel}</EuiText>
+        <div css={headerClipStyles}>
+          <div css={headerContentStyles}>
+            <EuiIcon type="megaphone" size="s" aria-hidden={true} />
+            <EuiText size="xs">{postToTeamLabel}</EuiText>
+          </div>
         </div>
       </div>
       <ConversationInputShell
