@@ -70,5 +70,13 @@ export type ManagedWorkflowDefinition<
   version: number;
   billable: boolean;
   visibility?: ManagedWorkflowVisibility;
+  /**
+   * Lets a `workflow.execute` step in an unmanaged workflow call this one, which the engine
+   * otherwise refuses: a user-authored parent can neither see globally-installed definitions nor
+   * execute a managed child. Opt in only for a workflow whose inputs are safe to accept from a
+   * workflow its owner can edit — a definition guarding a privileged action must stay closed, or
+   * a user-authored parent could reach it by naming its id.
+   */
+  callableByUnmanaged?: boolean;
   management: ManagedWorkflowManagement;
 } & ManagedWorkflowDefinitionSource<TValues>;

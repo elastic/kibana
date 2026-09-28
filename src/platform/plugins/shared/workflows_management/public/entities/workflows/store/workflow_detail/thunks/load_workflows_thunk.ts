@@ -33,12 +33,15 @@ export const loadWorkflowsThunk = createAsyncThunk<
   async (_, { dispatch, getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     try {
-      const isCurrentWorkflowManaged = getState().detail.workflow?.managed === true;
       const api = new WorkflowApi(http);
+      // Managed workflows are included whether or not the workflow being edited is managed. An
+      // unmanaged parent may call the ones that declare `callableByUnmanaged`, and having the rest
+      // in the map is what lets validation say a target cannot be called rather than that it does
+      // not exist. Suggestions filter the set down; see `getWorkflowSuggestions`.
       const response = await api.getWorkflows({
         size: MAX_WORKFLOWS_LOOKUP_SIZE,
         page: 1,
-        managed: isCurrentWorkflowManaged ? 'all' : 'unmanaged',
+        managed: 'all',
       });
 
       const workflowsMap: WorkflowsResponse['workflows'] = {};
@@ -49,6 +52,7 @@ export const loadWorkflowsThunk = createAsyncThunk<
           id: workflow.id,
           name: workflow.name,
           managed: workflow.managed,
+          callableByUnmanaged: workflow.callableByUnmanaged,
           inputsSchema,
         };
       });

@@ -22,7 +22,7 @@ This guide covers:
 
 | Concept | Meaning |
 |---|---|
-| **Definition** | Code-owned descriptor: `id`, `pluginId`, `version`, `billable`, optional `visibility`, `yaml` or `yamlTemplate`, `management` policy. Lives in `@kbn/workflows/managed`. |
+| **Definition** | Code-owned descriptor: `id`, `pluginId`, `version`, `billable`, optional `visibility` and `callableByUnmanaged`, `yaml` or `yamlTemplate`, `management` policy. Lives in `@kbn/workflows/managed`. |
 | **Owner plugin** | Plugin that owns a definition (`pluginId`). Drives reconciliation and orphan cleanup. |
 | **Installed document** | Persisted workflow in `.workflows-*` indices, identified by `workflowId` + `spaceId`. |
 | **Reserved namespace** | All managed definition ids start with `system-`. The platform rejects this prefix for user-defined workflows. |
@@ -155,14 +155,6 @@ Orphan reconciliation only targets documents whose definition has `lifecycle: 's
 
 Dynamic workflows with `versionStrategy: 'auto'` are still eligible for startup upgrades: when the owning plugin calls `ready()`, persisted dynamic instances for that plugin are re-applied from the current registry definition while preserving their stored template values.
 
-For installed workflows with `settings.run_as`, automatic upgrades may reuse the existing
-SA binding without a user request. This is limited to the registered owning plugin's
-code-defined upgrade: the persisted owner, definition ID, space, template values, and
-`run_as` must remain unchanged, and the binding must still match. The write uses optimistic
-concurrency control and never creates or repairs a binding. User-requested edits, initial
-binding, rebinding, and unbinding still require `manage_security` in addition to the normal
-Workflows privileges. Requestless deletion of a bound workflow remains unsupported.
-
 ## 4) Space-scoped vs global installs
 
 Managed workflows can live in a specific space or in the **global** space (`'*'`, exported as `GLOBAL_WORKFLOW_SPACE_ID` from `@kbn/workflows/server`).
@@ -192,8 +184,6 @@ This is the right choice for:
 
 - system-level workflows that don't need a per-space copy but still must respect per-space data boundaries at runtime
 - workflows that are space-agnostic (their behavior does not depend on the invoking space at all)
-
-> **Scheduled triggers are not supported for global workflows yet.** A scheduled run has no invoking space, so the platform never schedules a global workflow's `scheduled` triggers (it logs a warning instead). Use a space-scoped install per space if you need scheduled runs. Tracked in elastic/security-team#17380.
 
 ```ts
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -669,6 +659,34 @@ Global workflows (`spaceId: '*'`) are visible from any space, but each execution
 - the workflow lookup uses `includeGlobal: true`, so the global document is found from any space.
 - the execution document is stamped with the `spaceId` you pass in `options` — pass the requesting user's space, not `'*'`.
 - consequence: results of a global workflow run are visible only inside the space that triggered the run.
+
+### Being called from an unmanaged workflow (`callableByUnmanaged`)
+
+An **unmanaged** workflow is one a user authored and can edit. Its `workflow.execute` steps cannot
+see managed definitions: the lookup is scoped to the caller's own space and to unmanaged workflows,
+so the step fails with `Workflow not found`, not a permission error.
+
+Set `callableByUnmanaged: true` to open a definition to those callers:
+
+```ts
+export const MY_WORKFLOW = {
+  id: MY_WORKFLOW_ID,
+  pluginId: 'myPlugin',
+  version: 1,
+  billable: false,
+  callableByUnmanaged: true,
+  yaml: MY_WORKFLOW_YAML,
+  management: { lifecycle: 'static', versionStrategy: 'auto', enablement: 'enforced' },
+} as const satisfies ManagedWorkflowDefinition;
+```
+
+Treat this as a privilege decision. Anything that opts in can be called by any workflow that names
+its id, so its inputs must be safe from a caller you do not control. Keep it closed on definitions
+that perform or gate a privileged action — that is what limits the proposals gate to code-owned
+workflows.
+
+The opted-in set is asserted in `managed_workflow_definitions.test.ts`, so widening it shows up in
+review.
 
 ## 12) Global workflows: user-facing behavior
 

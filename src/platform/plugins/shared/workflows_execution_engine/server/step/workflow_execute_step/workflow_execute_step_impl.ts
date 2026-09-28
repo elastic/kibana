@@ -15,6 +15,7 @@ import type {
   WorkflowRepository,
 } from '@kbn/workflows';
 import type { WorkflowExecuteAsyncGraphNode, WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
+import { isManagedWorkflowCallableByUnmanaged } from '@kbn/workflows/managed';
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
 import type { StrategyResult } from './types';
@@ -198,9 +199,12 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
 
   private async getWorkflow(workflowId: string): Promise<EsWorkflow | null> {
     const isManagedParentRun = this.isManagedParentExecution();
+    // A managed definition may open itself to unmanaged callers; every other one stays hidden
+    // from a parent the user can edit.
+    const includeManaged = isManagedParentRun || isManagedWorkflowCallableByUnmanaged(workflowId);
     return this.init.workflowRepository.getWorkflow(workflowId, this.init.spaceId, {
-      includeGlobal: isManagedParentRun,
-      managedFilter: isManagedParentRun ? 'all' : 'unmanaged',
+      includeGlobal: includeManaged,
+      managedFilter: includeManaged ? 'all' : 'unmanaged',
     });
   }
 
@@ -219,7 +223,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       );
     }
     // Note: workflow visibility is validated by the repository fetch.
-    // Global definitions are included only for managed parent workflow runs.
+    // Global definitions are included for managed parent runs, and for definitions that
+    // declare `callableByUnmanaged`.
     if (!workflow.enabled) {
       throw new Error(
         `Workflow "${workflow.id}" is disabled (referenced by step "${node.stepId}" in workflow "${currentWorkflowId}")`
