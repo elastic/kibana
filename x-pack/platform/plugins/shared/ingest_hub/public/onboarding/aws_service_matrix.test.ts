@@ -522,6 +522,56 @@ describe('AWS service matrix', () => {
       expect(result.dataStreams).toEqual(['elb_logs']);
       expect(result.dataStreams).not.toContain('other_logs');
     });
+
+    it('populates full metadata (inputs, varDefs, signalTypes) for standalone no-PT packages', () => {
+      const pkg = {
+        policy_templates: [],
+        data_streams: [
+          {
+            path: 'log',
+            type: 'logs',
+            streams: [
+              {
+                input: 'firehose',
+                vars: [{ name: 'listen_port', type: 'integer', required: true }],
+              },
+            ],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ awsfirehose: pkg as any }, [
+        { id: 'awsfirehose', category: 'networking_content_delivery', packageName: 'awsfirehose' },
+      ]);
+      expect(result.dataStreams).toEqual(['log']);
+      expect(result.signalTypes).toContain('logs');
+      expect(result.inputs).toContain('firehose');
+      expect(result.varDefsByDataStream?.log).toBeDefined();
+      expect(result.varDefsByDataStream?.log?.varDefsByInput?.firehose?.listen_port).toBeDefined();
+      expect(result.isManifestLoaded).toBe(true);
+    });
+
+    it('does not consume aws-package data streams when the entry has a policyTemplate set', () => {
+      // An `aws` entry whose PT is temporarily missing must not fall through to the no-PT
+      // fallback and pick up ALL package data streams (regression guard for Libra 4125759535).
+      const pkg = {
+        policy_templates: [{ name: 'other_pt', data_streams: ['other_ds'] }],
+        data_streams: [
+          { path: 'elb_logs', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] },
+          { path: 'other_ds', type: 'logs', streams: [{ input: 'aws-cloudwatch', vars: [] }] },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
+        {
+          id: 'elb',
+          category: 'networking_content_delivery',
+          packageName: 'aws',
+          policyTemplate: 'elb',
+        },
+      ]);
+      // PT 'elb' not found in the package → no data streams should be assigned
+      expect(result.dataStreams).toEqual([]);
+      expect(result.inputs).toBeUndefined();
+    });
   });
 
   describe('defaultEnabledInputs derivation', () => {

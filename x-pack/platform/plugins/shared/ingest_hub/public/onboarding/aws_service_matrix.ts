@@ -126,6 +126,8 @@ export interface AwsServiceMatrixEntry {
   defaultEnabledInputs: string[];
   /** Whether this service should be shown in the AWS onboarding UI. */
   showInUI: boolean;
+  /** True when the package manifest for this entry has been fetched. False means the entry was built from static data only. */
+  isManifestLoaded: boolean;
   badge?: Badge;
   /**
    * ECF log type identifier passed as the `LogTypes` parameter in the CloudFormation template.
@@ -170,6 +172,7 @@ type AwsServiceStaticEntry = Omit<
   | 'defaultEnabled'
   | 'defaultEnabledInputs'
   | 'showInUI'
+  | 'isManifestLoaded'
   | 'optionalConfig'
   | 'name'
   | 'varDefsByInput'
@@ -982,10 +985,12 @@ export function buildAwsServiceMatrix(
         }
       }
 
-      // Fallback: packages with no matching policy template (e.g. awsfirehose) still expose
-      // their data streams — derive signal types and populate the full per-DS metadata so that
-      // buildPackageInputs can configure the agent policy with a valid input stream.
-      if (!pt) {
+      // Fallback: standalone packages with no matching policy template (e.g. awsfirehose) still
+      // expose their data streams — derive signal types and populate the full per-DS metadata so
+      // that buildPackageInputs can configure the agent policy with a valid input stream.
+      // The `!entry.policyTemplate` guard prevents aws-package entries (which always have a PT
+      // set) from consuming all package data streams when their PT is temporarily not found.
+      if (!pt && !entry.policyTemplate) {
         for (const ds of packageInfo.data_streams ?? []) {
           const dsId = (ds as any)?.path as string | undefined;
           const dsType = (ds as any)?.type as string | undefined;
@@ -1059,6 +1064,7 @@ export function buildAwsServiceMatrix(
       defaultEnabledInputs,
       inputTitles: Object.keys(inputTitles).length > 0 ? inputTitles : undefined,
       showInUI,
+      isManifestLoaded: packageInfo !== undefined,
       badge,
       identityFederationSupported,
     } as AwsServiceMatrixEntry;
@@ -1095,8 +1101,10 @@ export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsSer
 /** Internal static entries — exported for use by buildAwsServiceMatrix in the hook. */
 export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_RAW;
 
-/** True when the service can only be deployed via a self-managed Elastic Agent. */
+/** True when the service can only be deployed via a self-managed Elastic Agent.
+ *  Requires the manifest to have loaded so that deployment methods are final. */
 export const isAgentBasedOnly = (service: AwsServiceMatrixEntry): boolean =>
+  service.isManifestLoaded &&
   service.deploymentMethods.length > 0 &&
   service.deploymentMethods.every((dm) => dm.method === 'agent_based');
 
@@ -1119,6 +1127,7 @@ export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
       signalTypes: [],
       deploymentMethods,
       showInUI: entry.showInUI ?? true,
+      isManifestLoaded: false,
       defaultEnabled: true,
       defaultEnabledInputs: [],
     } as unknown as AwsServiceMatrixEntry;

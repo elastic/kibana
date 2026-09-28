@@ -85,6 +85,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Any agent-based-only service in the selection forces agent-based mode for all — lock the card.
   const allAgentBasedOnly = agentBasedOnlyServices.length > 0;
 
+  // True while any selected service's manifest hasn't loaded yet — prevents deploying with
+  // incomplete inputs before buildDeploymentMethods has resolved the final deployment methods.
+  const hasUnloadedSelectedManifests = selectedServiceIds.some(
+    (id) => awsServicesMap?.get(id)?.isManifestLoaded === false
+  );
+
   const isAgentBased = deploymentMethod === 'agent_based';
 
   useEffect(() => {
@@ -496,6 +502,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Agent enrolment is non-blocking, but the deploy itself now happens here on Next.
   // The section stays visible with the error callout if deploy fails.
   const isNextDisabled =
+    hasUnloadedSelectedManifests ||
     (showMiSection && !isMiDone) ||
     (hasAnyEcf && !isEcfDone) ||
     isSavingSO ||
@@ -511,7 +518,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         disabled={isMethodLocked}
       />
 
-      {isAgentBased && (
+      {isAgentBased && allAgentBasedOnly && (
         <>
           <EuiHorizontalRule margin="l" />
           <EuiCallOut
