@@ -95,6 +95,47 @@ describe('noise FPR evaluators', () => {
     expect(result.score).toBe(0);
   });
 
+  it('NoiseFalsePositive fails when a forbidden noise ID is cited only in the title', async () => {
+    // alertIds is empty and the Markdown fields are clean; a noise citation in
+    // the rendered title is user-visible and must still fail.
+    const evaluator = createNoiseFalsePositiveEvaluator();
+    const result = await evaluator.evaluate({
+      expected: { forbiddenAlertIds: ['noise-alert-42'] } as never,
+      output: {
+        insights: [
+          {
+            title: 'Suspicious activity around noise-alert-42',
+            summaryMarkdown: 'Chain summary',
+            detailsMarkdown: 'details',
+            alertIds: [],
+          },
+        ],
+      } as never,
+    } as never);
+
+    expect(result.score).toBe(0);
+  });
+
+  it('NoiseFalsePositive fails when a forbidden noise ID is cited only in entitySummaryMarkdown', async () => {
+    const evaluator = createNoiseFalsePositiveEvaluator();
+    const result = await evaluator.evaluate({
+      expected: { forbiddenAlertIds: ['noise-alert-42'] } as never,
+      output: {
+        insights: [
+          {
+            title: 'Looks clean',
+            summaryMarkdown: 'Chain summary',
+            detailsMarkdown: 'details',
+            entitySummaryMarkdown: 'Host wks-bob-02 fired noise-alert-42.',
+            alertIds: [],
+          },
+        ],
+      } as never,
+    } as never);
+
+    expect(result.score).toBe(0);
+  });
+
   it('NoiseFalsePositive does not flag a forbidden ID embedded in a longer different ID', async () => {
     // Word-boundary matching: 'noise-alert-4' must not match 'noise-alert-42'.
     const evaluator = createNoiseFalsePositiveEvaluator();

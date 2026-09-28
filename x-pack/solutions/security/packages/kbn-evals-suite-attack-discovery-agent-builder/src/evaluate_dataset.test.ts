@@ -20,6 +20,7 @@ import {
   trackedStageKeys,
   waitForValidationPhase,
   WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS,
+  resolveValidationWaitTimeoutMs,
   trackedStages,
 } from './evaluate_dataset';
 import { createAdToolResultEvaluator } from './evaluators/ad_tool_result_evaluator';
@@ -1729,6 +1730,19 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
   // to a finite number (and ignored when set to garbage).
   it('defaults to a 10-minute safety valve', () => {
     expect(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS).toBeGreaterThanOrEqual(600_000);
+  });
+
+  it.each(['', '0', '-5000', 'garbage'])(
+    'ignores a blank, nonpositive, or non-numeric AD2_VALIDATION_WAIT_TIMEOUT_MS override (%p)',
+    (override) => {
+      // Number('') === 0 passes Number.isFinite, so the guard must require a
+      // positive value, not just a finite one.
+      expect(resolveValidationWaitTimeoutMs(override)).toBe(600_000);
+    }
+  );
+
+  it('honors a positive AD2_VALIDATION_WAIT_TIMEOUT_MS override', () => {
+    expect(resolveValidationWaitTimeoutMs('30000')).toBe(30_000);
   });
 });
 

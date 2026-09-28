@@ -1113,14 +1113,24 @@ export const buildWorkflow = ({
 // gpt-5.2 tail is 90s deadline + ~80s generation. Override per environment
 // (e.g. known-fast stacks) with AD2_VALIDATION_WAIT_TIMEOUT_MS.
 const DEFAULT_WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = 600_000;
-const WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = Number.isFinite(
-  Number(process.env.AD2_VALIDATION_WAIT_TIMEOUT_MS)
-)
-  ? Number(process.env.AD2_VALIDATION_WAIT_TIMEOUT_MS)
-  : DEFAULT_WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS;
+// Number('') === 0 and Number.isFinite(0) is true, so a blank or nonpositive
+// override must fall back to the default rather than silently expire the wait.
+const resolveValidationWaitTimeoutMs = (envValue: string | undefined): number => {
+  const parsed = Number(envValue);
+  return Number.isFinite(parsed) && parsed > 0
+    ? parsed
+    : DEFAULT_WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS;
+};
+const WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = resolveValidationWaitTimeoutMs(
+  process.env.AD2_VALIDATION_WAIT_TIMEOUT_MS
+);
 const WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS = 5_000;
 
-export { WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS, WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS };
+export {
+  WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS,
+  WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS,
+  resolveValidationWaitTimeoutMs,
+};
 
 /**
  * Maps a pipeline `validated_discoveries` entry (snake_case API shape with
