@@ -2258,4 +2258,61 @@ describe('bulkCreate', () => {
       });
     });
   });
+
+  describe('extractObservables defaulting from space configuration', () => {
+    const caseSoForDefaults = mockCases[0];
+    const extractObservablesCasesClient = createCasesClientMock();
+
+    const createClientArgsWithConfig = (extractObservables: boolean) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSoForDefaults],
+      });
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: SECURITY_SOLUTION_OWNER,
+          customFields: [],
+          extractObservables,
+        },
+      ]);
+      return clientArgs;
+    };
+
+    it('inherits extractObservables from the space configuration when omitted', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+      const cases = getCases({ settings: { syncAlerts: true } });
+
+      await bulkCreate({ cases }, clientArgs, extractObservablesCasesClient);
+
+      const bulkCreateCall =
+        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(bulkCreateCall.settings.extractObservables).toBe(true);
+    });
+
+    it('uses explicit extractObservables over space configuration', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+      const cases = getCases({ settings: { syncAlerts: true, extractObservables: false } });
+
+      await bulkCreate({ cases }, clientArgs, extractObservablesCasesClient);
+
+      const bulkCreateCall =
+        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(bulkCreateCall.settings.extractObservables).toBe(false);
+    });
+
+    it('falls back to the owner autoExtractDefault when no space configuration exists', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSoForDefaults],
+      });
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+      const cases = getCases({ settings: { syncAlerts: true } });
+
+      await bulkCreate({ cases }, clientArgs, extractObservablesCasesClient);
+
+      const bulkCreateCall =
+        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(bulkCreateCall.settings.extractObservables).toBe(true);
+    });
+  });
 });

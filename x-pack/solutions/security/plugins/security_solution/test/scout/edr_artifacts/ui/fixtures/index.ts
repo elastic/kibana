@@ -20,7 +20,7 @@ import {
 import { extendPageObjects } from './page_objects';
 import type { ArtifactTabPageObjects } from './page_objects';
 
-export type { PolicyArtifactKind } from './page_objects';
+export type { PolicyArtifactKind, BlocklistOperator } from './page_objects';
 
 export interface ArtifactTabTestFixtures extends SecurityParallelTestFixtures {
   pageObjects: ArtifactTabPageObjects;

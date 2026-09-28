@@ -11,6 +11,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engine_read_privilege';
 import { registerAgentBuilderTools } from './agent_builder/tools';
 import { registerAttachmentTypes } from './attachment_types';
+import { registerContextEngineAgent } from './agent/context_engine_agent';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -31,6 +32,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
   workflowsManagement: WorkflowsManagementApi;
 }): void => {
   registerAttachmentTypes(agentBuilder);
+  registerContextEngineAgent(agentBuilder);
 
   agentBuilder.agents.registerAiIndexResolver(async ({ ids, request }) => {
     const [coreStart, startDeps] = await coreSetup.getStartServices();

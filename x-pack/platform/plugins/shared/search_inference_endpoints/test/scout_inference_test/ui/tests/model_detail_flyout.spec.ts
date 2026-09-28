@@ -9,7 +9,12 @@ import { expect } from '@kbn/scout/ui';
 import { INFERENCE_LOCAL_TAGS } from '../../scout_test_tags';
 import { test } from '../fixtures';
 import { eisEndpointsMockData } from '../fixtures/mock_data/eis_endpoints';
-import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mocks';
+import {
+  mockInferenceEndpoints,
+  mockNoRegionPolicy,
+  unmockInferenceEndpoints,
+  unmockRegionPolicy,
+} from '../fixtures/mocks';
 
 test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
@@ -278,6 +283,117 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
 
     await test.step('unavailable callout is visible', async () => {
       await expect(eisModels.flyoutRegionUnavailableCallout).toBeVisible();
+    });
+  });
+
+  test('Edit Region preferences button in blocked callout opens manage regions modal', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('mock endpoints denied by region policy and region policy API', async () => {
+      await unmockInferenceEndpoints(page);
+      await mockInferenceEndpoints(
+        page,
+        eisEndpointsMockData.map((endpoint) =>
+          endpoint.service_settings?.model_id === 'anthropic-claude-3.7-sonnet'
+            ? {
+                ...endpoint,
+                metadata: { ...endpoint.metadata, denied_by_region_policy: true },
+              }
+            : endpoint
+        )
+      );
+      await mockNoRegionPolicy(page);
+      await eisModels.goto();
+    });
+
+    await test.step('open flyout for a denied model', async () => {
+      await eisModels.showModelsOutsideRegionPreferences();
+      await eisModels.modelCard('Anthropic Claude Sonnet 3.7').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('expand callout details to reveal the button', async () => {
+      await eisModels.flyoutViewDetailsButton.click();
+    });
+
+    await test.step('click Edit Region preferences button', async () => {
+      await eisModels.flyoutEditRegionPreferencesButton.click();
+    });
+
+    await test.step('manage regions modal opens', async () => {
+      await expect(eisModels.manageRegionsModal).toBeVisible();
+      await eisModels.manageRegionsCancelButton.click();
+    });
+
+    await unmockRegionPolicy(page);
+  });
+
+  test('EOL model flyout shows the EOL callout with date', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('show EOL models and open flyout', async () => {
+      await eisModels.showEndOfLifeModels();
+      await eisModels.modelCard('OpenAI Davinci').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('EOL callout is visible in the flyout body', async () => {
+      await expect(eisModels.flyoutEolCallout).toBeVisible();
+    });
+
+    await test.step('expand details and verify the EOL date is rendered', async () => {
+      await eisModels.flyoutEolViewDetailsButton.click();
+      await expect(eisModels.flyoutEolDescription).toBeVisible();
+      await expect(eisModels.flyoutEolDescription).toContainText('2020');
+    });
+  });
+
+  test('preview model flyout shows the preview callout', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('show preview models and open flyout', async () => {
+      await eisModels.showPreviewModels();
+      await eisModels.modelCard('Elastic Preview Model').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('preview callout is visible in the flyout body', async () => {
+      await expect(eisModels.flyoutPreviewCallout).toBeVisible();
+    });
+  });
+
+  test('blocked callout suppresses lifecycle callouts', async ({ page, pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('mock preview model as also denied by region policy', async () => {
+      await unmockInferenceEndpoints(page);
+      await mockInferenceEndpoints(
+        page,
+        eisEndpointsMockData.map((endpoint) =>
+          endpoint.service_settings?.model_id === 'elastic-preview-model'
+            ? {
+                ...endpoint,
+                metadata: { ...endpoint.metadata, denied_by_region_policy: true },
+              }
+            : endpoint
+        )
+      );
+      await eisModels.goto();
+    });
+
+    await test.step('show preview and outside-region models, then open flyout', async () => {
+      await eisModels.showPreviewModels();
+      await eisModels.showModelsOutsideRegionPreferences();
+      await eisModels.modelCard('Elastic Preview Model').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('blocked callout is visible but preview callout is not', async () => {
+      await expect(eisModels.flyoutRegionUnavailableCallout).toBeVisible();
+      await expect(eisModels.flyoutPreviewCallout).toBeHidden();
     });
   });
 });

@@ -10,6 +10,7 @@
 import type { Locator } from '../../../..';
 import { expect } from '../..';
 import { resolveSelector } from '../../utils';
+import { euiSelectors } from '../../eui_components';
 import { type DataViewOptions } from './base';
 import { SaveMixin } from './save';
 
@@ -282,6 +283,12 @@ export abstract class LayoutMixin extends SaveMixin {
 
   // ── Runtime field / field editor helpers ───────────────────────────────────
 
+  /** Opens the field editor from the sidebar's "Add a field" button, which is gated on `canEditDataView`. */
+  async openAddFieldEditorFromSidebar() {
+    await this.page.testSubj.click('dataView-add-field_btn');
+    await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
+  }
+
   async createRuntimeField({
     fieldName,
     script,
@@ -471,23 +478,6 @@ export abstract class LayoutMixin extends SaveMixin {
     await flyout.waitFor({ state: 'hidden' });
     await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
   }
-
-  public readonly controls = {
-    getControlFrame: (controlId: string): Locator =>
-      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
-    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
-      this.controls.getControlFrame(controlId).getByText(value),
-    /**
-     * Locator for an options-list control's selected-values label, e.g. `AE` for a
-     * single selection or `AE, CN` for multiple. Unlike
-     * {@link getControlFrameSelectedValue} this matches the whole label, so it can
-     * assert that a value is the *only* selection.
-     */
-    getSelectionsLocator: (controlId: string): Locator =>
-      this.page.testSubj
-        .locator(`optionsList-control-${controlId}`)
-        .getByTestId('optionsListSelections'),
-  };
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
 
@@ -708,14 +698,19 @@ export abstract class LayoutMixin extends SaveMixin {
     return (await button.getAttribute('data-selected-value')) || '';
   }
 
-  /**
-   * Pick a histogram chart interval (e.g. `"Day"`).
-   */
-  async setChartInterval(intervalTitle: string) {
+  /** Opens the histogram's interval selector popover without picking an option. */
+  async openChartIntervalSelector() {
     await this.page.testSubj.click('unifiedHistogramTimeIntervalSelectorButton');
     await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
       state: 'visible',
     });
+  }
+
+  /**
+   * Pick a histogram chart interval (e.g. `"Day"`).
+   */
+  async setChartInterval(intervalTitle: string) {
+    await this.openChartIntervalSelector();
     await this.page
       .locator(
         `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
@@ -915,8 +910,9 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   getDocHeaderLabels(): Locator {
+    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
     return this.page.locator(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
     );
   }
 
@@ -1048,10 +1044,14 @@ export abstract class LayoutMixin extends SaveMixin {
     }
   }
 
+  /** Switches to the Field statistics view and waits for its content to mount. */
   async selectFieldStatisticsView() {
     await this.page.testSubj.click('dscViewModeToggleButton');
     await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
     await this.page.testSubj.click('dscViewModeFieldStatsOption');
+    // The Documents view stays mounted until the stats table renders, so callers
+    // need this gate to avoid acting on the previous view.
+    await this.page.testSubj.locator('dscFieldStatsEmbeddedContent').waitFor({ state: 'visible' });
   }
 
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { IS_ESQL_DEFAULT_FEATURE_FLAG_KEY } from '@kbn/discover-utils';
 import { LogsLocatorDefinition } from '../common/locators';
@@ -38,7 +39,9 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
         },
         getIsEsqlDefault: async () => {
           const [coreStart] = await coreSetup.getStartServices();
-          return coreStart.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false);
+          return firstValueFrom(
+            coreStart.featureFlags.getBooleanValue$(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false)
+          );
         },
       })
     );

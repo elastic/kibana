@@ -36,10 +36,13 @@ jest.mock('@kbn/connector-specs', () => {
   return {
     ...actual,
     getConnectorSpec: jest.fn(),
+    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeIsDual(actionTypeId)
+    ),
   };
 });
 
-import { getConnectorSpec } from '@kbn/connector-specs';
+import { connectorTypeIsDual, getConnectorSpec } from '@kbn/connector-specs';
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
 
@@ -119,6 +122,9 @@ describe('ingestInboundEvent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (connectorTypeIsDual as jest.Mock).mockImplementation((actionTypeId: string) =>
+      jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
+    );
     emitConnectorEvents.mockResolvedValue({ ok: true });
     getDecryptedConnectorAttributes.mockResolvedValue({
       actionTypeId: '.myConnector',
@@ -202,6 +208,44 @@ describe('ingestInboundEvent', () => {
     const { response: res } = await run();
     expect(res.notFound).toHaveBeenCalled();
     expectOutcome('debug', 'no_spec');
+  });
+
+  it('returns 404 when a dual connector is not enabled for inbound events', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run();
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'load_miss');
+  });
+
+  it('accepts a dual connector that still has inbound events enabled', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    unsecuredSavedObjectsClient.get.mockImplementation(async (type, id) => {
+      if (type === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE) {
+        if (id !== credentialId) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return mockCredentialGet() as never;
+      }
+      return {
+        ...mockConnectorGet(),
+        attributes: {
+          ...mockConnectorGet().attributes,
+          hasInboundEventIdentity: true,
+        },
+      } as never;
+    });
+    const { response: res } = await run();
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(handleEvents).toHaveBeenCalled();
   });
 
   it('returns 404 when the connector type is disabled in config', async () => {
