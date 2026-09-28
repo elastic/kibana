@@ -103,7 +103,7 @@ const i18nTexts = {
     defaultMessage: 'Execution time',
   }),
   executedBy: i18n.translate('workflows.executionFlyout.executedBy', {
-    defaultMessage: 'Executed by',
+    defaultMessage: 'Triggered by',
   }),
   tableTab: i18n.translate('workflows.executionFlyout.tableTab', { defaultMessage: 'Table' }),
   jsonTab: i18n.translate('workflows.executionFlyout.jsonTab', { defaultMessage: 'JSON' }),
@@ -1276,6 +1276,15 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                             </EuiFlexItem>
                           ) : null}
                         </EuiFlexGroup>
+                        {workflowExecution?.effectiveIdentity?.type === 'service_account' && (
+                          <EuiText size="s" data-test-subj="workflowExecutionFlyoutRunAs">
+                            {i18n.translate('workflows.executionFlyout.runAs', {
+                              defaultMessage: 'Run as',
+                            })}
+                            {': '}
+                            {workflowExecution.effectiveIdentity.id}
+                          </EuiText>
+                        )}
                       </div>
                     </div>
                   </div>
