@@ -49,7 +49,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
     try {
       const managedDests = (await aiIndexService.list(spaceId))
         .filter(({ managed }) => managed)
-        .map(({ dest }) => dest.value);
+        .map(({ dest }) => dest);
       const response = await queryAiIndices({ esClient, spaceId, managedDests, ...request });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.QUERY }));
       return response;

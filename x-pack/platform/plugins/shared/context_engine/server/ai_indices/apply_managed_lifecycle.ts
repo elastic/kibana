@@ -6,7 +6,8 @@
  */
 
 import { Parser, WrappingPrettyPrinter, mutate } from '@elastic/esql';
-import { LIFECYCLE_FILTERS } from './ki_view';
+import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import { kiViewPipeline } from './ki_view';
 
 const globToRegExp = (pattern: string): RegExp =>
   new RegExp(
@@ -23,9 +24,8 @@ const overlaps = (source: string, dest: string): boolean =>
  * Applies the view's lifecycle pipeline to a query that reads a managed backing store. Managed AI
  * indices have no view: the space filter runs on a view's output, where nested fields are absent.
  */
-export const applyManagedLifecycle = (query: string, managedDests: string[]): string => {
-  const dests = managedDests.flatMap((dest) => dest.split(','));
-  if (dests.length === 0) {
+export const applyManagedLifecycle = (query: string, managedDests: AiIndexDest[]): string => {
+  if (managedDests.length === 0) {
     return query;
   }
   const { root, errors } = Parser.parse(query);
@@ -35,10 +35,14 @@ export const applyManagedLifecycle = (query: string, managedDests: string[]): st
   const sources = [...mutate.commands.from.sources.list(root)].map(
     (source) => source.index?.valueUnquoted ?? source.name
   );
-  if (!sources.some((source) => dests.some((dest) => overlaps(source, dest)))) {
+  const matched = managedDests.filter(({ value }) =>
+    value.split(',').some((dest) => sources.some((source) => overlaps(source, dest)))
+  );
+  if (matched.length === 0) {
     return query;
   }
-  const { root: lifecycle } = Parser.parse(`FROM x | ${LIFECYCLE_FILTERS.join(' | ')}`);
+  const type = matched.some((dest) => dest.type === 'data_stream') ? 'data_stream' : 'index';
+  const { root: lifecycle } = Parser.parse(`FROM x | ${kiViewPipeline(type).join(' | ')}`);
   root.commands.splice(1, 0, ...lifecycle.commands.slice(1));
   return WrappingPrettyPrinter.print(root, { wrap: 80, pipeTab: '' });
 };

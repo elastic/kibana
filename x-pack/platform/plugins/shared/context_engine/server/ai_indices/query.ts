@@ -13,6 +13,7 @@ import {
   MAX_AI_INDEX_QUERY_RESPONSE_BYTES,
 } from '../../common/constants';
 import type {
+  AiIndexDest,
   QueryAiIndicesRequest,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
@@ -26,7 +27,7 @@ export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
   esClient: ElasticsearchClient;
   spaceId: string;
   /** Backing stores of managed AI indices, which get the view's lifecycle pipeline applied here. */
-  managedDests?: string[];
+  managedDests?: AiIndexDest[];
 }
 
 /**

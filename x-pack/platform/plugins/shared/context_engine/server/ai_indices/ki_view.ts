@@ -16,11 +16,10 @@ export const LIFECYCLE_FILTERS = [
   'DROP governance.*',
 ];
 
-/** The retrieval view of an AI index: the current, active, unexpired KIs without governance fields. */
-const kiViewQuery = ({ type, value }: AiIndexDest): string =>
-  (type === 'data_stream'
+/** The commands after `FROM` that select the current, active, unexpired KIs without governance fields. */
+export const kiViewPipeline = (type: AiIndexDest['type']): string[] =>
+  type === 'data_stream'
     ? [
-        `FROM ${value} METADATA _id, _index, _score`,
         'EVAL id = COALESCE(id, _id)',
         'INLINE STATS latest = MAX(@timestamp) BY id',
         'WHERE @timestamp == latest',
@@ -29,8 +28,11 @@ const kiViewQuery = ({ type, value }: AiIndexDest): string =>
         'DROP latest, latest_doc',
         ...LIFECYCLE_FILTERS,
       ]
-    : [`FROM ${value} METADATA _id, _index, _score`, ...LIFECYCLE_FILTERS]
-  ).join('\n| ');
+    : LIFECYCLE_FILTERS;
+
+/** The retrieval view of an AI index. */
+const kiViewQuery = ({ type, value }: AiIndexDest): string =>
+  [`FROM ${value} METADATA _id, _index, _score`, ...kiViewPipeline(type)].join('\n| ');
 
 /** Creates or replaces the view for an AI index. */
 export const putKiView = async ({
