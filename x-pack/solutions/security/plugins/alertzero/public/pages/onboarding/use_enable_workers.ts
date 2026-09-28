@@ -7,8 +7,11 @@
 
 import { useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { API_VERSIONS, buildWorkerUrl } from '@kbn/alertzero-common';
 import type { ListWorkersResponse } from '@kbn/alertzero-common';
-import { useUpdateWorker } from '../../hooks/use_workers_api';
+import { notifyWorkerUpdateError } from '../../hooks/use_workers_api';
 import { queryKeys } from '../../query_keys';
 
 type WorkerEnabledMap = Record<string, boolean>;
@@ -19,7 +22,7 @@ export const useEnableWorkers = (
   onSuccess?: () => void
 ) => {
   const queryClient = useQueryClient();
-  const { mutateAsync: updateWorker } = useUpdateWorker();
+  const { services } = useKibana<CoreStart>();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleEnableAndContinue = async () => {
@@ -35,14 +38,30 @@ export const useEnableWorkers = (
     const idsToUpdate = workerIds.filter((id) => visibleIds.has(id));
 
     setIsSaving(true);
+    // Direct http.patch calls instead of useUpdateWorker so no replaceWorkerInList
+    // fires per-PATCH. LandingPage's showQueue guard must only react to real server
+    // state changes (background refetches), not optimistic per-PATCH cache writes
+    // that would prematurely unmount OnboardingPage before all PATCHes settle.
     // allSettled keeps isSaving true for the full fan-out so a single rejection does
     // not re-enable the button while the remaining PATCHes are still in-flight.
     const results = await Promise.allSettled(
-      idsToUpdate.map((id) => updateWorker({ workerId: id, patch: { enabled: workerEnabled[id] } }))
+      idsToUpdate.map((id) =>
+        services.http!.patch(buildWorkerUrl(id), {
+          version: API_VERSIONS.internal.v1,
+          body: JSON.stringify({ enabled: workerEnabled[id] }),
+        })
+      )
     );
     setIsSaving(false);
-    // errors surfaced via toast in useUpdateWorker.onError
-    if (results.some((r) => r.status === 'rejected')) return;
+
+    let hadFailure = false;
+    results.forEach((result) => {
+      if (result.status === 'rejected') {
+        hadFailure = true;
+        notifyWorkerUpdateError(services.notifications!.toasts, result.reason);
+      }
+    });
+    if (hadFailure) return;
     onSuccess?.();
   };
 

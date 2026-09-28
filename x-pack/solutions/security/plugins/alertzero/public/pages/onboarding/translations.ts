@@ -63,7 +63,7 @@ export const BEFORE_YOU_ENABLE_AUTONOMY = i18n.translate(
   'xpack.alertzero.onboarding.beforeYouEnable.autonomy',
   {
     defaultMessage:
-      'Every worker starts at the lowest autonomy: it investigates and proposes; nothing runs without your approval. Change this any time on Watches.',
+      'Workers keep their existing autonomy settings. New workers default to the lowest level — investigates and proposes only; nothing runs without your approval. Adjust any time on Watches.',
   }
 );
 
