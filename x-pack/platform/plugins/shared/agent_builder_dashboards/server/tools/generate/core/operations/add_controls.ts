@@ -18,6 +18,7 @@ import {
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
+import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type PanelFailure } from '../utils';
@@ -77,19 +78,32 @@ const controlInputSchema = z.discriminatedUnion('type', [
 
 type ControlInput = z.infer<typeof controlInputSchema>;
 
+interface IndexedControlInput {
+  control: ControlInput;
+  controlInputIndex: number;
+}
+
+const createFailureRecorder =
+  (failures: PanelFailure[], controlInputIndex: number) => (error: string) =>
+    failures.push({
+      type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+      identifier: `controls[${controlInputIndex}]`,
+      error,
+    });
+
 const filterDuplicateTimeSliders = ({
   existingControls,
   controlsToAdd,
   failures,
 }: {
   existingControls: Array<{ type?: string }>;
-  controlsToAdd: ControlInput[];
+  controlsToAdd: IndexedControlInput[];
   failures: PanelFailure[];
-}): ControlInput[] => {
+}): IndexedControlInput[] => {
   const hasTimeSlider = existingControls.some((control) => control.type === TIME_SLIDER_CONTROL);
   let canAddTimeSlider = !hasTimeSlider;
 
-  return controlsToAdd.filter((control, controlInputIndex) => {
+  return controlsToAdd.filter(({ control, controlInputIndex }) => {
     if (control.type !== TIME_SLIDER_CONTROL) {
       return true;
     }
@@ -99,18 +113,18 @@ const filterDuplicateTimeSliders = ({
       return true;
     }
 
-    failures.push({
-      type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-      identifier: `controls[${controlInputIndex}]`,
-      error: 'A dashboard can contain at most one time_slider_control.',
-    });
+    const recordFailure = createFailureRecorder(failures, controlInputIndex);
+    recordFailure('A dashboard can contain at most one time_slider_control.');
     return false;
   });
 };
 
-const getFieldCandidates = (fieldName: string): string[] => [fieldName, `${fieldName}.keyword`];
+const getFieldCandidates = (control: Exclude<ControlInput, { type: typeof TIME_SLIDER_CONTROL }>) =>
+  control.type === RANGE_SLIDER_CONTROL
+    ? [control.field_name]
+    : [control.field_name, `${control.field_name}.keyword`];
 
-const fetchAggregatableFields = async ({
+const fetchAggregatableFieldTypes = async ({
   esClient,
   index,
   fields,
@@ -118,46 +132,56 @@ const fetchAggregatableFields = async ({
   esClient: ElasticsearchClient;
   index: string;
   fields: string[];
-}): Promise<Set<string>> => {
+}): Promise<Map<string, string[]>> => {
   const response = await esClient.fieldCaps({
     index,
     fields,
     ignore_unavailable: true,
     allow_no_indices: true,
   });
-  return new Set(
+  return new Map(
     Object.entries(response.fields)
-      .filter(([, capsByType]) =>
-        Object.values(capsByType).some(({ aggregatable }) => aggregatable)
+      .map(
+        ([fieldName, capsByType]) =>
+          [
+            fieldName,
+            Object.values(capsByType)
+              .filter(({ aggregatable }) => aggregatable)
+              .map(({ type }) => type),
+          ] as const
       )
-      .map(([fieldName]) => fieldName)
+      .filter(([, types]) => types.length > 0)
   );
 };
 
+const isNumericField = (types: string[]): boolean =>
+  types.every((type) => castEsToKbnFieldTypeName(type) === KBN_FIELD_TYPES.NUMBER);
+
 /**
- * Keep controls whose field Elasticsearch can `STATS BY`, rewriting text fields
- * to their `.keyword` sibling. Other data controls are skipped as failures.
+ * Keep controls whose field Elasticsearch can `STATS BY`, rewriting options list
+ * text fields to their `.keyword` sibling. Range sliders additionally require a
+ * numeric field. Other data controls are skipped as failures.
  */
 const resolveControlFields = async ({
   controls,
   esClient,
   failures,
 }: {
-  controls: ControlInput[];
+  controls: IndexedControlInput[];
   esClient?: ElasticsearchClient;
   failures: PanelFailure[];
-}): Promise<ControlInput[]> => {
+}): Promise<IndexedControlInput[]> => {
   if (!esClient) {
     return controls;
   }
 
   const candidatesByIndex = new Map<string, string[]>();
-  for (const control of controls) {
-    if ('field_name' in control) {
-      const { index, field_name: fieldName } = control;
+  for (const { control } of controls) {
+    if (control.type !== TIME_SLIDER_CONTROL) {
+      const { index } = control;
       candidatesByIndex.set(index, [
         ...(candidatesByIndex.get(index) ?? []),
-        ...getFieldCandidates(fieldName),
+        ...getFieldCandidates(control),
       ]);
     }
   }
@@ -168,7 +192,7 @@ const resolveControlFields = async ({
         async ([index, fields]) =>
           [
             index,
-            await fetchAggregatableFields({ esClient, index, fields }).catch(
+            await fetchAggregatableFieldTypes({ esClient, index, fields }).catch(
               (error) => new Error(getErrorMessage(error))
             ),
           ] as const
@@ -176,36 +200,43 @@ const resolveControlFields = async ({
     )
   );
 
-  const resolved: ControlInput[] = [];
-  for (const [controlInputIndex, control] of controls.entries()) {
-    if (!('field_name' in control)) {
-      resolved.push(control);
+  const resolved: IndexedControlInput[] = [];
+  for (const indexedControl of controls) {
+    const { control, controlInputIndex } = indexedControl;
+    if (control.type === TIME_SLIDER_CONTROL) {
+      resolved.push(indexedControl);
       continue;
     }
 
-    const recordFailure = (error: string) =>
-      failures.push({
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-        identifier: `controls[${controlInputIndex}]`,
-        error,
-      });
-
+    const recordFailure = createFailureRecorder(failures, controlInputIndex);
     const { index, field_name: fieldName } = control;
-    const aggregatableFields = lookupByIndex.get(index);
-    if (!(aggregatableFields instanceof Set)) {
-      recordFailure(`Could not load fields for index "${index}": ${aggregatableFields?.message}`);
+    const aggregatableFieldTypes = lookupByIndex.get(index);
+    if (!(aggregatableFieldTypes instanceof Map)) {
+      recordFailure(
+        `Could not load fields for index "${index}": ${aggregatableFieldTypes?.message}`
+      );
       continue;
     }
 
-    const resolvedFieldName = getFieldCandidates(fieldName).find((candidate) =>
-      aggregatableFields.has(candidate)
+    const resolvedFieldName = getFieldCandidates(control).find((candidate) =>
+      aggregatableFieldTypes.has(candidate)
     );
     if (resolvedFieldName === undefined) {
       recordFailure(`Field "${fieldName}" is not an aggregatable field on this index.`);
       continue;
     }
 
-    resolved.push({ ...control, field_name: resolvedFieldName });
+    const resolvedFieldTypes = aggregatableFieldTypes.get(resolvedFieldName) ?? [];
+    if (control.type === RANGE_SLIDER_CONTROL && !isNumericField(resolvedFieldTypes)) {
+      recordFailure(
+        `Field "${fieldName}" is not numeric (${resolvedFieldTypes.join(
+          ', '
+        )}); range_slider_control requires a numeric field.`
+      );
+      continue;
+    }
+
+    resolved.push({ controlInputIndex, control: { ...control, field_name: resolvedFieldName } });
   }
 
   return resolved;
@@ -277,7 +308,10 @@ export const addControlsOperation = defineOperation({
   handler: async ({ dashboardData, operation, context }) => {
     const existingControls = dashboardData.pinned_panels ?? [];
     const resolvedControls = await resolveControlFields({
-      controls: operation.controls,
+      controls: operation.controls.map((control, controlInputIndex) => ({
+        control,
+        controlInputIndex,
+      })),
       esClient: context.esClient,
       failures: context.failures,
     });
@@ -287,7 +321,7 @@ export const addControlsOperation = defineOperation({
       failures: context.failures,
     });
 
-    const newControls = controlsToAdd.map(buildStoredControl);
+    const newControls = controlsToAdd.map(({ control }) => buildStoredControl(control));
     return {
       ...dashboardData,
       pinned_panels: [...existingControls, ...newControls],
