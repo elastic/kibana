@@ -14,7 +14,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ServiceAccountEditorWidgets } from './service_account_editor_widgets';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../../../mocks';
-import { createMockMonacoEditor } from '../../../../shared/test_utils/mock_monaco';
+import {
+  createMockMonacoEditor,
+  createMockMonacoModel,
+} from '../../../../shared/test_utils/mock_monaco';
 import { createServiceAccountEditor } from '../../lib/service_accounts/service_account_editor';
 import { useServiceAccountEditor } from '../hooks/use_service_account_editor';
 
@@ -28,6 +31,34 @@ const account = {
   enabled: true,
   assumable: true,
 };
+const mouseEvent = (position: monaco.Position | null): monaco.editor.IEditorMouseEvent => ({
+  event: {
+    browserEvent: new MouseEvent('mousemove'),
+    leftButton: false,
+    middleButton: false,
+    rightButton: false,
+    buttons: 0,
+    target: document.body,
+    detail: 0,
+    posx: 0,
+    posy: 0,
+    ctrlKey: false,
+    shiftKey: false,
+    altKey: false,
+    metaKey: false,
+    timestamp: 0,
+    preventDefault: jest.fn(),
+    stopPropagation: jest.fn(),
+  },
+  target: {
+    type: monaco.editor.MouseTargetType.UNKNOWN,
+    element: document.body,
+    position,
+    mouseColumn: position?.column ?? 1,
+    range: null,
+  },
+});
+
 const setup = (enabled = true, yaml = 'settings:\n  run_as: ') => {
   const directory = {
     isEnabled: () => enabled,
@@ -64,7 +95,7 @@ const setup = (enabled = true, yaml = 'settings:\n  run_as: ') => {
       await descriptor.run(editor);
     });
   };
-  return { ...result, editor, directory, action };
+  return { ...result, editor, model, directory, action };
 };
 
 describe('ServiceAccountEditorWidgets', () => {
@@ -72,6 +103,107 @@ describe('ServiceAccountEditorWidgets', () => {
     jest.clearAllMocks();
     HTMLElement.prototype.scrollIntoView = jest.fn();
   });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('offers unrelated accounts when replacing an existing ID with Ctrl+Space', async () => {
+    const { directory, action, editor } = setup(true, 'settings:\n  run_as: opaque-id');
+    directory.list.mockResolvedValue({
+      serviceAccounts: [account, { ...account, id: 'replacement', name: 'Different account' }],
+    });
+    await action('suggest');
+    const replacement = await screen.findByRole('option', { name: 'Different account viewer' });
+    fireEvent.click(replacement);
+    expect(editor.executeEdits).toHaveBeenCalledWith('serviceAccount', [
+      {
+        range: expect.objectContaining({ startColumn: 11, endColumn: 20 }),
+        text: '"replacement"',
+      },
+    ]);
+  });
+
+  it('filters typed text but restores all accounts on explicit completion', async () => {
+    const { directory, editor, model, action } = setup();
+    directory.list.mockResolvedValue({
+      serviceAccounts: [account, { ...account, id: 'replacement', name: 'Different account' }],
+    });
+    await screen.findByRole('option', { name: 'Investigation reader viewer' });
+    Object.assign(model, createMockMonacoModel('settings:\n  run_as: Different'));
+    model.getVersionId = jest.fn(() => 2);
+    const position = new monaco.Position(2, 20);
+    jest.mocked(editor.getPosition).mockReturnValue(position);
+    act(() => {
+      jest.mocked(editor.onDidChangeModelContent).mock.calls[0][0]({
+        changes: [
+          {
+            range: new monaco.Range(2, 11, 2, 11),
+            rangeOffset: 20,
+            rangeLength: 0,
+            text: 'Different',
+          },
+        ],
+        eol: '\n',
+        versionId: 2,
+        isUndoing: false,
+        isRedoing: false,
+        isFlush: false,
+        isEolChange: false,
+      });
+      jest.mocked(editor.onDidChangeCursorPosition).mock.calls[0][0]({
+        position,
+        secondaryPositions: [],
+        reason: monaco.editor.CursorChangeReason.NotSet,
+        source: 'keyboard',
+      });
+    });
+    await screen.findByRole('option', { name: 'Different account viewer' });
+    expect(
+      screen.queryByRole('option', { name: 'Investigation reader viewer' })
+    ).not.toBeInTheDocument();
+    await action('suggest');
+    expect(screen.getByRole('option', { name: 'Investigation reader viewer' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Different account viewer' })).toBeInTheDocument();
+  });
+
+  it.each(['over value', 'outside value', 'leave editor'])(
+    'keeps pending completions when the pointer moves %s',
+    async (movement) => {
+      jest.useFakeTimers();
+      const { directory, editor } = setup(true, 'settings:\n  run_as: opaque-id');
+      let resolvePage: (page: { serviceAccounts: (typeof account)[] }) => void = () => {};
+      directory.list.mockReturnValue(
+        new Promise((resolve) => {
+          resolvePage = resolve;
+        })
+      );
+      await act(async () => {
+        jest.advanceTimersByTime(100);
+      });
+      expect(directory.list).toHaveBeenCalled();
+      act(() => {
+        if (movement === 'leave editor') {
+          jest.mocked(editor.onMouseLeave).mock.calls[0][0](mouseEvent(null));
+        } else {
+          jest
+            .mocked(editor.onMouseMove)
+            .mock.calls[0][0](
+              mouseEvent(new monaco.Position(movement === 'over value' ? 2 : 1, 12))
+            );
+        }
+      });
+      await act(async () => {
+        resolvePage({ serviceAccounts: [account] });
+      });
+      expect(screen.getByRole('option')).toHaveTextContent(account.name);
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(screen.getByRole('option')).toHaveTextContent(account.name);
+      expect(screen.queryByText('This deployment')).not.toBeInTheDocument();
+    }
+  );
 
   it('shows name and role badges, and clicking inserts only the stable ID', async () => {
     const { editor } = setup();

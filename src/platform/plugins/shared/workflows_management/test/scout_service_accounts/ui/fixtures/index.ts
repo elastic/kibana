@@ -8,6 +8,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import type { ScoutWorkerFixtures } from '@kbn/scout';
 import type { WorkflowServiceAccount } from '../../../../public/entities/service_accounts';
 import { spaceTest } from '../../../scout/ui/fixtures';
 import { cleanupEsServiceAccounts } from '../../api/fixtures/cleanup_es_service_accounts';
@@ -23,32 +24,49 @@ steps:
       message: Service account editor regression
 `;
 
+const serviceAccountFixture = async (
+  { kbnClient, esClient, config }: Pick<ScoutWorkerFixtures, 'kbnClient' | 'esClient' | 'config'>,
+  use: (account: WorkflowServiceAccount) => Promise<void>
+) => {
+  const created = await kbnClient.request<{ id: string }>({
+    method: 'POST',
+    path: '/internal/security/service_account',
+    body: { name: `scout-picker-${randomUUID()}`, roles: ['viewer'] },
+  });
+  try {
+    const { data } = await kbnClient.request<WorkflowServiceAccount>({
+      method: 'GET',
+      path: `/internal/security/service_account/${encodeURIComponent(created.data.id)}`,
+    });
+    await use(data);
+  } finally {
+    await cleanupEsServiceAccounts(esClient, config, [created.data.id]);
+  }
+};
+
 export const test = spaceTest.extend<
   {
     workflowId: string;
+    boundWorkflowId: string;
     paginatedDirectory: { requestedCursors: Array<string | null> };
   },
-  { serviceAccount: WorkflowServiceAccount }
+  { serviceAccount: WorkflowServiceAccount; replacementServiceAccount: WorkflowServiceAccount }
 >({
-  serviceAccount: [
-    async ({ kbnClient, esClient, config }, use) => {
-      const created = await kbnClient.request<{ id: string }>({
-        method: 'POST',
-        path: '/internal/security/service_account',
-        body: { name: `scout-picker-${randomUUID()}`, roles: ['viewer'] },
-      });
-      try {
-        const { data } = await kbnClient.request<WorkflowServiceAccount>({
-          method: 'GET',
-          path: `/internal/security/service_account/${encodeURIComponent(created.data.id)}`,
-        });
-        await use(data);
-      } finally {
-        await cleanupEsServiceAccounts(esClient, config, [created.data.id]);
-      }
-    },
-    { scope: 'worker' },
-  ],
+  serviceAccount: [serviceAccountFixture, { scope: 'worker' }],
+  replacementServiceAccount: [serviceAccountFixture, { scope: 'worker' }],
+  boundWorkflowId: async ({ apiServices, serviceAccount, replacementServiceAccount }, use) => {
+    const workflow = await apiServices.workflows.create(
+      `${workflowYaml.replace(
+        'Service account editor regression',
+        `${serviceAccount.name} to ${replacementServiceAccount.name}`
+      )}settings:\n  run_as: ${JSON.stringify(serviceAccount.id)}\n`
+    );
+    try {
+      await use(workflow.id);
+    } finally {
+      await apiServices.workflows.hardDelete(workflow.id);
+    }
+  },
   workflowId: async ({ apiServices, serviceAccount }, use) => {
     // Keep the account alive until the workflow has been deleted and unbound.
     const workflow = await apiServices.workflows.create(

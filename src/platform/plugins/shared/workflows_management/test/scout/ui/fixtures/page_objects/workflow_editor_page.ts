@@ -378,6 +378,16 @@ export class WorkflowEditorPage {
     await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
   }
 
+  async openExistingServiceAccountPicker(id: string): Promise<void> {
+    await this.setCursorToText(id);
+    await this.page.keyboard.press('Control+Space');
+    await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async typeServiceAccountSearch(query: string): Promise<void> {
+    await this.page.keyboard.type(query);
+  }
+
   async selectServiceAccount(name: string): Promise<void> {
     await this.serviceAccountOption(name).click();
   }

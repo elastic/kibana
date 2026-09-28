@@ -112,7 +112,9 @@ export const ServiceAccountEditorWidgets = ({
       'workflowServiceAccountValueFocused',
       false
     );
-    let generation = 0;
+    let completionGeneration = 0;
+    let hoverGeneration = 0;
+    let filterByTypedValue = false;
     let hoverTimer: ReturnType<typeof setTimeout>;
     let completionTimer: ReturnType<typeof setTimeout>;
     let dismissed = false;
@@ -136,8 +138,19 @@ export const ServiceAccountEditorWidgets = ({
       hoverSuppressed = false;
       editor.updateOptions({ hover: originalHover });
     };
+    const closeDetails = () => {
+      hoverGeneration++;
+      clearTimeout(hoverTimer);
+      if (popupRef.current?.kind === 'details') {
+        popupVisible.set(false);
+        setPopup(null);
+      }
+      restoreHover();
+    };
     const close = () => {
-      generation++;
+      completionGeneration++;
+      hoverGeneration++;
+      clearTimeout(hoverTimer);
       pickerVisible.set(false);
       popupVisible.set(false);
       setPopup(null);
@@ -153,6 +166,7 @@ export const ServiceAccountEditorWidgets = ({
       valueFocused.set(Boolean(value));
       if (!eligible || !model || !position || !value) {
         dismissed = false;
+        filterByTypedValue = false;
         restoreSuggestions();
         close();
         return;
@@ -164,15 +178,20 @@ export const ServiceAccountEditorWidgets = ({
       editor.trigger('serviceAccounts', 'hideSuggestWidget', {});
       if (dismissed) return;
       const version = model.getVersionId();
-      const current = ++generation;
+      const current = ++completionGeneration;
+      const query = filterByTypedValue ? value.id.toLocaleLowerCase() : '';
       const result = await accounts.completionProvider.provideCompletionItems(model, position, {
         get isCancellationRequested() {
-          return current !== generation;
+          return current !== completionGeneration;
         },
         onCancellationRequested: () => ({ dispose() {} }),
       });
-      if (current !== generation || model.isDisposed() || model.getVersionId() !== version) return;
-      const query = value.id.toLocaleLowerCase();
+      if (
+        current !== completionGeneration ||
+        model.isDisposed() ||
+        model.getVersionId() !== version
+      )
+        return;
       const suggestions =
         result?.suggestions.filter(
           ({ account }) =>
@@ -182,6 +201,8 @@ export const ServiceAccountEditorWidgets = ({
         close();
         return;
       }
+      hoverGeneration++;
+      clearTimeout(hoverTimer);
       pickerVisible.set(true);
       popupVisible.set(true);
       setPopup({
@@ -244,12 +265,17 @@ export const ServiceAccountEditorWidgets = ({
         run,
       });
     const disposables = [
-      editor.onDidChangeCursorPosition(queueCompletion),
-      editor.onDidChangeModelContent(() => {
+      editor.onDidChangeCursorPosition(({ reason }) => {
+        if (reason === monaco.editor.CursorChangeReason.Explicit) filterByTypedValue = false;
+        queueCompletion();
+      }),
+      editor.onDidChangeModelContent(({ isFlush, isUndoing, isRedoing }) => {
         dismissed = false;
+        filterByTypedValue = !isFlush && !isUndoing && !isRedoing;
         queueCompletion();
       }),
       editor.onDidFocusEditorText(() => {
+        filterByTypedValue = false;
         clearTimeout(closeTimer.current);
         queueCompletion();
       }),
@@ -258,6 +284,7 @@ export const ServiceAccountEditorWidgets = ({
       }),
       editor.onDidChangeModel(() => {
         dismissed = false;
+        filterByTypedValue = false;
         close();
         restoreSuggestions();
       }),
@@ -283,6 +310,7 @@ export const ServiceAccountEditorWidgets = ({
         [monaco.KeyMod.CtrlCmd + monaco.KeyCode.Space],
         () => {
           dismissed = false;
+          filterByTypedValue = false;
           void complete();
         },
         'workflowServiceAccountValueFocused && !editorReadonly'
@@ -300,9 +328,9 @@ export const ServiceAccountEditorWidgets = ({
           const position = editor.getPosition();
           if (!model || !position) return;
           close();
-          const current = generation;
+          const current = hoverGeneration;
           void accounts.getAccountAtPosition(model, position).then((details) => {
-            if (current === generation && details) {
+            if (current === hoverGeneration && details) {
               popupVisible.set(true);
               setPopup({ kind: 'details', account: details.account, position });
             }
@@ -318,18 +346,19 @@ export const ServiceAccountEditorWidgets = ({
         const position = event.target.position;
         const value = model && position && getRunAsValue(model, position);
         if (!value?.id || !model || !position) {
-          generation++;
-          if (popupRef.current?.kind === 'details') closeTimer.current = setTimeout(close, 200);
+          hoverGeneration++;
+          if (popupRef.current?.kind === 'details')
+            closeTimer.current = setTimeout(closeDetails, 200);
           restoreHover();
           return;
         }
         hoverSuppressed = true;
         editor.updateOptions({ hover: { enabled: false } });
-        const current = ++generation;
+        const current = ++hoverGeneration;
         const version = model.getVersionId();
         hoverTimer = setTimeout(async () => {
           const details = await accounts.getAccountAtPosition(model, position);
-          if (current !== generation || model.isDisposed() || model.getVersionId() !== version)
+          if (current !== hoverGeneration || model.isDisposed() || model.getVersionId() !== version)
             return;
           if (details) {
             popupVisible.set(true);
@@ -345,14 +374,15 @@ export const ServiceAccountEditorWidgets = ({
         }, 250);
       }),
       editor.onMouseLeave(() => {
-        generation++;
+        hoverGeneration++;
         clearTimeout(hoverTimer);
-        closeTimer.current = setTimeout(close, 250);
+        closeTimer.current = setTimeout(closeDetails, 250);
       }),
     ];
     queueCompletion();
     return () => {
-      generation++;
+      completionGeneration++;
+      hoverGeneration++;
       clearTimeout(hoverTimer);
       clearTimeout(completionTimer);
       clearTimeout(closeTimer.current);
