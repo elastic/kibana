@@ -158,21 +158,30 @@ export const useIlmLifecycleSummary = ({
   };
 
   const {
-    value: ilmStatsValue,
-    loading: ilmLoading,
+    value: ilmStatsResult,
+    loading: ilmStatsLoading,
     refresh: refreshIlmStats,
   } = useStreamsAppFetch(
     ({ signal: fetchSignal }) => {
       if (!isIlm) {
         return undefined;
       }
-      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
-        params: { path: { name: definition.stream.name } },
-        signal: fetchSignal,
-      });
+      return streamsRepositoryClient
+        .fetch('GET /internal/streams/{name}/lifecycle/_stats', {
+          params: { path: { name: definition.stream.name } },
+          signal: fetchSignal,
+        })
+        .then((ilmStats) => ({ definition, stats: ilmStats }));
     },
     [streamsRepositoryClient, definition, isIlm]
   );
+
+  const ilmStatsValue = ilmStatsResult?.stats;
+  // The fetch hook only flips `loading` once its effect runs, so the first render carrying a new
+  // definition still reports "settled" while holding the previous definition's stats. Report that
+  // window as loading too, otherwise the summary's readiness signal claims stale stats are current.
+  const ilmLoading =
+    ilmStatsLoading || (ilmStatsResult !== undefined && ilmStatsResult.definition !== definition);
 
   const applyOverwrite = async (context: DeleteContext) => {
     if (!isIlm) {
