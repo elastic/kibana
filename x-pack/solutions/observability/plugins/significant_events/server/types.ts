@@ -66,10 +66,6 @@ export interface SignificantEventsPluginSetupDependencies {
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
-  /**
-   * Still required so this plugin can register the KI client provider.
-   * https://github.com/elastic/kibana/pull/292293 removes that hook.
-   */
   streams: StreamsPluginSetup;
   nightshiftSources: NightshiftSourcesServerSetup;
   nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
