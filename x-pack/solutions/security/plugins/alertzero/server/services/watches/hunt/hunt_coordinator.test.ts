@@ -247,6 +247,31 @@ describe('huntCoordinator', () => {
       });
     });
 
+    it('hands scope resolution only the IOCs Tier 1 can query, so an unsearchable-only list cannot earn a broad scope', async () => {
+      mockLoad.mockResolvedValueOnce({
+        // Six hex characters is no md5, sha1, or sha256; Tier 1 builds no clause for it.
+        iocs: [
+          { type: 'hash', value: 'abcdef' },
+          { type: 'ip', value: '192.0.2.30' },
+        ],
+        techniques: [],
+        text: 'report body text',
+      });
+
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
+        report_id: 'rpt-hash',
+        spaceId: 'hunt-a',
+        trigger: 'scheduled',
+        run_id: 'run-scope-hash',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({
+          report: expect.objectContaining({ iocs: [{ type: 'ip', value: '192.0.2.30' }] }),
+        })
+      );
+    });
+
     it('hands over what the caller supplied when the caller overrode the report', async () => {
       mockLoad.mockResolvedValueOnce({
         iocs: [{ type: 'ip', value: '192.0.2.30' }],

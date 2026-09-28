@@ -410,7 +410,9 @@ export const resolveHuntScope = async ({
   if (staticPresent) return finish(staticScope);
 
   // Nothing matched. With IOCs the hunt can still run Tier 1 across every
-  // discovered dataset; without them there is nothing to search for broadly.
+  // discovered dataset; without them there is nothing to search for broadly. The
+  // coordinator hands over only IOCs Tier 1 can query, so a non-empty list here
+  // means at least one clause will be built.
   const blockedOrBroad = async (resolution: BlockedResolution): Promise<HuntScope> => {
     if (!report.iocs || report.iocs.length === 0) return blocked(resolution);
     return finish(

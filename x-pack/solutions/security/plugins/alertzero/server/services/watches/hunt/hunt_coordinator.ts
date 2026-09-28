@@ -22,6 +22,7 @@ import {
   huntCompletenessOf,
 } from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
+import { isTier1SearchableIoc } from './tier1/attribute_hits';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
 import type { HuntScope, HuntScopeResolution } from './common/resolve_index_scope';
 import { SUMMARIZE_HIT_SOURCE_FIELDS, summarizeHit } from './common/summarize_hit';
@@ -578,7 +579,11 @@ export const huntCoordinator = async (
             vendor: reportContext?.vendor,
             product: reportContext?.product,
             text,
-            iocs,
+            // Only IOCs Tier 1 can actually query. A broad scope exists so Tier 1 can
+            // search a report's IOCs across every dataset; an IOC Tier 1 will drop (a hash
+            // of no known length) must not send the hunt there to search for nothing and
+            // then retire the report as `nothing_searched`.
+            iocs: iocs.filter(isTier1SearchableIoc),
             techniques,
           }
         : undefined,
