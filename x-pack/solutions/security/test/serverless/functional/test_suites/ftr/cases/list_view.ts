@@ -214,11 +214,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.isEnabled('pagination-button-1');
         await testSubjects.click('pagination-button-1');
         await testSubjects.isEnabled('pagination-button-0');
-        await testSubjects.click('pagination-button-0');
       });
     });
 
     describe('row actions', () => {
+      before(async () => {
+        await navigateToCasesApp(getPageObject, getService, owner);
+      });
+
       afterEach(async () => {
         await toasts.dismissAll();
       });
@@ -247,22 +250,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         it('to medium', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+          await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.MEDIUM}`);
         });
 
         it('to high', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.HIGH, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
+          await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.HIGH}`);
         });
 
         it('to critical', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.CRITICAL, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.CRITICAL}`);
+          await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.CRITICAL}`);
         });
 
         it('to low', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.LOW, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.LOW}`);
+          await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.LOW}`);
         });
       });
 
