@@ -581,6 +581,7 @@ export class SearchInterceptor {
             )
           ).pipe(
             catchError((retrievalError) => {
+              // TEMP DEBUG (issue #246775 investigation) — remove before merging
               // eslint-disable-next-line no-console
               console.log(
                 '[DEBUG outer catchError] partial-results GET FAILED, using fallback',
@@ -588,10 +589,19 @@ export class SearchInterceptor {
                   traceId,
                   now: Date.now(),
                   id,
-                  retrievalErrorMessage: (retrievalError as Error)?.message,
-                  retrievalErrorBody: (retrievalError as { body?: unknown })?.body,
-                  retrievalErrorStatus: (retrievalError as { response?: { status?: number } })
-                    ?.response?.status,
+                  typeofRetrievalError: typeof retrievalError,
+                  retrievalErrorString: String(retrievalError),
+                  retrievalErrorOwnKeys:
+                    retrievalError && typeof retrievalError === 'object'
+                      ? Object.keys(retrievalError)
+                      : undefined,
+                  retrievalErrorJson: (() => {
+                    try {
+                      return JSON.stringify(retrievalError);
+                    } catch {
+                      return '<circular or unserializable>';
+                    }
+                  })(),
                 })
               );
               return of(getFallbackPartialResponse(id));
