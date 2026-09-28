@@ -179,15 +179,14 @@ const componentStyles = {
       overflow-x: scroll !important;
     }
   `,
-  gridContainer: () =>
-    css({
-      position: 'relative',
-      display: 'flex',
-      flexDirection: 'column',
-      flexGrow: 1,
-      alignSelf: 'stretch',
-      minBlockSize: 0,
-    }),
+  gridContainer: css({
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1,
+    alignSelf: 'stretch',
+    minBlockSize: 0,
+  }),
   title: ({ euiTheme }: UseEuiTheme) => css({ padding: euiTheme.size.xxs }),
   emptyMessage: ({ euiTheme }: UseEuiTheme) => css({ marginBlockEnd: euiTheme.size.m }),
 };

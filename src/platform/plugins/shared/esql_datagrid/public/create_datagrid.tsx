@@ -44,7 +44,7 @@ const Loader = () => {
     <div
       css={{
         display: 'flex',
-        padding: `0  ${euiTheme.size.base} 0`,
+        paddingInline: euiTheme.size.base,
         alignItems: 'center',
       }}
     >
