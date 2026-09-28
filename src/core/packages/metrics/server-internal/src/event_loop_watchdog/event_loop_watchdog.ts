@@ -162,6 +162,9 @@ export class EventLoopWatchdog {
 
   private scheduleRestart(buffer: SharedArrayBuffer, reason: string): void {
     if (this.restarts >= MAX_RESTARTS) {
+      // stay `running` so that disabling and re-enabling resets the budget, but stop the heartbeat
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = undefined;
       this.logger.error(
         `Event loop watchdog worker ${reason} and exhausted ${MAX_RESTARTS} restarts; the watchdog stays inactive until it is disabled and re-enabled`
       );

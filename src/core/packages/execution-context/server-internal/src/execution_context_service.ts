@@ -163,10 +163,12 @@ export class ExecutionContextService
       onActivityEnd();
       throw error;
     }
-    if (result instanceof Promise) {
-      // Return a derived promise that re-throws, so that a rejection the caller drops is still
-      // reported as unhandled instead of being swallowed by the activity bookkeeping.
-      return result.then(
+    if (isThenable(result)) {
+      // Return a derived native promise that re-throws, so that the activity ends when the result
+      // settles and a rejection the caller drops is still reported as unhandled instead of being
+      // swallowed by the bookkeeping. Non-native thenables are adopted, i.e. callers of tracked
+      // contexts receive a native promise.
+      return Promise.resolve(result).then(
         (value) => {
           onActivityEnd();
           return value;
@@ -240,3 +242,6 @@ export class ExecutionContextService
     );
   }
 }
+
+const isThenable = <T>(value: T): value is T & PromiseLike<Awaited<T>> =>
+  typeof (value as Partial<PromiseLike<Awaited<T>>> | null | undefined)?.then === 'function';

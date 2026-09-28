@@ -624,6 +624,21 @@ describe('ExecutionContextService', () => {
       expect(onEnd).toHaveBeenCalledTimes(1);
     });
 
+    it('keeps activities open until non-native thenables settle', async () => {
+      const { setupContract, onEnd } = setup(true);
+      let resolve: (value: string) => void = () => {};
+      const thenable: PromiseLike<string> = {
+        then: (onFulfilled, onRejected) =>
+          new Promise<string>((res) => (resolve = res)).then(onFulfilled, onRejected),
+      };
+      const returned = setupContract.withContext(context, () => thenable);
+      await timer(1);
+      expect(onEnd).not.toHaveBeenCalled();
+      resolve('done');
+      expect(await returned).toBe('done');
+      expect(onEnd).toHaveBeenCalledTimes(1);
+    });
+
     it('returns the original promise for untracked contexts', () => {
       const { setupContract } = setup(true);
       const original = Promise.resolve(1);

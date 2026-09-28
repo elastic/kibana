@@ -104,6 +104,8 @@ describe('EventLoopWatchdog', () => {
     jest.advanceTimersByTime(RESTART_BASE_DELAY_MS * 100);
     expect(MockWorker.instances).toHaveLength(MAX_RESTARTS + 1);
     expect(logger.error).toHaveBeenCalledWith(expect.stringMatching(/exhausted 3 restarts/));
+    // no heartbeat or restart timers are left behind
+    expect(jest.getTimerCount()).toBe(0);
   });
 
   it('resets the restart budget when re-enabled', async () => {
