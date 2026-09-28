@@ -485,7 +485,7 @@ describe('policy_execution_history_schema', () => {
       (failureReason) => {
         const item = {
           ...validItem,
-          outcome: 'dispatch_failed' as const,
+          outcome: 'failure' as const,
           failure_reason: failureReason,
         };
         expect(policyExecutionHistoryItemSchema.parse(item)).toEqual(item);
