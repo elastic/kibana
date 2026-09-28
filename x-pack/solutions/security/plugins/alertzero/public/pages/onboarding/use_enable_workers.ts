@@ -15,13 +15,10 @@ import type { ListWorkersResponse } from '@kbn/alertzero-common';
 import { notifyWorkerUpdateError } from '../../hooks/use_workers_api';
 import { queryKeys } from '../../query_keys';
 
-const PARTIAL_SUCCESS_WARNING = i18n.translate(
-  'xpack.alertzero.onboarding.partialSuccessWarning',
-  {
-    defaultMessage:
-      'Some workers were enabled before the error. Check Watches to review their status.',
-  }
-);
+const PARTIAL_SUCCESS_WARNING = i18n.translate('xpack.alertzero.onboarding.partialSuccessWarning', {
+  defaultMessage:
+    'Some workers were enabled before the error. Check Watches to review their status.',
+});
 
 type WorkerEnabledMap = Record<string, boolean>;
 

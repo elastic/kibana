@@ -198,9 +198,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                         onChange={(e) => handleToggle(wid, e.target.checked)}
                         data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
                         aria-describedby={
-                          description
-                            ? `alertZeroOnboardingWorkerDescription-${id}`
-                            : undefined
+                          description ? `alertZeroOnboardingWorkerDescription-${id}` : undefined
                         }
                       />
                     </EuiFlexItem>
