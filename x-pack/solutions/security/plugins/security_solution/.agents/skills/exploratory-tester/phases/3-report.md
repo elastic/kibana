@@ -220,8 +220,16 @@ again without `--dry-run` to restore and clean up for real.
 
 ---
 
-## Filing (human-started only)
+## Filing
 
-Do not file the report. Do not offer to file anything on your own initiative.
-If the human later names specific findings, stop this skill and follow
+After Step 3e, if the report has findings that are not in Known / Suppressed, ask:
+
+> "Do you want any of these findings filed as Kibana issues? Name the titles, finding numbers, or say the L1s."
+
+Skip the question when the report has no such findings. If they say no or do not name anything, stop. "Yes" without names is not enough — ask which ones, then stop the turn.
+
+This skill does not write to GitHub. Do not run `gh issue create`, `comment`, or `reopen`. If they name what to file, stop this skill and follow
 `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/SKILL.md`.
+That skill still shows a draft and waits for a write-yes. Issues filed from this session get the `sec-eng-prod:exploratory-tester` label. Two named findings are two full file-bug loops.
+
+If they name findings later (not only in this ask), the same handoff applies.

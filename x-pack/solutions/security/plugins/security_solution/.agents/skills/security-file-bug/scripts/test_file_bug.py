@@ -16,6 +16,7 @@ from file_bug import (  # noqa: E402
     FILED_VIA,
     IssueMatch,
     PartialWrite,
+    TESTER_SOURCE_LABEL,
     TitleTooLong,
     check_draft,
     compress_video,
@@ -431,6 +432,7 @@ class FindingFromJsonlTest(unittest.TestCase):
     def test_picks_by_title(self):
         finding = finding_from_jsonl(self.records, title="Second")
         self.assertEqual(finding["current_behavior"], "b")
+        self.assertEqual(finding["source"], "exploratory-tester")
 
     def test_picks_by_index(self):
         finding = finding_from_jsonl(self.records, index=0)
@@ -574,6 +576,35 @@ class CheckDraftTest(unittest.TestCase):
         self.assertIn("stamp", gaps)
         self.assertIn("title", gaps)
 
+    def test_tester_create_requires_source_label(self):
+        finding = {
+            "source": "exploratory-tester",
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["Open Entity Analytics"],
+            "feature_flags": "No feature flag (default/GA)",
+            "deployment": "ECH",
+            "role": "none",
+            "spaces": "default",
+        }
+        body = render_bug_body(finding, {"kibana_version": "9.3.0"})
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "Team:Entity Analytics"],
+        )
+        self.assertIn("tester_label", gaps)
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "Team:Entity Analytics", TESTER_SOURCE_LABEL],
+        )
+        self.assertNotIn("tester_label", gaps)
+
 
 class EmbedUploadsTest(unittest.TestCase):
     def test_replaces_local_paths(self):
@@ -698,6 +729,57 @@ class WriteGithubTest(unittest.TestCase):
             )
         self.assertEqual(len(calls), 1)
         self.assertEqual(calls[0][0:3], ["gh", "issue", "create"])
+
+    def test_create_adds_tester_label_from_finding(self):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            return {
+                "returncode": 0,
+                "stdout": "https://github.com/elastic/kibana/issues/1",
+                "stderr": "",
+            }
+
+        result = write_github(
+            action="create",
+            repo="elastic/kibana",
+            title="Bug",
+            body="body",
+            labels=["bug"],
+            number=None,
+            finding={"source": "exploratory-tester"},
+            run_gh=run_gh,
+        )
+        self.assertIn(TESTER_SOURCE_LABEL, result["labels"])
+        self.assertIn("--label", calls[0])
+        self.assertIn(TESTER_SOURCE_LABEL, calls[0])
+
+    def test_comment_adds_tester_label_to_existing_issue(self):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            return {
+                "returncode": 0,
+                "stdout": "https://github.com/elastic/kibana/issues/1",
+                "stderr": "",
+            }
+
+        write_github(
+            action="comment",
+            repo="elastic/kibana",
+            title=None,
+            body="evidence",
+            labels=[],
+            number=1,
+            finding={"source": "exploratory-tester"},
+            run_gh=run_gh,
+        )
+        self.assertEqual(calls[0][0:4], ["gh", "issue", "comment", "1"])
+        self.assertEqual(calls[1][0:4], ["gh", "issue", "edit", "1"])
+        self.assertIn("--add-label", calls[1])
+        self.assertIn(TESTER_SOURCE_LABEL, calls[1])
 
     def test_comment_failure_is_not_retried(self):
         calls = []
@@ -880,6 +962,9 @@ class FileBugCliTest(unittest.TestCase):
             result = run_cli("from-findings", "--jsonl", str(path), "--title", "Named")
         self.assertEqual(result.returncode, 0)
         self.assertEqual(json.loads(result.stdout)["finding"]["title"], "Named")
+        self.assertEqual(
+            json.loads(result.stdout)["finding"]["source"], "exploratory-tester"
+        )
 
     def test_check_pack_cli_exits_2_when_thin(self):
         result = run_cli(
@@ -948,6 +1033,31 @@ class FileBugCliTest(unittest.TestCase):
         payload = json.loads(result.stdout)
         self.assertEqual(payload["status"], "ask")
         self.assertIn("≤72", payload["error"])
+
+    def test_embed_uploads_cli_writes_out_file(self):
+        with TemporaryDirectory() as tmp:
+            body = Path(tmp) / "body.md"
+            dest = Path(tmp) / "embedded.md"
+            mapping = Path(tmp) / "uploaded.json"
+            body.write_text("See /tmp/shot.png\n", encoding="utf-8")
+            mapping.write_text(
+                json.dumps(
+                    {"uploaded": [{"path": "/tmp/shot.png", "url": "https://img/shot.png"}]}
+                ),
+                encoding="utf-8",
+            )
+            result = run_cli(
+                "embed-uploads",
+                "--body",
+                str(body),
+                "--map",
+                str(mapping),
+                "--out",
+                str(dest),
+            )
+            self.assertEqual(result.returncode, 0)
+            self.assertIn("https://img/shot.png", dest.read_text(encoding="utf-8"))
+            self.assertIn("https://img/shot.png", json.loads(result.stdout)["body"])
 
 
 TESTER_PARSE = (
@@ -1027,16 +1137,36 @@ class TesterPackIntegrationTest(unittest.TestCase):
         self.assertNotIn(f"**Describe the bug:**\n{finding['current_behavior']}", body)
 
 
-SKILL = Path(__file__).resolve().parents[1] / "SKILL.md"
+SKILL_ROOT = Path(__file__).resolve().parents[1]
+SKILL = SKILL_ROOT / "SKILL.md"
 
 
 class SkillProtocolTest(unittest.TestCase):
     def setUp(self):
-        self.text = SKILL.read_text(encoding="utf-8")
+        self.skill = SKILL.read_text(encoding="utf-8")
+        self.text = "\n".join(
+            [
+                self.skill,
+                (SKILL_ROOT / "references" / "drafting.md").read_text(encoding="utf-8"),
+                (SKILL_ROOT / "templates" / "bug-report.md").read_text(encoding="utf-8"),
+            ]
+        )
 
     def test_frontmatter(self):
-        self.assertIn("name: security-file-bug", self.text)
-        self.assertIn("disable-model-invocation: true", self.text)
+        self.assertIn("name: security-file-bug", self.skill)
+        self.assertIn("disable-model-invocation: true", self.skill)
+        self.assertIn("Use when the user says", self.skill)
+        self.assertIn("references/drafting.md", self.skill)
+
+    def test_write_uses_embedded_body(self):
+        write = self.skill.split("### 4. Write", 1)[1].split("## Red flags", 1)[0]
+        self.assertIn("--out embedded.md", write)
+        self.assertIn("--body-file embedded.md", write)
+        self.assertNotIn("--body-file body.md", write)
+
+    def test_red_flags_and_mistakes(self):
+        self.assertIn("## Red flags", self.skill)
+        self.assertIn("## Common mistakes", self.skill)
 
     def test_human_gate(self):
         self.assertIn("create a bug", self.text.lower())
@@ -1103,6 +1233,7 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("Video:", self.text)
         self.assertIn("clipped title", self.text)
         self.assertIn("Cases table", self.text)
+        self.assertIn("sec-eng-prod:exploratory-tester", self.text)
 
 
 if __name__ == "__main__":

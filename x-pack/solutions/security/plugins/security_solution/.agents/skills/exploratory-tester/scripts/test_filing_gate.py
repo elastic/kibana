@@ -15,13 +15,18 @@ class FilingGateTest(unittest.TestCase):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("security-file-bug", text)
         self.assertIn("Do not file anything they did not name", text)
-        self.assertNotIn("shall I file these?", text)
+        self.assertIn("you may ask whether they want any findings filed", text)
+        self.assertIn("Do not write to GitHub from this skill", text)
+        self.assertNotIn("Do not offer to file anything on your own initiative", text)
 
-    def test_phase3_does_not_auto_file(self):
+    def test_phase3_may_offer_then_handoff(self):
         text = (ROOT / "phases" / "3-report.md").read_text(encoding="utf-8")
         self.assertIn("security-file-bug", text)
-        self.assertNotIn("gh issue create", text)
-        self.assertNotIn("shall I file these?", text)
+        self.assertIn("Do you want any of these findings filed as Kibana issues?", text)
+        self.assertIn("Yes\" without names is not enough", text)
+        self.assertIn("Do not run `gh issue create`", text)
+        self.assertIn("sec-eng-prod:exploratory-tester", text)
+        self.assertNotIn("Do not offer to file anything on your own initiative", text)
 
 
 if __name__ == "__main__":

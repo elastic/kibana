@@ -14,6 +14,8 @@ WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
 UNKNOWN_ANSWER = "Unknown"
 FILED_VIA = "Filed via security-file-bug"
 MAX_TITLE_LEN = 72
+SOURCE_EXPLORATORY_TESTER = "exploratory-tester"
+TESTER_SOURCE_LABEL = "sec-eng-prod:exploratory-tester"
 _MEDIA_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4", ".webm", ".mov")
 
 
@@ -144,7 +146,7 @@ def finding_from_jsonl(
         wanted = title.strip().lower()
         for finding in findings:
             if str(finding.get("title", "")).strip().lower() == wanted:
-                return finding
+                return _with_tester_source(finding)
         raise ValueError(f"no finding titled {title!r}")
     numbered = [
         finding
@@ -153,11 +155,38 @@ def finding_from_jsonl(
     ]
     if index is None:
         if len(numbered) == 1:
-            return numbered[0]
+            return _with_tester_source(numbered[0])
         raise ValueError("pass --index or --title when jsonl has multiple findings")
     if index < 0 or index >= len(numbered):
         raise ValueError(f"finding index {index} out of range")
-    return numbered[index]
+    return _with_tester_source(numbered[index])
+
+
+def _with_tester_source(finding: dict) -> dict:
+    stamped = dict(finding)
+    stamped["source"] = SOURCE_EXPLORATORY_TESTER
+    return stamped
+
+
+def is_tester_finding(finding: dict, config: dict | None = None) -> bool:
+    if finding.get("source") == SOURCE_EXPLORATORY_TESTER:
+        return True
+    setup = _as_mapping((config or {}).get("setup"))
+    return str(setup.get("skill") or "").strip() == SOURCE_EXPLORATORY_TESTER
+
+
+def with_source_labels(
+    labels: list, finding: dict, config: dict | None = None
+) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    extras = [TESTER_SOURCE_LABEL] if is_tester_finding(finding, config) else []
+    for name in [*extras, *[str(label) for label in labels]]:
+        text = name.strip()
+        if text and text not in seen:
+            seen.add(text)
+            merged.append(text)
+    return merged
 
 
 def decide_write_path(matches: list[IssueMatch]) -> WritePath:
@@ -811,6 +840,7 @@ def check_draft(
     title: str | None,
     finding: dict,
     config: dict,
+    labels: list | None = None,
 ) -> list[str]:
     gaps = list(pack_gaps(finding, config))
     if title is not None:
@@ -818,6 +848,9 @@ def check_draft(
             gaps.append("title")
     if FILED_VIA not in body:
         gaps.append("stamp")
+    if is_tester_finding(finding, config) and title is not None:
+        if TESTER_SOURCE_LABEL not in [str(label) for label in (labels or [])]:
+            gaps.append("tester_label")
     gaps.extend(f"sensitive:{hit}" for hit in scan_sensitive(body, json.dumps(finding)))
     return gaps
 
@@ -1206,6 +1239,17 @@ def _gh_reopen(*, repo: str, number: int, run_gh: GhRunner) -> None:
         raise RuntimeError(_gh_failed(argv, stderr))
 
 
+def _gh_add_labels(
+    *, repo: str, number: int, labels: list, run_gh: GhRunner
+) -> None:
+    argv = ["gh", "issue", "edit", str(number), "--repo", repo]
+    for label in labels:
+        argv += ["--add-label", str(label)]
+    returncode, _, stderr = _gh_result(run_gh(argv))
+    if returncode != 0:
+        raise RuntimeError(_gh_failed(argv, stderr))
+
+
 def _gh_comment(
     *, repo: str, number: int, body_file: Path, run_gh: GhRunner
 ) -> str:
@@ -1233,6 +1277,8 @@ def write_github(
     body: str,
     labels: list,
     number: int | None,
+    finding: dict | None = None,
+    config: dict | None = None,
     run_gh: GhRunner = _default_run_gh,
 ) -> dict:
     """Run the `gh` write for `action`, never retrying a create that already failed."""
@@ -1244,6 +1290,7 @@ def write_github(
     elif number is None:
         raise ValueError(f"action {action!r} needs an issue number")
 
+    labels = with_source_labels(labels, finding or {}, config)
     workdir = Path(tempfile.mkdtemp(prefix="file_bug_body_"))
     try:
         body_file = workdir / "body.md"
@@ -1272,6 +1319,11 @@ def write_github(
                 url = _gh_comment(
                     repo=repo, number=number, body_file=body_file, run_gh=run_gh
                 )
+            extras = [name for name in labels if name == TESTER_SOURCE_LABEL]
+            if extras:
+                _gh_add_labels(
+                    repo=repo, number=number, labels=extras, run_gh=run_gh
+                )
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
-    return {"url": url}
+    return {"url": url, "labels": labels}

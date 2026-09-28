@@ -251,11 +251,13 @@ def _cmd_check_draft(args: argparse.Namespace) -> int:
     if not isinstance(finding, dict) or not isinstance(config, dict):
         return _fail("finding and config must be JSON objects")
     body = _read_text(args.body)
+    labels = [name.strip() for name in (args.labels or "").split(",") if name.strip()]
     gaps = check_draft(
         body=body,
         title=_optional(args.title),
         finding=finding,
         config=config,
+        labels=labels or None,
     )
     return _emit(
         {"fileable": not gaps, "gaps": gaps},
@@ -289,6 +291,12 @@ def _cmd_write(args: argparse.Namespace) -> int:
         return _fail(
             "action 'ask' must be resolved with the human before writing", EXIT_ASK
         )
+    finding = _read_json(args.finding) if args.finding else {}
+    config = _read_json(args.config) if args.config else {}
+    if args.finding and not isinstance(finding, dict):
+        return _fail("finding must be a JSON object")
+    if args.config and not isinstance(config, dict):
+        return _fail("config must be a JSON object")
     try:
         result = write_github(
             action=args.action,
@@ -297,6 +305,8 @@ def _cmd_write(args: argparse.Namespace) -> int:
             body=_read_text(args.body_file),
             labels=args.label,
             number=args.number,
+            finding=finding if isinstance(finding, dict) else {},
+            config=config if isinstance(config, dict) else {},
         )
     except CreateFailed as error:
         return _fail(str(error))
@@ -346,9 +356,10 @@ def _uploaded_pairs(payload: object) -> list:
 
 
 def _cmd_embed_uploads(args: argparse.Namespace) -> int:
-    return _emit(
-        {"body": embed_uploads(_read_text(args.body), _uploaded_pairs(_read_json(args.map)))}
-    )
+    body = embed_uploads(_read_text(args.body), _uploaded_pairs(_read_json(args.map)))
+    if args.out:
+        Path(args.out).write_text(body, encoding="utf-8")
+    return _emit({"body": body})
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -431,6 +442,11 @@ def _build_parser() -> argparse.ArgumentParser:
     draft.add_argument("--config", default=None)
     draft.add_argument("--body", required=True, help="Draft markdown path, or -")
     draft.add_argument("--title", default=None)
+    draft.add_argument(
+        "--labels",
+        default=None,
+        help="Comma-separated labels that will be applied on create",
+    )
     draft.set_defaults(handler=_cmd_check_draft)
 
     sensitive = subparsers.add_parser(
@@ -459,6 +475,8 @@ def _build_parser() -> argparse.ArgumentParser:
     write.add_argument("--body-file", required=True, help="Body markdown path, or - for stdin")
     write.add_argument("--label", action="append", default=[])
     write.add_argument("--number", type=int, default=None, help="Issue number to comment on")
+    write.add_argument("--finding", default=None, help="Finding JSON; Path B stamps the tester label")
+    write.add_argument("--config", default=None)
     write.set_defaults(handler=_cmd_write)
 
     upload = subparsers.add_parser("upload", help="Upload evidence to user-attachments")
@@ -472,6 +490,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     embed.add_argument("--body", required=True)
     embed.add_argument("--map", required=True, help="upload JSON or {\"uploaded\":[...]}")
+    embed.add_argument("--out", default=None, help="Write the embedded markdown body to this path")
     embed.set_defaults(handler=_cmd_embed_uploads)
 
     return parser
