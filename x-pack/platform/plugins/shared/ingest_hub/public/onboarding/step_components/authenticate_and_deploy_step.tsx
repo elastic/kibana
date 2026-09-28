@@ -229,6 +229,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     onContinue: () => {},
   });
   const isDirty = detectAndReviewStep.isDirty ?? false;
+  // Keep driftDirtyRef in sync with the persisted isDirty so that a successful deploy (which clears
+  // isDirty) also resets the ref. Without this, the stale true from the pre-deploy comparison merges
+  // with the StaticKeysReplaceView's initial onReadyChange(false) on remount and restores isDirty.
+  useEffect(() => {
+    if (!isDirty) driftDirtyRef.current = false;
+  }, [isDirty]);
   const [deployAttempted, setDeployAttempted] = useState(false);
   // Not done when isDirty: force the Deploy button visible so the user can apply updated settings.
   // isDirty is checked in both branches: a failed dirty redeploy leaves isDirty true, so a

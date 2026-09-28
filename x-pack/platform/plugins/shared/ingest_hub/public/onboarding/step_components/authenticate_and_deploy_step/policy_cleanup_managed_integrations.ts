@@ -108,7 +108,15 @@ export async function updateManagedIntegrationsPolicy(
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName, existingVersion);
   const pkgInfo = pkgInfoResponse.data?.item;
   const pkgVersion = pkgInfo?.version;
-  if (!pkgVersion || !pkgInfo) return;
+  // Treat a missing package as a failure so callers do not count the update as successful and
+  // clear isDirty for a policy that was never actually updated.
+  if (!pkgVersion || !pkgInfo) {
+    throw new Error(
+      `Cannot update managed-integration policy ${policyId}: package info unavailable for ${packageName}@${
+        existingVersion ?? 'latest'
+      }.`
+    );
+  }
 
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
