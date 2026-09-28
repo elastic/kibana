@@ -31,7 +31,11 @@ const page: CortexPage = {
   content: '## Overview',
 };
 
-const setup = ({ existing, enabled = true }: { existing?: CortexPage; enabled?: boolean } = {}) => {
+const setup = ({
+  existing,
+  enabled = true,
+  version,
+}: { existing?: CortexPage; enabled?: boolean; version?: string } = {}) => {
   const store = {
     pruneDuplicates: jest.fn().mockResolvedValue(0),
     get: jest.fn().mockResolvedValue(existing),
@@ -40,7 +44,7 @@ const setup = ({ existing, enabled = true }: { existing?: CortexPage; enabled?: 
   };
   const context = {
     request: {},
-    params: { body },
+    params: { body: version === undefined ? body : { ...body, version } },
     isCortexEnabled: () => enabled,
     getCortexPageStore: () => store,
   } as never;
@@ -95,5 +99,16 @@ describe('updateCortexPageRoute', () => {
     );
     expect(store.get).toHaveBeenCalledWith('cortex_service_checkout');
     expect(store.upsert).not.toHaveBeenCalled();
+  });
+
+  it('writes against the version the caller loaded and rejects a stale one', async () => {
+    const { store, context } = setup({ existing: page, version: '7:1' });
+    store.upsert.mockRejectedValueOnce({ statusCode: 409 });
+    await expect(update(context)).rejects.toEqual(
+      conflict(
+        'Cortex page cortex_service_checkout changed since it was loaded. Reload it and try again.'
+      )
+    );
+    expect(store.upsert).toHaveBeenCalledWith(expect.objectContaining({ version: '7:1' }));
   });
 });

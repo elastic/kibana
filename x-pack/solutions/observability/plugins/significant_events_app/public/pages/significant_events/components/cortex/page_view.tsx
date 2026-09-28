@@ -185,7 +185,9 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
             values: { title: page.title },
           })}
           onCancel={() => setIsConfirmingArchive(false)}
-          onConfirm={() => archivePage(page.id, { onSuccess: onArchived })}
+          onConfirm={() =>
+            archivePage({ id: page.id, version: page.version }, { onSuccess: onArchived })
+          }
           isLoading={isArchiving}
           cancelButtonText={i18n.translate(
             'xpack.significantEventsApp.cortex.archiveConfirmCancel',

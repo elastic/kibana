@@ -44,6 +44,8 @@ interface CortexPageWrite {
   content: string;
   status: CortexPageStatus;
   corroborations?: number;
+  /** When set, the write fails with a version conflict if the stored page has changed since. */
+  version?: string;
 }
 
 export interface CortexPageStore {
@@ -56,7 +58,7 @@ export interface CortexPageStore {
   /** Writes a new page atomically; resolves undefined when the page already exists. */
   create: (page: CortexPageWrite) => Promise<CortexPage | undefined>;
   corroborate: (id: string) => Promise<CortexPage | undefined>;
-  archive: (id: string) => Promise<CortexPage | undefined>;
+  archive: (id: string, version?: string) => Promise<CortexPage | undefined>;
   pruneDuplicates: () => Promise<number>;
 }
 
@@ -111,6 +113,20 @@ const getStatusCode = (error: unknown): number | undefined =>
     ? (error as { statusCode?: number }).statusCode
     : undefined;
 
+/** True when a versioned write lost to a concurrent change of the same page. */
+export const isVersionConflict = (error: unknown): boolean => getStatusCode(error) === 409;
+
+const toVersion = (seqNo: number | undefined, primaryTerm: number | undefined) =>
+  seqNo !== undefined && primaryTerm !== undefined ? `${seqNo}:${primaryTerm}` : undefined;
+
+const toConcurrencyParams = (version: string | undefined) => {
+  if (version === undefined) {
+    return {};
+  }
+  const [seqNo, primaryTerm] = version.split(':').map(Number);
+  return { if_seq_no: seqNo, if_primary_term: primaryTerm };
+};
+
 const isEntityType = (value: string | undefined): value is CortexEntityType =>
   value !== undefined && (CORTEX_ENTITY_TYPES as readonly string[]).includes(value);
 
@@ -147,7 +163,7 @@ const toSummary = (id: string, source: CortexKiSource): CortexPageSummary | unde
   };
 };
 
-const toPage = (id: string, source: CortexKiSource): CortexPage | undefined => {
+const toPage = (id: string, source: CortexKiSource, version?: string): CortexPage | undefined => {
   const summary = toSummary(id, source);
   if (!summary) {
     return undefined;
@@ -162,6 +178,7 @@ const toPage = (id: string, source: CortexKiSource): CortexPage | undefined => {
     ...summary,
     slug,
     content: source.content ?? '',
+    ...(version !== undefined ? { version } : {}),
   };
 };
 
@@ -273,7 +290,7 @@ export const createCortexPageStore = ({
 
   const getSource = async (
     id: string
-  ): Promise<{ id: string; source: CortexKiSource } | undefined> => {
+  ): Promise<{ id: string; source: CortexKiSource; version?: string } | undefined> => {
     try {
       const response = await esClient.get<CortexKiSource>(
         {
@@ -285,7 +302,11 @@ export const createCortexPageStore = ({
       if (!response.found || response._source === undefined) {
         return undefined;
       }
-      return { id: toPageId(response._id), source: response._source };
+      return {
+        id: toPageId(response._id),
+        source: response._source,
+        version: toVersion(response._seq_no, response._primary_term),
+      };
     } catch (error) {
       if (getStatusCode(error) === 404) {
         return undefined;
@@ -318,8 +339,12 @@ export const createCortexPageStore = ({
     };
   };
 
-  const toWrittenPage = (id: string, document: CortexKiSource): CortexPage => {
-    const page = toPage(id, document);
+  const toWrittenPage = (
+    id: string,
+    document: CortexKiSource,
+    { _seq_no: seqNo, _primary_term: primaryTerm }: { _seq_no?: number; _primary_term?: number }
+  ): CortexPage => {
+    const page = toPage(id, document, toVersion(seqNo, primaryTerm));
     if (!page) {
       throw new Error(`Failed to normalize Cortex page ${id}`);
     }
@@ -345,7 +370,7 @@ export const createCortexPageStore = ({
     async get(id) {
       const found = await getSource(id);
       if (found) {
-        return toPage(found.id, found.source);
+        return toPage(found.id, found.source, found.version);
       }
 
       for (const entityType of CORTEX_ENTITY_TYPES) {
@@ -357,7 +382,9 @@ export const createCortexPageStore = ({
           return undefined;
         }
         const redirected = await getSource(canonicalId);
-        return redirected ? toPage(redirected.id, redirected.source) : undefined;
+        return redirected
+          ? toPage(redirected.id, redirected.source, redirected.version)
+          : undefined;
       }
       return undefined;
     },
@@ -370,24 +397,25 @@ export const createCortexPageStore = ({
         page.corroborations ?? toCorroborations(existing?.source.attributes?.corroborations)
       );
 
-      await esClient.index(
+      const response = await esClient.index(
         {
           index: destValue,
           id: toStoredId(id),
           document,
           refresh: 'wait_for',
+          ...toConcurrencyParams(page.version),
         },
         { signal }
       );
 
       logger.debug(`Upserted Cortex page ${id}`);
-      return toWrittenPage(id, document);
+      return toWrittenPage(id, document, response);
     },
 
     async create(page) {
       const { id, document } = buildDocument(page, page.corroborations ?? 0);
       try {
-        await esClient.create(
+        const response = await esClient.create(
           {
             index: destValue,
             id: toStoredId(id),
@@ -396,15 +424,14 @@ export const createCortexPageStore = ({
           },
           { signal }
         );
+        logger.debug(`Created Cortex page ${id}`);
+        return toWrittenPage(id, document, response);
       } catch (error) {
         if (getStatusCode(error) === 409) {
           return undefined;
         }
         throw error;
       }
-
-      logger.debug(`Created Cortex page ${id}`);
-      return toWrittenPage(id, document);
     },
 
     async corroborate(id) {
@@ -429,7 +456,7 @@ export const createCortexPageStore = ({
       });
     },
 
-    async archive(id) {
+    async archive(id, version) {
       const found = await getSource(id);
       if (!found) {
         return undefined;
@@ -446,6 +473,7 @@ export const createCortexPageStore = ({
         content: page.content,
         status: 'archived',
         corroborations: page.corroborations,
+        version,
       });
     },
 

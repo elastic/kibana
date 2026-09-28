@@ -24,6 +24,8 @@ export type CortexPageInput = Pick<
   'entity_type' | 'slug' | 'title' | 'description' | 'content' | 'status'
 >;
 
+type CortexPageVersion = Pick<CortexPage, 'version'>;
+
 /**
  * Typed client for the Nightshift routes, or undefined when the plugin is not installed. Every
  * query below stays disabled in that case.
@@ -108,6 +110,8 @@ const useCortexMutation = <TVariables>(
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: errorTitle });
+      // A conflict means the page changed underneath the user, so show them the latest copy.
+      return queryClient.invalidateQueries({ queryKey: cortexKeys.anyPage });
     },
   });
 };
@@ -126,7 +130,7 @@ export const useCreateCortexPage = () =>
 
 export const useUpdateCortexPage = () =>
   useCortexMutation(
-    (client, page: CortexPageInput) =>
+    (client, page: CortexPageInput & CortexPageVersion) =>
       client.fetch('PUT /internal/nightshift/cortex/pages', {
         signal: null,
         params: { body: page },
@@ -138,10 +142,10 @@ export const useUpdateCortexPage = () =>
 
 export const useArchiveCortexPage = () =>
   useCortexMutation(
-    (client, id: string) =>
+    (client, { id, version }: CortexPageVersion & { id: string }) =>
       client.fetch('DELETE /internal/nightshift/cortex/pages/{id}', {
         signal: null,
-        params: { path: { id } },
+        params: { path: { id }, query: { version } },
       }),
     i18n.translate('xpack.significantEventsApp.cortex.archiveErrorTitle', {
       defaultMessage: 'Could not archive Cortex page',

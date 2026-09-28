@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { notFound } from '@hapi/boom';
+import { conflict, notFound } from '@hapi/boom';
 import type { CortexPage } from '../../common/cortex';
 import { archiveCortexPageRoute } from './archive_cortex_page';
 
 const { handler } = archiveCortexPageRoute['DELETE /internal/nightshift/cortex/pages/{id}'];
 
-const run = (id: string, resolved: CortexPage | undefined) => {
+const run = (id: string, resolved: CortexPage | undefined, version?: string) => {
   const store = {
     pruneDuplicates: jest.fn().mockResolvedValue(0),
     get: jest.fn().mockResolvedValue(resolved),
@@ -23,7 +23,7 @@ const run = (id: string, resolved: CortexPage | undefined) => {
   };
   const result = handler({
     request: {},
-    params: { path: { id } },
+    params: { path: { id }, query: { version } },
     isCortexEnabled: () => true,
     getCortexPageStore: () => store,
   } as never);
@@ -36,7 +36,7 @@ it('archives the page and returns it', async () => {
   await expect(result).resolves.toEqual({
     page: expect.objectContaining({ id: 'cortex_service_checkout', status: 'archived' }),
   });
-  expect(store.archive).toHaveBeenCalledWith('cortex_service_checkout');
+  expect(store.archive).toHaveBeenCalledWith('cortex_service_checkout', undefined);
 });
 
 it('folds legacy duplicates first and archives the canonical page', async () => {
@@ -46,7 +46,7 @@ it('folds legacy duplicates first and archives the canonical page', async () => 
   expect(store.pruneDuplicates.mock.invocationCallOrder[0]).toBeLessThan(
     store.get.mock.invocationCallOrder[0]
   );
-  expect(store.archive).toHaveBeenCalledWith('cortex_service_email-service');
+  expect(store.archive).toHaveBeenCalledWith('cortex_service_email-service', undefined);
 });
 
 it('throws not found for a missing page', async () => {
@@ -55,4 +55,22 @@ it('throws not found for a missing page', async () => {
     notFound('Cortex page cortex_service_checkout was not found')
   );
   expect(store.archive).not.toHaveBeenCalled();
+});
+
+it('archives only the version the caller loaded', async () => {
+  const page = { id: 'cortex_service_checkout', status: 'established' } as CortexPage;
+  const { store, result } = run('cortex_service_checkout', page, '7:1');
+  await result;
+  expect(store.archive).toHaveBeenCalledWith('cortex_service_checkout', '7:1');
+});
+
+it('throws conflict when the page changed since it was loaded', async () => {
+  const page = { id: 'cortex_service_checkout', status: 'established' } as CortexPage;
+  const { store, result } = run('cortex_service_checkout', page, '7:1');
+  store.archive.mockRejectedValueOnce({ statusCode: 409 });
+  await expect(result).rejects.toEqual(
+    conflict(
+      'Cortex page cortex_service_checkout changed since it was loaded. Reload it and try again.'
+    )
+  );
 });

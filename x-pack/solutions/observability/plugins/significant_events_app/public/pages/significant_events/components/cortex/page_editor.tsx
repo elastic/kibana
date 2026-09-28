@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiMarkdownEditor,
   EuiSelect,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +34,8 @@ export function CortexPageEditor({ page, onDone }: CortexPageEditorProps) {
   const [status, setStatus] = useState(page.status);
   const [description, setDescription] = useState(page.description ?? '');
   const [content, setContent] = useState(page.content);
+  // Pinned so a background refetch can't turn a stale draft into a blind overwrite.
+  const [version] = useState(page.version);
   const { mutate: updatePage, isLoading } = useUpdateCortexPage();
 
   const onSave = () =>
@@ -44,6 +47,7 @@ export function CortexPageEditor({ page, onDone }: CortexPageEditorProps) {
         description: description.trim(),
         content,
         status,
+        version,
       },
       { onSuccess: onDone }
     );
@@ -108,6 +112,7 @@ export function CortexPageEditor({ page, onDone }: CortexPageEditorProps) {
           data-test-subj="nightshiftCortexEditorContent"
         />
       </EuiFormRow>
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={onDone} data-test-subj="nightshiftCortexEditorCancel">

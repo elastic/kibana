@@ -7,27 +7,44 @@
 
 import { conflict, notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { CORTEX_ENTITY_TYPES, CORTEX_PAGE_STATUSES } from '../../common/cortex';
-import { toCortexPageId } from '../cortex/page_store';
+import { isVersionConflict, toCortexPageId } from '../cortex/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const MAX_DESCRIPTION_LENGTH = 4_096;
 const MAX_CONTENT_LENGTH = 100_000;
 
-const cortexPageParams = z.object({
-  body: z.object({
-    entity_type: z.enum(CORTEX_ENTITY_TYPES),
-    // Slugs are canonicalized to kebab-case, so one alphanumeric keeps the page id non-empty.
-    slug: z
-      .string()
-      .max(MAX_KEYWORD_LENGTH)
-      .regex(/[a-z0-9]/i),
-    title: z.string().trim().min(1).max(MAX_KEYWORD_LENGTH),
-    description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
-    content: z.string().max(MAX_CONTENT_LENGTH),
-    status: z.enum(CORTEX_PAGE_STATUSES),
-  }),
+/** The `version` a page was read at; writes carrying it fail if the page changed since. */
+export const cortexPageVersion = z
+  .string()
+  .regex(/^\d{1,19}:\d{1,19}$/)
+  .optional();
+
+/** Maps a lost versioned write to a 409 the UI can explain. */
+export const withVersionConflict = async <T>(id: string, write: () => Promise<T>): Promise<T> => {
+  try {
+    return await write();
+  } catch (error) {
+    if (isVersionConflict(error)) {
+      throw conflict(`Cortex page ${id} changed since it was loaded. Reload it and try again.`);
+    }
+    throw error;
+  }
+};
+
+const cortexPageBody = z.object({
+  entity_type: z.enum(CORTEX_ENTITY_TYPES),
+  // Slugs are canonicalized to kebab-case, so one alphanumeric keeps the page id non-empty.
+  slug: z
+    .string()
+    .max(MAX_KEYWORD_LENGTH)
+    .regex(/[a-z0-9]/i),
+  title: z.string().trim().min(1).max(MAX_KEYWORD_LENGTH),
+  description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
+  content: z.string().max(MAX_CONTENT_LENGTH),
+  status: z.enum(CORTEX_PAGE_STATUSES),
 });
 
 export const createCortexPageRoute = createNightshiftInvestigationsServerRoute({
@@ -39,9 +56,9 @@ export const createCortexPageRoute = createNightshiftInvestigationsServerRoute({
       'Creates a Cortex wiki page. Fails if a page with the same entity and slug exists.',
   },
   security: {
-    authz: { requiredPrivileges: ['agentBuilder:write'] },
+    authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] },
   },
-  params: cortexPageParams,
+  params: z.object({ body: cortexPageBody }),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 
@@ -63,12 +80,12 @@ export const updateCortexPageRoute = createNightshiftInvestigationsServerRoute({
     access: 'internal',
     summary: 'Update a Cortex page',
     description:
-      'Overwrites the editable fields of an existing Cortex wiki page, keeping its corroborations.',
+      'Overwrites the editable fields of an existing Cortex wiki page, keeping its corroborations. Fails if the page changed since the given version.',
   },
   security: {
-    authz: { requiredPrivileges: ['agentBuilder:write'] },
+    authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] },
   },
-  params: cortexPageParams,
+  params: z.object({ body: cortexPageBody.extend({ version: cortexPageVersion }) }),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 
@@ -80,6 +97,6 @@ export const updateCortexPageRoute = createNightshiftInvestigationsServerRoute({
     if (!(await store.get(id))) {
       throw notFound(`Cortex page ${id} was not found`);
     }
-    return { page: await store.upsert({ entityType, ...page }) };
+    return { page: await withVersionConflict(id, () => store.upsert({ entityType, ...page })) };
   },
 });

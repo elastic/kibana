@@ -7,8 +7,10 @@
 
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+import { cortexPageVersion, withVersionConflict } from './write_cortex_page';
 
 export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'DELETE /internal/nightshift/cortex/pages/{id}',
@@ -19,12 +21,13 @@ export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute(
       'Soft-deletes a Cortex wiki page by archiving it, so it stops being loaded into investigations but stays restorable.',
   },
   security: {
-    authz: { requiredPrivileges: ['agentBuilder:write'] },
+    authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] },
   },
   params: z.object({
     path: z.object({
       id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
+    query: z.object({ version: cortexPageVersion }).optional(),
   }),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
@@ -34,7 +37,11 @@ export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute(
     // the canonical page that `get` resolves the requested id to.
     await store.pruneDuplicates();
     const existing = await store.get(params.path.id);
-    const page = existing && (await store.archive(existing.id));
+    const page =
+      existing &&
+      (await withVersionConflict(existing.id, () =>
+        store.archive(existing.id, params.query?.version)
+      ));
     if (!page) {
       throw notFound(`Cortex page ${params.path.id} was not found`);
     }
