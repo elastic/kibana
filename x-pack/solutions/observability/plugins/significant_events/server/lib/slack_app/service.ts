@@ -8,6 +8,7 @@
 import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isAgentNotFoundError, isAgentUnavailableError } from '@kbn/agent-builder-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/server';
@@ -223,7 +224,7 @@ export class SlackAppService {
   /**
    * Relay posts every turn to `kibana_url`, which has no space prefix, so turns run in the default
    * space whatever space Connect was clicked from. Agent Builder accepts an unknown agent id and
-   * only fails the run, so the agent is declared only when it is there, checked with the minted key
+   * only fails the run, so the agent is declared only when it exists and is available, checked with the minted key
    * because that is the credential Relay presents.
    */
   private async resolveSlackAgentId(encodedApiKey: string): Promise<string | undefined> {
@@ -238,15 +239,19 @@ export class SlackAppService {
     });
     try {
       const registry = await agentBuilder.agents.getRegistry({ request });
-      if (await registry.has(NIGHTSHIFT_INVESTIGATION_AGENT_ID)) {
-        return NIGHTSHIFT_INVESTIGATION_AGENT_ID;
-      }
-      this.logger.debug(
-        `${NIGHTSHIFT_INVESTIGATION_AGENT_ID} is not installed in the default space, Slack turns use the Relay default agent`
-      );
+      // `get` rather than `has`: only `get` runs the agent's availability gate, which rejects runs
+      // the same way Relay's turns would be rejected.
+      await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+      return NIGHTSHIFT_INVESTIGATION_AGENT_ID;
     } catch (error) {
+      if (isAgentNotFoundError(error) || isAgentUnavailableError(error)) {
+        this.logger.debug(
+          `${NIGHTSHIFT_INVESTIGATION_AGENT_ID} is not installed in the default space, Slack turns will use the default agent`
+        );
+        return undefined;
+      }
       this.logger.warn(
-        `Failed to look up ${NIGHTSHIFT_INVESTIGATION_AGENT_ID}, Slack turns use the Relay default agent: ${this.toErrorMessage(
+        `Failed to look up ${NIGHTSHIFT_INVESTIGATION_AGENT_ID}, Slack turns will use the default agent: ${this.toErrorMessage(
           error
         )}`
       );

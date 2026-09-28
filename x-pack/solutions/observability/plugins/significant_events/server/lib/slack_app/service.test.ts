@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SignificantEventsServer } from '../../types';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
+import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID, SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
@@ -21,7 +22,7 @@ const request = {} as unknown as KibanaRequest;
 const startInstall = jest.fn();
 const fetchClaim = jest.fn();
 const unbind = jest.fn();
-const hasAgent = jest.fn();
+const getAgent = jest.fn();
 const getRegistry = jest.fn();
 
 jest.mock('@kbn/core-http-server-utils', () => ({
@@ -124,8 +125,8 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
 describe('SlackAppService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    hasAgent.mockResolvedValue(false);
-    getRegistry.mockResolvedValue({ has: hasAgent });
+    getAgent.mockRejectedValue(createAgentNotFoundError({ agentId: 'nightshift.investigation' }));
+    getRegistry.mockResolvedValue({ get: getAgent });
   });
 
   describe('connect', () => {
@@ -224,8 +225,8 @@ describe('SlackAppService', () => {
         return harness;
       };
 
-      it('declares nightshift.investigation when the minted key sees it in the default space', async () => {
-        hasAgent.mockResolvedValue(true);
+      it('declares nightshift.investigation when the minted key sees it available in the default space', async () => {
+        getAgent.mockResolvedValue({ id: 'nightshift.investigation' });
 
         await connectWithKey();
 
@@ -240,16 +241,30 @@ describe('SlackAppService', () => {
             spaceId: 'default',
           },
         });
-        expect(hasAgent).toHaveBeenCalledWith('nightshift.investigation');
+        expect(getAgent).toHaveBeenCalledWith('nightshift.investigation');
         expect(startInstall).toHaveBeenCalledWith(
           expect.objectContaining({ agent_id: 'nightshift.investigation' })
         );
       });
 
       it('omits agent_id when the agent is not installed in the default space', async () => {
-        await connectWithKey();
+        const { logger } = await connectWithKey();
 
         expect(startInstall.mock.calls[0][0]).not.toHaveProperty('agent_id');
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      // Runs through `get` would be rejected by the agent's availability gate (e.g. Nightshift
+      // disabled or its inference endpoint missing), so Relay turns would fail the same way.
+      it('omits agent_id when the agent exists but is unavailable', async () => {
+        getAgent.mockRejectedValue(
+          createAgentUnavailableError({ agentId: 'nightshift.investigation' })
+        );
+
+        const { logger } = await connectWithKey();
+
+        expect(startInstall.mock.calls[0][0]).not.toHaveProperty('agent_id');
+        expect(logger.warn).not.toHaveBeenCalled();
       });
 
       it('omits agent_id and still installs when the agent lookup fails', async () => {
