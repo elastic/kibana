@@ -7,10 +7,9 @@
 
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
-import { cortexPageVersion, withVersionConflict } from './write_cortex_page';
+import { cortexPageVersion, cortexWritePrivileges, withVersionConflict } from './write_cortex_page';
 
 export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'DELETE /internal/nightshift/cortex/pages/{id}',
@@ -21,7 +20,7 @@ export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute(
       'Soft-deletes a Cortex wiki page by archiving it, so it stops being loaded into investigations but stays restorable. Fails if the page changed since the given version.',
   },
   security: {
-    authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] },
+    authz: { requiredPrivileges: cortexWritePrivileges },
   },
   params: z.object({
     path: z.object({

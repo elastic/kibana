@@ -98,20 +98,23 @@ const useCortexMutation = <TVariables>(
     },
   } = useKibana();
 
+  const refreshCortex = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: cortexKeys.pages }),
+      queryClient.invalidateQueries({ queryKey: cortexKeys.anyPage }),
+    ]);
+
   return useMutation<GetCortexPageResponse, Error, TVariables>({
     mutationFn: (variables) => write(client!, variables),
     onSuccess: ({ page }) => {
       queryClient.setQueryData(cortexKeys.page(page.id), { page });
       // A write can fold a legacy page id into the canonical one, so every cached page may be stale.
-      return Promise.all([
-        queryClient.invalidateQueries({ queryKey: cortexKeys.pages }),
-        queryClient.invalidateQueries({ queryKey: cortexKeys.anyPage }),
-      ]);
+      return refreshCortex();
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: errorTitle });
-      // A conflict means the page changed underneath the user, so show them the latest copy.
-      return queryClient.invalidateQueries({ queryKey: cortexKeys.anyPage });
+      // A conflict means someone else changed the page, so the list and the page are both stale.
+      return refreshCortex();
     },
   });
 };

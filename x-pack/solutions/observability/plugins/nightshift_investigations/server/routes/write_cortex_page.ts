@@ -16,6 +16,9 @@ import { createNightshiftInvestigationsServerRoute } from './create_server_route
 const MAX_DESCRIPTION_LENGTH = 4_096;
 const MAX_CONTENT_LENGTH = 100_000;
 
+/** Cortex reads need `agentBuilder:read`, so writers must also be able to read back what they write. */
+export const cortexWritePrivileges = [NIGHTSHIFT_API_PRIVILEGES.manage, 'agentBuilder:read'];
+
 /** The `version` a page was read at; the write fails if the page changed since. */
 export const cortexPageVersion = z
   .string()
@@ -56,7 +59,7 @@ export const createCortexPageRoute = createNightshiftInvestigationsServerRoute({
       'Creates a Cortex wiki page. Fails if a page with the same entity and slug exists.',
   },
   security: {
-    authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] },
+    authz: { requiredPrivileges: cortexWritePrivileges },
   },
   params: z.object({ body: cortexPageBody }),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
@@ -83,7 +86,7 @@ export const updateCortexPageRoute = createNightshiftInvestigationsServerRoute({
       'Overwrites the editable fields of an existing Cortex wiki page, keeping its corroborations. Fails if the page changed since the given version.',
   },
   security: {
-    authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] },
+    authz: { requiredPrivileges: cortexWritePrivileges },
   },
   params: z.object({ body: cortexPageBody.extend({ version: cortexPageVersion }) }),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
