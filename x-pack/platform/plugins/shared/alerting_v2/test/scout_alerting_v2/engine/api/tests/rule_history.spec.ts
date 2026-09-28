@@ -501,7 +501,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
       expect(list.items[0]).toMatchObject({
         action: RuleChangesHistoryAction.ruleUpdate,
         is_current: true,
-        metadata: { version: updated.metadata.version },
+        version: updated.metadata.version,
       });
       expect('snapshot' in list.items[0]).toBe(false);
       expect(list.items[0].changes?.count).toBeGreaterThan(0);

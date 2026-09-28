@@ -479,9 +479,9 @@ describe('RulesClient', () => {
           attrs: expect.objectContaining({ enabled: true }),
         }),
       ]);
-      expect(res.rules).toHaveLength(2);
+      expect(res.items).toHaveLength(2);
       expect(res.errors).toEqual([]);
-      expect(res.rules.map((rule) => rule.id)).toEqual(['rule-a', 'rule-b']);
+      expect(res.items.map((rule) => rule.id)).toEqual(['rule-a', 'rule-b']);
     });
 
     it('maps saved object attributes from the service into the API response', async () => {
@@ -505,8 +505,8 @@ describe('RulesClient', () => {
         rules: [{ ...baseCreateData, id: 'rule-a', metadata: { name: 'from-request' } }],
       });
 
-      expect(res.rules).toHaveLength(1);
-      expect(res.rules[0]).toEqual(
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0]).toEqual(
         expect.objectContaining({
           id: 'rule-a',
           metadata: expect.objectContaining({ name: 'from-so' }),
@@ -529,8 +529,8 @@ describe('RulesClient', () => {
           attrs: expect.objectContaining({ enabled: false }),
         }),
       ]);
-      expect(res.rules).toHaveLength(1);
-      expect(res.rules[0].enabled).toBe(false);
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].enabled).toBe(false);
       expect(res.errors).toEqual([]);
     });
 
@@ -552,9 +552,9 @@ describe('RulesClient', () => {
         [expect.objectContaining({ params: expect.objectContaining({ ruleId: 'rule-on' }) })],
         expect.anything()
       );
-      expect(res.rules).toHaveLength(2);
-      expect(res.rules.find((rule) => rule.id === 'rule-on')?.enabled).toBe(true);
-      expect(res.rules.find((rule) => rule.id === 'rule-off')?.enabled).toBe(false);
+      expect(res.items).toHaveLength(2);
+      expect(res.items.find((rule) => rule.id === 'rule-on')?.enabled).toBe(true);
+      expect(res.items.find((rule) => rule.id === 'rule-off')?.enabled).toBe(false);
     });
 
     it('does not schedule enabled rules when bulkSchedule throws, and rolls back their saved objects', async () => {
@@ -577,8 +577,8 @@ describe('RulesClient', () => {
       ]);
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-on']);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-on']);
-      expect(res.rules).toHaveLength(1);
-      expect(res.rules[0].id).toBe('rule-off');
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].id).toBe('rule-off');
       expect(res.errors).toEqual([
         expect.objectContaining({
           id: 'rule-on',
@@ -602,7 +602,7 @@ describe('RulesClient', () => {
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
-      expect(res.rules).toEqual([]);
+      expect(res.items).toEqual([]);
       expect(res.errors).toEqual([
         {
           id: 'rule-dup',
@@ -628,7 +628,7 @@ describe('RulesClient', () => {
       });
 
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
-      expect(res.rules).toEqual([]);
+      expect(res.items).toEqual([]);
       expect(res.errors).toEqual([
         {
           id: 'rule-dup',
@@ -655,7 +655,7 @@ describe('RulesClient', () => {
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
-      expect(res.rules).toEqual([]);
+      expect(res.items).toEqual([]);
       expect(res.errors).toEqual([
         {
           id: 'rule-fail',
@@ -703,7 +703,7 @@ describe('RulesClient', () => {
 
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-b']);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-b']);
-      expect(res.rules.map((rule) => rule.id)).toEqual(['rule-a']);
+      expect(res.items.map((rule) => rule.id)).toEqual(['rule-a']);
       expect(res.errors).toEqual([
         expect.objectContaining({
           id: 'rule-b',
@@ -745,7 +745,7 @@ describe('RulesClient', () => {
         rules: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
       });
 
-      expect(res.rules).toHaveLength(1);
+      expect(res.items).toHaveLength(1);
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
     });
 
@@ -768,8 +768,8 @@ describe('RulesClient', () => {
         ],
       });
 
-      expect(res.rules).toHaveLength(1);
-      expect(res.rules[0].id).toBe('rule-ok');
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].id).toBe('rule-ok');
       expect(res.errors).toEqual([
         expect.objectContaining({
           id: 'rule-short',

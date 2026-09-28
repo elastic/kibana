@@ -37,6 +37,7 @@ import {
   MAX_BULK_ITEMS,
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
+  MAX_PER_PAGE,
 } from './constants';
 
 const validRuleFields = {
@@ -92,8 +93,8 @@ describe('createRuleDataSchema', () => {
         no_data: { strategy: 'keep_last', query: 'FROM heartbeat-* | LIMIT 1' },
         grouping: { fields: ['host.name'] },
         state_transition: {
-          pending: { operator: 'AND', count: 3, timeframe: '10m' },
-          recovering: { operator: 'OR', count: 5, timeframe: '15m' },
+          pending: { operator: 'and', count: 3, timeframe: '10m' },
+          recovering: { operator: 'or', count: 5, timeframe: '15m' },
         },
         artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
       });
@@ -108,8 +109,8 @@ describe('createRuleDataSchema', () => {
           no_data: { strategy: 'keep_last', query: 'FROM heartbeat-* | LIMIT 1' },
           grouping: { fields: ['host.name'] },
           state_transition: {
-            pending: { operator: 'AND', count: 3, timeframe: '10m' },
-            recovering: { operator: 'OR', count: 5, timeframe: '15m' },
+            pending: { operator: 'and', count: 3, timeframe: '10m' },
+            recovering: { operator: 'or', count: 5, timeframe: '15m' },
           },
           artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
         })
@@ -704,11 +705,11 @@ describe('createRuleDataSchema', () => {
     it('accepts state_transition with only a pending phase', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        state_transition: { pending: { operator: 'AND', count: 2, timeframe: '10m' } },
+        state_transition: { pending: { operator: 'and', count: 2, timeframe: '10m' } },
       });
 
       expect(result.state_transition).toEqual({
-        pending: { operator: 'AND', count: 2, timeframe: '10m' },
+        pending: { operator: 'and', count: 2, timeframe: '10m' },
       });
     });
 
@@ -716,11 +717,11 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
         recovery: { strategy: 'no_breach' },
-        state_transition: { recovering: { operator: 'OR', count: 5, timeframe: '15m' } },
+        state_transition: { recovering: { operator: 'or', count: 5, timeframe: '15m' } },
       });
 
       expect(result.state_transition).toEqual({
-        recovering: { operator: 'OR', count: 5, timeframe: '15m' },
+        recovering: { operator: 'or', count: 5, timeframe: '15m' },
       });
     });
 
@@ -793,7 +794,7 @@ describe('createRuleDataSchema', () => {
       (phase) => {
         const result = createRuleDataSchema.safeParse({
           ...validCreateData,
-          state_transition: { [phase]: { operator: 'AND', timeframe: '5m' } },
+          state_transition: { [phase]: { operator: 'and', timeframe: '5m' } },
         });
 
         expect(result.success).toBe(false);
@@ -805,7 +806,7 @@ describe('createRuleDataSchema', () => {
       (phase) => {
         const result = createRuleDataSchema.safeParse({
           ...validCreateData,
-          state_transition: { [phase]: { operator: 'AND', count: 2 } },
+          state_transition: { [phase]: { operator: 'and', count: 2 } },
         });
 
         expect(result.success).toBe(false);
@@ -1391,7 +1392,7 @@ describe('updateRuleDataSchema', () => {
 
     it('rejects a pending.operator without both count and timeframe', () => {
       const result = updateRuleDataSchema.safeParse({
-        state_transition: { pending: { operator: 'AND', count: 2 } },
+        state_transition: { pending: { operator: 'and', count: 2 } },
       });
 
       expect(result.success).toBe(false);
@@ -1774,16 +1775,18 @@ describe('findRulesRequestSchema', () => {
     expect(findRulesRequestSchema.safeParse({ page }).success).toBe(false);
   });
 
-  it.each([0, 1.5, 1001])('rejects per_page %p', (perPage) => {
+  it.each([0, 1.5, MAX_PER_PAGE + 1])('rejects per_page %p', (perPage) => {
     expect(findRulesRequestSchema.safeParse({ per_page: perPage }).success).toBe(false);
   });
 
   it('accepts the last page inside the max result window', () => {
-    expect(findRulesRequestSchema.safeParse({ page: 10, per_page: 1000 }).success).toBe(true);
+    expect(findRulesRequestSchema.safeParse({ page: 100, per_page: MAX_PER_PAGE }).success).toBe(
+      true
+    );
   });
 
   it('rejects a page beyond the max result window', () => {
-    const result = findRulesRequestSchema.safeParse({ page: 11, per_page: 1000 });
+    const result = findRulesRequestSchema.safeParse({ page: 101, per_page: MAX_PER_PAGE });
 
     expect(result.success).toBe(false);
   });
@@ -1813,18 +1816,18 @@ describe('bulkGetRulesResponseSchema', () => {
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
-  it('accepts an empty rules array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ rules: [] });
-    expect(result).toEqual({ rules: [] });
+  it('accepts an empty items array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ items: [] });
+    expect(result).toEqual({ items: [] });
   });
 
-  it('accepts a populated rules array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ rules: [sampleRule] });
-    expect(result.rules).toHaveLength(1);
-    expect(result.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
+  it('accepts a populated items array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ items: [sampleRule] });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
   });
 
-  it('rejects a missing rules field', () => {
+  it('rejects a missing items field', () => {
     expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
   });
 });
@@ -1911,14 +1914,14 @@ describe('bulkCreateRulesResponseSchema', () => {
   };
 
   it('accepts created rules and an empty errors array', () => {
-    const result = bulkCreateRulesResponseSchema.parse({ rules: [sampleRule], errors: [] });
-    expect(result.rules).toHaveLength(1);
+    const result = bulkCreateRulesResponseSchema.parse({ items: [sampleRule], errors: [] });
+    expect(result.items).toHaveLength(1);
     expect(result.errors).toEqual([]);
   });
 
   it('accepts per-item errors without created rules', () => {
     const result = bulkCreateRulesResponseSchema.parse({
-      rules: [],
+      items: [],
       errors: [
         {
           id: 'rule-1',
@@ -1926,11 +1929,11 @@ describe('bulkCreateRulesResponseSchema', () => {
         },
       ],
     });
-    expect(result.rules).toEqual([]);
+    expect(result.items).toEqual([]);
     expect(result.errors).toHaveLength(1);
   });
 
-  it('rejects a missing rules field', () => {
+  it('rejects a missing items field', () => {
     expect(() => bulkCreateRulesResponseSchema.parse({ errors: [] })).toThrow();
   });
 });

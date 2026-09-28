@@ -21,11 +21,11 @@ export interface ListExecutionHistoryUiParams {
   perPage?: number;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
+  outcomes?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
   from?: string;
   to?: string;
-  sort?: 'dispatchedAt';
+  sortField?: 'dispatchedAt';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -34,11 +34,11 @@ export const toListExecutionHistoryRequest = ({
   perPage,
   search,
   ruleIds,
-  outcome,
+  outcomes,
   episodeIds,
   from,
   to,
-  sort,
+  sortField,
   sortOrder,
   ...rest
 }: ListExecutionHistoryUiParams): Complete<Partial<ListPolicyExecutionHistoryRequest>> => {
@@ -48,11 +48,11 @@ export const toListExecutionHistoryRequest = ({
     per_page: perPage,
     search,
     rule_ids: ruleIds,
-    outcome,
+    outcomes,
     episode_ids: episodeIds,
     from,
     to,
-    sort: sort === 'dispatchedAt' ? 'dispatched_at' : sort,
+    sort_field: sortField === 'dispatchedAt' ? 'dispatched_at' : sortField,
     sort_order: sortOrder,
   };
 };
@@ -62,11 +62,11 @@ interface UseFetchExecutionHistoryParams {
   perPage: number;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
+  outcomes?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
   from?: string;
   to?: string;
-  sort?: 'dispatchedAt';
+  sortField?: 'dispatchedAt';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -75,11 +75,11 @@ export const useFetchExecutionHistory = ({
   perPage,
   search,
   ruleIds,
-  outcome,
+  outcomes,
   episodeIds,
   from,
   to,
-  sort,
+  sortField,
   sortOrder,
 }: UseFetchExecutionHistoryParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
@@ -90,11 +90,11 @@ export const useFetchExecutionHistory = ({
       perPage,
       search,
       ruleIds,
-      outcome,
+      outcomes,
       episodeIds,
       from,
       to,
-      sort,
+      sortField,
       sortOrder,
     }),
     queryFn: () =>
@@ -104,11 +104,11 @@ export const useFetchExecutionHistory = ({
           perPage,
           search,
           ruleIds,
-          outcome,
+          outcomes,
           episodeIds,
           from,
           to,
-          sort,
+          sortField,
           sortOrder,
         })
       ),

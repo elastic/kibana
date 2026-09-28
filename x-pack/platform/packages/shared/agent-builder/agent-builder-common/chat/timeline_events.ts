@@ -65,6 +65,15 @@ export interface EventActor {
 }
 
 /**
+ * Whether a chat request executes the agent. `never` appends the user message to the conversation
+ * and returns, leaving the execution options unused.
+ */
+export enum ChatTriggerMode {
+  Always = 'always',
+  Never = 'never',
+}
+
+/**
  * What caused an agent run to start.
  */
 export enum TimelineTriggerType {
@@ -455,6 +464,10 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   stepPrefix: '::step::',
   promptResponse: '::prompt_response',
 } as const;
+
+/** ID of the `user_message` event derived from a round. */
+export const roundUserMessageEventId = (roundId: string): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`;
 
 /** ID for a step event. */
 export const roundStepEventId = (roundId: string, sequence: number): string =>

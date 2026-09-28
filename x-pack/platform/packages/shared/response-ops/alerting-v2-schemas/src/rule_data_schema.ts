@@ -17,22 +17,26 @@ import {
 import {
   actorSchema,
   durationSchema,
+  entityIdSchema,
+  ENTITY_ID_NOTE,
+  ESTIMATED_COUNT_NOTE,
   queryIntSchema,
   tagsResponseSchema,
   tagsSchema,
 } from './common';
 import {
+  ID_MAX_LENGTH,
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
+  MAX_PER_PAGE,
   MAX_GROUPING_FIELDS,
   MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
   MAX_SEARCH_LENGTH,
   MIN_SCHEDULE_INTERVAL,
   MAX_BULK_ITEMS,
-  ID_MAX_LENGTH,
   VERSION_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
   MAX_ARTIFACT_DATA_LENGTH,
@@ -379,7 +383,7 @@ export const getRootEsqlQuery = (query: ReadableQuery): string => query.base;
 
 /** State transition (optional, alert-only) */
 
-export const stateTransitionOperatorSchema = z.enum(['AND', 'OR']);
+export const stateTransitionOperatorSchema = z.enum(['and', 'or']);
 export type StateTransitionOperator = z.infer<typeof stateTransitionOperatorSchema>;
 
 const stateTransitionPhaseSchema = ({
@@ -404,7 +408,7 @@ const stateTransitionPhaseSchema = ({
       operator: stateTransitionOperatorSchema
         .optional()
         .describe(
-          'When both `count` and `timeframe` are set, `AND` requires both and `OR` requires either. Allowed only when both fields are present.'
+          'When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.'
         ),
     })
     .strict()
@@ -483,7 +487,7 @@ export const groupingSchema = z
 
 const artifactSchema = z
   .object({
-    id: z.string().min(1).max(256).describe('Artifact identifier.'),
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('Artifact identifier.'),
     type: z.string().min(1).max(128).describe('Artifact type.'),
     data: z
       .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
@@ -557,7 +561,7 @@ export const createRuleDataBaseSchema = z
     time_field: z
       .string()
       .min(1)
-      .max(128)
+      .max(MAX_FIELD_NAME_LENGTH)
       .default(DEFAULT_TIME_FIELD)
       .describe(TIME_FIELD_DESCRIPTION),
     schedule: scheduleSchema,
@@ -772,7 +776,12 @@ export const updateRuleDataSchema = z
         tags: tagsSchema.min(1).nullable().optional(),
       })
       .optional(),
-    time_field: z.string().min(1).max(128).optional().describe(TIME_FIELD_UPDATE_DESCRIPTION),
+    time_field: z
+      .string()
+      .min(1)
+      .max(MAX_FIELD_NAME_LENGTH)
+      .optional()
+      .describe(TIME_FIELD_UPDATE_DESCRIPTION),
     schedule: scheduleSchema.partial().optional().nullable(),
     query: querySchema.optional(),
     recovery: recoverySchema.optional(),
@@ -826,9 +835,9 @@ export const ruleResponseSchema = createRuleDataBaseSchema
     metadata: ruleResponseMetadataSchema,
     enabled: z.boolean().describe('Whether the rule is enabled.'),
     created_by: actorSchema.nullable().describe('Actor who created the rule.'),
-    created_at: z.string().describe('ISO timestamp when the rule was created.'),
+    created_at: z.iso.datetime().describe('ISO timestamp when the rule was created.'),
     updated_by: actorSchema.nullable().describe('Actor who last updated the rule.'),
-    updated_at: z.string().describe('ISO timestamp when the rule was last updated.'),
+    updated_at: z.iso.datetime().describe('ISO timestamp when the rule was last updated.'),
     version: z
       .string()
       .optional()
@@ -852,7 +861,7 @@ export const findRulesRequestSchema = z
       .describe(
         `The page number to return. Defaults to 1. \`page * per_page\` cannot exceed ${FIND_MAX_RESULT_WINDOW}.`
       ),
-    per_page: queryIntSchema({ min: 1, max: 1000 })
+    per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
       .optional()
       .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}.`),
     filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
@@ -878,7 +887,7 @@ export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 export const findRulesResponseSchema = z
   .object({
     items: z.array(ruleResponseSchema).describe('The list of rules.'),
-    total: z.number().describe('The total number of rules matching the query.'),
+    total: z.number().describe(`The number of rules matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().describe('The current page number.'),
     per_page: z.number().describe('The number of rules per page.'),
   })
@@ -908,19 +917,14 @@ export const ruleTagsResponseSchema = tagsResponseSchema
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
-export const ruleIdSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(ID_MAX_LENGTH)
-  .describe('A rule identifier.');
+export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
  */
 export const bulkGetRulesResponseSchema = z
   .object({
-    rules: z
+    items: z
       .array(ruleResponseSchema)
       .describe('The requested rules, in the same order as the requested ids.'),
   })
@@ -978,12 +982,12 @@ export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_create`.
- * Successfully created rules are returned in `rules`; per-item failures land
+ * Successfully created rules are returned in `items`; per-item failures land
  * in `errors`. HTTP 200 even when some items fail (partial success).
  */
 export const bulkCreateRulesResponseSchema = z
   .object({
-    rules: z
+    items: z
       .array(ruleResponseSchema)
       .describe('Rules that were created. Rules listed in `errors` are not included.'),
     errors: z

@@ -15,6 +15,17 @@ import type {
   StateTransitionOperator,
 } from '@kbn/alerting-v2-schemas';
 import { composeEsqlQuery, hasBreachCondition } from '@kbn/alerting-v2-schemas';
+import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
+
+/**
+ * `state_transition` as stored. The API renamed `operator` to `and` / `or`, but
+ * the saved object keeps the uppercase literals so that rename needs no
+ * migration — {@link toApiStateTransition} maps them on the way out and
+ * `rules_client/utils` maps them back on the way in.
+ */
+type StoredStateTransition = NonNullable<RuleSavedObjectAttributes['state_transition']>;
+type StoredPhase = NonNullable<StoredStateTransition['pending']>;
+type StoredOperator = NonNullable<StoredPhase['operator']>;
 
 /** The pre-collapse `query`, which encoded the same rule two different ways. */
 export type LegacyQuery =
@@ -37,10 +48,10 @@ export type LegacyNoDataStrategy = 'last_known_status' | 'emit' | 'recover' | 'n
 
 /** The pre-nesting `state_transition`, which held six flat scalars. */
 export interface LegacyStateTransition {
-  pending_operator?: StateTransitionOperator;
+  pending_operator?: StoredOperator;
   pending_count?: number;
   pending_timeframe?: string;
-  recovering_operator?: StateTransitionOperator;
+  recovering_operator?: StoredOperator;
   recovering_count?: number;
   recovering_timeframe?: string;
 }
@@ -57,7 +68,8 @@ export interface CollapsedRuleShape {
   query: Query;
   recovery?: Recovery;
   no_data?: NoData;
-  state_transition?: StateTransition;
+  // Collapsing runs in a model version, so the phases stay in the stored casing.
+  state_transition?: { pending?: StoredPhase; recovering?: StoredPhase };
 }
 
 const omitEmpty = <T extends object>(value: T): T | undefined =>
@@ -119,8 +131,8 @@ const toNoData = (query: LegacyQuery, strategy?: LegacyNoDataStrategy): NoData =
 const toPhase = (
   count?: number,
   timeframe?: string,
-  operator?: StateTransitionOperator
-): NonNullable<StateTransition['pending']> | undefined =>
+  operator?: StoredOperator
+): StoredPhase | undefined =>
   omitEmpty({
     ...(count != null ? { count } : {}),
     ...(timeframe != null ? { timeframe } : {}),
@@ -130,7 +142,7 @@ const toPhase = (
 const toStateTransition = (
   stateTransition: LegacyStateTransition | null | undefined,
   recovery: Recovery | undefined
-): StateTransition | undefined => {
+): CollapsedRuleShape['state_transition'] => {
   if (stateTransition == null) {
     return undefined;
   }
@@ -191,13 +203,32 @@ export const toApiQuery = (query: ReadableQuery): Query => ({
   ...(hasBreachCondition(query.breach) ? { breach: { segment: query.breach.segment } } : {}),
 });
 
-/** Projects a stored `state_transition` onto the public shape, dropping the flat scalars. */
+/** Lowercases a stored `operator` onto the value the API publishes. */
+const toApiOperator = (operator?: StoredOperator): StateTransitionOperator | undefined => {
+  if (operator == null) return undefined;
+  return operator === 'AND' ? 'and' : 'or';
+};
+
+const toApiPhase = ({
+  operator,
+  ...phase
+}: StoredPhase): NonNullable<StateTransition['pending']> => {
+  const apiOperator = toApiOperator(operator);
+  return { ...phase, ...(apiOperator ? { operator: apiOperator } : {}) };
+};
+
+/**
+ * Projects a stored `state_transition` onto the public shape, dropping the flat
+ * scalars and lowercasing the operator the saved object keeps uppercase.
+ */
 export const toApiStateTransition = (
-  stateTransition?: (StateTransition & LegacyStateTransition) | null
+  stateTransition?: StoredStateTransition | null
 ): StateTransition | undefined =>
   stateTransition == null
     ? undefined
     : omitEmpty({
-        ...(stateTransition.pending ? { pending: stateTransition.pending } : {}),
-        ...(stateTransition.recovering ? { recovering: stateTransition.recovering } : {}),
+        ...(stateTransition.pending ? { pending: toApiPhase(stateTransition.pending) } : {}),
+        ...(stateTransition.recovering
+          ? { recovering: toApiPhase(stateTransition.recovering) }
+          : {}),
       });

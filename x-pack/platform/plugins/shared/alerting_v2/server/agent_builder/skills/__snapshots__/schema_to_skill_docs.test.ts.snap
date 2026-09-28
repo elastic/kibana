@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[
-  `schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy Operations Schema Reference
 
 #### \`operation: \\"set_metadata\\"\`
@@ -62,9 +60,7 @@ Use \`validate\` as the last operation to confirm the action policy is complete 
 | \`operation\` | \\"validate\\" | required |  |"
 `;
 
-exports[
-  `schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy API Schema Reference
 
 ## Top-Level Fields
@@ -80,9 +76,7 @@ exports[
 | \`throttle\` | object | optional | The throttle configuration for notifications. |"
 `;
 
-exports[
-  `schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy Workflow Dispatch Payload
 
 Catalog of fields the dispatcher passes as \`inputs.payload\`. In Liquid:
@@ -152,9 +146,7 @@ steps:
 \`\`\`"
 `;
 
-exports[
-  `schema_to_skill_docs generateDispatchFlowDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateDispatchFlowDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Dispatch Flow
 
 The end-to-end notification path:
@@ -171,9 +163,7 @@ The end-to-end notification path:
 Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events."
 `;
 
-exports[
-  `schema_to_skill_docs generateEpisodeLifecycleDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateEpisodeLifecycleDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Episode Lifecycle
 
 Episodes are the unit of alert state. Each unique group (by \`group_hash\`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:
@@ -188,9 +178,7 @@ Episodes are the unit of alert state. Each unique group (by \`group_hash\`) has 
 Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw signal events with no episode tracking."
 `;
 
-exports[
-  `schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Grouping Modes
 
 - \`per_episode\`: one notification per alert episode lifecycle (default).
@@ -200,9 +188,7 @@ exports[
 Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
 `;
 
-exports[
-  `schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy Matchers
 
 A matcher selects which alert **episodes** a policy applies to.
@@ -216,7 +202,7 @@ matcher: { tags?: string[] | null, expression?: string | null }
 
 Matches if the episode's rule has **at least one** of the listed tags (OR / any-of).
 Exact string match: case-sensitive, no wildcards, no prefix matching.
-Max 50 tags, up to 256 characters each.
+Max 50 tags, up to 128 characters each.
 
 > **Important**: \`matcher.tags\` is matched against the **rule**'s tags, not the
 > policy's own name or metadata.
@@ -275,9 +261,7 @@ To add tags while keeping an existing KQL filter, resend the current \`expressio
 \`\`\`"
 `;
 
-exports[
-  `schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateMultiRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Multi-rule Action Policies
 
 Use this path when the user wants **one policy across several rules**, a space-wide
@@ -316,9 +300,7 @@ not by a single rule name.
 For the default one-rule path, see [single-rule action policies](./action-policy-single-rule.md)."
 `;
 
-exports[
-  `schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# No-Data Strategy
 
 \`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour. Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'ignore' }\`.
@@ -337,9 +319,7 @@ Omit \`query\` to use \`query.base\` to decide whether a group has data.
 Signal rules cannot set \`no_data\` ([rule-kind reference](./rule-kind.md))."
 `;
 
-exports[
-  `schema_to_skill_docs generateNotificationsOverviewDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateNotificationsOverviewDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Notifications via Action Policies
 
 Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.
@@ -358,9 +338,7 @@ When a user asks for notifications on a rule that is currently \`kind: signal\` 
 4. After ensuring the rule is \`kind: alert\`, load the \`action-policy-management\` skill for notification setup."
 `;
 
-exports[
-  `schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Recovery Strategy
 
 \`recovery\` is a **top-level rule field** (not inside the query). It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour, and it controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Every alert rule is stored with one; omit it and the tool saves \`{ strategy: 'no_breach' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).
@@ -469,7 +447,7 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 |---|---|---|---|
 | \`count\` | integer | optional | Consecutive matches required before the alert episode becomes \`active\`. Set to \`0\` to open it on the first match. (min: 0, max: 1000) |
 | \`timeframe\` | string | optional | Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`. (max length: 32) |
-| \`operator\` | \\"AND\\" \\\\| \\"OR\\" | optional | When both \`count\` and \`timeframe\` are set, \`AND\` requires both and \`OR\` requires either. Allowed only when both fields are present. (enum: AND \\\\| OR) |
+| \`operator\` | \\"and\\" \\\\| \\"or\\" | optional | When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present. (enum: and \\\\| or) |
 
 ##### \`recovering\`
 
@@ -477,7 +455,7 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 |---|---|---|---|
 | \`count\` | integer | optional | Consecutive recoveries required before the alert episode becomes \`inactive\`. Set to \`0\` to close it on the first recovery. (min: 0, max: 1000) |
 | \`timeframe\` | string | optional | Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`. (max length: 32) |
-| \`operator\` | \\"AND\\" \\\\| \\"OR\\" | optional | When both \`count\` and \`timeframe\` are set, \`AND\` requires both and \`OR\` requires either. Allowed only when both fields are present. (enum: AND \\\\| OR) |
+| \`operator\` | \\"and\\" \\\\| \\"or\\" | optional | When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present. (enum: and \\\\| or) |
 
 #### \`operation: \\"set_dashboards\\"\`
 
@@ -515,7 +493,7 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 |---|---|---|---|
 | \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | Whether the rule creates alerts (\`alert\`) or only stores matching events (\`signal\`). |
 | \`metadata\` | object | required | Rule metadata. |
-| \`time_field\` | string | required | Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`. (min length: 1, max length: 128, default: \\"@timestamp\\") |
+| \`time_field\` | string | required | Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`. (min length: 1, max length: 256, default: \\"@timestamp\\") |
 | \`schedule\` | object | required | Execution schedule configuration. |
 | \`query\` | object | required | ES\\\\|QL query the rule evaluates. \`base\` is required. \`breach\` is an optional clause appended to it. |
 | \`recovery\` | { strategy: \\"no_breach\\", ... } \\\\| { strategy: \\"condition\\", ... } \\\\| { strategy: \\"query\\", ... } \\\\| { strategy: \\"manual\\", ... } | optional | When an alert episode recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. |
@@ -631,9 +609,7 @@ Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`
   \`| EVAL severity = CASE(cpu > 0.95, \\"critical\\", cpu > 0.8, \\"high\\", \\"medium\\")\`"
 `;
 
-exports[
-  `schema_to_skill_docs generateSingleRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateSingleRuleActionPolicyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Single-rule Action Policies
 
 Use this path when the user wants notifications for **one specific rule**.
@@ -688,9 +664,7 @@ If the user explicitly requests a cross-rule or shared policy, consult the
 [multi-rule action policies reference](./action-policy-multi-rule.md)."
 `;
 
-exports[
-  `schema_to_skill_docs generateStateTransitionDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateStateTransitionDoc matches the reviewed skill-doc snapshot 1`] = `
 "## State Transition
 
 Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
@@ -698,18 +672,16 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 - \`pending\` — Delay before a match opens an alert episode.
   - \`pending.count\` — Consecutive matches required before the alert episode becomes \`active\`. Set to \`0\` to open it on the first match.
   - \`pending.timeframe\` — Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`.
-  - \`pending.operator\` — When both \`count\` and \`timeframe\` are set, \`AND\` requires both and \`OR\` requires either. Allowed only when both fields are present.
+  - \`pending.operator\` — When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present.
 - \`recovering\` — Delay before a recovered match closes the alert episode. Has no effect when \`recovery.strategy\` is \`manual\`.
   - \`recovering.count\` — Consecutive recoveries required before the alert episode becomes \`inactive\`. Set to \`0\` to close it on the first recovery.
   - \`recovering.timeframe\` — Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`.
-  - \`recovering.operator\` — When both \`count\` and \`timeframe\` are set, \`AND\` requires both and \`OR\` requires either. Allowed only when both fields are present.
+  - \`recovering.operator\` — When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present.
 
 State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema."
 `;
 
-exports[
-  `schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Throttle / Grouping Compatibility
 
 - \`per_episode\`: one notification per alert episode lifecycle (default).
@@ -727,9 +699,7 @@ validates compatibility after all operations run.
 Related: [action-policy-grouping-modes](./action-policy-grouping-modes.md), [action-policy-throttle-strategies](./action-policy-throttle-strategies.md)."
 `;
 
-exports[
-  `schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Throttle Strategies
 
 - \`on_status_change\`: notify only on episode status transitions (default for \`per_episode\`).
@@ -740,9 +710,7 @@ exports[
 Compatibility with grouping modes — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
 `;
 
-exports[
-  `schema_to_skill_docs generateWorkflowDestinationsDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateWorkflowDestinationsDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Workflows
 
 A workflow is a **concrete automation defined in YAML** that executes when dispatched by an action policy.

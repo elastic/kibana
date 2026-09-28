@@ -1,5 +1,5 @@
 {
-  "sha1": "dd08dbbc271be04261eb54e2a60f4b67f82a9c05",
+  "sha1": "8a53ca288caa7bfefbef0bc98427cf4f9e33fe03",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -206,8 +206,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_panel_edit.spec.ts",
-        "line": 119,
-        "column": 68
+        "line": 114,
+        "column": 13
       }
     },
     {
@@ -219,8 +219,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_panel_edit.spec.ts",
-        "line": 145,
-        "column": 31
+        "line": 138,
+        "column": 11
       }
     },
     {

@@ -25,7 +25,7 @@ const DEFAULT_STATUS_COUNT = 1;
 type StateTransition = NonNullable<RuleResponse['state_transition']>;
 type StateTransitionPhase = NonNullable<StateTransition['pending']>;
 type Operator = NonNullable<StateTransitionPhase['operator']>;
-const DEFAULT_OPERATOR: Operator = 'OR';
+const DEFAULT_OPERATOR: Operator = 'or';
 
 interface ThresholdConfig {
   operator: Operator;
@@ -65,8 +65,8 @@ const isTimeframeThresholdMet = (elapsedMs: number, thresholdMs?: number): boole
  * Evaluates whether a combined (count + timeframe) threshold is met,
  * taking the operator into account.
  *
- * - AND: both count and timeframe must be met.
- * - OR:  either count or timeframe is sufficient.
+ * - and: both count and timeframe must be met.
+ * - or:  either count or timeframe is sufficient.
  *
  * When only one dimension is configured, the operator is irrelevant;
  * the single dimension decides.
@@ -83,7 +83,7 @@ const isThresholdMet = (
   const hasTimeframe = config.timeframeMs != null;
 
   if (hasCount && hasTimeframe) {
-    return config.operator === 'AND' ? countMet && timeframeMet : countMet || timeframeMet;
+    return config.operator === 'and' ? countMet && timeframeMet : countMet || timeframeMet;
   }
 
   if (hasCount) {

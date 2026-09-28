@@ -1066,7 +1066,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-timeframe" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          state_transition: { pending: { count: 1000, timeframe: '1s', operator: 'OR' } },
+          state_transition: { pending: { count: 1000, timeframe: '1s', operator: 'or' } },
         })
       );
 
@@ -1117,7 +1117,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           },
           state_transition: {
             pending: { count: 0 },
-            recovering: { count: 1000, timeframe: '1s', operator: 'OR' },
+            recovering: { count: 1000, timeframe: '1s', operator: 'or' },
           },
         })
       );
@@ -1181,7 +1181,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           },
           state_transition: {
             pending: { count: 0 },
-            recovering: { count: 1000, timeframe: '1s', operator: 'AND' },
+            recovering: { count: 1000, timeframe: '1s', operator: 'and' },
           },
         })
       );
@@ -1254,7 +1254,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          state_transition: { pending: { count: 1000, timeframe: '1s', operator: 'AND' } },
+          state_transition: { pending: { count: 1000, timeframe: '1s', operator: 'and' } },
         })
       );
 
@@ -1317,7 +1317,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-and-success" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          state_transition: { pending: { count: 2, timeframe: '1s', operator: 'AND' } },
+          state_transition: { pending: { count: 2, timeframe: '1s', operator: 'and' } },
         })
       );
 

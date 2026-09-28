@@ -239,7 +239,7 @@ describe('rule template create-rule schema coupling', () => {
                 },
                 "id": Object {
                   "description": "Artifact identifier.",
-                  "maxLength": 256,
+                  "maxLength": 150,
                   "minLength": 1,
                   "type": "string",
                 },
@@ -584,10 +584,10 @@ describe('rule template create-rule schema coupling', () => {
                   "type": "integer",
                 },
                 "operator": Object {
-                  "description": "When both \`count\` and \`timeframe\` are set, \`AND\` requires both and \`OR\` requires either. Allowed only when both fields are present.",
+                  "description": "When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present.",
                   "enum": Array [
-                    "AND",
-                    "OR",
+                    "and",
+                    "or",
                   ],
                   "type": "string",
                 },
@@ -609,10 +609,10 @@ describe('rule template create-rule schema coupling', () => {
                   "type": "integer",
                 },
                 "operator": Object {
-                  "description": "When both \`count\` and \`timeframe\` are set, \`AND\` requires both and \`OR\` requires either. Allowed only when both fields are present.",
+                  "description": "When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present.",
                   "enum": Array [
-                    "AND",
-                    "OR",
+                    "and",
+                    "or",
                   ],
                   "type": "string",
                 },
@@ -696,7 +696,7 @@ describe('rule template create-rule schema coupling', () => {
             "time_field": Object {
               "default": "@timestamp",
               "description": "Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`.",
-              "maxLength": 128,
+              "maxLength": 256,
               "minLength": 1,
               "type": "string",
             },

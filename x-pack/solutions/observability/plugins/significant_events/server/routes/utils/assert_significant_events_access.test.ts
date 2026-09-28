@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of, throwError } from 'rxjs';
 import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_error';
 import { MissingDependencyError } from '../../lib/errors/missing_dependency_error';
 import {
@@ -39,7 +40,7 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
 
   const server = {
     core: {
-      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(featureFlagAvailable) },
+      featureFlags: { getBooleanValue$: jest.fn().mockReturnValue(of(featureFlagAvailable)) },
       pricing: { isFeatureAvailable: jest.fn().mockReturnValue(tierAvailable) },
     },
     cloud: projectType && { isServerlessEnabled: true, serverless: { projectType } },
@@ -74,12 +75,14 @@ describe('assertSignificantEventsAccess', () => {
 
   it('fails closed (denies access) when the feature flag read rejects', async () => {
     const args = buildArgs();
-    const { getBooleanValue } = (
+    const { getBooleanValue$ } = (
       args as unknown as {
-        server: { core: { featureFlags: { getBooleanValue: jest.Mock } } };
+        server: { core: { featureFlags: { getBooleanValue$: jest.Mock } } };
       }
     ).server.core.featureFlags;
-    getBooleanValue.mockRejectedValue(new Error('feature flag provider unavailable'));
+    getBooleanValue$.mockReturnValue(
+      throwError(() => new Error('feature flag provider unavailable'))
+    );
 
     await expect(assertSignificantEventsAccess(args)).rejects.toThrow(
       'feature flag provider unavailable'

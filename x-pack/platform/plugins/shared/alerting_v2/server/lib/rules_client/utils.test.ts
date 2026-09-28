@@ -157,7 +157,7 @@ describe('utils', () => {
     it('stores the state_transition phases the request provided', () => {
       const data: CreateRuleData = {
         ...baseCreateData,
-        state_transition: { pending: { count: 3, timeframe: '5m', operator: 'AND' } },
+        state_transition: { pending: { count: 3, timeframe: '5m', operator: 'and' } },
       };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);

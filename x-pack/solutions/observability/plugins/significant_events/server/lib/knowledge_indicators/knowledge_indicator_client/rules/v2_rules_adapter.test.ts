@@ -241,7 +241,7 @@ describe('RulesAdapterV2', () => {
   describe('bulkCreateRules', () => {
     it('creates enabled rules in one v2 request and returns createdIds', async () => {
       const mock = makeRulesClientMock();
-      mock.bulkCreateRules.mockResolvedValue({ rules: [{ id: 'rule-1' }], errors: [] } as never);
+      mock.bulkCreateRules.mockResolvedValue({ items: [{ id: 'rule-1' }], errors: [] } as never);
       const adapter = makeAdapter(mock);
 
       const result = await adapter.bulkCreateRules([
@@ -271,7 +271,7 @@ describe('RulesAdapterV2', () => {
         definition: { ...createDefinition, name: `Rule ${index}` },
       }));
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [],
+        items: [],
         errors: rules.map(({ id }) => ({
           id,
           error: {
@@ -307,7 +307,7 @@ describe('RulesAdapterV2', () => {
     it('skips conflict updates and throws when fatal errors are present', async () => {
       const mock = makeRulesClientMock();
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [{ id: 'rule-created' }],
+        items: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-conflict',
@@ -352,7 +352,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       const updateError = Boom.serverUnavailable('update failed');
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [{ id: 'rule-created' }],
+        items: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-1',
@@ -386,7 +386,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       const updateError = Boom.notFound('deleted after conflict');
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [{ id: 'rule-created' }],
+        items: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-conflict',
@@ -445,7 +445,7 @@ describe('RulesAdapterV2', () => {
       });
       mock.bulkCreateRules
         .mockRejectedValueOnce(requestError)
-        .mockResolvedValueOnce({ rules: [{ id: 'rule-new' }], errors: [] } as never);
+        .mockResolvedValueOnce({ items: [{ id: 'rule-new' }], errors: [] } as never);
       mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
         Promise.resolve(id === 'rule-existing')
       );
@@ -477,7 +477,7 @@ describe('RulesAdapterV2', () => {
         code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
       });
       mock.bulkCreateRules.mockRejectedValueOnce(requestError).mockResolvedValueOnce({
-        rules: [],
+        items: [],
         errors: [
           {
             id: 'rule-raced',
@@ -513,7 +513,7 @@ describe('RulesAdapterV2', () => {
         code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
       });
       mock.bulkCreateRules.mockRejectedValueOnce(requestError).mockResolvedValueOnce({
-        rules: [{ id: 'rule-created' }],
+        items: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-failed',
@@ -554,7 +554,7 @@ describe('RulesAdapterV2', () => {
       const updateError = Boom.notFound('deleted after lookup');
       mock.bulkCreateRules
         .mockRejectedValueOnce(requestError)
-        .mockResolvedValueOnce({ rules: [{ id: 'rule-created' }], errors: [] } as never);
+        .mockResolvedValueOnce({ items: [{ id: 'rule-created' }], errors: [] } as never);
       mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
         Promise.resolve(id === 'rule-existing')
       );

@@ -19,13 +19,19 @@ export type {
 
 export {
   useAssignEscalation,
+  useLinkedInvestigations,
   useListEscalations,
   useCreateEscalation,
   useAddToEscalation,
-  useUpdateEscalation,
+  useSetEscalationStatus,
+  useEscalationClosePreview,
 } from './escalations/hooks/use_escalations_api';
 
-export { useAssignInvestigation } from './investigations/hooks/use_investigations_api';
+export {
+  useAssignInvestigation,
+  useSetInvestigationStatus,
+  useInvestigationClosePreview,
+} from './investigations/hooks/use_investigations_api';
 
 export { escalationQueryKeys } from './escalations/query_keys';
 
