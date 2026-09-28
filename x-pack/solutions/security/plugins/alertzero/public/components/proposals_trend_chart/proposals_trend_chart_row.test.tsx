@@ -100,6 +100,22 @@ describe('ProposalsTrendChartRow', () => {
     }
   });
 
+  it('should scale to a historical peak, not the latest counts', () => {
+    setup({
+      data: {
+        currentOpen: 3,
+        buckets: [
+          { timestamp: 1_700_000_000_000, counts: { respond: 1, investigate: 9, configure: 2 } },
+          { timestamp: 1_700_001_800_000, counts: { respond: 2, investigate: 0, configure: 1 } },
+        ],
+      },
+    });
+    // investigate peaked at 9 an hour ago and is 0 now; every latest count is below 9.
+    for (const id of ['respond', 'investigate', 'configure']) {
+      expect(screen.getByTestId(`sparkline-${id}`)).toHaveAttribute('data-y-max', '9');
+    }
+  });
+
   it('should pass the whole window to each sparkline, oldest bucket first', () => {
     setup();
 

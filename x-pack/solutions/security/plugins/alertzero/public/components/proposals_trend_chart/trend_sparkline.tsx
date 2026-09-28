@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiScreenReaderOnly, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import {
   AreaSeries,
@@ -46,6 +46,12 @@ const FLAT_TAIL_PX = 4;
 const ENDPOINT_RADIUS_PX = 3;
 const LINE_STROKE_WIDTH_PX = 1.5;
 const AREA_FILL_OPACITY = 0.2;
+
+const PARTIAL_THEME = {
+  chartMargins: CHART_MARGINS,
+  chartPaddings: { top: 0, bottom: 0, left: 0, right: 0 },
+  background: { color: 'transparent' },
+};
 
 interface TrendSparklineProps {
   series: SparklinePoint[];
@@ -142,11 +148,15 @@ export const TrendSparkline: React.FC<TrendSparklineProps> = ({
       values: { count },
     });
 
-  const partialTheme = {
-    chartMargins: { ...CHART_MARGINS },
-    chartPaddings: { top: 0, bottom: 0, left: 0, right: 0 },
-    background: { color: 'transparent' },
-  };
+  const areaSeriesStyle = useMemo(
+    () => ({
+      area: { fill: color, opacity: AREA_FILL_OPACITY, visible: true },
+      line: { stroke: color, strokeWidth: LINE_STROKE_WIDTH_PX, visible: true },
+      // Points are drawn but zero-sized; the accessor grows only the "Now" point.
+      point: { visible: 'always' as const, radius: 0, strokeWidth: 0 },
+    }),
+    [color]
+  );
 
   return (
     <>
@@ -161,7 +171,7 @@ export const TrendSparkline: React.FC<TrendSparklineProps> = ({
             data-test-subj="alertZeroProposalsTrendSparkline"
           >
             <Settings
-              theme={[partialTheme]}
+              theme={[PARTIAL_THEME]}
               baseTheme={chartBaseTheme}
               showLegend={false}
               locale={locale}
@@ -187,12 +197,7 @@ export const TrendSparkline: React.FC<TrendSparklineProps> = ({
               curve={CurveType.CURVE_MONOTONE_X}
               color={color}
               yNice={false}
-              areaSeriesStyle={{
-                area: { fill: color, opacity: AREA_FILL_OPACITY, visible: true },
-                line: { stroke: color, strokeWidth: LINE_STROKE_WIDTH_PX, visible: true },
-                // Points are drawn but zero-sized; the accessor grows only the "Now" point.
-                point: { visible: 'always', radius: 0, strokeWidth: 0 },
-              }}
+              areaSeriesStyle={areaSeriesStyle}
               pointStyleAccessor={endpointStyle}
               tickFormat={valueFormatter}
             />
