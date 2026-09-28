@@ -168,7 +168,9 @@ const refreshWrittenIndexes = async (
   refresh: BulkRequestOptions<{ id: string }>['refresh'],
   result: Array<BulkItemResponse | undefined>
 ): Promise<void> => {
-  if (refresh !== true && refresh !== 'wait_for') {
+  // `wait_for` is forwarded on the ES bulk itself. Only `true` is deferred so
+  // OCC retry rounds do not force-refresh after every 409.
+  if (refresh !== true) {
     return;
   }
 
@@ -425,7 +427,11 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
     if (toSend.length > 0) {
       const esResponse = await sendBulkRequest(
         esClient,
-        { ...request, refresh: undefined, items: toSend.map(({ plainItem }) => plainItem) },
+        {
+          ...request,
+          refresh: request.refresh === 'wait_for' ? 'wait_for' : undefined,
+          items: toSend.map(({ plainItem }) => plainItem),
+        },
         logger
       );
       const { nextQueue, settled: conflictSettled } = await requeueConflicts(

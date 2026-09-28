@@ -97,7 +97,7 @@ describe('sharedBulk', () => {
     expect(result.items[1].error?.type).toBe('version_conflict_engine_exception');
   });
 
-  it('omits refresh on OCC retry rounds and applies it on the last attempt', async () => {
+  it('forwards wait_for on every ES bulk including OCC retries', async () => {
     const { esClient, logger } = createSetup();
 
     esClient.mget
@@ -175,12 +175,12 @@ describe('sharedBulk', () => {
     expect(result.errors).toBe(false);
     expect(result.items[0].result).toBe('updated');
     expect(esClient.bulk).toHaveBeenCalledTimes(2);
-    expect(esClient.bulk.mock.calls[0][0].refresh).toBeUndefined();
-    expect(esClient.bulk.mock.calls[1][0].refresh).toBeUndefined();
-    expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: [INDEX] });
+    expect(esClient.bulk.mock.calls[0][0].refresh).toBe('wait_for');
+    expect(esClient.bulk.mock.calls[1][0].refresh).toBe('wait_for');
+    expect(esClient.indices.refresh).not.toHaveBeenCalled();
   });
 
-  it('refreshes after a successful first write even when OCC retries remain', async () => {
+  it('forwards wait_for on a successful first write', async () => {
     const { esClient, logger } = createSetup();
 
     esClient.mget.mockResolvedValue({
@@ -215,6 +215,61 @@ describe('sharedBulk', () => {
       esClient,
       request: {
         refresh: 'wait_for',
+        items: [
+          {
+            operation: 'update',
+            documentId: 'a',
+            sourceFields: ['status'],
+            retryOnConflict: 3,
+            updater: (current) => (current.status === 'queued' ? { status: 'pending' } : 'noop'),
+          },
+        ],
+      },
+      logger,
+      fallbackIndexes: [INDEX],
+    });
+
+    expect(result.items[0].result).toBe('updated');
+    expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    expect(esClient.bulk.mock.calls[0][0].refresh).toBe('wait_for');
+    expect(esClient.indices.refresh).not.toHaveBeenCalled();
+  });
+
+  it('defers refresh: true to one indices.refresh after OCC retries', async () => {
+    const { esClient, logger } = createSetup();
+
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _id: 'a',
+          _index: INDEX,
+          found: true,
+          _source: { id: 'a', status: 'queued' },
+          _seq_no: 0,
+          _primary_term: 1,
+        },
+      ],
+    } as never);
+
+    esClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [
+        {
+          update: {
+            _id: 'a',
+            _index: INDEX,
+            result: 'updated',
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        },
+      ],
+    } as never);
+
+    const result = await sharedBulk<{ id: string; status: string }>({
+      esClient,
+      request: {
+        refresh: true,
         items: [
           {
             operation: 'update',
