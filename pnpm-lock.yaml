@@ -449,8 +449,8 @@ importers:
         specifier: 1.24.2
         version: 1.24.2(@elastic/elasticsearch@8.19.2(supports-color@10.2.2))(supports-color@10.2.2)
       '@elastic/statistics':
-        specifier: 0.0.1
-        version: 0.0.1
+        specifier: 0.0.2
+        version: 0.0.2
       '@emotion/cache':
         specifier: 11.14.0
         version: 11.14.0
@@ -11126,8 +11126,8 @@ packages:
   '@elastic/search-ui@1.24.2':
     resolution: {integrity: sha512-fQ/BGEbh4EvX+IWw89xiSUXD3p3iDvZPA46WCHwH+jfEtKiC9P+274UiR32POI3znaWfZElxm9kIyNioVGin0Q==}
 
-  '@elastic/statistics@0.0.1':
-    resolution: {integrity: sha512-EmgH/skrYeQDHJ21hsrUkAmBeUUkdlpvO02qOvqaoWCBoU8tisiHeX7hoIdCqzwQHwL9BB5bxeVvGtcgdh832Q==}
+  '@elastic/statistics@0.0.2':
+    resolution: {integrity: sha512-KYhGGyP6/ddcfPzGjExy3V8S1dB0ZTOZqg8YL2/8R7uYKvgUFfq2tanv4NoEY9l+4gtcbFAkVnyx2/dWoJhn+A==}
     engines: {node: '>=22'}
 
   '@elastic/transport@8.11.0':
@@ -28199,7 +28199,7 @@ snapshots:
       history: 4.9.0
       qs: 6.16.0
 
-  '@elastic/statistics@0.0.1':
+  '@elastic/statistics@0.0.2':
     dependencies:
       simple-statistics: 7.12.0
 
