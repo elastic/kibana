@@ -152,7 +152,7 @@ schema.object({
 });
 ```
 
-Refer to [Bounded string schemas](../../../../../docs/extend/key-concepts/security/bounded-string-schemas.md)
+Refer to [Bounded string schemas](https://www.elastic.co/docs/extend/kibana/key-concepts/security/bounded-string-schemas)
 for the full list of helpers and their default bounds, length semantics,
 reporting-mode telemetry and adoption guidance.
 

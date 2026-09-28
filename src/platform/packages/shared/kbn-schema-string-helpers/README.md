@@ -9,5 +9,5 @@ validators so it can supply consistent limits and one length histogram without c
 circular dependency. It uses only the browser-compatible OpenTelemetry API;
 provider and exporter initialization remains with Kibana telemetry.
 
-Refer to [Bounded string schemas](../../../../../docs/extend/key-concepts/security/bounded-string-schemas.md)
+Refer to [Bounded string schemas](https://www.elastic.co/docs/extend/kibana/key-concepts/security/bounded-string-schemas)
 for when to use which helper, reporting mode, and the telemetry contract.
