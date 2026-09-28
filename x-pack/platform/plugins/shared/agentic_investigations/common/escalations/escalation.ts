@@ -32,10 +32,7 @@ export type EscalationConversation = Conversation;
 const conversationIdSchema = z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH);
 
 /** A user profile uid, bounded to the length the conversation ACL enforces. */
-const assigneeIdSchema = z
-  .string()
-  .min(1)
-  .max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH);
+const assigneeIdSchema = z.string().min(1).max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH);
 
 export const escalationVisibilitySchema = z.enum(['private', 'public']);
 export type EscalationVisibility = z.infer<typeof escalationVisibilitySchema>;

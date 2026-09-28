@@ -47,9 +47,7 @@ describe('createEscalationRequestSchema', () => {
   });
 
   it('rejects when assignees is empty', () => {
-    expect(() =>
-      createEscalationRequestSchema.parse({ ...validPublic, assignees: [] })
-    ).toThrow();
+    expect(() => createEscalationRequestSchema.parse({ ...validPublic, assignees: [] })).toThrow();
   });
 
   it('rejects when assignees is missing', () => {
