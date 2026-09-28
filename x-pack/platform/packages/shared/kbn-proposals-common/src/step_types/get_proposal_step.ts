@@ -64,11 +64,10 @@ export const getProposalStepCommonDefinition: BaseStepDefinition<
   with:
     proposalId: "{{ variables.current_proposal_id }}"`,
       `# Branch on dismissReason after a rejected proposal gate:
-- name: map_dismiss_reason_to_tag
+- name: resolve_dismissal
   type: data.set
   with:
-    dismissed_tag: >-
-      {% if steps.read_proposal.output.dismissReason == 'wrong' %}az:true_positive{% else %}az:inconclusive{% endif %}`,
+    recommendation_was_wrong: "\${{ steps.read_proposal.output.dismissReason == 'wrong' }}"`,
     ],
   },
 };
