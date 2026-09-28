@@ -207,10 +207,8 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
     (nt: InventoryItemType) => {
       setRuleParams('nodeType', nt);
 
-      // Drop the schema when the new node type has no Schema control, so a Hosts
-      // `semconv` cannot ride along into a rule that never offered the choice.
       if (!isSchemaSelectableForInventoryRule(nt, isPodSchemaSelectorEnabled)) {
-        setRuleParams('schema', null);
+        setRuleParams('schema', undefined);
       }
     },
     [isPodSchemaSelectorEnabled, setRuleParams]

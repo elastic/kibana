@@ -194,6 +194,7 @@ export const createInventoryMetricThresholdExecutor =
           esClient,
           executionTimestamp: new Date(dateEnd),
           filterQuery,
+          isPodSchemaSelectorEnabled,
           logger,
           logQueryFields,
           nodeType,

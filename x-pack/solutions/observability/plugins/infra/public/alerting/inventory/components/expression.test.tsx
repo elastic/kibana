@@ -294,18 +294,31 @@ describe('Expression', () => {
       expect(ruleParams.schema).toBeUndefined();
     });
 
-    it('drops the schema when For moves to a node type without a selector', () => {
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
+    const NON_SCHEMA_AWARE_NODE_TYPES: InventoryItemType[] = [
+      'container',
+      'awsEC2',
+      'awsS3',
+      'awsRDS',
+      'awsSQS',
+    ];
 
-      const { wrapper, params } = renderShallow({ nodeType: 'host', schema: 'semconv' });
+    it.each(NON_SCHEMA_AWARE_NODE_TYPES)(
+      'omits the schema when rule is selected for: %s',
+      (nodeType) => {
+        // Pod flag on so the start type (host) still shows the selector and has a schema to drop.
+        mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
 
-      wrapper.find('[data-test-subj="forExpressionSelect"]').simulate('change', 'container');
+        const { wrapper, params } = renderShallow({ nodeType: 'host', schema: 'semconv' });
 
-      expect(params.nodeType).toBe('container');
-      expect(params.schema).toBeNull();
-    });
+        wrapper.find('[data-test-subj="forExpressionSelect"]').simulate('change', nodeType);
 
-    it('keeps the schema when For moves between node types that both have a selector', () => {
+        expect(params.nodeType).toBe(nodeType);
+        expect(params.schema).not.toBeNull();
+        expect(params.schema).toBeUndefined();
+      }
+    );
+
+    it('keeps the schema when rule is selected For another node type that has a selector', () => {
       mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
 
       const { wrapper, params } = renderShallow({ nodeType: 'host', schema: 'semconv' });
