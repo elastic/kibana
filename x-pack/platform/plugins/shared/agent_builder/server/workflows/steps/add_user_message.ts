@@ -31,18 +31,17 @@ export const addUserMessageStepDefinition = ({
 
         const { conversation_id: conversationId, message, attachments } = context.input;
 
-        const { conversationId: storedConversationId } =
-          await getExecutionService().maybeExecuteAgent({
-            mode: AgentExecutionMode.conversation,
-            request,
-            params: {
-              conversationId,
-              nextInput: { message, attachments },
-              triggerMode: ChatTriggerMode.Never,
-            },
-          });
+        await getExecutionService().maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          params: {
+            conversationId,
+            nextInput: { message, attachments },
+            triggerMode: ChatTriggerMode.Never,
+          },
+        });
 
-        return { output: { conversation_id: storedConversationId ?? conversationId } };
+        return { output: { conversation_id: conversationId } };
       } catch (error) {
         return { error };
       }
