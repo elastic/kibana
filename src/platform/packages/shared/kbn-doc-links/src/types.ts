@@ -339,7 +339,6 @@ export interface DocLinks {
     readonly enableDeprecationHttpDebugLogs: string;
   };
   readonly securitySolution: {
-    readonly guide: string;
     readonly aiAssistant: {
       home: string;
       knowledgeBaseHome: string;
