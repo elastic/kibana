@@ -6,7 +6,12 @@
  */
 
 import { getMockStixBundle } from './stix_entities.mock';
-import { buildMitreArtifact, mapBundleToMitreEntities } from './build_artifact';
+import {
+  buildMitreArtifact,
+  mapBundleToMitreEntities,
+  MITRE_CONTENT_VERSIONS,
+  ATLAS_CONTENT_VERSIONS,
+} from './build_artifact';
 import { fetchStixBundle } from './fetch_stix_bundle';
 
 jest.mock('./fetch_stix_bundle');
@@ -17,11 +22,18 @@ const bundle = getMockStixBundle();
 
 describe('mapBundleToMitreEntities', () => {
   it('stamps every entity with the supplied framework and framework_version', () => {
-    // Uses '18.0' as a random version example
     const entities = mapBundleToMitreEntities(bundle, 'enterprise', '18.0');
     for (const entity of entities) {
       expect(entity.framework).toBe('enterprise');
       expect(entity.framework_version).toBe('18.0');
+    }
+  });
+
+  it('stamps atlas entities with atlas framework', () => {
+    const entities = mapBundleToMitreEntities(bundle, 'atlas', '2026.08', 'mitre-atlas');
+    for (const entity of entities) {
+      expect(entity.framework).toBe('atlas');
+      expect(entity.framework_version).toBe('2026.08');
     }
   });
 });
@@ -32,30 +44,30 @@ describe('buildMitreArtifact', () => {
     fetchStixBundleMock.mockResolvedValue(bundle);
   });
 
-  it('derives the framework version from the content tag', async () => {
-    const entities = await buildMitreArtifact(['ATT&CK-v19.1']);
+  it('fetches enterprise and atlas bundles via their respective URLs', async () => {
+    await buildMitreArtifact();
 
-    expect(fetchStixBundleMock).toHaveBeenCalledWith('ATT&CK-v19.1');
-    expect(entities.every((entity) => entity.framework_version === '19.1')).toBe(true);
+    const calls = fetchStixBundleMock.mock.calls.map(([url]) => url);
+    const enterpriseTag = MITRE_CONTENT_VERSIONS[0];
+    const atlasTag = ATLAS_CONTENT_VERSIONS[0];
+
+    expect(calls.some((url) => url.includes(enterpriseTag))).toBe(true);
+    expect(calls.some((url) => url.includes(atlasTag))).toBe(true);
   });
 
-  it('fetches every pinned version and combines them into one entity set', async () => {
-    const entities = await buildMitreArtifact(['ATT&CK-v19.1', 'ATT&CK-v18.0']);
+  it('fetches one bundle per framework version (enterprise + atlas)', async () => {
+    await buildMitreArtifact();
 
-    expect(fetchStixBundleMock).toHaveBeenCalledTimes(2);
-
-    const singleVersionCount = mapBundleToMitreEntities(bundle, 'enterprise', '19.1').length;
-    expect(entities).toHaveLength(singleVersionCount * 2);
+    // One call per framework version: 1 enterprise + 1 atlas
+    expect(fetchStixBundleMock).toHaveBeenCalledTimes(
+      MITRE_CONTENT_VERSIONS.length + ATLAS_CONTENT_VERSIONS.length
+    );
   });
 
-  it('keeps entities of the same ID distinct per version', async () => {
-    const entities = await buildMitreArtifact(['ATT&CK-v19.1', 'ATT&CK-v18.0']);
-
-    const versionsForTactic = entities
-      .filter((entity) => entity.id === 'TA0006')
-      .map((entity) => entity.framework_version)
-      .sort();
-
-    expect(versionsForTactic).toEqual(['18.0', '19.1']);
+  it('derives enterprise framework version from ATT&CK-v tag', async () => {
+    const entities = await buildMitreArtifact();
+    const enterpriseEntities = entities.filter((e) => e.framework === 'enterprise');
+    const expectedVersion = MITRE_CONTENT_VERSIONS[0].replace(/^ATT&CK-v/, '');
+    expect(enterpriseEntities.every((e) => e.framework_version === expectedVersion)).toBe(true);
   });
 });

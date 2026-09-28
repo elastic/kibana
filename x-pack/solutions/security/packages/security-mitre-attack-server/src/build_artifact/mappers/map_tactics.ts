@@ -16,7 +16,8 @@ import { buildRevokedByTargetRefs, getMitreReference, resolveSupersededBy } from
 export const mapTactics = (
   bundle: StixBundle,
   framework: MitreFramework,
-  frameworkVersion: string
+  frameworkVersion: string,
+  sourceName: 'mitre-attack' | 'mitre-atlas' = 'mitre-attack'
 ): MitreTactic[] => {
   const { objects } = bundle;
 
@@ -30,7 +31,7 @@ export const mapTactics = (
   return objects
     .filter((entity) => entity.type === 'x-mitre-tactic')
     .flatMap((stixEntity) => {
-      const mitreReference = getMitreReference(stixEntity);
+      const mitreReference = getMitreReference(stixEntity, sourceName);
       if (mitreReference == null) return [];
 
       const position = tacticPositionByRef.get(stixEntity.id);
@@ -52,7 +53,12 @@ export const mapTactics = (
           description: stixEntity.description ?? '',
           revoked: stixEntity.revoked === true,
           deprecated: stixEntity.x_mitre_deprecated === true,
-          superseded_by_id: resolveSupersededBy(stixEntity.id, entityById, revokedByTargetRefs),
+          superseded_by_id: resolveSupersededBy(
+            stixEntity.id,
+            entityById,
+            revokedByTargetRefs,
+            sourceName
+          ),
           position,
         },
       ];

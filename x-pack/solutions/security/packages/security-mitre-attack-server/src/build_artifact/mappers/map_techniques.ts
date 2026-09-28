@@ -19,7 +19,8 @@ import {
 export const mapTechniques = (
   bundle: StixBundle,
   framework: MitreFramework,
-  frameworkVersion: string
+  frameworkVersion: string,
+  sourceName: 'mitre-attack' | 'mitre-atlas' = 'mitre-attack'
 ): MitreTechnique[] => {
   const { objects } = bundle;
 
@@ -33,7 +34,7 @@ export const mapTechniques = (
 
   return techniqueEntities
     .flatMap((stixEntity) => {
-      const mitreReference = getMitreReference(stixEntity);
+      const mitreReference = getMitreReference(stixEntity, sourceName);
       if (mitreReference == null) return [];
       return [
         {
@@ -46,8 +47,13 @@ export const mapTechniques = (
           description: stixEntity.description ?? '',
           revoked: stixEntity.revoked === true,
           deprecated: stixEntity.x_mitre_deprecated === true,
-          superseded_by_id: resolveSupersededBy(stixEntity.id, entityById, revokedByTargetRefs),
-          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname),
+          superseded_by_id: resolveSupersededBy(
+            stixEntity.id,
+            entityById,
+            revokedByTargetRefs,
+            sourceName
+          ),
+          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname, sourceName),
         },
       ];
     })

@@ -5,43 +5,38 @@
  * 2.0.
  */
 
-// Tests the managed MITRE source path (xpack.mitreAttack.managedSourceEnabled=true)
-// for the rule creation MITRE ATT&CK threat picker. Synthetic entities at version 99.0
-// are seeded by global.setup.ts so the managed API returns only the fixture set, making
-// assertions independent of real MITRE artifact version bumps.
-//
-// NOTE: This suite intentionally lives in scout_managed_mitre rather than the
-// default scout/ directory because `xpack.mitreAttack.managedSourceEnabled` is a
-// boot-time flag (not dynamicConfig) that must be set before Kibana starts. Once the
-// flag defaults to true and the legacy static blob is removed, merge this spec into
-// the default scout UI suite and delete this directory.
+// Tests the rule creation MITRE ATT&CK threat picker against the managed MITRE source,
+// which is the default (xpack.mitreAttack.managedSourceEnabled defaults to true).
+// Synthetic entities at version 99.0 are seeded by global.setup.ts so the managed API
+// returns only the fixture set, making assertions independent of real MITRE artifact
+// version bumps.
 
-import { spaceTest } from '@kbn/scout-security';
+import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import {
   SEEDED_TACTIC_ALPHA,
+  SEEDED_TACTIC_BETA,
   SEEDED_TECHNIQUE_ONE,
+  SEEDED_TECHNIQUE_TWO,
   SEEDED_SUBTECHNIQUE_ONE,
 } from '../fixtures/mitre_fixtures';
-import { LOCAL_MANAGED_MITRE_TAGS } from '../fixtures/tags';
 
 const RULE_NAME = 'Managed MITRE picker test rule';
+const MULTI_TACTIC_RULE_NAME = 'Managed MITRE multi-tactic picker test rule';
 const RULE_DESCRIPTION = 'Verifies the managed MITRE API populates the tactic/technique picker.';
 const DEFINE_QUERY = 'host.name: *';
 
 spaceTest.describe(
   'Rule creation MITRE picker — managed MITRE source',
-  { tag: LOCAL_MANAGED_MITRE_TAGS },
+  { tag: tags.stateful.classic },
   () => {
-    // Clean up any rule left by a previous crashed run before this worker's test
-    // runs. The seeded mitre-attack-entity saved objects are space-agnostic
-    // (namespaceType: 'agnostic') and live in every space, so only rule cleanup
-    // needs space scoping — which spaceTest handles automatically.
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    // Clean up any rule left by a previous run before each test so a failed
+    // run of one test cannot bleed into the next, then log in. The seeded
+    // mitre-attack-entity saved objects are space-agnostic
+    // (namespaceType: 'agnostic') and live in every space, so only rule
+    // cleanup needs space scoping -- which spaceTest handles automatically.
+    spaceTest.beforeEach(async ({ apiServices, browserAuth }) => {
       await apiServices.detectionRule.deleteAll();
-    });
-
-    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPlatformEngineer();
     });
 
@@ -123,6 +118,66 @@ spaceTest.describe(
             SEEDED_SUBTECHNIQUE_ONE.name
           );
         });
+      }
+    );
+
+    spaceTest(
+      'offers a multi-tactic technique under each of its tactics',
+      async ({ pageObjects: { ruleCreateWizard } }) => {
+        await ruleCreateWizard.completeUntilActionsStep({
+          name: MULTI_TACTIC_RULE_NAME,
+          description: RULE_DESCRIPTION,
+          query: DEFINE_QUERY,
+          onAboutStep: async () => {
+            await spaceTest.step(
+              'Advanced settings: expand to reach the MITRE picker',
+              async () => {
+                await ruleCreateWizard.expandAdvancedSettings();
+                await ruleCreateWizard.waitForMitreLoaded();
+              }
+            );
+
+            await spaceTest.step(
+              'Select the first tactic and confirm the shared technique is offered',
+              async () => {
+                await ruleCreateWizard.selectMitreTacticById(SEEDED_TACTIC_ALPHA.id);
+                // Selecting by value throws if the option is absent, so a successful
+                // selection proves T9002 is offered under TA9001.
+                await ruleCreateWizard.addAndSelectMitreTechniqueById(SEEDED_TECHNIQUE_TWO.id);
+              }
+            );
+
+            await spaceTest.step(
+              'Switch the same row to the second tactic and confirm the technique is offered again',
+              async () => {
+                // Changing the tactic clears the row's techniques, so the picker must
+                // rebuild the technique options from tactic_ids for the new tactic.
+                await ruleCreateWizard.selectMitreTacticById(SEEDED_TACTIC_BETA.id);
+                await ruleCreateWizard.addAndSelectMitreTechniqueById(SEEDED_TECHNIQUE_TWO.id);
+              }
+            );
+          },
+        });
+
+        await spaceTest.step('Create rule without enabling', async () => {
+          await ruleCreateWizard.createWithoutEnablingRule();
+        });
+
+        await spaceTest.step(
+          'Assert the saved rule keeps the second tactic with the shared technique',
+          async () => {
+            await expect(ruleCreateWizard.ruleDetailsTitle).toContainText(MULTI_TACTIC_RULE_NAME);
+            await expect(ruleCreateWizard.savedThreatTactics).toContainText(
+              SEEDED_TACTIC_BETA.name
+            );
+            await expect(ruleCreateWizard.savedThreatTechniques).toContainText(
+              SEEDED_TECHNIQUE_TWO.name
+            );
+            await expect(ruleCreateWizard.savedThreatTactics).not.toContainText(
+              SEEDED_TACTIC_ALPHA.name
+            );
+          }
+        );
       }
     );
   }

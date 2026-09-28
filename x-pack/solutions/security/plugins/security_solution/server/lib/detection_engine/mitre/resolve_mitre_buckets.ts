@@ -34,18 +34,23 @@ export const resolveMitreBuckets = async (
   if (mitreDataClient) {
     if (!managedCachePromise) {
       // Assign the Promise before any await so concurrent callers share the same
-      // in-flight request.
-      managedCachePromise = mitreDataClient.list().then(
-        (collection): MitreEntitySummaryBuckets => {
-          // An empty managed collection means SO population has not completed yet.
-          // Returning it would be indistinguishable from real data to callers —
-          // every MITRE ID on every rule would appear invalid. Clear the cache and
-          // throw so callers' existing degraded-mode error handling engages instead.
-          if (collection.tactics.length === 0 && collection.techniques.length === 0) {
+      // in-flight request. Merge enterprise + atlas so that ATLAS-mapped rules
+      // are not flagged as invalidly mapped.
+      managedCachePromise = Promise.all([
+        mitreDataClient.list({ framework: 'enterprise' }),
+        mitreDataClient.list({ framework: 'atlas' }),
+      ]).then(
+        ([enterprise, atlas]): MitreEntitySummaryBuckets => {
+          // An empty enterprise collection means SO population has not completed yet.
+          if (enterprise.tactics.length === 0 && enterprise.techniques.length === 0) {
             managedCachePromise = null;
             throw new Error('Managed MITRE data is not initialized');
           }
-          return collection;
+          return {
+            tactics: [...enterprise.tactics, ...atlas.tactics],
+            techniques: [...enterprise.techniques, ...atlas.techniques],
+            subtechniques: [...enterprise.subtechniques, ...atlas.subtechniques],
+          };
         },
         (err) => {
           managedCachePromise = null;

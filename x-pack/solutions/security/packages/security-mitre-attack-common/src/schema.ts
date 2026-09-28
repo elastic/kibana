@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 // TypeScript domain model
 // -------------------------------------------------------------------------
 
-export type MitreFramework = 'enterprise';
+export type MitreFramework = 'enterprise' | 'atlas';
 export type MitreEntityType = 'tactic' | 'technique' | 'subtechnique';
 
 interface MitreEntityBase {
@@ -48,7 +48,7 @@ export type MitreEntity = MitreTactic | MitreTechnique | MitreSubtechnique;
 // Zod schemas
 // -------------------------------------------------------------------------
 
-const mitreFrameworkSchema = z.enum(['enterprise']);
+const mitreFrameworkSchema = z.enum(['enterprise', 'atlas']);
 
 const mitreEntityBaseSchema = z.object({
   framework: mitreFrameworkSchema,

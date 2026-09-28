@@ -105,6 +105,60 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('ordering contract', () => {
+      it('returns tactics ascending by position regardless of name order', async () => {
+        await seedMitreEntities(es, [
+          createMitreTactic({ id: 'TA0003', name: 'Alpha', position: 2 }),
+          createMitreTactic({ id: 'TA0001', name: 'Charlie', position: 0 }),
+          createMitreTactic({ id: 'TA0002', name: 'Bravo', position: 1 }),
+        ]);
+
+        const { body, status } = await mitreAttackApi.getEntities({ types: 'tactic' });
+
+        expect(status).to.eql(200);
+        expect(body.tactics.map((t: { id: string }) => t.id)).to.eql([
+          'TA0001',
+          'TA0002',
+          'TA0003',
+        ]);
+      });
+
+      it('returns techniques and subtechniques ascending by name', async () => {
+        const tactic = createMitreTactic();
+        await seedMitreEntities(es, [
+          tactic,
+          createMitreTechnique({ id: 'T0003', name: 'Zeta', tactic_ids: [tactic.id] }),
+          createMitreTechnique({ id: 'T0001', name: 'Alpha', tactic_ids: [tactic.id] }),
+          createMitreTechnique({ id: 'T0002', name: 'Mid', tactic_ids: [tactic.id] }),
+          createMitreSubtechnique({
+            id: 'T0003.001',
+            name: 'Zeta sub',
+            technique_id: 'T0003',
+            tactic_ids: [tactic.id],
+          }),
+          createMitreSubtechnique({
+            id: 'T0001.001',
+            name: 'Alpha sub',
+            technique_id: 'T0001',
+            tactic_ids: [tactic.id],
+          }),
+        ]);
+
+        const { body, status } = await mitreAttackApi.getEntities();
+
+        expect(status).to.eql(200);
+        expect(body.techniques.map((t: { id: string }) => t.id)).to.eql([
+          'T0001',
+          'T0002',
+          'T0003',
+        ]);
+        expect(body.subtechniques.map((t: { id: string }) => t.id)).to.eql([
+          'T0001.001',
+          'T0003.001',
+        ]);
+      });
+    });
+
     describe('types filtering', () => {
       it('returns all three buckets when types is omitted', async () => {
         const mockTactic = createMitreTactic();
@@ -471,7 +525,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('request validation', () => {
       it('rejects an unsupported framework value with 400', async () => {
-        const { status } = await mitreAttackApi.getEntities({ framework: 'atlas' });
+        const { status } = await mitreAttackApi.getEntities({ framework: 'mobile' });
         expect(status).to.eql(400);
       });
 

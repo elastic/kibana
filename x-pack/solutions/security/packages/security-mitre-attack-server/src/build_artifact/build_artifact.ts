@@ -13,29 +13,61 @@ import { mapSubtechniques } from './mappers/map_subtechniques';
 import { mapTactics } from './mappers/map_tactics';
 import { mapTechniques } from './mappers/map_techniques';
 
+interface FrameworkDefinition {
+  framework: MitreFramework;
+  sourceName: 'mitre-attack' | 'mitre-atlas';
+  bundleUrl: (tag: string) => string;
+  toFrameworkVersion: (tag: string) => string;
+  versions: readonly string[];
+}
+
 // Append a tag here to include an additional MITRE ATT&CK version in the artifact.
 // Each tag must correspond to the version used for prebuilt rules in
 // https://github.com/elastic/detection-rules.
 // Tags are published at https://github.com/mitre/cti/tags.
-export const MITRE_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.1'];
+export const MITRE_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.2'];
 
-/** Strips the 'ATT&CK-v' prefix, e.g. 'ATT&CK-v19.1' -> '19.1'. */
-const toFrameworkVersion = (tag: string): string => tag.replace(/^ATT&CK-v/, '');
+// Tags are published at https://github.com/mitre-atlas/atlas-data/releases.
+export const ATLAS_CONTENT_VERSIONS: readonly string[] = ['v2026.08'];
+
+const FRAMEWORKS: FrameworkDefinition[] = [
+  {
+    framework: 'enterprise',
+    sourceName: 'mitre-attack',
+    bundleUrl: (tag) =>
+      `https://raw.githubusercontent.com/mitre/cti/${tag}/enterprise-attack/enterprise-attack.json`,
+    toFrameworkVersion: (tag) => tag.replace(/^ATT&CK-v/, ''),
+    versions: MITRE_CONTENT_VERSIONS,
+  },
+  {
+    framework: 'atlas',
+    sourceName: 'mitre-atlas',
+    bundleUrl: (tag) =>
+      `https://github.com/mitre-atlas/atlas-data/releases/download/${tag}/stix-atlas.json`,
+    toFrameworkVersion: (tag) => tag.replace(/^v/, ''),
+    versions: ATLAS_CONTENT_VERSIONS,
+  },
+];
 
 /**
- * Builds the artifact content: fetches each pinned MITRE ATT&CK version, maps its
+ * Builds the artifact content: fetches each pinned MITRE version per framework, maps its
  * STIX bundle into MITRE entities, and validates the combined result. Entry point
  * for scripts/build_artifact.js, which writes the output to disk.
  */
-export const buildMitreArtifact = async (
-  versions: readonly string[] = MITRE_CONTENT_VERSIONS
-): Promise<MitreEntity[]> => {
+export const buildMitreArtifact = async (): Promise<MitreEntity[]> => {
   const allEntities: MitreEntity[] = [];
 
-  for (const tag of versions) {
-    const bundle = await fetchStixBundle(tag);
-    const entities = mapBundleToMitreEntities(bundle, 'enterprise', toFrameworkVersion(tag));
-    allEntities.push(...entities);
+  for (const def of FRAMEWORKS) {
+    for (const tag of def.versions) {
+      const bundle = await fetchStixBundle(def.bundleUrl(tag));
+      const entities = mapBundleToMitreEntities(
+        bundle,
+        def.framework,
+        def.toFrameworkVersion(tag),
+        def.sourceName
+      );
+      allEntities.push(...entities);
+    }
   }
 
   return mitreEntitiesSchema.parse(allEntities);
@@ -45,9 +77,10 @@ export const buildMitreArtifact = async (
 export const mapBundleToMitreEntities = (
   bundle: StixBundle,
   framework: MitreFramework,
-  frameworkVersion: string
+  frameworkVersion: string,
+  sourceName: 'mitre-attack' | 'mitre-atlas' = 'mitre-attack'
 ): MitreEntity[] => [
-  ...mapTactics(bundle, framework, frameworkVersion),
-  ...mapTechniques(bundle, framework, frameworkVersion),
-  ...mapSubtechniques(bundle, framework, frameworkVersion),
+  ...mapTactics(bundle, framework, frameworkVersion, sourceName),
+  ...mapTechniques(bundle, framework, frameworkVersion, sourceName),
+  ...mapSubtechniques(bundle, framework, frameworkVersion, sourceName),
 ];

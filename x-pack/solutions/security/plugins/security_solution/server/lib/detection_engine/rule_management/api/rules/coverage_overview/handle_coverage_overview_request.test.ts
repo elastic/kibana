@@ -331,8 +331,9 @@ describe('handleCoverageOverviewRequest', () => {
       deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
     });
 
-    // The managed client's list() must have been called to resolve MITRE IDs.
-    expect(mockList).toHaveBeenCalledTimes(1);
+    // The managed client's list() must have been called to resolve MITRE IDs,
+    // once per framework (enterprise + atlas).
+    expect(mockList).toHaveBeenCalledTimes(2);
 
     // Bogus tactic not in the managed buckets → invalid.
     expect(result.invalid_mitre_ids['rule-bogus']).toEqual(

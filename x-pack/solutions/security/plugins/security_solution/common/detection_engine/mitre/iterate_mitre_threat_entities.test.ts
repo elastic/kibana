@@ -9,6 +9,7 @@ import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   iterateMitreThreatEntities,
   MITRE_ATTACK_FRAMEWORK,
+  MITRE_ATLAS_FRAMEWORK,
 } from './iterate_mitre_threat_entities';
 
 const MITRE_FRAMEWORK = MITRE_ATTACK_FRAMEWORK;
@@ -93,6 +94,39 @@ describe('iterateMitreThreatEntities', () => {
       },
     ];
     expect(collect(threats)).toEqual([{ type: 'tactic', id: 'TA0005' }]);
+  });
+
+  it('yields ATLAS tactic and technique entities', () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_ATLAS_FRAMEWORK,
+        tactic: { id: 'AML.TA0000', name: 'Reconnaissance', reference: 'http://atlas/ta' },
+        technique: [{ id: 'AML.T0000', name: 'Search', reference: 'http://atlas/t' }],
+      },
+    ];
+    expect(collect(threats)).toEqual([
+      { type: 'tactic', id: 'AML.TA0000' },
+      { type: 'technique', id: 'AML.T0000' },
+    ]);
+  });
+
+  it('yields entities from mixed ATT&CK and ATLAS threat items', () => {
+    const threats: Threats = [
+      {
+        framework: MITRE_ATTACK_FRAMEWORK,
+        tactic: { id: 'TA0001', name: 'Initial Access', reference: 'http://attck/ta' },
+        technique: [],
+      },
+      {
+        framework: MITRE_ATLAS_FRAMEWORK,
+        tactic: { id: 'AML.TA0000', name: 'Reconnaissance', reference: 'http://atlas/ta' },
+        technique: [],
+      },
+    ];
+    expect(collect(threats)).toEqual([
+      { type: 'tactic', id: 'TA0001' },
+      { type: 'tactic', id: 'AML.TA0000' },
+    ]);
   });
 
   it('handles techniques with no subtechniques', () => {

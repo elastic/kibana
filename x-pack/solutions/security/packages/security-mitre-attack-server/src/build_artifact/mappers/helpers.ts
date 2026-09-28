@@ -65,10 +65,11 @@ export const buildTacticByShortname = (objects: StixEntity[]): Map<string, StixE
  */
 export const resolveTacticIds = (
   stixEntity: StixEntity,
-  tacticByShortname: Map<string, StixEntity>
+  tacticByShortname: Map<string, StixEntity>,
+  sourceName: 'mitre-attack' | 'mitre-atlas' = 'mitre-attack'
 ): string[] => {
   const phases =
-    stixEntity.kill_chain_phases?.filter((phase) => phase.kill_chain_name === 'mitre-attack') ?? [];
+    stixEntity.kill_chain_phases?.filter((phase) => phase.kill_chain_name === sourceName) ?? [];
   if (phases.length === 0) return [];
 
   const ids = phases.flatMap((phase) => {
@@ -82,7 +83,7 @@ export const resolveTacticIds = (
           ` (referenced by STIX entity '${stixEntity.id}')`
       );
     }
-    const mitreReference = getMitreReference(tacticEntity);
+    const mitreReference = getMitreReference(tacticEntity, sourceName);
     return mitreReference != null ? [mitreReference.id] : [];
   });
 
@@ -96,7 +97,8 @@ export const resolveTacticIds = (
 export const resolveSupersededBy = (
   stixId: string,
   entityById: Map<string, StixEntity>,
-  revokedByTargetRefs: Map<string, string[]>
+  revokedByTargetRefs: Map<string, string[]>,
+  sourceName: 'mitre-attack' | 'mitre-atlas' = 'mitre-attack'
 ): string[] | undefined => {
   const targetRefs = revokedByTargetRefs.get(stixId);
   if (!targetRefs || targetRefs.length === 0) return undefined;
@@ -104,7 +106,7 @@ export const resolveSupersededBy = (
   const ids = targetRefs.flatMap((targetStixId) => {
     const targetEntity = entityById.get(targetStixId);
     if (targetEntity == null) return [];
-    const mitreReference = getMitreReference(targetEntity);
+    const mitreReference = getMitreReference(targetEntity, sourceName);
     return mitreReference != null ? [mitreReference.id] : [];
   });
 
@@ -129,10 +131,11 @@ const normalizeThreatReference = (reference: string): string => {
  * reference, or null when it has none (such entities are skipped during the build).
  */
 export const getMitreReference = (
-  stixEntity: StixEntity
+  stixEntity: StixEntity,
+  sourceName: 'mitre-attack' | 'mitre-atlas' = 'mitre-attack'
 ): { id: string; reference: string } | null => {
   const mitreRef = stixEntity.external_references?.find(
-    (externalRef) => externalRef.source_name === 'mitre-attack'
+    (externalRef) => externalRef.source_name === sourceName
   );
   if (mitreRef == null || !mitreRef.external_id || !mitreRef.url) {
     return null;

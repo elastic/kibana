@@ -17,7 +17,7 @@ import type { MitreEntityStatus, MitreEntitySummaryBuckets } from './types';
 /** Zod schema for the GET /internal/mitre/entities request query parameters. */
 export const GetMitreEntitiesRequestQuery = z.object({
   /** MITRE framework to query. Currently only 'enterprise' is supported. */
-  framework: z.enum(['enterprise']).optional().default('enterprise'),
+  framework: z.enum(['enterprise', 'atlas']).optional().default('enterprise'),
   /** Pin results to a specific framework version. Defaults to the latest indexed version. */
   framework_version: z.string().min(1).max(32).optional(),
   /**
@@ -50,7 +50,7 @@ export interface GetMitreEntitiesRequestParams {
 // Response type
 // -------------------------------------------------------------------------
 
-/** Response body for GET /internal/mitre/entities. */
+/** Response body for GET /internal/mitre/entities. Bucket order is guaranteed: tactics ascending by position, techniques and subtechniques ascending by name. */
 export interface GetMitreEntitiesResponse extends MitreEntitySummaryBuckets {
   framework: MitreFramework;
   /**
