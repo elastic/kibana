@@ -7,6 +7,7 @@
 
 import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import pRetry from 'p-retry';
 import type { Evaluator } from '@kbn/evals';
 import { buildModelFromConnector } from '@kbn/evals';
@@ -50,26 +51,39 @@ const getModelFactory = (evaluationConnector: EvalConnector) => () => {
   };
 };
 
-/** Runs one judge prompt with retries and returns the first tool call's arguments. */
+/**
+ * Runs one judge prompt with retries and returns the first tool call's arguments.
+ *
+ * The `inferenceClient.prompt` REST call does not create a client-side inference span, so it must
+ * run inside an active inference span for the server-side `gen_ai` chat span to be captured under
+ * this evaluator's trace (and exported to the tracing cluster). This mirrors the built-in kbn-evals
+ * LLM evaluators, which get the same span via `executeUntilValid` → `withActiveInferenceSpan`.
+ * Without this wrap the judge model call emits no queryable `gen_ai` span.
+ */
 const invokeJudge = async <TArgs>(
   { inferenceClient, log }: Pick<JudgeDeps, 'inferenceClient' | 'log'>,
   name: string,
   prompt: Parameters<BoundInferenceClient['prompt']>[0]['prompt'],
   input: Record<string, unknown>
 ): Promise<TArgs> =>
-  pRetry(
-    async () => {
-      const response = await inferenceClient.prompt({ prompt, input, toolChoice: scoreTool });
-      const toolCall = response.toolCalls[0];
-      if (!toolCall) throw new Error(`No tool call returned by the ${name} judge`);
-      return toolCall.function.arguments as TArgs;
-    },
-    {
-      retries: 3,
-      onFailedAttempt: (error) => {
-        log.warning(`${name} judge attempt ${error.attemptNumber} failed: ${error.message}`);
-      },
-    }
+  withActiveInferenceSpan(
+    name,
+    { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
+    () =>
+      pRetry(
+        async () => {
+          const response = await inferenceClient.prompt({ prompt, input, toolChoice: scoreTool });
+          const toolCall = response.toolCalls[0];
+          if (!toolCall) throw new Error(`No tool call returned by the ${name} judge`);
+          return toolCall.function.arguments as TArgs;
+        },
+        {
+          retries: 3,
+          onFailedAttempt: (error) => {
+            log.warning(`${name} judge attempt ${error.attemptNumber} failed: ${error.message}`);
+          },
+        }
+      )
   );
 
 export const createGoalPassEvaluator = (deps: JudgeDeps): InvestigationEvaluator => ({
