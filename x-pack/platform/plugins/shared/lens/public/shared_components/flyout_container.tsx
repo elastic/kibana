@@ -54,6 +54,7 @@ export function FlyoutContainer({
   customFooter,
   isInlineEditing,
   overrideContainerCss,
+  dataTestSubj = 'lnsDimensionContainer',
 }: {
   isOpen: boolean;
   handleClose: () => void;
@@ -65,6 +66,7 @@ export function FlyoutContainer({
   customFooter?: React.ReactElement;
   isInlineEditing?: boolean;
   overrideContainerCss?: Interpolation<Theme>;
+  dataTestSubj?: string;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
@@ -118,7 +120,7 @@ export function FlyoutContainer({
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
-          data-test-subj={`lnsDimensionContainer-${isAnimationComplete ? 'ready' : 'animating'}`}
+          data-test-subj={`${dataTestSubj}-${isAnimationComplete ? 'ready' : 'animating'}`}
           css={[
             css`
               box-shadow: ${hideShadow ? 'none !important' : 'inherit'};

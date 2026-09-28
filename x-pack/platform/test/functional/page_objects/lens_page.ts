@@ -972,7 +972,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async openLayerSettings() {
       await testSubjects.click('lnsLayerSettings');
-      await testSubjects.existOrFail('lnsDimensionContainer-ready', { timeout: 30_000 });
+      await testSubjects.existOrFail('lnsLayerSettingsContainer-ready', { timeout: 30_000 });
     },
 
     async closeFlyoutWithBackButton() {
