@@ -46,18 +46,21 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  onOpenImpactEntity?: OpenImpactEntity;
 }
 
 export const OverviewSlot = ({
   conversation,
   attachmentsService,
   renderProposedActions,
+  onOpenImpactEntity,
 }: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}
     attachments={conversation.attachments}
     attachmentsService={attachmentsService}
     proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
+    onOpenImpactEntity={onOpenImpactEntity}
   />
 );
 

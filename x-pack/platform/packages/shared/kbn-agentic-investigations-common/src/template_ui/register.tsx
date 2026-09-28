@@ -119,6 +119,7 @@ export const registerAgenticInvestigationTemplateUI = ({
             conversation={conversation}
             attachmentsService={attachmentsService}
             renderProposedActions={renderProposedActions}
+            onOpenImpactEntity={onOpenImpactEntity}
           />
         </Suspense>
       );

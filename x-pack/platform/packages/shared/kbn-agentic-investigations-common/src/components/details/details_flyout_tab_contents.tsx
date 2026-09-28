@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import { AttachmentSummarySection } from '../attachment_summary';
+import { ImpactEntityChips } from '../impact/impact_entity_chips';
+import { selectImpactEntities, type OpenImpactEntity } from '../impact/impact_entities';
+import { IMPACT_LABELS } from '../impact/translations';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
@@ -27,12 +30,24 @@ export interface OverviewTabProps {
    * what appears while it is empty or loading.
    */
   proposedActionsContent?: React.ReactNode;
+  /**
+   * Opens an entity-store Impact chip. Knowledge-indicator chips stay plain text, matching the
+   * Attachments tab.
+   */
+  onOpenImpactEntity?: OpenImpactEntity;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
-  ({ investigation, attachments, attachmentsService, proposedActionsContent }) => {
+  ({
+    investigation,
+    attachments,
+    attachmentsService,
+    proposedActionsContent,
+    onOpenImpactEntity,
+  }) => {
     const { summary } = investigation;
     const [expanded, setExpanded] = useState(false);
+    const impactEntities = useMemo(() => selectImpactEntities(attachments), [attachments]);
 
     const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
     const displayedSummary =
@@ -59,6 +74,17 @@ export const OverviewTab = memo<OverviewTabProps>(
                   </EuiButtonEmpty>
                 </div>
               )}
+            </DetailsBlock>
+          </EuiFlexItem>
+        )}
+
+        {impactEntities.length > 0 && (
+          <EuiFlexItem>
+            <DetailsBlock title={IMPACT_LABELS.groupTitle}>
+              <ImpactEntityChips
+                entities={impactEntities}
+                onOpenImpactEntity={onOpenImpactEntity}
+              />
             </DetailsBlock>
           </EuiFlexItem>
         )}
