@@ -31,7 +31,7 @@ The `@kbn/eslint/scout_no_core_settings_in_space_test` ESLint rule warns when `a
 
 Scout CI lanes run multiple Playwright configs against the same Kibana and Elasticsearch servers. A feature-flag override left behind by one config can affect tests in the next. Always restore the expected configuration in teardown.
 
-The examples below assume the previous configured value was `false`, so teardown sets it back to `false`. If your test introduced an override where none previously existed in static configuration or dynamic overrides, use `null` to remove it and resume provider evaluation. `null` does not restore a previous configured value. Preserve existing values and unrelated overrides.
+The examples below assume the previous configured value was `false`, so teardown sets it back to `false`. If the flag had no configured override before your test, use `null` in teardown to remove the override your test added. `null` does not restore a previous configured value. Preserve existing values and unrelated overrides.
 
 ### In a global setup hook (recommended for parallel suites) [scout-feature-flags-global-setup]
 
