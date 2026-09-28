@@ -69,15 +69,21 @@ export function CortexSidebar({
   onSelect,
   onCreatePage,
 }: CortexSidebarProps) {
+  const statusFilters: CortexStatusFilter[] = pages.some((page) => page.status === 'archived')
+    ? ['all', ...CORTEX_PAGE_STATUSES]
+    : ['all', 'established', 'tentative'];
+  // Restoring the last archived page removes the Archived option out from under the selection.
+  const activeFilter = statusFilters.includes(statusFilter) ? statusFilter : 'all';
+
   const visiblePages = useMemo(
     () =>
       pages.filter((page) => {
-        if (statusFilter !== 'all' && page.status !== statusFilter) {
+        if (activeFilter !== 'all' && page.status !== activeFilter) {
           return false;
         }
         return matchesSearch(page, searchQuery);
       }),
-    [pages, searchQuery, statusFilter]
+    [pages, searchQuery, activeFilter]
   );
 
   const pagesByType = useMemo(() => {
@@ -90,10 +96,6 @@ export function CortexSidebar({
     }
     return grouped;
   }, [visiblePages]);
-
-  const statusFilters: CortexStatusFilter[] = pages.some((page) => page.status === 'archived')
-    ? ['all', ...CORTEX_PAGE_STATUSES]
-    : ['all', 'established', 'tentative'];
 
   return (
     <EuiFlexGroup
@@ -149,7 +151,7 @@ export function CortexSidebar({
             label: getCortexStatusFilterLabel(filter),
             'data-test-subj': `nightshiftCortexStatusFilter-${filter}`,
           }))}
-          idSelected={statusFilter}
+          idSelected={activeFilter}
           onChange={(id) => onStatusFilterChange(id as CortexStatusFilter)}
         />
       </EuiFlexItem>
