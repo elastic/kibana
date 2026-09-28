@@ -21,6 +21,12 @@ const request = {} as unknown as KibanaRequest;
 const startInstall = jest.fn();
 const fetchClaim = jest.fn();
 const unbind = jest.fn();
+const hasAgent = jest.fn();
+const getRegistry = jest.fn();
+
+jest.mock('@kbn/core-http-server-utils', () => ({
+  kibanaRequestFactory: jest.fn((rawRequest) => rawRequest),
+}));
 
 interface HarnessOptions {
   /** `streams.significantEventsAppsEnabled` feature flag value. Defaults to enabled. */
@@ -84,7 +90,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
   const server = {
     logger,
     config: {},
-    agentBuilder: {},
+    agentBuilder: { agents: { getRegistry } },
     kibanaVersion: '9.2.0',
     actions: { registerDynamicConnector, unregisterDynamicConnector, inMemoryConnectors },
     relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,
@@ -118,6 +124,8 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
 describe('SlackAppService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    hasAgent.mockResolvedValue(false);
+    getRegistry.mockResolvedValue({ has: hasAgent });
   });
 
   describe('connect', () => {
@@ -201,6 +209,58 @@ describe('SlackAppService', () => {
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({ authorizeUrl: 'https://slack/oauth' });
+    });
+
+    describe('agent_id', () => {
+      const connectWithKey = async () => {
+        const harness = createHarness();
+        harness.grantAsInternalUser.mockResolvedValue({
+          id: 'key-1',
+          name: 'k',
+          api_key: 'secret',
+        });
+        startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'c' });
+        await new SlackAppService(harness.server).connect(request);
+        return harness;
+      };
+
+      it('declares nightshift.investigation when the minted key sees it in the default space', async () => {
+        hasAgent.mockResolvedValue(true);
+
+        await connectWithKey();
+
+        // Relay turns hit `kibana_url` without a space prefix, so the lookup is pinned to the
+        // default space and authenticated as the key Relay will present.
+        expect(getRegistry).toHaveBeenCalledWith({
+          request: {
+            headers: {
+              authorization: `ApiKey ${Buffer.from('key-1:secret').toString('base64')}`,
+            },
+            path: '/',
+            spaceId: 'default',
+          },
+        });
+        expect(hasAgent).toHaveBeenCalledWith('nightshift.investigation');
+        expect(startInstall).toHaveBeenCalledWith(
+          expect.objectContaining({ agent_id: 'nightshift.investigation' })
+        );
+      });
+
+      it('omits agent_id when the agent is not installed in the default space', async () => {
+        await connectWithKey();
+
+        expect(startInstall.mock.calls[0][0]).not.toHaveProperty('agent_id');
+      });
+
+      it('omits agent_id and still installs when the agent lookup fails', async () => {
+        getRegistry.mockRejectedValue(new Error('registry unavailable'));
+
+        const { logger } = await connectWithKey();
+
+        expect(startInstall).toHaveBeenCalledTimes(1);
+        expect(startInstall.mock.calls[0][0]).not.toHaveProperty('agent_id');
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('registry unavailable'));
+      });
     });
 
     it('invalidates the minted key if the Relay install fails', async () => {
