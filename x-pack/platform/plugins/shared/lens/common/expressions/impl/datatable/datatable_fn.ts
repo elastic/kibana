@@ -30,6 +30,8 @@ export const datatableFn =
     if (context?.inspectorAdapters?.tables) {
       context.inspectorAdapters.tables.reset();
       context.inspectorAdapters.tables.allowCsvExport = true;
+      // Keep raw null values intact while matching the table's missing-value display.
+      context.inspectorAdapters.tables.missingValueDisplay = 'table';
 
       const logTable = prepareLogTable(
         sortedTable,

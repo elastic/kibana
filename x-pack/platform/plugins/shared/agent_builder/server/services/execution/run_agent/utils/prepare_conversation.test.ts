@@ -9,6 +9,7 @@ import type { ConversationRound, ConverseInput, TimelineEvent } from '@kbn/agent
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
   TimelineEventType,
   ToolResultType,
 } from '@kbn/agent-builder-common';
@@ -25,7 +26,7 @@ import {
   type AgentHandlerContextMock,
 } from '../../../../test_utils/runner';
 import { prepareConversation as prepareConversationFromTimeline } from './prepare_conversation';
-import { eventsForContext, groupTimelineRounds } from './context_timeline';
+import { eventsForContext, groupTimelineRounds, roundResponse } from './context_timeline';
 import {
   TIMELINE_FIXTURE_AUTHOR,
   eventsNativeConversation,
@@ -739,10 +740,7 @@ describe('prepareConversation', () => {
       expect(rounds[0].steps[0]).toEqual(
         expect.objectContaining({ prompt_id: 'p1', answers: [{ choice: [0] }] })
       );
-      expect(rounds[0].terminated.data.outcome).toEqual({
-        type: 'responded',
-        response: { message: 'done' },
-      });
+      expect(roundResponse(rounds[0])).toEqual({ message: 'done' });
     });
 
     it('keeps processed attachment refs when the resume carried refs of its own', async () => {
@@ -1253,6 +1251,69 @@ describe('prepareConversation', () => {
           current_version: 2,
         },
       ]);
+    });
+  });
+
+  describe('interrupted executions', () => {
+    it('processes the interrupted round user message and carries the execution events through', async () => {
+      const failedAt = '2026-01-01T00:01:00.000Z';
+      const timeline = [
+        ...timelineFromRounds([
+          createRound({
+            id: 'a',
+            input: { message: 'first' },
+            started_at: '2026-01-01T00:00:00.000Z',
+          }),
+        ]),
+        {
+          id: 'f::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: failedAt,
+          actor: { type: EventActorType.user, id: 'u1', username: 'user1' },
+          data: { message: 'second', attachments: [] },
+        },
+        {
+          id: 'f::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: failedAt,
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { trigger_type: 'user_message' },
+        },
+        {
+          id: 'f::execution_failed',
+          type: TimelineEventType.executionFailed,
+          created_at: failedAt,
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
+        },
+      ] as unknown as TimelineEvent[];
+
+      const result = await prepareConversationFromTimeline({
+        timeline,
+        nextInput: { message: 'third' },
+        context: mockContext,
+      });
+
+      const ids = result.timeline.map((event) => event.id);
+      expect(ids).toEqual([
+        'a::user_message',
+        'a::execution_started',
+        'a::execution_terminated',
+        'f::user_message',
+        'f::execution_started',
+        'f::execution_failed',
+      ]);
+      const failedUserMessage = result.timeline.find((event) => event.id === 'f::user_message');
+      // processed like any other user message: attachments stripped, author attributed
+      expect(failedUserMessage?.data).toEqual({
+        message: 'second',
+        attachments: [],
+        author: { id: 'u1', username: 'user1' },
+      });
     });
   });
 });

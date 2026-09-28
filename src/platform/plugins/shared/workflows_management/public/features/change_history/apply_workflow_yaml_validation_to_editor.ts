@@ -10,6 +10,11 @@
 import type { MutableRefObject } from 'react';
 import type { Document } from 'yaml';
 import { monaco } from '@kbn/code-editor';
+import {
+  BATCHED_CUSTOM_MARKER_OWNER,
+  filterHighlightableValidationResults,
+  type YamlValidationResult,
+} from '@kbn/workflows-yaml';
 import type { ComputedData } from '../../entities/workflows/store/workflow_detail/types';
 import {
   collectFullWorkflowYamlValidationResults,
@@ -17,11 +22,6 @@ import {
 } from '../validate_workflow_yaml/lib/collect_full_workflow_yaml_validation_results';
 import { createMarkersAndDecorations } from '../validate_workflow_yaml/lib/create_yaml_validation_markers_and_decorations';
 import { getCachedWorkflowYamlComputationAsync } from '../validate_workflow_yaml/lib/workflow_yaml_computation_cache';
-import {
-  BATCHED_CUSTOM_MARKER_OWNER,
-  filterHighlightableValidationResults,
-  type YamlValidationResult,
-} from '../validate_workflow_yaml/model/types';
 
 export interface ApplyWorkflowYamlValidationResult {
   validationResults: YamlValidationResult[];
@@ -72,7 +72,6 @@ export const applyValidationHighlightsToEditor = (
 
 export async function applyWorkflowYamlValidationFromComputed(
   editor: monaco.editor.IStandaloneCodeEditor,
-  yamlString: string,
   computed: ComputedData,
   highlightValidationErrors: boolean,
   decorationsCollectionRef: MutableRefObject<monaco.editor.IEditorDecorationsCollection | null>,
@@ -88,13 +87,13 @@ export async function applyWorkflowYamlValidationFromComputed(
     return { validationResults: [], yamlDocument: null };
   }
 
-  if (!computed.yamlDocument || !computed.yamlLineCounter) {
+  if (computed.yamlString === undefined || !computed.yamlDocument || !computed.yamlLineCounter) {
     clearEditorValidation(model, decorationsCollectionRef);
     return { validationResults: [], yamlDocument: computed.yamlDocument ?? null };
   }
 
   const validationResults = await collectFullWorkflowYamlValidationResults({
-    yamlString,
+    yamlString: computed.yamlString,
     model,
     yamlDocument: computed.yamlDocument,
     lineCounter: computed.yamlLineCounter,
@@ -151,7 +150,6 @@ export async function applyWorkflowYamlValidationToEditor(
 
   return applyWorkflowYamlValidationFromComputed(
     editor,
-    yamlString,
     computed,
     highlightValidationErrors,
     decorationsCollectionRef,

@@ -13,6 +13,7 @@ import {
 import { getConversationMetadataStepCommonDefinition } from '../../common/workflows/steps/get_conversation_metadata';
 import { updateConversationMetadataStepCommonDefinition } from '../../common/workflows/steps/update_conversation_metadata';
 import { createConversationStepCommonDefinition } from '../../common/workflows/steps/create_conversation';
+import { addConversationEventStepCommonDefinition } from '../../common/workflows/steps/add_conversation_event';
 
 export const sharedIcon: React.ComponentType = React.lazy(() =>
   import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
@@ -41,4 +42,8 @@ export const updateConversationMetadataStepDefinition = createPublicStepDefiniti
 
 export const createConversationStepDefinition = createPublicStepDefinition(
   createConversationStepCommonDefinition
+);
+
+export const addConversationEventStepDefinition = createPublicStepDefinition(
+  addConversationEventStepCommonDefinition
 );

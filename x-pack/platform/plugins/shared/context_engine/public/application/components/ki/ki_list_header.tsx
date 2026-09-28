@@ -13,9 +13,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { ALL_TYPE_FILTER, type KiListTypeFilter } from './helpers';
 
 interface TypeFilterOption {
@@ -45,7 +47,14 @@ export const KiListHeader = ({
 }: KiListHeaderProps) => {
   const destLink =
     indexManagementHref !== undefined ? (
-      <EuiLink href={indexManagementHref} data-test-subj="contextKiListPanelDestLink">
+      <EuiLink
+        href={indexManagementHref}
+        data-test-subj="contextKiListPanelDestLink"
+        {...getEbtProps({
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
+          action: CONTEXT_ENGINE_UI_EBT.action.kiList.DEST_LINK,
+        })}
+      >
         {destValue}
       </EuiLink>
     ) : (
@@ -86,6 +95,10 @@ export const KiListHeader = ({
               target="_blank"
               rel="noopener noreferrer"
               data-test-subj="contextKiListDiscoverLink"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
+                action: CONTEXT_ENGINE_UI_EBT.action.kiList.DISCOVER_LINK,
+              })}
             >
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.kiList.discoverLink"

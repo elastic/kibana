@@ -10,12 +10,8 @@ import type {
   ComposeDiscoverMode,
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
-import {
-  ComposeDiscoverFlyout,
-  RULE_BUILDER_REGISTRY,
-  resolveRuleNotificationTag,
-  ruleHasNotificationTag,
-} from '@kbn/alerting-v2-rule-form';
+import { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from '@kbn/esql/public';
+import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -28,10 +24,8 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
-import { RulesApi } from '../services/rules_api';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateRule } from './use_create_rule';
-import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
 
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
@@ -97,9 +91,7 @@ export const useComposeDiscoverFlyout = ({
       onConfirmSwitch: handleConfirmSwitch,
     });
 
-  const rulesApi = useService(RulesApi);
   const createRuleMutation = useCreateRule();
-  const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
   const ruleFormServices = useMemo<RuleFormServices>(
     () => ({
@@ -114,6 +106,9 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      esqlMenu: ESQLMenu,
+      esqlEditorActionsProvider: EsqlEditorActionsProvider,
+      esqlEditorActionsRegister: EsqlEditorActionsRegister,
     }),
     [
       http,
@@ -128,39 +123,6 @@ export const useComposeDiscoverFlyout = ({
       dashboard,
       cps,
     ]
-  );
-
-  /**
-   * Ensures the rule carries a usable notification tag before linking action policies.
-   * Mirrors the `resolveRuleNotificationTag` guard (`tags[0]?.trim()`) so both use the
-   * same definition of "has a tag". If the write fails, shows a warning toast and returns
-   * `null` — the caller must abort notification setup in that case.
-   */
-  const ensureNotificationTag = useCallback(
-    async (rule: RuleApiResponse): Promise<RuleApiResponse | null> => {
-      if (ruleHasNotificationTag(rule.metadata)) return rule;
-      try {
-        return await rulesApi.updateRule(rule.id, {
-          metadata: { tags: [resolveRuleNotificationTag(rule.metadata)] },
-        });
-      } catch {
-        notifications.toasts.addWarning({
-          title: i18n.translate(
-            'xpack.alertingV2.useComposeDiscoverFlyout.notificationTagWriteFailedTitle',
-            { defaultMessage: 'Notifications not linked' }
-          ),
-          text: i18n.translate(
-            'xpack.alertingV2.useComposeDiscoverFlyout.notificationTagWriteFailedText',
-            {
-              defaultMessage:
-                'The rule was saved but could not be tagged for notification matching. Add a tag to the rule and retry linking notifications.',
-            }
-          ),
-        });
-        return null;
-      }
-    },
-    [notifications.toasts, rulesApi]
   );
 
   const closeFlyout = useCallback(() => {
@@ -267,58 +229,13 @@ export const useComposeDiscoverFlyout = ({
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
       onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
-      onCreateRule={(payload, ruleNotifications) =>
-        createRuleMutation.mutate(
-          { payload },
-          {
-            onSuccess: async (rule) => {
-              const actions = ruleNotifications?.workflows ?? [];
-              if (actions.length === 0) {
-                closeAndRedirect();
-                return;
-              }
-              const ruleForNotifications = await ensureNotificationTag(rule);
-              if (!ruleForNotifications) {
-                closeAndRedirect();
-                return;
-              }
-              setupNotificationsMutation.mutate(
-                { rule: ruleForNotifications, actions },
-                { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-              );
-            },
-          }
-        )
+      onCreateRule={(payload) =>
+        createRuleMutation.mutate({ payload }, { onSuccess: closeAndRedirect })
       }
-      onUpdateRule={(id, payload, ruleNotifications) =>
-        updateRuleMutation.mutate(
-          { id, payload },
-          {
-            onSuccess: async (rule) => {
-              const actions = ruleNotifications?.workflows ?? [];
-              if (actions.length === 0) {
-                closeFlyout();
-                return;
-              }
-              const ruleForNotifications = await ensureNotificationTag(rule);
-              if (!ruleForNotifications) {
-                closeFlyout();
-                return;
-              }
-              // Only close the flyout once notification setup also succeeds
-              setupNotificationsMutation.mutate(
-                { rule: ruleForNotifications, actions },
-                { onSuccess: closeFlyout }
-              );
-            },
-          }
-        )
+      onUpdateRule={(id, payload) =>
+        updateRuleMutation.mutate({ id, payload }, { onSuccess: closeFlyout })
       }
-      isSaving={
-        createRuleMutation.isLoading ||
-        setupNotificationsMutation.isLoading ||
-        updateRuleMutation.isLoading
-      }
+      isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
     />
   ) : null;
 
