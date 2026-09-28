@@ -65,7 +65,7 @@ export const TraceSelector = ({ value, onChange, ebtElement }: TraceSelectorProp
           })}
         >
           {i18n.translate('xpack.contextEngine.traceSelector.elasticAgentsToggle', {
-            defaultMessage: 'Elastic agents',
+            defaultMessage: 'Agents on Elastic',
           })}
         </EuiButton>
         <EuiButton

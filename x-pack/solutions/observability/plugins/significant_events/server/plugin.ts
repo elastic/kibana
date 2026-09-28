@@ -32,7 +32,10 @@ import {
 } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_ENABLED_FLAG,
+  SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
+} from '@kbn/nightshift-shared';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -109,10 +112,15 @@ import {
   installFeatureIdentificationAgent,
   registerSignificantEventsFeatureIdentificationAgentTypes,
 } from './agent_builder/agents/feature_identification';
+import {
+  installKIQueryGenerationAgent,
+  registerSignificantEventsKIQueryGenerationAgentTypes,
+} from './agent_builder/agents/ki_query_generation';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -231,11 +239,17 @@ export class SignificantEventsPlugin
       // no fallback is needed. Knowledge indicators and their rules are scoped to this space.
       const space = request.spaceId;
 
+      const useRuleEventsRead = await coreStart.featureFlags.getBooleanValue(
+        SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
+        false
+      );
+
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
         space,
+        useRuleEventsRead,
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
@@ -356,6 +370,13 @@ export class SignificantEventsPlugin
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
       registerSignificantEventsFeatureIdentificationAgentTypes({
         agentBuilder: plugins.agentBuilder,
+      });
+      registerSignificantEventsKIQueryGenerationAgentTypes({
+        agentBuilder: plugins.agentBuilder,
+        isSemanticCodeSearchGroundingEnabled: async () =>
+          this.server?.core
+            ? isSignificantEventsSemanticCodeSearchGroundingEnabled(this.server.core.featureFlags)
+            : false,
       });
       void core
         .getStartServices()
@@ -592,6 +613,13 @@ export class SignificantEventsPlugin
         availability,
       }).catch((error: unknown) => {
         this.logManagedResourceError('feature identification agent', error);
+      });
+      void installKIQueryGenerationAgent({
+        agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        availability,
+      }).catch((error: unknown) => {
+        this.logManagedResourceError('KI query generation agent', error);
       });
     }
 

@@ -127,6 +127,18 @@ export function buildOverviewStepExecutionFromContext(
     contextData = context as Record<string, unknown>;
   }
 
+  if (workflowExecution.effectiveIdentity) {
+    const executionContext =
+      contextData.execution && typeof contextData.execution === 'object'
+        ? contextData.execution
+        : {};
+    contextData.execution = {
+      ...executionContext,
+      effectiveIdentity: workflowExecution.effectiveIdentity,
+      executedBy: workflowExecution.executedBy,
+    };
+  }
+
   if (isValidWorkflowDocumentVersion(workflowExecution.version)) {
     const workflowContext =
       contextData.workflow != null && typeof contextData.workflow === 'object'
@@ -187,6 +199,7 @@ export function buildOverviewStepExecutionFromContext(
     status: workflowExecution.status,
     stepExecutionIndex: 0,
     startedAt: workflowExecution.startedAt,
+    finishedAt: workflowExecution.finishedAt,
     input: contextData as JsonValue,
     scopeStack: [],
     workflowRunId: workflowExecution.id,

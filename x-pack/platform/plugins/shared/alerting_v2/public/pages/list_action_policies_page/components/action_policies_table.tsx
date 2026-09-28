@@ -19,6 +19,7 @@ import {
   type ActionPolicyCreateOption,
 } from '../../../components/action_policy/create_options/action_policy_create_options_panel';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
+import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from '../../../components/action_policy/labels';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
 import { useAlertingLocators } from '../../../application/locator_context';
 import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
@@ -32,6 +33,7 @@ import {
 } from '../../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../../hooks/use_navigate_to_agent_builder';
 import { useAlertingV2ExperimentalFeatures } from '../../../hooks/use_alerting_v2_experimental_features';
+import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
 import { useSnoozeActionPolicy } from '../../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_policy_api_key';
@@ -95,6 +97,7 @@ export const ActionPoliciesTable = () => {
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
   const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
 
   const navigateToCreate = useCallback(() => {
     actionPolicyLocators.navigateSync({ page: 'create' });
@@ -187,6 +190,8 @@ export const ActionPoliciesTable = () => {
         title: CREATE_POLICY_OPTION_TITLE,
         description: CREATE_POLICY_OPTION_DESCRIPTION,
         onClick: navigateToCreate,
+        disabled: !isLicenseValid,
+        tooltipText: isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
         'data-test-subj': 'createActionPolicyCard',
       },
       ...(showExperimentalFeatures
@@ -209,8 +214,10 @@ export const ActionPoliciesTable = () => {
               ),
               description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
               onClick: navigateToAgentBuilder,
-              disabled: !areAgentBuilderSkillsAvailable,
-              tooltipText: createWithAgentTooltipText,
+              disabled: !isLicenseValid || !areAgentBuilderSkillsAvailable,
+              tooltipText: isLicenseValid
+                ? createWithAgentTooltipText
+                : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
               'data-test-subj': 'createActionPolicyWithAgentCard',
             },
           ]
@@ -219,6 +226,7 @@ export const ActionPoliciesTable = () => {
     [
       navigateToCreate,
       navigateToAgentBuilder,
+      isLicenseValid,
       areAgentBuilderSkillsAvailable,
       createWithAgentTooltipText,
       showExperimentalFeatures,
@@ -305,6 +313,7 @@ export const ActionPoliciesTable = () => {
             isUnsnoozing={isUnsnoozing}
             unsnoozeVariables={unsnoozeVariables}
             isBulkActionInProgress={isBulkActionInProgress}
+            isLicenseValid={isLicenseValid}
             bulkAction={bulkAction}
             onRefetchReady={onRefetchReady}
             onEdit={navigateToEdit}

@@ -17,7 +17,7 @@ import { listAllSources } from '../../utils/list_all_sources';
 
 interface OnboardingClient {
   cancel: (args: { streamName: string; request: KibanaRequest }) => Promise<unknown>;
-  getNonTerminalExecutions?: () => Promise<WorkflowExecutionListItemDto[]>;
+  getNonTerminalExecutions?: (args: { request: KibanaRequest }) => Promise<WorkflowExecutionListItemDto[]>;
 }
 
 type CatalogKiClient = Pick<
@@ -79,7 +79,7 @@ export async function reconcileSourceCatalog({
   const catalogIds = new Set(sources.map((source) => source.id));
   const ownedRuleSourceIds = new Set(await kiClient.findStreamNamesWithOwnedRules());
   const maintenanceState = await maintenanceService.getState({ request });
-  const runningSourceIds = await loadRunningSourceIds(onboardingClient);
+  const runningSourceIds = await loadRunningSourceIds(onboardingClient, request);
 
   for (const source of sources) {
     if (!source.enabled) {
@@ -123,8 +123,11 @@ export async function reconcileSourceCatalog({
   return { sources, reconcileIds: survivingReconcileIds };
 }
 
-async function loadRunningSourceIds(onboardingClient?: OnboardingClient): Promise<Set<string>> {
-  const executions = (await onboardingClient?.getNonTerminalExecutions?.()) ?? [];
+async function loadRunningSourceIds(
+  onboardingClient: OnboardingClient | undefined,
+  request: KibanaRequest
+): Promise<Set<string>> {
+  const executions = (await onboardingClient?.getNonTerminalExecutions?.({ request })) ?? [];
   const sourceIds = new Set<string>();
   for (const execution of executions) {
     if (!execution.concurrencyGroupKey) {

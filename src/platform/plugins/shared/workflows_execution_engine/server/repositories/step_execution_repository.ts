@@ -98,9 +98,13 @@ export class StepExecutionRepository {
    */
   public async markNonTerminalStepsFailed(
     workflowExecutionId: string,
-    error: SerializedError
+    error: SerializedError,
+    stepExecutionIds?: string[]
   ): Promise<void> {
-    const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
+    const stepExecutions = await this.getStepExecutionsByWorkflowExecution(
+      workflowExecutionId,
+      stepExecutionIds
+    );
     const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
 
     if (nonTerminalSteps.length === 0) {
