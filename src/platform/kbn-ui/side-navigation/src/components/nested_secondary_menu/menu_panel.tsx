@@ -106,8 +106,8 @@ export const Panel: FC<PanelProps> = ({ children, footer, header, id, title }) =
 
   const footerStyles = css`
     flex-shrink: 0;
-    // Less top padding since the section above already ends with padding
-    padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.m};
+    // Less top padding since the section above already ends with padding, mirrors the menu header
+    padding: ${euiTheme.size.xxs} ${euiTheme.size.m} ${euiTheme.size.m};
   `;
 
   const footerNode = footer ? (
