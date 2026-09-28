@@ -42,7 +42,7 @@ describe('RuleSummaryActionPoliciesSection', () => {
       screen
         .getByTestId('ruleSummaryActionPolicies')
         .querySelector('[data-euiicon-type="tablePlay"]')
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('mockActionPoliciesArtifacts')).toHaveAttribute(
       'data-session',
       'inherit'
