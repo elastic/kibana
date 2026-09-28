@@ -10,8 +10,8 @@
 import { TASK_TYPE_BY_SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { loadConnectors } from '@kbn/inference-connectors';
-import type { ConnectorIdSelectionHandler, ConnectorInstance } from '@kbn/workflows/types/v1';
 import { isHitlWaitStepType } from '@kbn/workflows';
+import type { ConnectorIdSelectionHandler, ConnectorInstance } from '@kbn/workflows/types/v1';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { stepSchemas } from '../../../common/step_schemas';
 
