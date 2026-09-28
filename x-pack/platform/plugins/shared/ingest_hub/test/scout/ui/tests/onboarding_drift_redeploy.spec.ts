@@ -735,7 +735,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
     // Enter roleArn → isCredentialReady=true → isNextReady=true → Next enables.
-    await page.testSubj.locator('agentBasedSection-roleArn').fill('arn:aws:iam::123456789012:role/MyRole');
+    await page.testSubj
+      .locator('agentBasedSection-roleArn')
+      .fill('arn:aws:iam::123456789012:role/MyRole');
     await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
 
     // Mock Fleet package policy GET+PUT used by updateAgentBasedPolicy.
@@ -785,8 +787,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     // Override SO handler to also handle PUT (Playwright LIFO: this route is checked first).
     await page.route(
       (url) =>
-        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname) &&
-        true,
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname) && true,
       async (route) => {
         if (route.request().method() === 'PUT') {
           await route.fulfill({
@@ -807,7 +808,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     expect(pkgPutRequest.postData()).toContain('agent-drift-bucket');
     // SO must be updated with the new serviceVars so resume reflects the current settings.
     const soRequest = await soPutPromise;
-    expect(JSON.stringify(JSON.parse(soRequest.postData() ?? '{}'))).toContain('agent-drift-bucket');
+    expect(JSON.stringify(JSON.parse(soRequest.postData() ?? '{}'))).toContain(
+      'agent-drift-bucket'
+    );
 
     // isDirty cleared → drift callout disappears.
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
