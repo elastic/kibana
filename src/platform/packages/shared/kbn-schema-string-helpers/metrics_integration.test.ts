@@ -16,7 +16,10 @@ class TestMetricReader extends sdkMetrics.MetricReader {
   protected async onShutdown(): Promise<void> {}
 }
 
-test('records after the global provider is initialized, even if reporting ran earlier', async () => {
+// Reporting defers each record until `@opentelemetry/api` has loaded.
+const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+test('defers each record until the api loads, so reporting that ran before provider initialization still lands', async () => {
   metrics.disable();
   reportStringLengthViolation({
     helper: 'savedObjectId',
@@ -47,6 +50,7 @@ test('records after the global provider is initialized, even if reporting ran ea
       maxLength: 512,
       length: 600,
     });
+    await flush();
     const { resourceMetrics } = await reader.collect();
     expect(resourceMetrics.scopeMetrics).toHaveLength(1);
     const [scope] = resourceMetrics.scopeMetrics;
@@ -63,8 +67,8 @@ test('records after the global provider is initialized, even if reporting ran ea
             'schema.max_length': 512,
           },
           value: expect.objectContaining({
-            count: 2,
-            sum: 200600,
+            count: 3,
+            sum: 201200,
             min: 600,
             max: 200000,
             buckets: {
@@ -72,7 +76,7 @@ test('records after the global provider is initialized, even if reporting ran ea
                 0, 16, 64, 256, 512, 1024, 2048, 4096, 8192, 10000, 16384, 32768, 65536, 100000,
                 131072, 262144, 524288, 1048576,
               ],
-              counts: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+              counts: [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
             },
           }),
         }),
