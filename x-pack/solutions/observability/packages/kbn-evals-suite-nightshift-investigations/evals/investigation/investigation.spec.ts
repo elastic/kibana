@@ -210,15 +210,25 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
       // We do NOT require every evaluator trace to be present in traces-*: a judge that resolves via
       // its fast rule-based path never calls the evaluation model (rca_anti_leakage on clean cases,
       // and goal_pass/rca_cause_completeness abstain when an example has no reference answer), so those
-      // runs emit only a bare evaluator root span with no searchable gen_ai child. Naming judge roots
+      // runs emit only a bare evaluator root span with no searchable inference child. Naming judge roots
       // `judge · <name>` only clears the Tracing UI's EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS filter; this
       // assertion reads traces-* directly, so span naming does not make a childless root discoverable.
-      // The gen_ai assertion below is the persistence/viewability guarantee: the judge traces that
-      // actually called the model are stored in traces-* carrying their gen_ai judge calls.
       //
-      // The LLM judges call the evaluation model, so their evaluation traces must carry gen_ai judge
-      // calls. goal_pass and rca_cause_completeness call the judge whenever a reference answer exists;
-      // rca_anti_leakage may short-circuit its clean cases without one.
+      // The model-calling judges wrap `inferenceClient.prompt` in `withActiveInferenceSpan` (see
+      // judges/index.ts), which emits an inference-scoped CHAIN span parented onto the judge's
+      // `judge · <name>` evaluator trace (root span from `withEvaluatorSpan`, kbn-evals
+      // src/utils/tracing.ts). That CHAIN span is exported to traces-* carrying
+      // `attributes.elastic.inference.span.kind: "CHAIN"` (see ElasticGenAIAttributes.InferenceSpanKind).
+      // We assert at least one such span exists within the evaluator traces: this proves the judges
+      // actually ran the evaluation model and that their traces are persisted/viewable, and it still
+      // fails if no judge ever calls the model or the judge inference spans are not traced. goal_pass and
+      // rca_cause_completeness call the judge whenever a reference answer exists; rca_anti_leakage may
+      // short-circuit its clean cases without a model call (hence "at least one", not "every judge").
+      //
+      // The stronger assertion on judge `gen_ai` message content (attributes.gen_ai.input.messages) is
+      // deferred to issue #293725: that content lives on a server-side chat span that is not currently
+      // exported to nor correlated with the worker-side evaluator trace. This asserts the judge
+      // evaluator + inference spans that ARE exported today.
       await expect
         .poll(
           async () =>
@@ -229,7 +239,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
                   bool: {
                     filter: [
                       { terms: { 'trace.id': evaluatorTraces } },
-                      { exists: { field: 'attributes.gen_ai.input.messages' } },
+                      { term: { 'attributes.elastic.inference.span.kind': 'CHAIN' } },
                     ],
                   },
                 },
