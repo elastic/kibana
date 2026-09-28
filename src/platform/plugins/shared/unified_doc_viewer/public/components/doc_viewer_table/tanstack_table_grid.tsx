@@ -25,6 +25,9 @@ import {
   type ColumnDef,
   type ColumnSizingState,
   type Row,
+  type RowPinningState,
+  type Table,
+  type Updater,
 } from '@tanstack/react-table';
 import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual';
 import type { EuiDataGridColumnCellAction, UseEuiTheme } from '@elastic/eui';
@@ -40,6 +43,7 @@ import {
   EuiText,
   EuiToolTip,
   euiFontSize,
+  useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -267,25 +271,27 @@ const GridCell = memo(
   }
 );
 
-interface VirtualRowProps {
+interface GridRowProps {
   row: Row<FieldRow>;
-  rowIndex: number;
   ariaRowIndex: number;
-  measureElement: Virtualizer<HTMLDivElement, Element>['measureElement'];
+  isStriped: boolean;
   styles: TableStyles;
   // Only used to re-render memoized rows when the column definitions change.
   columns: Array<ColumnDef<FieldRow>>;
+  // Set for virtualized rows, so the virtualizer can measure their auto height.
+  virtualIndex?: number;
+  measureElement?: Virtualizer<HTMLDivElement, Element>['measureElement'];
 }
 
-const VirtualRow = memo(
-  ({ row, rowIndex, ariaRowIndex, measureElement, styles }: VirtualRowProps) => (
+const GridRow = memo(
+  ({ row, ariaRowIndex, isStriped, styles, virtualIndex, measureElement }: GridRowProps) => (
     <div
       ref={measureElement}
-      data-index={rowIndex}
+      data-index={virtualIndex}
       role="row"
       aria-rowindex={ariaRowIndex}
       className="kbnDocViewer__tanStackRow"
-      css={[styles.row, rowIndex % 2 === 1 && styles.rowStriped]}
+      css={[styles.row, isStriped && styles.rowStriped]}
     >
       {row.getVisibleCells().map((cell) => (
         <GridCell key={cell.id} cell={cell} styles={styles} />
@@ -324,11 +330,12 @@ export const TanStackTableGrid = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollTopRef = useRestorableRef('scrollTop', 0);
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
-  const [headerHeight, setHeaderHeight] = useState(0);
+  const tableRef = useRef<Table<FieldRow>>();
+  const virtualizerRef = useRef<Virtualizer<HTMLDivElement, Element>>();
 
-  const headerRef = useCallback((node: HTMLDivElement | null) => {
-    setHeaderHeight(node?.offsetHeight ?? 0);
-  }, []);
+  // Header and pinned rows share one sticky block, which the virtualized rows scroll below.
+  const [stickyElement, setStickyElement] = useState<HTMLDivElement | null>(null);
+  const { height: stickyHeight } = useResizeObserver(stickyElement, 'height');
 
   const onToggleColumn = useMemo(() => {
     if (!onRemoveColumn || !onAddColumn || !columns) {
@@ -369,37 +376,49 @@ export const TanStackTableGrid = ({
 
   const showPinColumn = Boolean(onTogglePinned) && !hidePinColumn;
 
-  // Must be stable: a new function makes the virtualizer rebuild all row measurements.
-  const getItemKey = useCallback((index: number) => rows[index]?.name ?? index, [rows]);
+  // Pinned fields are owned by the parent (restorable + local storage), TanStack row pinning mirrors them.
+  const rowPinning = useMemo<RowPinningState>(
+    () => ({ top: rows.filter((row) => row.isPinned).map((row) => row.name), bottom: [] }),
+    [rows]
+  );
 
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize,
-    overscan: OVERSCAN,
-    initialOffset: scrollTopRef.current,
-    getItemKey,
-    // Rows are rendered below the sticky header inside the scroll container.
-    scrollMargin: headerHeight,
-    scrollPaddingStart: headerHeight,
-  });
+  const onRowPinningChange = useCallback(
+    (updater: Updater<RowPinningState>) => {
+      const prevTop = rowPinning.top ?? [];
+      const nextTop = (typeof updater === 'function' ? updater(rowPinning) : updater).top ?? [];
+      const toggledFields = [
+        ...nextTop.filter((field) => !prevTop.includes(field)),
+        ...prevTop.filter((field) => !nextTop.includes(field)),
+      ];
+      toggledFields.forEach((field) => onTogglePinned?.(field));
+    },
+    [rowPinning, onTogglePinned]
+  );
 
   const handleTogglePinned = useCallback(
     (field: string, { isKeyboardEvent }: { isKeyboardEvent: boolean }) => {
-      onTogglePinned?.(field);
+      const tableRow = tableRef.current?.getRow(field, true);
+      if (!tableRow) {
+        return;
+      }
+      const isPinning = !tableRow.getIsPinned();
+      tableRow.pin(isPinning ? 'top' : false);
 
       if (!isKeyboardEvent) {
         return;
       }
 
-      // Keep keyboard focus on the toggled field after it moves in or out of the pinned section.
-      const pinnedRows = rows.filter((row) => row.isPinned);
-      const restRows = rows.filter((row) => !row.isPinned);
-      const rowIndex = getCellPositionAfterPinToggle({ field, pinnedRows, restRows });
-      if (rowIndex < 0) {
-        return;
+      // Keep keyboard focus on the toggled field. Pinned rows are always visible in the sticky
+      // section, an unpinned row moves back into the virtualized rows and may need scrolling to.
+      if (!isPinning) {
+        const pinnedRows = rows.filter((row) => row.isPinned);
+        const restRows = rows.filter((row) => !row.isPinned);
+        const centerIndex =
+          getCellPositionAfterPinToggle({ field, pinnedRows, restRows }) - (pinnedRows.length - 1);
+        if (centerIndex >= 0) {
+          virtualizerRef.current?.scrollToIndex(centerIndex);
+        }
       }
-      rowVirtualizer.scrollToIndex(rowIndex);
       requestAnimationFrame(() => {
         scrollRef.current
           ?.querySelector<HTMLElement>(
@@ -408,7 +427,7 @@ export const TanStackTableGrid = ({
           ?.focus();
       });
     },
-    [onTogglePinned, rows, rowVirtualizer]
+    [rows]
   );
 
   const tableColumns = useMemo<Array<ColumnDef<FieldRow>>>(() => {
@@ -498,9 +517,32 @@ export const TanStackTableGrid = ({
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.name,
     columnResizeMode: 'onChange',
-    state: { columnSizing: tableColumnSizing },
+    enableRowPinning: showPinColumn,
+    // Pinned fields are never filtered out by the fields search, see `DocViewerTable`.
+    keepPinnedRows: true,
+    state: { columnSizing: tableColumnSizing, rowPinning },
     onColumnSizingChange: setColumnSizing,
+    onRowPinningChange,
   });
+  tableRef.current = table;
+
+  const topRows = table.getTopRows();
+  const centerRows = table.getCenterRows();
+
+  // Must be stable: a new function makes the virtualizer rebuild all row measurements.
+  const getItemKey = useCallback((index: number) => centerRows[index]?.id ?? index, [centerRows]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: centerRows.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize,
+    overscan: OVERSCAN,
+    initialOffset: scrollTopRef.current,
+    getItemKey,
+    scrollMargin: stickyHeight,
+    scrollPaddingStart: stickyHeight,
+  });
+  virtualizerRef.current = rowVirtualizer;
 
   const onScroll = useCallback(() => {
     if (scrollRef.current) {
@@ -515,7 +557,6 @@ export const TanStackTableGrid = ({
     [nameColumnWidth]
   );
 
-  const tableRows = table.getRowModel().rows;
   const virtualItems = rowVirtualizer.getVirtualItems();
   const ariaRowIndexOffset = headerVisibility ? 2 : 1;
 
@@ -534,56 +575,74 @@ export const TanStackTableGrid = ({
       css={styles.scrollContainer}
       style={containerStyle}
     >
-      {headerVisibility &&
-        table.getHeaderGroups().map((headerGroup) => (
-          <div key={headerGroup.id} ref={headerRef} role="row" css={styles.headerRow}>
-            {headerGroup.headers.map((header) => (
-              <div
-                key={header.id}
-                role="columnheader"
-                data-gridcell-column-id={header.column.id}
-                css={[styles.headerCell, getColumnCss(styles, header.column.id)]}
-              >
-                {flexRender(header.column.columnDef.header, header.getContext())}
-                {header.column.getCanResize() && (
-                  <div
-                    role="presentation"
-                    onMouseDown={header.getResizeHandler()}
-                    onTouchStart={header.getResizeHandler()}
-                    onDoubleClick={() => header.column.resetSize()}
-                    css={[
-                      styles.resizeHandle,
-                      header.column.getIsResizing() && styles.resizeHandleActive,
-                    ]}
-                  />
-                )}
-              </div>
+      <div ref={setStickyElement} css={styles.stickyTop}>
+        {headerVisibility &&
+          table.getHeaderGroups().map((headerGroup) => (
+            <div key={headerGroup.id} role="row" css={styles.headerRow}>
+              {headerGroup.headers.map((header) => (
+                <div
+                  key={header.id}
+                  role="columnheader"
+                  data-gridcell-column-id={header.column.id}
+                  css={[styles.headerCell, getColumnCss(styles, header.column.id)]}
+                >
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  {header.column.getCanResize() && (
+                    <div
+                      role="presentation"
+                      onMouseDown={header.getResizeHandler()}
+                      onTouchStart={header.getResizeHandler()}
+                      onDoubleClick={() => header.column.resetSize()}
+                      css={[
+                        styles.resizeHandle,
+                        header.column.getIsResizing() && styles.resizeHandleActive,
+                      ]}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        {topRows.length > 0 && (
+          <div data-test-subj="unifiedDocViewerPinnedFields" css={styles.pinnedRows}>
+            {topRows.map((tableRow, index) => (
+              <GridRow
+                key={tableRow.id}
+                row={tableRow}
+                ariaRowIndex={index + ariaRowIndexOffset}
+                isStriped={index % 2 === 1}
+                styles={styles}
+                columns={tableColumns}
+              />
             ))}
           </div>
-        ))}
+        )}
+      </div>
       <div css={styles.virtualOuter} style={{ height: rowVirtualizer.getTotalSize() }}>
         <div
           css={styles.virtualInner}
           style={{
             transform: `translateY(${
-              (virtualItems[0]?.start ?? headerHeight) - rowVirtualizer.options.scrollMargin
+              (virtualItems[0]?.start ?? stickyHeight) - rowVirtualizer.options.scrollMargin
             }px)`,
           }}
         >
           {virtualItems.map(({ index, key }) => {
-            const tableRow = tableRows[index];
+            const tableRow = centerRows[index];
             if (!tableRow) {
               return null;
             }
+            const rowIndex = topRows.length + index;
             return (
-              <VirtualRow
+              <GridRow
                 key={key}
                 row={tableRow}
-                rowIndex={index}
-                ariaRowIndex={index + ariaRowIndexOffset}
-                measureElement={rowVirtualizer.measureElement}
+                ariaRowIndex={rowIndex + ariaRowIndexOffset}
+                isStriped={rowIndex % 2 === 1}
                 styles={styles}
                 columns={tableColumns}
+                virtualIndex={index}
+                measureElement={rowVirtualizer.measureElement}
               />
             );
           })}
@@ -656,11 +715,13 @@ const componentStyles = {
       },
     });
   },
+  stickyTop: css({
+    position: 'sticky',
+    top: 0,
+    zIndex: 2,
+  }),
   headerRow: ({ euiTheme }: UseEuiTheme) =>
     css({
-      position: 'sticky',
-      top: 0,
-      zIndex: 2,
       display: 'flex',
       backgroundColor: euiTheme.components.dataGridRowBackground,
       borderBottom: euiTheme.border.thin,
@@ -704,6 +765,13 @@ const componentStyles = {
       '&::after': {
         backgroundColor: euiTheme.colors.borderBasePlain,
       },
+    }),
+  // Keeps many pinned fields from taking over the whole table.
+  pinnedRows: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      maxBlockSize: '40vh',
+      overflowY: 'auto',
+      borderBottom: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBasePlain}`,
     }),
   virtualOuter: css({
     position: 'relative',
