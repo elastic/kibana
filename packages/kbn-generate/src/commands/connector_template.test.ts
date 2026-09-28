@@ -28,10 +28,10 @@ describe('connector scaffold template', () => {
     expect(minimumLicense).toBeDefined();
     expect(LICENSE_TYPE).toHaveProperty(minimumLicense as string);
     // `ensureSufficientLicense` in the actions plugin throws for a third party
-    // action type below gold, which exits Kibana on startup. Only `.server-log`
+    // action type below enterprise, which exits Kibana on startup. Only `.server-log`
     // and `.index` are exempt, and a scaffolded connector is never either.
     expect(LICENSE_TYPE[minimumLicense as keyof typeof LICENSE_TYPE]).toBeGreaterThanOrEqual(
-      LICENSE_TYPE.gold
+      LICENSE_TYPE.enterprise
     );
   });
 });

@@ -6,9 +6,9 @@ export const <%= connector.className %>: ConnectorSpec = {
     id: '<%= connector.id %>',
     displayName: '<%= connector.displayName %>',
     description: '',
-    // Third party connectors must require a gold license or higher; the actions
+    // Third party connectors must require an enterprise license or higher; the actions
     // plugin rejects anything lower at registration time and Kibana fails to start.
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   schema: lazySchema(() => z.object({})),
