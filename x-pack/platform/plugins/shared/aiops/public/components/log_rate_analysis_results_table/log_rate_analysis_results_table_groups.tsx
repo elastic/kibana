@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 
-
 import type { EuiBasicTableColumn, EuiTableSortingType, Criteria } from '@elastic/eui';
 import {
   EuiBadge,
@@ -38,10 +37,10 @@ import {
   type GroupTableItem,
 } from '@kbn/aiops-log-rate-analysis/state';
 import { stringHash } from '@kbn/ml-string-hash';
-import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 import usePrevious from 'react-use/lib/usePrevious';
 import useMountedState from 'react-use/lib/useMountedState';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 import { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
 import { LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE, useColumns } from './use_columns';

@@ -20,6 +20,7 @@ import {
   type QueryESQLControl,
   type StaticESQLControl,
 } from '@kbn/esql-types';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasPinnedPanels,
   apiPublishesChildren,
@@ -28,7 +29,6 @@ import {
   initializeRelatedPanels,
   initializeStateApi,
   useStateFromPublishingSubject,
-  ViewMode,
   type StateComparators,
 } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
