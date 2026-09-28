@@ -25,7 +25,7 @@ jest.mock('../../../../hooks/use_conversation_stream', () => ({
 
 // Stub the prompt components so the test targets PendingPrompts' aggregation, not each prompt's UI.
 // Each stub exposes the callbacks PendingPrompts wires up, keyed by prompt id.
-jest.mock('../../conversation_rounds/round_prompt', () => ({
+jest.mock('../prompts', () => ({
   ConfirmationPrompt: ({ prompt, onConfirm, onCancel, isDisabled }: any) => (
     <div>
       <button data-test-subj={`confirm-${prompt.id}`} disabled={isDisabled} onClick={onConfirm}>

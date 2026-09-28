@@ -39,6 +39,7 @@ import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_ho
 import { MANAGEMENT_HOST, type AlertingV2HostApp } from '../locators';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
+import { ManageRulesHrefProvider } from './manage_rules_href_context';
 
 import { CLASSIC_EPISODES_DATA_SOURCE } from '../episode_sources';
 
@@ -49,6 +50,7 @@ export interface AlertingV2PageProps {
   privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  manageRulesHref?: string;
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
@@ -168,6 +170,7 @@ export const AlertingV2EpisodesPage = ({
   hostApp = MANAGEMENT_HOST,
   privilegeCheck,
   createActions,
+  manageRulesHref,
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
   const locators = useMemo(() => {
@@ -215,6 +218,11 @@ export const AlertingV2EpisodesPage = ({
                 <I18nProvider>
                   <EpisodesApp dataSource={dataSource} />
                 </I18nProvider>
+                <ManageRulesHrefProvider value={manageRulesHref}>
+                  <I18nProvider>
+                    <EpisodesApp dataSource={dataSource} />
+                  </I18nProvider>
+                </ManageRulesHrefProvider>
               </PrivilegeCheckProvider>
             </BreadcrumbProvider>
           </LocatorProvider>

@@ -15,11 +15,13 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AiIndexCreatedCallout,
@@ -142,6 +144,10 @@ export const AiIndexDetailPage = () => {
           isSelected={selectedTab === 'overview'}
           onClick={() => setSelectedTab('overview')}
           data-test-subj="contextAiIndexDetailTab-overview"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+            action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_OVERVIEW,
+          })}
         >
           <FormattedMessage
             id="xpack.contextEngine.aiIndexDetail.tabs.overview"
@@ -157,6 +163,10 @@ export const AiIndexDetailPage = () => {
             ) : undefined
           }
           data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+            action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_KNOWLEDGE_INDICATORS,
+          })}
         >
           <FormattedMessage
             id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"

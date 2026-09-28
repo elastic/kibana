@@ -12,11 +12,15 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormFlyout } from './action_policy_form_flyout';
 
+const mockGetUrlForApp = jest.fn(
+  (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
+);
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
       return {
-        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+        getUrlForApp: mockGetUrlForApp,
       };
     }
     if (token === 'uiSettings') {
@@ -48,8 +52,18 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
   isActionValid: () => true,
-  InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
-    <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
+  InlineWorkflowEditor: ({
+    value,
+    connectorCreationConfig,
+  }: {
+    value: { id: string };
+    connectorCreationConfig?: { mode: string; href?: string };
+  }) => (
+    <div
+      data-test-subj={`inlineWorkflowEditor-${value.id}`}
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+      data-connector-creation-href={connectorCreationConfig?.href}
+    />
   ),
 }));
 
@@ -152,6 +166,31 @@ describe('ActionPolicyFormFlyout', () => {
 
     expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
     expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('actionPolicyFormSection-notificationControls'))
+        .getByText('Notification controls')
+        .closest('button')
+    ).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('opens connector creation in a new tab for inline workflows', async () => {
+    const user = userEvent.setup();
+    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+
+    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+
+    expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-mode',
+      'new-tab'
+    );
+    expect(screen.getByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-href',
+      '/app/management/connectors'
+    );
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('management', {
+      deepLinkId: 'triggersActionsConnectors',
+      path: '/connectors',
+    });
   });
 
   it('forwards the raw form state (not a payload) to onSave so the host can build it', async () => {
@@ -228,14 +267,10 @@ describe('ActionPolicyFormFlyout', () => {
       throttle: { strategy: 'time_interval', interval: '5m' },
       snoozed_until: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
-      created_by: 'elastic',
+      created_by: { profile_uid: 'elastic' },
       created_at: '2026-03-01T10:00:00.000Z',
-      updated_by: 'elastic',
+      updated_by: { profile_uid: 'elastic' },
       updated_at: '2026-03-01T10:00:00.000Z',
-      auth: {
-        owner: 'elastic',
-        created_by_user: true,
-      },
     };
 
     renderFlyout({ onClose: jest.fn(), onUpdate, initialValues });

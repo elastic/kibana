@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { proposalUserSchema } from '../proposals/proposal';
+import { userSchema } from '../user';
 import {
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
@@ -46,7 +46,7 @@ export const impactSchema = z.object({
   /** Deduped by `id`. A later attach fills in fields the first write omitted. */
   entities: impactEntitiesSchema,
   createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
-  createdBy: proposalUserSchema.optional(),
+  createdBy: userSchema.optional(),
 });
 export type Impact = z.infer<typeof impactSchema>;
 

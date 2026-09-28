@@ -8,21 +8,26 @@
  */
 
 import Path from 'path';
+import type { TestFramework } from '@kbn/scout-reporting';
 import { getLocationFromClassname } from '../failed_tests_reporter/get_failures';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
 import { getIssueMetadata } from '../failed_tests_reporter/issue_metadata';
-import { readSuiteFilePath } from './issue_title';
+import { readFlakySuiteIssueMetadata } from './issue_body';
 import type { FlakySuite } from './suites';
 
 /**
- * What a `failed-test` issue says about its test: a suite issue names the file in its title, a
- * per-test issue filed by `report_failed_tests` carries metadata. Every field is best effort:
- * older issues lack some metadata, hand-written ones lack all of it.
+ * What a `failed-test` issue says about its test: a suite issue records the file in its
+ * metadata, a per-test issue filed by `report_failed_tests` carries other metadata. Every field
+ * is best effort: older issues lack some metadata, hand-written ones lack all of it.
  */
 export interface IssueDetails {
   issue: GithubIssue;
-  /** File named by a `Flaky … test suite: <file>` title. */
+  /** File a suite issue is about, from its `flaky-test-suite` metadata. */
   suiteFilePath?: string;
+  /** Suite of that file the issue is about; absent for issues about a whole file. */
+  suiteTitle?: string;
+  /** Framework the suite issue is about; absent when the metadata does not record one. */
+  suiteFramework?: string;
   /** Scout test id from the `Test ID` row; the same id `discover-flaky-tests` reports. */
   scoutTestId?: string;
   /** File the issue names: the Scout `Location` row or the `<path>·ts` ending an FTR classname. */
@@ -31,12 +36,17 @@ export interface IssueDetails {
   jestDirectory?: string;
   /** Full test name from the metadata, i.e. the describe blocks followed by the test title. */
   testName?: string;
+  /**
+   * Framework of a per-test issue, from the `test.type` the failed-test reporter records
+   * (`scout` is Playwright); absent for hand-written issues and those filed before it was recorded.
+   */
+  testFramework?: TestFramework;
   /** Title and body with JUnit's `·` restored to `.`, so file paths can be looked up in it. */
   text: string;
 }
 
 export type IssueMatch =
-  /** An issue about the whole suite, `Flaky … test suite: <file>`. */
+  /** An issue about the whole suite, or about its whole file, by its `flaky-test-suite` metadata. */
   | 'suite'
   /** A per-test issue about one of the suite's flaky tests. */
   | 'test'
@@ -63,15 +73,27 @@ const metadataString = (body: string, key: string): string | undefined => {
   return typeof value === 'string' ? value : undefined;
 };
 
+/** `test.type` as `report_failed_tests` records it, mapped to the report's framework names. */
+const TEST_TYPE_FRAMEWORKS: Record<string, TestFramework> = {
+  jest: 'jest',
+  ftr: 'ftr',
+  scout: 'playwright',
+  cypress: 'cypress',
+};
+
 /** Extracts the matching keys of an issue once, so every suite can be checked cheaply. */
 export const describeIssue = (issue: GithubIssue): IssueDetails => {
   const className = metadataString(issue.body, 'test.class') ?? '';
   // FTR classnames end in the file (`<report>.<path>·ts`), Jest ones in the directory
   const classLocation = getLocationFromClassname(className);
   const location = issue.body.match(LOCATION_ROW)?.[1];
+  const suiteMetadata = readFlakySuiteIssueMetadata(issue.body);
+  const testType = metadataString(issue.body, 'test.type');
   return {
     issue,
-    suiteFilePath: readSuiteFilePath(issue.title),
+    suiteFilePath: suiteMetadata?.['suite.filePath'],
+    suiteTitle: suiteMetadata?.['suite.title'],
+    suiteFramework: suiteMetadata?.['suite.framework'],
     scoutTestId: issue.body.match(SCOUT_TEST_ID_ROW)?.[1],
     filePath: location
       ? undot(location)
@@ -80,6 +102,7 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
       : undefined,
     jestDirectory: className.startsWith(JEST_CLASS_PREFIX) ? classLocation : undefined,
     testName: metadataString(issue.body, 'test.name'),
+    testFramework: testType === undefined ? undefined : TEST_TYPE_FRAMEWORKS[testType],
     text: undot(`${issue.title}\n${issue.body}`),
   };
 };
@@ -108,32 +131,35 @@ const addTo = (index: Map<string, IssueDetails[]>, key: string, details: IssueDe
   }
 };
 
+/** Adds one issue to the index, e.g. one filed during the run, so later suites can match it. */
+export const addIssueToIndex = (index: IssueIndex, details: IssueDetails): void => {
+  const { text, filePath, suiteFilePath, jestDirectory, scoutTestId } = details;
+  const fileNames = new Set(text.match(SOURCE_FILE_NAME) ?? []);
+  for (const named of [filePath, suiteFilePath]) {
+    if (named) {
+      fileNames.add(Path.basename(named));
+    }
+  }
+  for (const fileName of fileNames) {
+    addTo(index.byFileName, fileName, details);
+  }
+  if (jestDirectory) {
+    addTo(index.byJestDirectory, jestDirectory, details);
+  }
+  if (scoutTestId) {
+    addTo(index.byScoutTestId, scoutTestId, details);
+  }
+};
+
 export const indexIssues = (issues: readonly IssueDetails[]): IssueIndex => {
   const index: IssueIndex = {
     byFileName: new Map(),
     byJestDirectory: new Map(),
     byScoutTestId: new Map(),
   };
-
   for (const details of issues) {
-    const { text, filePath, suiteFilePath, jestDirectory, scoutTestId } = details;
-    const fileNames = new Set(text.match(SOURCE_FILE_NAME) ?? []);
-    for (const named of [filePath, suiteFilePath]) {
-      if (named) {
-        fileNames.add(Path.basename(named));
-      }
-    }
-    for (const fileName of fileNames) {
-      addTo(index.byFileName, fileName, details);
-    }
-    if (jestDirectory) {
-      addTo(index.byJestDirectory, jestDirectory, details);
-    }
-    if (scoutTestId) {
-      addTo(index.byScoutTestId, scoutTestId, details);
-    }
+    addIssueToIndex(index, details);
   }
-
   return index;
 };
 
@@ -151,18 +177,27 @@ export const candidateIssues = (suite: FlakySuite, index: IssueIndex): IssueDeta
   return [...candidates];
 };
 
-/** Whether a full JUnit test name (`describe … title`) ends with the flaky test's title. */
-const namesTest = (testName: string, titles: readonly string[]): boolean =>
-  titles.some((title) => testName === title || testName.endsWith(` ${title}`));
+/**
+ * Whether a JUnit test name names one of the suite's tests. JUnit names are the describe titles
+ * followed by the test title, so with a suite title known the comparison covers both: a sibling
+ * describe with a test of the same title must not match. A name that is the bare title still
+ * does, for reporters that record no describes.
+ */
+const namesTest = (testName: string, suite: FlakySuite): boolean =>
+  suite.tests.some(({ title }) => {
+    const full = suite.suiteTitle ? `${suite.suiteTitle} ${title}` : title;
+    return testName === full || testName.endsWith(` ${full}`) || testName === title;
+  });
 
 /** Suite issues first, then strongest match, open before closed, newest first. */
-const compareMatches = (a: MatchedIssue, b: MatchedIssue): number =>
+export const compareMatches = (a: MatchedIssue, b: MatchedIssue): number =>
   MATCH_STRENGTH[a.match] - MATCH_STRENGTH[b.match] ||
   (a.issue.state === b.issue.state ? 0 : a.issue.state === 'open' ? -1 : 1) ||
   b.issue.number - a.issue.number;
 
 /**
- * Issues about the suite, strongest evidence first: a suite issue, then the Scout test id, then
+ * Issues about the suite, strongest evidence first: a suite issue (about this suite, or about the
+ * whole file, when it records no suite title), then the Scout test id, then
  * the test name together with the file (or, for Jest, the directory), then the test name together
  * with the file name alone (the file was moved), then any mention of the file.
  */
@@ -171,17 +206,28 @@ export const findMatchingIssues = (
   issues: readonly IssueDetails[]
 ): MatchedIssue[] => {
   const testIds = new Set(suite.tests.map((test) => test.testId));
-  const titles = suite.tests.map((test) => test.title);
   const directory = Path.dirname(suite.filePath);
   const baseName = Path.basename(suite.filePath);
 
   const matches: MatchedIssue[] = [];
   for (const details of issues) {
-    const { issue, suiteFilePath, scoutTestId, filePath, jestDirectory, testName, text } = details;
+    const { issue, suiteFilePath, suiteTitle, suiteFramework, scoutTestId, filePath } = details;
+    const { jestDirectory, testName, testFramework, text } = details;
     const mentionsFile = text.includes(suite.filePath);
-    const namesFlakyTest = testName !== undefined && namesTest(testName, titles);
+    // A per-test issue is about this suite's test only if the frameworks agree, when known: a
+    // Jest and a Playwright test in one directory may share a name
+    const namesFlakyTest =
+      testName !== undefined &&
+      namesTest(testName, suite) &&
+      (testFramework === undefined || testFramework === suite.framework);
 
-    if (suiteFilePath === suite.filePath) {
+    // An issue about the whole file is about each of its suites; one file can hold suites of
+    // several frameworks, so a recorded framework has to agree too
+    const aboutSuite =
+      suiteFilePath === suite.filePath &&
+      (suiteTitle === undefined || suiteTitle === suite.suiteTitle) &&
+      (suiteFramework === undefined || suiteFramework === suite.framework);
+    if (aboutSuite) {
       matches.push({ issue, match: 'suite' });
     } else if (scoutTestId !== undefined && testIds.has(scoutTestId)) {
       matches.push({ issue, match: 'test' });
