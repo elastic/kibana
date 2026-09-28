@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID, SANDBOX_TOOL_IDS } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
@@ -65,6 +65,10 @@ export const registerCortexAiIndex = (
 
 /** Rounds with fewer tool calls rarely establish anything durable, e.g. chat replies or smoke tests. */
 const MIN_OPTIMIZE_TOOL_CALLS = 3;
+
+// Only sandbox calls carry the queries and files the optimizer learns from; the rest (e.g.
+// progress reports) would spend its transcript budget and count towards the minimum.
+const OPTIMIZER_TOOL_IDS: ReadonlySet<string> = new Set(SANDBOX_TOOL_IDS);
 
 /** gRPC status the sandbox session rethrows when its pod refuses or drops the connection. */
 const GRPC_UNAVAILABLE = 14;
@@ -152,9 +156,12 @@ export const runCortexOptimize = async ({
     return;
   }
 
-  if (toolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
+  const sandboxToolCalls = toolCalls.filter(
+    ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
+  );
+  if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
     logger.debug(
-      `Cortex optimizer skipped — round made ${toolCalls.length} tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
+      `Cortex optimizer skipped — round made ${sandboxToolCalls.length} sandbox tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
     );
     return;
   }
@@ -197,7 +204,7 @@ export const runCortexOptimize = async ({
     proposeEdits: createLlmProposeCortexEdits({ inferenceClient }),
     userMessage,
     assistantMessage,
-    toolCalls,
+    toolCalls: sandboxToolCalls,
     telemetry: createCortexTelemetry({
       analytics,
       conversationId,

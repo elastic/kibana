@@ -14,6 +14,7 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { hydrateCortexWorkspace, runCortexOptimize } from './register_cortex';
 import { optimizeCortex } from './optimize';
 import { materializeCortex } from './materialize';
@@ -109,11 +110,15 @@ describe('runCortexOptimize', () => {
     },
   });
 
-  const toolCalls = [
-    { tool_id: 'nightshift.sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
-    { tool_id: 'nightshift.sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
-    { tool_id: 'nightshift.sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
+  const toolCalls: InvestigationToolCall[] = [
+    { tool_id: 'nightshift_sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
+    { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
+    { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
   ];
+  const progressReport: InvestigationToolCall = {
+    tool_id: 'platform.streams.investigation_progress_report',
+    params: { step: 'triage' },
+  };
 
   const run = (agentId?: string, calls = toolCalls) =>
     runCortexOptimize({
@@ -165,6 +170,20 @@ describe('runCortexOptimize', () => {
         },
       },
     });
+  });
+
+  it('passes only sandbox tool calls to the optimizer', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, [progressReport, ...toolCalls, progressReport]);
+    expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
+  });
+
+  it('does not count non-sandbox tool calls towards the minimum', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, [
+      ...toolCalls.slice(0, 2),
+      progressReport,
+      progressReport,
+    ]);
+    expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
   it('skips another agent', async () => {
