@@ -742,7 +742,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
             }
             color="warning"
             iconType="warning"
-            announceOnMount
             data-test-subj="authenticateAndDeployStep-driftCheckErrorCallout"
           >
             <FormattedMessage
