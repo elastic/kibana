@@ -85,11 +85,12 @@ export interface ProfileSummary {
   /** Share of sampled time attributed to GC. */
   gcPercent?: number;
   /**
-   * Time between requesting `Profiler.start` and its acknowledgement. Starting the V8 profiler
-   * stalls the main thread in proportion to the amount of compiled code, so this is also the
-   * approximate time the watchdog itself added to the block.
+   * Time between requesting `Profiler.start` and its acknowledgement. It includes waiting for the
+   * main thread to service the request (the rest of a native/syscall block) and the profiler's own
+   * start-up stall, which grows with the amount of compiled code. Only for `profiled` verdicts is
+   * it a reasonable upper bound of the time the watchdog itself added to the block.
    */
-  startLatencyMs?: number;
+  startAckLatencyMs?: number;
 }
 
 export interface BlockReport {

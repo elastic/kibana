@@ -59,6 +59,25 @@ describe('formatReportMessage', () => {
     },
   };
 
+  it('only presents the start acknowledgement latency as added stall for profiled blocks', () => {
+    const profiled = { ...report, profile: { ...report.profile, startAckLatencyMs: 700 } };
+    expect(formatReportMessage(profiled)).toContain(
+      'Profile profiled (starting the profiler added up to ~700ms to the block)'
+    );
+    const inconclusive = {
+      ...report,
+      profile: {
+        verdict: 'inconclusive' as const,
+        reason: 'r',
+        frames: [],
+        startAckLatencyMs: 900,
+      },
+    };
+    expect(formatReportMessage(inconclusive)).toContain(
+      'Profile inconclusive (profiler start acknowledged after ~900ms): r.'
+    );
+  });
+
   it('summarises verdict, frames, candidates and suppressed blocks', () => {
     expect(formatReportMessage(report)).toMatchInlineSnapshot(
       `"Event loop was blocked for ~1200ms, process CPU ratio 0.98. Profile profiled: JS samples cover 99% of the profiled 700ms of the block. Top frames: loop (src/a.js:3) 690ms 98.6% via run (src/b.js:9); (garbage collector) 10ms 1.4%. Candidates (in flight, not necessarily the cause): task alerting:.es-query [t1] (started 40ms before the block). 3 earlier block(s) were not reported."`

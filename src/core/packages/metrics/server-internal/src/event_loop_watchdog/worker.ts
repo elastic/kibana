@@ -156,7 +156,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
         sanitizeRoot,
         maxFrames: options.maxFrames,
       }),
-      startLatencyMs: Math.round((capture.startAckUs - capture.requestedAtUs) / 1000),
+      startAckLatencyMs: Math.round((capture.startAckUs - capture.requestedAtUs) / 1000),
     };
   };
 
