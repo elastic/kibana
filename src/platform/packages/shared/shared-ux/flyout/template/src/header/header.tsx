@@ -83,6 +83,14 @@ const dividerStyles = ({ euiTheme }: UseEuiTheme) => ({
   `,
 });
 
+const titleStyles = () => ({
+  title: css`
+    a {
+      font-weight: inherit;
+    }
+  `,
+});
+
 const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
   const duration = euiTheme.animation.normal;
   const easing = euiTheme.animation.resistance;
@@ -230,6 +238,7 @@ export const HeaderZone = ({
   const { euiTheme } = useEuiTheme();
   const badgeStyles = useEuiMemoizedStyles(badgeGroupStyles);
   const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
+  const { title: titleCss } = useEuiMemoizedStyles(titleStyles);
   const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
   const { tabs, selectedTabId, selectTab } = useFlyoutTabs();
   const items = useMemo(() => headerAssembly.parseChildren(children), [children]);
@@ -306,7 +315,7 @@ export const HeaderZone = ({
                     <EuiTitle size="xs">
                       <h3
                         id={flyoutTitleId}
-                        css={collapseStyles.collapsedTitle}
+                        css={[titleCss, collapseStyles.collapsedTitle]}
                         title={typeof title === 'string' ? title : undefined}
                       >
                         {title}
@@ -318,7 +327,9 @@ export const HeaderZone = ({
               ) : (
                 renderTitleWithIcon(
                   <EuiTitle size="m">
-                    <h3 id={flyoutTitleId}>{title}</h3>
+                    <h3 id={flyoutTitleId} css={titleCss}>
+                      {title}
+                    </h3>
                   </EuiTitle>,
                   titleIconNode
                 )
