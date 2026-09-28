@@ -134,7 +134,7 @@ export const DescriptionPanel = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={2} />
       ) : isEditing ? (
@@ -191,7 +191,7 @@ export const DescriptionPanel = ({
         </EuiText>
       ) : (
         <AiIndexDetailPanelEmptyPrompt
-          iconType="document"
+          iconType="text"
           dataTestSubj="contextAiIndexDescriptionEmpty"
           title={
             isManaged ? (

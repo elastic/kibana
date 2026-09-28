@@ -6,7 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIcon, EuiText } from '@elastic/eui';
 import React, { type ReactNode } from 'react';
 
 interface AiIndexDetailPanelEmptyPromptProps {
@@ -21,9 +21,12 @@ export const AiIndexDetailPanelEmptyPrompt = ({
   title,
 }: AiIndexDetailPanelEmptyPromptProps) => (
   <EuiEmptyPrompt
-    iconType={iconType}
-    titleSize="xs"
+    icon={<EuiIcon type={iconType} size="xl" aria-hidden={true} color="subdued" />}
     data-test-subj={dataTestSubj}
-    title={<h3>{title}</h3>}
+    body={
+      <EuiText size="xs" color="subdued">
+        {title}
+      </EuiText>
+    }
   />
 );
