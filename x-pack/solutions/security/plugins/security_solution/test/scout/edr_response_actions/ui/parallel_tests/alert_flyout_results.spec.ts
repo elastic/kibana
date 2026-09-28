@@ -54,10 +54,12 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      // soc_manager is the analyst-tier role from the Cypress spec. It can read
-      // alerts and the response-actions log. A missing `manage` privilege on the
-      // lists indices shows a callout beside the table; it does not replace it.
-      await browserAuth.loginAsSecurityRole('soc_manager');
+      // soc_manager can read alerts and the response-actions log, but the
+      // stateful role descriptor has no `manage` on `.lists-*` or `.items-*`.
+      // A flaky run then showed the insufficient-privileges callout and the
+      // rule name never appeared in the alerts grid. platform_engineer has
+      // `all` on those indices and actions-log read.
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterAll(async () => {
