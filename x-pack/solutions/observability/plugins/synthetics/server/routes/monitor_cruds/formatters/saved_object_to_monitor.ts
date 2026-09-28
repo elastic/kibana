@@ -95,11 +95,7 @@ export function mergeSourceMonitor(
 // fields (e.g. password-only update clearing username/domain and flipping enabled:false
 // after mergeHttpAuthDefaults fills defaults).
 const customizer = (destVal: any, srcValue: any, key: string) => {
-  if (
-    key === ConfigKey.ALERT_CONFIG ||
-    key === ConfigKey.KERBEROS ||
-    key === ConfigKey.NTLM
-  ) {
+  if (key === ConfigKey.ALERT_CONFIG || key === ConfigKey.KERBEROS || key === ConfigKey.NTLM) {
     return { ...destVal, ...srcValue };
   }
   if (key !== ConfigKey.METADATA) {
