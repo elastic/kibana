@@ -277,9 +277,18 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             });
             if (redeployResults.some((r) => r.status === 'rejected')) {
               // Surface the failure so the error callout shows and the user can retry (4119321580).
-              const allActiveIds = Object.keys(
-                detectAndReviewStep.policyIdsByInstance ?? {}
-              ).filter((id) => activeInstanceIds.has(id) && !cleanedLiveStale.includes(id));
+              // Also include undeployed new target IDs so Retry re-queues them alongside the
+              // existing-policy updates — without this they are dropped from failedInstances and
+              // never deployed when the user clicks Retry after a mixed dirty+new-target failure
+              // (4123478531).
+              const allActiveIds = [
+                ...Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
+                  (id) => activeInstanceIds.has(id) && !cleanedLiveStale.includes(id)
+                ),
+                ...targetsToDeploy.flatMap((g) => g.instanceIds).filter(
+                  (id) => !alreadyDeployedIds.has(id)
+                ),
+              ];
               const errorMsg =
                 'Failed to update package policy with new settings. Click Retry to try again.';
               setIsDeploying(false);
@@ -616,7 +625,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       updateDetectAndReviewStep,
       removeDeployInstances,
       getLatestFailedInstances,
-      selectedServiceIds,
       servicesStep,
       servicesMap,
       createDeployment,
