@@ -255,7 +255,7 @@ To give another Worker a schedule:
 
 3. **`impl/worker_settings/<watch>.ts`** (in `@kbn/alertzero-common`) — add `scheduleInterval: { defaultValue: '<interval>' }` to the Worker's declaration. Presence is the opt-in: it drives fresh-install defaults, the projected settings, and whether an interval PATCH is accepted or rejected with a 400 naming `scheduleInterval`.
 
-Nothing changes in the API schema or the UI: `scheduleInterval` is already optional on `WorkerSettings` and `WorkerSettingsWrite`, and the interval control renders purely off the field's presence in the read body. Documents persisted before the field existed do not match the new shape; see [Pre-customer state](#pre-customer-state).
+Nothing changes in the API schema or the UI: `scheduleInterval` is already optional on `WorkerSettings` and `WorkerSettingsWrite`, and the interval control renders purely off the field's presence in the read body. A new schedule on an existing Worker takes effect on the next save or enable.
 
 Tests to update:
 
