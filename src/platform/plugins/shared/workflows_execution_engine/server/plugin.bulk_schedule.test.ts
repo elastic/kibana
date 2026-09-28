@@ -729,6 +729,33 @@ describe('bulkScheduleWorkflow', () => {
     );
   });
 
+  it.each([
+    ['a fake request from another task', { spaceId: 'default' }, { isFakeRequest: true }],
+    ['a scheduled trigger context', { spaceId: 'default', triggeredBy: 'scheduled' }, {}],
+    ['a task-manager source context', { spaceId: 'default', source: 'task-manager' }, {}],
+  ])(
+    'schedules a dedicated workflow:run task when called with %s',
+    async (_label, context, requestOverrides) => {
+      const taskRequest = { ...request, ...requestOverrides } as KibanaRequest;
+
+      const result = await pluginStart.executeWorkflow(
+        createWorkflow('wf-from-task'),
+        context,
+        taskRequest
+      );
+
+      expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: expect.stringMatching(`^workflow:${result.workflowExecutionId}:`),
+          taskType: 'workflow:run',
+          params: { workflowRunId: result.workflowExecutionId, spaceId: 'default' },
+        }),
+        { request: taskRequest, cloneApiKey: true }
+      );
+    }
+  );
+
   it('fails a single execution without scheduling when no identity is attached', async () => {
     (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
 
