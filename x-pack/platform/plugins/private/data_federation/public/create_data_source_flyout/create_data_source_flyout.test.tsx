@@ -156,7 +156,7 @@ describe('CreateDataSourceFlyout', () => {
     });
   });
 
-  it('shows the S3 region field without expanding connection settings, and requires it on create', async () => {
+  it('does not show the S3 region field', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();
     const services: DataFederationKibanaServices = {
@@ -168,7 +168,7 @@ describe('CreateDataSourceFlyout', () => {
     };
     const onSave = jest.fn().mockResolvedValue(null);
 
-    const { getByTestId, queryByText } = render(
+    const { getByTestId, queryByTestId, findByText, queryByText } = render(
       <EuiProvider>
         <KibanaContextProvider services={services}>
           <CreateDataSourceFlyout
@@ -180,24 +180,18 @@ describe('CreateDataSourceFlyout', () => {
       </EuiProvider>
     );
 
-    // Region is visible up front, without expanding "Show connection settings".
-    expect(getByTestId('createDataSourceFlyoutS3Region')).toBeInTheDocument();
+    expect(queryByTestId('createDataSourceFlyoutS3Region')).not.toBeInTheDocument();
+    expect(queryByTestId('createDataSourceFlyoutConnectionSettingsToggle')).toBeInTheDocument();
 
     fireEvent.change(getByTestId('createDataSourceFlyoutName'), { target: { value: 'my-ds' } });
+    fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+    fireEvent.click(await findByText(authenticationStrings.anonymousLabel));
     fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
 
     await waitFor(() => {
-      expect(queryByText('Region is required.')).toBeInTheDocument();
+      expect(onSave).toHaveBeenCalledTimes(1);
     });
-    expect(onSave).not.toHaveBeenCalled();
-
-    fireEvent.change(getByTestId('createDataSourceFlyoutS3Region'), {
-      target: { value: 'us-east-1' },
-    });
-
-    await waitFor(() => {
-      expect(queryByText('Region is required.')).not.toBeInTheDocument();
-    });
+    expect(queryByText('Region is required.')).not.toBeInTheDocument();
   });
 
   it('shows an error', async () => {
