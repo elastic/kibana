@@ -75,6 +75,11 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   },
 }));
 
+const mockCreateActionPolicyFormFlyout = () => null;
+jest.mock('./components/action_policy/form_flyout/create_action_policy_form_flyout', () => ({
+  CreateActionPolicyFormFlyout: mockCreateActionPolicyFormFlyout,
+}));
+
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test
 // can resolve both the useAsync call and the currentAppId$ effect in one go.
 const pendingResolvers: Array<(services: AlertingV2KibanaServices) => void> = [];
@@ -154,6 +159,9 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.onClose).toBe(onClose);
       expect(capturedComposeProps.onCreateRule).toBeDefined();
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyFormFlyout
+      ).toBe(mockCreateActionPolicyFormFlyout);
     });
 
     it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {

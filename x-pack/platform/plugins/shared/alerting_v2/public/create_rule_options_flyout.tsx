@@ -27,7 +27,6 @@ import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
-import { CreateActionPolicyFormFlyout } from './components/action_policy/form_flyout/create_action_policy_form_flyout';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -115,16 +114,17 @@ const CreateRuleOptionsFlyoutInner = ({
   const { query, esqlVariables } = useSyncExternalStore(wrappedSubscribe, getDiscoverQuerySnapshot);
 
   const { loading, value } = useAsync(async (): Promise<LoadedModules> => {
-    const [services, mod] = await Promise.all([
+    const [services, ruleFormModule, actionPolicyFormModule] = await Promise.all([
       untilPluginStartServicesReady(),
       import('@kbn/alerting-v2-rule-form'),
+      import('./components/action_policy/form_flyout/create_action_policy_form_flyout'),
     ]);
     return {
       services: {
         ...services,
-        createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
+        createActionPolicyFormFlyout: actionPolicyFormModule.CreateActionPolicyFormFlyout,
       },
-      ComposeDiscoverFlyout: mod.ComposeDiscoverFlyout,
+      ComposeDiscoverFlyout: ruleFormModule.ComposeDiscoverFlyout,
     };
   }, []);
 
