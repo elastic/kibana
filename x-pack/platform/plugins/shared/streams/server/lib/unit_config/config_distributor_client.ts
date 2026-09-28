@@ -158,14 +158,16 @@ export const createConfigDistributorClient = ({
   const baseUrl = config.url?.replace(/\/$/, '');
 
   if (!baseUrl) {
+    const distributorNotConfigured = (): never => {
+      const message =
+        'streams-config-distributor URL is not configured; skipping unit validation and publish.';
+      logger.error(message);
+      throw new StatusError(message, 503);
+    };
+
     return {
-      publish: async () => {
-        logger.debug('streams-config-distributor URL is not configured; skipping unit publish.');
-      },
-      validate: async () => {
-        logger.debug('streams-config-distributor URL is not configured; skipping unit validation.');
-        return {};
-      },
+      publish: async (): Promise<void> => distributorNotConfigured(),
+      validate: async (): Promise<UnitValidationResult> => distributorNotConfigured(),
     };
   }
 
@@ -215,10 +217,12 @@ export const createConfigDistributorClient = ({
   return {
     publish: async ({ unitId, unit, secrets }) => {
       const unitYaml = serializeUnitYaml(unit);
-      const credentials =
-        Object.keys(secrets).length > 0
-          ? await encryptSecretsForDistributor(hooks.encryptCredentials, secrets)
-          : [];
+      const credentials = await credentialsForPublish({
+        unitId,
+        secrets,
+        encryptCredentials: hooks.encryptCredentials,
+        logger,
+      });
       const configHash = hashUnitPublishPayload(unitYaml, credentials);
 
       logger.debug(`Publishing Streams unit [${unitId}] to config distributor`);
@@ -264,6 +268,34 @@ export const createConfigDistributorClient = ({
       throw statusErrorFromDistributorResponse('Failed to validate Streams unit', response);
     },
   };
+};
+
+const credentialsForPublish = async ({
+  unitId,
+  secrets,
+  encryptCredentials,
+  logger,
+}: {
+  unitId: string;
+  secrets: StreamsUnit.Secrets;
+  encryptCredentials: UnitConfigHooks['encryptCredentials'];
+  logger: Logger;
+}): Promise<UnitCredential[]> => {
+  if (Object.keys(secrets).length === 0) {
+    return [];
+  }
+
+  // Project-key encryption is not wired yet. Keep the unit publish working and
+  // leave plaintext in Encrypted Saved Objects instead of sending it or failing
+  // the write.
+  if (!encryptCredentials) {
+    logger.warn(
+      `Project-key encryption is not configured; publishing Streams unit [${unitId}] without a credentials sidecar.`
+    );
+    return [];
+  }
+
+  return encryptSecretsForDistributor(encryptCredentials, secrets);
 };
 
 const encryptSecretsForDistributor = async (

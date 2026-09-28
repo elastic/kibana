@@ -8,6 +8,7 @@
 import { buildOasOperation } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
+  ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
   BULK_BY_IDS_REQUEST,
   BULK_RESPONSE,
   INVALID_BULK_BY_IDS_RESPONSE,
@@ -27,5 +28,6 @@ export const bulkEnableActionPoliciesOasExamples = (): AlertingOasOperationObjec
         value: BULK_RESPONSE,
       },
       400: INVALID_BULK_BY_IDS_RESPONSE,
+      403: ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
     },
   });
