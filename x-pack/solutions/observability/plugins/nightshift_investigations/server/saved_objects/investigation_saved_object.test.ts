@@ -41,7 +41,20 @@ describe('nightshift investigation saved object model version 4', () => {
     expect(modelVersion4?.changes).toEqual([]);
   });
 
-  it('accepts a timeline and an impact summary on create', () => {
+  it('accepts an impact with a top-level summary and evidence and no entities on create', () => {
+    const create = modelVersion4?.schemas?.create;
+    expect(() =>
+      create?.validate({
+        ...baseAttributes,
+        impact: {
+          summary: 'Checkout failed for 30% of requests.',
+          evidence: { description: 'Failed checkout requests per 5 minutes.' },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('accepts impact entities alongside the summary on create', () => {
     const create = modelVersion4?.schemas?.create;
     expect(() =>
       create?.validate({
@@ -50,8 +63,16 @@ describe('nightshift investigation saved object model version 4', () => {
           summary: 'Checkout failed for 30% of requests.',
           entities: [{ name: 'checkout' }],
         },
-        timeline: [{ timestamp: '2026-09-25T09:58:00Z', type: 'change', summary: 'Deploy v2.3.1' }],
       })
     ).not.toThrow();
+  });
+
+  it('no longer accepts blind spots on create', () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate({
+        ...baseAttributes,
+        blind_spots: [{ title: 'No traces', confidence: 0.5, description: 'Missing' }],
+      })
+    ).toThrow();
   });
 });

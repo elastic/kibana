@@ -27,9 +27,12 @@ import {
   FinalResults,
   HypothesisRow,
   ImpactSection,
-  TimelineSection,
 } from '@kbn/investigation-output';
-import type { InvestigationState, Severity } from '@kbn/significant-events-schema';
+import type {
+  InvestigationImpact,
+  InvestigationState,
+  Severity,
+} from '@kbn/significant-events-schema';
 import {
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   type GetInvestigationResponse,
@@ -58,11 +61,12 @@ function toInvestigationState(
     conclusion: inv.conclusion ?? progress?.conclusion,
     severity: inv.severity ?? progress?.severity,
     recommendations: inv.recommendations ?? progress?.recommendations,
-    blind_spots: inv.blind_spots ?? progress?.blind_spots,
     impact: inv.impact ?? progress?.impact,
-    timeline: inv.timeline ?? progress?.timeline,
   };
 }
+
+const hasImpact = (impact?: InvestigationImpact): impact is InvestigationImpact =>
+  Boolean(impact?.summary?.trim() || impact?.evidence || impact?.entities?.length);
 
 const SEVERITY_BADGES: Record<Severity, { color: string; label: string }> = {
   '80-critical': {
@@ -193,7 +197,7 @@ export function InvestigationDetailFlyout({
           </>
         )}
 
-        {invState.impact && (invState.impact.summary || invState.impact.entities.length > 0) && (
+        {hasImpact(invState.impact) && (
           <>
             <SectionTitle>
               {i18n.translate('xpack.nightshiftInvestigations.flyout.impactTitle', {
@@ -252,19 +256,6 @@ export function InvestigationDetailFlyout({
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-            <EuiSpacer size="l" />
-          </>
-        )}
-
-        {invState.timeline && invState.timeline.length > 0 && (
-          <>
-            <SectionTitle>
-              {i18n.translate('xpack.nightshiftInvestigations.flyout.timelineTitle', {
-                defaultMessage: 'Timeline',
-              })}
-            </SectionTitle>
-            <EuiSpacer size="s" />
-            <TimelineSection timeline={invState.timeline} />
             <EuiSpacer size="l" />
           </>
         )}

@@ -198,8 +198,6 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
   const recommendations = investigationStateSchema.shape.recommendations.safeParse(
     record.recommendations
   );
-  const blindSpots = investigationStateSchema.shape.blind_spots.safeParse(record.blind_spots);
-  const timeline = investigationStateSchema.shape.timeline.safeParse(record.timeline);
 
   return {
     ...toListInvestigationItem(record),
@@ -209,7 +207,6 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
     conclusion: record.conclusion,
     hypotheses: record.hypotheses,
     recommendations: recommendations.success ? recommendations.data : undefined,
-    blind_spots: blindSpots.success ? blindSpots.data : undefined,
     conversation_id: record.conversation_id,
     impact: record.impact,
   };

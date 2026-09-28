@@ -46,7 +46,6 @@ import {
   buildHypothesisChatOptions,
   buildRecommendationChatOptions,
 } from './open_investigation_item_in_chat';
-import { BlindSpotsTable } from './blind_spots_table';
 import {
   InvestigationFormattedText,
   NIGHTSHIFT_INLINE_CODE_FONT_SIZE,
@@ -83,7 +82,7 @@ import {
   type RecommendationItem,
 } from './investigation_presentation';
 
-export type InvestigationFlyoutTabId = 'recommendations' | 'blindSpots' | 'hypotheses';
+export type InvestigationFlyoutTabId = 'recommendations' | 'hypotheses';
 
 type CompletedTabId = InvestigationFlyoutTabId;
 
@@ -503,7 +502,6 @@ export function InvestigationFlyout({
   const headline = getInvestigationHeadline({ eventTitle, state, status });
   const conclusionBody = getConclusionText(state);
   const recommendations = useMemo(() => parseInvestigationRecommendations(state), [state]);
-  const blindSpots = useMemo(() => state?.blind_spots ?? [], [state?.blind_spots]);
   const hypotheses = useMemo(
     () => sortInvestigationHypotheses(state?.hypotheses ?? []),
     [state?.hypotheses]
@@ -558,13 +556,6 @@ export function InvestigationFlyout({
         defaultMessage: 'Recommendations',
       }),
       count: recommendations.length,
-    },
-    {
-      id: 'blindSpots' as const,
-      name: i18n.translate('xpack.nightshift.investigation.blindSpotsTab', {
-        defaultMessage: 'Blind spots',
-      }),
-      count: blindSpots.length,
     },
     {
       id: 'hypotheses' as const,
@@ -682,21 +673,6 @@ export function InvestigationFlyout({
               )}
             </EuiFlexGroup>
           )}
-          {selectedTab === 'blindSpots' &&
-            (blindSpots.length > 0 ? (
-              <BlindSpotsTable
-                items={blindSpots}
-                testSubj="nightshiftInvestigationFlyoutBlindSpots"
-                bodyFontSize={INVESTIGATION_FLYOUT_BODY_FONT_SIZE}
-                chatAttachmentIdPrefix="nightshift-flyout-blind-spot"
-              />
-            ) : (
-              <EuiText color="subdued" css={flyoutBodyTextCss}>
-                {i18n.translate('xpack.nightshift.investigation.flyout.emptyBlindSpots', {
-                  defaultMessage: 'No blind spots were identified for this investigation.',
-                })}
-              </EuiText>
-            ))}
           {selectedTab === 'hypotheses' && (
             <EuiFlexGroup
               direction="column"

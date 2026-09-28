@@ -15,14 +15,12 @@ import {
 import {
   INVESTIGATE_STEP_ID,
   investigationStateSchema,
-  MAX_BLIND_SPOTS,
   MAX_EVIDENCE_CHART_ANNOTATIONS,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
   MAX_HYPOTHESIS_EVIDENCE,
   MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
-  MAX_TIMELINE_EVENTS,
 } from './investigation_state';
 
 interface ParsedInvestigationWorkflow {
@@ -119,13 +117,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
         confidence: 0.95,
         description: 'Raise it back above the previous value.',
         code: 'connection_pool:\n  max_size: 100',
-      },
-    ],
-    blind_spots: [
-      {
-        title: 'No profiling data available',
-        confidence: 0.7,
-        description: 'Would have confirmed whether a leak compounded the exhaustion.',
       },
     ],
   };
@@ -362,20 +353,14 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(minimalRecommendation).success).toBe(true);
   });
 
-  it('rejects a recommendation or blind spot without confidence under both schemas', () => {
+  it('rejects a recommendation without confidence under both schemas', () => {
     const recommendationWithoutConfidence = {
       ...validPayload,
       recommendations: [{ title: 'Roll back the deployment' }],
     };
-    const blindSpotWithoutConfidence = {
-      ...validPayload,
-      blind_spots: [{ title: 'No traces', description: 'The causal path was unavailable.' }],
-    };
 
     expect(validate(recommendationWithoutConfidence)).toBe(false);
     expect(investigationStateSchema.safeParse(recommendationWithoutConfidence).success).toBe(false);
-    expect(validate(blindSpotWithoutConfidence)).toBe(false);
-    expect(investigationStateSchema.safeParse(blindSpotWithoutConfidence).success).toBe(false);
   });
 
   it('rejects item confidence outside the 0–1 range under both schemas', () => {
@@ -396,10 +381,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
         { title: 'Highest step', confidence: 0.9 },
         { title: 'Second tied step', confidence: 0.7 },
       ],
-      blind_spots: [
-        { title: 'Lower gap', confidence: 0.4, description: 'Lower relevance.' },
-        { title: 'Higher gap', confidence: 0.8, description: 'Higher relevance.' },
-      ],
     });
 
     expect(parsed.recommendations?.map(({ title }) => title)).toEqual([
@@ -407,7 +388,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       'First tied step',
       'Second tied step',
     ]);
-    expect(parsed.blind_spots?.map(({ title }) => title)).toEqual(['Higher gap', 'Lower gap']);
   });
 
   it('rejects a recommendations array exceeding MAX_RECOMMENDATIONS under both schemas', () => {
@@ -431,30 +411,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(missingTitle)).toBe(false);
     expect(investigationStateSchema.safeParse(missingTitle).success).toBe(false);
-  });
-
-  it('rejects a blind spot missing its description under both schemas', () => {
-    const missingDescription = {
-      ...validPayload,
-      blind_spots: [{ title: 'No traces for the cart service', confidence: 0.8 }],
-    };
-
-    expect(validate(missingDescription)).toBe(false);
-    expect(investigationStateSchema.safeParse(missingDescription).success).toBe(false);
-  });
-
-  it('rejects a blind_spots array exceeding MAX_BLIND_SPOTS under both schemas', () => {
-    const tooManyBlindSpots = {
-      ...validPayload,
-      blind_spots: Array.from({ length: MAX_BLIND_SPOTS + 1 }, (_, index) => ({
-        title: `Gap ${index}`,
-        confidence: 0.8,
-        description: `Missing data ${index}`,
-      })),
-    };
-
-    expect(validate(tooManyBlindSpots)).toBe(false);
-    expect(investigationStateSchema.safeParse(tooManyBlindSpots).success).toBe(false);
   });
 
   it('accepts a payload with an impact entity carrying a name and evidence under both schemas', () => {
@@ -544,38 +500,36 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(withImpactSummary).success).toBe(true);
   });
 
-  it('accepts a timeline and sorts it chronologically', () => {
-    const withTimeline = {
+  it('accepts an impact with only a top-level summary and evidence under both schemas', () => {
+    const topLevelImpact = {
       ...validPayload,
-      timeline: [
-        { timestamp: '2026-07-28T14:05:00Z', type: 'symptom', summary: 'Error rate spikes.' },
-        { timestamp: '2026-07-28T14:02:00Z', type: 'change', summary: 'Deploy v2.3.1.' },
-        { timestamp: '2026-07-28T14:40:00Z', type: 'recovery', summary: 'Rollback completes.' },
-      ],
+      impact: {
+        summary: 'Checkout failed for ~30% of requests for 40 minutes in eu-west-1.',
+        evidence: {
+          description: 'Failed checkout requests per 5 minutes.',
+          chart: sampleChart,
+        },
+      },
     };
 
-    expect(validate(withTimeline)).toBe(true);
-    const parsed = investigationStateSchema.parse(withTimeline);
-    expect(parsed.timeline?.map(({ type }) => type)).toEqual(['change', 'symptom', 'recovery']);
+    expect(validate(topLevelImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(topLevelImpact).success).toBe(true);
   });
 
-  it('rejects a timeline event with an unknown type or exceeding MAX_TIMELINE_EVENTS', () => {
-    const badType = {
+  it('accepts an empty impact object under both schemas', () => {
+    const emptyImpact = { ...validPayload, impact: {} };
+
+    expect(validate(emptyImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(emptyImpact).success).toBe(true);
+  });
+
+  it('rejects top-level impact evidence without a description under both schemas', () => {
+    const invalidEvidence = {
       ...validPayload,
-      timeline: [{ timestamp: '2026-07-28T14:05:00Z', type: 'deploy', summary: 'x' }],
-    };
-    const tooMany = {
-      ...validPayload,
-      timeline: Array.from({ length: MAX_TIMELINE_EVENTS + 1 }, () => ({
-        timestamp: '2026-07-28T14:05:00Z',
-        type: 'other',
-        summary: 'x',
-      })),
+      impact: { summary: 'Checkout failed.', evidence: { chart: sampleChart } },
     };
 
-    for (const payload of [badType, tooMany]) {
-      expect(validate(payload)).toBe(false);
-      expect(investigationStateSchema.safeParse(payload).success).toBe(false);
-    }
+    expect(validate(invalidEvidence)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidEvidence).success).toBe(false);
   });
 });

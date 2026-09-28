@@ -6,11 +6,9 @@
  */
 
 import type {
-  InvestigationBlindSpot,
   InvestigationHypothesis,
   InvestigationImpact,
   InvestigationRecommendation,
-  InvestigationTimelineEvent,
   Severity,
 } from '@kbn/significant-events-schema';
 import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
@@ -119,9 +117,7 @@ export interface InvestigationStructuredOutput {
   severity?: Severity;
   hypotheses?: InvestigationHypothesis[];
   recommendations?: InvestigationRecommendation[];
-  blind_spots?: InvestigationBlindSpot[];
   impact?: InvestigationImpact;
-  timeline?: InvestigationTimelineEvent[];
 }
 
 /** Body of PATCH /internal/nightshift/investigations/{id}. */

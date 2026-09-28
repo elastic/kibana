@@ -19,20 +19,10 @@
       "title": "Single investigation path",
       "impact": {
         "summary": "Checkout failed for roughly 30% of requests for 40 minutes.",
-        "entities": [
-          {
-            "name": "checkout-service",
-            "type": "service"
-          }
-        ]
-      },
-      "timeline": [
-        {
-          "timestamp": "2026-09-21T00:00:00.000Z",
-          "type": "change",
-          "summary": "Deploy v2.3.1 rolled out."
+        "evidence": {
+          "description": "Failed checkout requests per 5 minutes."
         }
-      ]
+      }
     }
   ]
 }

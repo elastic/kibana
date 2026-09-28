@@ -75,11 +75,11 @@ describe('Nightshift investigation workflow', () => {
       })
     );
     expect(persistCompleted.with?.body).not.toHaveProperty('trigger_feedback');
+    expect(persistCompleted.with?.body).not.toHaveProperty('blind_spots');
+    expect(persistCompleted.with?.body).not.toHaveProperty('timeline');
     expect(persistCompleted.with?.body).toEqual(
       expect.objectContaining({
-        blind_spots: '${{ steps.investigate.output.structured_output.blind_spots }}',
         impact: '${{ steps.investigate.output.structured_output.impact }}',
-        timeline: '${{ steps.investigate.output.structured_output.timeline }}',
       })
     );
     expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');

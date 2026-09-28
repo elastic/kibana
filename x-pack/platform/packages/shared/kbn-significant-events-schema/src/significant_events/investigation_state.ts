@@ -12,7 +12,6 @@ import {
   MAX_MEDIUM_STRING_LENGTH,
   MAX_SHORT_STRING_LENGTH,
   MAX_TEXT_LENGTH,
-  MAX_TIMESTAMP_LENGTH,
   MAX_TITLE_LENGTH,
 } from './constants';
 
@@ -128,50 +127,22 @@ export const investigationImpactEntitySchema = z.object({
 });
 export type InvestigationImpactEntity = z.infer<typeof investigationImpactEntitySchema>;
 
+/**
+ * Impact of the investigated issue. The top-level `summary` and `evidence` are the primary account;
+ * `entities` only lists affected services or components when the data clearly points at them.
+ */
 export const investigationImpactSchema = z.object({
   /**
    * Business-facing account of the impact: what was affected, how badly, for how long, and how
    * broadly (users, requests, regions). Lets a reader prioritise and explain the incident.
    */
   summary: z.string().max(MAX_TEXT_LENGTH).optional(),
-  entities: z.array(investigationImpactEntitySchema).max(MAX_IMPACT_ENTITIES),
+  /** One evidence artifact backing the summary — ideally a chart of the user-facing failure signal. */
+  evidence: investigationEvidenceSchema.optional(),
+  /** Affected services or components, listed only when strongly indicated by the data. */
+  entities: z.array(investigationImpactEntitySchema).max(MAX_IMPACT_ENTITIES).optional(),
 });
 export type InvestigationImpact = z.infer<typeof investigationImpactSchema>;
-
-/** Max timeline events an investigation can emit. Keep in sync with the YAML maxItems. */
-export const MAX_TIMELINE_EVENTS = 20;
-
-export const INVESTIGATION_TIMELINE_EVENT_TYPES = [
-  'change',
-  'symptom',
-  'alert',
-  'recovery',
-  'other',
-] as const;
-
-/**
- * One relevant event in the investigated system — a deploy or config change, the onset of a
- * symptom, an alert firing, a recovery. Not the investigation's own steps.
- */
-export const investigationTimelineEventSchema = z.object({
-  /** When it happened, as an ISO 8601 timestamp. */
-  timestamp: z.string().max(MAX_TIMESTAMP_LENGTH),
-  type: z.enum(INVESTIGATION_TIMELINE_EVENT_TYPES),
-  /** What happened, as one short plain-text sentence. */
-  summary: z.string().max(MAX_MEDIUM_STRING_LENGTH),
-});
-export type InvestigationTimelineEvent = z.infer<typeof investigationTimelineEventSchema>;
-
-const timestampSortKey = (timestamp: string): number => {
-  const parsed = Date.parse(timestamp);
-  return Number.isNaN(parsed) ? Number.POSITIVE_INFINITY : parsed;
-};
-
-/** Chronological order; events with unparseable timestamps keep their order at the end. */
-const sortByTimestamp = (events: InvestigationTimelineEvent[]): InvestigationTimelineEvent[] =>
-  [...events].sort(
-    (first, second) => timestampSortKey(first.timestamp) - timestampSortKey(second.timestamp)
-  );
 
 /** Max evidence entries per hypothesis. Keep in sync with the YAML maxItems. */
 export const MAX_HYPOTHESIS_EVIDENCE = 3;
@@ -219,25 +190,6 @@ export const investigationRecommendationSchema = z.object({
   code: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 export type InvestigationRecommendation = z.infer<typeof investigationRecommendationSchema>;
-
-/** Max blind spot entries a current investigation can emit. Keep in sync with YAML maxItems. */
-export const MAX_BLIND_SPOTS = 3;
-
-/**
- * A signal the agent wanted but could not access (e.g. missing instrumentation) — an actionable
- * knowledge gap, not an incident-specific fact. Structured so consumers don't have to split a
- * "title · description" sentence themselves.
- */
-export const investigationBlindSpotSchema = z.object({
-  /** The missing data source or access, named concisely as plain text with no Markdown or HTML.
-   * Put explanations and links in `description`. */
-  title: z.string().max(MAX_MEDIUM_STRING_LENGTH),
-  /** How strongly the findings support that closing this gap would materially improve the investigation. */
-  confidence: investigationItemConfidenceSchema,
-  /** Why this gap mattered to the investigation. */
-  description: z.string().max(MAX_TEXT_LENGTH),
-});
-export type InvestigationBlindSpot = z.infer<typeof investigationBlindSpotSchema>;
 
 /** Max hypotheses an investigation can track. Keep in sync with the YAML maxItems. */
 export const MAX_HYPOTHESES = 50;
@@ -295,28 +247,9 @@ export const investigationStateSchema = z.object({
     .overwrite(sortByConfidence)
     .optional(),
   /**
-   * Actionable knowledge gaps discovered during the investigation. Replaces the legacy free-text
-   * `gaps_found` string array, which this schema ignores.
-   */
-  blind_spots: z
-    .array(investigationBlindSpotSchema)
-    .max(MAX_BLIND_SPOTS)
-    .overwrite(sortByConfidence)
-    .optional(),
-  /**
-   * Structured account of which services or components were impacted. Optional so existing
-   * persisted investigations remain valid. Seeded from alert grouping or sig event causal
-   * features; finalized after hypotheses settle. At most 10 entries; service-level preferred.
+   * Structured account of the impact: a summary and evidence, plus the affected entities when
+   * strongly indicated. Optional so existing persisted investigations remain valid.
    */
   impact: investigationImpactSchema.optional(),
-  /**
-   * Chronological list of the relevant events in the investigated system (changes, symptoms,
-   * alerts, recoveries). Optional so existing persisted investigations remain valid.
-   */
-  timeline: z
-    .array(investigationTimelineEventSchema)
-    .max(MAX_TIMELINE_EVENTS)
-    .overwrite(sortByTimestamp)
-    .optional(),
 });
 export type InvestigationState = z.infer<typeof investigationStateSchema>;

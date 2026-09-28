@@ -8,11 +8,9 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
-  MAX_BLIND_SPOTS,
   MAX_HYPOTHESES,
   MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
-  MAX_TIMELINE_EVENTS,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   SEVERITY_OPTIONS,
@@ -29,6 +27,7 @@ export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
 const MAX_ISO_DATE_LENGTH = 64;
 const LEGACY_MAX_TRIGGER_FEEDBACK = 3;
+const LEGACY_MAX_BLIND_SPOTS = 3;
 
 const isoDateStringSchema = schema.string({
   maxLength: MAX_ISO_DATE_LENGTH,
@@ -73,7 +72,7 @@ const investigationAttributesSchemaBase = schema.object({
   severity: schema.maybe(enumOf(SEVERITY_OPTIONS)),
   hypotheses: opaqueArray(MAX_HYPOTHESES),
   recommendations: opaqueArray(MAX_RECOMMENDATIONS),
-  blind_spots: opaqueArray(MAX_BLIND_SPOTS),
+  blind_spots: opaqueArray(LEGACY_MAX_BLIND_SPOTS),
   conversation_id: optionalKeyword,
   impact: schema.maybe(
     schema.object({
@@ -96,17 +95,21 @@ const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extend
   title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
 });
 
-// Adds the impact narrative and the timeline. Neither is queried, so both stay unmapped.
+// Adds the impact summary and evidence, makes impact entities optional, and drops blind spots.
+// None of these are queried beyond the existing flattened `impact` mapping.
 const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends({
+  blind_spots: undefined,
   impact: schema.maybe(
     schema.object({
       summary: optionalText,
-      entities: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
-        maxSize: MAX_IMPACT_ENTITIES,
-      }),
+      evidence: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+      entities: schema.maybe(
+        schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+          maxSize: MAX_IMPACT_ENTITIES,
+        })
+      ),
     })
   ),
-  timeline: opaqueArray(MAX_TIMELINE_EVENTS),
 });
 
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {

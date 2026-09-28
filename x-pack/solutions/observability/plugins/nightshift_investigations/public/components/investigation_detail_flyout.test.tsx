@@ -155,11 +155,8 @@ describe('InvestigationDetailFlyout', () => {
         conclusion: 'The 12:02 deploy shrank the connection pool.',
         impact: {
           summary: 'Order placement failed for 40 minutes in all regions.',
-          entities: [{ name: 'checkout-service', type: 'service' }],
+          evidence: { description: 'Failed order placements per 5 minutes.' },
         },
-        timeline: [
-          { timestamp: '2026-09-15T12:02:00.000Z', type: 'change', summary: 'Deploy v2.3.1.' },
-        ],
         hypotheses: [
           {
             candidate: 'Connection pool exhaustion',
@@ -177,12 +174,11 @@ describe('InvestigationDetailFlyout', () => {
     expect(
       screen.getByText('Order placement failed for 40 minutes in all regions.')
     ).toBeInTheDocument();
+    expect(screen.getByTestId('investigationOutputImpactEvidence')).toHaveTextContent(
+      'Failed order placements per 5 minutes.'
+    );
     expect(screen.getByText('Conclusion')).toBeInTheDocument();
     expect(screen.getByText('Investigation')).toBeInTheDocument();
-    expect(screen.getByText('Timeline')).toBeInTheDocument();
-    expect(screen.getByTestId('investigationOutputTimelineEvent-change')).toHaveTextContent(
-      'Deploy v2.3.1.'
-    );
     expect(screen.getByTestId('nightshiftInvestigationDetailFlyoutSeverity')).toHaveTextContent(
       'High'
     );

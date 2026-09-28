@@ -312,45 +312,12 @@ steps:
               required:
                 - title
                 - confidence
-          blind_spots:
-            type: array
-            description: >
-              Actionable knowledge gaps discovered during this investigation — data sources that were
-              missing or inaccessible and would have helped diagnose the issue. Each item names the
-              missing data source and states why the gap mattered. Do not include incident-specific
-              observations; reduce the finding to what data source is missing and why it matters.
-              Score how strongly closing each gap would materially improve the investigation, sort by
-              confidence descending, and return only the 3 strongest items.
-            maxItems: 3
-            items:
-              type: object
-              properties:
-                title:
-                  type: string
-                  maxLength: 512
-                  description: >
-                    The missing data source or access, named concisely as plain text. Do not use
-                    Markdown or HTML, including links, emphasis, backticks, headings, lists, or code
-                    fences. Put explanations and links in description.
-                confidence:
-                  type: number
-                  minimum: 0
-                  maximum: 1
-                  description: How strongly the findings support that closing this gap would materially improve the investigation.
-                description:
-                  type: string
-                  maxLength: 10000
-                  description: Why this gap mattered to the investigation.
-              required:
-                - title
-                - confidence
-                - description
           impact:
             type: object
             description: >
-              Structured account of the impact. Prefer service-level entries. Each entity may carry
-              one evidence artifact; prefer a chart of that entity's failure signal. Omit only when
-              no signals establish impact.
+              Structured account of the impact. Lead with summary and evidence; list entities only
+              when the data clearly points at specific services or components. Omit only when no
+              signals establish impact.
             properties:
               summary:
                 type: string
@@ -358,8 +325,118 @@ steps:
                 description: >
                   Business-facing account of the impact in plain prose: what was affected, how badly,
                   for how long, and how broadly (users, requests, regions), backed by the evidence.
+              evidence:
+                description: >
+                  One artifact backing the impact summary. Prefer a chart of the user-facing failure
+                  signal (error rate, failed requests, latency), with a short Markdown description.
+                type: object
+                properties:
+                  description:
+                    type: string
+                    maxLength: 10000
+                    description: >
+                      Markdown explaining what was observed and why it bears on the claim. Use tables for small
+                      result sets and links only to URLs a tool actually returned. No images, headings, or HTML.
+                  chart:
+                    type: object
+                    description: >
+                      Optional static chart of the observation. Every value must be copied from query or tool
+                      output you actually have; never estimate, interpolate, or invent data points.
+                    properties:
+                      type:
+                        type: string
+                        enum: [line, bar]
+                        description: Line charts for values over time, bar charts for comparisons or counts.
+                      title:
+                        type: string
+                        maxLength: 255
+                      x_axis:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum: [time, category]
+                            description: '"time" when x values are ISO 8601 timestamps, "category" for labels.'
+                          label:
+                            type: string
+                            maxLength: 128
+                        required:
+                          - type
+                      y_axis:
+                        type: object
+                        properties:
+                          label:
+                            type: string
+                            maxLength: 128
+                          unit:
+                            type: string
+                            enum: [number, percent, bytes, ms, s]
+                            description: How y values are formatted. Percent values are on a 0-100 scale.
+                      stacked:
+                        type: boolean
+                        description: Stack the series on top of each other. Only for bar charts.
+                      series:
+                        type: array
+                        minItems: 1
+                        maxItems: 5
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              maxLength: 128
+                            points:
+                              type: array
+                              maxItems: 100
+                              description: Data points in x order. Downsample to at most 100 points per series.
+                              items:
+                                type: object
+                                properties:
+                                  x:
+                                    type: string
+                                    maxLength: 128
+                                    description: ISO 8601 timestamp for a time axis, or the category label.
+                                  y:
+                                    type: number
+                                required:
+                                  - x
+                                  - y
+                          required:
+                            - name
+                            - points
+                      annotations:
+                        type: array
+                        maxItems: 5
+                        description: Marks key moments such as a deploy or the incident onset.
+                        items:
+                          type: object
+                          properties:
+                            x:
+                              type: string
+                              maxLength: 128
+                            x_end:
+                              type: string
+                              maxLength: 128
+                              description: When set, highlights the range from x to x_end instead of a single point.
+                            label:
+                              type: string
+                              maxLength: 255
+                          required:
+                            - x
+                            - label
+                    required:
+                      - type
+                      - title
+                      - x_axis
+                      - y_axis
+                      - series
+                required:
+                  - description
               entities:
                 type: array
+                description: >
+                  Affected services or components, only when strongly indicated by the data. Prefer
+                  service-level entries. Leave it out rather than guessing.
                 maxItems: 10
                 items:
                   type: object
@@ -382,7 +459,7 @@ steps:
                       maxLength: 255
                     evidence:
                       description: >
-                        One artifact linking this entity to the investigation. Prefer a chart of the
+                        Optional artifact linking this entity to the impact. Prefer a chart of the
                         failure signal for this entity, with a short Markdown description as its label.
                       type: object
                       properties:
@@ -489,34 +566,6 @@ steps:
                         - description
                   required:
                     - name
-            required:
-              - entities
-          timeline:
-            type: array
-            maxItems: 20
-            description: >
-              Chronological list of the relevant events in the investigated system — deploys and
-              config changes, the onset of symptoms, alerts firing, recoveries — not the steps of
-              your investigation. Only include events you observed in the data, with the timestamp
-              the data reported.
-            items:
-              type: object
-              properties:
-                timestamp:
-                  type: string
-                  maxLength: 64
-                  description: When it happened, as an absolute ISO 8601 timestamp.
-                type:
-                  type: string
-                  enum: [change, symptom, alert, recovery, other]
-                summary:
-                  type: string
-                  maxLength: 512
-                  description: What happened, as one short plain-text sentence.
-              required:
-                - timestamp
-                - type
-                - summary
         required:
           - summary
           - hypotheses
@@ -541,9 +590,7 @@ steps:
         severity: '${{ steps.investigate.output.structured_output.severity }}'
         hypotheses: ${{ steps.investigate.output.structured_output.hypotheses }}
         recommendations: ${{ steps.investigate.output.structured_output.recommendations }}
-        blind_spots: ${{ steps.investigate.output.structured_output.blind_spots }}
         impact: ${{ steps.investigate.output.structured_output.impact }}
-        timeline: ${{ steps.investigate.output.structured_output.timeline }}
         conversation_id: '${{ steps.investigate.output.conversation_id }}'
     on-failure:
       retry:

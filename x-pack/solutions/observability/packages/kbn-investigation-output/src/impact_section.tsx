@@ -16,12 +16,14 @@ export interface ImpactSectionProps {
 }
 
 /**
- * What the investigation found was affected: the impact narrative, then each impacted entity with
- * the evidence (usually a chart of its failure signal) that ties it to the incident.
+ * What the investigation found was affected: the impact narrative and the evidence backing it,
+ * then any impacted entities with the evidence that ties each of them to the incident.
  */
-export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact: { summary, entities } }) => {
+export const ImpactSection: React.FC<ImpactSectionProps> = ({
+  impact: { summary, evidence, entities = [] },
+}) => {
   const hasSummary = Boolean(summary?.trim());
-  if (!hasSummary && entities.length === 0) {
+  if (!hasSummary && !evidence && entities.length === 0) {
     return null;
   }
 
@@ -32,9 +34,17 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact: { summary,
           {summary ?? ''}
         </EvidenceMarkdown>
       )}
-      {entities.length > 0 && (
+      {evidence && (
         <>
           {hasSummary && <EuiSpacer size="s" />}
+          <div data-test-subj="investigationOutputImpactEvidence">
+            <EvidenceItem evidence={evidence} />
+          </div>
+        </>
+      )}
+      {entities.length > 0 && (
+        <>
+          {(hasSummary || evidence) && <EuiSpacer size="s" />}
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             {entities.map((entity, index) => (
               <EuiFlexItem

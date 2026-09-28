@@ -59,13 +59,6 @@ const completeState: InvestigationState = {
       description: 'Revert commit abc123 and monitor error rate.',
     },
   ],
-  blind_spots: [
-    {
-      title: 'Missing trace coverage',
-      confidence: 0.8,
-      description: 'No spans for payment gateway calls.',
-    },
-  ],
 };
 
 const renderInvestigation = (
