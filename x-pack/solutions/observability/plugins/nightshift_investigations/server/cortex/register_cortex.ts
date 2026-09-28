@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceSetup,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
@@ -14,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { createCortexPageStore, type CortexPageStore } from './page_store';
@@ -51,21 +57,45 @@ export const registerCortexAiIndex = (
   });
 };
 
+/** gRPC status the sandbox session rethrows when its pod refuses or drops the connection. */
+const GRPC_UNAVAILABLE = 14;
+
+const isSandboxUnavailable = (err: unknown): err is Error & { code: number } =>
+  err instanceof Error && (err as Error & { code?: number }).code === GRPC_UNAVAILABLE;
+
 export const hydrateCortexWorkspace = async ({
   session,
   esClient,
   spaceId,
   signal,
+  analytics,
+  conversationId,
   logger,
 }: {
   session: SandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
+  analytics: AnalyticsServiceSetup;
+  conversationId?: string;
   logger: Logger;
 }): Promise<void> => {
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  await materializeCortex({ session, store, logger });
+  const telemetry = createCortexTelemetry({ analytics, conversationId, logger });
+  const materialize = () => materializeCortex({ session, store, telemetry, logger });
+
+  try {
+    await materialize();
+  } catch (err) {
+    if (!isSandboxUnavailable(err) || signal?.aborted) throw err;
+
+    // Hydrate is usually the conversation's first sandbox call, so it is the one that reaches a
+    // freshly allocated pod before that pod accepts connections. The sandbox drops the session on
+    // UNAVAILABLE and allocates a new pod for the next call, so a single retry lands on a pod
+    // that is ready. Without it the run continues with no wiki, because nothing else seeds it.
+    logger.warn(`Cortex hydrate reached an unavailable sandbox, retrying once: ${err.message}`);
+    await materialize();
+  }
 };
 
 export const runCortexOptimize = async ({
@@ -76,6 +106,9 @@ export const runCortexOptimize = async ({
   esClient,
   spaceId,
   signal,
+  analytics,
+  conversationId,
+  roundId,
   getInference,
   getSearchInferenceEndpoints,
   logger,
@@ -87,6 +120,9 @@ export const runCortexOptimize = async ({
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
+  analytics: AnalyticsServiceSetup;
+  conversationId?: string;
+  roundId?: string;
   getInference: () => InferenceServerStart | undefined;
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
   logger: Logger;
@@ -127,6 +163,12 @@ export const runCortexOptimize = async ({
     proposeEdits: createLlmProposeCortexEdits({ inferenceClient, connectorId }),
     userMessage,
     assistantMessage,
+    telemetry: createCortexTelemetry({
+      analytics,
+      conversationId,
+      roundId,
+      logger,
+    }),
     logger,
   });
 };
