@@ -301,6 +301,7 @@
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
     "@kbn/workflows-extensions",
+    "@kbn/alertzero-common",
     "@kbn/shared-ux-ai-components",
     "@kbn/shared-ux-markdown",
     "@kbn/controls-schemas",
@@ -321,5 +322,6 @@
     "@kbn/core-execution-context-common",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
+    "@kbn/test-es-server",
   ]
 }

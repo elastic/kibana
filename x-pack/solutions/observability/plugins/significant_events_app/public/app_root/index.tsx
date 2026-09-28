@@ -15,7 +15,6 @@ import { significantEventsAppRouter } from '../routes/config';
 import { significantEventsQueryClient } from '../query_client';
 import type { SignificantEventsAppStartDependencies } from '../types';
 import type { SignificantEventsAppServices } from '../services/types';
-import { DateRangeRedirect } from './date_range_redirect';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
 
 export function AppRoot({
@@ -48,11 +47,9 @@ export function AppRoot({
         {/* @ts-expect-error upgrade typescript v5.4.5 */}
         <RouterProvider history={history} router={significantEventsAppRouter}>
           <UpdateExecutionContextOnRouteChange>
-            <DateRangeRedirect>
-              <PerformanceContextProvider>
-                <RouteRenderer />
-              </PerformanceContextProvider>
-            </DateRangeRedirect>
+            <PerformanceContextProvider>
+              <RouteRenderer />
+            </PerformanceContextProvider>
           </UpdateExecutionContextOnRouteChange>
         </RouterProvider>
       </QueryClientProvider>

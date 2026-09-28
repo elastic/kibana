@@ -1409,6 +1409,7 @@ describe('injectChildWorkflowSteps', () => {
       stepType: string;
       stepExecutionId: string | null;
       status: ExecutionStatus | null;
+      isRetryAttempt: boolean;
       children: any[];
     }> = {}
   ) => ({
@@ -1532,5 +1533,116 @@ describe('injectChildWorkflowSteps', () => {
     expect(result[0].children).toHaveLength(1);
     expect(result[0].children[0].stepId).toBe('real_step');
     expect(childStepExecutions).toHaveLength(1);
+  });
+
+  it('lifts parent siblings that were nested under workflow.execute', () => {
+    const tree = [
+      makeTreeNode({
+        stepId: 'run_child',
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+        children: [
+          makeTreeNode({
+            stepId: 'after_child',
+            stepType: 'console',
+            stepExecutionId: 'after-id',
+          }),
+        ],
+      }),
+    ];
+
+    const childMap: ChildWorkflowExecutionsMap = new Map([
+      [
+        'wf-exec-step-1',
+        {
+          parentStepExecutionId: 'wf-exec-step-1',
+          workflowId: 'child-wf',
+          workflowName: 'Child',
+          executionId: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            createStepExecution({
+              id: 'child-step-1',
+              stepId: 'lookup_host',
+              stepType: 'data.set',
+              status: ExecutionStatus.COMPLETED,
+            }),
+          ],
+        },
+      ],
+    ]);
+
+    const { tree: result } = injectChildWorkflowSteps(tree, childMap, false);
+
+    expect(result.map((node) => node.stepId)).toEqual(['run_child', 'after_child']);
+    expect(result[0].children.map((child) => child.stepId)).toEqual(['lookup_host']);
+    expect(result[0].children[0].isChildWorkflowStep).toBe(true);
+    expect(result[1].stepId).toBe('after_child');
+    expect(result[1].isChildWorkflowStep).toBeUndefined();
+  });
+
+  it('lifts parent siblings from a retry-parent execute whose stepExecutionId is null', () => {
+    const tree = [
+      makeTreeNode({
+        stepId: 'run_child',
+        stepType: 'workflow.execute',
+        stepExecutionId: null,
+        children: [
+          makeTreeNode({
+            stepId: 'run_child',
+            stepType: 'workflow.execute',
+            stepExecutionId: 'attempt-1-id',
+            isRetryAttempt: true,
+          }),
+          makeTreeNode({
+            stepId: 'run_child',
+            stepType: 'workflow.execute',
+            stepExecutionId: 'attempt-2-id',
+            isRetryAttempt: true,
+          }),
+          makeTreeNode({
+            stepId: 'after_child',
+            stepType: 'console',
+            stepExecutionId: 'after-id',
+          }),
+        ],
+      }),
+    ];
+
+    const childMap: ChildWorkflowExecutionsMap = new Map([
+      [
+        'attempt-2-id',
+        {
+          parentStepExecutionId: 'attempt-2-id',
+          workflowId: 'child-wf',
+          workflowName: 'Child',
+          executionId: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            createStepExecution({
+              id: 'child-step-1',
+              stepId: 'lookup_host',
+              stepType: 'data.set',
+              status: ExecutionStatus.COMPLETED,
+            }),
+          ],
+        },
+      ],
+    ]);
+
+    const { tree: result } = injectChildWorkflowSteps(tree, childMap, false);
+
+    expect(result.map((node) => node.stepId)).toEqual(['run_child', 'after_child']);
+    expect(result[0].stepExecutionId).toBeNull();
+    expect(result[0].children.map((child) => child.stepId)).toEqual([
+      'lookup_host',
+      'run_child',
+      'run_child',
+    ]);
+    expect(result[0].children[0].isChildWorkflowStep).toBe(true);
+    expect(result[0].children[1].isRetryAttempt).toBe(true);
+    expect(result[0].children[2].isRetryAttempt).toBe(true);
+    expect(result[1].stepId).toBe('after_child');
+    expect(result[1].isChildWorkflowStep).toBeUndefined();
   });
 });

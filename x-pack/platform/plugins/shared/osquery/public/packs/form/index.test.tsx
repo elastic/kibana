@@ -1066,18 +1066,18 @@ describe('PackForm', () => {
 
     it('emits selected min_osquery_version and result_type on create', async () => {
       mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
-      const { getByTestId, getByRole, container } = renderWithContext(
-        <PackForm editMode={false} />
-      );
+      const { getByTestId, container } = renderWithContext(<PackForm editMode={false} />);
 
       const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
       fireEvent.change(nameInput, { target: { value: 'v5-pack' } });
 
       fireEvent.click(within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput'));
-      fireEvent.click(getByRole('option', { name: '5.0.1' }));
+      fireEvent.click(
+        within(getByTestId('comboBoxOptionsList pack-version-field-optionsList')).getByText('5.0.1')
+      );
 
       fireEvent.click(getByTestId('pack-result-type-field'));
-      fireEvent.click(getByRole('option', { name: /^Differential$/ }));
+      fireEvent.click(getByTestId('result-type-option-differential'));
 
       fireEvent.click(getByTestId('save-pack-button'));
 
@@ -1098,14 +1098,14 @@ describe('PackForm', () => {
           q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
         },
       };
-      const { getByTestId, getByRole } = renderWithContext(
+      const { getByTestId } = renderWithContext(
         <PackForm editMode={true} defaultValue={packWithDefaults} />
       );
 
       fireEvent.click(getByTestId('comboBoxClearButton'));
 
       fireEvent.click(getByTestId('pack-result-type-field'));
-      fireEvent.click(getByRole('option', { name: /No pack default/ }));
+      fireEvent.click(getByTestId('result-type-option-none'));
 
       fireEvent.click(getByTestId('update-pack-button'));
 
