@@ -151,7 +151,7 @@ export const ScheduleSection = ({
       ) : null}
 
       <ScheduleTypeSelector
-        value={value.scheduleType}
+        value={effectiveScheduleType}
         onChange={handleTypeChange}
         lockedScheduleType={lockedScheduleType}
         disabled={disabled}

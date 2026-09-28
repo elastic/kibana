@@ -220,14 +220,16 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     return errors;
   }, [isRruleSchedulingEnabled, overridePackSchedule, schedule, originalStartDate, packSchedule]);
 
+  // The one mode this flyout is in, resolved the same way `ScheduleSection`
+  // resolves it (`lockedScheduleType ?? value.scheduleType`, where the locked
+  // type is this pack's). #272441 was three places deriving the mode
+  // differently, so everything mode-dependent here reads this.
+  const effectiveScheduleType = packSchedule?.schedule_type ?? schedule?.scheduleType;
+
   // The serializer strips `timeout` from the wire for any rrule-mode query
   // (beats reads `rrule_schedule.timeout`), so the control must be disabled for
   // ALL rrule queries — inherited and override alike — never just inherited.
-  // Derive from the resolved mode rather than the override flag.
-  const resolvedScheduleType = overridePackSchedule
-    ? schedule?.scheduleType
-    : packSchedule?.schedule_type;
-  const isTimeoutDisabledForRrule = isRruleSchedulingEnabled && resolvedScheduleType === 'rrule';
+  const isTimeoutDisabledForRrule = isRruleSchedulingEnabled && effectiveScheduleType === 'rrule';
   const timeoutFieldProps = useMemo(
     () =>
       isTimeoutDisabledForRrule
@@ -276,10 +278,15 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const onSubmit = useCallback(
     async (payload: PackQueryFormData) => {
       // Final guard: the controlled schedule object doesn't register
-      // with RHF, so re-validate here and abort on error.
+      // with RHF, so re-validate here and abort on error. Checks the same
+      // conditions as `scheduleErrors` — a mode the pack does not use has to
+      // abort here too, or the serializer drops the override without a word.
       if (payload.override_pack_schedule && payload.schedule) {
         const errors = validateScheduleFormData(payload.schedule, { originalStartDate });
-        if (errors.length > 0) {
+        if (
+          errors.length > 0 ||
+          hasStaleOverrideMode(packSchedule, payload.schedule.scheduleType)
+        ) {
           return;
         }
       }
@@ -288,7 +295,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       await onSave(serializedData);
       onClose();
     },
-    [serializer, onSave, onClose, originalStartDate]
+    [serializer, onSave, onClose, originalStartDate, packSchedule]
   );
 
   const handleSaveClick = useCallback(() => {
