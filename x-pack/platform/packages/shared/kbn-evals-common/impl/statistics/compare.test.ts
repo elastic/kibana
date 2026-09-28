@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Direction, EvaluationScoreDocument } from '@kbn/evals-common';
-import { computePairedTTestResults, pairScores } from './statistical_analysis';
+import type { Direction, EvaluationScoreDocument } from '../schemas/common_attributes.gen';
+import { computePairedTTestResults } from './compare';
+import { pairScores } from './pairing';
 
 const baseTaskModel = {
   id: 'gpt-4',
