@@ -231,9 +231,9 @@ describe('LandingPage', () => {
 
     // Use a custom queryClient and core so we can keep PATCHes in-flight.
     const resolvers: Array<() => void> = [];
-    const httpPatch = jest.fn().mockImplementation(
-      () => new Promise((resolve) => resolvers.push(() => resolve({})))
-    );
+    const httpPatch = jest
+      .fn()
+      .mockImplementation(() => new Promise((resolve) => resolvers.push(() => resolve({}))));
     const coreStart = coreMock.createStart();
     (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
     const core = { ...coreStart, http: { ...coreStart.http, patch: httpPatch } };
