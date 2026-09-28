@@ -144,9 +144,14 @@ describe('WorkflowEventLogger', () => {
   it('writes to console logger when enabled', () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
-    const { workflowLogger } = createLoggerUnderTest(logsRepository, logger, {}, {
-      enableConsoleLogging: true,
-    });
+    const { workflowLogger } = createLoggerUnderTest(
+      logsRepository,
+      logger,
+      {},
+      {
+        enableConsoleLogging: true,
+      }
+    );
 
     workflowLogger.logWarn('watch out');
     workflowLogger.logDebug('debugging');

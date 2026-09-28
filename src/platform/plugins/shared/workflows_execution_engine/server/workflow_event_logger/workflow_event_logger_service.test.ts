@@ -8,9 +8,9 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { LogsRepository } from '../repositories/logs_repository';
 import { WorkflowEventLoggerService } from './workflow_event_logger_service';
 import { WorkflowEventQueue } from './workflow_event_queue';
+import type { LogsRepository } from '../repositories/logs_repository';
 
 const createLoggerMock = () =>
   ({
