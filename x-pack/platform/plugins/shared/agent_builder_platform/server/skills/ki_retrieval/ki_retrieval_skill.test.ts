@@ -42,9 +42,18 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content).not.toContain('"filter"');
   });
 
-  it('leaves lifecycle handling to the query tool', () => {
-    expect(kiRetrievalSkill.content).toContain('lifecycle handling never belongs in your query');
-    expect(kiRetrievalSkill.content).not.toContain('governance.lifecycle.status');
+  it('opens every template with the lifecycle filters the query tool also applies', () => {
+    const templates = kiRetrievalSkill.content.match(
+      /FROM <targets> METADATA _id, _index, _score\n/g
+    );
+    const withLifecycle = kiRetrievalSkill.content.match(
+      /FROM <targets> METADATA _id, _index, _score\n\| WHERE governance\.lifecycle\.status IS NULL OR governance\.lifecycle\.status == "active"\n\| WHERE expires_at IS NULL OR expires_at > NOW\(\)\n/g
+    );
+
+    expect(templates?.length).toBeGreaterThan(0);
+    expect(withLifecycle?.length).toBe(templates?.length);
+    expect(kiRetrievalSkill.content).toContain('plus `DROP governance.*`');
+    expect(kiRetrievalSkill.content).toContain('names neither `governance` nor `expires_at`');
   });
 
   it('has no referencedContent', () => {

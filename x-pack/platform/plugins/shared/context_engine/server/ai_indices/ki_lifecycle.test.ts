@@ -13,7 +13,9 @@ const index = (value: string): AiIndexDest => ({ type: 'index', value });
 const dataStream = (value: string): AiIndexDest => ({ type: 'data_stream', value });
 
 const LIFECYCLE =
-  'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW()';
+  'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW() | DROP governance.*';
+const LATEST_REVISION =
+  'EVAL id = COALESCE(id, _id) | INLINE STATS latest = MAX(@timestamp) BY id | WHERE @timestamp == latest | INLINE STATS latest_doc = MAX(_id) BY id | WHERE _id == latest_doc | DROP latest, latest_doc';
 
 const flat = (query: string) => query.replace(/\s+/g, ' ');
 
@@ -64,7 +66,7 @@ describe('applyKiLifecycle', () => {
     );
 
     expect(result).toBe(
-      `FROM ai-index-ds-support METADATA _id | EVAL id = COALESCE(id, _id) | INLINE STATS latest = MAX(@timestamp) BY id | WHERE @timestamp == latest | INLINE STATS latest_doc = MAX(_id) BY id | WHERE _id == latest_doc | DROP latest, latest_doc | ${LIFECYCLE} | KEEP title`
+      `FROM ai-index-ds-support METADATA _id | ${LATEST_REVISION} | ${LIFECYCLE} | KEEP title`
     );
     expect(Parser.parse(result).errors).toEqual([]);
   });
@@ -84,6 +86,31 @@ describe('applyKiLifecycle', () => {
         ])
       )
     ).toMatch(/^FROM ai-index-ds-support METADATA _score, _id \| EVAL/);
+  });
+
+  it('leaves lifecycle to a query that names a lifecycle field', () => {
+    const own = 'FROM ai-index-idx-support | WHERE governance.lifecycle.status == "deleted"';
+    expect(applyKiLifecycle(own, dests)).toBe(own);
+
+    const expiry = 'FROM ai-index-idx-support | WHERE expires_at < NOW() | KEEP title';
+    expect(applyKiLifecycle(expiry, dests)).toBe(expiry);
+
+    const provenance =
+      'FROM ai-index-idx-support | KEEP title, governance.provenance.created_by.uri';
+    expect(applyKiLifecycle(provenance, dests)).toBe(provenance);
+  });
+
+  it('still collapses revisions for a data stream query that names a lifecycle field', () => {
+    const result = flat(
+      applyKiLifecycle(
+        'FROM ai-index-ds-support | WHERE governance.lifecycle.status == "deleted" | KEEP id',
+        [dataStream('ai-index-ds-support')]
+      )
+    );
+
+    expect(result).toBe(
+      `FROM ai-index-ds-support METADATA _id | ${LATEST_REVISION} | WHERE governance.lifecycle.status == "deleted" | KEEP id`
+    );
   });
 
   it('leaves queries on unregistered indices untouched', () => {

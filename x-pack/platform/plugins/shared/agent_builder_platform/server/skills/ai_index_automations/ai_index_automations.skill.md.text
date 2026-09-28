@@ -24,8 +24,9 @@ Misquoting what an automation does is the most expensive mistake available here:
 on it inherits the error, and a reviewer who catches one stops trusting the rest. When several
 automations write to the same index, attribute an indicator to one by its
 `governance.provenance.created_by.uri`, which the steps stamp as `workflow://<workflow id>`, and
-confirm against the definition that writes to that destination and id pattern. If that does not
-settle it, say attribution was not established rather than guessing.
+confirm against the definition that writes to that destination and id pattern. Name that field in
+`KEEP`: `platform.context_engine.query_ai_indices` drops `governance` from any query that does not.
+If that does not settle it, say attribution was not established rather than guessing.
 
 The syntax these automations need — Liquid templating, `on-failure` handling, `if` conditions — is
 written out below, alongside the `context-engine` step contracts that no other skill or tool
@@ -542,11 +543,16 @@ server-side (never read an AI Index with `platform.core.execute_esql`):
 
 ```esql
 FROM <destination>
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | MV_EXPAND tags
 | WHERE tags == "ce-pilot-<runId>"
 | KEEP id, title, type, content, attributes, references
 | LIMIT 100
 ```
+
+The two lifecycle lines are what the tool adds to a query that omits them; they are written out so
+the query reads as what it returns.
 
 `MV_EXPAND tags` is not optional and is the one part of this worth memorizing. `tags` is a keyword
 array, an indicator carries several, and in ES|QL a scalar comparison like `==` skips multivalued
@@ -588,14 +594,16 @@ Then confirm, with `platform.context_engine.query_ai_indices` again:
 
 ```esql
 FROM <destination>
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | MV_EXPAND tags
 | WHERE tags == "ce-pilot-<runId>"
 | LIMIT 1
 ```
 
 It returns nothing once the cleanup has run, on an index and on a data stream alike: the tool
-reads only the newest revision per `id` and hides deleted ones, while the backing store still holds
-them. Do this for every `runId` you used, not only the last.
+reads only the newest revision per `id`, and the status filter hides the tombstones the backing
+store still holds. Do this for every `runId` you used, not only the last.
 
 **Strip the tag, then hand it back.** Remove the `ce-pilot-*` tag from the indicator's `tags` and
 the `ce-pilot-*` prefix from `ki_id`, and widen the `consts` bounds back to what the brief specified

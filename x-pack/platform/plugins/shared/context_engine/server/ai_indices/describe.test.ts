@@ -39,7 +39,7 @@ const fields = [
 
 const exampleQueriesBlock = [
   'Example queries (adapt field names for non-canonical indices)',
-  ...buildExampleQueries('ai-index-idx-support*').flatMap(({ title, esql }) => ['', title, esql]),
+  ...buildExampleQueries(aiIndex.dest).flatMap(({ title, esql }) => ['', title, esql]),
 ].join('\n');
 
 describe('describeAiIndex', () => {

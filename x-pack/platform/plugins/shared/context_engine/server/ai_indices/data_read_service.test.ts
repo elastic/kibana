@@ -92,7 +92,7 @@ describe('AiIndexDataReadService', () => {
       await service.query({ query: 'FROM ai-index-idx-support | KEEP title', limit: 10 });
 
       expect(esqlQuery.mock.calls[0][0].query.replace(/\s+/g, ' ')).toBe(
-        'FROM ai-index-idx-support | WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW() | KEEP title | LIMIT 10'
+        'FROM ai-index-idx-support | WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW() | DROP governance.* | KEEP title | LIMIT 10'
       );
     });
 

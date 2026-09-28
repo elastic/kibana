@@ -11,9 +11,7 @@ This skill is not about generating these KIs, that is a separate skill.
 
 Each AI index is queried through the ES|QL target listed for it: its backing index or data stream,
 matching `ai-index-*` for AI indices created in Kibana and `.ai-index-*` for the ones Elastic
-manages. `platform.context_engine.query_ai_indices` applies the lifecycle rules to every
-registered target it reads: it returns only current, active, unexpired KIs, and on a data stream
-only the newest revision of each KI, so lifecycle handling never belongs in your query.
+manages.
 
 The AI INDICES section of your instructions lists the targets available to this agent. When that
 section is absent, `platform.context_engine.list_ai_indices` returns the AI indices you can read
@@ -52,6 +50,8 @@ with `FIELD_EXTRACT` before filtering or keeping it:
 
 ```esql
 FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | WHERE type == "detection"
 | EVAL esql = FIELD_EXTRACT(attributes, "esql")
 | WHERE esql IS NOT NULL
@@ -68,10 +68,27 @@ need per-query filtering.
 
 A KI may be restricted to Kibana spaces through a nested privileges field that ES|QL cannot
 reference as a column. Run every AI-index query below through
-`platform.context_engine.query_ai_indices`, which applies the current space's scoping and the
-lifecycle rules server-side, and never through `platform.core.execute_esql`, which applies
-neither. Never write a space condition in ES|QL: it does not replace the server's scoping and can
-silently match nothing.
+`platform.context_engine.query_ai_indices`, which applies the current space's scoping
+server-side, and never through `platform.core.execute_esql`, which applies none. Never write a
+space condition in ES|QL: it does not replace the server's scoping and can silently match nothing.
+
+### Lifecycle
+
+A KI is retired by a tombstone (`governance.lifecycle.status: deleted`) or by an `expires_at` in
+the past, and on a data stream one KI is several revisions under the same `id`. Every template
+below opens with the two lifecycle filters, so the query reads as what it returns:
+
+```esql
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
+```
+
+`platform.context_engine.query_ai_indices` adds the same two filters plus `DROP governance.*` to
+any query on a registered target that names neither `governance` nor `expires_at`, and on a data
+stream target always keeps only the newest revision per `id`. Omitting the filters is therefore
+safe; writing them is not wrong. To read what the filters hide, name the field: a
+`WHERE governance.lifecycle.status == "deleted"` returns the tombstones, and a
+`KEEP ..., governance.provenance.created_by.uri` shows which automation wrote a KI.
 
 ---
 
@@ -83,6 +100,8 @@ either one:
 
 ```esql
 FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | STATS ki_count = COUNT(*) BY type
 | SORT ki_count DESC
 | LIMIT 10
@@ -90,6 +109,8 @@ FROM <targets> METADATA _id, _index, _score
 
 ```esql
 FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | STATS ki_count = COUNT(*) BY tags
 | SORT ki_count DESC
 | LIMIT 10
@@ -103,6 +124,8 @@ matches for a query distribute before narrowing:
 
 ```esql
 FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | STATS ki_count = COUNT(*) BY tags
 | SORT ki_count DESC
@@ -121,6 +144,8 @@ documents matching only one.
 
 ```esql
 FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | FORK
     ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
     ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
@@ -131,8 +156,8 @@ FROM <targets> METADATA _id, _index, _score
 ```
 
 `KEEP` is not optional. Without it the query also returns `_score`, `_id`, `_index`, `_fork`,
-`@timestamp`, `expires_at`, `governance`, `attributes` and `references` for every hit, which
-wastes the context the KIs are meant to save. `FUSE` and the sort use the `METADATA` fields
+`@timestamp`, `expires_at`, `attributes` and `references` for every hit, which wastes the context
+the KIs are meant to save. `FUSE` and the sort use the `METADATA` fields
 `_score`, `_id` and `_index` mid-pipeline; `KEEP` drops them once they have done their job. Add
 other fields to the `KEEP` list when you need them, for example a key from `attributes` you
 intend to filter on next.
@@ -148,6 +173,8 @@ keyword-only is a valid alternative:
 
 ```esql
 FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | SORT _score DESC, _id ASC
 | KEEP title, description, content, type, tags
@@ -160,6 +187,8 @@ To scope results to a specific type or tag, add a `WHERE` before `FORK`:
 
 ```esql
 FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | WHERE type == "index_metadata"
 | FORK
     ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )

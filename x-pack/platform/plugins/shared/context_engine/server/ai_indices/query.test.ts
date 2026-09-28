@@ -98,7 +98,7 @@ describe('queryAiIndices', () => {
     });
 
     expect(lastRequest().query.replace(/\s+/g, ' ')).toBe(
-      'FROM ai-index-idx-a | WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW() | KEEP title | LIMIT 5'
+      'FROM ai-index-idx-a | WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW() | DROP governance.* | KEEP title | LIMIT 5'
     );
   });
 

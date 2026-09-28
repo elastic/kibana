@@ -103,8 +103,10 @@ A **KI** is a structured fact stored in a searchable AI index or datastream (bac
 
 Agents retrieve through `platform.context_engine.query_ai_indices`, which returns only current,
 active, unexpired KIs: on a data stream the newest revision per `id`, never one whose
-`governance.lifecycle.status` is `deleted` or whose `expires_at` has passed. What that tool does
-not return is, for retrieval purposes, not in the index.
+`governance.lifecycle.status` is `deleted` or whose `expires_at` has passed, and with
+`governance` dropped. What that tool returns by default is, for retrieval purposes, the index.
+A query that names `governance` or `expires_at` keeps its own lifecycle handling, so diagnosis
+can read tombstones, expired KIs and provenance through the same tool.
 
 Each KI does two things:
 
@@ -397,7 +399,7 @@ Before proposing a change to something, read it.
   index actually holds, which is what determines whether an `empty_retrieval` means "missing
   content" or "content that exists under a name the agent did not guess". This is the step signals
   cannot substitute for. `governance.provenance.created_by.uri` on a KI names the automation that
-  wrote it.
+  wrote it; `KEEP` it to see it, since the tool drops `governance` otherwise.
 - **Sources, and the filter on them.** A coverage gap on data that is not in any source is a source
   problem, and a different fix from anything about generation. `ai-index-sources` covers how to
   tell those apart — an `esql` source is a query you can run, so run it with and without its filter

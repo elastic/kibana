@@ -122,5 +122,6 @@ id — never by indexing into the backing store directly.
 The current state is the newest document per `id`, dropped when that newest document's
 `governance.lifecycle.status` is `deleted` or its `expires_at` has passed. Read AI indices with
 `platform.context_engine.query_ai_indices`, which applies that rule and the space filter the
-backing store does not apply on its own; a plain `FROM ... | WHERE tags == ...` through any other
-tool returns every revision, deleted ones included.
+backing store does not apply on its own, and drops `governance` unless the query names it; a plain
+`FROM ... | WHERE tags == ...` through any other tool returns every revision, deleted ones
+included.

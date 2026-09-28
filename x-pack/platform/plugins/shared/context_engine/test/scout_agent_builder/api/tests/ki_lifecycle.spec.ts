@@ -137,6 +137,20 @@ apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.clas
     expect(columnValues(body, 'id')).toStrictEqual(['active', 'unexpired']);
   });
 
+  apiTest('drops governance unless the query names it', async ({ apiClient }) => {
+    const dropped = await run(apiClient, `FROM ${DEST} | LIMIT 1`);
+    const governanceColumns = dropped.columns
+      .map(({ name }) => name)
+      .filter((name) => name.startsWith('governance.'));
+    expect(governanceColumns).toStrictEqual([]);
+
+    const kept = await run(
+      apiClient,
+      `FROM ${DEST} | WHERE governance.lifecycle.status == "deleted" | KEEP id, governance.provenance.created_by.uri`
+    );
+    expect(kept.values).toStrictEqual([['deleted', 'workflow://scout']]);
+  });
+
   apiTest('applies the filter through a pattern and keeps the score', async ({ apiClient }) => {
     const body = await run(
       apiClient,

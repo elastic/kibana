@@ -69,11 +69,14 @@ and cannot be overridden:
 
 - **Lifecycle filter.** A query that reads a registered AI Index's backing
   store (by name, pattern, or as one of several `FROM` targets) gets the
-  knowledge indicator lifecycle rules inserted after `FROM`: only indicators
-  whose `governance.lifecycle.status` is unset or `active` and whose
-  `expires_at` is unset or in the future are returned. On a data stream, only
-  the newest revision of each `id` is considered (`METADATA _id` is added when
-  missing). Indices outside the registry are read as-is.
+  knowledge indicator lifecycle pipeline inserted after `FROM`: only
+  indicators whose `governance.lifecycle.status` is unset or `active` and
+  whose `expires_at` is unset or in the future are returned, and
+  `governance.*` is dropped from the result. A query that names `governance`
+  or `expires_at` itself keeps its own lifecycle handling and gets none of
+  that. On a data stream, only the newest revision of each `id` is considered
+  in either case (`METADATA _id` is added when missing). Indices outside the
+  registry are read as-is.
 - **Space filter.** Documents are visible when they carry no
   `permissions.kibana.privileges` element (public), or when one is scoped to
   the request's space or to `*`. The space comes from the request URL
@@ -119,6 +122,8 @@ Example queries (adapt field names for non-canonical indices)
 
 Full text search, lexical and semantic fused together (?query)
 FROM ai-index-idx-sales-knowledge METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | FORK
     ( WHERE MATCH(title, ?query) OR ... | SORT _score DESC | LIMIT 20 )
     ( WHERE MATCH(title.semantic, ?query) OR ... | SORT _score DESC | LIMIT 20 )
@@ -153,7 +158,9 @@ Count by type
   backing indices; the rest of the block still renders.
 - `Example queries` are three fixed ES|QL shapes written for the canonical KI
   schema (`title`, `description`, `content`, their `.semantic` multi-fields,
-  `type`, `tags`) with only the `FROM` target substituted. They use named
+  `type`, `tags`) with only the `FROM` target substituted. Each opens with the
+  lifecycle pipeline for the dest type, so the filters the query API would add
+  are visible and the same when run elsewhere. They use named
   parameters (`?query`; `?type` and `?tag`) meant for `_query`'s `params`. They
   run as-is on canonical indices; for other mappings the agent adapts field
   names from `Fields`.
