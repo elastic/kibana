@@ -22,10 +22,8 @@ export const getInventoryRuleSchema = (
   isPodSchemaSelectorEnabled: boolean = false
 ): DataSchemaFormat | undefined => {
   if (nodeType === 'pod') {
-    // A pod rule saved before the Schema control existed stores no schema and is ECS.
-    // Unlike Hosts, pods must not fall through to `undefined`: that drops the
-    // `event.module: kubernetes` node filter and the rule starts matching OTel documents.
-    return isPodSchemaSelectorEnabled ? schema ?? 'ecs' : 'ecs';
+    const storedSchema = isPodSchemaSelectorEnabled ? schema : undefined;
+    return storedSchema ?? 'ecs';
   }
 
   return schema ?? undefined;
