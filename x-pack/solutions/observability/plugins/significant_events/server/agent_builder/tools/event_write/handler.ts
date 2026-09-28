@@ -351,18 +351,18 @@ const fetchPriorDocsByEventId = async (
         // by reusing the already-fetched hits as the canonical legacy lineage.
         // Fall back to the canonical write client if the read store is unavailable, so a
         // temporary read-store failure cannot abort a write that would otherwise succeed.
-        let readClientHits: SignificantEvent[];
         let readClientIsCanonical = eventSearchClient === eventClient;
+        let hits: SignificantEvent[];
         try {
-          readClientHits = (await eventSearchClient.findByEventId(c.eventId)).hits;
+          const result = await eventSearchClient.findByEventId(c.eventId);
+          hits = result.hits;
         } catch {
-          readClientHits = (await eventClient.findByEventId(c.eventId)).hits;
+          const result = await eventClient.findByEventId(c.eventId);
+          hits = result.hits;
           readClientIsCanonical = true;
         }
-        const hits = readClientHits;
-        const legacyHits = readClientIsCanonical
-          ? hits
-          : (await eventClient.findByEventId(c.eventId)).hits;
+        const legacyResult = readClientIsCanonical ? null : await eventClient.findByEventId(c.eventId);
+        const legacyHits = legacyResult ? legacyResult.hits : hits;
         priorDocsByEventId.set(c.eventId, hits);
         const latest = hits.at(-1);
         if (latest !== undefined) {
