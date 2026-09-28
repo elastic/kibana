@@ -238,7 +238,9 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
           contentType: 'application/json',
           // Return the seeded policy so AgentBasedSection keeps selectedAgentPolicyIds populated.
           body: JSON.stringify({
-            items: [{ id: 'mock-agent-policy-id', name: 'Mock Agent Policy', namespace: 'default' }],
+            items: [
+              { id: 'mock-agent-policy-id', name: 'Mock Agent Policy', namespace: 'default' },
+            ],
           }),
         });
       }
