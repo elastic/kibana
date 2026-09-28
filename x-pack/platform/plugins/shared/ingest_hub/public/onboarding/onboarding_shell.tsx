@@ -93,9 +93,9 @@ export function OnboardingShell() {
 
   useEffect(() => {
     if (meta && !isValidStep) {
-      history.replace({ ...location, hash: `#${firstIncompleteStepId}` });
+      history.replace({ ...history.location, hash: `#${firstIncompleteStepId}` });
     }
-  }, [meta, isValidStep, firstIncompleteStepId, history, location]);
+  }, [meta, isValidStep, firstIncompleteStepId, history]);
 
   const currentStepIndex = ONBOARDING_STEPS.findIndex((s) => s.id === currentStepId);
 
@@ -104,16 +104,16 @@ export function OnboardingShell() {
     return () => {
       markStepComplete(currentStepId);
       if (nextStep) {
-        history.push({ ...location, hash: `#${nextStep.id}` });
+        history.push({ ...history.location, hash: `#${nextStep.id}` });
       }
     };
-  }, [currentStepId, currentStepIndex, markStepComplete, history, location]);
+  }, [currentStepId, currentStepIndex, markStepComplete, history]);
 
   const onBack = useMemo(() => {
     if (currentStepIndex <= 0) return undefined;
     const prevStep = ONBOARDING_STEPS[currentStepIndex - 1];
-    return () => history.push({ ...location, hash: `#${prevStep.id}` });
-  }, [currentStepIndex, history, location]);
+    return () => history.push({ ...history.location, hash: `#${prevStep.id}` });
+  }, [currentStepIndex, history]);
 
   const horizontalStepsConfig = useMemo(
     () =>
@@ -128,12 +128,12 @@ export function OnboardingShell() {
             | 'incomplete',
           onClick:
             isComplete || isCurrent
-              ? () => history.push({ ...location, hash: `#${step.id}` })
+              ? () => history.push({ ...history.location, hash: `#${step.id}` })
               : () => {},
           'data-test-subj': `onboardingStepIndicator-${step.id}`,
         };
       }),
-    [completedSteps, currentStepId, history, location]
+    [completedSteps, currentStepId, history]
   );
 
   if (!meta || !isValidStep) {
