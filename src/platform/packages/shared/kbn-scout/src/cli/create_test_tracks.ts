@@ -96,14 +96,45 @@ export function identifyTestLoads(
   testLoadFilters: TestLoadFilter[],
   log: ToolingLog
 ): ScoutCITestLoad[] {
-  // Runtime statistics are recorded per attribute set, so a lane must only draw on history
-  // gathered under the same attributes it is about to run with.
+  // Runtime statistics are recorded per attribute set, so a lane prefers history gathered
+  // under the same attributes it is about to run with.
   const runTargetAttributeKey = targetAttributes.key(
     testLoadFilters.find(
       (filter): filter is Extract<TestLoadFilter, { kind: 'targetAttributes' }> =>
         filter.kind === 'targetAttributes'
     )?.attributes ?? []
   );
+
+  let statsFallbackCount = 0;
+
+  const findStats = (configPath: string) => {
+    const candidates = testConfigStats.data.configs.filter(
+      (statsEntry) =>
+        statsEntry.path === configPath && statsEntry.test_target.tag === testTarget.tag
+    );
+
+    const exactMatch = candidates.find(
+      (statsEntry) => targetAttributes.key(statsEntry.target_attributes) === runTargetAttributeKey
+    );
+
+    if (exactMatch !== undefined) {
+      return exactMatch;
+    }
+
+    // Attribute history can be missing for a long time — the events may live in a pipeline the
+    // stats query does not look at, or the attribute may be new. An estimate measured without
+    // the attribute is still far closer than `buildTrack`'s "assume a whole lane" fallback,
+    // which would open one lane per config.
+    const attributeBlindMatch = candidates.find(
+      (statsEntry) => statsEntry.target_attributes.length === 0
+    );
+
+    if (attributeBlindMatch !== undefined) {
+      statsFallbackCount++;
+    }
+
+    return attributeBlindMatch;
+  };
 
   const testLoads = testConfigs.all
     .filter((config) => !scoutCIConfig.excluded_configs.includes(config.path))
@@ -155,12 +186,7 @@ export function identifyTestLoads(
       return {
         config,
         enabled,
-        stats: testConfigStats.data.configs.find(
-          (statsEntry) =>
-            statsEntry.path === config.path &&
-            statsEntry.test_target.tag === testTarget.tag &&
-            targetAttributes.key(statsEntry.target_attributes) === runTargetAttributeKey
-        ),
+        stats: findStats(config.path),
       };
     });
 
@@ -168,6 +194,14 @@ export function identifyTestLoads(
   if (testLoads.length === 0) {
     log.warning(`No test loads discovered for test target '${testTarget.tag}'`);
     return testLoads;
+  }
+
+  if (statsFallbackCount > 0) {
+    log.warning(
+      `No runtime stats recorded under target attributes '${runTargetAttributeKey}' for ` +
+        `${statsFallbackCount} of ${testLoads.length} test loads; falling back to stats ` +
+        'measured without attributes, so lane runtime estimates will be less accurate'
+    );
   }
 
   const enabledTestLoadCount = testLoads.filter((load) => load.enabled).length;

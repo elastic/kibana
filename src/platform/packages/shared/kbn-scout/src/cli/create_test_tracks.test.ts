@@ -754,17 +754,52 @@ describe('identifyTestLoads', () => {
           expect(loads[0].stats?.runtime.estimate).toBe(300000);
         });
 
-        it('reports no statistics when none were recorded for the declared attributes', () => {
-          const withoutFipsStats = new ScoutTestConfigStats({
+        const withoutFipsStats = () =>
+          new ScoutTestConfigStats({
             lastUpdated: new Date(),
             lookbackDays: 1,
             buildkite: {},
             configs: [createStatsEntry('plugin-a/config.ts', testTarget, 60000)],
           });
 
+        it('falls back to attribute-blind statistics when the attribute has no history', () => {
           const loads = identifyTestLoads(
             ciConfig,
-            withoutFipsStats,
+            withoutFipsStats(),
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          // Without this fallback every config would land on `buildTrack`'s whole-lane
+          // estimate, opening one lane per config on the very first run under a new attribute.
+          expect(loads[0].stats?.runtime.estimate).toBe(60000);
+          expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('falling back'));
+        });
+
+        it('does not warn about a fallback when the attribute set matches exactly', () => {
+          identifyTestLoads(
+            ciConfig,
+            attributeStats,
+            testTarget,
+            [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
+            log
+          );
+
+          expect(log.warning).not.toHaveBeenCalledWith(expect.stringContaining('falling back'));
+        });
+
+        it('reports no statistics when the config has no history at all', () => {
+          const unrelatedStats = new ScoutTestConfigStats({
+            lastUpdated: new Date(),
+            lookbackDays: 1,
+            buildkite: {},
+            configs: [createStatsEntry('plugin-z/config.ts', testTarget, 60000)],
+          });
+
+          const loads = identifyTestLoads(
+            ciConfig,
+            unrelatedStats,
             testTarget,
             [{ kind: 'targetAttributes', attributes: new Set(['fips'] as const) }],
             log

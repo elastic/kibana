@@ -18,9 +18,15 @@ source .buildkite/scripts/bootstrap.sh
 # equivalent SCOUT_TARGET_ATTRIBUTES for the steps that run the distributed tests.
 TARGET_ATTRIBUTE_FLAGS=()
 
+# Runtime stats default to the pull-request pipeline, which never runs with attributes. Point
+# the lookup at this build's own pipeline so attribute-specific history can accumulate, and
+# widen the lookback because the attribute-carrying pipelines run daily, not per commit.
+STATS_SOURCE_FLAGS=()
+
 if should_enable_fips; then
   export NODE_OPTIONS="${NODE_OPTIONS:-} --enable-fips --openssl-config=$HOME/nodejs.cnf"
   TARGET_ATTRIBUTE_FLAGS+=(--targetAttribute fips)
+  STATS_SOURCE_FLAGS+=(--pipelineSlug "${BUILDKITE_PIPELINE_SLUG:-kibana-fips}" --lookbackDays 7)
 fi
 
 echo '--- Verify Playwright CLI is functional'
@@ -90,7 +96,8 @@ SCOUT_TEST_DISTRIBUTION_STRATEGY="${SCOUT_TEST_DISTRIBUTION_STRATEGY:-configs}"
 
 if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
   echo '--- Update Scout Test Config Stats'
-  node scripts/scout update-test-config-stats
+  node scripts/scout update-test-config-stats \
+    "${STATS_SOURCE_FLAGS[@]+"${STATS_SOURCE_FLAGS[@]}"}"
 
   echo '--- Create Test Tracks'
   SERVERLESS_TARGETS=(
