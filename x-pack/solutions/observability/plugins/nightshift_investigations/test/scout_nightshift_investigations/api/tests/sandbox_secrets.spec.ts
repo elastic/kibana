@@ -15,6 +15,7 @@ import {
   NIGHTSHIFT_NO_ACCESS_ROLE,
   getSandboxSecrets,
   putSandboxSecrets,
+  replaceSandboxSecrets,
   uniqueId,
 } from '../fixtures';
 
@@ -80,12 +81,10 @@ apiTest.describe(
       expect(empty).toHaveStatusCode(200);
       expect(empty.body.keys).toStrictEqual([]);
 
-      const created = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
-        entries: [
-          { key: 'GITHUB_TOKEN', value: GITHUB_TOKEN },
-          { key: 'OTHER_KEY', value: OTHER_VALUE },
-        ],
-      });
+      const created = await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, [
+        { key: 'GITHUB_TOKEN', value: GITHUB_TOKEN },
+        { key: 'OTHER_KEY', value: OTHER_VALUE },
+      ]);
       expect(created).toHaveStatusCode(200);
       expect(created.body.keys).toStrictEqual(['GITHUB_TOKEN', 'OTHER_KEY']);
       expectNoSecretValuesLeaked(created.body);
@@ -110,8 +109,15 @@ apiTest.describe(
       });
       expect(stale).toHaveStatusCode(409);
 
+      // Once the object exists, an unversioned write is treated like a stale one.
+      const unversioned = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
+        entries: [{ key: 'GITHUB_TOKEN' }],
+      });
+      expect(unversioned).toHaveStatusCode(409);
+
       const cleared = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [],
+        version: kept.body.version,
       });
       expect(cleared).toHaveStatusCode(200);
       expect(cleared.body.keys).toStrictEqual([]);
@@ -120,42 +126,44 @@ apiTest.describe(
     apiTest(
       'rejects new keys without a value, too short values and reserved keys',
       async ({ apiClient }) => {
-        const missingValue = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
-          entries: [{ key: 'NO_VALUE' }],
-        });
+        const missingValue = await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, [
+          { key: 'NO_VALUE' },
+        ]);
         expect(missingValue).toHaveStatusCode(400);
 
-        const tooShort = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
-          entries: [{ key: 'TOO_SHORT', value: 'short' }],
-        });
+        const tooShort = await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, [
+          { key: 'TOO_SHORT', value: 'short' },
+        ]);
         expect(tooShort).toHaveStatusCode(400);
 
-        const reserved = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
-          entries: [{ key: 'CONNECTOR_TOKEN', value: 'reserved-value' }],
-        });
+        const reserved = await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, [
+          { key: 'CONNECTOR_TOKEN', value: 'reserved-value' },
+        ]);
         expect(reserved).toHaveStatusCode(400);
       }
     );
 
     apiTest('keeps secrets isolated per space', async ({ apiClient }) => {
-      const created = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
-        entries: [{ key: 'SPACE_SCOPED', value: 'space-value' }],
-      });
+      const created = await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, [
+        { key: 'SPACE_SCOPED', value: 'space-value' },
+      ]);
       expect(created).toHaveStatusCode(200);
 
       const other = await getSandboxSecrets(apiClient, manageCookie, OTHER_SPACE_ID);
       expect(other).toHaveStatusCode(200);
       expect(other.body.keys).toStrictEqual([]);
 
-      await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, { entries: [] });
+      await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, []);
     });
 
     apiTest(
       'lets read-only users list keys but not change secrets',
       async ({ apiClient, samlAuth }) => {
-        const seeded = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
-          entries: [{ key: 'READ_ONLY_VISIBLE', value: 'read-only-visible-value' }],
-        });
+        // Seed before switching roles: logging in as another custom role changes the privileges
+        // behind manageCookie too.
+        const seeded = await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, [
+          { key: 'READ_ONLY_VISIBLE', value: 'read-only-visible-value' },
+        ]);
         expect(seeded).toHaveStatusCode(200);
 
         const { cookieHeader: readCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ROLE);
@@ -167,8 +175,6 @@ apiTest.describe(
           entries: [{ key: 'READ_ONLY', value: 'read-only-value' }],
         });
         expect(update).toHaveStatusCode(403);
-
-        await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, { entries: [] });
       }
     );
 

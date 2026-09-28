@@ -29,4 +29,5 @@ export {
   NIGHTSHIFT_NO_ACCESS_ROLE,
   getSandboxSecrets,
   putSandboxSecrets,
+  replaceSandboxSecrets,
 } from './sandbox_secrets';

@@ -22,9 +22,10 @@ export const NIGHTSHIFT_READ_ROLE: KibanaRole = {
 };
 
 // Can open Kibana and the space, but has no Nightshift feature privilege at all (not even read).
+// The role API requires a non-empty `base` or `feature`, so grant an unrelated privilege.
 export const NIGHTSHIFT_NO_ACCESS_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: {}, spaces: ['*'] }],
+  kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
 };
 
 const spacePath = (spaceId: string): string => `s/${spaceId}/${SANDBOX_SECRETS_PATH}`;
@@ -50,3 +51,17 @@ export const putSandboxSecrets = (
     body,
     responseType: 'json',
   });
+
+/**
+ * Replaces the space's secrets using the currently stored version. Once a space's secrets object
+ * exists, every write must carry its version, so tests that only set up or clean up state use this.
+ */
+export const replaceSandboxSecrets = async (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  spaceId: string,
+  entries: Array<{ key: string; value?: string }>
+): Promise<ApiClientResponse> => {
+  const { body } = await getSandboxSecrets(apiClient, cookieHeader, spaceId);
+  return putSandboxSecrets(apiClient, cookieHeader, spaceId, { entries, version: body.version });
+};
