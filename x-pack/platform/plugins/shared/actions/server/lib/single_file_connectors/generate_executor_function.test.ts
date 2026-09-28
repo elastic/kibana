@@ -794,6 +794,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { mcp: fakeClientType },
       });
 
