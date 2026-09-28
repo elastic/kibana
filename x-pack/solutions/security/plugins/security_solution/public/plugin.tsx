@@ -95,6 +95,7 @@ import {
   registerExceptionAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerImpactAttachment,
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
@@ -369,6 +370,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         attachments: plugins.agentBuilder.attachments,
       });
       registerAttackDiscoveryVerdictAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
+      // Unconditional: the Alert Triage Worker (PR 3) writes `security.impact`,
+      // so registration must not race allow-list/setup.
+      registerImpactAttachment({
         attachments: plugins.agentBuilder.attachments,
       });
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
