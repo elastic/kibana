@@ -128,6 +128,13 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('30000');
   });
 
+  it('does not continue past a failed materialization persist for RSS reports', () => {
+    const step = findStepByName(workflow.steps, 'persist_materialization') as {
+      'on-failure'?: { continue?: boolean };
+    };
+    expect(step?.['on-failure']?.continue).not.toBe(true);
+  });
+
   // Dropped in this PR: it was a closed-set taxonomy field nothing consumed, and the
   // gate was using its presence as a stand-in for step health.
   it('no longer references detection_actionability anywhere', () => {

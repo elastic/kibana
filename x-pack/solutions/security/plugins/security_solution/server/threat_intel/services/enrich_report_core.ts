@@ -26,7 +26,7 @@ import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
 import {
   fullArticleContext,
-  selectDistributedArticleContext,
+  selectOverflowRetryArticleContext,
   type ArticleContext,
 } from './article_context';
 
@@ -216,7 +216,7 @@ export const enrichReportCore = async (
     };
   } catch (error) {
     if (!isContextLengthExceededError(error as Error)) throw error;
-    context = selectDistributedArticleContext(params.text);
+    context = selectOverflowRetryArticleContext(params.text);
     result = (await structured.invoke(buildPrompt(params, context.text, prepared.reviewable))) as {
       raw: { response_metadata: Record<string, unknown> };
       parsed: ReportCoreModelOutput;

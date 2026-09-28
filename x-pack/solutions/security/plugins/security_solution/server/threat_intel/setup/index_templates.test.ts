@@ -92,6 +92,8 @@ const fullyMigratedReportMappings = () => ({
           properties: {
             context_mode: {},
             context_coverage: {},
+            context_chars: {},
+            source_chars: {},
           },
         },
         gate: {
@@ -298,6 +300,22 @@ describe('index_templates — migrations', () => {
     const { patchedPaths } = await runMigrations({ reportMappings: mappings });
 
     expect(patchedPaths).toContain('content.materialization.rendered_chars');
+  });
+
+  it('repairs a partial Diamond context mapping missing char leaves', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (
+      mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>
+    ).context_chars;
+    delete (
+      mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>
+    ).source_chars;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toEqual(
+      expect.arrayContaining(['extracted.diamond.context_chars', 'extracted.diamond.source_chars'])
+    );
   });
 
   it('adds space_id to the indicators index when absent', async () => {

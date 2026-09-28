@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { isContextLengthExceededError } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import {
   SEVERITY_LEVELS,
@@ -15,6 +16,7 @@ import {
 } from '../../../common/threat_intel';
 import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
+import { selectOverflowRetryArticleContext } from './article_context';
 
 const severityLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
 
@@ -108,17 +110,30 @@ export const classifySeverity = async (
   logger: Logger,
   params: ClassifySeverityParams
 ): Promise<ClassifySeverityResult> => {
-  const prompt = buildSeverityPrompt(params);
   const inferenceEndpointId = model.connector.connectorId;
 
   const structured = model.chatModel.withStructuredOutput(classifySeverityLlmOutputSchema, {
     includeRaw: true,
   });
 
-  const result = (await structured.invoke(prompt)) as {
+  let text = params.text;
+  let result: {
     raw: { response_metadata: Record<string, unknown> };
     parsed: ClassifySeverityLlmOutput | undefined;
   };
+  try {
+    result = (await structured.invoke(buildSeverityPrompt({ ...params, text }))) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: ClassifySeverityLlmOutput | undefined;
+    };
+  } catch (error) {
+    if (!isContextLengthExceededError(error as Error)) throw error;
+    text = selectOverflowRetryArticleContext(params.text).text;
+    result = (await structured.invoke(buildSeverityPrompt({ ...params, text }))) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: ClassifySeverityLlmOutput | undefined;
+    };
+  }
 
   logStageUsage(
     logger,

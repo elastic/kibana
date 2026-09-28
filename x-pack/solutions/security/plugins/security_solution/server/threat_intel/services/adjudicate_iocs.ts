@@ -75,19 +75,6 @@ const contextFor = (text: string, lowerText: string, value: string): string => {
     .trim();
 };
 
-const isMarkdownLinkDestination = (lowerText: string, value: string): boolean => {
-  const lowerValue = value.toLowerCase();
-  let from = 0;
-  while (from < lowerText.length) {
-    const index = lowerText.indexOf(lowerValue, from);
-    if (index < 0) return false;
-    const prefix = lowerText.slice(Math.max(0, index - 3), index);
-    if (prefix.endsWith('](') || prefix.endsWith('](<')) return true;
-    from = index + lowerValue.length;
-  }
-  return false;
-};
-
 const hostnameFor = (value: string): string | undefined => {
   try {
     return new URL(value).hostname.toLowerCase();
@@ -130,12 +117,10 @@ export const prepareIocAdjudication = (
     .map((ioc, originalIndex) => ({ ioc, originalIndex }))
     .filter(({ ioc }) => isSemanticCandidate(ioc))
     .filter(({ ioc, originalIndex }) => {
-      if (
-        isSameOrigin(ioc, params.article_url) ||
-        (ioc.type === 'url' &&
-          ioc.tier !== 'discriminating' &&
-          isMarkdownLinkDestination(lowerText, ioc.value))
-      ) {
+      // Same-origin article links are citations. Markdown link destinations are
+      // not: Jina renders payload URLs as `[label](url)` too, so leave those for
+      // semantic review instead of discarding them before the model sees them.
+      if (isSameOrigin(ioc, params.article_url)) {
         output[originalIndex] = downgrade(ioc, 'semantic_reference_deterministic');
         deterministicReferences += 1;
         return false;

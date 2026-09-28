@@ -27,6 +27,8 @@ const CHALLENGE_MARKERS = [
   'access denied',
   'captcha',
 ] as const;
+const CHALLENGE_HEAD_CHARS = 1_000;
+const CHALLENGE_TINY_PAGE_CHARS = 1_200;
 
 let nextUnauthenticatedRequestAt = 0;
 
@@ -146,6 +148,25 @@ const extractMarkdown = (rawResponse: string): string => {
   return '';
 };
 
+/**
+ * Access-challenge interstitials front-load multiple cues (or are tiny pages
+ * whose only substance is one cue). An incidental phrase mid-article, such as
+ * an HTTP "access denied" log line inside a real threat write-up, must not
+ * discard the render.
+ */
+const isAccessChallengePage = (renderedText: string): boolean => {
+  if (renderedText.length >= 10_000) return false;
+  const lower = renderedText.toLowerCase();
+  const head = lower.slice(0, CHALLENGE_HEAD_CHARS);
+  const headMarkers = CHALLENGE_MARKERS.filter((marker) => head.includes(marker));
+  if (headMarkers.length >= 2) return true;
+  if (headMarkers.length === 1 && renderedText.length < CHALLENGE_TINY_PAGE_CHARS) {
+    const withoutMarker = head.split(headMarkers[0]).join('').replace(/\s+/g, ' ').trim();
+    return withoutMarker.length < 200;
+  }
+  return false;
+};
+
 const validateRender = (
   renderedText: string,
   rssBodyText: string
@@ -153,8 +174,7 @@ const validateRender = (
   if (renderedText.length < MIN_RENDER_CHARS) {
     return { valid: false, reason: `render_too_short:${renderedText.length}` };
   }
-  const lower = renderedText.toLowerCase();
-  if (renderedText.length < 10_000 && CHALLENGE_MARKERS.some((marker) => lower.includes(marker))) {
+  if (isAccessChallengePage(renderedText)) {
     return { valid: false, reason: 'render_is_access_challenge' };
   }
   const relativeMinimum = Math.min(2_000, Math.floor(rssBodyText.length * 0.25));

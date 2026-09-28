@@ -10,7 +10,11 @@ import {
   InferenceTaskError,
   isContextLengthExceededError,
 } from '@kbn/inference-common';
-import { fullArticleContext, selectDistributedArticleContext } from './article_context';
+import {
+  fullArticleContext,
+  selectDistributedArticleContext,
+  selectOverflowRetryArticleContext,
+} from './article_context';
 
 describe('article context selection', () => {
   it('keeps the complete source when it fits', () => {
@@ -33,6 +37,16 @@ describe('article context selection', () => {
     expect(selected.text).toContain(
       text.slice(Math.floor(text.length / 2), Math.floor(text.length / 2) + 10)
     );
+  });
+
+  it('shrinks a under-budget source on overflow retry so the prompt cannot repeat', () => {
+    const text = 'token-dense source that already overflowed once '.repeat(20);
+    const selected = selectOverflowRetryArticleContext(text);
+
+    expect(selected.mode).toBe('degraded_context');
+    expect(selected.text.length).toBeLessThan(text.length);
+    expect(selected.text).not.toBe(text);
+    expect(selected.original_chars).toBe(text.length);
   });
 
   it('recognizes typed context-limit errors', () => {

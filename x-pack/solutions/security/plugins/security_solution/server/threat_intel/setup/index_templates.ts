@@ -1029,6 +1029,8 @@ const migrateExistingCoreEnrichmentMappings = async (
         coreProps?.source_chars &&
         diamondProps?.context_mode &&
         diamondProps?.context_coverage &&
+        diamondProps?.context_chars &&
+        diamondProps?.source_chars &&
         gateProps?.context_mode &&
         gateProps?.context_coverage
       );
@@ -1541,6 +1543,8 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'extracted.core.context_mode' },
   { path: 'extracted.diamond' },
   { path: 'extracted.diamond.context_mode' },
+  { path: 'extracted.diamond.context_chars' },
+  { path: 'extracted.diamond.source_chars' },
   { path: 'extracted.gate.context_mode' },
   { path: 'extracted.gate' },
   { path: 'extracted.vulnerability' },

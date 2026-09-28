@@ -112,6 +112,22 @@ describe('materializeArticle', () => {
     expect(result.materialization.rendered_chars).toBeGreaterThan(0);
   });
 
+  it('keeps a real article that mentions an access-denied HTTP response mid-body', async () => {
+    const analysis =
+      `# Threat report\n\n` +
+      `${'Full technical analysis of the campaign. '.repeat(40)}` +
+      `The C2 returned HTTP access denied on the first probe, then served the payload. ` +
+      `${'Additional IOC and TTP detail follows. '.repeat(20)}`;
+    const fetchFn = jest.fn().mockResolvedValue(
+      new Response(JSON.stringify({ data: { markdown: analysis } }), { status: 200 })
+    ) as typeof fetch;
+    const result = await run({}, fetchFn);
+
+    expect(result.materialization.status).toBe('rendered');
+    expect(result.body_text).toContain('access denied');
+    expect(result.body_text).toContain('Full technical analysis');
+  });
+
   it('falls back to RSS when the render is suspiciously short', async () => {
     const fetchFn = jest.fn().mockResolvedValue(
       new Response(JSON.stringify({ data: { markdown: 'Not enough article content.' } }), {

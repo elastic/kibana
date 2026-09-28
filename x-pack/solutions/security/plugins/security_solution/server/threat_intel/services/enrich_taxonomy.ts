@@ -7,9 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { isContextLengthExceededError } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import { THREAT_CATEGORIES, THREAT_REGIONS } from '../../../common/threat_intel';
 import { logStageUsage } from '../lib/cost_tracker';
+import { selectOverflowRetryArticleContext } from './article_context';
 
 /**
  * Keeps only values from the closed set and caps the array length. A filter
@@ -93,17 +95,30 @@ export const enrichTaxonomy = async (
   logger: Logger,
   params: EnrichTaxonomyParams
 ): Promise<TaxonomyOutput> => {
-  const prompt = buildTaxonomyPrompt(params);
   const inferenceEndpointId = model.connector.connectorId;
 
   const structured = model.chatModel.withStructuredOutput(taxonomyOutputSchema, {
     includeRaw: true,
   });
 
-  const result = (await structured.invoke(prompt)) as {
+  let text = params.text;
+  let result: {
     raw: { response_metadata: Record<string, unknown> };
     parsed: TaxonomyOutput;
   };
+  try {
+    result = (await structured.invoke(buildTaxonomyPrompt({ ...params, text }))) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: TaxonomyOutput;
+    };
+  } catch (error) {
+    if (!isContextLengthExceededError(error as Error)) throw error;
+    text = selectOverflowRetryArticleContext(params.text).text;
+    result = (await structured.invoke(buildTaxonomyPrompt({ ...params, text }))) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: TaxonomyOutput;
+    };
+  }
 
   logStageUsage(logger, 'enrich_taxonomy', inferenceEndpointId, result.raw.response_metadata ?? {});
 

@@ -13,7 +13,7 @@ import type { CostTraceBuilder } from '../lib/cost_tracker';
 import { logStageUsage, extractUsageFromMetadata } from '../lib/cost_tracker';
 import {
   fullArticleContext,
-  selectDistributedArticleContext,
+  selectOverflowRetryArticleContext,
   type ArticleContext,
 } from './article_context';
 
@@ -315,7 +315,7 @@ export const extractDiamond = async (
       )) as RawResult<DiamondLlmOutput>;
     } catch (error) {
       if (!isContextLengthExceededError(error as Error)) throw error;
-      context = selectDistributedArticleContext(text);
+      context = selectOverflowRetryArticleContext(text);
       result = (await structured.invoke(
         buildSingleCallPrompt(context.text)
       )) as RawResult<DiamondLlmOutput>;

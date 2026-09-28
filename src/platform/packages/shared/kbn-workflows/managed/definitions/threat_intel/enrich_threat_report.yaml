@@ -115,8 +115,10 @@ steps:
               rss_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rss_body_text | default: steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
               rendered_body_text: "{{ steps.materialize_article.output.rendered_body_text }}"
               materialization: "${{ steps.materialize_article.output.materialization }}"
-        on-failure:
-          continue: true
+        # Do not continue on failure: a successful Jina render that fails to
+        # persist must leave the report pending. Continuing would let the gate
+        # or core mark workflow_v4 / workflow_v4_rejected with no retained
+        # article, and load_pending_reports would never retry it.
 
       # Cheap hard gate: a negative Haiku verdict stops this report before
       # deterministic extraction, Sonnet core extraction, or Opus Diamond.
