@@ -164,7 +164,7 @@ export type HuntScopeResolution =
   | 'static' // no technology given, at least one known technology present, no vendor/product match
   | 'discovered:deterministic' // report vendor/product matched a discovered dataset (wins over a present static technology)
   | 'discovered:model' // every known technology blocked; model match
-  | 'discovered:broad' // every known technology blocked, no dataset matched, report has IOCs: Tier 1 searches every discovered dataset
+  | 'discovered:broad' // every known technology blocked, no dataset matched, report has IOCs: Tier 1 searches every log source under the discovery pattern
   | 'blocked:pinned' // explicit technology, its required indices absent
   | 'blocked:no_report' // every known technology blocked, nothing to match against
   | 'blocked:discovery_failed' // listSearchSources threw (fail closed)
@@ -269,7 +269,12 @@ const mergeStaticScopes = (scopes: ResolvedIndexScope[], pinned: boolean): HuntS
 /**
  * The broad Tier 1 target: the discovery pattern with the agent-internal datasets
  * excluded, using the multi-target exclusion syntax both `_search` and `_count`
- * accept. Exclusion entries never match a backing index in `buildMatchesRequired`,
+ * accept. Deliberately wider than the discovered dataset list: the pattern also
+ * reaches plain indices and aliases under `logs-*` that are not data streams, which
+ * discovery never lists because it parses `{type}-{dataset}-{namespace}` names. A
+ * broad hunt is "every log source this user can see", and an IOC found in an
+ * imported archive index is a real hit; Tier 2 then generates against the indices
+ * that hit, not against the wildcard. Exclusion entries never match a backing index in `buildMatchesRequired`,
  * so they do not affect the hit bar; they only keep those streams out of the search.
  */
 export const broadSearchPatterns = (): string[] => [

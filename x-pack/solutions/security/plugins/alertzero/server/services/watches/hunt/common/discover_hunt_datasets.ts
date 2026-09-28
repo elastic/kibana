@@ -137,11 +137,23 @@ export const discoverHuntDatasets = async ({
     });
   }
 
-  const datasets = Array.from(byPattern.values());
-  for (const entry of datasets) {
-    const siblings = datasets.filter(
-      (other) => other !== entry && other.dataset.startsWith(`${entry.dataset}-`)
-    );
+  // Sorted by dataset name with a code-point compare, so every sibling that extends a
+  // name with a dash sits directly after it ('-' orders before '.', '_' and every
+  // letter). That turns sibling detection into one forward walk per dataset instead
+  // of a full pass over the list, which matters once an estate has thousands.
+  const datasets = Array.from(byPattern.values()).sort((a, b) =>
+    a.dataset < b.dataset ? -1 : a.dataset > b.dataset ? 1 : 0
+  );
+  for (let i = 0; i < datasets.length; i++) {
+    const entry = datasets[i];
+    const siblings: DiscoveredDataset[] = [];
+    for (
+      let j = i + 1;
+      j < datasets.length && datasets[j].dataset.startsWith(`${entry.dataset}-`);
+      j++
+    ) {
+      siblings.push(datasets[j]);
+    }
     if (siblings.length === 0) {
       entry.search_patterns = [entry.index_pattern];
       continue;

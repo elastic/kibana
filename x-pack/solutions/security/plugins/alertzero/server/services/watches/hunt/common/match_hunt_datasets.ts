@@ -48,10 +48,41 @@ const MAX_PROMPT_IOCS = 25;
 /**
  * Cap on the datasets offered to the model. Discovery is uncapped, so a large
  * estate could put thousands of lines in one prompt and blow the connector's
- * context window, which would read as the model declining. Datasets arrive
- * sorted by pattern, so the cut is deterministic and logged.
+ * context window, which would read as the model declining. Before the cut the
+ * options are ranked so datasets the report mentions come first (see
+ * `rankOptionsForModel`); the cut is deterministic and logged.
  */
 export const MAX_MODEL_DATASET_OPTIONS = 200;
+
+/**
+ * Orders the model's options so any dataset whose vendor token, or a segment of
+ * it, appears in the report's vendor, product, text, or IOC values comes first,
+ * keeping the original order within each half. A Zscaler report in a cluster with
+ * two hundred alphabetically earlier datasets still gets `zscaler.*` in front of
+ * the model; without this the cap would make later datasets unmatchable for good.
+ */
+export const rankOptionsForModel = (
+  datasets: DiscoveredDataset[],
+  report: HuntScopeReportContext
+): DiscoveredDataset[] => {
+  const haystack = normalizeVendorToken(
+    [
+      report.vendor ?? '',
+      report.product ?? '',
+      report.text?.slice(0, MAX_PROMPT_TEXT_CHARS) ?? '',
+      ...(report.iocs ?? []).slice(0, MAX_PROMPT_IOCS).map((ioc) => ioc.value),
+    ].join(' ')
+  );
+  if (haystack === '') return datasets;
+  const mentioned = (dataset: DiscoveredDataset): boolean =>
+    [normalizeVendorToken(dataset.vendor), ...vendorSegments(dataset.vendor)].some(
+      (token) =>
+        token.length >= MIN_TOKEN_LENGTH &&
+        !GENERIC_VENDOR_TOKENS.has(token) &&
+        haystack.includes(token)
+    );
+  return [...datasets.filter(mentioned), ...datasets.filter((dataset) => !mentioned(dataset))];
+};
 const MAX_PROMPT_TEXT_CHARS = 6000;
 
 /** Lower-cases and strips everything that is not `[a-z0-9]`, so 'Cisco ASA' and 'cisco_asa' compare equal. */
@@ -212,10 +243,9 @@ export const matchDatasetsWithModel = async ({
 }): Promise<ModelDatasetMatch | undefined> => {
   if (datasets.length === 0) return undefined;
 
+  const ranked = rankOptionsForModel(datasets, report);
   const options =
-    datasets.length > MAX_MODEL_DATASET_OPTIONS
-      ? datasets.slice(0, MAX_MODEL_DATASET_OPTIONS)
-      : datasets;
+    ranked.length > MAX_MODEL_DATASET_OPTIONS ? ranked.slice(0, MAX_MODEL_DATASET_OPTIONS) : ranked;
   if (options.length < datasets.length) {
     logger?.warn(
       `Hunt dataset model matching offered ${options.length} of ${datasets.length} discovered datasets; the rest cannot be matched by the model this run`

@@ -11,6 +11,7 @@ import type { DiscoveredDataset } from './discover_hunt_datasets';
 import {
   HUNT_DATASET_MATCH_MIN_CONFIDENCE,
   MAX_MODEL_DATASET_OPTIONS,
+  rankOptionsForModel,
   HUNT_VENDOR_ALIASES,
   matchDatasetsDeterministic,
   matchDatasetsWithModel,
@@ -426,6 +427,40 @@ describe('matchDatasetsWithModel', () => {
         `offered ${MAX_MODEL_DATASET_OPTIONS} of ${MAX_MODEL_DATASET_OPTIONS + 5}`
       )
     );
+  });
+
+  it('puts datasets the report mentions in front of the cap, so a late-alphabet vendor is still offered', async () => {
+    const logger = loggerMock.create();
+    const many = Array.from({ length: MAX_MODEL_DATASET_OPTIONS + 5 }, (_, i) =>
+      dataset(`vendor${String(i).padStart(3, '0')}.log`)
+    );
+    const zscaler = dataset('zscaler.zia');
+    const invoke = jest.fn().mockResolvedValue({ datasets: [] });
+    const { model } = buildModel(invoke);
+
+    await matchDatasetsWithModel({
+      model,
+      datasets: [...many, zscaler],
+      report: { text: 'Zscaler Client Connector privilege escalation' },
+      logger,
+    });
+
+    const prompt = invoke.mock.calls[0][0] as string;
+    expect(prompt).toContain('zscaler.zia');
+    expect(prompt.indexOf('zscaler.zia')).toBeLessThan(prompt.indexOf('vendor000.log'));
+  });
+
+  it('ranks mentioned datasets first and keeps the order otherwise', () => {
+    const ranked = rankOptionsForModel([okta, fortigate, ciscoAsa], {
+      vendor: 'Cisco',
+      text: 'affects Fortinet appliances',
+    });
+    expect(ranked.map((d) => d.dataset)).toEqual([
+      fortigate.dataset,
+      ciscoAsa.dataset,
+      okta.dataset,
+    ]);
+    expect(rankOptionsForModel([okta, fortigate], {})).toEqual([okta, fortigate]);
   });
 
   it('short-circuits without calling the model when there are no datasets', async () => {

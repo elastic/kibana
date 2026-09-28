@@ -50,3 +50,27 @@ describe('isIndexPatternAllowed', () => {
     expect(isIndexPatternAllowed('remote:logs-aws.*', allowlist)).toBe(false);
   });
 });
+
+describe('exclusion entries', () => {
+  const broad = ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'];
+
+  it('keeps an excluded stream out of the required set even though the positive pattern covers it', () => {
+    const matchesRequired = buildMatchesRequired(broad);
+    expect(matchesRequired('.ds-logs-okta.system-default-2026.09.01-000001')).toBe(true);
+    expect(matchesRequired('.ds-logs-elastic_agent.filebeat-default-2026.09.01-000001')).toBe(
+      false
+    );
+    expect(matchesRequired('.ds-logs-fleet_server.output-default-2026.09.01-000001')).toBe(false);
+  });
+
+  it('refuses a Tier 2 source that the scope excludes, so the ES|QL gate matches the Tier 1 search', () => {
+    expect(isIndexPatternAllowed('logs-okta.system-*', broad)).toBe(true);
+    expect(isIndexPatternAllowed('logs-elastic_agent*', broad)).toBe(false);
+    expect(isIndexPatternAllowed('logs-elastic_agent.filebeat-default*', broad)).toBe(false);
+    expect(isIndexPatternAllowed('logs-fleet_server*', broad)).toBe(false);
+  });
+
+  it('never accepts an exclusion entry itself as a source', () => {
+    expect(isIndexPatternAllowed('-logs-elastic_agent*', broad)).toBe(false);
+  });
+});
