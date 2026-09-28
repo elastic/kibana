@@ -77,7 +77,7 @@ Use this shortcut for **platform** specs that need coverage on stateful classic 
 - `tags.serverless.observability.complete`
 - `tags.serverless.security.complete`
 
-It excludes the Observability Logs Essentials, Security Essentials, and Security EASE tiers, as well as Workplace AI and VectorDB. Add their explicit tags if the test needs coverage there.
+It excludes the Observability Logs Essentials, Security Essentials, and Security EASE tiers, as well as Workplace AI. Add their explicit tags if the test needs coverage there.
 
 ::::{warning}
 `tags.deploymentAgnostic` includes multiple solutions. If your test lives in a solution module, use explicit targets instead (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`).
@@ -112,8 +112,6 @@ lands.
 | --------------------- | ---------------------- |
 | `tags.serverless.all` | All serverless targets |
 
-This includes every target listed below, including all project tiers, Workplace AI, and VectorDB. It is broader than `tags.deploymentAgnostic` for serverless coverage.
-
 #### Search [scout-deployment-tags-serverless-search]
 
 | Helper                   | Project type                      |
@@ -142,14 +140,6 @@ This includes every target listed below, including all project tiers, Workplace 
 | Helper                        | Project type                               |
 | ----------------------------- | ------------------------------------------ |
 | `tags.serverless.workplaceai` | {icon}`logo_workplace_search` Workplace AI |
-
-#### VectorDB [scout-deployment-tags-serverless-vectordb]
-
-| Helper                    | Project type |
-| ------------------------- | ------------ |
-| `tags.serverless.vectordb` | VectorDB     |
-
-This expands to `@local-serverless-vectordb` and `@cloud-serverless-vectordb`.
 
 ### `tags.performance` [scout-deployment-tags-performance]
 
