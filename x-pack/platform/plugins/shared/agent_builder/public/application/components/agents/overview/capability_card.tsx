@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { EuiCardProps } from '@elastic/eui';
 import {
   EuiCard,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingSpinner,
   EuiSkeletonText,
   EuiText,
@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 export interface CapabilityCardProps {
   count: number;
   title: string;
-  badge?: React.ReactNode;
+  betaBadgeProps?: EuiCardProps['betaBadgeProps'];
   description: string;
   emptyDescription: string;
   image?: string;
@@ -36,7 +36,7 @@ const CARD_IMAGE_HEIGHT = '112px';
 export const CapabilityCard: React.FC<CapabilityCardProps> = ({
   count,
   title,
-  badge,
+  betaBadgeProps,
   description,
   emptyDescription,
   image,
@@ -47,15 +47,6 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const titleNode = badge ? (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    title
-  );
-
   if (isCountLoading) {
     return (
       <EuiCard
@@ -63,9 +54,10 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
         hasBorder
         display="plain"
         paddingSize="m"
-        title={titleNode}
+        title={title}
         titleElement="h4"
         titleSize="xs"
+        betaBadgeProps={betaBadgeProps}
         textAlign="left"
         footer={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -92,9 +84,10 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
         hasBorder
         display="plain"
         paddingSize="none"
-        title={titleNode}
+        title={title}
         titleElement="h4"
         titleSize="xs"
+        betaBadgeProps={betaBadgeProps}
         description={emptyDescription}
         textAlign="left"
         href={href}
@@ -132,9 +125,10 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
       hasBorder
       display="plain"
       paddingSize="m"
-      title={titleNode}
+      title={title}
       titleElement="h4"
       titleSize="xs"
+      betaBadgeProps={betaBadgeProps}
       description={description}
       textAlign="left"
       footer={

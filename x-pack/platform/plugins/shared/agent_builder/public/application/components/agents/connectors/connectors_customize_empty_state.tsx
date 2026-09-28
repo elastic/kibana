@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -30,7 +30,18 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
     <CustomizeLandingEmptyState
       dataTestSubj="agentConnectorsCustomizeEmptyState"
       illustrationSrc={connectorsIllustration}
-      title={labels.agentConnectors.emptyStateTitle}
+      title={
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>{labels.agentConnectors.emptyStateTitle}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={labels.connectors.techPreviewBadgeLabel}
+              tooltipContent={labels.connectors.techPreviewBadgeDescription}
+              size="m"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       description={labels.agentConnectors.emptyStateDescription}
       learnMoreHref={docLinksService.agentBuilderConnectors}
       learnMoreSuffix={labels.agentConnectors.emptyStateLearnMoreSuffix}
