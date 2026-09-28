@@ -208,7 +208,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     _params: z.infer<typeof TestConnectorRequestSchema>,
     _connectorUsageCollector: ConnectorUsageCollector
   ): Promise<{ connected: boolean }> {
-    await this.pool.drop(this.getLeaseKey());
+    // `drop` removes the pool entry synchronously; the old client's disconnect runs in the
+    // background so the test waits only on the server under test, never on a stuck old session.
+    void this.pool.drop(this.getLeaseKey());
     await this.withPooledClient('test', async (client) => {
       listToolsCache.delete(this.getListToolsCacheKey());
       await client.listTools();

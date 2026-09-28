@@ -145,6 +145,21 @@ describe('McpConnector', () => {
       expect(mcpClientType.build).toHaveBeenCalledTimes(2);
     });
 
+    it('does not wait for the old client to disconnect before building the new one', async () => {
+      fakeClient.listTools.mockResolvedValue({ tools: [] });
+      const connector = createConnector();
+      await connector.testConnector({}, connectorUsageCollector);
+
+      // The old client's disconnect never settles; the next test must still complete.
+      mcpClientType.terminate.mockReturnValue(new Promise<void>(() => {}));
+
+      const result = await connector.testConnector({}, connectorUsageCollector);
+
+      expect(result).toEqual({ connected: true });
+      expect(mcpClientType.terminate).toHaveBeenCalledTimes(1);
+      expect(mcpClientType.build).toHaveBeenCalledTimes(2);
+    });
+
     it('clears the cached tool list so the next listTools fetches again', async () => {
       fakeClient.listTools.mockResolvedValue({ tools: [{ name: 'tool-a' }] });
       const connector = createConnector();
