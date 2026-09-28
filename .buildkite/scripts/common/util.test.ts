@@ -40,8 +40,8 @@ esac
     `#!/usr/bin/env bash
 set -euo pipefail
 echo "gcloud $*" >> "$CALLS_FILE"
-if [[ "$1 $2" == "auth list" ]]; then
-  echo "kibana-ci-sa-proxy@elastic-kibana-ci.iam.gserviceaccount.com"
+if [[ "$1 $2" == "auth login" ]]; then
+  [[ "\${GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES:-}" == "1" ]]
 elif [[ "$1 $2" == "storage cp" ]]; then
   src="\${3/gs:\\/\\//$FAKE_GCS/}"
   dest="\${4/gs:\\/\\//$FAKE_GCS/}"
@@ -68,6 +68,7 @@ const setupSandbox = () => {
     gcs: Path.join(root, 'gcs'),
     checkout: Path.join(root, 'checkout'),
     gcloudConfig: Path.join(root, 'gcloud-config'),
+    wifCredentials: Path.join(root, 'wif-credentials'),
   };
   Object.values(dirs).forEach((dir) => Fs.mkdirSync(dir, { recursive: true }));
   Fs.writeFileSync(Path.join(dirs.gcloudConfig, 'config'), '');
@@ -92,6 +93,8 @@ const setupSandbox = () => {
           META_FILE: metaFile,
           FAKE_GCS: dirs.gcs,
           CLOUDSDK_CONFIG: dirs.gcloudConfig,
+          KIBANA_WIF_CREDENTIALS_DIR: dirs.wifCredentials,
+          GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES: '1',
           BUILDKITE_AGENT_GCP_REGION: 'us-central1',
           BUILDKITE_BUILD_ID: BUILD_ID,
           ...env,

@@ -15,6 +15,7 @@ import type {
   ChatAgentEvent,
   AgentConfigurationOverrides,
   AgentExecutionMode,
+  AutoApprovedApi,
   ChatEvent,
   ExecutionStatus,
   InteractivityConfig,
@@ -96,6 +97,7 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -110,6 +112,7 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 

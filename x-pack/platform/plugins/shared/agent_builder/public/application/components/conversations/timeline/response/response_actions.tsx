@@ -15,6 +15,8 @@ import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
+import { useAgentId } from '../../../../hooks/use_conversation';
+import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { ExecutionMetadataPopover } from './execution_metadata_popover';
 import { TraceButton } from './trace_button';
 
@@ -57,6 +59,8 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   const { addSuccessToast } = useToasts();
   const { euiTheme } = useEuiTheme();
   const isTracingEnabled = useTracingEnabled();
+  const conversationId = useConversationId();
+  const agentId = useAgentId();
 
   const { action: copyLabel, success: copySuccessLabel } = copyLabels[copyTarget];
 
@@ -119,6 +123,8 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
           <ExecutionMetadataPopover
             executionTerminatedEvent={executionTerminatedEvent}
             steps={steps}
+            conversationId={conversationId}
+            agentId={agentId}
           />
         </EuiFlexItem>
       )}

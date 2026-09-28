@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
@@ -265,6 +265,67 @@ describe('AgentBasedSection', () => {
     it('does NOT show "Add agent" button in existing mode', () => {
       renderSection();
       expect(screen.queryByTestId('agentBasedSection-addAgentButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('existing policy options filtering', () => {
+    const regularPolicy = { id: 'regular', name: 'Regular policy' };
+    const managedPolicy = { id: 'managed', name: 'Managed policy', is_managed: true };
+    const fleetServerPolicy = {
+      id: 'fleet-server',
+      name: 'Fleet Server policy',
+      has_fleet_server: true,
+    };
+    const agentlessPolicy = {
+      id: 'agentless',
+      name: 'Agentless policy for aws-123',
+      is_managed: false,
+      supports_agentless: true,
+    };
+
+    beforeEach(() => {
+      setupMocks({ agentHostsMode: 'existing', selectedAgentPolicyIds: [] });
+    });
+
+    it('excludes agentless policies in the Fleet query', () => {
+      renderSection();
+      expect(mockUseGetAgentPoliciesQuery).toHaveBeenCalledWith(
+        {
+          full: false,
+          perPage: 1000,
+          sortField: 'name',
+          sortOrder: 'asc',
+          kuery: 'NOT ingest-agent-policies.supports_agentless:true',
+        },
+        { enabled: true }
+      );
+    });
+
+    it('lists only regular policies, hiding managed, Fleet Server and agentless ones', () => {
+      mockUseGetAgentPoliciesQuery.mockReturnValue({
+        data: { items: [regularPolicy, managedPolicy, fleetServerPolicy, agentlessPolicy] },
+        isLoading: false,
+      });
+      renderSection();
+
+      const comboBox = screen.getByTestId('agentBasedSection-agentPoliciesComboBox');
+      fireEvent.click(within(comboBox).getByTestId('comboBoxToggleListButton'));
+
+      expect(screen.getByRole('option', { name: 'Regular policy' })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Managed policy' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Fleet Server policy' })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('option', { name: 'Agentless policy for aws-123' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the empty placeholder when only agentless policies are returned', () => {
+      mockUseGetAgentPoliciesQuery.mockReturnValue({
+        data: { items: [agentlessPolicy] },
+        isLoading: false,
+      });
+      renderSection();
+      expect(screen.getByPlaceholderText('No agent policies available')).toBeDisabled();
     });
   });
 
