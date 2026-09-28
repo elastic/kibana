@@ -576,6 +576,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     const kept = huntResultOf(entry).tier1.per_index;
     expect(kept).toHaveLength(20);
     expect(kept.every((row) => row.required)).toBe(true);
+    expect(huntResultOf(entry).tier1.per_index_truncated).toBe(true);
   });
 
   it('caps resolved IOCs and keeps the technique indicator ahead of the IOC echo', () => {
@@ -614,6 +615,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     expect(schemaIssues(result)).toEqual([]);
     const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
     expect(huntResultOf(entry).tier1.resolved_iocs).toHaveLength(50);
+    expect(huntResultOf(entry).tier1.resolved_iocs_truncated).toBe(true);
     expect(entry.data.security_knowledge_indicators).toHaveLength(50);
     expect(
       entry.data.security_knowledge_indicators.some(
@@ -632,9 +634,11 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
         },
         { id: 'evt-epoch', index: 'logs-aws.cloudtrail-default', timestamp: '1785416700000' },
         { id: 'evt-garbage', index: 'logs-aws.cloudtrail-default', timestamp: 'not a time' },
+        // Date math in a document is malformed data, not a relative instant.
+        { id: 'evt-datemath', index: 'logs-aws.cloudtrail-default', timestamp: 'now-1d' },
       ],
-      counts: { total_hits: 3, returned_hits: 3, affected_hosts: 0, affected_users: 0 },
-      per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true }],
+      counts: { total_hits: 4, returned_hits: 4, affected_hosts: 0, affected_users: 0 },
+      per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 4, required: true }],
     });
 
     expect(schemaIssues(result)).toEqual([]);
@@ -643,6 +647,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     expect(byId.get('evt-offset')).toBe('2026-07-30T13:05:00.000Z');
     expect(byId.get('evt-epoch')).toBe('2026-07-30T13:05:00.000Z');
     expect(byId.get('evt-garbage')).toBeUndefined();
+    expect(byId.get('evt-datemath')).toBeUndefined();
     expect(entry.data.timeline).toHaveLength(2);
   });
 });

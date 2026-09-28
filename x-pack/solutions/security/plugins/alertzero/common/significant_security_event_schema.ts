@@ -137,6 +137,11 @@ const huntResultTier1Schema = z.object({
     }),
   per_index: z.array(huntResultPerIndexSchema).max(20),
   resolved_iocs: z.array(huntIocSchema).max(50),
+  // Tier 1 can produce more rows than either array holds (500 `_index` buckets, 100
+  // request IOCs). Same contract as the Tier 2 `affected_*_truncated` flags: set when the
+  // producer dropped rows, so a reader does not take the list as the whole breakdown.
+  per_index_truncated: z.boolean().optional(),
+  resolved_iocs_truncated: z.boolean().optional(),
 });
 
 /**

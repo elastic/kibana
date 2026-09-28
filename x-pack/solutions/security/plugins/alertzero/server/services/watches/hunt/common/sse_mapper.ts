@@ -64,25 +64,35 @@ const MAX_RESOLVED_IOCS = 50;
 const MAX_INDICATORS = 50;
 
 /**
- * The SSE schema requires `.datetime()` (ISO 8601, UTC `Z`) on every timestamp,
- * while the coordinator echoes whatever it was given: the caller's window may be
- * date math (`now-24h`, which `assertHuntWindow` accepts on purpose) and a Tier 1
- * hit's `timestamp` is the raw `_source['@timestamp']` string, which can carry an
- * offset or be an epoch string. Normalize to ISO here so a valid coordinator
- * result never produces an SSE the schema rejects. Returns `undefined` for a
- * value that is neither valid date math nor a parseable date.
+ * Window bounds: the SSE schema requires `.datetime()` (ISO 8601, UTC `Z`), while
+ * Tier 1 echoes the caller's window verbatim, which may be date math (`now-24h`,
+ * accepted on purpose by `assertHuntWindow`). Resolve it here so a valid
+ * coordinator result never produces an SSE the schema rejects. Returns
+ * `undefined` for a value that is neither valid date math nor a parseable date.
+ * Document timestamps use `toIsoInstant` instead.
  */
 const toIsoDatetime = (value: string | undefined, forceNow: Date): string | undefined => {
   if (!value) return undefined;
-  // `_source['@timestamp']` under an `epoch_millis` / `epoch_second` date format is a
-  // digit string, which moment (and so datemath) does not parse.
+  const parsed = dateMath.parse(value, { forceNow });
+  if (!parsed?.isValid()) return undefined;
+  return parsed.toISOString();
+};
+
+/**
+ * Strict form for document timestamps: an ISO 8601 string (any offset) or an
+ * `epoch_millis` / `epoch_second` digit string, which is what `_source['@timestamp']`
+ * carries under the common ES date formats. Date math is deliberately NOT accepted
+ * here: `now-1d` in a document is a malformed value, not a relative instant, and
+ * resolving it would stamp a fabricated time onto an event ref.
+ */
+const toIsoInstant = (value: string | undefined): string | undefined => {
+  if (!value) return undefined;
   if (/^\d{10}$|^\d{13}$/.test(value)) {
     const epoch = value.length === 13 ? Number(value) : Number(value) * 1000;
     return new Date(epoch).toISOString();
   }
-  const parsed = dateMath.parse(value, { forceNow });
-  if (!parsed?.isValid()) return undefined;
-  return parsed.toISOString();
+  const millis = Date.parse(value);
+  return Number.isNaN(millis) ? undefined : new Date(millis).toISOString();
 };
 
 /**
@@ -250,8 +260,8 @@ const isAlertsIndex = (index: string): boolean => {
  * offset (`+02:00`) or be an epoch string; the schema requires ISO `Z`. An
  * unparseable value is dropped rather than failing the whole attachment.
  */
-const hitTimestamp = (hit: { timestamp?: string }, forceNow: Date): string | undefined =>
-  toIsoDatetime(hit.timestamp, forceNow);
+const hitTimestamp = (hit: { timestamp?: string }): string | undefined =>
+  toIsoInstant(hit.timestamp);
 
 const toEventMatched = (
   matched: HuntCoordinatorResult['tier1']['hits'][number]['matched']
@@ -277,7 +287,6 @@ const toEventMatched = (
  */
 const splitHits = (
   result: HuntCoordinatorResult,
-  forceNow: Date,
   onlyTechniqueId?: string
 ): { events: SseEventRef[]; alerts: SseAlertRef[] } => {
   const events: SseEventRef[] = [];
@@ -291,7 +300,7 @@ const splitHits = (
     ) {
       continue;
     }
-    const timestamp = hitTimestamp(hit, forceNow);
+    const timestamp = hitTimestamp(hit);
     const matched = toEventMatched(hit.matched);
     if (isAlertsIndex(hit.index)) {
       alerts.push({
@@ -315,13 +324,11 @@ const mergeTierHitRefs = ({
   events: tier1Events,
   alerts: tier1Alerts,
   result,
-  forceNow,
   onlyTechniqueId,
 }: {
   events: SseEventRef[];
   alerts: SseAlertRef[];
   result: HuntCoordinatorResult;
-  forceNow: Date;
   onlyTechniqueId?: string;
 }): { events: SseEventRef[]; alerts: SseAlertRef[]; tier1RefCount: number } => {
   const events = [...tier1Events];
@@ -341,7 +348,7 @@ const mergeTierHitRefs = ({
       const key = `${ref.index}|${ref.id}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      const timestamp = hitTimestamp(ref, forceNow);
+      const timestamp = hitTimestamp(ref);
       if (isAlertsIndex(ref.index)) {
         if (alerts.length >= MAX_HIT_REFS) continue;
         alerts.push({
@@ -481,6 +488,10 @@ const buildHuntResult = (
       resolved_iocs: tier1.resolved_iocs
         .slice(0, MAX_RESOLVED_IOCS)
         .map((ioc) => ({ type: ioc.type, value: ioc.value })),
+      // `evidence_for` points readers at `per_index` for the breakdown, so a silent cut
+      // would read as the whole distribution.
+      ...(tier1.per_index.length > MAX_PER_INDEX ? { per_index_truncated: true } : {}),
+      ...(tier1.resolved_iocs.length > MAX_RESOLVED_IOCS ? { resolved_iocs_truncated: true } : {}),
     },
     tier2: tier2
       ? {
@@ -605,12 +616,12 @@ const buildEntry = ({
   spaceId: string;
   techniqueId?: string;
 }): SseEntry => {
-  // One clock for every timestamp on this entry, matching `assertHuntWindow`.
+  // One clock for both window bounds, matching `assertHuntWindow`. Document
+  // timestamps are absolute instants and do not use it.
   const forceNow = new Date();
   const { events, alerts, tier1RefCount } = mergeTierHitRefs({
-    ...splitHits(result, forceNow, techniqueId),
+    ...splitHits(result, techniqueId),
     result,
-    forceNow,
     onlyTechniqueId: techniqueId,
   });
   const { entities, truncated, originalCount } = buildEntities(result, techniqueId);
