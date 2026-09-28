@@ -207,6 +207,22 @@ export const PACK_QUERY_STALE_INTERVAL_ERROR = i18n.translate(
   }
 );
 
+export const PACK_QUERY_STALE_RRULE_ERROR = i18n.translate(
+  'xpack.osquery.scheduleSection.packQueryStaleRruleError',
+  {
+    defaultMessage:
+      'One or more queries still use a date & time schedule. Per-query recurrences do not apply while the pack uses an interval schedule and will not be saved.',
+  }
+);
+
+export const OVERRIDE_MODE_MISMATCH_ERROR = i18n.translate(
+  'xpack.osquery.scheduleSection.overrideModeMismatchError',
+  {
+    defaultMessage:
+      'This override uses a different schedule mode than the pack. Overrides change the schedule details; the mode is set at the pack level.',
+  }
+);
+
 export const SCHEDULE_ERRORS_TOAST_TITLE = i18n.translate(
   'xpack.osquery.scheduleSection.scheduleErrorsToastTitle',
   {
