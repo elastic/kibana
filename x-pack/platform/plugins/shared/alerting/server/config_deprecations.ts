@@ -12,7 +12,11 @@ export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = 
   deprecate,
   unused,
 }) => [
-  unused('ruleChangeTracking.enabled', { level: 'warning' }),
+  unused('ruleChangeTracking.enabled', {
+    level: 'warning',
+    message:
+      'Use the "securitySolution:enableRuleChangesHistory" advanced setting to turn the feature off per space.',
+  }),
   deprecate('maxEphemeralActionsPerAlert', '9.0.0', {
     level: 'warning',
     message: `The setting "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and currently ignored by the system. Please remove this setting.`,
