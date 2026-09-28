@@ -174,7 +174,9 @@ describe('AgenticInvestigationsPlugin', () => {
     it('grants no proposals privilege, which the proposals feature owns instead', () => {
       const { features } = setupPlugin();
 
-      expect(JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))).not.toMatch(/proposals/i);
+      expect(
+        JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))
+      ).not.toMatch(/proposals/i);
     });
 
     it('registers the HTTP routes for every entity', () => {
