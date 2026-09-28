@@ -20,6 +20,7 @@ import dedent from 'dedent';
 import { MAX_AI_INDEX_AUTOMATION_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
+import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import { getRunAutomationErrorMessage, runAutomationHandler } from './handler';
 import type { SavedWorkflowSummary } from '../save_automation/handler';
 import { tryResolveSavedWorkflowById } from '../save_automation/handler';
@@ -61,6 +62,7 @@ export const createRunAutomationTool = ({
     Call this after save_automation when the user has asked to run the automation.
   `,
   schema: runAutomationSchema,
+  availability: aiIndexToolsAvailability,
   confirmation: {
     askUser: 'always',
     getConfirmation: async ({ toolParams, context }) => {
