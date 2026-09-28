@@ -12,7 +12,7 @@ import type { APIReturnType } from '@kbn/apm-api-shared';
 import { MobileProperty } from '../../../../../../common/mobile_types';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
-import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
+import { useAnyOfApmParams, useMaybeApmParams } from '../../../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { push } from '../../../../shared/links/url_helpers';
 
@@ -66,7 +66,6 @@ export function MobileFilters() {
       osVersion,
       appVersion,
       transactionType,
-      mobileErrorTabId,
     },
   } = useAnyOfApmParams(
     '/mobile-services/{serviceName}/overview',
@@ -74,6 +73,13 @@ export function MobileFilters() {
     '/mobile-services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/errors-and-crashes'
   );
+
+  // `mobileErrorTabId` only exists on the errors-and-crashes route, so it can't
+  // be destructured from the union above. Read it separately (undefined on the
+  // other tabs) to scope filters to crash documents only on the crashes tab.
+  const mobileErrorTabId = useMaybeApmParams(
+    '/mobile-services/{serviceName}/errors-and-crashes'
+  )?.query.mobileErrorTabId;
 
   const filters = { netConnectionType, device, osVersion, appVersion };
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
