@@ -195,6 +195,7 @@ describe('Slack inbound events', () => {
             user: 'U123',
             text: '<@UAPP> hello',
             ts: '1515449522.000016',
+            thread_ts: '1515449522.000010',
             channel: 'C123',
           })
         )
@@ -208,6 +209,7 @@ describe('Slack inbound events', () => {
         workspace: 'T123',
         channel: 'C123',
         messageId: '1515449522.000016',
+        threadId: '1515449522.000010',
         sender: 'U123',
         text: '<@UAPP> hello',
       },

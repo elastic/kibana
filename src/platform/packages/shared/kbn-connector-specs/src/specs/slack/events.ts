@@ -65,6 +65,7 @@ const SlackAppMentionEventSchema = z.object({
   workspace: optionalSlackId('Slack workspace (team) id.'),
   channel: slackId('Channel where the app was mentioned.'),
   messageId: slackId('Message timestamp of the mention.'),
+  threadId: optionalSlackId('Thread timestamp when the mention is in a thread.'),
   sender: optionalSlackId('User id of the person who mentioned the app.'),
   text: z.string().max(SLACK_EVENT_TEXT_MAX).optional().describe('Text of the mention.'),
 });
@@ -241,6 +242,7 @@ const parseAppMention = (
       workspace,
       channel,
       messageId,
+      threadId: readId(event.thread_ts),
       sender: readId(event.user),
       text: readText(event.text),
     }),

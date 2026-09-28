@@ -39,7 +39,7 @@ The connector can start a workflow from a Slack Events API `event_callback`. A s
 | Workflow event | Slack `event.type` | Fields |
 | --- | --- | --- |
 | `slack2.message` | `message` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text`, `subtype`, `botId` |
-| `slack2.app_mention` | `app_mention` | `workspace`, `channel`, `messageId`, `sender`, `text` |
+| `slack2.app_mention` | `app_mention` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text` |
 | `slack2.reaction_added` | `reaction_added` | `channel`, `messageId`, `fileId`, `fileCommentId`, `itemType`, `user`, `reaction` |
 | `slack2.file_shared` | `file_shared` | `fileId`, `user`, `channel` |
 | `slack2.file_public` | `file_public` | `fileId`, `userId` |
