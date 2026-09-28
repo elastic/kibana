@@ -30,7 +30,6 @@ import {
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { SCAN_FAILURE_DEFINITION_IDS } from './scan_failure_classification';
 import {
   SCAN_FAILURE_PAGE_SIZE,
   ScanFailuresService,
@@ -70,7 +69,7 @@ const createService = (
       async (id: string) => lookup.get(id) ?? null
     ) as FailedExecutionSearch['getWorkflowExecution'],
   };
-  return { logger, service: new ScanFailuresService(executions, logger) };
+  return { logger, executions, service: new ScanFailuresService(executions, logger) };
 };
 
 /** A failed child whose parent execution is the catalog Worker that started it. */
@@ -293,16 +292,97 @@ describe('ScanFailuresService', () => {
     });
   });
 
-  it('stops paging once every classified definition id has been seen', async () => {
-    const search = jest.fn(async () => page([...SCAN_FAILURE_DEFINITION_IDS], 10_000));
-    const { service } = createService(search);
+  it('attributes the same child definition to each Worker that started it', async () => {
+    const reviewId = ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID;
+    const attackDiscoveryParentId = 'parent-attack-discovery';
+    const ruleTuningParentId = 'parent-rule-tuning';
+    const attackDiscoveryChild = execution(reviewId, undefined, {
+      id: 'child-attack-discovery',
+      triggeredBy: WORKFLOW_STEP,
+      parentId: attackDiscoveryParentId,
+    });
+    const ruleTuningChild = execution(reviewId, undefined, {
+      id: 'child-rule-tuning',
+      triggeredBy: WORKFLOW_STEP,
+      parentId: ruleTuningParentId,
+    });
+    const search = jest.fn(
+      async ({ page: pageNumber }: { page: number }): Promise<FailedExecutionPage> => {
+        if (pageNumber === 1) {
+          return {
+            results: Array.from({ length: SCAN_FAILURE_PAGE_SIZE }, () => attackDiscoveryChild),
+            total: SCAN_FAILURE_PAGE_SIZE + 1,
+          };
+        }
+        return { results: [ruleTuningChild], total: SCAN_FAILURE_PAGE_SIZE + 1 };
+      }
+    );
+    const { service } = createService(
+      search,
+      new Map([
+        [
+          attackDiscoveryParentId,
+          execution(ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, undefined, {
+            id: attackDiscoveryParentId,
+            triggeredBy: 'scheduled',
+          }),
+        ],
+        [
+          ruleTuningParentId,
+          execution(ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, undefined, {
+            id: ruleTuningParentId,
+            triggeredBy: 'scheduled',
+          }),
+        ],
+      ])
+    );
+
+    await expect(service.list(request, 'default')).resolves.toEqual({
+      workers: [
+        {
+          workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+          watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+        },
+        {
+          workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+          watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
+        },
+      ],
+      unknown: false,
+    });
+  });
+
+  it('loads a parent execution once when several failures share it', async () => {
+    const parentId = 'shared-parent';
+    const child = (id: string) =>
+      execution(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID, undefined, {
+        id,
+        triggeredBy: WORKFLOW_STEP,
+        parentId,
+      });
+    const search = jest.fn(async () => ({
+      results: [child('child-a'), child('child-b')],
+      total: 2,
+    }));
+    const { executions, service } = createService(
+      search,
+      new Map([
+        [
+          parentId,
+          execution(ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, undefined, {
+            id: parentId,
+            triggeredBy: 'scheduled',
+          }),
+        ],
+      ])
+    );
 
     await service.list(request, 'default');
 
-    expect(search).toHaveBeenCalledTimes(1);
+    expect(executions.getWorkflowExecution).toHaveBeenCalledTimes(1);
   });
 
-  it('reads the next page while classified definition ids remain', async () => {
+  it('reads the next page while a full page of failures remains', async () => {
     const search = jest.fn(
       async ({ page: pageNumber }: { page: number }): Promise<FailedExecutionPage> => {
         if (pageNumber === 1) {

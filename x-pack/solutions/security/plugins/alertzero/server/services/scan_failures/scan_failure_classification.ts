@@ -128,11 +128,6 @@ const DEFINITION_CLASSIFICATION = {
   [ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID]: exclude,
 } as const satisfies Record<AlertZeroDefinitionId, ScanFailureClassification>;
 
-/** Definition ids the scan query keeps paging until it has seen, or hits the page cap. */
-export const SCAN_FAILURE_DEFINITION_IDS = Object.keys(
-  DEFINITION_CLASSIFICATION
-) as AlertZeroDefinitionId[];
-
 export const classifyScanFailureDefinition = (
   definitionId: string | null | undefined
 ): ScanFailureClassification => {

@@ -8,21 +8,21 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SYSTEM_SECURITY_WORKER_CATALOG, type ScanFailuresResponse } from '@kbn/alertzero-common';
 import type { WorkflowExecutionDto, WorkflowExecutionListDto } from '@kbn/workflows';
+import pMap from 'p-map';
 import {
-  SCAN_FAILURE_DEFINITION_IDS,
   classifyScanFailureDefinition,
   isCatalogWorkerDefinition,
 } from './scan_failure_classification';
 
 export const SCAN_FAILURE_PAGE_SIZE = 100;
 export const SCAN_FAILURE_MAX_PAGES = 5;
+/** Parallel parent walks. Chains of one failure stay serial; siblings share the cache. */
+const SCAN_FAILURE_ATTRIBUTION_CONCURRENCY = 8;
 /** Worker → child → grandchild is the deepest AlertZero chain. Stop past that. */
 const SCAN_FAILURE_MAX_PARENT_HOPS = 8;
 const WORKFLOW_STEP_TRIGGER = 'workflow-step';
 
 const EMPTY_SCAN_FAILURES: ScanFailuresResponse = { workers: [], unknown: false };
-
-const CLASSIFIED_DEFINITION_IDS = new Set<string>(SCAN_FAILURE_DEFINITION_IDS);
 
 export type FailedExecutionPage = Pick<WorkflowExecutionListDto, 'results' | 'total'>;
 
@@ -120,10 +120,14 @@ export const foldFailedExecutions = async (
   executions: FailedExecutionPage['results'],
   loadExecution: LoadExecution
 ): Promise<ScanFailuresResponse> => {
+  const attributed = await pMap(
+    executions,
+    (execution) => attributeFailedExecution(execution, loadExecution),
+    { concurrency: SCAN_FAILURE_ATTRIBUTION_CONCURRENCY }
+  );
   const workerIds = new Set<string>();
 
-  for (const execution of executions) {
-    const workerId = await attributeFailedExecution(execution, loadExecution);
+  for (const workerId of attributed) {
     if (workerId) {
       workerIds.add(workerId);
     }
@@ -140,29 +144,20 @@ export const collectScanFailures = async (
   searchPage: (page: number) => Promise<FailedExecutionPage>,
   loadExecution: LoadExecution
 ): Promise<ScanFailuresResponse> => {
-  const seenDefinitionIds = new Set<string>();
   const executions: FailedExecutionPage['results'] = [];
 
   for (let page = 1; page <= SCAN_FAILURE_MAX_PAGES; page++) {
     const { results, total } = await searchPage(page);
     executions.push(...results);
 
-    for (const execution of results) {
-      const definitionId = definitionIdOf(execution);
-      if (definitionId && CLASSIFIED_DEFINITION_IDS.has(definitionId)) {
-        seenDefinitionIds.add(definitionId);
-      }
-    }
-
-    const everyClassifiedIdSeen = SCAN_FAILURE_DEFINITION_IDS.every((id) =>
-      seenDefinitionIds.has(id)
-    );
+    // The same definition can be started by different Workers, so a definition
+    // id on an earlier page does not mean later pages can be skipped.
     const noFurtherPage =
       results.length === 0 ||
       results.length < SCAN_FAILURE_PAGE_SIZE ||
       page * SCAN_FAILURE_PAGE_SIZE >= total;
 
-    if (everyClassifiedIdSeen || noFurtherPage) {
+    if (noFurtherPage) {
       break;
     }
   }
@@ -183,8 +178,16 @@ export class ScanFailuresService {
       return EMPTY_SCAN_FAILURES;
     }
 
-    const loadExecution = (executionId: string) =>
-      executions.getWorkflowExecution(executionId, spaceId, request).catch(() => null);
+    const pendingLoads = new Map<string, Promise<WorkflowExecutionDto | null>>();
+    const loadExecution = (executionId: string) => {
+      const pending = pendingLoads.get(executionId);
+      if (pending) {
+        return pending;
+      }
+      const next = executions.getWorkflowExecution(executionId, spaceId, request).catch(() => null);
+      pendingLoads.set(executionId, next);
+      return next;
+    };
 
     try {
       return await collectScanFailures(
