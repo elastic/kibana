@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { labels } from '../../../utils/i18n';
+import { connectorsTechPreviewBadgeProps, labels } from '../../../utils/i18n';
 import { CapabilityCard } from './capability_card';
 import skillsImage from './assets/connected-power-plug.svg';
 import pluginsImage from './assets/projects-folder.svg';
@@ -93,11 +93,7 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
           dataTestSubj="agentOverviewCapabilityCardConnectors"
           count={connectorsCount}
           title={overviewLabels.connectorsLabel(connectorsCount)}
-          betaBadgeProps={{
-            label: labels.connectors.techPreviewBadgeLabel,
-            tooltipContent: labels.connectors.techPreviewBadgeDescription,
-            size: 'm',
-          }}
+          betaBadgeProps={connectorsTechPreviewBadgeProps}
           description={overviewLabels.connectorsDescription}
           emptyDescription={overviewLabels.connectorsOnboardingDescription}
           image={connectorsImage}

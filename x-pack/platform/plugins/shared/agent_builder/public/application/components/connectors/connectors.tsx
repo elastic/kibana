@@ -11,7 +11,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import React from 'react';
 import { useConnectorsActions } from '../../context/connectors_provider';
-import { labels } from '../../utils/i18n';
+import { connectorsTechPreviewBadgeProps, labels } from '../../utils/i18n';
 import { AgentBuilderConnectorsTable } from './table/connectors_table';
 import { useHasConnectorsAllPrivileges } from '../../hooks/use_has_connectors_all_privileges';
 
@@ -26,11 +26,7 @@ export const AgentBuilderConnectors = () => {
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>{labels.connectors.libraryTitle}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={labels.connectors.techPreviewBadgeLabel}
-                tooltipContent={labels.connectors.techPreviewBadgeDescription}
-                size="m"
-              />
+              <EuiBetaBadge {...connectorsTechPreviewBadgeProps} />
             </EuiFlexItem>
           </EuiFlexGroup>
         }

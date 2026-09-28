@@ -3031,3 +3031,12 @@ export const labels = {
     }),
   },
 };
+
+// Shared badge config for the Connectors "Technical preview" label, reused across the
+// manage/agent connectors page headers, the connectors capability card, and the agent
+// connectors empty state — kept as one constant so wording/size stay in sync.
+export const connectorsTechPreviewBadgeProps = {
+  label: labels.connectors.techPreviewBadgeLabel,
+  tooltipContent: labels.connectors.techPreviewBadgeDescription,
+  size: 'm' as const,
+};

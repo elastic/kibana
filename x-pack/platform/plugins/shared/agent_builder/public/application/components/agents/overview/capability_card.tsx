@@ -20,7 +20,10 @@ import { css } from '@emotion/react';
 export interface CapabilityCardProps {
   count: number;
   title: string;
-  betaBadgeProps?: EuiCardProps['betaBadgeProps'];
+  betaBadgeProps?: Pick<
+    NonNullable<EuiCardProps['betaBadgeProps']>,
+    'label' | 'tooltipContent' | 'size'
+  >;
   description: string;
   emptyDescription: string;
   image?: string;
@@ -47,6 +50,18 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
+  // EuiCard simulates a click on the title link for any click target that isn't the link
+  // itself (its "redundant click" a11y behavior), which would otherwise fire card navigation
+  // when the user clicks the badge. Stopping propagation here keeps the badge non-navigating.
+  const cardBetaBadgeProps: EuiCardProps['betaBadgeProps'] = betaBadgeProps
+    ? {
+        label: betaBadgeProps.label,
+        tooltipContent: betaBadgeProps.tooltipContent,
+        size: betaBadgeProps.size,
+        onClick: (event: React.MouseEvent<HTMLButtonElement>) => event.stopPropagation(),
+      }
+    : undefined;
+
   if (isCountLoading) {
     return (
       <EuiCard
@@ -57,7 +72,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
         title={title}
         titleElement="h4"
         titleSize="xs"
-        betaBadgeProps={betaBadgeProps}
+        betaBadgeProps={cardBetaBadgeProps}
         textAlign="left"
         footer={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -87,7 +102,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
         title={title}
         titleElement="h4"
         titleSize="xs"
-        betaBadgeProps={betaBadgeProps}
+        betaBadgeProps={cardBetaBadgeProps}
         description={emptyDescription}
         textAlign="left"
         href={href}
@@ -128,7 +143,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
       title={title}
       titleElement="h4"
       titleSize="xs"
-      betaBadgeProps={betaBadgeProps}
+      betaBadgeProps={cardBetaBadgeProps}
       description={description}
       textAlign="left"
       footer={
