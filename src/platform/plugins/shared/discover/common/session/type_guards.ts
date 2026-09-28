@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { transformDiscoverSessionIn } from './transform_discover_session_in';
-export { transformDiscoverSessionOut } from './transform_discover_session_out';
+import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type {
+  DiscoverSessionApiEsqlTabBase,
+  DiscoverSessionApiTabBase,
+} from '@kbn/as-code-discover-schema';
+
+export function isDiscoverSessionEsqlTab(
+  tab: DiscoverSessionApiTabBase
+): tab is DiscoverSessionApiEsqlTabBase {
+  return 'data_source' in tab && tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
+}
