@@ -244,6 +244,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           for (const [instanceId, policyId] of Object.entries(
             detectAndReviewStep.policyIdsByInstance ?? {}
           )) {
+            if (cleanedLiveStale.includes(instanceId) || !activeInstanceIds.has(instanceId))
+              continue;
             if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
             byPolicy.get(policyId)!.push(instanceId);
           }
@@ -272,8 +274,19 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               }
             });
             if (redeployResults.some((r) => r.status === 'rejected')) {
+              // Surface the failure so the error callout shows and the user can retry (4119321580).
+              const allActiveIds = Object.keys(
+                detectAndReviewStep.policyIdsByInstance ?? {}
+              ).filter((id) => activeInstanceIds.has(id) && !cleanedLiveStale.includes(id));
+              const errorMsg =
+                'Failed to update package policy with new settings. Click Retry to try again.';
               setIsDeploying(false);
-              updateDetectAndReviewStep({ isDeploying: false });
+              setFailedInstances(allActiveIds);
+              updateDetectAndReviewStep({
+                isDeploying: false,
+                failedInstances: allActiveIds,
+                deployErrors: Object.fromEntries(allActiveIds.map((id) => [id, errorMsg])),
+              });
               return { failed: true };
             }
           }
