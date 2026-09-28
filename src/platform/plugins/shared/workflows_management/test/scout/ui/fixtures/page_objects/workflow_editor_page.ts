@@ -26,6 +26,7 @@ export class WorkflowEditorPage {
   public actionsMenuSearch: Locator;
   public readOnlyBadge: Locator;
   public readonly accessMode: Locator;
+  public readonly serviceAccountBadges: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -46,6 +47,9 @@ export class WorkflowEditorPage {
     this.actionsMenuButton = this.page.testSubj.locator('workflowBottomBarActionsMenu');
     this.actionsMenuSearch = this.page.locator('#actions-menu-search');
     this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
+    this.serviceAccountBadges = this.yamlEditor.locator(
+      '.service-account-name-badge, .service-account-name-badge-unavailable'
+    );
     this.accessMode = this.page.testSubj.locator('entityAccessControlMode');
   }
 
@@ -342,6 +346,25 @@ export class WorkflowEditorPage {
       null,
       { timeout: 15_000 }
     );
+  }
+
+  async acceptYamlSuggestion(name: string): Promise<void> {
+    await this.getYamlEditorSuggestWidget().getByRole('option', { name, exact: true }).dblclick();
+  }
+
+  async dismissYamlSuggestions(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+  }
+
+  async hoverServiceAccountId(id: string): Promise<void> {
+    const activateEditor = this.yamlEditor.getByRole('button', {
+      name: 'Code Editor, activate edit mode',
+    });
+    if (await activateEditor.isVisible()) {
+      await activateEditor.focus();
+      await this.page.keyboard.press('Enter');
+    }
+    await this.yamlEditor.getByText(id, { exact: true }).hover();
   }
 
   public getYamlEditorSuggestWidget() {

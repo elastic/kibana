@@ -47,12 +47,14 @@ export const UNIFIED_HOVER_PROVIDER_ID = 'unified-hover-provider';
 export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   __providerId: string = UNIFIED_HOVER_PROVIDER_ID;
 
+  private readonly provideServiceAccountHover?: ProviderConfig['provideServiceAccountHover'];
   private readonly getYamlDocument: () => YAML.Document | null;
   private readonly getExecutionContext?: () => ExecutionContext | null;
   private readonly fetchStepExecutionData?: (stepId: string) => Promise<StepExecutionData | null>;
 
   constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
+    this.provideServiceAccountHover = config.provideServiceAccountHover;
     this.getExecutionContext = config.getExecutionContext;
     this.fetchStepExecutionData = config.fetchStepExecutionData;
   }
@@ -66,6 +68,9 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       return null;
     }
 
+    const serviceAccountHover = await this.provideServiceAccountHover?.(model, position);
+    if (cancellationToken.isCancellationRequested) return null;
+    if (serviceAccountHover) return serviceAccountHover;
     const customHover = await this.provideCustomHover(model, position);
     if (customHover) {
       return customHover;

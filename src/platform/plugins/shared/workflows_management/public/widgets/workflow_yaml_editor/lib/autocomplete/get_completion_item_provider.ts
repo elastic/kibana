@@ -149,13 +149,21 @@ export function getCompletionItemProvider(
   getState: () => WorkflowDetailState,
   getKqlServices?: () => WorkflowKqlCompletionServices,
   getPropertyHandler?: GetStepPropertyHandler,
-  getEsqlServices?: () => WorkflowEsqlCompletionServices
+  getEsqlServices?: () => WorkflowEsqlCompletionServices,
+  serviceAccountProvider?: monaco.languages.CompletionItemProvider
 ): monaco.languages.CompletionItemProvider {
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
     __providerId: WORKFLOW_COMPLETION_PROVIDER_ID,
     triggerCharacters: [...WORKFLOW_TRIGGER_CHARACTERS],
-    provideCompletionItems: async (model, position, completionContext) => {
+    provideCompletionItems: async (model, position, completionContext, token) => {
+      const accountSuggestions = await serviceAccountProvider?.provideCompletionItems(
+        model,
+        position,
+        completionContext,
+        token
+      );
+      if (accountSuggestions) return accountSuggestions;
       const editorState = getState();
       const autocompleteContext = buildAutocompleteContext({
         registry,
