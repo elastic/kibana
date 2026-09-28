@@ -167,6 +167,8 @@ describe('createDashboardAttachmentType', () => {
       type: 'metric' as const,
       data_source: { type: 'esql' as const, query: 'FROM logs | STATS count = COUNT(*)' },
       metrics: [{ type: 'primary' as const, column: 'count' }],
+      sampling: 1,
+      ignore_global_filters: false,
     };
     const dashboardClient = {
       read: jest.fn().mockResolvedValue({
