@@ -6,7 +6,14 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexItem, EuiIcon, EuiText, euiCanAnimate } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  euiCanAnimate,
+  euiShadow,
+  euiShadowHover,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
@@ -55,7 +62,24 @@ const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: 100%;
   border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
   ${euiCanAnimate} {
-    transition: background-color ${euiTheme.animation.fast} ease-out;
+    transition: background-color ${euiTheme.animation.fast} ease-out, box-shadow 250ms;
+  }
+`;
+
+// The shell's shadow would stop at the input and leave the post-to-team bar outside it.
+const composerShadowStyles = (euiThemeContext: UseEuiTheme) => css`
+  ${euiShadow(euiThemeContext, 's')}
+  &:hover {
+    ${euiShadowHover(euiThemeContext, 's')}
+  }
+`;
+
+const composerFocusShadowStyles = (euiThemeContext: UseEuiTheme) => css`
+  &:focus-within {
+    ${euiShadow(euiThemeContext, 'xl')}
+    &:hover {
+      ${euiShadowHover(euiThemeContext, 'xl')}
+    }
   }
 `;
 
@@ -103,7 +127,14 @@ const InputContainer: React.FC<
   const showHeader = triggerMode === ChatTriggerMode.Never;
 
   return (
-    <div css={[wrapperStyles, showHeader && wrapperWithHeaderStyles]}>
+    <div
+      css={[
+        wrapperStyles,
+        composerShadowStyles,
+        !isDisabled && composerFocusShadowStyles,
+        showHeader && wrapperWithHeaderStyles,
+      ]}
+    >
       <div
         css={[headerStyles, showHeader && headerVisibleStyles]}
         aria-hidden={!showHeader}
@@ -119,6 +150,7 @@ const InputContainer: React.FC<
       <ConversationInputShell
         isDisabled={isDisabled}
         isCollapsed={isCollapsed}
+        suppressShadow
         data-test-subj="agentBuilderConversationInputForm"
         aria-label={containerAriaLabel}
       >
