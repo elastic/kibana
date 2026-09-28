@@ -135,6 +135,14 @@ export class McpClient {
     };
   }
 
+  /** Server capabilities from the initialize handshake; undefined until connected. */
+  getServerCapabilities(): ServerCapabilities | undefined {
+    if (!this.connected) {
+      return undefined;
+    }
+    return this.client.getServerCapabilities();
+  }
+
   /**
    * Disconnect from the MCP client and return the disconnected status.
    */

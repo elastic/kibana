@@ -45,6 +45,8 @@ const sendJson = (res: ServerResponse, status: number, body: unknown, sessionId?
   res.end(payload);
 };
 
+type FailNextInitializeWith = 503 | 'destroy' | undefined;
+
 /**
  * Minimal Streamable HTTP MCP endpoint. Auth is checked before JSON-RPC handling. A successful
  * tool call follows initialize, the initialized 202 (which arms the SSE gate), and the GET SSE channel.
@@ -52,19 +54,33 @@ const sendJson = (res: ServerResponse, status: number, body: unknown, sessionId?
 const startMcpServer = async (): Promise<{
   url: string;
   authorizations: string[];
+  initializeCount: number;
+  failNextInitializeWith: FailNextInitializeWith;
+  reset: () => void;
   close: () => Promise<void>;
 }> => {
-  const authorizations: string[] = [];
+  const state: {
+    authorizations: string[];
+    initializeCount: number;
+    failNextInitializeWith: FailNextInitializeWith;
+  } = {
+    authorizations: [],
+    initializeCount: 0,
+    failNextInitializeWith: undefined,
+  };
   const sessionId = randomUUID();
   const openStreams = new Set<ServerResponse>();
 
   const httpServer: Server = createServer(async (req, res) => {
     const authorization = req.headers.authorization;
     if (authorization !== AUTH_HEADER) {
+      if (req.method === 'POST') {
+        state.initializeCount += 1;
+      }
       sendJson(res, 401, { error: 'unauthorized' });
       return;
     }
-    authorizations.push(authorization);
+    state.authorizations.push(authorization);
 
     if (req.method === 'GET') {
       res.writeHead(200, {
@@ -90,6 +106,17 @@ const startMcpServer = async (): Promise<{
     const method = message.method;
 
     if (method === 'initialize') {
+      state.initializeCount += 1;
+      const failWith = state.failNextInitializeWith;
+      if (failWith !== undefined) {
+        state.failNextInitializeWith = undefined;
+        if (failWith === 503) {
+          sendJson(res, 503, { error: 'unavailable' });
+          return;
+        }
+        req.socket.destroy();
+        return;
+      }
       sendJson(
         res,
         200,
@@ -150,7 +177,21 @@ const startMcpServer = async (): Promise<{
 
   return {
     url: `http://127.0.0.1:${address.port}/mcp`,
-    authorizations,
+    authorizations: state.authorizations,
+    get initializeCount() {
+      return state.initializeCount;
+    },
+    get failNextInitializeWith() {
+      return state.failNextInitializeWith;
+    },
+    set failNextInitializeWith(value: FailNextInitializeWith) {
+      state.failNextInitializeWith = value;
+    },
+    reset: () => {
+      state.initializeCount = 0;
+      state.failNextInitializeWith = undefined;
+      state.authorizations.length = 0;
+    },
     close: async () => {
       for (const stream of openStreams) {
         stream.end();
@@ -199,6 +240,10 @@ describe('MCP client wire', () => {
     await server.close();
   });
 
+  beforeEach(() => {
+    server.reset();
+  });
+
   it('connects and calls a tool through the real fetch and SSE gate', async () => {
     const client = await clientTypes.mcp.build(makeBuildContext(server.url, AUTH_HEADER));
 
@@ -212,9 +257,32 @@ describe('MCP client wire', () => {
     }
   });
 
-  it('rejects a connection when the bearer token is wrong', async () => {
+  it('retries initialize after HTTP 503 then connects', async () => {
+    server.failNextInitializeWith = 503;
+    const client = await clientTypes.mcp.build(makeBuildContext(server.url, AUTH_HEADER));
+
+    try {
+      expect(server.initializeCount).toBe(2);
+    } finally {
+      await clientTypes.mcp.terminate(client);
+    }
+  });
+
+  it('retries initialize after the first socket is destroyed then connects', async () => {
+    server.failNextInitializeWith = 'destroy';
+    const client = await clientTypes.mcp.build(makeBuildContext(server.url, AUTH_HEADER));
+
+    try {
+      expect(server.initializeCount).toBe(2);
+    } finally {
+      await clientTypes.mcp.terminate(client);
+    }
+  });
+
+  it('rejects a connection when the bearer token is wrong and makes exactly one initialize attempt', async () => {
     await expect(
       clientTypes.mcp.build(makeBuildContext(server.url, 'Bearer wrong'))
     ).rejects.toThrow();
+    expect(server.initializeCount).toBe(1);
   });
 });

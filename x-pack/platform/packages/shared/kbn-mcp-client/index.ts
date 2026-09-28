@@ -13,6 +13,8 @@ export { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamable
 export { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 
 // Types
+export type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
+
 export type {
   ClientDetails,
   CallToolParams,

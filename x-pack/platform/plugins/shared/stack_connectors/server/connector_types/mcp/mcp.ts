@@ -29,6 +29,7 @@ import {
   type CallToolResponse,
   type ListToolsResponse,
   type Tool,
+  type ServerCapabilities,
   StreamableHTTPError,
   UnauthorizedError,
 } from '@kbn/mcp-client';
@@ -57,6 +58,11 @@ export const listToolsCache = new LRUCache<string, ListToolsResponse>({
   allowStale: false,
   ttlAutopurge: false,
 });
+
+export interface McpTestConnectorResponse {
+  connected: boolean;
+  capabilities?: ServerCapabilities;
+}
 
 /**
  * MCP Connector for Kibana Stack Connectors.
@@ -178,44 +184,59 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
         await this.pool.invalidate(key, promise);
       }
 
-      const isUserError = clientTypes.mcp.isUserError?.(err) ?? false;
-      const message = `MCP ${operation} failed: ${
-        err instanceof Error ? err.message : String(err)
-      }`;
-      if (isUserError) {
-        this.logger.warn(message);
-      } else {
-        this.logger.error(message);
-      }
-
-      if (isUserError) {
-        throw createTaskRunError(
-          err instanceof Error ? err : new Error(String(err)),
-          TaskErrorSource.USER
-        );
-      }
-
-      throw err;
+      this.throwClassified(operation, err);
     }
   }
 
+  private throwClassified(operation: string, err: unknown): never {
+    const isUserError = clientTypes.mcp.isUserError?.(err) ?? false;
+    const message = `MCP ${operation} failed: ${err instanceof Error ? err.message : String(err)}`;
+    if (isUserError) {
+      this.logger.warn(message);
+    } else {
+      this.logger.error(message);
+    }
+
+    if (isUserError) {
+      throw createTaskRunError(
+        err instanceof Error ? err : new Error(String(err)),
+        TaskErrorSource.USER
+      );
+    }
+
+    throw err;
+  }
+
   /**
-   * Test the connector with a fresh client: drop any pooled client for this lease key, build and
-   * connect a new one, then verify the session with a live `listTools` round trip. The cached
-   * tool list is cleared only once the new client exists, so a failed connect keeps it.
+   * Test the connector with a fresh isolated client: build and connect outside the pool, verify
+   * the session with a live `listTools` round trip, and always terminate that client. Does not
+   * read or write the pooled client or the tool-list cache.
    */
   public async testConnector(
     _params: z.infer<typeof TestConnectorRequestSchema>,
     _connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<{ connected: boolean }> {
-    // `drop` removes the pool entry synchronously; the old client's disconnect runs in the
-    // background so the test waits only on the server under test, never on a stuck old session.
-    void this.pool.drop(this.getLeaseKey());
-    await this.withPooledClient('test', async (client) => {
-      listToolsCache.delete(this.getListToolsCacheKey());
+  ): Promise<McpTestConnectorResponse> {
+    let client: McpClient;
+    try {
+      client = await this.buildClient();
+    } catch (err) {
+      return this.throwClassified('test', err);
+    }
+
+    try {
       await client.listTools();
-    });
-    return { connected: true };
+      return { connected: true, capabilities: client.getServerCapabilities() };
+    } catch (err) {
+      return this.throwClassified('test', err);
+    } finally {
+      try {
+        await clientTypes.mcp.terminate(client);
+      } catch (err) {
+        this.logger.debug(
+          `MCP test client terminate failed: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
   }
 
   /**

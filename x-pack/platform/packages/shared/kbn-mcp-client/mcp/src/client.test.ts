@@ -371,6 +371,25 @@ describe('McpClient', () => {
     });
   });
 
+  describe('getServerCapabilities', () => {
+    it('returns undefined before connect', () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      mockClient.getServerCapabilities.mockReturnValue({ tools: {} });
+
+      expect(client.getServerCapabilities()).toBeUndefined();
+    });
+
+    it('returns the SDK value after connect', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      mockClient.connect.mockResolvedValue(undefined);
+      mockClient.getServerCapabilities.mockReturnValue({ tools: {} });
+
+      await client.connect();
+
+      expect(client.getServerCapabilities()).toEqual({ tools: {} });
+    });
+  });
+
   describe('disconnect', () => {
     it('disconnects when connected', async () => {
       const client = await createConnectedClient();

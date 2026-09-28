@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
+import { McpClient, StreamableHTTPError, UnauthorizedError, type FetchLike } from '@kbn/mcp-client';
 import type { BuildContext } from '../../clients/client_type_spec';
-import { createMcpClientType } from './client_type';
+import {
+  createMcpClientType,
+  isTransientConnectError,
+  McpConnectionHttpError,
+  McpConnectionTransportError,
+  MCP_CONNECT_RETRY_DELAY_MS,
+} from './client_type';
 
 jest.mock('@kbn/mcp-client', () => {
   const actual = jest.requireActual('@kbn/mcp-client');
@@ -32,6 +38,63 @@ jest.mock('./fetch_resource', () => ({
     close: jest.fn().mockResolvedValue(undefined),
   }),
 }));
+
+const createRetryingClientType = () => createMcpClientType({ connectRetry: { delayMs: 0 } });
+
+const fetchFailed = (code: string): TypeError =>
+  new TypeError('fetch failed', { cause: Object.assign(new Error(code), { code }) });
+
+const installResourceMocks = (): {
+  createFetchResource: jest.Mock;
+  close: jest.Mock;
+} => {
+  const { createFetchResource } = jest.requireMock('./fetch_resource') as {
+    createFetchResource: jest.Mock;
+  };
+  const close = jest.fn().mockResolvedValue(undefined);
+  createFetchResource.mockImplementation(() => ({
+    fetch: jest.fn(),
+    close,
+  }));
+  return { createFetchResource, close };
+};
+
+const mockConnectSequence = (
+  implementations: Array<(customFetch: FetchLike) => Promise<unknown>>
+): void => {
+  let attempt = 0;
+  (McpClient as unknown as jest.Mock).mockImplementation(
+    (
+      _logger: ConstructorParameters<typeof McpClient>[0],
+      _clientDetails: ConstructorParameters<typeof McpClient>[1],
+      options: ConstructorParameters<typeof McpClient>[2]
+    ) => {
+      const index = attempt;
+      attempt += 1;
+      const impl = implementations[index];
+      if (!impl) {
+        throw new Error(`Unexpected McpClient construction #${index + 1}`);
+      }
+      return {
+        connect: jest.fn(async () => {
+          const customFetch = options?.fetch;
+          if (!customFetch) {
+            throw new Error('Expected a custom fetch implementation');
+          }
+          return impl(customFetch);
+        }),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+      };
+    }
+  );
+};
+
+const restoreDefaultMcpClient = (): void => {
+  (McpClient as unknown as jest.Mock).mockImplementation(() => ({
+    connect: jest.fn().mockResolvedValue({ connected: true }),
+    disconnect: jest.fn().mockResolvedValue(undefined),
+  }));
+};
 
 const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext => ({
   logger: {
@@ -59,6 +122,7 @@ const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext =
 describe('createMcpClientType', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    restoreDefaultMcpClient();
   });
 
   describe('id', () => {
@@ -273,6 +337,252 @@ describe('createMcpClientType', () => {
         expect(clientType.isUserError?.(error)).toBe(true);
       }
     );
+  });
+
+  describe('build retries', () => {
+    it('retries a transport failure and succeeds on attempt 2', async () => {
+      const { createFetchResource, close } = installResourceMocks();
+      const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
+        createSseGatedFetch: jest.Mock;
+      };
+      const transportError = fetchFailed('ECONNRESET');
+      createSseGatedFetch.mockReturnValue(jest.fn().mockRejectedValue(transportError));
+      mockConnectSequence([
+        async (customFetch) => {
+          await customFetch('https://mcp.example.com', { method: 'POST' });
+          throw new Error('should not reach');
+        },
+        async () => ({ connected: true }),
+      ]);
+
+      const ctx = makeBuildContext();
+      const client = await createRetryingClientType().build(ctx);
+
+      expect(client.connect).toHaveBeenCalled();
+      expect(McpClient).toHaveBeenCalledTimes(2);
+      expect(createFetchResource).toHaveBeenCalledTimes(2);
+      expect(close).toHaveBeenCalledTimes(1);
+      expect(ctx.logger.warn).toHaveBeenCalledTimes(1);
+      expect(ctx.logger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/MCP connect attempt 1\/3 failed: .*retrying in 0ms/)
+      );
+    });
+
+    it('succeeds on attempt 3 after two transient failures', async () => {
+      const { createFetchResource, close } = installResourceMocks();
+      const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
+        createSseGatedFetch: jest.Mock;
+      };
+      createSseGatedFetch.mockReturnValue(jest.fn().mockRejectedValue(fetchFailed('ECONNREFUSED')));
+      mockConnectSequence([
+        async (customFetch) => {
+          await customFetch('https://mcp.example.com', { method: 'POST' });
+          throw new Error('should not reach');
+        },
+        async (customFetch) => {
+          await customFetch('https://mcp.example.com', { method: 'POST' });
+          throw new Error('should not reach');
+        },
+        async () => ({ connected: true }),
+      ]);
+
+      await createRetryingClientType().build(makeBuildContext());
+
+      expect(McpClient).toHaveBeenCalledTimes(3);
+      expect(createFetchResource).toHaveBeenCalledTimes(3);
+      expect(close).toHaveBeenCalledTimes(2);
+    });
+
+    it('rejects with McpConnectionTransportError after 3 transient failures', async () => {
+      const { close } = installResourceMocks();
+      const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
+        createSseGatedFetch: jest.Mock;
+      };
+      createSseGatedFetch.mockReturnValue(jest.fn().mockRejectedValue(fetchFailed('ECONNRESET')));
+      mockConnectSequence([
+        async (customFetch) => {
+          await customFetch('https://mcp.example.com', { method: 'POST' });
+          throw new Error('should not reach');
+        },
+        async (customFetch) => {
+          await customFetch('https://mcp.example.com', { method: 'POST' });
+          throw new Error('should not reach');
+        },
+        async (customFetch) => {
+          await customFetch('https://mcp.example.com', { method: 'POST' });
+          throw new Error('should not reach');
+        },
+      ]);
+
+      const clientType = createRetryingClientType();
+      const error = await clientType.build(makeBuildContext()).catch((err: Error) => err);
+
+      expect(error).toBeInstanceOf(McpConnectionTransportError);
+      expect(error).toMatchObject({ name: 'McpConnectionTransportError', code: 'ECONNRESET' });
+      expect(McpClient).toHaveBeenCalledTimes(3);
+      expect(close).toHaveBeenCalledTimes(3);
+      expect(isTransientConnectError(error)).toBe(true);
+      expect(clientType.isUserError?.(error)).toBe(false);
+    });
+
+    it('retries when customFetch sees HTTP 503', async () => {
+      const { createFetchResource, close } = installResourceMocks();
+      const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
+        createSseGatedFetch: jest.Mock;
+      };
+      createSseGatedFetch.mockReturnValue(
+        jest.fn().mockResolvedValue(new Response(null, { status: 503 }))
+      );
+      mockConnectSequence([
+        async (customFetch) => {
+          await customFetch('https://mcp.example.com', { method: 'POST' });
+          throw new Error('wrapped 503');
+        },
+        async () => ({ connected: true }),
+      ]);
+
+      await createRetryingClientType().build(makeBuildContext());
+
+      expect(McpClient).toHaveBeenCalledTimes(2);
+      expect(createFetchResource).toHaveBeenCalledTimes(2);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([401, 403])(
+      'does not retry HTTP %i and closes the failed attempt',
+      async (httpStatus) => {
+        const { close } = installResourceMocks();
+        const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
+          createSseGatedFetch: jest.Mock;
+        };
+        createSseGatedFetch.mockReturnValue(
+          jest.fn().mockResolvedValue(new Response(null, { status: httpStatus }))
+        );
+        const connectError = new Error('wrapped connection error');
+        mockConnectSequence([
+          async (customFetch) => {
+            await customFetch('https://mcp.example.com', { method: 'POST' });
+            throw connectError;
+          },
+        ]);
+
+        const clientType = createRetryingClientType();
+        const error = await clientType.build(makeBuildContext()).catch((err: Error) => err);
+
+        expect(error).toMatchObject({
+          name: 'McpConnectionHttpError',
+          httpStatus,
+          cause: connectError,
+        });
+        expect(McpClient).toHaveBeenCalledTimes(1);
+        expect(close).toHaveBeenCalledTimes(1);
+        expect(clientType.isUserError?.(error)).toBe(true);
+      }
+    );
+
+    it('does not retry an unclassified Error from connect', async () => {
+      const { close } = installResourceMocks();
+      const connectError = new Error('unclassified');
+      (McpClient as unknown as jest.Mock).mockImplementationOnce(() => ({
+        connect: jest.fn().mockRejectedValue(connectError),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+      }));
+
+      await expect(createRetryingClientType().build(makeBuildContext())).rejects.toBe(connectError);
+      expect(McpClient).toHaveBeenCalledTimes(1);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits the default delay before starting attempt 2', async () => {
+      jest.useFakeTimers();
+      try {
+        const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
+          createSseGatedFetch: jest.Mock;
+        };
+        createSseGatedFetch.mockReturnValue(jest.fn().mockRejectedValue(fetchFailed('ECONNRESET')));
+        mockConnectSequence([
+          async (customFetch) => {
+            await customFetch('https://mcp.example.com', { method: 'POST' });
+            throw new Error('should not reach');
+          },
+          async () => ({ connected: true }),
+        ]);
+
+        const buildPromise = createMcpClientType().build(makeBuildContext());
+
+        await jest.advanceTimersByTimeAsync(0);
+        expect(McpClient).toHaveBeenCalledTimes(1);
+
+        await jest.advanceTimersByTimeAsync(MCP_CONNECT_RETRY_DELAY_MS - 1);
+        expect(McpClient).toHaveBeenCalledTimes(1);
+
+        await jest.advanceTimersByTimeAsync(1);
+        await buildPromise;
+        expect(McpClient).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+  });
+
+  describe('isTransientConnectError', () => {
+    it.each([500, 502, 503])('returns true for HTTP %i', (httpStatus) => {
+      expect(
+        isTransientConnectError(new McpConnectionHttpError(httpStatus, new Error('boom')))
+      ).toBe(true);
+    });
+
+    it.each([401, 403])('returns false for HTTP %i', (httpStatus) => {
+      expect(
+        isTransientConnectError(new McpConnectionHttpError(httpStatus, new Error('boom')))
+      ).toBe(false);
+    });
+
+    it.each([
+      'ECONNREFUSED',
+      'ECONNRESET',
+      'EPIPE',
+      'ETIMEDOUT',
+      'UND_ERR_SOCKET',
+      'UND_ERR_CONNECT_TIMEOUT',
+      'UND_ERR_HEADERS_TIMEOUT',
+    ])('returns true for transport code %s on the error', (code) => {
+      expect(
+        isTransientConnectError(new McpConnectionTransportError(code, new Error('boom')))
+      ).toBe(true);
+      expect(isTransientConnectError(Object.assign(new Error('boom'), { code }))).toBe(true);
+    });
+
+    it.each([
+      'ECONNREFUSED',
+      'ECONNRESET',
+      'EPIPE',
+      'ETIMEDOUT',
+      'UND_ERR_SOCKET',
+      'UND_ERR_CONNECT_TIMEOUT',
+      'UND_ERR_HEADERS_TIMEOUT',
+    ])('returns true for transport code %s on cause', (code) => {
+      const cause = Object.assign(new Error(code), { code });
+      expect(isTransientConnectError(new TypeError('fetch failed', { cause }))).toBe(true);
+    });
+
+    it('returns true for a socket hang up message', () => {
+      expect(isTransientConnectError(new Error('socket hang up'))).toBe(true);
+    });
+
+    it('returns false for UND_ERR_CLOSED', () => {
+      expect(
+        isTransientConnectError(Object.assign(new Error('closed'), { code: 'UND_ERR_CLOSED' }))
+      ).toBe(false);
+    });
+
+    it('returns false for a plain Error', () => {
+      expect(isTransientConnectError(new Error('boom'))).toBe(false);
+    });
+
+    it('returns false for a missing serverUrl error', () => {
+      expect(isTransientConnectError(new Error('config.serverUrl is required'))).toBe(false);
+    });
   });
 
   describe('terminate', () => {

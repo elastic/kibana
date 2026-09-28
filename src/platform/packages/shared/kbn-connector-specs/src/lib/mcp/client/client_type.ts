@@ -11,13 +11,39 @@ import { McpClient, StreamableHTTPError, UnauthorizedError, type FetchLike } fro
 import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spec';
 import { createFetchResource, type McpFetchResource } from './fetch_resource';
 import { createSseGatedFetch } from './sse_fetch';
+import { McpConnectionTransportError } from './mcp_connection_transport_error';
+
+export { McpConnectionTransportError };
 
 const DEFAULT_MCP_CLIENT_NAME = 'kibana-mcp';
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 const USER_ERROR_HTTP_STATUS_CODES = new Set([401, 403]);
 const TERMINAL_UNDICI_CODES = new Set(['UND_ERR_SOCKET', 'UND_ERR_CLOSED', 'UND_ERR_DESTROYED']);
+const SOCKET_HANG_UP = 'socket hang up';
+const TRANSIENT_ERROR_CODES = new Set([
+  'ECONNREFUSED',
+  'ECONNRESET',
+  'ECONNABORTED',
+  'EPIPE',
+  'ETIMEDOUT',
+  'EHOSTUNREACH',
+  'ENETUNREACH',
+  'EAI_AGAIN',
+  'UND_ERR_SOCKET',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_HEADERS_TIMEOUT',
+  'UND_ERR_BODY_TIMEOUT',
+]);
 
-class McpConnectionHttpError extends Error {
+export const MCP_CONNECT_MAX_ATTEMPTS = 3;
+export const MCP_CONNECT_RETRY_DELAY_MS = 100;
+
+export interface McpConnectRetryOptions {
+  maxAttempts?: number;
+  delayMs?: number;
+}
+
+export class McpConnectionHttpError extends Error {
   constructor(public readonly httpStatus: number, cause: unknown) {
     super(cause instanceof Error ? cause.message : String(cause), { cause });
     this.name = 'McpConnectionHttpError';
@@ -38,6 +64,7 @@ const fetchResources = new WeakMap<McpClient, McpFetchResource>();
 export interface McpClientTypeDeps {
   defaultHeaders?: Readonly<Record<string, string>>;
   userAgent?: string;
+  connectRetry?: McpConnectRetryOptions;
 }
 
 const getErrorCode = (err: unknown): string | undefined => {
@@ -47,6 +74,32 @@ const getErrorCode = (err: unknown): string | undefined => {
   return typeof err.code === 'string' ? err.code : undefined;
 };
 
+const getErrorMessage = (err: unknown): string => {
+  if (err instanceof Error) {
+    return err.message;
+  }
+  return String(err);
+};
+
+const getTransportErrorCode = (err: unknown): string | undefined => {
+  const direct = getErrorCode(err);
+  if (direct !== undefined) {
+    return direct;
+  }
+  const cause = err instanceof Error ? err.cause : undefined;
+  const causeCode = getErrorCode(cause);
+  if (causeCode !== undefined) {
+    return causeCode;
+  }
+  if (getErrorMessage(err).includes(SOCKET_HANG_UP)) {
+    return 'ECONNRESET';
+  }
+  if (cause !== undefined && getErrorMessage(cause).includes(SOCKET_HANG_UP)) {
+    return 'ECONNRESET';
+  }
+  return undefined;
+};
+
 const matchesErrorOrCause = (err: unknown, predicate: (current: unknown) => boolean): boolean => {
   if (predicate(err)) {
     return true;
@@ -54,6 +107,94 @@ const matchesErrorOrCause = (err: unknown, predicate: (current: unknown) => bool
   // Undici's fetch throws TypeError("fetch failed") and puts UND_ERR_* on cause.
   const cause = err instanceof Error ? err.cause : undefined;
   return cause !== undefined && predicate(cause);
+};
+
+const delay = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+export const isTransientConnectError = (err: unknown): boolean => {
+  if (err instanceof McpConnectionHttpError) {
+    return err.httpStatus >= 500;
+  }
+  if (err instanceof McpConnectionTransportError) {
+    return TRANSIENT_ERROR_CODES.has(err.code);
+  }
+  const code = getTransportErrorCode(err);
+  return code !== undefined && TRANSIENT_ERROR_CODES.has(code);
+};
+
+const connectOnce = async (
+  ctx: BuildContext,
+  deps: McpClientTypeDeps,
+  clientName: string,
+  serverUrl: string
+): Promise<McpClient> => {
+  const resource = createFetchResource({
+    networkSettings: ctx.networkSettings,
+    logger: ctx.logger,
+    targetUrl: serverUrl,
+    ...(deps.defaultHeaders ? { headers: deps.defaultHeaders } : {}),
+    getAuthHeaders: () => ctx.credential.getAuthHeaders(),
+    ...(deps.userAgent ? { userAgent: deps.userAgent } : {}),
+  });
+  const gatedFetch = createSseGatedFetch(resource);
+  let userErrorHttpStatus: number | undefined;
+  let transientHttpStatus: number | undefined;
+  let transportErrorCode: string | undefined;
+  const customFetch: FetchLike = async (url, init) => {
+    try {
+      const response = await gatedFetch(url, init);
+      if (USER_ERROR_HTTP_STATUS_CODES.has(response.status)) {
+        userErrorHttpStatus = response.status;
+      } else if (response.status >= 500) {
+        transientHttpStatus = response.status;
+      }
+      return response;
+    } catch (err) {
+      transportErrorCode = getTransportErrorCode(err);
+      throw err;
+    }
+  };
+
+  let client: McpClient | undefined;
+  try {
+    client = new McpClient(
+      ctx.logger,
+      {
+        name: clientName,
+        version: DEFAULT_MCP_CLIENT_VERSION,
+        url: serverUrl,
+      },
+      {
+        fetch: customFetch,
+      }
+    );
+
+    fetchResources.set(client, resource);
+    await client.connect();
+    return client;
+  } catch (err) {
+    if (client) {
+      fetchResources.delete(client);
+    }
+    try {
+      await resource.close();
+    } catch {
+      // Preserve the original connection error.
+    }
+    if (userErrorHttpStatus !== undefined) {
+      throw new McpConnectionHttpError(userErrorHttpStatus, err);
+    }
+    if (transientHttpStatus !== undefined) {
+      throw new McpConnectionHttpError(transientHttpStatus, err);
+    }
+    if (transportErrorCode !== undefined) {
+      throw new McpConnectionTransportError(transportErrorCode, err);
+    }
+    throw err;
+  }
 };
 
 export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpec<McpClient> => ({
@@ -71,55 +212,28 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
         ? ctx.config.clientName
         : DEFAULT_MCP_CLIENT_NAME;
 
-    const resource = createFetchResource({
-      networkSettings: ctx.networkSettings,
-      logger: ctx.logger,
-      targetUrl: serverUrl,
-      ...(deps.defaultHeaders ? { headers: deps.defaultHeaders } : {}),
-      getAuthHeaders: () => ctx.credential.getAuthHeaders(),
-      ...(deps.userAgent ? { userAgent: deps.userAgent } : {}),
-    });
-    const gatedFetch = createSseGatedFetch(resource);
-    let userErrorHttpStatus: number | undefined;
-    const customFetch: FetchLike = async (url, init) => {
-      const response = await gatedFetch(url, init);
-      if (USER_ERROR_HTTP_STATUS_CODES.has(response.status)) {
-        userErrorHttpStatus = response.status;
-      }
-      return response;
-    };
+    const maxAttempts = deps.connectRetry?.maxAttempts ?? MCP_CONNECT_MAX_ATTEMPTS;
+    const delayMs = deps.connectRetry?.delayMs ?? MCP_CONNECT_RETRY_DELAY_MS;
 
-    let client: McpClient | undefined;
-    try {
-      client = new McpClient(
-        ctx.logger,
-        {
-          name: clientName,
-          version: DEFAULT_MCP_CLIENT_VERSION,
-          url: serverUrl,
-        },
-        {
-          fetch: customFetch,
-        }
-      );
-
-      fetchResources.set(client, resource);
-      await client.connect();
-      return client;
-    } catch (err) {
-      if (client) {
-        fetchResources.delete(client);
-      }
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        await resource.close();
-      } catch {
-        // Preserve the original connection error.
+        return await connectOnce(ctx, deps, clientName, serverUrl);
+      } catch (err) {
+        lastError = err;
+        if (!isTransientConnectError(err) || attempt === maxAttempts) {
+          throw err;
+        }
+        ctx.logger.warn(
+          `MCP connect attempt ${attempt}/${maxAttempts} failed: ${getErrorMessage(
+            err
+          )}; retrying in ${delayMs}ms`
+        );
+        await delay(delayMs);
       }
-      if (userErrorHttpStatus !== undefined) {
-        throw new McpConnectionHttpError(userErrorHttpStatus, err);
-      }
-      throw err;
     }
+
+    throw lastError;
   },
 
   async terminate(client: McpClient): Promise<void> {

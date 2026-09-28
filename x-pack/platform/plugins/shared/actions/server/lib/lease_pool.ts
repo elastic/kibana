@@ -74,21 +74,6 @@ export class LeasePool<TClient> {
     await this.terminateEntry(entry, key);
   }
 
-  /** Removes and terminates the entry for `key`, whatever its promise, so the next lease rebuilds. */
-  async drop(key: string): Promise<void> {
-    if (key === '') {
-      return;
-    }
-
-    const entry = this.cache.peek(key);
-    if (entry === undefined) {
-      return;
-    }
-
-    this.cache.delete(key);
-    await this.terminateEntry(entry, key);
-  }
-
   /** Await termination so connector deletion and OAuth disconnect can remove credentials afterward. */
   async evict(connectorId: string): Promise<void> {
     const prefix = `${encodeURIComponent(connectorId)}:`;

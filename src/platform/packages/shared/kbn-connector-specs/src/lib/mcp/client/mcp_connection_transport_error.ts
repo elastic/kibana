@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  createMcpClientType,
-  isTransientConnectError,
-  MCP_CONNECT_MAX_ATTEMPTS,
-  MCP_CONNECT_RETRY_DELAY_MS,
-} from './client_type';
-export type { McpClientTypeDeps, McpConnectRetryOptions } from './client_type';
-export { createSseGatedFetch } from './sse_fetch';
-export { createFetchResource } from './fetch_resource';
-export type { CreateFetchResourceOpts, McpFetchResource } from './fetch_resource';
+/** Thrown when connect failed after a transport-level fetch error (ECONNRESET, ECONNREFUSED, undici socket/timeouts). */
+export class McpConnectionTransportError extends Error {
+  constructor(public readonly code: string, cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause), { cause });
+    this.name = 'McpConnectionTransportError';
+  }
+}

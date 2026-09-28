@@ -62,7 +62,14 @@ describe('McpConnector', () => {
   let fakeClient: {
     listTools: jest.Mock;
     callTool: jest.Mock;
+    getServerCapabilities: jest.Mock;
   };
+
+  const makeFakeClient = () => ({
+    listTools: jest.fn().mockResolvedValue({ tools: [] }),
+    callTool: jest.fn().mockResolvedValue({ content: [] }),
+    getServerCapabilities: jest.fn().mockReturnValue({ tools: {} }),
+  });
 
   const createParams = (
     overrides: Partial<ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>> = {}
@@ -93,10 +100,7 @@ describe('McpConnector', () => {
       connectorId: 'test-connector-id',
     });
 
-    fakeClient = {
-      listTools: jest.fn(),
-      callTool: jest.fn(),
-    };
+    fakeClient = makeFakeClient();
 
     mcpClientType.build.mockResolvedValue(fakeClient);
     mcpClientType.terminate.mockResolvedValue(undefined);
@@ -122,45 +126,58 @@ describe('McpConnector', () => {
   });
 
   describe('testConnector', () => {
-    it('returns { connected: true } after one build and one listTools round trip', async () => {
-      fakeClient.listTools.mockResolvedValue({ tools: [] });
+    it('returns connected and capabilities after one isolated build and listTools', async () => {
       const connector = createConnector();
 
       const result = await connector.testConnector({}, connectorUsageCollector);
 
-      expect(result).toEqual({ connected: true });
+      expect(result).toEqual({ connected: true, capabilities: { tools: {} } });
       expect(mcpClientType.build).toHaveBeenCalledTimes(1);
       expect(fakeClient.listTools).toHaveBeenCalledTimes(1);
-    });
-
-    it('drops the pooled client so two tests with the same lease key build twice', async () => {
-      fakeClient.listTools.mockResolvedValue({ tools: [] });
-      const connector1 = createConnector();
-      const connector2 = createConnector();
-
-      await connector1.testConnector({}, connectorUsageCollector);
-      await connector2.testConnector({}, connectorUsageCollector);
-
       expect(mcpClientType.terminate).toHaveBeenCalledTimes(1);
-      expect(mcpClientType.build).toHaveBeenCalledTimes(2);
+      expect(mcpClientType.terminate).toHaveBeenCalledWith(fakeClient);
     });
 
-    it('does not wait for the old client to disconnect before building the new one', async () => {
-      fakeClient.listTools.mockResolvedValue({ tools: [] });
+    it('does not touch a pooled client leased by callTool', async () => {
+      const pooledClient = makeFakeClient();
+      const testClient = makeFakeClient();
+      mcpClientType.build.mockResolvedValueOnce(pooledClient).mockResolvedValueOnce(testClient);
       const connector = createConnector();
+
+      await connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+      await connector.testConnector({}, connectorUsageCollector);
+      await connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+
+      expect(mcpClientType.build).toHaveBeenCalledTimes(2);
+      expect(mcpClientType.terminate).toHaveBeenCalledTimes(1);
+      expect(mcpClientType.terminate).toHaveBeenCalledWith(testClient);
+      expect(mcpClientType.terminate).not.toHaveBeenCalledWith(pooledClient);
+      expect(pooledClient.callTool).toHaveBeenCalledTimes(2);
+      expect(testClient.listTools).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not terminate an in-flight pooled client while the isolated test completes', async () => {
+      const pooledClient = makeFakeClient();
+      const testClient = makeFakeClient();
+      const callToolStarted = new Promise<void>((resolve) => {
+        pooledClient.callTool.mockImplementation(() => {
+          resolve();
+          return new Promise(() => {});
+        });
+      });
+      mcpClientType.build.mockResolvedValueOnce(pooledClient).mockResolvedValueOnce(testClient);
+      const connector = createConnector();
+
+      void connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+      await callToolStarted;
       await connector.testConnector({}, connectorUsageCollector);
 
-      // The old client's disconnect never settles; the next test must still complete.
-      mcpClientType.terminate.mockReturnValue(new Promise<void>(() => {}));
-
-      const result = await connector.testConnector({}, connectorUsageCollector);
-
-      expect(result).toEqual({ connected: true });
       expect(mcpClientType.terminate).toHaveBeenCalledTimes(1);
-      expect(mcpClientType.build).toHaveBeenCalledTimes(2);
+      expect(mcpClientType.terminate).toHaveBeenCalledWith(testClient);
+      expect(mcpClientType.terminate).not.toHaveBeenCalledWith(pooledClient);
     });
 
-    it('clears the cached tool list so the next listTools fetches again', async () => {
+    it('does not read or write the listTools cache', async () => {
       fakeClient.listTools.mockResolvedValue({ tools: [{ name: 'tool-a' }] });
       const connector = createConnector();
 
@@ -170,13 +187,13 @@ describe('McpConnector', () => {
       expect(listToolsCache.size).toBe(1);
 
       await connector.testConnector({}, connectorUsageCollector);
-      expect(listToolsCache.size).toBe(0);
+      expect(listToolsCache.size).toBe(1);
 
       await connector.listTools({}, connectorUsageCollector);
-      expect(fakeClient.listTools).toHaveBeenCalledTimes(3);
+      expect(fakeClient.listTools).toHaveBeenCalledTimes(2);
     });
 
-    it('rejects when listTools fails and does not report connected', async () => {
+    it('terminates the isolated client when listTools rejects', async () => {
       fakeClient.listTools.mockRejectedValue(new Error('list failed'));
       const connector = createConnector();
 
@@ -185,9 +202,61 @@ describe('McpConnector', () => {
       );
 
       expect(mcpClientType.build).toHaveBeenCalledTimes(1);
+      expect(mcpClientType.terminate).toHaveBeenCalledWith(fakeClient);
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('MCP test failed: list failed')
       );
+    });
+
+    it('does not terminate when build rejects, and the next test builds again', async () => {
+      mcpClientType.build
+        .mockRejectedValueOnce(new Error('connect failed'))
+        .mockResolvedValueOnce(fakeClient);
+      const connector = createConnector();
+
+      await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toThrow(
+        'connect failed'
+      );
+      expect(mcpClientType.terminate).not.toHaveBeenCalled();
+
+      const result = await connector.testConnector({}, connectorUsageCollector);
+      expect(result).toEqual({ connected: true, capabilities: { tools: {} } });
+      expect(mcpClientType.build).toHaveBeenCalledTimes(2);
+      expect(mcpClientType.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    it('wraps isUserError listTools failures as USER task errors', async () => {
+      fakeClient.listTools.mockRejectedValue(new Error('unauthorized'));
+      mcpClientType.isUserError.mockReturnValue(true);
+      const connector = createConnector();
+
+      try {
+        await connector.testConnector({}, connectorUsageCollector);
+        throw new Error('expected testConnector to throw');
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+      }
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('MCP test failed: unauthorized')
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(mcpClientType.terminate).toHaveBeenCalledWith(fakeClient);
+    });
+
+    it('builds and terminates a new isolated client on each test', async () => {
+      const firstClient = makeFakeClient();
+      const secondClient = makeFakeClient();
+      mcpClientType.build.mockResolvedValueOnce(firstClient).mockResolvedValueOnce(secondClient);
+      const connector = createConnector();
+
+      await connector.testConnector({}, connectorUsageCollector);
+      await connector.testConnector({}, connectorUsageCollector);
+
+      expect(mcpClientType.build).toHaveBeenCalledTimes(2);
+      expect(mcpClientType.terminate).toHaveBeenCalledTimes(2);
+      expect(mcpClientType.terminate).toHaveBeenNthCalledWith(1, firstClient);
+      expect(mcpClientType.terminate).toHaveBeenNthCalledWith(2, secondClient);
     });
   });
 
@@ -412,8 +481,8 @@ describe('McpConnector', () => {
       const connector = createConnector({ connectorVersion: undefined });
 
       try {
-        await connector.testConnector({}, connectorUsageCollector);
-        throw new Error('expected testConnector to throw');
+        await connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+        throw new Error('expected callTool to throw');
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
         expect((err as Error).message).toBe(
@@ -426,7 +495,6 @@ describe('McpConnector', () => {
     });
 
     it('surfaces a build rejection and does not cache the failed lease', async () => {
-      fakeClient.listTools.mockResolvedValue({ tools: [] });
       mcpClientType.build
         .mockRejectedValueOnce(new Error('connect failed'))
         .mockResolvedValueOnce(fakeClient);
@@ -437,7 +505,7 @@ describe('McpConnector', () => {
       );
 
       const result = await connector.testConnector({}, connectorUsageCollector);
-      expect(result).toEqual({ connected: true });
+      expect(result).toEqual({ connected: true, capabilities: { tools: {} } });
       expect(mcpClientType.build).toHaveBeenCalledTimes(2);
     });
   });
