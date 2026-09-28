@@ -67,8 +67,6 @@ const Hint = ({ keys, children }: { keys: string; children: React.ReactNode }) =
 };
 
 export interface DashboardHintBarProps {
-  /** plays the exit; the parent unmounts the bar once it's done */
-  isExiting?: boolean;
   /** skips the entrance, e.g. when it replaces the toolbar after a keyboard action */
   skipEntrance?: boolean;
 }
@@ -77,7 +75,7 @@ export interface DashboardHintBarProps {
  * Shows the dashboard's mouse and keyboard shortcuts while editing, when no panel is selected.
  * Collapsed it shows how to select panels; expanded it adds the keyboard shortcuts.
  */
-export const DashboardHintBar = ({ isExiting, skipEntrance }: DashboardHintBarProps) => {
+export const DashboardHintBar = ({ skipEntrance }: DashboardHintBarProps) => {
   const shared = useMemoCss(floatingToolbarStyles);
   const styles = useMemoCss(hintStyles);
   const { isExpanded, isMoreMounted, toggle, frameRef, moreRef } = useToolbarExpandAnimation();
@@ -86,7 +84,6 @@ export const DashboardHintBar = ({ isExiting, skipEntrance }: DashboardHintBarPr
   return (
     <FloatingToolbar
       frameRef={frameRef}
-      isExiting={isExiting}
       skipEntrance={skipEntrance}
       role="region"
       aria-label={strings.getAriaLabel()}
@@ -107,7 +104,7 @@ export const DashboardHintBar = ({ isExiting, skipEntrance }: DashboardHintBarPr
             <div css={styles.row}>
               <Hint keys={`${modifier} + Y`}>{strings.getRedo()}</Hint>
             </div>
-            <EuiHorizontalRule margin="s" />
+            <EuiHorizontalRule margin="xs" />
           </div>
         )}
         <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>

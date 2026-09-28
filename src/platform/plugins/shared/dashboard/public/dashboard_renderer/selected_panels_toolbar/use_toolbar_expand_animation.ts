@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createSpringTiming, supportsLinearEasing, type Timing } from '../floating_toolbar/spring';
 
 type Direction = 'open' | 'close';
 
@@ -29,47 +30,6 @@ const OPTION_STAGGER = 20;
 const prefersReducedMotion = () =>
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-const supportsLinearEasing = () =>
-  typeof CSS !== 'undefined' &&
-  typeof CSS.supports === 'function' &&
-  CSS.supports('animation-timing-function', 'linear(0, 1)');
-
-interface Timing {
-  duration: number;
-  easing: string;
-}
-
-/**
- * Simulates a spring from 0 to 1 and encodes it as a CSS `linear()` easing, so WAAPI animations
- * get spring physics (natural settle, optional overshoot) without an animation library.
- */
-const createSpringTiming = ({
-  stiffness,
-  damping,
-}: {
-  stiffness: number;
-  damping: number;
-}): Timing => {
-  const step = 1 / 120;
-  const samples: number[] = [];
-  let position = 0;
-  let velocity = 0;
-  let time = 0;
-  while (time < 2) {
-    velocity += (-stiffness * (position - 1) - damping * velocity) * step;
-    position += velocity * step;
-    time += step;
-    samples.push(position);
-    if (Math.abs(position - 1) < 0.001 && Math.abs(velocity) < 0.01) break;
-  }
-  // ~60 points per second is plenty for a smooth curve
-  const points = samples.filter((_, i) => i % 2 === 1).map((value) => value.toFixed(4));
-  return {
-    duration: Math.round(time * 1000),
-    easing: `linear(0, ${points.join(', ')}, 1)`,
-  };
-};
 
 const getTimings = (): { open: Timing; close: Timing } =>
   supportsLinearEasing()

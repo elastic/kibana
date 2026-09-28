@@ -9,12 +9,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-/** Matches the toolbar's exit animation */
-export const TOOLBAR_EXIT_DURATION = 150;
 /** Re-selecting within this window after the toolbar left skips its entrance */
 const QUICK_RESELECT_WINDOW = 1000;
-
-type ToolbarState = 'hidden' | 'visible' | 'exiting';
 
 const MODIFIER_KEYS = new Set(['Shift', 'Meta', 'Control', 'Alt']);
 
@@ -23,31 +19,22 @@ const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Decides when the selected panels toolbar is rendered, so it can play an exit once the selection
- * is cleared before the hint bar takes its place.
+ * Decides when the selected panels toolbar is shown and how the hint bar takes its place.
  *
- * - Clearing the selection with the keyboard (e.g. Escape) swaps instantly: keyboard actions
- *   never wait on motion.
- * - While exiting, the toolbar keeps showing the last non-empty selection.
+ * - The toolbar leaves instantly when the selection is cleared (like Linear's bulk actions bar):
+ *   the user is done with it, so nothing makes them wait.
+ * - The hint bar then fades in after a pointer interaction, and appears instantly after a keyboard
+ *   action (e.g. Escape): keyboard actions never wait on motion.
+ * - Re-selecting right after the toolbar left skips its entrance.
  */
 export const useSelectedPanelsToolbarPresence = (selectedPanelIds: Set<string>) => {
-  const hasSelection = selectedPanelIds.size > 0;
-  const [state, setStateValue] = useState<ToolbarState>(hasSelection ? 'visible' : 'hidden');
-  const stateRef = useRef(state);
-  const setState = (next: ToolbarState) => {
-    stateRef.current = next;
-    setStateValue(next);
-  };
+  const showToolbar = selectedPanelIds.size > 0;
   const [skipEntrance, setSkipEntrance] = useState(false);
-  // the hint bar fades back in when it replaces the toolbar after a pointer interaction, and
-  // appears instantly after a keyboard action
   const [animateHintBarIn, setAnimateHintBarIn] = useState(true);
-
-  const lastSelectionRef = useRef(selectedPanelIds);
-  if (hasSelection) lastSelectionRef.current = selectedPanelIds;
 
   const lastInputRef = useRef<'keyboard' | 'pointer'>('pointer');
   const hiddenAtRef = useRef(0);
+  const wasShownRef = useRef(showToolbar);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -64,37 +51,15 @@ export const useSelectedPanelsToolbarPresence = (selectedPanelIds: Set<string>) 
   }, []);
 
   useEffect(() => {
-    if (hasSelection) {
-      if (stateRef.current === 'hidden') {
-        setSkipEntrance(Date.now() - hiddenAtRef.current < QUICK_RESELECT_WINDOW);
-      }
-      setState('visible');
-      return;
-    }
-
-    const isInstant = lastInputRef.current === 'keyboard' || prefersReducedMotion();
-    if (isInstant) {
+    if (showToolbar === wasShownRef.current) return;
+    wasShownRef.current = showToolbar;
+    if (showToolbar) {
+      setSkipEntrance(Date.now() - hiddenAtRef.current < QUICK_RESELECT_WINDOW);
+    } else {
       hiddenAtRef.current = Date.now();
-      setAnimateHintBarIn(false);
-      setState('hidden');
-      return;
+      setAnimateHintBarIn(lastInputRef.current === 'pointer' && !prefersReducedMotion());
     }
+  }, [showToolbar]);
 
-    if (stateRef.current === 'hidden') return;
-    setState('exiting');
-    const timeout = setTimeout(() => {
-      hiddenAtRef.current = Date.now();
-      setAnimateHintBarIn(true);
-      setState('hidden');
-    }, TOOLBAR_EXIT_DURATION);
-    return () => clearTimeout(timeout);
-  }, [hasSelection]);
-
-  return {
-    showToolbar: state !== 'hidden',
-    isExiting: state === 'exiting',
-    skipEntrance,
-    animateHintBarIn,
-    toolbarPanelIds: lastSelectionRef.current,
-  };
+  return { showToolbar, skipEntrance, animateHintBarIn };
 };

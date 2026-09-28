@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, type MutableRefObject, type ReactNode } from 'react';
+import React, { type MutableRefObject, type ReactNode } from 'react';
 import {
   EuiButtonIcon,
   EuiIcon,
@@ -20,11 +20,13 @@ import {
 import { keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { createSpringTiming } from './spring';
 
 /**
  * The floating bars at the bottom of the dashboard in edit mode (the selected panels toolbar and the
  * hint bar) share this shell: a bottom-anchored surface with a drop shadow, a clipped frame that the
- * expand animation reveals from the bottom edge, and the same entrance / exit motion.
+ * expand animation reveals from the bottom edge, and the same entrance. There's no exit animation:
+ * like Linear's bulk actions bar, a bar leaves instantly once the user is done with it.
  */
 
 export const EASE_OUT = 'cubic-bezier(0.2, 0, 0, 1)';
@@ -49,8 +51,6 @@ export interface FloatingToolbarProps {
   'data-test-subj'?: string;
   /** stays invisible (and holds its entrance) until the content is complete */
   isReady?: boolean;
-  /** plays the exit; the parent unmounts the bar once it's done */
-  isExiting?: boolean;
   /** skips the entrance, e.g. when the bar was visible a moment ago */
   skipEntrance?: boolean;
 }
@@ -60,23 +60,15 @@ export const FloatingToolbar = ({
   children,
   role,
   isReady = true,
-  isExiting = false,
   skipEntrance = false,
   ...rest
 }: FloatingToolbarProps) => {
   const styles = useMemoCss(shellStyles);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (rootRef.current) rootRef.current.inert = isExiting;
-  }, [isExiting]);
 
   return (
     <div
-      ref={rootRef}
       css={styles.anchor}
       data-ready={isReady}
-      data-exiting={isExiting}
       data-skip-entrance={skipEntrance}
       role={role}
       {...rest}
@@ -110,12 +102,18 @@ export const FloatingToolbarButton = ({
 
 /**
  * Both icons stay rendered and crossfade (opacity + scale + blur) based on the toggle's
- * `aria-expanded`, so the swap under the cursor isn't a hard cut.
+ * `aria-expanded`, so the swap under the cursor isn't a hard cut. The crossfade is applied to a
+ * wrapper around each icon: EuiIcon's own load animation holds `opacity: 1` (fill `forwards`),
+ * which would otherwise keep the hidden icon visible as a blurred "glow".
  */
 const ExpandToggleIcon = ({ className }: { className?: string }) => (
   <span className={className} css={expandIconStyles} aria-hidden>
-    <EuiIcon type="maximize" className="dshExpandIcon__maximize" aria-hidden={true} />
-    <EuiIcon type="minimize" className="dshExpandIcon__minimize" aria-hidden={true} />
+    <span className="dshExpandIcon__maximize">
+      <EuiIcon type="maximize" aria-hidden={true} />
+    </span>
+    <span className="dshExpandIcon__minimize">
+      <EuiIcon type="minimize" aria-hidden={true} />
+    </span>
   </span>
 );
 
@@ -158,15 +156,18 @@ export const floatingToolbarStyles = {
   }),
 };
 
-const enter = keyframes({
-  from: { opacity: 0, translate: '0 8px', scale: '0.97' },
-  to: { opacity: 1, translate: '0 0', scale: '1' },
-});
+/**
+ * Entrance modeled on Linear's bulk actions toolbar: a 15px rise and a fade driven by one spring
+ * (stiffness 460, damping 27: lands at ~135ms, overshoots ~6%, then settles). Opacity follows the
+ * same curve, so it briefly exceeds 1 with the overshoot, which the browser clamps.
+ */
+const ENTER_SPRING = createSpringTiming({ stiffness: 460, damping: 27 });
 
-// quieter than the entrance: smaller travel, faster, eases in as the user moves on
-const exit = keyframes({
-  from: { opacity: 1, translate: '0 0', scale: '1' },
-  to: { opacity: 0, translate: '0 4px', scale: '0.98' },
+// Linear's hidden state: opacity starts slightly below zero, so the bar is already moving when it
+// becomes visible (the browser clamps the negative part)
+const enter = keyframes({
+  from: { opacity: -0.1, translate: '0 15px' },
+  to: { opacity: 1, translate: '0 0' },
 });
 
 const expandIconStyles = {
@@ -175,6 +176,7 @@ const expandIconStyles = {
   '& > *': {
     position: 'absolute' as const,
     inset: 0,
+    display: 'flex',
     transition: `opacity 150ms ${EASE_OUT}, transform 150ms ${EASE_OUT}, filter 150ms ${EASE_OUT}`,
   },
   '.dshExpandIcon__minimize, [aria-expanded="true"] & .dshExpandIcon__maximize': {
@@ -206,14 +208,16 @@ const shellStyles = {
       // one-shot entrance; `translate` and `scale` compose with the centering `transform` above
       transformOrigin: 'center bottom',
       animation: `${enter} 200ms ${EASE_OUT}`,
+      '@supports (animation-timing-function: linear(0, 1))': {
+        animation: `${enter} ${ENTER_SPRING.duration}ms ${ENTER_SPRING.easing}`,
+      },
+      // icons appear with the bar: no separate EuiIcon load fade-in trailing behind the entrance
+      // (they're preloaded, see `preloadFloatingToolbarIcons`; this covers a slow first load)
+      '.euiIcon': { animation: 'none' },
       '&[data-ready="false"]': { opacity: 0, animation: 'none' },
       '&[data-skip-entrance="true"]': { animation: 'none' },
-      '&[data-exiting="true"]': {
-        animation: `${exit} 150ms cubic-bezier(0.4, 0, 1, 1) forwards`,
-        pointerEvents: 'none' as const,
-      },
       '@media (prefers-reduced-motion: reduce)': {
-        '&, &[data-exiting="true"]': { animation: 'none' },
+        '&': { animation: 'none' },
       },
     };
   },

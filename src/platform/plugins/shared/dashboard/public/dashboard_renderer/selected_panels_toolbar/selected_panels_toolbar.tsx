@@ -123,15 +123,12 @@ const READY_TIMEOUT = 250;
 
 export interface SelectedPanelsToolbarProps {
   selectedPanelIds: Set<string>;
-  /** plays the exit; the parent unmounts the toolbar once it's done */
-  isExiting?: boolean;
   /** skips the entrance, e.g. when the toolbar was visible a moment ago */
   skipEntrance?: boolean;
 }
 
 export const SelectedPanelsToolbar = ({
   selectedPanelIds,
-  isExiting = false,
   skipEntrance = false,
 }: SelectedPanelsToolbarProps) => {
   const dashboardApi = useDashboardApi();
@@ -317,7 +314,6 @@ export const SelectedPanelsToolbar = ({
     <FloatingToolbar
       frameRef={frameRef}
       isReady={isReady}
-      isExiting={isExiting}
       skipEntrance={skipEntrance}
       role="toolbar"
       aria-label={strings.getToolbarLabel()}
@@ -372,7 +368,7 @@ export const SelectedPanelsToolbar = ({
               >
                 {strings.getDeletePanels()}
               </EuiContextMenuItem>
-              <EuiHorizontalRule margin="s" />
+              <EuiHorizontalRule margin="xs" />
             </div>
           )}
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -469,7 +465,7 @@ export const SelectedPanelsToolbar = ({
                     </EuiContextMenuItem>,
                     <EuiContextMenuItem
                       key="side"
-                      icon="boxesHorizontal"
+                      icon="alignRight"
                       onClick={() => handleLayout('side')}
                       data-test-subj="dashboardSelectedPanelsToolbarLayoutSide"
                     >
@@ -550,6 +546,8 @@ const toolbarStyles = {
   count: ({ euiTheme }: UseEuiTheme) => ({
     paddingRight: euiTheme.size.s,
     whiteSpace: 'nowrap' as const,
+    // equal-width digits, so the label doesn't shift as the count changes
+    fontVariantNumeric: 'tabular-nums',
   }),
   danger: ({ euiTheme }: UseEuiTheme) => ({
     color: euiTheme.colors.textDanger,

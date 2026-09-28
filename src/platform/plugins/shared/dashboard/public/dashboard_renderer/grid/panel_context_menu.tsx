@@ -142,7 +142,7 @@ export const PanelContextMenu = ({
           },
           {
             name: dashboardPanelContextMenuStrings.getLayoutSideLabel(),
-            icon: 'boxesHorizontal',
+            icon: 'alignRight',
             onClick: () => handleLayoutSubAction('side'),
             'data-test-subj': 'dashboardPanelContextMenuLayoutSide',
           },

@@ -21,6 +21,7 @@ import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 import { SelectedPanelsToolbar } from '../selected_panels_toolbar/selected_panels_toolbar';
 import { useSelectedPanelsToolbarPresence } from '../selected_panels_toolbar/use_selected_panels_toolbar_presence';
 import { DashboardHintBar } from '../hint_bar/dashboard_hint_bar';
+import { preloadFloatingToolbarIcons } from '../floating_toolbar/preload_icons';
 
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
@@ -47,6 +48,11 @@ export const DashboardViewport = () => {
     dashboardApi.settings.showHintBar$
   );
   const toolbarPresence = useSelectedPanelsToolbarPresence(selectedPanelIds);
+
+  // cache the floating bars' icons up front, so they appear together with the bars' entrance
+  useEffect(() => {
+    preloadFloatingToolbarIcons();
+  }, []);
 
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
@@ -114,8 +120,7 @@ export const DashboardViewport = () => {
         <EuiPortal>
           {toolbarPresence.showToolbar ? (
             <SelectedPanelsToolbar
-              selectedPanelIds={toolbarPresence.toolbarPanelIds}
-              isExiting={toolbarPresence.isExiting}
+              selectedPanelIds={selectedPanelIds}
               skipEntrance={toolbarPresence.skipEntrance}
             />
           ) : (
