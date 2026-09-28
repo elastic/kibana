@@ -8,6 +8,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import { ADD_CANVAS_ELEMENT_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { getDefaultSpec } from '../default_spec';
 import { VegaPanelIcon } from '../vega_icon';
@@ -34,6 +35,14 @@ describe('getAddVegaEmbeddableAction', () => {
     const action = getAddVegaEmbeddableAction(core);
 
     expect(action.getIconType({} as never)).toBe(VegaPanelIcon);
+  });
+
+  it('uses a named EUI icon in the Canvas add menu', () => {
+    const action = getAddVegaEmbeddableAction(core);
+
+    expect(
+      action.getIconType({ embeddable: {}, trigger: { id: ADD_CANVAS_ELEMENT_TRIGGER } } as never)
+    ).toBe('code');
   });
 
   it('opens the shared Vega editor for a newly created panel', async () => {

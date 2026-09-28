@@ -13,6 +13,7 @@ import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { apiCanAddNewPanel, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { ADD_CANVAS_ELEMENT_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { VegaByValueState } from '../../server';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from '../constants';
@@ -31,7 +32,11 @@ export const getAddVegaEmbeddableAction = (
   id: ADD_VEGA_EMBEDDABLE_ACTION_ID,
   order: 0,
   grouping: [ADD_PANEL_VISUALIZATION_GROUP],
-  getIconType: () => VegaPanelIcon,
+  // Canvas's add menu only renders EUI icon names, not custom icon components.
+  getIconType: (context) =>
+    'trigger' in context && context.trigger?.id === ADD_CANVAS_ELEMENT_TRIGGER
+      ? 'code'
+      : VegaPanelIcon,
   getDisplayName: () => 'Vega',
   getDisplayNameTooltip: () =>
     i18n.translate('visTypeVega.dashboard.addPanelActionDescription', {
