@@ -1767,7 +1767,7 @@ describe('toSOServiceVars', () => {
       defaultEnabled: false,
       defaultEnabledInputs: [],
       showInUI: true,
-    isManifestLoaded: true,
+      isManifestLoaded: true,
       varDefsByInput: {
         'aws-s3': {
           regions: makeVarDef('regions', 'text', { multi: true }),
