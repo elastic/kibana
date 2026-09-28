@@ -542,7 +542,7 @@ describe('validateMonitor', () => {
           enabled: true,
           auth_type: 'keytab',
           realm: 'CORP.LOCAL',
-          username: '',
+          username: 'svc',
           password: '',
           keytab: '',
           config_path: '/etc/krb5.conf',
@@ -555,7 +555,33 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor authentication configuration is invalid',
-        details: 'Kerberos keytab authentication requires a keytab path.',
+        details: 'Kerberos keytab authentication requires both username and a keytab path.',
+      });
+    });
+
+    it('invalidates Kerberos keytab auth without a username', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: '',
+          password: '',
+          keytab: '/etc/krb5.keytab',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos keytab authentication requires both username and a keytab path.',
       });
     });
 

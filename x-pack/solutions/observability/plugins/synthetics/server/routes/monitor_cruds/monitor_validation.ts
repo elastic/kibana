@@ -212,7 +212,8 @@ export function validateMonitor(
           };
         }
       } else if (kerberos.auth_type === KerberosAuthType.KEYTAB) {
-        if (!kerberos.keytab?.trim()) {
+        // Heartbeat: NewWithKeytab(config.Username, ...) — principal is required with the keytab path.
+        if (!kerberos.username?.trim() || !kerberos.keytab?.trim()) {
           return {
             valid: false,
             reason: INVALID_AUTH_CONFIGURATION_ERROR,
@@ -674,7 +675,7 @@ const INVALID_KERBEROS_PASSWORD_CREDENTIALS_DETAILS = i18n.translate(
 const INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS = i18n.translate(
   'xpack.synthetics.server.monitors.invalidKerberosKeytabCredentialsDetails',
   {
-    defaultMessage: 'Kerberos keytab authentication requires a keytab path.',
+    defaultMessage: 'Kerberos keytab authentication requires both username and a keytab path.',
   }
 );
 

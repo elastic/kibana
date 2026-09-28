@@ -66,6 +66,66 @@ describe('mergeSourceMonitor', () => {
     ]);
   });
 
+  it('should deep-merge partial NTLM updates without wiping sibling fields', () => {
+    const previous = {
+      ...testMonitor,
+      ntlm: {
+        enabled: true,
+        username: 'svc-monitor',
+        password: 'old-password',
+        domain: 'EXAMPLE',
+        workstation: 'MONITOR',
+      },
+    } as EncryptedSyntheticsMonitor;
+
+    const result = mergeSourceMonitor(previous, {
+      ntlm: { password: 'new-password' },
+    } as any);
+
+    expect(result.ntlm).toEqual({
+      enabled: true,
+      username: 'svc-monitor',
+      password: 'new-password',
+      domain: 'EXAMPLE',
+      workstation: 'MONITOR',
+    });
+  });
+
+  it('should deep-merge partial Kerberos updates without wiping sibling fields', () => {
+    const previous = {
+      ...testMonitor,
+      kerberos: {
+        enabled: true,
+        auth_type: 'password',
+        username: 'svc',
+        password: 'old-secret',
+        keytab: '',
+        config_path: '/etc/krb5.conf',
+        krb5_conf: '',
+        realm: 'CORP.LOCAL',
+        service_name: '',
+        enable_krb5_fast: false,
+      },
+    } as EncryptedSyntheticsMonitor;
+
+    const result = mergeSourceMonitor(previous, {
+      kerberos: { password: 'new-secret' },
+    } as any);
+
+    expect(result.kerberos).toEqual({
+      enabled: true,
+      auth_type: 'password',
+      username: 'svc',
+      password: 'new-secret',
+      keytab: '',
+      config_path: '/etc/krb5.conf',
+      krb5_conf: '',
+      realm: 'CORP.LOCAL',
+      service_name: '',
+      enable_krb5_fast: false,
+    });
+  });
+
   it('should not omit null or undefined values', () => {
     const result = mapSavedObjectToMonitor({ monitor: { attributes: testMonitor } } as any);
 

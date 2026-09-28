@@ -1060,13 +1060,15 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Username',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosUsername.helpText', {
-      defaultMessage: 'Username of the Kerberos principal.',
+      defaultMessage:
+        'Kerberos principal name. Required for both password and keytab authentication.',
     }),
+    // Heartbeat passes username to NewWithKeytab — hide only when Kerberos is off.
     hidden: (dependencies) => {
-      const [authType, kerberosAuthType] = dependencies;
-      return authType !== HttpAuthMethod.KERBEROS || kerberosAuthType !== KerberosAuthType.PASSWORD;
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
     },
-    dependencies: ['authType', 'kerberos.auth_type'],
+    dependencies: ['authType'],
     props: (): EuiFieldTextProps => ({
       'data-test-subj': 'syntheticsMonitorConfigKerberosUsername',
       readOnly,
