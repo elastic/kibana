@@ -276,15 +276,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the change status button', async () => {
-        await testSubjects.exists('case-view-status-badge');
+        await testSubjects.existOrFail('case-view-status-badge');
       });
 
       it('shows the add comment button', async () => {
-        await testSubjects.exists('submit-comment');
+        await testSubjects.existOrFail('submit-comment');
       });
 
       it('shows the assignees section', async () => {
-        await testSubjects.exists('case-view-assignees-field-panel');
+        await testSubjects.existOrFail('case-view-assignees-field-panel');
       });
     });
 
