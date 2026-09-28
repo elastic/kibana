@@ -10,4 +10,4 @@
 import type { z } from '@kbn/zod';
 import type { markdownLibraryItemSchema } from '../api/schema';
 
-export type StoredMarkdownState = z.infer<typeof markdownLibraryItemSchema>;
+export type StoredMarkdownState = Omit<z.infer<typeof markdownLibraryItemSchema>, 'tags'>;

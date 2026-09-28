@@ -64,14 +64,22 @@ export const LinksStrings = {
         i18n.translate('links.panelEditor.saveButtonLabel', {
           defaultMessage: 'Save',
         }),
-      getSaveToLibrarySwitchLabel: () =>
-        i18n.translate('links.panelEditor.saveToLibrarySwitchLabel', {
+      getApplyButtonLabel: () =>
+        i18n.translate('links.panelEditor.applyButtonLabel', {
+          defaultMessage: 'Apply',
+        }),
+      getSaveToLibraryButtonLabel: () =>
+        i18n.translate('links.panelEditor.saveToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         }),
-      getSaveToLibrarySwitchTooltip: () =>
+      getSaveToLibraryTooltip: () =>
         i18n.translate('links.panelEditor.saveToLibrarySwitchTooltip', {
           defaultMessage:
             'Save this links panel to the library so you can easily add it to other dashboards.',
+        }),
+      getMoreSaveOptionsButtonLabel: () =>
+        i18n.translate('links.panelEditor.moreSaveOptionsButtonLabel', {
+          defaultMessage: 'More save options',
         }),
       getTitleInputLabel: () =>
         i18n.translate('links.panelEditor.titleInputLabel', {

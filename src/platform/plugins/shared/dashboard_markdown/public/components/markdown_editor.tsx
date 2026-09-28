@@ -29,10 +29,12 @@ interface EuiMarkdownEditorRef {
 const componentStyles = {
   rootContainer: css({
     display: 'flex',
+    height: '100%',
     width: '100%',
     containerType: 'size',
   }),
   container: css({
+    height: '100%',
     width: '100%',
   }),
   componentInvisible: css({
@@ -59,6 +61,9 @@ const componentStyles = {
         },
       },
     }),
+  footerlessEditorStyles: css({
+    blockSize: '100%',
+  }),
 };
 
 const strings = {
@@ -73,10 +78,12 @@ export interface MarkdownEditorProps {
   parsingPluginList?: EuiMarkdownEditorProps['parsingPluginList'];
   processingPluginList: EuiMarkdownFormatProps['processingPluginList'];
   content: string;
+  onChange?: (value: string) => void;
   onCancel: () => void;
   onSave: (value: string) => Promise<void>;
   isPreview$: PublishingSubject<boolean>;
   settings$: BehaviorSubject<MarkdownSettingsState>;
+  showFooter?: boolean;
   uiPlugins?: EuiMarkdownEditorProps['uiPlugins'];
 }
 
@@ -84,15 +91,17 @@ export const MarkdownEditor = ({
   parsingPluginList,
   processingPluginList,
   content,
+  onChange: onContentChange,
   onCancel,
   onSave,
   isPreview$,
   settings$,
+  showFooter = true,
   uiPlugins = [],
 }: MarkdownEditorProps) => {
   const styles = useMemoCss(componentStyles);
   const [isPreview, settings] = useBatchedPublishingSubjects(isPreview$, settings$);
-  const [value, onChange] = useState(content);
+  const [value, setValue] = useState(content);
 
   const editorRef = useRef<EuiMarkdownEditorRef>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
@@ -107,6 +116,14 @@ export const MarkdownEditor = ({
       setHaveSettingsChanged(true);
     },
     [settings, settings$]
+  );
+
+  const onChange = useCallback(
+    (nextValue: string) => {
+      setValue(nextValue);
+      onContentChange?.(nextValue);
+    },
+    [onContentChange]
   );
 
   return (
@@ -129,8 +146,8 @@ export const MarkdownEditor = ({
           uiPlugins={uiPlugins}
           height="full"
           ref={editorRef}
-          css={styles.editorStyles}
-          aria-describedby={FOOTER_HELP_TEXT}
+          css={[styles.editorStyles, !showFooter && styles.footerlessEditorStyles]}
+          aria-describedby={showFooter ? FOOTER_HELP_TEXT : undefined}
           showFooter={false}
           toolbarProps={{
             right: (
@@ -155,13 +172,15 @@ export const MarkdownEditor = ({
           content={value}
         />
       )}
-      <MarkdownFooter
-        onCancel={onCancel}
-        onSave={async () => await onSave(value)}
-        isPreview={isPreview}
-        cancelButtonRef={cancelButtonRef}
-        isSaveable={isSaveable}
-      />
+      {showFooter ? (
+        <MarkdownFooter
+          onCancel={onCancel}
+          onSave={async () => await onSave(value)}
+          isPreview={isPreview}
+          cancelButtonRef={cancelButtonRef}
+          isSaveable={isSaveable}
+        />
+      ) : null}
     </div>
   );
 };

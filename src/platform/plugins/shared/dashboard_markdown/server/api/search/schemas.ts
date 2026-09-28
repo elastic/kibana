@@ -12,6 +12,7 @@ import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
   PAGINATION_MAX_SIZE,
+  getAsCodeTagsSchema,
 } from '@kbn/as-code-shared-schemas';
 
 export const searchResponseBodySchema = z
@@ -28,6 +29,7 @@ export const searchResponseBodySchema = z
                   .optional()
                   .meta({ description: 'A short description of the markdown library item.' }),
                 title: z.string().meta({ description: 'The markdown library item title.' }),
+                tags: getAsCodeTagsSchema().optional(),
               })
               .strict(),
             meta: asCodeMetaSchema,

@@ -20,7 +20,8 @@
       "charts",
       "dataViewFieldEditor",
       "visualizations",
-      "kibanaUtils"
+      "kibanaUtils",
+      "presentationUtil"
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["usageCollection"]

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { euiMarkdownLinkValidator, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
@@ -30,7 +29,7 @@ import type {
 } from '../server';
 import { APP_NAME, MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { MarkdownEditorApi } from './types';
-import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
+import { getMarkdownPlugins } from './plugins/get_markdown_plugins';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';
@@ -196,25 +195,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
           parsingPlugins: parsingPluginList,
           processingPlugins: processingPluginList,
           uiPlugins,
-        } = getDefaultEuiMarkdownPlugins({
-          processingConfig: {
-            linkProps: {
-              target: settings?.open_links_in_new_tab ? '_blank' : '_self',
-            },
-          },
-        });
-
-        // Insert before the link validator so document relative links like
-        // [discover](discover) get resolved before validation rejects them.
-        const linkValidatorIndex = parsingPluginList.findIndex(
-          // parsingPluginList is an array of Plugins or PluginTuples
-          (entry) => (Array.isArray(entry) ? entry[0] : entry) === euiMarkdownLinkValidator
-        );
-        parsingPluginList.splice(
-          linkValidatorIndex !== -1 ? linkValidatorIndex : parsingPluginList.length,
-          0,
-          [resolveRelativeLinksPlugin(), {}]
-        );
+        } = getMarkdownPlugins(Boolean(settings?.open_links_in_new_tab));
 
         const editorContent =
           viewMode === 'view' || !isEditing ? (

@@ -32,11 +32,15 @@ export function getEditorFlyout({
   parentDashboard,
   onCompleteEdit,
   closeFlyout,
+  onDraftChange,
+  onCancelEdit,
 }: {
   initialState?: EditorState;
   parentDashboard?: unknown;
   onCompleteEdit?: (newState?: EditorState) => void;
   closeFlyout: () => void;
+  onDraftChange?: (links: ResolvedLink[], layout: LinksLayoutType) => void;
+  onCancelEdit?: () => void;
 }) {
   const flyoutId = `linksEditorFlyout-${uuidv4()}`;
   return (
@@ -48,7 +52,11 @@ export function getEditorFlyout({
         onCompleteEdit?.(undefined);
         closeFlyout();
       }}
-      onSaveToLibrary={async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
+      onSaveToLibrary={async (
+        newLinks: ResolvedLink[],
+        newLayout: LinksLayoutType,
+        onCommit: () => void
+      ) => {
         const newState = {
           ...initialState,
           links: newLinks,
@@ -62,11 +70,13 @@ export function getEditorFlyout({
             ...updateState,
             links: serializeResolvedLinks(newLinks),
           });
+          onCommit();
           onCompleteEdit?.(newState);
           closeFlyout();
         } else {
           const saveResult = await runSaveToLibrary(newState);
           if (saveResult?.error) throw saveResult.error;
+          if (saveResult) onCommit();
           onCompleteEdit?.(saveResult);
           // If saveResult is undefined, the user cancelled the save as modal and we should not close the flyout
           if (saveResult) closeFlyout();
@@ -87,6 +97,8 @@ export function getEditorFlyout({
           : undefined
       }
       isByReference={Boolean(initialState?.refId)}
+      onDraftChange={onDraftChange}
+      onCancelEdit={onCancelEdit}
     />
   );
 }

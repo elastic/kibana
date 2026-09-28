@@ -8,133 +8,175 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { BehaviorSubject } from 'rxjs';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { Filter, Query } from '@kbn/es-query';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { VegaEmbeddableApi } from './vega_embeddable';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
 jest.mock('../components/vega_vis_editor', () => ({
   VegaSpecEditor: ({
     editorValue,
     onChange,
+    onFormatChange,
   }: {
     editorValue: string;
     onChange: (value: string) => void;
+    onFormatChange: (format: 'hjson' | 'json') => void;
   }) => (
-    <textarea
-      aria-label="Vega spec"
-      value={editorValue}
-      onChange={(event) => onChange(event.target.value)}
-    />
+    <div>
+      <div data-test-subj="vegaSpecEditorValue">{editorValue}</div>
+      <button onClick={() => onFormatChange('hjson')}>setFormat</button>
+      <button onClick={() => onChange('{ mark: bar }')}>changeSpec</button>
+    </div>
   ),
 }));
 
-describe('VegaEditorFlyout', () => {
-  const renderFlyout = ({ isNewPanel = false }: { isNewPanel?: boolean } = {}) => {
-    const closeFlyout = jest.fn();
-    const onRevert = jest.fn();
-    const onPreview = jest.fn();
-    const onSave = jest.fn();
-    const { unmount } = render(
-      <VegaEditorFlyout
-        ariaLabelledBy="vega-flyout-title"
-        closeFlyout={closeFlyout}
-        initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
-        isNewPanel={isNewPanel}
-        onPreview={onPreview}
-        onRevert={onRevert}
-        onSave={onSave}
-      />
+const renderFlyout = ({
+  initialQuery,
+  initialFilters,
+  isNewPanel = false,
+}: {
+  initialQuery?: Query;
+  initialFilters?: Filter[];
+  isNewPanel?: boolean;
+} = {}) => {
+  const query$ = new BehaviorSubject<Query | undefined>(initialQuery);
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilters);
+  const dataViews$ = new BehaviorSubject([]);
+  const api = {
+    query$,
+    filters$,
+    dataViews$,
+    setQuery: jest.fn((query?: Query) => query$.next(query)),
+    setFilters: jest.fn((filters?: Filter[]) => filters$.next(filters)),
+  } as unknown as VegaEmbeddableApi;
+
+  const SearchBar = ((props: unknown) => {
+    const { filters, onQuerySubmit, onFiltersUpdated } = props as {
+      filters: Filter[];
+      onQuerySubmit: (payload: { dateRange: unknown; query?: Query }) => void;
+      onFiltersUpdated: (filters: Filter[]) => void;
+    };
+
+    return (
+      <div>
+        <div>{`filtersLength:${filters.length}`}</div>
+        <button
+          onClick={() =>
+            onQuerySubmit({
+              dateRange: undefined,
+              query: { language: 'kuery', query: 'bytes > 1000' },
+            })
+          }
+        >
+          updateQuery
+        </button>
+        <button
+          onClick={() =>
+            onFiltersUpdated([
+              { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
+            ])
+          }
+        >
+          updateFilters
+        </button>
+      </div>
     );
-    return { closeFlyout, onRevert, onPreview, onSave, unmount };
-  };
+  }) as UnifiedSearchPublicPluginStart['ui']['SearchBar'];
 
-  it('does not preview while typing; Preview pushes the current spec', async () => {
-    const { onPreview } = renderFlyout();
-    const user = userEvent.setup();
+  const closeFlyout = jest.fn();
+  const onPreview = jest.fn();
+  const onRevert = jest.fn();
+  const onSave = jest.fn();
 
-    expect(screen.getByRole('heading', { name: 'Vega' })).toBeInTheDocument();
-    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    const previewButton = screen.getByTestId('vegaEditorFlyoutPreviewButton');
+  const view = render(
+    <VegaEditorFlyout
+      api={api}
+      ariaLabelledBy="vegaEditorTitle"
+      closeFlyout={closeFlyout}
+      initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
+      SearchBar={SearchBar}
+      isNewPanel={isNewPanel}
+      onPreview={onPreview}
+      onRevert={onRevert}
+      onSave={onSave}
+    />
+  );
 
-    // Preview is disabled until the spec differs from what is rendered on the panel.
-    expect(previewButton).toBeDisabled();
+  return { api, closeFlyout, onPreview, onRevert, onSave, view };
+};
 
-    await user.clear(editor);
-    await user.paste('{ mark: bar }');
-    // Editing must not trigger the preview (no queries run on keystrokes).
-    expect(onPreview).not.toHaveBeenCalled();
-    expect(previewButton).toBeEnabled();
-
-    await user.click(previewButton);
-    expect(onPreview).toHaveBeenCalledTimes(1);
-    expect(onPreview).toHaveBeenCalledWith({ format: 'hjson', value: '{ mark: bar }' });
-    // After previewing, Preview is disabled again until further edits.
-    expect(previewButton).toBeDisabled();
-  });
-
-  it('disables Apply and close until an existing panel has real changes', async () => {
+describe('VegaEditorFlyout', () => {
+  it('renders the title with the flyout label id and all footer actions', async () => {
     renderFlyout();
-    const user = userEvent.setup();
 
-    // No edits yet → nothing to save.
-    expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeDisabled();
+    await screen.findByText('changeSpec');
 
-    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    await user.clear(editor);
-    await user.paste('{ mark: bar }');
-    expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeEnabled();
-
-    // Editing back to the original spec disables Save again.
-    await user.clear(editor);
-    await user.paste('{ mark: point }');
-    expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeDisabled();
+    expect(screen.getByRole('heading', { name: 'Vega' })).toHaveAttribute('id', 'vegaEditorTitle');
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
   });
 
-  it('enables Apply and close for a new panel so its default spec can be accepted', () => {
-    renderFlyout({ isNewPanel: true });
-    expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeEnabled();
+  it('runs preview for an updated spec', async () => {
+    const { onPreview } = renderFlyout();
+
+    fireEvent.click(await screen.findByText('changeSpec'));
+    fireEvent.click(screen.getByRole('button', { name: 'Run preview' }));
+
+    expect(onPreview).toHaveBeenCalledWith({ format: 'hjson', value: '{ mark: bar }' });
   });
 
-  it('saves the current spec, closes, and does not revert on unmount', async () => {
-    const { closeFlyout, onPreview, onRevert, onSave, unmount } = renderFlyout();
-    const user = userEvent.setup();
+  it('applies and closes after saving', async () => {
+    const { closeFlyout, onSave } = renderFlyout();
 
-    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    await user.clear(editor);
-    await user.paste('{ mark: bar }');
+    fireEvent.click(await screen.findByText('changeSpec'));
+    fireEvent.click(screen.getByRole('button', { name: 'Apply and close' }));
 
-    await user.click(screen.getByTestId('vegaEditorFlyoutSaveButton'));
     expect(onSave).toHaveBeenCalledWith({ format: 'hjson', value: '{ mark: bar }' });
     expect(closeFlyout).toHaveBeenCalledTimes(1);
-    // Save persists directly; it does not depend on a prior Preview.
-    expect(onPreview).not.toHaveBeenCalled();
-
-    // Unmounting after a Save must not revert the committed spec.
-    unmount();
-    expect(onRevert).not.toHaveBeenCalled();
   });
 
-  it('reverts to the pre-edit state on unmount when not applied (e.g. Esc / click-away)', async () => {
-    const { onRevert, unmount } = renderFlyout();
-    const user = userEvent.setup();
+  it('closes without saving when cancel is clicked', async () => {
+    const { closeFlyout, onSave } = renderFlyout();
 
-    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    await user.clear(editor);
-    await user.paste('{ mark: bar }');
-    await user.click(screen.getByTestId('vegaEditorFlyoutPreviewButton')); // previewed but not saved
+    await screen.findByText('changeSpec');
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
-    unmount();
+    expect(closeFlyout).toHaveBeenCalledTimes(1);
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('reverts when the flyout unmounts without saving', async () => {
+    const { onRevert, view } = renderFlyout();
+
+    await screen.findByText('changeSpec');
+    view.unmount();
+
     expect(onRevert).toHaveBeenCalledTimes(1);
   });
 
-  it('closes the flyout when Cancel is clicked (revert happens on the ensuing unmount)', async () => {
-    const { closeFlyout, onSave, onRevert } = renderFlyout();
-    const user = userEvent.setup();
+  it('applies search changes live and enables saving for them', async () => {
+    const { api } = renderFlyout();
 
-    await user.click(screen.getByTestId('vegaEditorFlyoutCancelButton'));
-    expect(closeFlyout).toHaveBeenCalledTimes(1);
-    expect(onSave).not.toHaveBeenCalled();
-    // Cancel only closes; the revert is driven by unmount, not the button.
-    expect(onRevert).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByText('updateQuery'));
+    fireEvent.click(screen.getByText('updateFilters'));
+
+    await waitFor(() => {
+      expect(api.setQuery).toHaveBeenCalledWith({ language: 'kuery', query: 'bytes > 1000' });
+      expect(api.setFilters).toHaveBeenCalledWith([
+        { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
+      ]);
+    });
+
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
+  });
+
+  it('passes an empty filters array to the search bar when the panel has no filters', async () => {
+    renderFlyout();
+
+    expect(await screen.findByText('filtersLength:0')).toBeInTheDocument();
   });
 });

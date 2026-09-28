@@ -23,6 +23,7 @@ export {
   type MarkdownByValueState,
   type MarkdownEmbeddableState,
 } from './embeddable/schemas';
+export type { StoredMarkdownState } from './markdown_saved_object';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { MarkdownPlugin } = await import('./plugin');

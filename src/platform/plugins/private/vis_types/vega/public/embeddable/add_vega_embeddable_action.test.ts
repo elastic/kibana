@@ -7,33 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { getDefaultSpec } from '../default_spec';
 import { VegaPanelIcon } from '../vega_icon';
 import { getAddVegaEmbeddableAction } from './add_vega_embeddable_action';
+import { openVegaEditor } from './open_vega_editor';
 
 jest.mock('../default_spec', () => ({ getDefaultSpec: () => '{ mark: point }' }));
+jest.mock('./open_vega_editor', () => ({
+  openVegaEditor: jest.fn(),
+}));
+
+const mockOpenVegaEditor = jest.mocked(openVegaEditor);
+const core = {
+  notifications: { toasts: { addError: jest.fn() } },
+  overlays: {},
+} as unknown as CoreStart;
 
 describe('getAddVegaEmbeddableAction', () => {
   it('uses the Vega SVG icon in the add panel menu', () => {
-    const action = getAddVegaEmbeddableAction();
+    const action = getAddVegaEmbeddableAction(core);
 
-    expect(action.getIconType?.({ embeddable: {} })).toBe(VegaPanelIcon);
+    expect(action.getIconType({} as never)).toBe(VegaPanelIcon);
   });
 
-  it('adds one default Vega panel and opens its Dashboard editor', async () => {
-    const onEdit = jest.fn();
-    const addNewPanel = jest.fn().mockResolvedValue({ onEdit });
+  it('opens the shared Vega editor for a newly created panel', async () => {
+    const action = getAddVegaEmbeddableAction(core);
+    let resolvePanel: (panel: { getEditPanel: jest.Mock; uuid: string }) => void = () => {};
+    const addNewPanel = jest.fn(
+      () =>
+        new Promise<{ getEditPanel: jest.Mock; uuid: string }>((resolve) => {
+          resolvePanel = resolve;
+        })
+    );
     const returnFocus = jest.fn();
-    const action = getAddVegaEmbeddableAction();
 
-    await action.execute({ embeddable: { addNewPanel }, returnFocus });
+    await action.execute({
+      embeddable: { addNewPanel },
+      returnFocus,
+    });
+
+    expect(mockOpenVegaEditor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        core,
+        parentApi: { addNewPanel },
+        returnFocus,
+        isNewPanel: true,
+      })
+    );
+
+    const loadApi = mockOpenVegaEditor.mock.calls[0][0].loadApi;
+    const loading = loadApi();
 
     expect(addNewPanel).toHaveBeenCalledWith({
       panelType: VEGA_EMBEDDABLE_TYPE,
       serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
     });
-    // `returnFocus` is forwarded so closing the editor puts focus back on the Add panel menu.
-    expect(onEdit).toHaveBeenCalledWith({ isNewPanel: true, returnFocus });
+
+    const panel = { getEditPanel: jest.fn(), uuid: 'new-panel' };
+    resolvePanel(panel);
+
+    await expect(loading).resolves.toBe(panel);
   });
 });

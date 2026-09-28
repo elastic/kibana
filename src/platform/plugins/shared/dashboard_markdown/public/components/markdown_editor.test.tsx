@@ -73,6 +73,15 @@ it('calls onSave with current value when Apply clicked', async () => {
   expect(onSave).toHaveBeenCalledWith(testedContent + ' Added Paragraph');
 });
 
+it('enables Apply after draft content changes', async () => {
+  renderMarkdownEditor();
+
+  await userEvent.type(screen.getByRole('textbox'), ' draft');
+
+  expect(screen.getByRole('button', { name: /Discard/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /Apply/i })).toBeEnabled();
+});
+
 it('enables Apply when only the open links in new tab setting changes', async () => {
   renderMarkdownEditor();
 

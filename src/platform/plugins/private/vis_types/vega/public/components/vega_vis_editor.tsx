@@ -53,10 +53,17 @@ function format(
 const vegaVisStyles = {
   base: css({
     '&.vgaEditor': {
+      blockSize: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: 0,
+      position: 'relative',
       width: '100%',
       flexGrow: 1,
 
       '.kibanaCodeEditor': {
+        flex: 1,
+        minBlockSize: 0,
         width: '100%',
       },
     },

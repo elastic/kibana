@@ -9,12 +9,15 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+import deepEqual from 'fast-deep-equal';
 
 import type { DropResult, EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiDragDropContext,
   euiDragDropReorder,
   EuiDraggable,
@@ -26,7 +29,7 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiSwitch,
+  EuiSplitButton,
   EuiTitle,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
@@ -38,7 +41,6 @@ import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { coreServices } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';
 import { LinksStrings } from '../links_strings';
-import { TooltipWrapper } from '../tooltip_wrapper';
 import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
 import { LinksEditorSingleLink } from './links_editor_single_link';
 
@@ -56,7 +58,11 @@ const layoutOptions: EuiButtonGroupOptionProps[] = [
 ];
 
 export interface LinksEditorProps {
-  onSaveToLibrary: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => Promise<void>;
+  onSaveToLibrary: (
+    newLinks: ResolvedLink[],
+    newLayout: LinksLayoutType,
+    onCommit: () => void
+  ) => Promise<void>;
   onAddToDashboard: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => void;
   onClose: () => void;
   initialLinks?: ResolvedLink[];
@@ -64,6 +70,8 @@ export interface LinksEditorProps {
   parentDashboardId?: string;
   isByReference: boolean;
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
+  onDraftChange?: (links: ResolvedLink[], layout: LinksLayoutType) => void;
+  onCancelEdit?: () => void;
 }
 
 export const LinksEditor = ({
@@ -75,19 +83,51 @@ export const LinksEditor = ({
   parentDashboardId,
   isByReference,
   flyoutId,
+  onDraftChange,
+  onCancelEdit,
 }: LinksEditorProps) => {
   const toasts = coreServices.notifications.toasts;
   const isMounted = useMountedState();
   const editLinkFlyoutRef = useRef<HTMLDivElement>(null);
+  const didCommitRef = useRef(false);
 
   const [currentLayout, setCurrentLayout] = useState<LinksLayoutType>(
     initialLayout ?? LINKS_VERTICAL_LAYOUT
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>([]);
-  const [saveByReference, setSaveByReference] = useState(isByReference);
+  const [isSaveMenuOpen, setIsSaveMenuOpen] = useState(false);
+  const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>(initialLinks ?? []);
 
   const isEditingExisting = initialLinks || isByReference;
+  const hasChanges = !deepEqual(
+    {
+      links: initialLinks ?? [],
+      layout: initialLayout ?? LINKS_VERTICAL_LAYOUT,
+    },
+    { links: orderedLinks, layout: currentLayout }
+  );
+
+  const saveToLibrary = async () => {
+    setIsSaving(true);
+    try {
+      await onSaveToLibrary(orderedLinks, currentLayout, () => {
+        didCommitRef.current = true;
+      });
+    } catch (error) {
+      toasts.addError(error, {
+        title: LinksStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
+      });
+    } finally {
+      if (isMounted()) setIsSaving(false);
+    }
+  };
+
+  useEffect(
+    () => () => {
+      if (!didCommitRef.current) onCancelEdit?.();
+    },
+    [onCancelEdit]
+  );
 
   useEffect(() => {
     if (!initialLinks) {
@@ -96,6 +136,10 @@ export const LinksEditor = ({
     }
     setOrderedLinks(initialLinks);
   }, [initialLinks]);
+
+  useEffect(() => {
+    onDraftChange?.(orderedLinks, currentLayout);
+  }, [currentLayout, onDraftChange, orderedLinks]);
 
   const onDragEnd = useCallback(
     ({ source, destination }: DropResult) => {
@@ -157,17 +201,13 @@ export const LinksEditor = ({
     <>
       <div css={styles.flyoutStyles} ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s" data-test-subj="links--panelEditor--title">
-              <h2>
-                {isEditingExisting
-                  ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
-                  : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="s" data-test-subj="links--panelEditor--title">
+          <h2>
+            {isEditingExisting
+              ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
+              : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
+          </h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={styles.bodyStyles}>
         <EuiForm fullWidth>
@@ -246,57 +286,59 @@ export const LinksEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              {!initialLinks || !isByReference ? (
-                <EuiFlexItem grow={false}>
-                  <TooltipWrapper
-                    condition={!hasZeroLinks}
-                    tooltipContent={LinksStrings.editor.panelEditor.getSaveToLibrarySwitchTooltip()}
-                    data-test-subj="links--panelEditor--saveByReferenceTooltip"
-                  >
-                    <EuiSwitch
-                      compressed
-                      label={LinksStrings.editor.panelEditor.getSaveToLibrarySwitchLabel()}
-                      checked={saveByReference}
-                      disabled={hasZeroLinks}
-                      onChange={() => setSaveByReference(!saveByReference)}
-                      data-test-subj="links--panelEditor--saveByReferenceSwitch"
-                    />
-                  </TooltipWrapper>
-                </EuiFlexItem>
-              ) : null}
               <EuiFlexItem grow={false}>
-                <TooltipWrapper
-                  condition={hasZeroLinks}
-                  tooltipContent={LinksStrings.editor.panelEditor.getEmptyLinksTooltip()}
-                  data-test-id={'links--panelEditor--saveBtnTooltip'}
-                >
+                {isByReference ? (
                   <EuiButton
                     fill
                     isLoading={isSaving}
-                    disabled={hasZeroLinks}
+                    disabled={hasZeroLinks || !hasChanges}
                     data-test-subj={'links--panelEditor--saveBtn'}
-                    onClick={async () => {
-                      if (saveByReference) {
-                        setIsSaving(true);
-                        onSaveToLibrary(orderedLinks, currentLayout)
-                          .catch((e) => {
-                            toasts.addError(e, {
-                              title: LinksStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
-                            });
-                          })
-                          .finally(() => {
-                            if (isMounted()) {
-                              setIsSaving(false);
-                            }
-                          });
-                      } else {
-                        onAddToDashboard(orderedLinks, currentLayout);
-                      }
-                    }}
+                    onClick={saveToLibrary}
                   >
                     {LinksStrings.editor.panelEditor.getSaveButtonLabel()}
                   </EuiButton>
-                </TooltipWrapper>
+                ) : (
+                  <EuiSplitButton fill isDisabled={hasZeroLinks} isLoading={isSaving}>
+                    <EuiSplitButton.ActionPrimary
+                      data-test-subj="links--panelEditor--saveBtn"
+                      isDisabled={!hasChanges}
+                      onClick={() => {
+                        didCommitRef.current = true;
+                        onAddToDashboard(orderedLinks, currentLayout);
+                      }}
+                    >
+                      {LinksStrings.editor.panelEditor.getApplyButtonLabel()}
+                    </EuiSplitButton.ActionPrimary>
+                    <EuiSplitButton.ActionSecondary
+                      aria-label={LinksStrings.editor.panelEditor.getMoreSaveOptionsButtonLabel()}
+                      data-test-subj="links--panelEditor--saveOptionsBtn"
+                      iconType="chevronSingleDown"
+                      onClick={() => setIsSaveMenuOpen((isOpen) => !isOpen)}
+                      tooltipProps={{
+                        content: LinksStrings.editor.panelEditor.getSaveToLibraryTooltip(),
+                      }}
+                      popoverProps={{
+                        isOpen: isSaveMenuOpen,
+                        closePopover: () => setIsSaveMenuOpen(false),
+                        panelPaddingSize: 'none',
+                        children: (
+                          <EuiContextMenuPanel>
+                            <EuiContextMenuItem
+                              data-test-subj="links--panelEditor--saveToLibraryBtn"
+                              icon="save"
+                              onClick={() => {
+                                setIsSaveMenuOpen(false);
+                                saveToLibrary();
+                              }}
+                            >
+                              {LinksStrings.editor.panelEditor.getSaveToLibraryButtonLabel()}
+                            </EuiContextMenuItem>
+                          </EuiContextMenuPanel>
+                        ),
+                      }}
+                    />
+                  </EuiSplitButton>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
