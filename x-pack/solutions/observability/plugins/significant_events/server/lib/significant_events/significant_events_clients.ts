@@ -15,7 +15,7 @@ import {
 } from './detections';
 import type { DetectionClient } from './detections';
 import { EventService, eventsDataStream, type StoredEvent, type eventsMappings } from './events';
-import type { EventClient } from './events';
+import type { EventClient, RuleEventsClient } from './events';
 import type { TriggerEmitter } from '../../workflows/triggers/emit';
 
 export interface SignificantEventsServices {
@@ -26,6 +26,13 @@ export interface SignificantEventsServices {
 export interface SignificantEventsClients {
   getDetectionClient: () => Promise<DetectionClient>;
   getEventClient: () => Promise<EventClient>;
+  /**
+   * Flag-aware accessor for `eventsSearchRoute` (the list/count/pagination endpoint) — the only
+   * caller migrated onto `RuleEventsClient` so far (nightshift-program#1516). Honors
+   * `useRuleEventsRead`; every other caller must keep using `getEventClient()`, which always
+   * returns `EventClient` regardless of the flag.
+   */
+  getEventSearchClient: () => Promise<EventClient | RuleEventsClient>;
 }
 
 export function createSignificantEventsServices(): SignificantEventsServices {
@@ -51,6 +58,15 @@ export function createSignificantEventsClients({
   /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
   useRuleEventsRead?: boolean;
 }): SignificantEventsClients {
+  const buildEventClientOptions = async () => ({
+    dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
+      eventsDataStream.name
+    ),
+    esClient,
+    space,
+    triggerEmitter,
+  });
+
   return {
     getDetectionClient: async () =>
       services.detection.getClient({
@@ -62,31 +78,17 @@ export function createSignificantEventsClients({
         space,
       }),
     getEventClient: async () => {
-      // `EventService.getClient()` returns `EventClient | RuleEventsClient`, but every current
-      // caller of `getEventClient()` (routes, agent-builder tools, workflow triggers) still uses
-      // the full `EventClient` surface (`bulkCreate`, `findByEventUuid`, `findLatestActive`,
-      // `emitTrigger`, …), which `RuleEventsClient` intentionally does not implement (#1517).
-      // `useRuleEventsRead` is gated behind those sibling reader PRs migrating each call site —
-      // unlike `EventService.getClient()`'s own `false` default (a code-level fallback),
-      // `useRuleEventsRead` here is sourced from a *live* feature flag (see `plugin.ts`), so it can
-      // flip without a deploy. Guard loudly instead of silently casting: a `TypeError` on the first
-      // `.bulkCreate()`/`.emitTrigger()`/etc. call would be much harder to trace back to this flag.
-      if (useRuleEventsRead) {
-        throw new Error(
-          'SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ is not yet safe for getEventClient() callers: ' +
-            'RuleEventsClient does not implement bulkCreate, emitTrigger, findByEventUuid, or ' +
-            'findLatestActive. Do not enable this flag before nightshift-program#1516/#1517 land.'
-        );
-      }
-      return services.event.getClient({
-        dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
-          eventsDataStream.name
-        ),
-        esClient,
-        space,
-        triggerEmitter,
-        useRuleEventsRead,
-      }) as EventClient;
+      const eventClientOptions = await buildEventClientOptions();
+      // Every caller of `getEventClient()` (routes other than `eventsSearchRoute`, agent-builder
+      // tools, workflow triggers) uses the full `EventClient` surface (`bulkCreate`,
+      // `findByEventUuid`, `findLatestActive`, `emitTrigger`, …), which `RuleEventsClient`
+      // intentionally does not implement (#1517). This accessor always returns `EventClient`,
+      // independent of `useRuleEventsRead` — the flag only affects `getEventSearchClient()`.
+      return services.event.getClient(eventClientOptions) as EventClient;
+    },
+    getEventSearchClient: async () => {
+      const eventClientOptions = await buildEventClientOptions();
+      return services.event.getClient({ ...eventClientOptions, useRuleEventsRead });
     },
   };
 }

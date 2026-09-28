@@ -217,7 +217,7 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click(`dashboard-picker-option-${existing}`);
     }
     await this.clickConfirmSavedSearch();
-    if (await this.testSubjects.exists('appLeaveConfirmModal', { timeout: 1000 })) {
+    if (await this.testSubjects.exists('appLeaveConfirmModal')) {
       await this.testSubjects.click('confirmModalConfirmButton');
     }
     await this.header.waitUntilLoadingHasFinished();
@@ -849,36 +849,48 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
-    // First check if the button is directly visible
-    if (await this.testSubjects.exists('select-text-based-language-btn')) {
-      await this.testSubjects.click('select-text-based-language-btn');
-      await this.header.waitUntilLoadingHasFinished();
-      await this.waitUntilSearchingHasFinished();
-      return;
-    }
+    // Button may be directly in toolbar or hidden in overflow menu; retry both paths.
+    await this.retry.tryForTime(10000, async () => {
+      if (await this.testSubjects.exists('select-classic-mode-btn')) return;
 
-    // If not visible, try the overflow menu
-    if (await this.testSubjects.exists('app-menu-overflow-button')) {
-      await this.retry.try(async () => {
+      // Check if the button is directly visible (with brief wait for page render)
+      if (
+        await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 1000 })
+      ) {
+        await this.testSubjects.click('select-text-based-language-btn');
+        return;
+      }
+
+      // Try the overflow menu
+      if (await this.testSubjects.waitForExists('app-menu-overflow-button', { timeout: 1000 })) {
         try {
           await this.testSubjects.moveMouseTo('kbnQueryBar');
         } catch {
           // Ignore if query bar is not present
         }
         await this.testSubjects.click('app-menu-overflow-button');
-      });
+        await this.testSubjects.existOrFail('app-menu-popover', { timeout: 1000 });
 
-      if (await this.testSubjects.exists('select-text-based-language-btn')) {
-        await this.testSubjects.click('select-text-based-language-btn');
-        await this.header.waitUntilLoadingHasFinished();
-        await this.waitUntilSearchingHasFinished();
+        if (await this.testSubjects.exists('select-classic-mode-btn')) {
+          await this.testSubjects.click('app-menu-overflow-button');
+          return;
+        }
+
+        if (
+          await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 2000 })
+        ) {
+          await this.testSubjects.click('select-text-based-language-btn');
+          return;
+        }
+
+        // Close the popover if button wasn't found
+        if (await this.testSubjects.exists('app-menu-popover')) {
+          await this.testSubjects.click('app-menu-overflow-button');
+        }
       }
 
-      // Close the popover if open
-      if (await this.testSubjects.exists('app-menu-popover')) {
-        await this.testSubjects.click('app-menu-overflow-button');
-      }
-    }
+      throw new Error('select-text-based-language-btn not found in toolbar or overflow menu');
+    });
   }
 
   private async clickSelectedTabMenuItem(menuItemTestSubj: string) {

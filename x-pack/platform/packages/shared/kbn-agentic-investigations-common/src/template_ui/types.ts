@@ -41,6 +41,32 @@ export interface AssigneesSlotRenderProps {
 export type RenderAssignees = (props: AssigneesSlotRenderProps) => React.ReactNode;
 
 /**
+ * Props passed to the `renderStatus` render prop.
+ */
+export interface StatusSlotRenderProps {
+  /** Conversation id — used as the mutation target. */
+  conversationId: string;
+  /**
+   * `'investigation'` or `'escalation'`. The plugin uses this to pick the right
+   * status endpoint and the right capability check.
+   */
+  templateId: string;
+  /** Current status string from metadata (e.g. `'open'` / `'closed'`). */
+  status?: string;
+  /**
+   * Calls the flyout's internal refetch after a successful mutation, so the header
+   * reflects the server-confirmed state without waiting for the 5 s poll.
+   */
+  refetchConversation?: () => Promise<void>;
+}
+
+/**
+ * A render prop that the consuming plugin provides to render the interactive status toggle.
+ * When absent, the header falls back to a read-only status badge.
+ */
+export type RenderStatus = (props: StatusSlotRenderProps) => React.ReactNode;
+
+/**
  * Props passed to the `renderLinkedInvestigations` render prop.
  *
  * The render prop is supplied by the consuming plugin at registration time so that HTTP hooks

@@ -77,6 +77,7 @@ import { MAX_KI_ID_LENGTH } from '../../common/step_types/ki';
 import { apiPrivileges } from '../../common/features';
 import {
   validateAbsoluteSignalWindow,
+  validateAiIndexDestValue,
   validateAiIndexId,
   validateAiIndexQueryLimit,
   validateFeedbackAnalysisInterval,
@@ -105,6 +106,7 @@ import {
   deleteAutomationResources,
   deleteBackingStoreResource,
 } from '../ai_indices/delete_resources';
+import { deleteKiView } from '../ai_indices/ki_view';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
@@ -295,6 +297,7 @@ const aiIndexPropertiesSchema = {
     value: schema.string({
       minLength: 1,
       maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
+      validate: validateAiIndexDestValue,
       meta: {
         description:
           'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI index id. System indices are not allowed.',
@@ -969,6 +972,13 @@ export const registerAiIndexRoutes = ({
           // From here on, failures are best-effort: the AI index entry is already gone (the primary
           // goal), so any failure is reported back to the caller as a partial-failure
           const errors: string[] = [];
+
+          const viewError = await deleteKiView({
+            esClient: core.elasticsearch.client.asInternalUser,
+            logger,
+            aiIndexId,
+          });
+          if (viewError) errors.push(viewError);
 
           if (deleteKnowledgeIndicators) {
             const err = await deleteBackingStoreResource({

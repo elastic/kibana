@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import type { LinkedInvestigationsSlotRenderProps } from '@kbn/agentic-investigations-common';
 import { LinkedInvestigationsList } from '@kbn/agentic-investigations-common';
 import { useLinkedInvestigations } from '@kbn/agentic-investigations-plugin/public';
+import { useStatusSignal } from '../connected_status/use_status_signal';
 
 /**
  * Connected component for the escalation details flyout overview tab.
@@ -21,16 +22,24 @@ import { useLinkedInvestigations } from '@kbn/agentic-investigations-plugin/publ
  * HTTP hooks from `@kbn/agentic-investigations-plugin/public`. The plugin wraps it in
  * `KibanaContextProvider` + `QueryClientProvider` via `makeLazyWithProviders` before passing it
  * as a render prop to `registerEscalationTemplateUI`.
+ *
+ * The component subscribes to the cross-boundary `statusSignal` so that a status mutation in the
+ * escalation header toggle (which runs in a different `QueryClient`) triggers an immediate
+ * re-fetch here rather than waiting for the 5 s polling interval.
  */
 const ConnectedLinkedInvestigationsInner = ({
   escalationId,
   linkedInvestigationIds,
   onOpenInvestigation,
 }: LinkedInvestigationsSlotRenderProps) => {
-  const { data, isLoading, isError } = useLinkedInvestigations({
+  const { data, isLoading, isError, refetch } = useLinkedInvestigations({
     escalationId,
     linkedInvestigationIds,
   });
+
+  // Re-fetch immediately when a status mutation lands in the flyout's header toggle.
+  // Without this, the list would show stale investigation statuses until the next 5 s poll.
+  useStatusSignal(() => void refetch());
 
   return (
     <LinkedInvestigationsList
