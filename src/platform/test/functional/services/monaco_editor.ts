@@ -97,6 +97,7 @@ export class MonacoEditorService extends FtrService {
    * Append text to an existing editor value (atomic operation, no interleaving).
    */
   public async appendToCodeEditor(testSubjId: string, text: string) {
+    await this.waitCodeEditorReady(testSubjId);
     await this.browser.execute(
       (id: string, textToAppend: string) => {
         const container = document.querySelector(`[data-test-subj="${id}"]`);

@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clickContextMenu();
       await testSubjects.existOrFail('consoleMenuCopyAsButton');
       expect(await PageObjects.console.isContextMenuOpen()).to.be.eql(true);
-      expect(await PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
+      expect(await PageObjects.console.isCopyAsButtonVisible()).to.be.eql(true);
       expect(await PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
       expect(await PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
       await browser.pressKeys(browser.keys.ESCAPE);
