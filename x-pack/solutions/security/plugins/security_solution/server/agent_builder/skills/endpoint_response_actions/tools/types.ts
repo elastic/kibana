@@ -148,6 +148,8 @@ export function insufficientPrivilegesResult(privilege: string) {
  * Reason codes that explain why an endpoint lookup produced a "not found" result.
  *
  * - endpoint_not_found: the host name was resolved to zero fleet agents.
+ * - ambiguous_hostname: several live fleet agents share the host name; the
+ *   result carries `candidates` so the caller can ask for an agent ID.
  */
 export type HostLookupReason = 'endpoint_not_found' | 'ambiguous_hostname';
 
@@ -344,7 +346,7 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
     };
 
     runningSize += JSON.stringify(summary).length;
-    if (runningSize > MAX_OUTPUT_TOTAL_CHARS) {
+    if (runningSize > MAX_OUTPUT_TOTAL_CHARS && agents.length > 0) {
       summaryTruncated = true;
       break;
     }
@@ -376,7 +378,9 @@ export function summarizeActionHosts(hosts: unknown): ActionHostsSummary | undef
   const kept = byAgentId.slice(0, MAX_ACTION_HOSTS);
 
   return {
-    hosts: Object.fromEntries(kept),
+    hosts: Object.fromEntries(
+      kept.map(([agentId, host]) => [agentId, boundOutputValue(host, agentId).value])
+    ),
     totalHosts: byAgentId.length,
     ...(byAgentId.length > kept.length ? { hostsTruncated: byAgentId.length - kept.length } : {}),
   };
@@ -409,9 +413,11 @@ export function summarizeAgentState(agentState: unknown): AgentStateSummary | un
   }
 
   const totalDropped = byAgentId.length - Object.keys(retained).length;
+  const retainedOverBudget = JSON.stringify(retained).length > MAX_AGENT_STATE_TOTAL_CHARS;
 
   return {
     agentState: retained,
+    ...(retainedOverBudget ? { retainedOverBudget: true as const } : {}),
     totalAgents: byAgentId.length,
     ...(totalDropped > 0
       ? {
@@ -459,6 +465,12 @@ export interface AgentStateSummary {
   agentsTruncated?: number;
   /** How many agents were dropped specifically by the cumulative budget (subset of `agentsTruncated`). */
   agentsTruncatedByBudget?: number;
+  /**
+   * Set when the single retained entry still exceeds `MAX_AGENT_STATE_TOTAL_CHARS`.
+   * Kept deliberately (a too-big sample beats none) — consumers should not
+   * read `agentsTruncatedByBudget: 0` as "within budget".
+   */
+  retainedOverBudget?: true;
 }
 
 export interface ActionErrorsSummary {

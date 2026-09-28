@@ -55,9 +55,11 @@ improvise one with another tool.
   reads state.
 - Branch on the typed signals the tools return: a missing host or action is
   \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`
-  (and \`reason: ambiguous_hostname\` when several endpoints share the name),
-  while \`error: insufficient_privileges\` and \`error: unknown_error\` mean the
-  lookup itself could not run. Details in \`./reference\`.`;
+  (and \`reason: ambiguous_hostname\` when several endpoints share the name);
+  \`error: invalid_argument\` means the request itself was out of range (narrow
+  filters instead of paging further), while \`error: insufficient_privileges\`
+  and \`error: unknown_error\` mean the lookup itself could not run. Details in
+  \`./reference\`.`;
 
 export const createEndpointResponseActionsSkill = (
   endpointAppContextService: EndpointAppContextService

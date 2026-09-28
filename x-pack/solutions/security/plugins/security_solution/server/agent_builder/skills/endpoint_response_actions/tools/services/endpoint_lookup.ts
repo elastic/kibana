@@ -105,15 +105,6 @@ interface MetadataCandidate {
 }
 
 /**
- * A metadata candidate with some agent id proven present. Narrowed with a
- * plain boolean filter — a type predicate cannot express this, because the
- * predicate's type must be assignable to the (id-optional) mapped type.
- */
-interface MetadataCandidateWithAgent extends MetadataCandidate {
-  metadata: { agent?: { id?: string }; elastic?: { agent?: { id?: string } } };
-}
-
-/**
  * Walks pages until the backend reports it has handed over everything it
  * matched, and reports whether the walk had to stop early. `total` is optional
  * because a backend that does not report it gives no evidence of more results;
@@ -375,29 +366,33 @@ export function createEndpointLookupService(
       return { items: data ?? [], total: pageTotal };
     });
 
-    const candidates: NormalizedCandidate[] = items
-      .filter((entry): entry is MetadataCandidateWithAgent =>
-        Boolean(entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id)
-      )
-      .map((entry) => ({
-        // Identity: report the FLEET agent id (`elastic.agent.id`), not the
-        // endpoint's own `agent.id`. Fleet candidates key on `candidate.id`
-        // (the Fleet id), so carrying the endpoint id here makes the same
-        // host appear as TWO distinct candidates when the ids differ (false
-        // ambiguity), and downstream reads filtering on the Fleet id miss the
-        // metadata doc. Fleet-id-first with the endpoint id as fallback
-        // mirrors `EndpointMetadataService.getEnrichedHostMetadata()`.
-        agentId: (entry.metadata.elastic?.agent?.id || entry.metadata.agent?.id) as string,
-        // Metadata `host_status` is the HostStatus enum, not Fleet's
-        // agent-level `online`. Only records that are definitively gone
-        // (offline / inactive / unenrolled) count as not live; `updating` and
-        // `unhealthy` are still potentially-reachable machines.
-        isLive: ![HostStatus.OFFLINE, HostStatus.INACTIVE, HostStatus.UNENROLLED].includes(
-          entry.host_status as HostStatus
-        ),
-        status: entry.host_status as string,
-        recencyAt: entry.last_checkin,
-      }));
+    const candidates: NormalizedCandidate[] = items.flatMap((entry) => {
+      // Identity: report the FLEET agent id (`elastic.agent.id`), not the
+      // endpoint's own `agent.id`. Fleet candidates key on `candidate.id`
+      // (the Fleet id), so carrying the endpoint id here makes the same
+      // host appear as TWO distinct candidates when the ids differ (false
+      // ambiguity), and downstream reads filtering on the Fleet id miss the
+      // metadata doc. Fleet-id-first with the endpoint id as fallback
+      // mirrors `EndpointMetadataService.getEnrichedHostMetadata()`.
+      const agentId = entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id;
+      if (!agentId) {
+        return [];
+      }
+      return [
+        {
+          agentId,
+          // Metadata `host_status` is the HostStatus enum, not Fleet's
+          // agent-level `online`. Only records that are definitively gone
+          // (offline / inactive / unenrolled) count as not live; `updating` and
+          // `unhealthy` are still potentially-reachable machines.
+          isLive: ![HostStatus.OFFLINE, HostStatus.INACTIVE, HostStatus.UNENROLLED].includes(
+            entry.host_status as HostStatus
+          ),
+          status: entry.host_status as string,
+          recencyAt: entry.last_checkin,
+        },
+      ];
+    });
 
     return { candidates, truncated, total };
   };

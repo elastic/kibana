@@ -102,6 +102,15 @@ describe('resolveAgentTypeFromPackages', () => {
 });
 
 describe('summarizeActionOutputs', () => {
+  it('keeps the first agent summary even when it alone exceeds the total budget', () => {
+    const oversized = Object.fromEntries(
+      Array.from({ length: 50 }, (_, i) => [`key-${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+    );
+    const result = summarizeActionOutputs({ 'agent-1': oversized })!;
+    expect(result.agents).toHaveLength(1);
+    expect(result.agents[0].agentId).toBe('agent-1');
+  });
+
   it('returns undefined when there are no outputs', () => {
     expect(summarizeActionOutputs(undefined)).toBeUndefined();
     expect(summarizeActionOutputs(null)).toBeUndefined();
@@ -213,6 +222,13 @@ describe('summarizeActionOutputs', () => {
 });
 
 describe('summarizeActionHosts', () => {
+  it('bounds oversized host values like the other summarizers', () => {
+    const hugeName = 'h'.repeat(MAX_OUTPUT_STRING_LENGTH + 500);
+    const result = summarizeActionHosts({ 'agent-1': { name: hugeName } })!;
+    const name = (result.hosts['agent-1'] as { name: string }).name;
+    expect(name.length).toBeLessThan(hugeName.length);
+  });
+
   it('returns undefined when there are no hosts', () => {
     expect(summarizeActionHosts(undefined)).toBeUndefined();
     expect(summarizeActionHosts(null)).toBeUndefined();
@@ -242,6 +258,15 @@ describe('summarizeActionHosts', () => {
 });
 
 describe('summarizeAgentState', () => {
+  it('flags when the single retained agent state still exceeds the total budget', () => {
+    const oversized = Object.fromEntries(
+      Array.from({ length: 50 }, (_, i) => [`key-${i}`, 'x'.repeat(MAX_OUTPUT_STRING_LENGTH)])
+    );
+    const result = summarizeAgentState({ 'agent-1': oversized })!;
+    expect(Object.keys(result.agentState)).toEqual(['agent-1']);
+    expect(result.retainedOverBudget).toBe(true);
+  });
+
   it('returns undefined when there is no agent state', () => {
     expect(summarizeAgentState(undefined)).toBeUndefined();
   });
