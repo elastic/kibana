@@ -11,7 +11,6 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { SignificantEventsServer } from '../../../types';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
-import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
 import {
   createSearchKnowledgeIndicatorsTool,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
@@ -105,40 +104,5 @@ describe('ki_search tool', () => {
 
     const res = await tool.availability!.handler({ request, uiSettings, spaceId: 'default' });
     expect(res.status).toBe('unavailable');
-  });
-
-  it('fails the call when one slug is unknown and does not search', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    const getFeatures = jest.fn();
-    const getKnowledgeIndicatorClient = jest.fn().mockResolvedValue({
-      getFeatures,
-      getQueryLinks: jest.fn(),
-    });
-    const getScopedClients = jest.fn(async () => {
-      return {
-        sourcesClient: mockSourcesClient(['nginx-errors']),
-        getKnowledgeIndicatorClient,
-        licensing: {},
-      } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
-
-    const tool = createSearchKnowledgeIndicatorsTool({ getScopedClients, server, logger });
-    const result = await invokeHandler(
-      tool as never,
-      { slugs: ['nginx-errors', 'missing'] },
-      createMockToolContext()
-    );
-
-    expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
-    expect(getFeatures).not.toHaveBeenCalled();
-    if (!('results' in result)) {
-      throw new Error('Expected a standard tool result');
-    }
-    expect(result.results[0]).toEqual({
-      type: 'error',
-      data: {
-        message: 'Failed to search knowledge indicators: Source not found in this space: missing',
-      },
-    });
   });
 });

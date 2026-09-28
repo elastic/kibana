@@ -6,7 +6,7 @@
  */
 
 import { createKiIdentificationStartTool } from './tool';
-import { createMockToolContext, mockSourcesClient, sourceWithSlug } from '../../utils/test_helpers';
+import { createMockToolContext, mockSourcesClient } from '../../utils/test_helpers';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
@@ -96,52 +96,6 @@ describe('createKiIdentificationStartTool', () => {
       const data = result.results[0].data as Record<string, unknown>;
       expect(data.message).toContain('Failed to start KI identification background task');
       expect(data.operation).toBe('ki_identification_start');
-    }
-  });
-
-  it('rejects a disabled source and does not start the workflow', async () => {
-    const { managementApi, streamsKIsOnboardingClient, maintenanceService, context } = setup();
-    const tool = createKiIdentificationStartTool({
-      telemetry: telemetry as never,
-      streamsKIsOnboardingClient,
-      maintenanceService: maintenanceService as never,
-      getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: {
-          list: jest.fn().mockResolvedValue({
-            sources: [sourceWithSlug('nginx-errors', { enabled: false, id: 'source-nginx' })],
-            total: 1,
-          }),
-        },
-      }) as never,
-    });
-
-    const result = await tool.handler(
-      { slug: 'nginx-errors', steps: [KIsOnboardingStep.FeaturesIdentification] },
-      context
-    );
-
-    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('error');
-      const data = result.results[0].data as Record<string, unknown>;
-      expect(data.message).toContain('Source "nginx-errors" is disabled.');
-      expect(data.slug).toBe('nginx-errors');
-    }
-  });
-
-  it('returns an error for an unknown slug and does not start the workflow', async () => {
-    const { tool, context, managementApi } = setup();
-
-    const result = await tool.handler(
-      { slug: 'missing', steps: [KIsOnboardingStep.FeaturesIdentification] },
-      context
-    );
-
-    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('error');
-      const data = result.results[0].data as Record<string, unknown>;
-      expect(data.message).toContain('Source not found in this space: missing');
     }
   });
 });

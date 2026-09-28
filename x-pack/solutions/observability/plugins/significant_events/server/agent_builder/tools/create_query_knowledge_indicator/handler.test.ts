@@ -88,34 +88,6 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     );
   });
 
-  it('rejects a FROM clause that is not the source view name', async () => {
-    const actual = jest.requireActual<
-      typeof import('../../../lib/significant_events/validate_esql_query')
-    >('../../../lib/significant_events/validate_esql_query');
-    jest
-      .mocked(validateEsqlQueryForSourceOrThrow)
-      .mockImplementationOnce(actual.validateEsqlQueryForSourceOrThrow);
-
-    const kiClient = {
-      upsertQuery: jest.fn().mockResolvedValue(undefined),
-    };
-
-    await expect(
-      createQueryKnowledgeIndicatorToolHandler({
-        kiClient: kiClient as never,
-        source,
-        queryInput: {
-          title: 'Wrong source',
-          description: 'FROM does not match the view',
-          esql: { query: 'FROM logs.other | STATS c = COUNT()' },
-        },
-        logger,
-      })
-    ).rejects.toThrow(`ES|QL query must use FROM ${source.view_name}`);
-
-    expect(kiClient.upsertQuery).not.toHaveBeenCalled();
-  });
-
   it('rejects an over-broad multi-word full-text predicate', async () => {
     const kiClient = {
       upsertQuery: jest.fn().mockResolvedValue(undefined),

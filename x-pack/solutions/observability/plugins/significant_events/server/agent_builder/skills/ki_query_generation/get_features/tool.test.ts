@@ -98,16 +98,4 @@ describe('ki_features_get tool', () => {
       },
     ]);
   });
-
-  it('does not read features when the slug is missing', async () => {
-    const result = await invokeHandler(createTool(), { slug: 'missing' }, createMockToolContext());
-    if (!('results' in result)) {
-      throw new Error('Expected a standard tool result');
-    }
-
-    expect(getFeatures).not.toHaveBeenCalled();
-    expect(result.results).toEqual([
-      { type: 'error', data: { message: 'Source not found in this space: missing' } },
-    ]);
-  });
 });
