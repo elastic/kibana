@@ -47,21 +47,28 @@ export interface AmbiguousHostnameResult {
   message: string;
 }
 
-const getEndpointStatusSchema = z.object({
-  hostName: z
-    .string()
-    .min(1)
-    .max(MAX_HOSTNAME_LENGTH)
-    .describe('The hostname of the endpoint to check status for.'),
-  agentId: z
-    .string()
-    .min(1)
-    .max(MAX_AGENT_ID_LENGTH)
-    .optional()
-    .describe(
-      'The endpoint/agent ID, when the hostname resolves to more than one endpoint. Pass it with the hostName to select one specific host; omit it otherwise.'
-    ),
-});
+const getEndpointStatusSchema = z
+  .object({
+    hostName: z
+      .string()
+      .min(1)
+      .max(MAX_HOSTNAME_LENGTH)
+      .optional()
+      .describe(
+        'The hostname of the endpoint to check status for. Optional when agentId is supplied; pass both to confirm a specific host.'
+      ),
+    agentId: z
+      .string()
+      .min(1)
+      .max(MAX_AGENT_ID_LENGTH)
+      .optional()
+      .describe(
+        'The endpoint/agent ID. Pass it with hostName to select one specific host when several share the name, or on its own to look a host up by ID (for example, from an action record).'
+      ),
+  })
+  .refine((value) => Boolean(value.hostName || value.agentId), {
+    message: 'Provide hostName, agentId, or both.',
+  });
 
 export const getEndpointStatusTool = (
   endpointAppContextService: EndpointAppContextService
@@ -69,11 +76,11 @@ export const getEndpointStatusTool = (
   return {
     id: GET_ENDPOINT_STATUS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the current status of a host by its hostname, including whether it is isolated, its last seen time, and online/offline status. When several endpoints share the hostname, pass the endpoint's agent ID to select one.`,
+    description: `Retrieves the current status of a host by its hostname or agent ID, including whether it is isolated, its last seen time, and online/offline status. When several endpoints share the hostname, pass the endpoint's agent ID to select one, or pass the agent ID alone to look a host up by ID.`,
     schema: getEndpointStatusSchema,
     handler: async (params, { logger, request, spaceId }) => {
       try {
-        const hostName = params.hostName;
+        let hostName = params.hostName;
         const requestedAgentId = params.agentId;
 
         // The endpoint metadata detail route gates this behind
@@ -91,6 +98,15 @@ export const getEndpointStatusTool = (
         let agentId = requestedAgentId;
 
         if (!agentId) {
+          if (!hostName) {
+            // Unreachable: the schema refine requires hostName when agentId is
+            // absent — defensive guard so a future schema change can never
+            // resolve an empty hostname here.
+            return responseActionErrorResult(
+              'invalid_argument',
+              'Provide hostName, agentId, or both.'
+            );
+          }
           // Resolve hostname -> endpoint id + EDR vendor. The service handles
           // hostname escaping, space validation, and multi-vendor `agentType`
           // resolution in one place so every host-lookup tool behaves the same.
@@ -172,14 +188,22 @@ export const getEndpointStatusTool = (
         // and older callers carry). The two diverge on current agents, so
         // filtering on only one silently reports the host as not-found when
         // the caller holds the other.
+        // hostName is optional when the caller supplies agentId: without it
+        // the id alone selects the host and the hostname is derived from the
+        // matched metadata below; with it the hostname constraint is retained
+        // so a mismatched id+name pair reports not-found rather than the
+        // wrong host.
+        const idKuery = `(united.agent.agent.id: ${escapeKuery(agentId)} OR agent.id: ${escapeKuery(
+          agentId
+        )})`;
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
         const hostInfo = await metadataService.getHostMetadataList(
           {
             page: 0,
             pageSize: 1,
-            kuery: `(united.agent.agent.id: ${escapeKuery(agentId)} OR agent.id: ${escapeKuery(
-              agentId
-            )}) AND united.endpoint.host.hostname: ${escapeKuery(hostName)}`,
+            kuery: hostName
+              ? `${idKuery} AND united.endpoint.host.hostname: ${escapeKuery(hostName)}`
+              : idKuery,
           },
           scoped
         );
@@ -193,13 +217,17 @@ export const getEndpointStatusTool = (
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.other,
-                data: endpointNotFoundData(hostName),
+                // For an ID-only lookup the agent id is the identifier that
+                // failed to resolve, so that is what the payload echoes.
+                data: endpointNotFoundData(hostName ?? agentId),
               },
             ],
           };
         }
 
         const hostMetadata = hostInfo.data[0];
+        // ID-only lookup: report the matched host's own name.
+        hostName = hostName ?? hostMetadata.metadata?.host?.hostname ?? 'unknown';
         const isolated = Boolean(hostMetadata.metadata.Endpoint?.state?.isolation);
         const lastSeen = hostMetadata.last_checkin || null;
         const status = hostMetadata.host_status || HostStatus.OFFLINE;

@@ -108,6 +108,12 @@ export const listEndpointsTool = (
           const host = metadata?.host;
           const os = host?.os;
           const agent = metadata?.agent;
+          // Report the FLEET agent id (`elastic.agent.id`) first — that is the
+          // identity hostname resolution and response-action host keys use;
+          // top-level `agent.id` is the endpoint's own id and the two diverge
+          // on current agents (same fleet-id-first ordering as endpoint_lookup).
+          const fleetAgentId = (metadata as { elastic?: { agent?: { id?: string } } } | undefined)
+            ?.elastic?.agent?.id;
           const endpointState = metadata?.Endpoint?.state;
           const appliedPolicy = metadata?.Endpoint?.policy?.applied;
 
@@ -116,7 +122,7 @@ export const listEndpointsTool = (
 
           return {
             hostName: host?.hostname || 'unknown',
-            agentId: agent?.id || 'unknown',
+            agentId: fleetAgentId || agent?.id || 'unknown',
             status: entry.host_status || 'offline',
             isolated: Boolean(endpointState?.isolation),
             os: osLabel,

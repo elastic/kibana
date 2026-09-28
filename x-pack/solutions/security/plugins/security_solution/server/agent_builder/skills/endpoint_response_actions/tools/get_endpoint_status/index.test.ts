@@ -60,6 +60,57 @@ describe('getEndpointStatusTool', () => {
       tool = getEndpointStatusTool(mockEndpointAppContextService);
     });
 
+    it('looks up a host by agent ID alone and derives the hostname from metadata', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: {
+                host: { hostname: 'WIN-123' },
+                Endpoint: { state: { isolation: true } },
+              },
+              last_checkin: '2024-06-01T12:00:00Z',
+              host_status: 'healthy',
+            },
+          ],
+        }),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({ agentId: 'agent-123' }, mockContext);
+
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.found).toBe(true);
+        expect(data.hostName).toBe('WIN-123');
+        expect(data.agentId).toBe('agent-123');
+        expect(data.isolated).toBe(true);
+        expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+          {
+            page: 0,
+            pageSize: 1,
+            // No hostname constraint when only the ID is supplied.
+            kuery: '(united.agent.agent.id: agent-123 OR agent.id: agent-123)',
+          },
+          expect.objectContaining({ isCpsRead: expect.any(Function) })
+        );
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
+    it('requires hostName, agentId, or both', () => {
+      expect(() => tool.schema.parse({})).toThrow();
+      expect(() => tool.schema.parse({ agentId: 'agent-123' })).not.toThrow();
+      expect(() => tool.schema.parse({ hostName: 'my-host' })).not.toThrow();
+    });
+
     it('returns found: false with reason "endpoint_not_found" when no agent matches', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),

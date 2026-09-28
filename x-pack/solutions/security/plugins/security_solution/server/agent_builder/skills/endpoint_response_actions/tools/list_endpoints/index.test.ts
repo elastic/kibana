@@ -59,6 +59,45 @@ describe('listEndpointsTool', () => {
       tool = listEndpointsTool(mockEndpointAppContextService);
     });
 
+    it('reports the Fleet agent id when both endpoint and fleet ids are present', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: {
+                host: { hostname: 'dual-id-host', os: { name: 'Windows', version: '11' } },
+                agent: { id: 'endpoint-id-1' },
+                elastic: { agent: { id: 'fleet-id-1' } },
+                Endpoint: { state: { isolation: false } },
+              },
+              host_status: 'healthy',
+              last_checkin: '2024-06-01T12:00:00Z',
+            },
+          ],
+          total: 1,
+        }),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        const result = await tool.handler({}, mockContext);
+
+        const data = assertStandardReturn(result)[0].data as {
+          endpoints: Array<Record<string, unknown>>;
+        };
+        expect(data.endpoints[0].agentId).toBe('fleet-id-1');
+        expect(data.endpoints[0].hostName).toBe('dual-id-host');
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
     it('returns a list of endpoints with status and isolation info', async () => {
       const mockMetadataService = {
         getHostMetadataList: jest.fn().mockResolvedValue({
