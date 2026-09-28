@@ -1,33 +1,696 @@
 {
-  "sha1": "8280a58a1c69d0c447576fc30068a2c139dbe375",
+  "sha1": "9fd81f046ee77576d4c098135e6b0c6993364dcb",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "41a78a77f1ad1c5-f17c8832d70b41f",
-      "title": "Flyout System - EuiFlyout component Session J: open main flyout, open child flyout A, both remain visible",
+      "id": "103ba36e67340e1-502aea016c28ad9",
+      "title": "Flyout System - dialog focus accessibility opening a service flyout moves focus into the dialog",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
-        "line": 17,
-        "column": 5
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/dialog_focus_a11y.spec.ts",
+        "line": 18,
+        "column": 43
       }
     },
     {
-      "id": "41a78a77f1ad1c5-b201acb79cc68d7",
-      "title": "Flyout System - EuiFlyout component Back button: navigate from Session X overlay back to Session J push flyout",
+      "id": "41a78a77f1ad1c5-ecdbe6ac98de04b",
+      "title": "Flyout System - FlyoutTemplate component Session J: open main flyout, open child flyout A, both remain visible",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
-        "line": 33,
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "41a78a77f1ad1c5-3db28af08559440",
+      "title": "Flyout System - FlyoutTemplate component Back button: navigate from Session X overlay back to Session J push flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/flyout_with_component.spec.ts",
+        "line": 36,
+        "column": 13
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-4ab9f276cc96f0c",
+      "title": "Flyout System - footer action menu accessibility the component footer action menu trigger names itself and declares its popup",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 36,
+        "column": 34
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-4b1fb8f2c64f796",
+      "title": "Flyout System - footer action menu accessibility the component footer action menu opens from the keyboard and exposes its items",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 43,
+        "column": 15
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-15aef1c38fca17d",
+      "title": "Flyout System - footer action menu accessibility Escape dismisses the component footer action menu and leaves the flyout open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 58,
+        "column": 30
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-7cd7b4c096c659b",
+      "title": "Flyout System - footer action menu accessibility the component footer action menu back button returns to the first panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-84f7011019466fd",
+      "title": "Flyout System - footer action menu accessibility the open component footer action menu has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 95,
+        "column": 21
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-1886f1c8e1f694c",
+      "title": "Flyout System - footer action menu accessibility the service footer action menu trigger names itself and declares its popup",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 36,
+        "column": 34
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-fad957283a85827",
+      "title": "Flyout System - footer action menu accessibility the service footer action menu opens from the keyboard and exposes its items",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 43,
+        "column": 15
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-ad712c29845e945",
+      "title": "Flyout System - footer action menu accessibility Escape dismisses the service footer action menu and leaves the flyout open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 58,
+        "column": 30
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-b170afa388d9d4b",
+      "title": "Flyout System - footer action menu accessibility the service footer action menu back button returns to the first panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "d8ec61d402d83b5-25f6d2eb3e81aa5",
+      "title": "Flyout System - footer action menu accessibility the open service footer action menu has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/footer_action_menu_a11y.spec.ts",
+        "line": 95,
+        "column": 21
+      }
+    },
+    {
+      "id": "faa998808538e40-8054f17324835c9",
+      "title": "Flyout System - full surface accessibility a component-composed full surface flyout has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "faa998808538e40-8e4410fbe002191",
+      "title": "Flyout System - full surface accessibility a service-opened accordion and tabbed flyout has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 37,
+        "column": 41
+      }
+    },
+    {
+      "id": "faa998808538e40-0aafb5300b7367e",
+      "title": "Flyout System - full surface accessibility the component flyout dialog is named by its header title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 54,
+        "column": 13
+      }
+    },
+    {
+      "id": "faa998808538e40-b244368aca5cfa7",
+      "title": "Flyout System - full surface accessibility the service flyout dialog is named by its header title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 54,
+        "column": 13
+      }
+    },
+    {
+      "id": "faa998808538e40-c225592f9eb7a84",
+      "title": "Flyout System - full surface accessibility regular sections are exposed as named regions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 61,
         "column": 11
+      }
+    },
+    {
+      "id": "faa998808538e40-fcd9ba2602d6e61",
+      "title": "Flyout System - full surface accessibility component subsections are headings inside their parent, not regions of their own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 74,
+        "column": 28
+      }
+    },
+    {
+      "id": "faa998808538e40-28d69fe239f3f87",
+      "title": "Flyout System - full surface accessibility service subsections are headings inside their parent, not regions of their own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 74,
+        "column": 28
+      }
+    },
+    {
+      "id": "faa998808538e40-8c5a1ce30c29fb4",
+      "title": "Flyout System - full surface accessibility accordion sections report their expanded state and own their panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 90,
+        "column": 15
+      }
+    },
+    {
+      "id": "faa998808538e40-42f0fa678ec6cb5",
+      "title": "Flyout System - full surface accessibility component badge overflow is reachable by keyboard and names its contents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 101,
+        "column": 30
+      }
+    },
+    {
+      "id": "faa998808538e40-92011babc8aec45",
+      "title": "Flyout System - full surface accessibility service badge overflow is reachable by keyboard and names its contents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 101,
+        "column": 30
+      }
+    },
+    {
+      "id": "faa998808538e40-b2bcf12ac2974c0",
+      "title": "Flyout System - full surface accessibility tabs follow the roving tabindex pattern with manual activation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 122,
+        "column": 25
+      }
+    },
+    {
+      "id": "faa998808538e40-75bd2054599348a",
+      "title": "Flyout System - full surface accessibility component footer tab order reaches the secondary action before the primary",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 154,
+        "column": 7
+      }
+    },
+    {
+      "id": "faa998808538e40-3ffda5c250099ef",
+      "title": "Flyout System - full surface accessibility service footer tab order reaches the secondary action before the primary",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
+        "line": 154,
+        "column": 7
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-e62d659e1adafc5",
+      "title": "Flyout System - header collapse accessibility the component header collapses when the body is scrolled with the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 27,
+        "column": 41
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-4b9dd931c0fac99",
+      "title": "Flyout System - header collapse accessibility the component flyout stays named while the header is collapsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 39,
+        "column": 21
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-4c02f1747b130eb",
+      "title": "Flyout System - header collapse accessibility the component title tooltip stays available while the header is collapsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-62405edb8c54079",
+      "title": "Flyout System - header collapse accessibility the collapsed component header content leaves the tab order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-d87270eef0e7548",
+      "title": "Flyout System - header collapse accessibility the component header does not strand focus when it collapses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 95,
+        "column": 21
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-6894a118a17497c",
+      "title": "Flyout System - header collapse accessibility collapsing the component header dismisses the badge overflow popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 115,
+        "column": 30
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-1f49068c30c8614",
+      "title": "Flyout System - header collapse accessibility a scroll-collapsed component header has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 134,
+        "column": 21
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-c5ec45178cac4a4",
+      "title": "Flyout System - header collapse accessibility the component footer stays reachable by wheel at a reflow viewport",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 154,
+        "column": 30
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-de2d1129634b59f",
+      "title": "Flyout System - header collapse accessibility a permanently collapsed component child header still names its dialog",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 170,
+        "column": 9
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-55e095fcb774631",
+      "title": "Flyout System - header collapse accessibility the service header collapses when the body is scrolled with the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 27,
+        "column": 41
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-484726dddf3b382",
+      "title": "Flyout System - header collapse accessibility the service flyout stays named while the header is collapsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 39,
+        "column": 21
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-ebf240f4b6901fc",
+      "title": "Flyout System - header collapse accessibility the service title tooltip stays available while the header is collapsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-70592d64eaefe38",
+      "title": "Flyout System - header collapse accessibility the collapsed service header content leaves the tab order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-61c719d8f5dc32d",
+      "title": "Flyout System - header collapse accessibility the service header does not strand focus when it collapses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 95,
+        "column": 21
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-fa243d4149f3483",
+      "title": "Flyout System - header collapse accessibility collapsing the service header dismisses the badge overflow popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 115,
+        "column": 30
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-08e18c8a55d4359",
+      "title": "Flyout System - header collapse accessibility a scroll-collapsed service header has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 134,
+        "column": 21
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-4c1f8c2d29fb372",
+      "title": "Flyout System - header collapse accessibility the service footer stays reachable by wheel at a reflow viewport",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 154,
+        "column": 30
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-493d464132349d1",
+      "title": "Flyout System - header collapse accessibility a permanently collapsed service child header still names its dialog",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 170,
+        "column": 9
+      }
+    },
+    {
+      "id": "b1bb19297cb99af-0b13e90976d8c12",
+      "title": "Flyout System - header collapse accessibility the tab bar stays pinned and operable while the header is collapsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
+        "line": 190,
+        "column": 9
+      }
+    },
+    {
+      "id": "99eaf8511804849-3bab7302de5c2d3",
+      "title": "Flyout System - resizable flyout accessibility the component resize handle is reachable by keyboard and resizes the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
+        "line": 29,
+        "column": 41
+      }
+    },
+    {
+      "id": "99eaf8511804849-f247f5957518d93",
+      "title": "Flyout System - resizable flyout accessibility the component resize handle names the keys that operate it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
+        "line": 59,
+        "column": 17
+      }
+    },
+    {
+      "id": "99eaf8511804849-c2ea6170e13b34b",
+      "title": "Flyout System - resizable flyout accessibility resizing the component flyout honors the configured minimum width",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
+        "line": 67,
+        "column": 16
+      }
+    },
+    {
+      "id": "99eaf8511804849-6b78ed3541bd13e",
+      "title": "Flyout System - resizable flyout accessibility a resized component flyout keeps its dialog semantics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
+        "line": 86,
+        "column": 30
+      }
+    },
+    {
+      "id": "99eaf8511804849-74e26c3e0b7bed0",
+      "title": "Flyout System - resizable flyout accessibility the service resize handle is reachable by keyboard and resizes the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
+        "line": 29,
+        "column": 41
+      }
+    },
+    {
+      "id": "99eaf8511804849-c2bf1ed53839b16",
+      "title": "Flyout System - resizable flyout accessibility the service resize handle names the keys that operate it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
+        "line": 59,
+        "column": 17
+      }
+    },
+    {
+      "id": "99eaf8511804849-54912e1f4f6bce9",
+      "title": "Flyout System - resizable flyout accessibility resizing the service flyout honors the configured minimum width",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
+        "line": 67,
+        "column": 16
+      }
+    },
+    {
+      "id": "99eaf8511804849-039cfa774477f76",
+      "title": "Flyout System - resizable flyout accessibility a resized service flyout keeps its dialog semantics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/resizable_a11y.spec.ts",
+        "line": 86,
+        "column": 30
       }
     }
   ]

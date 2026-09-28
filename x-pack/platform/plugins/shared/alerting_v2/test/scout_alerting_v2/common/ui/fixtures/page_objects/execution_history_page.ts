@@ -17,12 +17,12 @@ export class ExecutionHistoryPage {
   public readonly policyDetailsFlyout: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.emptyPrompt = this.page.getByRole('cell').getByTestId('ruleExecutionHistoryEmptyPrompt');
+    this.emptyPrompt = this.page.testSubj.locator('ruleExecutionHistoryEmptyPrompt');
     this.retryButton = this.page.testSubj.locator('executionHistoryRetryButton');
     this.rulesTab = this.page.testSubj.locator('executionHistoryRulesTab');
     this.actionPoliciesTab = this.page.testSubj.locator('executionHistoryPoliciesTab');
     this.searchBar = this.page.testSubj.locator('executionHistorySearchBar');
-    this.policiesTable = this.page.testSubj.locator('actionPolicyExecutionHistoryTable');
+    this.policiesTable = this.page.testSubj.locator('policyExecutionHistoryTable');
     this.policyDetailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
   }
 

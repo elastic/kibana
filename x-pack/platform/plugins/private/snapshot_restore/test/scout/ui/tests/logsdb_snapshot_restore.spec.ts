@@ -7,11 +7,11 @@
 
 import { expect } from '@kbn/scout/ui';
 
+import { waitForSnapshotToFinish } from '../../common/fixtures/es_helpers';
 import { test } from '../fixtures';
 import {
   type ManagedSnapshotRepository,
   ensureSnapshotRepository,
-  waitForSlmSnapshotToFinish,
 } from '../fixtures/snapshot_repository_helpers';
 
 // Local only: this journey asserts on a snapshot-free cluster, and ECH's managed
@@ -102,7 +102,7 @@ test.describe(
       });
 
       await test.step('wait for snapshot to complete', async () => {
-        await waitForSlmSnapshotToFinish(esClient, repositoryName, currentSnapshotPrefix);
+        await waitForSnapshotToFinish(esClient, repositoryName, `${currentSnapshotPrefix}-*`);
         await snapshotRestore.navToSnapshots({ empty: false });
         await snapshotRestore.waitUntilSnapshotComplete(currentSnapshotPrefix);
       });

@@ -130,7 +130,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           matcher: { expression: "env == 'production'" },
           group_by: ['service.name', 'environment'],
           throttle: { interval: '5m' },
-          tags: [AGENT_BUILDER_TAG],
         })
       ),
       apiServices.alertingV2.actionPolicies.create(
@@ -190,7 +189,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     expect(state.action_policies_count).toBe(2);
     expect(state.action_policies_unique_workflow_count).toBe(2);
     expect(state.action_policies_count_with_matcher).toBe(1);
-    expect(state.action_policies_count_agent_builder_assisted).toBe(1);
     expect(state.action_policies_count_with_group_by).toBe(1);
     expect(state.action_policies_avg_group_by_fields_count).toBe(2);
     expect(sortByName(state.action_policies_count_by_throttle_interval)).toStrictEqual([

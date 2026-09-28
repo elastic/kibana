@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 export interface WorkflowDocumentGetOptions {
@@ -20,19 +21,32 @@ export interface VersionedWorkflowDocument {
   primaryTerm: number;
 }
 
+/** Internal context supplied only by the registered managed-definition lifecycle. */
+export interface ManagedWorkflowUpgrade {
+  pluginId: string;
+  definitionId: string;
+}
+
 export interface IndexWorkflowDocumentOptions {
+  managedWorkflowUpgrade?: ManagedWorkflowUpgrade;
+  previousDocument?: WorkflowProperties;
+  request?: KibanaRequest;
   create?: boolean;
   ifPrimaryTerm?: number;
   ifSeqNo?: number;
 }
 
 export interface WriteWorkflowDocumentWithOccParams {
+  managedWorkflowUpgrade?: ManagedWorkflowUpgrade;
+  previousDocument?: WorkflowProperties;
+  request?: KibanaRequest;
   document: WorkflowProperties;
   ifSeqNo: number;
   ifPrimaryTerm: number;
 }
 
 export interface ReadModifyWriteWorkflowDocumentParams {
+  request?: KibanaRequest;
   mutate: (existing: WorkflowProperties) => WorkflowProperties;
   maxRetries?: number;
   getOptions?: WorkflowDocumentGetOptions;

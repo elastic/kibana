@@ -10,8 +10,7 @@
 import { cloneDeep, differenceBy, omit } from 'lodash';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
@@ -93,6 +92,7 @@ export const setTabs: InternalStateThunkActionCreator<
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
       newRecentlyClosedTab.profileState = cloneDeep(tab.profileState);
+      newRecentlyClosedTab.skipInitialFetch = false;
       justRemovedTabs.push(newRecentlyClosedTab);
 
       dispatch(disconnectTab({ tabId: tab.id }));
@@ -206,6 +206,17 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
         tab.profileState = cloneDeep(existingTabToDuplicateFrom.profileState);
         tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
+        // Carry over auto-refresh. Prefer the live timefilter when duplicating
+        // the current tab so an in-progress interval is not replaced by defaults.
+        const refreshInterval =
+          existingTabToDuplicateFrom.id === currentTab.id
+            ? services.timefilter.getRefreshInterval()
+            : existingTabToDuplicateFrom.globalState.refreshInterval ??
+              services.timefilter.getRefreshInterval();
+        tab.globalState = {
+          ...tab.globalState,
+          refreshInterval: cloneDeep(refreshInterval),
+        };
       } else if (item.restoredFromId) {
         // the new tab was created by restoring a recently closed tab
         const recentlyClosedTabToRestore = selectRecentlyClosedTabs(currentState).find(
@@ -230,19 +241,44 @@ export const updateTabs: InternalStateThunkActionCreator<
         const currentQuery = currentTab.appState.query;
         const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
 
+        tab.skipInitialFetch = true;
+        const currentRefreshInterval =
+          tab.globalState.refreshInterval ?? services.timefilter.getRefreshInterval();
+        tab.globalState = {
+          ...tab.globalState,
+          refreshInterval: { ...currentRefreshInterval, pause: true },
+        };
+        tab.uiState = {
+          ...tab.uiState,
+          esqlEditor: {
+            ...tab.uiState.esqlEditor,
+            isHistoryOpen: true,
+          },
+        };
+
         if (!currentQuery || !currentDataView) {
           return tab;
         }
 
         tab.appState = {
-          ...(isOfAggregateQueryType(currentQuery)
-            ? { query: { esql: getInitialESQLQuery(currentDataView) } }
-            : {}),
+          ...(isOfAggregateQueryType(currentQuery) ? { query: { esql: '' } } : {}),
           dataSource: createDataSource({
             dataView: currentDataView,
             query: currentQuery,
           }),
         };
+
+        // Empty ES|QL has no dataViewId in app state. Keep the previous tab's
+        // data view so init does not fall back to the default and refetch fields.
+        if (isOfAggregateQueryType(currentQuery)) {
+          tab.initialInternalState = {
+            ...tab.initialInternalState,
+            serializedSearchSource: {
+              ...tab.initialInternalState?.serializedSearchSource,
+              index: currentDataView.isPersisted() ? currentDataView.id : currentDataView.toSpec(),
+            },
+          };
+        }
       }
 
       return tab;
@@ -319,7 +355,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
         dispatch(initializeAndSync({ tabId: nextTab.id }));
 
-        if (nextTab.forceFetchOnSelect) {
+        if (nextTab.forceFetchOnSelect && !isEmptyEsqlQuery(nextTab.appState.query)) {
           nextTabDataStateContainer.reset();
           dispatch(fetchData({ tabId: nextTab.id }));
         }

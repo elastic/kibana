@@ -13,12 +13,19 @@ settings:
   # concurrency is always checked within a single space.
   #
   # `cancel-in-progress` with max 1: the newest discoveries are the ones worth
-  # having, and a backlog must never delay a new run. `drop` and `queue` cannot
-  # deliver that — a run that is merely waiting still occupies the single slot, so
-  # a newer run would either wait behind superseded work or be turned away.
+  # having, and a backlog must never delay a new run. Neither alternative delivers
+  # that — `drop` turns the newer run away, and `queue` makes it wait behind
+  # superseded work (a QUEUED run does not hold the slot, but it does not pass the
+  # run ahead of it either, and `queue-ttl` expires it after 24h).
+  #
+  # What makes cancelling safe here is that this run is bounded by generation: the
+  # per-attack reviews are dispatched detached (`workflow.executeAsync` below), so no
+  # analyst's decision window is ever inside this execution or its slot. Were they
+  # synchronous instead, each scheduled run would cancel the previous run's parked
+  # gates, leaving those Investigations open and their proposals `pending` forever.
   #
   # Accepted cost: a run cancelled after generation persisted but before the fan-out
-  # finished leaves those attacks with no AlertZero review. Duplicates are not part
+  # dispatched leaves those attacks with no AlertZero review. Duplicates are not part
   # of the cost — the ad-hoc write path ids each attack by a hash of its alert ids,
   # connector, owner and space, so an identical attack is dropped on write; only a
   # regrouped alert set hashes differently and lands as a near-duplicate.
@@ -50,12 +57,13 @@ triggers:
           type: string
           enum:
             - manual
-            - assisted
             - supervised
           description: >-
             Worker autonomy level, passed through to each review so a true-positive
-            or inconclusive verdict knows whether it needs an analyst gate.
-            Defaults to `manual`.
+            or inconclusive verdict knows whether its forensics handoff needs an
+            analyst gate. Two of the three shared levels: this worker gates exactly
+            one thing, so `assisted` would mean the same as `manual`. Defaults to
+            `manual`.
         settings_version:
           type: integer
           minimum: 1
@@ -84,12 +92,15 @@ outputs:
   # `"${{ ... }}"` is reported as invalid even though Liquid keeps the number
   # at runtime. `{{ }}` stringifies so the emitted value matches this schema;
   # `${{ }}` would keep the count as a number and fail output validation.
+  #
+  # the batched generation child's new `discoveries_generated` output is for.
   - name: attacks_generated
     type: string
   - name: reviews_requested
     type: string
-  - name: reviews_failed
-    type: string
+  # No `reviews_failed` counterpart: the reviews are dispatched detached, so this run
+  # terminalizes without learning any of their outcomes. A failed review is visible in
+  # its own execution and in the journal it writes to its Investigation.
   - name: alerts_analyzed
     type: string
   - name: schedule_interval
@@ -139,6 +150,13 @@ steps:
   # The fan-out list, resolved once so the batches, the parallel step, and the
   # summary agree on it. `| default: consts.no_discoveries` normalizes the three
   # empty shapes to an empty array.
+  #
+  # These are the PERSISTED discovery documents: the batched child reads them back
+  # from the ad-hoc index by generation uuid and emits their `_source`. That is
+  # what gives each review a real Attack Discovery document id — `_source` carries
+  # `kibana.alert.uuid`, which is also the document's `_id`, and which
+  # `security.setAttackStatus` and the `security.attack_discovery` attachment both
+  # key on. The runner therefore does not repeat the index read.
   - name: resolve_fanout
     type: data.set
     with:
@@ -150,9 +168,11 @@ steps:
       # items are reviewed at once is `concurrency.max` below, not this.
       batches: "${{ steps.run_generation.output.attack_discoveries | default: consts.no_discoveries | chunk: 100 }}"
 
-  # A run that generated nothing is a normal outcome, not a failure: there may
-  # simply be no attack in the alerts. Logged explicitly so an empty execution is
-  # distinguishable from one that failed before generation.
+  # A run with nothing to review is a normal outcome, not a failure: there may
+  # simply be no attack in the alerts, or every attack this run found may already
+  # have been persisted by an earlier run. Both counts are logged so the two are
+  # distinguishable, and so an empty execution is distinguishable from one that
+  # failed before generation.
   - name: log_empty_run
     type: console
     if: "${{ steps.resolve_fanout.output.attack_count == 0 }}"
@@ -166,13 +186,6 @@ steps:
         steps.run_generation.output.batches_total }} succeeded, {{
         steps.run_generation.output.batches_failed }} failed). Skipping the
         per-attack fan-out.
-
-  # Failed-review count starts at 0 so an empty generation and the first batch
-  # both have a number to add to. Each batch writes the running total back here.
-  - name: init_review_counts
-    type: data.set
-    with:
-      reviews_failed: 0
 
   # One review execution per attack. Each `chunk: 100` batch stays under the
   # parallel fan-out ceiling so a 101+ generation cannot throw. Branches still
@@ -192,74 +205,88 @@ steps:
       - name: run_reviews
         type: parallel
         foreach: "${{ steps.current_batch.output.attacks }}"
-        # Settled: one failed review must not abandon the remaining attacks. Failures
-        # stay visible in the aggregate results and counts.
+        # Settled: a branch that fails to LAUNCH its review must not abandon the
+        # remaining attacks. The review's own outcome is not a branch outcome here —
+        # dispatch is detached, so a branch succeeds once the child has started.
         mode: settled
         concurrency:
-          # 2 is the smallest width that still reviews attacks concurrently — `max: 1`
-          # on a `parallel` step is a sequential `foreach` with extra steps. Each
-          # branch above that is one more child workflow execution running at the same
-          # time, and until #19211 puts a real analysis workflow behind the fan-out
-          # every step in the review child is a `console` stub, so a wider width buys
-          # throughput nothing is using. Widen it with evidence then, not before.
-          # DEFAULT_PARALLEL_MAX_CONCURRENCY (20) is the schema ceiling and is enforced
-          # as a validation error rather than clamped. This is not a cap on how many
-          # attacks are reviewed, only on how many at once.
+          # This bounds the rate of DISPATCH, not the width of review. Each branch only
+          # starts a child and terminalizes, so every attack in the batch is reviewed
+          # concurrently regardless of this number; 2 keeps a 100-attack batch from
+          # opening 100 executions in one tick. DEFAULT_PARALLEL_MAX_CONCURRENCY (20)
+          # is the schema ceiling and is enforced as a validation error rather than
+          # clamped.
           max: 2
-          # `count-waiting` is left at its default (true), which counts a parked branch
-          # against `max`. Every branch here parks as soon as it starts its child,
-          # because `workflow.execute` is synchronous, so at `false` this width would
-          # not restrain the fan-out at all.
-          #
-          # Refill is per slot rather than in lockstep: the engine frees a slot as each
-          # branch terminalizes and starts the next queued one on a following tick, so
-          # the branches in flight do not have to finish together. Revisit alongside
-          # #19214, which adds HITL gates and keeps each branch parked far longer.
+          # `count-waiting` is left at its default (true) and now costs nothing: no
+          # branch parks, because `workflow.executeAsync` returns as soon as the child
+          # is started. Refill is per slot rather than in lockstep, so the engine frees
+          # a slot as each branch terminalizes and starts the next on a following tick.
         steps:
+          # `executeAsync`, not `execute`: a review parks on its escalation gate for up
+          # to `176h`, and a synchronous launch would park this run with it. A run
+          # waiting on a child both burns its own wall clock and holds its concurrency
+          # slot, so two separate things would then kill the analyst's decision window
+          # — this run's workflow timeout (the engine's 6h default, wall-clock from
+          # `startedAt`), and the next scheduled run cancelling this one. Either
+          # cancels the review, and nothing settles a cancelled gate: the Investigation
+          # stays open, the proposal stays `pending` forever, and dispatch never hands
+          # that attack out again. Human time cannot share an execution with machine
+          # cadence.
+          #
+          # Nothing is lost by not joining. Re-dispatch is still safe — the review's
+          # own `drop max 1`, keyed per attack, turns a second launch away — and the
+          # review owns every write the verdict produces, so no step here needs its
+          # result. What goes is the failed-review count, which this run could only
+          # have learned by waiting (see `outputs` above).
           - name: run_review
-            type: workflow.execute
+            type: workflow.executeAsync
             with:
               workflow-id: system-security-attack-discovery-review
               inputs:
                 # `${{ }}` preserves the value's type (arrays stay arrays); `{{ }}`
-                # stringifies. `alert_ids` holds DETECTION alert ids; there is no
-                # persisted Attack Discovery `_id` to pass yet (#19022 / #19214).
+                # stringifies.
                 #
                 # Bracket access: these are persisted alert `_source` documents whose
                 # discovery fields are FLAT dotted keys, so `foreach.item.title`
                 # silently resolves to empty.
                 #
+                # `kibana.alert.uuid` IS the persisted document's `_id` — the bulk
+                # create indexes each candidate under it — so reading it off
+                # `_source` needs no second index read. It is what
+                # `security.setAttackStatus` and the by-reference
+                # `security.attack_discovery` attachment both key on.
+                #
+                # per attack and attach the discovery by reference.
+                attack_discovery_id: '{{ foreach.item["kibana.alert.uuid"] }}'
+                #
                 # Anonymized fields, not `*_with_replacements` — de-anonymizing
                 # reviews is a behaviour change owned by #19022 / #19211.
                 title: '{{ foreach.item["kibana.alert.attack_discovery.title"] }}'
+                # DETECTION alert ids, not the Attack Discovery's own id.
                 alert_ids: '${{ foreach.item["kibana.alert.attack_discovery.alert_ids"] }}'
                 summary_markdown: '{{ foreach.item["kibana.alert.attack_discovery.summary_markdown"] }}'
                 # `${{ }}` so the editor does not type-check the template source
-                # against the child's autonomy enum.
+                # against the child's enum.
                 autonomy: "${{ inputs.autonomy }}"
                 parent_run_id: "{{ execution.id }}"
 
-      - name: batch_failed
-        type: data.set
-        with:
-          count: "${{ steps.run_reviews.output.failed | default: 0 }}"
-
-      - name: accumulate_failed
-        type: data.set
-        with:
-          reviews_failed: "${{ variables.reviews_failed | plus: steps.batch_failed.output.count }}"
-
-  # Fan-in: every batch has settled. `variables.reviews_failed` needs no `default`
-  # here because `init_review_counts` runs unconditionally before the loop, so the
-  # key is always set; each `accumulate_failed` iteration is its own entry in
-  # `variables`, so the value read here is the last running total written.
+  # Every batch has dispatched. This is not a fan-in: the reviews are still running
+  # on their own executions, and this run reports only what it did itself.
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      attacks_generated: "{{ steps.resolve_fanout.output.attack_count }}"
+      # Generation truth: what the model produced, summed across batches and
+      # counted BEFORE persistence deduplicated it. Not `attack_discoveries |
+      # size` — that array is the child's read-back of what actually persisted,
+      # so sizing it would measure dispatch a second time.
+      attacks_generated: "{{ steps.run_generation.output.discoveries_generated | default: 0 }}"
+      # Dispatch truth: what persisted and was fanned out. Lower than
+      # attacks_generated when the ad-hoc write path drops an attack whose hash
+      # already exists, so these two are no longer the same number. Sourcing them
+      # from the same step is what made `reviews_requested` tautological on
+      # elastic/kibana#290732; keep them apart.
       reviews_requested: "{{ steps.resolve_fanout.output.attack_count }}"
-      reviews_failed: "{{ variables.reviews_failed }}"
       alerts_analyzed: "{{ steps.run_generation.output.alerts_analyzed | default: 0 }}"
       schedule_interval: "{{ inputs.schedule_interval }}"
       execution_uuids: "{{ steps.run_generation.output.execution_uuids | join: ',' }}"

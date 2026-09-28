@@ -9,9 +9,16 @@
 
 import type { ConnectorSpec } from './connector_spec';
 import { connectorSpecHasEvents } from './connector_spec_has_events';
+import { getConnectorSpec } from './get_connector_spec';
 
 /**
  * Inbound-only types have events and no outbound actions.
  */
 export const isInboundOnlyConnectorSpec = (spec: ConnectorSpec): boolean =>
   connectorSpecHasEvents(spec) && Object.keys(spec.actions).length === 0;
+
+/** True when the registered spec for this type id is inbound-only. */
+export const connectorTypeIsInboundOnly = (actionTypeId: string): boolean => {
+  const spec = getConnectorSpec(actionTypeId);
+  return spec !== undefined && isInboundOnlyConnectorSpec(spec);
+};

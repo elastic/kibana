@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSHandle } from 'playwright/test';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
@@ -36,6 +37,11 @@ export class LensApp {
   protected readonly closeDimensionEditorButton;
   readonly applyFlyoutButton;
   readonly cancelFlyoutButton;
+  /**
+   * Series colour input of the open dimension editor. Matched with `~=` because the
+   * input carries two space-separated test subjects (`euiColorPickerAnchor` and this one).
+   */
+  readonly dimensionColorPicker;
   protected readonly codeEditor: KibanaCodeEditorWrapper;
 
   private readonly chartSwitchPopover;
@@ -64,6 +70,9 @@ export class LensApp {
     );
     this.applyFlyoutButton = this.page.getByTestId('applyFlyoutButton');
     this.cancelFlyoutButton = this.page.getByTestId('cancelFlyoutButton');
+    this.dimensionColorPicker = this.page.locator(
+      '[data-test-subj~="indexPattern-dimension-colorPicker"]'
+    );
     this.codeEditor = new KibanaCodeEditorWrapper(this.page);
   }
 
@@ -167,7 +176,8 @@ export class LensApp {
 
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
-   * a dashboard target, and confirms. Waits for the modal to close.
+   * a dashboard target, and confirms. Waits for the modal to close and, when the save
+   * created a new library visualization, for the editor to finish reloading it.
    */
   async save(
     title: string,
@@ -185,6 +195,11 @@ export class LensApp {
           addToDashboard: 'none';
         }
   ) {
+    const savedObjectIdBeforeSave = await this.getSavedObjectIdFromUrl();
+    const workspaceBeforeSave = await this.page.evaluateHandle(() =>
+      document.querySelector('[data-test-subj="lnsWorkspace"]')
+    );
+
     await this.openSaveOptionsIfNeeded();
     await this.saveButton.click();
     await this.saveModal.waitFor({ state: 'visible' });
@@ -215,6 +230,45 @@ export class LensApp {
 
     await this.confirmSaveButton.click();
     await this.saveModal.waitFor({ state: 'hidden' });
+    await this.waitForPostSaveReload(savedObjectIdBeforeSave, workspaceBeforeSave);
+    // Release the handle so the detached pre-save workspace can be garbage collected.
+    await workspaceBeforeSave.dispose();
+  }
+
+  /** Reads the `#/edit/<id>` saved object id from the in-page URL, if the editor shows one. */
+  private async getSavedObjectIdFromUrl(): Promise<string | undefined> {
+    const url = await this.page.evaluate(() => window.location.href);
+    return /\/edit\/([^/?#]+)/.exec(url)?.[1];
+  }
+
+  /**
+   * Saving a *new* library visualization redirects the editor to `#/edit/<id>`, which makes
+   * Lens re-initialise its state from the saved object (`EditorRenderer` re-runs `loadInitial`).
+   * Until that reload lands the editor still looks interactive, but any edit made in the
+   * meantime is discarded when the reloaded state replaces it. The reload unmounts and
+   * remounts the editor frame, so wait for a *new* `lnsWorkspace` node before returning.
+   * Re-saving an existing visualization, or saving into a dashboard, does not reload.
+   */
+  private async waitForPostSaveReload(
+    savedObjectIdBeforeSave: string | undefined,
+    workspaceBeforeSave: JSHandle<Element | null>
+  ) {
+    const savedObjectIdAfterSave = await this.getSavedObjectIdFromUrl();
+    if (!savedObjectIdAfterSave || savedObjectIdAfterSave === savedObjectIdBeforeSave) {
+      return;
+    }
+    // Compare DOM nodes rather than waiting for `hidden` then `visible`: the unmounted
+    // window can be shorter than a poll interval locally, so a hidden-wait could miss it.
+    await this.page.waitForFunction(
+      (previousWorkspace) => {
+        const workspace = document.querySelector('[data-test-subj="lnsWorkspace"]');
+        return workspace !== null && workspace !== previousWorkspace;
+      },
+      workspaceBeforeSave,
+      // Two round trips (data view check + saved object load); slow on cloud.
+      { timeout: 20_000 }
+    );
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'visible' });
   }
 
   async applyFlyoutChanges() {
@@ -423,6 +477,20 @@ export class LensApp {
       [testSubj, want] as const,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
+  }
+
+  /**
+   * Opens the dimension editor for the XY chart's vertical axis, so callers can
+   * read or edit the series configuration.
+   *
+   * Deliberately does not wait: `lns-indexPattern-dimensionContainerClose` comes
+   * from the shared flyout container, so it can already be visible without the
+   * dimension editor being open, and waiting on it lets callers proceed too early.
+   * Assert on the control you actually need (e.g. {@link dimensionColorPicker});
+   * its own auto-waiting is the accurate readiness signal.
+   */
+  async openXYDimensionEditor() {
+    await this.page.testSubj.click('lnsXY_yDimensionPanel');
   }
 
   /**
@@ -702,5 +770,10 @@ export class LensApp {
       // Clear even on timeout so a leftover prev===count can't false-settle the next call.
       await clearPrevRenderCount();
     }
+  }
+
+  async assertLegacyMetric(title: string, count: string) {
+    await expect(this.page.locator('[data-test-subj="metric_label"]')).toHaveText(title);
+    await expect(this.page.locator('[data-test-subj="metric_value"]')).toHaveText(count);
   }
 }

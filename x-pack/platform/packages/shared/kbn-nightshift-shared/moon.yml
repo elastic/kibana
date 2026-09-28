@@ -16,7 +16,9 @@ project:
   channel: ''
   owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-nightshift-shared
-dependsOn: []
+dependsOn:
+  - '@kbn/std'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package

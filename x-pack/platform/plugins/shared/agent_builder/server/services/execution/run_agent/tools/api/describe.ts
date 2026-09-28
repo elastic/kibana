@@ -32,12 +32,21 @@ const describeSchema = z.object({
   api: z
     .string()
     .describe(
-      `The API identifier returned by the ${internalTools.discoverApis} tool, formed from the namespace ` +
-        'and name (e.g. "indices.create", "bulk", "cluster.health").'
+      'The API identifier, formed from the namespace and name (e.g. "indices.create", "bulk", ' +
+        '"cluster.health").'
     ),
 });
 
-export const createDescribeApiTool = (): InternalBuiltinToolDefinition<typeof describeSchema> => {
+export const createDescribeApiTool = ({
+  discoveryEnabled,
+}: {
+  discoveryEnabled: boolean;
+}): InternalBuiltinToolDefinition<typeof describeSchema> => {
+  const identifierGuidance = discoveryEnabled
+    ? `Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identifier, then call`
+    : `The \`api\` identifier comes from the instruction you are following, or from what you already
+know the target exposes. Describe it here to confirm it exists and to see its params, then call`;
+
   return {
     id: internalTools.describeApi,
     type: ToolType.builtin,
@@ -61,7 +70,7 @@ Returns:
 - \`expandable_types\`: the name of every type the schema stubbed, so you can see up front what
   still has to be expanded before you can fill it in.
 
-Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identifier, then call
+${identifierGuidance}
 \`${internalTools.executeApi}\` with the same \`target\` and \`api\` plus the \`params\` from this schema.`,
     schema: describeSchema,
     handler: async ({ target, api }, { logger }) => {
@@ -74,6 +83,7 @@ Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identif
               target,
               api,
               logger,
+              discoveryEnabled,
             }),
           ],
         };

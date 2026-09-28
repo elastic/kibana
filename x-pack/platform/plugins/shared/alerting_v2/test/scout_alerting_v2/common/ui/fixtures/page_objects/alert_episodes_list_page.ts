@@ -19,7 +19,14 @@ import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui
  */
 export class AlertEpisodesListPage {
   public readonly pageContainer: Locator;
+  public readonly tableToolbar: Locator;
   public readonly itemCount: Locator;
+  public readonly kpisAlertsPanel: Locator;
+  public readonly kpisAlertActionsPanel: Locator;
+  public readonly histogramPanel: Locator;
+  public readonly histogramChart: Locator;
+  public readonly tagsFilterButton: Locator;
+  public readonly tagsFilterSearch: Locator;
   /** Inline "Open in Discover" leading control (the only read-safe episode action). */
   public readonly openInDiscoverRowControl: Locator;
   /**
@@ -32,7 +39,14 @@ export class AlertEpisodesListPage {
 
   constructor(private readonly page: ScoutPage) {
     this.pageContainer = this.page.testSubj.locator('alertingV2EpisodesListPage');
+    this.tableToolbar = this.page.testSubj.locator('unifiedDataTableToolbar');
     this.itemCount = this.page.testSubj.locator('alertEpisodesItemCount');
+    this.kpisAlertsPanel = this.page.testSubj.locator('episodesKpisAlertsPanel');
+    this.kpisAlertActionsPanel = this.page.testSubj.locator('episodesKpisAlertActionsPanel');
+    this.histogramPanel = this.page.testSubj.locator('episodesHistogramPanel');
+    this.histogramChart = this.page.testSubj.locator('unifiedHistogramChart');
+    this.tagsFilterButton = this.page.testSubj.locator('episodesFilterBar-tags-button');
+    this.tagsFilterSearch = this.page.getByPlaceholder('Search alert tags…');
     this.openInDiscoverRowControl = this.page.testSubj.locator(
       `unifiedDataTable_rowControl_${OPEN_IN_DISCOVER_EPISODE_ACTION_ID}`
     );
@@ -43,5 +57,20 @@ export class AlertEpisodesListPage {
 
   async goto() {
     await this.page.gotoApp('management/alertingV2/episodes');
+  }
+
+  async openTagsFilter(): Promise<void> {
+    await this.tagsFilterButton.click();
+    // The listbox role is absent when there are no tag options; the search
+    // field is the popover's stable mount signal.
+    await this.tagsFilterSearch.waitFor({ state: 'visible' });
+  }
+
+  async searchTagsFilter(query: string): Promise<void> {
+    await this.tagsFilterSearch.fill(query);
+  }
+
+  tagFilterOption(tag: string): Locator {
+    return this.page.testSubj.locator(`episodesFilterBar-tags-popover-option-${tag}`);
   }
 }

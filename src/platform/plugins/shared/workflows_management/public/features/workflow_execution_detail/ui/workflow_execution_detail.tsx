@@ -9,7 +9,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { useQueryClient } from '@kbn/react-query';
@@ -30,6 +30,7 @@ import {
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import { selectStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
@@ -77,6 +78,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     onSelectedStepExecutionChange,
   }) => {
     const dispatch = useDispatch();
+    const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
@@ -319,6 +321,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
             <WorkflowExecutionPanel
               definition={workflowDefinition}
               execution={workflowExecution ?? null}
+              stepExecutionsTotal={stepExecutionsTotal}
               showBackButton={showBackButton}
               error={error}
               onClose={onClose}

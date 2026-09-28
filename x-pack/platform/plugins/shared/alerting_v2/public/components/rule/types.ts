@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+
+export type RuleSummaryData = Pick<
+  RuleAttachmentData,
+  | 'id'
+  | 'kind'
+  | 'metadata'
+  | 'query'
+  | 'schedule'
+  | 'time_field'
+  | 'grouping'
+  | 'state_transition'
+  | 'recovery_strategy'
+  | 'no_data_strategy'
+  | 'artifacts'
+>;
+
+export interface RuleSummarySectionProps {
+  rule: RuleSummaryData;
+}

@@ -7,6 +7,7 @@
 
 import { internalTools } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { AiIndexTraceWithQuery } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../../common/agent_builder_attachments';
 import {
   aiIndexAttachmentDataSchema,
@@ -16,6 +17,7 @@ import {
   AI_INDEX_AUTOMATIONS_SKILL_ID,
   AI_INDEX_SOURCES_SKILL_ID,
   ANALYZE_AND_IMPROVE_SKILL_ID,
+  CONTEXT_ENGINE_SIGNALS_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
@@ -53,12 +55,18 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
   getAgentDescription: () =>
     [
       'An `ai_index` attachment is a read-only snapshot of a Context Engine AI index (destination,',
-      'sources, and workflow automations). Use it to scope the conversation to this index — do not',
+      'sources, workflow automations, and traces). Use it to scope the conversation to this index — do not',
       're-run discovery for destination or sources already listed here.',
       `Before acting on this index, load \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` to decide what it should`,
       `hold. That skill is read-only: also load \`${AI_INDEX_AUTOMATIONS_SKILL_ID}\` to draft,`,
       `validate or run an automation, and \`${AI_INDEX_SOURCES_SKILL_ID}\` to choose or change the`,
       `data it draws on. For querying KIs in this index, load \`${KI_RETRIEVAL_SKILL_ID}\`.`,
+      'What counts as evidence follows from what the user chose, not from probing for it. An index',
+      'with sources and nothing built yet is analyzed from its data alone: do not look for signals or',
+      'traces, and say the proposal rests on the shape of the data. Read signals only when the user',
+      'brought traces into scope, or when the index already has automations and the question is how',
+      `they are doing; load \`${CONTEXT_ENGINE_SIGNALS_SKILL_ID}\` before reading them, and open a`,
+      'conversation only where the user asked for traces or a signal points at one worth reading.',
       'This attachment authorizes you to apply changes, not only to propose them.',
       'Two gates sit on this work, at opposite ends of it. Ask before you build. Do not ask before',
       'you save or run what came back — the save tool opens its own dialog for that.',
@@ -69,10 +77,14 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'something that is not working fixed, or may want neither, and nothing in the attachment or',
       'the data distinguishes those. Ask what they are after, and where the answer is new coverage,',
       `ask which strategy in the same question. Use \`${internalTools.askUserQuestion}\` for it rather than`,
-      'paraphrasing the options as chat text.',
+      'paraphrasing the options as chat text. Offer the named strategies from the catalog as the',
+      'options, plus one more: "something else — name the unit and what one KI should carry", so a',
+      'corpus that fits no named strategy is not forced into the nearest one.',
       'Then always ask again before handing anything to a subagent, whether it would create an',
       'automation or replace one. Lay the plan out in chat before it: the strategy, the sources and',
-      'the corpus filter you propose, and which it is — naming the automation being replaced. Propose',
+      'the corpus filter you propose, and which it is — naming the automation being replaced, in the',
+      `proposal shape \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` defines, with its Evidence and Cost sections`,
+      'filled from queries you ran rather than from the mapping. Propose',
       'values rather than asking for them. A filter you chose and stated can be corrected in a word,',
       'where an open question about what to filter on cannot be answered without the user doing the',
       'work you were asked to do. This is the checkpoint that counts: a subagent run is long, costs a',
@@ -131,5 +143,19 @@ const formatAiIndex = (data: AiIndexAttachmentData): string => {
       : 'Existing automations: none'
   );
 
+  parts.push(
+    data.traces.length > 0
+      ? `Traces:\n${data.traces.map((trace) => `- ${formatTrace(trace)}`).join('\n')}`
+      : 'Traces: none configured'
+  );
+
   return parts.join('\n');
+};
+
+// For 'esql' traces, value is already the query, so showing both would just repeat it.
+const formatTrace = (trace: AiIndexTraceWithQuery): string => {
+  if (trace.type === 'esql') {
+    return `esql: ${trace.query.replace(/\n/g, ' ')}`;
+  }
+  return `${trace.type}:${trace.value} -> ${trace.query.replace(/\n/g, ' ')}`;
 };
