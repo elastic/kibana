@@ -8,7 +8,13 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButton, EuiInMemoryTable, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiSpacer,
+  EuiTextBlockTruncate,
+} from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../common';
@@ -63,14 +69,14 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         field: 'name',
         name: mainTranslations.columns.dataSets.name,
         sortable: true,
-        width: '18%',
+        width: '16%',
         'data-test-subj': 'dataSetsSetsColName',
       },
       {
         field: 'data_source',
         name: mainTranslations.columns.dataSets.dataSourceId,
         sortable: true,
-        width: '18%',
+        width: '12%',
         'data-test-subj': 'dataSetsSetsColDataSourceId',
       },
       {
@@ -81,21 +87,26 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
             ? getDataSourceTypeVerbose(type)
             : mainTranslations.columns.dataSets.dataSourceTypeMissing,
         sortable: true,
-        width: '18%',
+        width: '12%',
         'data-test-subj': 'dataSetsSetsColDataSourceType',
       },
       {
         field: 'resource',
         name: mainTranslations.columns.dataSets.resource,
         sortable: true,
-        width: '22%',
+        width: '20%',
         'data-test-subj': 'dataSetsSetsColResource',
       },
       {
         field: 'description',
         name: mainTranslations.columns.dataSets.description,
+        render: (description: DataSetListRow['description']) => (
+          <EuiTextBlockTruncate lines={2} title={description}>
+            {description}
+          </EuiTextBlockTruncate>
+        ),
         sortable: true,
-        truncateText: true,
+        width: '30%',
         'data-test-subj': 'dataSetsSetsColDescription',
       },
       {
