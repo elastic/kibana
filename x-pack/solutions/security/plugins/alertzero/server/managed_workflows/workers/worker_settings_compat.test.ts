@@ -13,6 +13,7 @@ import {
   type WatchAutonomyLevel,
 } from '@kbn/alertzero-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import { renderedWorkflowInstallFailure } from '../test_utils';
 import { createWorkerSettingsRegistration, toTemplateValues } from './worker_settings';
 
 type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
@@ -327,6 +328,20 @@ describe('stored Worker settings compatibility', () => {
             )}.\n\n${FIXTURE_FAILURE_HINT}\n\n${rendered}`
           );
         }
+      }
+    }
+  );
+
+  it.each(ALL_FIXTURES)(
+    '$workerId $name would install as a valid workflow',
+    ({ workerId, name, values }) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+      const rendered = getYamlTemplate(workerId)(registration.withMissingDefaults(values));
+      const invalid = renderedWorkflowInstallFailure(rendered);
+      if (invalid) {
+        throw new Error(
+          `This stored shape would install as an invalid workflow (${workerId} ${name}): ${invalid}\n\n${FIXTURE_FAILURE_HINT}`
+        );
       }
     }
   );
