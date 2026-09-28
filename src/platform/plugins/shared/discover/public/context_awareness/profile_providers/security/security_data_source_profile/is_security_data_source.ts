@@ -27,10 +27,6 @@ const SECURITY_SOURCE_PATTERNS = [
   /^logs-ti_/,
   /^logs-cloud_security_posture\.(?:findings|findings_latest|vulnerabilities|vulnerabilities_latest)-/,
   /^security_solution-.*\.(?:misconfiguration_latest|vulnerability_latest)$/,
-  // Security-vendor integrations (CrowdStrike, SentinelOne, Microsoft 365 Defender): every dataset
-  // is security telemetry, so match the whole package namespace — mirrors Security Solution's
-  // response_actions index constants (common/endpoint/service/response_actions/*) without drifting
-  // as datasets are added.
   /^logs-crowdstrike\./,
   /^logs-sentinel_one\./,
   /^logs-m365_defender\./,

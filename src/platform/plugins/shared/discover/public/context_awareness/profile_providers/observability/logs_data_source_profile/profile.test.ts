@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, DEFAULT_ALLOWED_LOGS_BASE_PATTERNS } from '@kbn/discover-utils';
+import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
-import { createLogsDataSourceProfileProvider, isLogsDataSourceContext } from './profile';
+import {
+  createLogsDataSourceProfileProvider,
+  isLogsDataSourceContext,
+  type LogsDataSourceProfileProvider,
+} from './profile';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
@@ -100,7 +106,9 @@ describe('logsDataSourceProfileProvider', () => {
     }
   );
 
-  it('matches in Classic but not other solution views', () => {
+  it('does NOT match data view sources when solution type is Security or Search', () => {
+    // Default (classic) resolution is additionally gated on the configured log sources and is
+    // covered by the "in Default (classic) navigation" block below.
     const params: Omit<DataSourceProfileProviderParams, 'rootContext'> = {
       dataSource: createEsqlDataSource(),
       query: { esql: `from ${VALID_IMPLICIT_DATA_INDEX_PATTERN}` },
@@ -108,12 +116,6 @@ describe('logsDataSourceProfileProvider', () => {
     expect(logsDataSourceProfileProvider.resolve({ ...params, rootContext: ROOT_CONTEXT })).toEqual(
       RESOLUTION_MATCH
     );
-    expect(
-      logsDataSourceProfileProvider.resolve({
-        ...params,
-        rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Default },
-      })
-    ).toEqual(RESOLUTION_MATCH);
     expect(
       logsDataSourceProfileProvider.resolve({
         ...params,
@@ -126,6 +128,86 @@ describe('logsDataSourceProfileProvider', () => {
         rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Security },
       })
     ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  describe('in Default (classic) navigation', () => {
+    const logsBasePatternRegExp = createRegExpPatternFrom(
+      DEFAULT_ALLOWED_LOGS_BASE_PATTERNS,
+      'data'
+    );
+
+    // Builds a real LogsContextService from a given `observability:logSources` value, mirroring how
+    // production combines the base log patterns with the configured sources.
+    const servicesWithConfiguredLogSources = (
+      allLogsIndexPattern: string | undefined
+    ): ProfileProviderServices => ({
+      ...mockServices,
+      logsContextService: {
+        getAllLogsIndexPattern: () => allLogsIndexPattern,
+        isLogsIndexPattern: testPatternAgainstAllowedList([
+          logsBasePatternRegExp,
+          ...(allLogsIndexPattern?.split(',') ?? []),
+        ]),
+      },
+    });
+
+    const DEFAULT_ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+      profileId: 'classic-nav-root-profile',
+      solutionType: SolutionType.Default,
+    };
+
+    const resolveInDefault = (provider: LogsDataSourceProfileProvider, indexPattern: string) =>
+      provider.resolve({
+        rootContext: DEFAULT_ROOT_CONTEXT,
+        dataSource: createEsqlDataSource(),
+        query: { esql: `from ${indexPattern}` },
+      });
+
+    // The default values of the observability:logSources setting are too generic to claim in classic.
+    const GENERIC_DEFAULT_LOG_SOURCES = 'logs*,-logstash*,filebeat-*';
+
+    it('does not match generic log patterns when only the default log sources are configured', () => {
+      const provider = createLogsDataSourceProfileProvider(
+        servicesWithConfiguredLogSources(GENERIC_DEFAULT_LOG_SOURCES)
+      );
+
+      expect(resolveInDefault(provider, 'logs-nginx.access-*')).toEqual(RESOLUTION_MISMATCH);
+      expect(resolveInDefault(provider, 'logs-*')).toEqual(RESOLUTION_MISMATCH);
+      expect(resolveInDefault(provider, 'filebeat-*')).toEqual(RESOLUTION_MISMATCH);
+    });
+
+    it('matches a non-generic source explicitly added to the log sources setting', () => {
+      const provider = createLogsDataSourceProfileProvider(
+        servicesWithConfiguredLogSources(`${GENERIC_DEFAULT_LOG_SOURCES},my-app-logs-*`)
+      );
+
+      expect(resolveInDefault(provider, 'my-app-logs-*')).toEqual(RESOLUTION_MATCH);
+      // Generic patterns stay rejected even once a custom source is configured.
+      expect(resolveInDefault(provider, 'logs-nginx.access-*')).toEqual(RESOLUTION_MISMATCH);
+    });
+
+    it('does not match when no log sources are configured', () => {
+      const provider = createLogsDataSourceProfileProvider(
+        servicesWithConfiguredLogSources(undefined)
+      );
+
+      expect(resolveInDefault(provider, 'logs-nginx.access-*')).toEqual(RESOLUTION_MISMATCH);
+    });
+
+    it('applies the gate only to Default: Observability still matches the same generic pattern', () => {
+      const provider = createLogsDataSourceProfileProvider(
+        servicesWithConfiguredLogSources(GENERIC_DEFAULT_LOG_SOURCES)
+      );
+
+      expect(resolveInDefault(provider, 'logs-nginx.access-*')).toEqual(RESOLUTION_MISMATCH);
+      expect(
+        provider.resolve({
+          rootContext: ROOT_CONTEXT,
+          dataSource: createEsqlDataSource(),
+          query: { esql: 'from logs-nginx.access-*' },
+        })
+      ).toEqual(RESOLUTION_MATCH);
+    });
   });
 
   const dataViewWithLogLevel = createStubIndexPattern({
