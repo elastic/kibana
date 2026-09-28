@@ -43,7 +43,7 @@ node scripts/playwright test \
 
 ## CI
 
-Not part of default Scout (`excluded_configs`). Agents use nested virtualization (`n2-highmem-4`, 130GB), same class as Defend Workflows Cypress.
+Not part of default Scout (`excluded_configs`). Agents use nested virtualization (`n2-highmem-4`), same class as Defend Workflows Cypress.
 
 - **PRs:** path-filtered (`fleet_packages.json`, Endpoint/EDR, response-actions, this suite, or its CI wiring) or labels `ci:scout-edr-real-fleet` / `ci:all-ui-test-suites`. Fleet plugin-only PRs do not upload this job.
 - **Weekdays on `main`:** dedicated Buildkite pipeline `kibana / security solution / scout edr real fleet` (05:00 America/New_York, Mon–Fri). Failures go to `#security-defend-workflows-tests`.
