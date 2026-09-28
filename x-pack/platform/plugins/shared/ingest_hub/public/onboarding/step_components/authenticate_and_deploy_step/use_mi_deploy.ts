@@ -256,6 +256,60 @@ export function useMiDeploy({
       let remainingPending: Record<string, string> | undefined;
       let dirtyUpdateApplied = false;
 
+      // Updates all already-deployed MI policies with the current session config.
+      // Returns whether any policy update failed and the full set of IDs to mark failed.
+      // additionalFailedIds: undeployed targets that should also surface as failed on error
+      // (plan.targets on initial run; plan.groupsToDeploy instanceIds on retry).
+      async function applyDirtyPolicyUpdates(
+        additionalFailedIds: string[]
+      ): Promise<{ hadFailures: boolean; allFailedIds: string[] }> {
+        const byPolicy = new Map<string, string[]>();
+        // Only include active instances (still in deployGroups). Removed instances whose
+        // policyIds linger in the SO are cleanup targets, not update targets; including them
+        // would cause resolveSurvivingMembers to reject on pruned synthetic instance IDs.
+        const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+        for (const [instanceId, policyId] of Object.entries(policyIdsByInstance)) {
+          if (!activeInstanceIds.has(instanceId)) continue;
+          if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
+          byPolicy.get(policyId)!.push(instanceId);
+        }
+        if (byPolicy.size === 0) return { hadFailures: false, allFailedIds: [] };
+        const results = await Promise.allSettled(
+          [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
+            updateManagedIntegrationsPolicy(policyId, instanceIdsForPolicy, {
+              instances: serviceSettings?.instances ?? [],
+              storedServiceVars: serviceSettings?.serviceVars ?? {},
+              globalRegion: serviceSettings?.globalRegion ?? '',
+              namespace,
+              authenticateAndDeployStep,
+              servicesMap: servicesMap ?? new Map(),
+              // Only override the connector when auth actually changed. Without this gate a
+              // service-var-only redeploy would silently re-attach the wizard's connector over
+              // one reassigned by an operator since the wizard last ran.
+              ...(isAuthDirty
+                ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
+                : {}),
+            })
+          )
+        );
+        results.forEach((result) => {
+          if (result.status === 'rejected') {
+            // eslint-disable-next-line no-console
+            console.error(
+              'Failed to update managed-integration policy during dirty redeploy:',
+              result.reason
+            );
+          }
+        });
+        const hadFailures = results.some((r) => r.status === 'rejected');
+        return {
+          hadFailures,
+          allFailedIds: hadFailures
+            ? [...Object.keys(policyIdsByInstance), ...additionalFailedIds]
+            : [],
+        };
+      }
+
       if (isInitialDeploy) {
         const plan = planMiInitialRun(
           deployGroups,
@@ -287,59 +341,20 @@ export function useMiDeploy({
           // start a second dirty-update run from the same undeployed-target snapshot.
           setIsDeploying(true);
           updateDetectAndReviewStep({ isDeploying: true });
-          const byPolicy = new Map<string, string[]>();
-          // Only include active instances (still in deployGroups). Removed instances whose
-          // policyIds linger in the SO are cleanup targets, not update targets; including them
-          // would cause resolveSurvivingMembers to reject on pruned synthetic instance IDs.
-          const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-          for (const [instanceId, policyId] of Object.entries(policyIdsByInstance)) {
-            if (!activeInstanceIds.has(instanceId)) continue;
-            if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
-            byPolicy.get(policyId)!.push(instanceId);
-          }
-          if (byPolicy.size > 0) {
-            const redeployResults = await Promise.allSettled(
-              [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
-                updateManagedIntegrationsPolicy(policyId, instanceIdsForPolicy, {
-                  instances: serviceSettings?.instances ?? [],
-                  storedServiceVars: serviceSettings?.serviceVars ?? {},
-                  globalRegion: serviceSettings?.globalRegion ?? '',
-                  namespace,
-                  authenticateAndDeployStep,
-                  servicesMap: servicesMap ?? new Map(),
-                  // Only override the connector when auth actually changed. Without this gate a
-                  // service-var-only redeploy would silently re-attach the wizard's connector over
-                  // one reassigned by an operator since the wizard last ran.
-                  ...(isAuthDirty
-                    ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
-                    : {}),
-                })
-              )
-            );
-            redeployResults.forEach((result) => {
-              if (result.status === 'rejected') {
-                // eslint-disable-next-line no-console
-                console.error(
-                  'Failed to update managed-integration policy during dirty redeploy:',
-                  result.reason
-                );
-              }
+          // Include plan.targets so undeployed new services are also queued for retry — without
+          // this they are dropped from failedInstances and planMiRetryRun never deploys them.
+          const { hadFailures, allFailedIds } = await applyDirtyPolicyUpdates(plan.targets);
+          if (hadFailures) {
+            // At least one policy update failed — surface the existing instances as failed so
+            // hasFailed becomes true and the Retry button appears. Leave isDirty so Deploy stays
+            // visible for retry. Return cleanupFailed: true so the ECF-only gate blocks navigation.
+            setIsDeploying(false);
+            setFailedInstances(allFailedIds);
+            updateDetectAndReviewStep({
+              isDeploying: false,
+              failedInstances: allFailedIds,
             });
-            if (redeployResults.some((r) => r.status === 'rejected')) {
-              // At least one policy update failed — surface the existing instances as failed so
-              // hasFailed becomes true and the Retry button appears. Leave isDirty so Deploy stays
-              // visible for retry. Return cleanupFailed: true so the ECF-only gate blocks navigation.
-              // Include plan.targets so undeployed new services are also queued for retry — without
-              // this they are dropped from failedInstances and planMiRetryRun never deploys them.
-              setIsDeploying(false);
-              const allFailedIds = [...Object.keys(policyIdsByInstance), ...plan.targets];
-              setFailedInstances(allFailedIds);
-              updateDetectAndReviewStep({
-                isDeploying: false,
-                failedInstances: allFailedIds,
-              });
-              return { cleanupFailed: true };
-            }
+            return { cleanupFailed: true };
           }
 
           // Pure dirty-redeploy case: no new targets and no cleanup remaining.
@@ -499,53 +514,17 @@ export function useMiDeploy({
         // re-deploying the failed ones, so a connector/serviceVar change is applied even if the
         // user only clicks Retry (not a fresh Deploy).
         if (isDirty) {
-          const byPolicy = new Map<string, string[]>();
-          const activeRetryInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-          for (const [instanceId, policyId] of Object.entries(policyIdsByInstance)) {
-            if (!activeRetryInstanceIds.has(instanceId)) continue;
-            if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
-            byPolicy.get(policyId)!.push(instanceId);
-          }
-          if (byPolicy.size > 0) {
-            const dirtyRetryResults = await Promise.allSettled(
-              [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
-                updateManagedIntegrationsPolicy(policyId, instanceIdsForPolicy, {
-                  instances: serviceSettings?.instances ?? [],
-                  storedServiceVars: serviceSettings?.serviceVars ?? {},
-                  globalRegion: serviceSettings?.globalRegion ?? '',
-                  namespace,
-                  authenticateAndDeployStep,
-                  servicesMap: servicesMap ?? new Map(),
-                  ...(isAuthDirty
-                    ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
-                    : {}),
-                })
-              )
-            );
-            dirtyRetryResults.forEach((result) => {
-              if (result.status === 'rejected') {
-                // eslint-disable-next-line no-console
-                console.error(
-                  'Failed to update managed-integration policy during dirty retry:',
-                  result.reason
-                );
-              }
+          // Include undeployed retry targets so they remain queued for the next retry run.
+          const retryDeployTargets = plan.groupsToDeploy.flatMap((g) => g.instanceIds);
+          const { hadFailures, allFailedIds } = await applyDirtyPolicyUpdates(retryDeployTargets);
+          if (hadFailures) {
+            setIsDeploying(false);
+            setFailedInstances(allFailedIds);
+            updateDetectAndReviewStep({
+              isDeploying: false,
+              failedInstances: allFailedIds,
             });
-            if (dirtyRetryResults.some((r) => r.status === 'rejected')) {
-              setIsDeploying(false);
-              // Include undeployed retry targets so they remain queued for the next retry run.
-              const retryDeployTargets = plan.groupsToDeploy.flatMap((g) => g.instanceIds);
-              const allRetryFailedIds = [
-                ...Object.keys(policyIdsByInstance),
-                ...retryDeployTargets,
-              ];
-              setFailedInstances(allRetryFailedIds);
-              updateDetectAndReviewStep({
-                isDeploying: false,
-                failedInstances: allRetryFailedIds,
-              });
-              return { cleanupFailed: true };
-            }
+            return { cleanupFailed: true };
           }
           dirtyUpdateApplied = true;
         }

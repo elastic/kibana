@@ -125,7 +125,10 @@ export async function updateAgentBasedPolicy(
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName, existingVersion);
   const pkgInfo = pkgInfoResponse.data?.item;
   const pkgVersion = pkgInfo?.version;
-  if (!pkgVersion || !pkgInfo) return;
+  if (!pkgVersion || !pkgInfo)
+    throw new Error(
+      `Cannot safely update agent-based policy ${policyId}: package info unavailable for ${packageName}.`
+    );
 
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
