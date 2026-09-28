@@ -10,6 +10,7 @@ import {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -116,8 +117,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'custom_content_update_panel',
 
   // Platform – Context Engine
-  `${internalNamespaces.platformContextEngine}.save_automation`,
-  `${internalNamespaces.platformContextEngine}.run_automation`,
+  contextEngineAutomationTools.installAutomationTemplate,
+  contextEngineAutomationTools.saveAutomation,
+  contextEngineAutomationTools.runAutomation,
   ...Object.values(contextEngineAiIndexTools),
 
   // Nightshift – Sandbox

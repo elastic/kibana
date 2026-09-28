@@ -4,16 +4,11 @@ version: "1"
 # This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands;
 # everything below `consts` is already correct and does not need to be rewritten to make it work.
 #
-# To adapt it:
-#   1. Set every value in `consts`.
-#   2. Add grounding aggregations for the fields that actually matter in your corpus, next to
-#      `esql_category_counts` below, and reference each new step in the prompt. Grounding is what
-#      stops the model inventing distributions, so a field the KI will make claims about needs an
-#      aggregation here.
-#   3. Replace the italicised corpus description in the prompt with what your data really is.
+# Installed by platform.context_engine.install_automation_template. The tool fills the consts.
+# Do not save this YAML yourself.
 #
-# Leave the shape alone: the ai.prompt schema, the assemble step, the verified create_ki sink and
-# the `attributes.esql` wiring are what make the KI retrievable and verified.
+# Leave the shape alone: the ai.prompt schema, the assemble/verify/gate sequence and the
+# `attributes.esql` wiring are what make the KI retrievable and verified.
 name: Index metadata KI automation
 description: >
   Profiles one index (mapping + random sample + grounding aggregations) into a single
@@ -22,15 +17,16 @@ enabled: true
 
 consts:
   # The Context Engine AI index the indicators are written into.
-  ai_index_id: my-ai-index
+  ai_index_id: __AI_INDEX_ID__
   # The index being profiled. Also the index every generated ES|QL reads FROM.
-  source_index: my-source-index
+  source_index: __SOURCE_INDEX__
   # A keyword field whose distribution grounds the profile. Pick the one an analyst would
   # group by first.
-  category_field: my_category_field
+  category_field: __CATEGORY_FIELD__
 
 tags:
   - index-metadata
+  - ce-template:index_metadata
 
 triggers:
   - type: manual
@@ -59,13 +55,13 @@ steps:
     type: elasticsearch.esql.query
     with:
       format: json
-      query: "FROM {{ consts.source_index }} | STATS count = COUNT(*) BY {{ consts.category_field }} | SORT count DESC | LIMIT 50"
+      query: "FROM {{ consts.source_index }} | STATS count = COUNT(*) BY `{{ consts.category_field }}` | SORT count DESC | LIMIT 50"
 
   - name: esql_totals
     type: elasticsearch.esql.query
     with:
       format: json
-      query: "FROM {{ consts.source_index }} | STATS total = COUNT(*), distinct_categories = COUNT_DISTINCT({{ consts.category_field }})"
+      query: "FROM {{ consts.source_index }} | STATS total = COUNT(*), distinct_categories = COUNT_DISTINCT(`{{ consts.category_field }}`)"
 
   - name: generate_index_profile
     type: ai.prompt
@@ -194,7 +190,7 @@ steps:
           - answers_questions
           - access_patterns
 
-  # Built once, then handed to create_ki to verify and write.
+  # Built once so verify_ki and create_ki see exactly the same document.
   - name: assemble_ki
     type: data.set
     with:
@@ -258,25 +254,30 @@ steps:
           key_fields: "{{ steps.generate_index_profile.output.content.key_fields | json }}"
           when_to_use: "{{ steps.generate_index_profile.output.content.when_to_use }}"
 
-  # `ki_id` is the index name, so a re-run replaces this profile rather than appending a
-  # second copy. On a data-stream destination a re-run appends a new revision instead.
-  - name: create_ki
-    type: context-engine.createKi
+  - name: verify_ki
+    type: context-engine.verifyKi
     with:
-      ai_index_id: "{{ consts.ai_index_id }}"
-      ki_id: "{{ consts.source_index }}"
-      ki: "${{ steps.assemble_ki.output.ki }}"
       verifiers:
         - esql-valid-syntax
         - esql-valid-runtime
+      ki: "${{ steps.assemble_ki.output.ki }}"
 
   - name: check_verification
     type: if
-    condition: "steps.create_ki.output.verification.passed : false"
+    condition: "steps.verify_ki.output.passed : true"
     steps:
+      # `ki_id` is the index name, so a re-run replaces this profile on an index destination, and
+      # appends a newer revision of the same KI on a data stream, rather than writing a second KI.
+      - name: create_ki
+        type: context-engine.createKi
+        with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "{{ consts.source_index }}"
+          ki: "${{ steps.assemble_ki.output.ki }}"
+    else:
       - name: log_verification_failure
         type: console
         with:
           message: |
             KI verification failed for {{ consts.source_index }}.
-            Results: {{ steps.create_ki.output.verification.results | json }}
+            Results: {{ steps.verify_ki.output.results | json }}
