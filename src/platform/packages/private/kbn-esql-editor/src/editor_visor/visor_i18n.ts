@@ -30,7 +30,7 @@ export const aiModeLabel = i18n.translate('esqlEditor.visor.aiModeLabel', {
 });
 
 export const aiModeTooltip = i18n.translate('esqlEditor.visor.aiModeTooltip', {
-  defaultMessage: 'Filter using natural language',
+  defaultMessage: 'Query using natural language',
 });
 
 export const kqlModeLabel = i18n.translate('esqlEditor.visor.kqlModeLabel', {
