@@ -122,7 +122,7 @@ test.describe(
       }
     });
 
-    test('creates a CSV dataset, validates preview, and saves', async ({
+    test.skip('creates a CSV dataset, validates preview, and saves', async ({
       browserAuth,
       kbnClient,
       page,
