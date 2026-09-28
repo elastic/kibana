@@ -105,7 +105,9 @@ describe('restart', () => {
       mockGetAgents.mockResolvedValue(agents);
       mockRestartBatch.mockResolvedValue({ actionId: 'bulk-action-1' });
 
-      const result = await bulkRestartAgents(esClient, soClient, { agentIds: ['agent-1', 'agent-2'] });
+      const result = await bulkRestartAgents(esClient, soClient, {
+        agentIds: ['agent-1', 'agent-2'],
+      });
 
       expect(result).toEqual({ actionId: 'bulk-action-1' });
       expect(mockRestartBatch).toHaveBeenCalledWith(esClient, soClient, agents, {
@@ -134,9 +136,12 @@ describe('restart', () => {
       const mockProcessAgentsInBatches = jest
         .fn()
         .mockResolvedValue({ actionId: 'runner-action-1' });
-      mockRestartActionRunner.mockImplementation(() => ({
-        processAgentsInBatches: mockProcessAgentsInBatches,
-      }) as any);
+      mockRestartActionRunner.mockImplementation(
+        () =>
+          ({
+            processAgentsInBatches: mockProcessAgentsInBatches,
+          } as any)
+      );
 
       const result = await bulkRestartAgents(esClient, soClient, { kuery: 'status:online' });
 

@@ -30,7 +30,9 @@ jest.mock('../../services/agents', () => ({
 
 jest.mock('../../errors', () => ({
   ...jest.requireActual('../../errors'),
-  defaultIngestErrorHandler: jest.fn(({ error, response }) => response.customError({ statusCode: 500, body: error.message })),
+  defaultIngestErrorHandler: jest.fn(({ error, response }) =>
+    response.customError({ statusCode: 500, body: error.message })
+  ),
 }));
 
 describe('restart handlers', () => {
@@ -57,7 +59,11 @@ describe('restart handlers', () => {
       (getAgentById as jest.Mock).mockResolvedValue({ id: 'agent-1' });
       (AgentService.restartAgent as jest.Mock).mockResolvedValue({ actionId: 'action-abc' });
 
-      await restartAgentHandler(mockContext, { params: { agentId: 'agent-1' } } as any, mockResponse);
+      await restartAgentHandler(
+        mockContext,
+        { params: { agentId: 'agent-1' } } as any,
+        mockResponse
+      );
 
       expect(AgentService.restartAgent).toHaveBeenCalledWith(esClientMock, soClientMock, 'agent-1');
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { actionId: 'action-abc' } });
@@ -69,7 +75,11 @@ describe('restart handlers', () => {
         new HostedAgentPolicyRestrictionRelatedError('hosted')
       );
 
-      await restartAgentHandler(mockContext, { params: { agentId: 'agent-1' } } as any, mockResponse);
+      await restartAgentHandler(
+        mockContext,
+        { params: { agentId: 'agent-1' } } as any,
+        mockResponse
+      );
 
       expect(mockResponse.ok).not.toHaveBeenCalled();
     });
@@ -77,7 +87,9 @@ describe('restart handlers', () => {
 
   describe('bulkRestartAgentsHandler', () => {
     it('returns single actionId for agentIds array — response shape is { actionId: string }', async () => {
-      (AgentService.bulkRestartAgents as jest.Mock).mockResolvedValue({ actionId: 'bulk-action-1' });
+      (AgentService.bulkRestartAgents as jest.Mock).mockResolvedValue({
+        actionId: 'bulk-action-1',
+      });
 
       await bulkRestartAgentsHandler(
         mockContext,
@@ -94,7 +106,9 @@ describe('restart handlers', () => {
     });
 
     it('returns single actionId for kuery string — response shape is { actionId: string }', async () => {
-      (AgentService.bulkRestartAgents as jest.Mock).mockResolvedValue({ actionId: 'bulk-action-2' });
+      (AgentService.bulkRestartAgents as jest.Mock).mockResolvedValue({
+        actionId: 'bulk-action-2',
+      });
 
       await bulkRestartAgentsHandler(
         mockContext,
