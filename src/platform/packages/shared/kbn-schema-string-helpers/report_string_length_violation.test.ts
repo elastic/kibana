@@ -26,9 +26,12 @@ const histogram = meter.createHistogram('test');
 jest.mocked(provider.getMeter).mockClear();
 jest.mocked(meter.createHistogram).mockClear();
 
+// Reporting defers the record until `@opentelemetry/api` has loaded.
+const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
 beforeEach(() => jest.mocked(histogram.record).mockReset());
 
-test('creates one shared integer histogram with the proposed name', () => {
+test('creates one shared integer histogram with the proposed name', async () => {
   reportStringLengthViolation({
     helper: 'savedObjectId',
     library: 'zod',
@@ -41,6 +44,7 @@ test('creates one shared integer histogram with the proposed name', () => {
     maxLength: 512,
     length: 600,
   });
+  await flush();
   expect(provider.getMeter).toHaveBeenCalledTimes(1);
   expect(provider.getMeter).toHaveBeenCalledWith('kibana.schema');
   expect(meter.createHistogram).toHaveBeenCalledTimes(1);
@@ -55,7 +59,7 @@ test('creates one shared integer histogram with the proposed name', () => {
   );
 });
 
-test('records the actual length with only static dimensions', () => {
+test('records the actual length with only static dimensions', async () => {
   reportStringLengthViolation({
     helper: 'savedObjectId',
     library: 'zod',
@@ -63,6 +67,7 @@ test('records the actual length with only static dimensions', () => {
     length: 600,
     label: 'dashboard.panelId',
   });
+  await flush();
   expect(histogram.record).toHaveBeenCalledWith(600, {
     'schema.helper': 'savedObjectId',
     'schema.library': 'zod',
@@ -71,13 +76,14 @@ test('records the actual length with only static dimensions', () => {
   });
 });
 
-test('omits an absent label', () => {
+test('omits an absent label', async () => {
   reportStringLengthViolation({
     helper: 'description',
     library: 'config-schema',
     maxLength: 10000,
     length: 20000,
   });
+  await flush();
   expect(histogram.record).toHaveBeenCalledWith(20000, {
     'schema.helper': 'description',
     'schema.library': 'config-schema',
@@ -85,7 +91,7 @@ test('omits an absent label', () => {
   });
 });
 
-test('does not fail validation if the metric provider throws', () => {
+test('does not fail validation if the metric provider throws', async () => {
   jest.mocked(histogram.record).mockImplementation(() => {
     throw new Error('Exporter failure');
   });
@@ -97,4 +103,5 @@ test('does not fail validation if the metric provider throws', () => {
       length: 600,
     })
   ).not.toThrow();
+  await expect(flush()).resolves.toBeUndefined();
 });

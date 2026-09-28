@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { metrics, ValueType } from '@opentelemetry/api';
 import type { Histogram, MeterProvider } from '@opentelemetry/api';
 import type { StringHelperName } from './limits';
 
+type OpenTelemetryApi = typeof import('@opentelemetry/api');
+
 const histograms = new WeakMap<MeterProvider, Histogram>();
 
-const getHistogram = (): Histogram => {
+// Loaded on first violation so `@opentelemetry/api` stays out of page load bundles.
+let apiPromise: Promise<OpenTelemetryApi> | undefined;
+
+const getHistogram = ({ metrics, ValueType }: OpenTelemetryApi): Histogram => {
   // Schema libraries can load before telemetry initializes the global provider.
   const provider = metrics.getMeterProvider();
   const existing = histograms.get(provider);
@@ -52,14 +56,17 @@ export const reportStringLengthViolation = ({
   length: number;
   label?: string;
 }): void => {
-  try {
-    getHistogram().record(length, {
-      'schema.helper': helper,
-      'schema.library': library,
-      'schema.max_length': maxLength,
-      ...(label === undefined ? {} : { 'schema.label': label }),
+  apiPromise = apiPromise ?? import('@opentelemetry/api');
+  apiPromise
+    .then((api) => {
+      getHistogram(api).record(length, {
+        'schema.helper': helper,
+        'schema.library': library,
+        'schema.max_length': maxLength,
+        ...(label === undefined ? {} : { 'schema.label': label }),
+      });
+    })
+    .catch(() => {
+      // Reporting must never change whether request validation succeeds.
     });
-  } catch {
-    // Reporting must never change whether request validation succeeds.
-  }
 };

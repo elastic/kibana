@@ -16,8 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   sourceRoot: src/platform/packages/shared/kbn-zod
-dependsOn:
-  - '@kbn/schema-string-helpers'
+dependsOn: []
 tags:
   - shared-common
   - package
