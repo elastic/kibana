@@ -146,7 +146,7 @@ describe('AlertZero action workflows', () => {
 
     // The install response carries the new saved object, so the fresh path enables by
     // uuid; a rule installed in the meantime is reported as skipped with no saved
-    // object, and only then does the signature query stand in.
+    // object, so its uuid is looked up by exact signature id first.
     it('enables the installed rule by its returned saved-object id', () => {
       const fresh = stepByName(yaml, 'enable_installed_rule');
       const existing = stepByName(yaml, 'enable_existing_rule');
@@ -157,7 +157,35 @@ describe('AlertZero action workflows', () => {
 
       expect(existing?.type).toBe('security.enableRule');
       expect(existing?.if).toContain('steps.install_rule.output.summary.skipped > 0');
-      expect(String(existing?.with?.query)).toContain('{{ inputs.actionInput.rule_id }}');
+      expect(existing?.with?.ids).toEqual(['{{ steps.find_existing_rule.output.id }}']);
+    });
+
+    // `security.enableRule` enables every rule a query matches, and `rule_id` is only
+    // length-checked, so a quote in it must not reach a query.
+    it('never enables by a query built from rule_id', () => {
+      for (const step of yaml.steps.filter(({ type }) => type === 'security.enableRule')) {
+        expect(step.with).not.toHaveProperty('query');
+      }
+    });
+
+    it('looks the already-installed rule up by its exact, URL-encoded signature id', () => {
+      const find = stepByName(yaml, 'find_existing_rule');
+      expect(find?.type).toBe('kibana.request');
+      expect(find?.if).toContain('steps.install_rule.output.summary.skipped > 0');
+      expect(find?.with?.method).toBe('GET');
+
+      const names = yaml.steps.map(({ name }) => name);
+      expect(names.indexOf('find_existing_rule')).toBeLessThan(
+        names.indexOf('enable_existing_rule')
+      );
+
+      const path = createWorkflowLiquidEngine().parseAndRenderSync(String(find?.with?.path), {
+        workflow: { spaceId: 'default' },
+        inputs: { actionInput: { rule_id: 'x" or alert.attributes.enabled: false or "' } },
+      });
+      expect(path).toBe(
+        '/s/default/api/detection_engine/rules?rule_id=x%22+or+alert.attributes.enabled%3A+false+or+%22'
+      );
     });
 
     it('reports the installed saved-object id to the caller', () => {

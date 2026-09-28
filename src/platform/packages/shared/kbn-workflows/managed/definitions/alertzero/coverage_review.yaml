@@ -288,7 +288,7 @@ steps:
         {{ steps.compose_evidence.output.check_line }}
 
         **On approval**
-        Nothing is applied automatically; approving acknowledges the follow-up.
+        Nothing is applied automatically; approving acknowledges the follow-up. Approving or dismissing removes the gap from future coverage checks.
 
   # Step 6 of 10: propose the fix, one case per verdict. A missing or unknown verdict
   # matches no case and goes to the default, never to rule creation. Inside a case the

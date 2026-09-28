@@ -83,12 +83,26 @@ steps:
         - "{{ steps.install_rule.output.results.created[0].id }}"
 
   # A rule installed between proposal and approval is reported as skipped with no
-  # saved object in the response, so the signature id is the only handle left.
+  # saved object in the response, so look it up by its exact signature id. An
+  # enableRule query built from `rule_id` would enable every rule a quote in it
+  # could make match.
+  - name: find_existing_rule
+    type: kibana.request
+    if: "${{ steps.install_rule.output.summary.skipped > 0 }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.actionInput.rule_id | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+
   - name: enable_existing_rule
     type: security.enableRule
     if: "${{ steps.install_rule.output.summary.skipped > 0 }}"
     with:
-      query: 'alert.attributes.params.ruleId: "{{ inputs.actionInput.rule_id }}"'
+      ids:
+        - "{{ steps.find_existing_rule.output.id }}"
 
   # The install API answers 200 even when it installed nothing (`summary.failed`,
   # for a version the package no longer carries), and the proposal gate counts any
