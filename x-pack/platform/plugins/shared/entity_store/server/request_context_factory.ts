@@ -156,6 +156,7 @@ export async function createRequestHandlerContext({
       logger
     ),
     featureFlags: new FeatureFlags(core.uiSettings.client),
+    isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     logsExtractionClient,
     historySnapshotClient,
     security: startPlugins.security,

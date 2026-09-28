@@ -1,0 +1,188 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '../../types';
+import { wrapMiddlewares } from '../middleware';
+import { dualProcessEnabledMiddleware } from '../middleware/dual_process_enabled';
+import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
+import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
+import { ENGINE_STATUS } from '../../domain/constants';
+import type { EngineDescriptor } from '../../domain/saved_objects';
+
+/** `both` reproduces the public start/stop behaviour; the other two toggle a single task. */
+const ProcessParam = z.enum(['priority', 'nonPriority', 'both']).default('both');
+
+const bodySchema = z.object({
+  entityTypes: z
+    .array(EntityType)
+    .optional()
+    .default(ALL_ENTITY_TYPES)
+    .describe('Entity types to act on. Defaults to all installed types.'),
+  process: ProcessParam.describe(
+    'Which extraction process to act on. Defaults to both, matching the public start/stop APIs.'
+  ),
+});
+
+type StartStopRequestBody = z.infer<typeof bodySchema>;
+type SingleProcess = Exclude<z.infer<typeof ProcessParam>, 'both'>;
+
+/**
+ * The two processes track their state in separate descriptor fields, so which one decides
+ * whether a type needs acting on depends on the requested process.
+ */
+const statusFor = (engine: EngineDescriptor, process: SingleProcess) =>
+  process === EXTRACTION_MODE.nonPriority ? engine.nonPriorityStatus : engine.status;
+
+/** Types that have a non-priority variant at all. Others only ever run one process. */
+const rejectUngatedTypes = (
+  entityTypes: EntityType[],
+  process: z.infer<typeof ProcessParam>,
+  res: KibanaResponseFactory
+): IKibanaResponse | null => {
+  if (process !== EXTRACTION_MODE.nonPriority) return null;
+
+  const ungated = entityTypes.filter((type) => !hasPriorityExtractionGate(type));
+  if (ungated.length === 0) return null;
+
+  return res.badRequest({
+    body: {
+      message: `Entity types without a non-priority extraction process: ${ungated.join(', ')}`,
+    },
+  });
+};
+
+export async function handleInternalStart(
+  ctx: EntityStoreRequestHandlerContext,
+  req: KibanaRequest<unknown, unknown, StartStopRequestBody>,
+  res: KibanaResponseFactory
+): Promise<IKibanaResponse> {
+  const { logger, assetManagerClient: assetManager } = await ctx.entityStore;
+  const { entityTypes, process } = req.body;
+
+  logger.debug(`Internal start API invoked for process: ${process}`);
+
+  const invalid = rejectUngatedTypes(entityTypes, process, res);
+  if (invalid) return invalid;
+
+  const { engines } = await assetManager.getStatus();
+  const installed = new Map(engines.map((engine) => [engine.type, engine]));
+
+  if (process === 'both') {
+    const toStart = entityTypes.filter(
+      (type) => installed.get(type)?.status === ENGINE_STATUS.STOPPED
+    );
+    await Promise.all(toStart.map((type) => assetManager.start(req, type)));
+    return res.ok({ body: { ok: true, started: toStart } });
+  }
+
+  const toStart = entityTypes.filter((type) => {
+    const engine = installed.get(type);
+    return engine !== undefined && statusFor(engine, process) !== ENGINE_STATUS.STARTED;
+  });
+  await Promise.all(toStart.map((type) => assetManager.startProcess(req, type, process)));
+
+  return res.ok({ body: { ok: true, started: toStart } });
+}
+
+export async function handleInternalStop(
+  ctx: EntityStoreRequestHandlerContext,
+  req: KibanaRequest<unknown, unknown, StartStopRequestBody>,
+  res: KibanaResponseFactory
+): Promise<IKibanaResponse> {
+  const { logger, assetManagerClient: assetManager } = await ctx.entityStore;
+  const { entityTypes, process } = req.body;
+
+  logger.debug(`Internal stop API invoked for process: ${process}`);
+
+  const invalid = rejectUngatedTypes(entityTypes, process, res);
+  if (invalid) return invalid;
+
+  const { engines } = await assetManager.getStatus();
+  const installed = new Map(engines.map((engine) => [engine.type, engine]));
+
+  if (process === 'both') {
+    const toStop = entityTypes.filter(
+      (type) => installed.get(type)?.status === ENGINE_STATUS.STARTED
+    );
+    await Promise.all(toStop.map((type) => assetManager.stop(type)));
+    return res.ok({ body: { ok: true, stopped: toStop } });
+  }
+
+  const toStop = entityTypes.filter((type) => {
+    const engine = installed.get(type);
+    return engine !== undefined && statusFor(engine, process) === ENGINE_STATUS.STARTED;
+  });
+  await Promise.all(toStop.map((type) => assetManager.stopProcess(type, process)));
+
+  return res.ok({ body: { ok: true, stopped: toStop } });
+}
+
+const register = (
+  router: EntityStorePluginRouter,
+  {
+    path,
+    summary,
+    description,
+    handler,
+  }: {
+    path: string;
+    summary: string;
+    description: string;
+    handler: typeof handleInternalStart;
+  }
+) => {
+  router.versioned
+    .put({
+      path,
+      access: 'internal',
+      summary,
+      description,
+      security: {
+        authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
+      },
+      enableQueryVersion: true,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v2,
+        validate: {
+          request: {
+            body: buildStrictRouteValidationWithZod(bodySchema),
+          },
+        },
+      },
+      wrapMiddlewares(handler, [dualProcessEnabledMiddleware])
+    );
+};
+
+export function registerInternalStart(router: EntityStorePluginRouter) {
+  register(router, {
+    path: ENTITY_STORE_ROUTES.internal.START,
+    summary: 'Start one or both Entity Store extraction processes',
+    description:
+      'Start the priority or non-priority extraction task for the specified entity types. ' +
+      'Defaults to both, which behaves exactly like the public start API.',
+    handler: handleInternalStart,
+  });
+}
+
+export function registerInternalStop(router: EntityStorePluginRouter) {
+  register(router, {
+    path: ENTITY_STORE_ROUTES.internal.STOP,
+    summary: 'Stop one or both Entity Store extraction processes',
+    description:
+      'Stop the priority or non-priority extraction task for the specified entity types. ' +
+      'Defaults to both, which behaves exactly like the public stop API.',
+    handler: handleInternalStop,
+  });
+}

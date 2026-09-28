@@ -9,7 +9,10 @@ import { z } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
 import { LogExtractionInstallParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
-import type { LogExtractionTypeOverride } from '../../../domain/saved_objects';
+import type {
+  LogExtractionTypeOverride,
+  NonPriorityLogExtractionTypeOverride,
+} from '../../../domain/saved_objects';
 import {
   LOG_EXTRACTION_DELAY_DEFAULT,
   LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
@@ -17,8 +20,11 @@ import {
 
 const MIN_FREQUENCY_MS = 30 * 1000;
 
-/** Params of either config layer. Fields are only checked when a value is supplied: `undefined` and `null` both mean "nothing to check". */
-type LogExtractionParams = LogExtractionInstallParams | LogExtractionTypeOverride;
+/** Params of any config layer. Fields are only checked when a value is supplied: `undefined` and `null` both mean "nothing to check". */
+type LogExtractionParams =
+  | LogExtractionInstallParams
+  | LogExtractionTypeOverride
+  | NonPriorityLogExtractionTypeOverride;
 
 function validateFrequencyParam(data: LogExtractionParams, ctx: z.RefinementCtx): void {
   if (data.frequency == null) {
@@ -100,9 +106,12 @@ export function validateLogExtractionParams(
 ): void {
   if (!data) return;
 
+  // NonPriorityLogExtractionTypeOverride has no index pattern fields - they stay shared.
+  const patterns = data as Partial<LogExtractionTypeOverride>;
+
   validateFrequencyParam(data, ctx);
-  validateIndexPatternList(data.additionalIndexPatterns, 'additionalIndexPatterns', ctx);
-  validateIndexPatternList(data.excludedIndexPatterns, 'excludedIndexPatterns', ctx);
+  validateIndexPatternList(patterns.additionalIndexPatterns, 'additionalIndexPatterns', ctx);
+  validateIndexPatternList(patterns.excludedIndexPatterns, 'excludedIndexPatterns', ctx);
   validateDelayVsLookbackPeriod(data, ctx);
 }
 

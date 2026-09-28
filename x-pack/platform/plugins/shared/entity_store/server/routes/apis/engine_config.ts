@@ -1,0 +1,111 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '../../types';
+import { wrapMiddlewares } from '../middleware';
+import { dualProcessEnabledMiddleware } from '../middleware/dual_process_enabled';
+import { validateLogExtractionParams } from './utils/log_extraction_validator';
+import { enforceEntityStorePrivileges } from './utils/check_entity_store_privileges';
+import { EntityType } from '../../../common/domain/definitions/entity_schema';
+import {
+  LogExtractionTypeOverride,
+  NonPriorityLogExtractionTypeOverride,
+} from '../../domain/saved_objects';
+
+const paramsSchema = z.object({
+  entityType: EntityType,
+});
+
+const bodySchema = z.object({
+  /** Layer 5: reaches both processes, minus the fields only the non-priority layer may set. */
+  logExtraction: LogExtractionTypeOverride.superRefine(validateLogExtractionParams).optional(),
+  /** Layer 6: non-priority process only. */
+  nonPriorityOverride: NonPriorityLogExtractionTypeOverride.superRefine(
+    validateLogExtractionParams
+  ).optional(),
+});
+
+type EngineConfigRequestParams = z.infer<typeof paramsSchema>;
+type EngineConfigRequestBody = z.infer<typeof bodySchema>;
+
+export async function handleEngineConfig(
+  ctx: EntityStoreRequestHandlerContext,
+  req: KibanaRequest<EngineConfigRequestParams, unknown, EngineConfigRequestBody>,
+  res: KibanaResponseFactory
+): Promise<IKibanaResponse> {
+  const {
+    logger: baseLogger,
+    assetManagerClient: assetManager,
+    logsExtractionClient,
+  } = await ctx.entityStore;
+  const { entityType } = req.params;
+  const { logExtraction, nonPriorityOverride } = req.body;
+
+  const logger = baseLogger.get('engineConfig').get(entityType);
+  logger.debug('Engine config API called');
+
+  // Only `logExtraction` carries index patterns - NonPriorityLogExtractionTypeOverride has none.
+  const forbidden = await enforceEntityStorePrivileges(
+    assetManager,
+    req,
+    res,
+    logExtraction?.additionalIndexPatterns ?? undefined
+  );
+  if (forbidden) return forbidden;
+
+  try {
+    const config = await logsExtractionClient.updateTypeConfig(entityType, {
+      logExtraction,
+      nonPriorityOverride,
+    });
+
+    return res.ok({ body: config });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return res.notFound({
+        body: { message: `No entity engine installed for entity type ${entityType}` },
+      });
+    }
+    logger.error(error);
+    throw error;
+  }
+}
+
+export function registerEngineConfig(router: EntityStorePluginRouter) {
+  router.versioned
+    .put({
+      path: ENTITY_STORE_ROUTES.internal.ENGINE_CONFIG,
+      access: 'internal',
+      summary: 'Update the log extraction configuration of one entity type',
+      description:
+        'Set per entity-type log extraction overrides. `logExtraction` applies to both extraction ' +
+        'processes, `nonPriorityOverride` only to the non-priority one. ' +
+        'Omitting a field leaves it unchanged. Sending `null` clears it and falls back to the layer below.',
+      security: {
+        authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
+      },
+      enableQueryVersion: true,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v2,
+        validate: {
+          request: {
+            params: buildStrictRouteValidationWithZod(paramsSchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
+          },
+        },
+      },
+      wrapMiddlewares(handleEngineConfig, [dualProcessEnabledMiddleware])
+    );
+}
