@@ -106,7 +106,8 @@ describe('TableVisBasic', () => {
       table.formattedColumns,
       uiStateProps.columnsWidth,
       props.fireEvent,
-      undefined
+      undefined,
+      true
     );
 
     const { onSort } = comp.find('EuiDataGrid').prop<EuiDataGridProps['sorting']>('sorting')!;
