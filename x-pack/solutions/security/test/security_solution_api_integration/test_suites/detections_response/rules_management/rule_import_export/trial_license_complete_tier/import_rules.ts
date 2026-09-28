@@ -10,6 +10,8 @@ import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
+  assertNoRuleTask,
+  assertRuleTask,
   fetchRule,
   getCustomQueryRuleParams,
   getThresholdRuleForAlertTesting,
@@ -213,6 +215,37 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           expect(importedRule).toMatchObject(IMPORT_PAYLOAD[0]);
+          await assertNoRuleTask({
+            getService,
+            ruleId: importedRule.id,
+            spaceId: kibanaSpaceId,
+          });
+        });
+
+        it('imports an enabled custom query rule', async () => {
+          const rule = getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID,
+            enabled: true,
+          });
+
+          await importRulesWithSuccess({
+            getService,
+            rules: [rule],
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          const { body: imported } = await detectionsApi
+            .readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID } }, kibanaSpaceId)
+            .expect(200);
+
+          expect(imported).toMatchObject(rule);
+          await assertRuleTask({
+            getService,
+            ruleId: imported.id,
+            enabled: true,
+            spaceId: kibanaSpaceId,
+          });
         });
 
         it('imports a rule with defined optional fields', async () => {

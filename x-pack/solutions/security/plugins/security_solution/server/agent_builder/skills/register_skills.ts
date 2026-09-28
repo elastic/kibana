@@ -29,6 +29,7 @@ import {
   automaticMigrationRulesUpdateMigrationSkill,
   automaticMigrationRulesDeleteMigrationSkill,
   automaticMigrationRulesUpdateTranslatedRuleSkill,
+  automaticMigrationRulesInstallRulesSkill,
 } from './siem_migration';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
@@ -117,6 +118,7 @@ export const registerSkills = async ({
     await agentBuilder.skills.register(automaticMigrationRulesUpdateMigrationSkill);
     await agentBuilder.skills.register(automaticMigrationRulesDeleteMigrationSkill);
     await agentBuilder.skills.register(automaticMigrationRulesUpdateTranslatedRuleSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesInstallRulesSkill);
   }
 
   if (experimentalFeatures.leadGenerationEnabled) {

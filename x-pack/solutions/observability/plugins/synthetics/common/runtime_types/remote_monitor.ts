@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+import type { SchemaOutput } from './schema_output';
 import { remoteMonitorInfoSchema } from './remote';
 import { ConfigKey } from './monitor_management/config_key';
 import { MonitorTypeCodec } from './monitor_management/monitor_configs';
@@ -32,17 +33,17 @@ import type { SelectedSyntheticsMonitor } from './external_monitor';
  * @see useSelectedMonitor — the public consumer
  * @see useExternalMonitor — the hook that synthesizes values of this type from pings
  */
-export const RemoteSyntheticsMonitorCodec = t.type({
-  [ConfigKey.CONFIG_ID]: t.string,
-  [ConfigKey.MONITOR_QUERY_ID]: t.string,
-  [ConfigKey.NAME]: t.string,
+export const RemoteSyntheticsMonitorCodec = z.looseObject({
+  [ConfigKey.CONFIG_ID]: z.string(),
+  [ConfigKey.MONITOR_QUERY_ID]: z.string(),
+  [ConfigKey.NAME]: z.string(),
   [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
-  [ConfigKey.TAGS]: t.array(t.string),
-  [ConfigKey.LOCATIONS]: t.array(MonitorServiceLocationCodec),
+  [ConfigKey.TAGS]: z.array(z.string()),
+  [ConfigKey.LOCATIONS]: z.array(MonitorServiceLocationCodec),
   remote: remoteMonitorInfoSchema,
 });
 
-export type RemoteSyntheticsMonitor = t.TypeOf<typeof RemoteSyntheticsMonitorCodec>;
+export type RemoteSyntheticsMonitor = SchemaOutput<typeof RemoteSyntheticsMonitorCodec>;
 
 /**
  * Type guard distinguishing remote monitors from local saved objects.

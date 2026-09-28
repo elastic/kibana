@@ -50,7 +50,11 @@ describe('getMigrationRulesTool', () => {
               vendor: 'splunk',
               id: 's-1',
             },
-            elastic_rule: { title: 'Elastic rule', prebuilt_rule_id: 'pre-1' },
+            elastic_rule: {
+              id: 'installed-rule-1',
+              title: 'Elastic rule',
+              prebuilt_rule_id: 'pre-1',
+            },
             translation_result: 'full',
             status: 'completed',
             comments: [{ content: 'Initial translation', created_at: '2024-01-01T00:00:00Z' }],
@@ -97,6 +101,7 @@ describe('getMigrationRulesTool', () => {
         query_language: undefined,
       },
       elastic_rule: {
+        id: 'installed-rule-1',
         title: 'Elastic rule',
         prebuilt_rule_id: 'pre-1',
         integration_ids: undefined,

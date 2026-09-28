@@ -18,6 +18,8 @@ describe('executeEsql', () => {
     values: [['bar']],
   };
 
+  const frozenExclusion = { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } };
+
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -33,6 +35,7 @@ describe('executeEsql', () => {
       query: 'FROM idx',
       drop_null_columns: true,
       allow_partial_results: true,
+      filter: frozenExclusion,
     });
     expect(esClient.esql.query.mock.calls[0][1]).toEqual({
       maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
@@ -46,24 +49,41 @@ describe('executeEsql', () => {
     expect(lastRequest()).toEqual(expect.objectContaining({ drop_null_columns: false }));
   });
 
-  it('forwards the filter to Elasticsearch when one is provided', async () => {
+  it('excludes frozen tier indices by default', async () => {
+    await executeEsql({ query: 'FROM idx', esClient });
+
+    expect(lastRequest()).toEqual(expect.objectContaining({ filter: frozenExclusion }));
+  });
+
+  it('omits the filter key entirely when frozen tier indices are included', async () => {
+    await executeEsql({ query: 'FROM idx', includeFrozen: true, esClient });
+
+    expect(lastRequest()).not.toHaveProperty('filter');
+  });
+
+  it('combines a provided filter with the frozen tier exclusion', async () => {
     const filter = { term: { status: 'open' } };
 
     await executeEsql({ query: 'FROM idx', filter, esClient });
 
+    expect(lastRequest()).toEqual(
+      expect.objectContaining({
+        filter: {
+          bool: {
+            filter: [filter],
+            must_not: [{ term: { _tier: 'data_frozen' } }],
+          },
+        },
+      })
+    );
+  });
+
+  it('forwards the filter unchanged when frozen tier indices are included', async () => {
+    const filter = { term: { status: 'open' } };
+
+    await executeEsql({ query: 'FROM idx', filter, includeFrozen: true, esClient });
+
     expect(lastRequest()).toEqual(expect.objectContaining({ filter }));
-  });
-
-  it('omits the filter key entirely when none is provided', async () => {
-    await executeEsql({ query: 'FROM idx', esClient });
-
-    expect(lastRequest()).not.toHaveProperty('filter');
-  });
-
-  it('omits the filter key when it is explicitly undefined', async () => {
-    await executeEsql({ query: 'FROM idx', filter: undefined, esClient });
-
-    expect(lastRequest()).not.toHaveProperty('filter');
   });
 
   it('sends params and filter together without either overwriting the other', async () => {
@@ -73,6 +93,7 @@ describe('executeEsql', () => {
       query: 'FROM idx | WHERE host == ?host',
       params: [{ host: 'server-1' }],
       filter,
+      includeFrozen: true,
       esClient,
     });
 
@@ -88,7 +109,7 @@ describe('executeEsql', () => {
   it('applies the limit to the query while leaving the filter untouched', async () => {
     const filter = { term: { status: 'open' } };
 
-    await executeEsql({ query: 'FROM idx', limit: 10, filter, esClient });
+    await executeEsql({ query: 'FROM idx', limit: 10, filter, includeFrozen: true, esClient });
 
     expect(lastRequest()).toEqual(
       expect.objectContaining({ query: 'FROM idx | LIMIT 10', filter })

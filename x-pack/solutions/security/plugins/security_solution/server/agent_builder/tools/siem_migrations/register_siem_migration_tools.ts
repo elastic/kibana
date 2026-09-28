@@ -21,6 +21,8 @@ import { updateRuleMigrationTool } from './rules/update_rule_migration_tool';
 import { deleteRuleMigrationTool } from './rules/delete_rule_migration_tool';
 import { updateTranslatedRuleTool } from './rules/update_translated_rule_tool';
 
+import { installMigrationRulesTool } from './rules/install_migration_rules_tool';
+
 export const registerSiemMigrationTools = (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -42,4 +44,5 @@ export const registerSiemMigrationTools = (
   agentBuilder.tools.register(updateRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(deleteRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(updateTranslatedRuleTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(installMigrationRulesTool(core, logger, productFeaturesService));
 };

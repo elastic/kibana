@@ -104,10 +104,7 @@ export class AgentBuilderWorkflowsPlugin
   ): AgentBuilderWorkflowsPluginStart {
     this.security = startDeps.security;
     if (this.api) {
-      this.api.setSmlIndexAttachment(
-        startDeps.agentBuilderSml.indexAttachment,
-        this.logger.get('sml')
-      );
+      this.api.setSmlClient(startDeps.agentBuilderSml, this.logger.get('sml'));
     }
     return {};
   }

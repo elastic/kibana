@@ -11,3 +11,4 @@ export { automaticMigrationRulesStopMigrationSkill } from './automatic_migration
 export { automaticMigrationRulesUpdateMigrationSkill } from './automatic_migration_rules_update_migration_skill';
 export { automaticMigrationRulesDeleteMigrationSkill } from './automatic_migration_rules_delete_migration_skill';
 export { automaticMigrationRulesUpdateTranslatedRuleSkill } from './automatic_migration_rules_update_translated_rule_skill';
+export { automaticMigrationRulesInstallRulesSkill } from './automatic_migration_rules_install_rules_skill';

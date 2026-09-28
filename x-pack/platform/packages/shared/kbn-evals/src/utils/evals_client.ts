@@ -16,11 +16,15 @@ import {
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
+  EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
+  EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL,
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
   GetEvaluationDatasetResponse,
   GetEvaluationExperimentResponse,
+  GetEvaluationExperimentDatasetExamplesResponse,
+  GetEvaluationExperimentExampleDetailsResponse,
   GetEvaluationExperimentScoresResponse,
   GetEvaluationExperimentsResponse,
   IngestScoresRequestBody,
@@ -298,6 +302,50 @@ export class EvalsClient {
       );
       return [];
     }
+  }
+
+  /** Reads complete per-example score evidence from the run's home Space. */
+  async getExperimentDatasetExamples(
+    experimentId: string,
+    datasetId: string
+  ): Promise<GetEvaluationExperimentDatasetExamplesResponse> {
+    const response = await this.kbnClient.request({
+      path: this.path(
+        EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
+          '{experimentId}',
+          encodeURIComponent(experimentId)
+        ).replace('{datasetId}', encodeURIComponent(datasetId))
+      ),
+      method: 'GET',
+      headers: VERSIONED_HEADERS,
+    });
+    return GetEvaluationExperimentDatasetExamplesResponse.parse(getResponseData(response));
+  }
+
+  /**
+   * Full input and output for one example repetition; `getExperimentDatasetExamples` only
+   * returns previews of them.
+   */
+  async getExperimentExampleDetails(
+    experimentId: string,
+    datasetId: string,
+    exampleId: string,
+    repetitionIndex: number
+  ): Promise<GetEvaluationExperimentExampleDetailsResponse> {
+    const response = await this.kbnClient.request({
+      path: this.path(
+        EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL.replace(
+          '{experimentId}',
+          encodeURIComponent(experimentId)
+        )
+          .replace('{datasetId}', encodeURIComponent(datasetId))
+          .replace('{exampleId}', encodeURIComponent(exampleId))
+          .replace('{repetitionIndex}', String(repetitionIndex))
+      ),
+      method: 'GET',
+      headers: VERSIONED_HEADERS,
+    });
+    return GetEvaluationExperimentExampleDetailsResponse.parse(getResponseData(response));
   }
 
   /**

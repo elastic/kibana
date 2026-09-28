@@ -325,6 +325,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           hiddenStatuses={hiddenStatuses}
           onCreateCasePressed={onCreateCasePressed}
           isSelectorView={isSelectorView}
+          canCreateCase={permissions.create}
           isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}
           filterOptions={filterOptions}
