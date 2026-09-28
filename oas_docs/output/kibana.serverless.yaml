@@ -20589,6 +20589,11 @@ paths:
                       example: null
                       nullable: true
                       type: string
+                    extractObservables:
+                      description: |
+                        Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+                      example: true
+                      type: boolean
                     id:
                       example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                       type: string
@@ -20784,6 +20789,11 @@ paths:
                     example: null
                     nullable: true
                     type: string
+                  extractObservables:
+                    description: |
+                      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+                    example: true
+                    type: boolean
                   id:
                     example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                     type: string
@@ -20980,6 +20990,11 @@ paths:
                     example: null
                     nullable: true
                     type: string
+                  extractObservables:
+                    description: |
+                      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+                    example: true
+                    type: boolean
                   id:
                     example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                     type: string
@@ -43598,7 +43613,7 @@ paths:
               postCloudOnboardingDeploymentAgentBasedRequestExample:
                 description: Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)
                 value:
-                  connectorId: cloud-connector-id-1
+                  authMethod: assume_role
                   mechanisms:
                     - agent_based
                   provider: aws
@@ -43647,11 +43662,25 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                agentPolicyIds:
+                  description: Agent policy IDs for agent_based existing-policy deploys. Provided on create so that a mid-deploy tab-close leaves a record that hydrates back into existing mode.
+                  items:
+                    maxLength: 255
+                    type: string
+                  maxItems: 1000
+                  type: array
                 authMethod:
-                  description: Authentication method for managed integrations.
+                  description: |-
+                    Authentication method. Allowed values depend on the delivery mechanism:
+
+                    - managed_integration: identity_federation | static_keys
+                    - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                   enum:
                     - identity_federation
                     - static_keys
+                    - temporary_keys
+                    - shared_credentials
+                    - assume_role
                   type: string
                 connectorId:
                   description: ID of the fleet-cloud-connector to associate with this deployment. Omit for static-keys deployments.
@@ -43711,12 +43740,13 @@ paths:
             application/json:
               examples:
                 postCloudOnboardingDeploymentAgentBasedExample:
-                  description: Agent-based deployment — agentPolicyId set after the agent policy is selected or created
+                  description: Agent-based deployment — agentPolicyIds set after the agent policy is selected or created
                   value:
                     item:
-                      agentPolicyId: agent-policy-id-1
+                      agentPolicyIds:
+                        - agent-policy-id-1
                       attemptCount: 1
-                      connectorId: cloud-connector-id-1
+                      authMethod: assume_role
                       id: onboarding-deployment-id-2
                       mechanisms:
                         - agent_based
@@ -43782,9 +43812,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
-                      agentPolicyId:
-                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
-                        type: string
+                      agentPolicyIds:
+                        description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                        items:
+                          type: string
+                        maxItems: 1000
+                        type: array
                       apiKeyId:
                         description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
                         type: string
@@ -43793,10 +43826,17 @@ paths:
                         minimum: 1
                         type: number
                       authMethod:
-                        description: Authentication method for managed integrations.
+                        description: |-
+                          Authentication method. Allowed values depend on the delivery mechanism:
+
+                          - managed_integration: identity_federation | static_keys
+                          - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                         enum:
                           - identity_federation
                           - static_keys
+                          - temporary_keys
+                          - shared_credentials
+                          - assume_role
                         type: string
                       connectorId:
                         description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
@@ -43858,10 +43898,10 @@ paths:
                         maxItems: 10
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for managed_integration services.
+                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       policyIdsByInstance:
                         additionalProperties:
@@ -44072,6 +44112,8 @@ paths:
                   description: A cloud onboarding deployment that has succeeded
                   value:
                     item:
+                      agentPolicyIds:
+                        - agent-policy-id-1
                       attemptCount: 1
                       connectorId: cloud-connector-id-1
                       deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
@@ -44104,9 +44146,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
-                      agentPolicyId:
-                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
-                        type: string
+                      agentPolicyIds:
+                        description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                        items:
+                          type: string
+                        maxItems: 1000
+                        type: array
                       apiKeyId:
                         description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
                         type: string
@@ -44115,10 +44160,17 @@ paths:
                         minimum: 1
                         type: number
                       authMethod:
-                        description: Authentication method for managed integrations.
+                        description: |-
+                          Authentication method. Allowed values depend on the delivery mechanism:
+
+                          - managed_integration: identity_federation | static_keys
+                          - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                         enum:
                           - identity_federation
                           - static_keys
+                          - temporary_keys
+                          - shared_credentials
+                          - assume_role
                         type: string
                       connectorId:
                         description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
@@ -44180,10 +44232,10 @@ paths:
                         maxItems: 10
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for managed_integration services.
+                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       policyIdsByInstance:
                         additionalProperties:
@@ -44326,9 +44378,13 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                agentPolicyId:
-                  maxLength: 255
-                  type: string
+                agentPolicyIds:
+                  description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                  items:
+                    maxLength: 255
+                    type: string
+                  maxItems: 1000
+                  type: array
                 apiKeyId:
                   maxLength: 255
                   type: string
@@ -44337,9 +44393,13 @@ paths:
                   minimum: 1
                   type: number
                 authMethod:
+                  description: Authentication method. Refreshed on each successful deploy so a credential-method change between deploys is reflected on resume.
                   enum:
                     - identity_federation
                     - static_keys
+                    - temporary_keys
+                    - shared_credentials
+                    - assume_role
                     - null
                   nullable: true
                   type: string
@@ -44395,10 +44455,11 @@ paths:
                   maxItems: 10
                   type: array
                 packagePolicyIds:
+                  description: Package policy IDs created for this deployment (managed_integration and agent_based).
                   items:
                     maxLength: 255
                     type: string
-                  maxItems: 100
+                  maxItems: 1000
                   type: array
                 policyIdsByInstance:
                   additionalProperties:
@@ -44406,9 +44467,9 @@ paths:
                     type: string
                   type: object
                 services:
-                  description: Updated service list. Replaces the stored services array.
+                  description: Current service set for this deployment. Refreshed on each successful deploy so resume after an incremental service addition restores all deployed services.
                   items:
-                    maxLength: 255
+                    maxLength: 256
                     minLength: 1
                     type: string
                   maxItems: 1000
@@ -44442,6 +44503,8 @@ paths:
                   description: The updated cloud onboarding deployment
                   value:
                     item:
+                      agentPolicyIds:
+                        - agent-policy-id-1
                       attemptCount: 1
                       connectorId: cloud-connector-id-1
                       deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
@@ -44464,9 +44527,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
-                      agentPolicyId:
-                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
-                        type: string
+                      agentPolicyIds:
+                        description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                        items:
+                          type: string
+                        maxItems: 1000
+                        type: array
                       apiKeyId:
                         description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
                         type: string
@@ -44475,10 +44541,17 @@ paths:
                         minimum: 1
                         type: number
                       authMethod:
-                        description: Authentication method for managed integrations.
+                        description: |-
+                          Authentication method. Allowed values depend on the delivery mechanism:
+
+                          - managed_integration: identity_federation | static_keys
+                          - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                         enum:
                           - identity_federation
                           - static_keys
+                          - temporary_keys
+                          - shared_credentials
+                          - assume_role
                         type: string
                       connectorId:
                         description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
@@ -44540,10 +44613,10 @@ paths:
                         maxItems: 10
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for managed_integration services.
+                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       policyIdsByInstance:
                         additionalProperties:
@@ -44664,6 +44737,7 @@ paths:
           name: connectorId
           required: true
           schema:
+            maxLength: 255
             minLength: 1
             type: string
       responses:
@@ -44675,7 +44749,9 @@ paths:
                   description: List of cloud onboarding deployments for a connector
                   value:
                     items:
-                      - attemptCount: 1
+                      - agentPolicyIds:
+                          - agent-policy-id-1
+                        attemptCount: 1
                         connectorId: cloud-connector-id-1
                         deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
                         deploymentName: elastic-aws-onboarding
@@ -44712,9 +44788,12 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
-                        agentPolicyId:
-                          description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
-                          type: string
+                        agentPolicyIds:
+                          description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                          items:
+                            type: string
+                          maxItems: 1000
+                          type: array
                         apiKeyId:
                           description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
                           type: string
@@ -44723,10 +44802,17 @@ paths:
                           minimum: 1
                           type: number
                         authMethod:
-                          description: Authentication method for managed integrations.
+                          description: |-
+                            Authentication method. Allowed values depend on the delivery mechanism:
+
+                            - managed_integration: identity_federation | static_keys
+                            - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
                           enum:
                             - identity_federation
                             - static_keys
+                            - temporary_keys
+                            - shared_credentials
+                            - assume_role
                           type: string
                         connectorId:
                           description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
@@ -44788,10 +44874,10 @@ paths:
                           maxItems: 10
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for managed_integration services.
+                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         policyIdsByInstance:
                           additionalProperties:
@@ -74243,7 +74329,7 @@ paths:
                         id: email_exact_match
                         kind: same_field
                         managed: true
-                      - description: Links Windows and system account-management (IAM) entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.
+                      - description: Links user entities that share the same SID (`user.id`), including several `local` Windows or CrowdStrike endpoint users on different hosts. Windows domain accounts seen on several hosts are linked even before the Active Directory user is ingested; Active Directory entity analytics is needed only to link or retarget to that AD user once it arrives. A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. Needs Windows or CrowdStrike endpoint events (which create `local` user entities). Disable if well-known SID exclusions are not enough for your environment.
                         enabled: true
                         id: windows_sid_bridge
                         kind: same_field
@@ -74253,13 +74339,13 @@ paths:
                         id: entra_guid_bridge
                         kind: same_field
                         managed: true
-                      - description: Links CrowdStrike user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). Needs CrowdStrike FDR IAM events and Active Directory entity analytics. Disable if CrowdStrike SID coverage is noisy in your tenant.
-                        enabled: true
+                      - description: Links leftover CrowdStrike-namespace user entities to Active Directory by SID (`user.id`). A SID names one account, so duplicates in any namespace are the same account (identifier drift), not a collision. Excludes well-known SIDs such as LocalSystem and Linux numeric UIDs. CrowdStrike FDR events now create `local` entities, which the Windows SID bridge covers. Disabled by default because the crowdstrike namespace no longer receives entities; enable if leftover CrowdStrike-namespace users should still link.
+                        enabled: false
                         id: crowdstrike_sid_bridge
                         kind: same_field
                         managed: true
-                      - description: Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit user-lifecycle events and Entra entity analytics. Covers admins who perform AAD user operations; disable if that population should stay separate.
-                        enabled: true
+                      - description: 'Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit events that create user entities (`event.kind: asset`) and Entra entity analytics. Disabled by default because those events currently do not create entities; enable if your environment emits them as asset events.'
+                        enabled: false
                         id: upn_cross_field_bridge
                         kind: cross_field
                         managed: true
@@ -128184,6 +128270,13 @@ paths:
           schema:
             example: 'true'
             type: string
+        - description: Confirm that permanent deletion removes workflow access controls.
+          in: query
+          name: acknowledgeAclLoss
+          required: false
+          schema:
+            default: false
+            type: boolean
         - description: When true, permanently deletes the workflows (hard delete) instead of soft-deleting them. The workflow IDs become available for reuse.
           in: query
           name: force
@@ -128241,11 +128334,11 @@ paths:
               -d '{
                 "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
               }'
-        - label: Hard delete (permanent)
+        - label: Hard delete (confirm ACL loss)
           lang: curl
           source: |
             curl \
-              -X DELETE "${KIBANA_URL}/api/workflows?force=true" \
+              -X DELETE "${KIBANA_URL}/api/workflows?force=true&acknowledgeAclLoss=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -130321,6 +130414,13 @@ paths:
           schema:
             maxLength: 255
             type: string
+        - description: Confirm that permanent deletion removes workflow access controls.
+          in: query
+          name: acknowledgeAclLoss
+          required: false
+          schema:
+            default: false
+            type: boolean
         - description: When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.
           in: query
           name: force
@@ -130342,11 +130442,11 @@ paths:
               -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
-        - label: Hard delete (permanent)
+        - label: Hard delete (confirm ACL loss)
           lang: curl
           source: |
             curl \
-              -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}?force=true" \
+              -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}?force=true&acknowledgeAclLoss=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
         - lang: Console
@@ -133457,6 +133557,7 @@ components:
               type: text
               required: false
           error: null
+          extractObservables: true
           id: 856ee650-6c82-11ee-a20a-6164169afa58
           mappings: []
           observableTypes: []
@@ -133837,6 +133938,7 @@ components:
             type: text
             required: false
         error: null
+        extractObservables: true
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -133944,6 +134046,7 @@ components:
             type: toggle
             required: false
         error: null
+        extractObservables: true
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -139529,6 +139632,10 @@ components:
           maxItems: 10
           minItems: 0
           type: array
+        extractObservables:
+          description: |
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+          type: boolean
         owner:
           $ref: '#/components/schemas/Cases_owner'
         templates:
@@ -139545,8 +139652,8 @@ components:
       properties:
         extractObservables:
           description: |
-            When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.
-          example: false
+            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
+          example: true
           type: boolean
         syncAlerts:
           description: Turns alert syncing on or off.
@@ -139912,6 +140019,10 @@ components:
               - required
               - type
           type: array
+        extractObservables:
+          description: |
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+          type: boolean
         templates:
           $ref: '#/components/schemas/Cases_templates'
         version:
