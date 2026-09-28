@@ -1357,6 +1357,59 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
     expect(eventClient.findLatestActive).toHaveBeenCalled();
     expect(eventClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
   });
+
+  it('still writes when eventSearchClient.findLatestActive rejects (dedup fallback to canonical)', async () => {
+    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
+      findLatestPaginated: jest.fn(),
+      findLatestByCurrentStatePaginated: jest.fn(),
+      // .rule-events read store is unavailable
+      findLatestActive: jest.fn().mockRejectedValue(new Error('read-store outage')),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+    };
+    const eventClient = makeEventClient({
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      // no event_id → dedup candidate; must not be blocked by the read-store failure
+      inputs: [{ ...baseInput }],
+    });
+
+    expect(results[0]).toMatchObject({ written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('still writes when eventSearchClient.findByEventId rejects (continuation fallback to canonical)', async () => {
+    const eventId = 'checkout__latency-continuation';
+    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
+      findLatestPaginated: jest.fn(),
+      findLatestByCurrentStatePaginated: jest.fn(),
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      // .rule-events lookup for the existing event_id fails
+      findByEventId: jest.fn().mockRejectedValue(new Error('read-store outage')),
+    };
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({
+        // predecessor has lower severity so the write is not skipped as a no-op
+        hits: [makeStoredEvent(eventId, { event_uuid: 'real-uuid', severity: '40-medium' })],
+      }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      // severity escalation from 40-medium → 60-high (baseInput) prevents no-op skip
+      inputs: [{ ...baseInput, event_id: eventId }],
+    });
+
+    expect(results[0]).toMatchObject({ written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+    const written = eventClient.bulkCreate.mock.calls[0][0][0] as SignificantEvent;
+    // Continuation must chain from the canonical predecessor's UUID, not a synthetic one
+    expect(written.previous_event_uuid).toBe('real-uuid');
+  });
 });
 
 describe('eventsWriteBulkHandler — dual-write to .rule-events (Writer 1)', () => {

@@ -534,19 +534,23 @@ export async function eventsWriteBulkHandler({
   // Fall back to the canonical write client if the read store is unavailable, so a temporary
   // .rule-events failure cannot block a canonical write.
   let searchClientActiveEvents: SignificantEvent[];
+  let canonicalActiveEvents: SignificantEvent[];
   try {
     searchClientActiveEvents = await fetchActiveEventsForDedup(client, dedupCandidates);
+    // When the flag-aware read client differs from the canonical write client, also scan the
+    // canonical store. A write succeeds with `wait_for` refresh on the legacy store, but the
+    // dual-write to `.rule-events` is fire-and-forget with no matching refresh guarantee — a scan
+    // of `.rule-events` alone can miss a recently written event and produce a permanent duplicate.
+    canonicalActiveEvents =
+      client !== eventClient ? await fetchActiveEventsForDedup(eventClient, dedupCandidates) : [];
   } catch (err) {
     if (client === eventClient) throw err;
     logger?.warn(`Read store dedup scan failed; falling back to canonical write client: ${err}`);
+    // Reuse the fallback result as the canonical scan — avoids running the same expensive
+    // ES|QL dedup query twice against the legacy store during a .rule-events outage.
     searchClientActiveEvents = await fetchActiveEventsForDedup(eventClient, dedupCandidates);
+    canonicalActiveEvents = searchClientActiveEvents;
   }
-  // When the flag-aware read client differs from the canonical write client, also scan the
-  // canonical store. A write succeeds with `wait_for` refresh on the legacy store, but the
-  // dual-write to `.rule-events` is fire-and-forget with no matching refresh guarantee — a scan
-  // of `.rule-events` alone can miss a recently written event and produce a permanent duplicate.
-  const canonicalActiveEvents =
-    client !== eventClient ? await fetchActiveEventsForDedup(eventClient, dedupCandidates) : [];
   // Canonical takes precedence: if the same event_id appears in both stores, use the canonical
   // version to prevent a stale .rule-events active entry from suppressing a valid new-event write.
   const canonicalEventIds = new Set(
