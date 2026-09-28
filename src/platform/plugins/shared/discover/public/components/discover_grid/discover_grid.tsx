@@ -237,6 +237,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           toolbarLeftSide={toolbarLeftSide}
           toolbarTrailingControl={toolbarTrailingControl}
           showKeyboardShortcuts={props.showKeyboardShortcuts}
+          showMultiFields={props.showMultiFields}
           ariaLabelledBy={props.ariaLabelledBy}
           showFullScreenButton={props.showFullScreenButton}
           isPaginationEnabled={props.isPaginationEnabled}

@@ -23,6 +23,10 @@ import {
 } from '@kbn/unified-data-table';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../components/discover_grid';
+import {
+  resolveDiscoverGridImplementation,
+  type DiscoverGridImplementation,
+} from '../../components/discover_grid/discover_grid_implementation';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
@@ -52,6 +56,9 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   searchContext?: CellRenderersSearchContext;
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
+  /** Grid implementation saved with the Discover session tab, defaults to TanStack. */
+  gridImplementation?: DiscoverGridImplementation;
+  onChangeGridImplementation: (implementation: DiscoverGridImplementation) => void;
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
@@ -67,6 +74,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   } = props;
   const { euiTheme } = useEuiTheme();
   const setExpandedDoc = props.setExpandedDoc ?? noopSetExpandedDoc;
+  const gridImplementation = resolveDiscoverGridImplementation(props.gridImplementation);
 
   const renderDocumentView = useCallback(
     (
@@ -94,6 +102,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         docViewerRef={props.docViewerRef}
         flyoutMenuTrailingActions={flyoutMenuTrailingActions}
         hideFilteringOnComputedColumns={true}
+        gridImplementation={gridImplementation}
       />
     ),
     [
@@ -108,18 +117,21 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.query,
       props.savedSearchId,
       flyoutMenuTrailingActions,
+      gridImplementation,
     ]
   );
 
-  const renderCustomToolbarWithElements = useMemo(
+  const totalDocuments = useMemo(
     () =>
-      getRenderCustomToolbarWithElements({
-        leftSide:
-          typeof props.totalHitCount === 'number' ? (
-            <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={props.isPlainRecord} />
-          ) : undefined,
-      }),
+      typeof props.totalHitCount === 'number' ? (
+        <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={props.isPlainRecord} />
+      ) : undefined,
     [props.totalHitCount, props.isPlainRecord]
+  );
+
+  const renderCustomToolbarWithElements = useMemo(
+    () => getRenderCustomToolbarWithElements({ leftSide: totalDocuments }),
+    [totalDocuments]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -167,6 +179,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}
+        // The TanStack grid renders its own toolbar and takes the total documents as a slot.
+        toolbarLeftSide={totalDocuments}
         externalCustomRenderers={cellRenderers}
         enableComparisonMode
         showColumnTokens

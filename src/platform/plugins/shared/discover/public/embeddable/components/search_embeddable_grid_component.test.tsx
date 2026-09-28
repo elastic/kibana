@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -54,6 +54,7 @@ const createStateManager = (): SearchEmbeddableStateManager => ({
   density: new BehaviorSubject<DataGridDensity | undefined>(undefined),
   documentsDisplayMode: new BehaviorSubject<DocumentsDisplayMode | undefined>(undefined),
   jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(undefined),
+  gridImplementation: new BehaviorSubject<'tanstack' | 'unified' | undefined>(undefined),
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
@@ -211,6 +212,28 @@ describe('SearchEmbeddableGridComponent', () => {
 
       onResize({ columnId: '_source', width: undefined });
       expect(stateManager.grid.getValue()).toEqual({ columns: { _source: {} } });
+    });
+  });
+
+  describe('gridImplementation', () => {
+    it('passes the grid implementation saved with the Discover session', async () => {
+      const { api } = renderComponent({ isEsql: false });
+      await waitFor(() => expect(getLastGridProps()?.gridImplementation).toBeUndefined());
+
+      act(() => {
+        api.savedSearch$.next({ ...api.savedSearch$.getValue(), gridImplementation: 'unified' });
+      });
+
+      await waitFor(() => expect(getLastGridProps()?.gridImplementation).toBe('unified'));
+    });
+
+    it('stores grid implementation changes in the embeddable state', async () => {
+      const { stateManager } = renderComponent({ isEsql: false });
+      await waitFor(() => expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled());
+
+      getLastGridProps()?.onChangeGridImplementation('unified');
+
+      expect(stateManager.gridImplementation.getValue()).toBe('unified');
     });
   });
 
