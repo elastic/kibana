@@ -361,7 +361,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
-      apiTools: false,
+      apiDiscovery: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -437,7 +437,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
-      apiTools: false,
+      apiDiscovery: false,
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
@@ -497,7 +497,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
-      apiTools: false,
+      apiDiscovery: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),

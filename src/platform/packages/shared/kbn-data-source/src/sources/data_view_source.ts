@@ -8,9 +8,10 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { Column, DataSource, SerializedDataSource } from '../types';
+import type { Column, DataSourceBase, SerializedDataSource } from '../types';
 import { columnFromDataViewField } from '../to_column';
 
 /**
@@ -24,7 +25,7 @@ import { columnFromDataViewField } from '../to_column';
  * `getSourceFiltering()`, `getComputedFields()`, etc.) should call
  * {@link getDataView} to access the underlying instance.
  */
-export class DataViewSource implements DataSource {
+export class DataViewSource implements DataSourceBase {
   public readonly kind = 'index-pattern' as const;
   public readonly references: SavedObjectReference[];
 
@@ -73,7 +74,11 @@ export class DataViewSource implements DataSource {
   }
 
   public isTimeBased(): boolean {
-    return !!this.dataView.timeFieldName;
+    return this.dataView.isTimeBased();
+  }
+
+  public isRollup(): boolean {
+    return this.dataView.type === DataViewType.ROLLUP;
   }
 
   public isPersisted(): boolean {

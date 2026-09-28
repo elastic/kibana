@@ -109,9 +109,14 @@ export const runDeductiveAgent = async (
         outputSchema,
         abortSignal: params.abortSignal,
         callbacks: {
-          onAnswerChunk: (content) => {
-            context.events.emit(createTextChunkEvent(content, { messageId }));
-          },
+          // Suppress streaming chunks for structured output: the raw JSON fragments
+          // would render as an ugly blob. The client receives the parsed object via
+          // the messageComplete event instead and renders it as a formatted block.
+          onAnswerChunk: params.structuredOutput
+            ? undefined
+            : (content) => {
+                context.events.emit(createTextChunkEvent(content, { messageId }));
+              },
           onProgress: (progress) => {
             logger.debug(`deductive progress: ${progress}`);
           },
@@ -190,7 +195,16 @@ export const runDeductiveAgent = async (
   };
 
   // Finalize the streamed message so the UI can reconcile the round.
-  context.events.emit(createMessageEvent(round.response.message, { messageId }));
+  // Pass the parsed object when structured output is available so the client can
+  // suppress the raw JSON streaming text and switch to the formatted block early.
+  context.events.emit(
+    createMessageEvent(
+      params.structuredOutput && round.response.structured_output
+        ? round.response.structured_output
+        : round.response.message,
+      { messageId }
+    )
+  );
   context.events.emit({
     type: ChatEventType.roundComplete,
     data: { round },

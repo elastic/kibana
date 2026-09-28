@@ -9,6 +9,8 @@ import type {
   ConversationAccessControl,
   ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
+  ConversationAddEventInput,
+  ConversationEvent,
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
@@ -61,3 +63,11 @@ export interface UpdateConversationAccessControlRequestBody {
 }
 
 export type UpdateConversationAccessControlResponse = ConversationAccessControl;
+
+export interface AddConversationEventsRequestBody {
+  events: ConversationAddEventInput[];
+}
+
+export interface AddConversationEventsResponse {
+  events: ConversationEvent[];
+}

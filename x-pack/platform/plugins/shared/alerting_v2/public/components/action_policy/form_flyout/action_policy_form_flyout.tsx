@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
@@ -46,6 +47,7 @@ export const ActionPolicyFormFlyout = ({
   isLoading = false,
   initialValues,
 }: ActionPolicyFormFlyoutProps) => {
+  const application = useService(CoreStart('application'));
   const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
     initialValues,
     onSubmitCreate: onSave ?? noop,
@@ -53,7 +55,7 @@ export const ActionPolicyFormFlyout = ({
   });
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="m" ownFocus>
+    <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="fill" ownFocus>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
           <h2 data-test-subj="title">
@@ -73,7 +75,22 @@ export const ActionPolicyFormFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <FormProvider {...methods}>
-          <ActionPolicyForm />
+          <ActionPolicyForm
+            config={{
+              layout: 'flyout',
+              connectorCreation: {
+                mode: 'new-tab',
+                href: application.getUrlForApp('management', {
+                  deepLinkId: 'triggersActionsConnectors',
+                  path: '/connectors',
+                }),
+              },
+              collapsibleSections: {
+                notificationControls: { initialIsOpen: false },
+                destination: { initialIsOpen: true },
+              },
+            }}
+          />
         </FormProvider>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

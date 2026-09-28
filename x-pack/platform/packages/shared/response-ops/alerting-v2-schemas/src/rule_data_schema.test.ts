@@ -19,7 +19,6 @@ import {
   getNoDataEsqlQuery,
   getRootEsqlQuery,
   bulkGetRulesResponseSchema,
-  bulkGetRulesParamsSchema,
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
@@ -29,12 +28,12 @@ import {
 import { tagsResponseSchema } from './common';
 import {
   FIND_MAX_RESULT_WINDOW,
-  ID_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
   MAX_ARTIFACT_DATA_LENGTH,
   MAX_BULK_ITEMS,
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
+  MAX_PER_PAGE,
 } from './constants';
 
 const validCreateData = {
@@ -61,16 +60,16 @@ describe('createRuleDataSchema', () => {
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
+        metadata: { name: 'test rule', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
         recovery_strategy: 'no_breach',
         grouping: { fields: ['host.name'] },
         state_transition: {
-          pending_operator: 'AND',
+          pending_operator: 'and',
           pending_count: 3,
           pending_timeframe: '10m',
-          recovering_operator: 'OR',
+          recovering_operator: 'or',
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
@@ -79,16 +78,16 @@ describe('createRuleDataSchema', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
+          metadata: { name: 'test rule', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
           recovery_strategy: 'no_breach',
           grouping: { fields: ['host.name'] },
           state_transition: {
-            pending_operator: 'AND',
+            pending_operator: 'and',
             pending_count: 3,
             pending_timeframe: '10m',
-            recovering_operator: 'OR',
+            recovering_operator: 'or',
             recovering_count: 5,
             recovering_timeframe: '15m',
           },
@@ -697,14 +696,14 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
         state_transition: {
-          pending_operator: 'AND',
+          pending_operator: 'and',
           pending_count: 2,
           pending_timeframe: '10m',
         },
       });
 
       expect(result.state_transition).toEqual({
-        pending_operator: 'AND',
+        pending_operator: 'and',
         pending_count: 2,
         pending_timeframe: '10m',
       });
@@ -715,14 +714,14 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         recovery_strategy: 'no_breach',
         state_transition: {
-          recovering_operator: 'OR',
+          recovering_operator: 'or',
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
       });
 
       expect(result.state_transition).toEqual({
-        recovering_operator: 'OR',
+        recovering_operator: 'or',
         recovering_count: 5,
         recovering_timeframe: '15m',
       });
@@ -1726,6 +1725,26 @@ describe('findRulesRequestSchema', () => {
     expect(findRulesRequestSchema.parse({})).toEqual({});
   });
 
+  it('accepts valid query params', () => {
+    expect(
+      findRulesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        filter: 'kind: alert',
+        sort_field: 'name',
+        sort_order: 'asc',
+        search: 'cpu',
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      filter: 'kind: alert',
+      sort_field: 'name',
+      sort_order: 'asc',
+      search: 'cpu',
+    });
+  });
+
   it('coerces numeric strings for page and per_page', () => {
     expect(findRulesRequestSchema.parse({ page: '2', per_page: '50' })).toEqual({
       page: 2,
@@ -1737,16 +1756,18 @@ describe('findRulesRequestSchema', () => {
     expect(findRulesRequestSchema.safeParse({ page }).success).toBe(false);
   });
 
-  it.each([0, 1.5, 1001])('rejects per_page %p', (perPage) => {
+  it.each([0, 1.5, MAX_PER_PAGE + 1])('rejects per_page %p', (perPage) => {
     expect(findRulesRequestSchema.safeParse({ per_page: perPage }).success).toBe(false);
   });
 
   it('accepts the last page inside the max result window', () => {
-    expect(findRulesRequestSchema.safeParse({ page: 10, per_page: 1000 }).success).toBe(true);
+    expect(findRulesRequestSchema.safeParse({ page: 100, per_page: MAX_PER_PAGE }).success).toBe(
+      true
+    );
   });
 
   it('rejects a page beyond the max result window', () => {
-    const result = findRulesRequestSchema.safeParse({ page: 11, per_page: 1000 });
+    const result = findRulesRequestSchema.safeParse({ page: 101, per_page: MAX_PER_PAGE });
 
     expect(result.success).toBe(false);
   });
@@ -1755,58 +1776,9 @@ describe('findRulesRequestSchema', () => {
     expect(findRulesRequestSchema.safeParse({ page: 500 }).success).toBe(true);
     expect(findRulesRequestSchema.safeParse({ page: 501 }).success).toBe(false);
   });
-});
 
-describe('bulkGetRulesParamsSchema', () => {
-  it('accepts a single id', () => {
-    const result = bulkGetRulesParamsSchema.parse({ ids: ['rule-1'] });
-    expect(result).toEqual({ ids: ['rule-1'] });
-  });
-
-  it('accepts up to MAX_BULK_ITEMS ids', () => {
-    const ids = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => `rule-${i}`);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids })).not.toThrow();
-  });
-
-  it('preserves caller-provided id order (no sorting)', () => {
-    const ids = ['rule-z', 'rule-a', 'rule-m'];
-    const result = bulkGetRulesParamsSchema.parse({ ids });
-    expect(result.ids).toEqual(ids);
-  });
-
-  it('trims whitespace around ids', () => {
-    const result = bulkGetRulesParamsSchema.parse({ ids: ['  rule-1  '] });
-    expect(result.ids).toEqual(['rule-1']);
-  });
-
-  it('rejects a missing ids field', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({})).toThrow();
-  });
-
-  it('rejects an empty ids array', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [] })).toThrow();
-  });
-
-  it('rejects more than MAX_BULK_ITEMS ids', () => {
-    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `rule-${i}`);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids })).toThrow();
-  });
-
-  it('rejects an id longer than ID_MAX_LENGTH', () => {
-    const tooLong = 'a'.repeat(ID_MAX_LENGTH + 1);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [tooLong] })).toThrow();
-  });
-
-  it('rejects an empty-string id', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [''] })).toThrow();
-  });
-
-  it('rejects a whitespace-only id (after trim it is empty)', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['   '] })).toThrow();
-  });
-
-  it('rejects unknown top-level fields (strict)', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['rule-1'], foo: 'bar' })).toThrow();
+  it('rejects unknown keys', () => {
+    expect(() => findRulesRequestSchema.parse({ unknown_key: 'kind: alert' })).toThrow();
   });
 });
 
@@ -1819,24 +1791,24 @@ describe('bulkGetRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    created_by: 'user-a',
+    created_by: { profile_uid: 'user-a' },
     created_at: '2026-01-01T00:00:00.000Z',
-    updated_by: 'user-a',
+    updated_by: { profile_uid: 'user-a' },
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
-  it('accepts an empty rules array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ rules: [] });
-    expect(result).toEqual({ rules: [] });
+  it('accepts an empty items array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ items: [] });
+    expect(result).toEqual({ items: [] });
   });
 
-  it('accepts a populated rules array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ rules: [sampleRule] });
-    expect(result.rules).toHaveLength(1);
-    expect(result.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
+  it('accepts a populated items array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ items: [sampleRule] });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
   });
 
-  it('rejects a missing rules field', () => {
+  it('rejects a missing items field', () => {
     expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
   });
 });
@@ -1921,21 +1893,21 @@ describe('bulkCreateRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    created_by: 'user-a',
+    created_by: { profile_uid: 'user-a' },
     created_at: '2026-01-01T00:00:00.000Z',
-    updated_by: 'user-a',
+    updated_by: { profile_uid: 'user-a' },
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
   it('accepts created rules and an empty errors array', () => {
-    const result = bulkCreateRulesResponseSchema.parse({ rules: [sampleRule], errors: [] });
-    expect(result.rules).toHaveLength(1);
+    const result = bulkCreateRulesResponseSchema.parse({ items: [sampleRule], errors: [] });
+    expect(result.items).toHaveLength(1);
     expect(result.errors).toEqual([]);
   });
 
   it('accepts per-item errors without created rules', () => {
     const result = bulkCreateRulesResponseSchema.parse({
-      rules: [],
+      items: [],
       errors: [
         {
           id: 'rule-1',
@@ -1943,11 +1915,11 @@ describe('bulkCreateRulesResponseSchema', () => {
         },
       ],
     });
-    expect(result.rules).toEqual([]);
+    expect(result.items).toEqual([]);
     expect(result.errors).toHaveLength(1);
   });
 
-  it('rejects a missing rules field', () => {
+  it('rejects a missing items field', () => {
     expect(() => bulkCreateRulesResponseSchema.parse({ errors: [] })).toThrow();
   });
 });
