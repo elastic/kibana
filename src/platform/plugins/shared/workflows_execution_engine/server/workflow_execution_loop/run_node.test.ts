@@ -191,10 +191,7 @@ describe('runNode', () => {
       workflowExecution.cancelRequested = true;
       workflowExecution.status = ExecutionStatus.RUNNING;
 
-      const workflowLogger = {
-        ...createMockWorkflowEventLogger(),
-        flushEvents: jest.fn(),
-      };
+      const workflowLogger = createMockWorkflowEventLogger();
       const workflowExecutionRepository = {
         getWorkflowExecutionById: jest.fn(),
       };

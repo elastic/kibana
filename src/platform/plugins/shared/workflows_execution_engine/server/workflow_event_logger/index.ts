@@ -14,7 +14,6 @@ export type {
   WorkflowEventFlushOptions,
   WorkflowEventLoggerOptions,
   IWorkflowEventLogger,
-  IWorkflowEventLoggerWithFlush,
   IWorkflowEventLoggerService,
   ExecutionLogsParams,
   StepLogsParams,

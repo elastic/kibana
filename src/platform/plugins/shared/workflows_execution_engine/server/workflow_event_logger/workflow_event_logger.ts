@@ -12,23 +12,21 @@ import type { Logger } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type {
   IWorkflowEventLogger,
-  IWorkflowEventLoggerWithFlush,
-  WorkflowEventFlushOptions,
   WorkflowEventLoggerContext,
   WorkflowEventLoggerOptions,
 } from './types';
+import { WorkflowEventQueue } from './workflow_event_queue';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
-import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
-export class WorkflowEventLogger implements IWorkflowEventLoggerWithFlush {
-  private eventQueue: WorkflowLogEvent[] = [];
+export class WorkflowEventLogger implements IWorkflowEventLogger {
   private timings: Map<string, Date> = new Map();
 
   constructor(
     private logsRepository: LogsRepository,
     private logger: Logger,
     private context: WorkflowEventLoggerContext = {},
-    private options: WorkflowEventLoggerOptions = {}
+    private options: WorkflowEventLoggerOptions = {},
+    public readonly eventQueue: WorkflowEventQueue = new WorkflowEventQueue(logsRepository, logger)
   ) {}
 
   public logEvent(eventProperties: Partial<WorkflowLogEvent>): void {
@@ -42,7 +40,7 @@ export class WorkflowEventLogger implements IWorkflowEventLoggerWithFlush {
       this.logToConsole(event);
     }
 
-    this.queueEvent(event);
+    this.eventQueue.push(event);
   }
 
   public logInfo(message: string, additionalData: Partial<WorkflowLogEvent> = {}): void {
@@ -172,7 +170,8 @@ export class WorkflowEventLogger implements IWorkflowEventLoggerWithFlush {
         stepName,
         stepType,
       },
-      this.options
+      this.options,
+      this.eventQueue
     );
   }
 
@@ -240,40 +239,5 @@ export class WorkflowEventLogger implements IWorkflowEventLoggerWithFlush {
     return `${this.context.executionId || 'unknown'}-${event.event?.action || 'unknown'}-${
       this.context.stepId || 'workflow'
     }`;
-  }
-
-  private queueEvent(event: WorkflowLogEvent): void {
-    this.eventQueue.push(event);
-  }
-
-  public async flushEvents(options: WorkflowEventFlushOptions = {}): Promise<void> {
-    if (this.eventQueue.length === 0) return;
-
-    const events = [...this.eventQueue];
-    this.eventQueue = [];
-
-    try {
-      await this.logsRepository.createLogs(events);
-
-      this.logger.debug(`Successfully indexed ${events.length} workflow events`);
-    } catch (error) {
-      if (options.signal && isWorkflowTaskManagerAbortSignal(options.signal)) {
-        // Best-effort flushes are used after Task Manager aborts; do not re-queue
-        // because this process may not get another chance to flush them.
-        this.logger.debug(`Failed to index workflow events during best-effort flush`, {
-          eventsCount: events.length,
-          error: { message: error instanceof Error ? error.message : String(error) },
-        });
-        return;
-      }
-
-      this.logger.error(`Failed to index workflow events: ${error.message}`, {
-        eventsCount: events.length,
-        error: error.stack,
-      });
-
-      // Re-queue events for retry (optional)
-      this.eventQueue.unshift(...events);
-    }
   }
 }

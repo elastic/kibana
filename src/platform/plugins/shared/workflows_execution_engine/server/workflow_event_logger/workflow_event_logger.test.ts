@@ -35,7 +35,7 @@ describe('WorkflowEventLogger', () => {
     });
 
     workflowLogger.logInfo('hello', { tags: ['tag-1'] });
-    await workflowLogger.flushEvents();
+    await workflowLogger.eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
     const events = (logsRepository.createLogs as jest.Mock).mock.calls[0][0] as WorkflowLogEvent[];
@@ -68,8 +68,8 @@ describe('WorkflowEventLogger', () => {
     const workflowLogger = new WorkflowEventLogger(logsRepository, logger);
 
     workflowLogger.logError('failure', new Error('boom'));
-    await workflowLogger.flushEvents();
-    await workflowLogger.flushEvents();
+    await workflowLogger.eventQueue.flush();
+    await workflowLogger.eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(
@@ -95,8 +95,8 @@ describe('WorkflowEventLogger', () => {
     const signal = AbortSignal.abort(new WorkflowTaskManagerAbortError());
 
     workflowLogger.logInfo('best effort');
-    await workflowLogger.flushEvents({ signal });
-    await workflowLogger.flushEvents();
+    await workflowLogger.eventQueue.flush({ signal });
+    await workflowLogger.eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
     expect(logger.error).not.toHaveBeenCalled();
@@ -115,8 +115,8 @@ describe('WorkflowEventLogger', () => {
     controller.abort(new Error('user cancellation'));
 
     workflowLogger.logInfo('retryable');
-    await workflowLogger.flushEvents({ signal: controller.signal });
-    await workflowLogger.flushEvents();
+    await workflowLogger.eventQueue.flush({ signal: controller.signal });
+    await workflowLogger.eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(
@@ -157,7 +157,7 @@ describe('WorkflowEventLogger', () => {
     const timingEvent = { event: { action: 'poll' } } as WorkflowLogEvent;
     stepLogger.startTiming(timingEvent);
     stepLogger.stopTiming(timingEvent);
-    await (stepLogger as WorkflowEventLogger).flushEvents();
+    await workflowLogger.eventQueue.flush();
 
     const events = (logsRepository.createLogs as jest.Mock).mock.calls[0][0] as WorkflowLogEvent[];
     expect(events).toHaveLength(2);
@@ -167,10 +167,61 @@ describe('WorkflowEventLogger', () => {
     expect(events[0].workflow?.step_id).toBe('step-2');
     expect(events[0].workflow?.step_execution_id).toBe('step-exec-2');
   });
+
+  it('drains step logger events when the parent flushes', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    const workflowLogger = new WorkflowEventLogger(logsRepository, logger, {
+      workflowId: 'wf-1',
+      executionId: 'exec-1',
+    });
+    const stepLogger = workflowLogger.createStepLogger('step-exec-2', 'step-2', 'My Step', 'wait');
+
+    workflowLogger.logInfo('workflow started');
+    stepLogger.logInfo('step started');
+    await workflowLogger.eventQueue.flush();
+
+    const events = (logsRepository.createLogs as jest.Mock).mock.calls[0][0] as WorkflowLogEvent[];
+    expect(events.map((event) => event.message)).toEqual(['workflow started', 'step started']);
+    expect(events[1].workflow?.step_id).toBe('step-2');
+  });
+
+  it('keeps events logged during a flush for the next flush', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    let releaseFlush: (() => void) | undefined;
+    logsRepository.createLogs.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseFlush = resolve;
+        })
+    );
+    const workflowLogger = new WorkflowEventLogger(logsRepository, logger, {
+      workflowId: 'wf-1',
+      executionId: 'exec-1',
+    });
+    const stepLogger = workflowLogger.createStepLogger('step-exec-2', 'step-2', 'My Step', 'wait');
+
+    stepLogger.logInfo('before flush');
+    const flushPromise = workflowLogger.eventQueue.flush();
+    stepLogger.logInfo('during flush');
+    releaseFlush?.();
+    await flushPromise;
+
+    const firstBatch = (logsRepository.createLogs as jest.Mock).mock
+      .calls[0][0] as WorkflowLogEvent[];
+    expect(firstBatch.map((event) => event.message)).toEqual(['before flush']);
+
+    await workflowLogger.eventQueue.flush();
+
+    const secondBatch = (logsRepository.createLogs as jest.Mock).mock
+      .calls[1][0] as WorkflowLogEvent[];
+    expect(secondBatch.map((event) => event.message)).toEqual(['during flush']);
+  });
 });
 
 /**
- * `flushEvents()` is the swallow boundary for log writes. Whatever ES throws —
+ * `WorkflowEventQueue.flush()` is the swallow boundary for log writes. Whatever ES throws —
  * including a circuit breaker that surfaces lazily on first data-stream init —
  * must NOT propagate to the workflow execution loop, because the loop's
  * `finally` block flushes events and a rejection there would crash the
@@ -179,10 +230,10 @@ describe('WorkflowEventLogger', () => {
  * Tests pin down two contracts:
  *   1. A circuit breaker rejection from `LogsRepository.createLogs` is logged
  *      and swallowed; the failed events are re-queued for a future flush.
- *   2. The next `flushEvents()` call after a transient CB reattempts the
+ *   2. The next `flush()` call after a transient CB reattempts the
  *      previously-failed events alongside any new ones.
  */
-describe('WorkflowEventLogger.flushEvents — circuit breaker resilience', () => {
+describe('WorkflowEventQueue.flush — circuit breaker resilience', () => {
   it('swallows a circuit breaker rejection from createLogs and re-queues the events', async () => {
     const logsRepository = createLogsRepositoryMock();
     logsRepository.createLogs.mockRejectedValueOnce(createCircuitBreakerError());
@@ -193,7 +244,7 @@ describe('WorkflowEventLogger.flushEvents — circuit breaker resilience', () =>
     eventLogger.logInfo('first');
     eventLogger.logInfo('second');
 
-    await expect(eventLogger.flushEvents()).resolves.toBeUndefined();
+    await expect(eventLogger.eventQueue.flush()).resolves.toBeUndefined();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
     expect(logsRepository.createLogs.mock.calls[0][0]).toHaveLength(2);
@@ -213,10 +264,10 @@ describe('WorkflowEventLogger.flushEvents — circuit breaker resilience', () =>
     const eventLogger = new WorkflowEventLogger(logsRepository, logger);
 
     eventLogger.logInfo('event-a');
-    await eventLogger.flushEvents();
+    await eventLogger.eventQueue.flush();
 
     eventLogger.logInfo('event-b');
-    await eventLogger.flushEvents();
+    await eventLogger.eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
     const secondFlushBatch = logsRepository.createLogs.mock.calls[1][0];
@@ -237,7 +288,7 @@ describe('WorkflowEventLogger.flushEvents — circuit breaker resilience', () =>
 
     try {
       eventLogger.logInfo('boom');
-      await eventLogger.flushEvents();
+      await eventLogger.eventQueue.flush();
       await new Promise((resolve) => setImmediate(resolve));
 
       expect(onUnhandled).not.toHaveBeenCalled();

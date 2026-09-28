@@ -16,7 +16,8 @@ import type { WorkflowExecutionCursorApi } from '../workflow_context_manager/wor
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
-import type { IWorkflowEventLoggerWithFlush } from '../workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
+import type { WorkflowEventQueue } from '../workflow_event_logger/workflow_event_queue';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export interface WorkflowExecutionLoopParams {
@@ -26,7 +27,8 @@ export interface WorkflowExecutionLoopParams {
   stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
-  workflowLogger: IWorkflowEventLoggerWithFlush;
+  workflowLogger: IWorkflowEventLogger;
+  eventQueue: WorkflowEventQueue;
   workflowExecutionRepository: WorkflowExecutionRepository;
   nodesFactory: NodesFactory;
   esClient: ElasticsearchClient;

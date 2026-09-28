@@ -145,6 +145,7 @@ async function resumeWorkflowWithRequest({
     stepIoService,
     workflowExecutionRepository,
     workflowLogger,
+    eventQueue: workflowLogger.eventQueue,
     nodesFactory,
     workflowExecutionGraph,
     esClient,

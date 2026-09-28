@@ -44,7 +44,7 @@ export interface LogsByLevelParams extends BaseLogsParams {
 }
 
 export interface IWorkflowEventLoggerService {
-  createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLoggerWithFlush;
+  createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLogger;
   createWorkflowLogger(workflowId: string, workflowName?: string): IWorkflowEventLogger;
   createExecutionLogger(
     workflowId: string,
@@ -102,8 +102,4 @@ export interface IWorkflowEventLogger {
     stepName?: string,
     stepType?: string
   ): IWorkflowEventLogger;
-}
-
-export interface IWorkflowEventLoggerWithFlush extends IWorkflowEventLogger {
-  flushEvents(options?: WorkflowEventFlushOptions): Promise<void>;
 }

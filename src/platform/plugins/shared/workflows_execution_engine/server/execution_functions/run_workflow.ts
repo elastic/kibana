@@ -241,6 +241,7 @@ async function runWorkflowWithRequest({
       stepIoService,
       workflowExecutionRepository,
       workflowLogger,
+      eventQueue: workflowLogger.eventQueue,
       nodesFactory,
       workflowExecutionGraph,
       esClient,
