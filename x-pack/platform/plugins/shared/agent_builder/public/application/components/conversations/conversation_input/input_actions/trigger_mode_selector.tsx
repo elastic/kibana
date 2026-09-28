@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiListGroup, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, EuiSelectable } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
@@ -32,6 +33,10 @@ const getButtonAriaLabel = (mode: string) =>
     values: { mode },
   });
 
+const panelStyles = css`
+  inline-size: min-content;
+`;
+
 const triggerModeOptions = [ChatTriggerMode.Always, ChatTriggerMode.Never] as const;
 
 interface TriggerModeSelectorProps {
@@ -51,7 +56,8 @@ export const TriggerModeSelector: React.FC<TriggerModeSelectorProps> = ({
       aria-label={selectorAriaLabel}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="s"
+      panelPaddingSize="none"
+      panelProps={{ css: panelStyles }}
       anchorPosition="upRight"
       button={
         <EuiButtonEmpty
@@ -67,20 +73,29 @@ export const TriggerModeSelector: React.FC<TriggerModeSelectorProps> = ({
         </EuiButtonEmpty>
       }
     >
-      <EuiListGroup
-        color="text"
+      <EuiSelectable
+        aria-label={selectorAriaLabel}
         data-test-subj="agentBuilderTriggerModeSelectorList"
-        listItems={triggerModeOptions.map((mode) => ({
+        singleSelection="always"
+        options={triggerModeOptions.map((mode) => ({
+          key: mode,
           label: triggerModeLabels[mode],
-          size: 's',
-          isActive: mode === triggerMode,
+          checked: mode === triggerMode ? 'on' : undefined,
           'data-test-subj': `agentBuilderTriggerModeOption-${mode}`,
-          onClick: () => {
-            onTriggerModeChange(mode);
-            closePopover();
-          },
         }))}
-      />
+        listProps={{ isVirtualized: false, paddingSize: 's' }}
+        onChange={(_options, _event, { key }) => {
+          const mode = triggerModeOptions.find((option) => option === key);
+
+          if (mode) {
+            onTriggerModeChange(mode);
+          }
+
+          closePopover();
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
     </EuiPopover>
   );
 };

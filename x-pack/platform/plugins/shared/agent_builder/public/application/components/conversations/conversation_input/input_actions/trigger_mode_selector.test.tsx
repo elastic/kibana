@@ -21,6 +21,23 @@ describe('TriggerModeSelector', () => {
     );
   });
 
+  it('marks the current mode as the selected option', async () => {
+    render(
+      <TriggerModeSelector triggerMode={ChatTriggerMode.Never} onTriggerModeChange={jest.fn()} />
+    );
+
+    fireEvent.click(screen.getByTestId('agentBuilderTriggerModeSelectorButton'));
+
+    expect(await screen.findByRole('option', { name: 'Talk to users' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(screen.getByRole('option', { name: 'Talk to agent and users' })).toHaveAttribute(
+      'aria-selected',
+      'false'
+    );
+  });
+
   it('changes the mode and closes the popover when an option is picked', async () => {
     const onTriggerModeChange = jest.fn();
     render(
