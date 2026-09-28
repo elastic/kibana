@@ -74,6 +74,9 @@ export async function deleteExpiredHistorySnapshots({
 
   const now = new Date();
   const log = logger.get('deleteExpiredHistorySnapshots');
+
+  log.info(`Deleting entity store history snapshots older than ${retentionDays} days`);
+
   const patterns = await resolveHistorySnapshotIndexPatterns(
     esClient,
     namespace,
