@@ -314,7 +314,6 @@ export class ContextEnginePlugin
       logger: this.logger.get('routes'),
     });
 
-
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
       registerWorkflowProvider: (provider) => {

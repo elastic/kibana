@@ -46,10 +46,7 @@ interface Candidate {
 const missingRequiredField = (proposal: ProposedImprovement): string | undefined => {
   const { action, payload } = proposal;
   if (action === 'add_ki' && !payload?.ki) return 'payload.ki';
-  if (
-    action === 'edit_ki' &&
-    (!payload?.ki_patch || Object.keys(payload.ki_patch).length === 0)
-  )
+  if (action === 'edit_ki' && (!payload?.ki_patch || Object.keys(payload.ki_patch).length === 0))
     return 'payload.ki_patch';
   if ((action === 'add_workflow' || action === 'edit_workflow') && !payload?.workflow_yaml)
     return 'payload.workflow_yaml';
