@@ -7,6 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
 import { APP_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 
 const ALERTS_APP_PATH = 'security/alerts';
 
@@ -21,8 +22,14 @@ export class AlertFlyoutResponsePage {
   readonly responseSectionHeader: Locator;
   readonly responseButton: Locator;
   readonly responseDetails: Locator;
+  readonly tableSection: Locator;
+  readonly refreshQuery: Locator;
 
   constructor(private readonly page: ScoutPage) {
+    this.tableSection = this.page.testSubj.locator('alerts-page-table-section');
+    this.refreshQuery = this.page.testSubj
+      .locator('alerts-page-content')
+      .getByTestId('querySubmitButton');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded');
     this.expandEvent = this.alertsTable.getByTestId('expand-event');
     this.flyoutTitle = this.page.testSubj.locator('securitySolutionFlyoutAlertTitleText');
@@ -40,10 +47,26 @@ export class AlertFlyoutResponsePage {
         query: `(language:kuery,query:'_id: ${alertId}')`,
       },
     });
-    // First visit creates the ad-hoc alerts data view. The table stays on its
-    // skeleton until that finishes, which is past the default 10s action timeout.
-    await this.alertsTable.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
-    await this.expandEvent.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
+    // Charts render before list-index init finishes. Until that init completes,
+    // the alerts table returns null, so the grid is absent even when the
+    // summary already shows the alert. Refresh until the grid mounts.
+    await this.tableSection.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
+    await this.tableSection.scrollIntoViewIfNeeded();
+    await expect
+      .poll(
+        async () => {
+          if (await this.alertsTable.isVisible()) {
+            return true;
+          }
+          if (await this.refreshQuery.isEnabled()) {
+            await this.refreshQuery.click();
+          }
+          await this.tableSection.scrollIntoViewIfNeeded();
+          return false;
+        },
+        { timeout: APP_LOAD_TIMEOUT_MS, intervals: [2_000] }
+      )
+      .toBe(true);
     await this.expandEvent.click();
     await this.flyoutTitle.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
