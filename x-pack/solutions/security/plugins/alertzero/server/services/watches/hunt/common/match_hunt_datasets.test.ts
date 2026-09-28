@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import {
   HUNT_DATASET_MATCH_MIN_CONFIDENCE,
+  HUNT_VENDOR_ALIASES,
   matchDatasetsDeterministic,
   matchDatasetsWithModel,
   normalizeVendorToken,
@@ -27,8 +28,11 @@ const dataset = (name: string): DiscoveredDataset => {
 
 const fortigate = dataset('fortinet.fortigate');
 const okta = dataset('okta.system');
-const ciscoAsa = dataset('cisco_asa');
+const ciscoAsa = dataset('cisco_asa.log');
+const ciscoIse = dataset('cisco_ise.log');
 const awsCloudtrail = dataset('aws.cloudtrail');
+const panos = dataset('panw.panos');
+const f5BigIp = dataset('f5_bigip.log');
 const datasets = [fortigate, okta, ciscoAsa, awsCloudtrail];
 
 describe('normalizeVendorToken', () => {
@@ -57,15 +61,91 @@ describe('matchDatasetsDeterministic', () => {
     ).toEqual([okta]);
   });
 
-  it('matches when the report vendor appears in the dataset name', () => {
-    // `cisco_asa` has no '.', so its vendor token is the whole name ('ciscoasa'),
-    // which is not a substring of 'cisco'. The report-vendor-in-dataset-name rule
-    // fires instead: 'cisco' is a substring of 'ciscoasa'.
-    expect(matchDatasetsDeterministic({ datasets, vendor: 'Cisco' })).toEqual([ciscoAsa]);
+  it('matches when the report vendor equals a segment of the dataset vendor token', () => {
+    // `cisco_asa.log` has vendor token 'cisco_asa' ('ciscoasa' normalized), which is
+    // not a substring of 'cisco'. The segment rule fires instead: 'cisco' equals the
+    // first '_'-separated segment, so every Cisco integration matches.
+    expect(
+      matchDatasetsDeterministic({ datasets: [...datasets, ciscoIse], vendor: 'Cisco' })
+    ).toEqual([ciscoAsa, ciscoIse]);
   });
 
-  it('does not match a product against the dataset name (only the vendor is checked that way)', () => {
+  it('does not match a product against the dataset vendor segments (only the vendor is checked that way)', () => {
     expect(matchDatasetsDeterministic({ datasets, product: 'Cisco' })).toEqual([]);
+  });
+
+  it.each([
+    ['SAP', 'aws.apigateway_logs'],
+    ['SAP', 'windows.applocker_msi_and_script'],
+    ['SAP', 'axonius.application'],
+    ['Intel', 'zeek.intel'],
+    ['Intel', 'ti_crowdstrike.intel'],
+    ['Intel', 'bbot.asm_intel'],
+    ['Quest', 'cloudflare_logpush.http_request'],
+    ['Versa', 'openai_chatgpt_enterprise.conversation_message'],
+    ['Linux', 'ti_google_threat_intelligence.linux'],
+  ])(
+    'does not match report vendor %s against %s on a substring of the dataset name',
+    (vendor, name) => {
+      expect(matchDatasetsDeterministic({ datasets: [dataset(name)], vendor })).toEqual([]);
+    }
+  );
+
+  it('does not match the report vendor against a partial vendor segment', () => {
+    // 'cisco' is inside 'ciscoasa' but the segments are 'cisco' and 'asa'; 'cis' equals neither.
+    expect(matchDatasetsDeterministic({ datasets: [ciscoAsa], vendor: 'cis' })).toEqual([]);
+  });
+
+  it('still matches a dataset vendor token inside the report product for multi-segment names', () => {
+    expect(
+      matchDatasetsDeterministic({
+        datasets: [dataset('windows.applocker_msi_and_script'), okta],
+        vendor: 'Microsoft',
+        product: 'Windows',
+      })
+    ).toEqual([dataset('windows.applocker_msi_and_script')]);
+  });
+
+  describe('vendor aliases', () => {
+    it('seeds the vendors whose dataset token is not derivable from the name', () => {
+      expect(HUNT_VENDOR_ALIASES).toEqual({
+        paloaltonetworks: ['panw'],
+        f5: ['f5bigip'],
+        vmware: ['vsphere'],
+      });
+    });
+
+    it('matches Palo Alto Networks to panw.panos', () => {
+      expect(
+        matchDatasetsDeterministic({ datasets: [...datasets, panos], vendor: 'Palo Alto Networks' })
+      ).toEqual([panos]);
+    });
+
+    it('matches F5 to f5_bigip.log even though the vendor is under the minimum token length', () => {
+      expect(
+        matchDatasetsDeterministic({ datasets: [...datasets, f5BigIp], vendor: 'F5' })
+      ).toEqual([f5BigIp]);
+    });
+
+    it('matches VMware to vsphere.log', () => {
+      const vsphere = dataset('vsphere.log');
+      expect(
+        matchDatasetsDeterministic({ datasets: [...datasets, vsphere], vendor: 'VMware' })
+      ).toEqual([vsphere]);
+    });
+
+    it('also looks the report product up in the alias table', () => {
+      expect(
+        matchDatasetsDeterministic({
+          datasets: [...datasets, panos],
+          product: 'Palo Alto Networks',
+        })
+      ).toEqual([panos]);
+    });
+
+    it('does not let an alias pull in a different vendor', () => {
+      expect(matchDatasetsDeterministic({ datasets, vendor: 'Palo Alto Networks' })).toEqual([]);
+    });
   });
 
   it('is case and punctuation insensitive', () => {
@@ -110,7 +190,7 @@ describe('matchDatasetsDeterministic', () => {
         product: 'Windows Operating System',
       })
     ).toEqual([]);
-    // The report-vendor-in-dataset-name rule is unaffected.
+    // The report-vendor-equals-vendor-segment rule is unaffected.
     expect(matchDatasetsDeterministic({ datasets: [system], vendor: 'system' })).toEqual([system]);
   });
 
@@ -134,76 +214,156 @@ describe('matchDatasetsWithModel', () => {
     };
   };
 
-  it('returns the matched datasets and confidence', async () => {
+  it('returns the matched datasets, per-dataset scores, and the lowest confidence', async () => {
     const invoke = jest.fn().mockResolvedValue({
-      datasets: ['okta.system', 'fortinet.fortigate'],
-      confidence: 0.9,
+      datasets: [
+        { dataset: 'okta.system', confidence: 0.9 },
+        { dataset: 'fortinet.fortigate', confidence: 0.7 },
+      ],
     });
     const { model } = buildModel(invoke);
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' } })
-    ).resolves.toEqual({ matches: [fortigate, okta], confidence: 0.9 });
+    ).resolves.toEqual({
+      matches: [fortigate, okta],
+      confidence: 0.7,
+      scored: [
+        { dataset: 'fortinet.fortigate', confidence: 0.7 },
+        { dataset: 'okta.system', confidence: 0.9 },
+      ],
+    });
   });
 
-  it('filters hallucinated dataset names against the option list', async () => {
+  it('narrows a mixed set to the datasets that clear the threshold on their own', async () => {
+    const logger = loggerMock.create();
+    const options = [ciscoAsa, f5BigIp, panos];
     const invoke = jest.fn().mockResolvedValue({
-      datasets: ['okta.system', 'okta.sys', 'logs-okta.system-*', 'made_up.dataset'],
-      confidence: 0.8,
+      datasets: [
+        { dataset: 'panw.panos', confidence: 0.9 },
+        { dataset: 'cisco_asa.log', confidence: 0.6 },
+        { dataset: 'f5_bigip.log', confidence: 0.3 },
+      ],
     });
     const { model } = buildModel(invoke);
 
     await expect(
-      matchDatasetsWithModel({ model, datasets, report: { text: 'Okta session hijack' } })
-    ).resolves.toEqual({ matches: [okta], confidence: 0.8 });
+      matchDatasetsWithModel({
+        model,
+        datasets: options,
+        report: { vendor: 'Palo Alto Networks', product: 'PAN-OS' },
+        logger,
+      })
+    ).resolves.toEqual({
+      matches: [ciscoAsa, panos],
+      confidence: 0.6,
+      scored: [
+        { dataset: 'cisco_asa.log', confidence: 0.6 },
+        { dataset: 'panw.panos', confidence: 0.9 },
+      ],
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining(`1 below confidence threshold ${HUNT_DATASET_MATCH_MIN_CONFIDENCE}`)
+    );
+  });
+
+  it('filters hallucinated dataset names against the option list', async () => {
+    const logger = loggerMock.create();
+    const invoke = jest.fn().mockResolvedValue({
+      datasets: [
+        { dataset: 'okta.system', confidence: 0.8 },
+        { dataset: 'okta.sys', confidence: 0.9 },
+        { dataset: 'logs-okta.system-*', confidence: 0.9 },
+        { dataset: 'made_up.dataset', confidence: 1 },
+      ],
+    });
+    const { model } = buildModel(invoke);
+
+    await expect(
+      matchDatasetsWithModel({ model, datasets, report: { text: 'Okta session hijack' }, logger })
+    ).resolves.toEqual({
+      matches: [okta],
+      confidence: 0.8,
+      scored: [{ dataset: 'okta.system', confidence: 0.8 }],
+    });
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('3 not in the option list'));
   });
 
   it('returns undefined when only hallucinated names come back', async () => {
     const logger = loggerMock.create();
-    const invoke = jest.fn().mockResolvedValue({ datasets: ['nope.nothing'], confidence: 0.95 });
+    const invoke = jest
+      .fn()
+      .mockResolvedValue({ datasets: [{ dataset: 'nope.nothing', confidence: 0.95 }] });
     const { model } = buildModel(invoke);
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { text: 'x' }, logger })
     ).resolves.toBeUndefined();
     expect(logger.debug).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('1 not in the option list'));
   });
 
   it('returns undefined when the model picks nothing', async () => {
-    const invoke = jest.fn().mockResolvedValue({ datasets: [], confidence: 0.2 });
+    const logger = loggerMock.create();
+    const invoke = jest.fn().mockResolvedValue({ datasets: [] });
     const { model } = buildModel(invoke);
 
     await expect(
-      matchDatasetsWithModel({ model, datasets, report: { text: 'unrelated' } })
+      matchDatasetsWithModel({ model, datasets, report: { text: 'unrelated' }, logger })
     ).resolves.toBeUndefined();
+    expect(logger.debug).toHaveBeenCalledTimes(1);
   });
 
-  it('drops matches below the confidence threshold and logs at debug', async () => {
+  it('returns undefined when every dataset is below the confidence threshold and logs at debug', async () => {
     const logger = loggerMock.create();
     const invoke = jest.fn().mockResolvedValue({
-      datasets: ['okta.system'],
-      confidence: HUNT_DATASET_MATCH_MIN_CONFIDENCE - 0.01,
+      datasets: [
+        { dataset: 'okta.system', confidence: HUNT_DATASET_MATCH_MIN_CONFIDENCE - 0.01 },
+        { dataset: 'fortinet.fortigate', confidence: 0.1 },
+      ],
     });
     const { model } = buildModel(invoke);
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
     ).resolves.toBeUndefined();
+    expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining(`threshold ${HUNT_DATASET_MATCH_MIN_CONFIDENCE}`)
+      expect.stringContaining(`2 below confidence threshold ${HUNT_DATASET_MATCH_MIN_CONFIDENCE}`)
     );
   });
 
   it('accepts a match exactly at the confidence threshold', async () => {
     const invoke = jest.fn().mockResolvedValue({
-      datasets: ['okta.system'],
-      confidence: HUNT_DATASET_MATCH_MIN_CONFIDENCE,
+      datasets: [{ dataset: 'okta.system', confidence: HUNT_DATASET_MATCH_MIN_CONFIDENCE }],
     });
     const { model } = buildModel(invoke);
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' } })
-    ).resolves.toEqual({ matches: [okta], confidence: HUNT_DATASET_MATCH_MIN_CONFIDENCE });
+    ).resolves.toEqual({
+      matches: [okta],
+      confidence: HUNT_DATASET_MATCH_MIN_CONFIDENCE,
+      scored: [{ dataset: 'okta.system', confidence: HUNT_DATASET_MATCH_MIN_CONFIDENCE }],
+    });
+  });
+
+  it('keeps the highest score when the model repeats a dataset', async () => {
+    const invoke = jest.fn().mockResolvedValue({
+      datasets: [
+        { dataset: 'okta.system', confidence: 0.6 },
+        { dataset: 'okta.system', confidence: 0.9 },
+      ],
+    });
+    const { model } = buildModel(invoke);
+
+    await expect(
+      matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' } })
+    ).resolves.toEqual({
+      matches: [okta],
+      confidence: 0.9,
+      scored: [{ dataset: 'okta.system', confidence: 0.9 }],
+    });
   });
 
   it('returns undefined and warns when the model call throws', async () => {
@@ -215,6 +375,23 @@ describe('matchDatasetsWithModel', () => {
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
     ).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connector down'));
+  });
+
+  it.each([
+    ['a missing confidence', { datasets: [{ dataset: 'okta.system' }] }],
+    ['a NaN confidence', { datasets: [{ dataset: 'okta.system', confidence: Number.NaN }] }],
+    ['an out-of-range confidence', { datasets: [{ dataset: 'okta.system', confidence: 1.5 }] }],
+    ['a non-array datasets', { datasets: 'okta.system' }],
+    ['bare string items', { datasets: ['okta.system'], confidence: 0.9 }],
+  ])('returns undefined and warns when the model output has %s', async (_label, raw) => {
+    const logger = loggerMock.create();
+    const invoke = jest.fn().mockResolvedValue(raw);
+    const { model } = buildModel(invoke);
+
+    await expect(
+      matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
+    ).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid shape'));
   });
 
   it('short-circuits without calling the model when there are no datasets', async () => {
@@ -229,7 +406,9 @@ describe('matchDatasetsWithModel', () => {
   });
 
   it('puts the dataset list and report context into the prompt, clamping text and IOCs', async () => {
-    const invoke = jest.fn().mockResolvedValue({ datasets: ['okta.system'], confidence: 1 });
+    const invoke = jest
+      .fn()
+      .mockResolvedValue({ datasets: [{ dataset: 'okta.system', confidence: 1 }] });
     const { model } = buildModel(invoke);
     const iocs = Array.from({ length: 30 }, (_, i) => ({
       type: 'ip' as const,
@@ -254,6 +433,14 @@ describe('matchDatasetsWithModel', () => {
     expect(prompt).toContain('Vendor: Okta');
     expect(prompt).toContain('Product: Okta Identity Cloud');
     expect(prompt).toContain('Techniques: T1078, T1556');
+    // Vendor and product come before the dataset list so they read as the primary criterion.
+    expect(prompt.indexOf('Vendor: Okta')).toBeLessThan(
+      prompt.indexOf('okta.system | logs-okta.system-*')
+    );
+    expect(prompt.indexOf('Product: Okta Identity Cloud')).toBeLessThan(
+      prompt.indexOf('--- AVAILABLE DATASETS')
+    );
+    expect(prompt).toContain('a dataset from a different vendor is not relevant');
     expect(prompt).toContain('10.0.0.24');
     expect(prompt).not.toContain('10.0.0.25');
     expect(prompt).toContain('A'.repeat(6000));

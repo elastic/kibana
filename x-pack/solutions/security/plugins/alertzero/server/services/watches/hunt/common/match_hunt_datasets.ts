@@ -43,15 +43,37 @@ export const normalizeVendorToken = (value: string): string =>
   value.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 /**
+ * Report vendors whose Fleet dataset vendor token is not derivable from the
+ * name (KEV says 'Palo Alto Networks', the integration is `panw`), keyed by
+ * normalized report vendor -> normalized dataset vendor tokens. Consulted
+ * before the length check so a short vendor like `f5` can still match. Extend
+ * when live runs show a miss.
+ */
+export const HUNT_VENDOR_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  paloaltonetworks: ['panw'],
+  f5: ['f5bigip'],
+  vmware: ['vsphere'],
+};
+
+/** Normalized segments of a dataset vendor token: `cisco_asa` -> ['cisco', 'asa']. */
+const vendorSegments = (datasetVendor: string): string[] =>
+  datasetVendor
+    .split('_')
+    .map(normalizeVendorToken)
+    .filter((segment) => segment !== '');
+
+/**
  * Matches datasets to a report by vendor and product tokens alone. A dataset
- * matches when its vendor token appears inside the report's vendor or product,
- * or the report's vendor appears inside the dataset's full name (so 'Cisco'
- * still finds `cisco_asa`, whose vendor token is the whole name). Tokens
- * shorter than three characters are ignored on both sides, and category-like
- * dataset vendor tokens (`system`, `generic`) never match through the report's
- * product text. Returns [] when the
- * report has neither vendor nor product. No alias table: an unmatched vendor
- * falls through to the model matcher.
+ * matches when (a) its vendor token appears inside the report's vendor or
+ * product, (b) the report's vendor equals one of the `_`-separated segments of
+ * the dataset's vendor token (so 'Cisco' finds `cisco_asa.log` and
+ * `cisco_ise.log`, but 'Intel' does not find `zeek.intel`), or (c) its vendor
+ * token is listed under the report's vendor or product in
+ * `HUNT_VENDOR_ALIASES`. Tokens shorter than three characters are ignored for
+ * (a) and (b), and category-like dataset vendor tokens (`system`, `generic`)
+ * never match through the report's product text. Returns [] when the report
+ * has neither vendor nor product; an unmatched vendor falls through to the
+ * model matcher.
  */
 export const matchDatasetsDeterministic = ({
   datasets,
@@ -66,41 +88,62 @@ export const matchDatasetsDeterministic = ({
   const reportProduct = product ? normalizeVendorToken(product) : '';
   if (reportVendor === '' && reportProduct === '') return [];
 
+  const aliases = new Set([
+    ...(HUNT_VENDOR_ALIASES[reportVendor] ?? []),
+    ...(HUNT_VENDOR_ALIASES[reportProduct] ?? []),
+  ]);
+
   return datasets.filter((dataset) => {
     const datasetVendor = normalizeVendorToken(dataset.vendor);
-    const datasetName = normalizeVendorToken(dataset.dataset);
+    if (aliases.has(datasetVendor)) return true;
 
     const vendorTokenInReport =
       datasetVendor.length >= MIN_TOKEN_LENGTH &&
       !GENERIC_VENDOR_TOKENS.has(datasetVendor) &&
       (reportVendor.includes(datasetVendor) || reportProduct.includes(datasetVendor));
-    const reportVendorInDatasetName =
-      reportVendor.length >= MIN_TOKEN_LENGTH && datasetName.includes(reportVendor);
+    const reportVendorIsVendorSegment =
+      reportVendor.length >= MIN_TOKEN_LENGTH &&
+      vendorSegments(dataset.vendor).includes(reportVendor);
 
-    return vendorTokenInReport || reportVendorInDatasetName;
+    return vendorTokenInReport || reportVendorIsVendorSegment;
   });
 };
 
 export interface ModelDatasetMatch {
+  /** Datasets that cleared the threshold, in option-list order. */
   matches: DiscoveredDataset[];
+  /** Lowest confidence among the accepted matches. */
   confidence: number;
+  /** Every accepted match with its own confidence, for logging. */
+  scored: Array<{ dataset: string; confidence: number }>;
 }
 
 const datasetMatchSchema = z.object({
-  datasets: z.array(z.string()),
-  confidence: z.number().min(0).max(1),
+  datasets: z.array(
+    z.object({
+      dataset: z.string(),
+      confidence: z.number().min(0).max(1),
+    })
+  ),
 });
 
 type DatasetMatchOutput = z.infer<typeof datasetMatchSchema>;
 
 const SYSTEM_PROMPT = `You are a security analyst deciding which log datasets in an environment a threat report is relevant to.
-You will be given the list of datasets that actually exist, then the report's context.
-Pick only datasets whose vendor or product the report concerns, or whose events would directly record the described activity.
+You will be given the report's vendor and product, then the list of datasets that actually exist, then the rest of the report's context.
+The vendor and product are the primary criterion: pick only datasets from this vendor/product; a dataset from a different vendor is not relevant even if it could record similar activity.
 Return the exact dataset names from the list; never invent a name.
-Prefer returning no datasets over guessing. Report your confidence (0 to 1) that the chosen datasets are the right scope.`;
+Prefer returning no datasets over guessing. For each dataset you return, report your confidence (0 to 1) that it belongs in the scope.`;
 
 const buildPrompt = (datasets: DiscoveredDataset[], report: HuntScopeReportContext): string => {
   const sections: string[] = [SYSTEM_PROMPT];
+
+  const subjectLines: string[] = [];
+  if (report.vendor) subjectLines.push(`Vendor: ${report.vendor}`);
+  if (report.product) subjectLines.push(`Product: ${report.product}`);
+  if (subjectLines.length > 0) {
+    sections.push(`--- REPORT VENDOR AND PRODUCT ---\n${subjectLines.join('\n')}`);
+  }
 
   sections.push(
     `--- AVAILABLE DATASETS (dataset | index_pattern) ---\n${datasets
@@ -108,22 +151,20 @@ const buildPrompt = (datasets: DiscoveredDataset[], report: HuntScopeReportConte
       .join('\n')}`
   );
 
-  const reportLines: string[] = [];
-  if (report.vendor) reportLines.push(`Vendor: ${report.vendor}`);
-  if (report.product) reportLines.push(`Product: ${report.product}`);
+  const contextLines: string[] = [];
   if (report.techniques && report.techniques.length > 0) {
-    reportLines.push(`Techniques: ${report.techniques.join(', ')}`);
+    contextLines.push(`Techniques: ${report.techniques.join(', ')}`);
   }
   if (report.iocs && report.iocs.length > 0) {
-    reportLines.push(
+    contextLines.push(
       `IOCs: ${report.iocs
         .slice(0, MAX_PROMPT_IOCS)
         .map((ioc) => ioc.value)
         .join(', ')}`
     );
   }
-  if (reportLines.length > 0) {
-    sections.push(`--- REPORT CONTEXT ---\n${reportLines.join('\n')}`);
+  if (contextLines.length > 0) {
+    sections.push(`--- REPORT CONTEXT ---\n${contextLines.join('\n')}`);
   }
 
   if (report.text) {
@@ -134,11 +175,13 @@ const buildPrompt = (datasets: DiscoveredDataset[], report: HuntScopeReportConte
 };
 
 /**
- * Asks the model which discovered datasets a report is relevant to. Returned
- * names are checked against the real option list (exact match on `dataset`) so
- * a hallucinated name never reaches the hunt. Returns undefined, never throws,
- * when there is nothing to choose from, the call fails, nothing real was
- * chosen, or the model's confidence is below `HUNT_DATASET_MATCH_MIN_CONFIDENCE`.
+ * Asks the model which discovered datasets a report is relevant to, scoring
+ * each one separately so a confident pick is not diluted by a guess in the
+ * same answer. Returned names are checked against the real option list (exact
+ * match on `dataset`) so a hallucinated name never reaches the hunt, and every
+ * item below `HUNT_DATASET_MATCH_MIN_CONFIDENCE` is dropped on its own.
+ * Returns undefined, never throws, when there is nothing to choose from, the
+ * call fails, or nothing real clears the threshold.
  */
 export const matchDatasetsWithModel = async ({
   model,
@@ -156,7 +199,18 @@ export const matchDatasetsWithModel = async ({
   let output: DatasetMatchOutput;
   try {
     const structured = model.chatModel.withStructuredOutput(datasetMatchSchema);
-    output = (await structured.invoke(buildPrompt(datasets, report))) as DatasetMatchOutput;
+    const raw = await structured.invoke(buildPrompt(datasets, report));
+    // The structured-output contract is only as good as the provider honours it: a
+    // missing or NaN `confidence` would pass the threshold compare below, and a
+    // non-array `datasets` would throw outside this try. Validate before trusting.
+    const parsed = datasetMatchSchema.safeParse(raw);
+    if (!parsed.success) {
+      logger?.warn(
+        `Hunt dataset model matching returned an invalid shape: ${parsed.error.message}`
+      );
+      return undefined;
+    }
+    output = parsed.data;
   } catch (err) {
     logger?.warn(
       `Hunt dataset model matching failed: ${err instanceof Error ? err.message : String(err)}`
@@ -164,20 +218,49 @@ export const matchDatasetsWithModel = async ({
     return undefined;
   }
 
-  const chosen = new Set(output.datasets ?? []);
-  const matches = datasets.filter((dataset) => chosen.has(dataset.dataset));
-  if (matches.length === 0) {
-    logger?.debug('Hunt dataset model matching returned no dataset from the option list');
-    return undefined;
+  const optionNames = new Set(datasets.map((dataset) => dataset.dataset));
+  const confidenceByName = new Map<string, number>();
+  let hallucinated = 0;
+  let belowThreshold = 0;
+  for (const item of output.datasets) {
+    if (!optionNames.has(item.dataset)) {
+      hallucinated += 1;
+      continue;
+    }
+    if (item.confidence < HUNT_DATASET_MATCH_MIN_CONFIDENCE) {
+      belowThreshold += 1;
+      continue;
+    }
+    // The same name twice keeps its highest score.
+    const previous = confidenceByName.get(item.dataset);
+    if (previous === undefined || item.confidence > previous) {
+      confidenceByName.set(item.dataset, item.confidence);
+    }
   }
 
-  const confidence = output.confidence;
-  if (confidence < HUNT_DATASET_MATCH_MIN_CONFIDENCE) {
+  if (hallucinated > 0 || belowThreshold > 0) {
     logger?.debug(
-      `Hunt dataset model matching dropped ${matches.length} match(es): confidence ${confidence} below threshold ${HUNT_DATASET_MATCH_MIN_CONFIDENCE}`
+      `Hunt dataset model matching dropped ${
+        hallucinated + belowThreshold
+      } item(s): ${hallucinated} not in the option list, ${belowThreshold} below confidence threshold ${HUNT_DATASET_MATCH_MIN_CONFIDENCE}`
     );
+  }
+
+  const matches = datasets.filter((dataset) => confidenceByName.has(dataset.dataset));
+  if (matches.length === 0) {
+    if (hallucinated === 0 && belowThreshold === 0) {
+      logger?.debug('Hunt dataset model matching returned no datasets');
+    }
     return undefined;
   }
 
-  return { matches, confidence };
+  const scored = matches.flatMap((dataset) => {
+    const itemConfidence = confidenceByName.get(dataset.dataset);
+    return itemConfidence === undefined
+      ? []
+      : [{ dataset: dataset.dataset, confidence: itemConfidence }];
+  });
+  const confidence = Math.min(...scored.map((item) => item.confidence));
+
+  return { matches, confidence, scored };
 };
