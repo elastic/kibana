@@ -211,7 +211,6 @@ describe('initialize fetch ES|QL', () => {
     });
     mockFetchEsql.mockResolvedValue({
       records: [{ id: '1', raw: {}, flattened: {} }],
-      esqlColumns: [],
       interceptedWarnings: [],
       esqlHeaderWarning: undefined,
       approximationApplied: false,

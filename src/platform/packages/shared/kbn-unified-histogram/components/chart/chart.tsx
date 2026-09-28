@@ -151,7 +151,6 @@ export function UnifiedHistogramChart({
     timeRange,
     relativeTimeRange,
     abortController,
-    columns,
     controlsState,
     isESQLQuery: isPlainRecord,
     breakdown,
@@ -263,7 +262,6 @@ export function UnifiedHistogramChart({
             dataSource={dataSource}
             breakdown={breakdown}
             onBreakdownFieldChange={onBreakdownFieldChange}
-            esqlColumns={isPlainRecord ? columns : undefined}
           />
         )}
       </div>,
@@ -276,7 +274,6 @@ export function UnifiedHistogramChart({
       breakdown,
       dataSource,
       onBreakdownFieldChange,
-      columns,
     ]
   );
 

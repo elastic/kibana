@@ -25,6 +25,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
@@ -44,7 +45,8 @@ export interface FetchEsqlParams {
   inputQuery?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  timeFieldName?: string;
+  /** Time field comes from this source. Table columns, including `isNull`, are written onto it. */
+  esqlSource?: EsqlSource;
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
@@ -65,7 +67,7 @@ export function fetchEsql({
   inputQuery,
   filters,
   timeRange,
-  timeFieldName,
+  esqlSource,
   abortSignal,
   inspectorAdapters,
   data,
@@ -83,7 +85,7 @@ export function fetchEsql({
       inputQuery,
       filters,
       timeRange,
-      timeFieldName,
+      timeFieldName: esqlSource?.timeFieldName,
       data,
       inspectorConfig,
     }),
@@ -157,7 +159,7 @@ export function fetchEsql({
             }
             return {
               records: finalData || [],
-              esqlColumns: finalColumns,
+              dataSource: esqlSourceWithColumns(esqlSource, finalColumns),
               interceptedWarnings,
               esqlHeaderWarning,
               approximationApplied,
@@ -167,7 +169,7 @@ export function fetchEsql({
       }
       return {
         records: [],
-        esqlColumns: [],
+        dataSource: esqlSource,
         interceptedWarnings: [],
         esqlHeaderWarning: undefined,
         approximationApplied: undefined,
@@ -177,6 +179,18 @@ export function fetchEsql({
       throw new Error(err.message);
     });
 }
+
+/** Copies table nullability onto the LIMIT 0 source. An empty table keeps the original source. */
+function esqlSourceWithColumns(
+  esqlSource: EsqlSource | undefined,
+  columns: DatatableColumn[]
+): EsqlSource | undefined {
+  if (!esqlSource || columns.length === 0) {
+    return esqlSource;
+  }
+  return esqlSource.withColumns(columns);
+}
+
 export function getTextBasedQueryStateToAstProps({
   query,
   inputQuery,

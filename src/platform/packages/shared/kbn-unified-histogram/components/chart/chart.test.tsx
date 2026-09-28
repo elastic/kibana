@@ -15,7 +15,7 @@ import { act, screen } from '@testing-library/react';
 import { allSuggestionsMock } from '../../__mocks__/suggestions';
 import { checkChartAvailability } from './utils/check_chart_availability';
 import type { DataSource } from '@kbn/data-source';
-import { DataViewSource } from '@kbn/data-source';
+import { DataViewSource, EsqlSource } from '@kbn/data-source';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { getFetchParamsMock, getFetch$Mock } from '../../__mocks__/fetch_params';
@@ -66,6 +66,16 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
   const dataSource = propsDataSource ?? new DataViewSource(dataViewWithTimefieldMock);
   const lensDataView =
     dataSource instanceof DataViewSource ? dataSource.getDataView() : dataViewWithTimefieldMock;
+  const esqlQuery = isTransformationalESQL
+    ? 'from logs | limit 10 | stats var0 = avg(bytes) by extension'
+    : 'from logs | limit 10';
+  EsqlSource.clearCache();
+  const fetchDataSource = isPlainRecord
+    ? await EsqlSource.create({
+        query: esqlQuery,
+        timeFieldName: dataSource.isTimeBased() ? '@timestamp' : undefined,
+      })
+    : dataSource;
 
   // Handle mockEditVisualization separately to distinguish between "not passed" and "passed as undefined"
   mockUseEditVisualization =
@@ -97,11 +107,9 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
       };
 
   const fetchParams = getFetchParamsMock({
-    dataSource,
+    dataSource: fetchDataSource,
     query: isPlainRecord
-      ? isTransformationalESQL
-        ? { esql: 'from logs | limit 10 | stats var0 = avg(bytes) by extension' }
-        : { esql: 'from logs | limit 10' }
+      ? { esql: esqlQuery }
       : {
           language: 'kuery',
           query: '',

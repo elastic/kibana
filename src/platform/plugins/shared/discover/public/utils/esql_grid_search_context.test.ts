@@ -70,7 +70,6 @@ describe('getEsqlDatatableFromDocuments', () => {
     const result = [asEsqlRow('1', { bucket: '2023-11-15T00:00:00.000Z' })];
 
     const { table } = getEsqlDatatableFromDocuments({
-      isEsqlMode: true,
       documentsValue: {
         fetchStatus: FetchStatus.COMPLETE,
         result,
@@ -86,10 +85,10 @@ describe('getEsqlDatatableFromDocuments', () => {
 
   it('does not supply a table while documents are still loading', () => {
     const { table } = getEsqlDatatableFromDocuments({
-      isEsqlMode: true,
       documentsValue: {
         fetchStatus: FetchStatus.LOADING,
         result: [],
+        dataSource: createMockEsqlSource([], []),
       },
     });
 

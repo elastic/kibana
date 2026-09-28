@@ -168,7 +168,7 @@ describe('CascadedDocumentsFetcher', () => {
       expect.objectContaining({
         query: cascadeQuery,
         esqlVariables: params.esqlVariables,
-        timeFieldName: '@timestamp',
+        esqlSource: extensionSource,
         data: discoverServices.data,
         expressions: discoverServices.expressions,
         timeRange: params.timeRange,

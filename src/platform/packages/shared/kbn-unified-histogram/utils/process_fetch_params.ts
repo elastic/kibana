@@ -15,7 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import { DataViewSource, EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { DataViewSource, EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
 import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramFetchParamsExternal,
@@ -32,7 +32,7 @@ export interface ProcessFetchParamsResult {
   lensDataView: DataView | undefined;
 }
 
-export const processFetchParams = async ({
+export const buildFetchParams = ({
   params,
   services,
   initialBreakdownField,
@@ -40,22 +40,15 @@ export const processFetchParams = async ({
   params: UnifiedHistogramFetchParamsExternal;
   services: UnifiedHistogramServices;
   initialBreakdownField: string | undefined;
-}): Promise<ProcessFetchParamsResult> => {
+}): UnifiedHistogramFetchParams => {
   const query = params.query ?? services.data.query.queryString.getDefaultQuery();
   const relativeTimeRange =
     params.relativeTimeRange ?? services.data.query.timefilter.timefilter.getTimeDefaults();
   const { dataSource } = params;
 
-  let lensDataView: DataView | undefined;
-  if (dataSource instanceof DataViewSource) {
-    lensDataView = dataSource.getDataView();
-  } else if (dataSource instanceof EsqlSource) {
-    lensDataView = await registerEsqlSourceInDataViewsCache(services.dataViews, dataSource);
-  }
-
   const columns = params.columns;
   const isTimeBased = dataSource.isTimeBased() && !dataSource.isRollup();
-  const isESQLQuery = Boolean(query && isOfAggregateQueryType(query));
+  const isESQLQuery = dataSource.kind === 'esql';
   const breakdownField = 'breakdownField' in params ? params.breakdownField : initialBreakdownField;
 
   const fetchParams: UnifiedHistogramFetchParams = {
@@ -83,6 +76,28 @@ export const processFetchParams = async ({
     }),
     timeInterval: params.timeInterval ?? DEFAULT_TIME_INTERVAL,
   };
+
+  return fetchParams;
+};
+
+export const processFetchParams = async ({
+  params,
+  services,
+  initialBreakdownField,
+}: {
+  params: UnifiedHistogramFetchParamsExternal;
+  services: UnifiedHistogramServices;
+  initialBreakdownField: string | undefined;
+}): Promise<ProcessFetchParamsResult> => {
+  const { dataSource } = params;
+  const fetchParams = buildFetchParams({ params, services, initialBreakdownField });
+
+  let lensDataView: DataView | undefined;
+  if (dataSource instanceof DataViewSource) {
+    lensDataView = dataSource.getDataView();
+  } else if (dataSource instanceof EsqlSource) {
+    lensDataView = await getOrRegisterEsqlDataView(services.dataViews, dataSource);
+  }
 
   return { fetchParams, lensDataView };
 };

@@ -61,13 +61,12 @@ describe('fetchEsql', () => {
       ),
     } as unknown as ExecutionContract);
     const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
-    expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
-      records,
-      esqlColumns: ['_id', 'foo'],
-      esqlHeaderWarning: undefined,
-      interceptedWarnings: [],
-      approximationApplied: undefined,
-    });
+    const result = await fetchEsql(fetchEsqlMockProps);
+    expect(result.records).toEqual(records);
+    expect(result.dataSource?.resultColumns).toEqual(['_id', 'foo']);
+    expect(result.esqlHeaderWarning).toBeUndefined();
+    expect(result.interceptedWarnings).toEqual([]);
+    expect(result.approximationApplied).toBeUndefined();
     expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[0] });
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[1] });
@@ -96,24 +95,23 @@ describe('fetchEsql', () => {
         ),
       } as unknown as ExecutionContract);
 
-      await expect(fetchEsql(fetchEsqlMockProps)).resolves.toEqual({
-        records: [
-          {
-            id: `1@${responseTime}`,
-            raw: hits[0],
-            flattened: hits[0],
-          },
-          {
-            id: `2@${responseTime}`,
-            raw: hits[1],
-            flattened: hits[1],
-          },
-        ],
-        esqlColumns: ['_id', 'foo'],
-        esqlHeaderWarning: undefined,
-        interceptedWarnings: [],
-        approximationApplied: undefined,
-      });
+      const result = await fetchEsql(fetchEsqlMockProps);
+      expect(result.records).toEqual([
+        {
+          id: `1@${responseTime}`,
+          raw: hits[0],
+          flattened: hits[0],
+        },
+        {
+          id: `2@${responseTime}`,
+          raw: hits[1],
+          flattened: hits[1],
+        },
+      ]);
+      expect(result.dataSource?.resultColumns).toEqual(['_id', 'foo']);
+      expect(result.esqlHeaderWarning).toBeUndefined();
+      expect(result.interceptedWarnings).toEqual([]);
+      expect(result.approximationApplied).toBeUndefined();
     } finally {
       jest.useRealTimers();
     }

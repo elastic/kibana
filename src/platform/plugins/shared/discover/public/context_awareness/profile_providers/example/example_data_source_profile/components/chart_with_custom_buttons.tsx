@@ -194,7 +194,6 @@ export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomBut
               <UnifiedBreakdownFieldSelector
                 breakdown={fetchParams.breakdown}
                 dataSource={fetchParams.dataSource}
-                esqlColumns={fetchParams.isESQLQuery ? fetchParams.columns : undefined}
                 onBreakdownFieldChange={handleBreakdownFieldChange}
               />
             </EuiFlexItem>

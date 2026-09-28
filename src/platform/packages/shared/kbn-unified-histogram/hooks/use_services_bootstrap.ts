@@ -113,17 +113,13 @@ export const useServicesBootstrap = (
         updatedLensVisServiceState = updatedLensVisService.update({
           externalVisContext: nextFetchParams.externalVisContext,
           queryParams: {
-            dataView: lensDataView,
+            dataSource: nextFetchParams.dataSource,
             query: nextFetchParams.query,
             filters: nextFetchParams.filters,
             timeRange: nextFetchParams.timeRange,
             isPlainRecord: nextFetchParams.isESQLQuery,
             columns: nextFetchParams.columns,
             columnsMap: nextFetchParams.columnsMap,
-            timeFieldName:
-              nextFetchParams.dataSource.kind === 'esql'
-                ? nextFetchParams.dataSource.timeFieldName
-                : undefined,
           },
           timeInterval:
             !nextFetchParams.isTimeBased && !nextFetchParams.isESQLQuery

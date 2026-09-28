@@ -386,9 +386,8 @@ function DiscoverDocumentsComponent({
     () =>
       getEsqlDatatableFromDocuments({
         documentsValue: documentState,
-        isEsqlMode,
       }),
-    [documentState, isEsqlMode]
+    [documentState]
   );
   // New result identity after refresh - keeps sparkline cache from reusing a stale series.
   const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);

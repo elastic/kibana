@@ -280,20 +280,17 @@ export const useDiscoverHistogram = (
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
       const dataSourceForColumns =
-        isEsqlMode && currentDataSource?.kind === 'esql'
-          ? (currentDataSource as EsqlSource)
-          : undefined;
+        currentDataSource?.kind === 'esql' ? currentDataSource : undefined;
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
         currentDataSource: dataSourceForColumns,
-        isEsqlMode,
       });
 
       const nextFetchParams = {
         ...collectedFetchParams,
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
-        columns: isEsqlMode ? esqlQueryColumns : undefined,
-        table: isEsqlMode ? table : undefined,
+        columns: dataSourceForColumns ? esqlQueryColumns : undefined,
+        table: dataSourceForColumns ? table : undefined,
       };
       previousFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);
@@ -499,13 +496,11 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 function getUnifiedHistogramTableForEsql({
   documentsValue,
   currentDataSource,
-  isEsqlMode,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
   currentDataSource: EsqlSource | undefined;
-  isEsqlMode: boolean;
 }) {
-  if (!isEsqlMode || !currentDataSource) {
+  if (!currentDataSource) {
     return {
       table: undefined,
       esqlQueryColumns: EMPTY_ESQL_COLUMNS,

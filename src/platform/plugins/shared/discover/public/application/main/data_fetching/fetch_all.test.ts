@@ -255,7 +255,6 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockfetchEsql.mockResolvedValue({ records: documents });
     const query = { esql: 'from foo' };
     deps.internalState.dispatch(
       internalStateActions.updateAppState({
@@ -263,10 +262,10 @@ describe('test fetchAll', () => {
         appState: { query },
       })
     );
-    const mockEsqlSource = createMockEsqlSource();
+    const mockEsqlSource = createMockEsqlSource([], [], '@timestamp');
+    mockfetchEsql.mockResolvedValue({ records: documents, dataSource: mockEsqlSource });
     fetchAll({
       ...deps,
-      esqlTimeFieldName: '@timestamp',
       esqlSource: mockEsqlSource,
     });
     await waitForNextTick();

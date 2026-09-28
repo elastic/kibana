@@ -112,7 +112,6 @@ describe('traces breakdown toolbar selector', () => {
         <UnifiedBreakdownFieldSelector
           dataSource={esqlSource}
           breakdown={{ field }}
-          esqlColumns={[SERVICE_NAME_COLUMN]}
           onBreakdownFieldChange={jest.fn()}
         />
       </IntlProvider>

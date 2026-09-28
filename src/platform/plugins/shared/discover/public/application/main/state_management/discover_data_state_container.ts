@@ -150,7 +150,8 @@ export interface DiscoverDataStateContainer {
    */
   getInitialFetchStatus: () => FetchStatus;
   /**
-   * Clean up ES|QL state when saved search changes
+   * Drops the tracked ES|QL source. The fetch subscribe calls this when the query
+   * leaves ES|QL. Tests call it to reset column-default state between cases.
    */
   cleanupEsql: () => void;
 }
@@ -321,7 +322,6 @@ export function getDataStateContainer({
             currentDataSource$.next(source);
           }
           const esqlSource = source?.kind === 'esql' ? source : undefined;
-          const esqlTimeFieldName = esqlSource?.timeFieldName;
 
           let searchSessionId: string;
           let isSearchSessionRestored: boolean;
@@ -352,7 +352,6 @@ export function getDataStateContainer({
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,
-            esqlTimeFieldName,
             esqlSource,
           };
 

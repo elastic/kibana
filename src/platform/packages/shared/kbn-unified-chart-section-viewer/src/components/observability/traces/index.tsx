@@ -89,7 +89,6 @@ function TraceMetricsGrid({
           dataSource={dataSource}
           breakdown={{ field: breakdownDataViewField }}
           onBreakdownFieldChange={handleBreakdownFieldChange}
-          esqlColumns={isESQLQuery ? columns : undefined}
           recommendedFields={TRACES_BREAKDOWN_RECOMMENDED_FIELDS}
           fieldsMetadata={services.fieldsMetadata}
         />
@@ -100,8 +99,6 @@ function TraceMetricsGrid({
       dataSource,
       breakdownDataViewField,
       handleBreakdownFieldChange,
-      columns,
-      isESQLQuery,
       services.fieldsMetadata,
     ]
   );
@@ -133,7 +130,7 @@ function TraceMetricsGrid({
           discoverFetch$,
           actions,
           profileId,
-          breakdownField: breakdownDataViewField?.name ?? breakdownField,
+          breakdownField: breakdownDataViewField?.name,
         }}
       >
         <EuiPanel

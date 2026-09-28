@@ -8,11 +8,10 @@
  */
 
 import { isEqual, cloneDeep } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { EsqlSource } from '@kbn/data-source';
+import { EsqlSource, type DataSource } from '@kbn/data-source';
 import type {
   TextBasedLayerColumn,
   LensPartitionVisualizationState as PieVisualizationState,
@@ -33,19 +32,13 @@ import { removeTablesFromLensAttributes } from './lens_vis_from_table';
 export const TIMESTAMP_COLUMN = 'timestamp';
 
 export interface QueryParams {
-  dataView: DataView;
+  dataSource: DataSource;
   query?: Query | AggregateQuery;
   filters: Filter[] | undefined;
   isPlainRecord?: boolean;
   columns?: DatatableColumn[];
   columnsMap?: Record<string, DatatableColumn>;
   timeRange?: TimeRange;
-  /**
-   * Overrides `dataView.timeFieldName` for ES|QL mode. `EsqlSource` always carries the
-   * correct time field derived from the current query, whereas the DataView in the
-   * histogram may be stale after a query change.
-   */
-  timeFieldName?: string;
 }
 
 export const exportVisContext = (

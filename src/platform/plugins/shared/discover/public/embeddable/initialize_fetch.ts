@@ -271,7 +271,7 @@ export function initializeFetch({
               timeRange,
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
-              timeFieldName: embeddableEsqlSource.timeFieldName,
+              esqlSource: embeddableEsqlSource,
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,
@@ -283,7 +283,9 @@ export function initializeFetch({
               esqlApproximation: fetchContext.isApproximate,
             });
             return {
-              columnsMeta: columnsToColumnsMeta(embeddableEsqlSource.getColumns()),
+              columnsMeta: columnsToColumnsMeta(
+                (result.dataSource ?? embeddableEsqlSource).getColumns()
+              ),
               rows: result.records,
               hitCount: result.records.length,
               approximationApplied: result.approximationApplied,

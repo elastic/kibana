@@ -17,6 +17,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of, throwError } from 'rxjs';
 import { waitFor, renderHook } from '@testing-library/react';
+import { EsqlSource } from '@kbn/data-source';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 import { DataViewType } from '@kbn/data-plugin/common';
@@ -125,8 +126,13 @@ describe('useTotalHits', () => {
 
   it('should not fetch total hits if isPlainRecord is true', async () => {
     const onTotalHitsChange = jest.fn();
+    EsqlSource.clearCache();
     const fetchParams = getFetchParamsMock({
       query: { esql: 'from test' },
+      dataSource: await EsqlSource.create({
+        query: 'from test',
+        timeFieldName: '@timestamp',
+      }),
     });
     const deps = {
       ...getDeps(),

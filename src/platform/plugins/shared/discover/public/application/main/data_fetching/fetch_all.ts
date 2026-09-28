@@ -51,7 +51,6 @@ export interface CommonFetchParams {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   getCurrentTab: () => TabState;
-  esqlTimeFieldName?: string;
   esqlSource?: EsqlSource;
 }
 
@@ -80,7 +79,6 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
-    esqlTimeFieldName,
     esqlSource,
   } = params;
   const { data, expressions } = services;
@@ -125,7 +123,7 @@ export function fetchAll(
     const response: Promise<RecordsFetchResponse> = isEsqlQuery
       ? fetchEsql({
           query,
-          timeFieldName: esqlTimeFieldName,
+          esqlSource,
           abortSignal: abortController.signal,
           inspectorAdapters,
           data,
@@ -151,7 +149,7 @@ export function fetchAll(
           records,
           interceptedWarnings = [],
           esqlHeaderWarning,
-          esqlColumns,
+          dataSource: fetchedDataSource,
           approximationApplied,
         }) => {
           fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
@@ -192,16 +190,11 @@ export function fetchAll(
            */
           const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
-          // Overlay table `isNull` flags onto the resolved EsqlSource. Query columns
-          // already come from LIMIT 0 at resolve time; this only updates nullability.
-          const latestEsqlSource =
-            esqlSource && esqlColumns?.length ? esqlSource.withColumns(esqlColumns) : esqlSource;
-
           dataSubjects.documents$.next({
             fetchStatus,
             result: records,
             dataSource: isEsqlQuery
-              ? latestEsqlSource
+              ? fetchedDataSource
               : dataView.id
               ? new DataViewSource(dataView)
               : undefined,

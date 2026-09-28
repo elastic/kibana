@@ -92,7 +92,7 @@ const checkViewLikeSourceForTimestamp = async ({
  *
  * @returns timeField or undefined
  */
-export const resolveTimeField = async (
+const resolveTimeField = async (
   client: ElasticsearchClient,
   query: string,
   logger: Logger,

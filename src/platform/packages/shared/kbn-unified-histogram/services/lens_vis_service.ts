@@ -18,7 +18,7 @@ import {
   convertTimeseriesCommandToFrom,
   hasTimeseriesInfoCommand,
 } from '@kbn/esql-utils';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -43,6 +43,7 @@ import type { XYVisualizationState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
+import { DataViewSource, getRegisteredEsqlDataView, type DataSource } from '@kbn/data-source';
 import type {
   UnifiedHistogramSuggestionContext,
   UnifiedHistogramVisContext,
@@ -64,6 +65,13 @@ import {
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
+
+/** Lens suggestions still take a DataView. Classic unwraps it; ES|QL uses the registered shim. */
+function resolveLensDataView(dataSource: DataSource): DataView | undefined {
+  return dataSource instanceof DataViewSource
+    ? dataSource.getDataView()
+    : getRegisteredEsqlDataView(dataSource);
+}
 
 interface Services {
   data: DataPublicPluginStart;
@@ -236,7 +244,7 @@ export class LensVisService {
             queryParams: {
               ...queryParams,
               query: {
-                esql: `FROM ${queryParams.dataView.getIndexPattern()}`,
+                esql: `FROM ${queryParams.dataSource.title}`,
               },
             },
             breakdownField,
@@ -351,9 +359,9 @@ export class LensVisService {
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
   }): Suggestion | undefined => {
-    const { dataView } = queryParams;
+    const { dataSource } = queryParams;
 
-    if (!dataView.isTimeBased() || !dataView.timeFieldName) {
+    if (!dataSource.isTimeBased() || !dataSource.timeFieldName) {
       return undefined;
     }
 
@@ -369,10 +377,10 @@ export class LensVisService {
       date_column: {
         dataType: 'date',
         isBucketed: true,
-        label: dataView.timeFieldName,
+        label: dataSource.timeFieldName,
         operationType: 'date_histogram',
         scale: 'interval',
-        sourceField: dataView.timeFieldName,
+        sourceField: dataSource.timeFieldName,
         params: {
           interval: timeInterval ?? 'auto',
         },
@@ -429,7 +437,7 @@ export class LensVisService {
 
     const datasourceState = {
       layers: {
-        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns, indexPatternId: dataView.id },
+        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns, indexPatternId: dataSource.id },
       },
     };
 
@@ -499,8 +507,12 @@ export class LensVisService {
     breakdownField?: DataViewField;
     preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion | undefined => {
-    const { dataView, query, timeRange, columns } = queryParams;
-    const timeFieldName = queryParams.timeFieldName ?? dataView.timeFieldName;
+    const { query, timeRange, columns, dataSource } = queryParams;
+    const dataView = resolveLensDataView(dataSource);
+    if (!dataView) {
+      return undefined;
+    }
+    const timeFieldName = dataSource.timeFieldName;
     const breakdownColumn = breakdownField?.name
       ? columns?.find((column) => column.name === breakdownField.name)
       : undefined;
@@ -517,6 +529,7 @@ export class LensVisService {
             'splitAccessors' in layer && layer.splitAccessors?.includes(breakdownColumn.name)
         )
       ) {
+        // the preferred vis attributes don't contain the breakdown column, so we discard it to avoid issues
         preferredVisAttributes = undefined;
       }
     }
@@ -662,9 +675,10 @@ export class LensVisService {
     queryParams: QueryParams;
     preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion[] => {
-    const { dataView, columns, query, isPlainRecord } = queryParams;
+    const { columns, query, isPlainRecord, dataSource } = queryParams;
+    const dataView = resolveLensDataView(dataSource);
 
-    if (!isPlainRecord || !isOfAggregateQueryType(query)) {
+    if (!isPlainRecord || !isOfAggregateQueryType(query) || !dataView) {
       return [];
     }
 
@@ -723,8 +737,8 @@ export class LensVisService {
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
     visContext: UnifiedHistogramVisContext | undefined;
   } => {
-    const { dataView, query, filters, timeRange, columns } = queryParams;
-    const timeFieldName = queryParams.timeFieldName ?? dataView.timeFieldName;
+    const { query, filters, timeRange, columns, dataSource } = queryParams;
+    const timeFieldName = dataSource.timeFieldName;
     const { type: suggestionType, suggestion } = currentSuggestionContext;
 
     if (!suggestion || !suggestion.datasourceId || !query || !filters) {
@@ -736,7 +750,7 @@ export class LensVisService {
 
     const isTextBased = isOfAggregateQueryType(query);
     const requestData = {
-      dataViewId: dataView.id,
+      dataViewId: dataSource.id,
       timeField: timeFieldName,
       timeInterval: isTextBased ? undefined : timeInterval,
       breakdownField: breakdownField?.name,
@@ -785,6 +799,13 @@ export class LensVisService {
     }
 
     if (!visContext) {
+      const dataView = resolveLensDataView(dataSource);
+      if (!dataView) {
+        return {
+          externalVisContextStatus,
+          visContext: undefined,
+        };
+      }
       const attributes = getLensAttributesFromSuggestion({
         query: currentQuery,
         filters,
@@ -798,7 +819,7 @@ export class LensVisService {
         });
         attributes.references = [
           {
-            id: dataView.id ?? '',
+            id: dataSource.id,
             name: `indexpattern-datasource-layer-${UNIFIED_HISTOGRAM_LAYER_ID}`,
             type: 'index-pattern',
           },

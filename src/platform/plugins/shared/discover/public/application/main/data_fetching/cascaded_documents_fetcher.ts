@@ -101,7 +101,7 @@ export class CascadedDocumentsFetcher {
       const { records: fetchedRecords } = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
-        timeFieldName: (currentEsqlSource as EsqlSource).timeFieldName,
+        esqlSource: currentEsqlSource,
         data: this.services.data,
         expressions: this.services.expressions,
         abortSignal: abortController.signal,

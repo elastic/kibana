@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { ChartType } from '@kbn/visualization-utils';
+import { DataViewSource } from '@kbn/data-source';
 import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
@@ -70,7 +71,7 @@ export const getLensVisMock = async ({
 }: {
   filters: QueryParams['filters'];
   query: QueryParams['query'];
-  dataView: QueryParams['dataView'];
+  dataView: DataView;
   columns: DatatableColumn[];
   isPlainRecord: boolean;
   timeInterval: string;
@@ -123,9 +124,9 @@ export const getLensVisMock = async ({
 
   lensService.update({
     queryParams: {
+      dataSource: new DataViewSource(dataView),
       query,
       filters,
-      dataView,
       timeRange: timeRange ?? TIME_RANGE,
       columns,
       isPlainRecord,
