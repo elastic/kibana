@@ -1,0 +1,43 @@
+version: "1"
+name: Rule Coverage
+description: >
+  Per-space Detection rule-coverage worker. Dispatches the global coverage sweep,
+  which picks up pending coverage-gap indicators and starts one review per gap.
+enabled: false
+tags:
+  - watch
+  - watch-detection
+triggers:
+  - type: scheduled
+    with:
+      every: "__WORKER_SCHEDULE_INTERVAL__"
+  - type: manual
+outputs:
+  - name: pending
+    type: number
+  - name: started
+    type: number
+  - name: in_flight
+    type: number
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+    extras: __WORKER_EXTRAS__
+steps:
+  - name: run_rule_coverage
+    type: workflow.execute
+    with:
+      workflow-id: system-security-coverage-worker
+      inputs:
+        lookback_days: "${{ consts.worker_settings.extras.lookbackDays }}"
+        batch_size: "${{ consts.worker_settings.extras.maxGapsPerRun }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      pending: "${{ steps.run_rule_coverage.output.pending | default: 0 }}"
+      started: "${{ steps.run_rule_coverage.output.started | default: 0 }}"
+      in_flight: "${{ steps.run_rule_coverage.output.in_flight | default: 0 }}"
