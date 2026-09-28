@@ -134,6 +134,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Stores the SO-derived dirty result so the replace-form cancel handler can merge it without
   // re-fetching. Starts false; updated once the SO fetch resolves.
   const driftDirtyRef = useRef(false);
+  // Tracks whether the static-key replace form is currently dirty (new keys typed but not yet
+  // submitted). Used by the drift effect to merge form dirty with SO-derived dirty so that a
+  // clean SO comparison can still clear isDirty when the form has not been touched.
+  const replaceFormDirtyRef = useRef(false);
   // Sequence counter used to discard responses from stale drift fetches (e.g. connector changed
   // while a prior fetch was in flight). Only the response whose id matches the current counter
   // updates state.
@@ -169,13 +173,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         );
         const dirty = dirtyVarIds.length > 0 || authDirty;
         driftDirtyRef.current = dirty;
-        // In static-key edit mode the SO cannot see credential values, so we never write
-        // isDirty=false here — that would overwrite a isDirty=true the replace form already
-        // set. Credential dirty state is managed via handleReplaceFormDirtyChange instead.
-        // Service-var drift (dirty=true) still writes through.
-        if (authMethod !== 'static_keys' || dirty) {
-          updateDetectAndReviewStep({ isDirty: dirty });
-        }
+        // Merge SO-derived drift with replace-form dirty so that a clean drift result (dirty=false)
+        // still clears isDirty when the replace form has not been touched. Previously this write
+        // was suppressed in static-key mode entirely, leaving isDirty=true even after the user
+        // reverted their service-var changes and came back to Step 3.
+        updateDetectAndReviewStep({ isDirty: dirty || replaceFormDirtyRef.current });
       })
       .catch(() => {})
       .finally(() => {
@@ -193,6 +195,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // replace form correctly clears the callout when there is no underlying service-var drift.
   const handleReplaceFormDirtyChange = useCallback(
     (replaceFormDirty: boolean) => {
+      replaceFormDirtyRef.current = replaceFormDirty;
       updateDetectAndReviewStep({ isDirty: replaceFormDirty || driftDirtyRef.current });
     },
     [updateDetectAndReviewStep]
