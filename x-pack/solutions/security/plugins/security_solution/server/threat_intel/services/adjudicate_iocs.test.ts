@@ -152,4 +152,18 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
       'semantic_reference_unreviewed_overflow'
     );
   });
+
+  it('centers overflow context on the IOC instead of taking a leading prefix', () => {
+    const url = 'https://evil.example/payload';
+    const prepared = prepareIocAdjudication({
+      text: `${'leading attribution prose '.repeat(20)}${url} trailing notes`,
+      iocs: [candidate(url)],
+    });
+    expect(prepared.reviewable[0].context.length).toBeGreaterThan(120);
+
+    const bounded = boundIocAdjudicationForOverflow(prepared);
+
+    expect(bounded.reviewable[0].context.length).toBeLessThanOrEqual(120);
+    expect(bounded.reviewable[0].context).toContain(url);
+  });
 });

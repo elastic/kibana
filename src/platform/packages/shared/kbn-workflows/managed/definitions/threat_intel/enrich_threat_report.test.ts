@@ -123,16 +123,16 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     });
   });
 
-  it('defers RSS Jina fallbacks before gate rejection or core completion', () => {
-    expect(findStepByName(workflow.steps, 'defer_rss_fallback_materialization')).toMatchObject({
+  it('defers only retryable RSS Jina fallbacks before gate rejection or core', () => {
+    expect(findStepByName(workflow.steps, 'defer_rss_retryable_fallback')).toMatchObject({
       type: 'loop.continue',
-      if: "${{ steps.materialize_article.output.materialization.status == 'fallback' }}",
+      if: "${{ steps.materialize_article.output.materialization.status == 'retryable_fallback' }}",
     });
     const yaml = THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml;
-    expect(yaml.indexOf('name: defer_rss_fallback_materialization')).toBeLessThan(
+    expect(yaml.indexOf('name: defer_rss_retryable_fallback')).toBeLessThan(
       yaml.indexOf('name: persist_gate_rejection')
     );
-    expect(yaml.indexOf('name: defer_rss_fallback_materialization')).toBeLessThan(
+    expect(yaml.indexOf('name: defer_rss_retryable_fallback')).toBeLessThan(
       yaml.indexOf('name: extract_iocs')
     );
   });

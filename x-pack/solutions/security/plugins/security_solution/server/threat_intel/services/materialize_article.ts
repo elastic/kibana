@@ -61,6 +61,22 @@ const paceUnauthenticatedRequest = async (abortSignal: AbortSignal): Promise<voi
 const reason = (value: unknown): string =>
   (value instanceof Error ? value.message : String(value)).slice(0, MAX_REASON_CHARS);
 
+/**
+ * Transient failures worth another materialization pass. Permanent validation /
+ * 4xx / private-URL failures stay `fallback` so enrichment can finish on RSS.
+ */
+const isRetryableMaterializationError = (error: unknown): boolean => {
+  const message = reason(error);
+  if (/timed out/i.test(message)) return true;
+  if (/aborted/i.test(message)) return true;
+  const httpMatch = /Jina Reader returned HTTP (\d+)/i.exec(message);
+  if (httpMatch) {
+    const code = Number(httpMatch[1]);
+    return code === 429 || code >= 500;
+  }
+  return /fetch failed|network|ECONNRESET|ECONNREFUSED|ENOTFOUND|EAI_AGAIN/i.test(message);
+};
+
 const sliceWithoutSplittingSurrogatePair = (value: string, maxChars: number): string => {
   if (value.length <= maxChars) return value;
   const lastIncluded = value.charCodeAt(maxChars - 1);
@@ -197,7 +213,7 @@ const fallbackOutput = ({
 }: {
   input: MaterializeArticleInput;
   now: Date;
-  status: 'fallback' | 'skipped';
+  status: 'fallback' | 'retryable_fallback' | 'skipped';
   fallbackReason: string;
   renderedBodyText?: string;
   renderedChars?: number;
@@ -331,7 +347,7 @@ export const materializeArticle = async (
     return fallbackOutput({
       input,
       now,
-      status: 'fallback',
+      status: isRetryableMaterializationError(error) ? 'retryable_fallback' : 'fallback',
       fallbackReason: reason(error),
     });
   }

@@ -191,6 +191,24 @@ export const prepareIocAdjudication = (
 };
 
 /**
+ * Keep a maxChars window centered on the IOC mention. A leading prefix slice
+ * would drop the URL/domain when `contextFor` already spent its budget on
+ * preceding prose.
+ */
+const shrinkContextAroundIoc = (context: string, value: string, maxChars: number): string => {
+  if (context.length <= maxChars) return context;
+  const index = context.toLowerCase().indexOf(value.toLowerCase());
+  if (index < 0) {
+    const start = Math.max(0, Math.floor((context.length - maxChars) / 2));
+    return context.slice(start, start + maxChars);
+  }
+  if (value.length >= maxChars) return context.slice(index, index + maxChars);
+  const before = Math.floor((maxChars - value.length) / 2);
+  const start = Math.max(0, Math.min(index - before, context.length - maxChars));
+  return context.slice(start, start + maxChars);
+};
+
+/**
  * Shrink the candidate set and per-candidate context for a confirmed context
  * overflow retry. Candidates not sent are marked as unreviewed overflow so
  * reconcile cannot treat them as model rejections.
@@ -200,7 +218,11 @@ export const boundIocAdjudicationForOverflow = (
 ): PreparedIocAdjudication => {
   const kept = prepared.reviewable.slice(0, OVERFLOW_MAX_SEMANTIC_CANDIDATES).map((candidate) => ({
     ...candidate,
-    context: candidate.context.slice(0, OVERFLOW_CONTEXT_CHARS),
+    context: shrinkContextAroundIoc(
+      candidate.context,
+      candidate.ioc.value,
+      OVERFLOW_CONTEXT_CHARS
+    ),
   }));
   const skipped = prepared.reviewable.slice(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
   if (skipped.length === 0) {

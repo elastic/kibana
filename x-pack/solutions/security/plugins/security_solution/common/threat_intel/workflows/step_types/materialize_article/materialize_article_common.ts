@@ -21,7 +21,13 @@ export const materializeArticleInputSchema = z.object({
   existing_status: z.string().optional().default(''),
 });
 
-export const materializationStatusSchema = z.enum(['rendered', 'fallback', 'skipped']);
+export const materializationStatusSchema = z.enum([
+  'rendered',
+  'fallback',
+  /** Transient Jina/network failure; enrich workflow leaves the report pending. */
+  'retryable_fallback',
+  'skipped',
+]);
 
 export const materializeArticleOutputSchema = z.object({
   body_text: z.string(),
@@ -65,7 +71,7 @@ export const materializeArticleStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.threatIntelMaterializeArticle.documentation.details',
       {
         defaultMessage:
-          'Attempts unauthenticated Jina Reader materialization for RSS entries with a public article URL. It never drops the original RSS body: invalid, blocked, empty, or failed renders return that body with status fallback.',
+          'Attempts unauthenticated Jina Reader materialization for RSS entries with a public article URL. It never drops the original RSS body: invalid, blocked, empty, or failed renders return that body with status fallback (or retryable_fallback for transient Jina/network errors).',
       }
     ),
   },

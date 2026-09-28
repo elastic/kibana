@@ -157,15 +157,13 @@ steps:
           gate_has_original_commentary: "${{ steps.assess_relevance.output.has_original_commentary }}"
           gate_reason: "{{ steps.assess_relevance.output.reason }}"
 
-      # Jina HTTP / validation fallbacks keep status `fallback` (RSS + URL only;
-      # non-RSS and missing-URL are `skipped`). Leave those pending so a later
-      # run can re-materialize. Do not key this on needs_render alone: a positive
-      # gate on teaser text would otherwise write workflow_v4 and never retry,
-      # while needs_render on manual/KEV / rendered nav pages cannot acquire new
-      # article text and must be allowed to finalize.
-      - name: defer_rss_fallback_materialization
+      # Only transient Jina/network failures use status `retryable_fallback`.
+      # Permanent validation / 4xx / private-URL / challenge results stay
+      # `fallback` so enrichment can finish on the retained RSS body instead of
+      # occupying the oldest-first pending batch forever.
+      - name: defer_rss_retryable_fallback
         type: loop.continue
-        if: "${{ steps.materialize_article.output.materialization.status == 'fallback' }}"
+        if: "${{ steps.materialize_article.output.materialization.status == 'retryable_fallback' }}"
 
       - name: persist_gate_rejection
         type: elasticsearch.update

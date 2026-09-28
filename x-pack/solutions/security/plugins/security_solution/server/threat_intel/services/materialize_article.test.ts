@@ -143,13 +143,22 @@ describe('materializeArticle', () => {
     expect(result.materialization.reason).toMatch(/^render_too_short:/);
   });
 
-  it('falls back to RSS on an HTTP failure', async () => {
+  it('marks transient HTTP failures as retryable fallbacks', async () => {
     const fetchFn = jest.fn().mockResolvedValue(new Response('unavailable', { status: 503 }));
     const result = await run({}, fetchFn as typeof fetch);
 
     expect(result.body_text).toBe(INPUT.rss_body_text);
-    expect(result.materialization.status).toBe('fallback');
+    expect(result.materialization.status).toBe('retryable_fallback');
     expect(result.materialization.reason).toBe('Jina Reader returned HTTP 503');
+  });
+
+  it('keeps permanent HTTP failures as non-retryable fallbacks', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(new Response('gone', { status: 404 }));
+    const result = await run({}, fetchFn as typeof fetch);
+
+    expect(result.body_text).toBe(INPUT.rss_body_text);
+    expect(result.materialization.status).toBe('fallback');
+    expect(result.materialization.reason).toBe('Jina Reader returned HTTP 404');
   });
 
   it('rejects private article URLs before they reach Jina', async () => {
