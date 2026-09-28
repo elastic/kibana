@@ -188,41 +188,62 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     (): SignalCardData[] => [
       {
         id: 'entitiesWithAlerts',
-        title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.title', {
-          defaultMessage: 'Entities with alerts',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.title',
+          {
+            defaultMessage: 'Entities with alerts',
+          }
+        ),
         value: alertsCount,
         isLoading: alertBasedLoading,
-        description: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description', {
-          defaultMessage: 'Entities with at least one alert in the last {timeRange}',
-          values: { timeRange },
-        }),
-        filterLabel: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.filterLabel', {
-          defaultMessage: 'Entities with alerts ({timeRange})',
-          values: { timeRange },
-        }),
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
+          {
+            defaultMessage: 'Entities with at least one alert in the last {timeRange}',
+            values: { timeRange },
+          }
+        ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.filterLabel',
+          {
+            defaultMessage: 'Entities with alerts ({timeRange})',
+            values: { timeRange },
+          }
+        ),
       },
       {
         id: 'entitiesWithAnomalies',
-        title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.title', {
-          defaultMessage: 'Entities with anomalies',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.title',
+          {
+            defaultMessage: 'Entities with anomalies',
+          }
+        ),
         value: anomaliesCount,
         isLoading: anomaliesLoading,
-        description: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description', {
-          defaultMessage: 'Entities with at least one ML anomaly in the last {timeRange}',
-          values: { timeRange },
-        }),
-        filterLabel: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.filterLabel', {
-          defaultMessage: 'Entities with anomalies ({timeRange})',
-          values: { timeRange },
-        }),
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
+          {
+            defaultMessage: 'Entities with at least one ML anomaly in the last {timeRange}',
+            values: { timeRange },
+          }
+        ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.filterLabel',
+          {
+            defaultMessage: 'Entities with anomalies ({timeRange})',
+            values: { timeRange },
+          }
+        ),
       },
       {
         id: 'riskMovers',
-        title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.title', {
-          defaultMessage: 'Risk movers',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.title',
+          {
+            defaultMessage: 'Risk movers',
+          }
+        ),
         value: riskMoversCount,
         isLoading: riskMoversLoading,
         noDataMessage: riskMoversMissingIndex
@@ -232,56 +253,93 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           : undefined,
         description:
           timeRange === '24h'
-            ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description24h', {
-                defaultMessage: 'Entities whose risk score rose ≥10 points vs yesterday',
-              })
-            : i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description', {
-                defaultMessage: 'Entities whose risk score rose ≥10 points vs the previous {timeRange}',
-                values: { timeRange },
-              }),
-        filterLabel: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.filterLabel', {
-          defaultMessage: 'Risk movers',
-        }),
+            ? i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description24h',
+                {
+                  defaultMessage: 'Entities whose risk score rose ≥10 points vs yesterday',
+                }
+              )
+            : i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description',
+                {
+                  defaultMessage:
+                    'Entities whose risk score rose ≥10 points vs the previous {timeRange}',
+                  values: { timeRange },
+                }
+              ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.filterLabel',
+          {
+            defaultMessage: 'Risk movers',
+          }
+        ),
       },
       {
         id: 'newlyHighCritical',
-        title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.title', {
-          defaultMessage: 'Newly high/critical',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.title',
+          {
+            defaultMessage: 'Newly high/critical',
+          }
+        ),
         value: newlyHCCount,
         isLoading: newlyHCLoading,
         noDataMessage: newlyHCMissingIndex
-          ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData', {
-              defaultMessage: 'Requires risk score history data',
-            })
+          ? i18n.translate(
+              'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
+              {
+                defaultMessage: 'Requires risk score history data',
+              }
+            )
           : undefined,
         description:
           timeRange === '24h'
-            ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description24h', {
-                defaultMessage: 'Entities that crossed into High or Critical risk since yesterday',
-              })
-            : i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description', {
-                defaultMessage: 'Entities that crossed into High or Critical risk in the last {timeRange}',
-                values: { timeRange },
-              }),
-        filterLabel: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.filterLabel', {
-          defaultMessage: 'Newly high/critical',
-        }),
+            ? i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description24h',
+                {
+                  defaultMessage:
+                    'Entities that crossed into High or Critical risk since yesterday',
+                }
+              )
+            : i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
+                {
+                  defaultMessage:
+                    'Entities that crossed into High or Critical risk in the last {timeRange}',
+                  values: { timeRange },
+                }
+              ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.filterLabel',
+          {
+            defaultMessage: 'Newly high/critical',
+          }
+        ),
       },
       {
         id: 'watchlisted',
-        title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.title', {
-          defaultMessage: 'Watchlisted',
-        }),
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.title',
+          {
+            defaultMessage: 'Watchlisted',
+          }
+        ),
         value: watchlistedCount,
         isLoading: alertBasedLoading,
-        description: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description', {
-          defaultMessage: 'Entities on a watchlist with at least one alert in the last {timeRange}',
-          values: { timeRange },
-        }),
-        filterLabel: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.filterLabel', {
-          defaultMessage: 'Watchlisted',
-        }),
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
+          {
+            defaultMessage:
+              'Entities on a watchlist with at least one alert in the last {timeRange}',
+            values: { timeRange },
+          }
+        ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.filterLabel',
+          {
+            defaultMessage: 'Watchlisted',
+          }
+        ),
       },
       {
         id: 'newEntity',
@@ -290,14 +348,21 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         }),
         value: newEntityCount,
         isLoading: newEntityLoading,
-        description: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description', {
-          defaultMessage: 'Entities first seen in the last {timeRange} with a risk score above zero',
-          values: { timeRange },
-        }),
-        filterLabel: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newEntity.filterLabel', {
-          defaultMessage: 'New entity (last {timeRange})',
-          values: { timeRange },
-        }),
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
+          {
+            defaultMessage:
+              'Entities first seen in the last {timeRange} with a risk score above zero',
+            values: { timeRange },
+          }
+        ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.filterLabel',
+          {
+            defaultMessage: 'New entity (last {timeRange})',
+            values: { timeRange },
+          }
+        ),
       },
     ],
     [
