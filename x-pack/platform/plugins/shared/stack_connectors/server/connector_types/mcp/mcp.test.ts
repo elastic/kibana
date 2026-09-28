@@ -437,7 +437,13 @@ describe('McpConnector', () => {
 
       await connector.testConnector({}, connectorUsageCollector);
 
-      const { networkSettings } = mcpClientType.build.mock.calls[0][0];
+      const { networkSettings, platform } = mcpClientType.build.mock.calls[0][0];
+      expect(platform).toEqual(
+        expect.objectContaining({
+          resolveSrvHosts: expect.any(Function),
+          buildTlsOptions: expect.any(Function),
+        })
+      );
       networkSettings.ensureUriAllowed('https://example.com/mcp');
       networkSettings.ensureHostnameAllowed('example.com');
       networkSettings.getSslSettings();

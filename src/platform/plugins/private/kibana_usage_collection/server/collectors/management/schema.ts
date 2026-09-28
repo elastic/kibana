@@ -553,6 +553,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'alerting:v2:experimentalFeatures': {
+    type: 'boolean',
+    _meta: { description: 'Enables experimental features in Alerting v2 when true.' },
+  },
   'observability:logSources': {
     type: 'array',
     items: {
@@ -575,6 +579,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'agentBuilder:bashSupport': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:apiDiscovery': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
+    },
   },
   'agentBuilder:deductiveEnabled': {
     type: 'boolean',
@@ -937,6 +948,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable diagnostic mode',
     },
   },
+  'observability:nightshiftDeveloperMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of whether Nightshift developer mode is enabled.',
+    },
+  },
   'genAiSettings:defaultAIConnector': {
     type: 'keyword',
     _meta: {
@@ -1014,6 +1031,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: {
       description:
         'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
+    },
+  },
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables displaying nodes whose target entity is unknown or unresolved in the Security graph.',
     },
   },
   'elasticRamen:enabled': {

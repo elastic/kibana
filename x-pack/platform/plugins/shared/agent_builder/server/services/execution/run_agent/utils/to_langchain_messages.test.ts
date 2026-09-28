@@ -11,6 +11,7 @@ import type {
   CompactionSummary,
   ConversationRoundStep,
   ReasoningStep,
+  TimelineEvent,
   ToolCallStep,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
@@ -31,8 +32,13 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
+  T0,
+  abortedExec0Timeline,
+  completedRoundTimeline,
   eventsNativeConversation,
+  failedExec0Timeline,
   pausedAndResumedRoundTimeline,
+  pausedThenInterruptedResumeTimeline,
   roundsOfTimeline,
   timelineFromRounds,
   type ProcessedConversationRound,
@@ -1531,9 +1537,14 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
     // user message, ask_user_question tool call + answer, assistant response, next input
     expect(messages).toHaveLength(5);
     expect(messages[0].content as string).toContain('do it');
-    expect(isAIMessage(messages[1]) && messages[1].tool_calls?.[0].name).toBe('ask_user_question');
-    expect(isToolMessage(messages[2])).toBe(true);
-    expect(messages[2].content as string).toContain('"selected_options":["a"]');
+    expect(isAIMessage(messages[1]) && messages[1].tool_calls?.[0]).toMatchObject({
+      id: 'p1',
+      name: 'ask_user_question',
+    });
+    expect(isToolMessage(messages[2]) && messages[2].tool_call_id).toBe('p1');
+    expect(messages[2].content as string).toMatch(
+      /^<tool_result>.*"selected_options":\["a"\].*<\/tool_result>$/
+    );
     expect(messages[3].content).toBe('done');
     expect(messages[4].content).toBe('current');
   });
@@ -1548,9 +1559,192 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
     const fromAppendOnly = await prepareMessages({ conversation: baseConversation(appendOnly) });
     const fromSingle = await prepareMessages({ conversation: baseConversation(singleExecution) });
 
-    // The materialized ask_user_question tool call gets a fresh id on every render.
-    const withoutToolCallIds = (messages: unknown) =>
-      JSON.stringify(messages).replace(/[0-9a-f]{8}-[0-9a-f-]{27}/g, '<id>');
-    expect(withoutToolCallIds(fromAppendOnly)).toEqual(withoutToolCallIds(fromSingle));
+    // The materialized ask_user_question tool call is keyed on the prompt id, so both renderings match exactly.
+    expect(JSON.stringify(fromAppendOnly)).toEqual(JSON.stringify(fromSingle));
+  });
+
+  describe('interrupted rounds', () => {
+    /** Processes a raw timeline the way `prepareConversation` would: `attachments: []` on user messages. */
+    const processedTimeline = (events: TimelineEvent[]): ProcessedTimelineEvent[] =>
+      eventsForContext(eventsNativeConversation(events)).map((event) =>
+        event.type === TimelineEventType.userMessage
+          ? { ...event, data: { ...event.data, attachments: [] } }
+          : event
+      ) as ProcessedTimelineEvent[];
+
+    const conversationOf = (timeline: ProcessedTimelineEvent[]): ProcessedConversation => ({
+      nextInput: { message: 'bye', attachments: [] },
+      timeline,
+      attachmentTypes: [],
+      attachmentStateManager: createAttachmentStateManager([], {
+        getTypeDefinition: () => undefined as never,
+      }),
+    });
+
+    it('renders an interrupted round as user message, steps, notice — no assistant message', async () => {
+      const toolStep: ToolCallStep = {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'tc1',
+        tool_id: 'my_tool',
+        params: { q: 1 },
+        results: [{ type: ToolResultType.other, tool_result_id: 'res1', data: { value: 'a' } }],
+      };
+      const timeline = processedTimeline([
+        ...completedRoundTimeline('r1', '2026-01-01T00:00:00.000Z'),
+        ...failedExec0Timeline('r2', [toolStep], '2026-01-01T00:01:00.000Z'),
+      ]);
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      const texts = messages.map((message) => ({
+        type: message.getType(),
+        content: typeof message.content === 'string' ? message.content : '',
+      }));
+      // r1: human + ai; r2: human input, ai tool call, tool result, human notice; then next input
+      expect(texts.map((text) => text.type)).toEqual([
+        'human',
+        'ai',
+        'human',
+        'ai',
+        'tool',
+        'human',
+        'human',
+      ]);
+      const r2Start = texts.findIndex((text) => text.content.includes('hello r2'));
+      expect(r2Start).toBe(2);
+      expect((messages[3] as AIMessage).tool_calls?.[0].id).toBe('tc1');
+      expect(texts[5].content).toContain('<system_notice>');
+      expect(texts[5].content).toContain('attempt to answer the previous message failed');
+      expect(texts[5].content).toContain('code="internalError"');
+      expect(texts[6].content).toContain('bye');
+    });
+
+    it('renders an aborted round with the aborted notice', async () => {
+      const timeline = processedTimeline(abortedExec0Timeline('r1', T0, 'api'));
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      expect(messages.map((message) => message.getType())).toEqual(['human', 'human', 'human']);
+      expect(messages[1].content).toContain('interrupted before the agent finished');
+      expect(messages[1].content).toContain('<interruption source="api"');
+    });
+
+    it('renders a paused round whose resume was interrupted as one interrupted round', async () => {
+      const timeline = processedTimeline(
+        pausedThenInterruptedResumeTimeline(
+          'r1',
+          [],
+          [{ type: ConversationRoundStepType.reasoning, reasoning: 'again' }]
+        )
+      );
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      // the round is no longer pending: it is rendered as history, not re-used as the next input
+      const types = messages.map((message) => message.getType());
+      expect(types[0]).toBe('human');
+      expect(types.at(-2)).toBe('human');
+      expect(String(messages.at(-2)?.content)).toContain('<system_notice>');
+      expect(String(messages.at(-1)?.content)).toContain('bye');
+    });
+
+    it('end to end: a confirmation-blocked call + prompt_response + failed setup-window resume renders the call as interrupted', async () => {
+      // the pause left `tc1` pending; the resume failed before reaching it, so it never returned
+      const timeline = processedTimeline(pausedThenInterruptedResumeTimeline('r1', ['tc1']));
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      const tool = messages.find((message) => message.getType() === 'tool');
+      expect(tool).toBeDefined();
+      expect(String(tool?.content)).toContain('"interrupted":true');
+      expect(String(tool?.content)).toContain(
+        'The tool call was interrupted before it returned a result.'
+      );
+    });
+
+    it('renders Round A, then the failed round with its notice, then Round B', async () => {
+      const a = timelineFromRounds([
+        {
+          id: 'a',
+          input: { message: 'first', attachments: [] },
+          response: { message: 'first answer' },
+          started_at: '2026-01-01T00:00:00.000Z',
+        },
+      ]);
+      const b = timelineFromRounds([
+        {
+          id: 'b',
+          input: { message: 'third', attachments: [] },
+          response: { message: 'third answer' },
+          started_at: '2026-01-01T00:02:00.000Z',
+        },
+      ]);
+      const failedAt = '2026-01-01T00:01:00.000Z';
+      const failed = [
+        {
+          id: 'f::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: failedAt,
+          actor: { type: 'user', id: 'u1', username: 'user1' },
+          data: { message: 'second', attachments: [] },
+        },
+        {
+          id: 'f::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: failedAt,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { trigger_type: 'user_message' },
+        },
+        {
+          id: 'f::step::0',
+          type: TimelineEventType.executionStep,
+          created_at: failedAt,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { step: { type: 'reasoning', reasoning: 'standalone reasoning' }, sequence: 0 },
+        },
+        {
+          id: 'f::execution_failed',
+          type: TimelineEventType.executionFailed,
+          created_at: failedAt,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { time_to_last_token: 1, error: { code: 'internalError', message: 'LLM <boom>' } },
+        },
+      ] as unknown as ProcessedTimelineEvent[];
+      const result = await prepareMessages({
+        conversation: {
+          nextInput: { message: 'bye', attachments: [] },
+          timeline: [...a, ...failed, ...b],
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined as never,
+          }),
+        },
+      });
+
+      // A: user + assistant; F: user + notice (a lone reasoning step renders nothing); B: user +
+      // assistant; next input
+      expect(result).toHaveLength(7);
+      expect(result.map((message) => message.getType())).toEqual([
+        'human',
+        'ai',
+        'human',
+        'human',
+        'human',
+        'ai',
+        'human',
+      ]);
+      expect(result[2].content).toContain('second');
+      expect(result[3].content).toContain('<system_notice>');
+      expect(result[3].content).toContain('attempt to answer the previous message failed');
+      expect(result[3].content).toContain('code="internalError"');
+      expect(result[3].content).toContain('LLM &lt;boom&gt;');
+      expect(result[4].content).toContain('third');
+    });
   });
 });

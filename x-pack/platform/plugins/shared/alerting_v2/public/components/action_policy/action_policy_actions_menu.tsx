@@ -10,7 +10,14 @@ import type {
   EuiContextMenuPanelItemDescriptor,
   EuiPopoverProps,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  EuiToolTip,
+  EuiWrappingPopover,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +25,8 @@ import React, { useState } from 'react';
 import { formatSnoozeFullDate } from './format_snooze_date';
 import { isSnoozed } from './is_snoozed';
 import { ActionPolicySnoozeModal } from './action_policy_snooze_modal';
+import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from './labels';
+import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
 
 interface Props {
   policy: ActionPolicyResponse;
@@ -36,6 +45,9 @@ interface Props {
   renderButton?: (args: { isOpen: boolean; toggle: () => void }) => React.ReactElement;
   anchorPosition?: EuiPopoverProps['anchorPosition'];
   'data-test-subj'?: string;
+  anchorId?: string;
+  isOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 export const ActionPolicyActionsMenu = ({
@@ -55,13 +67,27 @@ export const ActionPolicyActionsMenu = ({
   renderButton,
   anchorPosition = 'downRight',
   'data-test-subj': dataTestSubj,
+  anchorId,
+  isOpen,
+  onOpenChange,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
   const [isSnoozeModalOpen, setIsSnoozeModalOpen] = useState(false);
 
-  const togglePopover = () => setIsPopoverOpen((prev) => !prev);
+  const isControlled = isOpen !== undefined;
+  const isPopoverOpen = isControlled ? isOpen! : uncontrolledIsOpen;
+  const setIsPopoverOpen = (next: boolean) => {
+    if (!isControlled) setUncontrolledIsOpen(next);
+    onOpenChange?.(next);
+  };
+
+  const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
+
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
+  const licenseTooltip = isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE;
+  const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
 
   const canSnooze = onSnooze != null && onCancelSnooze != null && policy.enabled;
   const snoozedActive = isSnoozed(policy.snoozed_until);
@@ -86,6 +112,8 @@ export const ActionPolicyActionsMenu = ({
         defaultMessage: 'Edit',
       }),
       icon: 'pencil',
+      disabled: !isLicenseValid,
+      toolTipContent: licenseTooltip,
       'data-test-subj': `editActionPolicy-${policy.id}`,
       onClick: () => {
         closePopover();
@@ -130,6 +158,8 @@ export const ActionPolicyActionsMenu = ({
       defaultMessage: 'Clone',
     }),
     icon: 'copy',
+    disabled: !isLicenseValid,
+    toolTipContent: licenseTooltip,
     'data-test-subj': `cloneActionPolicy-${policy.id}`,
     onClick: () => {
       closePopover();
@@ -146,7 +176,8 @@ export const ActionPolicyActionsMenu = ({
             defaultMessage: 'Enable',
           }),
       icon: policy.enabled ? 'stop' : 'play',
-      disabled: isStateLoading,
+      disabled: isStateLoading || isEnableBlockedByLicense,
+      toolTipContent: isEnableBlockedByLicense ? licenseTooltip : undefined,
       'data-test-subj': `toggleEnabledActionPolicy-${policy.id}`,
       onClick: () => {
         closePopover();
@@ -223,20 +254,40 @@ export const ActionPolicyActionsMenu = ({
     </EuiToolTip>
   );
 
+  const popoverContent = <EuiContextMenu initialPanelId={0} panels={panels} />;
+  const anchor = anchorId ? document.getElementById(anchorId) : null;
+
+  const menuAriaLabel = i18n.translate('xpack.alertingV2.actionPoliciesList.action.actionsMenu', {
+    defaultMessage: 'Action policy actions',
+  });
+
   return (
     <>
-      <EuiPopover
-        aria-label={i18n.translate('xpack.alertingV2.actionPoliciesList.action.actionsMenu', {
-          defaultMessage: 'Action policy actions',
-        })}
-        button={trigger}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        anchorPosition={anchorPosition}
-        panelPaddingSize="s"
-      >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
-      </EuiPopover>
+      {anchorId ? (
+        anchor && (
+          <EuiWrappingPopover
+            button={anchor}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            anchorPosition={anchorPosition}
+            panelPaddingSize="s"
+            aria-label={menuAriaLabel}
+          >
+            {popoverContent}
+          </EuiWrappingPopover>
+        )
+      ) : (
+        <EuiPopover
+          aria-label={menuAriaLabel}
+          button={trigger}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          anchorPosition={anchorPosition}
+          panelPaddingSize="s"
+        >
+          {popoverContent}
+        </EuiPopover>
+      )}
       {isSnoozeModalOpen && (
         <ActionPolicySnoozeModal
           onApplySnooze={(snoozedUntil) => {

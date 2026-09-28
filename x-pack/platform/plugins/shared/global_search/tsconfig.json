@@ -19,7 +19,8 @@
     "@kbn/utility-types",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/licensing-types",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/core-chrome-browser-components"
   ],
   "exclude": [
     "target/**/*",

@@ -16,6 +16,7 @@ export const ES_ARCHIVE_PATHS = {
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights',
   KIBANA_SAMPLE_DATA_LOGS_TSDB:
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb',
+  ML_ECOMMERCE: 'x-pack/platform/test/fixtures/es_archives/ml/ecommerce',
 } as const;
 
 export const DATA_VIEW_ID = {
@@ -84,6 +85,12 @@ export const KBN_ARCHIVE_PATHS = {
    * {@link LENS_BASIC_TITLES}.
    */
   LENS_BASIC: `${LENS_KBN_ARCHIVES_DIR}/lens_basic.json`,
+  /**
+   * Ships a `logstash-*` data view, the `library annotation group` event-annotation-group,
+   * the `first visualization` XY chart whose annotation layer links to that group, and the
+   * `annotation sync test dashboard` holding that chart by reference plus a by-value clone.
+   */
+  ANNOTATION_LIBRARY: `${LENS_KBN_ARCHIVES_DIR}/annotation_library.json`,
   OPEN_IN_LENS: {
     TSVB: {
       METRIC: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/metric.json`,

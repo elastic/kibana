@@ -59,6 +59,18 @@ describe('buildTriggerContextFromExecution', () => {
     });
   });
 
+  it('should detect manual trigger when a legacy row has event.type === manual', () => {
+    const inputs = { severity: 'high', hostId: 'host-1' };
+    const result = buildTriggerContextFromExecution({
+      event: { type: 'manual', inputs, spaceId: 'default' },
+      inputs,
+    });
+    expect(result).toEqual({
+      triggerType: 'manual',
+      input: inputs,
+    });
+  });
+
   it('should not treat custom provenance strings as event-driven without an event payload', () => {
     const result = buildTriggerContextFromExecution(
       { inputs: { query: 'gen' } },
@@ -222,6 +234,32 @@ describe('buildTriggerStepExecutionFromContext', () => {
     expect(result?.stepType).toBe('trigger_event');
   });
 
+  it('uses context.inputs as trigger input when a legacy row has event.type === manual', () => {
+    const inputs = { severity: 'high' };
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      stepExecutions: [completedActionStep],
+      context: {
+        event: { type: 'manual', inputs, spaceId: 'default' },
+        inputs,
+      },
+    });
+    expect(result).not.toBeNull();
+    expect(result?.stepId).toBe('manual');
+    expect(result?.stepType).toBe('trigger_manual');
+    expect(result?.input).toEqual(inputs);
+  });
+
+  it('labels the trigger manual when stored context has inputs and no event', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      context: { inputs: { message: 'test message' } },
+    });
+    expect(result?.stepId).toBe('manual');
+    expect(result?.stepType).toBe('trigger_manual');
+    expect(result?.input).toEqual({ message: 'test message' });
+  });
+
   it('exposes manual inputs as output when both event and inputs are present', () => {
     const result = buildTriggerStepExecutionFromContext({
       ...baseExecution,
@@ -267,6 +305,11 @@ describe('buildOverviewStepExecutionFromContext', () => {
     yaml: '',
     context: { inputs: {}, workflowRunId: 'run-1' },
   };
+
+  it('preserves the finish time without a context timestamp', () => {
+    const overview = buildOverviewStepExecutionFromContext(baseOverviewExecution);
+    expect(overview.finishedAt).toBe(baseOverviewExecution.finishedAt);
+  });
 
   it('adds executionError when execution.error is set and steps ran (no duplicate of trigger-only path)', () => {
     const overview = buildOverviewStepExecutionFromContext(baseOverviewExecution);

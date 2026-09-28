@@ -1,3 +1,3 @@
 #!/bin/bash
 
-TZ="Etc/UTC" yarn test:jest -c "$(dirname "${BASH_SOURCE[0]}")/jest.config.js"
+TZ="Etc/UTC" pnpm test:jest -c "$(dirname "${BASH_SOURCE[0]}")/jest.config.js"

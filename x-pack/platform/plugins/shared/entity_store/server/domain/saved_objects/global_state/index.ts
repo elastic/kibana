@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
@@ -74,6 +71,12 @@ const getWithLatestDefaults = (state: EntityStoreGlobalStateOverrides): EntitySt
   });
 
 export class EntityStoreGlobalStateClient {
+  /**
+   * @param soClient Must be a namespace-scoped client (e.g. from `getScopedClient`
+   * or `getUnsafeInternalClient().asScopedToNamespace(namespace)`). SO operations
+   * do not pass an explicit `namespace` option — correctness relies on the client being pre-scoped
+   * to the target space. Do not pass an internal/unscoped repository here.
+   */
   constructor(
     private readonly soClient: SavedObjectsClientContract,
     private readonly namespace: string,
@@ -155,15 +158,14 @@ export class EntityStoreGlobalStateClient {
   }
 
   async delete(): Promise<void> {
-    const response = await this.findSO();
-    if (response.total === 0) {
+    const so = await this.getSO();
+    if (so === undefined) {
       return;
     }
 
     try {
-      const id = response.saved_objects[0].id;
-      this.logger.debug(`Deleting global state with id ${id}`);
-      await this.soClient.delete(EntityStoreGlobalStateTypeName, id);
+      this.logger.debug(`Deleting global state with id ${so.id}`);
+      await this.soClient.delete(EntityStoreGlobalStateTypeName, so.id);
     } catch (error) {
       if (Boom.isBoom(error, 404)) {
         return;
@@ -179,20 +181,24 @@ export class EntityStoreGlobalStateClient {
   private async findRaw(): Promise<
     { attributes: EntityStoreGlobalStateOverrides; version?: string } | undefined
   > {
-    const response = await this.findSO();
-    if (response.total === 0) {
+    const so = await this.getSO();
+    if (so === undefined) {
       return undefined;
     }
-
-    const { attributes, version } = response.saved_objects[0];
-    return { attributes, version };
+    return { attributes: so.attributes, version: so.version };
   }
 
-  private findSO(): Promise<SavedObjectsFindResponse<EntityStoreGlobalStateOverrides>> {
-    return this.soClient.find<EntityStoreGlobalStateOverrides>({
-      type: EntityStoreGlobalStateTypeName,
-      namespaces: [this.namespace],
-      perPage: 1,
-    });
+  private async getSO(): Promise<SavedObject<EntityStoreGlobalStateOverrides> | undefined> {
+    try {
+      return await this.soClient.get<EntityStoreGlobalStateOverrides>(
+        EntityStoreGlobalStateTypeName,
+        this.getSavedObjectId()
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
+    }
   }
 }

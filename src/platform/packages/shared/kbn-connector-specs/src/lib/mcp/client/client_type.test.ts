@@ -51,6 +51,7 @@ const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext =
       .fn()
       .mockReturnValue({ timeout: 60_000, maxContentLength: 1_000_000 }),
   },
+  platform: { resolveSrvHosts: jest.fn(), buildTlsOptions: jest.fn() },
   credential: { getAuthHeaders: jest.fn().mockResolvedValue({}) },
   ...overrides,
 });

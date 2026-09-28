@@ -14,8 +14,8 @@ import type {
   ConverseInput,
   ChatAgentEvent,
   AgentConfigurationOverrides,
-  ConversationAction,
   AgentExecutionMode,
+  AutoApprovedApi,
   ChatEvent,
   ExecutionStatus,
   InteractivityConfig,
@@ -97,6 +97,7 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -111,6 +112,7 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -168,8 +170,8 @@ export interface ExperimentalFeatures {
   askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
-  /** Whether the HTTP API introspection tools (discover/describe/execute) are enabled */
-  apiTools: boolean;
+  /** Whether the `discover_apis` tool is enabled. */
+  apiDiscovery: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -398,10 +400,6 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
-  /**
-   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
-   */
-  action?: ConversationAction;
   /**
    * The execution ID for this run. Used for sub-agent parent tracking.
    */

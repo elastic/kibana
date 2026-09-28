@@ -20,6 +20,7 @@ import type { LeasePool } from '@kbn/actions-plugin/server/lib';
 import {
   buildClientLeaseKey,
   createConnectorNetworkSettings,
+  createPlatformServices,
 } from '@kbn/actions-plugin/server/lib';
 import type { AxiosError } from 'axios';
 import type { z } from '@kbn/zod/v4';
@@ -33,7 +34,11 @@ import {
 } from '@kbn/mcp-client';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import { clientTypes } from '@kbn/connector-specs/server';
-import type { CredentialAccessor, ConnectorNetworkSettings } from '@kbn/connector-specs';
+import type {
+  CredentialAccessor,
+  ConnectorNetworkSettings,
+  PlatformServices,
+} from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { buildHeadersFromSecrets } from './auth_helpers';
 
@@ -65,6 +70,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   private readonly pool: LeasePool<McpClient>;
   private readonly connectorVersion: string | undefined;
   private readonly networkSettings: ConnectorNetworkSettings;
+  private readonly platform: PlatformServices;
   private readonly credential: CredentialAccessor;
   private readonly authHeaders: Record<string, string>;
 
@@ -80,6 +86,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     const authHeaders = buildHeadersFromSecrets(this.secrets, this.config);
     this.authHeaders = authHeaders;
     this.networkSettings = createConnectorNetworkSettings(params.configurationUtilities);
+    this.platform = createPlatformServices(params.configurationUtilities);
     this.credential = {
       getAuthHeaders: async () => ({
         ...configHeaders,
@@ -145,6 +152,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       logger: this.logger,
       config: { serverUrl: this.config.serverUrl },
       networkSettings: this.networkSettings,
+      platform: this.platform,
       credential: this.credential,
     });
   }

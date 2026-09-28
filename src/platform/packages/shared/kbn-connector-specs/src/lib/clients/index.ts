@@ -9,6 +9,7 @@
 
 import { createMcpClientType } from '../mcp/client/client_type';
 import type { ClientTypeSpecs } from './client_registry';
+import { mongodbClientType } from './mongodb_client_type';
 import { mysqlClientType } from './mysql';
 
 export type {
@@ -17,11 +18,14 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  HostTarget,
+  PlatformServices,
 } from './client_type_spec';
 
 export type { ClientRegistry, ClientTypeId, ClientTypeSpecs } from './client_registry';
 
 export const clientTypes: ClientTypeSpecs = {
   mcp: createMcpClientType(),
+  mongodb: mongodbClientType,
   mysql: mysqlClientType,
 };

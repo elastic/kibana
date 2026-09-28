@@ -52,4 +52,7 @@ export {
   buildClientLeaseKey,
   IN_MEMORY_CONNECTOR_REVISION,
 } from './single_file_connectors/build_client_lease_key';
-export { createConnectorNetworkSettings } from './single_file_connectors/create_connector_network_settings';
+export {
+  createConnectorNetworkSettings,
+  createPlatformServices,
+} from './single_file_connectors/create_connector_network_settings';

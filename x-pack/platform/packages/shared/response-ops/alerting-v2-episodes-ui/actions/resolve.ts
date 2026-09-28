@@ -5,47 +5,42 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import {
   ALERT_EPISODE_STATUS,
-  type AlertEpisode,
   type BulkDeactivateEpisodeActionItem,
 } from '@kbn/alerting-v2-schemas';
-import type { EpisodeAction, EpisodeActionContext } from './types';
+import type { EpisodeActionExtension } from '../types/episode_data_source';
+import type { EpisodeAction } from './types';
 import { bulkDeactivateEpisodeActions } from './bulk_create_alert_actions';
-import { successOrPartialToast } from './helpers';
+import {
+  createCompositeEpisodeAction,
+  type CompositeActionDeps,
+} from './create_composite_episode_action';
 import * as i18n from './translations';
 
-export interface ResolveActionDeps {
-  http: HttpStart;
-  notifications: NotificationsStart;
-}
-
-const isResolvable = (episode: AlertEpisode) =>
-  episode['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE;
-
-export const createResolveAction = (deps: ResolveActionDeps): EpisodeAction => ({
-  id: 'ALERTING_V2_RESOLVE_EPISODE',
-  order: 30,
-  displayName: i18n.RESOLVE,
-  iconType: 'check',
-  isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 && episodes.some(isResolvable),
-  execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    // On a mixed selection, only resolve the episodes that are not already inactive.
-    const items: BulkDeactivateEpisodeActionItem[] = episodes.filter(isResolvable).map((ep) => ({
-      episode_id: ep['episode.id'],
-      reason: i18n.RESOLVE_ACTION_REASON,
-    }));
-    if (!items.length) return;
-
-    try {
-      const response = await bulkDeactivateEpisodeActions(deps.http, items);
-      deps.notifications.toasts.add(successOrPartialToast(response));
-      onSuccess?.();
-    } catch {
-      deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
-    }
-  },
+export const createResolveAction = (
+  deps: CompositeActionDeps,
+  extension?: EpisodeActionExtension
+): EpisodeAction => ({
+  ...createCompositeEpisodeAction(
+    {
+      id: 'ALERTING_V2_RESOLVE_EPISODE',
+      order: 30,
+      displayName: i18n.RESOLVE,
+      iconType: 'check',
+      isCompatible: (ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE,
+      execute: (episodes, http) =>
+        bulkDeactivateEpisodeActions(
+          http,
+          episodes.map(
+            (ep): BulkDeactivateEpisodeActionItem => ({
+              episode_id: ep['episode.id'],
+              reason: i18n.RESOLVE_ACTION_REASON,
+            })
+          )
+        ),
+    },
+    extension,
+    deps
+  ),
 });
