@@ -896,13 +896,13 @@ describe('WatchDetailPage', () => {
     });
   });
 
-  it('locks worker settings and hides save when the user cannot write', () => {
+  it('locks worker settings and disables save/discard with a tooltip when the user cannot write', () => {
     mockUseCanWriteAlertZero.mockReturnValue(false);
     renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
 
     expect(screen.getByTestId('alertZeroReadOnlyCallout')).toBeInTheDocument();
-    expect(screen.queryByTestId('alertZeroWatchSettingsSave')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('alertZeroWatchSettingsDiscard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeDisabled();
     expect(
       screen.getByTestId(
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
