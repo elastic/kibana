@@ -201,26 +201,62 @@ export const deleteIndexedFleetAgents = async (
   };
 
   if (indexedData.agents.length) {
-    response.agents = await esClient
-      .deleteByQuery({
-        index: `${indexedData.fleetAgentsIndex}-*`,
-        wait_for_completion: true,
-        conflicts: 'proceed',
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'local_metadata.elastic.agent.id': indexedData.agents.map(
-                    (agent) => agent.local_metadata.elastic.agent.id
-                  ),
-                },
-              },
-            ],
+    const query = {
+      bool: {
+        filter: [
+          {
+            terms: {
+              'local_metadata.elastic.agent.id': indexedData.agents.map(
+                (agent) => agent.local_metadata.elastic.agent.id
+              ),
+            },
           },
-        },
-      })
-      .catch(wrapErrorAndRejectPromise);
+        ],
+      },
+    };
+
+    // Fleet rewrites these docs while a test is cleaning up. With
+    // `conflicts: 'proceed'` that rewrite is skipped and reported as success,
+    // so the agent stays active and the agent-policy delete is rejected.
+    // Refresh, then retry until a pass has no version conflicts.
+    let deleted: DeleteByQueryResponse | undefined;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      deleted = await esClient
+        .deleteByQuery({
+          index: `${indexedData.fleetAgentsIndex}-*`,
+          wait_for_completion: true,
+          conflicts: 'proceed',
+          refresh: true,
+          query,
+        })
+        .catch(wrapErrorAndRejectPromise);
+
+      if ((deleted.version_conflicts ?? 0) === 0) {
+        break;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+
+    // The policy delete only cares that no active agent is still assigned.
+    // If a conflict survives the retries, unenroll the doc so that check passes.
+    if ((deleted?.version_conflicts ?? 0) > 0) {
+      await esClient
+        .updateByQuery({
+          index: `${indexedData.fleetAgentsIndex}-*`,
+          wait_for_completion: true,
+          conflicts: 'proceed',
+          refresh: true,
+          query,
+          script: {
+            lang: 'painless',
+            source: 'ctx._source.active = false',
+          },
+        })
+        .catch(wrapErrorAndRejectPromise);
+    }
+
+    response.agents = deleted;
   }
 
   return response;
