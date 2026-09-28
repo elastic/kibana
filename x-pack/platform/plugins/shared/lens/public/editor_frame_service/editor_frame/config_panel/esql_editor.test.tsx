@@ -193,7 +193,7 @@ describe('ESQLEditor', () => {
     expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
     expect(getSuggestionsMock).not.toHaveBeenCalled();
 
-    // While a refresh is in flight EuiAccordion swaps the row count for its spinner
+    // While a refresh is in flight the cached row count stays in the header
     await waitFor(() => expect(capturedOnSubmit).toBeDefined());
     act(() => {
       void capturedOnSubmit!(
@@ -201,8 +201,9 @@ describe('ESQLEditor', () => {
         new AbortController()
       );
     });
-    await waitFor(() => expect(within(results).getByRole('progressbar')).toBeInTheDocument());
-    expect(results).not.toHaveTextContent('3');
+    await waitFor(() => expect(getSuggestionsMock).toHaveBeenCalled());
+    expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(results).toHaveTextContent('3');
   });
 
   it('keeps the grid rendered and shows a refreshing bar while a refresh is in flight', async () => {
@@ -265,7 +266,7 @@ describe('ESQLEditor', () => {
       );
     });
 
-    await waitFor(() => expect(within(results).getByRole('progressbar')).toBeInTheDocument());
+    await waitFor(() => expect(within(results).getByText('Loading')).toBeInTheDocument());
     expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
   });
 

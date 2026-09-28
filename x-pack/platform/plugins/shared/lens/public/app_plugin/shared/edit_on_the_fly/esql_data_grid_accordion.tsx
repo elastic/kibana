@@ -52,7 +52,8 @@ export const ESQLDataGridAccordion = ({
     defaultMessage: 'Query error',
   });
 
-  const isAccordionLoading = !dataGridAttrs && isLoading;
+  const hasRows = Boolean(dataGridAttrs?.rows.length);
+  const isAccordionLoading = isLoading && !hasRows;
   const showQueryError = hasQueryError && !dataGridAttrs && !isLoading;
 
   return (
