@@ -94,6 +94,15 @@ describe('Actions Plugin', () => {
       expect(pluginSetup.isEarsEnabled).toBe(true);
     });
 
+    it('returns isEarsEnabled as false when auth.ears.enabled is false', async () => {
+      const context = coreMock.createPluginInitializerContext({
+        auth: { ears: { enabled: false } },
+      });
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isEarsEnabled).toBe(false);
+    });
+
     it('returns isInboundEventsEnabled as false when not configured', async () => {
       const context = coreMock.createPluginInitializerContext({});
       const plugin = new Plugin(context);
