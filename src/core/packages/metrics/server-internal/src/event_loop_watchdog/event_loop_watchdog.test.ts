@@ -1,0 +1,144 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { MockWorker } from './event_loop_watchdog.test.mocks';
+import { ActivityRegistry } from './activity_registry';
+import { EventLoopWatchdog, MAX_RESTARTS, RESTART_BASE_DELAY_MS } from './event_loop_watchdog';
+import type { BlockReport, WatchdogOptions } from './types';
+
+const options: WatchdogOptions = {
+  thresholdMs: 500,
+  heartbeatIntervalMs: 100,
+  pollIntervalMs: 50,
+  liveNoticeIntervalMs: 1_000,
+  maxLiveNoticesPerBlock: 3,
+  maxProfileDurationMs: 5_000,
+  profileCooldownMs: 60_000,
+  maxCandidates: 5,
+  profileSamplingIntervalUs: 1_000,
+  maxFrames: 5,
+};
+
+describe('EventLoopWatchdog', () => {
+  let logger: MockedLogger;
+  let registry: ActivityRegistry;
+  let watchdog: EventLoopWatchdog;
+
+  const lastWorker = () => MockWorker.instances[MockWorker.instances.length - 1];
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    MockWorker.instances = [];
+    logger = loggerMock.create();
+    registry = new ActivityRegistry();
+    watchdog = new EventLoopWatchdog({
+      logger,
+      loggerName: 'metrics.event_loop_watchdog',
+      options,
+      registry,
+      liveNoticeFormat: 'text',
+      sanitizeRoot: '/root',
+    });
+  });
+
+  afterEach(async () => {
+    await watchdog.stop();
+    jest.useRealTimers();
+  });
+
+  it('starts one unref-ed worker and sends a snapshot of in-flight activities', () => {
+    registry.observe({ type: 'task manager', name: 'run a', id: '1' });
+    watchdog.start();
+    watchdog.start();
+
+    expect(MockWorker.instances).toHaveLength(1);
+    const worker = lastWorker();
+    expect(worker.unref).toHaveBeenCalled();
+    expect(worker.postMessage).toHaveBeenCalledWith({
+      type: 'snapshot',
+      activities: [[0, expect.objectContaining({ type: 'a', id: '1' })]],
+    });
+
+    registry.observe({ type: 'task manager', name: 'run b', id: '2' });
+    expect(worker.postMessage).toHaveBeenLastCalledWith({
+      type: 'activity-start',
+      key: 1,
+      activity: expect.objectContaining({ type: 'b' }),
+    });
+  });
+
+  it('terminates the worker on stop and can start again', async () => {
+    watchdog.start();
+    const first = lastWorker();
+    await watchdog.stop();
+    expect(first.terminate).toHaveBeenCalled();
+    expect(watchdog.isRunning).toBe(false);
+
+    watchdog.start();
+    expect(MockWorker.instances).toHaveLength(2);
+    // the terminated worker's exit must not trigger a restart
+    jest.advanceTimersByTime(RESTART_BASE_DELAY_MS * 10);
+    expect(MockWorker.instances).toHaveLength(2);
+  });
+
+  it('restarts crashed workers with exponential backoff, bounded by MAX_RESTARTS', () => {
+    watchdog.start();
+    for (let restart = 0; restart < MAX_RESTARTS; restart++) {
+      lastWorker().emit('exit', 1);
+      const delay = RESTART_BASE_DELAY_MS * 2 ** restart;
+      jest.advanceTimersByTime(delay - 1);
+      expect(MockWorker.instances).toHaveLength(restart + 1);
+      jest.advanceTimersByTime(1);
+      expect(MockWorker.instances).toHaveLength(restart + 2);
+    }
+
+    lastWorker().emit('exit', 1);
+    jest.advanceTimersByTime(RESTART_BASE_DELAY_MS * 100);
+    expect(MockWorker.instances).toHaveLength(MAX_RESTARTS + 1);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringMatching(/exhausted 3 restarts/));
+  });
+
+  it('resets the restart budget when re-enabled', async () => {
+    watchdog.start();
+    for (let restart = 0; restart <= MAX_RESTARTS; restart++) {
+      lastWorker().emit('exit', 1);
+      jest.advanceTimersByTime(RESTART_BASE_DELAY_MS * 2 ** restart);
+    }
+    await watchdog.stop();
+    watchdog.start();
+    const count = MockWorker.instances.length;
+    lastWorker().emit('exit', 1);
+    jest.advanceTimersByTime(RESTART_BASE_DELAY_MS);
+    expect(MockWorker.instances).toHaveLength(count + 1);
+  });
+
+  it('logs reports and worker errors', () => {
+    watchdog.start();
+    const report: BlockReport = {
+      blockedMs: 1200,
+      startedAt: 1,
+      endedAt: 2,
+      cpuRatio: 0.99,
+      liveNotices: 0,
+      suppressedBlocks: 0,
+      candidates: [{ kind: 'task', type: 'a', id: '1', runningForMs: 5 }],
+      omittedCandidates: 0,
+      profile: { verdict: 'unavailable', reason: 'no profile captured', frames: [] },
+    };
+    lastWorker().emit('message', { type: 'report', report });
+    lastWorker().emit('message', { type: 'worker-error', message: 'boom' });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Event loop was blocked for ~1200ms'),
+      { tags: ['event-loop-watchdog'], kibana: { event_loop_watchdog: report } }
+    );
+    expect(logger.warn).toHaveBeenCalledWith('Event loop watchdog: boom');
+  });
+});

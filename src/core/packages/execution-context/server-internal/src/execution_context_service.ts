@@ -54,9 +54,21 @@ export interface IExecutionContext {
 }
 
 /**
+ * Notified when `withContext` starts running a function; returns a callback invoked once that
+ * function settles, or `undefined` when the context is not of interest.
  * @internal
  */
-export type InternalExecutionContextSetup = IExecutionContext;
+export type ExecutionContextActivityObserver = (
+  context: KibanaExecutionContext
+) => (() => void) | undefined;
+
+/**
+ * @internal
+ */
+export interface InternalExecutionContextSetup extends IExecutionContext {
+  /** Registers the single process-wide observer of `withContext` activity (e.g. for diagnostics). */
+  registerActivityObserver(observer: ExecutionContextActivityObserver): void;
+}
 
 /**
  * @internal
@@ -71,6 +83,7 @@ export class ExecutionContextService
   private readonly requestIdStore: AsyncLocalStorage<{ requestId: string }>;
   private enabled = false;
   private configSubscription?: Subscription;
+  private activityObserver?: ExecutionContextActivityObserver;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('execution_context');
@@ -93,6 +106,12 @@ export class ExecutionContextService
       get: this.get.bind(this),
       getAsHeader: this.getAsHeader.bind(this),
       getAsLabels: this.getAsLabels.bind(this),
+      registerActivityObserver: (observer) => {
+        if (this.activityObserver) {
+          throw new Error('An execution context activity observer is already registered');
+        }
+        this.activityObserver = observer;
+      },
     };
   }
 
@@ -110,6 +129,7 @@ export class ExecutionContextService
 
   stop() {
     this.enabled = false;
+    this.activityObserver = undefined;
     if (this.configSubscription) {
       this.configSubscription.unsubscribe();
       this.configSubscription = undefined;
@@ -128,6 +148,30 @@ export class ExecutionContextService
   }
 
   private withContext<R>(
+    context: KibanaExecutionContext | undefined,
+    fn: (...args: any[]) => R
+  ): R {
+    const onActivityEnd = context ? this.activityObserver?.(context) : undefined;
+    if (!onActivityEnd) {
+      return this.runWithContext(context, fn);
+    }
+
+    let result: R;
+    try {
+      result = this.runWithContext(context, fn);
+    } catch (error) {
+      onActivityEnd();
+      throw error;
+    }
+    if (isPromiseLike(result)) {
+      result.then(onActivityEnd, onActivityEnd);
+    } else {
+      onActivityEnd();
+    }
+    return result;
+  }
+
+  private runWithContext<R>(
     context: KibanaExecutionContext | undefined,
     fn: (...args: any[]) => R
   ): R {
@@ -186,3 +230,6 @@ export class ExecutionContextService
     );
   }
 }
+
+const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
+  typeof (value as PromiseLike<unknown> | undefined)?.then === 'function';
