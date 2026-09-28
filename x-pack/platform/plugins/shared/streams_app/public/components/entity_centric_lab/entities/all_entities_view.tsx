@@ -18,6 +18,7 @@ import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCallOut,
+  EuiComboBox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldSearch,
@@ -55,6 +56,9 @@ const NO_GROW = css`
 const k8sFilterGroupCss = css`
   gap: 4px;
 `;
+
+/** Sentinel for the top-level category filter ("All categories"). */
+const CATEGORY_FILTER_ALL = '__all_categories__';
 
 
 import {
@@ -126,6 +130,7 @@ import {
   getCategoryExtraFilters,
   getExtraFacets,
   getTagFacets,
+  getVisibleEntityCategories,
   isCategoryHiddenInElasticOn,
   matchesExtraFilters,
   matchesTagFilters,
@@ -1025,11 +1030,35 @@ const AllEntitiesViewInner = ({
     return activeGroupByFields;
   }, [isElasticOn, groupBy, activeGroupByFields, categoryScope]);
 
+  // ---------------------------------------------------------------------------
+  // Top-level Category filter — all state and derived values declared in one
+  // block so nothing references a variable before its declaration (TDZ).
+  // ---------------------------------------------------------------------------
+  const [categoryFilter, setCategoryFilter] = useState<string>(CATEGORY_FILTER_ALL);
+  const isCrossCategoryPage = !categoryScope && isElasticOn;
+  const visibleCategories = useMemo(
+    () => getVisibleEntityCategories(isElasticOn),
+    [isElasticOn]
+  );
+  const categoriesWithEntities = useMemo(() => {
+    const present = new Set(scopedEntities.map((e) => e.category));
+    return visibleCategories.filter((c) => present.has(c.id));
+  }, [scopedEntities, visibleCategories]);
+  const effectiveCategoryScope: EntityCategoryId | undefined =
+    categoryScope ?? (categoryFilter !== CATEGORY_FILTER_ALL ? (categoryFilter as EntityCategoryId) : undefined);
+  const categoryFilteredEntities = useMemo(
+    () =>
+      isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL
+        ? scopedEntities.filter((e) => e.category === categoryFilter)
+        : scopedEntities,
+    [isCrossCategoryPage, categoryFilter, scopedEntities]
+  );
+
   // Kubernetes cluster filter lifted to page level when on the K8s
-  // category page so it appears in the toolbar row (the inner card's
-  // header is hidden by `hideCategoryHeader`).
+  // category page OR when "Kubernetes" is selected in the top-level
+  // category filter on the cross-category page.
   const showK8sFilters =
-    !!categoryScope && categoryScope === 'kubernetes' && isElasticOn;
+    (!!categoryScope ? categoryScope === 'kubernetes' : categoryFilter === 'kubernetes') && isElasticOn;
   const [k8sResourceType, setK8sResourceType] = useState<KubernetesResourceType>(KUBERNETES_RESOURCE_TYPE_ALL);
   const [k8sClusterFilter, setK8sClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [k8sNamespaceFilter, setK8sNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
@@ -1041,14 +1070,17 @@ const AllEntitiesViewInner = ({
     [k8sResourceType]
   );
 
+  // When the K8s filters are driven by the top-level category filter
+  // (cross-category page), scope them to category-filtered entities.
+  const k8sBaseEntities = categoryFilteredEntities;
   const k8sEntitiesForFilters = useMemo(
-    () => (showK8sFilters ? filterEntitiesByResourceType(scopedEntities, k8sResourceType) : scopedEntities),
-    [showK8sFilters, scopedEntities, k8sResourceType]
+    () => (showK8sFilters ? filterEntitiesByResourceType(k8sBaseEntities, k8sResourceType) : k8sBaseEntities),
+    [showK8sFilters, k8sBaseEntities, k8sResourceType]
   );
 
   const k8sClusterNames = useMemo(
-    () => (showK8sFilters ? getKubernetesClusterNames(scopedEntities) : []),
-    [showK8sFilters, scopedEntities]
+    () => (showK8sFilters ? getKubernetesClusterNames(k8sBaseEntities) : []),
+    [showK8sFilters, k8sBaseEntities]
   );
   const k8sNamespaceNames = useMemo(
     () => (showK8sFilters && k8sFilterVisibility.showNamespace
@@ -1114,15 +1146,31 @@ const AllEntitiesViewInner = ({
     CLOUD_PROVIDER_FILTER_ALL
   );
 
+  const handleCategoryFilterChange = useCallback(
+    (next: string) => {
+      setCategoryFilter(next);
+      // Reset sub-filters when category changes.
+      setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL);
+      setK8sClusterFilter(KUBERNETES_FILTER_ALL);
+      setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
+      setK8sNodeFilter(KUBERNETES_FILTER_ALL);
+      setCloudProviderFilter(CLOUD_PROVIDER_FILTER_ALL);
+      setCategoryTypeFilter(CATEGORY_RESOURCE_TYPE_ALL);
+    },
+    []
+  );
+
   // Generic category resource-type filter — shown on non-K8s category
   // pages that have 2+ distinct entity types (Hosts, Cloud, Networking, etc.).
   const [categoryTypeFilter, setCategoryTypeFilter] = useState<string>(CATEGORY_RESOURCE_TYPE_ALL);
   const categoryTypeLabels = useMemo(
     () => {
-      if (!categoryScope || categoryScope === 'kubernetes' || !isElasticOn) return [];
-      return getEntityTypeLabels(scopedEntities);
+      const scope = effectiveCategoryScope;
+      if (!scope || scope === 'kubernetes' || !isElasticOn) return [];
+      return getEntityTypeLabels(isCrossCategoryPage ? categoryFilteredEntities : scopedEntities);
     },
-    [categoryScope, isElasticOn, scopedEntities]
+    [effectiveCategoryScope, isElasticOn, isCrossCategoryPage, categoryFilteredEntities, scopedEntities]
   );
   const showCategoryTypeFilter = categoryTypeLabels.length >= 2;
 
@@ -1351,6 +1399,16 @@ const AllEntitiesViewInner = ({
     extraFilterDefs,
   ]);
 
+  // Top-level category filter — narrow to the selected category on the
+  // cross-category page before applying K8s / Cloud / type sub-filters.
+  const filteredEntitiesAfterCategory = useMemo(
+    () =>
+      isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL
+        ? filteredEntitiesBeforeCluster.filter((e) => e.category === categoryFilter)
+        : filteredEntitiesBeforeCluster,
+    [filteredEntitiesBeforeCluster, isCrossCategoryPage, categoryFilter]
+  );
+
   // When on the K8s category page the cluster filter is lifted to page level.
   // Apply it to the filtered slice so counts, summary, and child views all
   // reflect the selection.
@@ -1359,9 +1417,9 @@ const AllEntitiesViewInner = ({
   const filteredEntitiesAfterResourceType = useMemo(
     () =>
       showK8sFilters && k8sResourceType !== KUBERNETES_RESOURCE_TYPE_ALL
-        ? filterEntitiesByResourceType(filteredEntitiesBeforeCluster, k8sResourceType)
-        : filteredEntitiesBeforeCluster,
-    [filteredEntitiesBeforeCluster, showK8sFilters, k8sResourceType]
+        ? filterEntitiesByResourceType(filteredEntitiesAfterCategory, k8sResourceType)
+        : filteredEntitiesAfterCategory,
+    [filteredEntitiesAfterCategory, showK8sFilters, k8sResourceType]
   );
   const filteredEntitiesAfterCluster = useMemo(
     () =>
@@ -1446,6 +1504,7 @@ const AllEntitiesViewInner = ({
     Object.values(activeExtraFilters).some((values) => values.length > 0) ||
     labFilters.length > 0 ||
     search.trim() !== '' ||
+    (isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL) ||
     (showK8sFilters && (
       k8sResourceType !== KUBERNETES_RESOURCE_TYPE_ALL ||
       k8sClusterFilter !== KUBERNETES_FILTER_ALL ||
@@ -1462,6 +1521,7 @@ const AllEntitiesViewInner = ({
     setActiveExtraFilters(EMPTY_EXTRA_FILTERS);
     setLabFilters([]);
     setSearch('');
+    setCategoryFilter(CATEGORY_FILTER_ALL);
     setCloudProviderFilter(CLOUD_PROVIDER_FILTER_ALL);
     setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL);
     setK8sClusterFilter(KUBERNETES_FILTER_ALL);
@@ -2299,7 +2359,7 @@ const AllEntitiesViewInner = ({
                   </div>
                 </EuiTourStep>
                 <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={NO_GROW}>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap css={NO_GROW}>
                   <EuiFlexItem grow={false}>
                     <EntitiesTagFilters
                       facets={tagFacets}
@@ -2311,6 +2371,41 @@ const AllEntitiesViewInner = ({
                       isPhase1={isPhase1}
                     />
                   </EuiFlexItem>
+                  {isCrossCategoryPage && categoriesWithEntities.length >= 2 ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiComboBox
+                        compressed
+                        singleSelection={{ asPlainText: true }}
+                        options={categoriesWithEntities.map((c) => ({
+                          label: c.label,
+                          value: c.id,
+                        }))}
+                        selectedOptions={
+                          categoryFilter === CATEGORY_FILTER_ALL
+                            ? []
+                            : categoriesWithEntities
+                                .filter((c) => c.id === categoryFilter)
+                                .map((c) => ({ label: `Category: ${c.label}`, value: c.id }))
+                        }
+                        onChange={(selected) => {
+                          handleCategoryFilterChange(
+                            selected.length > 0 ? (selected[0].value as string) : CATEGORY_FILTER_ALL
+                          );
+                        }}
+                        placeholder={i18n.translate(
+                          'xpack.streams.entityCentricLab.entities.categoryFilter.placeholder',
+                          { defaultMessage: 'All categories' }
+                        )}
+                        isClearable
+                        aria-label={i18n.translate(
+                          'xpack.streams.entityCentricLab.entities.categoryFilter.ariaLabel',
+                          { defaultMessage: 'Filter resources by category' }
+                        )}
+                        data-test-subj="entityCentricLabCategoryFilter"
+                        style={{ minWidth: 150 }}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                   {extraFilterDefs.length > 0 ? (
                     <EuiFlexItem grow={false}>
                       <EntityExtraFilters

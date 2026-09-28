@@ -486,7 +486,7 @@ export const KubernetesResourceTypeFilter = ({
         { defaultMessage: 'Filter Kubernetes entities by resource type' }
       )}
       data-test-subj="entityCentricLabKubernetesResourceTypeFilter"
-      style={{ minWidth: 180 }}
+      style={{ minWidth: 140 }}
     />
   );
 };
@@ -551,7 +551,7 @@ export const KubernetesClusterFilter = ({
         }
       )}
       data-test-subj="entityCentricLabKubernetesClusterFilter"
-      style={{ minWidth: 200 }}
+      style={{ minWidth: 140 }}
     />
   );
 };
@@ -606,7 +606,7 @@ export const KubernetesNamespaceFilter = ({
         { defaultMessage: 'Filter Kubernetes entities by namespace' }
       )}
       data-test-subj="entityCentricLabKubernetesNamespaceFilter"
-      style={{ minWidth: 170 }}
+      style={{ minWidth: 130 }}
     />
   );
 };
@@ -661,7 +661,7 @@ export const KubernetesDeploymentFilter = ({
         { defaultMessage: 'Filter Kubernetes entities by deployment' }
       )}
       data-test-subj="entityCentricLabKubernetesDeploymentFilter"
-      style={{ minWidth: 170 }}
+      style={{ minWidth: 130 }}
     />
   );
 };
@@ -716,7 +716,7 @@ export const KubernetesNodeFilter = ({
         { defaultMessage: 'Filter Kubernetes entities by node' }
       )}
       data-test-subj="entityCentricLabKubernetesNodeFilter"
-      style={{ minWidth: 150 }}
+      style={{ minWidth: 120 }}
     />
   );
 };

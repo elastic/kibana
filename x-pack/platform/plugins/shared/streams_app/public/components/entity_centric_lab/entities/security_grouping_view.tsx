@@ -422,55 +422,10 @@ const GroupAccordion = ({
         </EuiTitle>
       }
       extraAction={
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {isK8s && clusterNames.length > 0 && categoryScope !== 'kubernetes' ? (
-            <EuiFlexItem grow={false}>
-              <KubernetesClusterFilter
-                clusterNames={clusterNames}
-                value={clusterFilter}
-                onChange={handleClusterChange}
-              />
-            </EuiFlexItem>
-          ) : null}
-          {isK8s && nodeNames.length > 0 && categoryScope !== 'kubernetes' ? (
-            <EuiFlexItem grow={false}>
-              <KubernetesNodeFilter
-                nodeNames={nodeNames}
-                value={effectiveNodeFilter}
-                onChange={setNodeFilter}
-              />
-            </EuiFlexItem>
-          ) : null}
-          {isK8s && namespaceNames.length > 0 && categoryScope !== 'kubernetes' ? (
-            <EuiFlexItem grow={false}>
-              <KubernetesNamespaceFilter
-                namespaceNames={namespaceNames}
-                value={effectiveNamespaceFilter}
-                onChange={setNamespaceFilter}
-              />
-            </EuiFlexItem>
-          ) : null}
-          {isK8s && deploymentNames.length > 0 && categoryScope !== 'kubernetes' ? (
-            <EuiFlexItem grow={false}>
-              <KubernetesDeploymentFilter
-                deploymentNames={deploymentNames}
-                value={effectiveDeploymentFilter}
-                onChange={setDeploymentFilter}
-              />
-            </EuiFlexItem>
-          ) : null}
-          {isCloud && categoryScope !== 'cloud' ? (
-            <EuiFlexItem grow={false}>
-              <CloudProviderFilter value={providerFilter} onChange={setProviderFilter} />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <AccordionBadges
-              entityCount={visibleEntities.length}
-              alertingCount={visibleAlertingCount}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <AccordionBadges
+          entityCount={visibleEntities.length}
+          alertingCount={visibleAlertingCount}
+        />
       }
       paddingSize="m"
       data-test-subj={`securityGrouping-accordion-${index}`}

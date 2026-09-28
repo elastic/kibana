@@ -362,21 +362,29 @@ export const EntityFlyout = ({
 
   // Header badges always lead with the health indicator (see
   // {@link HEALTH_TAG_LABELS}); the remaining tags keep their per-kind order.
-  // In Phase 1 (hideHealthBadge), the health tag is dropped and replaced
-  // with an alerts badge provided by the caller.
+  // In Phase 1 (hideHealthBadge), order is: category → type → alerts,
+  // with overflow collapsed behind a clickable "+ N more" badge.
   const orderedTags = useMemo(() => {
     if (hideHealthBadge) {
       const withoutHealth = overview.tags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
+      // First two tags are category & type (per kind_templates order).
+      const primary = withoutHealth.slice(0, 2);
+      const rest = withoutHealth.slice(2);
       if (alertsBadge) {
-        return [alertsBadge, ...withoutHealth];
+        return [...primary, alertsBadge, ...rest];
       }
-      return withoutHealth;
+      return [...primary, ...rest];
     }
     const healthIndex = overview.tags.findIndex((tag) => HEALTH_TAG_LABELS.has(tag.label));
     if (healthIndex <= 0) return overview.tags;
     const rest = overview.tags.filter((_, index) => index !== healthIndex);
     return [overview.tags[healthIndex], ...rest];
   }, [overview.tags, hideHealthBadge, alertsBadge]);
+  // Number of always-visible badges (category + type + alerts) in Phase 1.
+  const VISIBLE_TAG_COUNT = hideHealthBadge && alertsBadge ? 3 : orderedTags.length;
+  const [showAllTags, setShowAllTags] = useState(false);
+  const visibleTags = showAllTags ? orderedTags : orderedTags.slice(0, VISIBLE_TAG_COUNT);
+  const overflowCount = orderedTags.length - VISIBLE_TAG_COUNT;
   const tabsData = useMemo(
     () => buildFakeEntityTabsData(entityName, entityType, effectiveHealth, alertsActiveCount),
     [entityName, entityType, effectiveHealth, alertsActiveCount]
@@ -846,23 +854,54 @@ export const EntityFlyout = ({
       // side by side. Undefined keeps the classic single-flyout behaviour.
       session={session}
       onClose={onClose}
+      hideCloseButton
       size={size}
       aria-labelledby={titleId}
       data-test-subj="entityCentricLabFlyout"
     >
       <EuiFlyoutHeader css={css`padding-bottom: 0;`}>
+        {/* Dedicated top row: expand + close icons right-aligned */}
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs" responsive={false}>
+          {onExpand ? (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate(
+                  'entityCentricLabFlyout.flyout.expandToFullPageTooltip',
+                  { defaultMessage: 'Open as full page' }
+                )}
+              >
+                <EuiButtonIcon
+                  iconType="fullScreen"
+                  aria-label={i18n.translate(
+                    'entityCentricLabFlyout.flyout.expandToFullPageAriaLabel',
+                    { defaultMessage: 'Open as full page' }
+                  )}
+                  color="text"
+                  display="empty"
+                  onClick={() => onExpand?.(activeTab)}
+                  data-test-subj="entityCentricLabFlyoutExpand"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label={i18n.translate(
+                'entityCentricLabFlyout.flyout.closeAriaLabel',
+                { defaultMessage: 'Close' }
+              )}
+              color="text"
+              display="empty"
+              onClick={onClose}
+              data-test-subj="entityCentricLabFlyoutClose"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h2 id={titleId} data-test-subj="entityCentricLabFlyoutTitle">
-                {/*
-                  Live display-name resolution honours the wizard's
-                  per-entity-type `displayField` choice — when the user
-                  swaps e.g. `kubernetes.pod.name` for `kubernetes.pod.uid`,
-                  this title re-renders immediately via the shared
-                  `entity_display_config` store. Falls back to the entity
-                  name when no override is configured.
-                */}
                 {displayName}
               </h2>
             </EuiTitle>
@@ -879,32 +918,6 @@ export const EntityFlyout = ({
               size="s"
             />
           </EuiFlexItem>
-          {onExpand ? (
-            <EuiFlexItem grow>
-              <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'entityCentricLabFlyout.flyout.expandToFullPageTooltip',
-                      { defaultMessage: 'Open as full page' }
-                    )}
-                  >
-                    <EuiButtonIcon
-                      iconType="fullScreen"
-                      aria-label={i18n.translate(
-                        'entityCentricLabFlyout.flyout.expandToFullPageAriaLabel',
-                        { defaultMessage: 'Open as full page' }
-                      )}
-                      color="text"
-                      display="empty"
-                      onClick={() => onExpand?.(activeTab)}
-                      data-test-subj="entityCentricLabFlyoutExpand"
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
         </EuiFlexGroup>
         <EuiText size="xs" color="subdued">
           {i18n.translate('entityCentricLabFlyout.flyout.lastUpdate', {
@@ -914,7 +927,7 @@ export const EntityFlyout = ({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
-          {orderedTags.map((tag) => (
+          {visibleTags.map((tag) => (
             <EuiFlexItem grow={false} key={tag.label}>
               <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
             </EuiFlexItem>
@@ -924,6 +937,43 @@ export const EntityFlyout = ({
               <EuiBadge color="success" data-test-subj="entityCentricLabFlyoutPodPhaseBadge">
                 {i18n.translate('entityCentricLabFlyout.flyout.podPhaseRunning', {
                   defaultMessage: 'Running',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+          {overflowCount > 0 && !showAllTags ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="hollow"
+                onClick={() => setShowAllTags(true)}
+                onClickAriaLabel={i18n.translate(
+                  'entityCentricLabFlyout.flyout.showMoreTags',
+                  {
+                    defaultMessage: 'Show {count} more tags',
+                    values: { count: overflowCount },
+                  }
+                )}
+                data-test-subj="entityCentricLabFlyoutShowMoreTags"
+              >
+                {`+ ${overflowCount} more`}
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+          {showAllTags && overflowCount > 0 ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="hollow"
+                onClick={() => setShowAllTags(false)}
+                onClickAriaLabel={i18n.translate(
+                  'entityCentricLabFlyout.flyout.showLessTags',
+                  { defaultMessage: 'Show fewer tags' }
+                )}
+                iconType="arrowUp"
+                iconSide="right"
+                data-test-subj="entityCentricLabFlyoutShowLessTags"
+              >
+                {i18n.translate('entityCentricLabFlyout.flyout.lessLabel', {
+                  defaultMessage: 'Less',
                 })}
               </EuiBadge>
             </EuiFlexItem>

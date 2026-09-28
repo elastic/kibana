@@ -71,7 +71,6 @@ import { labThings } from '../lab_terminology';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import {
   CLOUD_PROVIDER_FILTER_ALL,
-  CloudProviderFilter,
   filterEntitiesByProvider,
 } from './cloud_provider_filter';
 import {
@@ -2764,21 +2763,6 @@ const KubernetesCard = ({
         <EuiFlexItem grow={false}>
           <CategoryHeader category="kubernetes" total={visibleEntities.length} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <KubernetesResourceTypeFilter
-            value={resourceType}
-            onChange={setResourceType}
-          />
-        </EuiFlexItem>
-        {clusterNames.length > 0 ? (
-          <EuiFlexItem grow={false}>
-            <KubernetesClusterFilter
-              clusterNames={clusterNames}
-              value={clusterFilter}
-              onChange={setClusterFilter}
-            />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div className={nestedContentClass}>{groupContent}</div>
@@ -2853,15 +2837,6 @@ const MultiTypeCategoryCard = ({
         <EuiFlexItem grow={false}>
           <CategoryHeader category={category} total={visibleEntities.length} />
         </EuiFlexItem>
-        {typeLabels.length > 1 ? (
-          <EuiFlexItem grow={false}>
-            <CategoryResourceTypeFilter
-              typeLabels={typeLabels}
-              value={typeFilter}
-              onChange={setTypeFilter}
-            />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div className={nestedContentClass}>
@@ -3083,9 +3058,6 @@ const CloudGroupedCards = ({
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <CategoryHeader category="cloud" total={visibleEntities.length} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CloudProviderFilter value={providerFilter} onChange={setProviderFilter} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
