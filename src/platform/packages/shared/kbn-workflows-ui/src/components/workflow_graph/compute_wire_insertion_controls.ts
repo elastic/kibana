@@ -13,13 +13,12 @@ import { MERGE_BUS_TRUNK, TRUNK_LENGTH_TO_TARGET } from './compute_edge_path';
 import type { InsertionPoints, NodePortTargets } from './compute_insertion_points';
 import type { WorkflowGraphInsertionContext } from './workflow_graph_actions_context';
 import { stepSupportsErrorHandling } from './step_supports_error_handling';
-import { WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
-
 /**
  * Stub length from the last node's exit edge to the terminal + tip.
- * Half a normal inter-rank arrow so the end control reads as attached, not floating.
+ * Longer than inter-rank spacing so the terminal insert control is visually
+ * distinct from mid-wire controls and the + tip doesn't crowd the node.
  */
-export const TERMINAL_STUB_PX = Math.round(WORKFLOW_RANK_SEP / 2);
+export const TERMINAL_STUB_PX = 75;
 
 export type WireControlKind = 'wire' | 'terminal';
 
@@ -155,9 +154,14 @@ const isMergeEdge = (edge: Edge): boolean => {
 };
 
 const isForkEdge = (edge: Edge): boolean => {
-  const data = edge.data as { branchType?: EdgeBranchType } | undefined;
+  const data = edge.data as { branchType?: EdgeBranchType; branchIndex?: number } | undefined;
   const branchType = data?.branchType;
-  return branchType === 'switch' || branchType === 'then' || branchType === 'else';
+  return (
+    branchType === 'switch' ||
+    branchType === 'then' ||
+    branchType === 'else' ||
+    typeof data?.branchIndex === 'number'
+  );
 };
 
 const stepTypeOf = (node: Node | undefined): string | undefined => {
@@ -205,7 +209,23 @@ export function computeWireInsertionControls(args: {
     if (isFailureEdge(edge)) continue;
     const ports = insertionPoints.byNodeId.get(edge.source);
     if (!ports) continue;
-    const insertContext = resolveInsertContext(ports, edge.sourceHandle);
+    // For switch/parallel branch edges the React Flow sourceHandle is not set
+    // to the case/branch key (nodes don't mount a named handle per case/branch).
+    // Derive the logical branch key from edge data so insertionPoints can be
+    // looked up correctly, independently of the rendered handle.
+    const edgeData = edge.data as
+      | { branchType?: EdgeBranchType; branchIndex?: number; label?: string }
+      | undefined;
+    const handleKey =
+      edgeData?.branchType === 'switch'
+        ? edgeData.label === 'default'
+          ? 'default'
+          : `case:${edgeData.label}`
+        : typeof edgeData?.branchIndex === 'number'
+        ? `branch:${edgeData.branchIndex}`
+        : edge.sourceHandle ?? 'step';
+
+    const insertContext = resolveInsertContext(ports, handleKey);
     if (!insertContext) continue;
 
     const sourceNode = byId.get(edge.source);
@@ -217,7 +237,6 @@ export function computeWireInsertionControls(args: {
     const start = exitPoint(sourceBounds, direction);
     const end = entryPoint(targetBounds, direction);
 
-    const handleKey = edge.sourceHandle ?? 'step';
     wiredExits.add(`${edge.source}:${handleKey}`);
 
     const merge = isMergeEdge(edge);

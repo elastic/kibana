@@ -22,7 +22,14 @@ import { prettifyCatalogKey } from '../../../shared/utils/catalog_display_name';
  * How a field renders in the step configuration form. `code` fields get a
  * Monaco editor in `language`; everything else is a plain EUI control.
  */
-export type StepFieldKind = 'text' | 'number' | 'boolean' | 'select' | 'code';
+export type StepFieldKind =
+  | 'text'
+  | 'number'
+  | 'boolean'
+  | 'select'
+  | 'code'
+  | 'switch-cases'
+  | 'parallel-branches';
 export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext' | 'esql';
 
 export interface StepFormField {
@@ -224,6 +231,13 @@ const resolveKind = (
   key: string,
   schema: z.ZodType
 ): Pick<StepFormField, 'kind' | 'language' | 'options'> => {
+  if (stepType === 'switch' && key === 'cases') {
+    return { kind: 'switch-cases' };
+  }
+  if (stepType === 'parallel' && key === 'branches') {
+    return { kind: 'parallel-branches' };
+  }
+
   const inner = unwrapSchema(schema);
 
   // Schema-level `.meta({ language })` annotation takes priority over name-based overrides,
@@ -484,6 +498,8 @@ export const isFieldValueRepresentable = (field: StepFormField, value: unknown):
   if (value === undefined || value === null) return true;
   switch (field.kind) {
     case 'code':
+    case 'switch-cases':
+    case 'parallel-branches':
       return true;
     case 'boolean':
       return typeof value === 'boolean' || typeof value === 'string';
@@ -508,6 +524,9 @@ const placeholderFor = (field: StepFormField): unknown => {
       return field.options?.[0] ?? '';
     case 'code':
       return field.language === 'json' ? {} : '';
+    case 'switch-cases':
+    case 'parallel-branches':
+      return [];
     case 'text':
     default:
       return '';

@@ -639,6 +639,10 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     flashNodeId,
   });
 
+  // DEBUG: trace edges into ReactFlow — remove once root cause is found
+  // eslint-disable-next-line no-console
+  console.log('[Canvas] animatedEdges:', animatedEdges.length, 'layoutEdges:', layoutEdges.length, 'animatedNodes:', animatedNodes.length, 'suppressInsertionControls:', suppressInsertionControls);
+
   const handleNodeClick = useCallback(
     (_evt: React.MouseEvent, node: { id: string; data: Record<string, unknown> }) => {
       const stepType = typeof node.data?.stepType === 'string' ? node.data.stepType : '';
@@ -674,15 +678,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     );
   }, [nodes]);
 
-  // Restrict panning to the graph's bounding box plus a comfortable margin
-  // so the user can't scroll far off into empty space.
-  const translateExtent = useMemo<[[number, number], [number, number]]>(() => {
-    const PAD = 400;
-    return [
-      [graphBounds.minX - PAD, graphBounds.minY - PAD],
-      [graphBounds.maxX + PAD, graphBounds.maxY + PAD],
-    ];
-  }, [graphBounds]);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
@@ -791,8 +786,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   // lifetime, so later resizes never yank the viewport away from the user.
   //
   // Empty → first structure (creation-panel trigger/step): wait two animation
-  // frames so dagre positions + translateExtent commit, then animate into the
-  // home frame — same cadence as a direction change.
+  // frames so dagre positions commit, then animate into the home frame — same
+  // cadence as a direction change.
   useEffect(() => {
     if (hasCenteredInitialViewRef.current || !instanceReady) {
       return;
@@ -1032,7 +1027,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               zoomOnScroll={false}
               zoomOnPinch={showNavChrome}
               zoomOnDoubleClick={false}
-              translateExtent={translateExtent}
               minZoom={0.1}
             >
               {showBackground && (

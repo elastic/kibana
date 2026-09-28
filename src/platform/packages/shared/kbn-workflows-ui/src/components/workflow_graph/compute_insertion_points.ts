@@ -155,6 +155,21 @@ export function computeInsertionPoints(
       branches.set('steps', { slot: { kind: 'steps' }, ownerStepName: step.name, isTerminal: true });
     }
 
+    // if steps always present both 'then' (steps) and 'else' branch ports,
+    // even when those keys are absent from the YAML. Without this, visitStepChildSlots
+    // fires nothing → hasBranches stays false → node gets a spurious step port
+    // that produces a phantom middle terminal stub instead of the two expected branch stubs.
+    if (type === 'if') {
+      if (!branches.has('steps')) {
+        hasBranches = true;
+        branches.set('steps', { slot: { kind: 'steps' }, ownerStepName: step.name, isTerminal: true });
+      }
+      if (!branches.has('else')) {
+        hasBranches = true;
+        branches.set('else', { slot: { kind: 'else' }, ownerStepName: step.name, isTerminal: true });
+      }
+    }
+
     const supportsFallback = stepSupportsErrorHandling(type);
 
     if (hasBranches) {

@@ -508,6 +508,7 @@ export function useWorkflowLayout({
           traversed,
           points: laid?.points,
           branchType: e.branchType,
+          branchIndex: e.branchIndex,
           isMerge: mergeNodeIds.has(e.target),
           hideEndMarker: allBypassLaneIds.has(e.target),
           isFailure,
@@ -530,6 +531,10 @@ export function useWorkflowLayout({
     branchTraversal,
     syntheticTriggerExecution,
   ]);
+
+  // DEBUG: trace edge count at each layer — remove once root cause is found
+  // eslint-disable-next-line no-console
+  console.log('[useWorkflowLayout] derivedEdges:', derivedEdges.length, 'allEdges:', topologyMeta.allEdges.length, 'transformed.edges:', transformed.edges.length, 'workflow steps:', (workflow as any)?.steps?.length ?? 'n/a');
 
   return { nodes: derivedNodes, edges: derivedEdges, transformed };
 }

@@ -8,16 +8,23 @@
  */
 
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiComboBox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiFormRow,
+  EuiComboBox,
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
@@ -31,17 +38,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isMap, isSeq, parseDocument, stringify as stringifyYaml } from 'yaml';
+import { isMap, parseDocument, stringify as stringifyYaml } from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
-import type { AggregateQuery } from '@kbn/es-query';
-import ESQLEditorImport from '@kbn/esql-editor';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowsServices } from '../../../types';
 import { ESQL_LANG_ID, XJSON_LANG_ID, YAML_LANG_ID } from '@kbn/monaco';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { getBuiltInStepDefinition } from '@kbn/workflows';
-import { ensureWorkflowGraphEuiIcons, stepSupportsErrorHandling, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { ensureWorkflowGraphEuiIcons, resolveNodeChipStyle, stepSupportsErrorHandling, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
@@ -53,8 +56,14 @@ import {
   validateStepField,
   type StepFormField,
 } from '../lib/step_form_schema';
+import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
+import {
+  FlyoutMonacoFrame,
+  getFlyoutMonacoEditorOptions,
+} from './flyout_monaco_frame';
 import { ReferenceCapableField } from './reference_capable_field';
 import { StepErrorHandlingSection } from './step_error_handling_section';
+import { WORKFLOW_STEP_CONFIG_FLYOUT_HISTORY_KEY } from './workflow_step_config_flyout_history_key';
 
 ensureWorkflowGraphEuiIcons();
 
@@ -80,16 +89,17 @@ export interface StepConfigPanelProps {
    * Error handling section (mirrors canvas error-port eligibility).
    */
   readonly isFallbackStep?: boolean;
-  /** Momentarily reveal/pulse this step's error port on the canvas. */
-  readonly onRevealErrorPort?: () => void;
-  /** Select/center a fallback step on the canvas (read-only discovery). */
-  readonly onViewFallbackOnCanvas?: (stepName: string) => void;
+  /** Flyout width in px (supports resize via `onResize`). */
+  readonly size?: number;
+  readonly minWidth?: number;
+  readonly maxWidth?: number;
+  readonly onResize?: (width: number) => void;
 }
 
-type PanelTab = 'parameters' | 'branches' | 'settings';
+const DEFAULT_FLYOUT_SIZE = 560;
+const DEFAULT_FLYOUT_MIN_WIDTH = 420;
 
-/** Step types that have user-configurable branching structure. */
-const BRANCHING_STEP_TYPES = new Set(['if', 'switch', 'parallel']);
+/** Builder form vs full-step YAML — same axis as the canvas bottom-bar toggle. */
 type ParametersMode = 'form' | 'yaml';
 
 /** Catalog display name — same label the Actions menu shows. */
@@ -117,6 +127,9 @@ const resolveCatalogLabel = (
 };
 
 const CODE_EDITOR_HEIGHT = 160;
+
+/** Flatten newlines / runs of whitespace for single-line Inputs display only. */
+const collapseWhitespaceForDisplay = (text: string): string => text.replace(/\s+/g, ' ');
 
 /** Monaco language for a code field. There is no KQL Monaco mode, so conditions use plaintext. */
 const monacoLanguageFor = (field: StepFormField): string => {
@@ -150,7 +163,9 @@ const writeFragmentValue = (
 ): string => {
   const doc = parseDocument(fragment);
   if (!isMap(doc.contents)) return fragment;
-  if (isEmptyFieldValue(value) && !field.required) {
+  // An empty string is the expression-mode sentinel for boolean/number fields —
+  // don't delete it; keep the key so the UI stays in expression mode.
+  if (isEmptyFieldValue(value) && value !== '' && !field.required) {
     doc.deleteIn(field.path as string[]);
   } else {
     doc.setIn(field.path as string[], value);
@@ -174,6 +189,17 @@ const toJs = (value: unknown): unknown =>
 /** Stable id for field rows and draft-error maps. */
 const fieldId = (field: StepFormField): string => field.path.join('.');
 
+/**
+ * Settings accordion open state for the lifetime of this page. Survives panel
+ * remounts when switching steps; resets when the document unloads.
+ */
+let settingsAccordionOpenForPage = false;
+
+/** @internal clears page-session accordion state between Jest cases. */
+export function resetStepConfigPanelSessionStateForTests(): void {
+  settingsAccordionOpenForPage = false;
+}
+
 export function StepConfigPanel({
   stepType,
   actionLabel,
@@ -183,22 +209,34 @@ export function StepConfigPanel({
   onCancel,
   onSave,
   isFallbackStep = false,
-  onRevealErrorPort,
+  size = DEFAULT_FLYOUT_SIZE,
+  minWidth = DEFAULT_FLYOUT_MIN_WIDTH,
+  maxWidth,
+  onResize,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
-  const [tab, setTab] = useState<PanelTab>('parameters');
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
   // The fragment is the single source of truth for Form and YAML.
   const [fragment, setFragment] = useState(initialFragment);
   const [showValidation, setShowValidation] = useState(false);
   const indent = useMemo(() => detectIndent(initialFragment), [initialFragment]);
-  const panelRef = useRef<HTMLDivElement | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [nameError, setNameError] = useState<string | undefined>();
   const nameEditBaselineRef = useRef('');
   const isEditingNameRef = useRef(false);
+  const titleId = useGeneratedHtmlId({ prefix: 'workflowStepConfigTitle' });
+  const flyoutId = useGeneratedHtmlId({ prefix: 'workflowStepConfigFlyout' });
+  const settingsAccordionId = useGeneratedHtmlId({ prefix: 'workflowStepConfigSettings' });
+  const [settingsOpen, setSettingsOpen] = useState(settingsAccordionOpenForPage);
+  /** Field currently open in the expanded editor child flyout (depth ≤ 2). */
+  const [expandedField, setExpandedField] = useState<StepFormField | null>(null);
+
+  const handleSettingsToggle = useCallback((isOpen: boolean) => {
+    settingsAccordionOpenForPage = isOpen;
+    setSettingsOpen(isOpen);
+  }, []);
 
   const [draftErrors, setDraftErrors] = useState<ReadonlyMap<string, string>>(() => new Map());
 
@@ -220,26 +258,8 @@ export function StepConfigPanel({
     setDraftErrors(new Map());
     setIsEditingName(false);
     setNameError(undefined);
+    setExpandedField(null);
   }, [initialFragment]);
-
-  useEffect(() => {
-    panelRef.current?.focus();
-  }, []);
-
-  // Escape anywhere inside the panel cancels — unless the step-name editor is
-  // active (Escape reverts the name instead).
-  useEffect(() => {
-    const panel = panelRef.current;
-    if (!panel) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      if (isEditingName) return;
-      event.stopPropagation();
-      onCancel();
-    };
-    panel.addEventListener('keydown', onKeyDown);
-    return () => panel.removeEventListener('keydown', onKeyDown);
-  }, [onCancel, isEditingName]);
 
   const schema = useMemo(() => getStepFormSchema(stepType, connectors), [stepType, connectors]);
   // Name is edited in the header only — never as a form body field.
@@ -296,6 +316,48 @@ export function StepConfigPanel({
       setFragment((current) => writeFragmentValue(current, field, value, indent)),
     [indent]
   );
+
+  const expandedFieldValue = useMemo(() => {
+    if (!expandedField) return '';
+    const raw = toJs(readFragmentValue(fragment, expandedField.path));
+    if (raw === undefined || raw === null) return '';
+    if (
+      expandedField.kind === 'code' &&
+      expandedField.language === 'json' &&
+      typeof raw !== 'string'
+    ) {
+      return JSON.stringify(raw, null, 2);
+    }
+    return String(raw);
+  }, [expandedField, fragment]);
+
+  const handleExpandedFieldChange = useCallback(
+    (next: string) => {
+      if (!expandedField) return;
+      if (expandedField.kind === 'code' && expandedField.language === 'json') {
+        if (next.trim() === '') {
+          handleFieldChange(expandedField, undefined);
+          return;
+        }
+        try {
+          handleFieldChange(expandedField, JSON.parse(next));
+        } catch {
+          // Keep the last valid fragment value while the draft is invalid.
+        }
+        return;
+      }
+      handleFieldChange(expandedField, next);
+    },
+    [expandedField, handleFieldChange]
+  );
+
+  const handleExpandField = useCallback((field: StepFormField) => {
+    setExpandedField(field);
+  }, []);
+
+  const handleFieldEditorBack = useCallback(() => {
+    setExpandedField(null);
+  }, []);
 
   const catalogLabel = useMemo(
     () => resolveCatalogLabel(stepType, connectors, actionLabel),
@@ -391,34 +453,16 @@ export function StepConfigPanel({
     onSave(fragment);
   }, [parsed.valid, hasFormErrors, onSave, fragment]);
 
+  // Flyout Escape / mask close — skip while the step-name editor is active
+  // (Escape there reverts the name via the input handler instead).
+  const handleClose = useCallback(() => {
+    if (isEditingNameRef.current) return;
+    onCancel();
+  }, [onCancel]);
+
   const showSettings = !isFallbackStep && stepSupportsErrorHandling(stepType);
 
-  const tabOptions: Array<{ id: PanelTab; label: string }> = [
-    {
-      id: 'parameters',
-      label: i18n.translate('workflows.stepConfigPanel.parametersTab', {
-        defaultMessage: 'Inputs',
-      }),
-    },
-    ...(BRANCHING_STEP_TYPES.has(stepType)
-      ? [
-          {
-            id: 'branches' as const,
-            label: i18n.translate('workflows.stepConfigPanel.branchesTab', {
-              defaultMessage: 'Branches',
-            }),
-          },
-        ]
-      : []),
-    {
-      id: 'settings',
-      label: i18n.translate('workflows.stepConfigPanel.settingsTab', {
-        defaultMessage: 'Settings',
-      }),
-    },
-  ];
-
-  const parametersModeOptions: Array<{
+  const editorModeOptions: Array<{
     id: ParametersMode;
     iconType: string;
     label: string;
@@ -426,41 +470,53 @@ export function StepConfigPanel({
     {
       id: 'form',
       iconType: 'workflow',
-      label: i18n.translate('workflows.stepConfigPanel.builderView', {
-        defaultMessage: 'Builder view',
+      label: i18n.translate('workflows.stepConfigPanel.builderTab', {
+        defaultMessage: 'Visual builder',
       }),
     },
     {
       id: 'yaml',
       iconType: 'code',
-      label: i18n.translate('workflows.stepConfigPanel.yamlView', {
-        defaultMessage: 'YAML view',
+      label: i18n.translate('workflows.stepConfigPanel.yamlTab', {
+        defaultMessage: 'YAML',
       }),
     },
   ];
 
   const isBuilderMode = parametersMode === 'form';
+  const chip = resolveNodeChipStyle(euiTheme, stepType, false, {
+    isSuccess: false,
+    isFailed: false,
+  });
 
   return (
-    <div
-      ref={panelRef}
-      tabIndex={-1}
-      role="dialog"
-      aria-label={headerTitle}
+    <>
+    <EuiFlyout
+      // Keep the canvas interactive while this is open: no overlay mask, and
+      // outside clicks must not dismiss. Closing is driven by selection
+      // (pane click deselects → parent clears the panel) or Cancel / Escape.
+      id={flyoutId}
+      session="start"
+      historyKey={WORKFLOW_STEP_CONFIG_FLYOUT_HISTORY_KEY}
+      flyoutMenuProps={{ title: headerTitle }}
+      ownFocus={false}
+      outsideClickCloses={false}
+      hideCloseButton
+      paddingSize="none"
+      size={size}
+      minWidth={minWidth}
+      maxWidth={maxWidth}
+      resizable={Boolean(onResize)}
+      onResize={onResize}
+      onClose={handleClose}
+      aria-labelledby={titleId}
       data-test-subj="workflowStepConfigPanel"
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        outline: 'none',
-        background: euiTheme.colors.backgroundBasePlain,
-      }}
     >
-      <div
+      <EuiFlyoutHeader
+        hasBorder
         css={{
-          display: 'flex',
-          flexDirection: 'column',
-          borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+          // Keep Visual builder / YAML tabs flush on the header border.
+          '&&': { paddingBottom: 0 },
         }}
       >
         <div
@@ -468,13 +524,15 @@ export function StepConfigPanel({
             display: 'flex',
             alignItems: 'center',
             gap: euiTheme.size.m,
-            padding: `${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.s}`,
+            // paddingSize="none" on the flyout clears header inset — restore
+            // 16px (size.base) so the step tile and close aren't edge-flush.
+            padding: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s}`,
           }}
         >
           {/*
-            Single-line header: icon · name · pencil. No catalog/type subtitle —
-            the user already picked this node, the chip carries the provider,
-            and the form fields / YAML view identify the step kind.
+            Single-line header: icon · name · pencil · close. No catalog/type
+            subtitle — the user already picked this node, the chip carries the
+            provider, and the form fields / YAML view identify the step kind.
           */}
           <div
             css={{
@@ -490,16 +548,36 @@ export function StepConfigPanel({
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                // Match the 40×40 step icon tiles (Actions menu / graph weight).
+                // Match canvas / Actions menu chip palette for this step type.
                 width: euiTheme.size.xxl,
                 height: euiTheme.size.xxl,
                 flex: '0 0 auto',
                 borderRadius: euiTheme.border.radius.small,
-                border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-                background: euiTheme.colors.backgroundBaseSubdued,
+                border: `1px solid ${chip.border}`,
+                background: chip.background,
               }}
             >
-              <StepIcon stepType={stepType} executionStatus={undefined} size="m" />
+              {/*
+                Match canvas / Actions menu glyph tinting: mask-based StepIcons
+                honor `iconColor`, but EUI glyphs (e.g. `branch` for if) need
+                the SVG fill wrapper used by NodeStepIcon.
+              */}
+              <span
+                css={[
+                  { color: chip.iconColor, display: 'inline-flex', lineHeight: 0 },
+                  chip.iconColor
+                    ? { '& svg, & svg *': { fill: chip.iconColor } }
+                    : undefined,
+                ]}
+              >
+                <StepIcon
+                  stepType={stepType}
+                  executionStatus={undefined}
+                  size="m"
+                  iconColor={chip.iconColor}
+                  color={chip.iconColor}
+                />
+              </span>
             </span>
             <div css={{ minWidth: 0, flex: '1 1 auto' }}>
               {isEditingName ? (
@@ -512,6 +590,9 @@ export function StepConfigPanel({
                     justifyContent: 'center',
                   }}
                 >
+                  <span id={titleId} hidden>
+                    {headerTitle}
+                  </span>
                   <EuiFieldText
                     inputRef={(el) => {
                       nameInputRef.current = el;
@@ -560,7 +641,8 @@ export function StepConfigPanel({
                 </div>
               ) : (
                 <EuiTitle size="xxs">
-                  <h3
+                  <h2
+                    id={titleId}
                     css={{
                       display: 'flex',
                       alignItems: 'center',
@@ -624,7 +706,7 @@ export function StepConfigPanel({
                       data-test-subj="workflowStepConfigPanelEditName"
                       css={{ flex: '0 0 auto' }}
                     />
-                  </h3>
+                  </h2>
                 </EuiTitle>
               )}
             </div>
@@ -637,17 +719,6 @@ export function StepConfigPanel({
               flex: '0 0 auto',
             }}
           >
-            {/*
-              Builder/YAML picks a *representation of the whole step* (YAML
-              covers inputs and settings together) while tabs pick *which part*
-              of the step you're viewing — two axes. The toggle sits above the
-              tabs in the header so it can govern them without an extra row.
-            */}
-            <ParametersModeToggle
-              mode={parametersMode}
-              options={parametersModeOptions}
-              onChange={setParametersMode}
-            />
             <EuiToolTip content={closeLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="cross"
@@ -660,262 +731,212 @@ export function StepConfigPanel({
             </EuiToolTip>
           </div>
         </div>
-        {isBuilderMode ? (
-          <EuiTabs
-            size="s"
-            bottomBorder={false}
-            data-test-subj="workflowStepConfigPanelTabs"
-            aria-label={i18n.translate('workflows.stepConfigPanel.tabsLegend', {
-              defaultMessage: 'Step editor sections',
-            })}
-            css={{ paddingInline: euiTheme.size.m }}
-          >
-            {tabOptions.map((option) => (
-              <EuiTab
-                key={option.id}
-                isSelected={tab === option.id}
-                onClick={() => setTab(option.id)}
-                data-test-subj={`workflowStepConfigPanelTab-${option.id}`}
-              >
-                {option.label}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-        ) : null}
-      </div>
-
-      <div
-        css={{
-          flex: '1 1 auto',
-          minHeight: 0,
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column' as const,
-          paddingInline: euiTheme.size.m,
-          boxSizing: 'border-box' as const,
-        }}
-      >
-        {!isBuilderMode ? (
-          <div
-            css={{
-              flex: '1 1 auto',
-              minHeight: 240,
-              height: '100%',
-              width: '100%',
-              marginBlock: euiTheme.size.m,
-              background: euiTheme.colors.backgroundBaseSubdued,
-              overflow: 'hidden',
-            }}
-          >
-            <CodeEditor
-              languageId={YAML_LANG_ID}
-              value={fragment}
-              onChange={setFragment}
-              height="100%"
-              aria-label={i18n.translate('workflows.stepConfigPanel.yamlAriaLabel', {
-                defaultMessage: 'Step YAML',
-              })}
-              options={{
-                theme: WORKFLOWS_MONACO_EDITOR_THEME,
-                automaticLayout: true,
-                fontSize: 12,
-                minimap: { enabled: false },
-                lineNumbersMinChars: 3,
-                scrollBeyondLastLine: false,
-                tabSize: indent,
-              }}
-              dataTestSubj="workflowStepConfigPanelYaml"
-            />
-          </div>
-        ) : (
-          <>
-            <div
-              css={{
-                display: tab === 'parameters' ? 'flex' : 'none',
-                flexDirection: 'column',
-                flex: '1 1 auto',
-                minHeight: 0,
-                overflow: 'hidden',
-                paddingTop: euiTheme.size.m,
-              }}
-            >
-              {parsed.valid ? (
-                <StepForm
-                  key={initialFragment}
-                  fields={fields}
-                  hasSchema={schema !== undefined}
-                  fragment={fragment}
-                  showValidation={showValidation}
-                  referenceCatalog={referenceCatalog}
-                  onChange={handleFieldChange}
-                  onDraftErrorChange={handleDraftErrorChange}
-                />
-              ) : (
-                <EuiText
-                  size="s"
-                  color="danger"
-                  data-test-subj="workflowStepConfigPanelFormBlocked"
-                >
-                  {i18n.translate('workflows.stepConfigPanel.invalidYamlForForm', {
-                    defaultMessage: 'Fix the YAML to edit this step as a form. {error}',
-                    values: { error: parsed.error ?? '' },
-                  })}
-                </EuiText>
-              )}
-            </div>
-
-            <div
-              css={{
-                display: tab === 'branches' ? 'flex' : 'none',
-                flexDirection: 'column',
-                flex: '1 1 auto',
-                minHeight: 0,
-                overflow: 'auto',
-                paddingBlock: euiTheme.size.m,
-                paddingInline: euiTheme.size.m,
-              }}
-              data-test-subj="workflowStepConfigPanelBranches"
-            >
-              <BranchesSection
-                stepType={stepType}
-                fragment={fragment}
-                indent={indent}
-                onChange={setFragment}
-              />
-            </div>
-
-            <div
-              css={{
-                display: tab === 'settings' ? 'block' : 'none',
-                flex: '1 1 auto',
-                minHeight: 0,
-                overflow: 'auto',
-                paddingBlock: euiTheme.size.m,
-              }}
-              data-test-subj="workflowStepConfigPanelSettings"
-            >
-              {showSettings ? (
-                <div data-test-subj="workflowStepConfigErrorHandlingSection">
-                  <StepErrorHandlingSection
-                    fragment={fragment}
-                    indent={indent}
-                    onFragmentChange={setFragment}
-                    onRevealErrorPort={onRevealErrorPort}
-                  />
-                </div>
-              ) : (
-                <EuiText size="s" color="subdued">
-                  {i18n.translate('workflows.stepConfigPanel.settingsUnavailable', {
-                    defaultMessage: 'Error handling is not available for this step.',
-                  })}
-                </EuiText>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-
-      <div
-        css={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: euiTheme.size.s,
-          padding: euiTheme.size.m,
-          borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-        }}
-      >
-        <EuiButtonEmpty size="s" onClick={onCancel} data-test-subj="workflowStepConfigPanelCancel">
-          {i18n.translate('workflows.stepConfigPanel.cancel', { defaultMessage: 'Cancel' })}
-        </EuiButtonEmpty>
-        <EuiButton
+        <EuiTabs
           size="s"
-          fill
-          onClick={handleSave}
-          isDisabled={!parsed.valid || hasFormErrors}
-          data-test-subj="workflowStepConfigPanelSave"
+          bottomBorder={false}
+          data-test-subj="workflowStepConfigPanelTabs"
+          aria-label={i18n.translate('workflows.stepConfigPanel.editorModeLegend', {
+            defaultMessage: 'Step editor mode',
+          })}
+          css={{ paddingInline: euiTheme.size.base }}
         >
-          {i18n.translate('workflows.stepConfigPanel.save', { defaultMessage: 'Save step' })}
-        </EuiButton>
-      </div>
-    </div>
-  );
-}
+          {editorModeOptions.map((option) => (
+            <EuiTab
+              key={option.id}
+              isSelected={parametersMode === option.id}
+              onClick={() => setParametersMode(option.id)}
+              prepend={<EuiIcon type={option.iconType} aria-hidden />}
+              data-test-subj={`workflowStepConfigPanelView-${option.id}`}
+            >
+              {option.label}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </EuiFlyoutHeader>
 
-/** Icon segmented control — same glyphs/chrome as the canvas Visual/YAML toggle. */
-function ParametersModeToggle({
-  mode,
-  options,
-  onChange,
-}: {
-  mode: ParametersMode;
-  options: ReadonlyArray<{ id: ParametersMode; iconType: string; label: string }>;
-  onChange: (next: ParametersMode) => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <div
-      role="group"
-      aria-label={i18n.translate('workflows.stepConfigPanel.parametersModeLegend', {
-        defaultMessage: 'Step editor mode',
-      })}
-      data-test-subj="workflowStepConfigPanelViewToggle"
-      css={{
-        background: euiTheme.colors.backgroundBaseSubdued,
-        border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-        borderRadius: euiTheme.border.radius.small,
-        padding: 3,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        flex: '0 0 auto',
-      }}
-    >
-      {options.map(({ id, iconType, label }) => {
-        const active = id === mode;
-        return (
-          <EuiToolTip key={id} content={label}>
-            <button
-              type="button"
-              title={label}
-              aria-label={label}
-              aria-pressed={active}
-              onClick={() => onChange(id)}
-              data-test-subj={`workflowStepConfigPanelView-${id}`}
+      <EuiFlyoutBody
+        css={{
+          // Own scroll / fill layout so YAML monaco can take remaining height.
+          '.euiFlyoutBody__overflow': {
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          },
+          '.euiFlyoutBody__overflowContent': {
+            flex: '1 1 auto',
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            padding: 0,
+          },
+        }}
+      >
+        <div
+          css={{
+            flex: '1 1 auto',
+            minHeight: 0,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column' as const,
+            boxSizing: 'border-box' as const,
+            height: '100%',
+          }}
+        >
+          {!isBuilderMode ? (
+            <FlyoutMonacoFrame>
+              <CodeEditor
+                languageId={YAML_LANG_ID}
+                value={fragment}
+                onChange={setFragment}
+                height="100%"
+                aria-label={i18n.translate('workflows.stepConfigPanel.yamlAriaLabel', {
+                  defaultMessage: 'Step YAML',
+                })}
+                options={getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent })}
+                dataTestSubj="workflowStepConfigPanelYaml"
+              />
+            </FlyoutMonacoFrame>
+          ) : (
+            <div
               css={{
-                width: 28,
-                height: 28,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: 'none',
-                cursor: 'pointer',
-                borderRadius: 4,
-                padding: 0,
-                background: active ? euiTheme.colors.backgroundBasePrimary : 'transparent',
-                color: euiTheme.colors.text,
-                transition: 'background 120ms ease',
-                '&:hover': {
-                  background: active
-                    ? euiTheme.colors.backgroundBasePrimary
-                    : euiTheme.colors.backgroundBaseInteractiveHover,
-                },
-                '&:focus-visible': {
-                  outline: `2px solid ${euiTheme.colors.primary}`,
-                  outlineOffset: 2,
-                },
+                flex: '1 1 auto',
+                minHeight: 0,
+                width: '100%',
+                overflow: 'auto',
               }}
             >
-              <EuiIcon
-                type={iconType}
-                aria-hidden
-                color={active ? euiTheme.colors.primaryText : euiTheme.colors.text}
-              />
-            </button>
-          </EuiToolTip>
-        );
-      })}
-    </div>
+              <div
+                css={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: euiTheme.size.base,
+                  boxSizing: 'border-box' as const,
+                }}
+              >
+                {parsed.valid ? (
+                  <StepForm
+                    key={initialFragment}
+                    fields={fields}
+                    hasSchema={schema !== undefined}
+                    fragment={fragment}
+                    showValidation={showValidation}
+                    referenceCatalog={referenceCatalog}
+                    onChange={handleFieldChange}
+                    onDraftErrorChange={handleDraftErrorChange}
+                    onExpandField={handleExpandField}
+                    expandedFieldId={expandedField ? fieldId(expandedField) : undefined}
+                  />
+                ) : (
+                  <EuiText
+                    size="s"
+                    color="danger"
+                    data-test-subj="workflowStepConfigPanelFormBlocked"
+                  >
+                    {i18n.translate('workflows.stepConfigPanel.invalidYamlForForm', {
+                      defaultMessage: 'Fix the YAML to edit this step as a form. {error}',
+                      values: { error: parsed.error ?? '' },
+                    })}
+                  </EuiText>
+                )}
+
+                <EuiHorizontalRule margin="m" />
+
+                <EuiAccordion
+                  id={settingsAccordionId}
+                  forceState={settingsOpen ? 'open' : 'closed'}
+                  onToggle={handleSettingsToggle}
+                  paddingSize="none"
+                  buttonContent={
+                    <EuiTitle size="xxs">
+                      <h4>
+                        {i18n.translate('workflows.stepConfigPanel.settingsAccordion', {
+                          defaultMessage: 'Advanced',
+                        })}
+                      </h4>
+                    </EuiTitle>
+                  }
+                  data-test-subj="workflowStepConfigPanelAccordion-settings"
+                >
+                  <div
+                    data-test-subj="workflowStepConfigPanelSettings"
+                    css={{ paddingTop: euiTheme.size.m }}
+                  >
+                    {showSettings ? (
+                      <div data-test-subj="workflowStepConfigErrorHandlingSection">
+                        <StepErrorHandlingSection
+                          fragment={fragment}
+                          indent={indent}
+                          onFragmentChange={setFragment}
+                        />
+                      </div>
+                    ) : (
+                      <EuiText size="s" color="subdued">
+                        {i18n.translate('workflows.stepConfigPanel.settingsUnavailable', {
+                          defaultMessage: 'Error handling is not available for this step.',
+                        })}
+                      </EuiText>
+                    )}
+                  </div>
+                </EuiAccordion>
+              </div>
+            </div>
+          )}
+        </div>
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter
+        css={{
+          // paddingSize="none" zeroes `.euiFlyoutFooter` via the parent flyout
+          // selector — pad an inner wrapper so we don't fight that cascade.
+          padding: 0,
+        }}
+      >
+        <div
+          css={{
+            // Match EUI paddingSize="m" footer: 12px block / 16px inline → use 16px all around.
+            paddingBlock: euiTheme.size.base,
+            paddingInline: euiTheme.size.base,
+          }}
+        >
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={onCancel}
+                data-test-subj="workflowStepConfigPanelCancel"
+              >
+                {i18n.translate('workflows.stepConfigPanel.cancel', { defaultMessage: 'Cancel' })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={handleSave}
+                isDisabled={!parsed.valid || hasFormErrors}
+                data-test-subj="workflowStepConfigPanelSave"
+              >
+                {i18n.translate('workflows.stepConfigPanel.save', { defaultMessage: 'Save step' })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+
+      {expandedField ? (
+        <FieldEditorSubFlyout
+          fieldLabel={expandedField.label}
+          value={expandedFieldValue}
+          onChange={handleExpandedFieldChange}
+          catalog={referenceCatalog}
+          language={
+            expandedField.kind === 'code' ? expandedField.language : undefined
+          }
+          onBack={handleFieldEditorBack}
+          onCloseStack={onCancel}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -927,6 +948,8 @@ function StepForm({
   referenceCatalog,
   onChange,
   onDraftErrorChange,
+  onExpandField,
+  expandedFieldId,
 }: {
   fields: readonly StepFormField[];
   /** False when no connector/built-in schema was resolved for this step type. */
@@ -936,8 +959,11 @@ function StepForm({
   referenceCatalog: ReturnType<typeof buildDataReferenceCatalog>;
   onChange: (field: StepFormField, value: unknown) => void;
   onDraftErrorChange: (id: string, error: string | undefined) => void;
+  onExpandField: (field: StepFormField) => void;
+  expandedFieldId?: string;
 }) {
   const { euiTheme } = useEuiTheme();
+  const inputsAccordionId = useGeneratedHtmlId({ prefix: 'workflowStepConfigInputs' });
   const [optionalPickerOpen, setOptionalPickerOpen] = useState(false);
 
   // Primary = required or `advanced: false` (promoted). Everything else is optional
@@ -1026,6 +1052,8 @@ function StepForm({
       onRemove={options.removable ? () => removeOptionalField(field) : undefined}
       onChange={(value) => onChange(field, value)}
       onDraftErrorChange={(error) => onDraftErrorChange(fieldId(field), error)}
+      onExpand={() => onExpandField(field)}
+      isExpanded={expandedFieldId === fieldId(field)}
     />
   );
 
@@ -1045,79 +1073,68 @@ function StepForm({
     </EuiContextMenuItem>
   ));
 
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const endSentinelRef = useRef<HTMLDivElement | null>(null);
-  const [addFieldPinned, setAddFieldPinned] = useState(false);
-
-  useEffect(() => {
-    const root = scrollRef.current;
-    const sentinel = endSentinelRef.current;
-    if (
-      typeof IntersectionObserver === 'undefined' ||
-      !root ||
-      !sentinel ||
-      availableOptionalFields.length === 0
-    ) {
-      setAddFieldPinned(false);
-      return undefined;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setAddFieldPinned(!entry.isIntersecting);
-      },
-      { root, threshold: 1 }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [availableOptionalFields.length, primaryFields.length, revealedOptionalFields.length]);
-
-  const addOptionalButton = (
-    <EuiPopover
-      isOpen={optionalPickerOpen}
-      closePopover={() => setOptionalPickerOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="upLeft"
-      button={
-        <EuiButtonEmpty
+  const addOptionalButton =
+    availableOptionalFields.length > 0 ? (
+      <EuiPopover
+        isOpen={optionalPickerOpen}
+        closePopover={() => setOptionalPickerOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        button={
+          <EuiButtonEmpty
+            size="xs"
+            flush="both"
+            color="primary"
+            iconType="plusCircle"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOptionalPickerOpen((open) => !open);
+            }}
+            data-test-subj="workflowStepConfigAddOptionalField"
+          >
+            {i18n.translate('workflows.stepConfigPanel.addOptionalField', {
+              defaultMessage: 'Add optional',
+            })}
+          </EuiButtonEmpty>
+        }
+      >
+        <EuiContextMenuPanel
           size="s"
-          iconType="plusCircle"
-          flush="left"
-          color="primary"
-          onClick={() => setOptionalPickerOpen((open) => !open)}
-          data-test-subj="workflowStepConfigAddOptionalField"
-        >
-          {i18n.translate('workflows.stepConfigPanel.addOptionalField', {
-            defaultMessage: 'Add optional field',
-          })}
-        </EuiButtonEmpty>
-      }
-    >
-      <EuiContextMenuPanel
-        items={optionalPickerItems}
-        data-test-subj="workflowStepConfigOptionalFieldMenu"
-      />
-    </EuiPopover>
-  );
+          items={optionalPickerItems}
+          data-test-subj="workflowStepConfigOptionalFieldMenu"
+        />
+      </EuiPopover>
+    ) : undefined;
 
   return (
-    <div
-      data-test-subj="workflowStepConfigPanelForm"
+    <EuiAccordion
+      id={inputsAccordionId}
+      initialIsOpen
+      paddingSize="none"
+      buttonContent={
+        <EuiTitle size="xxs">
+          <h4>
+            {i18n.translate('workflows.stepConfigPanel.inputsAccordion', {
+              defaultMessage: 'Inputs',
+            })}
+          </h4>
+        </EuiTitle>
+      }
+      extraAction={addOptionalButton}
+      data-test-subj="workflowStepConfigPanelAccordion-inputs"
       css={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: '1 1 auto',
-        minHeight: 0,
-        height: '100%',
+        // Keep the Inputs row reachable while the form scrolls beneath it.
+        '.euiAccordion__triggerWrapper': {
+          position: 'sticky',
+          top: 0,
+          zIndex: 2,
+          background: euiTheme.colors.backgroundBasePlain,
+        },
       }}
     >
       <div
-        ref={scrollRef}
-        css={{
-          flex: '1 1 auto',
-          minHeight: 0,
-          overflow: 'auto',
-          paddingBottom: euiTheme.size.m,
-        }}
+        data-test-subj="workflowStepConfigPanelForm"
+        css={{ paddingTop: 12 }}
       >
         {fields.length === 0 ? (
           <EuiEmptyPrompt
@@ -1140,7 +1157,7 @@ function StepForm({
                 {hasSchema
                   ? i18n.translate('workflows.stepConfigPanel.noInputsBody', {
                       defaultMessage:
-                        'This step has no inputs to set. You can still rename it above or configure Settings.',
+                        'This step has no inputs to set. You can still rename it above or configure Advanced.',
                     })
                   : i18n.translate('workflows.stepConfigPanel.formUnavailableBody', {
                       defaultMessage:
@@ -1156,27 +1173,8 @@ function StepForm({
             {revealedOptionalFields.map((field) => renderField(field, { removable: true }))}
           </div>
         )}
-
-        {availableOptionalFields.length > 0 && !addFieldPinned ? (
-          <div css={{ marginTop: euiTheme.size.m }}>{addOptionalButton}</div>
-        ) : null}
-        <div ref={endSentinelRef} aria-hidden css={{ height: 1, width: '100%' }} />
       </div>
-
-      {availableOptionalFields.length > 0 && addFieldPinned ? (
-        <div
-          css={{
-            flex: '0 0 auto',
-            borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-            boxShadow: `0 -6px 12px -8px rgba(0, 0, 0, 0.18)`,
-            background: euiTheme.colors.backgroundBasePlain,
-            paddingBlock: euiTheme.size.s,
-          }}
-        >
-          {addOptionalButton}
-        </div>
-      ) : null}
-    </div>
+    </EuiAccordion>
   );
 }
 
@@ -1215,6 +1213,8 @@ function StepFieldRow({
   onRemove,
   onChange,
   onDraftErrorChange,
+  onExpand,
+  isExpanded = false,
 }: {
   field: StepFormField;
   value: unknown;
@@ -1224,6 +1224,8 @@ function StepFieldRow({
   onRemove?: () => void;
   onChange: (value: unknown) => void;
   onDraftErrorChange: (error: string | undefined) => void;
+  onExpand: () => void;
+  isExpanded?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const switchId = useGeneratedHtmlId({ prefix: `workflowStepConfigSwitch-${fieldId(field)}` });
@@ -1367,7 +1369,7 @@ function StepFieldRow({
   }
 
   if (field.kind === 'boolean') {
-    // True when the stored value is a string — any string means it's a Liquid/Mustache expression.
+    // Any string value is a Liquid/Mustache expression; `true`/`false` is typed mode.
     const exprMode = typeof value === 'string';
 
     const switchToExprLabel = i18n.translate('workflows.stepConfigPanel.switchToExpression', {
@@ -1391,7 +1393,48 @@ function StepFieldRow({
       </EuiToolTip>
     );
 
-    // Compact: label + switch on one line (8px gap), Optional + toggle right-aligned; help 4px below.
+    if (exprMode) {
+      return (
+        <div className="workflowStepConfigFieldRow">
+          <StepValidatedFormRow
+            label={labelContent}
+            labelAppend={labelAppend}
+            helpText={helpText}
+            isInvalid={isInvalid}
+            error={errorMessage}
+            fullWidth
+            display="row"
+          >
+            <ReferenceCapableField
+              catalog={referenceCatalog}
+              value={typeof value === 'string' ? value : ''}
+              onChange={onChange}
+              onExpand={onExpand}
+            >
+              {({ value: textValue, teachingPlaceholder, appendControls, expandButton, reportChange, attachInputRef, isOpen }) => (
+                <EuiFieldText
+                  compressed
+                  fullWidth
+                  isInvalid={isInvalid}
+                  value={textValue}
+                  placeholder={textValue.length === 0 ? teachingPlaceholder : undefined}
+                  inputRef={attachInputRef}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    reportChange(next, e.target.selectionStart ?? next.length);
+                  }}
+                  onBlur={accuseIfInvalid}
+                  append={[isExpanded ? expandButton : appendControls, exprToggleButton]}
+                  data-test-subj={testSubj}
+                  aria-expanded={isOpen}
+                />
+              )}
+            </ReferenceCapableField>
+          </StepValidatedFormRow>
+        </div>
+      );
+    }
+
     return (
       <div
         className="euiFormRow workflowStepConfigFieldRow"
@@ -1411,62 +1454,25 @@ function StepFieldRow({
             flexWrap: 'wrap',
           }}
         >
-          {exprMode ? (
-            // Expression mode: text input occupies full width, toggle on the right.
-            <>
-              <label css={{ cursor: 'default', flex: '0 0 auto' }}>{labelContent}</label>
-              <div css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs, flex: '1 1 auto', minWidth: 0 }}>
-                <ReferenceCapableField
-                  catalog={referenceCatalog}
-                  value={typeof value === 'string' ? value : ''}
-                  onChange={onChange}
-                >
-                  {({ value: textValue, teachingPlaceholder, atButton, reportChange, attachInputRef, isOpen }) => (
-                    <EuiFieldText
-                      compressed
-                      fullWidth
-                      isInvalid={isInvalid}
-                      value={textValue}
-                      placeholder={textValue.length === 0 ? teachingPlaceholder : undefined}
-                      inputRef={attachInputRef}
-                      onChange={(e) => {
-                        const next = e.target.value;
-                        reportChange(next, e.target.selectionStart ?? next.length);
-                      }}
-                      onBlur={accuseIfInvalid}
-                      append={[atButton, exprToggleButton]}
-                      data-test-subj={testSubj}
-                      aria-expanded={isOpen}
-                    />
-                  )}
-                </ReferenceCapableField>
-              </div>
-              {labelAppend}
-            </>
-          ) : (
-            // Typed mode: checkbox + label, toggle on the right.
-            <>
-              <div css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s, minWidth: 0 }}>
-                <label htmlFor={switchId} css={{ cursor: 'pointer' }}>
-                  {labelContent}
-                </label>
-                <EuiSwitch
-                  id={switchId}
-                  compressed
-                  label={field.label}
-                  showLabel={false}
-                  checked={value === true}
-                  onChange={(e) => onChange(e.target.checked)}
-                  aria-describedby={helpText ? `${switchId}-help` : undefined}
-                  data-test-subj={testSubj}
-                />
-              </div>
-              <div css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
-                {labelAppend}
-                {exprToggleButton}
-              </div>
-            </>
-          )}
+          <div css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s, minWidth: 0 }}>
+            <label htmlFor={switchId} css={{ cursor: 'pointer' }}>
+              {labelContent}
+            </label>
+            <EuiSwitch
+              id={switchId}
+              compressed
+              label={field.label}
+              showLabel={false}
+              checked={value === true}
+              onChange={(e) => onChange(e.target.checked)}
+              aria-describedby={helpText ? `${switchId}-help` : undefined}
+              data-test-subj={testSubj}
+            />
+          </div>
+          <div css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+            {labelAppend}
+            {exprToggleButton}
+          </div>
         </div>
         {helpText ? (
           <EuiText size="xs" color="subdued" id={`${switchId}-help`}>
@@ -1521,8 +1527,9 @@ function StepFieldRow({
               catalog={referenceCatalog}
               value={typeof value === 'string' ? value : ''}
               onChange={onChange}
+              onExpand={onExpand}
             >
-              {({ value: textValue, teachingPlaceholder, atButton, reportChange, attachInputRef, isOpen }) => (
+              {({ value: textValue, teachingPlaceholder, appendControls, expandButton, reportChange, attachInputRef, isOpen }) => (
                 <EuiFieldText
                   compressed
                   fullWidth
@@ -1535,7 +1542,7 @@ function StepFieldRow({
                     reportChange(next, e.target.selectionStart ?? next.length);
                   }}
                   onBlur={accuseIfInvalid}
-                  append={[atButton, numExprToggle]}
+                  append={[isExpanded ? expandButton : appendControls, numExprToggle]}
                   data-test-subj={testSubj}
                   aria-expanded={isOpen}
                 />
@@ -1559,7 +1566,7 @@ function StepFieldRow({
       );
     }
     case 'select': {
-      // Combobox: enum values + {{ }} template entry — same control for typed and expression mode.
+      // EuiComboBox: enum values + {{ }} template entry — same control for typed and expression mode.
       const selectOptions = [
         ...(field.options ?? []).map((o) => ({ label: o })),
         { label: '{{ }}' },
@@ -1587,26 +1594,149 @@ function StepFieldRow({
     case 'code':
       return wrapRow(
         <StepValidatedFormRow {...rowProps}>
-          {field.language === 'esql' ? (
-            <ESQLEditorField
-              value={value}
-              onChange={onChange}
-              testSubj={testSubj}
-            />
-          ) : (
-            <CodeField
-              field={field}
-              value={value}
-              catalog={referenceCatalog}
-              onChange={onChange}
-              testSubj={testSubj}
-              isInvalid={isInvalid}
-              onBlur={accuseIfInvalid}
-              onDraftErrorChange={setDraftError}
-            />
-          )}
+          <CodeField
+            field={field}
+            value={value}
+            catalog={referenceCatalog}
+            onChange={onChange}
+            testSubj={testSubj}
+            isInvalid={isInvalid}
+            onBlur={accuseIfInvalid}
+            onDraftErrorChange={setDraftError}
+            // TODO(slice7): ES|QL keeps its specialized editor — no expand here.
+            onExpand={field.language === 'esql' ? undefined : onExpand}
+            isExpanded={isExpanded}
+          />
         </StepValidatedFormRow>
       );
+    case 'switch-cases': {
+      type CaseItem = { match: unknown; steps: unknown[] };
+      const casesArray = Array.isArray(value) ? (value as CaseItem[]) : [];
+      const addCaseLabel = i18n.translate('workflows.stepConfigPanel.switchCases.addCase', {
+        defaultMessage: 'Add case',
+      });
+      const deleteCaseLabel = i18n.translate('workflows.stepConfigPanel.switchCases.deleteCase', {
+        defaultMessage: 'Delete case',
+      });
+      return wrapRow(
+        <StepValidatedFormRow
+          label={labelContent}
+          labelAppend={labelAppend}
+          helpText={helpText}
+          isInvalid={isInvalid}
+          error={errorMessage}
+          fullWidth
+          display="row"
+        >
+          <div css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xs }}>
+            {casesArray.map((caseItem, idx) => (
+              <div
+                key={idx}
+                css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
+              >
+                <EuiFieldText
+                  compressed
+                  fullWidth
+                  value={String(caseItem.match ?? '')}
+                  isInvalid={isInvalid}
+                  onChange={(e) => {
+                    const next = [...casesArray];
+                    next[idx] = { ...caseItem, match: e.target.value };
+                    onChange(next);
+                  }}
+                  onBlur={accuseIfInvalid}
+                  data-test-subj={`${testSubj}-case-${idx}`}
+                />
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  size="xs"
+                  aria-label={deleteCaseLabel}
+                  onClick={() => onChange(casesArray.filter((_, i) => i !== idx))}
+                  data-test-subj={`${testSubj}-case-${idx}-delete`}
+                />
+              </div>
+            ))}
+            <div>
+              <EuiButtonEmpty
+                iconType="plusCircle"
+                size="xs"
+                flush="left"
+                onClick={() => onChange([...casesArray, { match: '', steps: [] }])}
+                data-test-subj={`${testSubj}-addCase`}
+              >
+                {addCaseLabel}
+              </EuiButtonEmpty>
+            </div>
+          </div>
+        </StepValidatedFormRow>
+      );
+    }
+    case 'parallel-branches': {
+      type BranchItem = { name?: unknown; steps: unknown[] };
+      const branchesArray = Array.isArray(value) ? (value as BranchItem[]) : [];
+      const addBranchLabel = i18n.translate('workflows.stepConfigPanel.parallelBranches.addBranch', {
+        defaultMessage: 'Add branch',
+      });
+      const deleteBranchLabel = i18n.translate(
+        'workflows.stepConfigPanel.parallelBranches.deleteBranch',
+        { defaultMessage: 'Delete branch' }
+      );
+      return wrapRow(
+        <StepValidatedFormRow
+          label={labelContent}
+          labelAppend={labelAppend}
+          helpText={helpText}
+          isInvalid={isInvalid}
+          error={errorMessage}
+          fullWidth
+          display="row"
+        >
+          <div css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xs }}>
+            {branchesArray.map((branch, idx) => (
+              <div
+                key={idx}
+                css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
+              >
+                <EuiFieldText
+                  compressed
+                  fullWidth
+                  value={branch.name !== undefined ? String(branch.name) : ''}
+                  placeholder={`branch ${idx + 1}`}
+                  isInvalid={isInvalid}
+                  onChange={(e) => {
+                    const next = [...branchesArray];
+                    next[idx] = { ...branch, name: e.target.value };
+                    onChange(next);
+                  }}
+                  onBlur={accuseIfInvalid}
+                  data-test-subj={`${testSubj}-branch-${idx}`}
+                />
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  size="xs"
+                  aria-label={deleteBranchLabel}
+                  onClick={() => onChange(branchesArray.filter((_, i) => i !== idx))}
+                  data-test-subj={`${testSubj}-branch-${idx}-delete`}
+                />
+              </div>
+            ))}
+            <div>
+              <EuiButtonEmpty
+                iconType="plusCircle"
+                size="xs"
+                flush="left"
+                onClick={() => onChange([...branchesArray, { name: '', steps: [] }])}
+                data-test-subj={`${testSubj}-addBranch`}
+              >
+                {addBranchLabel}
+              </EuiButtonEmpty>
+            </div>
+          </div>
+        </StepValidatedFormRow>
+      );
+    }
     case 'text':
     default:
       return wrapRow(
@@ -1615,11 +1745,13 @@ function StepFieldRow({
             catalog={referenceCatalog}
             value={value === undefined || value === null ? '' : String(value)}
             onChange={onChange}
+            onExpand={onExpand}
           >
             {({
               value: textValue,
               teachingPlaceholder,
-              atButton,
+              appendControls,
+              expandButton,
               reportChange,
               attachInputRef,
               isOpen,
@@ -1637,7 +1769,7 @@ function StepFieldRow({
                   reportChange(next, caret);
                 }}
                 onBlur={accuseIfInvalid}
-                append={atButton}
+                append={isExpanded ? expandButton : appendControls}
                 data-test-subj={testSubj}
                 aria-expanded={isOpen}
               />
@@ -1649,11 +1781,10 @@ function StepFieldRow({
 }
 
 /**
- * Monaco-backed field. JSON-language fields hold structured YAML values, so
- * the editor text is JSON and only valid JSON is written back; invalid drafts
- * stay local until they parse. Height is bounded (~160px) with vertical resize.
- * Invalid borders only paint when the parent marks `isInvalid` (blur/save).
- * Reference-capable via shared ReferenceCapableField (typed @ / {{ + @ button).
+ * Templatable code-shaped Inputs field. Inline UI is always a single-line
+ * `EuiFieldText` (whitespace-collapsed for display); multi-line editing is the
+ * expand sub-flyout. ES|QL keeps its specialized Monaco editor (`// TODO(slice7)`).
+ * JSON fields still round-trip through parse; invalid drafts stay local.
  */
 function CodeField({
   field,
@@ -1664,6 +1795,8 @@ function CodeField({
   isInvalid,
   onBlur,
   onDraftErrorChange,
+  onExpand,
+  isExpanded = false,
 }: {
   field: StepFormField;
   value: unknown;
@@ -1673,11 +1806,13 @@ function CodeField({
   isInvalid: boolean;
   onBlur: () => void;
   onDraftErrorChange: (error: string | undefined) => void;
+  onExpand?: () => void;
+  isExpanded?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
-  // Match EUI textarea / form-control padding (`controlPadding` = size.m).
-  const controlPaddingPx = parseInt(String(euiTheme.size.m), 10);
   const isJson = field.language === 'json';
+  const isEsql = field.language === 'esql';
+  const controlPaddingPx = parseInt(String(euiTheme.size.m), 10);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<{
     focus: () => void;
@@ -1685,23 +1820,27 @@ function CodeField({
     setCaret: (offset: number) => void;
   } | null>(null);
   const [editorHeight, setEditorHeight] = useState(CODE_EDITOR_HEIGHT);
+
   const external = useMemo(() => {
     if (value === undefined || value === null) return '';
     if (isJson && typeof value !== 'string') return JSON.stringify(value, null, 2);
     return String(value);
   }, [value, isJson]);
-  const [draft, setDraft] = useState(external);
 
-  // Sync from the form value only when that value changes — do not depend on
-  // unstable callback identities (those re-created every parent render and would
-  // reset the draft on every keystroke).
+  // Inline Inputs show a whitespace-collapsed string; the document keeps the
+  // original until the user edits (or expands and edits in the sub-flyout).
+  const [draft, setDraft] = useState(() =>
+    isEsql ? external : collapseWhitespaceForDisplay(external)
+  );
+
   useEffect(() => {
-    setDraft(external);
+    setDraft(isEsql ? external : collapseWhitespaceForDisplay(external));
     onDraftErrorChange(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- onDraftErrorChange is intentionally omitted
-  }, [external]);
+  }, [external, isEsql]);
 
   useEffect(() => {
+    if (!isEsql) return;
     const shell = shellRef.current;
     if (!shell || typeof ResizeObserver === 'undefined') return;
     const syncHeight = () => {
@@ -1711,7 +1850,7 @@ function CodeField({
     const observer = new ResizeObserver(syncHeight);
     observer.observe(shell);
     return () => observer.disconnect();
-  }, []);
+  }, [isEsql]);
 
   const jsonParseError = i18n.translate('workflows.stepConfigPanel.validation.mustBeJson', {
     defaultMessage: 'Must be valid JSON',
@@ -1741,9 +1880,16 @@ function CodeField({
     [isJson, jsonParseError, onChange, onDraftErrorChange]
   );
 
-  return (
-    <ReferenceCapableField catalog={catalog} value={draft} onChange={applyDraft}>
-      {({ teachingPlaceholder, atButton, reportChange, registerSelection }) => (
+  // TODO(slice7): ES|QL keeps its specialized editor — no single-line collapse.
+  if (isEsql) {
+    return (
+      <ReferenceCapableField
+        catalog={catalog}
+        value={draft}
+        onChange={applyDraft}
+        onExpand={onExpand}
+      >
+        {({ teachingPlaceholder, appendControls, expandButton, reportChange, registerSelection }) => (
           <div
             ref={shellRef}
             onBlur={onBlur}
@@ -1772,7 +1918,7 @@ function CodeField({
                 zIndex: 2,
               }}
             >
-              {atButton}
+              {isExpanded ? expandButton : appendControls}
             </div>
             <CodeEditor
               languageId={monacoLanguageFor(field)}
@@ -1841,8 +1987,6 @@ function CodeField({
                 lineNumbersMinChars: 0,
                 glyphMargin: false,
                 folding: false,
-                // Monaco only pads top/bottom; lineDecorationsWidth insets the left
-                // when line numbers are off — matches EUI textarea controlPadding.
                 padding: { top: controlPaddingPx, bottom: controlPaddingPx },
                 lineDecorationsWidth: controlPaddingPx,
                 scrollBeyondLastLine: false,
@@ -1852,356 +1996,51 @@ function CodeField({
             />
           </div>
         )}
+      </ReferenceCapableField>
+    );
+  }
+
+  return (
+    <ReferenceCapableField
+      catalog={catalog}
+      value={draft}
+      onChange={applyDraft}
+      onExpand={onExpand}
+    >
+      {({
+        teachingPlaceholder,
+        appendControls,
+        expandButton,
+        reportChange,
+        attachInputRef,
+        isOpen,
+      }) => (
+        <EuiFieldText
+          compressed
+          fullWidth
+          isInvalid={isInvalid}
+          value={draft}
+          placeholder={draft.length === 0 ? teachingPlaceholder : undefined}
+          inputRef={attachInputRef}
+          onChange={(e) => {
+            const next = e.target.value;
+            const caret = e.target.selectionStart ?? next.length;
+            reportChange(next, caret);
+          }}
+          onBlur={onBlur}
+          append={isExpanded ? expandButton : appendControls}
+          data-test-subj={testSubj}
+          data-language={field.language}
+          aria-expanded={isOpen}
+          css={{
+            // Ellipsis when collapsed JSON / multi-line values overflow the row.
+            '.euiFieldText': {
+              textOverflow: 'ellipsis',
+            },
+          }}
+        />
+      )}
     </ReferenceCapableField>
   );
-}
-
-function ESQLEditorField({
-  value,
-  onChange,
-  testSubj,
-}: {
-  value: unknown;
-  onChange: (value: unknown) => void;
-  testSubj: string;
-}) {
-  // ESQLEditor uses useKibana<{ core: CoreStart, data, ... }> internally.
-  // The workflows app provides a flat context (WorkflowsServices = CoreStart & deps),
-  // so we re-provide the services in the nested shape ESQLEditor expects.
-  const { services } = useKibana<WorkflowsServices>();
-  const esqlServices = { ...services, core: services };
-
-  const query: AggregateQuery = { esql: typeof value === 'string' ? value : '' };
-  return (
-    <KibanaContextProvider services={esqlServices}>
-      <div data-test-subj={testSubj}>
-        <ESQLEditorImport
-          query={query}
-          onTextLangQueryChange={(next: AggregateQuery) => {
-            onChange('esql' in next ? next.esql ?? '' : '');
-          }}
-          onTextLangQuerySubmit={async () => {}}
-          hideRunQueryButton
-          hideQueryHistory
-          expandToFitQueryOnMount
-          editorIsInline
-        />
-      </div>
-    </KibanaContextProvider>
-  );
-}
-
-// ── BranchesSection ───────────────────────────────────────────────────────────
-// Lens color-mapping style: each case/branch is a row with criteria + delete.
-// Only shown in the "Branches" tab for if / switch / parallel step types.
-
-function BranchesSection({
-  stepType,
-  fragment,
-  indent,
-  onChange,
-}: {
-  stepType: string;
-  fragment: string;
-  indent: number;
-  onChange: (next: string) => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-
-  // ── Read-only derived state ─────────────────────────────────────────────────
-
-  const cases = useMemo((): Array<{ match: string }> => {
-    if (stepType !== 'switch') return [];
-    const doc = parseDocument(fragment);
-    if (!isMap(doc.contents)) return [];
-    const seq = doc.getIn(['cases'], false);
-    if (!isSeq(seq)) return [];
-    return seq.items.filter(isMap).map((item) => ({ match: String(toJs(item.get('match', false)) ?? '') }));
-  }, [fragment, stepType]);
-
-  const branchCount = useMemo((): number => {
-    if (stepType !== 'parallel') return 0;
-    const doc = parseDocument(fragment);
-    if (!isMap(doc.contents)) return 0;
-    const seq = doc.getIn(['branches'], false);
-    return isSeq(seq) ? seq.items.length : 0;
-  }, [fragment, stepType]);
-
-  // ── Writers ─────────────────────────────────────────────────────────────────
-
-  const addCase = useCallback(() => {
-    const doc = parseDocument(fragment);
-    if (!isMap(doc.contents)) return;
-    const existing = doc.getIn(['cases'], false);
-    if (isSeq(existing)) {
-      existing.add(doc.createNode({ match: '', steps: [] }));
-    } else {
-      doc.setIn(['cases'], doc.createNode([{ match: '', steps: [] }]));
-    }
-    onChange(doc.toString({ indent, lineWidth: 0 }));
-  }, [fragment, indent, onChange]);
-
-  const removeCase = useCallback(
-    (idx: number) => {
-      const doc = parseDocument(fragment);
-      if (!isMap(doc.contents)) return;
-      const seq = doc.getIn(['cases'], false);
-      if (!isSeq(seq)) return;
-      seq.delete(idx);
-      onChange(doc.toString({ indent, lineWidth: 0 }));
-    },
-    [fragment, indent, onChange]
-  );
-
-  const updateCaseMatch = useCallback(
-    (idx: number, value: string) => {
-      const doc = parseDocument(fragment);
-      if (!isMap(doc.contents)) return;
-      const seq = doc.getIn(['cases'], false);
-      if (!isSeq(seq)) return;
-      const item = seq.items[idx];
-      if (!isMap(item)) return;
-      item.set('match', value);
-      onChange(doc.toString({ indent, lineWidth: 0 }));
-    },
-    [fragment, indent, onChange]
-  );
-
-  const addBranch = useCallback(() => {
-    const doc = parseDocument(fragment);
-    if (!isMap(doc.contents)) return;
-    const existing = doc.getIn(['branches'], false);
-    if (isSeq(existing)) {
-      existing.add(doc.createNode({ steps: [] }));
-    } else {
-      doc.setIn(['branches'], doc.createNode([{ steps: [] }]));
-    }
-    onChange(doc.toString({ indent, lineWidth: 0 }));
-  }, [fragment, indent, onChange]);
-
-  const removeBranch = useCallback(
-    (idx: number) => {
-      const doc = parseDocument(fragment);
-      if (!isMap(doc.contents)) return;
-      const seq = doc.getIn(['branches'], false);
-      if (!isSeq(seq)) return;
-      seq.delete(idx);
-      onChange(doc.toString({ indent, lineWidth: 0 }));
-    },
-    [fragment, indent, onChange]
-  );
-
-  // ── Shared row style ────────────────────────────────────────────────────────
-
-  const rowCss = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: euiTheme.size.s,
-    padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-    background: euiTheme.colors.backgroundBasePlain,
-  };
-
-  const labelCss = {
-    fontFamily: euiTheme.font.family,
-    fontSize: 12,
-    fontWeight: 500 as const,
-    color: euiTheme.colors.textSubdued,
-    flex: '0 0 auto',
-    minWidth: 48,
-  };
-
-  const listBorderCss = {
-    border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-    borderRadius: euiTheme.border.radius.small,
-    overflow: 'hidden' as const,
-  };
-
-  // ── Render ──────────────────────────────────────────────────────────────────
-
-  if (stepType === 'if') {
-    return (
-      <div data-test-subj="workflowBranchesSectionIf">
-        <EuiTitle size="xs">
-          <h4>
-            {i18n.translate('workflows.branchesSection.if.title', { defaultMessage: 'Branches' })}
-          </h4>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued" css={{ marginBottom: euiTheme.size.m }}>
-          {i18n.translate('workflows.branchesSection.if.description', {
-            defaultMessage: 'Both branches are always rendered on the canvas.',
-          })}
-        </EuiText>
-        <div css={listBorderCss}>
-          <div css={rowCss}>
-            <span css={labelCss}>Then</span>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('workflows.branchesSection.if.then', {
-                defaultMessage: 'When condition is true',
-              })}
-            </EuiText>
-          </div>
-          <EuiHorizontalRule margin="none" />
-          <div css={rowCss}>
-            <span css={labelCss}>Else</span>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('workflows.branchesSection.if.else', {
-                defaultMessage: 'When condition is false',
-              })}
-            </EuiText>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (stepType === 'switch') {
-    return (
-      <div data-test-subj="workflowBranchesSectionSwitch">
-        <EuiTitle size="xs">
-          <h4>
-            {i18n.translate('workflows.branchesSection.switch.title', { defaultMessage: 'Cases' })}
-          </h4>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued" css={{ marginBottom: euiTheme.size.m }}>
-          {i18n.translate('workflows.branchesSection.switch.description', {
-            defaultMessage: 'Each case routes to a different path when the value matches.',
-          })}
-        </EuiText>
-        <div css={listBorderCss}>
-          {cases.map((c, idx) => (
-            <React.Fragment key={idx}>
-              {idx > 0 && <EuiHorizontalRule margin="none" />}
-              <div css={rowCss} data-test-subj={`workflowBranchesCaseRow-${idx}`}>
-                <span css={labelCss}>
-                  {i18n.translate('workflows.branchesSection.switch.matchLabel', {
-                    defaultMessage: 'Match',
-                  })}
-                </span>
-                <EuiFieldText
-                  compressed
-                  value={c.match}
-                  placeholder={i18n.translate('workflows.branchesSection.switch.matchPlaceholder', {
-                    defaultMessage: 'value',
-                  })}
-                  onChange={(e) => updateCaseMatch(idx, e.target.value)}
-                  css={{ flex: '1 1 auto' }}
-                  data-test-subj={`workflowBranchesCaseMatch-${idx}`}
-                  aria-label={i18n.translate('workflows.branchesSection.switch.matchAriaLabel', {
-                    defaultMessage: 'Match value for case {n}',
-                    values: { n: idx + 1 },
-                  })}
-                />
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  size="xs"
-                  onClick={() => removeCase(idx)}
-                  aria-label={i18n.translate('workflows.branchesSection.switch.removeCase', {
-                    defaultMessage: 'Remove case {n}',
-                    values: { n: idx + 1 },
-                  })}
-                  data-test-subj={`workflowBranchesCaseRemove-${idx}`}
-                />
-              </div>
-            </React.Fragment>
-          ))}
-          {cases.length > 0 && <EuiHorizontalRule margin="none" />}
-          <div css={{ ...rowCss, opacity: 0.6 }} data-test-subj="workflowBranchesDefaultRow">
-            <span css={labelCss}>
-              {i18n.translate('workflows.branchesSection.switch.default', {
-                defaultMessage: 'Default',
-              })}
-            </span>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('workflows.branchesSection.switch.defaultDescription', {
-                defaultMessage: 'When no case matches',
-              })}
-            </EuiText>
-          </div>
-        </div>
-        <EuiButtonEmpty
-          size="s"
-          iconType="plusInCircle"
-          flush="left"
-          onClick={addCase}
-          css={{ marginTop: euiTheme.size.s }}
-          data-test-subj="workflowBranchesAddCase"
-        >
-          {i18n.translate('workflows.branchesSection.switch.addCase', {
-            defaultMessage: 'Add case',
-          })}
-        </EuiButtonEmpty>
-      </div>
-    );
-  }
-
-  if (stepType === 'parallel') {
-    return (
-      <div data-test-subj="workflowBranchesSectionParallel">
-        <EuiTitle size="xs">
-          <h4>
-            {i18n.translate('workflows.branchesSection.parallel.title', {
-              defaultMessage: 'Branches',
-            })}
-          </h4>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued" css={{ marginBottom: euiTheme.size.m }}>
-          {i18n.translate('workflows.branchesSection.parallel.description', {
-            defaultMessage: 'All branches run in parallel and rejoin when all complete.',
-          })}
-        </EuiText>
-        <div css={listBorderCss}>
-          {Array.from({ length: branchCount }, (_, idx) => (
-            <React.Fragment key={idx}>
-              {idx > 0 && <EuiHorizontalRule margin="none" />}
-              <div css={rowCss} data-test-subj={`workflowBranchesBranchRow-${idx}`}>
-                <span css={labelCss}>
-                  {i18n.translate('workflows.branchesSection.parallel.branchLabel', {
-                    defaultMessage: 'Branch {n}',
-                    values: { n: idx + 1 },
-                  })}
-                </span>
-                <div css={{ flex: '1 1 auto' }} />
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  size="xs"
-                  onClick={() => removeBranch(idx)}
-                  aria-label={i18n.translate('workflows.branchesSection.parallel.removeBranch', {
-                    defaultMessage: 'Remove branch {n}',
-                    values: { n: idx + 1 },
-                  })}
-                  data-test-subj={`workflowBranchesBranchRemove-${idx}`}
-                />
-              </div>
-            </React.Fragment>
-          ))}
-          {branchCount === 0 && (
-            <div css={{ ...rowCss, opacity: 0.6 }}>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('workflows.branchesSection.parallel.empty', {
-                  defaultMessage: 'No branches yet — add one to get started.',
-                })}
-              </EuiText>
-            </div>
-          )}
-        </div>
-        <EuiButtonEmpty
-          size="s"
-          iconType="plusInCircle"
-          flush="left"
-          onClick={addBranch}
-          css={{ marginTop: euiTheme.size.s }}
-          data-test-subj="workflowBranchesAddBranch"
-        >
-          {i18n.translate('workflows.branchesSection.parallel.addBranch', {
-            defaultMessage: 'Add branch',
-          })}
-        </EuiButtonEmpty>
-      </div>
-    );
-  }
-
-  return null;
 }
 

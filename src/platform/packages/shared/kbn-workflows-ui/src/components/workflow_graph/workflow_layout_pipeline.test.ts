@@ -542,7 +542,7 @@ describe('workflow layout pipeline', () => {
     // the exported values have the expected numeric meaning (50 / 90) that
     // was hard-coded in the original use_workflow_layout.ts.
     expect(WORKFLOW_NODE_SEP).toBe(50);
-    expect(WORKFLOW_RANK_SEP).toBe(150);
+    expect(WORKFLOW_RANK_SEP).toBe(70);
   });
 
   it('applyDagre returns points.length < 2 for every fan-in edge (cross-package invariant)', () => {

@@ -58,6 +58,12 @@ export interface ComputeEdgePathInput {
    * waypoints (translated by reconcileEdgePoints) or smooth-step.
    */
   readonly isFailure?: boolean;
+  /**
+   * True when this edge targets a bypass lane node (invisible 1×1 layout helper
+   * for an empty branch). Skips the fork-bus routing so the edge renders as a
+   * straight diagonal rather than a right-angle bus shape.
+   */
+  readonly hideEndMarker?: boolean;
 }
 
 /**
@@ -316,6 +322,7 @@ export const computeEdgePath = ({
   branchType,
   isMerge,
   isFailure,
+  hideEndMarker,
 }: ComputeEdgePathInput): { path: string; labelX: number; labelY: number } => {
   // Single-bus routing for all fork (fan-out) edges: switch case/default,
   // if-then, and if-else. All branch edges of one fork node share the same
@@ -324,7 +331,13 @@ export const computeEdgePath = ({
   // its own target. Labels sit at a fixed offset below the bus (TB) / right of
   // the bus (LR) so all branch labels align on one row/column regardless of
   // how deep each branch target sits.
-  const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
+  //
+  // Exception: bypass-lane targets (hideEndMarker=true, invisible 1×1 nodes
+  // for empty branches) use a straight diagonal instead of the bus shape so
+  // the dangling stub looks like a simple labeled line, not a right-angle jog.
+  const isForkEdge =
+    !hideEndMarker &&
+    (branchType === 'switch' || branchType === 'then' || branchType === 'else');
   // isLR checks both sides: the failure handle is unconditionally Position.Bottom (so that
   // the edge exits the bottom edge in both TB and LR), but spine/fork edges still anchor
   // on the right in LR. The target side is always direction-faithful, so checking it

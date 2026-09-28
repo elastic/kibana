@@ -16,7 +16,7 @@ import {
   segmentMidpoint,
   TERMINAL_STUB_PX,
 } from './compute_wire_insertion_controls';
-import { WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
+
 
 describe('segmentMidpoint', () => {
   it('returns the geometric midpoint on both axes', () => {
@@ -289,8 +289,8 @@ describe('computeWireInsertionControls', () => {
     expect(terminal).toBeDefined();
     expect(terminal!.centre).toEqual(terminal!.segmentEnd);
     expect(terminal!.segmentEnd.y - terminal!.segmentStart.y).toBe(TERMINAL_STUB_PX);
-    // Half a normal inter-rank arrow.
-    expect(TERMINAL_STUB_PX).toBe(Math.round(WORKFLOW_RANK_SEP / 2));
+    // Independent of inter-rank spacing so terminal stubs stay visually distinct.
+    expect(TERMINAL_STUB_PX).toBe(75);
     // No duplicate terminal for a (already has a wire).
     expect(controls.some((c) => c.kind === 'terminal' && c.id.includes(':a:'))).toBe(
       false

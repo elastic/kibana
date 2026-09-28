@@ -94,6 +94,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
     branchType: edgeData?.branchType,
     isMerge: edgeData?.isMerge,
     isFailure: edgeData?.isFailure,
+    hideEndMarker: edgeData?.hideEndMarker,
   });
 
   const traversed = edgeData?.traversed ?? false;

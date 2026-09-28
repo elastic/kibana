@@ -40,3 +40,5 @@ export {
   useWorkflowGraphPocToggles,
   WorkflowSettingsPanel,
 } from './workflow_graph_poc_toggles';
+
+export { resolveNodeChipStyle, type NodeChipStyle } from './resolve_node_chip_style';

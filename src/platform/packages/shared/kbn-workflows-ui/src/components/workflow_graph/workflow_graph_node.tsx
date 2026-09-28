@@ -46,7 +46,6 @@ import {
   STEP_PORT,
 } from './port_geometry';
 import { WorkflowGraphConnectionPorts } from './workflow_graph_connection_ports';
-import { PORT_SPRING_EASE, PORT_SPRING_MS } from './workflow_graph_connection_ports';
 import { INSERT_FLASH_MS } from './use_insert_layout_animation';
 import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 
@@ -1007,10 +1006,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               overflow: 'hidden',
               opacity: trailingReveal ? 1 : 0,
               pointerEvents: trailingReveal ? 'auto' : 'none',
-              [euiCanAnimate]: {
-                transition: `opacity ${PORT_SPRING_MS} ${PORT_SPRING_EASE}`,
-              },
-              '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             }}
             data-test-subj="workflowGraphNodeTrailingActions"
           >

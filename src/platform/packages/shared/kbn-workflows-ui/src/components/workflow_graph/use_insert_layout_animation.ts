@@ -227,5 +227,9 @@ export function useInsertLayoutAnimation({
       })
     : edges;
 
+  // DEBUG: trace edge count at animation layer — remove once root cause is found
+  // eslint-disable-next-line no-console
+  console.log('[useInsertLayoutAnimation] animatedEdges:', animatedEdges.length, 'input edges:', edges.length, 'isSliding:', isSliding);
+
   return { nodes: animatedNodes, edges: animatedEdges, isSliding };
 }

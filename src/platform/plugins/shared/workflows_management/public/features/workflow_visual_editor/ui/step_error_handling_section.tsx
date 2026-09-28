@@ -12,7 +12,6 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
-  EuiLink,
   EuiSwitch,
   EuiText,
   useEuiTheme,
@@ -30,10 +29,6 @@ export interface StepErrorHandlingSectionProps {
   readonly fragment: string;
   readonly indent: number;
   readonly onFragmentChange: (next: string) => void;
-  /** Momentarily reveal/pulse the owning node's error port on the canvas. */
-  readonly onRevealErrorPort?: () => void;
-  /** Select/center a fallback step on the canvas (read-only discovery). */
-  readonly onViewFallbackOnCanvas?: (stepName: string) => void;
 }
 
 const DEFAULT_MAX_ATTEMPTS = 3;
@@ -118,13 +113,12 @@ const mutateOnFailure = (
 
 /**
  * Form controls for step `on-failure` retry / continue. Fallback creation and
- * removal live on the canvas only — this section is discovery + properties.
+ * removal live on the canvas only.
  */
 export function StepErrorHandlingSection({
   fragment,
   indent,
   onFragmentChange,
-  onRevealErrorPort,
 }: StepErrorHandlingSectionProps) {
   const { euiTheme } = useEuiTheme();
   const retrySwitchId = useGeneratedHtmlId({ prefix: 'workflowStepErrorRetry' });
@@ -325,31 +319,6 @@ export function StepErrorHandlingSection({
         </EuiText>
       </div>
 
-      <div
-        data-test-subj="workflowStepConfigErrorFallback"
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: euiTheme.size.s,
-          padding: euiTheme.size.s,
-          borderRadius: euiTheme.border.radius.medium,
-          background: euiTheme.colors.backgroundBaseSubdued,
-        }}
-      >
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('workflows.stepConfigPanel.errorHandling.canvasHint', {
-            defaultMessage:
-              'To run specific steps when this fails, add an error path from this step on the canvas',
-          })}{' '}
-          {onRevealErrorPort ? (
-            <EuiLink onClick={onRevealErrorPort} data-test-subj="workflowStepConfigErrorShowMe">
-              {i18n.translate('workflows.stepConfigPanel.errorHandling.showMe', {
-                defaultMessage: 'Show me',
-              })}
-            </EuiLink>
-          ) : null}
-        </EuiText>
-      </div>
     </div>
   );
 }

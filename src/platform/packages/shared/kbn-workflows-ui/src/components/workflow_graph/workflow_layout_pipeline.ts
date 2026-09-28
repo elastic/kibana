@@ -26,10 +26,7 @@ import {
 // This keeps the terminal stub of the last inner step visible inside the container.
 export const WORKFLOW_COMPOUND_PADDING = { top: 70, right: 32, bottom: 96, left: 32 } as const;
 export const WORKFLOW_NODE_SEP = 50;
-// Must clear FORK_BUS_TRUNK (80) plus TRUNK_LENGTH_TO_TARGET (64) so fork
-// edges keep a straight lead-in before the arrowhead (room for the Add-step
-// control) instead of curving straight into the marker.
-export const WORKFLOW_RANK_SEP = 150;
+export const WORKFLOW_RANK_SEP = 70;
 
 export interface LayoutSnapshot {
   nodes: DagPositionedNode[];

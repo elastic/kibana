@@ -305,8 +305,18 @@ function transformInternal(
         });
         branchExits.push(bypassId);
       } else {
-        // Both branches empty — the true path falls through via the gate.
-        branchExits.push(id);
+        // Both branches empty — synthesize bypass nodes for both so labeled
+        // dangling edges appear on the canvas.
+        const thenBypassId = ids.allocate(`${step.name}-then-bypass`);
+        bypassLaneNodes.push({ id: thenBypassId, style: { width: 1, height: 1 } });
+        edges.push({
+          id: `${id}:${thenBypassId}-then`,
+          source: id,
+          target: thenBypassId,
+          branchType: 'then',
+          label: 'true',
+        });
+        branchExits.push(thenBypassId);
       }
 
       if (hasElse) {
@@ -343,21 +353,39 @@ function transformInternal(
         });
         branchExits.push(bypassId);
       } else {
-        // Both branches empty — the false path falls through via the gate.
-        // (Already handled in the then arm above; this else is unreachable but
-        // kept for symmetry and future-proofing.)
-        branchExits.push(id);
+        // Both branches empty — synthesize a bypass for the false path too.
+        const elseBypassId = ids.allocate(`${step.name}-else-bypass`);
+        bypassLaneNodes.push({ id: elseBypassId, style: { width: 1, height: 1 } });
+        edges.push({
+          id: `${id}:${elseBypassId}-else`,
+          source: id,
+          target: elseBypassId,
+          branchType: 'else',
+          label: 'false',
+        });
+        branchExits.push(elseBypassId);
       }
 
       exitIds = dedupeIds(branchExits);
     } else if (step.type === 'parallel') {
       const parallelStep = step as ParallelStep;
-      const branches = (parallelStep.branches as Array<{ name?: string; steps: Step[] }>) ?? [];
+      const branches = Array.isArray(parallelStep.branches)
+        ? (parallelStep.branches as Array<{ name?: string; steps: Step[] }>)
+        : [];
       const branchExits: string[] = [];
       branches.forEach((branch, idx) => {
         if (!Array.isArray(branch.steps) || branch.steps.length === 0) {
-          // Empty branch — fall through via the gate node's id (same semantics as `if`).
-          branchExits.push(id);
+          // Empty branch — synthesize a bypass lane node so the labeled edge appears.
+          const bypassId = ids.allocate(`${step.name}-branch-${idx}-bypass`);
+          bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
+          edges.push({
+            id: `${id}:${bypassId}-branch-${idx}`,
+            source: id,
+            target: bypassId,
+            branchIndex: idx,
+            label: branch.name ?? `branch ${idx + 1}`,
+          });
+          branchExits.push(bypassId);
           return;
         }
         const inner = transformInternal([], branch.steps, ids, ctx);
@@ -383,8 +411,9 @@ function transformInternal(
       if (branchExits.length > 0) exitIds = dedupeIds(branchExits);
     } else if (step.type === 'switch') {
       const switchStep = step as SwitchStep;
-      const cases =
-        (switchStep.cases as Array<{ match: string | number | boolean; steps: Step[] }>) ?? [];
+      const cases = Array.isArray(switchStep.cases)
+        ? (switchStep.cases as Array<{ match: string | number | boolean; steps: Step[] }>)
+        : [];
       const branchExits: string[] = [];
 
       const defaultSteps = switchStep.default as Step[] | undefined;
@@ -393,8 +422,17 @@ function transformInternal(
       // Rule 1 — one labeled edge per case (label = match value).
       cases.forEach((caseItem, idx) => {
         if (!Array.isArray(caseItem.steps) || caseItem.steps.length === 0) {
-          // Defensive: empty case in loose/partial schema — fall through the gate.
-          branchExits.push(id);
+          // Empty case — synthesize a bypass lane node so the labeled edge appears.
+          const bypassId = ids.allocate(`${step.name}-case-${idx}-bypass`);
+          bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
+          edges.push({
+            id: `${id}:${bypassId}-case-${idx}`,
+            source: id,
+            target: bypassId,
+            branchType: 'switch',
+            label: String(caseItem.match ?? ''),
+          });
+          branchExits.push(bypassId);
           return;
         }
         const inner = transformInternal([], caseItem.steps as Step[], ids, ctx);
