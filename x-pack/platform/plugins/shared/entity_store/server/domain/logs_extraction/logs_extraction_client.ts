@@ -55,11 +55,14 @@ import {
 } from '../asset_manager/external_indices_contants';
 import { type LogExtractionConfig } from '../saved_objects';
 import {
+  applyOverrides,
   type EngineDescriptor,
   type EngineDescriptorClient,
   type EngineError,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
+  type LogExtractionTypeOverride,
+  type NonPriorityLogExtractionTypeOverride,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../errors';
@@ -350,6 +353,62 @@ export class LogsExtractionClient {
   public async updateConfig(params?: LogExtractionInstallParams): Promise<LogExtractionConfig> {
     const state = await this.globalStateClient.update({ logsExtraction: params });
     return state.logsExtraction;
+  }
+
+  /**
+   * Writes the two per entity-type override layers. `logExtraction` reaches both processes (minus
+   * the non-priority-exclusive fields), `nonPriorityOverride` only the non-priority one.
+   *
+   * Saved object updates merge attributes shallowly, so each block is rebuilt from the stored one:
+   * an omitted field is left alone, `null` clears it and falls back to the layer below.
+   */
+  public async updateTypeConfig(
+    type: EntityType,
+    {
+      logExtraction,
+      nonPriorityOverride,
+    }: {
+      logExtraction?: LogExtractionTypeOverride;
+      nonPriorityOverride?: NonPriorityLogExtractionTypeOverride;
+    }
+  ): Promise<{
+    logExtractionConfig: LogExtractionTypeOverride;
+    nonPriorityLogExtractionConfig: NonPriorityLogExtractionTypeOverride;
+  }> {
+    const descriptor = await this.engineDescriptorClient.findOrThrow(type);
+
+    const logExtractionConfig = logExtraction
+      ? applyOverrides<LogExtractionTypeOverride>(descriptor.logExtractionConfig, logExtraction)
+      : descriptor.logExtractionConfig ?? {};
+    const nonPriorityLogExtractionConfig = nonPriorityOverride
+      ? applyOverrides<NonPriorityLogExtractionTypeOverride>(
+          descriptor.nonPriorityLogExtractionConfig,
+          nonPriorityOverride
+        )
+      : descriptor.nonPriorityLogExtractionConfig ?? {};
+
+    const patch = {
+      ...(logExtraction ? { logExtractionConfig } : {}),
+      ...(nonPriorityOverride ? { nonPriorityLogExtractionConfig } : {}),
+    };
+    if (Object.keys(patch).length > 0) {
+      await this.engineDescriptorClient.update(type, patch);
+    }
+
+    return { logExtractionConfig, nonPriorityLogExtractionConfig };
+  }
+
+  /** Same dependencies, different extraction process. */
+  public withExtractionMode(extractionMode: ExtractionMode): LogsExtractionClient {
+    return new LogsExtractionClient({
+      logger: this.logger,
+      namespace: this.namespace,
+      esClient: this.esClient,
+      dataViewsService: this.dataViewsService,
+      engineDescriptorClient: this.engineDescriptorClient,
+      globalStateClient: this.globalStateClient,
+      extractionMode,
+    });
   }
 
   private async runQueryAndIngestDocs({

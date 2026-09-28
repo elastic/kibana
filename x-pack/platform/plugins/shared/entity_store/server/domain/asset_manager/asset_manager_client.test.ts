@@ -642,6 +642,61 @@ describe('AssetManagerClient', () => {
       expect(errorUpdate).toBeDefined();
       expect(errorUpdate![1]).not.toHaveProperty('nonPriorityStatus');
     });
+
+    describe('per-process start/stop', () => {
+      it('startProcess schedules only the non-priority task and writes only its status', async () => {
+        await createDualProcessClient().startProcess(
+          {} as KibanaRequest,
+          'user',
+          EXTRACTION_MODE.nonPriority
+        );
+
+        expect(scheduledModes()).toEqual([EXTRACTION_MODE.nonPriority]);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledTimes(1);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          nonPriorityStatus: ENGINE_STATUS.STARTED,
+          nonPriorityError: null,
+        });
+      });
+
+      it('startProcess schedules only the priority task and writes only the shared status', async () => {
+        await createDualProcessClient().startProcess(
+          {} as KibanaRequest,
+          'user',
+          EXTRACTION_MODE.priority
+        );
+
+        expect(scheduledModes()).toEqual([EXTRACTION_MODE.single]);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          status: ENGINE_STATUS.STARTED,
+          error: null,
+        });
+      });
+
+      it('stopProcess removes only the non-priority task', async () => {
+        await createDualProcessClient().stopProcess('user', EXTRACTION_MODE.nonPriority);
+
+        expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(1);
+        expect(mockStopExtractEntityTask).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'user', extractionMode: EXTRACTION_MODE.nonPriority })
+        );
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          nonPriorityStatus: ENGINE_STATUS.STOPPED,
+        });
+      });
+
+      it('stopProcess marks only its own process errored on failure', async () => {
+        mockStopExtractEntityTask.mockRejectedValueOnce(new Error('remove failed'));
+
+        await expect(
+          createDualProcessClient().stopProcess('user', EXTRACTION_MODE.nonPriority)
+        ).rejects.toThrow('remove failed');
+
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          nonPriorityStatus: ENGINE_STATUS.ERROR,
+        });
+      });
+    });
   });
 });
 
