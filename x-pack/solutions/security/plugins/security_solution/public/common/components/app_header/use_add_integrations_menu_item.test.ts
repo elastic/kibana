@@ -62,6 +62,14 @@ describe('useAddIntegrationsMenuItem', () => {
     expect(result.current).toBeUndefined();
   });
 
+  it('returns undefined when fleet is not registered', () => {
+    mockCapabilities({ [SECURITY_FEATURE_ID]: { configurations: false } });
+
+    const { result } = renderHook(() => useAddIntegrationsMenuItem());
+
+    expect(result.current).toBeUndefined();
+  });
+
   it('returns undefined for Search AI Lake configurations even when fleet is readable', () => {
     mockCapabilities({ fleet: { read: true }, [SECURITY_FEATURE_ID]: { configurations: true } });
 

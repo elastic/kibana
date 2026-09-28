@@ -35,7 +35,7 @@ export const useAddIntegrationsMenuItem = (): AppMenuItemType | undefined => {
 
   const hasSearchAILakeConfigurations =
     application.capabilities[SECURITY_FEATURE_ID]?.configurations === true;
-  const canAddData = application.capabilities.fleet.read === true && !hasSearchAILakeConfigurations;
+  const canAddData = application.capabilities.fleet?.read === true && !hasSearchAILakeConfigurations;
 
   return useMemo<AppMenuItemType | undefined>(() => {
     if (!canAddData) {
