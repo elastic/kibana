@@ -62,6 +62,10 @@ export const useEnableWorkers = (
       }
     });
     if (hadFailure) return;
+    // Invalidate the workers cache so the Watches page doesn't briefly render
+    // stale (disabled) worker state after navigating away. Not awaited — the
+    // refetch runs in the background while the navigation is processed.
+    queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
     onSuccess?.();
   };
 

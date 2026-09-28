@@ -179,6 +179,32 @@ describe('OnboardingPage', () => {
       expect(httpPatch).not.toHaveBeenCalled();
     });
 
+    it('disables the Not now link while save is in-flight so the user cannot navigate away mid-PATCH', async () => {
+      const resolvers: Array<() => void> = [];
+      const httpPatch = jest.fn().mockImplementation(
+        () =>
+          new Promise<{ worker: { id: string; enabled: boolean } }>((resolve) => {
+            resolvers.push(() => resolve({ worker: { id: 'mock', enabled: true } }));
+          })
+      );
+      const { application } = renderPage({ canWrite: true, httpPatch });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+
+      // While PATCHes are pending the Not now link must be disabled.
+      await waitFor(() =>
+        expect(screen.getByTestId('alertZeroOnboardingNotNowLink')).toHaveAttribute('disabled')
+      );
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingNotNowLink'));
+      expect(application.navigateToApp).not.toHaveBeenCalled();
+
+      // After all PATCHes settle the link re-enables.
+      resolvers.forEach((r) => r());
+      await waitFor(() =>
+        expect(screen.getByTestId('alertZeroOnboardingNotNowLink')).not.toHaveAttribute('disabled')
+      );
+    });
+
     it('disables a toggle when it is the last enabled worker', () => {
       renderPage({ canWrite: true });
 

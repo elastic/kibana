@@ -246,7 +246,8 @@ export const OnboardingPage: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            onClick={() => application.navigateToApp(SECURITY_APP_ID)}
+            onClick={isSaving ? undefined : () => application.navigateToApp(SECURITY_APP_ID)}
+            disabled={isSaving}
             data-test-subj="alertZeroOnboardingNotNowLink"
           >
             {i18n.NOT_NOW} &rarr;
