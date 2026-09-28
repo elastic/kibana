@@ -28,6 +28,13 @@ interface VersionedImpact extends Impact {
   primaryTerm: number;
 }
 
+/** Document indexed by `attach`, plus the body that index overwrote. */
+export interface WrittenAttach {
+  written: Impact;
+  /** Absent when this attempt created the document. */
+  previous?: Impact;
+}
+
 /**
  * Owns every write to the impact index. One document per space and conversation:
  * attaching more entities unions them onto that record, which is what
@@ -39,7 +46,7 @@ export class ImpactService {
   async attach(
     params: AttachImpactRequest,
     { spaceId, user }: { spaceId: string; user?: User }
-  ): Promise<Impact> {
+  ): Promise<WrittenAttach> {
     const entities = unionEntities(params.entities);
     if (entities.length === 0) {
       throw new ImpactInvalidRequestError('entities must contain at least one entity');
@@ -54,9 +61,9 @@ export class ImpactService {
 
     const id = impactDocumentId(spaceId, params.conversationId);
     for (let attempt = 0; attempt < MAX_ATTACH_ATTEMPTS; attempt++) {
-      const written = await this.writeAttach(id, params.conversationId, spaceId, entities, user);
-      if (written) {
-        return written;
+      const attached = await this.writeAttach(id, params.conversationId, spaceId, entities, user);
+      if (attached) {
+        return attached;
       }
     }
 
@@ -71,6 +78,67 @@ export class ImpactService {
       throw new ImpactNotFoundError(conversationId);
     }
     return withoutVersion(existing);
+  }
+
+  /** Loads an Impact document by id for by-reference attachment resolve. */
+  async get(id: string, spaceId: string): Promise<Impact> {
+    assertBoundedId(spaceId, 'spaceId');
+    if (id.length < 1 || id.length > MAX_IMPACT_ID_LENGTH) {
+      throw new ImpactNotFoundError(id);
+    }
+
+    const existing = await this.findById(id);
+    if (!existing || existing.spaceId !== spaceId) {
+      throw new ImpactNotFoundError(id);
+    }
+    return withoutVersion(existing);
+  }
+
+  /**
+   * Undoes an attach whose conversation attachment did not land. Deletes a
+   * document this call created, or restores `previous`, only while the stored
+   * body is still the one `attach` wrote. `previous` is the body that write overwrote.
+   */
+  async revertAttach({ written, previous }: { written: Impact; previous?: Impact }): Promise<void> {
+    const current = await this.findById(written.id);
+    if (!current || !sameImpactBody(current, written)) {
+      return;
+    }
+
+    if (!previous) {
+      try {
+        await this.deps.storage.delete({
+          id: written.id,
+          if_seq_no: current.seqNo,
+          if_primary_term: current.primaryTerm,
+        });
+      } catch (error) {
+        if (!isVersionConflict(error)) {
+          throw error;
+        }
+      }
+      return;
+    }
+
+    const document: ImpactDocument = {
+      spaceId: previous.spaceId,
+      conversationId: previous.conversationId,
+      entities: previous.entities,
+      createdAt: previous.createdAt,
+      createdBy: previous.createdBy,
+    };
+    try {
+      await this.deps.storage.index({
+        id: written.id,
+        document,
+        if_seq_no: current.seqNo,
+        if_primary_term: current.primaryTerm,
+      });
+    } catch (error) {
+      if (!isVersionConflict(error)) {
+        throw error;
+      }
+    }
   }
 
   /**
@@ -119,8 +187,8 @@ export class ImpactService {
   }
 
   /**
-   * Returns the written impact, or undefined when a concurrent attach won the
-   * version check and the caller should re-read and union again.
+   * Returns the indexed document and the body it overwrote, or undefined when a
+   * concurrent attach won the version check and the caller should re-read and union again.
    */
   private async writeAttach(
     id: string,
@@ -128,7 +196,7 @@ export class ImpactService {
     spaceId: string,
     entities: ImpactEntity[],
     user?: User
-  ): Promise<Impact | undefined> {
+  ): Promise<WrittenAttach | undefined> {
     const existing = await this.findById(id);
     if (!existing) {
       const document: ImpactDocument = {
@@ -140,7 +208,7 @@ export class ImpactService {
       };
       try {
         await this.deps.storage.index({ id, document, op_type: 'create' });
-        return toImpact(id, document);
+        return { written: toImpact(id, document) };
       } catch (error) {
         if (isVersionConflict(error)) {
           return undefined;
@@ -170,7 +238,7 @@ export class ImpactService {
         if_seq_no: existing.seqNo,
         if_primary_term: existing.primaryTerm,
       });
-      return toImpact(id, document);
+      return { written: toImpact(id, document), previous: withoutVersion(existing) };
     } catch (error) {
       if (isVersionConflict(error)) {
         return undefined;
@@ -179,23 +247,41 @@ export class ImpactService {
     }
   }
 
+  /**
+   * Versioned read for optimistic concurrency. Storage `get` is a search that
+   * does not request `_seq_no` / `_primary_term`, and a search hit omits them
+   * unless asked. This read asks, so a later attach can merge instead of
+   * failing closed on a document that is already there.
+   */
   private async findById(id: string): Promise<VersionedImpact | undefined> {
-    try {
-      const hit = await this.deps.storage.get({ id });
-      if (!hit._source || hit._seq_no === undefined || hit._primary_term === undefined) {
-        throw new Error(`Impact document [${id}] is missing concurrency metadata`);
-      }
-      return {
-        ...toImpact(hit._id, hit._source),
-        seqNo: hit._seq_no,
-        primaryTerm: hit._primary_term,
-      };
-    } catch (error) {
-      if (isNotFound(error)) {
-        return undefined;
-      }
-      throw error;
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      seq_no_primary_term: true,
+      query: {
+        bool: {
+          filter: [{ term: { _id: id } }],
+        },
+      },
+    });
+    const hit = response.hits.hits[0];
+    if (!hit) {
+      return undefined;
     }
+    if (
+      hit._id === undefined ||
+      !hit._source ||
+      hit._seq_no === undefined ||
+      hit._primary_term === undefined
+    ) {
+      throw new Error(`Impact document [${id}] is missing concurrency metadata`);
+    }
+    return {
+      ...toImpact(hit._id, hit._source),
+      seqNo: hit._seq_no,
+      primaryTerm: hit._primary_term,
+    };
   }
 }
 
@@ -264,6 +350,13 @@ const unionEntities = (entities: ImpactEntity[]): ImpactEntity[] => {
 
 const toImpact = (id: string, document: ImpactDocument): Impact => ({ id, ...document });
 
+const sameImpactBody = (left: Impact, right: Impact): boolean =>
+  left.spaceId === right.spaceId &&
+  left.conversationId === right.conversationId &&
+  left.createdAt === right.createdAt &&
+  JSON.stringify(left.createdBy ?? null) === JSON.stringify(right.createdBy ?? null) &&
+  JSON.stringify(left.entities) === JSON.stringify(right.entities);
+
 const withoutVersion = ({
   seqNo: _seqNo,
   primaryTerm: _primaryTerm,
@@ -274,7 +367,5 @@ const statusCodeOf = (error: unknown): number | undefined => {
   const candidate = error as { statusCode?: number; meta?: { statusCode?: number } };
   return candidate.statusCode ?? candidate.meta?.statusCode;
 };
-
-const isNotFound = (error: unknown): boolean => statusCodeOf(error) === 404;
 
 const isVersionConflict = (error: unknown): boolean => statusCodeOf(error) === 409;
