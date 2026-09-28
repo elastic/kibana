@@ -144,10 +144,17 @@ describe('claim nudge', () => {
     mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
 
     const id = uuidV4();
-    await injectFutureTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, id);
+    const esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
+    await injectFutureTask(esClient, id);
+
+    // A process's first nudge is spent establishing the watcher's baseline rather than delivered
+    // (see `claim_nudge_service`). Spend it here, then put the task back out of regular polling's
+    // reach so only the nudge below can make it eligible.
+    await taskManagerPlugin.runSoon(id, { requestImmediateClaim: true });
+    await injectFutureTask(esClient, id);
 
     const before = Date.now();
-    await taskManagerPlugin.runSoon(id);
+    await taskManagerPlugin.runSoon(id, { requestImmediateClaim: true });
 
     try {
       await retry(async () => {
@@ -161,44 +168,9 @@ describe('claim nudge', () => {
     }
   });
 
-  it('claims a scheduled task almost immediately when requestImmediateClaim is set', async () => {
-    const taskManagerPlugin = await startKibanaWith({
-      claim_strategy: 'mget',
-      poll_interval: POLLING_INTERVAL,
-      unsafe: {
-        exclude_task_types: ['[A-Za-z]*'],
-      },
-    });
-
-    mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
-
-    const id = uuidV4();
-    const before = Date.now();
-    await taskManagerPlugin.schedule(
-      {
-        id,
-        taskType: '_claimNudgeTestType',
-        params: {},
-        state: { foo: 'test' },
-      },
-      { requestImmediateClaim: true }
-    );
-
-    try {
-      await retry(async () => {
-        expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(1);
-      }, NUDGE_RETRY_OPTS);
-      const elapsedMs = Date.now() - before;
-
-      expect(elapsedMs).toBeLessThan(POLLING_INTERVAL / 2);
-    } finally {
-      await cleanupTask(taskManagerPlugin, id);
-    }
-  });
-
-  // Only that the task still runs. That no nudge was sent is pinned by the unit test
-  // 'does not notify the claim nudge when requestImmediateClaim is not set'.
-  it('still runs a schedule() task without requestImmediateClaim', async () => {
+  // Only that the task still runs. That scheduling never nudges is pinned by the unit test
+  // 'does not notify the claim nudge'.
+  it('still runs a schedule() task', async () => {
     const taskManagerPlugin = await startKibanaWith({
       claim_strategy: 'mget',
       poll_interval: 1000,
@@ -243,7 +215,7 @@ describe('claim nudge', () => {
     const id = uuidV4();
     await injectFutureTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, id);
 
-    await taskManagerPlugin.runSoon(id);
+    await taskManagerPlugin.runSoon(id, { requestImmediateClaim: true });
 
     try {
       await retry(async () => {

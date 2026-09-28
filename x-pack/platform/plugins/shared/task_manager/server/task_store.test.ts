@@ -258,26 +258,6 @@ describe('TaskStore', () => {
       expect(attributes.state).toEqual('{}');
     });
 
-    // An optionless `schedule()` is already covered above; this pins the case the `?? false` in
-    // `schedule` exists for, where options are supplied but say nothing about refreshing.
-    test('defaults to refresh:false when options omit refresh', async () => {
-      await testSchedule({ taskType: 'yawn', params: {}, state: {} }, {});
-      expect(savedObjectsClient.create).toHaveBeenCalledWith(
-        'task',
-        expect.anything(),
-        expect.objectContaining({ refresh: false })
-      );
-    });
-
-    test('passes refresh:true through to the saved objects client when requested', async () => {
-      await testSchedule({ taskType: 'yawn', params: {}, state: {} }, { refresh: true });
-      expect(savedObjectsClient.create).toHaveBeenCalledWith(
-        'task',
-        expect.anything(),
-        expect.objectContaining({ refresh: true })
-      );
-    });
-
     test('schedule a task without API key if request is provided but security disabled', async () => {
       store = new TaskStore({
         logger: mockLogger(),

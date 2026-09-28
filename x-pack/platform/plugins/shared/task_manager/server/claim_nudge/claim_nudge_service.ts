@@ -55,8 +55,8 @@ export const NUDGE_CREATE_TIMEOUT_MS = 3_000;
 /**
  * Long-polls a dedicated, low-volume Elasticsearch index via the Fleet
  * `_fleet/global_checkpoints?wait_for_advance` API so Task Manager is notified almost
- * immediately when a `runSoon` (or `schedule(..., { requestImmediateClaim: true })`) happens
- * on another Kibana node, instead of waiting for the next poll interval.
+ * immediately when a `runSoon(..., { requestImmediateClaim: true })` happens on another Kibana
+ * node, instead of waiting for the next poll interval.
  *
  * Best-effort: if the long-poll fails or is disabled, regular polling still picks up tasks;
  * this only nudges an existing poll cycle to run sooner.
@@ -236,6 +236,9 @@ export class TaskManagerClaimNudgeService {
         // Any resolved response — even a timeout — counts as a success for backoff purposes.
         this.consecutiveErrors = 0;
 
+        // The first response only establishes the checkpoint later ones are compared against, so a
+        // nudge racing the watcher's first call is never delivered. Accepted: it costs the one
+        // poll interval a nudge would have saved, and nudging is best-effort by contract.
         const hasAdvanced =
           this.baselineSet &&
           !timedOut &&

@@ -11,7 +11,7 @@ import { type Attributes, type Counter, metrics, ValueType } from '@opentelemetr
  * Which API requested the nudge. Orthogonal sources of the same event, so they live as an
  * attribute on one counter rather than as separate counters.
  */
-export type ClaimNudgeSource = 'run_soon' | 'schedule';
+export type ClaimNudgeSource = 'run_soon';
 
 class TaskManagerClaimNudgeTelemetry {
   private readonly meter = metrics.getMeter('kibana.task_manager');

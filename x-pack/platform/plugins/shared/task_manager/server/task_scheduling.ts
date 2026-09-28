@@ -22,7 +22,7 @@ import {
   type TaskInstanceWithDeprecatedFields,
   type TaskInstanceWithId,
 } from './task';
-import type { ScheduleTaskOptions, TaskStore } from './task_store';
+import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
@@ -36,14 +36,13 @@ import {
   type ClaimNudgeSource,
 } from './otel/claim_nudge_telemetry';
 
-const scheduleOptionsToStoreOptions = (
-  options: ScheduleOptions | undefined,
-  claimNudgeEnabled: boolean
-): ScheduleTaskOptions | undefined => {
+const scheduleOptionsToStoreApiKeyOptions = (
+  options?: ScheduleOptions
+): ApiKeyOptions | undefined => {
   if (!options) {
     return undefined;
   }
-  const storeOpts: ScheduleTaskOptions = {};
+  const storeOpts: ApiKeyOptions = {};
   if (options.request) {
     storeOpts.request = options.request;
   }
@@ -55,10 +54,6 @@ const scheduleOptionsToStoreOptions = (
   }
   if (options.regenerateApiKey !== undefined) {
     storeOpts.regenerateApiKey = options.regenerateApiKey;
-  }
-  if (options.requestImmediateClaim === true && claimNudgeEnabled) {
-    // the refresh only serves the nudged claim cycle, so skip it when no nudge follows
-    storeOpts.refresh = true;
   }
   return Object.keys(storeOpts).length ? storeOpts : undefined;
 };
@@ -89,6 +84,19 @@ export interface BulkUpdateTaskResult {
    */
   errors: ErrorOutput[];
 }
+export interface RunSoonOptions {
+  /** Run even when the task is already running on another node. */
+  force?: boolean;
+  /**
+   * Asks background task nodes to claim this task immediately instead of waiting for the next
+   * `poll_interval`. Best-effort: the task still runs on the next regular poll if the nudge fails.
+   *
+   * Off by default: a nudged run arrives within milliseconds, early enough that a task gating its
+   * work on an elapsed grace period can find nothing to do. Opt in per call site.
+   */
+  requestImmediateClaim?: boolean;
+}
+
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
   forced: boolean;
@@ -140,7 +148,7 @@ export class TaskScheduling {
     if (!this.claimNudgeService) {
       return;
     }
-    // counts attempts, not successes: the forced refresh has already happened by this point
+    // Counted before the write, so a nudge that Elasticsearch never confirms still shows up here.
     taskManagerClaimNudgeTelemetry.recordClaimNudge(source);
     try {
       await this.claimNudgeService.notify();
@@ -174,24 +182,18 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
 
-    const scheduledTask = await this.store.schedule(
+    return await this.store.schedule(
       {
         ...modifiedTask,
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      scheduleOptionsToStoreOptions(options, this.claimNudgeEnabled)
+      scheduleOptionsToStoreApiKeyOptions(options)
     );
-
-    if (options?.requestImmediateClaim === true) {
-      await this.notifyClaimNudge(scheduledTask.id, 'schedule');
-    }
-
-    return scheduledTask;
   }
 
   /**
-   * Bulk schedules a task. Ignores `requestImmediateClaim`; use `schedule()` per task to nudge.
+   * Bulk schedules a task.
    *
    * @param tasks - The tasks being scheduled.
    * @returns {Promise<ConcreteTaskInstance>}
@@ -231,8 +233,7 @@ export class TaskScheduling {
 
     return await this.store.bulkSchedule(
       modifiedTasks,
-      // no nudge follows a bulk schedule, so never force a refresh
-      scheduleOptionsToStoreOptions(options, false)
+      scheduleOptionsToStoreApiKeyOptions(options)
     );
   }
 
@@ -357,9 +358,20 @@ export class TaskScheduling {
    * Run task.
    *
    * @param taskId - The task being scheduled.
+   * @param forceOrOptions - Legacy positional `force`, or the options bag. Set
+   * `requestImmediateClaim` to ask background nodes to claim the task straight away.
    * @returns {Promise<RunSoonResult>}
    */
-  public async runSoon(taskId: string, force: boolean = false): Promise<RunSoonResult> {
+  public async runSoon(
+    taskId: string,
+    forceOrOptions?: boolean | RunSoonOptions
+  ): Promise<RunSoonResult> {
+    const options: RunSoonOptions =
+      typeof forceOrOptions === 'boolean' ? { force: forceOrOptions } : forceOrOptions ?? {};
+    const force = options.force === true;
+    // Both the forced refresh and the nudge itself only serve an immediate claim cycle, so they
+    // stand or fall together: without one there is no cycle for the other to help.
+    const nudge = options.requestImmediateClaim === true && this.claimNudgeEnabled;
     let forced: boolean = false;
     let conflict: boolean = false;
     const task = await this.store.get(taskId);
@@ -396,8 +408,7 @@ export class TaskScheduling {
           scheduledAt: new Date(),
           runAt: new Date(),
         },
-        // the refresh only serves the nudged claim cycle, letting it see the new runAt at once
-        { validate: false, refresh: this.claimNudgeEnabled }
+        { validate: false, refresh: nudge }
       );
     } catch (e) {
       if (e.statusCode === 409) {
@@ -411,7 +422,7 @@ export class TaskScheduling {
       }
     }
 
-    if (!conflict) {
+    if (!conflict && nudge) {
       await this.notifyClaimNudge(taskId, 'run_soon');
     }
 

@@ -73,12 +73,6 @@ import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './api_k
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
 
-/**
- * `TaskStore.schedule()` options: `ApiKeyOptions` plus an internal `refresh` flag that makes
- * the write immediately visible to searches (used by `requestImmediateClaim`).
- */
-export type ScheduleTaskOptions = ApiKeyOptions & { refresh?: boolean };
-
 export interface StoreOpts {
   esClient: ElasticsearchClient;
   index: string;
@@ -482,7 +476,7 @@ export class TaskStore {
    */
   public async schedule(
     taskInstance: TaskInstance,
-    options?: ScheduleTaskOptions
+    options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance> {
     return this.executionContextRunner.run(() => this._schedule(taskInstance, options), {
       id: 'schedule',
@@ -490,7 +484,7 @@ export class TaskStore {
   }
   private async _schedule(
     taskInstance: TaskInstance,
-    options?: ScheduleTaskOptions
+    options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance> {
     try {
       this.validateCanEncryptSavedObjects(options?.request);
@@ -520,7 +514,7 @@ export class TaskStore {
           ...apiKeySOFields,
           runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
-        { id, refresh: options?.refresh ?? false }
+        { id, refresh: false }
       );
       if (
         get(taskInstance, 'schedule.interval', null) == null &&

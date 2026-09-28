@@ -75,6 +75,9 @@ apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] 
     const response = await apiClient.post(`internal/ftr/task_manager/${taskId}/run_soon`, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       responseType: 'json',
+      // Nudging is opt-in, so without this the suite would still pass while exercising nothing
+      // but ordinary polling.
+      body: { requestImmediateClaim: true },
     });
     expect(response).toHaveStatusCode(200);
     expect(response.body).toMatchObject({ id: taskId, forced: false });
@@ -123,15 +126,21 @@ apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] 
   let warmUpClaimedAt = 0;
 
   /**
-   * The first nudge of the Kibana process also creates the signal index, which on a cold cluster
-   * can take most of the claim budget on its own. Pay that cost here instead of inside a timed
-   * assertion.
+   * Pays the first nudge's cost — index creation on a cold cluster, and the watcher's baseline —
+   * outside any timed assertion.
    *
    * Waiting for the claim rather than just the `runSoon` response matters: the response only proves
    * the signal was written, while the throttle window opens when the watcher acts on it.
    */
   apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+
+    // A nudge racing the watcher's first call is spent on its baseline rather than delivered (see
+    // `claim_nudge_service`). Nothing else in Kibana nudges now that it is opt-in, so spend it on a
+    // throwaway task instead of the one under test.
+    const { taskId: primingTaskId } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
+    await runSoon(apiClient, cookieHeader, primingTaskId);
+
     const { taskId, runAt: originalRunAt } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
 
     const runSoonAt = Date.now();
