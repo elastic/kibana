@@ -75,6 +75,11 @@ export class InventoryPage {
   public readonly alertsFlyoutDetailsStep: Locator;
   public readonly alertsFlyoutLinkedDashboards: Locator;
 
+  public readonly ruleFlyoutForExpressionButton: Locator;
+  public readonly ruleFlyoutSchemaExpressionButton: Locator;
+  public readonly ruleFlyoutNodeTypeSelect: Locator;
+  public readonly ruleFlyoutSchemaSelect: Locator;
+
   constructor(
     private readonly page: ScoutPage,
     private readonly kbnUrl: KibanaUrl,
@@ -147,6 +152,17 @@ export class InventoryPage {
     );
     this.alertsFlyoutDetailsStep = this.alertsFlyout.getByRole('button', { name: 'Details' });
     this.alertsFlyoutLinkedDashboards = this.alertsFlyout.getByTestId('ruleLinkedDashboards');
+
+    // The "For" and "Schema" expression buttons share the `nodeTypeExpression` test subject.
+    this.ruleFlyoutForExpressionButton = this.alertsFlyout
+      .getByTestId('nodeTypeExpression')
+      .filter({ hasText: 'For' });
+    this.ruleFlyoutSchemaExpressionButton = this.alertsFlyout
+      .getByTestId('nodeTypeExpression')
+      .filter({ hasText: 'Schema' });
+    // The expression popovers render in a portal, outside the flyout dialog.
+    this.ruleFlyoutNodeTypeSelect = this.page.getByTestId('forExpressionSelect');
+    this.ruleFlyoutSchemaSelect = this.page.getByTestId('schemaExpressionSelect');
   }
 
   public async waitForNodesToLoad() {
@@ -371,6 +387,33 @@ export class InventoryPage {
     await this.inventoryAlertsMenuOption.click();
     await this.createInventoryRuleButton.click();
     await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /**
+   * Opens the inventory rule flyout from a waffle pod tile: click the tile, then
+   * "Create inventory rule" in the resulting Kubernetes Pod details context menu.
+   */
+  public async openInventoryRuleFlyoutFromPodWaffleNode(podName: string) {
+    const pod = await this.podWaffleNodeByName(podName);
+    await pod.container.click();
+    await this.k8sPodWaffleContextMenu.waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
+    await this.k8sPodWaffleContextMenu.getByRole('link', { name: 'Create inventory rule' }).click();
+    await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /** Picks a node type in the rule flyout "For" expression; the popover closes on selection. */
+  public async selectRuleNodeType(nodeType: 'host' | 'pod' | 'container') {
+    await this.ruleFlyoutForExpressionButton.click();
+    await this.ruleFlyoutNodeTypeSelect.selectOption(nodeType);
+  }
+
+  /** Picks a schema in the rule flyout "Schema" expression; the popover closes on selection. */
+  public async selectRuleSchema(schema: 'ecs' | 'semconv') {
+    await this.ruleFlyoutSchemaExpressionButton.click();
+    await this.ruleFlyoutSchemaSelect.selectOption(schema);
   }
 
   public async openMetricsThresholdRuleFlyout() {
