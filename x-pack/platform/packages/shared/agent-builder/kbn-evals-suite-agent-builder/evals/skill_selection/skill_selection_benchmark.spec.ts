@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { evaluate as evalsBase } from '@kbn/evals';
+import { evaluate as evalsBase, getSpaceIdsFromEnv } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { AgentBuilderEvaluationChatClient } from '../../src/chat_client';
-import { skillSelectionEvaluator } from '../../src/skill_selection_evaluators';
+import { preSelectionEvaluator, skillSelectionEvaluator } from '../../src/skill_selection_evaluators';
 import type { BenchmarkExample } from './benchmark_dataset';
 import {
   ALERT_ANALYSIS_EXAMPLES,
@@ -42,7 +42,8 @@ import {
 const base = evalsBase.extend<{}, { chatClient: AgentBuilderEvaluationChatClient }>({
   chatClient: [
     async ({ fetch, log, connector }, use) => {
-      await use(new AgentBuilderEvaluationChatClient(fetch, log, connector.id));
+      const [spaceId] = getSpaceIdsFromEnv() ?? [];
+      await use(new AgentBuilderEvaluationChatClient(fetch, log, connector.id, spaceId));
     },
     { scope: 'worker' },
   ],
@@ -86,7 +87,7 @@ const evaluate = base.extend<{}, { evaluateBenchmark: EvaluateBenchmark }>({
               } satisfies SkillRoutingTaskOutput;
             },
           },
-          [skillSelectionEvaluator]
+          [skillSelectionEvaluator, preSelectionEvaluator]
         );
       });
     },
