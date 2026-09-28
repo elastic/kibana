@@ -24,7 +24,7 @@ jest.mock('@kbn/date-range-picker-presets', () => ({
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within, act } from '@testing-library/react';
 import { EMPTY, of } from 'rxjs';
 
 import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
@@ -44,6 +44,7 @@ import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mo
 import { SearchSessionState } from '@kbn/data-plugin/public';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
 import { DATE_RANGE_PICKER_FEATURE_FLAG } from '@kbn/date-range-picker';
+import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 const mockUseDateRangePickerPresets = useDateRangePickerPresets as jest.Mock;
@@ -300,6 +301,41 @@ describe('QueryBarTopRowTopRow', () => {
       expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
       expect(screen.getByTestId('esqlApproximationToggleButton')).toBeDisabled();
     });
+  });
+
+  it('forwards visor KQL submit with the quick search trigger', async () => {
+    const onSubmit = jest.fn();
+    const kql = kqlPluginMock.createStartContract();
+    (kql.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
+    render(
+      wrapQueryBarTopRowInContext(
+        {
+          query: { esql: 'FROM test_index' },
+          screenTitle: 'ES|QL Screen',
+          isDirty: false,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+          onSubmit,
+          onTextLangQueryChange: jest.fn(),
+        },
+        { servicesOverride: { kql } }
+      )
+    );
+
+    await waitFor(() => expect(kql.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit: visorKqlSubmit } = (kql.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => visorKqlSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { esql: 'FROM test_index | WHERE KQL("""hostname:web-01""")' },
+      }),
+      QuerySubmitTrigger.QUICK_SEARCH
+    );
   });
 
   describe('when background search is enabled', () => {

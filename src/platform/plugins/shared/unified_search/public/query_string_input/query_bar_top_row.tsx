@@ -796,10 +796,13 @@ export const QueryBarTopRow = React.memo(
         if (isSubmitDisabled) return;
         const aggregateQuery = { esql: newEsqlQuery } as AggregateQuery;
         propsOnTextLangQueryChange(aggregateQuery);
-        onSubmit({
-          query: aggregateQuery as unknown as Query | QT,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query: aggregateQuery as unknown as Query | QT,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUICK_SEARCH
+        );
       },
       [isSubmitDisabled, propsOnTextLangQueryChange, onSubmit]
     );
