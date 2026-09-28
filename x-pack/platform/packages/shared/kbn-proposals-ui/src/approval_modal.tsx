@@ -9,8 +9,13 @@ import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { ApprovalContent } from './approval_content';
-import { getProposalTone, isProposalExpired } from './proposal_helpers';
-import { toActionImpactItems } from './to_action_impact_items';
+import {
+  getProposalCaption,
+  getProposalDecision,
+  getProposalTitle,
+  getProposalTone,
+  isProposalExpired,
+} from './proposal_helpers';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import type { ApprovalProposal } from './types';
 
@@ -22,13 +27,22 @@ export interface ApprovalModalProps {
     onChange: (checked: boolean) => void;
   };
   proposal: ApprovalProposal;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
   onClose: () => void;
   /**
    * Renders Dismiss beside Approve. Omitted by hosts that cannot record a dismissal, which is
    * why there is no Cancel here — `EuiModal`'s own close control already covers walking away.
    */
   onDismiss?: () => void;
+  /**
+   * Whether this proposal's approve/decline is currently in flight. Sourced from the host's own
+   * mutation cache (e.g. `useIsMutating`) so it agrees with whatever else shows the same proposal
+   * (the flyout row this modal opened from, say) and survives this modal being closed and
+   * reopened mid-submission.
+   */
+  isSubmitting?: 'applying' | 'declining';
+  /** Who's approving, for the "Applying"/"Declining" caption before the server confirms a decider. */
+  currentActorName?: string;
   'data-test-subj'?: string;
 }
 
@@ -40,19 +54,27 @@ export interface ApprovalModalProps {
  * from whatever each host happened to keep.
  */
 export const ApprovalModal = memo<ApprovalModalProps>(
-  ({ alwaysAllow, proposal, onConfirm, onClose, onDismiss, 'data-test-subj': dataTestSubj }) => {
+  ({
+    alwaysAllow,
+    proposal,
+    onConfirm,
+    onClose,
+    onDismiss,
+    isSubmitting,
+    currentActorName,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const titleId = useGeneratedHtmlId({ prefix: 'approvalModalHeader' });
 
-    const title =
-      proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
+    const title = getProposalTitle(proposal);
     const isExpired = isProposalExpired(proposal);
 
     return (
       <EuiModal
         aria-labelledby={titleId}
         onClose={onClose}
-        css={css({ maxWidth: 560, width: '100%', borderRadius: euiTheme.size.m })}
+        css={css({ maxWidth: 640, width: '100%', borderRadius: euiTheme.size.xs })}
         data-test-subj={dataTestSubj}
       >
         <ApprovalContent
@@ -60,9 +82,11 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           tone={getProposalTone(proposal)}
           iconType="lock"
           comment={proposal.comment}
-          actionImpact={{ variant: 'list', items: toActionImpactItems(proposal) }}
           titleId={titleId}
-          warningLabel={APPROVAL_MODAL_TRANSLATIONS.warningLabel}
+          caption={getProposalCaption(proposal, { includeRiskDetails: true })}
+          decision={getProposalDecision(proposal)}
+          isSubmitting={isSubmitting}
+          currentActorName={currentActorName}
           alwaysAllow={alwaysAllow}
           data-test-subj={dataTestSubj}
           primaryAction={{
@@ -79,6 +103,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
                     iconType: 'cross',
                     color: 'text',
                     onClick: onDismiss,
+                    isDisabled: isExpired,
                     'data-test-subj': dataTestSubj ? `${dataTestSubj}-dismiss` : undefined,
                   },
                 ]

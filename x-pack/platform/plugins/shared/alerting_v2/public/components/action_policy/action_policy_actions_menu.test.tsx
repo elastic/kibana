@@ -12,6 +12,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyActionsMenu } from './action_policy_actions_menu';
 
+let mockIsLicenseValid = true;
+jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
+
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
   version: 'v1',
@@ -49,6 +54,55 @@ const renderMenu = (props: Partial<React.ComponentProps<typeof ActionPolicyActio
 const openMenu = () => fireEvent.click(screen.getByLabelText('More actions'));
 
 describe('ActionPolicyActionsMenu', () => {
+  beforeEach(() => {
+    mockIsLicenseValid = true;
+  });
+
+  describe('license gating', () => {
+    it('enables edit, clone, and enable when the license is valid', () => {
+      renderMenu({
+        policy: createPolicy({ enabled: false }),
+        onEdit: jest.fn(),
+        onEnable: jest.fn(),
+        onDisable: jest.fn(),
+      });
+      openMenu();
+      expect(screen.getByTestId('editActionPolicy-policy-1')).toBeEnabled();
+      expect(screen.getByTestId('cloneActionPolicy-policy-1')).toBeEnabled();
+      expect(screen.getByTestId('toggleEnabledActionPolicy-policy-1')).toBeEnabled();
+    });
+
+    it('disables edit, clone, and enable when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      const onEnable = jest.fn();
+      renderMenu({
+        policy: createPolicy({ enabled: false }),
+        onEdit: jest.fn(),
+        onEnable,
+        onDisable: jest.fn(),
+      });
+      openMenu();
+      expect(screen.getByTestId('editActionPolicy-policy-1')).toBeDisabled();
+      expect(screen.getByTestId('cloneActionPolicy-policy-1')).toBeDisabled();
+      expect(screen.getByTestId('toggleEnabledActionPolicy-policy-1')).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('toggleEnabledActionPolicy-policy-1'));
+      expect(onEnable).not.toHaveBeenCalled();
+    });
+
+    it('keeps disable, update API key, and delete available when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      const onDisable = jest.fn();
+      renderMenu({ onEnable: jest.fn(), onDisable });
+      openMenu();
+      expect(screen.getByTestId('updateApiKeyActionPolicy-policy-1')).toBeEnabled();
+      expect(screen.getByTestId('deleteActionPolicy-policy-1')).toBeEnabled();
+
+      fireEvent.click(screen.getByTestId('toggleEnabledActionPolicy-policy-1'));
+      expect(onDisable).toHaveBeenCalledWith('policy-1');
+    });
+  });
+
   describe('default kebab trigger', () => {
     it('renders the "More actions" icon button when renderButton is not provided', () => {
       renderMenu();
