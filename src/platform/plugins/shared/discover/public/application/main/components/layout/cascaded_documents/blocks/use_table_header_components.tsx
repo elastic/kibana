@@ -18,7 +18,6 @@ import {
   EuiDataGridToolbarControl,
   EuiToolTip,
   EuiBadge,
-  EuiText,
 } from '@elastic/eui';
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,38 +27,16 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import type { ESQLDataGroupNode } from './types';
+import {
+  PatternComparisonMessage,
+  type PatternComparisonMessageState,
+} from '../../histogram_overlay/pattern_comparison_message';
 
 interface UseTableHeaderProps {
   renderViewModeToggle: CascadedDocumentsContext['renderViewModeToggle'];
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
-  patternComparison?: 'hint' | 'approximate';
+  patternComparison?: PatternComparisonMessageState;
 }
-
-export const PatternComparisonMessage = ({
-  patternComparison,
-}: {
-  patternComparison: 'hint' | 'approximate';
-}) => {
-  if (patternComparison === 'approximate') {
-    return (
-      <EuiText size="s" color="subdued" data-test-subj="patternHistogramApproximate">
-        <FormattedMessage
-          id="discover.dataCascade.header.patternComparisonApproximate"
-          defaultMessage="Pattern comparison is approximate."
-        />
-      </EuiText>
-    );
-  }
-
-  return (
-    <EuiText size="s" color="subdued" data-test-subj="patternHistogramComparisonHint">
-      <FormattedMessage
-        id="discover.dataCascade.header.patternComparisonHint"
-        defaultMessage="Expand a pattern to compare its volume with total document volume."
-      />
-    </EuiText>
-  );
-};
 
 interface GroupBySelectorRendererProps {
   width?: number;
@@ -219,23 +196,44 @@ export function useEsqlDataCascadeHeaderComponent({
     NonNullable<DataCascadeProps<ESQLDataGroupNode, DataTableRecord>['customTableHeader']>
   >(
     ({ currentSelectedColumns, availableColumns }) => {
+      const groupBySelector = (
+        <EuiFlexItem grow={false}>
+          {groupBySelectorRenderer(availableColumns, currentSelectedColumns)}
+        </EuiFlexItem>
+      );
+
+      if (!patternComparison) {
+        return (
+          <EuiFlexGroup
+            justifyContent={renderViewModeToggle ? 'spaceBetween' : 'flexEnd'}
+            alignItems="center"
+            responsive={false}
+          >
+            {renderViewModeToggle && (
+              <EuiFlexItem>{renderViewModeToggle({ hitsCounterVariant: 'groups' })}</EuiFlexItem>
+            )}
+            {groupBySelector}
+          </EuiFlexGroup>
+        );
+      }
+
       return (
-        <EuiFlexGroup
-          justifyContent={renderViewModeToggle ? 'spaceBetween' : 'flexEnd'}
-          alignItems="center"
-          responsive={false}
-        >
+        <EuiFlexGroup alignItems="center" responsive={false}>
           {renderViewModeToggle && (
-            <EuiFlexItem>{renderViewModeToggle({ hitsCounterVariant: 'groups' })}</EuiFlexItem>
-          )}
-          {patternComparison && (
-            <EuiFlexItem>
-              <PatternComparisonMessage patternComparison={patternComparison} />
+            <EuiFlexItem grow={false}>
+              {renderViewModeToggle({ hitsCounterVariant: 'groups' })}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            {groupBySelectorRenderer(availableColumns, currentSelectedColumns)}
+          <EuiFlexItem
+            css={css({
+              flexBasis: 0,
+              minWidth: 0,
+              overflow: 'hidden',
+            })}
+          >
+            <PatternComparisonMessage patternComparison={patternComparison} />
           </EuiFlexItem>
+          {groupBySelector}
         </EuiFlexGroup>
       );
     },

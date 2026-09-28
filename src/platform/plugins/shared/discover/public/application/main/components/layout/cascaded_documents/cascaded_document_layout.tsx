@@ -41,8 +41,10 @@ import {
   buildHistogramOverlaySelection,
   resolveHistogramOverlayPublication,
 } from './histogram_overlay_selection';
+import { getPatternComparisonMessageState } from '../histogram_overlay/pattern_comparison_message';
 import {
   publishHistogramOverlaySelection,
+  useAppStateSelector,
   useCurrentTabRuntimeState,
   useInternalStateSelector,
   useRuntimeStateManager,
@@ -114,6 +116,7 @@ const ESQLDataCascade = React.memo(
       [cascadeGroupingChangeHandler, trackCascadeOptOut]
     );
 
+    const chartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
     const sparkline = useMemo(() => getCountSparkline(esqlQuery.esql), [esqlQuery.esql]);
     const canComparePatterns = useMemo(
       () =>
@@ -121,25 +124,12 @@ const ESQLDataCascade = React.memo(
         Boolean(sparkline),
       [queryMeta.groupByFields, sparkline]
     );
-    const patternComparison = (() => {
-      if (!canComparePatterns) {
-        return undefined;
-      }
-
-      if (!histogramOverlaySelection) {
-        return 'hint' as const;
-      }
-
-      if (
-        histogramOverlayResult?.key === histogramOverlaySelection.key &&
-        histogramOverlayResult.applied &&
-        histogramOverlayResult.approximate
-      ) {
-        return 'approximate' as const;
-      }
-
-      return undefined;
-    })();
+    const patternComparison = getPatternComparisonMessageState({
+      canCompare: canComparePatterns,
+      chartHidden,
+      selection: histogramOverlaySelection,
+      result: histogramOverlayResult,
+    });
 
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
       renderViewModeToggle,

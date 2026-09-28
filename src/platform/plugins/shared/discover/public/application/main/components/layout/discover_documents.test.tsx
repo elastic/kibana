@@ -14,7 +14,11 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  dataViewMockWithTimeField,
+  esHitsMock,
+} from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
@@ -63,11 +67,13 @@ async function mountComponent({
   hits,
   toolkit,
   isEsqlMode,
+  dataView = dataViewMock,
 }: {
   fetchStatus: FetchStatus;
   hits: EsHitRecord[];
   toolkit?: InternalStateMockToolkit;
   isEsqlMode?: boolean;
+  dataView?: typeof dataViewMock;
 }) {
   if (!toolkit) {
     ({ toolkit } = await setup());
@@ -107,7 +113,7 @@ async function mountComponent({
       ReturnType<RenderViewModeToggle>,
       Parameters<RenderViewModeToggle>
     >(() => <div data-test-subj="viewModeToggle">test</div>),
-    dataView: dataViewMock,
+    dataView,
     onAddFilter: jest.fn(),
     onFieldEdited: jest.fn(),
   };
@@ -333,6 +339,73 @@ describe('Discover documents layout', () => {
         displayedRows: [expandedDoc, nextExpandedDoc],
         displayedColumns: ['bytes'],
       });
+    });
+  });
+
+  describe('pattern comparison controls', () => {
+    const patternQuery =
+      'FROM logs | STATS Sparkline = SPARKLINE(COUNT(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern = CATEGORIZE(message)';
+
+    beforeEach(() => {
+      discoverGridMock.mockImplementation(() => <div data-test-subj="discoverGridMock" />);
+    });
+
+    const usePatternQuery = (toolkit: InternalStateMockToolkit) => {
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            dataSource: createEsqlDataSource(),
+            query: { esql: patternQuery },
+          },
+        })
+      );
+    };
+
+    it('passes the compare action for a compatible pattern query with the default histogram', async () => {
+      const { toolkit } = await setup();
+      usePatternQuery(toolkit);
+
+      await mountComponent({
+        fetchStatus: FetchStatus.COMPLETE,
+        hits: esHitsMock,
+        toolkit,
+        dataView: dataViewMockWithTimeField,
+      });
+
+      await waitFor(() => {
+        const discoverGridProps = discoverGridMock.mock.lastCall?.[0];
+        expect(discoverGridProps?.rowAdditionalLeadingControls?.[0]?.id).toBe(
+          'comparePatternHistogram'
+        );
+        expect(discoverGridProps?.visibleRowLeadingControls).toBeUndefined();
+      });
+    });
+
+    it('does not pass the compare action while the cascade layout is active', async () => {
+      const { toolkit } = await setup();
+      const tabId = toolkit.getCurrentTab().id;
+      usePatternQuery(toolkit);
+      toolkit.internalState.dispatch(
+        internalStateActions.setCascadedDocumentsState({
+          tabId,
+          cascadedDocumentsState: {
+            availableCascadeGroups: ['Pattern'],
+            selectedCascadeGroups: ['Pattern'],
+            columnsMeta: {},
+            cascadedDocumentsMap: {},
+          },
+        })
+      );
+
+      await mountComponent({
+        fetchStatus: FetchStatus.COMPLETE,
+        hits: esHitsMock,
+        toolkit,
+        dataView: dataViewMockWithTimeField,
+      });
+
+      expect(discoverGridMock.mock.lastCall?.[0]?.rowAdditionalLeadingControls).toBeUndefined();
     });
   });
 
