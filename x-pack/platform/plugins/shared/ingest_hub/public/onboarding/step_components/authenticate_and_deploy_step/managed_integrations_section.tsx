@@ -162,6 +162,15 @@ export function ManagedIntegrationsSection({
     },
   ];
 
+  const gettingStartedLink = (
+    <EuiLink target="_blank" external>
+      <FormattedMessage
+        id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.gettingStartedLink"
+        defaultMessage="Getting Started"
+      />
+    </EuiLink>
+  );
+
   const headerButtonCss = css`
     display: block;
     width: 100%;
@@ -227,22 +236,21 @@ export function ManagedIntegrationsSection({
       {isOpen && (
         <div id={contentId} role="region">
           <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-            <EuiText size="s">
+            <EuiText size="s" data-test-subj="managedIntegrationsSection-description">
               <p>
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.description"
-                  defaultMessage="Utilize AWS Access Keys or Federated Identity to set up and deploy your AWS account. Refer to our {gettingStartedLink} for details."
-                  values={{
-                    gettingStartedLink: (
-                      <EuiLink target="_blank" external>
-                        <FormattedMessage
-                          id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.gettingStartedLink"
-                          defaultMessage="Getting Started"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
+                {showIdentityFederation ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.description"
+                    defaultMessage="Utilize AWS Access Keys or Federated Identity to set up and deploy your AWS account. Refer to our {gettingStartedLink} for details."
+                    values={{ gettingStartedLink }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.accessKeysOnlyDescription"
+                    defaultMessage="Utilize AWS Access Keys to set up and deploy your AWS account. Refer to our {gettingStartedLink} for details."
+                    values={{ gettingStartedLink }}
+                  />
+                )}
               </p>
             </EuiText>
 

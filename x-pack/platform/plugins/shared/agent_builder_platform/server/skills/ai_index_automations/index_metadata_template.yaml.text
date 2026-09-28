@@ -12,8 +12,8 @@ version: "1"
 #      aggregation here.
 #   3. Replace the italicised corpus description in the prompt with what your data really is.
 #
-# Leave the shape alone: the ai.prompt schema, the assemble/verify/gate sequence and the
-# `attributes.esql` wiring are what make the KI retrievable and verified.
+# Leave the shape alone: the ai.prompt schema, the assemble step, the verified create_ki sink and
+# the `attributes.esql` wiring are what make the KI retrievable and verified.
 name: Index metadata KI automation
 description: >
   Profiles one index (mapping + random sample + grounding aggregations) into a single
@@ -198,7 +198,7 @@ steps:
           - answers_questions
           - access_patterns
 
-  # Built once so verify_ki and create_ki see exactly the same document.
+  # Built once, then handed to create_ki to verify and write.
   - name: assemble_ki
     type: data.set
     with:
@@ -262,30 +262,25 @@ steps:
           key_fields: "{{ steps.generate_index_profile.output.content.key_fields | json }}"
           when_to_use: "{{ steps.generate_index_profile.output.content.when_to_use }}"
 
-  - name: verify_ki
-    type: context-engine.verifyKi
+  # `ki_id` is the index name, so a re-run replaces this profile rather than appending a
+  # second copy. On a data-stream destination a re-run appends a new revision instead.
+  - name: create_ki
+    type: context-engine.createKi
     with:
+      ai_index_id: "{{ consts.ai_index_id }}"
+      ki_id: "{{ consts.source_index }}"
+      ki: "${{ steps.assemble_ki.output.ki }}"
       verifiers:
         - esql-valid-syntax
         - esql-valid-runtime
-      ki: "${{ steps.assemble_ki.output.ki }}"
 
   - name: check_verification
     type: if
-    condition: "steps.verify_ki.output.passed : true"
+    condition: "steps.create_ki.output.verification.passed : false"
     steps:
-      # `ki_id` is the index name, so a re-run replaces this profile on an index destination, and
-      # appends a newer revision of the same KI on a data stream, rather than writing a second KI.
-      - name: create_ki
-        type: context-engine.createKi
-        with:
-          ai_index_id: "{{ consts.ai_index_id }}"
-          ki_id: "{{ consts.source_index }}"
-          ki: "${{ steps.assemble_ki.output.ki }}"
-    else:
       - name: log_verification_failure
         type: console
         with:
           message: |
             KI verification failed for {{ consts.source_index }}.
-            Results: {{ steps.verify_ki.output.results | json }}
+            Results: {{ steps.create_ki.output.verification.results | json }}

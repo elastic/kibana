@@ -37,6 +37,7 @@ import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerCortexTelemetryEvents } from './telemetry';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
@@ -111,6 +112,7 @@ export class NightshiftInvestigationsPlugin
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+      registerCortexTelemetryEvents(core.analytics);
     }
 
     // Decision trees are edited in the sandbox and read the Cortex investigator context, so the
@@ -241,6 +243,7 @@ export class NightshiftInvestigationsPlugin
           plugins.workflowsExtensions.registerStepDefinition(
             cortexHydrateStepDefinition({
               getSandboxStart: () => this.sandboxStart,
+              analytics: core.analytics,
               logger: this.logger.get('cortex'),
             })
           );
@@ -248,6 +251,7 @@ export class NightshiftInvestigationsPlugin
             cortexOptimizeStepDefinition({
               getInference: () => this.inference,
               getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+              analytics: core.analytics,
               logger: this.logger.get('cortex'),
             })
           );
