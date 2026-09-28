@@ -456,6 +456,7 @@ export class CRUDClient {
     const previousDocs = await this.eventPublisher.maybeGetExistingDocs(
       emitTargets.map(({ doc }) => doc)
     );
+
     this.logger.debug(`Bulk updating ${objects.length} entities`);
     const resp = await this.esClient.bulk({
       index: await this.latestIndexName(),
