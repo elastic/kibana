@@ -78,6 +78,23 @@ describe('addUserMessageStepDefinition', () => {
     expect(result).toEqual({ output: { conversation_id: conversationId } });
   });
 
+  it('adds an attachment-only user message', async () => {
+    const { execution, definition } = buildDefinition();
+    const attachments = [{ type: 'text', data: { content: 'alert reason' } }];
+
+    const result = await definition.handler(
+      createStepHandlerContext({ input: { conversation_id: conversationId, attachments } })
+    );
+
+    const [[{ params }]] = execution.maybeExecuteAgent.mock.calls;
+    expect(params).toEqual({
+      conversationId,
+      nextInput: { attachments },
+      triggerMode: ChatTriggerMode.Never,
+    });
+    expect(result).toEqual({ output: { conversation_id: conversationId } });
+  });
+
   it('returns an error without writing when experimental features are disabled', async () => {
     const { execution, definition } = buildDefinition({}, { experimental: false });
 
