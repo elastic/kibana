@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 
@@ -65,6 +65,23 @@ describe('FlyoutTemplate header title icon and description', () => {
 
     const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
     expect(title.id).toMatch(/^flyoutTemplateTitle/);
+  });
+
+  it('renders a link title inside the H3 heading', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#details">Alert details</a>} />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    expect(within(title).getByRole('link', { name: 'Alert details' })).toHaveAttribute(
+      'href',
+      '#details'
+    );
   });
 
   const body = (
