@@ -181,7 +181,7 @@ describe('CreateDataSourceFlyout', () => {
     );
 
     expect(queryByTestId('createDataSourceFlyoutS3Region')).not.toBeInTheDocument();
-    expect(queryByTestId('createDataSourceFlyoutConnectionSettingsToggle')).toBeInTheDocument();
+    expect(queryByTestId('createDataSourceFlyoutConnectionSettingsToggle')).not.toBeInTheDocument();
 
     fireEvent.change(getByTestId('createDataSourceFlyoutName'), { target: { value: 'my-ds' } });
     fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
