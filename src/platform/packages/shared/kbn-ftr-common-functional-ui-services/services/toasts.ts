@@ -78,7 +78,7 @@ export class ToastsService extends FtrService {
   }
 
   public async dismissAll(): Promise<void> {
-    if (!(await this.testSubjects.exists('globalToastList', { timeout: 0 }))) return;
+    if (!(await this.testSubjects.exists('globalToastList'))) return;
 
     const allToastElements = await this.getAll({ timeout: 0 });
 

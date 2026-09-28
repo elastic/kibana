@@ -524,7 +524,7 @@ export class DashboardPageControls extends FtrService {
         expectation.invalidSelections.sort()
       );
     });
-    if (await this.testSubjects.exists('optionsList-cardinality-label', { timeout: 0 })) {
+    if (await this.testSubjects.exists('optionsList-cardinality-label')) {
       expect(await this.optionsListGetCardinalityValue()).to.be(
         Object.keys(expectation.suggestions).length.toLocaleString()
       );

@@ -506,7 +506,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    const tourShown = await this.testSubjects.exists('consoleSkipTourButton', { timeout: 0 });
+    const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
     if (tourShown) {
       await this.clickSkipTour();
     }
@@ -524,7 +524,9 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isContextMenuOpen(timeout?: number) {
-    return await this.testSubjects.exists('consoleMenu', { timeout });
+    return timeout === undefined || timeout === 0
+      ? await this.testSubjects.exists('consoleMenu')
+      : await this.testSubjects.waitForExists('consoleMenu', { timeout });
   }
 
   public async isCopyAsCurlButtonVisible() {
@@ -544,7 +546,9 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isSelectLanguageButtonVisible(timeout?: number) {
-    return await this.testSubjects.exists('consoleMenuSelectLanguage', { timeout });
+    return timeout === undefined || timeout === 0
+      ? await this.testSubjects.exists('consoleMenuSelectLanguage')
+      : await this.testSubjects.waitForExists('consoleMenuSelectLanguage', { timeout });
   }
 
   public async clickCopyAsCurlButton() {

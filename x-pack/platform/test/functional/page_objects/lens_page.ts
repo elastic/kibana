@@ -1091,8 +1091,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const searchInputValue = await testSubjects.getAttribute('lnsChartSwitchSearch', 'value');
         const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
         const optionExists = await testSubjects.exists(
-          `lnsChartSwitchPopover_${subVisualizationId}`,
-          { timeout: 0 }
+          `lnsChartSwitchPopover_${subVisualizationId}`
         );
         return searchInputValue === queryTerm && optionExists;
       });
@@ -1884,7 +1883,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async ensureLayerTabIsActive(index: number = 0) {
-      if (await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 0 })) {
+      if (await testSubjects.exists(`lns-layerPanel-${index}`)) {
         return;
       }
 

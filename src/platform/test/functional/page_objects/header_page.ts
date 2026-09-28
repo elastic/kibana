@@ -67,9 +67,12 @@ export class HeaderPageObject extends FtrService {
   public async awaitGlobalLoadingIndicatorHidden() {
     // The loading indicator is debounced by 250ms. Give an in-flight request one complete
     // debounce window to make it visible, but do not delay after a visible load has completed.
-    const loadingIndicatorAppeared = await this.testSubjects.exists('globalLoadingIndicator', {
-      timeout: LOADING_INDICATOR_APPEARANCE_TIMEOUT_MS,
-    });
+    const loadingIndicatorAppeared = await this.testSubjects.waitForExists(
+      'globalLoadingIndicator',
+      {
+        timeout: LOADING_INDICATOR_APPEARANCE_TIMEOUT_MS,
+      }
+    );
     if (!loadingIndicatorAppeared) {
       return;
     }
@@ -86,7 +89,7 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async onAppLeaveWarning(ignoreWarning = false) {
-    const warning = await this.testSubjects.exists('confirmModalTitleText', { timeout: 0 });
+    const warning = await this.testSubjects.exists('confirmModalTitleText');
     if (warning) {
       await this.testSubjects.click(
         ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
