@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
 import { useRulesTableHeaderTabs } from './use_rules_table_header_tabs';
-import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
+import { AllRulesTabs } from '../rules_table/constants';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../../common/lib/telemetry';
 
 jest.mock('@kbn/security-solution-navigation/src/context');

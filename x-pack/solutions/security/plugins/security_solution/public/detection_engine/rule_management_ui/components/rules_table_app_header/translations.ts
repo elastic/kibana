@@ -7,7 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-export { ADD_NEW_RULE } from '../../../common/translations';
+export {
+  ADD_NEW_RULE,
+  IMPORT_RULE,
+  IMPORT_VALUE_LISTS,
+  PAGE_TITLE,
+  RULE_SETTINGS_TITLE,
+  UPLOAD_VALUE_LISTS_TOOLTIP,
+} from '../../../common/translations';
+export { ADD_ELASTIC_RULES } from '../pre_packaged_rules/translations';
+
+export const ADD_ELASTIC_RULES_WITH_COUNT = (count: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.appHeader.addElasticRulesWithCount', {
+    values: { count },
+    defaultMessage: 'Add Elastic rules ({count})',
+  });
 
 export const CREATE_RULE_MENU_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.contextMenu.buttonLabel',

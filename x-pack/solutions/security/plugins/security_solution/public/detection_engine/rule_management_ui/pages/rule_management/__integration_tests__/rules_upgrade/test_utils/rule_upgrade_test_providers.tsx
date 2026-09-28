@@ -20,7 +20,7 @@ import { MockDiscoverInTimelineContext } from '../../../../../../../common/compo
 import { createKibanaContextProviderMock } from '../../../../../../../common/lib/kibana/kibana_react.mock';
 import { createMockStore } from '../../../../../../../common/mock';
 import { RouterSpyStateContext } from '../../../../../../../common/utils/route/helpers';
-import { AllRulesTabs } from '../../../../../components/rules_table/rules_table_toolbar';
+import { AllRulesTabs } from '../../../../../components/rules_table/constants';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { MlCapabilitiesProvider } from '../../../../../../../common/components/ml/permissions/ml_capabilities_provider';
 import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';

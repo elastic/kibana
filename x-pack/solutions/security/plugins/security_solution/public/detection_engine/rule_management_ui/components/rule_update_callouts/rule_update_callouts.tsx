@@ -18,7 +18,7 @@ import {
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TEXT,
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
 } from '../mini_callout/translations';
-import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
+import { AllRulesTabs } from '../rules_table/constants';
 
 interface RuleUpdateCalloutsProps {
   shouldShowNewRulesCallout?: boolean;

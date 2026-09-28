@@ -14,7 +14,7 @@ import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
-import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
+import { AllRulesTabs } from '../rules_table/constants';
 import * as i18n from '../rules_table/translations';
 
 const toBadge = (count: number): number | undefined => (count > 0 ? count : undefined);
