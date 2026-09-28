@@ -248,7 +248,7 @@ describe('RuleConditions', () => {
       state_transition: {
         pending_count: 3,
         pending_timeframe: '5m',
-        pending_operator: 'AND',
+        pending_operator: 'and',
         recovering_count: 0,
       },
     });
@@ -264,7 +264,7 @@ describe('RuleConditions', () => {
         pending_count: 0,
         recovering_count: 4,
         recovering_timeframe: '20m',
-        recovering_operator: 'OR',
+        recovering_operator: 'or',
       },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent(

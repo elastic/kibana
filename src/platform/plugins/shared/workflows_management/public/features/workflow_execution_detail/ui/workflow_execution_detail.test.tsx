@@ -119,6 +119,12 @@ jest.mock('../../../entities/workflows/model/use_workflow_execution_polling', ()
   useWorkflowExecutionPolling: () => mockUseWorkflowExecutionPolling(),
 }));
 
+// The component reads the polled execution from the store; mirror the mocked poll result there.
+jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
+  ...jest.requireActual('../../../entities/workflows/store/workflow_detail/selectors'),
+  selectExecution: () => mockUseWorkflowExecutionPolling().workflowExecution,
+}));
+
 const createMockExecution = (
   overrides: Partial<WorkflowExecutionDto> = {}
 ): WorkflowExecutionDto => ({
@@ -602,6 +608,21 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
     expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
     expect(mockStepExecutionDetailsProps.current.resumeMessage).toBeUndefined();
     expect(mockStepExecutionDetailsProps.current.resumeSchema).toBeUndefined();
+    expect(mockStepExecutionDetailsProps.current.waitingStepExecutionId).toBeUndefined();
+  });
+
+  it('does not pass waitingStepExecutionId when getStepExecution fails', () => {
+    mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: false });
+
+    render(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+      </TestWrapper>
+    );
+
+    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
+    expect(mockStepExecutionDetailsProps.current.waitingStepExecutionId).toBeUndefined();
+    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBeUndefined();
   });
 
   it('passes resumeMessage and resumeSchema when waitForInput is nested under if in YAML (fetch-driven)', () => {
