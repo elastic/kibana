@@ -147,110 +147,112 @@ export const scoresByPrefixToDatasets = (
     const matchingPrefixes = prefixes.filter(
       (p) => exampleId === p || exampleId.startsWith(`${p}-`)
     );
-    if (matchingPrefixes.length === 0) {
-      continue;
-    }
-
-    // Rejection flags depend on the document, not the prefix: compute them once and
-    // tally the suite/model ExcludedScoreCounts once per document. A doc matching both
-    // `alert` and `alert-analysis` must not double-count the model audit's 'dropped N
-    // score doc(s)' warning — only the per-prefix records tally per matching prefix.
-    const evaluatorName = doc.evaluator?.name;
-    const direction = (doc.evaluator as { direction?: string } | undefined)?.direction;
-    const judgeId = doc.evaluator?.model?.id;
-    const taskModelId = doc.task?.model?.id;
-    // An admitted provenance of "no judge id at all" is indistinguishable from a
-    // non-EIS judge when requireEisJudge is on: without this, a doc whose evaluator
-    // omitted its judge model silently contributes to a matrix that claims every
-    // score is EIS-graded.
-    const rejectedEisJudge = Boolean(
-      evaluatorName && options.requireEisJudge && (!judgeId || !isEisBacked(judgeId))
-    );
-    const rejectedSelfJudged = Boolean(
-      evaluatorName &&
-        !rejectedEisJudge &&
-        options.excludeSelfJudged &&
-        judgeId &&
-        taskModelId &&
-        describeJudge(judgeId, taskModelId).selfJudged
-    );
-    // Only maximize-direction evaluators are quality scores.
-    const rejectedNonQuality = Boolean(
-      evaluatorName && !rejectedEisJudge && !rejectedSelfJudged && direction && direction !== 'maximize'
-    );
-    if (evaluatorName) {
-      if (rejectedEisJudge) {
-        excluded.nonEis += 1;
-      }
-      if (rejectedSelfJudged) {
-        excluded.selfJudged += 1;
-      }
-      if (rejectedNonQuality) {
-        excluded.nonQuality += 1;
-      }
-    }
-    // Doc-level effective score and unmapped-verdict tally: like the rejection counts
-    // above, a doc matching several prefixes counts once, not once per prefix.
-    const admitted = Boolean(
-      evaluatorName && !rejectedEisJudge && !rejectedSelfJudged && !rejectedNonQuality
-    );
-    const score = admitted
-      ? options.useVerdictLadder
-        ? resolveVerdictScore(evaluatorName as string, doc)
-        : doc.evaluator?.score
-      : undefined;
-    if (
-      admitted &&
-      typeof score !== 'number' &&
-      options.useVerdictLadder &&
-      typeof doc.evaluator?.score === 'number'
-    ) {
-      excluded.unmappedVerdict += 1;
-    }
-
-    for (const prefix of matchingPrefixes) {
+    if (matchingPrefixes.length > 0) {
+      // Rejection flags depend on the document, not the prefix: compute them once and
+      // tally the suite/model ExcludedScoreCounts once per document. A doc matching both
+      // `alert` and `alert-analysis` must not double-count the model audit's 'dropped N
+      // score doc(s)' warning — only the per-prefix records tally per matching prefix.
+      const evaluatorName = doc.evaluator?.name;
+      const direction = (doc.evaluator as { direction?: string } | undefined)?.direction;
+      const judgeId = doc.evaluator?.model?.id;
+      const taskModelId = doc.task?.model?.id;
+      // An admitted provenance of "no judge id at all" is indistinguishable from a
+      // non-EIS judge when requireEisJudge is on: without this, a doc whose evaluator
+      // omitted its judge model silently contributes to a matrix that claims every
+      // score is EIS-graded.
+      const rejectedEisJudge = Boolean(
+        evaluatorName && options.requireEisJudge && (!judgeId || !isEisBacked(judgeId))
+      );
+      const rejectedSelfJudged = Boolean(
+        evaluatorName &&
+          !rejectedEisJudge &&
+          options.excludeSelfJudged &&
+          judgeId &&
+          taskModelId &&
+          describeJudge(judgeId, taskModelId).selfJudged
+      );
+      // Only maximize-direction evaluators are quality scores.
+      const rejectedNonQuality = Boolean(
+        evaluatorName &&
+          !rejectedEisJudge &&
+          !rejectedSelfJudged &&
+          direction &&
+          direction !== 'maximize'
+      );
       if (evaluatorName) {
         if (rejectedEisJudge) {
-          tallyPrefixExclusion(prefix, 'nonEis');
+          excluded.nonEis += 1;
         }
         if (rejectedSelfJudged) {
-          tallyPrefixExclusion(prefix, 'selfJudged');
+          excluded.selfJudged += 1;
         }
+        if (rejectedNonQuality) {
+          excluded.nonQuality += 1;
+        }
+      }
+      // Doc-level effective score and unmapped-verdict tally: like the rejection counts
+      // above, a doc matching several prefixes counts once, not once per prefix.
+      const admitted = Boolean(
+        evaluatorName && !rejectedEisJudge && !rejectedSelfJudged && !rejectedNonQuality
+      );
+      const score = admitted
+        ? options.useVerdictLadder
+          ? resolveVerdictScore(evaluatorName as string, doc)
+          : doc.evaluator?.score
+        : undefined;
+      if (
+        admitted &&
+        typeof score !== 'number' &&
+        options.useVerdictLadder &&
+        typeof doc.evaluator?.score === 'number'
+      ) {
+        excluded.unmappedVerdict += 1;
+      }
 
-        if (admitted) {
-          let errTrack = erroredByPrefix.get(prefix);
-          // A trace evaluator that found no spans reports 'unavailable', not 'error'.
-          if (doc.evaluator?.label === 'error' || doc.evaluator?.label === 'unavailable') {
-            if (!errTrack) {
-              errTrack = new Map();
-              erroredByPrefix.set(prefix, errTrack);
-            }
-            const tally = errTrack.get(evaluatorName as string) ?? { errored: 0, scored: 0 };
-            tally.errored += 1;
-            errTrack.set(evaluatorName as string, tally);
+      for (const prefix of matchingPrefixes) {
+        if (evaluatorName) {
+          if (rejectedEisJudge) {
+            tallyPrefixExclusion(prefix, 'nonEis');
+          }
+          if (rejectedSelfJudged) {
+            tallyPrefixExclusion(prefix, 'selfJudged');
           }
 
-          if (typeof score !== 'number') {
-            // Unmapped verdicts were tallied once at the doc level above.
-          } else {
-            if (errTrack) {
+          if (admitted) {
+            let errTrack = erroredByPrefix.get(prefix);
+            // A trace evaluator that found no spans reports 'unavailable', not 'error'.
+            if (doc.evaluator?.label === 'error' || doc.evaluator?.label === 'unavailable') {
+              if (!errTrack) {
+                errTrack = new Map();
+                erroredByPrefix.set(prefix, errTrack);
+              }
               const tally = errTrack.get(evaluatorName as string) ?? { errored: 0, scored: 0 };
-              tally.scored += 1;
+              tally.errored += 1;
               errTrack.set(evaluatorName as string, tally);
             }
 
-            if (judgeId && taskModelId && describeJudge(judgeId, taskModelId).selfJudged) {
-              selfJudgedByPrefix.set(prefix, true);
+            if (typeof score !== 'number') {
+              // Unmapped verdicts were tallied once at the doc level above.
+            } else {
+              if (errTrack) {
+                const tally = errTrack.get(evaluatorName as string) ?? { errored: 0, scored: 0 };
+                tally.scored += 1;
+                errTrack.set(evaluatorName as string, tally);
+              }
+
+              if (judgeId && taskModelId && describeJudge(judgeId, taskModelId).selfJudged) {
+                selfJudgedByPrefix.set(prefix, true);
+              }
+              let evaluators = byPrefix.get(prefix);
+              if (!evaluators) {
+                evaluators = new Map();
+                byPrefix.set(prefix, evaluators);
+              }
+              const agg = evaluators.get(evaluatorName as string) ?? { sum: 0, count: 0 };
+              agg.sum += score;
+              agg.count += 1;
+              evaluators.set(evaluatorName as string, agg);
             }
-            let evaluators = byPrefix.get(prefix);
-            if (!evaluators) {
-              evaluators = new Map();
-              byPrefix.set(prefix, evaluators);
-            }
-            const agg = evaluators.get(evaluatorName as string) ?? { sum: 0, count: 0 };
-            agg.sum += score;
-            agg.count += 1;
-            evaluators.set(evaluatorName as string, agg);
           }
         }
       }

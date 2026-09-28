@@ -292,11 +292,11 @@ const processExampleBatch = (
       const policyScore = scoringPolicy?.useVerdictLadder
         ? applyScoringPolicy(score, scoringPolicy, () => false).score
         : undefined;
-      if (scoringPolicy?.useVerdictLadder && typeof policyScore !== 'number') {
-        continue;
+      const unmappedVerdict = scoringPolicy?.useVerdictLadder && typeof policyScore !== 'number';
+      if (!unmappedVerdict) {
+        const verdict = verdictFromScoreDoc(score, modelId, suiteId, policyScore ?? undefined);
+        if (verdict) judgeVerdictsOut.push(verdict);
       }
-      const verdict = verdictFromScoreDoc(score, modelId, suiteId, policyScore ?? undefined);
-      if (verdict) judgeVerdictsOut.push(verdict);
     }
   }
 
