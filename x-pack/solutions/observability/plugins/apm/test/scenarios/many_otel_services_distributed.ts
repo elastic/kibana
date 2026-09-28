@@ -110,7 +110,11 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
               const spanDuration = random(20, 300);
               const backendName = backend.fields['service.name'] as string;
               return gateway
-                .span({ spanName: `call ${backendName}`, spanType: 'external', spanSubtype: 'http' })
+                .span({
+                  spanName: `call ${backendName}`,
+                  spanType: 'external',
+                  spanSubtype: 'http',
+                })
                 .timestamp(timestamp + i * 5)
                 .duration(spanDuration)
                 .destination(backendName)
@@ -151,17 +155,15 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
               .children(...backendSpans, ...neighborSpans);
 
             return generateError
-              ? rootTx
-                  .failure()
-                  .errors(
-                    gateway
-                      .error({
-                        message: 'Request failed',
-                        type: 'Error',
-                        culprit: 'GET /api/request',
-                      })
-                      .timestamp(timestamp + 5)
-                  )
+              ? rootTx.failure().errors(
+                  gateway
+                    .error({
+                      message: 'Request failed',
+                      type: 'Error',
+                      culprit: 'GET /api/request',
+                    })
+                    .timestamp(timestamp + 5)
+                )
               : rootTx.success();
           }),
         ];

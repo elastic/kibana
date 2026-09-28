@@ -10,7 +10,10 @@ import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { apmEnableServiceInventoryTableSearchBar, apmMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import {
+  apmEnableServiceInventoryTableSearchBar,
+  apmMaxNumberOfServices,
+} from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';

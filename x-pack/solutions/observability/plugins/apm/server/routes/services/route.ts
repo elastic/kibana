@@ -98,23 +98,32 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
     } = params.query;
-    const { savedObjects: { client: savedObjectsClient }, uiSettings: { client: uiSettingsClient } } =
-      await context.core;
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
 
     const coreStart = await core.start();
 
-    const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler, maxNumServices] =
-      await Promise.all([
-        getMlClient(resources),
-        getApmEventClient(resources),
-        getApmAlertsClient(resources),
-        getApmSloClient(resources),
-        serviceGroupId
-          ? getServiceGroup({ savedObjectsClient, serviceGroupId })
-          : Promise.resolve(null),
-        getRandomSampler({ coreStart, request, probability }),
-        uiSettingsClient.get<number>(apmMaxNumberOfServices).catch(() => MAX_NUMBER_OF_SERVICES),
-      ]);
+    const [
+      mlClient,
+      apmEventClient,
+      apmAlertsClient,
+      sloClient,
+      serviceGroup,
+      randomSampler,
+      maxNumServices,
+    ] = await Promise.all([
+      getMlClient(resources),
+      getApmEventClient(resources),
+      getApmAlertsClient(resources),
+      getApmSloClient(resources),
+      serviceGroupId
+        ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+        : Promise.resolve(null),
+      getRandomSampler({ coreStart, request, probability }),
+      uiSettingsClient.get<number>(apmMaxNumberOfServices).catch(() => MAX_NUMBER_OF_SERVICES),
+    ]);
 
     return getServicesItems({
       environment,
