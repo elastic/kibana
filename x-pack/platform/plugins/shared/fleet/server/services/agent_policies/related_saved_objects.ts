@@ -8,9 +8,9 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniq } from 'lodash';
 
-import type { AgentPolicy, DownloadSource, FleetProxy } from '../../types';
+import type { AgentPolicy, DownloadSource, FleetProxy, Output } from '../../types';
 import { outputService } from '../output';
-import { isBeatsOutput } from '../../../common/services/output_helpers';
+import { isBeatsOutput, isOtlpOutput } from '../../../common/services/output_helpers';
 
 import { getDownloadSourcesForAgentPolicy } from '../../routes/agent/source_uri_utils';
 
@@ -74,7 +74,27 @@ export async function fetchRelatedSavedObjects(
   if (!dataOutput) {
     throw new OutputNotFoundError(`Data output not found ${dataOutputId}`);
   }
-  const monitoringOutput = outputs.find((output) => output.id === monitoringOutputId);
+
+  let monitoringOutput: Output | undefined = outputs.find(
+    (output) => output.id === monitoringOutputId
+  );
+
+  // If existing setups were relying on implicit dataOutput fallbacks for monitoringOutput, this guards against
+  // defaulting behavior that would select an OTLP output as the preferred data output, and missing monitoring output falling back to it.
+  // OTLP outputs are not valid for agent monitoring.
+  if (monitoringOutput && isOtlpOutput(monitoringOutput)) {
+    const fallbackOutput =
+      outputs.find((o) => o.id === defaultDataOutputId) ??
+      (await outputService.get(defaultDataOutputId).catch(() => undefined));
+
+    // The full policy derives both `outputs` and `output_permissions` from this array, so a
+    // fallback resolved outside the bulk fetch has to join it or the monitoring reference dangles.
+    if (fallbackOutput && !outputs.some((o) => o.id === fallbackOutput.id)) {
+      outputs.push(fallbackOutput);
+    }
+    monitoringOutput = fallbackOutput;
+  }
+
   if (!monitoringOutput) {
     throw new OutputNotFoundError(`Monitoring output not found ${monitoringOutputId}`);
   }

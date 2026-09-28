@@ -10,17 +10,17 @@ import { z } from '@kbn/zod/v4';
 import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
-  ID_MAX_LENGTH,
   MAX_BULK_ITEMS,
   MAX_KQL_LENGTH,
   MAX_SEARCH_LENGTH,
 } from './constants';
+import { entityIdSchema } from './common';
 import { errorResponseSchema } from './error_response_schema';
 
 export const bulkByIdsSchema = z
   .object({
     ids: z
-      .array(z.string().min(1).max(ID_MAX_LENGTH))
+      .array(entityIdSchema)
       .min(1)
       .max(MAX_BULK_ITEMS)
       .describe('Explicit list of IDs to operate on.'),

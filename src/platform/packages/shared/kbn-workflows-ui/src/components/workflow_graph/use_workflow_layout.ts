@@ -181,9 +181,13 @@ export function useWorkflowLayout({
     }
     const mergeNodeIds = new Set<string>();
     for (const [target, sources] of incomingByTarget) {
-      if (sources.length > 1 && sources.some((s) => allBypassLaneIds.has(s))) {
-        mergeNodeIds.add(target);
-      }
+      // Every fan-in joins on the shared bus just above its target, so the lane
+      // change happens as late as possible. Synthetic bypass lanes are not special
+      // here — this is exactly the set of edges for which applyDagre blanks
+      // `points` (predecessorCount > 1), so nothing usable is being discarded.
+      // Array length is safe as a distinct-source count: transformWorkflowToGraph
+      // dedupes exit ids (`dedupeIds`) before emitting sequential edges.
+      if (sources.length > 1) mergeNodeIds.add(target);
     }
 
     return {

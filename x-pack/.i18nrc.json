@@ -30,6 +30,11 @@
     "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
     "xpack.contextEngine": "platform/plugins/shared/context_engine",
     "xpack.agenticInvestigations": "platform/plugins/shared/agentic_investigations",
+    "xpack.proposals": [
+      "platform/plugins/shared/proposals",
+      "platform/packages/shared/kbn-proposals-common",
+      "platform/packages/shared/kbn-proposals-ui"
+    ],
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
@@ -102,7 +107,7 @@
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAlerting": "solutions/observability/plugins/observability_alerting",
     "xpack.nightshift": "solutions/observability/plugins/nightshift",
-    "xpack.nightshiftInvestigations": ["platform/plugins/shared/nightshift_investigations"],
+    "xpack.nightshiftInvestigations": ["solutions/observability/plugins/nightshift_investigations"],
     "xpack.observabilityAgentBuilder": "solutions/observability/plugins/observability_agent_builder",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_ai_assistant",
@@ -122,7 +127,7 @@
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
-    "xpack.alertzero": ["solutions/security/plugins/alertzero", "solutions/security/packages/kbn-alertzero-common"],
+    "xpack.alertzero": ["solutions/security/plugins/alertzero", "solutions/security/packages/kbn-alertzero-common", "platform/packages/shared/kbn-agentic-investigations-common"],
     "xpack.queryActivity": "platform/plugins/shared/query_activity",
     "xpack.profiling": ["solutions/observability/plugins/profiling"],
     "xpack.reindexService": "platform/plugins/private/reindex_service",
@@ -156,8 +161,8 @@
     "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.sharedComponents": "platform/packages/shared/kbn-shared-components",
     "xpack.changeHistoryUi": "platform/packages/shared/kbn-change-history-ui",
-    "xpack.significantEvents": ["platform/plugins/shared/significant_events"],
-    "xpack.significantEventsApp": ["platform/plugins/shared/significant_events_app"],
+    "xpack.significantEvents": ["solutions/observability/plugins/significant_events"],
+    "xpack.significantEventsApp": ["solutions/observability/plugins/significant_events_app"],
     "xpack.streams": ["platform/plugins/shared/streams_app"],
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
