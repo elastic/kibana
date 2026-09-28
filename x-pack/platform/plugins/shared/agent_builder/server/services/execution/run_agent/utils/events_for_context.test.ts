@@ -9,13 +9,20 @@ import type { Conversation, ConversationRound, TimelineEvent } from '@kbn/agent-
 import {
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
-  EventActorType,
+  ConversationRoundStepType,
   TimelineEventType,
+  isExecutionTerminalEvent,
 } from '@kbn/agent-builder-common';
-import { pausedAndResumedRoundTimeline } from '../../../../test_utils/timeline';
+import {
+  abortedExec0Timeline,
+  completedRoundTimeline,
+  failedExec0Timeline,
+  pausedAndResumedRoundTimeline,
+  pausedThenInterruptedResumeTimeline,
+} from '../../../../test_utils/timeline';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
 import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
-import { eventsForContext, MAX_FAILED_EXECUTIONS_IN_CONTEXT } from './context_timeline';
+import { eventsForContext } from './context_timeline';
 
 const storedRound = (id: string, message: string): ConversationRound => ({
   id,
@@ -100,119 +107,53 @@ describe('eventsForContext', () => {
 });
 
 describe('eventsForContext — interrupted executions', () => {
-  const userActor = { type: EventActorType.user, id: 'u1', username: 'user1' };
-  const agentActor = { type: EventActorType.agent, id: 'agent-1' };
-
-  const interruptedExecution = (
-    roundId: string,
-    createdAt: string,
-    terminal: TimelineEventType.executionFailed | TimelineEventType.executionAborted
-  ): TimelineEvent[] =>
-    [
-      {
-        id: `${roundId}::user_message`,
-        type: TimelineEventType.userMessage,
-        created_at: createdAt,
-        actor: userActor,
-        data: { message: `${roundId} input` },
-      },
-      {
-        id: `${roundId}::execution_started`,
-        type: TimelineEventType.executionStarted,
-        created_at: createdAt,
-        actor: agentActor,
-        execution_id: `${roundId}::execution`,
-        trigger_event_id: `${roundId}::user_message`,
-        data: { trigger_type: 'user_message' },
-      },
-      {
-        id: `${roundId}::${terminal}`,
-        type: terminal,
-        created_at: createdAt,
-        actor: agentActor,
-        execution_id: `${roundId}::execution`,
-        trigger_event_id: `${roundId}::user_message`,
-        data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
-      },
-    ] as unknown as TimelineEvent[];
-
-  const completedRound = (roundId: string, createdAt: string): TimelineEvent[] =>
-    roundsToEvents(
-      conversationWith({
-        rounds: [{ ...storedRound(roundId, `${roundId} input`), started_at: createdAt }],
-      })
-    );
-
   const eventsNativeConversation = (events: TimelineEvent[]): Conversation =>
     conversationWith({ schema_version: CONVERSATION_SCHEMA_VERSION, events });
 
   const roundIds = (events: TimelineEvent[]) =>
     Array.from(new Set(events.map((event) => event.id.split('::')[0])));
 
-  it('surfaces a failed initial execution in stored order and hides an aborted one', () => {
+  it('includes a failed and an aborted initial execution as interrupted rounds, in stored order', () => {
     const events = [
-      ...completedRound('a', '2026-01-01T00:00:00.000Z'),
-      ...interruptedExecution('f', '2026-01-01T00:01:00.000Z', TimelineEventType.executionFailed),
-      ...interruptedExecution('x', '2026-01-01T00:02:00.000Z', TimelineEventType.executionAborted),
-      ...completedRound('b', '2026-01-01T00:03:00.000Z'),
+      ...completedRoundTimeline('r1', '2026-01-01T00:00:00.000Z'),
+      ...failedExec0Timeline(
+        'r2',
+        [{ type: ConversationRoundStepType.reasoning, reasoning: 'thinking' }],
+        '2026-01-01T00:01:00.000Z'
+      ),
+      ...abortedExec0Timeline('r3', '2026-01-01T00:02:00.000Z'),
+      ...completedRoundTimeline('r4', '2026-01-01T00:03:00.000Z'),
     ];
 
     const timeline = eventsForContext(eventsNativeConversation(events));
 
-    expect(roundIds(timeline)).toEqual(['a', 'f', 'b']);
-    expect(
-      timeline.filter((event) => event.id.startsWith('f::')).map((event) => event.type)
-    ).toEqual([
-      TimelineEventType.userMessage,
-      TimelineEventType.executionStarted,
+    expect(roundIds(timeline)).toEqual(['r1', 'r2', 'r3', 'r4']);
+    expect(timeline.filter(isExecutionTerminalEvent).map((event) => event.type)).toEqual([
+      TimelineEventType.executionTerminated,
       TimelineEventType.executionFailed,
+      TimelineEventType.executionAborted,
+      TimelineEventType.executionTerminated,
     ]);
-  });
-
-  it('hides a failed resume execution (the round stays a paused round)', () => {
-    const events = [
-      ...pausedAndResumedRoundTimeline().filter((event) => !event.execution_id?.endsWith('::1')),
-      {
-        id: 'r1::execution::1::execution_failed',
-        type: TimelineEventType.executionFailed,
-        created_at: '2026-01-01T00:00:03.000Z',
-        actor: agentActor,
-        execution_id: 'r1::execution::1',
-        trigger_event_id: 'r1::prompt_response::1',
-        data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
-      },
-    ] as TimelineEvent[];
-
-    const timeline = eventsForContext(eventsNativeConversation(events));
-
-    expect(timeline.some((event) => event.type === TimelineEventType.executionFailed)).toBe(false);
-    expect(eventsToRounds(timeline)).toHaveLength(1);
-  });
-
-  it('caps the surfaced failures to the most recent ones and restores chronological order', () => {
-    const failures = Array.from({ length: MAX_FAILED_EXECUTIONS_IN_CONTEXT + 2 }, (_, index) =>
-      interruptedExecution(
-        `f${index}`,
-        `2026-01-01T00:0${index}:00.000Z`,
-        TimelineEventType.executionFailed
-      )
+    expect(timeline.filter((event) => event.type === TimelineEventType.executionStep)).toHaveLength(
+      1
     );
-    const events = [...failures.flat(), ...completedRound('z', '2026-01-01T00:09:00.000Z')];
-
-    const timeline = eventsForContext(eventsNativeConversation(events));
-
-    // the two oldest failures are dropped; the rest keep chronological order
-    expect(roundIds(timeline)).toEqual(['f2', 'f3', 'f4', 'z']);
+    // no duplicates
+    expect(new Set(timeline.map((event) => event.id)).size).toBe(timeline.length);
   });
 
-  it('breaks a timestamp tie by stored position (later stored wins)', () => {
-    const sameInstant = '2026-01-01T00:00:00.000Z';
-    const failures = Array.from({ length: MAX_FAILED_EXECUTIONS_IN_CONTEXT + 1 }, (_, index) =>
-      interruptedExecution(`f${index}`, sameInstant, TimelineEventType.executionFailed)
+  it('folds an interrupted resume into its round: one execution whose terminal is execution_failed', () => {
+    const timeline = eventsForContext(
+      eventsNativeConversation(pausedThenInterruptedResumeTimeline('r1'))
     );
 
-    const timeline = eventsForContext(eventsNativeConversation(failures.flat()));
-
-    expect(roundIds(timeline)).toEqual(['f1', 'f2', 'f3']);
+    expect(
+      timeline.filter((event) => event.type === TimelineEventType.promptResponse)
+    ).toHaveLength(0);
+    expect(timeline.filter(isExecutionTerminalEvent).map((event) => event.id)).toEqual([
+      'r1::execution_failed',
+    ]);
+    expect(new Set(timeline.map((event) => event.execution_id).filter(Boolean))).toEqual(
+      new Set(['r1::execution'])
+    );
   });
 });

@@ -61,24 +61,10 @@ const resolveDefaultSelectedTabId = (
 /** Renders Header, Body, Footer zones in template order from fully resolved root props. */
 const FlyoutTemplateResolved = ({
   children,
-  onClose,
   size = 'm',
-  minWidth,
-  type,
-  maxWidth,
-  paddingSize,
-  ownFocus,
-  resizable,
-  onResize,
   session = 'start',
-  historyKey,
-  onActive,
+  paddingSize,
   flyoutMenuProps,
-  id,
-  hasChildBackground,
-  outsideClickCloses,
-  focusTrapProps,
-  closeButtonProps,
   tabs: tabsProp,
   defaultSelectedTabId,
   selectedTabId: controlledSelectedTabId,
@@ -86,6 +72,7 @@ const FlyoutTemplateResolved = ({
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'data-test-subj': dataTestSubj,
+  ...euiFlyoutProps
 }: FlyoutTemplateProps) => {
   const htmlIdSuffix = useId().replace(/[^A-Za-z0-9_-]/g, '');
   const flyoutTitleId = useGeneratedHtmlId({ prefix: `flyoutTemplateTitle${htmlIdSuffix}` });
@@ -193,28 +180,15 @@ const FlyoutTemplateResolved = ({
 
   return (
     <EuiFlyout
-      onClose={onClose}
+      {...euiFlyoutProps}
       size={size}
-      minWidth={minWidth}
-      type={type}
-      maxWidth={maxWidth}
-      paddingSize={paddingSize}
-      ownFocus={ownFocus}
-      resizable={resizable}
-      onResize={onResize}
       session={session}
-      historyKey={historyKey}
-      onActive={onActive}
+      paddingSize={paddingSize}
+      data-test-subj={dataTestSubj}
       flyoutMenuDisplayMode="auto"
       flyoutMenuProps={hasMenuProps ? mergedMenuProps : undefined}
-      id={id}
-      hasChildBackground={hasChildBackground}
-      outsideClickCloses={outsideClickCloses}
-      focusTrapProps={focusTrapProps}
-      closeButtonProps={closeButtonProps}
       aria-label={flyoutAriaLabel}
       aria-labelledby={flyoutAriaLabelledBy}
-      data-test-subj={dataTestSubj}
     >
       <FlyoutTemplateConfigProvider value={{ dataTestSubj, paddingSize }}>
         <FlyoutTabsProvider value={tabsContextValue}>

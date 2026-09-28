@@ -18,17 +18,17 @@ import {
   type SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiTab, DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import { fromStoredTab, toStoredSort, toStoredTab } from '../../common/embeddable/transform_utils';
 import {
   deserializeEsqlControls,
   serializeEsqlControls,
 } from '../../common/session/control_panels';
-import type { DiscoverSessionApiData, DiscoverSessionApiResponse } from '../../server';
+import type { DiscoverSessionApiResponse } from '../../server';
 import type {
-  DiscoverSessionRequestData,
-  DiscoverSessionRequestTab,
-  DiscoverSessionResolve,
+  DiscoverSessionClientRequestData,
+  DiscoverSessionClientRequestTab,
+  DiscoverSessionResolveMetadata,
 } from './api_client';
 import { fromApiVisContext, toApiVisContext } from '../../common/session/vis_context';
 import { getVisContextRequestData } from '../../common/session/get_vis_context_request_data';
@@ -42,7 +42,7 @@ import { fromApiTabTypeState, toApiTabTypeState } from '../../common/session/tab
 /** Builds a Discover session from API data, including filter defaults and URL-resolution metadata. */
 export const fromDiscoverSessionApiResponse = (
   response: DiscoverSessionApiResponse,
-  resolve?: DiscoverSessionResolve
+  resolve?: DiscoverSessionResolveMetadata
 ): DiscoverSession => {
   const tabsWithReferences = response.data.tabs.map(fromApiTab);
   const { references: tagReferences } = toStoredTags({ tags: response.data.tags });
@@ -62,7 +62,7 @@ export const fromDiscoverSessionApiResponse = (
 /** Converts a Discover session into a create or upsert request body. */
 export const toDiscoverSessionApiData = (
   session: Pick<DiscoverSession, 'title' | 'description' | 'tabs' | 'tags'>
-): DiscoverSessionRequestData => ({
+): DiscoverSessionClientRequestData => ({
   title: session.title,
   description: session.description,
   ...(session.tags !== undefined && { tags: session.tags }),
@@ -130,7 +130,7 @@ const fromApiTab = (apiTab: DiscoverSessionApiTab) => {
 };
 
 /** Builds an API tab from Discover state, omitting local inline IDs and mapping session-only fields. */
-const toApiTab = (tab: DiscoverSessionTab): DiscoverSessionRequestTab => {
+const toApiTab = (tab: DiscoverSessionTab): DiscoverSessionClientRequestTab => {
   const { id, label, serializedSearchSource: _searchSource, ...tabAttributes } = tab;
   // Only the search source needs a different shape here. The transformer selects the API fields.
   const storedTab: Parameters<typeof fromStoredTab>[0] = {
