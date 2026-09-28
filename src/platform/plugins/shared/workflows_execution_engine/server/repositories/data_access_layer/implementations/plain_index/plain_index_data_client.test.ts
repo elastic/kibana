@@ -38,4 +38,72 @@ describe('PlainIndexDataClient', () => {
       conflicts: 'proceed',
     });
   });
+
+  it('bulk stamps the configured index on plain items', async () => {
+    const { esClient, dataAccess } = createDataAccess();
+    esClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [{ create: { _id: 'a', _index: '.workflows-executions', result: 'created' } }],
+    } as never);
+
+    await dataAccess.bulk({
+      items: [{ operation: 'create', document: { id: 'a' } }],
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operations: [{ create: { _id: 'a', _index: '.workflows-executions' } }, { id: 'a' }],
+      })
+    );
+  });
+
+  it('bulk updater mgets the configured index', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const dataAccess = new PlainIndexDataClient<{ id: string; status: string }>({
+      esClient,
+      indexName: '.workflows-executions',
+      logger: loggerMock.create(),
+    });
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _id: 'a',
+          _index: '.workflows-executions',
+          found: true,
+          _source: { id: 'a', status: 'queued' },
+          _seq_no: 0,
+          _primary_term: 1,
+        },
+      ],
+    } as never);
+    esClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [
+        {
+          update: {
+            _id: 'a',
+            _index: '.workflows-executions',
+            result: 'updated',
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        },
+      ],
+    } as never);
+
+    await dataAccess.bulk({
+      items: [
+        {
+          operation: 'update',
+          documentId: 'a',
+          sourceFields: ['status'] as const,
+          updater: (current) => (current.status === 'queued' ? { status: 'pending' } : 'noop'),
+        },
+      ],
+    });
+
+    expect(esClient.mget).toHaveBeenCalledWith({
+      docs: [expect.objectContaining({ _id: 'a', _index: '.workflows-executions' })],
+    });
+  });
 });

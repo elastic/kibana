@@ -221,12 +221,14 @@ export async function sharedBulk<TExecution extends { id: string }>(
           'found' in doc &&
           doc.found &&
           doc._source &&
+          doc._id &&
           doc._seq_no !== undefined &&
           doc._primary_term !== undefined &&
           !foundById.has(doc._id)
         ) {
+          // `_source.includes` can omit `id`; updaters and callers key by document.id.
           foundById.set(doc._id, {
-            source: doc._source as TExecution,
+            source: { ...doc._source, id: doc._id } as TExecution,
             seqNo: doc._seq_no,
             primaryTerm: doc._primary_term,
             index: doc._index,
