@@ -866,14 +866,14 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       const scopeStepExecution = this.state.getStepExecution(scopeStepExecutionId);
       const scopeStepType = scopeStepExecution?.stepType;
       if (scopeStepType === 'foreach' || scopeStepType === 'while') {
-        // foreach stores its source under input.foreach (an expression);
-        // while stores its source under input.condition (a KQL/template
-        // string). The KQL-aware extraction below handles both — a while
-        // condition is frequently bare KQL with no Liquid markers.
+        // Foreach source is `input.foreach`. `input.items` is the evaluated
+        // list and must not be scanned: item text can look like a template
+        // and force rehydration of every predecessor. While source is
+        // `input.condition` (often bare KQL, so KQL-parsed).
         const scopeInputStepIds =
           scopeStepType === 'while'
             ? this.extractReferencedStepIdsFromCondition(scopeStepExecutionId)
-            : this.extractReferencedStepIdsFromValue(this.getStepInput(scopeStepExecutionId));
+            : this.extractReferencedStepIdsFromForeach(scopeStepExecutionId);
         if (scopeInputStepIds === null) {
           fallbackToPredecessors();
         } else {
@@ -924,6 +924,20 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         pinned.set(stepId, latestExec.id);
       }
     }
+  }
+
+  private extractReferencedStepIdsFromForeach(scopeStepExecutionId: string): Set<string> | null {
+    const input = this.getStepInput(scopeStepExecutionId);
+    if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+      return new Set();
+    }
+
+    const expression = (input as { foreach?: unknown }).foreach;
+    if (typeof expression !== 'string') {
+      return new Set();
+    }
+
+    return this.extractReferencedStepIdsFromValue(expression);
   }
 
   /**
