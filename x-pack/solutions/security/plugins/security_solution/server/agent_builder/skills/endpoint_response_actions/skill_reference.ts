@@ -14,7 +14,7 @@ export const ENDPOINT_RESPONSE_ACTIONS_REFERENCE = `## Error Handling Reference
 
 | Scenario | Tool signal | Agent response |
 |----------|-------------|----------------|
-| No enrolled endpoints | \`list_endpoints\` returns an empty \`endpoints\` list | Report that no response-action-capable endpoints are enrolled |
+| No enrolled Elastic Defend endpoints | \`list_endpoints\` returns an empty \`endpoints\` list | Report that no Elastic Defend endpoints are visible in this space; do not infer that other response-action agents are absent |
 | Host not found | \`found: false\`, \`reason: endpoint_not_found\` | Ask analyst to clarify hostname; do not guess |
 | Hostname matches several endpoints | \`found: false\`, \`reason: ambiguous_hostname\` (+ \`candidates\`) | Ask analyst which agent ID they mean, then re-call \`get_endpoint_status\` with \`agentId\` |
 | Action not found | \`found: false\`, \`reason: action_not_found\` | Ask analyst to verify the action ID from Response Actions history |

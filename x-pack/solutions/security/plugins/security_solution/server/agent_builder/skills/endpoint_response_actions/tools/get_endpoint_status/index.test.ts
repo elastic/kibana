@@ -105,6 +105,45 @@ describe('getEndpointStatusTool', () => {
       }
     });
 
+    it('reports the Fleet agent id when looked up by Endpoint ID and the two ids differ', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: {
+                host: { hostname: 'WIN-999' },
+                Endpoint: { state: { isolation: false } },
+                elastic: { agent: { id: 'fleet-999' } },
+              },
+              last_checkin: '2024-06-01T12:00:00Z',
+              host_status: 'healthy',
+            },
+          ],
+        }),
+      };
+
+      const originalGetEndpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+
+      try {
+        // Looked up by the Endpoint ID (agent.id), which differs from the
+        // host's Fleet id (elastic.agent.id) in this fixture.
+        const result = await tool.handler({ agentId: 'endpoint-id-123' }, mockContext);
+
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+        expect(data.found).toBe(true);
+        // The response must report the Fleet agent id, not the raw supplied
+        // id, so it matches list_endpoints and response-action host keys.
+        expect(data.agentId).toBe('fleet-999');
+      } finally {
+        mockEndpointAppContextService.getEndpointMetadataService =
+          originalGetEndpointMetadataService;
+      }
+    });
+
     it('requires hostName, agentId, or both', () => {
       expect(() => tool.schema.parse({})).toThrow();
       expect(() => tool.schema.parse({ agentId: 'agent-123' })).not.toThrow();

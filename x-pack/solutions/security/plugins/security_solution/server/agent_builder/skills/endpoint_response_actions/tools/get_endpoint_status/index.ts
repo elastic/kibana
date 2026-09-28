@@ -228,6 +228,14 @@ export const getEndpointStatusTool = (
         const hostMetadata = hostInfo.data[0];
         // ID-only lookup: report the matched host's own name.
         hostName = hostName ?? hostMetadata.metadata?.host?.hostname ?? 'unknown';
+        // The request may supply either the Endpoint ID or the Fleet ID (the
+        // kuery above matches both). Always report the Fleet agent id back —
+        // matching list_endpoints and hostname resolution — so a caller that
+        // looked this host up by its Endpoint ID still gets an id it can feed
+        // into response-action follow-ups.
+        const resolvedAgentId =
+          (hostMetadata.metadata as { elastic?: { agent?: { id?: string } } } | undefined)?.elastic
+            ?.agent?.id ?? agentId;
         const isolated = Boolean(hostMetadata.metadata.Endpoint?.state?.isolation);
         const lastSeen = hostMetadata.last_checkin || null;
         const status = hostMetadata.host_status || HostStatus.OFFLINE;
@@ -241,7 +249,7 @@ export const getEndpointStatusTool = (
                 kind: 'response_action_result' as const,
                 action: 'get-endpoint-status' as const,
                 hostName,
-                agentId,
+                agentId: resolvedAgentId,
                 found: true,
                 status,
                 isolated,
