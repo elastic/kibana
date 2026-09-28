@@ -199,7 +199,7 @@ editor:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
+        - feature_agenticInvestigations.escalations_all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
   run_as: []
@@ -442,7 +442,7 @@ t3_analyst:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
+        - feature_agenticInvestigations.escalations_all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
@@ -619,7 +619,7 @@ rule_author:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
+        - feature_agenticInvestigations.escalations_all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
@@ -721,7 +721,7 @@ soc_manager:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
+        - feature_agenticInvestigations.escalations_all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
@@ -802,7 +802,7 @@ detections_admin:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
+        - feature_agenticInvestigations.escalations_all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
@@ -890,7 +890,7 @@ platform_engineer:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
+        - feature_agenticInvestigations.escalations_all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
