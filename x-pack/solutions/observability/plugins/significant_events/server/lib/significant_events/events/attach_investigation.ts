@@ -64,6 +64,10 @@ export const attachInvestigationToEvent = async ({
     ? latestByEventId
     : await eventClient.findLatestByEventId(eventId);
 
+  if (!latest) {
+    return { event_uuid: eventId, updated: 0, ignored: 1 };
+  }
+
   // RuleEventsClient uses `group_hash` as a synthetic event_uuid, so a legacy write must retain
   // the actual EventClient version as its predecessor.
   // If we already fell back to eventClient above, reuse that result — no second round-trip needed.
@@ -71,6 +75,7 @@ export const attachInvestigationToEvent = async ({
     usedLegacyFallback || resolvedSearchClient === eventClient
       ? latest
       : await eventClient.findLatestByEventId(eventId);
+
   if (!latestLegacy) {
     // The event exists in the read store (resolvedSearchClient) but not in the write store
     // (eventClient) — most likely a dual-write lag race. Surface a retryable error so the caller

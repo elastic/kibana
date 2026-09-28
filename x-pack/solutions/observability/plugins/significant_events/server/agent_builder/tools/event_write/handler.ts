@@ -526,9 +526,7 @@ export async function eventsWriteBulkHandler({
   // dual-write to `.rule-events` is fire-and-forget with no matching refresh guarantee — a scan
   // of `.rule-events` alone can miss a recently written event and produce a permanent duplicate.
   const canonicalActiveEvents =
-    client !== eventClient
-      ? await fetchActiveEventsForDedup(eventClient, dedupCandidates)
-      : [];
+    client !== eventClient ? await fetchActiveEventsForDedup(eventClient, dedupCandidates) : [];
   const activeEvents = [...searchClientActiveEvents, ...canonicalActiveEvents];
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
