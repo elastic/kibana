@@ -202,9 +202,9 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   // The list may supply a synthetic group_hash as event.event_uuid (read-flag path); using
   // it on the update route returns { updated: 0, ignored: 1 } while the UI shows success.
   // Once lifecycleData is populated the real UUID is available via latestEvent.event_uuid.
-  // On lifecycle error, fall back permissive: a transient fetch failure should not
-  // permanently lock the user out of dismiss/close actions.
-  const hasCanonicalLifecycle = Boolean(lifecycleData?.events.length) || isLifecycleError;
+  // On lifecycle error, keep disabled: lifecycleData is absent so latestEvent still holds the
+  // synthetic group_hash — enabling actions in that state silently no-ops the update.
+  const hasCanonicalLifecycle = Boolean(lifecycleData?.events.length);
 
   const isInvestigationRunning = hasRunningInvestigation(latestEvent);
 
