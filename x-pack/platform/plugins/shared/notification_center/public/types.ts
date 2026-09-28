@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-/**
- * UI plugin setup is gated on `notificationCenter.uiEnabled` feature flag
- */
+import type { Observable } from 'rxjs';
+import type { NotificationCenterVisibility } from './lib/ui_visibility';
+
 export type NotificationCenterPublicSetup = Record<string, never>;
 
-export type NotificationCenterPublicStart = Record<string, never>;
+export interface NotificationCenterPublicStart {
+  /**
+   * What the UI may render in the active space, as resolved from the
+   * `notificationCenter.uiEnabled` deployment flag and the space's advanced settings.
+   */
+  visibility$: Observable<NotificationCenterVisibility>;
+}

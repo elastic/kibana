@@ -72,6 +72,11 @@ export const NOTIFICATION_TYPES = Object.fromEntries(
   };
 };
 
+/** Every registered `(namespace, type)` pair, in registry order. */
+export const NOTIFICATION_TYPE_REFS: readonly NotificationTypeRef[] = Object.values(
+  NOTIFICATION_TYPES
+).flatMap((types) => Object.values(types).map(({ namespace, type }) => ({ namespace, type })));
+
 /**
  * Simple helper to create the id string for a notification type to avoid duplicated logic in other functions.
  */

@@ -1155,6 +1155,50 @@ groups:
           self: ga
           serverless: ga
 
+  - group: Notification Center
+    id: kibana-notification-center-settings
+    note: "The Notification Center is in technical preview. These settings apply to the current space, and are not available on serverless projects. A pair of settings is added for each notification source, so this list grows as sources are registered."
+    settings:
+
+      - setting: "notificationCenter:enabled"
+        id: notification-center-enabled
+        description: |
+          Shows the Notification Center in this space. Turn individual notification sources off with the settings below.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+
+      - setting: "notificationCenter:types:inference"
+        id: notification-center-types-inference
+        description: |
+          Shows notifications from the Elastic Inference Service, which reports lifecycle changes to inference models.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+
+      - setting: "notificationCenter:types:inference:modelStatus"
+        id: notification-center-types-inference-model-status
+        description: |
+          Shows model status notifications, which report a change to the lifecycle status of an inference model, such as deprecation.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+
   - group: "{{observability}}"
     id: observability-advanced-settings
     settings:

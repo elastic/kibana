@@ -10,6 +10,7 @@ import { NotificationCenterPlugin } from './plugin';
 import type { NotificationCenterPublicSetup, NotificationCenterPublicStart } from './types';
 
 export type { NotificationCenterPublicSetup, NotificationCenterPublicStart } from './types';
+export type { NotificationCenterVisibility } from './lib/ui_visibility';
 
 export const plugin: PluginInitializer<
   NotificationCenterPublicSetup,
