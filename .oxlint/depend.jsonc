@@ -1,0 +1,19 @@
+{
+  // Explicitly suppress Oxlint 1.79's default plugin injection when this config is extended.
+  "plugins": [],
+  "jsPlugins": ["eslint-plugin-depend"],
+  "rules": {
+    // Suggests better replacements for packages: https://github.com/es-tooling/module-replacements/tree/main/docs/modules
+    "depend/ban-dependencies": [
+      "error",
+      {
+        "allowed": [
+          "^@kbn/*", // internal packages
+          "lodash", // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/lodash-underscore.md
+          "moment", // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/momentjs.md
+          "jquery" // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/jquery.md
+        ]
+      }
+    ]
+  }
+}

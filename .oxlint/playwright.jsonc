@@ -1,0 +1,85 @@
+{
+  // Explicitly suppress Oxlint 1.79's default plugin injection when this config is extended.
+  "plugins": [],
+  "jsPlugins": ["eslint-plugin-playwright"],
+  "overrides": [
+    {
+      // Scout tests: the middle four globs expand `TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB` from
+      // @kbn/scout-info, which `.eslintrc.js` uses for its Scout overrides. oxlint treats `**`
+      // inside a `{}` alternation as a single segment, so the outer alternation is split.
+      "files": [
+        "**/kbn-scout*/src/playwright/**/*.ts",
+        "{src/platform,src/core}/{plugins,packages}/**/test/scout{_*,}/**/*.ts",
+        "x-pack/**/{plugins,packages}/**/test/scout{_*,}/**/*.ts",
+        "{examples,x-pack/examples}/**/test/scout{_*,}/**/*.ts",
+        "src/core/test/scout{_*,}/**/*.ts",
+        "packages/**/test/scout{_*,}/**/*.ts"
+      ],
+      "excludeFiles": ["src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts"],
+      "rules": {
+        // `plugin:playwright/recommended`
+        "playwright/consistent-spacing-between-blocks": "warn",
+        "playwright/no-duplicate-slow": "warn",
+        "playwright/no-element-handle": "warn",
+        "playwright/no-eval": "warn",
+        "playwright/no-force-option": "warn",
+        "playwright/no-identical-title": "warn",
+        "playwright/no-nested-step": "warn",
+        "playwright/no-networkidle": "error",
+        "playwright/no-skipped-test": "warn",
+        "playwright/no-unnecessary-assertions": "error",
+        "playwright/no-unused-locators": "error",
+        "playwright/no-useless-not": "warn",
+        "playwright/no-wait-for-navigation": "error",
+        "playwright/no-wait-for-timeout": "warn",
+        "playwright/prefer-locator": "warn",
+        "playwright/valid-expect": "error",
+        "playwright/valid-expect-in-promise": "error",
+
+        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
+        // calls. The linter can't trace expects into called functions, so without
+        // this config tests using assertion helpers trigger a false-positive
+        // "Test has no assertions" warning. Registering the assert* pattern as
+        // known assertion functions avoids that.
+        "playwright/expect-expect": [
+          "warn",
+          {
+            "assertFunctionNames": ["expect", "expect.soft"],
+            "assertFunctionPatterns": ["^assert[A-Z]"]
+          }
+        ],
+        "playwright/no-commented-out-tests": "error",
+        "playwright/no-conditional-expect": "error",
+        "playwright/no-conditional-in-test": "warn",
+        "playwright/no-duplicate-hooks": "error",
+        "playwright/no-focused-test": "error",
+        "playwright/no-get-by-title": "error",
+        "playwright/no-nth-methods": "error",
+        "playwright/no-page-pause": "error",
+        "playwright/no-restricted-matchers": "error",
+        "playwright/no-slowed-test": "error",
+        "playwright/no-standalone-expect": "error",
+        "playwright/no-unsafe-references": "error",
+        "playwright/no-useless-await": "error",
+        "playwright/no-wait-for-selector": "error",
+        "playwright/max-nested-describe": ["error", { "max": 1 }],
+        "playwright/missing-playwright-await": "error",
+        "playwright/prefer-comparison-matcher": "error",
+        "playwright/prefer-equality-matcher": "error",
+        "playwright/prefer-hooks-in-order": "error",
+        "playwright/prefer-hooks-on-top": "error",
+        "playwright/prefer-strict-equal": "error",
+        "playwright/prefer-to-be": "error",
+        "playwright/prefer-to-contain": "error",
+        "playwright/prefer-to-have-count": "error",
+        "playwright/prefer-to-have-length": "error",
+        "playwright/prefer-web-first-assertions": "error",
+        "playwright/require-to-throw-message": "error",
+        "playwright/require-top-level-describe": "error",
+        "playwright/valid-describe-callback": "error",
+        "playwright/valid-title": "error"
+        // Scout has its own runtime validator for test tags, so `playwright/valid-test-tags` stays off.
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  // Explicitly suppress Oxlint 1.79's default plugin injection when this config is extended.
+  "plugins": [],
+  "jsPlugins": ["eslint-plugin-cypress"],
+  "overrides": [
+    {
+      "files": [
+        "x-pack/solutions/security/test/security_solution_cypress/cypress/**",
+        "x-pack/solutions/security/plugins/security_solution/public/management/cypress/**"
+      ],
+      "rules": {
+        // `plugin:cypress/recommended`
+        "cypress/no-assigning-return-values": "error",
+        "cypress/no-async-tests": "error",
+        "cypress/no-unnecessary-waiting": "error",
+        "cypress/unsafe-to-chain-command": "error",
+
+        "cypress/no-force": "warn"
+      }
+    }
+  ]
+}

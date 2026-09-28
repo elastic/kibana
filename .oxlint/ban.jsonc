@@ -1,0 +1,21 @@
+{
+  // Explicitly suppress Oxlint 1.79's default plugin injection when this config is extended.
+  "plugins": [],
+  "jsPlugins": ["eslint-plugin-ban"],
+  "overrides": [
+    {
+      "files": ["**/*.{ts,tsx}"],
+      "rules": {
+        // Old tslint yml override or defined rules
+        "ban/ban": [
+          "error",
+          { "name": ["describe", "only"], "message": "No exclusive suites." },
+          { "name": ["it", "only"], "message": "No exclusive tests." },
+          { "name": ["test", "only"], "message": "No exclusive tests." },
+          { "name": ["testSuggestions", "only"], "message": "No exclusive tests." },
+          { "name": ["testErrorsAndWarnings", "only"], "message": "No exclusive tests." }
+        ]
+      }
+    }
+  ]
+}

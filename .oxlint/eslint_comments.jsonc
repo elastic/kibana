@@ -1,0 +1,15 @@
+{
+  // Explicitly suppress Oxlint 1.79's default plugin injection when this config is extended.
+  "plugins": [],
+  "jsPlugins": ["@eslint-community/eslint-plugin-eslint-comments"],
+  "overrides": [
+    {
+      "files": ["**/*.{ts,tsx}"],
+      "rules": {
+        // `no-unused-disable` is intentionally not enabled: `eslint-disable` directives are shared by
+        // ESLint and oxlint, so each linter sees the other's directives as unused.
+        "@eslint-community/eslint-comments/no-unused-enable": "error"
+      }
+    }
+  ]
+}
