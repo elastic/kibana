@@ -46,12 +46,9 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.referencedContent).toHaveLength(0);
   });
 
-  it('binds the two required registry tools', async () => {
+  it('binds the Context Engine AI index tools', async () => {
     const toolIds = (await kiRetrievalSkill.getRegistryTools?.()) ?? [];
 
-    expect(toolIds).toEqual([
-      contextEngineAiIndexTools.queryAiIndices,
-      contextEngineAiIndexTools.listAiIndices,
-    ]);
+    expect(toolIds).toEqual(Object.values(contextEngineAiIndexTools));
   });
 });
