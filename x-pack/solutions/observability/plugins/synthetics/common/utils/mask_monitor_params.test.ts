@@ -76,6 +76,15 @@ describe('restoreMaskedMonitorParams', () => {
       })
     ).toBe('[]');
   });
+
+  it('keeps a masked key that only matches an inherited object property', () => {
+    expect(
+      restoreMaskedMonitorParams({
+        previousParams: '{"token":"secret"}',
+        submittedParams: '{"token":"********","toString":"********"}',
+      })
+    ).toBe('{"token":"secret","toString":"********"}');
+  });
 });
 
 describe('getUnrestorableMaskedParamKeys', () => {
@@ -103,6 +112,15 @@ describe('getUnrestorableMaskedParamKeys', () => {
         submittedParams: '["********","********"]',
       })
     ).toEqual(['1']);
+  });
+
+  it('returns a masked key that only matches an inherited object property', () => {
+    expect(
+      getUnrestorableMaskedParamKeys({
+        previousParams: '{"token":"secret"}',
+        submittedParams: '{"token":"********","toString":"********"}',
+      })
+    ).toEqual(['toString']);
   });
 
   it('ignores submissions that are not parameter objects', () => {

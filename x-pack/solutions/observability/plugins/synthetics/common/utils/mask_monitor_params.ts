@@ -31,6 +31,12 @@ const parseMonitorParams = (params: string): MonitorParams | undefined => {
   }
 };
 
+const getOwnParamValue = (
+  params: MonitorParams | undefined,
+  key: string
+): ParameterValue | undefined =>
+  params !== undefined && Object.hasOwn(params, key) ? params[key] : undefined;
+
 const parseMonitorParamArray = (params: string): ParameterValue[] | undefined => {
   try {
     const parsedParams = JSON.parse(params) as ParameterValue;
@@ -93,7 +99,8 @@ export const getUnrestorableMaskedParamKeys = ({
   const parsedPreviousParams = previousParams ? parseMonitorParams(previousParams) : undefined;
   return Object.entries(parsedSubmittedParams)
     .filter(
-      ([key, value]) => value === MASKED_PARAM_VALUE && parsedPreviousParams?.[key] === undefined
+      ([key, value]) =>
+        value === MASKED_PARAM_VALUE && getOwnParamValue(parsedPreviousParams, key) === undefined
     )
     .map(([key]) => key);
 };
@@ -137,7 +144,7 @@ export const restoreMaskedMonitorParams = ({
   return JSON.stringify(
     Object.fromEntries(
       Object.entries(parsedSubmittedParams).map(([key, value]) => {
-        const previousValue = parsedPreviousParams?.[key];
+        const previousValue = getOwnParamValue(parsedPreviousParams, key);
         return [
           key,
           value === MASKED_PARAM_VALUE && previousValue !== undefined ? previousValue : value,
