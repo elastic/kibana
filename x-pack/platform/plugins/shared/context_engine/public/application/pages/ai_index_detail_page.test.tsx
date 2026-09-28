@@ -198,11 +198,11 @@ describe('AiIndexDetailPage', () => {
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
     const services = createServices();
-    services.http.get.mockResolvedValue(aiIndex);
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
 
     renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
 
-    await waitForAiIndexDetailLoaded();
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
 
     expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
     expect(screen.getByText('Your AI index is ready')).toBeInTheDocument();
@@ -232,9 +232,38 @@ describe('AiIndexDetailPage', () => {
     expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
   });
 
+  it('dismisses the success callout when a source is added after creation', async () => {
+    const services = createServices();
+    const indexWithoutSources = { ...aiIndex, sources: [] };
+    const indexWithSources = {
+      ...aiIndex,
+      sources: [{ type: 'esql', value: 'FROM My view' }],
+    };
+    services.http.get
+      .mockResolvedValueOnce(indexWithoutSources)
+      .mockResolvedValueOnce(indexWithSources);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAddSourcesButton');
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+
+    const editor = await screen.findByTestId('mockEsqlEditor');
+    fireEvent.change(editor, { target: { value: 'FROM My view' } });
+    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
+    fireEvent.click(screen.getByTestId('contextEditSourcesDoneButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+    });
+  });
+
   it('strips creation navigation state from history after showing the callout', async () => {
     const services = createServices();
-    services.http.get.mockResolvedValue(aiIndex);
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
     const history = createMemoryHistory({
       initialEntries: [
         {
@@ -281,7 +310,7 @@ describe('AiIndexDetailPage', () => {
       </ChromeServiceProvider>
     );
 
-    await waitForAiIndexDetailLoaded();
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
 
     expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
     expect(history.location.state).toBeUndefined();

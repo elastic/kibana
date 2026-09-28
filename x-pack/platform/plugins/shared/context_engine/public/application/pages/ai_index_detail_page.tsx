@@ -79,6 +79,13 @@ export const AiIndexDetailPage = () => {
     () => location.state?.aiIndexCreated === true
   );
 
+  // Hide the callout as soon as the user adds a source.
+  useEffect(() => {
+    if (showCreatedCallout && aiIndex && aiIndex.sources.length > 0) {
+      setShowCreatedCallout(false);
+    }
+  }, [aiIndex, showCreatedCallout]);
+
   // Remove aiIndexCreated from location state after it has been shown
   useEffect(() => {
     if (!location.state?.aiIndexCreated) {
