@@ -76,13 +76,13 @@ test.describe(
         })
       );
 
-      const firstIteration = await pageObjects.workflowExecution.getStep('loop > iteration-0');
+      const firstIteration = await pageObjects.workflowExecution.getStep('loop > Iteration #0');
       await firstIteration.click();
       expect(
         await pageObjects.workflowExecution.getStepResultJson<{ item: number }>('input')
       ).toStrictEqual({ item: 1 });
 
-      const secondIteration = await pageObjects.workflowExecution.getStep('loop > iteration-1');
+      const secondIteration = await pageObjects.workflowExecution.getStep('loop > Iteration #1');
       await secondIteration.click();
       expect(
         await pageObjects.workflowExecution.getStepResultJson<{ item: number }>('input')
@@ -95,7 +95,7 @@ test.describe(
       await expect(logIterationButtons).toHaveCount(2);
 
       const firstLogIteration = await pageObjects.workflowExecution.getStep(
-        'loop > iteration-0 > log_iteration'
+        'loop > Iteration #0 > log_iteration'
       );
       await firstLogIteration.click();
       let stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
@@ -104,7 +104,7 @@ test.describe(
       );
 
       const lastLogIteration = await pageObjects.workflowExecution.getStep(
-        'loop > iteration-1 > log_iteration'
+        'loop > Iteration #1 > log_iteration'
       );
       await lastLogIteration.click();
       stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
@@ -130,6 +130,12 @@ test.describe(
 
       await pageObjects.workflowExecution.expandStepsTree();
 
+      const showMoreIterations = pageObjects.workflowExecution.executionPanel.getByRole('button', {
+        name: /Show \d+ more iterations/,
+      });
+      await showMoreIterations.click();
+      await pageObjects.workflowExecution.expandStepsTree();
+
       const iterationSteps = pageObjects.workflowExecution.executionPanel.getByRole('button', {
         name: /^(?!foreach_).*hello_world_step/,
       });
@@ -148,7 +154,7 @@ test.describe(
       // Compare vertical positions: the post-foreach step must render
       // below the last iteration group, not interleaved among them.
       const lastIterationGroup = await pageObjects.workflowExecution.getStep(
-        'foreach_loop > iteration-49'
+        'foreach_loop > Iteration #49'
       );
       await lastIterationGroup.scrollIntoViewIfNeeded();
       const lastIterationBox = await lastIterationGroup.boundingBox();
