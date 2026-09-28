@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
+
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { toSOServiceVars } from './package_inputs';
@@ -49,14 +51,14 @@ export function detectServiceVarsDrift(
               servicesMap
             )[instanceId] ?? {}
           : {};
-        if (JSON.stringify(deployedDefault) !== JSON.stringify(soServiceVars[instanceId])) {
+        if (!isEqual(deployedDefault, soServiceVars[instanceId])) {
           dirty.push(instanceId);
         }
       }
       // Otherwise it is a truly removed instance — handled as a cleanup target; skip.
       continue;
     }
-    if (JSON.stringify(typedSession[instanceId]) !== JSON.stringify(soServiceVars[instanceId])) {
+    if (!isEqual(typedSession[instanceId], soServiceVars[instanceId])) {
       dirty.push(instanceId);
     }
   }
@@ -82,7 +84,7 @@ export function detectServiceVarsDrift(
             servicesMap
           )[instanceId] ?? {}
         : {};
-      if (JSON.stringify(typedSession[instanceId]) !== JSON.stringify(deployedDefault)) {
+      if (!isEqual(typedSession[instanceId], deployedDefault)) {
         dirty.push(instanceId);
       }
     }
