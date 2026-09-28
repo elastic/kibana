@@ -8,13 +8,17 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
 import {
   useHealthCheck,
   useGetRuleTypesPermissions,
   useFetchFlappingSettings,
+  useSpecActionTypeModels,
 } from '@kbn/alerts-ui-shared';
+import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   useLoadConnectors,
@@ -30,6 +34,9 @@ export interface UseLoadDependencies {
   http: HttpStart;
   toasts: ToastsStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  docLinks: DocLinksStart;
+  uiSettings?: IUiSettingsClient;
   capabilities: ApplicationStart['capabilities'];
   consumer?: string;
   id?: string;
@@ -45,6 +52,9 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     toasts,
     ruleTypeRegistry,
+    actionTypeRegistry,
+    docLinks,
+    uiSettings,
     id,
     ruleTypeId,
     capabilities,
@@ -122,6 +132,19 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
   });
 
   const {
+    models: specActionTypeModels,
+    isLoading: isLoadingSpecActionTypeModels,
+    isInitialLoading: isInitialLoadingSpecActionTypeModels,
+  } = useSpecActionTypeModels({
+    http,
+    docLinks,
+    uiSettings,
+    actionTypeRegistry,
+    connectorTypes,
+    enabled: canReadConnectors,
+  });
+
+  const {
     data: alertFields,
     isLoading: isLoadingAlertFields,
     isInitialLoading: isInitialLoadingAlertFields,
@@ -157,6 +180,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
         isLoadingFlappingSettings ||
         isLoadingConnectors ||
         isLoadingConnectorTypes ||
+        isLoadingSpecActionTypeModels ||
         isLoadingAlertFields
       );
     }
@@ -170,6 +194,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
       isLoadingFlappingSettings ||
       isLoadingConnectors ||
       isLoadingConnectorTypes ||
+      isLoadingSpecActionTypeModels ||
       isLoadingAlertFields
     );
   }, [
@@ -181,6 +206,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isLoadingFlappingSettings,
     isLoadingConnectors,
     isLoadingConnectorTypes,
+    isLoadingSpecActionTypeModels,
     isLoadingAlertFields,
   ]);
 
@@ -194,6 +220,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
         isInitialLoadingFlappingSettings ||
         isInitialLoadingConnectors ||
         isInitialLoadingConnectorTypes ||
+        isInitialLoadingSpecActionTypeModels ||
         isInitialLoadingAlertFields
       );
     }
@@ -207,6 +234,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
       isInitialLoadingFlappingSettings ||
       isInitialLoadingConnectors ||
       isInitialLoadingConnectorTypes ||
+      isInitialLoadingSpecActionTypeModels ||
       isInitialLoadingAlertFields
     );
   }, [
@@ -218,6 +246,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isInitialLoadingFlappingSettings,
     isInitialLoadingConnectors,
     isInitialLoadingConnectorTypes,
+    isInitialLoadingSpecActionTypeModels,
     isInitialLoadingAlertFields,
   ]);
 
@@ -233,6 +262,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     flappingSettings,
     connectors,
     connectorTypes,
+    specActionTypeModels,
     alertFields,
   };
 };

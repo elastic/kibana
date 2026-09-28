@@ -55,6 +55,7 @@ describe('GcpCloudFunctionsConnector', () => {
     it('should have correct id, display name, and auth type', () => {
       expect(GcpCloudFunctionsConnector.metadata.id).toBe('.gcp_cloud_functions');
       expect(GcpCloudFunctionsConnector.metadata.displayName).toBe('GCP Cloud Functions');
+      expect(GcpCloudFunctionsConnector.metadata.minimumLicense).toBe('enterprise');
       expect(GcpCloudFunctionsConnector.metadata.supportedFeatureIds).toContain('workflows');
       expect(GcpCloudFunctionsConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
       expect(GcpCloudFunctionsConnector.auth?.types).toEqual(['gcp_service_account']);

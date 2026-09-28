@@ -33,7 +33,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.abuseipdb.metadata.description', {
       defaultMessage: 'IP reputation checking and abuse reporting',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 

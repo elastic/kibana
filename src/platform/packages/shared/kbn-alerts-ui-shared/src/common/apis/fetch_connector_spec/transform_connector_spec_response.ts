@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorMetadata } from '@kbn/connector-specs';
+import type { ConnectorAlertingHint, ConnectorMetadata } from '@kbn/connector-specs';
 
 /**
  * Wire JSON from GET /internal/actions/connector_types/{id}/spec
@@ -25,6 +25,8 @@ export interface ConnectorSpecWireResponse {
     is_technical_preview?: boolean;
   };
   schema: Record<string, unknown>;
+  actions: Record<string, { input: Record<string, unknown>; description?: string; scope: string }>;
+  alerting?: { default_action: string; message_field?: string };
   is_testable: boolean;
 }
 
@@ -32,6 +34,8 @@ export interface ConnectorSpecWireResponse {
 export interface ConnectorSpecResponse {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
+  actions: Record<string, { input: Record<string, unknown>; description?: string; scope: string }>;
+  alerting?: ConnectorAlertingHint;
   isTestable: boolean;
 }
 
@@ -61,6 +65,17 @@ export function transformConnectorSpecResponse(
       ...(isTechnicalPreview !== undefined ? { isTechnicalPreview } : {}),
     },
     schema: wire.schema,
+    actions: wire.actions ?? {},
+    ...(wire.alerting !== undefined
+      ? {
+          alerting: {
+            defaultAction: wire.alerting.default_action,
+            ...(wire.alerting.message_field !== undefined
+              ? { messageField: wire.alerting.message_field }
+              : {}),
+          },
+        }
+      : {}),
     isTestable: wire.is_testable,
   };
 }

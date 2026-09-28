@@ -18,6 +18,7 @@ export enum WidgetType {
   Hidden = 'hidden',
   Object = 'object',
   FileUpload = 'fileUpload',
+  Boolean = 'boolean',
 }
 
 export interface BaseWidgetProps<

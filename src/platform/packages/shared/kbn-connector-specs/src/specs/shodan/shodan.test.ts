@@ -28,6 +28,10 @@ describe('ShodanConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('requires an enterprise license', () => {
+    expect(ShodanConnector.metadata.minimumLicense).toBe('enterprise');
+  });
+
   describe('searchHosts action', () => {
     it('should search hosts with query and pagination', async () => {
       const mockResponse = {

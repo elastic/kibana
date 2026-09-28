@@ -18,6 +18,7 @@ import { DiscriminatedUnionWidget } from './components/discriminated_union_widge
 import { HiddenWidget } from './components/hidden_widget';
 import { ObjectWidget } from './components/object_widget';
 import { FileUploadWidget } from './components/file_upload_widget';
+import { BooleanWidget } from './components/boolean_widget';
 
 const WIDGET_REGISTRY = {
   [WidgetType.Text]: TextWidget,
@@ -28,6 +29,7 @@ const WIDGET_REGISTRY = {
   [WidgetType.Hidden]: HiddenWidget,
   [WidgetType.Object]: ObjectWidget,
   [WidgetType.FileUpload]: FileUploadWidget,
+  [WidgetType.Boolean]: BooleanWidget,
 };
 
 interface MetaFunctionsParam {
@@ -47,6 +49,8 @@ const getDefaultWidgetForSchema = (schema: z.ZodType, { getMeta, setMeta }: Meta
     return WidgetType.Text;
   } else if (schema instanceof z.ZodNumber) {
     return WidgetType.Number;
+  } else if (schema instanceof z.ZodBoolean) {
+    return WidgetType.Boolean;
   } else if (schema instanceof z.ZodEnum) {
     return WidgetType.Select;
   } else if (schema instanceof z.ZodDiscriminatedUnion) {

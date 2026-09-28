@@ -47,10 +47,13 @@ export async function getConnectorSpecAsJsonSchema({
       isPfxEnabled,
       isEarsEnabled,
       isEarsExperimentalEnabled,
+      logger: context.logger,
     });
     return {
       metadata: serialized.metadata,
       schema: serialized.schema,
+      actions: serialized.actions,
+      alerting: serialized.alerting,
       isTestable: Boolean(spec.test.enabled),
     };
   } catch (error) {

@@ -66,7 +66,7 @@ export const JinaReaderConnector: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.jinaReader.metadata.description', {
       defaultMessage: 'Convert web pages and files to markdown, and search the web via Jina Reader',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     docsUrl: 'https://jina.ai/reader',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },

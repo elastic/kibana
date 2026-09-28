@@ -349,6 +349,51 @@ export const getConnectorSpecResponseBodySchema = schema.object({
         'JSON Schema envelope for the connector form (top-level `config` and `secrets` shapes)',
     },
   }),
+  actions: schema.recordOf(
+    schema.string(),
+    schema.object({
+      input: schema.recordOf(schema.string(), schema.any(), {
+        meta: {
+          description: 'JSON Schema for this action input (`subActionParams`).',
+        },
+      }),
+      description: schema.maybe(
+        schema.string({
+          meta: {
+            description: 'Human-readable summary of what this action does.',
+          },
+        })
+      ),
+      scope: schema.string({
+        meta: {
+          description: 'Action scope: read, write, or destroy.',
+        },
+      }),
+    }),
+    {
+      meta: {
+        description:
+          'Serialized action definitions keyed by sub-action name, including JSON Schema inputs.',
+      },
+    }
+  ),
+  alerting: schema.maybe(
+    schema.object({
+      default_action: schema.string({
+        meta: {
+          description: 'Default sub-action used by the alerting v1 rule form.',
+        },
+      }),
+      message_field: schema.maybe(
+        schema.string({
+          meta: {
+            description:
+              'Optional key in the default action input that receives the rule default message.',
+          },
+        })
+      ),
+    })
+  ),
   is_testable: schema.boolean({
     meta: {
       description: 'When true, this connector type supports the reserved test sub-action.',

@@ -32,6 +32,7 @@ describe('useActionTypeModel', () => {
     id: 'test-connector',
   });
 
+  const serializedAlienVault = serializeConnectorSpec(connectorsSpecs.AlienVaultOTXConnector);
   const mockSpecResponse = {
     metadata: {
       id: 'spec-connector',
@@ -40,10 +41,9 @@ describe('useActionTypeModel', () => {
       minimum_license: 'basic',
       supported_feature_ids: ['alerting'],
     },
-    schema: serializeConnectorSpec(connectorsSpecs.AlienVaultOTXConnector).schema as Record<
-      string,
-      unknown
-    >,
+    schema: serializedAlienVault.schema as Record<string, unknown>,
+    actions: serializedAlienVault.actions,
+    is_testable: true,
   };
 
   const createWrapper = (): FC<PropsWithChildren<unknown>> => {

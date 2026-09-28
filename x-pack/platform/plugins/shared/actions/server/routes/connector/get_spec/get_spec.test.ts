@@ -90,6 +90,17 @@ describe('getConnectorSpecRoute', () => {
           secrets: { type: 'object', properties: {} },
         },
       },
+      actions: {
+        sendMessage: {
+          input: { type: 'object', properties: { text: { type: 'string' } } },
+          description: 'Send a message',
+          scope: 'write',
+        },
+      },
+      alerting: {
+        defaultAction: 'sendMessage',
+        messageField: 'text',
+      },
       isTestable: true,
     };
     const responseBody = {
@@ -102,6 +113,11 @@ describe('getConnectorSpecRoute', () => {
         is_technical_preview: true,
       },
       schema: clientResult.schema,
+      actions: clientResult.actions,
+      alerting: {
+        default_action: 'sendMessage',
+        message_field: 'text',
+      },
       is_testable: true,
     };
     actionsClient.getConnectorSpec.mockResolvedValue(clientResult as never);
@@ -140,6 +156,7 @@ describe('getConnectorSpecRoute', () => {
         supportedFeatureIds: ['alerting'],
       },
       schema: {},
+      actions: {},
       isTestable: false,
     } as never);
 

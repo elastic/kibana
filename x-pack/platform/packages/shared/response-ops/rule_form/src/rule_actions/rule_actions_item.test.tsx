@@ -407,4 +407,52 @@ describe('ruleActionsItem', () => {
       type: 'removeAction',
     });
   });
+
+  test('renders a spec action through a registry model with subAction params', () => {
+    const specRegistry = new TypeRegistry<ActionTypeModel>();
+    specRegistry.register(
+      getActionTypeModel('slack2', {
+        id: '.slack2',
+        validateParams: mockValidate,
+      })
+    );
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry: specRegistry,
+        http: {
+          basePath: {
+            publicBaseUrl: 'publicUrl',
+          },
+        },
+      },
+      connectors: [
+        getConnector('slack2', {
+          id: 'slack2-connector',
+          actionTypeId: '.slack2',
+          name: 'Slack v2',
+        }),
+      ],
+      connectorTypes: [getActionType('slack2', { id: '.slack2' })],
+      aadTemplateFields: [],
+      actionsParamsErrors: {},
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(
+      <RuleActionsItem
+        action={getAction('slack2', {
+          id: 'slack2-connector',
+          actionTypeId: '.slack2',
+          params: { subAction: 'sendMessage', subActionParams: { channel: 'C1', text: 'hi' } },
+        })}
+        index={0}
+        producerId="stackAlerts"
+      />
+    );
+
+    expect(screen.getByTestId('ruleActionsItem')).toBeInTheDocument();
+    expect(screen.getByText('ruleActionsMessage')).toBeInTheDocument();
+  });
 });

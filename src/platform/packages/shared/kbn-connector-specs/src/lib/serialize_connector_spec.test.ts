@@ -10,7 +10,8 @@
 import { z } from '@kbn/zod/v4';
 import * as connectorsSpecs from '../all_specs';
 import * as generateSecretsModule from './generate_secrets_schema_from_spec';
-import { serializeConnectorSpec } from './serialize_connector_spec';
+import { TEST_CONNECTOR_SUB_ACTION } from '../connector_spec';
+import { serializeConnectorActions, serializeConnectorSpec } from './serialize_connector_spec';
 
 describe('serializeConnectorSpec', () => {
   describe('basic structure', () => {
@@ -470,6 +471,123 @@ describe('serializeConnectorSpec', () => {
 
       expect(authTypes).toContain('bearer');
       expect(authTypes).not.toContain('ears');
+    });
+  });
+
+  describe('actions and alerting', () => {
+    const baseMetadata = {
+      id: '.test',
+      displayName: 'Test',
+      description: 'Test',
+      minimumLicense: 'basic' as const,
+      supportedFeatureIds: ['alerting' as const],
+    };
+
+    it('emits JSON Schema inputs for each action and passes through alerting', () => {
+      const spec = {
+        metadata: baseMetadata,
+        alerting: { defaultAction: 'send', messageField: 'text' },
+        actions: {
+          send: {
+            input: z.object({
+              text: z.string().min(1).describe('Message body'),
+              urgent: z.boolean().optional(),
+            }),
+            description: 'Send a message',
+            scope: 'write' as const,
+            handler: async () => ({ success: true }),
+          },
+        },
+        test: { handler: async () => ({}), enabled: false },
+      };
+
+      const result = serializeConnectorSpec(spec);
+
+      expect(result.alerting).toEqual({ defaultAction: 'send', messageField: 'text' });
+      expect(result.actions.send).toMatchObject({
+        description: 'Send a message',
+        scope: 'write',
+      });
+      expect(result.actions.send.input).toMatchObject({
+        type: 'object',
+        properties: {
+          text: expect.objectContaining({ type: 'string' }),
+          urgent: expect.objectContaining({ type: 'boolean' }),
+        },
+      });
+    });
+
+    it('excludes the reserved test sub-action', () => {
+      const spec = {
+        metadata: baseMetadata,
+        actions: {
+          send: {
+            input: z.object({ text: z.string() }),
+            scope: 'write' as const,
+            handler: async () => ({ success: true }),
+          },
+          [TEST_CONNECTOR_SUB_ACTION]: {
+            input: z.object({}),
+            scope: 'read' as const,
+            handler: async () => ({ success: true }),
+          },
+        },
+        test: { handler: async () => ({}), enabled: true },
+      };
+
+      const result = serializeConnectorSpec(spec);
+
+      expect(result.actions.send).toBeDefined();
+      expect(result.actions[TEST_CONNECTOR_SUB_ACTION]).toBeUndefined();
+    });
+
+    it('skips actions whose input cannot be serialized', () => {
+      const { actions, skipped } = serializeConnectorActions({
+        send: {
+          input: z.object({ text: z.string() }),
+          scope: 'write',
+          handler: async () => ({ success: true }),
+        },
+        broken: {
+          input: { not: 'a zod schema' } as never,
+          scope: 'read',
+          handler: async () => ({ success: true }),
+        },
+      });
+
+      expect(actions.send).toBeDefined();
+      expect(actions.broken).toBeUndefined();
+      expect(skipped).toEqual(['broken']);
+    });
+
+    it('logs skipped action names when a logger is provided', () => {
+      const logger = { warn: jest.fn() };
+      serializeConnectorSpec(
+        {
+          metadata: baseMetadata,
+          actions: {
+            broken: {
+              input: { not: 'a zod schema' } as never,
+              scope: 'read',
+              handler: async () => ({ success: true }),
+            },
+          },
+          test: { handler: async () => ({}), enabled: false },
+        },
+        {
+          isPfxEnabled: true,
+          isEarsEnabled: false,
+          isEarsExperimentalEnabled: false,
+          logger: logger as never,
+        }
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Skipping unserializable action input schemas for connector ".test"'
+        )
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('broken'));
     });
   });
 });

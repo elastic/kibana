@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { z, ZodError } from '@kbn/zod/v4';
+import { startCase } from 'lodash';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
@@ -156,7 +157,12 @@ export const renderField = ({ field, meta = defaultMeta }: RenderFieldProps) => 
   const WidgetComponent = getWidgetComponent(schema, { getMeta, setMeta });
 
   // getWidgetComponent might update meta information, therefore we get the meta after calling it
-  const { label, helpText, disabled, placeholder } = getMeta(schema);
+  const fieldMeta = getMeta(schema);
+  const lastSegment = path.split('.').pop() ?? path;
+  const label = fieldMeta.label ?? startCase(lastSegment);
+  const description = typeof fieldMeta.description === 'string' ? fieldMeta.description : undefined;
+  const helpText = fieldMeta.helpText ?? description;
+  const { disabled, placeholder } = fieldMeta;
 
   return (
     <React.Fragment key={path}>

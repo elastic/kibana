@@ -6,3 +6,5 @@
  */
 
 export { generateFormFields } from './src/form';
+export { FormGeneratorFieldContext } from './src/field_context';
+export type { FormGeneratorFieldContextValue } from './src/field_context';

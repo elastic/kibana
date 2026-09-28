@@ -150,7 +150,7 @@ export const Misp: ConnectorSpec = {
       defaultMessage:
         'Search MISP attributes and events, check indicators and warninglists, and write sightings, events, attributes, and tags back to a self-hosted MISP instance',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },

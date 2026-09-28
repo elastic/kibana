@@ -295,4 +295,63 @@ describe('ruleActionsConnectorsBody', () => {
     expect(screen.getByText('Deprecated')).toBeInTheDocument();
     expect(screen.getAllByText('Deprecated')).toHaveLength(1);
   });
+
+  it('lists a spec connector when the registry has its model', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(getActionTypeModel('slack2', { id: '.slack2' }));
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: [
+        getConnector('slack2', {
+          id: 'slack2-connector',
+          actionTypeId: '.slack2',
+          name: 'Slack v2',
+        }),
+      ],
+      connectorTypes: [getActionType('slack2', { id: '.slack2', name: 'Slack (v2)' })],
+      aadTemplateFields: [],
+      selectedRuleType: {
+        defaultActionGroupId: 'default',
+      },
+    });
+
+    render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
+
+    expect(await screen.findByText('Slack v2')).toBeInTheDocument();
+  });
+
+  it('hides a spec connector when the registry does not have its model', () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: [
+        getConnector('slack2', {
+          id: 'slack2-connector',
+          actionTypeId: '.slack2',
+          name: 'Slack v2',
+        }),
+      ],
+      connectorTypes: [getActionType('slack2', { id: '.slack2', name: 'Slack (v2)' })],
+      aadTemplateFields: [],
+      selectedRuleType: {
+        defaultActionGroupId: 'default',
+      },
+    });
+
+    render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
+
+    expect(screen.queryByText('Slack v2')).not.toBeInTheDocument();
+  });
 });

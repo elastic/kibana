@@ -43,7 +43,7 @@ export const getConnectorSpecRoute = (
         access: 'internal',
         summary: 'Get connector type specification',
         description:
-          'Returns metadata and JSON Schema for a connector type form (config + secrets). Only available for spec-based connectors.',
+          'Returns metadata, JSON Schema for a connector type form (config + secrets), and action input schemas. Only available for spec-based connectors.',
         tags: ['oas-tag:connectors'],
       },
       validate: {

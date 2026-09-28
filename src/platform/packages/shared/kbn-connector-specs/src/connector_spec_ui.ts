@@ -32,6 +32,7 @@ export enum WidgetType {
   FormFieldset = 'formFieldset',
   KeyValue = 'keyValue',
   FileUpload = 'fileUpload',
+  Boolean = 'boolean',
 }
 
 export interface BaseMetadata {

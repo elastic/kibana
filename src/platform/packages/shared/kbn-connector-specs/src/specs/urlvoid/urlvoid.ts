@@ -31,7 +31,7 @@ export const URLVoidConnector: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.urlvoid.metadata.description', {
       defaultMessage: 'Domain and URL reputation checking via multi-engine scanning',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 

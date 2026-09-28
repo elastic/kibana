@@ -24,6 +24,10 @@ describe('GreyNoiseConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('requires an enterprise license', () => {
+    expect(GreyNoiseConnector.metadata.minimumLicense).toBe('enterprise');
+  });
+
   describe('getIpContext action', () => {
     it('should retrieve full IP context information', async () => {
       const mockResponse = {

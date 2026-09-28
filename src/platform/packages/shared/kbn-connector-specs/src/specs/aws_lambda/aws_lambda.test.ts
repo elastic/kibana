@@ -40,6 +40,7 @@ describe('AwsLambdaConnector', () => {
     it('should have correct id, display name, and auth type', () => {
       expect(AwsLambdaConnector.metadata.id).toBe('.aws_lambda');
       expect(AwsLambdaConnector.metadata.displayName).toBe('AWS Lambda');
+      expect(AwsLambdaConnector.metadata.minimumLicense).toBe('enterprise');
       expect(AwsLambdaConnector.metadata.supportedFeatureIds).toContain('workflows');
       expect(AwsLambdaConnector.auth?.types).toEqual(['aws_credentials']);
     });

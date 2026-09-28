@@ -30,7 +30,7 @@ export const ShodanConnector: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.shodan.metadata.description', {
       defaultMessage: 'Internet-wide asset discovery and vulnerability scanning',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 

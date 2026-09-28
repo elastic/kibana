@@ -128,7 +128,7 @@ export const AwsXRay: ConnectorSpec = {
       defaultMessage:
         'Retrieve insights, service graphs, and trace summaries and details from AWS X-Ray',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     // A new connector type must reach Production-NonCanary before it can declare
     // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
     // in a follow-up PR once this connector type exists on every Production-NonCanary node.

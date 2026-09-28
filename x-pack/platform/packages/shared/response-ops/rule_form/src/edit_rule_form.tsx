@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
+import { createCompositeActionTypeRegistry } from '@kbn/alerts-ui-shared';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
@@ -89,6 +90,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     fetchedFormData,
     connectors,
     connectorTypes,
+    specActionTypeModels,
     alertFields,
     flappingSettings,
   } = useLoadDependencies({
@@ -96,10 +98,18 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     toasts: notifications.toasts,
     capabilities: plugins.application.capabilities,
     ruleTypeRegistry,
+    actionTypeRegistry: plugins.actionTypeRegistry,
+    docLinks,
+    uiSettings: plugins.settings.client,
     id,
     connectorFeatureId,
     fieldsMetadata,
   });
+
+  const compositeActionTypeRegistry = useMemo(
+    () => createCompositeActionTypeRegistry(plugins.actionTypeRegistry, specActionTypeModels),
+    [plugins.actionTypeRegistry, specActionTypeModels]
+  );
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -222,7 +232,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
         },
         id,
         metadata: computedInitialMetadata,
-        plugins,
+        plugins: { ...plugins, actionTypeRegistry: compositeActionTypeRegistry },
         minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
         selectedRuleType: ruleType,
         selectedRuleTypeModel: ruleTypeModel,
