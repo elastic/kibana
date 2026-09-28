@@ -42,6 +42,3 @@ Categorical series empty in the view or identical to its total are already skipp
 Numeric SUM eligibility is currently still based on the supported numeric types:
 this does not distinguish quantities from numeric codes. Query priority alone is
 not a justification for summing a field, and no name-based rule is introduced.
-
-Unit tests and the Discover integration regression cover the new path. They have
-been added but have not been executed as part of this change.

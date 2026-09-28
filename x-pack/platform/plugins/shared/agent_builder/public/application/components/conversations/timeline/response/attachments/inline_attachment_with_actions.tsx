@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
@@ -16,9 +16,7 @@ import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../../../../../services';
 import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
-import { useAgentId, useConversationReadOnly } from '../../../../../hooks/use_conversation';
-import { useConversationStream } from '../../../../../hooks/use_conversation_stream';
-import { useIsAwaitingPrompt } from '../../../../../hooks/use_is_awaiting_prompt';
+import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
@@ -69,35 +67,8 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     previewedAttachmentKey,
     setPreviewedAttachmentKey,
   } = useCanvasContext();
-  const { conversationActions, conversationId: activeConversationId } = useConversationContext();
+  const { conversationActions } = useConversationContext();
   const agentId = useAgentId();
-  const { sendMessage, isStreaming } = useConversationStream();
-  const { isReadOnly, isLoading: isReadOnlyLoading } = useConversationReadOnly();
-  const isAwaitingPrompt = useIsAwaitingPrompt();
-  const sending = useRef(false);
-  useEffect(() => {
-    sending.current = false;
-  }, [isStreaming, conversationId]);
-  const canSendMessage =
-    Boolean(agentId) &&
-    activeConversationId === conversationId &&
-    !isStreaming &&
-    !isReadOnly &&
-    !isReadOnlyLoading &&
-    !isAwaitingPrompt;
-  const sendFollowUp = useCallback(
-    (message: string) => {
-      if (!canSendMessage || sending.current || !message.trim()) return;
-      sending.current = true;
-      try {
-        sendMessage({ message, conversationId });
-      } catch (error) {
-        sending.current = false;
-        throw error;
-      }
-    },
-    [canSendMessage, sendMessage, conversationId]
-  );
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
 
   const openCanvas = useCallback(() => {
@@ -140,7 +111,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         attachment,
         isSidebar,
         agentId,
-        sendMessage: canSendMessage ? sendFollowUp : undefined,
         updateOrigin,
         openCanvas,
         openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
@@ -156,8 +126,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       attachment,
       isSidebar,
       agentId,
-      canSendMessage,
-      sendFollowUp,
       updateOrigin,
       openCanvas,
       setPreviewedAttachmentKey,

@@ -32,7 +32,6 @@ export type {
   ListAttachmentsArgs,
   ConversationDetailsRenderProps,
 } from './attachments';
-export { ActionButtonType } from './attachments';
 export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
 export type {
   ConversationEventRenderContext,
