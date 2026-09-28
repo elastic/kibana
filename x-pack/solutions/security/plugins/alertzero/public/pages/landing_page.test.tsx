@@ -29,6 +29,9 @@ jest.mock('./conversations', () => ({
 jest.mock('../components/layout/alertzero_page_section', () => ({
   AlertZeroPageSection: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+jest.mock('../components/scan_failure_callout/scan_failure_callout', () => ({
+  ScanFailureCallout: () => null,
+}));
 jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
 
 const mockUseWorkers = useWorkers as jest.Mock;
