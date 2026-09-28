@@ -479,11 +479,22 @@ export const validateTemplateInRequest = async ({
   if (updateReq.template == null) return;
 
   const { id, version } = updateReq.template;
+
+  // An empty id would cause getTemplate to omit its id filter and return an
+  // unrelated template; reject early so callers can't probe other owners' templates.
+  if (!id) {
+    throw Boom.badRequest(`Template id must not be empty`);
+  }
+
   const templateSO = await templatesService.getTemplate(id, String(version));
 
-  // Return the same "not found" error for both missing and cross-owner cases to avoid
-  // leaking the existence of another owner's templates (matches resolveTemplateForCreate).
-  if (!templateSO || templateSO.attributes.owner !== originalCase.attributes.owner) {
+  // Return the same "not found" error for both missing, id-mismatch, and cross-owner cases
+  // to avoid leaking the existence of another owner's templates (matches resolveTemplateForCreate).
+  if (
+    !templateSO ||
+    templateSO.attributes.templateId !== id ||
+    templateSO.attributes.owner !== originalCase.attributes.owner
+  ) {
     throw Boom.badRequest(`Template ${id} version ${version} not found`);
   }
 };

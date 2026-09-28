@@ -1217,10 +1217,17 @@ const createPatchCasesPayload = async ({
             updateReq.template === null
               ? null
               : updateReq.template?.id ?? originalCase.attributes.template?.id;
+          // Pin to the explicitly requested (or stored) version so post-pairing validation
+          // uses the same template definition that was validated pre-pairing.
+          const templateVersion =
+            updateReq.template === null
+              ? undefined
+              : updateReq.template?.version ?? originalCase.attributes.template?.version;
           const globalFields = await resolveCachedGlobalFields(originalCase.attributes.owner);
           await validateCaseExtendedFields({
             extendedFields: finalExtendedFields,
             templateId,
+            templateVersion,
             globalFields,
             templatesService,
             fieldDefinitionsService,
