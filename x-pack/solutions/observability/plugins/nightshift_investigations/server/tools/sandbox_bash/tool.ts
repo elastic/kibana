@@ -221,7 +221,7 @@ export const createSandboxBashTool = ({
       // output (this catch runs before any redaction), and the message returned to the agent below
       // is already redacted.
       const errorType = error instanceof Error ? error.constructor.name : typeof error;
-      logger.error(`Sandbox bash tool failed with a ${errorType}.`);
+      logger.error(`Sandbox bash tool failed (${errorType}).`);
       return {
         results: [
           {
