@@ -1307,6 +1307,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -1337,6 +1338,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const opts = makeExecOptions({ subAction: 'hitlAction', subActionParams: {} });
@@ -1353,6 +1355,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -1377,6 +1380,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const opts = makeExecOptions({ subAction: 'hitlAction', subActionParams: {} });
@@ -1393,6 +1397,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -1415,6 +1420,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -1444,6 +1450,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const opts = makeExecOptions({
