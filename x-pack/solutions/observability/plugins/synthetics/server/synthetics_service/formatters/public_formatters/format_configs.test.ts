@@ -230,6 +230,36 @@ describe('formatMonitorConfig', () => {
       expect(yamlConfig[ConfigKey.USERNAME]).toBeUndefined();
     });
 
+    it('resolves nested NTLM params for public Heartbeat configs', () => {
+      const ntlmConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: 'ntlm-user',
+          password: '${ntlmPassword}',
+          domain: 'EXAMPLE',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(ntlmConfig) as ConfigKey[],
+        ntlmConfig,
+        logger,
+        { ntlmPassword: 's3c"ret\nline' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.NTLM]).toEqual({
+        enabled: true,
+        username: 'ntlm-user',
+        password: 's3c"ret\nline',
+        domain: 'EXAMPLE',
+        workstation: '',
+      });
+    });
+
     it('omits both Kerberos and NTLM blocks when neither is enabled', () => {
       const noAuthConfig: Partial<MonitorFields> = {
         ...testHTTPConfig,

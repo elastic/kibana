@@ -17,6 +17,7 @@ import {
   formatMWs,
   handleMultilineStringFormatter,
   replaceStringWithParams,
+  resolveHttpAuthParams,
 } from '../formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
@@ -55,36 +56,7 @@ export const assertHttpAuthPackageVarsAvailable = (
   }
 };
 
-/**
- * Resolve `${params}` on each auth string field before JSON serialization so
- * values with quotes/newlines stay valid JSON.
- */
-export const resolveHttpAuthParams = (
-  config: Partial<MonitorFields & ProcessorFields>,
-  params: Record<string, string>
-): Partial<MonitorFields & ProcessorFields> => {
-  const next: Partial<MonitorFields & ProcessorFields> = { ...config };
-
-  const resolveAuthObject = <T extends Record<string, unknown>>(auth: T): T => {
-    const resolved = { ...auth };
-    for (const [field, fieldValue] of Object.entries(auth)) {
-      if (typeof fieldValue === 'string') {
-        (resolved as Record<string, unknown>)[field] = replaceStringWithParams(fieldValue, params);
-      }
-    }
-    return resolved;
-  };
-
-  const kerberos = next[ConfigKey.KERBEROS];
-  if (kerberos?.enabled) {
-    next[ConfigKey.KERBEROS] = resolveAuthObject(kerberos);
-  }
-  const ntlm = next[ConfigKey.NTLM];
-  if (ntlm?.enabled) {
-    next[ConfigKey.NTLM] = resolveAuthObject(ntlm);
-  }
-  return next;
-};
+export { resolveHttpAuthParams };
 
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
