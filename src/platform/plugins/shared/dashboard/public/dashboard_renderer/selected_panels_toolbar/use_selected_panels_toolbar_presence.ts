@@ -24,7 +24,7 @@ const prefersReducedMotion = () =>
 
 /**
  * Decides when the selected panels toolbar is rendered, so it can play an exit once the selection
- * is cleared.
+ * is cleared before the hint bar takes its place.
  *
  * - Clearing the selection with the keyboard (e.g. Escape) swaps instantly: keyboard actions
  *   never wait on motion.
@@ -39,6 +39,9 @@ export const useSelectedPanelsToolbarPresence = (selectedPanelIds: Set<string>) 
     setStateValue(next);
   };
   const [skipEntrance, setSkipEntrance] = useState(false);
+  // the hint bar fades back in when it replaces the toolbar after a pointer interaction, and
+  // appears instantly after a keyboard action
+  const [animateHintBarIn, setAnimateHintBarIn] = useState(true);
 
   const lastSelectionRef = useRef(selectedPanelIds);
   if (hasSelection) lastSelectionRef.current = selectedPanelIds;
@@ -72,6 +75,7 @@ export const useSelectedPanelsToolbarPresence = (selectedPanelIds: Set<string>) 
     const isInstant = lastInputRef.current === 'keyboard' || prefersReducedMotion();
     if (isInstant) {
       hiddenAtRef.current = Date.now();
+      setAnimateHintBarIn(false);
       setState('hidden');
       return;
     }
@@ -80,6 +84,7 @@ export const useSelectedPanelsToolbarPresence = (selectedPanelIds: Set<string>) 
     setState('exiting');
     const timeout = setTimeout(() => {
       hiddenAtRef.current = Date.now();
+      setAnimateHintBarIn(true);
       setState('hidden');
     }, TOOLBAR_EXIT_DURATION);
     return () => clearTimeout(timeout);
@@ -89,6 +94,7 @@ export const useSelectedPanelsToolbarPresence = (selectedPanelIds: Set<string>) 
     showToolbar: state !== 'hidden',
     isExiting: state === 'exiting',
     skipEntrance,
+    animateHintBarIn,
     toolbarPanelIds: lastSelectionRef.current,
   };
 };

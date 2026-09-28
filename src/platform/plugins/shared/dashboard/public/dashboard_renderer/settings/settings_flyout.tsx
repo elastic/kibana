@@ -290,6 +290,27 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
           </EuiFormRow>
 
           <EuiFormRow
+            helpText={i18n.translate(
+              'dashboard.embeddableApi.showSettings.flyout.form.showHintBarHelpText',
+              {
+                defaultMessage: 'Shows keyboard and mouse shortcuts while editing the dashboard.',
+              }
+            )}
+          >
+            <EuiSwitch
+              label={i18n.translate(
+                'dashboard.embeddableApi.showSettings.flyout.form.showHintBarSwitchLabel',
+                {
+                  defaultMessage: 'Show hint bar',
+                }
+              )}
+              checked={localSettings.show_hint_bar}
+              onChange={(event) => updateDashboardSetting({ show_hint_bar: event.target.checked })}
+              data-test-subj="dashboardShowHintBarCheckbox"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
             label={i18n.translate('dashboard.embeddableApi.flyout.formRow.controls', {
               defaultMessage: 'Control panels',
             })}

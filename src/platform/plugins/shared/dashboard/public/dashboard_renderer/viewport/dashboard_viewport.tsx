@@ -20,6 +20,7 @@ import { DashboardGrid } from '../grid';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 import { SelectedPanelsToolbar } from '../selected_panels_toolbar/selected_panels_toolbar';
 import { useSelectedPanelsToolbarPresence } from '../selected_panels_toolbar/use_selected_panels_toolbar_presence';
+import { DashboardHintBar } from '../hint_bar/dashboard_hint_bar';
 
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
@@ -33,6 +34,7 @@ export const DashboardViewport = () => {
     useMargins,
     fullScreenMode,
     selectedPanelIds,
+    showHintBar,
   ] = useBatchedPublishingSubjects(
     dashboardApi.title$,
     dashboardApi.description$,
@@ -41,7 +43,8 @@ export const DashboardViewport = () => {
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$,
-    dashboardApi.selectedPanelIds$
+    dashboardApi.selectedPanelIds$,
+    dashboardApi.settings.showHintBar$
   );
   const toolbarPresence = useSelectedPanelsToolbarPresence(selectedPanelIds);
 
@@ -109,12 +112,14 @@ export const DashboardViewport = () => {
       )}
       {viewMode === 'edit' && (
         <EuiPortal>
-          {toolbarPresence.showToolbar && (
+          {toolbarPresence.showToolbar ? (
             <SelectedPanelsToolbar
               selectedPanelIds={toolbarPresence.toolbarPanelIds}
               isExiting={toolbarPresence.isExiting}
               skipEntrance={toolbarPresence.skipEntrance}
             />
+          ) : (
+            showHintBar && <DashboardHintBar skipEntrance={!toolbarPresence.animateHintBarIn} />
           )}
         </EuiPortal>
       )}

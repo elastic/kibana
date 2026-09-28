@@ -24,6 +24,10 @@ export const optionsSchema = z
       .boolean()
       .default(DEFAULT_DASHBOARD_OPTIONS.hide_panel_borders)
       .meta({ description: 'When `true`, panel borders are hidden. Defaults to `false`.' }),
+    show_hint_bar: z.boolean().default(DEFAULT_DASHBOARD_OPTIONS.show_hint_bar).meta({
+      description:
+        'When `true`, a bar with keyboard and mouse shortcuts is shown while editing the dashboard. Defaults to `true`.',
+    }),
     use_margins: z
       .boolean()
       .default(DEFAULT_DASHBOARD_OPTIONS.use_margins)
