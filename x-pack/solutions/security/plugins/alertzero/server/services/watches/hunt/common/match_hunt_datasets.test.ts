@@ -181,6 +181,17 @@ describe('matchDatasetsDeterministic', () => {
     ).toEqual([fortigate, fortinetTwo]);
   });
 
+  it('does not match Elastic Defend datasets through an "Endpoint Manager" product', () => {
+    const defend = dataset('endpoint.events.process');
+    expect(
+      matchDatasetsDeterministic({
+        datasets: [defend, okta],
+        vendor: 'Ivanti',
+        product: 'Endpoint Manager Mobile (EPMM)',
+      })
+    ).toEqual([]);
+  });
+
   it('does not match a generic dataset vendor token through the report product', () => {
     const system = dataset('system.auth');
     expect(

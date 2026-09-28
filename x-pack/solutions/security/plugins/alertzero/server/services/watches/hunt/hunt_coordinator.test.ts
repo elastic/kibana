@@ -1237,6 +1237,50 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(true);
     });
 
+    it('retires a report whose Tier 2 queries were ungrounded when Tier 1 had nothing to search', async () => {
+      // A KEV-shaped report: no IOCs or techniques for Tier 1, prose with no literal values
+      // for Tier 2 to ground a query in. The same text fails grounding identically every
+      // sweep, so leaving it retryable re-spends a Tier 2 call per sweep and never retires.
+      mockT1.mockResolvedValueOnce(
+        tier1Result({
+          status: 'no_searchable_terms',
+          searched_iocs: 0,
+          searched_techniques: 0,
+          resolved_iocs: [],
+          resolved_techniques: [],
+        })
+      );
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          incomplete: [
+            { reason: 'query_ungrounded', technique_id: 'T1190', detail: 'no literal matched' },
+          ],
+        })
+      );
+
+      const result = await run('run-kev-ungrounded');
+
+      expect(result.tier2_skipped_reason).toBeUndefined();
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.completed_successfully).toBe(true);
+    });
+
+    it('keeps an ungrounded Tier 2 query retryable when Tier 1 did have terms to search', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          incomplete: [
+            { reason: 'query_ungrounded', technique_id: 'T1190', detail: 'no literal matched' },
+          ],
+        })
+      );
+
+      const result = await run('run-ungrounded-with-terms');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
+    });
+
     it('lets one transient gap keep the report eligible even alongside a deterministic one', async () => {
       mockT1.mockResolvedValueOnce(
         tier1Result({ incomplete: [{ reason: 'index_unavailable', detail: 'no shards' }] })

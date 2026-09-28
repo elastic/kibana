@@ -16,7 +16,11 @@ import type {
   HuntIoc,
   HuntTechnology,
 } from '@kbn/alertzero-common';
-import { completedSuccessfully, huntCompletenessOf } from './common/completeness';
+import {
+  completedSuccessfully,
+  FINAL_WHEN_NOTHING_SEARCHABLE,
+  huntCompletenessOf,
+} from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
 import type { HuntScope, HuntScopeResolution } from './common/resolve_index_scope';
@@ -850,7 +854,16 @@ export const huntCoordinator = async (
   // on the same techniques forever — but it retires as `incomplete_final`, so a caller
   // writing hunt evidence can tell a searched-and-clean environment from one this run
   // never reached.
-  const completeness = huntCompletenessOf(gaps);
+  //
+  // When Tier 1 had nothing to search, the report gave Tier 2 no literal values either,
+  // so an ungrounded query is a deterministic gap for this report: the same text yields
+  // the same generation and the same refusal every sweep. Leaving it retryable turned
+  // every IOC-less KEV entry into a Tier 2 call per sweep that never retired (seen live).
+  const nothingSearchable = tier1Raw.status === 'no_searchable_terms';
+  const completeness = huntCompletenessOf(
+    gaps,
+    nothingSearchable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
+  );
 
   return {
     status: 'tier1_and_tier2',

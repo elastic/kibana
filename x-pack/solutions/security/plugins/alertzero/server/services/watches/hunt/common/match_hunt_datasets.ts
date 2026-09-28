@@ -32,7 +32,15 @@ const MIN_TOKEN_LENGTH = 3;
  * `system.*` or `generic.*` datasets into every hunt, so the vendor-token rule
  * skips them; the report-vendor-in-dataset-name rule still applies.
  */
-const GENERIC_VENDOR_TOKENS: ReadonlySet<string> = new Set(['system', 'generic', 'log', 'logs']);
+const GENERIC_VENDOR_TOKENS: ReadonlySet<string> = new Set([
+  'system',
+  'generic',
+  'log',
+  'logs',
+  // Elastic Defend's dataset token; "Endpoint Manager" products (Ivanti EPMM, Motex) are 195
+  // KEV entries that would otherwise pull `endpoint.events.*` into scope.
+  'endpoint',
+]);
 
 /** Prompt budget: enough IOCs to hint at the platform without drowning the dataset list. */
 const MAX_PROMPT_IOCS = 25;
