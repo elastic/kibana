@@ -29,7 +29,10 @@ import {
   createMainFlyoutDescriptionItems,
   FLYOUT_MIN_WIDTH,
   FlyoutOwnFocusSwitch,
+  FOOTER_MENU_PANELS,
+  headerBlocks,
   FlyoutTypeSwitch,
+  returnFocusToTrigger,
 } from '../utils';
 
 export interface FlyoutFromOverlaysProps {
@@ -115,8 +118,25 @@ const FillerContent: React.FC = () => (
       Aenean facilisis nulla vitae urna tincidunt congue sed ut dui. Morbi malesuada nulla nec purus
       convallis consequat. Vivamus id mollis quam. Morbi ac commodo nulla.
     </p>
+    <p>
+      Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo
+      pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in
+      mauris eu nibh euismod gravida. Duis ac tellus et risus vulputate vehicula. Donec lobortis
+      risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis,
+      id tincidunt sapien risus a quam. Maecenas fermentum consequat mi. Donec fermentum.
+      Pellentesque malesuada nulla a mi. Duis sapien sem, aliquet nec, commodo eget, consequat quis,
+      neque. Aliquam faucibus, elit ut dictum aliquet, felis nisl adipiscing sapien, sed malesuada
+      diam lacus eget erat.
+    </p>
   </EuiText>
 );
+
+/** Render all testable components in the first tab so they are immediately reachable. */
+const BODY_TABS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'activity', label: 'Activity' },
+  { id: 'settings', label: 'Settings' },
+];
 
 interface ChildFlyoutTriggersProps {
   historyKey: symbol;
@@ -138,6 +158,7 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
   childMaxWidth,
   overlays,
 }) => {
+  const titleKey = title.replace(/\s+/g, '');
   const childTriggerARef = useRef<HTMLButtonElement>(null);
   const childTriggerBRef = useRef<HTMLButtonElement>(null);
 
@@ -162,6 +183,7 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
         hasChildBackground: true,
         maxWidth: childMaxWidth,
         minWidth: FLYOUT_MIN_WIDTH,
+        'data-test-subj': `flyoutOverlays${titleKey}Child${label}`,
         onActive: () => {
           console.log(`activate child flyout ${label}`, title); // eslint-disable-line no-console
         },
@@ -177,6 +199,20 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
           <FlyoutTemplate.Body>
             <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />
           </FlyoutTemplate.Body>
+          {label === 'B' && (
+            <FlyoutTemplate.Footer>
+              <FlyoutTemplate.Footer.SecondaryAction
+                label="Close"
+                onClick={onClose}
+                data-test-subj={`closeChildFlyoutOverlaysBButton-${title}`}
+              />
+              <FlyoutTemplate.Footer.PrimaryActionMenu
+                label="Take action"
+                panels={FOOTER_MENU_PANELS}
+                data-test-subj={`menuChildFlyoutOverlaysBButton-${title}`}
+              />
+            </FlyoutTemplate.Footer>
+          )}
         </FlyoutTemplate>
       )
     );
@@ -247,6 +283,8 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
 
 const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, overlays, historyKey } = props;
+  // Create a selector-safe string for use in test subjects
+  const titleKey = title.replace(/\s+/g, '');
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
@@ -266,8 +304,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     setIsFlyoutOpen(false);
   }, [setIsFlyoutOpen]);
 
-  // Bridge URL-backed open state to the imperative overlays.openFlyoutTemplate API:
-  // opening mounts the overlay, closing (via URL, Back button, or user click) unmounts it.
+  const handleSave = useCallback(() => {
+    console.log('save main flyout', title); // eslint-disable-line no-console
+  }, [title]);
+
+  // Bridge URL-backed open state to the imperative overlays.openFlyoutTemplate API.
   useEffect(() => {
     if (isFlyoutOpen && !isOpen) {
       overlayRef.current = overlays.openFlyoutTemplate(
@@ -280,11 +321,13 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           maxWidth: mainMaxWidth,
           resizable: true,
           onActive: mainFlyoutOnActive,
+          'data-test-subj': `flyoutOverlays${titleKey}`,
+          tabs: BODY_TABS,
           onClose: () => {
             overlayRef.current = null;
             setIsOpen(false);
             setIsFlyoutOpen(false);
-            triggerRef.current?.focus();
+            returnFocusToTrigger(triggerRef);
           },
           historyKey,
         },
@@ -292,37 +335,78 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           <FlyoutTemplate onClose={onClose}>
             <FlyoutTemplate.Header
               title={title}
+              titleTooltip="This flyout demonstrates the flyout template."
               description={
                 <>
                   Opened with <EuiCode>openFlyoutTemplate</EuiCode>
                 </>
               }
-            />
+            >
+              {headerBlocks()}
+            </FlyoutTemplate.Header>
             <FlyoutTemplate.Body>
-              <FlyoutTemplate.Body.Section title="Flyout properties">
-                <FlyoutProperties
-                  flyoutType={flyoutType}
-                  flyoutOwnFocus={flyoutOwnFocus}
-                  mainSize={mainSize}
-                  mainMaxWidth={mainMaxWidth}
-                />
-              </FlyoutTemplate.Body.Section>
-              <FillerContent />
-              <FlyoutTemplate.Body.Section title="Child flyouts">
-                <ChildFlyoutTriggers
-                  historyKey={historyKey}
-                  title={title}
-                  childSize={childSize}
-                  childMaxWidth={childMaxWidth}
-                  overlays={overlays}
-                />
-              </FlyoutTemplate.Body.Section>
+              {/* Put all interactive parts in the first tab to simplify tests. */}
+              <FlyoutTemplate.Body.TabPanel tabId="overview">
+                <FlyoutTemplate.Body.Accordion
+                  id="properties"
+                  title="Flyout properties"
+                  initialIsOpen
+                >
+                  <FlyoutProperties
+                    flyoutType={flyoutType}
+                    flyoutOwnFocus={flyoutOwnFocus}
+                    mainSize={mainSize}
+                    mainMaxWidth={mainMaxWidth}
+                  />
+                </FlyoutTemplate.Body.Accordion>
+                <FlyoutTemplate.Body.Accordion id="details" title="Details">
+                  <FlyoutTemplate.Body.Accordion.Subsection id="host" title="Host">
+                    <EuiText size="s">
+                      <p>A subsection adds a second level of titling inside an accordion.</p>
+                    </EuiText>
+                  </FlyoutTemplate.Body.Accordion.Subsection>
+                  <FlyoutTemplate.Body.Accordion.Subsection id="service" title="Service">
+                    <EuiText size="s">
+                      <p>Under an accordion, every subsection is bordered.</p>
+                    </EuiText>
+                  </FlyoutTemplate.Body.Accordion.Subsection>
+                </FlyoutTemplate.Body.Accordion>
+                <FlyoutTemplate.Body.Accordion
+                  id="childFlyouts"
+                  title="Child flyouts"
+                  initialIsOpen
+                >
+                  {/* Filler makes the first tab overflow, which is what drives header collapse. */}
+                  <FillerContent />
+                  <EuiSpacer size="m" />
+                  <ChildFlyoutTriggers
+                    historyKey={historyKey}
+                    title={title}
+                    childSize={childSize}
+                    childMaxWidth={childMaxWidth}
+                    overlays={overlays}
+                  />
+                </FlyoutTemplate.Body.Accordion>
+              </FlyoutTemplate.Body.TabPanel>
+              <FlyoutTemplate.Body.TabPanel tabId="activity">
+                <FillerContent />
+              </FlyoutTemplate.Body.TabPanel>
+              <FlyoutTemplate.Body.TabPanel tabId="settings">
+                <EuiText size="s">
+                  <p>Nothing to configure in this example.</p>
+                </EuiText>
+              </FlyoutTemplate.Body.TabPanel>
             </FlyoutTemplate.Body>
             <FlyoutTemplate.Footer>
               <FlyoutTemplate.Footer.SecondaryAction
                 label="Close"
                 onClick={handleCloseFlyout}
                 data-test-subj={`closeMainFlyoutOverlaysButton-${title}`}
+              />
+              <FlyoutTemplate.Footer.PrimaryAction
+                label="Save"
+                onClick={handleSave}
+                data-test-subj={`saveMainFlyoutOverlaysButton-${title}`}
               />
             </FlyoutTemplate.Footer>
           </FlyoutTemplate>
@@ -333,7 +417,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
       overlayRef.current?.close();
       overlayRef.current = null;
       setIsOpen(false);
-      triggerRef.current?.focus();
+      returnFocusToTrigger(triggerRef);
     }
   }, [
     isFlyoutOpen,
@@ -349,7 +433,9 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     historyKey,
     mainFlyoutOnActive,
     handleCloseFlyout,
+    handleSave,
     setIsFlyoutOpen,
+    titleKey,
   ]);
 
   // The overlay renders into core's DOM target, outside this app's React root, so unmounting
