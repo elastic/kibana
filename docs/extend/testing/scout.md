@@ -93,7 +93,13 @@ Scout uses the changed files to narrow the eligible tests in PR builds:
 
 Deployment tags and the pipeline’s CI test-channel selection still apply in every mode.
 
-Current PR builds group tests into Buildkite steps named `Scout Lane #<number> - <arch>-<domain> / <config-set>`. Check the lane's logs and test results for your config and suite to confirm they ran; a lane label alone does not show which tests executed.
+To inspect the selection decision, open `.scout/testing_scope.json` in the **Scout Test Run Builder** step's Buildkite artifacts. The `kind` field identifies the selection mode:
+
+- `tests-only`: `affectedConfigs` lists the selected Playwright config paths.
+- `dependency-tree`: `affectedModules` lists the modules used to select configs.
+- `full`: `reason` explains why selective filtering was disabled.
+
+This file records the selection scope, not execution results. Deployment tags and CI test channels still apply. To confirm a suite actually ran, check its test results in the corresponding `Scout Lane #<number> - <arch>-<domain> / <config-set>` step.
 
 #### Q: Why is it a good idea for tests to be close to the plugin code? [scout-faq-colocation]
 
