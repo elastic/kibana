@@ -104,7 +104,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ item: makeSoItem(DEP_ID) }),
+          body: JSON.stringify({ item: makeSoItem(DEP_ID, { connectorId: null, authMethod: 'static_keys' }) }),
         })
     );
 
@@ -153,8 +153,12 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
     // The MI section must auto-open (isDone: true → false when isDirty fires).
-    // Deploy button must be enabled immediately — connectorId is present so isDeployReady
-    // initialises to true without waiting for the identity-federation form to load.
+    // The deployment used static keys (no connectorId), so StaticKeysReplaceView is shown.
+    // Fill in both credential fields so isDeployReady becomes true and Deploy enables.
+    await page.testSubj.click('staticKeysReplace-accessKeyId-toggle');
+    await page.testSubj.fill('staticKeysReplace-accessKeyId', 'AKIAIOSFODNN7EXAMPLE');
+    await page.testSubj.click('staticKeysReplace-secretAccessKey-toggle');
+    await page.testSubj.fill('staticKeysReplace-secretAccessKey', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
     const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
     await expect(deployButton).toBeEnabled();
 

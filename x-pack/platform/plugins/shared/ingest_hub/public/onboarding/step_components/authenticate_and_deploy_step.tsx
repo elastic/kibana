@@ -147,6 +147,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Initialised to true when there is no deployment to check (fresh deploy / no edit mode) so
   // that isMiDone is not blocked for users who have never deployed before.
   const [driftSettled, setDriftSettled] = useState(!onboardingDeploymentId);
+  const [driftCheckError, setDriftCheckError] = useState(false);
+  const [driftRetryKey, setDriftRetryKey] = useState(0);
   useEffect(() => {
     const thisId = ++driftCheckIdRef.current;
     // Nothing to fetch — leave driftSettled unchanged (already true for fresh deploys; remains
@@ -154,10 +156,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     // effect re-runs with a loaded map).
     if (!onboardingDeploymentId || awsServicesMap === undefined) return;
     setDriftSettled(false);
+    setDriftCheckError(false);
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
       .then(({ item }) => {
         if (thisId !== driftCheckIdRef.current) return; // stale response — discard
-        if (!item) return;
+        if (!item) {
+          // SO does not exist or was cleared — nothing to compare against; treat as clean.
+          setDriftSettled(true);
+          return;
+        }
         // policyIdsByInstance is captured from the closure: it is hydrated at mount from the SO
         // (same as serviceVars) and does not change during the component's lifetime at Step 3.
         // Filter against currently selected instances: policyIdsByInstance may include stale entries
@@ -192,13 +199,16 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // so Next stays blocked rather than enabling with a stale (default false) isDirty value.
         setDriftSettled(true);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (thisId !== driftCheckIdRef.current) return;
+        setDriftCheckError(true);
+      });
     // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
     // service-var and region changes come from Step 2 navigation (full remount), not same-step
     // edits. Only auth mutations (connector swap, authMethod change) happen in this component's
     // lifetime and need to re-trigger the check; adding them to deps is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingDeploymentId, awsServicesMap, authMethod, connectorId]);
+  }, [onboardingDeploymentId, awsServicesMap, authMethod, connectorId, driftRetryKey]);
 
   // Called by ManagedIntegrationsSection when the static-key replace form becomes ready or is
   // cancelled. Merges the form's own dirty with the SO-derived drift so that cancelling the
@@ -714,6 +724,43 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       )}
 
       {showMiSection && <EuiHorizontalRule margin="l" />}
+
+      {driftCheckError && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.title"
+                defaultMessage="Could not check for settings changes"
+              />
+            }
+            color="warning"
+            iconType="warning"
+            data-test-subj="authenticateAndDeployStep-driftCheckErrorCallout"
+          >
+            <FormattedMessage
+              id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.body"
+              defaultMessage="Unable to reach the deployment record. Check your connection and try again."
+            />
+            <EuiSpacer size="s" />
+            <EuiButton
+              size="s"
+              color="warning"
+              onClick={() => {
+                setDriftCheckError(false);
+                setDriftRetryKey((k) => k + 1);
+              }}
+              data-test-subj="authenticateAndDeployStep-driftCheckRetryButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.retryButton"
+                defaultMessage="Retry"
+              />
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {showMiSection && isDirty && (
         <>

@@ -89,7 +89,13 @@ export function ManagedIntegrationsSection({
   onReplaceFormDirtyChange,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
-  const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
+  const {
+    setConnectorId,
+    setStaticKeys,
+    clearStagedStaticKeys,
+    setPendingIacTemplate,
+    authenticateAndDeployStep,
+  } =
     useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
@@ -175,14 +181,15 @@ export function ManagedIntegrationsSection({
         onReplaceFormDirtyChange?.(true);
       } else if (replaceFormEverReady.current) {
         // Form was previously ready — user cleared the fields, treat as cancellation.
-        // Clear staged credentials so a bypass-eligible dirty redeploy cannot use the cancelled keys.
-        setStaticKeys(undefined);
+        // Clear only the in-memory staged keys without touching persisted authMethod/connectorId so
+        // isStaticKeysEditMode stays true and the SO comparison does not report false auth drift.
+        clearStagedStaticKeys();
         onReplaceFormDirtyChange?.(false);
       }
       // If form was never ready, its false is a mount-time event, not a cancellation —
       // don't forward it so the persisted isDirty from a prior visit is preserved.
     },
-    [onReplaceFormDirtyChange]
+    [clearStagedStaticKeys, onReplaceFormDirtyChange]
   );
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(

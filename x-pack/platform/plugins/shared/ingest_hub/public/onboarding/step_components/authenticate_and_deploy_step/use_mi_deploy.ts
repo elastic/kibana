@@ -329,12 +329,14 @@ export function useMiDeploy({
               // At least one policy update failed — surface the existing instances as failed so
               // hasFailed becomes true and the Retry button appears. Leave isDirty so Deploy stays
               // visible for retry. Return cleanupFailed: true so the ECF-only gate blocks navigation.
+              // Include plan.targets so undeployed new services are also queued for retry — without
+              // this they are dropped from failedInstances and planMiRetryRun never deploys them.
               setIsDeploying(false);
-              const existingInstanceIds = Object.keys(policyIdsByInstance);
-              setFailedInstances(existingInstanceIds);
+              const allFailedIds = [...Object.keys(policyIdsByInstance), ...plan.targets];
+              setFailedInstances(allFailedIds);
               updateDetectAndReviewStep({
                 isDeploying: false,
-                failedInstances: existingInstanceIds,
+                failedInstances: allFailedIds,
               });
               return { cleanupFailed: true };
             }
@@ -529,11 +531,13 @@ export function useMiDeploy({
             });
             if (dirtyRetryResults.some((r) => r.status === 'rejected')) {
               setIsDeploying(false);
-              const existingInstanceIds = Object.keys(policyIdsByInstance);
-              setFailedInstances(existingInstanceIds);
+              // Include undeployed retry targets so they remain queued for the next retry run.
+              const retryDeployTargets = plan.groupsToDeploy.flatMap((g) => g.instanceIds);
+              const allRetryFailedIds = [...Object.keys(policyIdsByInstance), ...retryDeployTargets];
+              setFailedInstances(allRetryFailedIds);
               updateDetectAndReviewStep({
                 isDeploying: false,
-                failedInstances: existingInstanceIds,
+                failedInstances: allRetryFailedIds,
               });
               return { cleanupFailed: true };
             }
@@ -684,6 +688,7 @@ export function useMiDeploy({
       policyIdsByInstance,
       pendingCleanupPolicyIds,
       isDirty,
+      isAuthDirty,
     ]
   );
 }

@@ -156,11 +156,18 @@ export async function updateAgentBasedPolicy(
   const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
   const builtVars = buildPackageVars(globalRegion, staticKeys, pkgVarNames, agentCredentials);
-  // Merge existing var values (base) with newly built vars (override). This preserves
-  // memory-only credential vars (access/temp keys) that are unavailable after page reload
-  // so a service-var-only dirty redeploy does not silently clear them from the policy.
-  const mergedVars = { ...existingVarValues, ...(builtVars ?? {}) };
-  const vars = Object.keys(mergedVars).length > 0 ? mergedVars : undefined;
+  // When new credentials are explicitly provided, use only the newly built vars — merging the
+  // existing values would retain stale fields from the old credential method (e.g. access_key_id
+  // left over after switching to shared_credentials). When no credentials are in memory (access/
+  // temp keys are memory-only and lost after reload), merge existing vars as a base so a
+  // service-var-only dirty redeploy does not silently clear credential fields from the policy.
+  let vars: Record<string, string> | undefined;
+  if (agentCredentials) {
+    vars = builtVars;
+  } else {
+    const mergedVars = { ...existingVarValues, ...(builtVars ?? {}) };
+    vars = Object.keys(mergedVars).length > 0 ? mergedVars : undefined;
+  }
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
   const policyNamespace = existingNamespace ?? namespace;

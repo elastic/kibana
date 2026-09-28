@@ -143,6 +143,8 @@ interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
+  /** Clear only the in-memory staged credentials without touching persisted authMethod or connectorId. */
+  clearStagedStaticKeys: () => void;
   setPendingIacTemplate: (iac: PendingIacTemplate | undefined) => void;
   setAgentBasedDeployment: (state: Partial<AgentBasedDeploymentState>) => void;
   agentBasedDeployment: AgentBasedDeploymentState;
@@ -219,6 +221,10 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     },
     [setPersistedAuthenticateAndDeployStep]
   );
+
+  const clearStagedStaticKeys = useCallback(() => {
+    setStaticKeysState(undefined);
+  }, []);
 
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
@@ -532,6 +538,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,
+        clearStagedStaticKeys,
         setPendingIacTemplate,
         setAgentBasedDeployment,
         agentBasedDeployment,
