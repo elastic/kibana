@@ -100,7 +100,7 @@ export const LABEL_BORDER_WIDTH = 1;
 export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;
 export const LABEL_PADDING_X = 8;
 
-const LABEL_BORDER_RADIUS = 8;
+const LABEL_BORDER_RADIUS = 9999;
 
 type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
 

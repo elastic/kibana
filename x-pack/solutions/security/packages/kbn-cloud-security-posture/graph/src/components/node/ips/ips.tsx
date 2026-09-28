@@ -70,8 +70,8 @@ export interface IpsProps {
 }
 
 export const Ips = ({ ips, onIpClick }: IpsProps) => {
-  const sFontSize = useEuiFontSize('s');
   const xsFontSize = useEuiFontSize('xs');
+  const xxsFontSize = useEuiFontSize('xxs');
 
   if (ips.length === 0) return null;
 
@@ -80,21 +80,21 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
       <EuiFlexItem grow={false}>
         <EuiText
           data-test-subj={GRAPH_IPS_TEXT_ID}
-          size="s"
+          size="xs"
           color="subdued"
           css={css`
             font-weight: medium;
-            ${sFontSize};
+            ${xxsFontSize};
           `}
         >
-          {'IP: '}
+          {'IP address: '}
         </EuiText>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         {ips.length === 1 && onIpClick ? (
           <EuiButtonEmpty
-            size="s"
+            size="xs"
             color="text"
             data-test-subj={GRAPH_IPS_BUTTON_ID}
             onClick={onIpClick}
@@ -102,7 +102,7 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
             flush="both"
             css={css`
               font-weight: medium;
-              ${sFontSize};
+              ${xsFontSize};
             `}
           >
             {ips[0]}
@@ -110,11 +110,11 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
         ) : (
           <EuiText
             data-test-subj={GRAPH_IPS_VALUE_ID}
-            size="s"
+            size="xs"
             color="subdued"
             css={css`
               font-weight: medium;
-              ${sFontSize};
+              ${xsFontSize};
             `}
           >
             {ips.slice(0, VISIBLE_IPS_LIMIT).join(', ')}

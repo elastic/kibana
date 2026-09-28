@@ -33,7 +33,7 @@ describe('Ips', () => {
     const testIp = '192.168.1.1';
     render(<Ips ips={[testIp]} />);
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP:');
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP address:');
     expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIp);
     expect(screen.queryByTestId(GRAPH_IPS_BUTTON_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('Ips', () => {
     const testIps = ['192.168.1.1'];
     render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP:');
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP address:');
     expect(screen.getByTestId(GRAPH_IPS_BUTTON_ID)).toHaveTextContent(testIps[0]);
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
@@ -54,7 +54,7 @@ describe('Ips', () => {
     const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
     render(<Ips ips={testIps} />);
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP:');
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP address:');
     expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIps[0]);
     expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toHaveTextContent('+2');
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('Ips', () => {
     const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
     render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP:');
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP address:');
     expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIps[0]);
     expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).toHaveTextContent('+2');
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();

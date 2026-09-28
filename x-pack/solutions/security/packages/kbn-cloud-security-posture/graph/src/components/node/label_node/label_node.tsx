@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { Handle, NodeToolbar, Position } from '@xyflow/react';
+import { Handle, NodeToolbar, Position, useViewport } from '@xyflow/react';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -63,6 +63,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
+  const { zoom } = useViewport();
 
   const text = label ? label : id;
 
@@ -112,6 +113,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             <div
               onMouseEnter={showToolbar}
               onMouseLeave={hideToolbar}
+              style={{ transform: `scale(${zoom})`, transformOrigin: 'center bottom' }}
               css={css`
                 display: flex;
                 align-items: center;
@@ -131,9 +133,9 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
                   <EuiButtonIcon
                     data-test-subj={item.testSubject}
                     iconType={item.iconType}
-                    iconSize="s"
+                    iconSize="m"
                     color="text"
-                    size="xs"
+                    size="s"
                     aria-label={item.label}
                     disabled={item.disabled}
                     onClick={item.onClick}

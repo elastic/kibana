@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
-import { Handle, NodeToolbar, Position } from '@xyflow/react';
+import { Handle, NodeToolbar, Position, useViewport } from '@xyflow/react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiIcon,
+  EuiNotificationBadge,
   EuiText,
   EuiTextTruncate,
   EuiToolTip,
@@ -99,14 +100,22 @@ const EntityCardWrapper = styled.div<{
 /**
  * The 60px header row: icon | name+tag | risk badge.
  */
-const EntityCardHeader = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  height: ${ENTITY_CARD_HEADER_HEIGHT}px;
-  padding: 0 8px;
-  gap: 8px;
-`;
+const EntityCardHeader = ({ children }: { children: React.ReactNode }) => (
+  <EuiFlexGroup
+    direction="row"
+    alignItems="center"
+    gutterSize="none"
+    responsive={false}
+    css={css`
+      height: ${ENTITY_CARD_HEADER_HEIGHT}px;
+      padding: 0 8px;
+      gap: 8px;
+      flex-wrap: nowrap;
+    `}
+  >
+    {children}
+  </EuiFlexGroup>
+);
 
 /** Size of the inset icon box inside the header. */
 const ICON_BOX_SIZE = 40;
@@ -225,24 +234,24 @@ const EntityCardMetadata = styled.div<{ euiTheme: EuiThemeComputed }>`
  * Circular badge in the top-left corner of a grouped node showing the entity
  * count. Capped at "99+" to keep the badge compact.
  */
-const CountBadge = styled.div<{ euiTheme: EuiThemeComputed }>`
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  padding: 0 ${({ euiTheme }) => euiTheme.size.xs};
-  background: ${({ euiTheme }) => euiTheme.colors.primary};
-  color: ${({ euiTheme }) => euiTheme.colors.textInverse};
-  font-size: 11px;
-  font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-  white-space: nowrap;
-`;
+const CountBadge = ({ children, ...props }: React.ComponentPropsWithoutRef<'span'>) => (
+  <EuiNotificationBadge
+    {...props}
+    size="s"
+    color="accent"
+    css={css`
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      z-index: 1;
+      height: 20px;
+      min-width: 20px;
+      border-radius: 10px;
+    `}
+  >
+    {children}
+  </EuiNotificationBadge>
+);
 
 /**
  * Single metadata cell — label above value.
@@ -454,19 +463,15 @@ const CriticalityDistribution = memo<{
   levels: Array<{ level: string; count: number }>;
   euiTheme: EuiThemeComputed;
 }>(({ levels, euiTheme }) => (
-  <div
-    css={css`
-      display: flex;
-      flex-direction: column;
-      gap: ${euiTheme.size.xxs};
-    `}
-  >
+  <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
     {levels.map(({ level, count }) => (
-      <EuiHealth key={level} color={getCriticalityColor(level, euiTheme)} textSize="xs">
-        {`${count} ${formatCriticalityLevel(level)}`}
-      </EuiHealth>
+      <EuiFlexItem key={level} grow={false}>
+        <EuiHealth color={getCriticalityColor(level, euiTheme)} textSize="xs">
+          {`${count} ${formatCriticalityLevel(level)}`}
+        </EuiHealth>
+      </EuiFlexItem>
     ))}
-  </div>
+  </EuiFlexGroup>
 ));
 CriticalityDistribution.displayName = 'CriticalityDistribution';
 
@@ -488,14 +493,7 @@ DashValue.displayName = 'DashValue';
 /** Bold small label rendered above a metadata value. */
 const MetadataLabel = ({ children }: { children: React.ReactNode }) => (
   <EuiText size="xs">
-    <p
-      css={css`
-        margin: 0;
-        font-weight: bold;
-      `}
-    >
-      {children}
-    </p>
+    <strong>{children}</strong>
   </EuiText>
 );
 
@@ -598,6 +596,42 @@ const computeRiskBadge = (
 const getCountDisplay = (count: number | undefined): string =>
   count != null && count > 99 ? '99+' : String(count ?? '');
 
+interface EntityMetadataContentProps {
+  isGrouped: boolean;
+  ips?: string[];
+  countryCodes?: string[];
+  sources?: string[];
+  assetCriticality?: Array<{ level: string; count: number }>;
+  euiTheme: EuiThemeComputed;
+}
+
+/** Renders the appropriate metadata panel based on whether the node is grouped or single. */
+const EntityMetadataContent: React.FC<EntityMetadataContentProps> = ({
+  isGrouped,
+  ips,
+  countryCodes,
+  sources,
+  assetCriticality,
+  euiTheme,
+}) =>
+  isGrouped ? (
+    <GroupedMetadataPanel
+      ips={ips}
+      countryCodes={countryCodes}
+      sources={sources}
+      assetCriticality={assetCriticality}
+      euiTheme={euiTheme}
+    />
+  ) : (
+    <SingleEntityMetadataPanel
+      ips={ips}
+      countryCodes={countryCodes}
+      sources={sources}
+      assetCriticality={assetCriticality}
+      euiTheme={euiTheme}
+    />
+  );
+
 /**
  * Shared horizontal card node rendered by all entity node shape types
  * (hexagon, pentagon, ellipse, rectangle, diamond). Always renders the full
@@ -623,6 +657,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m');
+  const { zoom } = useViewport();
   const fillColor = useNodeFillColor(color ?? 'primary');
   const iconBgColor = getIconColorByRiskScore(riskScore, fillColor);
   // Hover state for NodeToolbar visibility.
@@ -700,6 +735,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
           <div
             onMouseEnter={showToolbar}
             onMouseLeave={handleToolbarMouseLeave}
+            style={{ transform: `scale(${zoom})`, transformOrigin: 'center bottom' }}
             css={css`
               display: flex;
               align-items: center;
@@ -714,9 +750,9 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 <EuiButtonIcon
                   data-test-subj={item.testSubject}
                   iconType={item.iconType}
-                  iconSize="s"
+                  iconSize="m"
                   color="text"
-                  size="xs"
+                  size="s"
                   aria-label={item.label}
                   disabled={item.disabled}
                   onClick={item.onClick}
@@ -749,9 +785,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
             <EntityCardHeader>
               <IconBox bgColor={iconBgColor} euiTheme={euiTheme}>
                 {isGrouped && (
-                  <CountBadge data-test-subj={GRAPH_TAG_COUNT_ID} euiTheme={euiTheme}>
-                    {countDisplay}
-                  </CountBadge>
+                  <CountBadge data-test-subj={GRAPH_TAG_COUNT_ID}>{countDisplay}</CountBadge>
                 )}
                 {icon && (
                   <EuiIcon
@@ -814,38 +848,31 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               </EuiBadge>
             </EntityCardHeader>
 
-            {/* Metadata panel — always visible */}
-            <EntityCardMetadata
-              data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
-              euiTheme={euiTheme}
-            >
-              {isGrouped ? (
-                <GroupedMetadataPanel
+            {/* Metadata panel — hidden in preview (non-interactive) mode */}
+            {interactive && (
+              <EntityCardMetadata
+                data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
+                euiTheme={euiTheme}
+              >
+                <EntityMetadataContent
+                  isGrouped={isGrouped}
                   ips={ips}
                   countryCodes={countryCodes}
                   sources={entitySources}
                   assetCriticality={assetCriticality}
                   euiTheme={euiTheme}
                 />
-              ) : (
-                <SingleEntityMetadataPanel
-                  ips={ips}
-                  countryCodes={countryCodes}
-                  sources={entitySources}
-                  assetCriticality={assetCriticality}
-                  euiTheme={euiTheme}
-                />
-              )}
-            </EntityCardMetadata>
+              </EntityCardMetadata>
+            )}
           </EntityCardWrapper>
 
-          {/* Single stacked card peeking from the bottom edge */}
+          {/* Single stacked card peeking from the bottom edge — always shown for grouped nodes */}
           {showStackedShape(count) && (
             <StackedCard
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               euiTheme={euiTheme}
               bgColor={iconBgColor}
-              bottomOffset={4}
+              bottomOffset={8}
               scale={0.95}
             />
           )}
